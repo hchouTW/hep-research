@@ -25,6 +25,12 @@ M = "/nonexistent/hep-research-cli-check/input.json"
 OUT = "/nonexistent/hep-research-cli-check/out"
 
 MISSING_FILE_ARGS = {
+    "skills/hep-detector/scripts/build_response.py": ["build", M, "--truth-col", "t", "--reco-col", "r", "--unweighted",
+                                                       "--all-selected", "--truth-edges", "0", "1", "--reco-edges", "0",
+                                                       "1", "--variable", "x", "--unit", "GeV", "--normalization",
+                                                       "conditional_on_selected", "--acceptance", "outside_matrix",
+                                                       "--residual", "difference", "--intended-use", "forward_folding",
+                                                       "--artifact-id", "a", "--objective", "o", "--out", OUT],
     "skills/hep-detector/scripts/calorimeter_resolution.py": ["--fit", M],
     "skills/hep-measurement/scripts/collection_time.py": ["accumulate", "--config", M, M],
     "skills/hep-detector/scripts/multiple_scattering.py": [M],

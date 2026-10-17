@@ -111,7 +111,7 @@
    "id": "response-construction",
    "capability": "Response construction from matched truth and reconstructed events",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D9"

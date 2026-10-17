@@ -24,6 +24,15 @@ truth bins are independent. With weights, use `sum w` and `sum w^2` per cell (ef
 artifact's `mc_stat` (`kind: generated_counts` with `events_per_truth_bin`, or `sumw2`): from contracts 2.8.0 a
 response for unfolding without it is unresolved.
 
+**Building one.** `scripts/build_response.py build` makes the artifact from a matched sample (truth, reco, weight,
+selection flag) with every convention declared: rows reco and columns truth, `conditional_on_generated` (columns plus
+the explicit under/overflow sum to the selection efficiency) or `conditional_on_selected` (they sum to one and the
+efficiency is listed under `applied_separately`), the acceptance placement, `mc_stat` (event counts, or per-cell sums
+of w^2 with weights), the delta-method multinomial uncertainty of each entry, and per truth bin the resolution core and
+tails of a declared residual (median, sigma68, MAD, tail fraction). Negative weights are refused (hep-statistics). The
+artifact must pass `contracts/validate.py` (strict) and `contracts/response_adapter.py --validate`, or nothing is
+written; `--fold` folds a truth spectrum through it.
+
 **Fakes.** Reconstructed events with no truth match under the matching criterion of
 [reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md) form a reco-space
 vector `b_fake`, estimated from simulation with that criterion and validated in a control region; they belong in `b`,

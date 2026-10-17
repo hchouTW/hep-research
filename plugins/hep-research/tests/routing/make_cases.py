@@ -345,6 +345,9 @@ C = [
     # batch B, M1: collection time
  ("b-flux-m1-1", "en", "direct", "How do I compute the collection time per rigidity bin and era from my period table, with quality cuts and a cutoff safety factor, for the flux normalization?", "hep-measurement", ["live time", "correction chains"], None, None, {}),
  ("b-flux-m1-2", "zh-Hant", "direct", "通量正規化要用的收集時間怎麼算？每個時段有活時間比例與截止剛度，還要分 era 和品質條件。", "hep-measurement", ["live time"], None, None, {}),
+    # batch B, D9: response construction
+ ("b-flux-d9-1", "en", "direct", "Build the response matrix from my matched truth and reco simulation with weights and a selection flag, with its finite-MC uncertainty.", "hep-detector", ["response matrices"], None, None, {}),
+ ("b-flux-d9-2", "zh-Hant", "direct", "用模擬的真值與重建值配對事件建立響應矩陣，包含效率、溢出與每個真值區間的解析度。", "hep-detector", ["response matrices"], None, None, {}),
 ]
 
 cases = []

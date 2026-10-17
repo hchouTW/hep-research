@@ -3556,6 +3556,26 @@
    "trigger_terms": [
     "live time"
    ]
+  },
+  {
+   "id": "b-flux-d9-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build the response matrix from my matched truth and reco simulation with weights and a selection flag, with its finite-MC uncertainty.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
+  },
+  {
+   "id": "b-flux-d9-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用模擬的真值與重建值配對事件建立響應矩陣，包含效率、溢出與每個真值區間的解析度。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
   }
  ]
 }

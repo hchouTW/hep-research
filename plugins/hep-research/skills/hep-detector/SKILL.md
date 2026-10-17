@@ -51,7 +51,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |
 | Particle identification, TOF, dE/dx, RICH | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py` |
 | Signal formation, readout, front-end electronics | [front-end electronics](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
-| Response matrices, forward folding | [response and folding](references/response-and-forward-folding.md) |
+| Response matrices, forward folding; build one from matched events | [response and folding](references/response-and-forward-folding.md); `build_response.py` |
 | Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |
 | Calibration, alignment, conditions | [calibration and alignment](references/calibration-and-alignment.md) |
 | Propagating a calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |
