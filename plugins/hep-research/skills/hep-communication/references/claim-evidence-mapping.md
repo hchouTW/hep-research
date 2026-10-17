@@ -33,7 +33,22 @@ decimals is 1.03); append `:half-even` (`decimals:2:half-even`) when the venue o
 collaboration rounds half to even. A display without a rule passes only if it is
 a rounding of the source to its own last digit (1.1 for 1.09, not 1.02), and is
 then flagged so the rule gets declared. A malformed rule, or a NaN or infinite
-value, is an error, never a skipped comparison.
+value, is an error, never a skipped comparison. The rule `pdg` applies the Review of
+Particle Physics rounding (Introduction 5.3, read 2026-10-17): the three highest digits of
+the uncertainty 100-354 keep two significant digits, 355-949 one, 950-999 round up to 1000
+and keep two; the value keeps the uncertainty's precision (0.827 +- 0.119 -> 0.83 +- 0.12,
+0.827 +- 0.367 -> 0.8 +- 0.4); asymmetric errors within 10% of their average use the
+average, otherwise the narrower sets the rounding. It needs the source uncertainty.
+
+Numbers from artifacts: `render_results.py` writes LaTeX macros and result tables from
+statistical-results and dataset-records, each annotated with the artifact id and sha256;
+synthetic and preliminary values sit in watermark macros that a final build (one that
+defines `\hepfinalbuild`) refuses. A single value also bound for HEPData becomes a
+one-bin dataset-record (`--hepdata-record`), because `hepdata_export.py` takes
+dataset-records only. `check_manuscript.py --numbers` fails when one quantity
+(`SYMBOL = VALUE \pm UNC`) differs between abstract, body, tables and conclusions;
+`audit_claims.py --compare A B` fails when two versions (English and Chinese drafts) differ
+in numbers, status words or claim strength (evidence for vs observation of).
 
 ## Checking evidence against claim type
 

@@ -4121,6 +4121,26 @@
    "trigger_terms": [
     "drafting or revising paper sections"
    ]
+  },
+  {
+   "id": "c-ml-numbers-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Make sure the signal strength in my abstract, tables and conclusion is the same number, rounded the PDG way from the fit result.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "numbers and units"
+   ]
+  },
+  {
+   "id": "c-ml-numbers-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "中英文兩版論文草稿的數字、不確定度和「證據」與「觀測」的用詞一致嗎？",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "English or Chinese"
+   ]
   }
  ]
 }

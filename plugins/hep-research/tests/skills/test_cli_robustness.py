@@ -87,6 +87,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-theory/scripts/physical_data.py": ["nuclide", "4He", "--ame", M],
     "skills/hep-theory/scripts/import_published_table.py": ["--table", M, "--spec", M, "--out", M],
     "skills/hep-computing/scripts/check_histogram_errors.py": [M],
+    "skills/hep-communication/scripts/render_results.py": ["--quantity", f"Mu={M}:a:b", "--out", OUT],
     "skills/hep-ml/scripts/check_split_integrity.py": [M],
     "skills/hep-ml/scripts/check_surrogate_domain.py": [M],
     "skills/hep-ml/scripts/compare_model_runs.py": [M],

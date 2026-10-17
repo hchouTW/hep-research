@@ -60,7 +60,7 @@ Answer inline, never from memory: the bound profile's ledger first, else a prima
 | Verify a citation, latest result, what a paper states | [citation verification](references/citation-verification.md), [literature recipes](references/literature-lookup-recipes.md) |
 | Bibliography and citation style; primary sources for statistics and detector methods | [citations and bibliography](references/citations-and-bibliography.md), [primary sources](references/primary-sources-and-version-checks.md) |
 | Literature search, matrix, review | [literature discovery](references/literature-discovery-and-search.md); `build_lit_matrix.py` |
-| Claims linked to results | [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md); `audit_claims.py`, `check_communication.py` |
+| Claims linked to results; numbers from artifacts (macros, tables, PDG rounding, version compare) | [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md); `audit_claims.py`, `render_results.py` |
 | Figures, tables, physics plots | [figures and tables](references/figures-and-tables.md), [physics plots](references/physics-plots.md) |
 | Diagrams as editable sources | [diagrams guide](references/academic-diagrams-guide.md); `check_diagram_sources.py` |
 | LaTeX checks and venues | [LaTeX venues](references/latex-venue-setup.md); `check_manuscript.py` |

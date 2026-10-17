@@ -429,6 +429,9 @@ C = [
     # batch C, Com6: paper types and blueprints (check_manuscript.py --blueprint)
  ("c-ml-genre-1", "en", "direct", "Check my search paper draft against what a search paper must contain: is a systematic-uncertainty table or the statistical method missing?", "hep-communication", ["papers from results"], None, None, {}),
  ("c-ml-genre-3", "zh-Hant", "direct", "我在寫探測器性能（instrumentation）論文，內容一定要包含哪些部分？請幫我檢查草稿缺了什麼。", "hep-communication", ["drafting or revising paper sections"], None, None, {}),
+    # batch C, Com7: numbers from artifacts (render_results.py, --numbers, --compare)
+ ("c-ml-numbers-1", "en", "direct", "Make sure the signal strength in my abstract, tables and conclusion is the same number, rounded the PDG way from the fit result.", "hep-communication", ["numbers and units"], None, None, {}),
+ ("c-ml-numbers-2", "zh-Hant", "direct", "中英文兩版論文草稿的數字、不確定度和「證據」與「觀測」的用詞一致嗎？", "hep-communication", ["English or Chinese"], None, None, {}),
 ]
 
 cases = []

@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-communication": {
    "references": 57,
-   "bytes": 403951,
+   "bytes": 405185,
    "uncited": 0
   },
   "hep-computing": {
@@ -168,8 +168,8 @@
   {
    "path": "skills/hep-communication/references/claim-evidence-mapping.md",
    "owner": "hep-communication",
-   "bytes": 3973,
-   "lines": 70,
+   "bytes": 5207,
+   "lines": 85,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/SKILL.md",
@@ -641,7 +641,7 @@
     "tests/skills/hep_communication/test_paper_blueprints.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1cfd2077 2026-10-17"
+   "last_commit": "ac1eb235 2026-10-17"
   },
   {
    "path": "skills/hep-communication/references/paper-structure.md",

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 import re
-from decimal import Decimal, InvalidOperation, ROUND_HALF_EVEN, ROUND_HALF_UP
+from decimal import ROUND_DOWN, ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal, InvalidOperation
 from pathlib import Path
 
 from communication_lib import numbers as N
@@ -69,9 +69,44 @@ def _locate(doc, locator: str):
 MODES = {"half-up": ROUND_HALF_UP, "half-even": ROUND_HALF_EVEN}
 
 
+def _pdg_decimals(unc: Decimal) -> int:
+    """Decimal places the PDG rule keeps for an uncertainty (Review of Particle Physics, Introduction 5.3, read
+    2026-10-17): the three highest digits 100-354 keep two significant digits, 355-949 one, 950-999 round up to 1000
+    and keep two."""
+    if unc <= 0:
+        raise ValueError("the PDG rule needs a positive uncertainty")
+    adj = unc.adjusted()  # exponent of the leading digit
+    top = int(abs(unc).scaleb(2 - adj).to_integral_value(rounding=ROUND_DOWN))  # the three highest digits, 100-999
+    if top <= 354:
+        return 1 - adj
+    return -adj  # 355-949: one significant digit; 950-999: rounds up to 1000, two significant digits
+
+
+def pdg_round(value, uncertainty) -> tuple[str, str]:
+    """(value, uncertainty) as the PDG rule displays them; the value keeps the uncertainty's precision (half up)."""
+    v, u = Decimal(str(value)), Decimal(str(uncertainty))
+    q = Decimal(1).scaleb(-_pdg_decimals(u))
+    return str(v.quantize(q, rounding=ROUND_HALF_UP)), str(u.quantize(q, rounding=ROUND_HALF_UP))
+
+
+def pdg_round_asymmetric(value, plus, minus) -> tuple[str, str, str]:
+    """PDG rule for asymmetric errors: when they differ by less than 10% of their average, the average is the
+    displayed symmetric error; otherwise the narrower one sets the rounding of both."""
+    v, up, dn = Decimal(str(value)), Decimal(str(plus)), Decimal(str(minus))
+    avg = (up + dn) / 2
+    if abs(up - dn) < Decimal("0.1") * avg:
+        val, unc = pdg_round(v, avg)
+        return val, unc, unc
+    q = Decimal(1).scaleb(-_pdg_decimals(min(up, dn)))
+    return (str(v.quantize(q, rounding=ROUND_HALF_UP)), str(up.quantize(q, rounding=ROUND_HALF_UP)),
+            str(dn.quantize(q, rounding=ROUND_HALF_UP)))
+
+
 def parse_rounding(rounding: str) -> tuple[str, int, str]:
-    """(kind, n, mode) of a rule 'decimals:n' or 'significant:n' with an optional ':half-up' (default) or ':half-even';
-    ValueError when malformed."""
+    """(kind, n, mode) of a rule 'decimals:n' or 'significant:n' with an optional ':half-up' (default) or ':half-even',
+    or 'pdg' (the PDG rule, which needs the uncertainty); ValueError when malformed."""
+    if str(rounding) == "pdg":
+        return "pdg", 0, "half-up"
     parts = str(rounding).split(":")
     if len(parts) not in (2, 3) or parts[0] not in ("decimals", "significant"):
         raise ValueError(f"unknown rounding rule {rounding!r}: use decimals:n or significant:n[:half-up|half-even]")
@@ -87,14 +122,18 @@ def parse_rounding(rounding: str) -> tuple[str, int, str]:
     return parts[0], n, mode
 
 
-def _round(value: str, rounding: str | None):
+def _round(value: str, rounding: str | None, uncertainty=None):
     """The display form of an exact value under a declared rounding rule (round half up unless the rule says
-    ':half-even'), or None when the rule is missing or malformed or the value is not a finite number."""
+    ':half-even'), or None when the rule is missing or malformed, the value is not a finite number, or the rule is
+    'pdg' and no uncertainty is given."""
     d = N.to_decimal(value)
     if d is None or rounding is None:
         return None
     try:
         kind, n, mode = parse_rounding(rounding)
+        if kind == "pdg":
+            u = N.to_decimal(uncertainty) if uncertainty is not None else None
+            return None if u is None else pdg_round(d, u)[0]
         if kind == "decimals":
             return str(d.quantize(Decimal(1).scaleb(-n), rounding=MODES[mode]))
         if d == 0:
@@ -341,7 +380,14 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
                     add("occurrence.rounding_malformed", "error", owhere, f"occurrence {o.get('id')}: {exc}",
                         "write the rule as decimals:n or significant:n, optionally :half-up (default) or :half-even")
                     continue
-                shown = _round(str(val), ov.get("rounding"))
+                unc = None
+                if isinstance(node, dict):
+                    if "uncertainty" in node:
+                        unc = node["uncertainty"]
+                    elif "stat" in node or "syst" in node:  # the total, stat and syst in quadrature
+                        parts = [N.to_decimal(node[k]) for k in ("stat", "syst") if k in node]
+                        unc = None if any(p is None for p in parts) else str(sum(p * p for p in parts).sqrt())
+                shown = _round(str(val), ov.get("rounding"), uncertainty=unc)
                 if shown is None:
                     add("occurrence.rounding_malformed", "error", owhere,
                         f"occurrence {o.get('id')}: the source value {val!r} cannot be rounded under {ov.get('rounding')!r}",
@@ -377,3 +423,47 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
         not_run.append({"check": "reporting", "reason": "no reporting_context in the record", "required": False})
     return R.assemble("audit_claims", scope, findings, checks_run=checks_run, checks_not_run=not_run, notes=notes,
                       claim_matrix=matrix, draft_facts=facts, handoffs=handoffs, reporting=reporting, note=NOTE)
+
+
+# ---------------------------------------------------------------- two versions of one text (Com7, audit_claims.py --compare)
+
+_NUM = re.compile(r"(?<![A-Za-z_\d.])[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?")
+_STATUS_WORDS = {
+    "synthetic": r"\bsynthetic\b|合成|模[拟擬][数數][据據]",
+    "asimov": r"\basimov\b",
+    "preliminary": r"\bpreliminary\b|初步",
+    "expected": r"\bexpected\b|預期|预期",
+    "unvalidated": r"\bunvalidated\b|未[验驗][证證]",
+}
+# claim-strength levels: 3 observation / discovery, 2 evidence, 1 indication or hint, 0 none
+_STRENGTH = ((3, r"\bobservation of\b|\bdiscover(?:y|ed)\b|[观觀][测測]到.{0,6}[讯訊信][号號]|[发發][现現]"),
+             (2, r"\bevidence for\b|[证證][据據]"),
+             (1, r"\bindication of\b|\bhint of\b|[迹跡]象|暗示"))
+
+
+def _features(text: str) -> dict:
+    nums = sorted(str(Decimal(m.group(0))) for m in _NUM.finditer(text))
+    status = sorted(k for k, rx in _STATUS_WORDS.items() if re.search(rx, text, re.I))
+    level = max((lvl for lvl, rx in _STRENGTH if re.search(rx, text, re.I)), default=0)
+    return {"numbers": nums, "status_words": status, "claim_strength": level}
+
+
+def compare_versions(a: str, b: str) -> dict:
+    """Numbers (with their uncertainties), status words and the strongest claim level of two versions of one text,
+    such as an English and a Chinese draft; any difference is reported."""
+    fa, fb = _features(a), _features(b)
+    diffs = []
+    if fa["numbers"] != fb["numbers"]:
+        only_a = sorted((set(fa["numbers"]) - set(fb["numbers"])) | {n for n in fa["numbers"] if fa["numbers"].count(n) > fb["numbers"].count(n)})
+        only_b = sorted((set(fb["numbers"]) - set(fa["numbers"])) | {n for n in fb["numbers"] if fb["numbers"].count(n) > fa["numbers"].count(n)})
+        diffs.append({"check": "numbers", "only_in_a": only_a, "only_in_b": only_b,
+                      "message": "the versions do not show the same numbers (values or uncertainties)"})
+    if fa["status_words"] != fb["status_words"]:
+        diffs.append({"check": "status-words", "a": fa["status_words"], "b": fb["status_words"],
+                      "message": "a status word (synthetic, preliminary, expected, ...) is in one version only"})
+    if fa["claim_strength"] != fb["claim_strength"]:
+        names = {0: "none", 1: "indication", 2: "evidence", 3: "observation"}
+        diffs.append({"check": "claim-strength", "a": names[fa["claim_strength"]], "b": names[fb["claim_strength"]],
+                      "message": "the claim strength differs (for example evidence for vs observation of)"})
+    return {"a": fa, "b": fb, "differences": diffs,
+            "note": "deterministic comparison of numbers, status words and the strongest claim level; wording is not judged"}

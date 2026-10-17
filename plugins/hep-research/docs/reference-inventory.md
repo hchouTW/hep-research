@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| hep-communication | 57 | 404 | 0 |
+| hep-communication | 57 | 405 | 0 |
 | hep-computing | 33 | 305 | 0 |
 | hep-detector | 36 | 466 | 0 |
 | hep-measurement | 13 | 113 | 0 |
@@ -93,7 +93,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-and-cosmic-ray-papers.md` | hep-communication | 13.4 | yes | 13 | hep-measurement | 9257d7b5 2026-10-15 |
 | `citation-verification.md` | hep-communication | 6.5 | yes | 12 | - | e5427f10 2026-10-17 |
 | `citations-and-bibliography.md` | hep-communication | 19.9 | yes | 12 | - | 9257d7b5 2026-10-15 |
-| `claim-evidence-mapping.md` | hep-communication | 4.0 | yes | 9 | hep-statistics, hep-theory | 9257d7b5 2026-10-15 |
+| `claim-evidence-mapping.md` | hep-communication | 5.2 | yes | 9 | hep-statistics, hep-theory | 9257d7b5 2026-10-15 |
 | `code-review-report.md` | hep-communication | 5.5 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `code-to-methodology-synthesis.md` | hep-communication | 5.7 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `collaboration-results-lifecycle.md` | hep-communication | 3.7 | no | 2 | - | 9257d7b5 2026-10-15 |
@@ -123,7 +123,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `mermaid-patterns.md` | hep-communication | 4.5 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `multi-venue-reformatting.md` | hep-communication | 3.0 | no | 1 | - | 9257d7b5 2026-10-15 |
 | `outreach-and-public-facing-summaries.md` | hep-communication | 4.2 | yes | 6 | - | 9257d7b5 2026-10-15 |
-| `paper-genre-variants.md` | hep-communication | 7.6 | yes | 6 | - | 1cfd2077 2026-10-17 |
+| `paper-genre-variants.md` | hep-communication | 7.6 | yes | 6 | - | ac1eb235 2026-10-17 |
 | `paper-structure.md` | hep-communication | 11.1 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `papers-review-modes-and-reference-index.md` | hep-communication | 14.1 | no | 2 | - | 485e96cb 2026-10-17 |
 | `physics-plots.md` | hep-communication | 6.9 | yes | 7 | - | 9257d7b5 2026-10-15 |
