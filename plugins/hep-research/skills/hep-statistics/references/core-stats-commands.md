@@ -415,6 +415,16 @@ only gives one flat direction along (1, 1)/sqrt(2), matched to `D0/L`, with D0/L
 grids from a real propagation code, more than a few parameters (the start scans every node), and interval coverage
 along a near-flat direction.
 
+
+## Conventions in detail
+
+- **EDM threshold.** The fit verdict's EDM limit of 1e-5 is stricter than iminuit's default: Migrad stops at
+  EDM < 0.002 x tol x errordef, with tol 0.1, that is 1e-4 for a negative log-likelihood with errordef 0.5; the
+  threshold depends on the tolerance (iminuit reference documentation).
+- **Poisson domain.** A negative or non-finite Poisson mean is outside every likelihood here (NLL = +inf); a mean of
+  0 is allowed only for an empty bin. A shape template that interpolates below zero is therefore excluded by the fit
+  instead of being read as an empty bin.
+
 ## Inference scripts outside hep-statistics
 
 Read `--help` first. `cr_spectrum_powerlaw_fit.py` fits a single or

@@ -76,9 +76,7 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
   10 s prints the estimate to stderr first.
 - **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
   `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
-  at most 1e-5 (stricter than iminuit's default: Migrad stops at EDM < 0.002 x tol x errordef, with tol 0.1,
-  that is 1e-4 for a negative log-likelihood with errordef 0.5; the threshold depends on the tolerance, iminuit
-  reference documentation); otherwise `failed` with reasons (`invalid_domain`,
+  at most 1e-5 (stricter than iminuit's default; [details](core-stats-commands.md#conventions-in-detail)); otherwise `failed` with reasons (`invalid_domain`,
   `hessian_not_positive_definite`, `gradient_not_small`, `max_iterations`, `line_search_stalled`). A best fit on the
   boundary `mu = 0` is checked by the KKT condition (the profile rises into `mu > 0`), not by an interior Hessian. A
   conditional NLL below the global one by more than 1e-4 triggers a global refit from the conditional point and, if
@@ -86,9 +84,6 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
   reasons for the observed data and for toys) and `status`: `failed` (exit 1) when a fit on the data failed,
   `incomplete` (exit 3) when only toy fits failed; failed toys are counted, never dropped, and toy p-values then
   carry the range `[k/N, (k+F)/N]`.
-- **Poisson domain.** A negative or non-finite Poisson mean is outside every likelihood here (NLL = +inf); a mean of
-  0 is allowed only for an empty bin. A shape template that interpolates below zero is therefore excluded by the fit
-  instead of being read as an empty bin.
 - **Toy tails** (`tail_estimation.py`, helper, no CLI). A toy p-value is k exceedances of N toys. Outputs carry
   `toy_tail`: k, N, the estimate k/N (None at k = 0), the Clopper-Pearson interval at 68.27%, and at k = 0 a one-sided
   95% upper bound `1 - 0.05^(1/N)` (0.0295 for N = 100); the legacy `p_value_toys` and binomial-error fields are None
@@ -139,6 +134,8 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `roofit_fit_check.py` (needs PyROOT): a saved RooFitResult is ok only with status 0, covQual 3 and an EDM below the declared `--edm-max`; `weighted` requires `--weighted-errors` for weighted data.
 - `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure, systematics by
   their M5 scaling class, and the reach; every output is labeled `projection` and fails the publication gate.
+- `tail_extrapolation.py`: a control-region tail fitted by several model families and extrapolated into the signal
+  region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy are imported at run time.
 - Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command
   reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 

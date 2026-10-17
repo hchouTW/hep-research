@@ -245,6 +245,11 @@ ROUTES = {
         {"id": "b", "values": [1.1, 1.8], "covariance": [[0.05, 0.0], [0.0, 0.08]]}]}),
     ("skills/hep-statistics/scripts/project_uncertainty.py", None): (["@IN", "--k", "2,4"], {"stat": 0.04, "systematics": [
         {"name": "theory", "scaling": "floor", "sigma": 0.03, "control_grows_with_exposure": False}]}),
+    ("skills/hep-statistics/scripts/tail_extrapolation.py", None): (["--input", "@IN"], {
+        "edges": [100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0], "counts": [500, 300, 180, 110, 66, 40, 24],
+        "control_region": [100.0, 160.0], "validation_region": [140.0, 160.0], "signal_region": [160.0, 170.0],
+        "models": ["exponential"], "nominal": "exponential", "max_extrapolation": 20.0, "validation_alpha": 0.05,
+        "cl": 0.6827}),
     ("core/stats/statistical_toys.py", "unfold-scan"): (["--input", "@IN", "--toys", "50", "--seed", "1"], dict(RESP, max_iterations=4)),
     ("core/stats/unfolding_diagnostics.py", "closure"): (["--input", "@IN", "--method", "dagostini", "--param", "3",
                                                           "--toys", "50", "--seed", "1"], RESP),

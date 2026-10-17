@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-detector | 37 | 471 | 0 |
 | hep-measurement | 13 | 113 | 0 |
 | hep-ml | 42 | 192 | 0 |
-| hep-statistics | 12 | 177 | 0 |
+| hep-statistics | 12 | 179 | 0 |
 | hep-theory | 15 | 105 | 0 |
 
 ## Overlapping pairs
@@ -271,9 +271,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 10 | hep-statistics | 485e96cb 2026-10-17 |
 | `astroparticle-statistics.md` | hep-statistics | 11.6 | yes | 15 | hep-detector, hep-measurement | 14eeda45 2026-10-15 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
-| `core-stats-commands.md` | hep-statistics | 42.2 | yes | 6 | hep-detector, hep-measurement | f598f1ae 2026-10-17 |
-| `core-stats-guide.md` | hep-statistics | 15.8 | yes | 13 | hep-measurement | f598f1ae 2026-10-17 |
-| `inference-recipes.md` | hep-statistics | 18.2 | yes | 12 | hep-detector, hep-measurement | 13868667 2026-10-13 |
+| `core-stats-commands.md` | hep-statistics | 42.8 | yes | 6 | hep-detector, hep-measurement | ca23333b 2026-10-17 |
+| `core-stats-guide.md` | hep-statistics | 15.6 | yes | 13 | hep-measurement | ca23333b 2026-10-17 |
+| `inference-recipes.md` | hep-statistics | 20.4 | yes | 12 | hep-detector, hep-measurement | 13868667 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.7 | yes | 10 | hep-computing, hep-detector | db0a9cca 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `nuisance-modeling.md` | hep-statistics | 20.3 | yes | 9 | hep-measurement | 100eb1c3 2026-10-16 |

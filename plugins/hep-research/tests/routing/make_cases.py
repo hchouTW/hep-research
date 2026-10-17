@@ -444,6 +444,9 @@ C = [
     # batch C, S7: validated-range caps and their override
  ("c-st-caps-1", "en", "direct", "My template fit has 72 bins and the core tool refuses above 60; can I run it anyway, and what does the output then claim?", "hep-statistics", ["template fits"], None, None, {}),
  ("c-st-caps-2", "zh-Hant", "direct", "多組 bin 的極限計算超過工具的上限，可以強制執行嗎？結果還能當成發表的結果嗎？", "hep-statistics", ["intervals and limits"], None, None, {}),
+    # batch C, S8: background tail extrapolation (tail_extrapolation.py)
+ ("c-st-tail-1", "en", "direct", "Extrapolate the background tail from my sideband into the signal region with an exponential and a power law, and tell me whether the extrapolation validates.", "hep-statistics", ["low or zero counts", "nuisance parameters"], None, None, {}),
+ ("c-st-tail-2", "zh-Hant", "direct", "背景尾巴只在控制區量到，要怎麼外推到訊號區？不同函數形式的差異要怎麼當成不確定度？", "hep-statistics", ["model comparison"], None, None, {}),
 ]
 
 cases = []

@@ -4222,6 +4222,27 @@
    "trigger_terms": [
     "intervals and limits"
    ]
+  },
+  {
+   "id": "c-st-tail-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Extrapolate the background tail from my sideband into the signal region with an exponential and a power law, and tell me whether the extrapolation validates.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "low or zero counts",
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "c-st-tail-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "背景尾巴只在控制區量到，要怎麼外推到訊號區？不同函數形式的差異要怎麼當成不確定度？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "model comparison"
+   ]
   }
  ]
 }
