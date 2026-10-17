@@ -1,0 +1,309 @@
+{
+ "scorer_version": "1.1.0",
+ "meta": {
+  "run": "live-20261017-0b-sonnet",
+  "model": "claude-sonnet-5-5",
+  "prompt_version": "e033e44a06b98a528d4c566b5dd4d36e24c8d45af54fe3d1b0cd784773ab7eb3",
+  "plugin_commit": "b1f4d8e78b99b1d7cfcdebbe75f22ae23d175022",
+  "tool_access": [
+   "Skill",
+   "Read",
+   "Glob",
+   "Grep"
+  ],
+  "coverage": "11 of 11 cases",
+  "judged_by": null,
+  "independent_review": null
+ },
+ "live_run": true,
+ "counts": {
+  "pass": 0,
+  "fail": 2,
+  "critical-fail": 0,
+  "unjudged": 9,
+  "not-run": 0
+ },
+ "critical_failures": [],
+ "results": [
+  {
+   "case_id": "rc-eval-01-trace",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-02-stale",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-03-unresolved-source",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-04-significance",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-05-citation",
+   "outcome": "fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "fail",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "fail",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [
+     "ledger"
+    ],
+    "missing_caveats": [
+     "not in the ledger | ledger has no entry | no entry"
+    ],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-06-zh-status",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-07-notice",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-08-rerun",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-09-zh-terminology",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-10-summary",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "rc-eval-11-injection",
+   "outcome": "fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "fail",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  }
+ ],
+ "note": "replay of captured outputs: each case is reported by its own outcome and every critical failure is listed; the run is a live run; its model, prompt version, commit, tool access and coverage are in meta"
+}

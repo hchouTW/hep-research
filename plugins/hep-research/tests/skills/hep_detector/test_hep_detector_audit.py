@@ -123,7 +123,7 @@ class GaisserHillasBracketingTests(unittest.TestCase):
 class CherenkovChargeTests(unittest.TestCase):
     # n=1.05, p=40 GeV/c, L=2 cm, N0=100/cm, 5 mrad: He4 beta=0.995687, theta=0.296014 rad,
     # z=1 yield 17.0188937; with z^2: 68.0755750, sigma_theta = 5/sqrt(68.0756) = 0.6060024 mrad.
-    HE4_PHOTONS = 68.07557496982115
+    HE4_PHOTONS = 68.07557492992738  # with the CODATA 2022 alpha-particle mass (Th9); 68.07557496982115 with 3.72737940 GeV
     HE4_SIGMA_MRAD = 0.6060024015969153
 
     def test_helium_yield_scales_with_z_squared(self):
@@ -134,12 +134,14 @@ class CherenkovChargeTests(unittest.TestCase):
         self.assertAlmostEqual(he4['expected_photons'], self.HE4_PHOTONS, delta=1e-9)
         self.assertAlmostEqual(he4['track_angular_resolution_mrad'], self.HE4_SIGMA_MRAD, delta=1e-9)
         # The threshold and the angle depend on beta only, not on z.
-        self.assertAlmostEqual(he4['threshold_momentum_gev'], 11.642377257681904, delta=1e-9)
-        self.assertAlmostEqual(he4['cherenkov_angle_rad'], 0.2960136491360844, delta=1e-12)
+        # 11.642377294538912 with the CODATA 2022 alpha-particle mass (Th9); 11.642377257681904 with 3.72737940 GeV
+        self.assertAlmostEqual(he4['threshold_momentum_gev'], 11.642377294538912, delta=1e-9)
+        # 0.2960136490467237 with the CODATA 2022 alpha-particle mass (Th9); 0.2960136491360844 with 3.72737940 GeV
+        self.assertAlmostEqual(he4['cherenkov_angle_rad'], 0.2960136490467237, delta=1e-12)
 
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
-                           '3.72737940:2', '--momentum', '40')
+                           '3.7273794118:2', '--momentum', '40')  # the CODATA 2022 mass, stated
         self.assertAlmostEqual(payload['species_b']['expected_photons'], self.HE4_PHOTONS, delta=1e-9)
 
     def test_rigidity_input_gives_p_equals_z_r(self):
@@ -299,6 +301,16 @@ STATUS_CASES = {
 }
 
 
+# Scripts written after F-04 follow the plugin-wide contract of core/status.py instead: "status" is the run status
+# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic; propagate_scale_distortion.py takes --status).
+F04_CASES = {
+    'toy_spectrometer.py': ['resolution', ASSETS / 'toy-spectrometer.fictional.json', '--species', 'p',
+                            '--rigidity', '10'],
+    'propagate_scale_distortion.py': ['events', ASSETS / 'scale-distortion-events.example.csv', '--column', 'x',
+                                      '--signed', '--edges', '1', '2', '4', '--mode', 'scale', '--scale', '0.01'],
+}
+
+
 class StatusLabelTests(_TempFiles, unittest.TestCase):
     """E-6: replicate cosmic_ray_flux.py: --status (choices = core artifact_statuses,
     default unvalidated) echoed as the top-level key 'status'."""
@@ -307,13 +319,23 @@ class StatusLabelTests(_TempFiles, unittest.TestCase):
     FILE_STATUS = {'calorimeter_resolution.py', 'multiple_scattering.py', 'pileup_reweight.py'}
 
     def test_every_script_echoes_status(self):
-        self.assertEqual(set(STATUS_CASES), {p.name for p in SCRIPTS.glob('*.py')})
+        self.assertEqual(set(STATUS_CASES) | set(F04_CASES), {p.name for p in SCRIPTS.glob('*.py')})
+        self.assertFalse(set(STATUS_CASES) & set(F04_CASES))
         for script, args in STATUS_CASES.items():
             with self.subTest(script=script):
                 default = run_json(self, script, *args)
                 self.assertEqual(default.get('status'), 'synthetic' if script in self.FILE_STATUS else 'unvalidated')
                 labelled = run_json(self, script, *args, '--status', 'synthetic')
                 self.assertEqual(labelled.get('status'), 'synthetic')
+
+    def test_f04_scripts_report_a_run_status_and_a_label(self):
+        sys.path.insert(0, str(PLUGIN))
+        from core.status import ARTIFACT_LABELS, RUN_STATUSES
+        for script, args in F04_CASES.items():
+            with self.subTest(script=script):
+                payload = run_json(self, script, *args)
+                self.assertIn(payload.get('status'), RUN_STATUSES)
+                self.assertIn(payload.get('status_label'), ARTIFACT_LABELS)
 
     def test_status_in_an_input_file_propagates(self):
         stack = json.loads((ASSETS / 'detector-stack.example.json').read_text(encoding='utf-8'))
@@ -326,7 +348,7 @@ class StatusLabelTests(_TempFiles, unittest.TestCase):
         import ast
         vocab = json.loads((PLUGIN / 'contracts' / 'vocab' / 'core.json').read_text(encoding='utf-8'))
         expected = set(vocab['vocabularies']['artifact_statuses'])
-        for path in sorted(SCRIPTS.glob('*.py')):
+        for path in sorted(p for p in SCRIPTS.glob('*.py') if p.name not in F04_CASES):
             with self.subTest(script=path.name):
                 tree = ast.parse(path.read_text(encoding='utf-8'))
                 values = [ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)

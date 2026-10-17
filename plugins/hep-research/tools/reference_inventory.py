@@ -7,10 +7,12 @@ in backticks or plain text; its own file, docs/, CHANGELOG.md and VALIDATION.md 
 touched it (from git; in a shallow clone that is the oldest commit available, said so in the output). Overlap is the
 Jaccard index and the containment (shared / smaller) of word 8-shingles between two references (lowercased,
 punctuation removed); pairs at or above --threshold or containment 0.15 are listed, and references with similar names are grouped. Overlap is a hypothesis to read, not proof of
-duplication.
+duplication. One owner per topic (upgrade plan X2): a listed pair whose two references belong to different skills is
+an error in both modes (status fail, exit 1); keep the topic in its owner's reference and link to it from the other.
+Pairs inside one skill stay listed only.
 
 Usage: python3 tools/reference_inventory.py [--json docs/reference-inventory.json] [--md docs/reference-inventory.md]
-       [--threshold 0.08] [--check]
+       [--threshold 0.08] [--check] [--root PLUGIN_ROOT]
 --check regenerates in memory and exits 1 if the committed files differ in anything except the git columns
 (so a new or removed reference, or a changed citation, is caught). Standard library only.
 Soft budget (upgrade plan B-05): both modes print "warnings" for the routing part of an entry reference above
@@ -142,6 +144,16 @@ def build(root: Path, threshold: float, with_git: bool = True) -> dict:
     return out
 
 
+def cross_skill_overlaps(inv: dict) -> list[dict]:
+    """Overlapping pairs whose references belong to different skills (X2: one owner per topic)."""
+    return [p for p in inv["overlap_pairs"] if p["a"].split("/")[1] != p["b"].split("/")[1]]
+
+
+def overlap_problems(inv: dict) -> list[str]:
+    return [f"one owner per topic: {p['a']} and {p['b']} overlap (Jaccard {p['jaccard']}, containment "
+            f"{p['containment']}); keep the text in the owner's reference and link to it" for p in cross_skill_overlaps(inv)]
+
+
 def entry_references(root: Path) -> list[str]:
     """The first reference each SKILL.md's '## Resources' section links (plugin-relative paths)."""
     out = []
@@ -215,24 +227,27 @@ def main(argv=None) -> int:
     ap.add_argument("--md", type=Path, default=ROOT / "docs" / "reference-inventory.md")
     ap.add_argument("--threshold", type=float, default=0.08)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--root", type=Path, default=ROOT, help="plugin root (default: this checkout)")
     opts = ap.parse_args(argv)
+    root = opts.root.resolve()
     if opts.check:
         if not opts.json.is_file():
             print(json.dumps({"status": "fail", "problems": [f"{opts.json.name} missing"]}))
             return 1
         committed = json.loads(opts.json.read_text(encoding="utf-8"))
-        fresh = build(ROOT, committed.get("threshold", opts.threshold), with_git=False)
+        fresh = build(root, committed.get("threshold", opts.threshold), with_git=False)
         same = strip_git(committed) == strip_git(fresh)
-        print(json.dumps({"status": "pass" if same else "fail", "references": len(fresh["references"]),
-                          "problems": [] if same else ["the committed inventory is stale: rerun tools/reference_inventory.py"],
-                          "warnings": soft_budget(ROOT)}))
-        return 0 if same else 1
-    inv = build(ROOT, opts.threshold)
+        problems = ([] if same else ["the committed inventory is stale: rerun tools/reference_inventory.py"]) + overlap_problems(fresh)
+        print(json.dumps({"status": "fail" if problems else "pass", "references": len(fresh["references"]),
+                          "problems": problems, "warnings": soft_budget(root)}))
+        return 1 if problems else 0
+    inv = build(root, opts.threshold)
     opts.json.write_text(json.dumps(inv, indent=1) + "\n", encoding="utf-8")
     opts.md.write_text(markdown(inv), encoding="utf-8")
-    print(json.dumps({"status": "ok", "references": len(inv["references"]), "overlap_pairs": len(inv["overlap_pairs"]),
-                      "warnings": soft_budget(ROOT)}))
-    return 0
+    problems = overlap_problems(inv)
+    print(json.dumps({"status": "fail" if problems else "ok", "references": len(inv["references"]),
+                      "overlap_pairs": len(inv["overlap_pairs"]), "problems": problems, "warnings": soft_budget(root)}))
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":

@@ -4,11 +4,12 @@
   "kinematics": {
    "steward": "hep-theory",
    "status": "implemented-M2",
-   "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians)",
+   "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians); four-vector kinematics (two-body decays, boosts, Mandelstam variables, thresholds, Dalitz boundaries, rapidity, width/lifetime/c tau; Th7)",
    "files": [
-    "relativistic"
+    "relativistic",
+    "fourvector"
    ],
-   "source": "all conversions are generic; no constants embedded, masses are caller-supplied"
+   "source": "all conversions are generic; no constants embedded, masses are caller-supplied; fourvector.py takes hbar and c from core/constants"
   },
   "stats": {
    "steward": "hep-statistics",
@@ -104,6 +105,15 @@
     "tests/skills/test_cli_contract.py"
    ],
    "source": "new in this plugin (upgrade plan v1.3, F-04)"
+  },
+  "constants": {
+   "steward": "hep-theory",
+   "status": "implemented-Th9",
+   "purpose": "Physical constants, particle and nuclide data with value, uncertainty, unit, source and edition; unit conversions; decay Q values",
+   "files": [
+    "physical"
+   ],
+   "source": "CODATA 2022 (NIST), PDG 2026 subset (CC BY 4.0, via pdg 2026.0), AME2020 and NUBASE2020 subsets (AMDC), read 2026-10-17; data in core/constants/data; standard library only"
   }
  }
 }

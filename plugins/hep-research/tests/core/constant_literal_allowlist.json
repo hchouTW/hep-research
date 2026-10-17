@@ -1,0 +1,30 @@
+{
+ "about": "Th9: numeric literals of common masses that stay in code, each with its reason. Files under core/ and skills/ may not appear (they take values from core/constants); profile IDs may not appear in core/, so this list lives under tests/.",
+ "entries": [
+  {
+   "file": "profiles/theory/cr-secondary-antiprotons/scripts/predict.py",
+   "literal": "0.93827208816",
+   "reason": "CODATA 2018 proton mass pinned by the profile's constants claim (crpb:C06); the profile's committed benchmark outputs depend on it"
+  },
+  {
+   "file": "profiles/theory/cr-secondary-antiprotons/scripts/published_benchmark.py",
+   "literal": "0.93827208816",
+   "reason": "CODATA 2018 proton mass pinned for the published benchmark (crpb:C06)"
+  },
+  {
+   "file": "profiles/theory/cr-secondary-antiprotons/scripts/published_benchmark.py",
+   "literal": "0.389379372",
+   "reason": "(hbar c)^2 from CODATA 2018 hbar c, pinned for the published benchmark (crpb:C10)"
+  },
+  {
+   "file": "profiles/theory/cr-secondary-ratio/scripts/predict.py",
+   "literal": "0.93149410242",
+   "reason": "CODATA 2018 atomic mass unit pinned by the profile's constants claim (crsr:C05); the committed B/C benchmark depends on it"
+  },
+  {
+   "file": "profiles/theory/cr-secondary-ratio/scripts/predict.py",
+   "literal": "1.67262192369e-24",
+   "reason": "CODATA 2018 proton mass in grams (target mass) pinned by the profile's constants claim (crsr:C05)"
+  }
+ ]
+}

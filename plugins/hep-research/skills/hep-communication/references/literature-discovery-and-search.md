@@ -19,7 +19,8 @@ and the task is only pulling a clean BibTeX entry for it.
    The import deduplicates only on identical stable identifiers (DOI, arXiv id, INSPIRE record; similar titles are
    proposed, never merged), keeps arXiv version history and flags citing claims when a version changes, applies
    correction, retraction and journal-version notices as flags on the dependent claims (never deletes a citation), and
-   marks an old verification date as "recheck", not as error. It never looks anything up: verifying a source at a
+   marks an old verification date as "recheck", not as error; a planned claim (`kind: planned`) past its
+   `recheck_by` date is flagged (see "Planned claims" in `citation-verification.md`). It never looks anything up: verifying a source at a
    primary source stays the explicit workflow of `citation-verification.md`, recorded as a read event.
 1. **Pick the database(s) for the field**, not just whichever is habitual:
    - HEP/collider: INSPIRE-HEP first (citation graph, author disambiguation,

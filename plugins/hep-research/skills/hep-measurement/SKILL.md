@@ -50,7 +50,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 | Estimand, fiducial definitions, result levels | [measurements and unfolding](references/measurements-and-unfolding.md) |
 | Efficiencies, exposure, live time, luminosity, POT | [correction chain](references/correction-chain.md) |
 | Backgrounds: control regions, ABCD, sidebands | [backgrounds](references/backgrounds.md) |
-| Physical sources of systematics, variations | [systematics](references/systematics.md); `check_systematic_variations.py`, `systematics_table_tex.py` |
+| Physical sources of systematics, variations, scaling class | [systematics](references/systematics.md); `check_systematic_variations.py`, `systematics_table_tex.py` |
 | Normalization, signed weights, cutflows, yields | [weights and normalization](references/weights-normalization.md); `make_yield_table.py` |
 | Histograms, efficiencies with uncertainties | [histograms and efficiencies](references/histograms-efficiencies.md) |
 | Validation, review checks, preservation | [analysis validation](references/analysis-validation.md) |
@@ -60,7 +60,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 | Counting reference, ratio of two yields | `counting_reference.py`, `particle_ratio_with_uncertainty.py` |
 | A named experiment's beams or run conditions | the bound profile's `index.md` |
 
-Scripts in `<plugin root>/skills/hep-measurement/scripts/` (read `--help` first; the README describes each). Spec template and field guide: `assets/measurement_spec.template.{json,md}`. Unfolding and combination methods belong to hep-statistics; detector data/MC validation to hep-detector. Folder guide: [README.md](README.md).
+Scripts in `<plugin root>/skills/hep-measurement/scripts/` (read `--help` first; the analysis guide's "Executable resources" describes each). Spec template and field guide: `assets/measurement_spec.template.{json,md}`. Unfolding and combination methods belong to hep-statistics; detector data/MC validation to hep-detector. Folder guide: [README.md](README.md).
 
 ## Handoffs
 

@@ -16,6 +16,11 @@ derivation or argument itself is valid — proof status, assumptions — as
 distinct from this file's algebra/dimension/notation-consistency scope, see
 `../../hep-theory/references/mathematical-reasoning-and-proof.md`.
 
+The glossary template separates terms that are often mixed: collection time (a duration, s), exposure (the
+normalization, acceptance times live time) and data exposure (what was seen, for blinding), and rigidity (GV) and
+momentum (GeV/c). Each normalization term names its effect ID in `contracts/vocab/effects.json` (`exposure`,
+`acceptance`, `livetime`).
+
 Build a symbol ledger as needed: symbol, definition, first-use location, units or
 dimensions, scalar/vector/tensor shape, index range, and local scope. Distinguish
 intentional local reuse from contradictory definitions. Check equations, prose,

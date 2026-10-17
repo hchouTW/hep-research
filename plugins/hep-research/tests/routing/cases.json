@@ -1319,6 +1319,56 @@
    ]
   },
   {
+   "id": "th-heavyion-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Extract the shear viscosity of the quark-gluon plasma from a hydrodynamic model of Pb-Pb elliptic flow.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X3",
+   "limited_support": true
+  },
+  {
+   "id": "th-nucstruct-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute the ground-state quadrupole deformation of 154Sm with a nuclear energy density functional.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X3",
+   "limited_support": true
+  },
+  {
+   "id": "th-relic-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Solve the Boltzmann equation for the relic density of my WIMP model, including coannihilations.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X3",
+   "limited_support": true
+  },
+  {
+   "id": "th-scope-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "幫我推導微中子振盪機率在物質中的修正。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X1",
+   "limited_support": true
+  },
+  {
+   "id": "th-flavour-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "幫我做 CKM 全域擬合。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X1",
+   "limited_support": true
+  },
+  {
    "id": "underspec-1",
    "lang": "en",
    "kind": "underspecified",
@@ -3285,6 +3335,186 @@
    "inputs": {
     "abstract_zh.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n我們以 3.2 fb⁻¹ 的合成資料量測截面，得到 σ = 12.4 ± 0.8 (stat) ± 1.1 (syst) pb，與理論預測一致。\n"
    }
+  },
+  {
+   "id": "th-a-qvalue-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What is the Q value of the 238U alpha decay from AME2020 masses, and which edition and uncertainty should I quote?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nuclear decays"
+   ]
+  },
+  {
+   "id": "th-a-const-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "π⁺ 的質量要用哪一版 PDG 的數值？請附上來源、版本與不確定度。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "constants"
+   ]
+  },
+  {
+   "id": "th-a-kin-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What beam energy is the threshold for antiproton production on a proton at rest, and what is the Dalitz-plot boundary of D0 to K pi pi0?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates and widths"
+   ]
+  },
+  {
+   "id": "th-a-kin-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把這個四動量從質心系 boost 到實驗室系，順便算 s、t、u 與 rapidity。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ]
+  },
+  {
+   "id": "dr-a-toy-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Simulate a toy magnetic spectrometer with a fixed seed so I can test how the efficiency and resolution of my rigidity selection change when a tracker layer is added.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "efficiency and resolution"
+   ]
+  },
+  {
+   "id": "dr-a-toy-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用固定亂數種子產生一組合成的磁譜儀事件，作為 detector simulation (Geant4) 之外的快速版本，檢查各時段的剛度解析度。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "detector simulation (Geant4)"
+   ]
+  },
+  {
+   "id": "dr-a-residual-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Propagate my calibration and alignment residual, a curvature offset, into the antiproton-to-proton ratio bins and give me up and down variations.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "dr-a-residual-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "動量尺度的 calibration and alignment 殘差要怎麼傳遞到每個能區的產額與共變異矩陣？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "ms-a-scaling-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which of my systematic uncertainties will shrink with a four times larger control sample, and which are a floor? I need the evaluation plan for the projection.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "the physical sources of systematic uncertainties and their evaluation plan"
+   ]
+  },
+  {
+   "id": "th-a-drift-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Can I fit one force-field phi to positron and electron fluxes across the solar polarity reversal, or do drift effects break the approximation?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ]
+  },
+  {
+   "id": "th-a-drift-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "太陽磁場極性反轉前後的反質子比，用 force-field 近似還適用嗎？漂移效應要怎麼處理？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ]
+  },
+  {
+   "id": "ms-a-scaling-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的系統誤差哪些會隨控制樣本變大而縮小、哪些是下限？請幫我規劃評估方式。",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "the physical sources of systematic uncertainties and their evaluation plan"
+   ]
+  },
+  {
+   "id": "ml-a-split-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build grouped train/validation/test splits by run and lumi block, stratified by class so the rare signal reaches every split, then run leakage checks.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ]
+  },
+  {
+   "id": "ml-a-split-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "依 run 分組切 train/val/test，並按訊號與背景分層，確認每個 split 都有稀有類別而且沒有洩漏。",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ]
+  },
+  {
+   "id": "cm-a-planned-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My citation ledger says a detector upgrade is planned for 2027; how do I cite that plan so it gets rechecked, and keep it from supporting the measured result in my paper?",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "finding and verifying literature and citations"
+   ]
+  },
+  {
+   "id": "cm-a-planned-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "文獻紀錄裡有一條「預計 2027 年安裝」的計畫性敘述，引用時要怎麼寫，過了日期要怎麼提醒重新查核？",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "finding and verifying literature and citations"
+   ]
+  },
+  {
+   "id": "cm-a-terms-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check the terminology of my cosmic-ray paper draft: it mixes exposure, collection time and data exposure, and quotes momenta in GV.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "terminology"
+   ]
+  },
+  {
+   "id": "cm-a-terms-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "幫我檢查論文草稿的術語：曝露量、收集時間和資料曝光混用，剛度和動量也分不清。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "terminology"
+   ]
   }
  ]
 }

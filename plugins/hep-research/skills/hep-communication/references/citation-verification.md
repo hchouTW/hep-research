@@ -72,6 +72,16 @@ a passage the old locators do not cover; otherwise the old record supports the
 same claim it supported before. A recheck is a new read event with its own date
 beside the old one, not a replacement of it.
 
+## Planned claims
+
+A schedule, an intended upgrade, an announced run or a promised release is a plan, not a result. Record it in the
+ledger as a claim with `"kind": "planned"` and a `"recheck_by": "YYYY-MM-DD"` date, and write it in the future tense
+with the date it was read: "as of 2026-10-12, the installation is planned for 2027 [source]", never "the detector has
+the new layer". `manage_literature.py` flags a planned claim once its `recheck_by` date has passed (exit 3) and reports
+one without a date; recheck at a primary source, then record the outcome as a new claim or move the date. A planned
+claim never supports a measured result: `audit_claims.py` refuses a supporting edge of a measurement, search or limit
+claim to a source whose only ledger claims are planned, and a measured claim marked planned (exit 1).
+
 ## Deliverable
 
 Deliver a ledger with: manuscript location and claim; citation key and stable

@@ -52,13 +52,14 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | Event-generation physics (ME order, shower, matching), event weights | [event generation](references/event-generation.md); `event_weights.py` |
 | Recasting a published analysis (MadGraph, Rivet, Delphes, SModelS) | [recasting toolchain](references/recasting-toolchain.md) (documented, not run) |
 | DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |
-| Phase space, decay widths, narrow width, Breit-Wigner | [amplitudes and widths](references/amplitudes-and-widths.md) |
+| Constants, particle masses and lifetimes, nuclide masses and half-lives, unit conversions, decay Q values (with source and edition) | `physical_data.py` (`<plugin root>/core/constants`: CODATA 2022, PDG 2026 subset, AME2020/NUBASE2020) |
+| Phase space, decay widths, narrow width, Breit-Wigner | [amplitudes and widths](references/amplitudes-and-widths.md); `kinematics.py` (two-body, boosts, Mandelstam, thresholds, Dalitz, rapidity, width/lifetime/c tau) |
 | Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
 | Schemes, running masses, regularization | [schemes](references/regularization-and-schemes.md) |
 | HEPData table to a dataset record, or a record back to HEPData | `<plugin root>/adapters/hepdata/assets/hepdata_record.py`, `<plugin root>/adapters/hepdata/assets/hepdata_export.py` |
 | Scientific-ML boundaries (surrogates of a theory) | `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md` |
 | Shipped theory-domain profiles | `<plugin root>/profiles/registry.json` |
-| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; general discipline |
+| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; general discipline; full list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |
 
 Folder guide for people: [README.md](README.md).
 

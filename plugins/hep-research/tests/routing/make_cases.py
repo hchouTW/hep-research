@@ -122,6 +122,13 @@ C = [
  ("recast-1", "zh-Hant", "recasting", "請重新詮釋（recasting a published analysis）這個 LHC 搜尋結果以限制我的模型。", "hep-theory", ["recasting a published analysis"], None, None, {"chain": ["hep-theory", "hep-detector", "hep-statistics"]}),
  ("out-of-v1-1", "en", "out-of-v1", "Fit cosmic-ray propagation parameters with GALPROP across all species.", "hep-statistics", [], None, None, {"limited_support": True}),
  ("out-of-v1-2", "zh-Hant", "out-of-v1", "幫我做 SMEFT 全域擬合。", "hep-theory", [], None, None, {"limited_support": True, "also_accept": ["hep-statistics"]}),  # hep-theory claims EFT global fits; both give the notice
+ # X3: every domain outside v1 on docs/capability-map.json has a limited-support case
+ ("th-heavyion-1", "en", "out-of-v1", "Extract the shear viscosity of the quark-gluon plasma from a hydrodynamic model of Pb-Pb elliptic flow.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
+ ("th-nucstruct-1", "en", "out-of-v1", "Compute the ground-state quadrupole deformation of 154Sm with a nuclear energy density functional.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
+ ("th-relic-1", "en", "out-of-v1", "Solve the Boltzmann equation for the relic density of my WIMP model, including coannihilations.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
+ # X1: scope declaration (limited-support until Th4 lands for th-scope-2, then a direct case)
+ ("th-scope-2", "zh-Hant", "out-of-v1", "幫我推導微中子振盪機率在物質中的修正。", "hep-theory", [], None, None, {"set": "X1", "limited_support": True}),
+ ("th-flavour-2", "zh-Hant", "out-of-v1", "幫我做 CKM 全域擬合。", "hep-theory", [], None, None, {"set": "X1", "limited_support": True}),
  ("underspec-1", "en", "underspecified", "Compare the two experiments.", "ask", [], None, None, {"note": "ask which datasets and observables; never pick experiments"}),
  ("underspec-2", "zh-Hant", "underspecified", "比較這兩個實驗的結果。", "ask", [], None, None, {}),
  # EIC profile: facility, experiment, theory with no profile, underspecified
@@ -306,6 +313,32 @@ C = [
  ("cm-numbers-1", "en", "direct", "Generate the LaTeX macros for my results table from this statistical result, with consistent numbers and units.", "hep-communication", ["numbers and units"], None, None, {}),
  ("cm-genre-2", "zh-Hant", "direct", "我要寫一篇 search 論文投 PRD，結果章節一定要有哪些內容？", "hep-communication", ["papers from results"], None, None, {}),
  ("cm-translate-1", "en", "direct", "Translate my Chinese draft abstract into English without changing the claim strength or any number.", "hep-communication", ["English or Chinese"], None, None, {}),
+    # batch A, Th9: physical constants, particle and nuclide data (physical_data.py)
+ ("th-a-qvalue-1", "en", "direct", "What is the Q value of the 238U alpha decay from AME2020 masses, and which edition and uncertainty should I quote?", "hep-theory", ["nuclear decays"], None, None, {}),
+ ("th-a-const-2", "zh-Hant", "direct", "π⁺ 的質量要用哪一版 PDG 的數值？請附上來源、版本與不確定度。", "hep-theory", ["constants"], None, None, {}),
+    # batch A, Th7: four-vector kinematics (kinematics.py)
+ ("th-a-kin-1", "en", "direct", "What beam energy is the threshold for antiproton production on a proton at rest, and what is the Dalitz-plot boundary of D0 to K pi pi0?", "hep-theory", ["decay rates and widths"], None, None, {}),
+ ("th-a-kin-2", "zh-Hant", "direct", "把這個四動量從質心系 boost 到實驗室系，順便算 s、t、u 與 rapidity。", "hep-theory", ["cross sections"], None, None, {}),
+    # batch A (D7, D1): synthetic spectrometer test bed, propagating a calibration residual
+    ("dr-a-toy-1", "en", "direct", "Simulate a toy magnetic spectrometer with a fixed seed so I can test how the efficiency and resolution of my rigidity selection change when a tracker layer is added.", "hep-detector", ["efficiency and resolution"], None, None, {}),
+    ("dr-a-toy-2", "zh-Hant", "direct", "用固定亂數種子產生一組合成的磁譜儀事件，作為 detector simulation (Geant4) 之外的快速版本，檢查各時段的剛度解析度。", "hep-detector", ["detector simulation (Geant4)"], None, None, {}),
+    ("dr-a-residual-1", "en", "direct", "Propagate my calibration and alignment residual, a curvature offset, into the antiproton-to-proton ratio bins and give me up and down variations.", "hep-detector", ["calibration and alignment"], None, None, {}),
+    ("dr-a-residual-2", "zh-Hant", "direct", "動量尺度的 calibration and alignment 殘差要怎麼傳遞到每個能區的產額與共變異矩陣？", "hep-detector", ["calibration and alignment"], None, None, {}),
+ # batch A docs track: M5 scaling class of systematics
+ # batch A docs track: M5 scaling class of systematics, Th3 charge-sign-dependent modulation
+ ("ms-a-scaling-1", "en", "direct", "Which of my systematic uncertainties will shrink with a four times larger control sample, and which are a floor? I need the evaluation plan for the projection.", "hep-measurement", ["the physical sources of systematic uncertainties and their evaluation plan"], None, None, {}),
+ ("th-a-drift-1", "en", "direct", "Can I fit one force-field phi to positron and electron fluxes across the solar polarity reversal, or do drift effects break the approximation?", "hep-theory", ["approximations and validity domains"], None, None, {}),
+ ("th-a-drift-2", "zh-Hant", "direct", "太陽磁場極性反轉前後的反質子比，用 force-field 近似還適用嗎？漂移效應要怎麼處理？", "hep-theory", ["approximations and validity domains"], None, None, {}),
+ ("ms-a-scaling-2", "zh-Hant", "direct", "我的系統誤差哪些會隨控制樣本變大而縮小、哪些是下限？請幫我規劃評估方式。", "hep-measurement", ["the physical sources of systematic uncertainties and their evaluation plan"], None, None, {}),
+ # batch A, ML2: stratified grouped splits and composite keys
+ ("ml-a-split-1", "en", "direct", "Build grouped train/validation/test splits by run and lumi block, stratified by class so the rare signal reaches every split, then run leakage checks.", "hep-ml", ["grouped train/validation/test splits and leakage checks"], None, None, {}),
+ ("ml-a-split-2", "zh-Hant", "direct", "依 run 分組切 train/val/test，並按訊號與背景分層，確認每個 split 都有稀有類別而且沒有洩漏。", "hep-ml", ["grouped train/validation/test splits and leakage checks"], None, None, {}),
+ # batch A, Com1: planned claims with a recheck date
+ ("cm-a-planned-1", "en", "direct", "My citation ledger says a detector upgrade is planned for 2027; how do I cite that plan so it gets rechecked, and keep it from supporting the measured result in my paper?", "hep-communication", ["finding and verifying literature and citations"], None, None, {}),
+ ("cm-a-planned-2", "zh-Hant", "direct", "文獻紀錄裡有一條「預計 2027 年安裝」的計畫性敘述，引用時要怎麼寫，過了日期要怎麼提醒重新查核？", "hep-communication", ["finding and verifying literature and citations"], None, None, {}),
+ # batch A, Com3: glossary of normalization terms
+ ("cm-a-terms-1", "en", "direct", "Check the terminology of my cosmic-ray paper draft: it mixes exposure, collection time and data exposure, and quotes momenta in GV.", "hep-communication", ["terminology"], None, None, {}),
+ ("cm-a-terms-2", "zh-Hant", "direct", "幫我檢查論文草稿的術語：曝露量、收集時間和資料曝光混用，剛度和動量也分不清。", "hep-communication", ["terminology"], None, None, {}),
 ]
 
 cases = []

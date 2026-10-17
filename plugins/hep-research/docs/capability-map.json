@@ -1,0 +1,511 @@
+{
+ "map_version": "1.0.0",
+ "source": "X3 of the upgrade work order; rebuilt from docs/capability-matrix.md, docs/routing-contract.md, the SKILL.md files and the work order's item list (the plan's 33-row map, section 3.4.1, could not be read in the implementing session)",
+ "capabilities": [
+  {
+   "id": "measurement-design",
+   "capability": "Measurement design and verdict-first review: estimand, selections and cutflows, backgrounds, correction chains, systematics plan, blinding policy",
+   "owner": "hep-measurement",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "M3",
+    "M4",
+    "M10"
+   ]
+  },
+  {
+   "id": "cosmic-ray-flux",
+   "capability": "Cosmic-ray flux from counts and its helpers (orbit cutoff, force field, broken power law, anisotropy design)",
+   "owner": "hep-measurement",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "M6",
+    "M9"
+   ]
+  },
+  {
+   "id": "systematic-scaling",
+   "capability": "Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection",
+   "owner": "hep-measurement",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "M5",
+    "S2"
+   ]
+  },
+  {
+   "id": "collection-time",
+   "capability": "Collection time per period with quality cuts, cutoff transmission and eras",
+   "owner": "hep-measurement",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "M1"
+   ]
+  },
+  {
+   "id": "spectral-transform",
+   "capability": "Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging)",
+   "owner": "hep-measurement",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "M7",
+    "M8"
+   ]
+  },
+  {
+   "id": "acceptance-from-generation",
+   "capability": "Acceptance from generation records",
+   "owner": "hep-measurement",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "M2"
+   ]
+  },
+  {
+   "id": "response-folding",
+   "capability": "Response objects, forward folding, double-counting checks",
+   "owner": "hep-detector",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "D5"
+   ]
+  },
+  {
+   "id": "resolution-efficiency",
+   "capability": "Resolution and efficiency at detector level (tag-and-probe, truth matching, weighted efficiency)",
+   "owner": "hep-detector",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "D8"
+   ]
+  },
+  {
+   "id": "fast-spectrometer-simulation",
+   "capability": "Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras)",
+   "owner": "hep-detector",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "D7"
+   ]
+  },
+  {
+   "id": "scale-distortion",
+   "capability": "Propagating a calibration residual (scale, inverse offset, resolution) to yields, ratios and covariance",
+   "owner": "hep-detector",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "D1"
+   ]
+  },
+  {
+   "id": "response-construction",
+   "capability": "Response construction from matched truth and reconstructed events",
+   "owner": "hep-detector",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "D9"
+   ]
+  },
+  {
+   "id": "species-migration",
+   "capability": "Charge-sign confusion, nuclear interactions in material and species-migration responses",
+   "owner": "hep-detector",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "D2",
+    "D3",
+    "D4"
+   ]
+  },
+  {
+   "id": "multisample-pid",
+   "capability": "Multi-sample particle identification (charge from many samples, likelihood ratios)",
+   "owner": "hep-detector",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "D10"
+   ]
+  },
+  {
+   "id": "stability-monitoring",
+   "capability": "Stability monitoring over time (trends, change points, era boundaries)",
+   "owner": "hep-detector",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "D11"
+   ]
+  },
+  {
+   "id": "detector-design",
+   "capability": "Detector design principles and a sourced detector atlas",
+   "owner": "hep-detector",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "D6",
+    "D13",
+    "D14"
+   ]
+  },
+  {
+   "id": "geomagnetic-backtracing",
+   "capability": "Geomagnetic backtracing with an external tracer",
+   "owner": "hep-detector",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "D12"
+   ]
+  },
+  {
+   "id": "fits-and-limits",
+   "capability": "Likelihoods, binned and unbinned fits, template fits, intervals and limits, significance and look-elsewhere effects",
+   "owner": "hep-statistics",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "S7",
+    "S8"
+   ]
+  },
+  {
+   "id": "covariance-and-combinations",
+   "capability": "Covariance assembly and validation, combinations, comparisons with published records",
+   "owner": "hep-statistics",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "S3",
+    "S4"
+   ]
+  },
+  {
+   "id": "unfolding",
+   "capability": "Unfolding with regularization and coverage",
+   "owner": "hep-statistics",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "S10"
+   ]
+  },
+  {
+   "id": "bayesian",
+   "capability": "Bayesian posteriors, priors, samplers and convergence diagnostics",
+   "owner": "hep-statistics",
+   "state": "tool",
+   "v1": true
+  },
+  {
+   "id": "time-series",
+   "capability": "Binned time-series inference and periodicity",
+   "owner": "hep-statistics",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "S5",
+    "S9"
+   ]
+  },
+  {
+   "id": "split-consistency",
+   "capability": "Consistency of split samples and multi-era joint fits",
+   "owner": "hep-statistics",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "S1",
+    "S6"
+   ]
+  },
+  {
+   "id": "roofit-status",
+   "capability": "RooFit/RooStats fit-status mapping and cross-checks",
+   "owner": "hep-statistics",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "S11"
+   ]
+  },
+  {
+   "id": "theory-predictions",
+   "capability": "Conventions, derivations, cross sections, decay rates, higher-order and PDF uncertainties, predictions for published data",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th8",
+    "Th10"
+   ]
+  },
+  {
+   "id": "recasting",
+   "capability": "Recasting a published analysis with a parametrized response",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true
+  },
+  {
+   "id": "physical-data",
+   "capability": "Physical constants and particle and nuclear data with source and edition",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th9"
+   ]
+  },
+  {
+   "id": "relativistic-kinematics",
+   "capability": "Relativistic kinematics: two-body decays, boosts, invariant mass, Mandelstam variables, thresholds",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th7"
+   ],
+   "note": "core/kinematics/relativistic.py has point and bin-edge conversions only"
+  },
+  {
+   "id": "cosmic-ray-propagation",
+   "capability": "Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th1",
+    "Th2",
+    "Th3",
+    "Th6",
+    "Th11"
+   ]
+  },
+  {
+   "id": "nuclear-physics-entry",
+   "capability": "Nuclear cross-section conventions, nuclear decays and Q-values",
+   "owner": "hep-theory",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "Th1",
+    "Th12"
+   ]
+  },
+  {
+   "id": "partition-and-batch",
+   "capability": "Local partition, batch campaigns, resubmission and duplicate-safe merges",
+   "owner": "hep-computing",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "C1"
+   ]
+  },
+  {
+   "id": "root-and-columnar-io",
+   "capability": "ROOT, PyROOT, uproot/awkward and columnar data tools",
+   "owner": "hep-computing",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "C4",
+    "C5",
+    "C7"
+   ]
+  },
+  {
+   "id": "reproducibility",
+   "capability": "Environment manifests, run records, workflows and preservation",
+   "owner": "hep-computing",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "C2",
+    "C3",
+    "C6"
+   ]
+  },
+  {
+   "id": "task-authoring",
+   "capability": "Implementation-ready research tasks for coding agents",
+   "owner": "hep-computing",
+   "state": "tool",
+   "v1": true
+  },
+  {
+   "id": "ml-training",
+   "capability": "Grouped splits, training, inference domain flags, calibration and ML artifacts",
+   "owner": "hep-ml",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "ML2",
+    "ML4"
+   ]
+  },
+  {
+   "id": "bdt-pipeline",
+   "capability": "BDT pipeline for analyses (cross-training, negative weights, working points)",
+   "owner": "hep-ml",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "ML3"
+   ]
+  },
+  {
+   "id": "ml-eras",
+   "capability": "Era changes in machine-learning studies",
+   "owner": "hep-ml",
+   "state": "none",
+   "v1": true,
+   "items": [
+    "ML1"
+   ]
+  },
+  {
+   "id": "claims-and-literature",
+   "capability": "Claims linked to results, literature and citation verification, manuscript checks",
+   "owner": "hep-communication",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Com1",
+    "Com2"
+   ]
+  },
+  {
+   "id": "terminology",
+   "capability": "Terminology and notation against a glossary",
+   "owner": "hep-communication",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Com3"
+   ]
+  },
+  {
+   "id": "papers-and-numbers",
+   "capability": "Paper types, venues, numbers from artifacts and spectrum plots",
+   "owner": "hep-communication",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "Com4",
+    "Com5",
+    "Com6",
+    "Com7"
+   ]
+  },
+  {
+   "id": "lattice-qcd",
+   "capability": "Lattice QCD and its global analyses",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "j12"
+   ]
+  },
+  {
+   "id": "eft-global-fits",
+   "capability": "EFT global fits",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "out-of-v1-2"
+   ]
+  },
+  {
+   "id": "ckm-global-fits",
+   "capability": "CKM global fits",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th-flavour-2"
+   ]
+  },
+  {
+   "id": "propagation-global-fits",
+   "capability": "Global cosmic-ray propagation fits that run a propagation code",
+   "owner": "hep-statistics",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "out-of-v1-1"
+   ]
+  },
+  {
+   "id": "dark-matter-phenomenology",
+   "capability": "Dark-matter phenomenology and interpretation of excesses",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "wp11-bound-dm-1",
+    "wp11-bound-dm-2"
+   ],
+   "enters_v1_with": "Th5",
+   "note": "wp11-bound-dm-1/-2 stay limited-support after Th5"
+  },
+  {
+   "id": "heavy-ions",
+   "capability": "Heavy-ion physics (quark-gluon plasma, collective flow)",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th-heavyion-1"
+   ]
+  },
+  {
+   "id": "nuclear-structure",
+   "capability": "Nuclear-structure calculations (shell model, density functionals)",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th-nucstruct-1"
+   ]
+  },
+  {
+   "id": "relic-density-solvers",
+   "capability": "Full relic-density Boltzmann solvers",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th-relic-1"
+   ]
+  },
+  {
+   "id": "neutrino-oscillations",
+   "capability": "Neutrino-oscillation probabilities, including matter effects",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th-scope-2"
+   ],
+   "enters_v1_with": "Th4",
+   "note": "th-scope-2 becomes a direct case when Th4 lands"
+  }
+ ]
+}

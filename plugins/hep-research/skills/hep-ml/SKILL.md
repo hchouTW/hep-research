@@ -50,7 +50,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 | Fast simulation, generative models | [fast-simulation-validation.md](references/fast-simulation-validation.md), [generative-models.md](references/generative-models.md) |
 | Surrogates, SBI training | [scientific-machine-learning.md](references/scientific-machine-learning.md), [sbi-training.md](references/sbi-training.md) |
 | Calibration, uncertainty, distribution shift | [uncertainty-and-calibration.md](references/uncertainty-and-calibration.md), [robustness-and-distribution-shift.md](references/robustness-and-distribution-shift.md) |
-| Grouped splits and leakage checks | `make_grouped_splits.py`, `check_split_integrity.py` |
+| Grouped splits and leakage checks (composite keys, stratified by class or period) | `make_grouped_splits.py`, `check_split_integrity.py` |
 | Train, calibrate, infer | `assets/train_classifier.py`, `assets/calibration.py`, `assets/inference.py` |
 | Record the model for inference | `write_ml_artifact.py` |
 | Surrogate training domain | `check_surrogate_domain.py` |

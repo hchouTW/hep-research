@@ -92,6 +92,15 @@ from the data (Mudelsee 2002, TAUEST; Schulz and Mudelsee 2002, REDFIT, with the
 Lomb 1976 and Scargle 1982). A power-law spectrum is the other common red-noise model (Vaughan 2005, 2010); the choice
 is part of the null hypothesis and is stated.
 
+**Known or unknown period.** A period with a physical reason to test (the ~27-day solar rotation and its harmonics, an
+orbital or attitude period of the instrument) is tested alone, for example by folding the series at that period
+(epoch folding) against the same red-noise null: one trial, no search penalty. A periodogram search (Lomb-Scargle for
+uneven sampling and gaps) is for a genuinely unknown or approximate period and pays the trials below. Comparing the
+amplitude and phase of the same candidate period between species of opposite charge sign (a particle and its
+antiparticle, protons and electrons) separates a drift-related heliospheric effect from an instrumental or
+environmental artefact, which affects both signs alike; the comparison is a joint fit with the shared normalization
+and its covariance, not two separate significances.
+
 **Test.** At the Fourier frequencies `f_j` of a Gaussian stationary series, the periodogram ordinates are approximately
 independent and distributed as `S(f_j) chi2_2 / 2` (Brockwell and Davis 1991, Ch. 10). The local test compares each
 ordinate with the fitted red-noise spectrum: `2 I(f_j) / S_hat(f_j)` against `chi2_2`. Then:

@@ -6,7 +6,10 @@ record): title or author similarity proposes a merge and never performs one; a r
 (different formal status) stay separate records related as same-work. An arXiv version change keeps the version
 history and flags the citing claims for reassessment. A correction or retraction notice flags dependent claims
 (reassess within its scope, check outside it) without deleting a citation or asserting that every claim is false.
-Freshness (an old verification date) is a reason to recheck, never proof of error. No lookup is performed; online
+Freshness (an old verification date) is a reason to recheck, never proof of error. A planned claim (kind "planned":
+a schedule, an intended upgrade, an announced run) carries recheck_by (YYYY-MM-DD); once that date has passed it is
+flagged for recheck (unresolved, exit 3), a planned claim without the date is unresolved, and a malformed date is an
+error. No lookup is performed; online
 verification is an explicit host-agent workflow recorded as not performed here. Citation keys are preserved.
 """
 from __future__ import annotations
@@ -126,9 +129,10 @@ def import_literature(inputs: list[dict], existing: dict | None, *, today: str |
             if isinstance(n, dict):
                 _apply_notice(rec, n, alias, findings)
     _freshness_and_access(rec, today, notes)
+    _planned_claims(rec, today, findings)
     _citation_keys(rec, findings)
     rep = R.assemble("manage_literature", {"inputs": [i.get("path") for i in inputs], "existing": bool(existing), "today": today},
-                     findings, checks_run=["ledger", "identifiers", "versions", "notices", "searches", "citation-keys"],
+                     findings, checks_run=["ledger", "identifiers", "versions", "notices", "searches", "planned-claims", "citation-keys"],
                      checks_not_run=[{"check": "online-verification", "reason": "offline import; verify at a primary source through the host's tools", "required": False},
                                      {"check": "full-text-reading", "reason": "a record states a read level; this import never reads a paper", "required": False}],
                      notes=notes, counts_record={"sources": len(rec["sources"]), "claims": len(rec["claims"]), "flags": len(rec["flags"]),
@@ -277,6 +281,40 @@ def _freshness_and_access(rec, today, notes):
         if s.get("verification_level") in ACCESS_LIMITED and (sid, "access-limited") not in seen:
             rec["flags"].append({"source_id": sid, "reason": f"read level {s.get('verification_level')}: {s.get('verification_limitations') or 'full text not read'}",
                                  "level": "access-limited", "claims": sorted(cid for cid, c in rec["claims"].items() if sid in (c.get("source_ids") or []))})
+
+
+def _planned_claims(rec, today, findings):
+    """Planned claims past their recheck_by date are flagged (per cited source); a missing or malformed date is reported."""
+    t = _day(today)
+    seen = {(f["source_id"], f["level"], tuple(f["claims"])) for f in rec["flags"]}
+    for cid, c in sorted(rec["claims"].items()):
+        if not isinstance(c, dict) or c.get("kind") != "planned":
+            continue
+        where = f"claims.{cid}"
+        recheck = c.get("recheck_by")
+        if recheck is None:
+            findings.append(R.finding("literature.planned_claim_no_recheck", "unresolved", where,
+                                      f"planned claim {cid} has no recheck_by date: nothing says when the plan must be checked again",
+                                      "add recheck_by (YYYY-MM-DD) and write the claim in the future tense with 'as of <date>'",
+                                      source="literature"))
+            continue
+        due = _day(recheck) if isinstance(recheck, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", recheck) else None
+        if due is None:
+            findings.append(R.finding("literature.planned_claim_bad_date", "error", where,
+                                      f"planned claim {cid} has recheck_by {recheck!r}, not a YYYY-MM-DD date",
+                                      "write recheck_by as YYYY-MM-DD", source="literature"))
+            continue
+        if t and t > due:
+            for sid in c.get("source_ids") or [None]:
+                flag = {"source_id": sid, "reason": f"planned claim {cid} passed its recheck_by date {recheck}",
+                        "level": "recheck-plan", "claims": [cid]}
+                if (sid, flag["level"], (cid,)) not in seen:
+                    rec["flags"].append(flag)
+            findings.append(R.finding("literature.planned_claim_expired", "unresolved", where,
+                                      f"planned claim {cid} was to be rechecked by {recheck} ({(t - due).days} days ago): "
+                                      "the plan may have happened, slipped or been cancelled",
+                                      "check the current status at a primary source; then record the outcome as a new claim or "
+                                      "move recheck_by, keeping the 'as of <date>' wording", source="literature"))
 
 
 def _citation_keys(rec, findings):

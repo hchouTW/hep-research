@@ -1,0 +1,639 @@
+{
+ "edition": "AME2020 + NUBASE2020",
+ "source": "AME2020: W.J. Huang et al., Chinese Phys. C 45 (2021) 030002; M. Wang et al., Chinese Phys. C 45 (2021) 030003 (file mass.mas20, https://www-nds.iaea.org/amdc/ame2020/mass_1.mas20.txt). NUBASE2020: F.G. Kondev et al., Chinese Phys. C 45 (2021) 030001 (file nubase_4.mas20, https://www-nds.iaea.org/amdc/ame2020/nubase_4.mas20.txt)",
+ "read": "2026-10-17, values parsed from the fixed-width files (ground states only)",
+ "license": "AMDC public data; cite the AME2020 and NUBASE2020 papers",
+ "notes": "Atomic (neutral-atom) masses. A nuclear mass is atomic mass x m_u c^2 - Z m_e c^2 with the electron binding energy neglected. Half-life units are NUBASE's (y = 365.2422 d per NUBASE2020). Full tables: core.constants.load_ame / load_nubase.",
+ "nuclides": {
+  "n": {
+   "element": "n",
+   "A": 1,
+   "Z": 0,
+   "mass_excess_keV": 8071.31806,
+   "mass_excess_uncertainty_keV": 0.00044,
+   "atomic_mass_u": 1.0086649159,
+   "atomic_mass_uncertainty_u": 4.7e-10,
+   "estimated": false,
+   "half_life": {
+    "value": 609.8,
+    "unit": "s",
+    "uncertainty": 0.6,
+    "uncertainty_text": "0.6",
+    "estimated": false,
+    "nubase_text": "609.8    s 0.6"
+   }
+  },
+  "1H": {
+   "element": "H",
+   "A": 1,
+   "Z": 1,
+   "mass_excess_keV": 7288.971064,
+   "mass_excess_uncertainty_keV": 1.3e-05,
+   "atomic_mass_u": 1.007825031898,
+   "atomic_mass_uncertainty_u": 1.4e-11,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "2H": {
+   "element": "H",
+   "A": 2,
+   "Z": 1,
+   "mass_excess_keV": 13135.722895,
+   "mass_excess_uncertainty_keV": 1.5e-05,
+   "atomic_mass_u": 2.014101777844,
+   "atomic_mass_uncertainty_u": 1.5e-11,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "3H": {
+   "element": "H",
+   "A": 3,
+   "Z": 1,
+   "mass_excess_keV": 14949.8109,
+   "mass_excess_uncertainty_keV": 8e-05,
+   "atomic_mass_u": 3.01604928132,
+   "atomic_mass_uncertainty_u": 8e-11,
+   "estimated": false,
+   "half_life": {
+    "value": 12.32,
+    "unit": "y",
+    "uncertainty": 0.02,
+    "uncertainty_text": "0.02",
+    "estimated": false,
+    "nubase_text": "12.32   y 0.02"
+   }
+  },
+  "3He": {
+   "element": "He",
+   "A": 3,
+   "Z": 2,
+   "mass_excess_keV": 14931.21888,
+   "mass_excess_uncertainty_keV": 6e-05,
+   "atomic_mass_u": 3.01602932197,
+   "atomic_mass_uncertainty_u": 6e-11,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "4He": {
+   "element": "He",
+   "A": 4,
+   "Z": 2,
+   "mass_excess_keV": 2424.91587,
+   "mass_excess_uncertainty_keV": 0.00015,
+   "atomic_mass_u": 4.00260325413,
+   "atomic_mass_uncertainty_u": 1.6e-10,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "6Li": {
+   "element": "Li",
+   "A": 6,
+   "Z": 3,
+   "mass_excess_keV": 14086.88044,
+   "mass_excess_uncertainty_keV": 0.00144,
+   "atomic_mass_u": 6.01512288742,
+   "atomic_mass_uncertainty_u": 1.55e-09,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "7Li": {
+   "element": "Li",
+   "A": 7,
+   "Z": 3,
+   "mass_excess_keV": 14907.10463,
+   "mass_excess_uncertainty_keV": 0.00419,
+   "atomic_mass_u": 7.01600343426,
+   "atomic_mass_uncertainty_u": 4.5e-09,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "7Be": {
+   "element": "Be",
+   "A": 7,
+   "Z": 4,
+   "mass_excess_keV": 15768.998,
+   "mass_excess_uncertainty_keV": 0.071,
+   "atomic_mass_u": 7.016928714,
+   "atomic_mass_uncertainty_u": 7.6e-08,
+   "estimated": false,
+   "half_life": {
+    "value": 53.22,
+    "unit": "d",
+    "uncertainty": 0.06,
+    "uncertainty_text": "0.06",
+    "estimated": false,
+    "nubase_text": "53.22   d 0.06"
+   }
+  },
+  "9Be": {
+   "element": "Be",
+   "A": 9,
+   "Z": 4,
+   "mass_excess_keV": 11348.451,
+   "mass_excess_uncertainty_keV": 0.076,
+   "atomic_mass_u": 9.012183062,
+   "atomic_mass_uncertainty_u": 8.2e-08,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "10Be": {
+   "element": "Be",
+   "A": 10,
+   "Z": 4,
+   "mass_excess_keV": 12607.487,
+   "mass_excess_uncertainty_keV": 0.081,
+   "atomic_mass_u": 10.013534692,
+   "atomic_mass_uncertainty_u": 8.6e-08,
+   "estimated": false,
+   "half_life": {
+    "value": 1.387,
+    "unit": "My",
+    "uncertainty": 0.012,
+    "uncertainty_text": "0.012",
+    "estimated": false,
+    "nubase_text": "1.387 My 0.012"
+   }
+  },
+  "10B": {
+   "element": "B",
+   "A": 10,
+   "Z": 5,
+   "mass_excess_keV": 12050.611,
+   "mass_excess_uncertainty_keV": 0.015,
+   "atomic_mass_u": 10.012936862,
+   "atomic_mass_uncertainty_u": 1.6e-08,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "11B": {
+   "element": "B",
+   "A": 11,
+   "Z": 5,
+   "mass_excess_keV": 8667.708,
+   "mass_excess_uncertainty_keV": 0.012,
+   "atomic_mass_u": 11.009305166,
+   "atomic_mass_uncertainty_u": 1.3e-08,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "12C": {
+   "element": "C",
+   "A": 12,
+   "Z": 6,
+   "mass_excess_keV": 0.0,
+   "mass_excess_uncertainty_keV": 0.0,
+   "atomic_mass_u": 12.0,
+   "atomic_mass_uncertainty_u": 0.0,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "13C": {
+   "element": "C",
+   "A": 13,
+   "Z": 6,
+   "mass_excess_keV": 3125.00933,
+   "mass_excess_uncertainty_keV": 0.00023,
+   "atomic_mass_u": 13.00335483534,
+   "atomic_mass_uncertainty_u": 2.5e-10,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "14C": {
+   "element": "C",
+   "A": 14,
+   "Z": 6,
+   "mass_excess_keV": 3019.89328,
+   "mass_excess_uncertainty_keV": 0.00375,
+   "atomic_mass_u": 14.00324198862,
+   "atomic_mass_uncertainty_u": 4.03e-09,
+   "estimated": false,
+   "half_life": {
+    "value": 5.7,
+    "unit": "ky",
+    "uncertainty": 0.03,
+    "uncertainty_text": "0.03",
+    "estimated": false,
+    "nubase_text": "5.70  ky 0.03"
+   }
+  },
+  "14N": {
+   "element": "N",
+   "A": 14,
+   "Z": 7,
+   "mass_excess_keV": 2863.41683,
+   "mass_excess_uncertainty_keV": 0.00022,
+   "atomic_mass_u": 14.00307400425,
+   "atomic_mass_uncertainty_u": 2.4e-10,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "15N": {
+   "element": "N",
+   "A": 15,
+   "Z": 7,
+   "mass_excess_keV": 101.43809,
+   "mass_excess_uncertainty_keV": 0.00058,
+   "atomic_mass_u": 15.00010889827,
+   "atomic_mass_uncertainty_u": 6.2e-10,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "16O": {
+   "element": "O",
+   "A": 16,
+   "Z": 8,
+   "mass_excess_keV": -4737.00217,
+   "mass_excess_uncertainty_keV": 0.0003,
+   "atomic_mass_u": 15.99491461926,
+   "atomic_mass_uncertainty_u": 3.2e-10,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "17O": {
+   "element": "O",
+   "A": 17,
+   "Z": 8,
+   "mass_excess_keV": -808.76421,
+   "mass_excess_uncertainty_keV": 0.00064,
+   "atomic_mass_u": 16.99913175595,
+   "atomic_mass_uncertainty_u": 6.9e-10,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "18O": {
+   "element": "O",
+   "A": 18,
+   "Z": 8,
+   "mass_excess_keV": -782.81634,
+   "mass_excess_uncertainty_keV": 0.00064,
+   "atomic_mass_u": 17.99915961214,
+   "atomic_mass_uncertainty_u": 6.9e-10,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "26Al": {
+   "element": "Al",
+   "A": 26,
+   "Z": 13,
+   "mass_excess_keV": -12210.139,
+   "mass_excess_uncertainty_keV": 0.066,
+   "atomic_mass_u": 25.986891876,
+   "atomic_mass_uncertainty_u": 7.1e-08,
+   "estimated": false,
+   "half_life": {
+    "value": 717.0,
+    "unit": "ky",
+    "uncertainty": 24.0,
+    "uncertainty_text": "24",
+    "estimated": false,
+    "nubase_text": "717     ky 24"
+   }
+  },
+  "36Cl": {
+   "element": "Cl",
+   "A": 36,
+   "Z": 17,
+   "mass_excess_keV": -29522.008,
+   "mass_excess_uncertainty_keV": 0.036,
+   "atomic_mass_u": 35.968306822,
+   "atomic_mass_uncertainty_u": 3.8e-08,
+   "estimated": false,
+   "half_life": {
+    "value": 301.3,
+    "unit": "ky",
+    "uncertainty": 1.5,
+    "uncertainty_text": "1.5",
+    "estimated": false,
+    "nubase_text": "301.3   ky 1.5"
+   }
+  },
+  "40K": {
+   "element": "K",
+   "A": 40,
+   "Z": 19,
+   "mass_excess_keV": -33535.497,
+   "mass_excess_uncertainty_keV": 0.056,
+   "atomic_mass_u": 39.963998165,
+   "atomic_mass_uncertainty_u": 6e-08,
+   "estimated": false,
+   "half_life": {
+    "value": 1.248,
+    "unit": "Gy",
+    "uncertainty": 0.003,
+    "uncertainty_text": "0.003",
+    "estimated": false,
+    "nubase_text": "1.248 Gy 0.003"
+   }
+  },
+  "56Fe": {
+   "element": "Fe",
+   "A": 56,
+   "Z": 26,
+   "mass_excess_keV": -60607.163,
+   "mass_excess_uncertainty_keV": 0.268,
+   "atomic_mass_u": 55.934935537,
+   "atomic_mass_uncertainty_u": 2.87e-07,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "60Co": {
+   "element": "Co",
+   "A": 60,
+   "Z": 27,
+   "mass_excess_keV": -61650.437,
+   "mass_excess_uncertainty_keV": 0.403,
+   "atomic_mass_u": 59.933815536,
+   "atomic_mass_uncertainty_u": 4.33e-07,
+   "estimated": false,
+   "half_life": {
+    "value": 5.2714,
+    "unit": "y",
+    "uncertainty": 0.0006,
+    "uncertainty_text": "0.0006",
+    "estimated": false,
+    "nubase_text": "5.2714 y 0.0006"
+   }
+  },
+  "137Cs": {
+   "element": "Cs",
+   "A": 137,
+   "Z": 55,
+   "mass_excess_keV": -86545.772,
+   "mass_excess_uncertainty_keV": 0.302,
+   "atomic_mass_u": 136.907089296,
+   "atomic_mass_uncertainty_u": 3.24e-07,
+   "estimated": false,
+   "half_life": {
+    "value": 30.04,
+    "unit": "y",
+    "uncertainty": 0.04,
+    "uncertainty_text": "0.04",
+    "estimated": false,
+    "nubase_text": "30.04   y 0.04"
+   }
+  },
+  "206Pb": {
+   "element": "Pb",
+   "A": 206,
+   "Z": 82,
+   "mass_excess_keV": -23785.506,
+   "mass_excess_uncertainty_keV": 1.144,
+   "atomic_mass_u": 205.97446521,
+   "atomic_mass_uncertainty_u": 1.228e-06,
+   "estimated": false,
+   "half_life": {
+    "stable": true
+   }
+  },
+  "210Pb": {
+   "element": "Pb",
+   "A": 210,
+   "Z": 82,
+   "mass_excess_keV": -14728.429,
+   "mass_excess_uncertainty_keV": 1.448,
+   "atomic_mass_u": 209.984188381,
+   "atomic_mass_uncertainty_u": 1.554e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 22.2,
+    "unit": "y",
+    "uncertainty": 0.22,
+    "uncertainty_text": "0.22",
+    "estimated": false,
+    "nubase_text": "22.20   y 0.22"
+   }
+  },
+  "210Bi": {
+   "element": "Bi",
+   "A": 210,
+   "Z": 83,
+   "mass_excess_keV": -14791.905,
+   "mass_excess_uncertainty_keV": 1.364,
+   "atomic_mass_u": 209.984120237,
+   "atomic_mass_uncertainty_u": 1.463e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 5.012,
+    "unit": "d",
+    "uncertainty": 0.005,
+    "uncertainty_text": "0.005",
+    "estimated": false,
+    "nubase_text": "5.012  d 0.005"
+   }
+  },
+  "210Po": {
+   "element": "Po",
+   "A": 210,
+   "Z": 84,
+   "mass_excess_keV": -15953.06,
+   "mass_excess_uncertainty_keV": 1.146,
+   "atomic_mass_u": 209.982873686,
+   "atomic_mass_uncertainty_u": 1.23e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 138.376,
+    "unit": "d",
+    "uncertainty": 0.002,
+    "uncertainty_text": "0.002",
+    "estimated": false,
+    "nubase_text": "138.376  d 0.002"
+   }
+  },
+  "222Rn": {
+   "element": "Rn",
+   "A": 222,
+   "Z": 86,
+   "mass_excess_keV": 16371.957,
+   "mass_excess_uncertainty_keV": 1.944,
+   "atomic_mass_u": 222.017576017,
+   "atomic_mass_uncertainty_u": 2.086e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 3.8215,
+    "unit": "d",
+    "uncertainty": 0.0002,
+    "uncertainty_text": "0.0002",
+    "estimated": false,
+    "nubase_text": "3.8215 d 0.0002"
+   }
+  },
+  "226Ra": {
+   "element": "Ra",
+   "A": 226,
+   "Z": 88,
+   "mass_excess_keV": 23667.576,
+   "mass_excess_uncertainty_keV": 1.927,
+   "atomic_mass_u": 226.025408186,
+   "atomic_mass_uncertainty_u": 2.068e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 1.6,
+    "unit": "ky",
+    "uncertainty": 0.007,
+    "uncertainty_text": "0.007",
+    "estimated": false,
+    "nubase_text": "1.600 ky 0.007"
+   }
+  },
+  "230Th": {
+   "element": "Th",
+   "A": 230,
+   "Z": 90,
+   "mass_excess_keV": 30862.512,
+   "mass_excess_uncertainty_keV": 1.209,
+   "atomic_mass_u": 230.033132267,
+   "atomic_mass_uncertainty_u": 1.297e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 75.4,
+    "unit": "ky",
+    "uncertainty": 0.3,
+    "uncertainty_text": "0.3",
+    "estimated": false,
+    "nubase_text": "75.4   ky 0.3"
+   }
+  },
+  "232Th": {
+   "element": "Th",
+   "A": 232,
+   "Z": 90,
+   "mass_excess_keV": 35446.71,
+   "mass_excess_uncertainty_keV": 1.421,
+   "atomic_mass_u": 232.038053606,
+   "atomic_mass_uncertainty_u": 1.525e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 14.0,
+    "unit": "Gy",
+    "uncertainty": 0.1,
+    "uncertainty_text": "0.1",
+    "estimated": false,
+    "nubase_text": "14.0   Gy 0.1"
+   }
+  },
+  "234Th": {
+   "element": "Th",
+   "A": 234,
+   "Z": 90,
+   "mass_excess_keV": 40612.958,
+   "mass_excess_uncertainty_keV": 2.589,
+   "atomic_mass_u": 234.043599801,
+   "atomic_mass_uncertainty_u": 2.779e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 24.107,
+    "unit": "d",
+    "uncertainty": 0.024,
+    "uncertainty_text": "0.024",
+    "estimated": false,
+    "nubase_text": "24.107  d 0.024"
+   }
+  },
+  "234Pa": {
+   "element": "Pa",
+   "A": 234,
+   "Z": 91,
+   "mass_excess_keV": 40338.87,
+   "mass_excess_uncertainty_keV": 4.094,
+   "atomic_mass_u": 234.043305555,
+   "atomic_mass_uncertainty_u": 4.395e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 6.7,
+    "unit": "h",
+    "uncertainty": 0.05,
+    "uncertainty_text": "0.05",
+    "estimated": false,
+    "nubase_text": "6.70   h 0.05"
+   }
+  },
+  "234U": {
+   "element": "U",
+   "A": 234,
+   "Z": 92,
+   "mass_excess_keV": 38144.959,
+   "mass_excess_uncertainty_keV": 1.129,
+   "atomic_mass_u": 234.040950296,
+   "atomic_mass_uncertainty_u": 1.212e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 245.5,
+    "unit": "ky",
+    "uncertainty": 0.6,
+    "uncertainty_text": "0.6",
+    "estimated": false,
+    "nubase_text": "245.5   ky 0.6"
+   }
+  },
+  "235U": {
+   "element": "U",
+   "A": 235,
+   "Z": 92,
+   "mass_excess_keV": 40918.782,
+   "mass_excess_uncertainty_keV": 1.116,
+   "atomic_mass_u": 235.043928117,
+   "atomic_mass_uncertainty_u": 1.198e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 704.0,
+    "unit": "My",
+    "uncertainty": 1.0,
+    "uncertainty_text": "1",
+    "estimated": false,
+    "nubase_text": "704     My 1"
+   }
+  },
+  "238U": {
+   "element": "U",
+   "A": 238,
+   "Z": 92,
+   "mass_excess_keV": 47307.732,
+   "mass_excess_uncertainty_keV": 1.492,
+   "atomic_mass_u": 238.050786936,
+   "atomic_mass_uncertainty_u": 1.601e-06,
+   "estimated": false,
+   "half_life": {
+    "value": 4.463,
+    "unit": "Gy",
+    "uncertainty": 0.003,
+    "uncertainty_text": "0.003",
+    "estimated": false,
+    "nubase_text": "4.463 Gy 0.003"
+   }
+  }
+ }
+}

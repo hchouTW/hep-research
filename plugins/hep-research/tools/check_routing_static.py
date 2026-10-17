@@ -18,6 +18,8 @@ Language independence (STH-T4.6): trigger terms are required for English cases o
 natural prompt ("natural": true) that reuses no run of NATURAL_NGRAM consecutive words of the expected skill's
 description, and every topic listed for a skill in the description-topics table of docs/routing-contract.md must stay
 named in that skill's "Use when" text.
+Scope (X3): every domain outside v1 in docs/capability-map.json names limited-support cases that exist and are routed to
+the domain's closest owner (or accept it); cases the map does not name are not checked by this rule.
 Also checks that no SKILL.md mentions a dispatch API. This is a static check of descriptions, not a live routing run.
 
 Usage: python3 tools/check_routing_static.py   Exit 0 all pass, 1 otherwise. Output: JSON.
@@ -38,6 +40,7 @@ LIMITED = re.compile(r"no validated domain profile|domain without a validated pr
 DISPATCH = re.compile(r"\b(dispatch|invoke_skill|call_skill|route_to)\s*\(", re.I)
 NATURAL_NGRAM = 4  # a natural prompt may not reuse this many consecutive description words
 TOPICS_MARKER = "<!-- description-topics: read by tools/check_routing_static.py -->"
+CAPABILITY_MAP = ROOT / "docs" / "capability-map.json"
 
 
 def description_topics() -> dict:
@@ -52,6 +55,26 @@ def description_topics() -> dict:
         cells = [c.strip() for c in line.strip("|").split("|")]
         out[cells[0]] = [t.strip() for t in cells[1].split(";") if t.strip()]
     return out
+
+
+def scope_errors(cmap: dict, cases: list) -> list[str]:
+    """X3: each domain outside v1 on the capability map has a limited-support case routed to its closest owner."""
+    by_id = {c["id"]: c for c in cases}
+    errs = []
+    for e in cmap.get("capabilities", []):
+        if e.get("v1") is not False:
+            continue
+        if not e.get("cases"):
+            errs.append(f"{e['id']}: outside v1 but no limited-support routing case")
+        for cid in e.get("cases", []):
+            c = by_id.get(cid)
+            if c is None:
+                errs.append(f"{e['id']}: case {cid} does not exist")
+            elif not c.get("limited_support"):
+                errs.append(f"{e['id']}: case {cid} is not a limited-support case")
+            elif e["owner"] != c["expected_primary"] and e["owner"] not in c.get("also_accept", []):
+                errs.append(f"{e['id']}: case {cid} routes to {c['expected_primary']}, not the owner {e['owner']}")
+    return errs
 
 
 def _words(text: str) -> list[str]:
@@ -170,11 +193,13 @@ def main() -> int:
         topic_errors += [f"{skill}: topic '{t}' is not named in its description" for t in topics
                          if t.lower() not in d[skill]["use"]]
     dispatch = [s for s in SKILLS if DISPATCH.search(d[s]["body"])]
+    scope = (scope_errors(json.loads(CAPABILITY_MAP.read_text(encoding="utf-8")), cases)
+             if CAPABILITY_MAP.exists() else ["docs/capability-map.json is missing"])
     rep = {"cases": len(cases), "failed": [r for r in results if not r["ok"]], "coverage_errors": coverage_errors,
-           "topic_errors": topic_errors, "natural_cases": sum(1 for c in cases if c.get("natural")),
+           "topic_errors": topic_errors, "scope_errors": scope, "natural_cases": sum(1 for c in cases if c.get("natural")),
            "dispatch_api_mentions": dispatch, "languages": sorted(langs),
            "note": "static check only: descriptions cover the cases; a live routing run needs approval (paid model calls)"}
-    rep["ok"] = not rep["failed"] and not coverage_errors and not dispatch and not topic_errors
+    rep["ok"] = not rep["failed"] and not coverage_errors and not dispatch and not topic_errors and not scope
     print(json.dumps(rep, indent=1, ensure_ascii=False))
     return 0 if rep["ok"] else 1
 
