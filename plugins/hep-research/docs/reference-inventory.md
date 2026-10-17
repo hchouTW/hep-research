@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 12 | 106 | 0 |
 | hep-ml | 42 | 189 | 0 |
 | hep-statistics | 12 | 175 | 0 |
-| hep-theory | 13 | 96 | 0 |
+| hep-theory | 14 | 101 | 0 |
 
 ## Overlapping pairs
 
@@ -276,16 +276,17 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | hep-ml | 578c12ff 2026-10-13 |
 | `time-series-inference.md` | hep-statistics | 18.8 | yes | 14 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
 | `unfolding.md` | hep-statistics | 7.0 | yes | 27 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
-| `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6b 2026-10-13 |
+| `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 18.7 | yes | 15 | hep-detector | 26970179 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
-| `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c0 2026-10-07 |
+| `higher-order-predictions.md` | hep-theory | 4.2 | yes | 2 | - | 351029c0 2026-10-07 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.2 | yes | 8 | hep-communication, hep-statistics | db0a9cca 2026-10-17 |
-| `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 2 | - | untracked |
+| `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 3 | - | 69f359f5 2026-10-17 |
 | `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 4 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
-| `pdfs-and-lhapdf.md` | hep-theory | 6.0 | yes | 2 | - | 6164b848 2026-10-13 |
+| `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | untracked |
+| `pdfs-and-lhapdf.md` | hep-theory | 6.0 | yes | 3 | - | 6164b848 2026-10-13 |
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | 9257d7b5 2026-10-15 |
-| `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 3 | - | 6c22fd52 2026-10-13 |
-| `selection-rules.md` | hep-theory | 7.7 | yes | 1 | - | 195e4d1e 2026-10-13 |
-| `smeft-and-eft.md` | hep-theory | 3.4 | yes | 2 | - | fa29fcf3 2026-10-13 |
+| `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 4 | - | 6c22fd52 2026-10-13 |
+| `selection-rules.md` | hep-theory | 7.7 | yes | 2 | - | 195e4d1e 2026-10-13 |
+| `smeft-and-eft.md` | hep-theory | 3.4 | yes | 3 | - | fa29fcf3 2026-10-13 |

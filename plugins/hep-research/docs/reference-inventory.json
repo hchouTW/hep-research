@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 13,
-   "bytes": 96418,
+   "references": 14,
+   "bytes": 100779,
    "uncited": 0
   }
  },
@@ -3609,7 +3609,8 @@
    "lines": 99,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-theory/SKILL.md"
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "83ae4f6b 2026-10-13"
@@ -3682,7 +3683,8 @@
    "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-theory/SKILL.md"
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
@@ -3717,10 +3719,11 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/neutrino_oscillation.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "69f359f5 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/nuclear-cross-sections.md",
@@ -3741,6 +3744,21 @@
    "last_commit": "151889fb 2026-10-17"
   },
   {
+   "path": "skills/hep-theory/references/particle-physics-essentials.md",
+   "owner": "hep-theory",
+   "bytes": 4361,
+   "lines": 60,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/scripts/running_coupling.py",
+    "tests/skills/hep_theory/test_particle_physics_essentials.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",
    "owner": "hep-theory",
    "bytes": 6047,
@@ -3748,6 +3766,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/pdf_uncertainty.py"
    ],
    "cited_by_other_skills": [],
@@ -3775,7 +3794,8 @@
    "cited_by": [
     "profiles/theory/higgs-bb-width/index.md",
     "profiles/theory/higgs-bb-width/models/running-mass-hbb.md",
-    "skills/hep-theory/SKILL.md"
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "6c22fd52 2026-10-13"
@@ -3787,7 +3807,8 @@
    "lines": 94,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-theory/SKILL.md"
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "195e4d1e 2026-10-13"
@@ -3800,6 +3821,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/eft_truncation.py"
    ],
    "cited_by_other_skills": [],

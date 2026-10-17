@@ -408,6 +408,9 @@ C = [
     # batch C, Th4: neutrino oscillations (neutrino_oscillation.py)
  ("c-th-nu-1", "en", "direct", "Compute the nu_mu to nu_e appearance probability at 1300 km and 2.5 GeV in constant-density matter for both mass orderings.", "hep-theory", ["neutrino oscillations"], None, None, {}),
  ("c-th-nu-2", "zh-Hant", "direct", "反微中子在真空中 295 公里、0.6 GeV 的振盪機率怎麼算？PMNS 的 CP 相位慣例要怎麼寫？", "hep-theory", ["neutrino oscillations"], None, None, {}),
+    # batch C, Th10: running coupling and particle-physics entry (running_coupling.py)
+ ("c-th-alphas-1", "en", "direct", "Run alpha_s(mZ) = 0.118 down to 10 GeV at four loops with MS-bar quark-mass thresholds; which scheme conventions should I state?", "hep-theory", ["schemes"], None, None, {}),
+ ("c-th-alphas-2", "zh-Hant", "direct", "CKM 矩陣的標準參數化與 Wolfenstein 參數的慣例是什麼？我的預測要怎麼註明？", "hep-theory", ["conventions"], None, None, {}),
 ]
 
 cases = []

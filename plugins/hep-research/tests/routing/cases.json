@@ -3979,6 +3979,26 @@
    "trigger_terms": [
     "neutrino oscillations"
    ]
+  },
+  {
+   "id": "c-th-alphas-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run alpha_s(mZ) = 0.118 down to 10 GeV at four loops with MS-bar quark-mass thresholds; which scheme conventions should I state?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "schemes"
+   ]
+  },
+  {
+   "id": "c-th-alphas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "CKM 矩陣的標準參數化與 Wolfenstein 參數的慣例是什麼？我的預測要怎麼註明？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
   }
  ]
 }
