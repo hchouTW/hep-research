@@ -312,6 +312,9 @@ C = [
     # batch A, Th7: four-vector kinematics (kinematics.py)
  ("th-a-kin-1", "en", "direct", "What beam energy is the threshold for antiproton production on a proton at rest, and what is the Dalitz-plot boundary of D0 to K pi pi0?", "hep-theory", ["decay rates and widths"], None, None, {}),
  ("th-a-kin-2", "zh-Hant", "direct", "把這個四動量從質心系 boost 到實驗室系，順便算 s、t、u 與 rapidity。", "hep-theory", ["cross sections"], None, None, {}),
+    # batch A (D7, D1): synthetic spectrometer test bed, propagating a calibration residual
+    ("dr-a-toy-1", "en", "direct", "Simulate a toy magnetic spectrometer with a fixed seed so I can test how the efficiency and resolution of my rigidity selection change when a tracker layer is added.", "hep-detector", ["efficiency and resolution"], None, None, {}),
+    ("dr-a-toy-2", "zh-Hant", "direct", "用固定亂數種子產生一組合成的磁譜儀事件，作為 detector simulation (Geant4) 之外的快速版本，檢查各時段的剛度解析度。", "hep-detector", ["detector simulation (Geant4)"], None, None, {}),
 ]
 
 cases = []

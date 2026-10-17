@@ -28,6 +28,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-detector/scripts/calorimeter_resolution.py": ["--fit", M],
     "skills/hep-detector/scripts/multiple_scattering.py": [M],
     "skills/hep-detector/scripts/pileup_reweight.py": [M],
+    "skills/hep-detector/scripts/toy_spectrometer.py": ["generate", M, "--seed", "1", "--events-out", OUT, "--periods-out", OUT + "p"],
     "skills/hep-measurement/scripts/check_systematic_variations.py": ["--json", M],
     "skills/hep-measurement/scripts/cr_spectrum_powerlaw_fit.py": ["--input", M],
     "skills/hep-measurement/scripts/make_yield_table.py": ["--input", M, "--status", "synthetic"],

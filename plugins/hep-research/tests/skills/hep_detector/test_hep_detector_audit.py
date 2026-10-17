@@ -301,6 +301,14 @@ STATUS_CASES = {
 }
 
 
+# Scripts written after F-04 follow the plugin-wide contract of core/status.py instead: "status" is the run status
+# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic).
+F04_CASES = {
+    'toy_spectrometer.py': ['resolution', ASSETS / 'toy-spectrometer.fictional.json', '--species', 'p',
+                            '--rigidity', '10'],
+}
+
+
 class StatusLabelTests(_TempFiles, unittest.TestCase):
     """E-6: replicate cosmic_ray_flux.py: --status (choices = core artifact_statuses,
     default unvalidated) echoed as the top-level key 'status'."""
@@ -309,13 +317,23 @@ class StatusLabelTests(_TempFiles, unittest.TestCase):
     FILE_STATUS = {'calorimeter_resolution.py', 'multiple_scattering.py', 'pileup_reweight.py'}
 
     def test_every_script_echoes_status(self):
-        self.assertEqual(set(STATUS_CASES), {p.name for p in SCRIPTS.glob('*.py')})
+        self.assertEqual(set(STATUS_CASES) | set(F04_CASES), {p.name for p in SCRIPTS.glob('*.py')})
+        self.assertFalse(set(STATUS_CASES) & set(F04_CASES))
         for script, args in STATUS_CASES.items():
             with self.subTest(script=script):
                 default = run_json(self, script, *args)
                 self.assertEqual(default.get('status'), 'synthetic' if script in self.FILE_STATUS else 'unvalidated')
                 labelled = run_json(self, script, *args, '--status', 'synthetic')
                 self.assertEqual(labelled.get('status'), 'synthetic')
+
+    def test_f04_scripts_report_a_run_status_and_a_label(self):
+        sys.path.insert(0, str(PLUGIN))
+        from core.status import ARTIFACT_LABELS, RUN_STATUSES
+        for script, args in F04_CASES.items():
+            with self.subTest(script=script):
+                payload = run_json(self, script, *args)
+                self.assertIn(payload.get('status'), RUN_STATUSES)
+                self.assertIn(payload.get('status_label'), ARTIFACT_LABELS)
 
     def test_status_in_an_input_file_propagates(self):
         stack = json.loads((ASSETS / 'detector-stack.example.json').read_text(encoding='utf-8'))
@@ -328,7 +346,7 @@ class StatusLabelTests(_TempFiles, unittest.TestCase):
         import ast
         vocab = json.loads((PLUGIN / 'contracts' / 'vocab' / 'core.json').read_text(encoding='utf-8'))
         expected = set(vocab['vocabularies']['artifact_statuses'])
-        for path in sorted(SCRIPTS.glob('*.py')):
+        for path in sorted(p for p in SCRIPTS.glob('*.py') if p.name not in F04_CASES):
             with self.subTest(script=path.name):
                 tree = ast.parse(path.read_text(encoding='utf-8'))
                 values = [ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)
