@@ -3,7 +3,12 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.14.0 (2026-10-17)
+
+The upgrade plan v1.3 (88 items in six batches, PRs #131-#136). Contracts 2.12.0: vocabulary and optional fields only
+(levels, two artifact status labels, four effects and a composition, optional measurement-spec fields, the profile kind
+`reference`); a 2.11 artifact keeps its outcome. Every analysis-check rule stays in shadow mode. The batch notes below
+say "no version bump" for each batch; this release is that bump.
 
 Upgrade plan v1.3, batch 0a (F-01 to F-15): correctness and risk fixes, each with a regression test that fails on
 its parent commit (VALIDATION UPGRADE-0A). Contracts stay 2.11.0 with one additive vocabulary change (F-14); no

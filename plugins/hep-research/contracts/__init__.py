@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.11.0"
+CONTRACTS_VERSION = "2.12.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -64,6 +64,13 @@ CONTRACTS_VERSION = "2.11.0"
 # contracts/semantics/model_pairings.json, the result binding (contracts/schemas/result_binding.json) and the
 # post-execution report fields. No artifact type changes and no capability is added; a 2.10 artifact keeps its outcome,
 # and a 2.10 reader refuses the new bundle mode and context fields (schema enum, additionalProperties).
+# 2.12.0 (upgrade plan v1.3, batches 0a-D) adds vocabulary and optional fields only: the levels top-of-instrument and
+# top-of-atmosphere; the artifact statuses projection and outside-validated-range (the publication gate refuses both,
+# the second unless a validation record is attached); the effects cutoff_transmission, survival and
+# fragmentation_feeddown and the composition exposure_acceptance_livetime_transmission, with coverage entries; the
+# optional measurement-spec fields systematics[].scaling, systematics[].era_correlation, eras[] and
+# coupled_backgrounds; the profile kind reference. No capability is added; a 2.11 artifact keeps its outcome, and a
+# 2.11 reader refuses the new labels, fields and profile kind (schema enums, additionalProperties).
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})
