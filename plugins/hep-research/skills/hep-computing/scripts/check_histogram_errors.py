@@ -127,9 +127,13 @@ def _from_uproot(path: Path, names: list[str]) -> dict:
     def th1(obj) -> dict:
         sw2 = obj.member("fSumw2")
         sw2 = [float(v) for v in sw2] if sw2 is not None and len(sw2) else None
-        return {"kind": "TH1", "values": [float(v) for v in obj.values(flow=True).ravel()], "sumw2": sw2,
-                "entries": float(obj.member("fEntries")), "tsumw": float(obj.member("fTsumw")),
-                "tsumw2": float(obj.member("fTsumw2"))}
+        out = {"kind": "TH1", "values": [float(v) for v in obj.values(flow=True).ravel()], "sumw2": sw2,
+               "entries": float(obj.member("fEntries")), "tsumw": float(obj.member("fTsumw")),
+               "tsumw2": float(obj.member("fTsumw2"))}
+        if obj.classname.startswith("TH1"):  # 1D: the axis and the x moments (C4 summaries)
+            out.update(edges=[float(e) for e in obj.axis().edges()], tsumwx=float(obj.member("fTsumwx")),
+                       tsumwx2=float(obj.member("fTsumwx2")))
+        return out
     try:
         f = uproot.open(path)
     except Exception as exc:  # uproot raises many types for a file that is not ROOT
@@ -162,8 +166,13 @@ def _from_pyroot(path: Path, names: list[str]) -> dict:
         h.GetStats(stats)
         n = h.GetNcells()
         sw2 = [float(h.GetSumw2().At(i)) for i in range(n)] if h.GetSumw2N() > 0 else None
-        return {"kind": "TH1", "values": [float(h.GetBinContent(i)) for i in range(n)], "sumw2": sw2,
-                "entries": float(h.GetEntries()), "tsumw": float(stats[0]), "tsumw2": float(stats[1])}
+        out = {"kind": "TH1", "values": [float(h.GetBinContent(i)) for i in range(n)], "sumw2": sw2,
+               "entries": float(h.GetEntries()), "tsumw": float(stats[0]), "tsumw2": float(stats[1])}
+        if h.GetDimension() == 1:  # 1D: the axis and the x moments (C4 summaries)
+            ax = h.GetXaxis()
+            out.update(edges=[float(ax.GetBinLowEdge(i)) for i in range(1, h.GetNbinsX() + 2)],
+                       tsumwx=float(stats[2]), tsumwx2=float(stats[3]))
+        return out
     f = ROOT.TFile.Open(str(path))
     if not f or f.IsZombie():
         raise InputError(f"{path}: not readable by ROOT")
@@ -183,6 +192,9 @@ def _from_pyroot(path: Path, names: list[str]) -> dict:
     finally:
         f.Close()
     return out
+
+
+read_uproot, read_pyroot = _from_uproot, _from_pyroot  # the canonical-form readers, reused by C4 summaries
 
 
 def load(args) -> tuple[str, dict]:

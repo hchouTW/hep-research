@@ -483,6 +483,9 @@ C = [
     # batch D, C3: analysis preservation
  ("d-cc-preserve-1", "en", "direct", "What must I archive so my analysis can be rerun and re-folded after the experiment ends?", "hep-computing", ["reproducible scientific software"], None, None, {}),
  ("d-cc-preserve-2", "zh-Hant", "direct", "實驗結束後要保存哪些東西，分析才能重跑？請給我保存清單。", "hep-computing", ["reproducible scientific software"], None, None, {}),
+    # batch D, C4: uproot reader for histogram summaries
+ ("d-cc-uproot-1", "en", "direct", "Summarize the mean, RMS and effective entries of a histogram in my ROOT file with uproot, without PyROOT.", "hep-computing", ["uproot/awkward"], None, None, {}),
+ ("d-cc-uproot-2", "zh-Hant", "direct", "沒有 PyROOT，用 uproot 讀 ROOT 檔的直方圖並算平均值、RMS 與有效事件數。", "hep-computing", ["uproot/awkward"], None, None, {}),
 ]
 
 cases = []

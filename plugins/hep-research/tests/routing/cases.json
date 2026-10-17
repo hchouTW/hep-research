@@ -4485,6 +4485,26 @@
    "trigger_terms": [
     "reproducible scientific software"
    ]
+  },
+  {
+   "id": "d-cc-uproot-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Summarize the mean, RMS and effective entries of a histogram in my ROOT file with uproot, without PyROOT.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "uproot/awkward"
+   ]
+  },
+  {
+   "id": "d-cc-uproot-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "沒有 PyROOT，用 uproot 讀 ROOT 檔的直方圖並算平均值、RMS 與有效事件數。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "uproot/awkward"
+   ]
   }
  ]
 }
