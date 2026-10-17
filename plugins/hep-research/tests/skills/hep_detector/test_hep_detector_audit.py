@@ -302,10 +302,12 @@ STATUS_CASES = {
 
 
 # Scripts written after F-04 follow the plugin-wide contract of core/status.py instead: "status" is the run status
-# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic).
+# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic; propagate_scale_distortion.py takes --status).
 F04_CASES = {
     'toy_spectrometer.py': ['resolution', ASSETS / 'toy-spectrometer.fictional.json', '--species', 'p',
                             '--rigidity', '10'],
+    'propagate_scale_distortion.py': ['events', ASSETS / 'scale-distortion-events.example.csv', '--column', 'x',
+                                      '--signed', '--edges', '1', '2', '4', '--mode', 'scale', '--scale', '0.01'],
 }
 
 

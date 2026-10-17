@@ -15,7 +15,7 @@
   },
   "hep-detector": {
    "references": 35,
-   "bytes": 449913,
+   "bytes": 452056,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1515,8 +1515,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 11734,
-   "lines": 184,
+   "bytes": 13877,
+   "lines": 211,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1536,10 +1536,11 @@
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
-    "skills/hep-detector/references/tracking-and-vertexing.md"
+    "skills/hep-detector/references/tracking-and-vertexing.md",
+    "skills/hep-detector/scripts/propagate_scale_distortion.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "7334012 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -1571,6 +1572,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],

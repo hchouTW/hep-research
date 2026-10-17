@@ -3345,6 +3345,26 @@
    "trigger_terms": [
     "detector simulation (Geant4)"
    ]
+  },
+  {
+   "id": "dr-a-residual-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Propagate my calibration and alignment residual, a curvature offset, into the antiproton-to-proton ratio bins and give me up and down variations.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "dr-a-residual-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "動量尺度的 calibration and alignment 殘差要怎麼傳遞到每個能區的產額與共變異矩陣？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
   }
  ]
 }

@@ -54,6 +54,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Response matrices, forward folding | [response and folding](references/response-and-forward-folding.md) |
 | Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |
 | Calibration, alignment, conditions | [calibration and alignment](references/calibration-and-alignment.md) |
+| Propagating a calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |
 | Triggers, luminosity, pileup | [triggers and pileup](references/triggers-luminosity-pileup.md); `pileup_reweight.py` |
 | Simulation (Geant4) | [detector simulation](references/detector-simulation.md) |
 | Charge-sign confusion | [charge confusion](references/charge-confusion.md) |

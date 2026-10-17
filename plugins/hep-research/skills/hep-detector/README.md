@@ -14,12 +14,12 @@ Formerly `detector-response`; the old name is a deprecated alias in contracts 2.
 |---|---|
 | `SKILL.md` | entry point |
 | `references/` | thirty-five references: a principles summary that indexes the rest, one file per subsystem or topic, astroparticle instruments, case studies, comparison tables, glossary, bibliography |
-| `scripts/` | nine helpers: calorimeter resolution, Cherenkov angle, front-end electronics (noise, thresholds, timing, quantization, pileup, SiPM, dead time), multiple scattering, PID separation power, pileup reweighting, tag-and-probe efficiency, the Gaisser-Hillas longitudinal profile, a seeded toy spectrometer (synthetic events and periods) |
+| `scripts/` | ten helpers: calorimeter resolution, Cherenkov angle, front-end electronics (noise, thresholds, timing, quantization, pileup, SiPM, dead time), multiple scattering, PID separation power, pileup reweighting, tag-and-probe efficiency, the Gaisser-Hillas longitudinal profile, a seeded toy spectrometer (synthetic events and periods), propagation of a calibration residual into yields and ratios |
 | `assets/` | synthetic example inputs: a calorimeter response, a detector stack, pileup profiles, a fictional toy-spectrometer configuration |
 
 ## Scripts
 
-`calorimeter_resolution.py`, `cherenkov_angle.py`, `frontend_response.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `toy_spectrometer.py`, `xmax_gaisser_hillas.py`. Each reads `--help`, echoes a `--status` label and prints JSON at every exit code (0 ok, 1 failed, 2 invalid input; `toy_spectrometer.py` 3 without NumPy); five have tool contracts in `contracts/tool_contracts/` (`frontend_response.json` with one operation per subcommand); particle masses come from the caller or the primary-source table, never from a built-in constant presented as a measurement.
+`calorimeter_resolution.py`, `cherenkov_angle.py`, `frontend_response.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `propagate_scale_distortion.py`, `tag_and_probe_efficiency.py`, `toy_spectrometer.py`, `xmax_gaisser_hillas.py`. Each reads `--help`, echoes a `--status` label and prints JSON at every exit code (0 ok, 1 failed, 2 invalid input; `toy_spectrometer.py` 3 without NumPy; `propagate_scale_distortion.py` 1 when a user plugin fails); five have tool contracts in `contracts/tool_contracts/` (`frontend_response.json` with one operation per subcommand); particle masses come from the caller or the primary-source table, never from a built-in constant presented as a measurement.
 
 ## References
 
