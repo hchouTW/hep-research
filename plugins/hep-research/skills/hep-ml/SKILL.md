@@ -44,7 +44,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 | Request | Read or run |
 |---|---|
 | Classifier or regressor for an analysis: splits, weights, metrics, working points, decorrelation, systematics, sim-to-data; other tasks via its Task routes index | [ml-analysis.md](references/ml-analysis.md) |
-| BDT vs NN, BDT practice, regression targets; cross-trained XGBoost BDT (negative weights, working points) | [multivariate-analysis-bdt-nn.md](references/multivariate-analysis-bdt-nn.md); `train_bdt.py` |
+| BDT vs NN, regression targets; cross-trained XGBoost BDT (negative weights, working points, mass sculpting), its export, external TMVA/LightGBM scores | [multivariate-analysis-bdt-nn.md](references/multivariate-analysis-bdt-nn.md); `train_bdt.py`, `export_bdt.py` |
 | Jets, particle sets, hits, point clouds, graphs | [particle-and-jet-architectures.md](references/particle-and-jet-architectures.md) |
 | Space or ground-based astroparticle detectors (with the bound profile) | [space-and-astroparticle-ml.md](references/space-and-astroparticle-ml.md) |
 | Fast simulation, generative models | [fast-simulation-validation.md](references/fast-simulation-validation.md), [generative-models.md](references/generative-models.md) |

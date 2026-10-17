@@ -89,6 +89,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-ml/scripts/check_split_integrity.py": [M],
     "skills/hep-ml/scripts/check_surrogate_domain.py": [M],
     "skills/hep-ml/scripts/compare_model_runs.py": [M],
+    "skills/hep-ml/scripts/export_bdt.py": [M, "--to", "ubj", "--out", OUT],
     "skills/hep-ml/scripts/domain_shift_report.py": ["--reference", M, "--target", M, "--features", "x", "--control-sample", "c"],
     "skills/hep-ml/scripts/inspect_checkpoint.py": [M],
     "skills/hep-ml/scripts/make_grouped_splits.py": [M, "--id-column", "id", "--group-column", "g", "--out", OUT],

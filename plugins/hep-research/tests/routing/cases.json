@@ -4060,6 +4060,27 @@
    "trigger_terms": [
     "domain shift between simulation and data"
    ]
+  },
+  {
+   "id": "c-ml-bdtext-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My BDT cut sculpts the background mass peak; how do I quantify it, and can I export the XGBoost model for TMVA inference?",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "mass decorrelation",
+    "BDTs in analyses"
+   ]
+  },
+  {
+   "id": "c-ml-bdtext-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 XGBoost BDT 做能量回歸校正，怎麼檢查各能量區間的 response 與 resolution？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "regressors for events, particles, jets or detector signals"
+   ]
   }
  ]
 }

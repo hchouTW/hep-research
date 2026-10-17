@@ -12,7 +12,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 32 | 299 | 0 |
 | hep-detector | 36 | 466 | 0 |
 | hep-measurement | 13 | 113 | 0 |
-| hep-ml | 42 | 190 | 0 |
+| hep-ml | 42 | 192 | 0 |
 | hep-statistics | 12 | 175 | 0 |
 | hep-theory | 15 | 105 | 0 |
 
@@ -250,13 +250,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `ml-analysis-weights.md` | hep-ml | 6.0 | no | 7 | - | 485e96cb 2026-10-17 |
 | `ml-analysis.md` | hep-ml | 7.3 | yes | 25 | hep-detector, hep-measurement | 03d23875 2026-10-17 |
 | `monitoring-and-lifecycle.md` | hep-ml | 2.1 | no | 3 | - | 9257d7b5 2026-10-15 |
-| `multivariate-analysis-bdt-nn.md` | hep-ml | 13.1 | yes | 12 | hep-detector | f3e0ff6d 2026-10-17 |
+| `multivariate-analysis-bdt-nn.md` | hep-ml | 14.6 | yes | 12 | hep-detector | f3e0ff6d 2026-10-17 |
 | `optimization-and-training-dynamics.md` | hep-ml | 3.8 | no | 1 | - | 9257d7b5 2026-10-15 |
 | `parallelism-strategy.md` | hep-ml | 3.5 | no | 5 | - | 9257d7b5 2026-10-15 |
 | `particle-and-jet-architectures.md` | hep-ml | 8.5 | yes | 8 | - | 9257d7b5 2026-10-15 |
 | `performance-memory.md` | hep-ml | 3.4 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `reproducibility.md` | hep-ml | 5.1 | no | 6 | - | 485e96cb 2026-10-17 |
-| `robustness-and-distribution-shift.md` | hep-ml | 4.4 | yes | 11 | - | f3e0ff6d 2026-10-17 |
+| `robustness-and-distribution-shift.md` | hep-ml | 4.4 | yes | 11 | - | 1a844ba0 2026-10-17 |
 | `sbi-training.md` | hep-ml | 4.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `scientific-machine-learning.md` | hep-ml | 3.1 | yes | 8 | hep-statistics, hep-theory | 9257d7b5 2026-10-15 |
 | `sequence-models.md` | hep-ml | 2.2 | no | 4 | - | 9257d7b5 2026-10-15 |

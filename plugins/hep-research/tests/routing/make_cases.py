@@ -420,6 +420,9 @@ C = [
     # batch C, ML4: domain-shift report (domain_shift_report.py)
  ("c-ml-shift-1", "en", "direct", "Compare my simulation and data control sample feature by feature and tell me which inputs drive the difference before I trust the classifier.", "hep-ml", ["domain shift between simulation and data"], None, None, {}),
  ("c-ml-shift-2", "zh-Hant", "direct", "模擬和資料的控制樣本在輸入變數上有沒有偏移？哪些變數造成分類器表現不同？", "hep-ml", ["domain shift between simulation and data"], None, None, {}),
+    # batch C, ML3 extensions: BDT regression, mass sculpting, export, external scores
+ ("c-ml-bdtext-1", "en", "direct", "My BDT cut sculpts the background mass peak; how do I quantify it, and can I export the XGBoost model for TMVA inference?", "hep-ml", ["mass decorrelation", "BDTs in analyses"], None, None, {}),
+ ("c-ml-bdtext-2", "zh-Hant", "direct", "用 XGBoost BDT 做能量回歸校正，怎麼檢查各能量區間的 response 與 resolution？", "hep-ml", ["regressors for events, particles, jets or detector signals"], None, None, {}),
 ]
 
 cases = []

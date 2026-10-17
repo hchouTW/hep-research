@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Cross-trained BDT for an analysis: k folds by event number, xgboost (primary) or scikit-learn (fallback) (ML3).
+"""Cross-trained BDT for an analysis: k folds by event number, xgboost (primary) or scikit-learn (fallback) (ML3), for
+a classifier or a regression.
 
 Purpose: the executable path for a boosted-decision-tree classifier in a physics analysis, with the choices that bias
 results made explicit: every event is scored only by a model that never saw it, hyperparameters are chosen on
@@ -25,6 +26,15 @@ Method:
            class and the effective entries n_eff = (sum w)^2 / sum w^2; a distance, never a p-value. Importance
            (xgboost): gain, cover and TreeSHAP (mean |pred_contribs| on the test folds). Working points: score cuts
            at the target signal efficiencies, from the out-of-fold scores with physical weights (simulation).
+  regression  "task": "regression" fits the numeric "label" column (for example an energy calibration) with squared
+           error; "objective" must be "rmse" (the hyperparameter point with the lowest weighted validation RMSE is kept).
+           The test folds give the RMSE, the mean bias and the ml-artifact regression checks: response (median of
+           prediction / target) and resolution (half the central 68% width of that ratio) in bins of the true and of the
+           predicted value, the outlier fraction (|ratio - median| beyond 5 resolutions), and closure on another truth
+           spectrum, which needs a second sample and is recorded as not run. No working points.
+  sculpting with "mass_column" (classification): the Jensen-Shannon distance (base 2, in [0, 1]) between the background
+           mass shapes that pass and fail each working-point cut (or the median score cut without working points), on
+           "mass_bins" quantile bins of the background mass, with |physical weights|; 0 means no sculpting.
   models   xgboost models are saved with save_model as JSON or UBJSON (model_fold<k>.json|ubj); model_hash is the
            sha256 of those files. scikit-learn has no pickle-free format: its models are not saved, and model_hash is
            the sha256 of the tree node arrays. No pickle is written or read.
@@ -74,7 +84,7 @@ INSTALL = {"numpy": "pip install 'numpy>=2.4,<3'",
            "uproot": "pip install uproot awkward  (optional extra `root-uproot`; for ROOT input)"}
 DEFAULTS = {"signal_label": 1, "seed": 0, "n_threads": 1, "early_stopping_rounds": 0, "validation_fraction": 0.2,
             "working_point_efficiencies": [], "tree_method": "hist", "model_format": "json", "asimov_scale": 1.0,
-            "missing_values": {}, "units": {}}
+            "missing_values": {}, "units": {}, "task": "classification", "mass_bins": 20}
 REQUIRED = ("features", "label", "weight", "event_number", "folds", "backend", "hyperparameters", "objective")
 
 
@@ -122,8 +132,17 @@ def load_config(path) -> tuple[dict, list[str]]:
     cfg = {**json.loads(json.dumps(DEFAULTS)), **cfg}
     if cfg["backend"] not in BACKENDS:
         raise InputError(f"backend must be one of {BACKENDS}")
-    if cfg["objective"] not in ("auc", "asimov"):
+    if cfg["task"] not in ("classification", "regression"):
+        raise InputError("task must be classification or regression")
+    if cfg["task"] == "regression":
+        if cfg["objective"] != "rmse":
+            raise InputError("a regression needs objective rmse (squared-error loss, lowest validation RMSE kept)")
+        if cfg.get("mass_column") or cfg["working_point_efficiencies"]:
+            raise InputError("mass_column and working_point_efficiencies apply to a classifier only")
+    elif cfg["objective"] not in ("auc", "asimov"):
         raise InputError("objective must be auc or asimov")
+    if not isinstance(cfg["mass_bins"], int) or isinstance(cfg["mass_bins"], bool) or cfg["mass_bins"] < 2:
+        raise InputError("mass_bins must be an integer >= 2")
     if not isinstance(cfg["folds"], int) or isinstance(cfg["folds"], bool) or cfg["folds"] < 2:
         raise InputError("folds must be an integer >= 2")
     if not (isinstance(cfg["features"], list) and cfg["features"] and all(isinstance(f, str) for f in cfg["features"])):
@@ -253,6 +272,69 @@ def ks_distance(np, a, wa, b, wb):
     return float(np.max(np.abs(va - vb)))
 
 
+def weighted_rmse(np, pred, truth, w):
+    return float(math.sqrt(np.sum(w * (pred - truth) ** 2) / np.sum(w)))
+
+
+def _wquantile(np, v, w, q):
+    o = np.argsort(v, kind="mergesort")
+    c = np.cumsum(w[o]) / w.sum()
+    return float(v[o][min(int(np.searchsorted(c, q)), len(v) - 1)])
+
+
+def regression_checks(np, pred, truth, w, bins=10):
+    """Response (median of pred / truth) and resolution (half the 16-84% width) in quantile bins of the truth and of
+    the prediction; outlier fraction beyond 5 resolutions of the global median; closure needs a second sample."""
+    ok = truth != 0
+    ratio, aw = pred[ok] / truth[ok], np.abs(w[ok])
+
+    def binned(var):
+        edges = np.unique(np.quantile(var, np.linspace(0, 1, bins + 1)))
+        rows = []
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            m = (var >= lo) & ((var < hi) | (hi == edges[-1]))
+            if m.sum() < 5:
+                continue
+            r, ww = ratio[m], aw[m]
+            rows.append({"low": float(lo), "high": float(hi), "n": int(m.sum()), "response": _wquantile(np, r, ww, 0.5),
+                         "resolution": 0.5 * (_wquantile(np, r, ww, 0.84) - _wquantile(np, r, ww, 0.16))})
+        return rows
+    med = _wquantile(np, ratio, aw, 0.5)
+    res = 0.5 * (_wquantile(np, ratio, aw, 0.84) - _wquantile(np, ratio, aw, 0.16))
+    out = float(aw[np.abs(ratio - med) > 5 * res].sum() / aw.sum()) if res > 0 else 0.0
+    return {"response_vs_truth": binned(truth[ok]), "response_vs_reco": binned(pred[ok]),
+            "closure_alt_spectrum": {"status": "not-run", "reason": "needs a second sample with another truth spectrum"},
+            "outlier_fraction": out, "definition": "response = weighted median of prediction / truth; resolution = half "
+                                                   "the weighted 16-84% width of that ratio; outliers beyond 5 resolutions",
+            "computed_on": "out-of-fold predictions of every event"}
+
+
+def js_distance(np, p, q):
+    """Jensen-Shannon distance (base 2) between two histograms."""
+    p, q = p / p.sum(), q / q.sum()
+    m = 0.5 * (p + q)
+
+    def kl(a, b):
+        nz = a > 0
+        return float(np.sum(a[nz] * np.log2(a[nz] / b[nz])))
+    return math.sqrt(max(0.5 * kl(p, m) + 0.5 * kl(q, m), 0.0))
+
+
+def mass_sculpting(np, mass, score, y, w, cuts, bins):
+    bkg = y == 0
+    mb, sb, wb = mass[bkg], score[bkg], np.abs(w[bkg])
+    edges = np.unique(np.quantile(mb, np.linspace(0, 1, bins + 1)))
+    edges[-1] = np.nextafter(edges[-1], np.inf)
+    rows = []
+    for label, cut in cuts:
+        hp, _ = np.histogram(mb[sb >= cut], edges, weights=wb[sb >= cut])
+        hf, _ = np.histogram(mb[sb < cut], edges, weights=wb[sb < cut])
+        rows.append({"cut": label, "score_cut": float(cut),
+                     "js_distance": js_distance(np, hp, hf) if hp.sum() > 0 and hf.sum() > 0 else None,
+                     "background_pass_fraction": float(wb[sb >= cut].sum() / wb.sum())})
+    return rows
+
+
 # ---------------------------------------------------------------- backends
 
 class Xgb:
@@ -262,7 +344,9 @@ class Xgb:
         self.xgb, self.cfg, self.features = need("xgboost"), cfg, features
 
     def fit(self, np, xtr, ytr, wtr, xva, yva, wva, hp):
-        params = {"objective": "binary:logistic", "eval_metric": "logloss", "tree_method": self.cfg["tree_method"],
+        reg = self.cfg["task"] == "regression"
+        params = {"objective": "reg:squarederror" if reg else "binary:logistic", "eval_metric": "rmse" if reg else "logloss",
+                  "tree_method": self.cfg["tree_method"],
                   "seed": int(self.cfg["seed"]), "nthread": int(self.cfg["n_threads"]),
                   "max_depth": int(hp.get("max_depth", 6)), "eta": float(hp.get("learning_rate", 0.3))}
         for k in ("min_child_weight", "subsample", "reg_lambda"):
@@ -315,8 +399,10 @@ class Skl:
 
     def __init__(self, cfg, features):
         need("sklearn")
-        from sklearn.ensemble import HistGradientBoostingClassifier
-        self.cls, self.cfg, self.features = HistGradientBoostingClassifier, cfg, features
+        from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
+        self.reg = cfg["task"] == "regression"
+        self.cls = HistGradientBoostingRegressor if self.reg else HistGradientBoostingClassifier
+        self.cfg, self.features = cfg, features
         try:
             from threadpoolctl import threadpool_limits
             self.limits = threadpool_limits
@@ -342,7 +428,11 @@ class Skl:
         es = int(self.cfg["early_stopping_rounds"])
         if es > 0 and len(yva):
             losses = []
-            for p in est.staged_predict_proba(xva):
+            staged = est.staged_predict(xva) if self.reg else est.staged_predict_proba(xva)
+            for p in staged:
+                if self.reg:
+                    losses.append(float(np.sum(wva * (p - yva) ** 2) / np.sum(wva)))
+                    continue
                 q = np.clip(p[:, 1], 1e-12, 1 - 1e-12)
                 losses.append(float(-np.sum(wva * (yva * np.log(q) + (1 - yva) * np.log(1 - q))) / np.sum(wva)))
             best, since = 0, 0
@@ -358,6 +448,8 @@ class Skl:
         return {"est": est, "rounds": int(est.n_iter_)}
 
     def predict(self, np, model, x):
+        if self.reg:
+            return np.asarray(model["est"].predict(x), dtype=float)
         return np.asarray(model["est"].predict_proba(x)[:, 1], dtype=float)
 
     def save(self, model, path: Path):
@@ -386,7 +478,9 @@ def run(args) -> tuple[str, dict]:
     np = need("numpy")
     backend = (Xgb if cfg["backend"] == "xgboost" else Skl)(cfg, cfg["features"])
     cols = read_table(Path(args.data), cfg)
-    needed = cfg["features"] + [cfg["label"], cfg["weight"]] + ([cfg["id"]] if cfg.get("id") else [])
+    reg = cfg["task"] == "regression"
+    needed = (cfg["features"] + [cfg["label"], cfg["weight"]] + ([cfg["id"]] if cfg.get("id") else [])
+              + ([cfg["mass_column"]] if cfg.get("mass_column") else []))
     absent = [c for c in needed if c not in cols]
     if absent:
         raise InputError(f"columns {absent} are not in the data")
@@ -399,8 +493,12 @@ def run(args) -> tuple[str, dict]:
     try:
         x = np.array([[float(cols[f][i]) for f in cfg["features"]] for i in range(n)], dtype=float)
         w = np.array([float(v) for v in cols[cfg["weight"]]], dtype=float)
-        y = np.array([1 if str(v).strip() in (str(cfg["signal_label"]), str(float(cfg["signal_label"]))) else 0
-                      for v in cols[cfg["label"]]], dtype=float)
+        if reg:
+            y = np.array([float(v) for v in cols[cfg["label"]]], dtype=float)
+        else:
+            y = np.array([1 if str(v).strip() in (str(cfg["signal_label"]), str(float(cfg["signal_label"]))) else 0
+                          for v in cols[cfg["label"]]], dtype=float)
+        mass = np.array([float(v) for v in cols[cfg["mass_column"]]], dtype=float) if cfg.get("mass_column") else None
     except ValueError as exc:
         raise InputError(f"a feature, weight or label value is not numeric: {exc}") from exc
     for j, f in enumerate(cfg["features"]):
@@ -408,7 +506,9 @@ def run(args) -> tuple[str, dict]:
             x[x[:, j] == float(cfg["missing_values"][f]), j] = np.nan
     if not np.all(np.isfinite(w)):
         raise InputError("non-finite event weight")
-    if y.sum() == 0 or y.sum() == n:
+    if reg and not np.all(np.isfinite(y)):
+        raise InputError("non-finite regression target")
+    if not reg and (y.sum() == 0 or y.sum() == n):
         raise InputError("both classes (signal_label and the rest) must be present")
 
     neg = w < 0
@@ -447,7 +547,7 @@ def run(args) -> tuple[str, dict]:
         raise Stop("incomplete", reason="the fold manifest did not pass check_split_integrity.py --strict",
                    split_report=str(out_dir / "split_report.json"))
     for k in range(K):
-        if len(np.unique(y[fold == k])) < 2:
+        if not reg and len(np.unique(y[fold == k])) < 2:
             raise InputError(f"fold {k} lacks a class; use more events or fewer folds")
 
     grid_names = sorted(cfg["hyperparameters"])
@@ -459,13 +559,15 @@ def run(args) -> tuple[str, dict]:
         for k in range(K):
             tr = (fold != k) & ~is_val & train_ok
             va = (fold != k) & is_val
-            if len(np.unique(y[tr])) < 2:
+            if not reg and len(np.unique(y[tr])) < 2:
                 raise InputError(f"the training part of fold {k} lacks a class")
             model = backend.fit(np, x[tr], y[tr], w_train[tr], x[va & train_ok], y[va & train_ok],
                                 w_train[va & train_ok], hp)
             trained[(gi, k)] = model
             sv = backend.predict(np, model, x[va])
-            if cfg["objective"] == "auc":
+            if reg:
+                vals.append(-weighted_rmse(np, sv, y[va], np.abs(w[va])))
+            elif cfg["objective"] == "auc":
                 vals.append(weighted_auc(np, sv, y[va], w[va]))
             else:
                 vals.append(best_asimov(np, sv, y[va], w[va], float(cfg["asimov_scale"])))
@@ -486,43 +588,67 @@ def run(args) -> tuple[str, dict]:
 
     with open(out_dir / "scores.csv", "w", newline="", encoding="utf-8") as fh:
         wr = csv.writer(fh)
-        wr.writerow(["id", "fold", "label", "weight", "score"])
+        wr.writerow(["id", "fold", "label", "weight", "prediction" if reg else "score"])
         for i in range(n):
-            wr.writerow([ids[i], int(fold[i]), int(y[i]), repr(float(w[i])), repr(float(score[i]))])
+            wr.writerow([ids[i], int(fold[i]), repr(float(y[i])) if reg else int(y[i]), repr(float(w[i])),
+                         repr(float(score[i]))])
 
-    test_metrics = {"auc_weighted": weighted_auc(np, score, y, w),
-                    "auc_weighted_per_fold": [weighted_auc(np, score[fold == k], y[fold == k], w[fold == k])
-                                              for k in range(K)],
-                    "n_eff": {"signal": n_eff(np, w[y == 1]), "background": n_eff(np, w[y == 0])},
-                    "evaluated_on": "out-of-fold scores of every event, signed physical weights"}
-    if cfg["objective"] == "asimov":
-        test_metrics["asimov_z_best_cut"] = best_asimov(np, score, y, w, float(cfg["asimov_scale"]))
-    weights_out["evaluated_weight_sum"] = {"signal": float(w[y == 1].sum()), "background": float(w[y == 0].sum())}
+    regression_validation = None
+    if reg:
+        res = score - y
+        test_metrics = {"rmse": weighted_rmse(np, score, y, np.abs(w)), "mean_bias": float(np.average(res, weights=np.abs(w))),
+                        "rmse_per_fold": [weighted_rmse(np, score[fold == k], y[fold == k], np.abs(w[fold == k]))
+                                          for k in range(K)],
+                        "n_eff": n_eff(np, w), "evaluated_on": "out-of-fold predictions of every event, |physical weights|"}
+        regression_validation = regression_checks(np, score, y, w)
+        tr_res = ts - ty
+        overtraining = {"train_test_distance": {"residual": {
+            "ks_distance": ks_distance(np, tr_res, np.abs(tw), res, np.abs(w)), "n_eff_train": n_eff(np, tw),
+            "n_eff_test": n_eff(np, w)}}, "note": "weighted Kolmogorov distance between the training-fold and test-fold "
+                                                  "residual distributions; a distance, not a test"}
+        wps = []
+    else:
+        test_metrics = {"auc_weighted": weighted_auc(np, score, y, w),
+                        "auc_weighted_per_fold": [weighted_auc(np, score[fold == k], y[fold == k], w[fold == k])
+                                                  for k in range(K)],
+                        "n_eff": {"signal": n_eff(np, w[y == 1]), "background": n_eff(np, w[y == 0])},
+                        "evaluated_on": "out-of-fold scores of every event, signed physical weights"}
+        if cfg["objective"] == "asimov":
+            test_metrics["asimov_z_best_cut"] = best_asimov(np, score, y, w, float(cfg["asimov_scale"]))
+        weights_out["evaluated_weight_sum"] = {"signal": float(w[y == 1].sum()), "background": float(w[y == 0].sum())}
 
-    overtraining = {"train_test_distance": {}, "note": ("weighted Kolmogorov distance between the training-fold and "
-                                                        "test-fold score distributions and the effective entries; a "
-                                                        "distance for judgement, not a test: no p-value is computed")}
-    for cls, name in ((1, "signal"), (0, "background")):
-        a, wa = ts[ty == cls], np.abs(tw[ty == cls])
-        b, wb = score[y == cls], np.abs(w[y == cls])
-        overtraining["train_test_distance"][name] = {
-            "ks_distance": ks_distance(np, a, wa, b, wb) if len(a) and len(b) else None,
-            "n_eff_train": n_eff(np, tw[ty == cls]), "n_eff_test": n_eff(np, w[y == cls])}
+        overtraining = {"train_test_distance": {}, "note": ("weighted Kolmogorov distance between the training-fold and "
+                                                            "test-fold score distributions and the effective entries; a "
+                                                            "distance for judgement, not a test: no p-value is computed")}
+        for cls, name in ((1, "signal"), (0, "background")):
+            a, wa = ts[ty == cls], np.abs(tw[ty == cls])
+            b, wb = score[y == cls], np.abs(w[y == cls])
+            overtraining["train_test_distance"][name] = {
+                "ks_distance": ks_distance(np, a, wa, b, wb) if len(a) and len(b) else None,
+                "n_eff_train": n_eff(np, tw[ty == cls]), "n_eff_test": n_eff(np, w[y == cls])}
 
-    wps = []
-    sig = np.argsort(-score[y == 1], kind="mergesort")
-    s_sorted, ws_sorted = score[y == 1][sig], w[y == 1][sig]
-    tot_s, tot_b = float(w[y == 1].sum()), float(w[y == 0].sum())
-    for target in cfg["working_point_efficiencies"]:
-        cum = np.cumsum(ws_sorted) / tot_s
-        idx = int(np.searchsorted(cum, float(target) - 1e-12))
-        idx = min(idx, len(s_sorted) - 1)
-        cut = float(s_sorted[idx])
-        wps.append({"target_signal_efficiency": float(target), "score_cut": cut,
-                    "signal_efficiency": float(w[(y == 1) & (score >= cut)].sum()) / tot_s,
-                    "background_efficiency": float(w[(y == 0) & (score >= cut)].sum()) / tot_b,
-                    "computed_on": "out-of-fold scores with physical weights (simulation)"})
+        wps = []
+        sig = np.argsort(-score[y == 1], kind="mergesort")
+        s_sorted, ws_sorted = score[y == 1][sig], w[y == 1][sig]
+        tot_s, tot_b = float(w[y == 1].sum()), float(w[y == 0].sum())
+        for target in cfg["working_point_efficiencies"]:
+            cum = np.cumsum(ws_sorted) / tot_s
+            idx = int(np.searchsorted(cum, float(target) - 1e-12))
+            idx = min(idx, len(s_sorted) - 1)
+            cut = float(s_sorted[idx])
+            wps.append({"target_signal_efficiency": float(target), "score_cut": cut,
+                        "signal_efficiency": float(w[(y == 1) & (score >= cut)].sum()) / tot_s,
+                        "background_efficiency": float(w[(y == 0) & (score >= cut)].sum()) / tot_b,
+                        "computed_on": "out-of-fold scores with physical weights (simulation)"})
 
+    sculpting = None
+    if mass is not None:
+        cuts = ([(f"signal efficiency {wp['target_signal_efficiency']}", wp["score_cut"]) for wp in wps]
+                or [("median score", float(np.median(score)))])
+        sculpting = {"mass_column": cfg["mass_column"], "bins": int(cfg["mass_bins"]),
+                     "working_points": mass_sculpting(np, mass, score, y, w, cuts, int(cfg["mass_bins"])),
+                     "definition": "Jensen-Shannon distance (base 2) between the background mass shapes passing and "
+                                   "failing the cut, |physical weights|, quantile bins of the background mass"}
     importance = backend.importance(np, models, [x[fold == k] for k in range(K)])
     h = hashlib.sha256()
     model_files = []
@@ -543,8 +669,9 @@ def run(args) -> tuple[str, dict]:
     status_labels = list(dict.fromkeys(args.label or []))
     summary = {
         **({"status": status_labels} if status_labels else {}),
-        "task": "classification", "features": cfg["features"], "units": cfg["units"] or {},
-        "labels": ["background", "signal"],
+        "task": cfg["task"], "features": cfg["features"], "units": cfg["units"] or {},
+        "labels": [cfg["label"]] if reg else ["background", "signal"],
+        **({"output_semantics": "regression-value", "regression_validation": regression_validation} if reg else {}),
         "grouping_key": "+".join(cfg["event_number"]) if isinstance(cfg["event_number"], list) else cfg["event_number"],
         "split_manifest": str(man_path.resolve()), "split_manifest_sha256": man_sha,
         "split_check": {"tool": "check_split_integrity.py", "result": "pass",
@@ -579,6 +706,7 @@ def run(args) -> tuple[str, dict]:
               "rounds_per_fold": [m["rounds"] for m in models],
               "metrics": {"test": test_metrics}, "working_points": wps, "overtraining": overtraining,
               "importance": importance, "weights": weights_out, "model_hash": model_hash,
+              **({"mass_sculpting": sculpting} if sculpting else {}),
               "run_summary": str((out_dir / "run_summary.json").resolve()), "defaults_used_config": defaults_used}
     return "ok", result
 

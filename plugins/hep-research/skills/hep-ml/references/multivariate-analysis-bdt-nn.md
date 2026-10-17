@@ -156,6 +156,21 @@ HistGradientBoosting as a fallback; optional extra `bdt`; exit 3 with the pip co
   pickle-free format, so its models are hashed, not saved.
 - **Working points** come from the out-of-fold scores with physical weights on simulation; their efficiencies in data
   are measured separately (tag-and-probe or control samples).
+- **Regression.** `"task": "regression"` (objective `rmse`) fits an energy or momentum calibration with the same
+  folds; the test folds give the RMSE, the bias and the ml-artifact regression checks (response and resolution in bins
+  of the true and of the predicted value, the outlier fraction; closure on another truth spectrum needs a second
+  sample and is recorded as not run).
+- **Mass sculpting.** With `mass_column` the run reports the Jensen-Shannon distance between the background mass
+  shapes passing and failing each working-point cut. Without sculpting it is finite-sample noise,
+  JS^2 ~ (bins - 1) / (8 ln 2) (1/N_pass + 1/N_fail); a value well above that is sculpting (then decorrelate:
+  [ml-analysis-decorrelation-and-systematics.md](ml-analysis-decorrelation-and-systematics.md)).
+- **Deployment.** `export_bdt.py` converts a fold model between JSON and UBJSON, or to ONNX (`onnxmltools`) or a ROOT
+  file for TMVA's RBDT (`ROOT.TMVA.Experimental.SaveXGBoost`); both are optional packages the plugin does not
+  install, so without them it exits 3 with the install command. The written file's sha256 is the model_hash to carry.
+- **Scores from another tool** (TMVA, LightGBM): `assets/inference.py --external-scores` applies the same checks to a
+  score file: every scored event must be a test event of the split manifest (or of the fold whose model scored it),
+  the training-domain flags, and a calibration that names the model's sha256; `--run-summary-out` feeds
+  `write_ml_artifact.py`.
 
 TMVA options for the same choices (`MethodBDT`, checked against ROOT master `tmva/tmva/src/MethodBDT.cxx`, read
 2026-10-17; classification defaults):
