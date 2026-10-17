@@ -25,7 +25,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 183891,
+   "bytes": 186055,
    "uncited": 0
   },
   "hep-statistics": {
@@ -2985,7 +2985,10 @@
     "skills/hep-ml/references/deep-learning-guide.md",
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/particle-and-jet-architectures.md",
-    "skills/hep-ml/references/uncertainty-and-calibration.md"
+    "skills/hep-ml/references/robustness-and-distribution-shift.md",
+    "skills/hep-ml/references/space-and-astroparticle-ml.md",
+    "skills/hep-ml/references/uncertainty-and-calibration.md",
+    "tests/skills/hep_ml/test_era_changes_ml1.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"
@@ -3076,8 +3079,8 @@
   {
    "path": "skills/hep-ml/references/robustness-and-distribution-shift.md",
    "owner": "hep-ml",
-   "bytes": 2125,
-   "lines": 27,
+   "bytes": 3312,
+   "lines": 41,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-ml/SKILL.md",
@@ -3087,7 +3090,9 @@
     "skills/hep-ml/references/ml-analysis-decorrelation-and-systematics.md",
     "skills/hep-ml/references/monitoring-and-lifecycle.md",
     "skills/hep-ml/references/scientific-machine-learning.md",
-    "skills/hep-ml/references/uncertainty-and-calibration.md"
+    "skills/hep-ml/references/space-and-astroparticle-ml.md",
+    "skills/hep-ml/references/uncertainty-and-calibration.md",
+    "tests/skills/hep_ml/test_era_changes_ml1.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "485e96cb 2026-10-17"
@@ -3160,14 +3165,15 @@
   {
    "path": "skills/hep-ml/references/space-and-astroparticle-ml.md",
    "owner": "hep-ml",
-   "bytes": 8596,
-   "lines": 119,
+   "bytes": 9573,
+   "lines": 131,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-ml/SKILL.md",
     "skills/hep-ml/references/deep-learning-guide.md",
-    "skills/hep-ml/references/ml-analysis.md"
+    "skills/hep-ml/references/ml-analysis.md",
+    "tests/skills/hep_ml/test_era_changes_ml1.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"
@@ -3516,7 +3522,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "713b9055 2026-10-17"
+   "last_commit": "e2cb73b9 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",

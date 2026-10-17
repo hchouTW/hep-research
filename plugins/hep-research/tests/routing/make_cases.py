@@ -375,6 +375,9 @@ C = [
     # batch B, S6: multi-era joint fit (documentation)
  ("b-ms-joint-1", "en", "direct", "How do I fit one flux to two detector eras with different responses and acceptances, with era-correlated nuisances?", "hep-statistics", ["nuisance parameters"], None, None, {}),
  ("b-ms-joint-2", "zh-Hant", "direct", "兩個偵測器時期的響應矩陣不同，要怎麼做聯合擬合同一個通量？", "hep-statistics", ["fits that use a folded prediction"], None, None, {}),
+    # batch B, ML1: detector configuration changes (eras) in ML studies
+ ("b-ml-era-1", "en", "direct", "Our detector added a tracking layer halfway through data taking; should I train one classifier per era or condition on the era, and how do I set the working points and calibration of model outputs?", "hep-ml", ["calibration of model outputs"], None, None, {}),
+ ("b-ml-era-2", "zh-Hant", "direct", "探測器中途換了讀出系統，前後兩個時期的分類器要分開訓練還是把時期當輸入？工作點與效率要怎麼處理？", "hep-ml", ["working points and mass decorrelation"], None, None, {}),
 ]
 
 cases = []

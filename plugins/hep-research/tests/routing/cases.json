@@ -3757,6 +3757,26 @@
    "trigger_terms": [
     "fits that use a folded prediction"
    ]
+  },
+  {
+   "id": "b-ml-era-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Our detector added a tracking layer halfway through data taking; should I train one classifier per era or condition on the era, and how do I set the working points and calibration of model outputs?",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "calibration of model outputs"
+   ]
+  },
+  {
+   "id": "b-ml-era-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "探測器中途換了讀出系統，前後兩個時期的分類器要分開訓練還是把時期當輸入？工作點與效率要怎麼處理？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "working points and mass decorrelation"
+   ]
   }
  ]
 }

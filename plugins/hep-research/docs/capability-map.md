@@ -54,7 +54,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | task-authoring | Implementation-ready research tasks for coding agents | hep-computing | tool | yes |  |  |
 | ml-training | Grouped splits, training, inference domain flags, calibration and ML artifacts | hep-ml | tool | yes | ML2, ML4 |  |
 | bdt-pipeline | BDT pipeline for analyses (cross-training, negative weights, working points) | hep-ml | documentation | yes | ML3 |  |
-| ml-eras | Era changes in machine-learning studies | hep-ml | none | yes | ML1 |  |
+| ml-eras | Era changes in machine-learning studies | hep-ml | documentation | yes | ML1 |  |
 | claims-and-literature | Claims linked to results, literature and citation verification, manuscript checks | hep-communication | tool | yes | Com1, Com2 |  |
 | terminology | Terminology and notation against a glossary | hep-communication | tool | yes | Com3 |  |
 | papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-communication | documentation | yes | Com4, Com5, Com6, Com7 |  |

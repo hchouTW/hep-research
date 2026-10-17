@@ -71,6 +71,18 @@ decorrelation) are in [ml-analysis.md](ml-analysis.md).
 - **Check stability in instrument variables.** Incidence angle and impact position (edges, dead regions, layer
   patterns) matter because the acceptance is geometric.
 
+## Detector configuration change (eras)
+
+When the instrument changes during the mission (an added tracking layer, a replaced subsystem, a new calibration
+scheme), the periods before and after are different domains; the bound profile names the eras, never memory. Options:
+per-era training, era conditioning (era as an input), common features only (inputs present in every era), or
+missing-feature indicators for inputs that exist in one era only. Keep per-era calibration and per-era working
+points chosen at the same signal efficiency, and use efficiencies measured in data for each era (control samples per
+period), because the simulation of a new configuration is the least validated. Splits group by period within era.
+The executable BDT path (cross-training, negative weights, working points) is in
+[multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md); the robustness view is in
+[robustness-and-distribution-shift.md](robustness-and-distribution-shift.md).
+
 ## Steep spectra, rigidity dependence, and the working point
 
 - **Training weight.** The training sample is dominated by the lowest rigidity or energy bins. Train flat in log

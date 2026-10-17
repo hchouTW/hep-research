@@ -372,7 +372,7 @@
    "id": "ml-eras",
    "capability": "Era changes in machine-learning studies",
    "owner": "hep-ml",
-   "state": "none",
+   "state": "documentation",
    "v1": true,
    "items": [
     "ML1"
