@@ -1,5 +1,5 @@
 {
- "$comment": "Scan submission (task P6.1): what an agent session sends to the custodian's scan service (a service outside the plugin) to ask whether outputs contain a sealed value. It names the outputs by digest and states how many candidate values they hold (contracts/scan_verdict.py count_candidates), because each answer is a group test over every candidate value (agentic-architecture.md \u00a76.5): the per-analysis budget is counted in candidate values, not calls.",
+ "$comment": "Scan submission (task P6.1): what an agent session sends to the custodian's scan service (a service outside the plugin) to ask whether outputs contain a sealed value. It names the outputs by digest and states how many candidate values they hold (contracts/scan_verdict.py count_candidates), because each answer is a group test over every candidate value (protected-data-architecture.md \u00a76.5): the per-analysis budget is counted in candidate values, not calls.",
  "type": "object",
  "required": [
   "submission_version",

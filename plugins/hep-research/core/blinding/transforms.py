@@ -1,4 +1,4 @@
-"""Input-blinding transforms (task P4.1, C02, T1.1, T1.6; DP-3 modes; agentic-architecture.md §6.2).
+"""Input-blinding transforms (task P4.1, C02, T1.1, T1.6; DP-3 modes; protected-data-architecture.md §6.2).
 
 Each transform takes the custodian's unblinded input and returns a Release dict:
   mode       binned-mask | event-removal | common-offset | common-scale

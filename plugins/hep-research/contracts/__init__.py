@@ -27,7 +27,7 @@ CONTRACTS_VERSION = "2.12.0"
 # capability: the rules only refuse inconsistent or incomplete results, and a 2.5 reader accepts the new optional
 # keys without misreading any field (it simply does not apply the new rules). Other rule families joining 2.6.0 add
 # their own *_SEMANTICS_FROM constant and helper.
-# 2.7.0 adds three capabilities for the agentic-architecture sidecars (task P3.4) and the validator warning
+# 2.7.0 adds three capabilities for the protected-data sidecars (task P3.4) and the validator warning
 # exposure.capability_not_declared; no other rule changes, so a 2.6 artifact keeps its outcome under a 2.7 reader, and
 # a 2.6 reader refuses a 2.7 artifact that requires one of the new capabilities (and warns on, or in protected use
 # refuses, the newer minor). core:revocation-log: the artifact's status

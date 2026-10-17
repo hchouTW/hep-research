@@ -2,7 +2,7 @@
 
 Advisory blinding tools (masks, sealing, output scans) and the input-blinding transforms a data custodian runs to
 prepare a release. Run by an agent on synthetic data they are exercises; with real data, preparation, sealing and
-scanning are custodian services (agentic-architecture.md §6.2, §8). Nothing here is enforcement.
+scanning are custodian services (protected-data-architecture.md §6.2, §8). Nothing here is enforcement.
 
 | File | What |
 |---|---|

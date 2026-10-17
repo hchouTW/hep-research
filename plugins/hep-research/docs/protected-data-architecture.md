@@ -1,8 +1,8 @@
-# hep-research Agentic Architecture: Functions and Design
+# hep-research Protected-Data Architecture: Blinding, Custodianship and Egress
 
 Status: 2026-10-14, release 0.9.0 (contracts 2.8.0, core 1.0.0, project config schema 1.2.0). Version labels in §12 name the release that introduced each component.
 
-This document describes the agentic architecture of hep-research (AGENTIC-R5, from the R5.4 planning basis): its objectives, design principles, components, trust boundaries, data and execution flows, and the functions each part performs. Names of files, fields, commands, and states are those of this tree. Section 12 maps each architectural component to the plugin file that implements it, or marks it as a component outside the plugin. How the components outside the plugin are deployed, and how a host configuration is qualified, is in [deployment-model.md](deployment-model.md). Nothing here qualifies a host configuration or authorizes a use: no host configuration is qualified for private or blinded data.
+This document describes the protected-data architecture of hep-research (planning ID AGENTIC-R5, from the R5.4 planning basis, kept for traceability; renamed from `docs/agentic-architecture.md` after release 0.14.1): its objectives, design principles, components, trust boundaries, data and execution flows, and the functions each part performs. Names of files, fields, commands, and states are those of this tree. Section 12 maps each architectural component to the plugin file that implements it, or marks it as a component outside the plugin. How the components outside the plugin are deployed, and how a host configuration is qualified, is in [deployment-model.md](deployment-model.md). Nothing here qualifies a host configuration or authorizes a use: no host configuration is qualified for private or blinded data.
 
 ---
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Instruction-text conformance (HC-18, U12): shipped texts the agent follows must not direct it against a hard
-constraint of the agentic plan (AGENTIC-R5 §13.4, MUST items M01-M25).
+constraint of the protected-data plan (AGENTIC-R5 §13.4, MUST items M01-M25).
 
 Each rule is a phrase that, where it occurs, tells the agent to unblind in the session, to hold unblinded data or real
 sealed values, to treat an agent-run check as enforcement or authorization, or to bring private material onto an

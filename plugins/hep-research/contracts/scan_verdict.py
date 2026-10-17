@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Interface to the custodian's scan service (task P6.1; agentic-architecture.md §6.5): scan submissions, the
+"""Interface to the custodian's scan service (task P6.1; protected-data-architecture.md §6.5): scan submissions, the
 agent-visible verdict, and the per-analysis query budget. The service itself (which holds the sealed values and runs
 core.blinding.scan_paths) lives outside the plugin; this module fixes what crosses the boundary.
 
