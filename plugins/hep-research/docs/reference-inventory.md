@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | hep-communication | 57 | 402 | 0 |
 | hep-computing | 32 | 299 | 0 |
-| hep-detector | 35 | 455 | 0 |
+| hep-detector | 35 | 459 | 0 |
 | hep-measurement | 12 | 104 | 0 |
 | hep-ml | 42 | 184 | 0 |
 | hep-statistics | 12 | 172 | 0 |
@@ -174,7 +174,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 9257d7b5 2026-10-15 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c0 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 9257d7b5 2026-10-15 |
-| `calibration-and-alignment.md` | hep-detector | 15.5 | yes | 20 | - | 0d506417 2026-10-17 |
+| `calibration-and-alignment.md` | hep-detector | 19.0 | yes | 21 | - | 0d506417 2026-10-17 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 13.0 | yes | 11 | - | 9257d7b5 2026-10-15 |
 | `charge-confusion.md` | hep-detector | 11.2 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
@@ -209,7 +209,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `timing-detectors.md` | hep-detector | 9.1 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `tracking-and-vertexing.md` | hep-detector | 16.1 | yes | 16 | hep-communication | 9257d7b5 2026-10-15 |
 | `triggers-luminosity-pileup.md` | hep-detector | 15.7 | yes | 13 | - | 9257d7b5 2026-10-15 |
-| `analysis-design.md` | hep-measurement | 13.1 | yes | 16 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
+| `analysis-design.md` | hep-measurement | 13.1 | yes | 16 | hep-computing, hep-detector | fe71ebcf 2026-10-17 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `backgrounds.md` | hep-measurement | 4.7 | yes | 20 | hep-detector | 9257d7b5 2026-10-15 |
 | `correction-chain.md` | hep-measurement | 12.5 | yes | 7 | - | 36140fee 2026-10-17 |

@@ -3697,6 +3697,26 @@
    "trigger_terms": [
     "verdict-first measurement review"
    ]
+  },
+  {
+   "id": "b-det-layer-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "We are adding a new outer tracking layer to a running spectrometer: how do we align it and check the rigidity scale with and without it?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "b-det-layer-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "在運轉中的磁譜儀加裝一層外層矽徑跡層，對準與剛度尺度要怎麼處理？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
   }
  ]
 }

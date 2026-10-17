@@ -366,6 +366,9 @@ C = [
     # batch B, M3: multi-era design (eras in the spec, review rules)
  ("b-ms-eras-1", "en", "direct", "A tracking layer was added halfway through data taking; how should my measurement spec handle the two detector eras before I review it?", "hep-measurement", ["verdict-first measurement review"], None, None, {}),
  ("b-ms-eras-2", "zh-Hant", "direct", "資料取樣期間偵測器換過組態，我的量測設計要怎麼切分時期，系統誤差在不同時期之間的相關性要怎麼宣告？", "hep-measurement", ["verdict-first measurement review"], None, None, {}),
+    # batch B, D6: adding a tracking layer to a running detector
+ ("b-det-layer-1", "en", "direct", "We are adding a new outer tracking layer to a running spectrometer: how do we align it and check the rigidity scale with and without it?", "hep-detector", ["calibration and alignment"], None, None, {}),
+ ("b-det-layer-2", "zh-Hant", "direct", "在運轉中的磁譜儀加裝一層外層矽徑跡層，對準與剛度尺度要怎麼處理？", "hep-detector", ["calibration and alignment"], None, None, {}),
 ]
 
 cases = []
