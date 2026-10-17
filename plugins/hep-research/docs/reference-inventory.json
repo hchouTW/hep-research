@@ -15,7 +15,7 @@
   },
   "hep-detector": {
    "references": 36,
-   "bytes": 463929,
+   "bytes": 465595,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1582,7 +1582,7 @@
     "skills/hep-detector/scripts/charge_confusion_rate.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1acbdded 2026-10-17"
+   "last_commit": "4c1cb871 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -2023,6 +2023,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/scripts/survival_feeddown.py",
     "skills/hep-theory/references/nuclear-cross-sections.md"
    ],
@@ -2134,8 +2135,8 @@
   {
    "path": "skills/hep-detector/references/response-and-forward-folding.md",
    "owner": "hep-detector",
-   "bytes": 12455,
-   "lines": 147,
+   "bytes": 14121,
+   "lines": 166,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2148,6 +2149,7 @@
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/scripts/build_response.py",
     "skills/hep-detector/scripts/mix_period_responses.py",
+    "skills/hep-detector/scripts/species_response.py",
     "skills/hep-measurement/references/measurements-and-unfolding.md",
     "skills/hep-statistics/references/unfolding.md"
    ],

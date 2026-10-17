@@ -44,14 +44,14 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 | Request | Read or run |
 |---|---|
-| Any detector question: the chain, the fourteen questions, task routing | [principles summary](references/detector-principles-summary.md) |
+| Any detector question: the chain, task routing | [principles summary](references/detector-principles-summary.md) |
 | Resolution, efficiency (weighted, binned), tag-and-probe, truth matching | [reconstruction performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
 | Tracking, vertexing, multiple scattering | [tracking and vertexing](references/tracking-and-vertexing.md); `multiple_scattering.py` |
 | Synthetic spectrometer events and periods (seeded) | `toy_spectrometer.py`; `assets/toy-spectrometer.fictional.json` |
 | Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |
 | PID: TOF, dE/dx, RICH; many samples (charge, LLR) | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py`, `multisample_pid.py` |
 | Signal formation, readout, front-end electronics | [front-end electronics](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
-| Response matrices, forward folding; build from matched events; mix or stack eras | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py` |
+| Response matrices, folding; build from events; mix or stack eras; species migration | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py`, `species_response.py` |
 | Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |
 | Calibration, alignment, conditions; stability, eras, an added layer | [calibration and alignment](references/calibration-and-alignment.md); `stability_monitor.py` |
 | Calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |

@@ -393,6 +393,9 @@ C = [
     # batch C, D3: charge-sign confusion rate
  ("c-nuc-cc-1", "en", "direct", "Measure the charge-sign confusion rate per rigidity bin with right- and wrong-sign templates; how do I get its interval near zero?", "hep-detector", ["tracking"], None, None, {}),
  ("c-nuc-cc-2", "zh-Hant", "direct", "用已知電荷符號的控制樣本量測每個剛度區間的電荷混淆率，資料與模擬的比例因子怎麼算？", "hep-detector", ["tracking"], None, None, {}),
+    # batch C, D2: species-migration response
+ ("c-nuc-mig-1", "en", "direct", "Build a species-migration response so carbon reconstructed as boron and protons reconstructed with the wrong sign fold into my prediction.", "hep-detector", ["response matrices"], None, None, {}),
+ ("c-nuc-mig-2", "zh-Hant", "direct", "把每個物種的響應矩陣組成物種遷移響應，再把理論預測折疊到重建空間。", "hep-detector", ["response matrices"], None, None, {}),
 ]
 
 cases = []

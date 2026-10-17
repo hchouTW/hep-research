@@ -3878,6 +3878,26 @@
    "trigger_terms": [
     "tracking"
    ]
+  },
+  {
+   "id": "c-nuc-mig-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a species-migration response so carbon reconstructed as boron and protons reconstructed with the wrong sign fold into my prediction.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
+  },
+  {
+   "id": "c-nuc-mig-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把每個物種的響應矩陣組成物種遷移響應，再把理論預測折疊到重建空間。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
   }
  ]
 }

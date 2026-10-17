@@ -1,0 +1,4 @@
+{
+ "note": "SYNTHETIC: sign rates as charge_confusion_rate.py writes them (invented rates).",
+ "sign_rates": {"edges": [1, 10, 100], "variable": "rigidity", "rates": [{"true": "negative", "reco": "positive", "rate": [0.01, 0.05]}]}
+}

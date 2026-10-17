@@ -413,6 +413,8 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
             ('charge_confusion_rate.py', 'gaussian-core', '--edges', '10', 'nan', '--sigma-inv-r', '0.002'),
             ('charge_confusion_rate.py', 'gaussian-core', '--edges', '1e-308', '10', '--sigma-inv-r', '1e-308'),
             ('charge_confusion_rate.py', 'template', '--input', self.write('cc_bad.json', '{"edges": [1, 2], "true_sign": "up", "bins": []}')),
+            ('species_response.py', 'from-rates', '--rates', self.write('sr_nan.json', '{"edges": [1, 2], "rates": [{"true": "a", "reco": "b", "rate": [NaN]}]}'), '--out', self.tmp / 'sm.json'),
+            ('species_response.py', 'assemble', '--manifest', self.write('sm_bad.json', '{"manifest_version": "0.1.0", "species": ["a"], "inefficiency_location": "outside", "blocks": [{"true": "a", "reco": "a", "source": "s", "response": {"matrix": [[1e308]], "truth_edges": [0, 1], "reco_edges": [0, 1]}}]}')),
             ('survival_feeddown.py', 'compute', '--layers', self.write('sl_big.json', json.dumps({'layers': [
                 {'name': 'x', 'grammage_g_cm2': 1e308, 'composition': [{'target': 'C', 'A': 12.0, 'mass_fraction': 1.0}]}]})),
              '--species', ASSETS / 'survival-species.example.json', '--xs', ASSETS / 'survival-xs.example.json'),
