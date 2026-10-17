@@ -4081,6 +4081,26 @@
    "trigger_terms": [
     "regressors for events, particles, jets or detector signals"
    ]
+  },
+  {
+   "id": "c-ml-roothist-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My weighted histogram has error bars that look like sqrt(N); did I forget Sumw2, and are the TEfficiency passed counts ever above the totals?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "histogram and TEfficiency objects"
+   ]
+  },
+  {
+   "id": "c-ml-roothist-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "RooWorkspace 匯入第二個 dataset 時變數名稱衝突，import 被取消，要怎麼改程式？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "ROOT/PyROOT"
+   ]
   }
  ]
 }

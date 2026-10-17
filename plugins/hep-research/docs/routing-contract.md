@@ -64,6 +64,7 @@ normalization and systematics around a score.
 - Theory request that mentions an experiment's **published** data → hep-theory with a dataset record, not hep-measurement.
 - Recasting → hep-theory (predictions in the published observable space), then hep-statistics for the limit.
 - Code problem in an experiment's script → hep-computing; the profile is read only if a data format or convention matters.
+- ROOT histogram and TEfficiency objects: using the objects (Sumw2, errors, Divide, flow bins, TEfficiency construction, RooWorkspace imports) → hep-computing; which interval to quote → hep-statistics; measuring an efficiency (tag-and-probe, truth matching) → hep-detector.
 - Domain outside v1 → closest core owner with an explicit "no validated domain profile" notice (stanza step 4). The domains are listed under "Scope of v1" below.
 - Underspecified cross-experiment request (for example "compare the two experiments") → ask which datasets and observables; never pick experiments from vague wording.
 

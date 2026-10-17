@@ -9,8 +9,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 32,
-   "bytes": 299427,
+   "references": 33,
+   "bytes": 305064,
    "uncited": 0
   },
   "hep-detector": {
@@ -1199,7 +1199,8 @@
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/bash-balanced-design-guidelines.md",
-    "skills/hep-computing/references/engineering-playbook.md"
+    "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/root-usage-patterns.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "efa283c7 2026-10-13"
@@ -1385,7 +1386,8 @@
     "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-computing/references/python-balanced-design-guidelines.md",
-    "skills/hep-computing/references/python-hep-coding-patterns.md"
+    "skills/hep-computing/references/python-hep-coding-patterns.md",
+    "skills/hep-computing/references/root-usage-patterns.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
@@ -1404,6 +1406,22 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
+  },
+  {
+   "path": "skills/hep-computing/references/root-usage-patterns.md",
+   "owner": "hep-computing",
+   "bytes": 5637,
+   "lines": 70,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/scripts/check_histogram_errors.py",
+    "skills/hep-ml/scripts/export_bdt.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-ml"
+   ],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",
@@ -2471,6 +2489,7 @@
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
+    "skills/hep-computing/references/root-usage-patterns.md",
     "skills/hep-detector/references/detector-systems-overview.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -3047,7 +3066,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "f3e0ff6d 2026-10-17"
+   "last_commit": "3398e5c3 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/optimization-and-training-dynamics.md",
@@ -4024,12 +4043,6 @@
    "skills/hep-computing/references/numerical-and-computational-methods.md",
    "skills/hep-computing/references/symbolic-and-numerical-computation.md"
   ],
-  "pattern": [
-   "skills/hep-communication/references/graphviz-patterns.md",
-   "skills/hep-communication/references/mermaid-patterns.md",
-   "skills/hep-communication/references/plantuml-patterns.md",
-   "skills/hep-communication/references/tikz-patterns.md"
-  ],
   "performance": [
    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
@@ -4060,7 +4073,8 @@
   ],
   "root": [
    "skills/hep-computing/references/root-balanced-design-guidelines.md",
-   "skills/hep-computing/references/root-debugging.md"
+   "skills/hep-computing/references/root-debugging.md",
+   "skills/hep-computing/references/root-usage-patterns.md"
   ],
   "scientific": [
    "skills/hep-communication/references/interpreting-scientific-graphics.md",

@@ -423,6 +423,9 @@ C = [
     # batch C, ML3 extensions: BDT regression, mass sculpting, export, external scores
  ("c-ml-bdtext-1", "en", "direct", "My BDT cut sculpts the background mass peak; how do I quantify it, and can I export the XGBoost model for TMVA inference?", "hep-ml", ["mass decorrelation", "BDTs in analyses"], None, None, {}),
  ("c-ml-bdtext-2", "zh-Hant", "direct", "用 XGBoost BDT 做能量回歸校正，怎麼檢查各能量區間的 response 與 resolution？", "hep-ml", ["regressors for events, particles, jets or detector signals"], None, None, {}),
+    # batch C, C7: ROOT usage and histogram errors (check_histogram_errors.py)
+ ("c-ml-roothist-1", "en", "direct", "My weighted histogram has error bars that look like sqrt(N); did I forget Sumw2, and are the TEfficiency passed counts ever above the totals?", "hep-computing", ["histogram and TEfficiency objects"], None, None, {}),
+ ("c-ml-roothist-2", "zh-Hant", "direct", "RooWorkspace 匯入第二個 dataset 時變數名稱衝突，import 被取消，要怎麼改程式？", "hep-computing", ["ROOT/PyROOT"], None, None, {}),
 ]
 
 cases = []
