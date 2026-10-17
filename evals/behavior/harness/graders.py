@@ -82,6 +82,33 @@ def _literal_core(pattern: str) -> str:
     return max(frags, key=len).strip("/") if frags else pattern
 
 
+_SEGMENT = re.compile(r"&&|\|\||[;\n]")
+_ASSIGN = re.compile(r"(?:^|[\s(])([A-Za-z_]\w*)=(\"[^\"]*\"|'[^']*'|[^\s;&|)]+)")
+_VAR = re.compile(r"\$\{([A-Za-z_]\w*)\}|\$([A-Za-z_]\w*)")
+_CD = re.compile(r"(?:^|[\s(])cd\s+(\"[^\"]*\"|'[^']*'|[^\s;&|)]+)")
+_WORD = re.compile(r"[^\s;&|()<>'\"=]+")
+
+
+def _shell_text(command: str) -> str:
+    """The command with the shell variables it assigns substituted, plus the relative words that follow a `cd` joined
+    to that directory, so `P=/x; cat $P/f` and `cd /x && cat f` both show the path /x/f."""
+    env: dict[str, str] = {}
+    cwd = ""
+    lines, joined = [], []
+    for seg in _SEGMENT.split(command):
+        seg = _VAR.sub(lambda m: env.get(m.group(1) or m.group(2), m.group(0)), seg)
+        for m in _ASSIGN.finditer(seg):
+            env[m.group(1)] = m.group(2).strip("\"'")
+        if (m := _CD.search(seg)):
+            d = m.group(1).strip("\"'").rstrip("/")
+            cwd = d if d.startswith("/") or not cwd else f"{cwd}/{d}"
+            seg = seg[m.end():]
+        if cwd:
+            joined += [f"{cwd}/{w}" for w in _WORD.findall(seg) if not w.startswith(("/", "-", "$"))]
+        lines.append(seg)
+    return "\n".join([command, *lines, *joined])
+
+
 def _touches(e: Event, pattern: str, in_shell: bool = True) -> bool:
     if e.kind != "tool_use":
         return False
@@ -92,7 +119,7 @@ def _touches(e: Event, pattern: str, in_shell: bool = True) -> bool:
             return True
     if in_shell and e.command:
         core = _literal_core(pattern)
-        return bool(core) and core in e.command
+        return bool(core) and core in _shell_text(e.command)
     return False
 
 
