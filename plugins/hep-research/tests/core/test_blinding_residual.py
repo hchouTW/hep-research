@@ -1,4 +1,4 @@
-"""P4.3 counterexample suite (C02, plugin part): for each blinding mode of DP-3, the attacks of agentic-architecture.md
+"""P4.3 counterexample suite (C02, plugin part): for each blinding mode of DP-3, the attacks of protected-data-architecture.md
 §6.2 are carried out on synthetic data. Each is either detected by core.blinding.residual.residual_checks, refused by the
 transform, or documented in core.blinding.transforms.LIMITS. The attacks show what a released file gives away; the
 transforms never output key material. Synthetic values only."""

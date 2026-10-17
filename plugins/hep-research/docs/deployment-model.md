@@ -1,6 +1,6 @@
 # hep-research Deployment Model
 
-Status: 2026-10-14. Companion to [agentic-architecture.md](agentic-architecture.md), which defines the components and
+Status: 2026-10-14. Companion to [protected-data-architecture.md](protected-data-architecture.md), which defines the components and
 constraints (HC-01 to HC-18) named here. This document says where each component lives, what the parts outside the
 plugin rely on from it, how a plugin release reaches a deployment, and what a qualification checks. It qualifies
 nothing: no host configuration is qualified for private or blinded data.

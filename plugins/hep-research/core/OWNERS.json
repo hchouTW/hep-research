@@ -90,7 +90,7 @@
     "revocation_log",
     "trusted_input"
    ],
-   "source": "agentic-architecture.md §9, task P1/P2"
+   "source": "protected-data-architecture.md §9, task P1/P2"
   },
   "status": {
    "steward": "hep-computing",

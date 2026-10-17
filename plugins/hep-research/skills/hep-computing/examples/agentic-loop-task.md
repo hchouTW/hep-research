@@ -2,7 +2,7 @@
 
 > Verified against the repository (`plugins/hep-research/`) on 2026-10-07. Paths are relative to the plugin root. This is the worked example for `references/loop-engineering.md`; the loop is real: today a person alternates `watch` and `resubmit --submit` by hand until a campaign is complete.
 
-> Scope limit: automatic resubmission is unsandboxed execution. This example applies only to disposable test environments with synthetic data (stages S0/S1 of the agentic plan); with protected data, submission and resubmission go through a trusted submitter that runs only frozen, digest-verified bundles.
+> Scope limit: automatic resubmission is unsandboxed execution. This example applies only to disposable test environments with synthetic data (stages S0/S1 of the protected-data architecture, `docs/protected-data-architecture.md` §7); with protected data, submission and resubmission go through a trusted submitter that runs only frozen, digest-verified bundles.
 
 ## Background
 

@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- `docs/agentic-architecture.md` is renamed `docs/protected-data-architecture.md` and retitled "Protected-Data
+  Architecture: Blinding, Custodianship and Egress": it describes how blinded and private data are protected when
+  an agent takes part, not an agent workflow. Section numbers and constraint IDs are unchanged. Every live
+  reference is updated, including the stage reference in `skills/hep-computing/examples/agentic-loop-task.md`. The
+  old path holds a pointer until 0.15.0. The planning ID AGENTIC-R5 is kept for traceability. Documentation and
+  comments only; no behavior changes, contracts stay 2.12.0.
+
 ## 0.14.1 (2026-10-17)
 
 Routing fix after the first live run of the cases added in batches A-D (`evals/routing/`, 117/135 on 0.14.0).

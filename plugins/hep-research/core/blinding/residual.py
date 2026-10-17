@@ -1,4 +1,4 @@
-"""Residual-information checks for a prepared release (task P4.3, C02; agentic-architecture.md §6.2 rule 6).
+"""Residual-information checks for a prepared release (task P4.3, C02; protected-data-architecture.md §6.2 rule 6).
 
 residual_checks(release, context) looks at a Release from core.blinding.transforms together with what the custodian
 knows about its context, and reports each way it can see that the release still gives away a protected feature:

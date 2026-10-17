@@ -75,7 +75,7 @@ BATCH_REFUSAL = "protected.batch_needs_trusted_submitter"
 def _batch_guard(entry: str, campaign_dir, acts: bool = True):
     """The protected-use guard for a batch command, then (HC-10, HC-16) the refusal of a command that reaches a
     scheduler or settles a submission's outcome in protected mode: from there on only a trusted submitter outside the
-    agent's reach may do it (docs/agentic-architecture.md §10.2). acts=False (a dry run) is checked by the guard only.
+    agent's reach may do it (docs/protected-data-architecture.md §10.2). acts=False (a dry run) is checked by the guard only.
     The switch is protected mode itself (the project's agent_policy, DP-2), never the campaign config."""
     ctx = guard(entry, paths=[campaign_dir])
     if ctx.protected and acts:
