@@ -125,6 +125,32 @@ Live runs use the same isolation as `evals/routing/` (see its README), recorded 
   them. Default `--max-turns` 40 (6 for the `selection` preset).
 - After each run the `~/.claude/projects/` folder its workspace created is removed.
 
+## Runs so far
+
+Rates are point [95% Wilson interval]. P(load) and P(pass | load) count every run with an expected owner skill, in the
+natural arm unless marked forced. The paired comparison is L2+L3, natural → forced, with McNemar's p.
+
+| Run | Runs | P(load) | P(pass \| load): natural / forced | P(pass \| no load) | Natural → forced (L2+L3) | Gate | Cost | Note |
+|---|---|---|---|---|---|---|---|---|
+| `probe-2026-10-18-sonnet-l1`, `-l2l4` | 16: 2 cases per layer, 1 repeat | 100% | n/a | n/a | n/a | not run | $1.80 ($0.11 per run) | WP2 cost probe, plugin `bd189ac7`. Exposed two grader faults, fixed before the baseline: reads through shell variables or `cd` were not seen, and a run stopping at `--max-turns` counted as a host error |
+| `boundary-2026-10-18-sonnet` | 165: `--preset boundary` (L1 132, L2 27, L3 6), 3 repeats | 93.6% [85.9, 97.2] | 56.2% [44.8, 67.0] / 93.6% [85.9, 97.2] | 40.0% [11.8, 76.9] (5 runs) | 27.8% [12.5, 50.9] → 53.3% [30.1, 75.2], p = 0.25 | fail: L1 load lower bound 0.859 < 0.90; 47 runs with a blocking failure | $21.97 ($0.133 per run) | WP3 baseline for 0.14.1, Claude Code 2.1.302, plugin `07eda1b7`, setting-sources isolation, 0 contaminated. L1 pass: natural 54.5% [42.6, 66.0], forced 98.5% [91.9, 99.7]. 40 of the 47 runs with a blocking failure did not read a bound profile's `index.md` (CTX-READ-BOUND-PROFILE and the profile reads of L2/L3 cases), 36 of them after the expected skill loaded. Misroutes: hep-theory → none ×3, hep-statistics → hep-communication ×2 |
+| `boundary-2026-10-18-haiku` | 165, as above | 96.2% [89.3, 98.7] | 54.7% [43.4, 65.4] / 64.1% [53.0, 73.9] | 100% [43.9, 100.0] (3 runs) | 33.3% [16.3, 56.3] → 60.0% [35.7, 80.2], p = 0.0625 | fail: 68 runs with a blocking failure (L1 load lower bound 0.893 ≥ 0.60) | $1.80 ($0.011 per run, as the host reports) | as above. L1 pass: natural 56.1% [44.1, 67.4], forced 62.1% [50.1, 72.9]; 63 of the 68 runs with a blocking failure did not read a bound profile's `index.md`, 61 of them after the expected skill loaded, in both arms |
+
+Common to both models: L3 passes 0 of 6 (`l3-theory-vs-published` never runs `gate.py` before the comparison; the
+fault-matrix response case's validator is not run), `l2-th-qed-conventions` never reads
+`profiles/theory/qed-benchmark/index.md` (6 of 6), and 18 judge-scored criteria are unverified because no `judge`
+run was made (they are `minor` and count as not passed).
+
+**Reading (DESIGN §10).** The failures are mostly L2, not L1. The expected skill loads in 94-96% of runs, and of the natural-arm L1+L2 failures only 8 of 40 (Sonnet) and 4 of 38
+(Haiku) are runs without it. What fails after the load is context resolution step 2,
+reading the bound profile's `index.md` (of Sonnet's 30 natural-arm L1 failures, 15 read other files in the profile, such
+as `evidence/index.md` or a module, and 15 never open it). Forcing the load removes this for Sonnet (L1 pass
+54.5% → 98.5%), so for Sonnet the gap is in how a naturally loaded skill is followed; for Haiku forcing barely helps
+(56.1% → 62.1%), so the rule itself is not followed. CTX-READ-BOUND-PROFILE is on coverage's list of blocking rules
+enforced only by prose (`results/coverage-0.14.1.md`); per §10 it is the first candidate for a script check. L3's
+failures (no validator or gate run on a handed-over artifact) are L2 gaps too: HANDOFF-VALIDATE-INPUT and the
+comparison-gate rule are followed in neither arm.
+
 ## What is committed
 
 | Path | Content | Committed |
