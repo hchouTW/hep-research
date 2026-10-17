@@ -123,7 +123,7 @@ class GaisserHillasBracketingTests(unittest.TestCase):
 class CherenkovChargeTests(unittest.TestCase):
     # n=1.05, p=40 GeV/c, L=2 cm, N0=100/cm, 5 mrad: He4 beta=0.995687, theta=0.296014 rad,
     # z=1 yield 17.0188937; with z^2: 68.0755750, sigma_theta = 5/sqrt(68.0756) = 0.6060024 mrad.
-    HE4_PHOTONS = 68.07557496982115
+    HE4_PHOTONS = 68.07557492992738  # with the CODATA 2022 alpha-particle mass (Th9); 68.07557496982115 with 3.72737940 GeV
     HE4_SIGMA_MRAD = 0.6060024015969153
 
     def test_helium_yield_scales_with_z_squared(self):
@@ -134,12 +134,14 @@ class CherenkovChargeTests(unittest.TestCase):
         self.assertAlmostEqual(he4['expected_photons'], self.HE4_PHOTONS, delta=1e-9)
         self.assertAlmostEqual(he4['track_angular_resolution_mrad'], self.HE4_SIGMA_MRAD, delta=1e-9)
         # The threshold and the angle depend on beta only, not on z.
-        self.assertAlmostEqual(he4['threshold_momentum_gev'], 11.642377257681904, delta=1e-9)
-        self.assertAlmostEqual(he4['cherenkov_angle_rad'], 0.2960136491360844, delta=1e-12)
+        # 11.642377294538912 with the CODATA 2022 alpha-particle mass (Th9); 11.642377257681904 with 3.72737940 GeV
+        self.assertAlmostEqual(he4['threshold_momentum_gev'], 11.642377294538912, delta=1e-9)
+        # 0.2960136490467237 with the CODATA 2022 alpha-particle mass (Th9); 0.2960136491360844 with 3.72737940 GeV
+        self.assertAlmostEqual(he4['cherenkov_angle_rad'], 0.2960136490467237, delta=1e-12)
 
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
-                           '3.72737940:2', '--momentum', '40')
+                           '3.7273794118:2', '--momentum', '40')  # the CODATA 2022 mass, stated
         self.assertAlmostEqual(payload['species_b']['expected_photons'], self.HE4_PHOTONS, delta=1e-9)
 
     def test_rigidity_input_gives_p_equals_z_r(self):

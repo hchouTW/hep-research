@@ -49,6 +49,11 @@ import argparse
 import json
 import math
 import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core import constants  # noqa: E402
 
 DEFAULTS = {'path': 1.0, 'time_resolution': 60.0, 'material': 'silicon', 'relative_resolution': 0.06,
             'beta_resolution': 1e-3, 'threshold': 3.0, 'convention': 'single'}
@@ -67,17 +72,14 @@ class JsonArgumentParser(argparse.ArgumentParser):
         self.exit(2, f'{self.prog}: error: {message}\n')
 
 
-# Masses in GeV/c^2 (PDG); see <plugin root>/skills/hep-communication/references/primary-sources-and-version-checks.md.
-MASSES_GEV = {
-    'e': 0.00051099895,
-    'mu': 0.1056583755,
-    'pi': 0.13957039,
-    'K': 0.493677,
-    'p': 0.93827209,
-    'd': 1.87561294,
-    'He3': 2.80839160,
-    'He4': 3.72737940,
-}
+# Masses in GeV/c^2 from core/constants (Th9): CODATA 2022 for the electron, muon, proton and light nuclei (bare
+# nuclei: deuteron, helion, alpha particle), PDG 2026 for the charged pion and kaon.
+_CODATA = {'e': 'electron_mass_energy', 'mu': 'muon_mass_energy', 'p': 'proton_mass_energy',
+           'd': 'deuteron_mass_energy', 'He3': 'helion_mass_energy', 'He4': 'alpha_particle_mass_energy'}
+MASSES_GEV = {name: constants.constant(key, unit='GeV').value for name, key in _CODATA.items()}
+MASSES_GEV.update({'pi': constants.particle('pi+', 'mass', unit='GeV').value,
+                   'K': constants.particle('K+', 'mass', unit='GeV').value})
+MASSES_GEV = {k: MASSES_GEV[k] for k in ('e', 'mu', 'pi', 'K', 'p', 'd', 'He3', 'He4')}
 
 # Charge numbers |z| of the named species; anything else defaults to 1.
 CHARGES = {'He3': 2, 'He4': 2}
@@ -99,7 +101,7 @@ SCAN_POINTS_PER_DECADE = 200
 CONVENTIONS = ('single', 'quadrature')
 
 C_M_PER_S = 299792458.0
-ELECTRON_MASS_MEV = 0.51099895
+ELECTRON_MASS_MEV = constants.constant('electron_mass_energy').value  # CODATA 2022, MeV
 # Bethe-Bloch coefficient, MeV mol^-1 cm^2.
 BETHE_K = 0.307075
 
