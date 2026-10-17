@@ -287,7 +287,7 @@ def write(rep: dict, out_dir: Path) -> None:
 
 # ------------------------------------------------------------------ committed summary
 RUN_FIELDS = ("case", "layer", "suite", "lang", "kind", "arm", "model", "repeat", "expected_skill", "first_hep_skill",
-              "skills", "loaded_expected", "pass", "blocking_failure", "score", "host_error", "contaminated",
+              "skills", "loaded_expected", "pass", "blocking_failure", "score", "host_error", "turn_limit", "contaminated",
               "unverified", "cost_usd", "cli_version")
 
 
