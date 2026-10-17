@@ -153,7 +153,7 @@
    "id": "detector-design",
    "capability": "Detector design principles and a sourced detector atlas",
    "owner": "hep-detector",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "D6",

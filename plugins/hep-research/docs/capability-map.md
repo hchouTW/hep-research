@@ -33,7 +33,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | tool | yes | D2, D3, D4 |  |
 | multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | tool | yes | D10 |  |
 | stability-monitoring | Stability monitoring over time (trends, change points, era boundaries) | hep-detector | tool | yes | D11 |  |
-| detector-design | Detector design principles and a sourced detector atlas | hep-detector | documentation | yes | D6, D13, D14 |  |
+| detector-design | Detector design principles and a sourced detector atlas | hep-detector | tool | yes | D6, D13, D14 |  |
 | geomagnetic-backtracing | Geomagnetic backtracing with an external tracer | hep-detector | none | yes | D12 |  |
 | fits-and-limits | Likelihoods, binned and unbinned fits, template fits, intervals and limits, significance and look-elsewhere effects | hep-statistics | tool | yes | S7, S8 |  |
 | covariance-and-combinations | Covariance assembly and validation, combinations, comparisons with published records | hep-statistics | tool | yes | S3, S4 |  |

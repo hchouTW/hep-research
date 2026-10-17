@@ -44,6 +44,7 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Correlation evidence and a proposed correlation scheme for systematics | hep-measurement | `correlation evidence` | — |
 | Detector calibration (energy scale, alignment constants, conditions) | hep-detector | `detector calibration` | — |
 | Validation of a fast or learned simulation against full detector simulation | hep-detector | `detector simulation` | — |
+| Instrument design: requirements flow-down, trade-offs, figures of merit, layout optimization | hep-detector | `detector design principles` | Detector design principles and tracker resolution |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in
@@ -60,6 +61,7 @@ normalization and systematics around a score.
 
 - Detector subsystem performance study → hep-detector + the experiment profile's subsystem module.
 - Measurement design for a named experiment → hep-measurement + that experiment profile.
+- Instrument design (layers, field, material, granularity, a layout meeting a resolution) → hep-detector; the design of the measurement or analysis that uses the instrument → hep-measurement.
 - Symbolic derivation → hep-theory with no experiment.
 - Theory request that mentions an experiment's **published** data → hep-theory with a dataset record, not hep-measurement.
 - Recasting → hep-theory (predictions in the published observable space), then hep-statistics for the limit.

@@ -133,6 +133,7 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-detector/scripts/frontend_response.py": "numbers on the command line",
     "skills/hep-detector/scripts/pid_separation_power.py": "numbers on the command line",
     "skills/hep-detector/scripts/tag_and_probe_efficiency.py": "counts on the command line",
+    "skills/hep-detector/scripts/tracker_resolution.py": "numbers on the command line",
     "skills/hep-detector/scripts/xmax_gaisser_hillas.py": "numbers on the command line",
     "skills/hep-measurement/scripts/cosmic_ray_flux.py": "numbers on the command line",
     "skills/hep-measurement/scripts/counting_reference.py": "counts on the command line",

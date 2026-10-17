@@ -449,6 +449,8 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
              '--truncate-high', 'nan', '--no-path-correction'),
             ('stability_monitor.py', ASSETS / 'stability-series.example.csv', '--time-column', 'time_s',
              '--value-column', 'value', '--sigma', 'nan', '--false-alarm', '0.05', '--seed', '1'),
+            ('tracker_resolution.py', 'momentum', '--positions-m', '0', '0.5', '1', '--point-resolution-um', 'nan',
+             '--field-tesla', '1', '--x-over-x0', '0.05', '--charge', '1', '--beta', '1', '--pt', '10'),
             ('multiple_scattering.py', huge_stack),
             ('multiple_scattering.py', stack, '--rigidity', '1e308'),
             ('multiple_scattering.py', stack, '--rigidity', '1e-308'),

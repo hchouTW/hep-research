@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 36,
-   "bytes": 465595,
+   "references": 37,
+   "bytes": 470882,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1549,6 +1549,7 @@
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
+    "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -1578,6 +1579,7 @@
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
+    "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
@@ -1634,6 +1636,7 @@
    "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "tests/skills/hep_detector/test_reference_links.py"
@@ -1717,6 +1720,19 @@
    "last_commit": "485e96cb 2026-10-17"
   },
   {
+   "path": "skills/hep-detector/references/detector-design-principles.md",
+   "owner": "hep-detector",
+   "bytes": 5287,
+   "lines": 70,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/scripts/tracker_resolution.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-detector/references/detector-glossary.md",
    "owner": "hep-detector",
    "bytes": 6045,
@@ -1797,6 +1813,7 @@
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
+    "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2067,6 +2084,7 @@
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
+    "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
@@ -2262,6 +2280,7 @@
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
+    "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
@@ -2272,7 +2291,8 @@
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
-    "skills/hep-detector/scripts/multiple_scattering.py"
+    "skills/hep-detector/scripts/multiple_scattering.py",
+    "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [
     "hep-communication"
@@ -2289,6 +2309,7 @@
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
+    "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/event-reconstruction.md",
@@ -4056,6 +4077,7 @@
    "skills/hep-theory/references/particle-physics-essentials.md"
   ],
   "principle": [
+   "skills/hep-detector/references/detector-design-principles.md",
    "skills/hep-detector/references/detector-principles-bibliography.md",
    "skills/hep-detector/references/detector-principles-summary.md"
   ],

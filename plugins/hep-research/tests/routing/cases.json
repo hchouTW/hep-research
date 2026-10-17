@@ -4141,6 +4141,26 @@
    "trigger_terms": [
     "English or Chinese"
    ]
+  },
+  {
+   "id": "c-det-design-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How many tracking layers and what lever arm do I need for 5% momentum resolution at 100 GeV in a 0.5 T field?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ]
+  },
+  {
+   "id": "c-det-design-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "比較四層與八層矽追蹤器的動量解析度，精確最小平方與 Gluckstern 近似差多少？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking"
+   ]
   }
  ]
 }

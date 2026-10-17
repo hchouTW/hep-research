@@ -432,6 +432,9 @@ C = [
     # batch C, Com7: numbers from artifacts (render_results.py, --numbers, --compare)
  ("c-ml-numbers-1", "en", "direct", "Make sure the signal strength in my abstract, tables and conclusion is the same number, rounded the PDG way from the fit result.", "hep-communication", ["numbers and units"], None, None, {}),
  ("c-ml-numbers-2", "zh-Hant", "direct", "中英文兩版論文草稿的數字、不確定度和「證據」與「觀測」的用詞一致嗎？", "hep-communication", ["English or Chinese"], None, None, {}),
+    # batch C, D14: detector design principles (tracker_resolution.py)
+ ("c-det-design-1", "en", "direct", "How many tracking layers and what lever arm do I need for 5% momentum resolution at 100 GeV in a 0.5 T field?", "hep-detector", ["design principles and trade-offs"], None, None, {}),
+ ("c-det-design-2", "zh-Hant", "direct", "比較四層與八層矽追蹤器的動量解析度，精確最小平方與 Gluckstern 近似差多少？", "hep-detector", ["tracking"], None, None, {}),
 ]
 
 cases = []
