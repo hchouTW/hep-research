@@ -363,6 +363,9 @@ C = [
     # batch B, M7: spectral-variable transformation (spectrum_transform.py)
  ("b-ms-transform-1", "en", "direct", "Convert my helium flux from rigidity bins to kinetic energy per nucleon, propagating the 3He/4He composition uncertainty.", "hep-measurement", ["correction chains"], None, None, {}),
  ("b-ms-transform-2", "zh-Hant", "direct", "把以剛度分箱的硼通量換成每核子動能，同位素比例的不確定度要怎麼傳遞？", "hep-measurement", ["correction chains"], None, None, {}),
+    # batch B, M3: multi-era design (eras in the spec, review rules)
+ ("b-ms-eras-1", "en", "direct", "A tracking layer was added halfway through data taking; how should my measurement spec handle the two detector eras before I review it?", "hep-measurement", ["verdict-first measurement review"], None, None, {}),
+ ("b-ms-eras-2", "zh-Hant", "direct", "資料取樣期間偵測器換過組態，我的量測設計要怎麼切分時期，系統誤差在不同時期之間的相關性要怎麼宣告？", "hep-measurement", ["verdict-first measurement review"], None, None, {}),
 ]
 
 cases = []

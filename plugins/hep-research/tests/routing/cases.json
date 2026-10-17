@@ -3677,6 +3677,26 @@
    "trigger_terms": [
     "correction chains"
    ]
+  },
+  {
+   "id": "b-ms-eras-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "A tracking layer was added halfway through data taking; how should my measurement spec handle the two detector eras before I review it?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "verdict-first measurement review"
+   ]
+  },
+  {
+   "id": "b-ms-eras-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "資料取樣期間偵測器換過組態，我的量測設計要怎麼切分時期，系統誤差在不同時期之間的相關性要怎麼宣告？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "verdict-first measurement review"
+   ]
   }
  ]
 }

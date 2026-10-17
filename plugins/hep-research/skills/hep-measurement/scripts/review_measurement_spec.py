@@ -10,6 +10,12 @@ not physics, and a human review still writes the physics judgement and may raise
 
 Usage: python3 review_measurement_spec.py SPEC.json [--profiles-from hep-research.project.json] [--markdown]
        [--status S] [--check-bundle BUNDLE --check-root DIR]
+Eras (M3): when the spec declares `eras` ([{id, start, end, kind, source, ...}]), four review rules run:
+era.bin_straddles_boundary (error: a period or a time-variable bin crosses an era boundary), era.correction_missing
+(warning: a correction neither determined for an era nor listed in its shared_corrections), era.correlation_undeclared
+(warning: with two or more eras, a systematic without era_correlation) and era.version_mismatch (warning: eras with
+different versions where the later era is not a declared software or calibration change). Times are numbers or ISO
+dates; values that cannot be compared are not checked. Specs without eras are reviewed as before.
 --check-bundle (opt-in) adds "analysis_check": the bounded summary of contracts/analysis_check.py on a v2 analysis
 bundle (violated and unverified obligations, missing bindings, next steps); it never changes the verdict or exit code.
 Output: JSON {"status", "verdict", "reason", "defects": [...ranked...], "unresolved": [...], "warnings": [...],
@@ -23,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
@@ -49,17 +56,87 @@ def _reject_constant(token):
     raise ValueError(f'non-finite number {token} in the input')
 
 
-def draft(doc: dict, vocab: Vocabulary | None = None) -> dict:
+def _time(value):
+    """A comparable time: a number, or an ISO date or date-time string; None otherwise."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return ('n', float(value))
+    if isinstance(value, str):
+        try:
+            return ('d', datetime.fromisoformat(value.replace('Z', '+00:00')).replace(tzinfo=None))
+        except ValueError:
+            return None
+    return None
+
+
+def _inside(lo, b, hi) -> bool:
+    return lo is not None and hi is not None and b is not None and lo[0] == b[0] == hi[0] and lo[1] < b[1] < hi[1]
+
+
+def era_findings(ext: dict) -> list[tuple[str, str, str, str]]:
+    """(severity, code, field, message) of the M3 era rules; empty when the spec declares no eras."""
+    eras = ext.get('eras')
+    if not isinstance(eras, list) or not eras:
+        return []
+    eras = [e for e in eras if isinstance(e, dict)]
+    out = []
+    bounds = sorted({(e.get('start'), e.get('id')) for e in eras[1:]} | {(e.get('end'), e.get('id')) for e in eras[:-1]},
+                    key=str)
+    intervals = []
+    periods = ext.get('period')
+    for i, per in enumerate(periods if isinstance(periods, list) else [periods]):
+        if isinstance(per, dict):
+            intervals.append((f'$.extension.period[{i}]', per.get('start'), per.get('end')))
+    obs = ext.get('observable') if isinstance(ext.get('observable'), dict) else {}
+    for j, var in enumerate(obs.get('variables') or []):
+        if isinstance(var, dict) and 'time' in str(var.get('name', '')).lower() and isinstance(var.get('edges'), list):
+            edges = var['edges']
+            for k, (a, b) in enumerate(zip(edges, edges[1:])):
+                intervals.append((f'$.extension.observable.variables[{j}].edges[{k}]', a, b))
+    for field, a, b in intervals:
+        for bound, era_id in bounds:
+            if _inside(_time(a), _time(bound), _time(b)):
+                out.append(('error', 'era.bin_straddles_boundary', field,
+                            f'[{a}, {b}] crosses the boundary {bound} of era {era_id}: split it at the boundary so '
+                            'that each bin belongs to one era'))
+    effects = [c.get('effect_id') for c in ext.get('corrections') or [] if isinstance(c, dict) and c.get('effect_id')]
+    if len(eras) > 1:
+        for i, e in enumerate(eras):
+            covered = set(e.get('corrections') or []) | set(e.get('shared_corrections') or [])
+            for eff in effects:
+                if eff not in covered:
+                    out.append(('warning', 'era.correction_missing', f'$.extension.eras[{i}]',
+                                f"correction '{eff}' is neither determined for era {e.get('id')} (corrections) nor "
+                                'declared valid across eras (shared_corrections)'))
+        for i, syst in enumerate(ext.get('systematics') or []):
+            if isinstance(syst, dict) and not syst.get('era_correlation'):
+                out.append(('warning', 'era.correlation_undeclared', f'$.extension.systematics[{i}]',
+                            f"systematic '{syst.get('name')}' does not say how it is correlated across the "
+                            f'{len(eras)} eras (era_correlation: correlated, uncorrelated or partial)'))
+        for i, (prev, cur) in enumerate(zip(eras, eras[1:]), start=1):
+            pv, cv = prev.get('versions') or {}, cur.get('versions') or {}
+            changed = sorted(k for k in set(pv) & set(cv) if pv[k] != cv[k])
+            if changed and cur.get('kind') not in ('software', 'calibration'):
+                out.append(('warning', 'era.version_mismatch', f'$.extension.eras[{i}].versions',
+                            f"era {cur.get('id')} uses other {', '.join(changed)} versions than era {prev.get('id')} "
+                            f"but is a '{cur.get('kind')}' era: reprocess, or declare the software or calibration change"))
+    return out
+
+
+def draft(doc: dict, vocab: Vocabulary | None = None, era_checks: bool = True) -> dict:
     if not isinstance(doc, dict) or doc.get('artifact_type') != 'measurement-spec':
         raise ValueError('input is not a measurement-spec artifact')
     rep = validate_artifact(doc, vocab, strict=True)
-    errors = [f for f in rep.findings if f.severity == 'error']
+    found = [(f.severity, f.code, f.path, f.message) for f in rep.findings]
+    if era_checks and isinstance(doc.get('extension'), dict):
+        found += era_findings(doc['extension'])
     rank = {c: i for i, c in enumerate(BLOCKING)}
-    errors.sort(key=lambda f: (rank.get(f.code, len(BLOCKING)), f.path))
-    defects = [{'rank': i + 1, 'code': f.code, 'evidence': f.path, 'why': f.message,
-                'blocking': f.code in rank, 'owner': OWNER.get(f.code, 'hep-measurement')} for i, f in enumerate(errors)]
-    unresolved = [{'code': f.code, 'field': f.path, 'message': f.message} for f in rep.findings if f.severity == 'unresolved']
-    warnings = [{'code': f.code, 'field': f.path, 'message': f.message} for f in rep.findings if f.severity == 'warning']
+    errors = sorted((f for f in found if f[0] == 'error'), key=lambda f: (rank.get(f[1], len(BLOCKING)), f[2]))
+    defects = [{'rank': i + 1, 'code': c, 'evidence': p, 'why': m,
+                'blocking': c in rank, 'owner': OWNER.get(c, 'hep-measurement')} for i, (_, c, p, m) in enumerate(errors)]
+    unresolved = [{'code': c, 'field': p, 'message': m} for sev, c, p, m in found if sev == 'unresolved']
+    warnings = [{'code': c, 'field': p, 'message': m} for sev, c, p, m in found if sev == 'warning']
     if any(d['blocking'] for d in defects):
         verdict = 'blocked'
         reason = f"{defects[0]['code']} at {defects[0]['evidence']}: {defects[0]['why']}"

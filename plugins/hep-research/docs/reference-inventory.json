@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 102300,
+   "bytes": 104485,
    "uncited": 0
   },
   "hep-ml": {
@@ -2263,8 +2263,8 @@
   {
    "path": "skills/hep-measurement/references/analysis-design.md",
    "owner": "hep-measurement",
-   "bytes": 10921,
-   "lines": 102,
+   "bytes": 13106,
+   "lines": 129,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -2275,12 +2275,14 @@
     "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
     "skills/hep-detector/references/triggers-luminosity-pileup.md",
     "skills/hep-measurement/SKILL.md",
+    "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/histograms-efficiencies.md",
     "skills/hep-measurement/references/review-and-artifacts.md",
-    "tests/skills/hep_measurement/test_method_references.py"
+    "tests/skills/hep_measurement/test_method_references.py",
+    "tests/skills/hep_measurement/test_review_eras_m3.py"
    ],
    "cited_by_other_skills": [
     "hep-computing",
@@ -2418,7 +2420,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "36140fee 2026-10-17"
+   "last_commit": "c17bfafe 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
