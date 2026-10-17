@@ -9,6 +9,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -41,6 +42,20 @@ def load():
     return mod
 
 
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _without_release(doc):
+    """The document without versions.plugin_release, with every 64-hex hash replaced by a placeholder."""
+    if isinstance(doc, dict):
+        return {k: _without_release(v) for k, v in doc.items() if k != "plugin_release"}
+    if isinstance(doc, list):
+        return [_without_release(v) for v in doc]
+    if isinstance(doc, str) and HEX64.match(doc):
+        return "<hash>"
+    return doc
+
+
 @unittest.skipUnless(HAS_NUMPY, "numpy is not installed")
 class AnalysisToPaper(unittest.TestCase):
     @classmethod
@@ -62,11 +77,23 @@ class AnalysisToPaper(unittest.TestCase):
         self.assertTrue(all(self.r["pass"].values()), self.r["pass"])
 
     def test_reproduces_committed_output(self):
+        # versions.plugin_release is the release identity: "unreleased" in a working tree, the version and manifest
+        # digest in a tree identical to its release manifest (CI after a release). It is not compared, nor are the
+        # sha256 hashes of artifacts that carry it (record provenance, numbers.tex); every value is.
         out = SCRIPT.parent / "output"
-        for rel in ("results.json", "artifacts/signal_strength.json", "artifacts/selected_mass.json",
-                    "artifacts/signal_strength_record.json", "draft/numbers.tex", "draft/main.tex"):
+        for rel in ("results.json", "draft/main.tex"):
             with self.subTest(file=rel):
                 self.assertEqual((Path(self.tmp.name) / rel).read_bytes(), (out / rel).read_bytes())
+        for rel in ("artifacts/signal_strength.json", "artifacts/selected_mass.json",
+                    "artifacts/signal_strength_record.json"):
+            with self.subTest(file=rel):
+                a, b = (_without_release(json.loads((d / rel).read_text(encoding="utf-8")))
+                        for d in (Path(self.tmp.name), out))
+                self.assertEqual(a, b)
+        sha = re.compile(r"sha256 [0-9a-f]{64}")
+        a, b = (sha.sub("sha256 <hash>", (d / "draft/numbers.tex").read_text(encoding="utf-8"))
+                for d in (Path(self.tmp.name), out))
+        self.assertEqual(a, b)
 
     def test_synthetic_everywhere(self):
         self.assertIn("SYNTHETIC", self.r["label"])

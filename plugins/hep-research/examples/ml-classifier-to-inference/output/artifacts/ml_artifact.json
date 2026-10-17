@@ -1,5 +1,5 @@
 {
- "contract_version": "2.11.0",
+ "contract_version": "2.12.0",
  "artifact_id": "synthetic-j9-classifier",
  "artifact_type": "ml-artifact",
  "objective": "SYNTHETIC J9: event classifier whose (prior-corrected, temperature-scaled) score feeds a template fit",
@@ -13,8 +13,8 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.13.1",
-  "contracts": "2.11.0",
+  "plugin": "0.14.0",
+  "contracts": "2.12.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -329,12 +329,12 @@
    },
    {
     "ref": "work/split_check.json",
-    "sha256": "34002e053a8ab2e850f0f7e3f9fc9a20e5ed000f6dd43dfb4acf7257ec3db8b3",
+    "sha256": "476779d7e646307b5f35ec56f7d0b40565bc80d188bdb29dc694a2e9e8a91cef",
     "role": "split-report"
    },
    {
     "ref": "work/calibration.json",
-    "sha256": "cc5dbdbdc59b8a3e8be4879d81599b42e7c8234694fb6131420581f8f22f5b69",
+    "sha256": "79ca7a4a3ee85e26f2cef07416da20f8a84ffb6f6259447d923c69b7eee07721",
     "role": "calibration"
    },
    {
