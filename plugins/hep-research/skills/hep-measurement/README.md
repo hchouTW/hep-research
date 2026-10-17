@@ -10,7 +10,7 @@ Formerly `hep-analysis`; the old name is a deprecated alias in contracts 2.9.0.
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point: invariants, workflow, context resolution, resources, handoffs |
-| `references/` | twelve method references, routed from `hep-measurement-guide.md` (`data-pipelines.md` is a pointer: the code-level pipeline material moved to hep-computing's `analysis-data-pipelines.md`) |
+| `references/` | thirteen method references, routed from `hep-measurement-guide.md` (`data-pipelines.md` is a pointer: the code-level pipeline material moved to hep-computing's `analysis-data-pipelines.md`) |
 | `scripts/` | sixteen command-line helpers (systematic variations, yield and systematics tables, counting reference, blinded-bin masking, analysis-change and spec review, collection time, cosmic-ray helpers, spectral-variable transformation, isotope fractions) |
 | `assets/` | the `measurement-spec` template and its field guide, a synthetic cosmic-ray worked spec, the systematics ledger (CSV), the report template, the measurement-review template and a synthetic review example, a synthetic cosmic-ray spectrum example |
 
@@ -20,7 +20,7 @@ The scripts cover systematic variations, yield and systematics tables, a Poisson
 
 ## References
 
-Start with `references/hep-measurement-guide.md`, which routes to one reference per question: analysis design, review and deliverables, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. `references/cosmic-ray-measurements.md` indexes the cosmic-ray measurement types (absolute flux, flux and isotope ratios, time-dependent flux, rare-event searches) by linking existing sections, and adds the anisotropy measurement design (dipole amplitude and phase, directional exposure, upper limits on the amplitude, whose statistics belong to hep-statistics; time-bin covariance and binned-series inference link to hep-statistics' `time-series-inference.md`); status `documented`. Detector data/MC validation lives in hep-detector.
+Start with `references/hep-measurement-guide.md`, which routes to one reference per question: analysis design, review and deliverables, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. `references/cosmic-ray-measurements.md` indexes the cosmic-ray measurement types (absolute flux, flux and isotope ratios, time-dependent flux, rare-event searches) by linking existing sections, and adds the anisotropy measurement design (dipole amplitude and phase, directional exposure, upper limits on the amplitude, whose statistics belong to hep-statistics; time-bin covariance and binned-series inference link to hep-statistics' `time-series-inference.md`); status `documented`. `references/rare-event-and-neutrino-measurements.md` covers rare-event searches and neutrino measurements (exposure in kg y or t y and live time, region-of-interest choice without unblinding, salting and blinding, the background budget, energy scale and quenching, flux, cross section and near/far extrapolation, presentation); status `documented`. Detector data/MC validation lives in hep-detector.
 
 ## Handoffs
 

@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-measurement": {
-   "references": 12,
-   "bytes": 106002,
+   "references": 13,
+   "bytes": 112987,
    "uncited": 0
   },
   "hep-ml": {
@@ -2301,6 +2301,7 @@
     "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/histograms-efficiencies.md",
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-measurement/references/review-and-artifacts.md",
     "tests/skills/hep_measurement/test_method_references.py",
     "tests/skills/hep_measurement/test_review_eras_m3.py"
@@ -2360,6 +2361,7 @@
     "skills/hep-measurement/references/correction-chain.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-measurement/scripts/review_measurement_spec.py",
     "tests/skills/hep_measurement/test_coupled_backgrounds_m4.py",
     "tests/skills/hep_measurement/test_method_references.py"
@@ -2381,6 +2383,7 @@
     "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-measurement/references/systematics.md",
     "skills/hep-measurement/scripts/collection_time.py",
     "skills/hep-measurement/scripts/isotope_fraction.py",
@@ -2438,8 +2441,8 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16520,
-   "lines": 112,
+   "bytes": 16533,
+   "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -2448,6 +2451,7 @@
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "tests/skills/hep_detector/test_reference_values.py",
     "tests/skills/hep_measurement/test_method_references.py",
+    "tests/skills/hep_measurement/test_rare_event_m10.py",
     "tests/skills/hep_measurement/test_reference_links.py",
     "tests/skills/test_doc_consistency.py",
     "tests/skills/test_one_owner_per_topic_x2.py"
@@ -2506,6 +2510,20 @@
    "last_commit": "7a584954 2026-10-17"
   },
   {
+   "path": "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
+   "owner": "hep-measurement",
+   "bytes": 6972,
+   "lines": 96,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-measurement/README.md",
+    "skills/hep-measurement/references/hep-measurement-guide.md",
+    "tests/skills/hep_measurement/test_rare_event_m10.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-measurement/references/review-and-artifacts.md",
    "owner": "hep-measurement",
    "bytes": 7736,
@@ -2558,6 +2576,7 @@
     "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-ml/references/ml-analysis-validation-and-deployment.md",
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
@@ -3325,6 +3344,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/measurements-and-unfolding.md",
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-measurement/scripts/cosmic_ray_flux.py",
     "skills/hep-measurement/scripts/particle_ratio_with_uncertainty.py",
     "skills/hep-statistics/SKILL.md",
@@ -3413,6 +3433,7 @@
     "skills/hep-measurement/references/analysis-design.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
@@ -3718,11 +3739,14 @@
    "lines": 77,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/neutrino_oscillation.py"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-measurement"
+   ],
    "last_commit": "69f359f5 2026-10-17"
   },
   {
@@ -3756,7 +3780,7 @@
     "tests/skills/hep_theory/test_nuclear_physics_essentials.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "87421c11 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/particle-physics-essentials.md",
@@ -3980,7 +4004,8 @@
   "measurement": [
    "skills/hep-measurement/references/cosmic-ray-measurements.md",
    "skills/hep-measurement/references/hep-measurement-guide.md",
-   "skills/hep-measurement/references/measurements-and-unfolding.md"
+   "skills/hep-measurement/references/measurements-and-unfolding.md",
+   "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md"
   ],
   "model": [
    "skills/hep-ml/references/generative-models.md",

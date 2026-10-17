@@ -4019,6 +4019,27 @@
    "trigger_terms": [
     "nuclear decays"
    ]
+  },
+  {
+   "id": "c-th-rare-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "live time",
+    "blinding policy"
+   ]
+  },
+  {
+   "id": "c-th-rare-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
   }
  ]
 }

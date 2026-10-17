@@ -414,6 +414,9 @@ C = [
     # batch C, Th12: nuclear-physics entry (decay_chain.py)
  ("c-th-chain-1", "en", "direct", "How long until 226Ra and its daughters reach secular equilibrium, and what are the activities after 30 days?", "hep-theory", ["nuclear decays"], None, None, {}),
  ("c-th-chain-2", "zh-Hant", "direct", "β+ 衰變的 Q 值為什麼要扣掉兩個電子質量？用原子質量怎麼算？", "hep-theory", ["nuclear decays"], None, None, {}),
+    # batch C, M10: rare-event and neutrino measurements (reference)
+ ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
+ ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),
 ]
 
 cases = []
