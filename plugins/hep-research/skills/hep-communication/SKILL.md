@@ -66,7 +66,7 @@ Answer inline, never from memory: the bound profile's ledger first, else a prima
 | LaTeX checks and venues | [LaTeX venues](references/latex-venue-setup.md); `check_manuscript.py` |
 | Talks and posters | [posters and talks](references/poster-and-talk-design.md) |
 | Referee reports and replies | [reviewer assessment](references/reviewer-style-assessment.md), [comment exchange](references/comment-and-reply-exchange.md) |
-| Audience adaptation, terminology | [outreach summaries](references/outreach-and-public-facing-summaries.md); `check_adaptation.py`, `check_terminology.py` |
+| Audience adaptation, terminology (exposure vs collection time, rigidity vs momentum) | [outreach summaries](references/outreach-and-public-facing-summaries.md); `check_adaptation.py`, `check_terminology.py` with `assets/paper/glossary-template.json` |
 | Revisions and literature records; planned claims to recheck | `track_revision_impact.py`, `manage_literature.py`; [citation-verification.md](references/citation-verification.md) |
 | Statistics and astroparticle papers | [statistics and ML papers](references/statistics-and-ml-papers.md), [astroparticle papers](references/astroparticle-and-cosmic-ray-papers.md) |
 

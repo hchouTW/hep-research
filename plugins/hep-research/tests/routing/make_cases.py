@@ -329,6 +329,9 @@ C = [
  # batch A, Com1: planned claims with a recheck date
  ("cm-a-planned-1", "en", "direct", "My citation ledger says a detector upgrade is planned for 2027; how do I cite that plan so it gets rechecked, and keep it from supporting the measured result in my paper?", "hep-communication", ["finding and verifying literature and citations"], None, None, {}),
  ("cm-a-planned-2", "zh-Hant", "direct", "文獻紀錄裡有一條「預計 2027 年安裝」的計畫性敘述，引用時要怎麼寫，過了日期要怎麼提醒重新查核？", "hep-communication", ["finding and verifying literature and citations"], None, None, {}),
+ # batch A, Com3: glossary of normalization terms
+ ("cm-a-terms-1", "en", "direct", "Check the terminology of my cosmic-ray paper draft: it mixes exposure, collection time and data exposure, and quotes momenta in GV.", "hep-communication", ["terminology"], None, None, {}),
+ ("cm-a-terms-2", "zh-Hant", "direct", "幫我檢查論文草稿的術語：曝露量、收集時間和資料曝光混用，剛度和動量也分不清。", "hep-communication", ["terminology"], None, None, {}),
 ]
 
 cases = []

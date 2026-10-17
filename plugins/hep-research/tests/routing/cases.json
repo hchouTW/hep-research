@@ -3445,6 +3445,26 @@
    "trigger_terms": [
     "finding and verifying literature and citations"
    ]
+  },
+  {
+   "id": "cm-a-terms-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check the terminology of my cosmic-ray paper draft: it mixes exposure, collection time and data exposure, and quotes momenta in GV.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "terminology"
+   ]
+  },
+  {
+   "id": "cm-a-terms-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "幫我檢查論文草稿的術語：曝露量、收集時間和資料曝光混用，剛度和動量也分不清。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "terminology"
+   ]
   }
  ]
 }

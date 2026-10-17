@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-communication": {
    "references": 57,
-   "bytes": 401174,
+   "bytes": 401532,
    "uncited": 0
   },
   "hep-computing": {
@@ -140,7 +140,7 @@
     "tests/skills/hep_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d5799d9 2026-10-17"
+   "last_commit": "e5427f1 2026-10-17"
   },
   {
    "path": "skills/hep-communication/references/citations-and-bibliography.md",
@@ -324,8 +324,8 @@
   {
    "path": "skills/hep-communication/references/equation-and-notation-auditing.md",
    "owner": "hep-communication",
-   "bytes": 4028,
-   "lines": 62,
+   "bytes": 4386,
+   "lines": 67,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-communication/references/academic-papers-guide.md",
@@ -511,7 +511,7 @@
     "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d5799d9 2026-10-17"
+   "last_commit": "e5427f1 2026-10-17"
   },
   {
    "path": "skills/hep-communication/references/literature-lookup-recipes.md",
