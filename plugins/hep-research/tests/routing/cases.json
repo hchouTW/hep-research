@@ -3617,6 +3617,26 @@
    "trigger_terms": [
     "TRD"
    ]
+  },
+  {
+   "id": "b-det-stab-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Is the gain calibration of my calorimeter stable over the last 200 runs, and where are the change points at a 1% false-alarm rate?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "b-det-stab-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "每天的 TOF 時間校正值有沒有漂移？要怎麼找出 era 的分界？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
   }
  ]
 }

@@ -437,6 +437,8 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
             ('multisample_pid.py', 'charge', ASSETS / 'multisample-events.example.csv', '--layers', 'l1,l2',
              '--response', ASSETS / 'multisample-response.example.json', '--method', 'truncated-mean',
              '--truncate-high', 'nan', '--no-path-correction'),
+            ('stability_monitor.py', ASSETS / 'stability-series.example.csv', '--time-column', 'time_s',
+             '--value-column', 'value', '--sigma', 'nan', '--false-alarm', '0.05', '--seed', '1'),
             ('multiple_scattering.py', huge_stack),
             ('multiple_scattering.py', stack, '--rigidity', '1e308'),
             ('multiple_scattering.py', stack, '--rigidity', '1e-308'),

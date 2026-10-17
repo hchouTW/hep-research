@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | hep-communication | 57 | 402 | 0 |
 | hep-computing | 32 | 299 | 0 |
-| hep-detector | 35 | 453 | 0 |
+| hep-detector | 35 | 455 | 0 |
 | hep-measurement | 12 | 101 | 0 |
 | hep-ml | 42 | 184 | 0 |
 | hep-statistics | 12 | 172 | 0 |
@@ -174,7 +174,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 9257d7b5 2026-10-15 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c0 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 9257d7b5 2026-10-15 |
-| `calibration-and-alignment.md` | hep-detector | 13.9 | yes | 19 | - | bb4e1459 2026-10-17 |
+| `calibration-and-alignment.md` | hep-detector | 15.5 | yes | 20 | - | bb4e1459 2026-10-17 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 13.0 | yes | 11 | - | 9257d7b5 2026-10-15 |
 | `charge-confusion.md` | hep-detector | 11.2 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
@@ -199,7 +199,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `muon-systems.md` | hep-detector | 8.4 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
 | `neutrino-astronomy.md` | hep-detector | 10.2 | no | 7 | hep-statistics | 9257d7b5 2026-10-15 |
 | `noble-liquid-neutrino-and-rare-event-detectors.md` | hep-detector | 12.5 | no | 7 | - | 9257d7b5 2026-10-15 |
-| `particle-identification.md` | hep-detector | 18.2 | yes | 23 | hep-measurement | 9257d7b5 2026-10-15 |
+| `particle-identification.md` | hep-detector | 18.2 | yes | 23 | hep-measurement | f7d5722d 2026-10-17 |
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 18.5 | no | 11 | - | 9257d7b5 2026-10-15 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 11 | - | 9257d7b5 2026-10-15 |

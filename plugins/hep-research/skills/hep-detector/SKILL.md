@@ -53,7 +53,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Signal formation, readout, front-end electronics | [front-end electronics](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
 | Response matrices, forward folding; build one from matched events; mix or stack era responses | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py` |
 | Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |
-| Calibration, alignment, conditions | [calibration and alignment](references/calibration-and-alignment.md) |
+| Calibration, alignment, conditions; stability over time, era boundaries | [calibration and alignment](references/calibration-and-alignment.md); `stability_monitor.py` |
 | Propagating a calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |
 | Triggers, luminosity, pileup | [triggers and pileup](references/triggers-luminosity-pileup.md); `pileup_reweight.py` |
 | Simulation (Geant4) | [detector simulation](references/detector-simulation.md) |

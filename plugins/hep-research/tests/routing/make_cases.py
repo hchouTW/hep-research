@@ -354,6 +354,9 @@ C = [
     # batch B, D10: combining many samples (multisample_pid.py)
  ("b-det-msp-1", "en", "direct", "Combine the dE/dx samples of eight silicon layers into a charge estimate with a truncated mean and give the leakage between neighbouring charges.", "hep-detector", ["particle identification"], None, None, {}),
  ("b-det-msp-2", "zh-Hant", "direct", "TRD 每層的訊號要怎麼組成 likelihood ratio？效率與誤判率曲線怎麼算？", "hep-detector", ["TRD"], None, None, {}),
+    # batch B, D11: stability monitoring (stability_monitor.py)
+ ("b-det-stab-1", "en", "direct", "Is the gain calibration of my calorimeter stable over the last 200 runs, and where are the change points at a 1% false-alarm rate?", "hep-detector", ["calibration and alignment"], None, None, {}),
+ ("b-det-stab-2", "zh-Hant", "direct", "每天的 TOF 時間校正值有沒有漂移？要怎麼找出 era 的分界？", "hep-detector", ["calibration and alignment"], None, None, {}),
 ]
 
 cases = []

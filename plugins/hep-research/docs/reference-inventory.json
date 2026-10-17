@@ -15,7 +15,7 @@
   },
   "hep-detector": {
    "references": 35,
-   "bytes": 453392,
+   "bytes": 455053,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1517,8 +1517,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 13877,
-   "lines": 211,
+   "bytes": 15538,
+   "lines": 230,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1539,7 +1539,8 @@
     "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
-    "skills/hep-detector/scripts/propagate_scale_distortion.py"
+    "skills/hep-detector/scripts/propagate_scale_distortion.py",
+    "skills/hep-detector/scripts/stability_monitor.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "bb4e1459 2026-10-17"
@@ -2046,7 +2047,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "f7d5722d 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",

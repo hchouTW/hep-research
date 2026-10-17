@@ -29,7 +29,8 @@
     "fit_diagnostics",
     "tail_estimation",
     "toy_ensemble",
-    "broken_power_law"
+    "broken_power_law",
+    "change_point"
    ],
    "source": "experiment-neutral implementations; imports packaged"
   },

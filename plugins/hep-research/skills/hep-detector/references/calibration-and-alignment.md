@@ -139,6 +139,25 @@ requirements:
   structure, producing a small population of badly-calibrated events that shows up as
   a non-Gaussian tail rather than a shift.
 
+## Monitoring stability over time
+
+A per-period value with its uncertainty (a gain, a scale, a resolution, an efficiency) is tested for stability with
+`<plugin root>/skills/hep-detector/scripts/stability_monitor.py` (statistics in `core/stats/change_point.py`):
+
+- **Trends first.** Weighted constant and linear fits with chi2 and p-value. A poor constant fit without any step
+  means a drift, or uncertainties that are too small; fix the uncertainties before trusting any threshold.
+- **Change points with a declared false-alarm rate.** A step is tested with z = |m2 - m1| / sqrt(1/W1 + 1/W2) at the
+  best split (binary segmentation for several steps), and a two-sided CUSUM catches slow onsets. Both thresholds
+  are calibrated by seeded toys with the series' own uncertainties so that the chance of a false change anywhere in
+  the series is the declared rate; quote the rate, the toy count and the seed with the result. A threshold "at
+  3 sigma" on the largest of many splits is not a 3 sigma test.
+- **Tolerance is separate from significance.** Periods out of a declared tolerance around a reference are listed
+  apart from change points: a significant 0.1% step may be harmless, a 2% excursion of one period may matter.
+- **Era boundaries are proposals.** Each change point is proposed as a boundary of kind `calibration`, with the step
+  and the times around it. The tool never writes it into a measurement spec: the analyst checks it against the
+  run log (a magnet ramp, a reprocessing, a hardware change) and enters an accepted boundary with its source. A
+  hardware change such as an added layer is an era of its own even when no step is visible.
+
 ## Propagating a calibration change
 
 Because a calibration constant sits at the base of the chain, changing it changes
