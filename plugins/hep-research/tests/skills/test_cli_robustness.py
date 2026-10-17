@@ -108,6 +108,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-ml/scripts/write_ml_artifact.py": ["--run-summary", M, "--out", OUT],
     "skills/hep-communication/scripts/audit_claims.py": [M, "--project-root", "/tmp"],
     "skills/hep-communication/scripts/build_lit_matrix.py": [M],
+    "skills/hep-communication/scripts/spectrum_plot.py": ["--record", M, "--bin-position", "center", "--out", OUT + ".png"],
     "skills/hep-communication/scripts/check_adaptation.py": [M, "--project-root", "/tmp", "--responses"],
     "skills/hep-communication/scripts/check_communication.py": [M, "--project-root", "/tmp"],
     "skills/hep-communication/scripts/check_diagram_sources.py": [M],

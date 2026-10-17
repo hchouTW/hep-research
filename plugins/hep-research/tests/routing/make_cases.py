@@ -495,6 +495,9 @@ C = [
     # batch D, Com4: venues, Chinese typesetting, read levels
  ("d-cc-venue-1", "en", "direct", "Set up my thesis in Chinese with XeLaTeX and ctex, and tell me the JINST class and bibliography rules for the paper version.", "hep-communication", ["theses"], None, None, {}),
  ("d-cc-venue-2", "zh-Hant", "direct", "我要用 xeCJK 排中文博士論文，也想知道投 JINST 要用哪個 class。", "hep-communication", ["theses"], None, None, {}),
+    # batch D, Com5: spectrum plots
+ ("d-cc-spectrum-1", "en", "direct", "Plot E^2.7 times the flux from these two dataset records with Lafferty-Wyatt bin positions and status labels in the caption.", "hep-communication", ["figures and tables"], None, None, {}),
+ ("d-cc-spectrum-2", "zh-Hant", "direct", "把兩筆通量資料畫成 E^2.7 加權的能譜圖，圖說要標明資料狀態，而且不要看起來像合併結果。", "hep-communication", ["figures and tables"], None, None, {}),
 ]
 
 cases = []

@@ -61,7 +61,7 @@ Answer inline, never from memory: the bound profile's ledger first, else a prima
 | Bibliography and citation style; primary sources for statistics and detector methods | [bibliography](references/citations-and-bibliography.md), [primary sources](references/primary-sources-and-version-checks.md) |
 | Literature search, matrix with read levels, review | [discovery](references/literature-discovery-and-search.md); `build_lit_matrix.py --require-provenance` |
 | Claims linked to results; numbers from artifacts (macros, tables, PDG rounding, version compare) | [claim mapping](references/claim-evidence-mapping.md), [linked writing](references/evidence-linked-writing.md); `audit_claims.py`, `render_results.py` |
-| Figures, tables, physics plots | [figures](references/figures-and-tables.md), [physics plots](references/physics-plots.md) |
+| Figures, tables, physics plots; spectra from dataset-records (E^gamma, bin position, overlays) | [figures](references/figures-and-tables.md), [physics plots](references/physics-plots.md); `spectrum_plot.py` |
 | Diagrams as editable sources (.dot, .mmd, .puml, .tex) | [diagrams guide](references/academic-diagrams-guide.md); `check_diagram_sources.py` |
 | LaTeX checks and venues; Chinese typesetting, a thesis | [LaTeX venues](references/latex-venue-setup.md); `check_manuscript.py`; `assets/paper/thesis-skeleton-zh.tex` |
 | Talks and posters | [talks](references/poster-and-talk-design.md) |

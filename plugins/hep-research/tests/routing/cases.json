@@ -4565,6 +4565,26 @@
    "trigger_terms": [
     "theses"
    ]
+  },
+  {
+   "id": "d-cc-spectrum-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Plot E^2.7 times the flux from these two dataset records with Lafferty-Wyatt bin positions and status labels in the caption.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "figures and tables"
+   ]
+  },
+  {
+   "id": "d-cc-spectrum-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把兩筆通量資料畫成 E^2.7 加權的能譜圖，圖說要標明資料狀態，而且不要看起來像合併結果。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "figures and tables"
+   ]
   }
  ]
 }

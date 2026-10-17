@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| hep-communication | 57 | 410 | 0 |
+| hep-communication | 57 | 411 | 0 |
 | hep-computing | 36 | 318 | 0 |
 | hep-detector | 37 | 471 | 0 |
 | hep-measurement | 13 | 113 | 0 |
@@ -113,7 +113,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `graphviz-patterns.md` | hep-communication | 3.5 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `interpreting-scientific-graphics.md` | hep-communication | 8.3 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `latex-mechanics-and-tooling.md` | hep-communication | 13.4 | no | 7 | - | 9257d7b5 2026-10-15 |
-| `latex-venue-setup.md` | hep-communication | 30.4 | yes | 13 | - | 9257d7b5 2026-10-15 |
+| `latex-venue-setup.md` | hep-communication | 30.4 | yes | 13 | - | 655033a5 2026-10-17 |
 | `legends-panels-and-export.md` | hep-communication | 6.6 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `literature-discovery-and-search.md` | hep-communication | 5.1 | yes | 3 | - | e5427f10 2026-10-17 |
 | `literature-lookup-recipes.md` | hep-communication | 5.9 | yes | 7 | - | 14eeda45 2026-10-15 |
@@ -126,7 +126,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `paper-genre-variants.md` | hep-communication | 7.6 | yes | 6 | - | ac1eb235 2026-10-17 |
 | `paper-structure.md` | hep-communication | 11.1 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `papers-review-modes-and-reference-index.md` | hep-communication | 14.1 | no | 2 | - | 485e96cb 2026-10-17 |
-| `physics-plots.md` | hep-communication | 6.9 | yes | 7 | - | 9257d7b5 2026-10-15 |
+| `physics-plots.md` | hep-communication | 8.3 | yes | 8 | - | 68a8a029 2026-10-17 |
 | `plagiarism-and-text-reuse-checking.md` | hep-communication | 3.0 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `plantuml-patterns.md` | hep-communication | 3.6 | no | 1 | - | 9257d7b5 2026-10-15 |
 | `poster-and-talk-design.md` | hep-communication | 6.2 | yes | 5 | - | 9257d7b5 2026-10-15 |
