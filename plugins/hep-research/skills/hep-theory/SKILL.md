@@ -44,9 +44,9 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 
 | Request | Read or run |
 |---|---|
-| Derivation status, proof, approximation validity, checks | [proof](references/mathematical-reasoning-and-proof.md) |
+| Derivation status, proof, validity, checks | [proof](references/mathematical-reasoning-and-proof.md) |
 | NLO/NNLO predictions, scale envelopes, truncation | [higher orders](references/higher-order-predictions.md) |
-| PDF sets, LHAPDF, PDF uncertainty from members | [PDFs](references/pdfs-and-lhapdf.md); `pdf_uncertainty.py` |
+| PDF sets, LHAPDF, PDF uncertainty | [PDFs](references/pdfs-and-lhapdf.md); `pdf_uncertainty.py` |
 | SMEFT and EFT conventions, truncation | [SMEFT](references/smeft-and-eft.md); `eft_truncation.py` |
 | Cosmic-ray propagation (fits outside v1); nuclear cross sections | [propagation](references/cosmic-ray-propagation.md); [nuclear xs](references/nuclear-cross-sections.md) |
 | Event generation (ME order, shower, matching), event weights | [event generation](references/event-generation.md); `event_weights.py` |
@@ -54,7 +54,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |
 | Constants and their CODATA edition, particle masses and lifetimes, nuclide data, unit conversion (GeV^-2 to mb), Q values | `physical_data.py` |
 | Two-body decays, boosts, invariant mass, Mandelstam s t u, thresholds, Dalitz, rapidity, width/lifetime/c tau | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
-| Neutrino oscillations (PMNS, vacuum, constant-density matter, mass ordering, CP phase) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
+| Neutrino oscillations (PMNS, vacuum, constant-density matter) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
 | Nuclear masses and Q values, decay chains (Bateman), equilibrium, S factor | [nuclear essentials](references/nuclear-physics-essentials.md); `decay_chain.py` |
 | Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
 | alpha_s running (1-4 loops, thresholds); CKM and PMNS conventions; PDG MC codes | [essentials](references/particle-physics-essentials.md); `running_coupling.py` |

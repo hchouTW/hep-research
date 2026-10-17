@@ -11,7 +11,7 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | twelve references: nuclear cross-section conventions, mathematical reasoning and proof status, higher-order predictions, PDFs and LHAPDF, SMEFT and EFT conventions, cosmic-ray propagation (guidance; narrow secondary-ratio, antiproton-source and force-field modulation profiles and a fit to tabulated predictions, synthetic data only), event generation, the recasting toolchain (documented, not run), DIS kinematics, amplitudes and widths (phase space, narrow width, Breit-Wigner), selection rules, regularization and schemes (running masses) |
+| `references/` | fifteen references: nuclear cross-section conventions, mathematical reasoning and proof status, higher-order predictions, PDFs and LHAPDF, SMEFT and EFT conventions, cosmic-ray propagation (guidance; narrow secondary-ratio, antiproton-source and force-field modulation profiles and a fit to tabulated predictions, synthetic data only), event generation, the recasting toolchain (documented, not run), DIS kinematics, amplitudes and widths (phase space, narrow width, Breit-Wigner), selection rules, regularization and schemes (running masses), neutrino oscillations, particle-physics essentials, nuclear-physics essentials |
 | `scripts/` | ten helpers: DIS kinematics, PDF uncertainty, event weights, EFT truncation, physical data, kinematics, published-table import, neutrino oscillations, running coupling, decay chains |
 
 ## Scripts
