@@ -1,0 +1,5534 @@
+{
+ "meta": {
+  "run_id": "live-20261017-0.14.0-AD-sonnet",
+  "date": "2026-10-17",
+  "cli": "claude",
+  "cli_version": "2.1.302",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "843c4e00a19a9f84647f0611f3e65063764b1ba5",
+  "plugin_dirty": false,
+  "cases_file_sha256": "63b18e5458268892cd1b696bdc0812bcd46e41911133317009c284b936e4a4c1",
+  "selected": 135,
+  "completed": 135,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 15.0,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 135,
+   "strict_pass": 117,
+   "lenient_pass": 117
+  },
+  "by_lang": {
+   "en": {
+    "cases": 68,
+    "strict_pass": 59,
+    "lenient_pass": 59
+   },
+   "zh-Hant": {
+    "cases": 67,
+    "strict_pass": 58,
+    "lenient_pass": 58
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 131,
+    "strict_pass": 114,
+    "lenient_pass": 114
+   },
+   "out-of-v1": {
+    "cases": 4,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 135,
+    "strict_pass": 117,
+    "lenient_pass": 117
+   }
+  },
+  "by_expected_primary": {
+   "hep-communication": {
+    "cases": 12,
+    "strict_pass": 11,
+    "lenient_pass": 11
+   },
+   "hep-computing": {
+    "cases": 14,
+    "strict_pass": 12,
+    "lenient_pass": 12
+   },
+   "hep-detector": {
+    "cases": 28,
+    "strict_pass": 23,
+    "lenient_pass": 23
+   },
+   "hep-measurement": {
+    "cases": 18,
+    "strict_pass": 15,
+    "lenient_pass": 15
+   },
+   "hep-ml": {
+    "cases": 10,
+    "strict_pass": 10,
+    "lenient_pass": 10
+   },
+   "hep-statistics": {
+    "cases": 24,
+    "strict_pass": 22,
+    "lenient_pass": 22
+   },
+   "hep-theory": {
+    "cases": 29,
+    "strict_pass": 24,
+    "lenient_pass": 24
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 130,
+    "strict_pass": 113,
+    "lenient_pass": 113
+   },
+   "X1": {
+    "cases": 2,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "X3": {
+    "cases": 3,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "outcomes": {
+   "pass": 117,
+   "wrong-skill": 14,
+   "no-skill": 4
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 11.2132,
+   "per_case": 0.0831,
+   "per_turn": 0.0159
+  }
+ },
+ "cases": [
+  {
+   "id": "b-det-eff-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.094202,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "b-det-eff-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.076656,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-det-layer-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.093418,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-det-layer-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.125737,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-det-msp-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.116515,
+   "n_turns": 9,
+   "loading_violation": false
+  },
+  {
+   "id": "b-det-msp-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.095001,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "b-det-stab-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.055994,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "b-det-stab-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.096402,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-c1-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.085644,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-c1-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.066025,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-d5-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.09303,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-d5-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.087039,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-d9-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.090049,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-d9-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.088616,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-m1-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.108392,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "b-flux-m1-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.093103,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ml-bdt-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.113801,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ml-bdt-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.107039,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ml-era-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.092073,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ml-era-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.059595,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ml-roofit-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072399,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ml-roofit-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.081294,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-eras-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.087628,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-eras-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.07602,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-joint-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.065071,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-joint-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.060128,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-split-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.071053,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-split-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.067698,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-transform-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.061514,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "b-ms-transform-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.140271,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "c-det-atlas-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [
+    "profiles/**/*",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.081858,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-det-atlas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 1
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/reference/detector-atlas",
+    "profiles/reference/detector-atlas/evidence/claims.json",
+    "profiles/reference/detector-atlas/evidence/sources.json",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.093742,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-det-design-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.081213,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-det-design-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.100575,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-bdtext-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.083015,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-bdtext-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.060897,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-genre-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.07171,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-genre-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.074169,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-numbers-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.057857,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-numbers-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.082463,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-roothist-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.059986,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-roothist-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.064224,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-shift-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053557,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-ml-shift-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.067183,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-cc-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.064124,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-cc-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.099322,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-coupled-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.088656,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-coupled-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.070947,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-iso-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.059283,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-iso-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.120283,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-mig-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.090047,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-mig-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.091371,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-surv-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.067606,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-surv-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.122452,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-xs-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.109534,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-xs-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.07756,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-caps-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.094578,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-caps-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072913,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-proj-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.089698,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-proj-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.044522,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-roofit-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.054744,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-roofit-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.083902,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-tail-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.056704,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-st-tail-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.077686,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-alphas-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.100287,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-alphas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.070193,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-chain-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.110422,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-chain-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.073106,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-import-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.089023,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-import-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.067313,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-nu-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.066885,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-nu-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.077351,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-rare-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.086183,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-rare-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.070705,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "cm-a-planned-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.110172,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "cm-a-planned-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.089423,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "cm-a-terms-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.087777,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "cm-a-terms-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.083068,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-columnar-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.085741,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-columnar-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.090212,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-pairs-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053577,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-pairs-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.040669,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-preserve-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.067915,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-preserve-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072045,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-spectrum-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.037032,
+   "n_turns": 2,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-spectrum-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [
+    "dataviz"
+   ],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.066057,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-uproot-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072453,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-uproot-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.07509,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-venue-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.192999,
+   "n_turns": 9,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-venue-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-communication",
+   "turns": [
+    {
+     "expected": "hep-communication",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.084025,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-workflow-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.064074,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "d-cc-workflow-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.082818,
+   "n_turns": 9,
+   "loading_violation": false
+  },
+  {
+   "id": "d-det-backtrace-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.058365,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-det-backtrace-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.055252,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-ms-accept-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.084576,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-ms-accept-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.069866,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-ms-aniso-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.068333,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "d-ms-aniso-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.139556,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-cov-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.08138,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-cov-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.11356,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-period-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.092509,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-period-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.100047,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-scale-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.060324,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-scale-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.10398,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-time-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.055388,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-time-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.105439,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-unfold-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.056086,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-st-unfold-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.080803,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-astro-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.07195,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-astro-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.088046,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-coal-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.104012,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-coal-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.07444,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-dm-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.098203,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-dm-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072798,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-lepton-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.12294,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-lepton-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.129977,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-a-residual-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.0684,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-a-residual-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.099286,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-a-toy-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.130635,
+   "n_turns": 9,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-a-toy-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.130065,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-a-split-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.073659,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-a-split-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-ml",
+   "turns": [
+    {
+     "expected": "hep-ml",
+     "first_skill": "hep-ml",
+     "skills": [
+      "hep-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.104329,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "ms-a-scaling-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.080462,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ms-a-scaling-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-measurement",
+   "turns": [
+    {
+     "expected": "hep-measurement",
+     "first_skill": "hep-measurement",
+     "skills": [
+      "hep-measurement"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.083991,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-const-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.078323,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-drift-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.095225,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-drift-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.077423,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-kin-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.064369,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-kin-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.039527,
+   "n_turns": 2,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-qvalue-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.115762,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "th-flavour-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X1",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.058179,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "th-heavyion-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.056714,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "th-nucstruct-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072133,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "th-relic-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053963,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "th-scope-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "X1",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.086548,
+   "n_turns": 4,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/live-20261017-0.14.0-AD-sonnet/raw/, not committed)"
+}
