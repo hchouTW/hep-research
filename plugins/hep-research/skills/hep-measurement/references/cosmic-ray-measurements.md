@@ -23,7 +23,8 @@ periods, resolutions) come from the bound profile, never from this file.
 | Efficiency factors and their denominators | [Correction chain, factorized efficiency](correction-chain.md#factorized-efficiency) |
 | Rigidity vs energy as the variable | hep-detector: [rigidity, not energy](../../hep-detector/references/space-based-direct-detection.md#rigidity-not-energy-is-the-natural-variable---for-a-spectrometer) |
 | Geomagnetic cutoff and the cutoff-filtered exposure | hep-detector: [geomagnetic cutoff](../../hep-detector/references/space-based-direct-detection.md#geomagnetic-cutoff) |
-| A flux point from counts, low-count bins | hep-detector: [worked walkthrough](../../hep-detector/references/space-based-direct-detection.md#worked-walkthrough-a-proton-flux-point-from-counts-verified-2026-09-24), [low-count bins](../../hep-detector/references/space-based-direct-detection.md#low-count-high-rigidity-bins); script `cosmic_ray_flux.py` |
+| A flux point from counts, low-count bins | hep-detector: [worked walkthrough](../../hep-detector/references/space-based-direct-detection.md#worked-walkthrough-a-proton-flux-point-from-counts-verified-2026-09-24), [low-count bins](../../hep-detector/references/space-based-direct-detection.md#low-count-high-rigidity-bins); script `cosmic_ray_flux.py` (the bin-width unit is a free string, reported and never converted; beyond the Feldman-Cousins grid, total mean above 500, `auto` takes an asymptotic profile-likelihood interval, labelled approximate, within 5% of Feldman-Cousins at the grid edge) |
+| Orbit-averaged cutoff, retrograde orbits | script `orbit_averaged_geomagnetic_cutoff.py` (an inclination above 90 deg reaches the latitudes of 180 - i; `--edges` sets the exposure-versus-cutoff bins) |
 | Instrument response checklist | hep-detector: [instrument response functions](../../hep-detector/references/space-based-direct-detection.md#instrument-response-functions-checklist) |
 | Spillover near the resolution limit; forward-fold or unfold | [Steeply falling spectra](measurements-and-unfolding.md#steeply-falling-spectra-and-spillover) |
 | Spectral features and what they mean | hep-detector: [all-particle spectrum](../../hep-detector/references/cosmic-ray-spectrum-and-composition.md#the-all-particle-spectrum-and-its-features); script `cr_spectrum_powerlaw_fit.py` |
@@ -167,6 +168,23 @@ between a Neyman upper limit, a Feldman-Cousins interval on `s >= 0` or a Bayesi
 simulated skies drawn with the real exposure, and the trials over energy bins
 ([inference recipes](../../hep-statistics/references/inference-recipes.md#cls-and-upper-limits),
 [astroparticle look-elsewhere](../../hep-statistics/references/astroparticle-statistics.md#the-look-elsewhere-effect-in-its-astroparticle-forms)).
+
+### Script
+
+`<plugin root>/skills/hep-measurement/scripts/anisotropy.py` implements the right-ascension part of this section:
+
+- `exposure`: the relative exposure per right-ascension bin from data-taking periods (the period table of
+  `collection_time.py`), for a top-hat field of view of declared half-width around the zenith right ascension, which
+  advances one turn per sidereal day from the user's local sidereal time at the clock's zero (no default). A planning
+  model; a real exposure comes from the acceptance per direction and can be passed as the map.
+- `harmonic`: the weighted first harmonic (amplitude, phase, Rayleigh probability with the effective count), `d_perp`
+  when declinations are given, the amplitude upper limit (Neyman, from the Rice distribution, power-constrained at the
+  expected limit so it is never empty; its coverage is checked on toys) and, with event times, the solar, sidereal and
+  anti-sidereal harmonics: a significant anti-sidereal amplitude makes the run `failed` (exit 1). Without an exposure
+  map it warns that uniform exposure is assumed; without times the checks are reported as not run.
+
+The full three-dimensional dipole (whole-sky exposure) and the joint multipole fit for partial coverage are not
+implemented; they belong to hep-statistics.
 
 ### Deliverables
 

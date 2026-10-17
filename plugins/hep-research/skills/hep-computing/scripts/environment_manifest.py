@@ -11,14 +11,23 @@ are recorded only by name from a fixed list, never all of them (they can hold cr
 current environment with a manifest and lists every drift: Python, implementation, executable, OS family,
 architecture, libc, origin, packages, variables, changed or missing inputs, and with --project a changed commit or a
 dirty checkout. A different kernel release (or the old free-form platform string) is a note, not a drift.
+`pairs` (C2) compares, for each era, the software versions declared for data and for simulation (reconstruction,
+calibration, conditions, ...): a component whose versions differ is a mismatch (status failed), a component declared
+on one side only is undeclared (status incomplete); matching versions are no proof that the two chains agree, only
+that the declared versions do.
 
 Usage:
   environment_manifest.py record [--packages numpy,scipy] [--all-packages] [--project DIR] [--inputs FILE ...]
                                  [--out FILE]
   environment_manifest.py check --manifest FILE [--project DIR]
+  environment_manifest.py pairs --pairs PAIRS.json [--status LABEL]
+    PAIRS.json: {"eras": [{"id": ERA, "data": {COMPONENT: VERSION, ...}, "mc": {COMPONENT: VERSION, ...}}, ...]}
 Output: JSON with a "status" key: "recorded" (record; with --out the manifest goes to FILE, whose parent folders are
-created, else it is printed under "manifest"), "same" or "drift" (check), "error" (bad input).
-Exit codes: 0 written or no drift, 1 drift found, 2 bad input or unwritable output. Standard library only.
+created, else it is printed under "manifest"), "same" or "drift" (check), "error" (bad input); pairs: "ok",
+"failed" (a mismatch), "incomplete" (an undeclared version) or "rejected" (bad input), with "status_label" (--status,
+default unvalidated), "inputs", "defaults_used" and per-era verdicts.
+Exit codes: 0 written, no drift or every pair matching; 1 drift found or a version mismatch; 2 bad input or
+unwritable output; 3 a version undeclared (pairs). Standard library only.
 """
 from __future__ import annotations
 
@@ -35,6 +44,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.protected.guard import guard, protected_main  # noqa: E402
+from core.status import add_status_argument, exit_code  # noqa: E402
 
 ENV_VARS = ("LCG_VERSION", "BINARY_TAG", "CMTCONFIG", "ROOTSYS", "APPTAINER_CONTAINER", "SINGULARITY_CONTAINER",
             "CONDA_PREFIX", "CONDA_DEFAULT_ENV", "VIRTUAL_ENV", "HEP_CONTAINER_IMAGE")
@@ -158,6 +168,37 @@ def notes(saved: dict, current: dict, project_checked: bool) -> list[str]:
     return out
 
 
+def version_pairs(doc: dict) -> dict:
+    """Per-era comparison of data and simulation versions (C2)."""
+    eras = doc.get("eras") if isinstance(doc, dict) else None
+    if not isinstance(eras, list) or not eras:
+        raise ValueError("pairs file needs a non-empty 'eras' list")
+    out, worst = [], "ok"
+    for i, era in enumerate(eras):
+        if not isinstance(era, dict) or not isinstance(era.get("id"), str) or not era["id"]:
+            raise ValueError(f"era {i} needs a non-empty string 'id'")
+        sides = {k: era.get(k) for k in ("data", "mc")}
+        for k, v in sides.items():
+            if not isinstance(v, dict) or not all(isinstance(x, str) for x in v.values()):
+                raise ValueError(f"era {era['id']}: '{k}' must map component names to version strings")
+        comps = sorted(set(sides["data"]) | set(sides["mc"]))
+        mism = [{"component": c, "data": sides["data"][c], "mc": sides["mc"][c]} for c in comps
+                if c in sides["data"] and c in sides["mc"] and sides["data"][c] != sides["mc"][c]]
+        undeclared = [{"component": c, "missing_in": "mc" if c in sides["data"] else "data"} for c in comps
+                      if (c in sides["data"]) != (c in sides["mc"])]
+        verdict = "mismatch" if mism else ("undeclared" if undeclared or not comps else "match")
+        if not comps:
+            undeclared = [{"component": None, "missing_in": "both"}]
+        out.append({"id": era["id"], "verdict": verdict, "components": comps, "mismatches": mism,
+                    "undeclared": undeclared})
+        if verdict == "mismatch":
+            worst = "failed"
+        elif verdict == "undeclared" and worst == "ok":
+            worst = "incomplete"
+    return {"status": worst, "eras": out,
+            "note": "matching declared versions are not proof that the data and simulation chains agree"}
+
+
 def _load(path: Path) -> dict:
     doc = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(doc, dict) and isinstance(doc.get("manifest"), dict):  # the printed form of `record` without --out
@@ -182,7 +223,21 @@ def main(argv=None) -> int:
     r.add_argument("--out", type=Path, help="write the manifest here (parent folders are created)")
     c.add_argument("--manifest", type=Path, required=True)
     c.add_argument("--project", type=Path, help="the git checkout to compare with the recorded commit (dirty is drift)")
+    pr = sub.add_parser("pairs", help="compare data and simulation software versions per era (C2)")
+    pr.add_argument("--pairs", type=Path, required=True, help="JSON {eras: [{id, data: {...}, mc: {...}}]}")
+    add_status_argument(pr)
     args = ap.parse_args(argv)
+    if args.command == "pairs":
+        given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
+        base = {"status_label": args.status, "inputs": {"pairs": str(args.pairs)},
+                "defaults_used": [] if "--status" in given else ["status"]}
+        try:
+            res = version_pairs(json.loads(args.pairs.read_text(encoding="utf-8")))
+        except (OSError, ValueError) as exc:
+            print(json.dumps({"status": "rejected", **base, "error": f"{type(exc).__name__}: {exc}"}, indent=1))
+            return 2
+        print(json.dumps({**res, **base}, indent=1))
+        return exit_code(res["status"])
     names = [n.strip() for n in args.packages.split(",") if n.strip()]
     try:
         if args.command == "record":

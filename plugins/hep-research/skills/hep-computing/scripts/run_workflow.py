@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+"""Run a workflow DAG of analysis steps and write a computational-run artifact per step (C6). Standard library only.
+
+Purpose: a reproducible chain of steps that a plain Python can run, the same DAG a Snakefile template mirrors
+(<plugin root>/skills/hep-computing/assets/workflow/). See
+<plugin root>/skills/hep-computing/references/analysis-workflows.md.
+Method: the steps run in a topological order of `needs` (ties in file order); each runs as an argument list (no
+shell) in the work folder, with placeholders {python} (this interpreter), {plugin} (the plugin root) and {workflow}
+(the folder of the workflow file) replaced; a step's declared inputs must exist before it runs and its outputs after.
+Each step writes runs/<id>.computational-run.json: inputs with SHA-256, the command with the placeholders kept (so the
+record does not depend on where it ran), the Python version, seeds, exit status and output hashes. Paths inside the
+work folder are relative, so a rerun on the same inputs is byte-identical.
+Input: workflow JSON {"workflow": NAME, "steps": [{"id", "needs": [...], "inputs": [...], "outputs": [...],
+"argv": [...], "stdout": FILE (optional), "seeds": {...} (optional)}]}.
+Usage: run_workflow.py WORKFLOW.json --work DIR [--created YYYY-MM-DD] [--dry-run] [--status LABEL]
+Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, order and per-step results.
+Exit codes: 0 every step ran; 1 a step failed (later steps are not run); 2 bad input (malformed workflow, a cycle, an
+unknown dependency, a missing input or output).
+"""
+from __future__ import annotations
+
+import argparse
+import datetime
+import hashlib
+import json
+import platform
+import subprocess
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # the imports below leave no __pycache__ (F-10)
+PLUGIN = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(PLUGIN))
+from contracts import CONTRACTS_VERSION  # noqa: E402
+from core.status import add_status_argument, exit_code  # noqa: E402
+
+STEP_TIMEOUT_S = 3600
+
+
+class WorkflowError(ValueError):
+    pass
+
+
+def sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def load(path: Path) -> dict:
+    try:
+        wf = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise WorkflowError(f"cannot read {path}: {exc}") from exc
+    steps = wf.get("steps") if isinstance(wf, dict) else None
+    if not isinstance(steps, list) or not steps:
+        raise WorkflowError("a workflow needs a non-empty 'steps' list")
+    ids = []
+    for s in steps:
+        if not isinstance(s, dict) or not isinstance(s.get("id"), str) or not s["id"]:
+            raise WorkflowError("every step needs a string 'id'")
+        if not isinstance(s.get("argv"), list) or not s["argv"] or not all(isinstance(a, str) for a in s["argv"]):
+            raise WorkflowError(f"step {s['id']}: 'argv' must be a non-empty list of strings")
+        for key in ("needs", "inputs", "outputs"):
+            if not isinstance(s.get(key, []), list):
+                raise WorkflowError(f"step {s['id']}: '{key}' must be a list")
+        ids.append(s["id"])
+    if len(set(ids)) != len(ids):
+        raise WorkflowError("step ids must be unique")
+    for s in steps:
+        unknown = [n for n in s.get("needs", []) if n not in ids]
+        if unknown:
+            raise WorkflowError(f"step {s['id']} needs unknown step(s) {unknown}")
+    return wf
+
+
+def order(steps: list[dict]) -> list[str]:
+    """Kahn's algorithm; ties keep the file order. A cycle is refused."""
+    pending = {s["id"]: set(s.get("needs", [])) for s in steps}
+    done: list[str] = []
+    while pending:
+        ready = [i for i in (s["id"] for s in steps) if i in pending and not pending[i]]
+        if not ready:
+            raise WorkflowError(f"the workflow has a cycle among {sorted(pending)}")
+        for i in ready:
+            done.append(i)
+            del pending[i]
+            for deps in pending.values():
+                deps.discard(i)
+    return done
+
+
+def record(wf_name: str, step: dict, cmd: list[str], inputs: list[dict], outputs: dict, code: int, created: str,
+           label: str) -> dict:
+    plugin_version = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))["version"]
+    status = [label] if code == 0 else [label, "failed"]
+    return {"contract_version": CONTRACTS_VERSION, "artifact_id": f"{wf_name}-{step['id']}-run",
+            "artifact_type": "computational-run",
+            "objective": f"step {step['id']} of workflow {wf_name}, run by run_workflow.py",
+            "bindings": {"experiments": [], "theory": []},
+            "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "profiles": {}},
+            "provenance": {"producer_skill": "hep-computing", "created": created, "evidence_ids": []},
+            "inputs": [], "outputs": [], "status": list(dict.fromkeys(status)), "unresolved_inputs": [],
+            "extension": {"input_manifest": inputs, "tools": [{"name": "python", "version": platform.python_version()}],
+                          "commands": [" ".join(cmd)], "environment": {"python": platform.python_version()},
+                          "seeds": step.get("seeds", {}), "tolerances": {}, "exit_status": code,
+                          "output_hashes": outputs}}
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("workflow", type=Path)
+    ap.add_argument("--work", type=Path, required=True, help="the work folder (created); relative paths resolve here")
+    ap.add_argument("--created", help="the created date written into the run records (default: today)")
+    ap.add_argument("--dry-run", action="store_true", help="print the order and run nothing")
+    add_status_argument(ap)
+    args = ap.parse_args(argv)
+    given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
+    base = {"status_label": args.status, "inputs": {"workflow": str(args.workflow), "work": str(args.work)},
+            "defaults_used": [k for k in ("created", "status") if f"--{k}" not in given]}
+    try:
+        wf = load(args.workflow)
+        steps = {s["id"]: s for s in wf["steps"]}
+        seq = order(wf["steps"])
+    except WorkflowError as exc:
+        print(json.dumps({"status": "rejected", **base, "error": str(exc)}, indent=1))
+        return exit_code("rejected")
+    if args.dry_run:
+        print(json.dumps({"status": "ok", **base, "order": seq}, indent=1))
+        return 0
+    created = args.created or datetime.date.today().isoformat()
+    work = args.work
+    try:
+        (work / "runs").mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        print(json.dumps({"status": "rejected", **base, "order": seq, "error": f"cannot create {work}: {exc}"}, indent=1))
+        return exit_code("rejected")
+    subst = {"{python}": sys.executable, "{plugin}": str(PLUGIN), "{workflow}": str(args.workflow.resolve().parent)}
+    shown = {"{python}": "python3", "{plugin}": "<plugin root>", "{workflow}": "<workflow>"}
+    results, status = [], "ok"
+    for sid in seq:
+        step = steps[sid]
+        missing = [i for i in step.get("inputs", []) if not (work / i).is_file()]
+        if missing:
+            print(json.dumps({"status": "rejected", **base, "order": seq, "steps": results,
+                              "error": f"step {sid}: input(s) {missing} missing in the work folder"}, indent=1))
+            return exit_code("rejected")
+        inputs = [{"path": i, "sha256": sha256(work / i)} for i in step.get("inputs", [])]
+
+        def fill(arg: str, table: dict) -> str:
+            for k, v in table.items():
+                arg = arg.replace(k, v)
+            return arg
+        cmd = [fill(a, subst) for a in step["argv"]]
+        rec_cmd = [fill(a, shown) for a in step["argv"]]
+        stdout_path = step.get("stdout")
+        if stdout_path:
+            rec_cmd += [">", stdout_path]
+        p = subprocess.run(cmd, cwd=work, capture_output=True, text=True, timeout=STEP_TIMEOUT_S)
+        if stdout_path:
+            (work / stdout_path).write_text(p.stdout, encoding="utf-8")
+        outputs = {}
+        for o in step.get("outputs", []):
+            if (work / o).is_file():
+                outputs[o] = sha256(work / o)
+        code = p.returncode
+        if code == 0 and len(outputs) != len(step.get("outputs", [])):
+            code = 1  # a step that claims success but did not write its outputs failed
+        doc = record(wf.get("workflow", args.workflow.stem), step, rec_cmd, inputs, outputs, code, created, args.status)
+        (work / "runs" / f"{sid}.computational-run.json").write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n",
+                                                                     encoding="utf-8")
+        results.append({"id": sid, "exit_status": code, "outputs": outputs,
+                        "stderr_tail": p.stderr[-400:] if code else ""})
+        if code != 0:
+            status = "failed"
+            break
+    print(json.dumps({"status": status, **base, "order": seq, "steps": results}, indent=1))
+    return exit_code(status)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

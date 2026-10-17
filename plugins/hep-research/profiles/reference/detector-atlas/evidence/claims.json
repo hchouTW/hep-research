@@ -2038,5 +2038,2147 @@
    "valid_for": "pre-flight expected performance (2009 paper)",
    "conditions": null
   }
+ },
+ {
+  "id": "detector-atlas:C061",
+  "claim": "The beam energy asymmetry is 7 GeV/c on 4 GeV/c (instead of 8 GeV/c on 3.5 GeV/c in Belle).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "section 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "accelerator interface",
+   "quantity": "beam momenta",
+   "value": "7 on 4",
+   "unit": "GeV/c",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C062",
+  "claim": "The pixel detector (PXD) has 2 layers of DEPFET sensors with a pixel size of 50x50 (75) um^2.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "pixel detector (PXD)",
+   "quantity": "pixel size",
+   "value": "50x50 (75)",
+   "unit": "um^2",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C063",
+  "claim": "Impact parameter resolution sigma_z0 ~ 20 um (PXD and SVD).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "vertex detector (PXD and SVD)",
+   "quantity": "impact parameter resolution sigma_z0",
+   "value": "~20",
+   "unit": "um",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C064",
+  "claim": "The silicon strip detector (SVD) has 4 layers of double-sided silicon strip sensors.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "silicon strip detector (SVD)",
+   "quantity": "layers",
+   "value": "4",
+   "unit": "layers",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C065",
+  "claim": "The central drift chamber (CDC) has 56 layers (32 axial, 24 stereo) between r = 16 and 112 cm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "central drift chamber (CDC)",
+   "quantity": "layers",
+   "value": "56",
+   "unit": "layers",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C066",
+  "claim": "CDC resolution: sigma_rphi = 100 um, sigma_z = 2 mm.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "central drift chamber (CDC)",
+   "quantity": "r-phi resolution",
+   "value": "100",
+   "unit": "um",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C067",
+  "claim": "Transverse-momentum resolution with the SVD: sigma_pt/pt = sqrt((0.1% pt)^2 + (0.3%/beta)^2) (pt in GeV/c).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "tracking (CDC with SVD)",
+   "quantity": "transverse-momentum resolution",
+   "value": "sqrt((0.1% pt)^2 + (0.3%/beta)^2)",
+   "unit": "relative (pt in GeV/c)",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C068",
+  "claim": "CDC dE/dx resolution: 5%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "central drift chamber (CDC)",
+   "quantity": "dE/dx resolution",
+   "value": "5",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C069",
+  "claim": "Time-of-propagation counter (TOP): N_p.e. ~ 20, sigma_t = 40 ps.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "time-of-propagation counter (TOP)",
+   "quantity": "time resolution",
+   "value": "40",
+   "unit": "ps",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C070",
+  "claim": "ARICH K/pi separation at 4 GeV/c: efficiency 96% at 1% pion fake probability.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "aerogel RICH (ARICH)",
+   "quantity": "kaon efficiency at 1% pion fake probability, 4 GeV/c",
+   "value": "96",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C071",
+  "claim": "ECL (CsI(Tl)) energy resolution: sigma_E/E = 0.2%/E (+) 1.6%/E^(1/4) (+) 1.2% (E in GeV).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "electromagnetic calorimeter (ECL)",
+   "quantity": "energy resolution",
+   "value": "0.2%/E (+) 1.6%/E^(1/4) (+) 1.2%",
+   "unit": "relative (E in GeV)",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C072",
+  "claim": "The ECL barrel has 6624 CsI(Tl) crystals (readout channels), between r = 125 and 162 cm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S07"
+  ],
+  "location": "table 1.3",
+  "scope": {
+   "text": "Belle II: design in the 2010 technical design report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Belle II",
+   "subsystem": "electromagnetic calorimeter (ECL)",
+   "quantity": "barrel crystals",
+   "value": "6624",
+   "unit": "crystals",
+   "kind": "design",
+   "valid_for": "design in the 2010 technical design report",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C073",
+  "claim": "The central barrel is contained in a solenoidal magnet with B = 0.5 T.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "magnet",
+   "quantity": "solenoid field",
+   "value": "0.5",
+   "unit": "T",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C074",
+  "claim": "The forward muon system has a dipole magnet providing a total bending power of 3 T m.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "muon dipole magnet",
+   "quantity": "bending power",
+   "value": "3",
+   "unit": "T m",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C075",
+  "claim": "The new Inner Tracking System (ITS2) is based on seven (7) layers of ALPIDE monolithic active pixel sensors (MAPS).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "inner tracking system (ITS2)",
+   "quantity": "layers",
+   "value": "7",
+   "unit": "layers",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C076",
+  "claim": "The readout rate of the full Run 1-2 ITS was limited to 1 kHz.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 1 (Runs 1 and 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "inner tracking system (ITS, Runs 1-2)",
+   "quantity": "readout rate limit",
+   "value": "1",
+   "unit": "kHz",
+   "kind": "operating",
+   "valid_for": "ALICE 1 (Runs 1 and 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C077",
+  "claim": "The TPC extends from 0.85 m to 2.5 m in radius over a length of 5 m.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "time projection chamber (TPC)",
+   "quantity": "radial extent",
+   "value": "0.85 - 2.5",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C078",
+  "claim": "With gated multiwire proportional chambers the TPC readout rate was limited to about 700 Hz for Pb-Pb collisions.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 1 (Runs 1 and 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "time projection chamber (TPC, Runs 1-2)",
+   "quantity": "Pb-Pb readout rate limit",
+   "value": "~700",
+   "unit": "Hz",
+   "kind": "operating",
+   "valid_for": "ALICE 1 (Runs 1 and 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C079",
+  "claim": "The upgrades allow Pb-Pb collisions to be recorded at rates up to 50 kHz.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "abstract; section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "readout",
+   "quantity": "Pb-Pb interaction rate",
+   "value": "50",
+   "unit": "kHz",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C080",
+  "claim": "The new inner tracker improves the pointing resolution by a factor of 3 in the transverse direction and a factor 6 in the longitudinal direction.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "inner tracking system (ITS2)",
+   "quantity": "pointing-resolution improvement, transverse",
+   "value": "3",
+   "unit": "factor",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C081",
+  "claim": "The TRD extends from 2.8 m to 3.5 m in radius.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "transition radiation detector (TRD)",
+   "quantity": "radial extent",
+   "value": "2.8 - 3.5",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C082",
+  "claim": "The muon detectors cover the forward pseudorapidity range -4.0 < eta < -2.5.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ALICE: ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "muon system",
+   "quantity": "pseudorapidity coverage",
+   "value": "-4.0 < eta < -2.5",
+   "unit": "eta",
+   "kind": "design",
+   "valid_for": "ALICE 2 (Run 3 and 4, after Long Shutdown 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C083",
+  "claim": "Typical collision rates in Runs 1 and 2 were up to 8 kHz for Pb-Pb collisions and around 200 kHz for pp collisions.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S08"
+  ],
+  "location": "section 1.3",
+  "scope": {
+   "text": "ALICE: ALICE 1 (Runs 1 and 2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ALICE",
+   "subsystem": "operations",
+   "quantity": "Pb-Pb collision rate",
+   "value": "8",
+   "unit": "kHz",
+   "kind": "operating",
+   "valid_for": "ALICE 1 (Runs 1 and 2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C084",
+  "claim": "The far detector consists of four LArTPC modules, each with a fiducial mass of at least 10 kt.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.3",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "far detector",
+   "quantity": "fiducial mass per module",
+   "value": ">= 10",
+   "unit": "kt",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C085",
+  "claim": "The far detector has a fiducial mass of 40 kt of liquid argon, kept at 88 K.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.1.2",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "far detector",
+   "quantity": "total fiducial mass",
+   "value": "40",
+   "unit": "kt",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C086",
+  "claim": "The far detector is situated 1.5 km underground at SURF.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.1.2",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "far detector",
+   "quantity": "depth",
+   "value": "1.5",
+   "unit": "km",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C087",
+  "claim": "The LBNF beamline at Fermilab and the far detector in South Dakota are separated by 1300 km.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "figure 1.1 caption",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "beamline and far detector",
+   "quantity": "baseline",
+   "value": "1300",
+   "unit": "km",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C088",
+  "claim": "Each module has a cryostat of internal dimensions 15.1 m (w) x 14.0 m (h) x 62.0 m (l) containing a total LAr mass of about 17.5 kt.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.3",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "cryostat",
+   "quantity": "total LAr mass per module",
+   "value": "~17.5",
+   "unit": "kt",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C089",
+  "claim": "In the single-phase module each drift volume has an E field of 500 V/cm, corresponding to a cathode high voltage of 180 kV.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.3.1.1",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "single-phase TPC",
+   "quantity": "drift field",
+   "value": "500",
+   "unit": "V/cm",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C090",
+  "claim": "The maximum drift length of the single-phase module is 3.5 m.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.3.1.1",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "single-phase TPC",
+   "quantity": "maximum drift length",
+   "value": "3.5",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C091",
+  "claim": "A single-phase module has 150 anode plane assemblies, each 6 m high by 2.3 m wide.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.3.1.1",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "single-phase TPC",
+   "quantity": "anode plane assemblies",
+   "value": "150",
+   "unit": "APAs",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C092",
+  "claim": "The purity requirement is a minimum electron lifetime of 3 ms for the single-phase design (5 ms for the dual-phase design).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.3",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "single-phase TPC",
+   "quantity": "minimum electron lifetime",
+   "value": "3",
+   "unit": "ms",
+   "kind": "design",
+   "valid_for": "far detector as designed in the 2020 TDR",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C093",
+  "claim": "ProtoDUNE-SP has the same 3.5 m maximum drift length as the full single-phase module; ProtoDUNE-DP has a 6 m maximum drift length, half that planned for the dual-phase module.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S09"
+  ],
+  "location": "section 1.3.2",
+  "scope": {
+   "text": "DUNE: far detector as designed in the 2020 TDR",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "DUNE",
+   "subsystem": "dual-phase TPC",
+   "quantity": "maximum drift length (prototype)",
+   "value": "6",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "ProtoDUNE-DP prototype at CERN",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C094",
+  "claim": "The detector has a 20 kton liquid scintillator target in a spherical acrylic vessel with an inner diameter of 35.4 m.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "central detector",
+   "quantity": "liquid scintillator mass",
+   "value": "20",
+   "unit": "kton",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C095",
+  "claim": "JUNO is located in a laboratory at 700-m underground.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "site",
+   "quantity": "depth",
+   "value": "700",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C096",
+  "claim": "The liquid scintillator light is watched by 17,612 20-inch PMTs and 25,600 3-inch PMTs.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "central detector PMTs",
+   "quantity": "20-inch PMTs",
+   "value": "17612",
+   "unit": "PMTs",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C097",
+  "claim": "The photocathode coverage is 75.2% for the 20-inch PMTs and 2.7% for the 3-inch PMTs.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "central detector PMTs",
+   "quantity": "photocathode coverage (20-inch)",
+   "value": "75.2",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C098",
+  "claim": "All PMTs have been tested: the average photon detection efficiency is 29.1% for the large PMTs in the Central Detector.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: PMT acceptance tests before installation",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "central detector PMTs",
+   "quantity": "average photon detection efficiency (20-inch)",
+   "value": "29.1",
+   "unit": "%",
+   "kind": "achieved",
+   "valid_for": "PMT acceptance tests before installation",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C099",
+  "claim": "A yield of 1345 photoelectrons per MeV is obtained in simulations.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "central detector",
+   "quantity": "photoelectron yield (simulation)",
+   "value": "1345",
+   "unit": "p.e./MeV",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C100",
+  "claim": "An effective energy resolution of 3.02%/sqrt(E(MeV)) is expected for the mass-ordering determination in simulations (a = 2.61%, b = 0.82%, c = 1.23%).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 1, equations 2-3",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "central detector",
+   "quantity": "effective energy resolution (simulation)",
+   "value": "3.02%/sqrt(E)",
+   "unit": "relative (E in MeV)",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C101",
+  "claim": "A water buffer of 1.42 m thickness lies between the acrylic vessel and the PMT surface.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "central detector",
+   "quantity": "water buffer thickness",
+   "value": "1.42",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C102",
+  "claim": "The water pool has a diameter of 43.5 m and a height of 44 m and is equipped with 2,400 20-inch PMTs.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "water Cherenkov veto",
+   "quantity": "PMTs",
+   "value": "2400",
+   "unit": "PMTs",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C103",
+  "claim": "The muon detection efficiency of the water pool is expected to be 99.8%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S10"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "JUNO: detector as designed before data taking (2021 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "JUNO",
+   "subsystem": "water Cherenkov veto",
+   "quantity": "muon detection efficiency (expected)",
+   "value": "99.8",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "detector as designed before data taking (2021 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C104",
+  "claim": "The cryostat contains 8.5 tonnes of xenon at -98 C, of which 5.9 tonnes are inside the TPC active volume.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2.1.1",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "TPC",
+   "quantity": "active LXe mass",
+   "value": "5.9",
+   "unit": "tonnes",
+   "kind": "design",
+   "valid_for": "detector as built (2024 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C105",
+  "claim": "The background is reduced in a central 4 tonnes fiducial volume.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "TPC",
+   "quantity": "fiducial mass",
+   "value": "4",
+   "unit": "tonnes",
+   "kind": "design",
+   "valid_for": "detector as built (2024 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C106",
+  "claim": "The active region of the TPC is 1613 mm high and about 1327 mm wide (at -98 C).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2.1.1",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "TPC",
+   "quantity": "active height",
+   "value": "1613",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "detector as built (2024 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C107",
+  "claim": "Two PMT arrays detect the S1 and S2 light, with 253 PMTs at the top and 241 PMTs at the bottom.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2.1.1",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "TPC PMT arrays",
+   "quantity": "PMTs (top + bottom)",
+   "value": "253 + 241",
+   "unit": "PMTs",
+   "kind": "design",
+   "valid_for": "detector as built (2024 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C108",
+  "claim": "The installed PMTs have an average quantum efficiency of 34.1% measured by Hamamatsu at 20 C for 175 nm light.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2.1.2",
+  "scope": {
+   "text": "XENONnT: installed PMTs (manufacturer measurement)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "TPC PMT arrays",
+   "quantity": "average quantum efficiency at 175 nm",
+   "value": "34.1",
+   "unit": "%",
+   "kind": "achieved",
+   "valid_for": "installed PMTs (manufacturer measurement)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C109",
+  "claim": "At the design voltages the drift field between cathode and gate is expected to have an average strength of 191 V/cm with an RMS spread of 1%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2.1.3",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "TPC",
+   "quantity": "design drift field",
+   "value": "191",
+   "unit": "V/cm",
+   "kind": "design",
+   "valid_for": "design voltages (electrostatic simulation)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C110",
+  "claim": "During SR0 electron lifetimes greater than 10 ms were reached, exceeding the maximum drift time of about 2 ms.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 3.2.3",
+  "scope": {
+   "text": "XENONnT: first science run (SR0)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "LXe purification",
+   "quantity": "electron lifetime",
+   "value": "> 10",
+   "unit": "ms",
+   "kind": "achieved",
+   "valid_for": "first science run (SR0)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C111",
+  "claim": "The liquid xenon purification extracts LXe at a rate between 4-16 tonne/day.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "LXe purification",
+   "quantity": "purification flow",
+   "value": "4-16",
+   "unit": "tonne/day",
+   "kind": "operating",
+   "valid_for": "detector as built (2024 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C112",
+  "claim": "The radon distillation plant is operated continuously at 1.73 tonnes/day to reach the design goal of ~1 uBq/kg.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "radon removal",
+   "quantity": "radon distillation flow",
+   "value": "1.73",
+   "unit": "tonnes/day",
+   "kind": "operating",
+   "valid_for": "detector as built (2024 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C113",
+  "claim": "The XENONnT TPC was designed to fit into the XENON1T outer cryostat vessel of 1620 mm inner diameter.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S11"
+  ],
+  "location": "section 2.1.1",
+  "scope": {
+   "text": "XENONnT: detector as built (2024 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "XENONnT",
+   "subsystem": "cryostat",
+   "quantity": "outer vessel inner diameter",
+   "value": "1620",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "detector as built (2024 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C114",
+  "claim": "The surface detector baseline array has 1660 water Cherenkov stations in a triangular grid with nearest neighbours separated by 1500 m.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "surface detector (SD)",
+   "quantity": "stations",
+   "value": "1660",
+   "unit": "stations",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C115",
+  "claim": "The surface array is spread over an area of ~3000 km^2.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "surface detector (SD)",
+   "quantity": "area",
+   "value": "~3000",
+   "unit": "km^2",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C116",
+  "claim": "Three high elevation fluorescence telescopes overlook a 23.5 km^2, 61-detector infilled array with 750 m spacing.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "infilled array and HEAT",
+   "quantity": "infill spacing",
+   "value": "750",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C117",
+  "claim": "The mean altitude is ~1400 m, corresponding to an atmospheric overburden of ~875 g cm^-2.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "site",
+   "quantity": "atmospheric overburden",
+   "value": "~875",
+   "unit": "g cm^-2",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C118",
+  "claim": "A station is a 3.6 m diameter water tank whose liner contains 12,000 liters of ultrapure water, seen by three 9-inch PMTs.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 3.1",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "surface detector station",
+   "quantity": "water volume",
+   "value": "12000",
+   "unit": "liters",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C119",
+  "claim": "The 24 telescopes of the FD overlook the SD array from four sites, six telescopes per site.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 4.1",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "fluorescence detector (FD)",
+   "quantity": "telescopes",
+   "value": "24",
+   "unit": "telescopes",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C120",
+  "claim": "A single telescope has a field of view of 30 x 30 degrees in azimuth and elevation, with a minimum elevation of 1.5 degrees above the horizon.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 4.1",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "fluorescence detector (FD)",
+   "quantity": "telescope field of view",
+   "value": "30 x 30",
+   "unit": "degrees",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C121",
+  "claim": "The camera pixels are arranged in a matrix of 22 rows by 20 columns; the pixel field of view corresponds to an angular size of 1.5 degrees.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 4.2",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "fluorescence detector camera",
+   "quantity": "pixel angular size",
+   "value": "1.5",
+   "unit": "degrees",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C122",
+  "claim": "Fluorescence observation is limited to dark nights of good weather, a duty cycle that increased from 12% during early years up to ~15%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 2",
+  "scope": {
+   "text": "Pierre Auger Observatory: data taking up to 2015",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "fluorescence detector (FD)",
+   "quantity": "duty cycle",
+   "value": "~15",
+   "unit": "%",
+   "kind": "operating",
+   "valid_for": "data taking up to 2015",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C123",
+  "claim": "Design targets for the surface detector array included 100% duty cycle.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S12"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "Pierre Auger Observatory: observatory as completed in 2008 (2015 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Pierre Auger Observatory",
+   "subsystem": "surface detector (SD)",
+   "quantity": "duty-cycle target",
+   "value": "100",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "observatory as completed in 2008 (2015 paper)",
+   "conditions": null
+  }
  }
 ]

@@ -1,6 +1,6 @@
 {
- "policy_version": "1.1.0",
- "$comment": "Conditional reporting policies per result type (hep-communication plan T5). A policy checks the method metadata a record supplies; it never chooses the method or invents a default. `when` conditions compare dotted keys of reporting_context.method (equality, or {\"not\": value}); `when_absent` says what an absent key means: unknown (default: the field's applicability is unresolved), applicable, or not-applicable. `conflicts_with` marks a field that must not be provided under that method (error reporting.interval_kind_mismatch). Field states in a record: provided, missing, not-applicable (needs a reason), unresolved. Version 1.1.0 (RC-C3) adds flux-measurement. Comparison and interpretation claims get no policy of their own: their completeness is that of the results they compare or interpret (each with its own reporting_context), and their wording rules are in references/scientific-style.md.",
+ "policy_version": "1.2.0",
+ "$comment": "Conditional reporting policies per result type (hep-communication plan T5). A policy checks the method metadata a record supplies; it never chooses the method or invents a default. `when` conditions compare dotted keys of reporting_context.method (equality, or {\"not\": value}); `when_absent` says what an absent key means: unknown (default: the field's applicability is unresolved), applicable, or not-applicable. `conflicts_with` marks a field that must not be provided under that method (error reporting.interval_kind_mismatch). Field states in a record: provided, missing, not-applicable (needs a reason), unresolved. Version 1.1.0 (RC-C3) adds flux-measurement; 1.2.0 (Com2) adds five flux-measurement fields, each required only when the method declares it, so records that do not declare those methods keep their results. Comparison and interpretation claims get no policy of their own: their completeness is that of the results they compare or interpret (each with its own reporting_context), and their wording rules are in references/scientific-style.md.",
  "result_types": {
   "measurement": {"description": "a measured quantity with its uncertainties", "fields": {
    "value": {"description": "the central value as reported"},
@@ -51,6 +51,16 @@
    "statistical_uncertainty": {"description": "the statistical component per bin"},
    "systematic_uncertainty": {"description": "the systematic components per bin"},
    "scale_systematic": {"description": "the rigidity- or energy-scale uncertainty and how it propagates to the flux"},
-   "period": {"description": "the data-taking period, which fixes the solar-modulation conditions"}}}
+   "period": {"description": "the data-taking period, which fixes the solar-modulation conditions"},
+   "refold_kit": {"description": "what lets a reader fold their own model through the result: the response (or per-era responses), the exposure per bin and their conventions",
+                  "when": {"method.forward_folding": true}, "when_absent": "not-applicable"},
+   "collection_time_definition": {"description": "how the collection time per bin was formed (live time above the cutoff, safety factor, quality cuts), as in collection_time.py",
+                                  "when": {"method.time_dependent": true}, "when_absent": "not-applicable"},
+   "bin_position": {"description": "where each point sits in its bin and why (Lafferty-Wyatt for a stated spectral shape, or another stated rule)",
+                    "when": {"method.points_in_bins": true}, "when_absent": "not-applicable"},
+   "variable_conversion": {"description": "how the flux was converted to another variable (Jacobian and bin averaging, isotope composition), as in spectrum_transform.py",
+                           "when": {"method.variable_converted": true}, "when_absent": "not-applicable"},
+   "era": {"description": "the detector configurations (eras) the result spans, and how era differences enter the uncertainties",
+           "when": {"method.multi_era": true}, "when_absent": "not-applicable"}}}
  }
 }

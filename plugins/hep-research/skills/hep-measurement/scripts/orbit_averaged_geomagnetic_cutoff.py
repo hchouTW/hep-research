@@ -22,6 +22,11 @@ What it does, two modes:
     (centred tilted dipole), and the output adds the time fraction spent below each
     --thresholds cutoff and an exposure-versus-cutoff table (time fraction per cutoff bin).
 
+Retrograde orbits: an inclination i above 90 deg reaches the same latitudes as 180 - i; the untilted mode maps it
+(reported as inclination_effective_deg), the tilted mode follows the retrograde ground track directly.
+--edges (comma-separated cutoffs in GV, increasing) sets the bins of the exposure-versus-cutoff table (tilted mode;
+in the untilted mode it adds that table); without it the tilted mode keeps its fixed default bins.
+
 Usage notes / assumptions: standard library only. Both modes assume a circular orbit and a
 centred dipole (the tilted mode ignores the dipole offset and higher multipoles), so both are
 planning-level estimates. It does NOT replace backtracing a real
@@ -54,8 +59,26 @@ def _finite(value, name, positive=False):
     return float(value)
 
 
+DEFAULT_EDGES = [0.0, 0.5, 1, 2, 3, 4, 6, 8, 10, 12, 14, 16, 20]
+
+
+def _edges(edges):
+    if edges is None:
+        return list(DEFAULT_EDGES)
+    out = [_finite(e, 'edge') for e in edges]
+    if len(out) < 2 or any(b <= a for a, b in zip(out, out[1:])) or out[0] < 0:
+        raise ValueError('edges must be at least two increasing cutoffs >= 0 (GV)')
+    return out
+
+
+def _table(cutoffs, edges):
+    n = len(cutoffs)
+    return [{'cutoff_gv': [lo, hi], 'time_fraction': sum(1 for c in cutoffs if lo <= c < hi) / n}
+            for lo, hi in zip(edges, edges[1:])]
+
+
 def orbit_cutoff_profile(inclination_deg, altitude_re=1.0, dipole_moment_g_cm3=DEFAULT_DIPOLE_MOMENT_G_CM3,
-                         n_samples=2000):
+                         n_samples=2000, edges=None):
     """Time-weighted min/max/average vertical Stormer cutoff over one quarter-orbit
     of an inclined circular orbit, sampled at n_samples points in true anomaly.
 
@@ -65,12 +88,13 @@ def orbit_cutoff_profile(inclination_deg, altitude_re=1.0, dipole_moment_g_cm3=D
     weighting once doubled (equator-to-peak and peak-to-equator are mirror images).
     """
     inclination_deg = _finite(inclination_deg, 'inclination_deg')
-    if not 0.0 < inclination_deg <= 90.0:
-        raise ValueError('inclination_deg must be between 0 (exclusive) and 90 (inclusive)')
+    if not 0.0 < inclination_deg < 180.0:
+        raise ValueError('inclination_deg must be between 0 and 180 (exclusive)')
+    effective = 180.0 - inclination_deg if inclination_deg > 90.0 else inclination_deg
     if isinstance(n_samples, bool) or type(n_samples) is not int or n_samples < 10:
         raise ValueError('n_samples must be an integer of at least 10')
 
-    inclination_rad = math.radians(inclination_deg)
+    inclination_rad = math.radians(effective)
     sin_i = math.sin(inclination_rad)
 
     thetas = [math.pi / 2.0 * k / (n_samples - 1) for k in range(n_samples)]
@@ -89,9 +113,10 @@ def orbit_cutoff_profile(inclination_deg, altitude_re=1.0, dipole_moment_g_cm3=D
     total_weight = math.fsum(weights)
     weighted_mean = math.fsum(w * c for w, c in zip(weights, cutoffs)) / total_weight
 
-    return {
+    out = {
         'mode': 'untilted dipole (planning estimate)',
         'inclination_deg': inclination_deg,
+        'inclination_effective_deg': effective,
         'altitude_re': altitude_re,
         'latitude_range_deg': [min(latitudes_deg), max(latitudes_deg)],
         'min_cutoff_gv': min(cutoffs),
@@ -101,6 +126,11 @@ def orbit_cutoff_profile(inclination_deg, altitude_re=1.0, dipole_moment_g_cm3=D
         'note': ('latitude treated as geomagnetic latitude (dipole-tilt/offset '
                 'ignored); circular orbit assumed; see docstring caveats'),
     }
+    if inclination_deg > 90.0:
+        out['note'] += '; retrograde inclination mapped to 180 - i'
+    if edges is not None:
+        out['exposure_vs_cutoff'] = _table(cutoffs, _edges(edges))
+    return out
 
 
 EARTH_GM_M3_S2 = 3.986004418e14  # IERS / WGS84 geocentric gravitational constant
@@ -110,7 +140,7 @@ SIDEREAL_DAY_S = 86164.0905
 
 def tilted_dipole_profile(inclination_deg, pole_lat_deg, pole_lon_deg, altitude_re=1.0,
                           dipole_moment_g_cm3=DEFAULT_DIPOLE_MOMENT_G_CM3, days=30.0, step_s=10.0,
-                          thresholds_gv=(), ascending_node_deg=0.0):
+                          thresholds_gv=(), ascending_node_deg=0.0, edges=None):
     """Vertical Stormer cutoff along the ground track of a circular orbit for a centred dipole whose
     north pole sits at (pole_lat_deg, pole_lon_deg) geographic; Earth rotates under the orbit."""
     inclination_deg = _finite(inclination_deg, 'inclination_deg')
@@ -127,6 +157,7 @@ def tilted_dipole_profile(inclination_deg, pole_lat_deg, pole_lon_deg, altitude_
     if n < 10 or n > 5_000_000:
         raise ValueError('days / step_s must give between 10 and 5e6 samples')
     thresholds = sorted(_finite(t, 'threshold', positive=True) for t in thresholds_gv)
+    edge_list = _edges(edges)
     r_m = altitude_re * EARTH_RADIUS_M
     period_s = 2.0 * math.pi * math.sqrt(r_m ** 3 / EARTH_GM_M3_S2)
     omega_orbit, omega_earth = 2.0 * math.pi / period_s, 2.0 * math.pi / SIDEREAL_DAY_S
@@ -142,11 +173,7 @@ def tilted_dipole_profile(inclination_deg, pole_lat_deg, pole_lon_deg, altitude_
         lat_m = math.degrees(math.asin(max(-1.0, min(1.0, sin_m))))
         mag_lats.append(lat_m)
         cutoffs.append(stormer_cutoff_gv(lat_m, altitude_re, dipole_moment_g_cm3))
-    edges = [0.0, 0.5, 1, 2, 3, 4, 6, 8, 10, 12, 14, 16, 20]
-    table = []
-    for lo, hi in zip(edges, edges[1:]):
-        frac = sum(1 for c in cutoffs if lo <= c < hi) / n
-        table.append({'cutoff_gv': [lo, hi], 'time_fraction': frac})
+    table = _table(cutoffs, edge_list)
     return {
         'mode': 'tilted centred dipole along the ground track (planning estimate)',
         'inclination_deg': inclination_deg, 'altitude_re': altitude_re,
@@ -167,7 +194,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--inclination', type=float, required=True, dest='inclination_deg',
-                        help='orbital inclination in degrees, 0 (exclusive) to 90')
+                        help='orbital inclination in degrees, 0 to 180 (exclusive); above 90 is retrograde')
     parser.add_argument('--radius-re', type=float, default=None, dest='radius_re',
                         help='orbit radius (geocentric distance) in Earth radii (default 1.0)')
     parser.add_argument('--altitude-re', type=float, default=None, dest='altitude_re',
@@ -185,6 +212,8 @@ def main():
                         help='tilted mode: time step in seconds (default 10)')
     parser.add_argument('--thresholds', default='',
                         help='tilted mode: comma-separated cutoffs in GV for the time fraction below each')
+    parser.add_argument('--edges', default=None,
+                        help='comma-separated increasing cutoffs in GV for the exposure-versus-cutoff table')
     parser.add_argument('--status', choices=STATUSES, default='unvalidated',
                         help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
@@ -198,13 +227,15 @@ def main():
         args.altitude_re = args.radius_re if args.radius_re is not None else (args.altitude_re or 1.0)
         if (args.pole_lat is None) != (args.pole_lon is None):
             raise ValueError('--pole-lat and --pole-lon must be given together')
+        edges = [float(x) for x in args.edges.split(',') if x.strip()] if args.edges else None
         if args.pole_lat is not None:
             thresholds = [float(x) for x in args.thresholds.split(',') if x.strip()]
             result = tilted_dipole_profile(args.inclination_deg, args.pole_lat, args.pole_lon, args.altitude_re,
-                                           args.dipole_moment, args.days, args.step_s, thresholds)
+                                           args.dipole_moment, args.days, args.step_s, thresholds, edges=edges)
             method = 'vertical Stormer cutoff along a ground track with Earth rotation, tilted centred dipole'
         else:
-            result = orbit_cutoff_profile(args.inclination_deg, args.altitude_re, args.dipole_moment, args.n_samples)
+            result = orbit_cutoff_profile(args.inclination_deg, args.altitude_re, args.dipole_moment, args.n_samples,
+                                          edges=edges)
             method = 'time average of the vertical Stormer dipole cutoff along an inclined circular orbit'
     except ValueError as exc:
         parser.error(str(exc))

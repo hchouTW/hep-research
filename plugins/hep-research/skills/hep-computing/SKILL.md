@@ -43,21 +43,24 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 | Request | Read or run |
 |---|---|
-| Implementation scenario: bug fix, feature, refactor, review | [engineering playbook](references/engineering-playbook.md) |
+| Bug fix, feature, refactor, review | [playbook](references/engineering-playbook.md) |
 | ROOT and PyROOT design | [ROOT design](references/root-balanced-design-guidelines.md) |
-| Crashes, memory leaks | [crash and memory debugging](references/crash-and-memory-debugging.md), [ROOT debugging](references/root-debugging.md) |
-| uproot, awkward, RDataFrame, analysis pipelines | [Python HEP coding](references/python-hep-coding-patterns.md), [analysis pipelines](references/analysis-data-pipelines.md) |
-| Slow or large code | [performance profiling](references/performance-profiling.md) |
+| Crashes, memory leaks | [crashes](references/crash-and-memory-debugging.md), [ROOT debugging](references/root-debugging.md) |
+| uproot, awkward, RDataFrame, analysis pipelines | [Python HEP](references/python-hep-coding-patterns.md), [pipelines](references/analysis-data-pipelines.md) |
+| Large or columnar data: Parquet, HDF5, chunked passes, memory | [columnar data](references/columnar-and-large-scale-data.md); `assets/chunked_histogram.py` |
+| Slow or large code | [profiling](references/performance-profiling.md) |
 | CMake and root-config builds | [CMake](references/cmake-and-build.md); `check_root_cpp_env.sh`, `new_root_cpp_project.sh` |
-| SymPy, integrals, ODEs, convergence | [symbolic and numerical computation](references/symbolic-and-numerical-computation.md), [numerical methods](references/numerical-and-computational-methods.md) |
-| Environments, containers, run manifests; interpreter for package-dependent work | [environments](references/environments-and-containers.md); `environment_manifest.py`; `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH) |
-| Inspect or compare ROOT files and histograms; histogram errors, TEfficiency, RooWorkspace import, ROOT install | `inspect_root_file.py`, `compare_root_histograms.py`, `check_histogram_errors.py`; [ROOT usage](references/root-usage-patterns.md) |
+| SymPy, integrals, ODEs, convergence | [symbolic](references/symbolic-and-numerical-computation.md), [numerical](references/numerical-and-computational-methods.md) |
+| Environments, containers, run manifests, data/MC version pairs per era; interpreter for package-dependent work | [environments](references/environments-and-containers.md); `environment_manifest.py` (`pairs`); `find_python.py` (`--python`, `HEP_RESEARCH_PYTHON`, caller, PATH) |
+| Inspect or compare ROOT files; histogram errors, TEfficiency, RooWorkspace import, ROOT install | `inspect_root_file.py`, `compare_root_histograms.py`, `check_histogram_errors.py`, `summarize_histogram_statistics.py` (PyROOT or uproot); [ROOT usage](references/root-usage-patterns.md) |
 | Partition, resubmit, merge | `local_partition.py`; Slurm and HTCondor: [batch scheduling](references/batch-scheduling.md) |
-| Time-sliced records: deduplicate by key, then sum; mergeable partial sums | `assets/time_slice_reduction.py`; [analysis pipelines](references/analysis-data-pipelines.md) |
+| Workflows (DAG, run record per step, Snakemake) | [workflows](references/analysis-workflows.md); `run_workflow.py`; `assets/workflow/` |
+| Time-sliced records: deduplicate by key, then sum | `assets/time_slice_reduction.py`; [pipelines](references/analysis-data-pipelines.md) |
 | CERN EOS storage | [CERN EOS](references/storage-cern-eos.md) |
+| Analysis preservation: what to archive, rehearse a rerun | [preservation checklist](references/preservation-checklist.md) |
 | Blinding checks of outputs, logs, caches | `audit_blinded_outputs.py` (synthetic sentinels only) |
-| Implementation-ready research task | [task authoring](references/task-authoring-guide.md); `lint_task.py` |
-| Agile delivery, definition of done | [agile delivery](references/agile-development-guide.md), [validation and done](references/validation-and-done.md) |
+| Implementation-ready research task | [tasks](references/task-authoring-guide.md); `lint_task.py` |
+| Agile delivery, definition of done | [agile](references/agile-development-guide.md), [done](references/validation-and-done.md) |
 
 Scripts in `<plugin root>/skills/hep-computing/scripts/` (read `--help` first; each is described in the [engineering playbook](references/engineering-playbook.md)); design guidelines: [Python](references/python-balanced-design-guidelines.md), [C++](references/cpp-balanced-design-guidelines.md), [Bash](references/bash-balanced-design-guidelines.md). Submission is unsandboxed execution: synthetic test environments only, each submission user-approved. Folder guide for people: [README.md](README.md).
 

@@ -55,7 +55,9 @@ class OrbitAveragedCutoffTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             orbit_cutoff_profile(0.0)
         with self.assertRaises(ValueError):
-            orbit_cutoff_profile(91.0)
+            orbit_cutoff_profile(180.0)  # M6: 90 < i < 180 is retrograde and maps to 180 - i (91 was refused before)
+        with self.assertRaises(ValueError):
+            orbit_cutoff_profile(-5.0)
 
     def test_rejects_too_few_samples(self):
         with self.assertRaises(ValueError):

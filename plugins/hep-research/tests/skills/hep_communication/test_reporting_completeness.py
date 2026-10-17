@@ -31,7 +31,7 @@ class PolicyFile(unittest.TestCase):
     def test_policy_file_loads_and_covers_the_result_types(self):
         self.assertIsNotNone(load_policy, "communication_lib.reporting does not exist")
         pol = load_policy(POLICY)
-        self.assertEqual(pol["policy_version"], "1.1.0")
+        self.assertEqual(pol["policy_version"], "1.2.0")  # Com2: five add-only flux-measurement fields
         self.assertEqual(set(pol["result_types"]), {"measurement", "search", "limit", "theory-prediction", "ml-result", "flux-measurement"})
         schema = json.loads((POLICY.parents[3] / "contracts" / "schemas" / "ext_communication_traceability.json").read_text(encoding="utf-8"))
         enum = schema["$defs"]["reporting_context"]["properties"]["result_type"]["enum"]

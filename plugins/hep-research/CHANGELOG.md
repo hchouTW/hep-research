@@ -178,6 +178,37 @@ profile kind); no version bump.
   `examples/analysis-to-paper/` (E-4); `examples/multi-era-fit/` gains the S2 projection check (new keys only).
 - Routing cases: 356 (44 new; `th-scope-2` becomes a direct case).
 
+
+Upgrade plan v1.3, batch D (S3, S4, S5, S9, S10, M2, M6, M9, Th2, Th5, Th6, Th11, C2, C3, C4, C5, C6, Com2, Com4,
+Com5, D12, and the D13 expansion) (VALIDATION UPGRADE-D). Contracts stay 2.11.0; no version bump. Two new optional
+adapters wrap third-party code that the plugin never bundles (gate G5).
+
+- Statistics (S3, S4, S5, S9, S10): `build_covariance.py` ([Proposal] covariances from declared correlation models,
+  with a length scan; a non-PSD block is reported, never repaired); `covariance_fit.py` joint fits with a per-dataset
+  `scale_nuisance` (unchanged without the declaration); `periodicity_scan.py` (weighted generalized Lomb-Scargle with
+  white, AR(1) or OU surrogates and a band-maximum global p-value); `time_structure.py` (change points with a
+  toy-calibrated penalty, lags with autocorrelation-preserving surrogates); `adapters/unfolding/` (pyunfold, and
+  RooUnfold when built, with the plugin's own closure, stress and coverage validation).
+- Measurement (M2, M6, M9): `acceptance_from_generation.py`; `cosmic_ray_flux.py` reports a free bin-width unit and
+  has an asymptotic interval beyond the Feldman-Cousins grid (`auto`); `orbit_averaged_geomagnetic_cutoff.py` maps
+  retrograde inclinations and takes `--edges`; `anisotropy.py` (right-ascension exposure, first harmonic, dipole
+  projection, amplitude upper limit, spurious-modulation checks).
+- Theory (Th2, Th5, Th6, Th11): `lepton_energy_losses.py`; `dm_direct_rate.py` and `dark-matter-phenomenology.md`
+  (dark-matter phenomenology conventions enter v1; interpreting an excess stays outside v1); `coalescence.py` and
+  `light-nuclei-coalescence.md`; `secondary_gamma.py` and `astroparticle-essentials.md`.
+- Computing (C2-C6): `environment_manifest.py pairs`; the preservation checklist; an uproot reader for
+  `summarize_histogram_statistics.py` and the Python floor tiers; columnar and large-scale data with
+  `assets/chunked_histogram.py`; analysis workflows with `run_workflow.py` and a Snakefile template.
+- Communication (Com2, Com4, Com5): the flux-measurement reporting policy 1.2.0 (refold kit, collection-time
+  definition, bin position, variable conversion, era); seven more venues with sources or to-verify, Chinese
+  typesetting and a XeLaTeX thesis skeleton, diagram files by extension, read levels in reading notes and
+  `build_lit_matrix.py --require-provenance`; `spectrum_plot.py` (dataset-records only, a stated bin position,
+  status labels, overlays never combined).
+- Detector (D12, D13): `adapters/geomagnetic-backtracing/` runs OTSO (GPL-3.0) as a separate program with a
+  user-supplied interpreter, never imported or bundled; the detector atlas adds Belle II, ALICE, DUNE, JUNO, XENONnT
+  and the Pierre Auger Observatory (12 experiments, 123 claims).
+- Routing cases: 394.
+
 ## 0.13.1 (2026-10-17)
 
 G-ENFORCE inputs completed for the full v6.3 suite set, and README updates. Contracts stay 2.11.0, and every

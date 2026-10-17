@@ -14,7 +14,8 @@ number per bin) and the bin width, computes flux = s / (exposure * bin_width) wi
 interval on the signal mean s, chosen by --method:
 
   auto (default)    no background: garwood; known background (sigma 0): feldman-cousins;
-                    uncertain background: cousins-highland.
+                    uncertain background: cousins-highland; beyond the Feldman-Cousins grid (total mean
+                    above 500) with a background: asymptotic.
   garwood           exact central (Garwood) interval on N, for any N up to core/stats' mean
                     limit (no background allowed). Conservative.
   feldman-cousins   unified interval on s >= 0 for a known background (grid scan in core/stats).
@@ -24,6 +25,9 @@ interval on the signal mean s, chosen by --method:
   profile-fc        Feldman-Cousins-style interval with the background profiled, seeded toys
                     (needs --toys and --seed); the choice for publication use with an
                     uncertain background.
+  asymptotic        profile-likelihood interval on s >= 0 from -2 ln(lambda) = z^2 (Wilks), with the
+                    background profiled under a Gaussian constraint when --background-sigma is given;
+                    for large counts, labelled approximate (within 5% of Feldman-Cousins at the grid edge).
   naive             the old subtraction (exact interval on the raw count, background error in
                     quadrature), labelled approximate; a negative value is clipped at 0 and
                     flagged in warnings.
@@ -31,12 +35,13 @@ interval on the signal mean s, chosen by --method:
 The interval code is core/stats (poisson_diagnostics.central_interval and fc_interval,
 likelihood_limits.profile_fc); this script only wraps it. No bound is ever negative: when
 the lower end is 0 the output also gives flux_upper_limit. Above the Feldman-Cousins grid
-limit (total mean 500) with a background, the script stops with exit 3 and names the
-alternative (likelihood_limits.py profile-fc or an asymptotic construction); it never
-truncates silently. --exposure-rel-uncertainty is reported as flux_syst_exposure, separate
+limit (total mean 500) with a background, auto takes the asymptotic interval (and says so);
+an explicitly requested feldman-cousins or cousins-highland stops with exit 3 and names the
+alternative; it never truncates silently. --exposure-rel-uncertainty is reported as flux_syst_exposure, separate
 from the statistical interval.
 
-Bin-width unit: --bin-width-unit is required and is echoed as bin_width_unit. The width
+Bin-width unit: --bin-width-unit is required, a free string (e.g. GV, GeV/n, MeV) reported as
+bin_width_unit and never converted. The width
 must be in the unit the flux is differential in (per GV: 600 for a 1.2-1.8 TV bin; never
 pass a width in TV when the flux is quoted per GV, which makes the flux 1000x too large).
 
@@ -69,9 +74,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root,
 from core.stats.poisson_diagnostics import FC_MAX_TOTAL_MEAN, DiagnosticsError, SolveFailed  # noqa: E402
 from core.stats.poisson_diagnostics import central_interval, fc_interval  # noqa: E402
 
-BIN_WIDTH_UNITS = ('GV', 'GeV', 'GeV/n', 'TeV', 'TV')
-METHODS = ('auto', 'garwood', 'feldman-cousins', 'cousins-highland', 'profile-fc', 'naive')
-APPROXIMATE_METHODS = ('naive', 'cousins-highland')
+METHODS = ('auto', 'garwood', 'feldman-cousins', 'cousins-highland', 'profile-fc', 'asymptotic', 'naive')
+APPROXIMATE_METHODS = ('naive', 'cousins-highland', 'asymptotic')
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
@@ -116,6 +120,57 @@ def poisson_interval(observed, level=0.6827):
     return iv['lower'], iv['upper']
 
 
+def asymptotic_interval(counts, background, background_sigma, level):
+    """Profile-likelihood interval on the signal mean s >= 0: -2 ln(lambda(s)) = z^2 with z the two-sided normal
+    quantile of level; the background is fixed (sigma 0) or profiled under a Gaussian constraint."""
+    from statistics import NormalDist
+    z2 = NormalDist().inv_cdf(0.5 + level / 2.0) ** 2
+    n, b, sb = float(counts), float(background), float(background_sigma)
+
+    def b_hat(s):
+        if sb == 0.0:
+            return b
+        # d/db' [ (s + b') - n ln(s + b') + (b' - b)^2 / (2 sb^2) ] = 0, a quadratic in b' (positive root)
+        a2 = 1.0 / (sb * sb)
+        a1 = 1.0 + (s - b) * a2
+        a0 = s - n - b * s * a2
+        disc = a1 * a1 - 4.0 * a2 * a0
+        root = (-a1 + math.sqrt(max(disc, 0.0))) / (2.0 * a2)
+        return max(root, 0.0)
+
+    def nll(s):
+        bp = b_hat(s)
+        mu = s + bp
+        if mu <= 0.0:
+            return 0.0 if n == 0 else math.inf
+        out = mu - (n * math.log(mu) if n > 0 else 0.0)
+        if sb > 0.0:
+            out += (bp - b) ** 2 / (2.0 * sb * sb)
+        return out
+
+    s_hat = max(n - b, 0.0)
+    f0 = nll(s_hat)
+
+    def q(s):
+        return 2.0 * (nll(s) - f0)
+
+    def solve(lo, hi):
+        for _ in range(200):
+            mid = 0.5 * (lo + hi)
+            if (q(mid) > z2) == (q(lo) > z2):
+                lo = mid
+            else:
+                hi = mid
+        return 0.5 * (lo + hi)
+
+    lower = 0.0 if q(0.0) <= z2 else solve(0.0, s_hat)
+    top = s_hat + 10.0 * (math.sqrt(n + 1.0) + sb) + 10.0
+    while q(top) <= z2:
+        top *= 2.0
+    upper = solve(s_hat, top)
+    return lower, upper
+
+
 def _resolve_method(method, background, background_sigma):
     if method not in METHODS:
         raise ValueError(f'method must be one of {", ".join(METHODS)}')
@@ -144,9 +199,15 @@ def _signal_interval(method, counts, background, background_sigma, level, toys, 
             raise IntervalFailed(str(exc)) from None
         except DiagnosticsError as exc:
             if 'limited to total means' in str(exc):
-                raise UnsupportedRange(f'{exc} (method {method}, total-mean limit {FC_MAX_TOTAL_MEAN:g})') from None
+                raise UnsupportedRange(f'{exc} (method {method}, total-mean limit {FC_MAX_TOTAL_MEAN:g}); use '
+                                       f'--method asymptotic (or profile-fc), or auto, which selects it') from None
             raise ValueError(str(exc)) from None
         return iv['lower'], iv['upper'], iv['method'], iv['note']
+    if method == 'asymptotic':
+        lo, hi = asymptotic_interval(counts, background, background_sigma, level)
+        return lo, hi, ('asymptotic profile-likelihood interval (Wilks), background ' +
+                        ('profiled under a Gaussian constraint' if background_sigma else 'known') + '; approximate'), \
+            'asymptotic: valid for large counts; within 5% of Feldman-Cousins at the grid edge'
     if method == 'profile-fc':
         from core.stats.likelihood_limits import LikelihoodError, profile_fc
         if toys is None or seed is None:
@@ -183,10 +244,11 @@ def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sig
     background_sigma = _nonnegative_finite(background_sigma, 'background_sigma')
     if isinstance(level, bool) or not isinstance(level, (int, float)) or not 0 < level < 1:
         raise ValueError('level must be a confidence level strictly between 0 and 1')
-    if bin_width_unit is not None and bin_width_unit not in BIN_WIDTH_UNITS:
-        raise ValueError(f'bin_width_unit must be one of {", ".join(BIN_WIDTH_UNITS)}')
+    if bin_width_unit is not None and (not isinstance(bin_width_unit, str) or not bin_width_unit.strip()):
+        raise ValueError('bin_width_unit must be a non-empty string (it is reported, not converted)')
     if exposure_rel_uncertainty is not None:
         exposure_rel_uncertainty = _nonnegative_finite(exposure_rel_uncertainty, 'exposure_rel_uncertainty')
+    requested = method
     method = _resolve_method(method, background, background_sigma)
 
     denom = exposure * bin_width
@@ -212,7 +274,14 @@ def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sig
                             'method (Feldman-Cousins on s >= 0) for this bin')
             lo_s, hi_s, estimate = max(lo_s, 0.0), max(hi_s, 0.0), max(estimate, 0.0)
     else:
-        lo_s, hi_s, label, note = _signal_interval(method, counts, background, background_sigma, level, toys, seed)
+        try:
+            lo_s, hi_s, label, note = _signal_interval(method, counts, background, background_sigma, level, toys, seed)
+        except UnsupportedRange:
+            if requested != 'auto':
+                raise
+            method = 'asymptotic'
+            lo_s, hi_s, label, note = _signal_interval(method, counts, background, background_sigma, level, toys, seed)
+            note = f'auto: beyond the Feldman-Cousins grid (total mean > {FC_MAX_TOTAL_MEAN:g}); {note}'
         estimate = max(net_counts, 0.0)
     flux = (estimate / denom, lo_s / denom, hi_s / denom)
     if not all(math.isfinite(f) for f in flux):
@@ -274,15 +343,17 @@ def main():
     parser.add_argument('--bin-width', type=float, required=True, dest='bin_width',
                         help='energy/rigidity bin width, in the unit the flux is differential in '
                              '(per GV: 600 for a 1.2-1.8 TV bin; never a width in TV for a flux per GV)')
-    parser.add_argument('--bin-width-unit', required=True, choices=BIN_WIDTH_UNITS, dest='bin_width_unit',
-                        help='unit of --bin-width (required; echoed as bin_width_unit). The flux is per this unit')
+    parser.add_argument('--bin-width-unit', required=True, dest='bin_width_unit',
+                        help='unit of --bin-width, a free string (required; reported as bin_width_unit, never '
+                             'converted). The flux is per this unit')
     parser.add_argument('--background', type=float, default=0.0, help='expected background count')
     parser.add_argument('--background-sigma', type=float, default=0.0, dest='background_sigma',
                         help='uncertainty on the background expectation')
     parser.add_argument('--level', type=float, default=0.6827,
                         help='confidence level of the interval (default 0.6827, ~1 sigma)')
     parser.add_argument('--method', choices=METHODS, default='auto',
-                        help='interval method (default auto: garwood, feldman-cousins or cousins-highland)')
+                        help='interval method (default auto: garwood, feldman-cousins or cousins-highland, and '
+                             'asymptotic beyond the Feldman-Cousins grid)')
     parser.add_argument('--toys', type=int, default=None, help='toys for --method profile-fc')
     parser.add_argument('--seed', type=int, default=None, help='seed for --method profile-fc')
     parser.add_argument('--exposure-rel-uncertainty', type=float, default=None, dest='exposure_rel_uncertainty',

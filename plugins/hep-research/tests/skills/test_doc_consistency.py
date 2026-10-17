@@ -64,7 +64,9 @@ class ComputingReadmeUproot(unittest.TestCase):
     def test_only_the_uproot_backend_is_described_with_uproot(self):
         with_backend = [t for t in self.TOOLS
                         if re.search(r"^\s*import uproot", text(f"skills/hep-computing/scripts/{t}"), re.M)]
-        self.assertEqual(with_backend, ["compare_root_histograms.py"])
+        # F-11 fixed the README claim when only compare_root_histograms.py had an uproot backend; C4 added one to
+        # summarize_histogram_statistics.py (through the check_histogram_errors.py reader).
+        self.assertEqual(with_backend, ["compare_root_histograms.py", "summarize_histogram_statistics.py"])
         readme = flat(text("skills/hep-computing/README.md"))
         self.assertNotIn("(PyROOT or uproot when installed", readme)
         line = next(x for x in text("skills/hep-computing/README.md").splitlines() if "inspect ROOT files" in x)

@@ -25,6 +25,10 @@ compile alone carries a line '% diagram-check: skip <reason>' and is reported as
 Rendering is not visual inspection: a rendered block may still have overlapping labels or a wrong layout, and nothing
 here checks the physics a diagram shows.
 
+Files named by extension (Com4) are read directly as one diagram each: .dot and .gv (Graphviz), .mmd and .mermaid,
+.puml, .plantuml and .pu (PlantUML), .svg, and .tex (a TikZ picture, or a document with its own \\documentclass);
+markdown files (.md) are scanned for fenced blocks; any other extension holds no block.
+
 Usage: `python3 <plugin root>/skills/hep-communication/scripts/check_diagram_sources.py [path ...] [--format text|json]
         [--require-render] [--no-tikz] [--no-mermaid]` (default paths: the whole bundle).
 Exit codes: 2 a named file holds no diagram block (nothing was checked) or cannot be read; 1 at least one source error; 3 no source error but at least one environment error, or --require-render and
@@ -341,11 +345,27 @@ def check_block(lang: str, source: str, renderers: dict, setup: str = "") -> dic
     return through("mmdc", render_mermaid)
 
 
+# A diagram source file named by its extension is one block of that language (Com4); every other file is read as
+# markdown and its fenced blocks are checked.
+SOURCE_EXTENSIONS = {".dot": "dot", ".gv": "dot", ".mmd": "mermaid", ".mermaid": "mermaid", ".puml": "plantuml",
+                     ".plantuml": "plantuml", ".pu": "plantuml", ".svg": "svg", ".tex": "latex"}
+
+
+def file_blocks(path: Path) -> list[tuple[str, str, str]]:
+    text = path.read_text(encoding="utf-8")
+    lang = SOURCE_EXTENSIONS.get(path.suffix.lower())
+    if lang is None:
+        return extract_blocks_with_setup(text) if path.suffix.lower() in (".md", ".markdown") else []
+    if lang == "latex" and "tikzpicture" not in text and "\\documentclass" not in text:
+        return []  # a .tex file with nothing to draw holds no diagram
+    return [(lang, text, "")]
+
+
 def run(paths: list[Path], require_render: bool = False, tikz: bool = True, mermaid: bool = True) -> dict:
     renderers = preflight_renderers(tikz, mermaid)
     blocks = []
     for path in paths:
-        for i, (lang, source, setup) in enumerate(extract_blocks_with_setup(path.read_text(encoding="utf-8"))):
+        for i, (lang, source, setup) in enumerate(file_blocks(path)):
             r = check_block(lang, source, renderers, setup)
             blocks.append({"file": str(path), "block": i, "lang": lang, "renderer": r.get("renderer"), "outcome": r["outcome"],
                            "reason": r.get("reason"), "output_format": r.get("output_format")})
@@ -392,7 +412,8 @@ def print_text(rep: dict) -> None:
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("paths", nargs="*", type=Path, help="markdown files to check (default: every .md in the skill)")
+    ap.add_argument("paths", nargs="*", type=Path,
+                    help="markdown files or diagram sources (.dot, .gv, .mmd, .puml, .svg, .tex); default: every .md in the skill")
     ap.add_argument("--format", choices=("text", "json"), default="text", help="text (default) or one JSON report object")
     ap.add_argument("--require-render", action="store_true",
                     help="strict: a block that was only linted or skipped makes the run incomplete (exit 3)")

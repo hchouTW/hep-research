@@ -31,6 +31,12 @@ Input (fit): {"y": [...], "cov": [[...]] (additive part), "x": [...] (abscissa, 
   exit 1)}
 Models with x > 0: broken-power-law (sharp) and smoothly-broken-power-law, theta = [ln A, gamma1, gamma2, ln x_b],
   ln F = ln A - gamma1 (u - h) - gamma2 h, u = ln(x / x_b), h = max(u, 0) or s ln((1 + e^(u/s)) / 2); give start.
+Input (fit, joint datasets with optional scale nuisances; S4): {"model", "model_options", "start",
+  "datasets": [{"name", "y", "cov", "x", "scale_nuisance": {"sigma", "kind": energy|rigidity|momentum|generic}}]}:
+  one model fitted to all datasets (block-diagonal covariance); a dataset with scale_nuisance is predicted as
+  Phi(x / (1 + s)) / (1 + s) with a fitted s constrained by N(0, sigma^2); output "scale_nuisances" [{dataset, kind,
+  sigma, s, error, pull}]. A top-level scale_nuisance with y, cov, x is one dataset. Without a declaration nothing
+  changes: the plain fit path is not used for these inputs and is unchanged.
 Input (break-scan): {"y", "cov", "x", "smoothness": 0 (sharp), "break_range": [lo, hi], "grid_points": 40}: the profile
   chi2 over ln x_b, a toy-calibrated interval for the break (not Wilks: the break is not a regular parameter) and the
   toy-calibrated no-break test.
@@ -369,6 +375,109 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
             "note": ("chi2 and dof are counted in the subspace orthogonal to the declared constraints; a near-singular "
                      "covariance is fitted as given and flagged, never regularized; with multiplicative uncertainties the "
                      "'data' mode is biased (Peelle's pertinent puzzle) and is reported, not recommended")}
+
+
+# ------------------------------------------------------------------------------------- per-dataset scale nuisance (S4)
+SCALE_KINDS = ("energy", "rigidity", "momentum", "generic")
+
+
+def _scale_decl(d, name):
+    sn = d.get("scale_nuisance")
+    if sn is None:
+        return None
+    if not isinstance(sn, dict) or set(sn) != {"sigma", "kind"}:
+        raise CovFitInputError(f"dataset {name!r}: scale_nuisance must be exactly {{sigma, kind}}")
+    sig, kind = sn["sigma"], sn["kind"]
+    if isinstance(sig, bool) or not isinstance(sig, (int, float)) or not math.isfinite(sig) or sig <= 0:
+        raise CovFitInputError(f"dataset {name!r}: scale_nuisance.sigma must be a finite number > 0")
+    if kind not in SCALE_KINDS:
+        raise CovFitInputError(f"dataset {name!r}: scale_nuisance.kind must be one of {list(SCALE_KINDS)}")
+    return {"sigma": float(sig), "kind": kind}
+
+
+def fit_datasets(doc: dict, allow_plugin=False, base_dir=None) -> dict:
+    """Joint fit of one model to several datasets (block-diagonal covariance); a dataset may declare
+    scale_nuisance {sigma, kind}: its prediction is Phi(x / (1 + s)) / (1 + s) with s a fitted nuisance constrained by
+    N(0, sigma^2), for an abscissa (energy, rigidity, momentum) known to a relative scale. A top-level scale_nuisance
+    with y, cov, x is a single dataset."""
+    if doc.get("multiplicative") or doc.get("constraints"):
+        raise CovFitInputError("the datasets mode takes no multiplicative or constraints (fit each dataset alone)")
+    if "datasets" in doc:
+        sets = doc["datasets"]
+        if not isinstance(sets, list) or not sets:
+            raise CovFitInputError("datasets must be a non-empty list of {name, y, cov, x}")
+    else:
+        sets = [{"name": "dataset", "y": doc["y"], "cov": doc["cov"], "x": doc.get("x"),
+                 "scale_nuisance": doc.get("scale_nuisance")}]
+    model, opts = doc.get("model", "constant"), doc.get("model_options")
+    data, names = [], []
+    for i, d in enumerate(sets):
+        if not isinstance(d, dict):
+            raise CovFitInputError("every dataset must be an object with y, cov and x")
+        name = str(d.get("name", f"dataset-{i}"))
+        if name in names:
+            raise CovFitInputError(f"duplicate dataset name {name!r}")
+        names.append(name)
+        y = np.asarray(d["y"], dtype=float)
+        cov = np.asarray(d["cov"], dtype=float)
+        n = len(y)
+        if cov.shape != (n, n) or not np.allclose(cov, cov.T, rtol=1e-12, atol=0) or not np.all(np.isfinite(cov)):
+            raise CovFitInputError(f"dataset {name!r}: cov must be a symmetric {n} x {n} matrix")
+        x = np.arange(n, dtype=float) if d.get("x") is None else np.asarray(d["x"], dtype=float)
+        if x.shape != (n,):
+            raise CovFitInputError(f"dataset {name!r}: x must have {n} entries")
+        q, info = subspace(cov, None)
+        f, npar = model_fn(model, x, opts, allow_plugin, base_dir)
+        data.append({"name": name, "y": y, "cov": cov, "x": x, "f": f, "scale": _scale_decl(d, name), "info": info})
+    nuis = [k for k, d in enumerate(data) if d["scale"]]
+    start = doc.get("start")
+    if start is None and model in ("broken-power-law", "smoothly-broken-power-law"):
+        raise CovFitInputError("a broken power law needs start [ln A, gamma1, gamma2, ln x_b] (or use break-scan)")
+    y_all = np.concatenate([d["y"] for d in data])
+    th0 = np.asarray(start if start is not None else ([float(np.mean(y_all))] + [0.0] * (npar - 1)), dtype=float)
+
+    def pred(d, th, s):
+        if s == 0.0:
+            return d["f"](th)
+        f_s, _ = model_fn(model, d["x"] / (1.0 + s), opts, allow_plugin, base_dir)
+        return f_s(th) / (1.0 + s)
+
+    def parts(p):
+        th, svals = p[:npar], dict(zip(nuis, p[npar:]))
+        out = []
+        for k, d in enumerate(data):
+            s = float(svals.get(k, 0.0))
+            if s <= -1.0:
+                return None
+            r = d["y"] - pred(d, th, s)
+            out.append(float(r @ np.linalg.solve(d["cov"], r)))
+        pen = sum((float(svals[k]) / data[k]["scale"]["sigma"]) ** 2 for k in nuis)
+        return out, pen
+
+    def m2ll(p):
+        v = parts(p)
+        return float("inf") if v is None else sum(v[0]) + v[1]
+    res = optimize.minimize(m2ll, np.append(th0, np.zeros(len(nuis))), method="BFGS", options={"gtol": 1e-8})
+    p = res.x
+    hess, edm = _verdict(m2ll, p)
+    cov_p = 2.0 * np.linalg.inv(hess)
+    err = np.sqrt(np.diag(cov_p))
+    chi2_sets, pen = parts(p)
+    chi2 = float(sum(chi2_sets) + pen)
+    dof = int(len(y_all) - npar)
+    from scipy.stats import chi2 as chi2_dist
+    scale_out = [{"dataset": data[k]["name"], "kind": data[k]["scale"]["kind"], "sigma": data[k]["scale"]["sigma"],
+                  "s": float(p[npar + j]), "error": float(err[npar + j]),
+                  "pull": float(p[npar + j] / data[k]["scale"]["sigma"])} for j, k in enumerate(nuis)]
+    return {"label": LABEL, "model": model, "mode": "datasets", "theta": p[:npar].tolist(),
+            "theta_errors": err[:npar].tolist(), "chi2": chi2, "dof": dof,
+            "p_value": float(chi2_dist.sf(chi2, dof)) if dof > 0 else None, "edm": edm,
+            "datasets": [{"name": d["name"], "n": len(d["y"]), "chi2": c, "covariance": d["info"]}
+                         for d, c in zip(data, chi2_sets)],
+            "scale_nuisances": scale_out, "constraint_chi2": float(pen),
+            "note": ("Phi_obs(x) = Phi_model(x / (1 + s)) / (1 + s) for a dataset that declares scale_nuisance, with a "
+                     "Gaussian constraint (s / sigma)^2 counted in chi2; dof = total points - model parameters (each "
+                     "constrained nuisance adds one parameter and one constraint)")}
 
 
 # ------------------------------------------------------------------------------------- break position (STH-T3.13)
@@ -1070,6 +1179,8 @@ def main(argv=None) -> int:
             out = break_scan(doc, a.toys, a.seed, a.cl)
         elif doc.get("model") == "tabulated-grid":
             out = grid_fit(doc, Path(a.input).resolve().parent)
+        elif "datasets" in doc or "scale_nuisance" in doc:
+            out = fit_datasets(doc, a.allow_plugin, Path(a.input).resolve().parent)
         else:
             out = fit(doc["y"], doc["cov"], doc.get("model", "constant"), doc.get("x"), doc.get("constraints"),
                       doc.get("start"), doc.get("multiplicative"), model_options=doc.get("model_options"),

@@ -75,7 +75,6 @@ STATUS_FLAG_EXEMPT = {
     "skills/hep-computing/scripts/roofit_workspace_summary.py": "lists the contents of a workspace; no derived numbers",
     "skills/hep-computing/scripts/check_example_diversity.py": "checks skill examples, not physics inputs",
     "skills/hep-computing/scripts/create_story_card.py": "writes a planning note",
-    "skills/hep-computing/scripts/environment_manifest.py": "records the software environment",
     "skills/hep-computing/scripts/find_python.py": "chooses an interpreter",
     "skills/hep-computing/scripts/generate_skill_example.py": "writes a skill example skeleton",
     "skills/hep-computing/scripts/inspect_root_file.py": "lists the contents of a file; no derived numbers",

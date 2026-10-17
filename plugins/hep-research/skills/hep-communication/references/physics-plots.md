@@ -83,6 +83,24 @@ A figure that drops the label of a non-published result misstates its status, wh
   Bayesian credible region) and the confidence levels drawn; L/E plots state the baseline and energy definition.
   The construction itself is hep-statistics'.
 
+## Spectrum plots
+
+`<plugin root>/skills/hep-communication/scripts/spectrum_plot.py` draws a spectrum from dataset-records only and
+writes a JSON sidecar that ties every point to its record (artifact id, file SHA-256, bin index).
+
+- **Bin position.** `--bin-position` has no default: `lafferty-wyatt` with the declared power-law index
+  (`--lw-index`), where the power law equals its bin average; `center` or `log-center` otherwise. The rule is printed
+  in the caption. A point's x is a convention, not a measurement.
+- **E^gamma weighting.** `--weight-power` multiplies flux and error bars by x^gamma at the plotted position; the axis
+  label and the caption say so.
+- **Another variable.** `--to` converts each record through hep-measurement's `spectrum_transform.py` (Jacobian and
+  bin averaging with a declared isotope composition, never a relabeling of the axis); the sidecar keeps its
+  transformation record, and the error bars include the composition uncertainty.
+- **Status.** The legend carries each record's status labels and the caption lists them, so a synthetic or
+  user-supplied series is never read as a measurement.
+- **Overlays are not combinations.** Series from different records or experiments are drawn side by side; the
+  caption says no average or fit across them is shown. A combination is hep-statistics' work, with its covariance.
+
 ## Pre-submission checklist
 
 - [ ] `pdffonts` on every figure: no Type 3, all embedded.

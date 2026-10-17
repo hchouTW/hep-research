@@ -450,6 +450,63 @@ C = [
     # batch C, S11 extensions: RooMCStudy pulls and RooFit/RooStats against core (roofit_fit_check.py)
  ("c-st-roofit-1", "en", "direct", "Run a RooMCStudy pull study of my RooFit model and check its HypoTestInverter CLs limit against an independent implementation.", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
  ("c-st-roofit-2", "zh-Hant", "direct", "RooFit 的 MINOS 區間和 profile likelihood 掃描要怎麼跟另一套程式交叉檢查？低計數時漸近 CLs 可靠嗎？", "hep-statistics", ["RooFit/RooStats", "low or zero counts"], None, None, {}),
+    # batch D, S3: covariance proposal from declared correlation models
+ ("d-st-cov-1", "en", "direct", "Build a covariance for my energy-scale uncertainty correlated over log energy with a correlation length, and show how the fit changes with that length.", "hep-statistics", ["covariance assembly and validation"], None, None, {}),
+ ("d-st-cov-2", "zh-Hant", "direct", "時間相關的系統誤差要怎麼組成協方差矩陣？相關長度不知道時要怎麼掃描？", "hep-statistics", ["covariance assembly and validation"], None, None, {}),
+    # batch D, S4: per-dataset scale nuisance in fits to published points
+ ("d-st-scale-1", "en", "direct", "Fit one spectral model to two experiments' published fluxes where one has a 3% energy-scale uncertainty; add it as a nuisance on the energy axis.", "hep-statistics", ["fits of model parameters to published data points with their covariance", "nuisance parameters"], None, None, {}),
+ ("d-st-scale-2", "zh-Hant", "direct", "兩組已發表的能譜一起擬合，其中一組的能量刻度有 2% 不確定度，要怎麼放成 nuisance？", "hep-statistics", ["nuisance parameters"], None, None, {}),
+    # batch D, S5: periodicity with red-noise surrogates
+ ("d-st-period-1", "en", "direct", "Is there a periodic signal in my unevenly sampled light curve? Calibrate the Lomb-Scargle peak against red noise.", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+ ("d-st-period-2", "zh-Hant", "direct", "這條時間序列有沒有週期性？紅噪聲背景下全域顯著性要怎麼算？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+    # batch D, S9: change points and lags
+ ("d-st-time-1", "en", "direct", "Did my detector-rate series change level at some point? Calibrate the change-point threshold to a 5% false-alarm rate, with the correlated noise I have.", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+ ("d-st-time-2", "zh-Hant", "direct", "宇宙線強度落後太陽活動幾個月？上升段與下降段的遲滯要怎麼量，顯著性怎麼算？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+    # batch D, S10: unfolding through an external package, validated
+ ("d-st-unfold-1", "en", "direct", "Unfold my spectrum with pyunfold, with the number of iterations fixed in advance, and show closure, stress tests and toy coverage.", "hep-statistics", ["unfolding with regularization and coverage"], None, None, {}),
+ ("d-st-unfold-2", "zh-Hant", "direct", "用 RooUnfold 的 Bayes 方法反摺積，迭代次數要怎麼先決定？閉合測試與覆蓋率怎麼檢查？", "hep-statistics", ["unfolding with regularization and coverage"], None, None, {}),
+    # batch D, Th2: electron and positron energy losses (lepton_energy_losses.py)
+ ("d-th-lepton-1", "en", "direct", "How far can a 1 TeV electron travel before synchrotron and inverse-Compton losses on the CMB drain it, with Klein-Nishina corrections?", "hep-theory", ["astroparticle physics"], None, None, {}),
+ ("d-th-lepton-2", "zh-Hant", "direct", "1 TeV 正電子在 3 μG 磁場與星際輻射場中的能量損失時間是多少？要考慮 Klein-Nishina 效應。", "hep-theory", ["astroparticle physics"], None, None, {}),
+    # batch D, Th5: dark-matter conventions (dm_direct_rate.py)
+ ("d-th-dm-1", "en", "direct", "Compute the spin-independent recoil spectrum of a 100 GeV WIMP on xenon with the Helm form factor and the standard halo model, stating every convention.", "hep-theory", ["conventions"], None, None, {}),
+ ("d-th-dm-2", "zh-Hant", "direct", "暗物質湮滅的 J 因子要怎麼定義？NFW 輪廓要積分到多大的角度？自共軛因子用 1/2 還是 1/4？", "hep-theory", ["conventions"], None, None, {}),
+    # batch D, Th6: coalescence of light (anti)nuclei (coalescence.py)
+ ("d-th-coal-1", "en", "direct", "Convert a coalescence momentum p0 = 80 MeV into B_2 for antideuterons and build the antideuteron yield from my antiproton yield.", "hep-theory", ["conventions"], None, None, {}),
+ ("d-th-coal-2", "zh-Hant", "direct", "反氘核的 coalescence 參數 B_A 和 p0 怎麼互換？Wigner 函數模型的權重又是什麼？", "hep-theory", ["conventions"], None, None, {}),
+    # batch D, Th11: astroparticle essentials (secondary_gamma.py)
+ ("d-th-astro-1", "en", "direct", "Compute the gamma-ray spectrum from pi0 decay for my pion spectrum, and the neutrino flavour ratio at Earth for a 1:2:0 source.", "hep-theory", ["astroparticle physics"], None, None, {}),
+ ("d-th-astro-2", "zh-Hant", "direct", "質子撞 CMB 光子的 photopion 閾值能量是多少？順便說明 Hillas 判據與擴散激波加速的譜指數。", "hep-theory", ["astroparticle physics"], None, None, {}),
+    # batch D, C2: data and simulation software versions per era
+ ("d-cc-pairs-1", "en", "direct", "Check that the reconstruction and calibration versions of data and simulation match in each era of my analysis.", "hep-computing", ["environment and run manifests"], None, None, {}),
+ ("d-cc-pairs-2", "zh-Hant", "direct", "幫我檢查每個時期資料與模擬用的重建與校準軟體版本是否一致。", "hep-computing", ["environment and run manifests"], None, None, {}),
+    # batch D, C3: analysis preservation
+ ("d-cc-preserve-1", "en", "direct", "What must I archive so my analysis can be rerun and re-folded after the experiment ends?", "hep-computing", ["reproducible scientific software"], None, None, {}),
+ ("d-cc-preserve-2", "zh-Hant", "direct", "實驗結束後要保存哪些東西，分析才能重跑？請給我保存清單。", "hep-computing", ["reproducible scientific software"], None, None, {}),
+    # batch D, C4: uproot reader for histogram summaries
+ ("d-cc-uproot-1", "en", "direct", "Summarize the mean, RMS and effective entries of a histogram in my ROOT file with uproot, without PyROOT.", "hep-computing", ["uproot/awkward"], None, None, {}),
+ ("d-cc-uproot-2", "zh-Hant", "direct", "沒有 PyROOT，用 uproot 讀 ROOT 檔的直方圖並算平均值、RMS 與有效事件數。", "hep-computing", ["uproot/awkward"], None, None, {}),
+    # batch D, C5: columnar and large-scale data
+ ("d-cc-columnar-1", "en", "direct", "My ntuples don't fit in memory: how do I fill histograms chunk by chunk with uproot and get the same result as one pass?", "hep-computing", ["data I/O and formats"], None, None, {}),
+ ("d-cc-columnar-2", "zh-Hant", "direct", "Parquet 與 HDF5 的大檔案記憶體放不下，要怎麼分批處理並確定結果和一次讀完相同？", "hep-computing", ["data I/O and formats"], None, None, {}),
+    # batch D, C6: analysis workflows
+ ("d-cc-workflow-1", "en", "direct", "Turn my analysis steps into a Snakemake workflow with a run record per step that reruns byte for byte.", "hep-computing", ["environment and run manifests"], None, None, {}),
+ ("d-cc-workflow-2", "zh-Hant", "direct", "把分析步驟寫成一個工作流程（DAG），每一步都留下執行紀錄，重跑結果完全相同。", "hep-computing", ["environment and run manifests"], None, None, {}),
+    # batch D, Com4: venues, Chinese typesetting, read levels
+ ("d-cc-venue-1", "en", "direct", "Set up my thesis in Chinese with XeLaTeX and ctex, and tell me the JINST class and bibliography rules for the paper version.", "hep-communication", ["theses"], None, None, {}),
+ ("d-cc-venue-2", "zh-Hant", "direct", "我要用 xeCJK 排中文博士論文，也想知道投 JINST 要用哪個 class。", "hep-communication", ["theses"], None, None, {}),
+    # batch D, Com5: spectrum plots
+ ("d-cc-spectrum-1", "en", "direct", "Plot E^2.7 times the flux from these two dataset records with Lafferty-Wyatt bin positions and status labels in the caption.", "hep-communication", ["figures and tables"], None, None, {}),
+ ("d-cc-spectrum-2", "zh-Hant", "direct", "把兩筆通量資料畫成 E^2.7 加權的能譜圖，圖說要標明資料狀態，而且不要看起來像合併結果。", "hep-communication", ["figures and tables"], None, None, {}),
+    # batch D, D12: geomagnetic backtracing (adapters/geomagnetic-backtracing, OTSO)
+ ("d-det-backtrace-1", "en", "direct", "Backtrace cosmic-ray trajectories through IGRF plus an external field model to get the cutoff grid and the penumbra along my balloon instrument's flight path.", "hep-detector", ["astroparticle instruments"], None, None, {}),
+ ("d-det-backtrace-2", "zh-Hant", "direct", "用 OTSO 反向追蹤宇宙線軌跡，算出這組緯度經度網格的截止剛度與半影寬度。", "hep-detector", ["astroparticle instruments"], None, None, {}),
+    # batch D, M2: acceptance from generation records (acceptance_from_generation.py)
+ ("d-ms-accept-1", "en", "direct", "My simulation generated 1e7 protons with a cosine law on a 3.9 m^2 plane; how do I turn the selected events into an acceptance per rigidity bin?", "hep-measurement", ["correction chains"], None, None, {}),
+ ("d-ms-accept-2", "zh-Hant", "direct", "模擬在 3.9 平方公尺的平面上以 cosine 分布產生了一千萬個質子，要怎麼把選到的事件換算成每個剛度區間的接受度？", "hep-measurement", ["correction chains"], None, None, {}),
+    # batch D, M9: anisotropy in right ascension (anisotropy.py)
+ ("d-ms-aniso-1", "en", "direct", "How do I test my cosmic-ray arrival directions for a first-harmonic anisotropy in right ascension, with the exposure and an upper limit on the amplitude?", "hep-measurement", ["cosmic-ray measurements"], None, None, {}),
+ ("d-ms-aniso-2", "zh-Hant", "direct", "宇宙線到達方向在赤經上的一次諧波各向異性要怎麼分析？曝光怎麼算，振幅上限怎麼給？", "hep-measurement", ["cosmic-ray measurements"], None, None, {}),
 ]
 
 cases = []

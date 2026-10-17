@@ -20,6 +20,7 @@ multi-file structuring, encoding) — this file is venue-specific setup only.
 - [Common compile errors](#common-compile-errors)
 - [Length-limit tactics](#length-limit-tactics)
 - [Venue rules: sources and last-verified dates](#venue-rules-sources-and-last-verified-dates)
+- [Chinese typesetting (xeCJK, ctex)](#chinese-typesetting-xecjk-ctex)
 
 ## Quick reference
 
@@ -49,6 +50,14 @@ is quoted as a hard limit.
 | TMLR | Venue's own LaTeX template | No page limit (long papers review more slowly) | Journal-style open review, closer to a physics journal's process |
 | JMLR | `jmlr2e.sty` | No hard limit; > 35 pages (with appendices) risks rejection, > 50 pages needs a cover-letter justification; abstract ≤ 200 words | Journal review; non-JMLR style is rejected without review |
 | Statistics journals (JASA, Annals of Statistics, ...) | Usually plain `article`-based | Not verified | Journal-specific reference style; theorem/proof structure for theory papers |
+| PLB | `elsarticle.cls` (Elsevier; see the `elsarticle` row of the sources table) | Not verified: the guide for authors could not be fetched; read it before quoting a limit | Elsevier house style |
+| NPB | `elsarticle.cls` (Elsevier) | Not verified (same) | Elsevier house style |
+| NIM A | `elsarticle.cls` (Elsevier) | Not verified (same) | Instrumentation and detector papers |
+| JINST | `article` + SISSA's `jinstpub.sty` (`\documentclass[11pt,a4paper]{article}`, `\usepackage{jinstpub}`) | No limit in the author pages read | `\abstract{}` (citations in it strongly discouraged), `\keywords{}` (the published ones are those chosen at submission); `JHEP.bst`, natbib `sort&compress`, references in order of citation, each work once and one work per item, no self-citation; a front matter over 2 pages moves the full author list to the end (since March 2025) |
+| PoS (proceedings) | `pos.sty` with the conference's pre-filled `skeleton.tex` from the author work area (also an Overleaf template) | Set per conference; not in the general author page | English only; keep `\FullConference{}` as given; upload one uncompressed PDF; CC BY-NC-ND 4.0 by default |
+| SciPost Physics | Journal template | Not verified: the site's bot check blocked reading (to-verify) | Check the journal's own instructions |
+| PTEP | Journal class (Oxford University Press) | Not verified: the publisher page blocked reading (to-verify) | Check the journal's own instructions |
+| Chinese Physics C | Journal template (IOP) | Not verified: the author-guideline page did not load (to-verify) | Check the journal's own instructions |
 | arXiv preprint | Whatever the target journal uses, or `article` | Match target venue | arXiv runs BibTeX/biber itself; upload any `.sty`/`.cls` not in TeX Live; don't mix PS and PDF figures |
 
 ## Getting the right class file
@@ -373,5 +382,31 @@ value comes from a search engine's copy of that official page.
 | Astroparticle Physics (journal) | page/word limits, reference style, abstract length, highlights requirement: not verified (publisher pages returned HTTP 403). Take them from the journal's Guide for Authors | https://www.sciencedirect.com/journal/astroparticle-physics/publish/guide-for-authors (not fetchable) | 2026-10 |
 | A&A | `aa.cls`; Letters 3,000 words (search copy only, not verified); structured abstract optional (search copy). aanda.org returned HTTP 403; a "100-word Letter abstract" snippet conflicts and is unsourced | https://www.aanda.org/doc_journal/instructions/aadoc.pdf (not fetchable) | 2026-10 |
 | Statistics journals (JASA, Annals of Statistics) | not verified: the Annals page defers to a "Preparation of Manuscripts" page that was not followed, and tandfonline returned HTTP 403 | https://imstat.org/journals-and-publications/annals-of-statistics/annals-of-statistics-manuscript-submission/ | 2026-10 |
+
+| JINST | `jinstpub.sty`, front matter, `\abstract`, `\keywords`, bibliography rules | https://jinst.sissa.it/jinst/help/JINST_TeXclass.jsp ; author manual https://jinst.sissa.it/jinst/help/JINST/TeXclass/jinst-author-manual.pdf (read: sections 2 and 5) | 2026-10-17 |
+| JINST | full author list at the end when the front matter exceeds 2 pages (March 2025) | https://jinst.sissa.it/jinst/help/helpLoader.jsp?pgType=author | 2026-10-17 |
+| PoS | `pos.sty`, conference `skeleton.tex`, PDF upload, English only, CC BY-NC-ND 4.0 | https://pos.sissa.it/cgi-bin/reader/info.cgi?p=authors (page read in full) | 2026-10-17 |
+| PLB / NPB / NIM A | length and format limits: to-verify (ScienceDirect returned a robot check); the class is `elsarticle` (row above) | https://www.sciencedirect.com/journal/physics-letters-b/publish/guide-for-authors and the NPB and NIM A equivalents (not fetchable) | to-verify |
+| SciPost Physics | template and limits: to-verify (bot check) | https://scipost.org/SciPostPhys/authoring (not fetchable) | to-verify |
+| PTEP | class and limits: to-verify (browser check) | https://academic.oup.com/ptep/pages/General_Instructions (not fetchable) | to-verify |
+| Chinese Physics C | template and limits: to-verify (HTTP 502) | http://cpc.ihep.ac.cn/news/Author.htm, linked from https://iopscience.iop.org/journal/1674-1137 (not fetchable) | to-verify |
+| ctex, xeCJK (TeX Live 2026) | `ctexart`/`ctexbook`/`ctexrep`/`ctexbeamer`; options `scheme`, `zihao`, `fontset` (adobe, fandol, founder, mac, macnew, macold, ubuntu, windows, none); engines | the bundles' own sources in TeX Live 2026 (`ctex.dtx` documentation, `xeCJK.sty`), read locally | 2026-10-17 |
+
+
+## Chinese typesetting (xeCJK, ctex)
+
+- Compile Chinese documents with XeLaTeX, the common choice. The ctex bundle (`ctexart`, `ctexbook`, `ctexrep`,
+  `ctexbeamer`, or `\usepackage{ctex}` on a standard class) has engine files for XeLaTeX (it loads xeCJK), LuaLaTeX,
+  pdfLaTeX (through the CJK or CJKutf8 package, with fewer font choices), upLaTeX and ApTeX, and sets Chinese
+  headings, line spacing and sizes (`scheme = chinese`; `zihao = 5` or `-4` for the body).
+- Fonts: ctex detects the operating system and picks a `fontset` (mac, windows, ubuntu, ...); `fontset = fandol`
+  uses the free Fandol fonts shipped with TeX Live, which also works on a build server. Check that the chosen fonts
+  cover Traditional characters before a long document; a missing glyph is a warning in the log, not an error.
+- With xeCJK alone (no ctex): `\setCJKmainfont{...}` names the font; English text keeps the Latin font.
+- A thesis: `<plugin root>/skills/hep-communication/assets/paper/thesis-skeleton-zh.tex` (ctexbook, Chinese and
+  English abstracts, chapters, a systematics table, `[VALUE NEEDED]` placeholders) builds with `xelatex`. A
+  university's own thesis class replaces it when the school provides one.
+- A Chinese and an English version of the same paper state the same numbers and the same claim strength;
+  `scripts/audit_claims.py --compare` checks that.
 
 **Done when:** the manuscript compiles in the venue's current class and meets the limits in the quick-reference table, rechecked when the row is older than a year.

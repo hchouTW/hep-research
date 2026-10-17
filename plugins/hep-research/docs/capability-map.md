@@ -24,7 +24,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | systematic-scaling | Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection | hep-measurement | tool | yes | M5, S2 |  |
 | collection-time | Collection time per period with quality cuts, cutoff transmission and eras | hep-measurement | tool | yes | M1 |  |
 | spectral-transform | Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging) | hep-measurement | tool | yes | M7, M8 |  |
-| acceptance-from-generation | Acceptance from generation records | hep-measurement | none | yes | M2 |  |
+| acceptance-from-generation | Acceptance from generation records | hep-measurement | tool | yes | M2 |  |
 | response-folding | Response objects, forward folding, double-counting checks | hep-detector | tool | yes | D5 |  |
 | resolution-efficiency | Resolution and efficiency at detector level (tag-and-probe, truth matching, weighted efficiency) | hep-detector | tool | yes | D8 |  |
 | fast-spectrometer-simulation | Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras) | hep-detector | tool | yes | D7 |  |
@@ -34,7 +34,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | tool | yes | D10 |  |
 | stability-monitoring | Stability monitoring over time (trends, change points, era boundaries) | hep-detector | tool | yes | D11 |  |
 | detector-design | Detector design principles and a sourced detector atlas | hep-detector | tool | yes | D6, D13, D14 |  |
-| geomagnetic-backtracing | Geomagnetic backtracing with an external tracer | hep-detector | none | yes | D12 |  |
+| geomagnetic-backtracing | Geomagnetic backtracing with an external tracer | hep-detector | tool | yes | D12 |  |
 | fits-and-limits | Likelihoods, binned and unbinned fits, template fits, intervals and limits, significance and look-elsewhere effects | hep-statistics | tool | yes | S7, S8 |  |
 | covariance-and-combinations | Covariance assembly and validation, combinations, comparisons with published records | hep-statistics | tool | yes | S3, S4 |  |
 | unfolding | Unfolding with regularization and coverage | hep-statistics | tool | yes | S10 |  |
@@ -62,9 +62,10 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | eft-global-fits | EFT global fits | hep-theory | none | no |  | out-of-v1-2 |
 | ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |
 | propagation-global-fits | Global cosmic-ray propagation fits that run a propagation code | hep-statistics | none | no |  | out-of-v1-1 |
-| dark-matter-phenomenology | Dark-matter phenomenology and interpretation of excesses | hep-theory | none | no (enters with Th5) |  | wp11-bound-dm-1, wp11-bound-dm-2 |
+| dark-matter-excess-interpretation | Interpreting an excess with a dark-matter model (which model explains a signal) | hep-theory | none | no |  | wp11-bound-dm-1, wp11-bound-dm-2 |
 | heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1 |
 | nuclear-structure | Nuclear-structure calculations (shell model, density functionals) | hep-theory | none | no |  | th-nucstruct-1 |
 | relic-density-solvers | Full relic-density Boltzmann solvers | hep-theory | none | no |  | th-relic-1 |
 | neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | tool | yes | Th4 |  |
+| dark-matter-phenomenology | Dark-matter phenomenology conventions: spin-independent recoil rates in the standard halo model, form factors, J and D factors, flux prefactors, relic-density conventions (no Boltzmann solver) | hep-theory | tool | yes | Th5 |  |
 <!-- /capability-map -->

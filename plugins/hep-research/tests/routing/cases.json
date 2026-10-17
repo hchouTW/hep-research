@@ -4264,6 +4264,387 @@
     "RooFit/RooStats",
     "low or zero counts"
    ]
+  },
+  {
+   "id": "d-st-cov-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a covariance for my energy-scale uncertainty correlated over log energy with a correlation length, and show how the fit changes with that length.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ]
+  },
+  {
+   "id": "d-st-cov-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "時間相關的系統誤差要怎麼組成協方差矩陣？相關長度不知道時要怎麼掃描？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ]
+  },
+  {
+   "id": "d-st-scale-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit one spectral model to two experiments' published fluxes where one has a 3% energy-scale uncertainty; add it as a nuisance on the energy axis.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits of model parameters to published data points with their covariance",
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "d-st-scale-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩組已發表的能譜一起擬合，其中一組的能量刻度有 2% 不確定度，要怎麼放成 nuisance？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "d-st-period-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Is there a periodic signal in my unevenly sampled light curve? Calibrate the Lomb-Scargle peak against red noise.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "d-st-period-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "這條時間序列有沒有週期性？紅噪聲背景下全域顯著性要怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "d-st-time-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Did my detector-rate series change level at some point? Calibrate the change-point threshold to a 5% false-alarm rate, with the correlated noise I have.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "d-st-time-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "宇宙線強度落後太陽活動幾個月？上升段與下降段的遲滯要怎麼量，顯著性怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "d-st-unfold-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Unfold my spectrum with pyunfold, with the number of iterations fixed in advance, and show closure, stress tests and toy coverage.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding with regularization and coverage"
+   ]
+  },
+  {
+   "id": "d-st-unfold-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 RooUnfold 的 Bayes 方法反摺積，迭代次數要怎麼先決定？閉合測試與覆蓋率怎麼檢查？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding with regularization and coverage"
+   ]
+  },
+  {
+   "id": "d-th-lepton-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How far can a 1 TeV electron travel before synchrotron and inverse-Compton losses on the CMB drain it, with Klein-Nishina corrections?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
+  },
+  {
+   "id": "d-th-lepton-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "1 TeV 正電子在 3 μG 磁場與星際輻射場中的能量損失時間是多少？要考慮 Klein-Nishina 效應。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
+  },
+  {
+   "id": "d-th-dm-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the spin-independent recoil spectrum of a 100 GeV WIMP on xenon with the Helm form factor and the standard halo model, stating every convention.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
+  },
+  {
+   "id": "d-th-dm-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "暗物質湮滅的 J 因子要怎麼定義？NFW 輪廓要積分到多大的角度？自共軛因子用 1/2 還是 1/4？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
+  },
+  {
+   "id": "d-th-coal-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Convert a coalescence momentum p0 = 80 MeV into B_2 for antideuterons and build the antideuteron yield from my antiproton yield.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
+  },
+  {
+   "id": "d-th-coal-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "反氘核的 coalescence 參數 B_A 和 p0 怎麼互換？Wigner 函數模型的權重又是什麼？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
+  },
+  {
+   "id": "d-th-astro-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the gamma-ray spectrum from pi0 decay for my pion spectrum, and the neutrino flavour ratio at Earth for a 1:2:0 source.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
+  },
+  {
+   "id": "d-th-astro-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "質子撞 CMB 光子的 photopion 閾值能量是多少？順便說明 Hillas 判據與擴散激波加速的譜指數。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
+  },
+  {
+   "id": "d-cc-pairs-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check that the reconstruction and calibration versions of data and simulation match in each era of my analysis.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
+  },
+  {
+   "id": "d-cc-pairs-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "幫我檢查每個時期資料與模擬用的重建與校準軟體版本是否一致。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
+  },
+  {
+   "id": "d-cc-preserve-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What must I archive so my analysis can be rerun and re-folded after the experiment ends?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "reproducible scientific software"
+   ]
+  },
+  {
+   "id": "d-cc-preserve-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "實驗結束後要保存哪些東西，分析才能重跑？請給我保存清單。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "reproducible scientific software"
+   ]
+  },
+  {
+   "id": "d-cc-uproot-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Summarize the mean, RMS and effective entries of a histogram in my ROOT file with uproot, without PyROOT.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "uproot/awkward"
+   ]
+  },
+  {
+   "id": "d-cc-uproot-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "沒有 PyROOT，用 uproot 讀 ROOT 檔的直方圖並算平均值、RMS 與有效事件數。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "uproot/awkward"
+   ]
+  },
+  {
+   "id": "d-cc-columnar-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My ntuples don't fit in memory: how do I fill histograms chunk by chunk with uproot and get the same result as one pass?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "data I/O and formats"
+   ]
+  },
+  {
+   "id": "d-cc-columnar-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "Parquet 與 HDF5 的大檔案記憶體放不下，要怎麼分批處理並確定結果和一次讀完相同？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "data I/O and formats"
+   ]
+  },
+  {
+   "id": "d-cc-workflow-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Turn my analysis steps into a Snakemake workflow with a run record per step that reruns byte for byte.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
+  },
+  {
+   "id": "d-cc-workflow-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把分析步驟寫成一個工作流程（DAG），每一步都留下執行紀錄，重跑結果完全相同。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
+  },
+  {
+   "id": "d-cc-venue-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up my thesis in Chinese with XeLaTeX and ctex, and tell me the JINST class and bibliography rules for the paper version.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "theses"
+   ]
+  },
+  {
+   "id": "d-cc-venue-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要用 xeCJK 排中文博士論文，也想知道投 JINST 要用哪個 class。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "theses"
+   ]
+  },
+  {
+   "id": "d-cc-spectrum-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Plot E^2.7 times the flux from these two dataset records with Lafferty-Wyatt bin positions and status labels in the caption.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "figures and tables"
+   ]
+  },
+  {
+   "id": "d-cc-spectrum-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把兩筆通量資料畫成 E^2.7 加權的能譜圖，圖說要標明資料狀態，而且不要看起來像合併結果。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "figures and tables"
+   ]
+  },
+  {
+   "id": "d-det-backtrace-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Backtrace cosmic-ray trajectories through IGRF plus an external field model to get the cutoff grid and the penumbra along my balloon instrument's flight path.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "astroparticle instruments"
+   ]
+  },
+  {
+   "id": "d-det-backtrace-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 OTSO 反向追蹤宇宙線軌跡，算出這組緯度經度網格的截止剛度與半影寬度。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "astroparticle instruments"
+   ]
+  },
+  {
+   "id": "d-ms-accept-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My simulation generated 1e7 protons with a cosine law on a 3.9 m^2 plane; how do I turn the selected events into an acceptance per rigidity bin?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "d-ms-accept-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "模擬在 3.9 平方公尺的平面上以 cosine 分布產生了一千萬個質子，要怎麼把選到的事件換算成每個剛度區間的接受度？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "d-ms-aniso-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I test my cosmic-ray arrival directions for a first-harmonic anisotropy in right ascension, with the exposure and an upper limit on the amplitude?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "cosmic-ray measurements"
+   ]
+  },
+  {
+   "id": "d-ms-aniso-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "宇宙線到達方向在赤經上的一次諧波各向異性要怎麼分析？曝光怎麼算，振幅上限怎麼給？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "cosmic-ray measurements"
+   ]
   }
  ]
 }

@@ -9,6 +9,9 @@ measurement should be unfolded at all, and at which level it is published, is a 
 Executable validation: `<plugin root>/core/stats/unfolding_diagnostics.py outer-coverage` repeats data, MC response and
 efficiency draws and the regularization choice inside every outer toy and reports bias, marginal and simultaneous
 coverage; a pull width measured on the ensemble that tuned the regularization is not independent evidence.
+An external package (pyunfold, or RooUnfold through ROOT) runs through `<plugin root>/adapters/unfolding/assets/unfold.py`,
+which applies the same validation to a regularization declared before the run: nominal and reweighted closure, stress
+tests and toy coverage (exit 1 when one fails); `compare-core` checks pyunfold against the core estimator up to 60 bins.
 
 ## Choosing a method
 

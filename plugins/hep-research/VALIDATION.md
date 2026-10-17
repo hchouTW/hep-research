@@ -1913,6 +1913,69 @@ Commands, from the plugin root with `PYTHONDONTWRITEBYTECODE=1`, on the final tr
 Skipped tests are unverified, not passed: they need PyTorch, pyhf, ROOT, uproot, network access or
 `HEP_SLOW_TESTS=1`. Not run: the slow tier, live routing (no description changed), the CLI host checks.
 
+## UPGRADE-D (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
+
+Upgrade plan v1.3, batch D on branch `upgrade/D` from main `7c57cd1b`: S3, S4, S5, S9, S10, M2, M6, M9, Th2, Th5, Th6,
+Th11, C2, C3, C4, C5, C6, Com2, Com4, Com5, D12 and the D13 expansion. Gate decisions (maintainer, 2026-10-17):
+S10 (pyunfold, RooUnfold) and D12 (OTSO) as optional adapters with no extras or CI jobs (G5); the six further atlas
+experiments at the "passages + overview" read level; sources may be fetched for Th5 and Com4 (G6); C6 ships a
+Snakefile template plus a standard-library runner. Each item's tests, run on the parent with the item's test files,
+then on the item's commit:
+
+| Item | Parent | Commit |
+|---|---|---|
+| S3 (`7068e8ee`) | fail (failures=6, errors=4) | pass |
+| S4 (`d04bf00a`) | fail (failures=3) | pass |
+| S5 (`2cd78747`) | fail (errors=6, skipped=2) | pass (skipped=2) |
+| S9 (`829f9fbe`) | fail (errors=9, skipped=2) | pass (skipped=2) |
+| S10 (`0f4d7c4c`) | fail (failures=7) | pass |
+| Th2 (`42ad7086`) | fail (failures=4, errors=8) | pass |
+| Th5 (`98460703`) | fail (failures=2, errors=10) | pass |
+| Th6 (`7321e6dc`) | fail (errors=5) | pass |
+| Th11 (`4cedacd8`) | fail (failures=4, errors=3) | pass |
+| C3 (`76c520c1`) | fail (errors=5) | pass |
+| C4 (`b46124ad`) | fail (failures=2, skipped=3) | pass (skipped=3) |
+| C5 (`63d31062`) | fail (failures=2, errors=2, skipped=2) | pass (skipped=2) |
+| C6 (`98159ba5`) | fail (failures=2, errors=3, skipped=1) | pass (skipped=1) |
+| Com4 (`655033a5`) | fail (failures=19, errors=2) | pass |
+| Com5 (`01c56589`) | fail (failures=4, errors=1) | pass |
+| D12 (`ed36cea3`) | fail (failures=4, errors=7, skipped=1) | pass (skipped=1) |
+| M2 (`ecd989f1`) | fail (failures=3, errors=3) | pass |
+| M9 (`f79b4c5f`) | fail (failures=3, errors=7, skipped=2) | pass (skipped=2) |
+| C2 (`840fd013`) | fail (errors=6) | pass |
+| M6 (`19424afc`) | fail (failures=2, errors=3) | pass |
+| Com2 (`1b7ae5b0`) | fail (failures=2, errors=1) | pass |
+| D13 expansion (hep-detector test) (`25ee70e7`) | pass | pass |
+| D13 expansion, atlas profile test (`25ee70e7`) | fail (failures=1) | pass |
+
+S10 ran in a venv with pyunfold 0.5.0; the other rows in the CI lock venv.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, `8a1da481` | 23 pass, 1 fail (`unittest`: the F-11 README-consistency test still expected one uproot backend; C4 added a second), 2 skipped (CLI host checks); 4278 tests, 1 failure, 232 skipped |
+| `check_relocation.py`, `08b9067b` (the test updated) | pass; 4278 tests, 4040 pass, 0 failures, 238 skipped |
+| `ruff check core contracts`, `mypy` (CI pins) | pass |
+| `measure_entrypoints.py --no-cli` | ok, no warnings: SKILL.md 8,142-10,201 bytes |
+| `check_routing_static.py` | ok, 394 cases; `check_ownership.py`, `check_layering.py`, `check_packaging.py` (README: about 2040 files, 22.4 MB), `check_instruction_text.py` pass |
+| `reference_inventory.py --check`, `capability_map.py --check` | pass; soft-budget warnings only |
+| Default outputs unchanged | S4 without `scale_nuisance` and M6 defaults: every example and existing test result identical; Com2: existing records keep their results (the evidence-linked example changes only its policy version string) |
+| Slow tier, run for these items | S5 global p uniform under white noise (300 series), AR(1) null rejects at 0.05 +- 0.02 (400); S9 false-alarm rate within 3 sigma, the declared covariance restores it under AR(1); M9 Rayleigh law under isotropy (KS) |
+| Local optional runs | pyunfold 0.5.0 equals core D'Agostini to 1e-9 at 8 and 60 bins, toy coverage 0.68; OTSO 1.3.8 (GPL-3.0, run as a separate program) in a pure dipole: the traced cutoff is at or above Stormer at every latitude and within 0.7% at the equator; uproot 5.7.6 and ROOT 6.38.04 agree on the histogram summary; TeX Live 2026 xelatex builds the Chinese thesis skeleton |
+
+Sources read (2026-10-17, generic User-Agent): PDG 2026 "Dark Matter" and "Cosmic Rays" sections; Baxter et al.
+(arXiv:2105.00599, section 3.1, tables 1-2); Duda, Kemper, Gondolo (hep-ph/0608035); Moderski et al.
+(astro-ph/0504388, sections 2.1-2.2, appendix A); Duperray et al. (astro-ph/0503544); Kachelriess et al.
+(1905.01192); Blasi (1311.7346); the JINST author manual and the PoS author page; OTSO's repository and PyPI record
+(license); the detector-atlas sources for Belle II (1011.0352), ALICE (2302.01238), DUNE (2002.02967), JUNO
+(2104.02565), XENONnT (2402.10446) and the Pierre Auger Observatory (1502.01323), each claim's passage and the
+overview sections in the full text. Marked to-verify: the PLB, NPB, NIM A, SciPost, PTEP and Chinese Physics C author
+pages (bot checks or errors), Th5's published reference rate, and the Sullivan attribution of M2's two-disc formula.
+
+Not run: live routing of the 38 new cases (gate G2), the full slow tier, the CLI host checks, RooUnfold (not part of
+the local ROOT), snakemake (not installed; the Snakefile is checked for matching rules only), the Parquet path of
+C5 (no pyarrow locally; CI's columnar job runs it). The run left `__pycache__` folders from tests that start
+`python -I` (the known issue, present on main). Skipped tests are unverified, not passed.
+
 ## UPGRADE-C (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
 
 Upgrade plan v1.3, batch C on branch `upgrade/C` from main `8dab2bb2`: Th1, D4, D3, D2, M4, E-1, Th8, M8, M10, Th4,

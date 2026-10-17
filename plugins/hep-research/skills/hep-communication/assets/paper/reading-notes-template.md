@@ -1,8 +1,12 @@
 # Reading Notes: [Paper Title]
 
 **Citation key (INSPIRE-HEP or BibTeX key):**
+**Identifiers:** arXiv: · DOI: · INSPIRE: (at least one; the literature matrix needs it)
 **Year / venue:**
 **Read on:** [date] · **Pass depth:** 1 / 2 / 3 (see ../../references/reading-papers.md)
+**Read level:** not-opened / metadata-only / abstract+metadata / page / full-text (what was actually read; a claim
+taken from a section you did not read is marked to-verify). A machine-readable copy of these notes is
+`reading-notes-record-template.json` next to this file (checked by `scripts/check_communication.py --checks schema`).
 
 ## One-line summary
 (What the paper does, in one sentence, in your own words.)

@@ -48,14 +48,14 @@ description: "Use when the deliverable is the design or review of an experimenta
 | Any measurement question: check-first proposals, invariants, routing | [analysis guide](references/hep-measurement-guide.md) |
 | Design, triggers, optimization, blinding | [analysis design](references/analysis-design.md); `mask_blinded_bins.py` (synthetic only) |
 | Estimand, fiducial definitions, result levels | [measurements and unfolding](references/measurements-and-unfolding.md) |
-| Efficiencies, exposure, live time, collection time, luminosity, POT | [correction chain](references/correction-chain.md); `collection_time.py` |
+| Efficiencies, acceptance from generation, exposure, live/collection time, luminosity, POT | [correction chain](references/correction-chain.md); `acceptance_from_generation.py`, `collection_time.py` |
 | Backgrounds: control regions, ABCD, sidebands | [backgrounds](references/backgrounds.md) |
 | Physical sources of systematics, variations, scaling class | [systematics](references/systematics.md); `check_systematic_variations.py`, `systematics_table_tex.py` |
 | Normalization, signed weights, cutflows, yields | [weights and normalization](references/weights-normalization.md); `make_yield_table.py` |
 | Histograms, efficiencies with uncertainties | [histograms and efficiencies](references/histograms-efficiencies.md) |
 | Validation, review checks, preservation | [analysis validation](references/analysis-validation.md) |
 | Review a spec or a change; deliverables | [review and artifacts](references/review-and-artifacts.md); `review_measurement_spec.py`, `review_analysis_change.py` |
-| Cosmic-ray flux, ratios, isotopes, anisotropy; flux in another variable | [cosmic-ray measurements](references/cosmic-ray-measurements.md); `cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py`, `spectrum_transform.py`, `isotope_fraction.py` |
+| Cosmic-ray flux, ratios, isotopes, anisotropy; flux in another variable | [cosmic-ray measurements](references/cosmic-ray-measurements.md); `cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py`, `spectrum_transform.py`, `isotope_fraction.py`, `anisotropy.py` |
 | Geomagnetic cutoff, solar modulation | `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py` |
 | Counting reference, ratio of two yields | `counting_reference.py`, `particle_ratio_with_uncertainty.py` |
 | A named experiment's beams or run conditions | the bound profile's `index.md` |

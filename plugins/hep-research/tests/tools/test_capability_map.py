@@ -77,7 +77,7 @@ class MapFile(unittest.TestCase):
     def test_every_v1_out_domain_named_by_the_work_order_is_on_the_map(self):
         ids = {e["id"] for e in cm.load()["capabilities"] if not e["v1"]}
         for d in ("lattice-qcd", "eft-global-fits", "propagation-global-fits", "heavy-ions", "nuclear-structure",
-                  "relic-density-solvers", "dark-matter-phenomenology"):
+                  "relic-density-solvers", "dark-matter-excess-interpretation"):
             self.assertIn(d, ids)
 
     def test_markdown_table_is_generated_from_the_map(self):

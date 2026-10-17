@@ -1,5 +1,5 @@
 """Tests of the shipped detector-atlas ledger: core/evidence/ledger.py passes, the evidence index is in sync, every
-claim carries a complete atlas block with an allowed kind, and coverage matches index.md (six experiments, about ten
+claim carries a complete atlas block with an allowed kind, and coverage matches index.md (twelve experiments, about ten
 claims each, no AMS-02 claim). Run from the profile folder: python3 -m unittest discover -s tests -t tests -v"""
 import json
 import re
@@ -54,7 +54,7 @@ class AtlasLedger(unittest.TestCase):
             self.assertGreaterEqual(n, 9, exp)
             name = "Super-Kamiokande" if exp == "Super-K" else exp
             self.assertRegex(text, rf"\| {re.escape(name)} \| {n} \|")
-        self.assertEqual(len(counts), 6)
+        self.assertEqual(len(counts), 12)
         self.assertNotIn("AMS-02", counts)
 
     def test_values_appear_in_the_claim_sentence(self):
