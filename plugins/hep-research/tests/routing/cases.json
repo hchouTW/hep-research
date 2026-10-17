@@ -3737,6 +3737,26 @@
    "trigger_terms": [
     "goodness of fit"
    ]
+  },
+  {
+   "id": "b-ms-joint-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I fit one flux to two detector eras with different responses and acceptances, with era-correlated nuisances?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "b-ms-joint-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個偵測器時期的響應矩陣不同，要怎麼做聯合擬合同一個通量？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits that use a folded prediction"
+   ]
   }
  ]
 }

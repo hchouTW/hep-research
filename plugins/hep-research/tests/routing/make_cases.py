@@ -372,6 +372,9 @@ C = [
     # batch B, S1: split consistency (split_consistency.py)
  ("b-ms-split-1", "en", "direct", "Do my two data-taking eras agree? I have both fluxes with covariances and a shared calibration uncertainty.", "hep-statistics", ["combinations across datasets or experiments"], None, None, {}),
  ("b-ms-split-2", "zh-Hant", "direct", "把資料分成前後兩半各自量測，兩個結果一致嗎？共同的系統誤差要怎麼扣掉再算卡方？", "hep-statistics", ["goodness of fit"], None, None, {}),
+    # batch B, S6: multi-era joint fit (documentation)
+ ("b-ms-joint-1", "en", "direct", "How do I fit one flux to two detector eras with different responses and acceptances, with era-correlated nuisances?", "hep-statistics", ["nuisance parameters"], None, None, {}),
+ ("b-ms-joint-2", "zh-Hant", "direct", "兩個偵測器時期的響應矩陣不同，要怎麼做聯合擬合同一個通量？", "hep-statistics", ["fits that use a folded prediction"], None, None, {}),
 ]
 
 cases = []
