@@ -130,7 +130,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `poster-and-talk-design.md` | hep-communication | 6.2 | yes | 5 | - | 9257d7b 2026-10-15 |
 | `preprint-to-journal-reconciliation.md` | hep-communication | 2.9 | no | 3 | - | 9257d7b 2026-10-15 |
 | `preregistration-and-registered-reports.md` | hep-communication | 3.5 | no | 1 | - | 9257d7b 2026-10-15 |
-| `primary-sources-and-version-checks.md` | hep-communication | 12.6 | yes | 10 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
+| `primary-sources-and-version-checks.md` | hep-communication | 12.6 | yes | 9 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
 | `reading-papers.md` | hep-communication | 9.8 | no | 9 | hep-statistics | 9257d7b 2026-10-15 |
 | `reproducibility-auditing.md` | hep-communication | 3.1 | no | 9 | hep-computing | 9257d7b 2026-10-15 |
 | `reviewer-style-assessment.md` | hep-communication | 2.1 | yes | 2 | - | 9257d7b 2026-10-15 |

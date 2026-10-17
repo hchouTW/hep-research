@@ -3305,6 +3305,26 @@
    "trigger_terms": [
     "constants"
    ]
+  },
+  {
+   "id": "th-a-kin-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What beam energy is the threshold for antiproton production on a proton at rest, and what is the Dalitz-plot boundary of D0 to K pi pi0?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates and widths"
+   ]
+  },
+  {
+   "id": "th-a-kin-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把這個四動量從質心系 boost 到實驗室系，順便算 s、t、u 與 rapidity。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ]
   }
  ]
 }

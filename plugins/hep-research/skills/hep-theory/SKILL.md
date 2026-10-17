@@ -53,7 +53,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | Recasting a published analysis (MadGraph, Rivet, Delphes, SModelS) | [recasting toolchain](references/recasting-toolchain.md) (documented, not run) |
 | DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |
 | Constants, particle masses and lifetimes, nuclide masses and half-lives, unit conversions, decay Q values (with source and edition) | `physical_data.py` (`core/constants`: CODATA 2022, PDG 2026 subset, AME2020/NUBASE2020) |
-| Phase space, decay widths, narrow width, Breit-Wigner | [amplitudes and widths](references/amplitudes-and-widths.md) |
+| Phase space, decay widths, narrow width, Breit-Wigner | [amplitudes and widths](references/amplitudes-and-widths.md); `kinematics.py` (two-body, boosts, Mandelstam, thresholds, Dalitz, rapidity, width/lifetime/c tau) |
 | Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
 | Schemes, running masses, regularization | [schemes](references/regularization-and-schemes.md) |
 | HEPData table to a dataset record, or a record back to HEPData | `<plugin root>/adapters/hepdata/assets/hepdata_record.py`, `<plugin root>/adapters/hepdata/assets/hepdata_export.py` |

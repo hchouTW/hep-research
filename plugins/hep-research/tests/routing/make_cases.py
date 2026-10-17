@@ -309,6 +309,9 @@ C = [
     # batch A, Th9: physical constants, particle and nuclide data (physical_data.py)
  ("th-a-qvalue-1", "en", "direct", "What is the Q value of the 238U alpha decay from AME2020 masses, and which edition and uncertainty should I quote?", "hep-theory", ["nuclear decays"], None, None, {}),
  ("th-a-const-2", "zh-Hant", "direct", "π⁺ 的質量要用哪一版 PDG 的數值？請附上來源、版本與不確定度。", "hep-theory", ["constants"], None, None, {}),
+    # batch A, Th7: four-vector kinematics (kinematics.py)
+ ("th-a-kin-1", "en", "direct", "What beam energy is the threshold for antiproton production on a proton at rest, and what is the Dalitz-plot boundary of D0 to K pi pi0?", "hep-theory", ["decay rates and widths"], None, None, {}),
+ ("th-a-kin-2", "zh-Hant", "direct", "把這個四動量從質心系 boost 到實驗室系，順便算 s、t、u 與 rapidity。", "hep-theory", ["cross sections"], None, None, {}),
 ]
 
 cases = []

@@ -4,11 +4,12 @@
   "kinematics": {
    "steward": "hep-theory",
    "status": "implemented-M2",
-   "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians)",
+   "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians); four-vector kinematics (two-body decays, boosts, Mandelstam variables, thresholds, Dalitz boundaries, rapidity, width/lifetime/c tau; Th7)",
    "files": [
-    "relativistic"
+    "relativistic",
+    "fourvector"
    ],
-   "source": "all conversions are generic; no constants embedded, masses are caller-supplied"
+   "source": "all conversions are generic; no constants embedded, masses are caller-supplied; fourvector.py takes hbar and c from core/constants"
   },
   "stats": {
    "steward": "hep-statistics",
