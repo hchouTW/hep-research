@@ -107,6 +107,29 @@ Worked example (synthetic, invented interaction lengths): with x = 10 g/cm2 abov
 P_heavy = 0.55 and 10% of their fragments are reconstructed as the light species, the feed-down is
 1000 x 0.45 x 0.10 = 45 events, to be subtracted before the survival correction.
 
+## Spectral variables
+
+A flux measured in one variable (rigidity, as a magnetic spectrometer measures it) is often compared in another
+(kinetic energy per nucleon, the variable of propagation models). The conversion is a Jacobian and a bin average,
+never a relabeling of the bin edges: the target bin [y1, y2] holds
+`Phi_y = (1 / (y2 - y1)) * sum_i integral over x_i(y1)..x_i(y2) of f_i(x) Phi(x) dx`, with x_i(y) the inverse map for
+isotope i and f_i the isotope fraction at equal source-variable value.
+
+- **One isotope.** With the mapped source edges as target edges the result is exact,
+  `Phi_y = Phi_x (x2 - x1) / (y2 - y1)`, and the statistical covariance scales with the same factors.
+- **Several isotopes.** Each isotope maps the edges differently (A and the mass differ), so the edges of an element in
+  rigidity correspond to different kinetic energies per nucleon for 3He and 4He. The transform then integrates inside
+  source bins and needs a declared within-bin shape (constant, or a local power law). The isotope composition is an
+  input with an uncertainty, and its covariance is reported separately from the statistical one; a published
+  element flux in rigidity converted with an assumed composition is model-dependent, and the comparison carries the
+  composition with it.
+- **Refuse what is missing.** No default Z, A, mass or composition; a target bin that needs the flux outside the
+  measured range is refused, not extrapolated.
+
+`<plugin root>/skills/hep-measurement/scripts/spectrum_transform.py` does this (masses from `core/constants`, the
+variables of `core/kinematics/relativistic.py`), and writes a transformation record (variables, isotopes, masses and
+their sources, composition, shape, input checksum) for the comparison gate.
+
 ## Neutrino and fixed-target specifics
 
 - **Protons on target.** The normalization is the integrated POT of the selected spills (beam-quality and detector-live

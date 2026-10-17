@@ -93,7 +93,7 @@ The astroparticle and cosmic-ray invariants (ON/OFF trials, flux level, cutoff a
 
 ## Executable resources
 
-Scripts in `<plugin root>/skills/hep-measurement/scripts/`; each takes `--status`, prints JSON (tables: a labelled table) and exits 0 ok, 1 finding or failed computation, 2 invalid input, 3 incomplete. Read `--help` first.
+Scripts in `<plugin root>/skills/hep-measurement/scripts/`; each takes `--status`, prints JSON or a labelled table, and exits 0 ok, 1 finding, 2 invalid input, 3 incomplete. Read `--help` first.
 
 - `check_systematic_variations.py`: check that Up/Down variation histograms exist and share the nominal binning, classify each variation's effect as normalization, shape or mixed with a statistical test when the variance of the difference is known (per-sample variances only with `--independent`: a variation made from the same events is correlated with the nominal), and flag same-direction integral shifts as a cue; the direction of a variation is established from its payloads and generation code, not from integrals (ROOT input requires PyROOT, a JSON bin-content input does not).
 - `make_yield_table.py`, `systematics_table_tex.py`: Markdown yield tables and a booktabs systematics table, both labelled with their status.
@@ -104,6 +104,7 @@ Scripts in `<plugin root>/skills/hep-measurement/scripts/`; each takes `--status
 - `review_measurement_spec.py`: verdict-first review draft of a `measurement-spec` from the validator findings (ranked defects, unresolved inputs; `--markdown` in the template's order).
 - `collection_time.py`: collection time per era and bin ([correction chain](correction-chain.md)).
 - `cosmic_ray_flux.py`: differential flux from an observed count, exposure, and bin width (`--bin-width-unit` required), with an exact Garwood interval for any count, a Feldman-Cousins interval on s >= 0 with a known background, Cousins-Highland (default) or seeded profile-FC with an uncertain background; never a negative bound (`flux_upper_limit` when the lower end is 0); the old subtraction only as `--method naive`, labelled approximate.
+- `spectrum_transform.py`: flux in another variable, by isotope ([method](correction-chain.md#spectral-variables)).
 - `cr_spectrum_powerlaw_fit.py`, `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py`: power-law fits, vertical Stormer cutoff (single point and orbit), force-field solar modulation; planning estimates, not backtracing or a propagation model. The broken power law (parameters, normalization at the break, smoothness) is the plugin's one parametrization, shared with hep-statistics `covariance_fit.py`: [convention](../../hep-statistics/references/core-stats-commands.md#broken-power-law); a break's position interval and significance are hep-statistics' (`break-scan`, `global_significance.py`).
 
 Assets in `<plugin root>/skills/hep-measurement/assets/`: `measurement_spec.template.json` and its field guide, `worked-spec.cosmic-ray.synthetic.json`, `measurement-review-template.md`, `review-example.synthetic.json`, `systematics.csv`, `report-template.md`, `cosmic-ray-spectrum.example.json` (synthetic input for the power-law fit).

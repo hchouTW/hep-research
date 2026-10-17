@@ -12,9 +12,10 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-SCRIPTS = ROOT / 'skills' / 'hep-measurement' / 'scripts'
 sys.path.insert(0, str(ROOT))
 from core.status import RUN_STATUSES  # noqa: E402
+SCRIPTS = ROOT / 'skills' / 'hep-measurement' / 'scripts'
+sys.path.insert(0, str(ROOT))
 CORE_STATUSES = sorted(json.loads((ROOT / 'contracts' / 'vocab' / 'core.json').read_text(encoding='utf-8'))
                        ['vocabularies']['artifact_statuses'])
 
@@ -25,6 +26,8 @@ SPECTRUM = {'points': [[10, 1.0], [20, 0.18], [40, 0.03], [80, 0.006]]}
 CHANGES = {'changes': [{'id': 'c1', 'parameter': 'p', 'old': 1, 'new': 2, 'motivation': 'new calibration',
                         'evidence': {'control_sample': 'Z->ee', 'evidence_ids': [], 'independent_of_signal_region': True},
                         'looked_at': ['control-region data']}]}
+TRANSFORM = {'variable': 'rigidity', 'edges': [2, 4, 8], 'values': [1.0, 0.2], 'Z': 2,
+             'composition': {'kind': 'fixed', 'isotopes': [{'A': 4, 'fraction': 1.0}]}}
 YIELDS = 'region,sample,yield,uncertainty\nSR,ttbar,10.5,1.2\n'
 SYST_CSV = ('name,source,effect,applied_via,affected_processes,correlation_key,payload,validation\n'
             'jes,calibration,shape,rerun,all,jes,p,v\n')
@@ -76,6 +79,9 @@ CASES = {
                                         (['--modulate', '--energy', '1', '--mass', '0.938272', '--charge', '1',
                                           '--phi', '0.5', '--lis-normalization', '1e4', '--lis-index=nan'], None),
                                         None, 'json'),
+    'spectrum_transform.py': ((['{f}', '--to', 'kinetic_energy_per_nucleon'], json.dumps(TRANSFORM)),
+                              (['{f}', '--to', 'kinetic_energy_per_nucleon'], json.dumps(TRANSFORM).replace('0.2', 'NaN')),
+                              (['{f}', '--to', 'kinetic_energy_per_nucleon'], '{"variable": '), 'run-json'),
     'systematics_table_tex.py': ((['--input', '{f}', '--status', 'synthetic'], SYST_CSV),
                                  (['--input', '{f}', '--status', 'synthetic'], SYST_CSV.replace(',p,v', ',nan,v')),
                                  (['--input', '{f}', '--status', 'synthetic', '--columns', 'nonexistent'], SYST_CSV),

@@ -50,7 +50,7 @@
    "id": "spectral-transform",
    "capability": "Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging)",
    "owner": "hep-measurement",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "M7",

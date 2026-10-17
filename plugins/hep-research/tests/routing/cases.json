@@ -3657,6 +3657,26 @@
    "trigger_terms": [
     "tag-and-probe"
    ]
+  },
+  {
+   "id": "b-ms-transform-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Convert my helium flux from rigidity bins to kinetic energy per nucleon, propagating the 3He/4He composition uncertainty.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "b-ms-transform-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把以剛度分箱的硼通量換成每核子動能，同位素比例的不確定度要怎麼傳遞？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
   }
  ]
 }

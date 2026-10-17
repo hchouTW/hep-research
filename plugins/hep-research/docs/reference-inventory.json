@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 100588,
+   "bytes": 102439,
    "uncited": 0
   },
   "hep-ml": {
@@ -2344,8 +2344,8 @@
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
    "owner": "hep-measurement",
-   "bytes": 10733,
-   "lines": 129,
+   "bytes": 12496,
+   "lines": 152,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-measurement/SKILL.md",
@@ -2401,8 +2401,8 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16594,
-   "lines": 112,
+   "bytes": 16682,
+   "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",

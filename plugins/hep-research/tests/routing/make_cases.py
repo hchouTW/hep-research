@@ -360,6 +360,9 @@ C = [
     # batch B, D8: weighted and binned tag-and-probe efficiency
  ("b-det-eff-1", "en", "direct", "My tag-and-probe sample has simulation event weights: what is the efficiency per pT bin with a proper interval?", "hep-detector", ["tag-and-probe"], None, None, {}),
  ("b-det-eff-2", "zh-Hant", "direct", "加權的 tag-and-probe 效率要怎麼算區間？每個 pT bin 都要。", "hep-detector", ["tag-and-probe"], None, None, {}),
+    # batch B, M7: spectral-variable transformation (spectrum_transform.py)
+ ("b-ms-transform-1", "en", "direct", "Convert my helium flux from rigidity bins to kinetic energy per nucleon, propagating the 3He/4He composition uncertainty.", "hep-measurement", ["correction chains"], None, None, {}),
+ ("b-ms-transform-2", "zh-Hant", "direct", "把以剛度分箱的硼通量換成每核子動能，同位素比例的不確定度要怎麼傳遞？", "hep-measurement", ["correction chains"], None, None, {}),
 ]
 
 cases = []
