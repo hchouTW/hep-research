@@ -61,7 +61,7 @@
    "id": "acceptance-from-generation",
    "capability": "Acceptance from generation records",
    "owner": "hep-measurement",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "M2"

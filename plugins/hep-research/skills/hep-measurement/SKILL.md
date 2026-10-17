@@ -48,7 +48,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 | Any measurement question: check-first proposals, invariants, routing | [analysis guide](references/hep-measurement-guide.md) |
 | Design, triggers, optimization, blinding | [analysis design](references/analysis-design.md); `mask_blinded_bins.py` (synthetic only) |
 | Estimand, fiducial definitions, result levels | [measurements and unfolding](references/measurements-and-unfolding.md) |
-| Efficiencies, exposure, live time, collection time, luminosity, POT | [correction chain](references/correction-chain.md); `collection_time.py` |
+| Efficiencies, acceptance from generation, exposure, live/collection time, luminosity, POT | [correction chain](references/correction-chain.md); `acceptance_from_generation.py`, `collection_time.py` |
 | Backgrounds: control regions, ABCD, sidebands | [backgrounds](references/backgrounds.md) |
 | Physical sources of systematics, variations, scaling class | [systematics](references/systematics.md); `check_systematic_variations.py`, `systematics_table_tex.py` |
 | Normalization, signed weights, cutflows, yields | [weights and normalization](references/weights-normalization.md); `make_yield_table.py` |

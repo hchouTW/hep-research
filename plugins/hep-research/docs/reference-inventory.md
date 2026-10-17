@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-communication | 57 | 411 | 0 |
 | hep-computing | 36 | 318 | 0 |
 | hep-detector | 37 | 472 | 0 |
-| hep-measurement | 13 | 113 | 0 |
+| hep-measurement | 13 | 114 | 0 |
 | hep-ml | 42 | 192 | 0 |
 | hep-statistics | 13 | 185 | 0 |
 | hep-theory | 18 | 121 | 0 |
@@ -220,7 +220,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-design.md` | hep-measurement | 13.1 | yes | 17 | hep-computing, hep-detector | fe71ebcf 2026-10-17 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `backgrounds.md` | hep-measurement | 5.9 | yes | 26 | hep-detector | ccc1eb2a 2026-10-17 |
-| `correction-chain.md` | hep-measurement | 12.8 | yes | 14 | hep-detector, hep-theory | ccc1eb2a 2026-10-17 |
+| `correction-chain.md` | hep-measurement | 14.3 | yes | 15 | hep-detector, hep-theory | ccc1eb2a 2026-10-17 |
 | `cosmic-ray-measurements.md` | hep-measurement | 19.9 | yes | 4 | - | 485e96cb 2026-10-17 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 12 | hep-computing | 9257d7b5 2026-10-15 |
 | `hep-measurement-guide.md` | hep-measurement | 16.5 | yes | 10 | hep-detector | 172a3335 2026-10-17 |

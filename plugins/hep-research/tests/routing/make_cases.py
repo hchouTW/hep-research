@@ -501,6 +501,9 @@ C = [
     # batch D, D12: geomagnetic backtracing (adapters/geomagnetic-backtracing, OTSO)
  ("d-det-backtrace-1", "en", "direct", "Backtrace cosmic-ray trajectories through IGRF plus an external field model to get the cutoff grid and the penumbra along my balloon instrument's flight path.", "hep-detector", ["astroparticle instruments"], None, None, {}),
  ("d-det-backtrace-2", "zh-Hant", "direct", "用 OTSO 反向追蹤宇宙線軌跡，算出這組緯度經度網格的截止剛度與半影寬度。", "hep-detector", ["astroparticle instruments"], None, None, {}),
+    # batch D, M2: acceptance from generation records (acceptance_from_generation.py)
+ ("d-ms-accept-1", "en", "direct", "My simulation generated 1e7 protons with a cosine law on a 3.9 m^2 plane; how do I turn the selected events into an acceptance per rigidity bin?", "hep-measurement", ["correction chains"], None, None, {}),
+ ("d-ms-accept-2", "zh-Hant", "direct", "模擬在 3.9 平方公尺的平面上以 cosine 分布產生了一千萬個質子，要怎麼把選到的事件換算成每個剛度區間的接受度？", "hep-measurement", ["correction chains"], None, None, {}),
 ]
 
 cases = []

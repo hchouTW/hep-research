@@ -37,12 +37,21 @@ PERIODS = 'period,start_s,duration_s,live_fraction,cutoff_gv\np1,0,100,0.9,1.5\n
 ISO_CFG = json.dumps(dict(json.loads((ROOT / 'skills' / 'hep-measurement' / 'assets' / 'isotope-fraction.example.json')
                                      .read_text(encoding='utf-8')), mc_events_per_isotope=2000))
 ISO_DATA = json.dumps({'bins': [[3] * 15, [3] * 15]})
+AFG_CFG = json.dumps({'generation': {'surface': 'plane', 'area_m2': 1.0, 'angular': 'cosine', 'n_generated': 100,
+                                     'spectrum': {'kind': 'power-law', 'index': 2.0, 'x_min': 1, 'x_max': 8}},
+                      'x': {'variable': 'rigidity', 'unit': 'GV', 'edges': [1, 2, 4, 8]}})
+AFG_EVENTS = 'x\n1.5\n3.0\n'
 
 # script: (valid args, NaN args, malformed-file args or None, how the status is reported)
 # '{f}' is replaced by a file written from the given text; a dict of texts writes one file per placeholder ('{f}',
 # '{g}'). 'json' reports the status label under status; 'run-json' (core/status.py, F-04) a run status under status
 # and the label under status_label.
 CASES = {
+    'acceptance_from_generation.py': ((['--config', '{f}', '--events', '{g}'], {'{f}': AFG_CFG, '{g}': AFG_EVENTS}),
+                                      (['--config', '{f}', '--events', '{g}'],
+                                       {'{f}': AFG_CFG.replace('"area_m2": 1.0', '"area_m2": NaN'), '{g}': AFG_EVENTS}),
+                                      (['--config', '{f}', '--events', '{g}'], {'{f}': '{"generation": ', '{g}': AFG_EVENTS}),
+                                      'run-json'),
     'check_systematic_variations.py': ((['--json', '{f}'], json.dumps(SYS_JSON)),
                                        (['--json', '{f}'], '{"nominal": [1, NaN], "up": [1, 2], "down": [1, 2]}'),
                                        (['--json', '{f}'], '{"nominal": [1, 2'), 'json'),

@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 112984,
+   "bytes": 114385,
    "uncited": 0
   },
   "hep-ml": {
@@ -2473,8 +2473,8 @@
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
    "owner": "hep-measurement",
-   "bytes": 12846,
-   "lines": 156,
+   "bytes": 14312,
+   "lines": 172,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2484,6 +2484,7 @@
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-measurement/references/systematics.md",
+    "skills/hep-measurement/scripts/acceptance_from_generation.py",
     "skills/hep-measurement/scripts/collection_time.py",
     "skills/hep-measurement/scripts/isotope_fraction.py",
     "skills/hep-theory/references/nuclear-cross-sections.md",
@@ -2541,7 +2542,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16530,
+   "bytes": 16465,
    "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [

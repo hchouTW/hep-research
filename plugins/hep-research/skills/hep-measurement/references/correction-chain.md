@@ -42,6 +42,22 @@ with the same denominator. Its systematic comes from the control-sample statisti
 the tag definition, and the extrapolation from the control kinematics to the signal kinematics. Apply SF to the
 simulated efficiency once; a selection already reweighted by SF in the event weight must not be divided by it again.
 
+## Acceptance from generation records
+
+An acceptance from simulation is `A(x) = G_gen N_sel(x) / N_gen(x)`: the generation factor times the fraction of the
+events generated in the bin that pass the selection. The generation must be declared, not inferred: the surface (a
+plane of area S, or a sphere of radius R), the angular law (the cosine law of an isotropic flux crossing the surface,
+`G_gen = pi S` for one side of a plane, `pi sin^2(theta_max) S` within theta_max, `pi 4 pi R^2` for a sphere), the
+generation spectrum and its range, and the number generated, including every event that missed the instrument. The
+generated count per bin follows from the spectrum (`N_gen(x) = N_generated P(x)`), never from the selected sample.
+`acceptance_from_generation.py` does this with a Clopper-Pearson interval per bin and stops (exit 3) when the generated
+count is missing. Two checks: a one-sided flat detector in an isotropic flux has `G = pi S`; two coaxial discs of radii
+R1, R2 a distance L apart have `G = (pi^2/2) [R1^2 + R2^2 + L^2 - sqrt((R1^2 + R2^2 + L^2)^2 - 4 R1^2 R2^2)]`, which
+tends to `pi^2 R^2` at L = 0 (R1 = R2 = R) and to `A1 A2 / L^2` far apart (the formula is usually attributed to
+Sullivan 1971; to-verify, checked here against a Monte Carlo). Reweighting to a target spectrum changes the acceptance
+within wide bins; a target taken from this measurement's own flux makes the result depend on itself (iterate and
+report it; the script warns).
+
 ## Worked example (synthetic)
 
 All numbers invented. A flux bin with N = 40 selected events, B = 4 expected background (known), acceptance

@@ -4605,6 +4605,26 @@
    "trigger_terms": [
     "astroparticle instruments"
    ]
+  },
+  {
+   "id": "d-ms-accept-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My simulation generated 1e7 protons with a cosine law on a 3.9 m^2 plane; how do I turn the selected events into an acceptance per rigidity bin?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "d-ms-accept-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "模擬在 3.9 平方公尺的平面上以 cosine 分布產生了一千萬個質子，要怎麼把選到的事件換算成每個剛度區間的接受度？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
   }
  ]
 }
