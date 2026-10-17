@@ -4545,6 +4545,26 @@
    "trigger_terms": [
     "environment and run manifests"
    ]
+  },
+  {
+   "id": "d-cc-venue-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up my thesis in Chinese with XeLaTeX and ctex, and tell me the JINST class and bibliography rules for the paper version.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "theses"
+   ]
+  },
+  {
+   "id": "d-cc-venue-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要用 xeCJK 排中文博士論文，也想知道投 JINST 要用哪個 class。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "theses"
+   ]
   }
  ]
 }

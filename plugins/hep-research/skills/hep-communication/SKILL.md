@@ -58,15 +58,15 @@ Answer inline, never from memory: the bound profile's ledger first, else a prima
 | Reading, reviewing, writing papers | [papers guide](references/academic-papers-guide.md) |
 | Paper structure and genres (search, measurement, instrumentation, letter content lists) | [paper structure](references/paper-structure.md), [genre variants](references/paper-genre-variants.md); `check_manuscript.py --blueprint` |
 | Verify a citation, latest result, what a paper states | [citation verification](references/citation-verification.md), [literature recipes](references/literature-lookup-recipes.md) |
-| Bibliography and citation style; primary sources for statistics and detector methods | [citations and bibliography](references/citations-and-bibliography.md), [primary sources](references/primary-sources-and-version-checks.md) |
-| Literature search, matrix, review | [literature discovery](references/literature-discovery-and-search.md); `build_lit_matrix.py` |
-| Claims linked to results; numbers from artifacts (macros, tables, PDG rounding, version compare) | [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md); `audit_claims.py`, `render_results.py` |
-| Figures, tables, physics plots | [figures and tables](references/figures-and-tables.md), [physics plots](references/physics-plots.md) |
-| Diagrams as editable sources | [diagrams guide](references/academic-diagrams-guide.md); `check_diagram_sources.py` |
-| LaTeX checks and venues | [LaTeX venues](references/latex-venue-setup.md); `check_manuscript.py` |
-| Talks and posters | [posters and talks](references/poster-and-talk-design.md) |
-| Referee reports and replies | [reviewer assessment](references/reviewer-style-assessment.md), [comment exchange](references/comment-and-reply-exchange.md) |
-| Audience adaptation, terminology (exposure vs collection time, rigidity vs momentum) | [outreach summaries](references/outreach-and-public-facing-summaries.md); `check_adaptation.py`, `check_terminology.py` with `assets/paper/glossary-template.json` |
+| Bibliography and citation style; primary sources for statistics and detector methods | [bibliography](references/citations-and-bibliography.md), [primary sources](references/primary-sources-and-version-checks.md) |
+| Literature search, matrix with read levels, review | [discovery](references/literature-discovery-and-search.md); `build_lit_matrix.py --require-provenance` |
+| Claims linked to results; numbers from artifacts (macros, tables, PDG rounding, version compare) | [claim mapping](references/claim-evidence-mapping.md), [linked writing](references/evidence-linked-writing.md); `audit_claims.py`, `render_results.py` |
+| Figures, tables, physics plots | [figures](references/figures-and-tables.md), [physics plots](references/physics-plots.md) |
+| Diagrams as editable sources (.dot, .mmd, .puml, .tex) | [diagrams guide](references/academic-diagrams-guide.md); `check_diagram_sources.py` |
+| LaTeX checks and venues; Chinese typesetting, a thesis | [LaTeX venues](references/latex-venue-setup.md); `check_manuscript.py`; `assets/paper/thesis-skeleton-zh.tex` |
+| Talks and posters | [talks](references/poster-and-talk-design.md) |
+| Referee reports and replies | [reviewing](references/reviewer-style-assessment.md), [comment exchange](references/comment-and-reply-exchange.md) |
+| Audience adaptation, terminology (exposure vs collection time, rigidity vs momentum) | [outreach](references/outreach-and-public-facing-summaries.md); `check_adaptation.py`, `check_terminology.py` with `assets/paper/glossary-template.json` |
 | Revisions and literature records; planned claims to recheck | `track_revision_impact.py`, `manage_literature.py`; [citation-verification.md](references/citation-verification.md) |
 | Statistics and astroparticle papers | [statistics and ML papers](references/statistics-and-ml-papers.md), [astroparticle papers](references/astroparticle-and-cosmic-ray-papers.md) |
 

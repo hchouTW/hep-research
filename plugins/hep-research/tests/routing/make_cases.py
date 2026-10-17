@@ -492,6 +492,9 @@ C = [
     # batch D, C6: analysis workflows
  ("d-cc-workflow-1", "en", "direct", "Turn my analysis steps into a Snakemake workflow with a run record per step that reruns byte for byte.", "hep-computing", ["environment and run manifests"], None, None, {}),
  ("d-cc-workflow-2", "zh-Hant", "direct", "把分析步驟寫成一個工作流程（DAG），每一步都留下執行紀錄，重跑結果完全相同。", "hep-computing", ["environment and run manifests"], None, None, {}),
+    # batch D, Com4: venues, Chinese typesetting, read levels
+ ("d-cc-venue-1", "en", "direct", "Set up my thesis in Chinese with XeLaTeX and ctex, and tell me the JINST class and bibliography rules for the paper version.", "hep-communication", ["theses"], None, None, {}),
+ ("d-cc-venue-2", "zh-Hant", "direct", "我要用 xeCJK 排中文博士論文，也想知道投 JINST 要用哪個 class。", "hep-communication", ["theses"], None, None, {}),
 ]
 
 cases = []

@@ -1,0 +1,79 @@
+% Thesis skeleton in Chinese (Traditional characters in the text) with the ctex bundle. Compile with XeLaTeX:
+%   xelatex thesis-skeleton-zh.tex   (run twice for the table of contents)
+% ctexbook sets Chinese headings, spacing and font sizes (scheme = chinese, zihao = -4 below); the fonts are chosen by
+% ctex's fontset detection for the operating system (fontset = mac, windows, ubuntu, fandol, ...). A university's own
+% thesis class replaces this file when the school provides one; keep its rules over these.
+% Every number in a thesis comes from an artifact (see ../../references/academic-papers-guide.md and
+% scripts/render_results.py); [VALUE NEEDED] marks a value that has not been filled from one.
+\documentclass[a4paper, zihao = -4, openany]{ctexbook}
+
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+
+\title{論文題目\\[0.5em]\large English Title of the Thesis}
+\author{作者姓名}
+\date{[VALUE NEEDED: 口試日期]}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+
+\chapter*{摘要}
+\addcontentsline{toc}{chapter}{摘要}
+研究問題、方法、主要結果（含數值與不確定度：[VALUE NEEDED]）、結論。數值須與正文、表格一致。
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+The English abstract states the same result with the same numbers ([VALUE NEEDED]) and the same claim strength.
+
+\tableofcontents
+
+\mainmatter
+
+\chapter{緒論}
+研究動機、物理背景與本論文的貢獻。
+
+\chapter{實驗裝置與資料}
+\section{探測器}
+探測器與觸發；探測器細節引用其公開論文或實驗設定檔，不憑記憶。
+\section{資料與模擬樣本}
+資料期間、模擬樣本與版本。
+
+\chapter{分析方法}
+\section{事例選擇}
+\section{背景估計}
+\section{修正與系統不確定度}
+系統不確定度表（表~\ref{tab:syst}）。
+
+\begin{table}[htbp]
+  \centering
+  \caption{系統不確定度（[VALUE NEEDED]）}
+  \label{tab:syst}
+  \begin{tabular}{lc}
+    \toprule
+    來源 & 相對不確定度 \\
+    \midrule
+    {[VALUE NEEDED]} & {[VALUE NEEDED]} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\chapter{結果}
+測量結果為 $X = \text{[VALUE NEEDED]}$，單位以 \si{\giga\electronvolt} 等標準寫法表示。
+
+\chapter{討論與結論}
+結果的意義、限制與後續工作。
+
+\backmatter
+\begin{thebibliography}{9}
+\bibitem{ref1} [作者], [題目], [期刊或 arXiv 編號] ([年份]).
+\end{thebibliography}
+
+\appendix
+\chapter{補充材料}
+
+\end{document}
