@@ -1855,6 +1855,27 @@ that decides the same question.
 | Ruff 0.16.10, mypy 2.4.0 | clean |
 | Registry | 80 of 80 V parts passing |
 
+## 0.14.0 release check (2026-10-17, E2 and the CI lock)
+
+Release branch `release/0.14.0` from main `5d918484`, which carries the upgrade plan v1.3 (batches 0a-D, PRs
+#131-#136; VALIDATION UPGRADE-0A to UPGRADE-D). Contracts 2.12.0 (vocabulary and optional fields only).
+
+What changed:
+- Version 0.14.0 in both manifests, `pyproject.toml` and the README; CHANGELOG "Unreleased" became 0.14.0.
+- Contracts 2.12.0 in `contracts/__init__.py` (history entry), `vocab/core.json`, the two pinned tests, the 126
+  fixtures, the measurement-spec template, the reading-notes record template and the D5 example response.
+- Examples regenerated with the E2 venv; `bc-propagation-fit`, which records NumPy and SciPy versions, with the CI
+  lock. Only version strings and the hashes that cover them change. The unfolding-coverage round-off drift was
+  reverted. The sbottom benchmark artifacts' `plugin` string was edited by hand. The theory-profile artifacts were
+  regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3), `1d18f860` | 24 pass, 0 fail, 2 skipped (CLI host checks); 4278 tests, 4163 pass, 0 failures, 115 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 24 pass, 0 fail, 2 skipped; 4278 tests, 4046 pass, 0 failures, 232 skipped |
+
+Not run: live routing of the cases added in batches A-D (gate G2), the slow tier, the CLI host checks.
+
 ## 0.13.1 release check (2026-10-17, E2 and the CI lock)
 
 Release branch `release/0.13.1` from main `a6adf48`. It carries the G-ENFORCE inputs for all suites and the README
