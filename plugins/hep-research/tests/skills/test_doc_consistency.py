@@ -116,7 +116,8 @@ class NoAccuracyMetric(unittest.TestCase):
 
 class AsymptoticErrorWording(unittest.TestCase):
     def test_every_mention_says_known_weights(self):
-        for rel in ("skills/hep-statistics/references/likelihood-fitting.md", "skills/hep-statistics/scripts/sweighted_fit.py"):
+        for rel in ("skills/hep-statistics/references/likelihood-fitting.md", "skills/hep-statistics/scripts/sweighted_fit.py",
+                    "skills/hep-statistics/references/roofit-and-roostats-methods.md"):
             body = flat(text(rel))
             sentences = re.split(r"(?<=\.)\s", body)
             hits = [s for s in sentences if "AsymptoticError" in s]

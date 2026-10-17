@@ -4243,6 +4243,27 @@
    "trigger_terms": [
     "model comparison"
    ]
+  },
+  {
+   "id": "c-st-roofit-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run a RooMCStudy pull study of my RooFit model and check its HypoTestInverter CLs limit against an independent implementation.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats"
+   ]
+  },
+  {
+   "id": "c-st-roofit-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "RooFit 的 MINOS 區間和 profile likelihood 掃描要怎麼跟另一套程式交叉檢查？低計數時漸近 CLs 可靠嗎？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats",
+    "low or zero counts"
+   ]
   }
  ]
 }

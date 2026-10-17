@@ -447,6 +447,9 @@ C = [
     # batch C, S8: background tail extrapolation (tail_extrapolation.py)
  ("c-st-tail-1", "en", "direct", "Extrapolate the background tail from my sideband into the signal region with an exponential and a power law, and tell me whether the extrapolation validates.", "hep-statistics", ["low or zero counts", "nuisance parameters"], None, None, {}),
  ("c-st-tail-2", "zh-Hant", "direct", "背景尾巴只在控制區量到，要怎麼外推到訊號區？不同函數形式的差異要怎麼當成不確定度？", "hep-statistics", ["model comparison"], None, None, {}),
+    # batch C, S11 extensions: RooMCStudy pulls and RooFit/RooStats against core (roofit_fit_check.py)
+ ("c-st-roofit-1", "en", "direct", "Run a RooMCStudy pull study of my RooFit model and check its HypoTestInverter CLs limit against an independent implementation.", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
+ ("c-st-roofit-2", "zh-Hant", "direct", "RooFit 的 MINOS 區間和 profile likelihood 掃描要怎麼跟另一套程式交叉檢查？低計數時漸近 CLs 可靠嗎？", "hep-statistics", ["RooFit/RooStats", "low or zero counts"], None, None, {}),
 ]
 
 cases = []

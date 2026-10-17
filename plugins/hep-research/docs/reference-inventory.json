@@ -29,8 +29,8 @@
    "uncited": 0
   },
   "hep-statistics": {
-   "references": 12,
-   "bytes": 179438,
+   "references": 13,
+   "bytes": 184408,
    "uncited": 0
   },
   "hep-theory": {
@@ -3442,12 +3442,12 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "ca23333b 2026-10-17"
+   "last_commit": "a73d421e 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15569,
+   "bytes": 15585,
    "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3468,7 +3468,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "ca23333b 2026-10-17"
+   "last_commit": "a73d421e 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3488,19 +3488,20 @@
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/ml-assisted-inference.md",
+    "skills/hep-statistics/references/roofit-and-roostats-methods.md",
     "skills/hep-statistics/scripts/project_uncertainty.py"
    ],
    "cited_by_other_skills": [
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "13868667 2026-10-13"
+   "last_commit": "a73d421e 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
    "owner": "hep-statistics",
-   "bytes": 9708,
-   "lines": 97,
+   "bytes": 7091,
+   "lines": 65,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/references/root-debugging.md",
@@ -3509,6 +3510,7 @@
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
+    "skills/hep-statistics/references/roofit-and-roostats-methods.md",
     "skills/hep-statistics/references/time-series-inference.md",
     "skills/hep-statistics/scripts/roofit_fit_check.py",
     "tests/skills/hep_statistics/test_weighted_unbinned_fit.py",
@@ -3561,6 +3563,22 @@
     "hep-measurement"
    ],
    "last_commit": "100eb1c3 2026-10-16"
+  },
+  {
+   "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
+   "owner": "hep-statistics",
+   "bytes": 7571,
+   "lines": 99,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/references/likelihood-fitting.md",
+    "skills/hep-statistics/scripts/roofit_fit_check.py",
+    "tests/skills/test_doc_consistency.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",

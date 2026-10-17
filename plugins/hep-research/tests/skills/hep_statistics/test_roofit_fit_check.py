@@ -9,6 +9,7 @@ ok; an EDM above the declared threshold is failed. Without PyROOT, `result` exit
 exits 3 when weighted data come without --weighted-errors; sweights points to sweighted_fit.py. --help runs without
 NumPy. All data are SYNTHETIC."""
 import json
+import math
 import os
 import subprocess
 import sys
@@ -179,6 +180,114 @@ class WithRoot(unittest.TestCase):
         code, out, _ = self.result("no-such-result")
         self.assertEqual(code, 2)
         self.assertEqual(out["status"], "rejected")
+
+
+# ---------------------------------------------------------------- S11 extensions: toys, crosscheck, weighted coverage
+SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
+WORKSPACE = r'''
+import sys, ROOT
+ROOT.gErrorIgnoreLevel = ROOT.kError
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
+x = ROOT.RooRealVar("x", "x", -10, 10)
+m = ROOT.RooRealVar("m", "m", 0.3, -5, 5); s = ROOT.RooRealVar("s", "s", 1.2, 0.1, 5)
+g = ROOT.RooGaussian("g", "g", x, m, s)
+w = ROOT.RooWorkspace("w"); w.Import(g)
+f = ROOT.TFile(sys.argv[1], "RECREATE"); w.Write(); f.Close()
+'''
+WEIGHTED_COVERAGE = r'''
+import json, math, sys, ROOT
+ROOT.gErrorIgnoreLevel = ROOT.kError
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
+ROOT.RooRandom.randomGenerator().SetSeed(7)
+x = ROOT.RooRealVar("x", "x", -10, 10); wv = ROOT.RooRealVar("wv", "wv", 0, 10)
+m = ROOT.RooRealVar("m", "m", 0, -5, 5); s = ROOT.RooRealVar("s", "s", 1.0); s.setConstant(True)
+g = ROOT.RooGaussian("g", "g", x, m, s)
+ntoys, nev, weight = int(sys.argv[1]), 200, 3.0
+cover = {"naive": 0, "asymptotic": 0}
+for t in range(ntoys):
+    m.setVal(0.0)  # generate at the true value
+    raw = g.generate(ROOT.RooArgSet(x), nev)
+    ds = ROOT.RooDataSet("d", "d", ROOT.RooArgSet(x, wv), ROOT.RooFit.WeightVar("wv"))
+    for i in range(raw.numEntries()):
+        x.setVal(raw.get(i).getRealValue("x")); ds.add(ROOT.RooArgSet(x, wv), weight)
+    for kind, opts in (("naive", []), ("asymptotic", [ROOT.RooFit.AsymptoticError(True)])):
+        m.setVal(0.0)
+        r = g.fitTo(ds, ROOT.RooFit.Save(True), ROOT.RooFit.PrintLevel(-1), *opts)
+        p = r.floatParsFinal().find("m")
+        cover[kind] += abs(p.getVal()) <= p.getError()
+print(json.dumps({k: v / ntoys for k, v in cover.items()}))
+'''
+GAUSS_EXP = {"bins": [], "background_uncertainty": {"kind": "common_scale", "sigma": 0.1}}
+for _i, _n in enumerate([22, 18, 21, 30, 41, 33, 15, 12, 10, 9]):  # SYNTHETIC: a Gaussian peak on an exponential
+    _lo, _hi = 100 + 5 * _i, 105 + 5 * _i
+    _s = 20 * (0.5 * (1 + math.erf((_hi - 125) / (3 * math.sqrt(2)))) - 0.5 * (1 + math.erf((_lo - 125) / (3 * math.sqrt(2)))))
+    _b = 200 * (math.exp(-(_lo - 100) / 40) - math.exp(-(_hi - 100) / 40))
+    GAUSS_EXP["bins"].append({"n": _n, "b": round(_b, 6), "s": round(_s, 6)})
+
+
+class ExtensionsWithoutRoot(unittest.TestCase):
+    def test_toys_and_crosscheck_without_pyroot_exit_3(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "ROOT.py").write_text("raise ImportError('ROOT hidden for this test')\n", encoding="utf-8")
+            env = dict(os.environ, PYTHONPATH=f"{d}{os.pathsep}{PLUGIN}", PYTHONDONTWRITEBYTECODE="1")
+            Path(d, "w.root").write_bytes(b"")
+            Path(d, "m.json").write_text(json.dumps(GAUSS_EXP), encoding="utf-8")
+            code, out, _ = run("toys", "--file", Path(d, "w.root"), "--workspace", "w", "--pdf", "g", "--observables",
+                               "x", "--nevents", "100", "--toys", "50", "--seed", "1", env=env)
+            self.assertEqual((code, out["status"]), (3, "missing-dependency"))
+            code, out, _ = run("crosscheck", "--input", Path(d, "m.json"), env=env)
+            self.assertEqual((code, out["status"]), (3, "missing-dependency"))
+
+
+@unittest.skipUnless(has_pyroot(), "no PyROOT on Python >= 3.13 (set HEP_ROOT_PYTHON)")
+class ExtensionsWithRoot(unittest.TestCase):
+    def test_crosscheck_gaussian_on_exponential_agrees_with_core(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "m.json").write_text(json.dumps(GAUSS_EXP), encoding="utf-8")
+            code, out, err = run("crosscheck", "--input", Path(d, "m.json"), python=PYTHON)
+        self.assertEqual(code, 0, (out, err[-800:]))
+        self.assertEqual(out["status"], "ok")
+        self.assertLess(abs(out["mle"]["roofit"] - out["mle"]["core"]), 1e-3)
+        for a, b in zip(out["minos"]["roofit"], out["minos"]["core_profile"]):
+            self.assertLess(abs(a - b), 2e-3)
+        self.assertLess(max(abs(r["diff"]) for r in out["profile_scan"]), 2e-3)
+        cls = out["asymptotic_cls"]
+        self.assertLess(abs(cls["roostats"] / cls["core"] - 1), 0.01)
+
+    def test_toys_report_pull_moments(self):
+        with tempfile.TemporaryDirectory() as d:
+            script, ws = Path(d, "ws.py"), Path(d, "ws.root")
+            script.write_text(WORKSPACE, encoding="utf-8")
+            subprocess.run([PYTHON, str(script), str(ws)], check=True, capture_output=True, timeout=600)
+            n = 1000 if SLOW else 200
+            code, out, err = run("toys", "--file", ws, "--workspace", "w", "--pdf", "g", "--observables", "x",
+                                 "--nevents", "500", "--toys", n, "--seed", "3", python=PYTHON)
+        self.assertEqual(code, 0, (out, err[-500:]))
+        for name in ("m", "s"):
+            p = out["pulls"][name]
+            self.assertEqual(p["n"], n)
+            self.assertTrue(p["consistent_with_unit_normal"], p)
+        self.assertEqual(out["fits"]["failed"], 0)
+
+    @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
+    def test_toy_cls_at_low_counts(self):
+        low = {"bins": [{"n": 2, "b": 1.5, "s": 1.0}, {"n": 1, "b": 0.8, "s": 0.6}]}
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "m.json").write_text(json.dumps(low), encoding="utf-8")
+            code, out, err = run("crosscheck", "--input", Path(d, "m.json"), "--cls-toys", "500", "--seed", "1",
+                                 python=PYTHON)
+        self.assertEqual(code, 0, (out, err[-500:]))
+        self.assertGreater(out["toy_cls"]["roostats_toy_cls_upper_limit"], 0)
+
+    @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
+    def test_known_constant_weights_asymptotic_error_covers_and_naive_hessian_does_not(self):
+        with tempfile.TemporaryDirectory() as d:
+            script = Path(d, "cov.py")
+            script.write_text("import math\n" + WEIGHTED_COVERAGE, encoding="utf-8")
+            p = subprocess.run([PYTHON, str(script), "300"], capture_output=True, text=True, timeout=1800)
+        cov = json.loads(p.stdout.strip().splitlines()[-1])
+        self.assertLess(abs(cov["asymptotic"] - 0.6827), 0.08, cov)
+        self.assertLess(cov["naive"], 0.55, cov)
 
 
 if __name__ == "__main__":
