@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 13 | 113 | 0 |
 | hep-ml | 42 | 192 | 0 |
 | hep-statistics | 13 | 185 | 0 |
-| hep-theory | 15 | 107 | 0 |
+| hep-theory | 16 | 112 | 0 |
 
 ## Overlapping pairs
 
@@ -283,7 +283,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `time-series-inference.md` | hep-statistics | 18.8 | yes | 15 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
 | `unfolding.md` | hep-statistics | 7.3 | yes | 27 | hep-detector, hep-measurement | 0f4d7c4c 2026-10-17 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 20.2 | yes | 16 | hep-detector | 26970179 2026-10-17 |
+| `cosmic-ray-propagation.md` | hep-theory | 20.2 | yes | 17 | hep-detector | 42ad7086 2026-10-17 |
+| `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 3 | - | untracked |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 2 | - | 351029c0 2026-10-07 |

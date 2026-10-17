@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 15,
-   "bytes": 106798,
+   "references": 16,
+   "bytes": 111940,
    "uncited": 0
   }
  },
@@ -3725,6 +3725,7 @@
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dark-matter-phenomenology.md",
     "skills/hep-theory/references/nuclear-cross-sections.md",
     "skills/hep-theory/scripts/lepton_energy_losses.py",
     "tests/skills/hep_theory/test_charge_sign_modulation_th3.py",
@@ -3733,7 +3734,21 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "26970179 2026-10-17"
+   "last_commit": "42ad7086 2026-10-17"
+  },
+  {
+   "path": "skills/hep-theory/references/dark-matter-phenomenology.md",
+   "owner": "hep-theory",
+   "bytes": 5142,
+   "lines": 69,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/scripts/dm_direct_rate.py",
+    "tests/skills/hep_theory/test_dark_matter_phenomenology.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",

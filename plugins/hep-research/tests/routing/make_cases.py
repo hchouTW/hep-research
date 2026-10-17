@@ -468,6 +468,9 @@ C = [
     # batch D, Th2: electron and positron energy losses (lepton_energy_losses.py)
  ("d-th-lepton-1", "en", "direct", "How far can a 1 TeV electron travel before synchrotron and inverse-Compton losses on the CMB drain it, with Klein-Nishina corrections?", "hep-theory", ["astroparticle physics"], None, None, {}),
  ("d-th-lepton-2", "zh-Hant", "direct", "1 TeV 正電子在 3 μG 磁場與星際輻射場中的能量損失時間是多少？要考慮 Klein-Nishina 效應。", "hep-theory", ["astroparticle physics"], None, None, {}),
+    # batch D, Th5: dark-matter conventions (dm_direct_rate.py)
+ ("d-th-dm-1", "en", "direct", "Compute the spin-independent recoil spectrum of a 100 GeV WIMP on xenon with the Helm form factor and the standard halo model, stating every convention.", "hep-theory", ["conventions"], None, None, {}),
+ ("d-th-dm-2", "zh-Hant", "direct", "暗物質湮滅的 J 因子要怎麼定義？NFW 輪廓要積分到多大的角度？自共軛因子用 1/2 還是 1/4？", "hep-theory", ["conventions"], None, None, {}),
 ]
 
 cases = []

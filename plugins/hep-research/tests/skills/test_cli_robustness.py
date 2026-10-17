@@ -163,6 +163,7 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-theory/scripts/running_coupling.py": "numbers on the command line",
     "skills/hep-theory/scripts/decay_chain.py": "numbers and nuclide names on the command line",
     "skills/hep-theory/scripts/lepton_energy_losses.py": "numbers on the command line",
+    "skills/hep-theory/scripts/dm_direct_rate.py": "numbers on the command line",
     "skills/hep-ml/scripts/benchmark_model.py": "a synthetic model, no input",
     "skills/hep-ml/scripts/check_dataset_contract.py": "a synthetic dataset, no input",
     "skills/hep-ml/scripts/check_pytorch_env.py": "inspects the environment",

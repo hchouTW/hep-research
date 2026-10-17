@@ -49,20 +49,19 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | PDF sets, LHAPDF, PDF uncertainty | [PDFs](references/pdfs-and-lhapdf.md); `pdf_uncertainty.py` |
 | SMEFT and EFT conventions, truncation | [SMEFT](references/smeft-and-eft.md); `eft_truncation.py` |
 | Cosmic-ray propagation (fits outside v1), lepton losses; nuclear cross sections | [propagation](references/cosmic-ray-propagation.md); [nuclear xs](references/nuclear-cross-sections.md); `lepton_energy_losses.py` |
-| Event generation (ME order, shower, matching), event weights | [event generation](references/event-generation.md); `event_weights.py` |
+| Event generation (ME order, shower, matching), weights | [event generation](references/event-generation.md); `event_weights.py` |
 | Recasting (MadGraph, Rivet, Delphes, SModelS) | [recasting](references/recasting-toolchain.md) (documented, not run) |
 | DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |
-| Constants (CODATA edition), masses, lifetimes, nuclides, units (GeV^-2 to mb), Q values | `physical_data.py` |
-| Two-body decays, boosts, invariant mass, Mandelstam s t u, thresholds, Dalitz, rapidity, width/lifetime/c tau | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
-| Neutrino oscillations (PMNS, vacuum, constant-density matter) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
-| Nuclear masses and Q values, decay chains (Bateman), equilibrium, S factor | [nuclear essentials](references/nuclear-physics-essentials.md); `decay_chain.py` |
-| Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
-| alpha_s running (1-4 loops, thresholds); CKM and PMNS conventions; PDG MC codes | [essentials](references/particle-physics-essentials.md); `running_coupling.py` |
-| Schemes, running masses, regularization | [schemes](references/regularization-and-schemes.md) |
-| A published table (CSV, FITS, HEPData) to a dataset record, or back to HEPData | `import_published_table.py`; `<plugin root>/adapters/hepdata/assets/` |
-| Surrogates of a theory | `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md` |
-| Shipped theory-domain profiles | `<plugin root>/profiles/registry.json` |
-| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |
+| Constants (CODATA), masses, lifetimes, nuclides, units, Q values | `physical_data.py` |
+| Two-body decays, boosts, Mandelstam, thresholds, Dalitz, rapidity, lifetimes | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
+| Neutrino oscillations (vacuum, constant density) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
+| Dark matter: recoil rates (SHM, Helm), J factors, relic estimates | [dark matter](references/dark-matter-phenomenology.md); `dm_direct_rate.py` |
+| Nuclear masses, Q values, decay chains, equilibrium, S factor | [nuclear essentials](references/nuclear-physics-essentials.md); `decay_chain.py` |
+| alpha_s running; CKM, PMNS conventions; PDG MC codes | [essentials](references/particle-physics-essentials.md); `running_coupling.py` |
+| Is a process or diagram allowed; schemes, running masses | [selection rules](references/selection-rules.md); [schemes](references/regularization-and-schemes.md) |
+| Published tables (CSV, FITS, HEPData) to and from dataset records | `import_published_table.py`; `<plugin root>/adapters/hepdata/assets/` |
+| Surrogates of a theory; shipped theory profiles | `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md`; `<plugin root>/profiles/registry.json` |
+| Outside v1 (lattice QCD, EFT or propagation global fits) | say so; `<plugin root>/docs/routing-contract.md`, Scope of v1 |
 
 Folder guide for people: [README.md](README.md).
 

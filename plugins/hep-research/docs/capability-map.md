@@ -62,9 +62,10 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | eft-global-fits | EFT global fits | hep-theory | none | no |  | out-of-v1-2 |
 | ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |
 | propagation-global-fits | Global cosmic-ray propagation fits that run a propagation code | hep-statistics | none | no |  | out-of-v1-1 |
-| dark-matter-phenomenology | Dark-matter phenomenology and interpretation of excesses | hep-theory | none | no (enters with Th5) |  | wp11-bound-dm-1, wp11-bound-dm-2 |
+| dark-matter-excess-interpretation | Interpreting an excess with a dark-matter model (which model explains a signal) | hep-theory | none | no |  | wp11-bound-dm-1, wp11-bound-dm-2 |
 | heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1 |
 | nuclear-structure | Nuclear-structure calculations (shell model, density functionals) | hep-theory | none | no |  | th-nucstruct-1 |
 | relic-density-solvers | Full relic-density Boltzmann solvers | hep-theory | none | no |  | th-relic-1 |
 | neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | tool | yes | Th4 |  |
+| dark-matter-phenomenology | Dark-matter phenomenology conventions: spin-independent recoil rates in the standard halo model, form factors, J and D factors, flux prefactors, relic-density conventions (no Boltzmann solver) | hep-theory | tool | yes | Th5 |  |
 <!-- /capability-map -->

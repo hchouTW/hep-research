@@ -453,8 +453,8 @@
    ]
   },
   {
-   "id": "dark-matter-phenomenology",
-   "capability": "Dark-matter phenomenology and interpretation of excesses",
+   "id": "dark-matter-excess-interpretation",
+   "capability": "Interpreting an excess with a dark-matter model (which model explains a signal)",
    "owner": "hep-theory",
    "state": "none",
    "v1": false,
@@ -462,8 +462,7 @@
     "wp11-bound-dm-1",
     "wp11-bound-dm-2"
    ],
-   "enters_v1_with": "Th5",
-   "note": "wp11-bound-dm-1/-2 stay limited-support after Th5"
+   "note": "stays limited-support after Th5: conventions are in v1, the choice of a model that explains an excess is not"
   },
   {
    "id": "heavy-ions",
@@ -505,6 +504,17 @@
     "Th4"
    ],
    "note": "in v1 since Th4 (batch C): three flavours, vacuum and constant density; global fits of the parameters stay outside v1"
+  },
+  {
+   "id": "dark-matter-phenomenology",
+   "capability": "Dark-matter phenomenology conventions: spin-independent recoil rates in the standard halo model, form factors, J and D factors, flux prefactors, relic-density conventions (no Boltzmann solver)",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th5"
+   ],
+   "note": "in v1 since Th5 (batch D); halo and cross-section inputs from the user"
   }
  ]
 }

@@ -4385,6 +4385,26 @@
    "trigger_terms": [
     "astroparticle physics"
    ]
+  },
+  {
+   "id": "d-th-dm-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the spin-independent recoil spectrum of a 100 GeV WIMP on xenon with the Helm form factor and the standard halo model, stating every convention.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
+  },
+  {
+   "id": "d-th-dm-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "暗物質湮滅的 J 因子要怎麼定義？NFW 輪廓要積分到多大的角度？自共軛因子用 1/2 還是 1/4？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
   }
  ]
 }
