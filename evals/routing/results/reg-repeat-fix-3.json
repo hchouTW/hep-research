@@ -1,0 +1,262 @@
+{
+ "meta": {
+  "run_id": "reg-repeat-fix-3",
+  "date": "2026-10-17",
+  "cli": "claude",
+  "cli_version": "2.1.302",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "3e54aa7c288fe9b28e9403e0abdeb8a69a628b91",
+  "plugin_dirty": false,
+  "cases_file_sha256": "63b18e5458268892cd1b696bdc0812bcd46e41911133317009c284b936e4a4c1",
+  "selected": 4,
+  "completed": 4,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 0.6,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 4,
+   "strict_pass": 3,
+   "lenient_pass": 3
+  },
+  "by_lang": {
+   "en": {
+    "cases": 4,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 3,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "out-of-v1": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 3,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "quick": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_expected_primary": {
+   "hep-detector": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "hep-theory": {
+    "cases": 3,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 2,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "T19": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "X3": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "outcomes": {
+   "pass": 3,
+   "no-skill": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.2227,
+   "per_case": 0.0557,
+   "per_turn": 0.0139
+  }
+ },
+ "cases": [
+  {
+   "id": "d-th-astro-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072333,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-quick-3",
+   "lang": "en",
+   "kind": "direct",
+   "variant": "quick",
+   "set": "T19",
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.052128,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "th-const-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.043866,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "th-relic-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.054389,
+   "n_turns": 4,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/reg-repeat-fix-3/raw/, not committed)"
+}
