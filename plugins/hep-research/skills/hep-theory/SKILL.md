@@ -55,6 +55,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | Constants and their CODATA edition, particle masses and lifetimes, nuclide data, unit conversion (GeV^-2 to mb), Q values | `physical_data.py` |
 | Two-body decays, boosts, invariant mass, Mandelstam s t u, thresholds, Dalitz, rapidity, width/lifetime/c tau | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
 | Neutrino oscillations (PMNS, vacuum, constant-density matter, mass ordering, CP phase) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
+| Nuclear masses and Q values, decay chains (Bateman), equilibrium, S factor | [nuclear essentials](references/nuclear-physics-essentials.md); `decay_chain.py` |
 | Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
 | alpha_s running (1-4 loops, thresholds); CKM and PMNS conventions; PDG MC codes | [essentials](references/particle-physics-essentials.md); `running_coupling.py` |
 | Schemes, running masses, regularization | [schemes](references/regularization-and-schemes.md) |

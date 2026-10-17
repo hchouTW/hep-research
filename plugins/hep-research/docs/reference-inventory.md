@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 12 | 106 | 0 |
 | hep-ml | 42 | 189 | 0 |
 | hep-statistics | 12 | 175 | 0 |
-| hep-theory | 14 | 101 | 0 |
+| hep-theory | 15 | 105 | 0 |
 
 ## Overlapping pairs
 
@@ -44,6 +44,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **deployment**: `export-and-deployment.md`, `ml-analysis-validation-and-deployment.md`
 - **detection**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **engineering**: `engineering-playbook.md`, `loop-engineering.md`, `prompt-engineering-and-token-optimization.md`
+- **essential**: `nuclear-physics-essentials.md`, `particle-physics-essentials.md`
 - **evaluation**: `evaluation-metrics.md`, `evaluation-strategy.md`
 - **event**: `event-reconstruction.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
 - **evidence**: `claim-evidence-mapping.md`, `evidence-linked-writing.md`
@@ -57,9 +58,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **measurement**: `cosmic-ray-measurements.md`, `hep-measurement-guide.md`, `measurements-and-unfolding.md`
 - **model**: `generative-models.md`, `sequence-models.md`
 - **neutrino**: `neutrino-astronomy.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
+- **nuclear**: `nuclear-cross-sections.md`, `nuclear-physics-essentials.md`
 - **numerical**: `numerical-and-computational-methods.md`, `symbolic-and-numerical-computation.md`
 - **pattern**: `graphviz-patterns.md`, `mermaid-patterns.md`, `plantuml-patterns.md`, `tikz-patterns.md`
 - **performance**: `performance-metrics-and-residual-diagnostics.md`, `reconstruction-performance-and-truth-matching.md`
+- **physic**: `nuclear-physics-essentials.md`, `particle-physics-essentials.md`
 - **principle**: `detector-principles-bibliography.md`, `detector-principles-summary.md`
 - **python**: `python-balanced-design-guidelines.md`, `python-hep-coding-patterns.md`
 - **quality**: `risk-and-quality.md`, `task-quality-checklist.md`
@@ -284,9 +287,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.2 | yes | 8 | hep-communication, hep-statistics | db0a9cca 2026-10-17 |
 | `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 3 | - | 69f359f5 2026-10-17 |
 | `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 4 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
-| `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | untracked |
+| `nuclear-physics-essentials.md` | hep-theory | 4.6 | yes | 4 | - | untracked |
+| `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | c0b6b6d8 2026-10-17 |
 | `pdfs-and-lhapdf.md` | hep-theory | 6.0 | yes | 3 | - | 6164b848 2026-10-13 |
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | 9257d7b5 2026-10-15 |
 | `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 4 | - | 6c22fd52 2026-10-13 |
-| `selection-rules.md` | hep-theory | 7.7 | yes | 2 | - | 195e4d1e 2026-10-13 |
+| `selection-rules.md` | hep-theory | 7.7 | yes | 3 | - | 195e4d1e 2026-10-13 |
 | `smeft-and-eft.md` | hep-theory | 3.4 | yes | 3 | - | fa29fcf3 2026-10-13 |

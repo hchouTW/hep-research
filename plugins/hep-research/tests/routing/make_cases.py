@@ -411,6 +411,9 @@ C = [
     # batch C, Th10: running coupling and particle-physics entry (running_coupling.py)
  ("c-th-alphas-1", "en", "direct", "Run alpha_s(mZ) = 0.118 down to 10 GeV at four loops with MS-bar quark-mass thresholds; which scheme conventions should I state?", "hep-theory", ["schemes"], None, None, {}),
  ("c-th-alphas-2", "zh-Hant", "direct", "CKM 矩陣的標準參數化與 Wolfenstein 參數的慣例是什麼？我的預測要怎麼註明？", "hep-theory", ["conventions"], None, None, {}),
+    # batch C, Th12: nuclear-physics entry (decay_chain.py)
+ ("c-th-chain-1", "en", "direct", "How long until 226Ra and its daughters reach secular equilibrium, and what are the activities after 30 days?", "hep-theory", ["nuclear decays"], None, None, {}),
+ ("c-th-chain-2", "zh-Hant", "direct", "β+ 衰變的 Q 值為什麼要扣掉兩個電子質量？用原子質量怎麼算？", "hep-theory", ["nuclear decays"], None, None, {}),
 ]
 
 cases = []

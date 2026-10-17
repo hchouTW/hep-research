@@ -3999,6 +3999,26 @@
    "trigger_terms": [
     "conventions"
    ]
+  },
+  {
+   "id": "c-th-chain-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How long until 226Ra and its daughters reach secular equilibrium, and what are the activities after 30 days?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nuclear decays"
+   ]
+  },
+  {
+   "id": "c-th-chain-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "β+ 衰變的 Q 值為什麼要扣掉兩個電子質量？用原子質量怎麼算？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nuclear decays"
+   ]
   }
  ]
 }

@@ -299,7 +299,7 @@
    "id": "nuclear-physics-entry",
    "capability": "Nuclear cross-section conventions, nuclear decays and Q-values",
    "owner": "hep-theory",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "Th1",

@@ -12,8 +12,8 @@ Bundled data (core/constants/data/, read 2026-10-17; each file records its sourc
 
 Conventions: particle masses and widths are energies (c = 1) in the unit PDG quotes; convert() bridges natural units
 (GeV^-1 <-> fm or s, GeV^-2 <-> mb, MeV/c2 <-> kg) through the exact hbar and c. Unit changes within one dimension are
-done in decimal arithmetic, so 938.27208943 MeV is exactly the float 0.93827208943 GeV. Year-unit half-lives are not
-converted to seconds: the NUBASE2020 year length was not read (to-verify).
+done in decimal arithmetic, so 938.27208943 MeV is exactly the float 0.93827208943 GeV. Year-unit half-lives convert
+with the NUBASE2020 year, 1 y = 365.2422 d (the tropical year; Kondev et al. 2021, Sec. 2.3, read 2026-10-17).
 
 Usage (from the plugin root; the CLI is skills/hep-theory/scripts/physical_data.py):
   from core import constants as K
@@ -35,7 +35,7 @@ DATA = Path(__file__).resolve().parent / "data"
 FILES = {"codata": "codata-2022.json", "pdg": "pdg-2026.json", "nuclides": "ame2020-nubase2020.json"}
 LABEL = "[General method]"
 PI = Decimal("3.14159265358979323846264338327950288419716939937510")
-YEAR_NOTE = "year-unit half-life not converted: the NUBASE2020 year length was not read (to-verify)"
+YEAR_NOTE = "NUBASE2020 year: 1 y = 365.2422 d (tropical year), Kondev et al., Chinese Phys. C 45 (2021) 030001, Sec. 2.3"
 
 ELEMENTS = ("n H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb "
             "Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf "
@@ -308,18 +308,22 @@ def half_life(name, table: dict | None = None) -> Quantity | None:
 
 _TIME_S = {"ys": "1e-24", "zs": "1e-21", "as": "1e-18", "fs": "1e-15", "ps": "1e-12", "ns": "1e-9", "us": "1e-6",
            "ms": "1e-3", "s": "1", "m": "60", "h": "3600", "d": "86400"}
+_YEAR_S = Decimal("365.2422") * 86400
+_TIME_S.update({p + "y": str(Decimal(f) * _YEAR_S) for p, f in
+                (("", "1"), ("k", "1e3"), ("M", "1e6"), ("G", "1e9"), ("T", "1e12"), ("P", "1e15"), ("E", "1e18"),
+                 ("Z", "1e21"), ("Y", "1e24"))})
 
 
 def half_life_seconds(name, table: dict | None = None) -> dict:
-    """{'value': seconds or None, 'uncertainty', 'note'}; year units are not converted (YEAR_NOTE)."""
+    """{'value': seconds, 'uncertainty', 'note'}; year units use the NUBASE2020 year (YEAR_NOTE)."""
     q = half_life(name, table)
     if q is None:
         return {"value": None, "uncertainty": None, "note": "stable"}
     if q.unit not in _TIME_S:
-        return {"value": None, "uncertainty": None, "note": YEAR_NOTE, "nubase": q.to_dict()}
+        return {"value": None, "uncertainty": None, "note": f"unknown NUBASE unit {q.unit!r}", "nubase": q.to_dict()}
     f = Decimal(_TIME_S[q.unit])
     unc = None if q.uncertainty is None else float(_D(q.uncertainty) * f)
-    return {"value": float(_D(q.value) * f), "uncertainty": unc, "note": None}
+    return {"value": float(_D(q.value) * f), "uncertainty": unc, "note": YEAR_NOTE if q.unit.endswith("y") else None}
 
 
 _DECAYS = {"alpha": (-2, -4), "beta-": (1, 0), "beta+": (-1, 0), "ec": (-1, 0)}
