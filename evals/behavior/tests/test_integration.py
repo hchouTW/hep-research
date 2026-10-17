@@ -16,7 +16,7 @@ EVALS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(EVALS))
 
 from harness import cases as casemod  # noqa: E402
-from harness import invariants, report, runner  # noqa: E402
+from harness import graders, invariants, report, runner  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location("behavior_run", EVALS / "run.py")
 run = importlib.util.module_from_spec(_spec)
@@ -168,6 +168,42 @@ class CommandLine(unittest.TestCase):
                                                           arms="natural", repeats=1, bound_only=False)
         run.apply_preset(args)
         self.assertEqual(args.max_turns, 40)
+
+
+class ShellReads(unittest.TestCase):
+    """Reads through shell variables and `cd`, as written by claude-sonnet-5-5 in the 2026-10-18 probe."""
+
+    def touches(self, command, glob="profiles/experiments/eic/index.md"):
+        from harness.trace import Event
+        return graders._touches(Event(0, "tool_use", 0, name="Bash", input={"command": command}), glob)
+
+    def test_variable_and_cd_forms_count_as_reads(self):
+        p = "/r/plugins/hep-research/profiles"
+        self.assertTrue(self.touches(f"P={p}; sed -n 1,40p $P/registry.json; cat $P/experiments/eic/index.md"))
+        self.assertTrue(self.touches(f"P={p}/experiments/eic; cat ${{P}}/index.md"))
+        self.assertTrue(self.touches(f"cd {p}/experiments/eic && ls -R . | head -50; cat index.md"))
+        self.assertTrue(self.touches(f"cd {p} && cd experiments/eic && cat index.md"))
+        self.assertTrue(self.touches(f"cat {p}/experiments/eic/index.md"), "the literal form still works")
+
+    def test_other_paths_do_not_match(self):
+        p = "/r/plugins/hep-research/profiles"
+        self.assertFalse(self.touches(f"P={p}/experiments/ams-02; cat $P/index.md"))
+        self.assertFalse(self.touches(f"cd {p}/experiments/eic && ls"))
+        self.assertFalse(self.touches(f"cat $Q/experiments/eic/index.md; P={p}"), "assigned after its use")
+
+    def test_turn_limit_is_not_a_host_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            rdir = Path(tmp)
+            lines = [{"type": "system", "subtype": "init", "model": "m", "session_id": "s"},
+                     {"type": "result", "subtype": "error_max_turns", "is_error": True, "num_turns": 7}]
+            (rdir / "transcript.t0.jsonl").write_text("\n".join(json.dumps(x) for x in lines))
+            (rdir / "meta.json").write_text(json.dumps({"arm": "natural", "turns": [{"returncode": 1}]}))
+            case = {"id": "x", "layer": "L1", "prompt": "p", "expect": [{"grader": "skill_loaded", "skill": "hep-ml"}]}
+            out = runner.grade_run(rdir, case, ROOT)
+            self.assertEqual((out["host_error"], out["turn_limit"]), (False, True))
+            self.assertNotIn("host", out.get("unverified", []))
+            (rdir / "transcript.t0.jsonl").write_text(json.dumps(lines[0]))
+            self.assertTrue(runner.grade_run(rdir, case, ROOT)["host_error"], "another nonzero exit still is")
 
 
 class CommittedSummary(unittest.TestCase):

@@ -1,0 +1,449 @@
+{
+ "run_id": "probe-2026-10-18-sonnet-l1",
+ "manifest": {
+  "created": "2026-10-17T21:51:33.139701+00:00",
+  "plugin": {
+   "version": "0.14.1",
+   "behavior_hash": "51d2d3704d933a5c",
+   "files": 235
+  },
+  "plugin_git": {
+   "commit": "bd189ac77936c603ce94e1cbe79781eb9f05a92f",
+   "dirty": false
+  },
+  "isolation": "setting-sources",
+  "opts": {
+   "max_turns": 6,
+   "timeout": 900,
+   "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+   "rerun": false,
+   "isolation": "setting-sources",
+   "case_budget_usd": 0.5,
+   "budget_usd": 1.0
+  },
+  "allowed_tools_default": [
+   "Bash",
+   "Read",
+   "Write",
+   "Edit",
+   "Glob",
+   "Grep",
+   "Skill"
+  ],
+  "runs": 4,
+  "holdout": null,
+  "completed": 4,
+  "skipped": 0,
+  "spent_usd": 0.5498,
+  "stopped": null,
+  "cli_versions": [
+   "2.1.302"
+  ]
+ },
+ "runs": [
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.1157464,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.1226739,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": true,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.14898129999999998,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": true,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.16238799999999998,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  }
+ ],
+ "cost_usd": {
+  "total": 0.5498,
+  "per_run": 0.1374
+ },
+ "contaminated": [],
+ "report": {
+  "manifest": {
+   "created": "2026-10-17T21:51:33.139701+00:00",
+   "plugin": {
+    "version": "0.14.1",
+    "behavior_hash": "51d2d3704d933a5c",
+    "files": 235
+   },
+   "plugin_git": {
+    "commit": "bd189ac77936c603ce94e1cbe79781eb9f05a92f",
+    "dirty": false
+   },
+   "isolation": "setting-sources",
+   "opts": {
+    "max_turns": 6,
+    "timeout": 900,
+    "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+    "rerun": false,
+    "isolation": "setting-sources",
+    "case_budget_usd": 0.5,
+    "budget_usd": 1.0
+   },
+   "allowed_tools_default": [
+    "Bash",
+    "Read",
+    "Write",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Skill"
+   ],
+   "runs": 4,
+   "holdout": null,
+   "completed": 4,
+   "skipped": 0,
+   "spent_usd": 0.5498,
+   "stopped": null,
+   "cli_versions": [
+    "2.1.302"
+   ]
+  },
+  "runs": 4,
+  "host_errors": 0,
+  "by_layer_arm_model": {
+   "L1|forced|claude-sonnet-5-5": {
+    "runs": 2,
+    "pass": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.6576197724933468
+    ],
+    "mean_score": 0.9375
+   },
+   "L1|natural|claude-sonnet-5-5": {
+    "runs": 2,
+    "pass": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.6576197724933468
+    ],
+    "mean_score": 0.9375
+   }
+  },
+  "L1_selection": {
+   "claude-sonnet-5-5": {
+    "runs": 2,
+    "loaded_expected": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "first_is_expected": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "loaded_nothing": [
+     0.0,
+     0.0,
+     0.6576197724933468
+    ],
+    "by_lang": {
+     "en": [
+      1.0,
+      0.2065493143772375,
+      1.0
+     ],
+     "zh-Hant": [
+      1.0,
+      0.2065493143772375,
+      1.0
+     ]
+    },
+    "by_kind": {
+     "direct": [
+      1.0,
+      0.2065493143772375,
+      1.0
+     ],
+     "journey": [
+      1.0,
+      0.2065493143772375,
+      1.0
+     ]
+    },
+    "confusion": {
+     "hep-detector -> hep-detector": 1,
+     "hep-measurement -> hep-measurement": 1
+    }
+   }
+  },
+  "L1_out_of_domain": {},
+  "L1_L2_decomposition": {
+   "claude-sonnet-5-5|forced": {
+    "runs": 2,
+    "p_load": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "p_pass_given_load": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "p_pass_given_no_load": [
+     NaN,
+     0.0,
+     1.0
+    ],
+    "p_pass": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "p_pass_if_always_loaded": 1.0,
+    "failures_from_not_loading": 0.0
+   },
+   "claude-sonnet-5-5|natural": {
+    "runs": 2,
+    "p_load": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "p_pass_given_load": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "p_pass_given_no_load": [
+     NaN,
+     0.0,
+     1.0
+    ],
+    "p_pass": [
+     1.0,
+     0.3423802275066532,
+     1.0
+    ],
+    "p_pass_if_always_loaded": 1.0,
+    "failures_from_not_loading": 0.0
+   }
+  },
+  "natural_vs_forced": {},
+  "L2_by_skill": {},
+  "invariants": {
+   "CTX-READ-BOUND-PROFILE|forced": [
+    1.0,
+    0.5101091635454028,
+    0.9999999999999999
+   ],
+   "CTX-READ-BOUND-PROFILE|natural": [
+    1.0,
+    0.5101091635454028,
+    0.9999999999999999
+   ],
+   "L1-SELECT|forced": [
+    1.0,
+    0.3423802275066532,
+    1.0
+   ],
+   "L1-SELECT|natural": [
+    1.0,
+    0.3423802275066532,
+    1.0
+   ]
+  },
+  "blocking_failures": [],
+  "L3": {},
+  "L4": {},
+  "reliability": {},
+  "unverified_graders": {}
+ },
+ "note": "scored summary only: prompts, answers, tool results and transcripts are not stored here (they stay in evals/behavior/runs/<id>/, which is not committed)"
+}

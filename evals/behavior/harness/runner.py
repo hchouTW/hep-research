@@ -213,7 +213,9 @@ def grade_run(rdir: Path, case: dict, plugin_root: Path) -> dict:
     judge = json.loads((rdir / "judge.json").read_text()).get("scores") if (rdir / "judge.json").exists() else None
     ctx = GradeContext(trace=tr, case=case, workspace=rdir / "workspace", plugin_root=plugin_root, judge_scores=judge)
     verdict = grade_case(case, ctx)
-    host_failed = any(t.get("returncode") not in (0, None) for t in meta.get("turns", []))
+    # Reaching --max-turns is the model's behavior under a declared limit, not a host failure; the graders judge it.
+    turn_limit = tr.meta.get("subtype") == "error_max_turns"
+    host_failed = not turn_limit and any(t.get("returncode") not in (0, None) for t in meta.get("turns", []))
     expected = casemod.first_expected_skill(case)
     hep = tr.hep_skills()
     out = {"case": case["id"], "layer": case["layer"], "suite": case.get("suite"), "lang": case.get("lang", "en"),
@@ -221,7 +223,7 @@ def grade_run(rdir: Path, case: dict, plugin_root: Path) -> dict:
            "repeat": meta.get("repeat"), "expected_skill": expected,
            "first_hep_skill": hep[0] if hep else None, "skills": tr.skills,
            "loaded_expected": bool(expected and expected in tr.skills),
-           "host_error": host_failed, "cost_usd": tr.meta.get("total_cost_usd") or 0.0,
+           "host_error": host_failed, "turn_limit": turn_limit, "cost_usd": tr.meta.get("total_cost_usd") or 0.0,
            "cli_version": tr.meta.get("cli_version"), "contaminated": contamination(tr, meta.get("arm")),
            "trace": tr.summary(), **verdict}
     if host_failed:
