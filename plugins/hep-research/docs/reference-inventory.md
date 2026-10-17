@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-detector | 37 | 471 | 0 |
 | hep-measurement | 13 | 113 | 0 |
 | hep-ml | 42 | 192 | 0 |
-| hep-statistics | 13 | 184 | 0 |
+| hep-statistics | 13 | 185 | 0 |
 | hep-theory | 15 | 105 | 0 |
 
 ## Overlapping pairs
@@ -272,7 +272,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 11.6 | yes | 15 | hep-detector, hep-measurement | 14eeda45 2026-10-15 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 42.8 | yes | 6 | hep-detector, hep-measurement | a73d421e 2026-10-17 |
-| `core-stats-guide.md` | hep-statistics | 15.4 | yes | 13 | hep-measurement | 2cd78747 2026-10-17 |
+| `core-stats-guide.md` | hep-statistics | 15.4 | yes | 13 | hep-measurement | 829f9fbe 2026-10-17 |
 | `inference-recipes.md` | hep-statistics | 20.4 | yes | 13 | hep-detector, hep-measurement | a73d421e 2026-10-17 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | hep-ml | 9257d7b5 2026-10-15 |
@@ -281,7 +281,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `statistical-inference-for-physics.md` | hep-statistics | 12.9 | yes | 11 | hep-communication, hep-computing, hep-theory | 9257d7b5 2026-10-15 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | hep-ml | 578c12ff 2026-10-13 |
 | `time-series-inference.md` | hep-statistics | 18.8 | yes | 15 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
-| `unfolding.md` | hep-statistics | 7.0 | yes | 27 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
+| `unfolding.md` | hep-statistics | 7.3 | yes | 27 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 18.7 | yes | 15 | hep-detector | 26970179 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b5 2026-10-15 |

@@ -4345,6 +4345,26 @@
    "trigger_terms": [
     "significance and look-elsewhere effects"
    ]
+  },
+  {
+   "id": "d-st-unfold-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Unfold my spectrum with pyunfold, with the number of iterations fixed in advance, and show closure, stress tests and toy coverage.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding with regularization and coverage"
+   ]
+  },
+  {
+   "id": "d-st-unfold-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 RooUnfold 的 Bayes 方法反摺積，迭代次數要怎麼先決定？閉合測試與覆蓋率怎麼檢查？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding with regularization and coverage"
+   ]
   }
  ]
 }

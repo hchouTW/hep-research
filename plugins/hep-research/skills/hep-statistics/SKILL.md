@@ -56,7 +56,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Likelihood construction, template and weighted fits | [likelihood fitting](references/likelihood-fitting.md); `covariance_fit.py`, `sweighted_fit.py` |
 | Systematics in the likelihood: constraints, interpolation | [nuisance modeling](references/nuisance-modeling.md) |
 | pyhf, HistFactory, Combine | [statistical tools](references/statistical-tools.md); `<plugin root>/adapters/pyhf-combine/` |
-| Unfolding, regularization, coverage | [unfolding](references/unfolding.md) |
+| Unfolding, regularization, coverage | [unfolding](references/unfolding.md); `<plugin root>/adapters/unfolding/` |
 | Combining measurements or experiments | [combinations](references/combinations.md); `combine_measurements.py`, `combine_asymmetric.py` |
 | Covariance from declared correlation models (length, AR(1), time), with a scan | `build_covariance.py` (labeled [Proposal]) |
 | ON/OFF counting, trials, exposure | [astroparticle statistics](references/astroparticle-statistics.md); `li_ma_significance.py`, `look_elsewhere.py` |

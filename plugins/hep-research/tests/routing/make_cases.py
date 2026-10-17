@@ -462,6 +462,9 @@ C = [
     # batch D, S9: change points and lags
  ("d-st-time-1", "en", "direct", "Did my detector-rate series change level at some point? Calibrate the change-point threshold to a 5% false-alarm rate, with the correlated noise I have.", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
  ("d-st-time-2", "zh-Hant", "direct", "宇宙線強度落後太陽活動幾個月？上升段與下降段的遲滯要怎麼量，顯著性怎麼算？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+    # batch D, S10: unfolding through an external package, validated
+ ("d-st-unfold-1", "en", "direct", "Unfold my spectrum with pyunfold, with the number of iterations fixed in advance, and show closure, stress tests and toy coverage.", "hep-statistics", ["unfolding with regularization and coverage"], None, None, {}),
+ ("d-st-unfold-2", "zh-Hant", "direct", "用 RooUnfold 的 Bayes 方法反摺積，迭代次數要怎麼先決定？閉合測試與覆蓋率怎麼檢查？", "hep-statistics", ["unfolding with regularization and coverage"], None, None, {}),
 ]
 
 cases = []

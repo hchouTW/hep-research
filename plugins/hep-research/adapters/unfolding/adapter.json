@@ -1,0 +1,29 @@
+{
+ "id": "adapter:unfolding",
+ "version": "0.1.0",
+ "status": "documented",
+ "purpose": "Iterative (D'Agostini) unfolding through pyunfold or RooUnfold with the plugin's own validation: nominal and reweighted closure, stress tests and toy coverage for a regularization declared before the run; agreement with core/stats/unfolding_diagnostics.py up to 60 bins",
+ "tools": [
+  {
+   "name": "pyunfold (MIT)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "0.5.0"
+   ]
+  },
+  {
+   "name": "RooUnfold (through PyROOT)",
+   "status": "documented",
+   "tested_versions": []
+  }
+ ],
+ "environment": "local scratch venv outside the repository: Python 3.13.2, numpy 2.4.6, scipy 1.17.1, pyunfold 0.5.0 (2026-10-17); no CI job; RooUnfold is not part of ROOT and was not available (Homebrew ROOT 6.38.04 has no RooUnfoldBayes)",
+ "assets": [
+  "assets/unfold.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_unfolding_adapter.py"
+ ],
+ "owner_skill": "hep-statistics",
+ "status_rule": "the adapter status is the lowest of its tools' statuses: pyunfold was run on synthetic inputs, the RooUnfold path is documented and not run"
+}
