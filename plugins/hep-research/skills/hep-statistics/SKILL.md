@@ -60,6 +60,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Binned time series, periodicity, multi-period fits, split consistency | [time-series inference](references/time-series-inference.md); `split_consistency.py` |
 | ML-assisted inference, SBC | [ML-assisted inference](references/ml-assisted-inference.md); `bayes_calibration.py` |
 | MCMC convergence, prior reweighting | `bayes_diagnostics.py` |
+| RooFit fit status (status, covQual, EDM, MINOS), errors for weighted data | `roofit_fit_check.py` |
 | Write the statistical-result artifact | `result_artifact.py` |
 | Unbinned fits | `<plugin root>/adapters/unbinned-fit/` |
 | Outside v1 (global propagation fits, EFT global fits) | say so; general discipline; full list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |

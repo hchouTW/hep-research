@@ -236,7 +236,7 @@
    "id": "roofit-status",
    "capability": "RooFit/RooStats fit-status mapping and cross-checks",
    "owner": "hep-statistics",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "S11"

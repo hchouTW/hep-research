@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 174343,
+   "bytes": 174542,
    "uncited": 0
   },
   "hep-theory": {
@@ -2994,7 +2994,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "f3e0ff6d 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/optimization-and-training-dynamics.md",
@@ -3096,7 +3096,7 @@
     "tests/skills/hep_ml/test_era_changes_ml1.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c1221a7 2026-10-17"
+   "last_commit": "f3e0ff6d 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/sbi-training.md",
@@ -3179,7 +3179,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "6c1221a7 2026-10-17"
+   "last_commit": "f3e0ff6d 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/tensor-shapes.md",
@@ -3344,8 +3344,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15384,
-   "lines": 154,
+   "bytes": 15583,
+   "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3404,6 +3404,7 @@
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "skills/hep-statistics/references/time-series-inference.md",
+    "skills/hep-statistics/scripts/roofit_fit_check.py",
     "tests/skills/hep_statistics/test_weighted_unbinned_fit.py",
     "tests/skills/test_doc_consistency.py"
    ],

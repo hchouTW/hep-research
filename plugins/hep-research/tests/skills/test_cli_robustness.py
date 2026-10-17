@@ -63,6 +63,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-computing/scripts/validate_agile_notes.py": [M],
     "skills/hep-computing/scripts/validate_skill_example.py": [M],
     "skills/hep-statistics/scripts/bayes_calibration.py": ["check-quantiles", "--input", M],
+    "skills/hep-statistics/scripts/roofit_fit_check.py": ["result", "--file", M, "--name", "r", "--edm-max", "1e-3"],
     "skills/hep-statistics/scripts/bayes_diagnostics.py": ["diagnose", "--input", M],
     "skills/hep-statistics/scripts/covariance_fit.py": ["fit", "--input", M],
     "skills/hep-statistics/scripts/eft_scan.py": ["scan", "--input", M],

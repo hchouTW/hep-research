@@ -3798,6 +3798,26 @@
    "trigger_terms": [
     "XGBoost"
    ]
+  },
+  {
+   "id": "b-ml-roofit-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My saved RooFitResult has covQual 2 and status 0 after MIGRAD; can I quote the fit, and which errors do I use for my weighted unbinned fit?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats"
+   ]
+  },
+  {
+   "id": "b-ml-roofit-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "RooFit 擬合的 covQual 不是 3、EDM 也偏大，這個結果可以用嗎？加權資料的誤差要選哪一種？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats"
+   ]
   }
  ]
 }
