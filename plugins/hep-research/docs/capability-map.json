@@ -165,7 +165,7 @@
    "id": "geomagnetic-backtracing",
    "capability": "Geomagnetic backtracing with an external tracer",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D12"

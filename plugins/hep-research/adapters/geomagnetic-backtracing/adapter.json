@@ -1,0 +1,25 @@
+{
+ "id": "adapter:geomagnetic-backtracing",
+ "version": "0.1.0",
+ "status": "tested-in-declared-environment",
+ "purpose": "Geomagnetic cutoff grids and penumbra (Ru, Rc, Rl, penumbral transmission) for declared locations, date and field model by backtracing with OTSO, run as a separate program; slices for core/partition with a duplicate-safe merge; an axial-dipole oracle against the Stormer cutoff of hep-measurement geomagnetic_cutoff.py. Results are backtraced cutoffs in the declared field model, not any experiment's official cutoff; optional, required by no skill",
+ "tools": [
+  {
+   "name": "OTSO (https://github.com/NLarsen15/OTSOpy, PyPI `otso`; Larsen, Mishev and Usoskin, JGR Space Physics 128, e2022JA031061, 2023), GPL-3.0",
+   "status": "tested-in-declared-environment",
+   "tested_versions": [
+    "otso 1.3.8 from PyPI (numpy 2.4.6, pandas 3.0.6, scipy 1.18.1) in a separate Python 3.13.2 venv on E2, 2026-10-17: the axial-dipole oracle (g10 = -30000 nT, no external field, spherical boundary 25 Re, 20 km, latitudes 0, 20, 40, 60 degrees) recorded in tests/adapters/fixtures/geomagnetic_backtracing/ and replayed offline; the live rerun needs HEP_OTSO_PYTHON"
+   ]
+  }
+ ],
+ "licence_boundary": "OTSO is GPL-3.0 and this plugin Apache-2.0: the adapter never imports, copies or bundles OTSO; it writes a driver script and runs it as a separate program with an interpreter the user installed OTSO into (--otso-python), exchanging JSON files. No pyproject extra and no CI job (gate G5, 2026-10-17). Whether running a user-installed GPL program this way is acceptable for a given distribution is the maintainer's call",
+ "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, plugin side Python 3.13.2 standard library only; OTSO in its own venv. No network at run time: OTSO's server and live data retrieval are refused by the adapter",
+ "assets": [
+  "assets/otso_cutoff.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_geomagnetic_backtracing.py"
+ ],
+ "owner_skill": "hep-detector",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; OTSO stays tested-in-declared-environment only while the recorded dipole run replays and the live rerun (HEP_OTSO_PYTHON) passes on the declared version; another OTSO release is a new test. A traced cutoff in a model field is not validated against data"
+}

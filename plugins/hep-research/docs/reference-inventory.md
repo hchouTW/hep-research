@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | hep-communication | 57 | 411 | 0 |
 | hep-computing | 36 | 318 | 0 |
-| hep-detector | 37 | 471 | 0 |
+| hep-detector | 37 | 472 | 0 |
 | hep-measurement | 13 | 113 | 0 |
 | hep-ml | 42 | 192 | 0 |
 | hep-statistics | 13 | 185 | 0 |
@@ -126,7 +126,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `paper-genre-variants.md` | hep-communication | 7.6 | yes | 6 | - | ac1eb235 2026-10-17 |
 | `paper-structure.md` | hep-communication | 11.1 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `papers-review-modes-and-reference-index.md` | hep-communication | 14.1 | no | 2 | - | 485e96cb 2026-10-17 |
-| `physics-plots.md` | hep-communication | 8.3 | yes | 8 | - | 68a8a029 2026-10-17 |
+| `physics-plots.md` | hep-communication | 8.3 | yes | 8 | - | 01c56589 2026-10-17 |
 | `plagiarism-and-text-reuse-checking.md` | hep-communication | 3.0 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `plantuml-patterns.md` | hep-communication | 3.6 | no | 1 | - | 9257d7b5 2026-10-15 |
 | `poster-and-talk-design.md` | hep-communication | 6.2 | yes | 5 | - | 9257d7b5 2026-10-15 |
@@ -213,7 +213,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 11 | - | 9257d7b5 2026-10-15 |
 | `response-and-forward-folding.md` | hep-detector | 14.1 | yes | 14 | hep-computing, hep-measurement, hep-statistics | 11f66a20 2026-10-17 |
 | `signal-formation-and-readout.md` | hep-detector | 18.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
-| `space-based-direct-detection.md` | hep-detector | 19.2 | yes | 15 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
+| `space-based-direct-detection.md` | hep-detector | 19.7 | yes | 15 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
 | `timing-detectors.md` | hep-detector | 9.1 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `tracking-and-vertexing.md` | hep-detector | 16.1 | yes | 18 | hep-communication | 9257d7b5 2026-10-15 |
 | `triggers-luminosity-pileup.md` | hep-detector | 15.7 | yes | 14 | - | 9257d7b5 2026-10-15 |

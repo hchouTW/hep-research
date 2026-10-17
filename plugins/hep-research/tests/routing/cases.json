@@ -4585,6 +4585,26 @@
    "trigger_terms": [
     "figures and tables"
    ]
+  },
+  {
+   "id": "d-det-backtrace-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Backtrace cosmic-ray trajectories through IGRF plus an external field model to get the cutoff grid and the penumbra along my balloon instrument's flight path.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "astroparticle instruments"
+   ]
+  },
+  {
+   "id": "d-det-backtrace-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 OTSO 反向追蹤宇宙線軌跡，算出這組緯度經度網格的截止剛度與半影寬度。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "astroparticle instruments"
+   ]
   }
  ]
 }

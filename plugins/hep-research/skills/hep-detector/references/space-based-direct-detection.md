@@ -78,7 +78,11 @@ field further complicates this into a "penumbra" of partially-forbidden trajecto
 requiring backtracing simulation rather than the analytic formula. `<plugin root>/skills/hep-measurement/scripts/geomagnetic_cutoff.py` evaluates the
 analytic vertical Störmer cutoff as a first-order estimate; a rigorous cutoff for a
 specific orbit and epoch requires particle backtracing through a full geomagnetic
-field model and is not something the analytic formula replaces.
+field model and is not something the analytic formula replaces. For backtracing, the optional adapter
+`<plugin root>/adapters/geomagnetic-backtracing/assets/otso_cutoff.py` runs OTSO (installed separately; GPL-3.0, never
+bundled) over a declared location grid, date and field model and returns Ru, Rc, Rl and the penumbral transmission. In a
+pure dipole its lowest allowed vertical rigidity is at or above the Störmer value and equals it at the equator; its
+output is a model cutoff, not any experiment's official one.
 
 **Selection rule for a flux.** Keep an event in a rigidity bin only if the bin's lower edge
 is above a safety factor times the maximum cutoff (1.2 is one experiment's convention,

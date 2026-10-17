@@ -122,6 +122,7 @@ MISSING_FILE_ARGS = {
                                                                 "--param", "D0=1", "--out", OUT],
     "adapters/crdb/assets/crdb_query.py": ["summarize", M],
     "adapters/unfolding/assets/unfold.py": ["unfold", "--input", M, "--backend", "pyunfold", "--iterations", "3"],
+    "adapters/geomagnetic-backtracing/assets/otso_cutoff.py": ["dipole-check", "--replay", M],
     "adapters/hepdata/assets/hepdata_export.py": ["--artifact", M, "--out", OUT],
     "adapters/hepdata/assets/hepdata_record.py": ["--table", M, "--observable", M, "--record", "r", "--table-name", "t",
                                                   "--out", OUT],

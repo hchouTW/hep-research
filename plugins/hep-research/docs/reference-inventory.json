@@ -15,7 +15,7 @@
   },
   "hep-detector": {
    "references": 37,
-   "bytes": 471281,
+   "bytes": 471737,
    "uncited": 0
   },
   "hep-measurement": {
@@ -697,7 +697,7 @@
     "skills/hep-communication/scripts/spectrum_plot.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "68a8a029 2026-10-17"
+   "last_commit": "01c56589 2026-10-17"
   },
   {
    "path": "skills/hep-communication/references/plagiarism-and-text-reuse-checking.md",
@@ -2279,8 +2279,8 @@
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
    "owner": "hep-detector",
-   "bytes": 19237,
-   "lines": 260,
+   "bytes": 19693,
+   "lines": 264,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",

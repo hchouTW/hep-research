@@ -498,6 +498,9 @@ C = [
     # batch D, Com5: spectrum plots
  ("d-cc-spectrum-1", "en", "direct", "Plot E^2.7 times the flux from these two dataset records with Lafferty-Wyatt bin positions and status labels in the caption.", "hep-communication", ["figures and tables"], None, None, {}),
  ("d-cc-spectrum-2", "zh-Hant", "direct", "把兩筆通量資料畫成 E^2.7 加權的能譜圖，圖說要標明資料狀態，而且不要看起來像合併結果。", "hep-communication", ["figures and tables"], None, None, {}),
+    # batch D, D12: geomagnetic backtracing (adapters/geomagnetic-backtracing, OTSO)
+ ("d-det-backtrace-1", "en", "direct", "Backtrace cosmic-ray trajectories through IGRF plus an external field model to get the cutoff grid and the penumbra along my balloon instrument's flight path.", "hep-detector", ["astroparticle instruments"], None, None, {}),
+ ("d-det-backtrace-2", "zh-Hant", "direct", "用 OTSO 反向追蹤宇宙線軌跡，算出這組緯度經度網格的截止剛度與半影寬度。", "hep-detector", ["astroparticle instruments"], None, None, {}),
 ]
 
 cases = []

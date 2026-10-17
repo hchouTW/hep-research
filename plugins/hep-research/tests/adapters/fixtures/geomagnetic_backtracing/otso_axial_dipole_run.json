@@ -1,0 +1,97 @@
+{
+ "g10_nt": -30000.0,
+ "latitudes_deg": [
+  0.0,
+  20.0,
+  40.0,
+  60.0
+ ],
+ "altitude_km": 20.0,
+ "spec": {
+  "locations": [
+   {
+    "id": "L0",
+    "latitude_deg": 0.0,
+    "longitude_deg": 0.0
+   },
+   {
+    "id": "L1",
+    "latitude_deg": 20.0,
+    "longitude_deg": 0.0
+   },
+   {
+    "id": "L2",
+    "latitude_deg": 40.0,
+    "longitude_deg": 0.0
+   },
+   {
+    "id": "L3",
+    "latitude_deg": 60.0,
+    "longitude_deg": 0.0
+   }
+  ],
+  "altitude_km": 20.0,
+  "datetime": {
+   "year": 2000,
+   "month": 1,
+   "day": 1,
+   "hour": 0
+  },
+  "field": {
+   "internal": "Custom Gauss",
+   "external": "NONE",
+   "magnetopause": "Sphere",
+   "spheresize": 25,
+   "g": [
+    0.0,
+    -30000.0,
+    0.0
+   ],
+   "h": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max_degree": 1
+  },
+  "rigidity": {
+   "start_gv": 20.0,
+   "end_gv": 0.0,
+   "step_gv": 0.01
+  },
+  "particle": {
+   "atomic_number": 1,
+   "anti": "YES"
+  },
+  "cutoff": "Vertical"
+ },
+ "otso": {
+  "table": {
+   "L0": {
+    "Ru": 14.34,
+    "Rc": 14.34,
+    "Rl": 14.34,
+    "PTF": 0.0
+   },
+   "L1": {
+    "Ru": 12.65,
+    "Rc": 12.65,
+    "Rl": 12.65,
+    "PTF": 0.0
+   },
+   "L2": {
+    "Ru": 5.51,
+    "Rc": 5.32,
+    "Rl": 5.03,
+    "PTF": 0.4
+   },
+   "L3": {
+    "Ru": 1.02,
+    "Rc": 1.0,
+    "Rl": 0.96,
+    "PTF": 0.33
+   }
+  },
+  "info": "\nOTSO Version: 1.3.8\nDate of OTSO computation: 2026-10-17\nTotal computation time: 3.285 seconds\n\nCutoff Computed: Vertical Cutoff Rigidity\n\nRigidity Scan:\nRigidity Scan Used\n\nIntegration Method:\nUnknown Integration Method\n\nInput Variables:\n\nData Used: User Inputted Data Used\n\nSimulation Date: 01/01/2000, 00:00:00\n\nMax Time Step [% of gyrofrequency]: 10.0\nTotal Beta Error Check Applied: No\nFixed Step Size Used\nBeta Error Tolerance: 0.001%\n\nMinimum Altitude: 20km\nMax Distance: 100Re\nMax Time: 0s\nMax Steps: 0.0\n\nStart Altitude = 20.0km \nZenith = 0\nAzimuth = 0\n\nKp = 0\nIOPT = 1\n\nSolar Wind Speed [km/s]:\nVx = 500\nVy = 0\nVz = 0\n\nIMF [nT]:\nBx = 0\nBy = 5\nBz = 5\n\nBy Average (30mins) = 0\nBz Average (30mins) = 0\n\nDensity = 1 cm^-3\nPdyn = 0 nPa\n\nDst = 0 nT\n\nG1 = 0\nG2 = 0\nG3 = 0\n\nW1 = 0\nW2 = 0\nW3 = 0\nW4 = 0\nW5 = 0\nW6 = 0\n\nN = 0\nB = 0\n\nSYM-H = 0\n\nAtomic Number = 1\n\nParticle Type = anti-particle\n\nMagnetic Field Models:\nInternal Model = Custom Gauss\nMax Spherical Harmonics Order/Degree = 1\nExternal Model = No External Field\n\nMagnetopause Model = 25.0Re Sphere\n\nBoberg Extension Applied: No Boberg Extension Applied\n\nRigidity:\nStart = 20.0 [GV]\nEnd = 0.0 [GV]\nStep = 0.01 [GV]\n\nStations:\nL0, Latitude: 0.0, Longitude: 0.0\n\nL1, Latitude: 20.0, Longitude: 0.0\n\nL2, Latitude: 40.0, Longitude: 0.0\n\nL3, Latitude: 60.0, Longitude: 0.0\n\nReferences Used\n================\n\nLarsen, N., Mishev, A., and Usoskin, I., A new open-source geomagnetosphere propagation tool (OTSO) and its applications, Journal of Geophysical Research: Space Physics, Volume 128, e2022JA031061, 2023.\nDOI: 10.1029/2022JA031061\n\nBoris, J., Proceedings of the Fourth Conference on Numerical Simulation of Plasmas, Naval Research Laboratory, Washington DC, 1970.\nDOI: N/A\n"
+ }
+}
