@@ -34,9 +34,10 @@
   {
    "name": "sourced-detector-atlas",
    "status": "tested-in-declared-environment",
-   "scope": "Structural validity of the ledger and its atlas blocks (complete block, allowed kind, values as written in the claim sentence), index sync and coverage; not the truth of any claim",
+   "scope": "Structural validity of the ledger and its atlas blocks (complete block, allowed kind, values as written in the claim sentence), index sync and coverage; not the truth of any claim; validation, rendering with claim ids and querying through skills/hep-detector/scripts/detector_atlas.py",
    "tests": [
-    "tests/test_atlas_ledger.py"
+    "tests/test_atlas_ledger.py",
+    "../../../tests/skills/hep_detector/test_detector_atlas.py"
    ]
   }
  ]

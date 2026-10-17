@@ -185,8 +185,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cosmic-ray-spectrum-and-composition.md` | hep-detector | 11.7 | no | 13 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
 | `data-mc-validation-and-detector-systematics.md` | hep-detector | 12.9 | yes | 9 | - | 9257d7b5 2026-10-15 |
 | `detector-case-studies-and-checklists.md` | hep-detector | 14.1 | no | 3 | - | 485e96cb 2026-10-17 |
-| `detector-comparison-tables.md` | hep-detector | 15.1 | no | 2 | - | 485e96cb 2026-10-17 |
-| `detector-design-principles.md` | hep-detector | 5.3 | yes | 2 | - | 6721da68 2026-10-17 |
+| `detector-comparison-tables.md` | hep-detector | 15.4 | no | 3 | - | 485e96cb 2026-10-17 |
+| `detector-design-principles.md` | hep-detector | 5.4 | yes | 3 | - | 6721da68 2026-10-17 |
 | `detector-glossary.md` | hep-detector | 6.0 | no | 5 | - | 9257d7b5 2026-10-15 |
 | `detector-measurement-framework.md` | hep-detector | 11.0 | no | 11 | hep-communication, hep-measurement | 9257d7b5 2026-10-15 |
 | `detector-principles-bibliography.md` | hep-detector | 14.8 | no | 3 | - | 9257d7b5 2026-10-15 |

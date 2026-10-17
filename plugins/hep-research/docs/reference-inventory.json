@@ -15,7 +15,7 @@
   },
   "hep-detector": {
    "references": 37,
-   "bytes": 470882,
+   "bytes": 471281,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1709,12 +1709,13 @@
   {
    "path": "skills/hep-detector/references/detector-comparison-tables.md",
    "owner": "hep-detector",
-   "bytes": 15138,
-   "lines": 160,
+   "bytes": 15376,
+   "lines": 163,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-glossary.md",
-    "skills/hep-detector/references/detector-principles-summary.md"
+    "skills/hep-detector/references/detector-principles-summary.md",
+    "tests/skills/hep_detector/test_detector_atlas.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "485e96cb 2026-10-17"
@@ -1722,11 +1723,12 @@
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
    "owner": "hep-detector",
-   "bytes": 5287,
-   "lines": 70,
+   "bytes": 5448,
+   "lines": 71,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/scripts/detector_atlas.py",
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [],

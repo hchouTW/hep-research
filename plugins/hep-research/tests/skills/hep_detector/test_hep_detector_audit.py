@@ -309,6 +309,7 @@ F04_CASES = {
     'charge_confusion_rate.py': ['gaussian-core', '--edges', '10', '100', '--sigma-inv-r', '0.002'],
     'survival_feeddown.py': ['compute', '--layers', ASSETS / 'survival-layers.example.json', '--species',
                              ASSETS / 'survival-species.example.json', '--xs', ASSETS / 'survival-xs.example.json'],
+    'detector_atlas.py': ['validate', '--today', '2026-10-17'],
     'tracker_resolution.py': ['momentum', '--positions-m', '0', '0.5', '1', '--point-resolution-um', '10',
                               '--field-tesla', '1', '--x-over-x0', '0.05', '--charge', '1', '--beta', '1', '--pt', '10'],
     'mix_period_responses.py': ['stack', '--period', f"e1={ASSETS / 'response-synthetic.example.json'}", '--out',

@@ -451,6 +451,7 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
              '--value-column', 'value', '--sigma', 'nan', '--false-alarm', '0.05', '--seed', '1'),
             ('tracker_resolution.py', 'momentum', '--positions-m', '0', '0.5', '1', '--point-resolution-um', 'nan',
              '--field-tesla', '1', '--x-over-x0', '0.05', '--charge', '1', '--beta', '1', '--pt', '10'),
+            ('detector_atlas.py', 'query', '--page', '-1'),
             ('multiple_scattering.py', huge_stack),
             ('multiple_scattering.py', stack, '--rigidity', '1e308'),
             ('multiple_scattering.py', stack, '--rigidity', '1e-308'),

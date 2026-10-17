@@ -3,7 +3,8 @@
 Method for designing or upgrading an instrument: how physics requirements flow down to subsystem specifications,
 which trade-offs and figures of merit decide between layouts, and how a design is optimized by simulation. Formulas
 live in the references that own them and are linked, not copied. Facts about a named experiment's detector come
-from its bound profile or the user, never from memory.
+from its bound profile, the user, or the sourced detector atlas (`<plugin root>/profiles/reference/detector-atlas/`,
+read with `<plugin root>/skills/hep-detector/scripts/detector_atlas.py query`), never from memory.
 
 Routing boundary: designing the instrument (layers, field, material, granularity, timing) is hep-detector; designing
 the measurement or analysis that uses it (estimand, selection, backgrounds, systematics plan) is hep-measurement.

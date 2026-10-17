@@ -5,9 +5,9 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 # hep-detector: detector performance and response
 
-**Owns:** signal formation, reconstruction, detector calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks, detector design principles.
+**Owns:** signal formation, reconstruction, detector calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks, detector design principles, sourced detector atlas.
 **Typical artifacts:** `response` (truth/reco axes, orientation, normalization, what sits inside the matrix, intended use), folded `prediction`, performance reports, conditions provenance.
-**Never:** invent detector facts; detector specifics come from an experiment profile, the user, or are `unknown`. Inference on top of a response belongs to hep-statistics.
+**Never:** invent detector facts; detector specifics come from an experiment profile, the user, the sourced detector atlas, or are `unknown`. Inference on top of a response belongs to hep-statistics.
 
 ## Invariants
 
@@ -61,7 +61,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Charge-sign confusion; nuclei in material (survival, feed-down) | [charge confusion](references/charge-confusion.md), [nuclear interactions](references/nuclear-interactions-in-detector-material.md); `charge_confusion_rate.py`, `survival_feeddown.py` |
 | Space-based and balloon instruments | [space-based](references/space-based-direct-detection.md) |
 | Air showers, X_max | [air showers](references/extensive-air-showers.md); `xmax_gaisser_hillas.py` |
-| A named experiment's detector | the bound profile; ask which configuration is meant |
+| A named experiment's detector | the bound profile, else `detector_atlas.py query` (claim ids; `unknown` if absent); ask which configuration |
 
 Scripts in `<plugin root>/skills/hep-detector/scripts/` (read `--help` first); example inputs in `assets/`. Folder guide for people: [README.md](README.md).
 

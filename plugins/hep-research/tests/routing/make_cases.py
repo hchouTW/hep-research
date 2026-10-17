@@ -435,6 +435,9 @@ C = [
     # batch C, D14: detector design principles (tracker_resolution.py)
  ("c-det-design-1", "en", "direct", "How many tracking layers and what lever arm do I need for 5% momentum resolution at 100 GeV in a 0.5 T field?", "hep-detector", ["design principles and trade-offs"], None, None, {}),
  ("c-det-design-2", "zh-Hant", "direct", "比較四層與八層矽追蹤器的動量解析度，精確最小平方與 Gluckstern 近似差多少？", "hep-detector", ["tracking"], None, None, {}),
+    # batch C, D13: sourced detector atlas (detector_atlas.py)
+ ("c-det-atlas-1", "en", "direct", "What solenoid field and tracker volume does the CMS detector paper give, with the source for each number?", "hep-detector", ["sourced facts on large experiments' detectors"], None, None, {}),
+ ("c-det-atlas-2", "zh-Hant", "direct", "IceCube 的 DOM 數量與垂直間距是多少？請附上出處，不要憑記憶。", "hep-detector", ["sourced facts on large experiments' detectors"], None, None, {}),
 ]
 
 cases = []

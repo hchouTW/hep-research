@@ -45,6 +45,7 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Detector calibration (energy scale, alignment constants, conditions) | hep-detector | `detector calibration` | — |
 | Validation of a fast or learned simulation against full detector simulation | hep-detector | `detector simulation` | — |
 | Instrument design: requirements flow-down, trade-offs, figures of merit, layout optimization | hep-detector | `detector design principles` | Detector design principles and tracker resolution |
+| Sourced facts on named experiments' detectors (design, achieved, operating values with claim ids) | hep-detector | `sourced detector atlas` | Sourced detector atlas |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in
