@@ -137,6 +137,19 @@ def _covered(locator: str, event: dict) -> bool:
     return any(r and re.match(r"^" + re.escape(r) + r"(?![a-z0-9])", loc) for r in recorded)
 
 
+MEASURED_TYPES = {"measurement", "search", "limit"}
+
+
+def _planned_only(context: dict, sid: str) -> list[str]:
+    """IDs of the planned ledger claims citing a source when every ledger claim citing it is planned; else []."""
+    ns = sid.split(":", 1)[0] if ":" in sid else None
+    led = (context.get("ledgers") or {}).get(ns) or {}
+    citing = [(cid, c) for cid, c in (led.get("claims") or {}).items() if sid in (c.get("source_ids") or [])]
+    if citing and all(c.get("kind") == "planned" for _, c in citing):
+        return sorted(cid for cid, _ in citing)
+    return []
+
+
 def audit_claims(record: dict, context: dict, policy: dict) -> dict:
     ext = record.get("extension") if isinstance(record.get("extension"), dict) else {}
     fmt = format_of(record)
@@ -210,6 +223,22 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
                     f"edge {e.get('id')} cites {e.get('locator')!r} of {e.get('target')}, but the read event covers level "
                     f"{ev.get('level')!r} with locators {ev.get('locators') or []}: the cited passage was not read",
                     "read the cited passage and record a read event covering it, or cite what was read (an abstract value with the abstract locator)")
+        # planned claims never support a measured result
+        if c.get("claim_type") in MEASURED_TYPES:
+            if c.get("kind") == "planned":
+                add("claim.planned_as_measured", "error", f"{where}.kind",
+                    f"a {c.get('claim_type')} claim is marked planned: a plan is not a measured result",
+                    "state the plan in the future tense with 'as of <date>' as a background claim, or record the result once it exists")
+            for j, e in enumerate(c.get("evidence", []) or []):
+                if not isinstance(e, dict) or e.get("target_kind") != "source" or e.get("role") != "supports" \
+                        or (e.get("usage") or "used-in-claim") != "used-in-claim":
+                    continue
+                plans = _planned_only(context, str(e.get("target")))
+                if plans:
+                    add("claim.planned_support", "error", f"{where}.evidence[{j}]",
+                        f"edge {e.get('id')} supports a {c.get('claim_type')} claim with source {e.get('target')}, whose only "
+                        f"ledger claims are planned ({', '.join(plans)}): a plan cannot support a measured result",
+                        "cite the source of the measured result, or change the edge role to background and the wording to the future tense")
         # wording (advisory)
         status = set(c.get("status", []) or [])
         text = str(c.get("text", ""))

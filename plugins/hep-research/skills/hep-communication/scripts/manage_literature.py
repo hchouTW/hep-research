@@ -11,10 +11,11 @@ new_source_id). The import never edits INPUT or EXISTING and never performs a lo
 with provenance (input path and digest, date), deduplicates only on identical stable identifiers (DOI, arXiv id, INSPIRE
 record), keeps arXiv version history and flags citing claims when a version changes, applies notices as flags on
 dependent claims (reassess inside the notice's scope, check outside) without deleting a citation, marks old
-verification dates as recheck (never as error), and preserves citation keys. A summary report (report_version 1.0.0)
+verification dates as recheck (never as error), flags planned claims (kind "planned") whose recheck_by date has passed, and preserves
+citation keys. A summary report (report_version 1.0.0)
 goes to stdout. Exit codes: 0 imported with no open item; 1 a confirmed problem (invalid ledger records, a citation-key
 collision, a notice naming an unknown source); 2 invalid invocation or unreadable input; 3 open items (a version
-change, a notice to assess, an incomplete search). Online verification is an explicit host-agent workflow; this tool
+change, a notice to assess, an incomplete search, a planned claim past or without its recheck_by date). Online verification is an explicit host-agent workflow; this tool
 records it as not performed.
 """
 from __future__ import annotations
@@ -35,7 +36,7 @@ from communication_lib import report as R  # noqa: E402
 from communication_lib.literature import import_literature  # noqa: E402
 from contracts.communication_project import output_aliases_input  # noqa: E402
 
-CHECKS = ("ledger", "identifiers", "versions", "notices", "searches", "citation-keys")
+CHECKS = ("ledger", "identifiers", "versions", "notices", "searches", "planned-claims", "citation-keys")
 
 
 def main(argv=None) -> int:

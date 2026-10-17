@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-communication": {
    "references": 57,
-   "bytes": 400220,
+   "bytes": 401174,
    "uncited": 0
   },
   "hep-computing": {
@@ -122,8 +122,8 @@
   {
    "path": "skills/hep-communication/references/citation-verification.md",
    "owner": "hep-communication",
-   "bytes": 5640,
-   "lines": 89,
+   "bytes": 6465,
+   "lines": 99,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/README.md",
@@ -140,7 +140,7 @@
     "tests/skills/hep_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "d5799d9 2026-10-17"
   },
   {
    "path": "skills/hep-communication/references/citations-and-bibliography.md",
@@ -502,8 +502,8 @@
   {
    "path": "skills/hep-communication/references/literature-discovery-and-search.md",
    "owner": "hep-communication",
-   "bytes": 5005,
-   "lines": 74,
+   "bytes": 5134,
+   "lines": 75,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/SKILL.md",
@@ -511,7 +511,7 @@
     "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "d5799d9 2026-10-17"
   },
   {
    "path": "skills/hep-communication/references/literature-lookup-recipes.md",
@@ -2940,7 +2940,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "485e96c 2026-10-17"
+   "last_commit": "03d2387 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/monitoring-and-lifecycle.md",

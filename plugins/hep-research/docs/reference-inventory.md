@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| hep-communication | 57 | 400 | 0 |
+| hep-communication | 57 | 401 | 0 |
 | hep-computing | 32 | 298 | 0 |
 | hep-detector | 35 | 452 | 0 |
 | hep-measurement | 12 | 99 | 0 |
@@ -89,7 +89,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `academic-papers-guide.md` | hep-communication | 14.6 | yes | 13 | - | 485e96c 2026-10-17 |
 | `artifact-packaging-for-release.md` | hep-communication | 2.9 | no | 3 | - | 9257d7b 2026-10-15 |
 | `astroparticle-and-cosmic-ray-papers.md` | hep-communication | 13.4 | yes | 13 | hep-measurement | 9257d7b 2026-10-15 |
-| `citation-verification.md` | hep-communication | 5.6 | yes | 12 | - | 9257d7b 2026-10-15 |
+| `citation-verification.md` | hep-communication | 6.5 | yes | 12 | - | d5799d9 2026-10-17 |
 | `citations-and-bibliography.md` | hep-communication | 19.9 | yes | 12 | - | 9257d7b 2026-10-15 |
 | `claim-evidence-mapping.md` | hep-communication | 4.0 | yes | 9 | hep-statistics, hep-theory | 9257d7b 2026-10-15 |
 | `code-review-report.md` | hep-communication | 5.5 | no | 3 | - | 9257d7b 2026-10-15 |
@@ -113,7 +113,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `latex-mechanics-and-tooling.md` | hep-communication | 13.4 | no | 7 | - | 9257d7b 2026-10-15 |
 | `latex-venue-setup.md` | hep-communication | 25.7 | yes | 9 | - | 9257d7b 2026-10-15 |
 | `legends-panels-and-export.md` | hep-communication | 6.6 | no | 2 | - | 9257d7b 2026-10-15 |
-| `literature-discovery-and-search.md` | hep-communication | 5.0 | yes | 3 | - | 9257d7b 2026-10-15 |
+| `literature-discovery-and-search.md` | hep-communication | 5.1 | yes | 3 | - | d5799d9 2026-10-17 |
 | `literature-lookup-recipes.md` | hep-communication | 5.9 | yes | 7 | - | 14eeda4 2026-10-15 |
 | `literature-review.md` | hep-communication | 7.8 | no | 6 | - | 9257d7b 2026-10-15 |
 | `logical-consistency-and-argument-uniformity.md` | hep-communication | 4.9 | no | 5 | hep-theory | 9257d7b 2026-10-15 |
@@ -243,7 +243,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `ml-analysis-training-and-data.md` | hep-ml | 9.0 | no | 5 | - | 485e96c 2026-10-17 |
 | `ml-analysis-validation-and-deployment.md` | hep-ml | 3.1 | no | 3 | - | 485e96c 2026-10-17 |
 | `ml-analysis-weights.md` | hep-ml | 6.0 | no | 7 | - | 485e96c 2026-10-17 |
-| `ml-analysis.md` | hep-ml | 7.3 | yes | 25 | hep-detector, hep-measurement | 485e96c 2026-10-17 |
+| `ml-analysis.md` | hep-ml | 7.3 | yes | 25 | hep-detector, hep-measurement | 03d2387 2026-10-17 |
 | `monitoring-and-lifecycle.md` | hep-ml | 2.1 | no | 3 | - | 9257d7b 2026-10-15 |
 | `multivariate-analysis-bdt-nn.md` | hep-ml | 9.9 | yes | 8 | hep-detector | 485e96c 2026-10-17 |
 | `optimization-and-training-dynamics.md` | hep-ml | 3.8 | no | 1 | - | 9257d7b 2026-10-15 |

@@ -326,6 +326,9 @@ C = [
  # batch A, ML2: stratified grouped splits and composite keys
  ("ml-a-split-1", "en", "direct", "Build grouped train/validation/test splits by run and lumi block, stratified by class so the rare signal reaches every split, then run leakage checks.", "hep-ml", ["grouped train/validation/test splits and leakage checks"], None, None, {}),
  ("ml-a-split-2", "zh-Hant", "direct", "依 run 分組切 train/val/test，並按訊號與背景分層，確認每個 split 都有稀有類別而且沒有洩漏。", "hep-ml", ["grouped train/validation/test splits and leakage checks"], None, None, {}),
+ # batch A, Com1: planned claims with a recheck date
+ ("cm-a-planned-1", "en", "direct", "My citation ledger says a detector upgrade is planned for 2027; how do I cite that plan so it gets rechecked, and keep it from supporting the measured result in my paper?", "hep-communication", ["finding and verifying literature and citations"], None, None, {}),
+ ("cm-a-planned-2", "zh-Hant", "direct", "文獻紀錄裡有一條「預計 2027 年安裝」的計畫性敘述，引用時要怎麼寫，過了日期要怎麼提醒重新查核？", "hep-communication", ["finding and verifying literature and citations"], None, None, {}),
 ]
 
 cases = []
