@@ -45,7 +45,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Request | Read or run |
 |---|---|
 | Any detector question: the chain, the fourteen questions, task routing | [principles summary](references/detector-principles-summary.md) (section 11 indexes every file) |
-| Resolution, efficiency, tag-and-probe, truth matching | [reconstruction performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
+| Resolution, efficiency (weighted, binned), tag-and-probe, truth matching | [reconstruction performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
 | Tracking, vertexing, multiple scattering | [tracking and vertexing](references/tracking-and-vertexing.md); `multiple_scattering.py` |
 | Synthetic spectrometer events and periods (test bed, seeded) | `toy_spectrometer.py`; `assets/toy-spectrometer.fictional.json` |
 | Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |

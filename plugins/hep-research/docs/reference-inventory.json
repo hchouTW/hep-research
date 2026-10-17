@@ -1543,7 +1543,7 @@
     "skills/hep-detector/scripts/stability_monitor.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bb4e1459 2026-10-17"
+   "last_commit": "0d506417 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",

@@ -3637,6 +3637,26 @@
    "trigger_terms": [
     "calibration and alignment"
    ]
+  },
+  {
+   "id": "b-det-eff-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My tag-and-probe sample has simulation event weights: what is the efficiency per pT bin with a proper interval?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tag-and-probe"
+   ]
+  },
+  {
+   "id": "b-det-eff-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "加權的 tag-and-probe 效率要怎麼算區間？每個 pT bin 都要。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tag-and-probe"
+   ]
   }
  ]
 }

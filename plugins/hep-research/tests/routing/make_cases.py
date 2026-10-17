@@ -357,6 +357,9 @@ C = [
     # batch B, D11: stability monitoring (stability_monitor.py)
  ("b-det-stab-1", "en", "direct", "Is the gain calibration of my calorimeter stable over the last 200 runs, and where are the change points at a 1% false-alarm rate?", "hep-detector", ["calibration and alignment"], None, None, {}),
  ("b-det-stab-2", "zh-Hant", "direct", "每天的 TOF 時間校正值有沒有漂移？要怎麼找出 era 的分界？", "hep-detector", ["calibration and alignment"], None, None, {}),
+    # batch B, D8: weighted and binned tag-and-probe efficiency
+ ("b-det-eff-1", "en", "direct", "My tag-and-probe sample has simulation event weights: what is the efficiency per pT bin with a proper interval?", "hep-detector", ["tag-and-probe"], None, None, {}),
+ ("b-det-eff-2", "zh-Hant", "direct", "加權的 tag-and-probe 效率要怎麼算區間？每個 pT bin 都要。", "hep-detector", ["tag-and-probe"], None, None, {}),
 ]
 
 cases = []
