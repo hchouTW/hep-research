@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-communication": {
    "references": 57,
-   "bytes": 411270,
+   "bytes": 411532,
    "uncited": 0
   },
   "hep-computing": {
@@ -358,8 +358,8 @@
   {
    "path": "skills/hep-communication/references/evidence-linked-writing.md",
    "owner": "hep-communication",
-   "bytes": 5388,
-   "lines": 69,
+   "bytes": 5650,
+   "lines": 71,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/README.md",
@@ -2513,7 +2513,7 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "19424afc 2026-10-17"
+   "last_commit": "f79b4c5f 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/data-pipelines.md",
@@ -2561,7 +2561,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "ecd989f1 2026-10-17"
+   "last_commit": "f79b4c5f 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",

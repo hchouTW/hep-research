@@ -37,7 +37,9 @@ schema `<plugin root>/contracts/schemas/ext_communication_traceability.json`, va
    wording or scope change, or a changed input hash, makes it stale; re-inspect, then re-pin.
 7. `reporting_context`: result type, method metadata and field states (`provided`, `missing`, `not-applicable` with a
    reason, `unresolved`) against `<plugin root>/skills/hep-communication/assets/reporting-policies.json`. A missing field is requested from the producing
-   skill, never defaulted.
+   skill, never defaulted. A flux measurement that declares in its method `forward_folding`, `time_dependent`,
+   `points_in_bins`, `variable_converted` or `multi_era` must also give the refold kit, the collection-time
+   definition, the bin position, the variable conversion or the eras.
 
 ## Check it
 

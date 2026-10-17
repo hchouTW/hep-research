@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| hep-communication | 57 | 411 | 0 |
+| hep-communication | 57 | 412 | 0 |
 | hep-computing | 36 | 318 | 0 |
 | hep-detector | 37 | 472 | 0 |
 | hep-measurement | 13 | 116 | 0 |
@@ -106,7 +106,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-statistics.md` | hep-communication | 6.3 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `equation-and-notation-auditing.md` | hep-communication | 4.4 | no | 6 | hep-statistics, hep-theory | 064f60fb 2026-10-17 |
 | `erratum-and-corrigendum-drafting.md` | hep-communication | 4.5 | no | 3 | - | 9257d7b5 2026-10-15 |
-| `evidence-linked-writing.md` | hep-communication | 5.4 | yes | 5 | - | 9257d7b5 2026-10-15 |
+| `evidence-linked-writing.md` | hep-communication | 5.7 | yes | 5 | - | 9257d7b5 2026-10-15 |
 | `figures-and-tables.md` | hep-communication | 9.3 | yes | 11 | - | 9257d7b5 2026-10-15 |
 | `general-diagram-principles.md` | hep-communication | 7.8 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `grant-and-fellowship-proposal-writing.md` | hep-communication | 4.8 | no | 1 | - | 9257d7b5 2026-10-15 |
@@ -221,9 +221,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `backgrounds.md` | hep-measurement | 5.9 | yes | 26 | hep-detector | ccc1eb2a 2026-10-17 |
 | `correction-chain.md` | hep-measurement | 14.3 | yes | 15 | hep-detector, hep-theory | ecd989f1 2026-10-17 |
-| `cosmic-ray-measurements.md` | hep-measurement | 21.7 | yes | 5 | - | 19424afc 2026-10-17 |
+| `cosmic-ray-measurements.md` | hep-measurement | 21.7 | yes | 5 | - | f79b4c5f 2026-10-17 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 12 | hep-computing | 9257d7b5 2026-10-15 |
-| `hep-measurement-guide.md` | hep-measurement | 16.4 | yes | 10 | hep-detector | ecd989f1 2026-10-17 |
+| `hep-measurement-guide.md` | hep-measurement | 16.4 | yes | 10 | hep-detector | f79b4c5f 2026-10-17 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 9 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a584954 2026-10-17 |
 | `rare-event-and-neutrino-measurements.md` | hep-measurement | 7.0 | no | 3 | - | c4d801c4 2026-10-17 |
