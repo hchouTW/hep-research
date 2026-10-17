@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 175157,
+   "bytes": 176823,
    "uncited": 0
   },
   "hep-theory": {
@@ -3427,8 +3427,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 41283,
-   "lines": 447,
+   "bytes": 42211,
+   "lines": 455,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -3442,13 +3442,13 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "f598f1ae 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15018,
-   "lines": 151,
+   "bytes": 15756,
+   "lines": 158,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3460,6 +3460,7 @@
     "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
+    "tests/skills/hep_statistics/test_cap_override_s7.py",
     "tests/skills/hep_statistics/test_core_stats_guide.py",
     "tests/skills/test_documented_output_claims.py",
     "tests/tools/test_reference_soft_budget.py"
@@ -3467,7 +3468,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "83f5b982 2026-10-17"
+   "last_commit": "f598f1ae 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",

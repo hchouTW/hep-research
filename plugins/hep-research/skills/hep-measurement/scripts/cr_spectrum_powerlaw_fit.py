@@ -53,7 +53,7 @@ from core.stats.broken_power_law import basis as _basis, log_flux as _bpl_log_fl
 from core.stats.statistical_toys import chi2_sf  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope', 'projection')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 def _reject_constant(token):

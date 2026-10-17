@@ -4202,6 +4202,26 @@
    "trigger_terms": [
     "significance and look-elsewhere effects"
    ]
+  },
+  {
+   "id": "c-st-caps-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My template fit has 72 bins and the core tool refuses above 60; can I run it anyway, and what does the output then claim?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits"
+   ]
+  },
+  {
+   "id": "c-st-caps-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "多組 bin 的極限計算超過工具的上限，可以強制執行嗎？結果還能當成發表的結果嗎？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "intervals and limits"
+   ]
   }
  ]
 }

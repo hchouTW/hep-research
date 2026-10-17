@@ -57,7 +57,7 @@ DEFAULTS = {'radiator_length': 2.0, 'figure_of_merit': 100.0, 'single_photon_res
             'track_resolution': 0.0, 'convention': 'single'}
 DETECTOR_PARAMETERS = ('radiator_length', 'figure_of_merit', 'single_photon_resolution', 'track_resolution')  # F-06
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope', 'projection')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 class JsonArgumentParser(argparse.ArgumentParser):

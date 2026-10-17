@@ -441,6 +441,9 @@ C = [
     # batch C, S2: uncertainty projection (project_uncertainty.py)
  ("c-st-proj-1", "en", "direct", "How does my uncertainty budget scale at four times the exposure, with the floor systematics kept, and what Asimov significance do I reach?", "hep-statistics", ["toys and Asimov datasets", "nuisance parameters"], None, None, {}),
  ("c-st-proj-2", "zh-Hant", "direct", "資料量變成三倍時，統計誤差與各項系統誤差會降到多少？要多少曝光才能達到 5σ？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+    # batch C, S7: validated-range caps and their override
+ ("c-st-caps-1", "en", "direct", "My template fit has 72 bins and the core tool refuses above 60; can I run it anyway, and what does the output then claim?", "hep-statistics", ["template fits"], None, None, {}),
+ ("c-st-caps-2", "zh-Hant", "direct", "多組 bin 的極限計算超過工具的上限，可以強制執行嗎？結果還能當成發表的結果嗎？", "hep-statistics", ["intervals and limits"], None, None, {}),
 ]
 
 cases = []

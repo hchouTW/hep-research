@@ -30,7 +30,7 @@ from core.blinding.blinding import mask_binned, mask_ratio  # noqa: E402
 from core.protected.guard import protected_main  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope', 'projection')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 def _reject_constant(token):

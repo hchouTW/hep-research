@@ -52,7 +52,7 @@ import re
 import sys
 
 STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
-            "validated-in-scope", "projection")  # contracts/vocab/core.json artifact_statuses
+            "validated-in-scope", "projection", "outside-validated-range")  # contracts/vocab/core.json artifact_statuses
 RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "roles", "strata", "_comment"}
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 

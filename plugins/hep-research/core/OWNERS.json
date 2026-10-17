@@ -26,6 +26,7 @@
     "_linalg",
     "_poisson",
     "_validate",
+    "_caps",
     "fit_diagnostics",
     "tail_estimation",
     "toy_ensemble",

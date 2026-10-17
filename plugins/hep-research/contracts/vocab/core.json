@@ -49,7 +49,8 @@
    "observed": "Real observed data",
    "user-supplied": "Supplied by the user without independent verification",
    "validated-in-scope": "Passed declared checks within a declared scope (not physical validity)",
-   "projection": "A projection to another exposure or data set (S2), never a result; fails the publication gate"
+   "projection": "A projection to another exposure or data set (S2), never a result; fails the publication gate",
+   "outside-validated-range": "Produced beyond a tool's validated-range cap with --allow-outside-validated-range (S7); fails the publication gate without a validation record"
   },
   "dataset_statuses": {
    "published": "Formally published",

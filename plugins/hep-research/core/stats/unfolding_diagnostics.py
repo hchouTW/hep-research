@@ -87,6 +87,7 @@ import random
 import sys
 from pathlib import Path
 
+from core.stats import _caps
 from core.stats._linalg import cholesky, jacobi_eigh, matmul, solve, transpose
 from core.stats.statistical_toys import (ToyError, _load_response, _num, _scan_then_golden, _seed, _std, _toys, _unfold,
                               poisson_draw)
@@ -225,7 +226,7 @@ def regularized_scan(doc: dict, method: str, values, toys: int, seed: int) -> di
                if cov[j][j] > 0 and cov[j + 1][j + 1] > 0]
         rng = random.Random(seed)
         neg = 0
-        for _ in range(toys):
+        for _ in _caps.timed_range(toys, "unfolding toys"):
             n = [poisson_draw(rng, m) for m in mu]
             neg += any(sum(a[j][i] * n[i] for i in range(len(n))) < 0 for j in range(n_truth))
         rows.append({"setting": p, "rms_relative_bias": _rms(bias), "rms_relative_spread": _rms(spread),
@@ -320,7 +321,7 @@ def fold_compare(doc: dict, method: str, param, toys: int, seed: int) -> dict:
     rng = random.Random(seed)
     fold_fit, unf_fit = [], []
     g_lo, g_hi = g_true - 3.0, g_true + 3.0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "unfolding toys"):
         n = [poisson_draw(rng, m) for m in mu]
         if sum(n) == 0:
             continue
@@ -405,7 +406,8 @@ def response_stat(doc: dict, method: str, param, toys: int, seed: int, response_
     r, truth, prior, p = _unpack(doc, method, param)
     n_truth, n_reco = len(truth), len(r)
     if method == "tsvd" and n_truth > 20:
-        raise ToyError("response-stat with tsvd is limited to 20 truth bins (a decomposition per toy)")
+        _caps.exceed("response-stat tsvd truth bins", n_truth, 20, ToyError,
+                     "response-stat with tsvd is limited to 20 truth bins (a decomposition per toy)")
     gen = doc.get("mc_events_per_truth_bin")
     if not isinstance(gen, list) or len(gen) != n_truth:
         raise ToyError(f"mc_events_per_truth_bin must list {n_truth} generated-event counts")
@@ -418,7 +420,7 @@ def response_stat(doc: dict, method: str, param, toys: int, seed: int, response_
     data_only, resp_only, both = [], [], []
     skipped = {"empty_truth_column": 0}
     eff_above_one = 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "unfolding toys"):
         r2 = [[0.0] * n_truth for _ in range(n_reco)]
         for j in range(n_truth):
             if response_model == "multinomial":
@@ -543,7 +545,7 @@ def choose_regularization(doc: dict, method: str, values, toys: int, seed: int) 
     chosen: dict[str, list[int]] = {name: [] for name in picks}
     errs: dict[str, list[float]] = {name: [] for name in picks}
     fixed_errs: list[list[float]] = [[] for _ in mats]
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "unfolding toys"):
         cnt = [poisson_draw(rng, m) for m in mu]
         for k, a_k in enumerate(mats):
             fixed_errs[k].append(err_of(a_k, cnt))
@@ -772,7 +774,8 @@ def _setup_response(doc, method, param, need_gen=True):
     r, truth, prior, p = _unpack(doc, method, param)
     n_truth, n_reco = len(truth), len(r)
     if method == "tsvd" and max(n_truth, n_reco) > 15:
-        raise ToyError("this diagnostic with tsvd is limited to 15 bins (a decomposition per Jacobian column)")
+        _caps.exceed("tsvd Jacobian diagnostics bins", max(n_truth, n_reco), 15, ToyError,
+                     "this diagnostic with tsvd is limited to 15 bins (a decomposition per Jacobian column)")
     if n_truth * n_reco > 400:
         raise ToyError("this diagnostic is limited to 400 response cells")
     gen = None
@@ -1149,7 +1152,7 @@ def nonparam_fold(doc: dict, tau, compare_tau, toys: int, seed: int, prior: str 
     a = linear_matrix("tikhonov", compare_tau, r, mu)
     rng = random.Random(seed)
     fits, unf, laplace, fails = [], [], [], 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "unfolding toys"):
         n = [poisson_draw(rng, m) for m in mu]
         if sum(n) == 0:
             continue
@@ -1265,7 +1268,7 @@ def choose_penalty_poisson(doc: dict, prior: str, taus, toys: int, seed: int) ->
     err_of = lambda t: _rms([(t[j] - truth[j]) / truth[j] for j in used])
     chosen_idx, chosen_err = [], []
     fixed_err: list[list[float]] = [[] for _ in taus]
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "unfolding toys"):
         cnt = [poisson_draw(rng, m) for m in mu]
         if sum(cnt) == 0:
             continue
@@ -1309,12 +1312,17 @@ def _read(path):
     return doc
 
 
+INPUT_HELP = ('JSON file (shared, module --help): {"response": [[...]], "orientation"?, "truth": [expected truth counts], '
+              '"prior"?: [...]} plus, per subcommand, "test_truth", "truth_edges" and "model", "mc_events_per_truth_bin", '
+              '"data", "efficiency_uncertainty", "response_covariance" or "response_replicas"')
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
 
     def common(p, toys, method_default=None, param=True):
-        p.add_argument("--input", required=True, help="JSON file (see the module docstring)")
+        p.add_argument("--input", required=True, help=INPUT_HELP)
         p.add_argument("--method", choices=METHODS, default=method_default, required=method_default is None)
         if param:
             p.add_argument("--param", type=float, required=True, help="iterations, strength or singular values")
@@ -1338,43 +1346,47 @@ def build_parser() -> argparse.ArgumentParser:
     common(rc, 200)
     rc.add_argument("--response-model", choices=RESPONSE_MODELS, default="poisson_cells", help="statistical model of the response cells")
     du = sub.add_parser("dagostini-unfold", help="D'Agostini unfolding of measured data with its covariance")
-    du.add_argument("--input", required=True, help="JSON file: response, data, optional prior and mc_events_per_truth_bin")
+    du.add_argument("--input", required=True, help='JSON file: {"response": [[...]], "data": [measured counts], "prior"?: [...], '
+                    '"mc_events_per_truth_bin"?: [...], "orientation"?} (module --help)')
     du.add_argument("--param", type=float, required=True, help="iterations")
     du.add_argument("--response-model", choices=RESPONSE_MODELS, default="multinomial", help="statistical model of the response cells")
     rm = sub.add_parser("response-measured", help="propagate a measured response covariance or replicas")
-    rm.add_argument("--input", required=True)
+    rm.add_argument("--input", required=True, help=INPUT_HELP)
     rm.add_argument("--method", choices=METHODS, required=True)
     rm.add_argument("--param", type=float, required=True, help="iterations, strength or singular values")
     nf = sub.add_parser("nonparam-fold", help="penalized non-parametric forward folding")
-    nf.add_argument("--input", required=True)
+    nf.add_argument("--input", required=True, help=INPUT_HELP)
     nf.add_argument("--tau", type=float, required=True, help="log-curvature penalty strength")
     nf.add_argument("--compare-tau", type=float, default=0.01, help="Tikhonov strength for the comparison")
     nf.add_argument("--prior", choices=PRIORS, default="log_curvature", help="smoothness prior of the forward fold")
     nf.add_argument("--toys", type=int, default=100)
     nf.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
     cp = sub.add_parser("compare-fold-priors", help="compare forward-folding smoothness priors on the same toys")
-    cp.add_argument("--input", required=True)
+    cp.add_argument("--input", required=True, help=INPUT_HELP)
     cp.add_argument("--priors", required=True, help="comma-separated name:tau entries, e.g. log_curvature:0.1,entropy:0.01")
     cp.add_argument("--toys", type=int, default=100)
     cp.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
     oc = sub.add_parser("outer-coverage", help="outer-toy bias and marginal/simultaneous coverage, regularization chosen per toy")
-    oc.add_argument("--input", required=True)
+    oc.add_argument("--input", required=True, help=INPUT_HELP)
     oc.add_argument("--method", required=True, choices=("tikhonov", "tsvd"))
     oc.add_argument("--values", required=True, help="comma-separated settings; one value means no selection")
     oc.add_argument("--criterion", default="gcv", choices=("gcv", "loo_cv", "l_curve_corner", "fixed"))
     oc.add_argument("--toys", type=int, default=500)
     oc.add_argument("--seed", type=int, required=True)
     pc = sub.add_parser("choose-penalty-poisson", help="Poisson-exact leave-one-out CV of the forward-fold penalty")
-    pc.add_argument("--input", required=True)
+    pc.add_argument("--input", required=True, help=INPUT_HELP)
     pc.add_argument("--prior", choices=PRIORS, default="log_curvature")
     pc.add_argument("--taus", help="comma-separated strengths (default: 1e-4 to 1e3)")
     pc.add_argument("--toys", type=int, default=40)
     pc.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    for sp in sub.choices.values():
+        _caps.add_argument(sp)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    _caps.allow_outside(args.allow_outside_validated_range)
     try:
         doc = _read(args.input)
         if args.command == "choose-regularization":
@@ -1425,6 +1437,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2
     result["status"] = "ok"
+    result.update(_caps.report())
     print(json.dumps(result, indent=2))
     return 0
 

@@ -44,7 +44,7 @@ DEFAULT_ALPHA = 0.01  # significance level of the normalization pull and the sha
 DIRECTION_NOTE = ("the direction of a variation cannot be inferred from integrals: establish which is up from the "
                   "payloads and the generation code")
 STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
-            "validated-in-scope", "projection")  # contracts/vocab/core.json artifact_statuses
+            "validated-in-scope", "projection", "outside-validated-range")  # contracts/vocab/core.json artifact_statuses
 
 
 class InputError(ValueError):

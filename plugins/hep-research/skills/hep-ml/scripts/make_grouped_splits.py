@@ -60,7 +60,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_split_integrity import canonical_key, parse_timestamp  # noqa: E402  (one normalization for both tools)
 
 STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
-            "validated-in-scope", "projection")  # contracts/vocab/core.json artifact_statuses
+            "validated-in-scope", "projection", "outside-validated-range")  # contracts/vocab/core.json artifact_statuses
 SPLITS = ("train", "val", "test")
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 

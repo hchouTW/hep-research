@@ -48,7 +48,7 @@ T_POWER_FACTOR = {
 
 
 STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
-            "validated-in-scope", "projection")  # contracts/vocab/core.json artifact_statuses
+            "validated-in-scope", "projection", "outside-validated-range")  # contracts/vocab/core.json artifact_statuses
 
 def _scores(values, name):
     if not isinstance(values, (list, tuple)) or len(values) < 2:

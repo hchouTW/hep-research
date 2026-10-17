@@ -129,6 +129,8 @@ add to the result; only a model or method uncertainty prescribed before the resu
 combined. A profile limit is not a CLs limit (no CLs protection). Always report the expected sensitivity next to an observed limit. Near a boundary
 or at small counts quote the toy value, not the asymptotic one.
 
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
+
 ## `statistical_toys.py`: narrow toy studies
 
 Each subcommand answers one question under stated simplifications.
@@ -167,6 +169,8 @@ Each subcommand answers one question under stated simplifications.
   circular: repeat with a different truth and prior before choosing an iteration count, and document the stopping rule
   separately.
 
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
+
 ## `template_fit.py`: Barlow-Beeston template fits
 
 Several templates with free yields and the full per-template Barlow-Beeston likelihood (Barlow & Beeston 1993): one
@@ -192,6 +196,8 @@ follows the Barlow-Beeston fit: unconverged (or infeasible) means `failed` with 
 Decision rule: use `bb-fit`/`bb-toys` instead of the one-parameter `template-bb` whenever there are several templates,
 and quote the full-fit error when `bb-fit` shows it inflated. Use either Barlow-Beeston or a per-bin `staterror`-type
 nuisance for one statistical source, never both ([nuisance modeling](nuisance-modeling.md)).
+
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
 
 ## `unfolding_diagnostics.py`: regularization, closure, folding
 
@@ -259,6 +265,8 @@ from data, compare the criteria on toys with `choose-regularization`; the L-curv
 fixed setting. Quote the response covariance as a full matrix with the data covariance when the unfolded result is
 fitted, run `fold-compare` when a parameter is fitted from an unfolded spectrum, and `response-stat` when the response
 comes from a finite MC sample.
+
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
 
 ## `validate_covariance.py` and `validate_response.py`
 

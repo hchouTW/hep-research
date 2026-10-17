@@ -51,7 +51,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root,
 from core.stats.tail_estimation import clopper_pearson  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope', 'projection')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 def _positive_finite(value, name):

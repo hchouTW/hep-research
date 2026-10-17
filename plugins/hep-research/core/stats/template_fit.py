@@ -70,6 +70,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from core.stats import _caps
 from core.stats._linalg import solve
 from core.protected.guard import guard, protected_main
 from core.stats.statistical_toys import ToyError, _num, _seed, _std, _toys, poisson_draw
@@ -243,11 +244,16 @@ def _load(doc):
     if not isinstance(doc, dict):
         raise ToyError("input must be a JSON object")
     data, tmpl = doc.get("data"), doc.get("templates")
-    if not isinstance(data, list) or not 2 <= len(data) <= MAX_BINS:
+    if not isinstance(data, list) or len(data) < 2:
         raise ToyError(f"data must be a list of 2 to {MAX_BINS} bin counts")
+    if not 2 <= len(data) <= MAX_BINS:
+        _caps.exceed("template_fit bins", len(data), MAX_BINS, ToyError, f"data must be a list of 2 to {MAX_BINS} bin counts")
     data = [_num(v, "data", 0.0, 1e6) for v in data]
-    if not isinstance(tmpl, dict) or not 1 <= len(tmpl) <= MAX_TEMPLATES:
+    if not isinstance(tmpl, dict) or not tmpl:
         raise ToyError(f"templates must map 1 to {MAX_TEMPLATES} names to count lists")
+    if not 1 <= len(tmpl) <= MAX_TEMPLATES:
+        _caps.exceed("template_fit templates", len(tmpl), MAX_TEMPLATES, ToyError,
+                     f"templates must map 1 to {MAX_TEMPLATES} names to count lists")
     names = list(tmpl)
     m = []
     for nme in names:
@@ -349,7 +355,7 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
     rng = random.Random(seed)
     res: dict[str, list[dict[str, list[Any]]]] = {kind: [{"fits": [], "pulls": [], "cov": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
     skipped, failed = 0, {"naive": 0, "barlow_beeston": 0}
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "template_fit toys"):
         mt = [[poisson_draw(rng, mc[j] * p[j][i]) for i in range(b)] for j in range(k)]
         dt = [poisson_draw(rng, sum(y_true[j] * p[j][i] for j in range(k))) for i in range(b)]
         if any(sum(row) == 0 for row in mt) or sum(dt) == 0:
@@ -552,11 +558,16 @@ def _load_w(doc):
     if not isinstance(doc, dict):
         raise ToyError("input must be a JSON object")
     data, tmpl = doc.get("data"), doc.get("templates")
-    if not isinstance(data, list) or not 2 <= len(data) <= MAX_BINS:
+    if not isinstance(data, list) or len(data) < 2:
         raise ToyError(f"data must be a list of 2 to {MAX_BINS} bin counts")
+    if not 2 <= len(data) <= MAX_BINS:
+        _caps.exceed("template_fit bins", len(data), MAX_BINS, ToyError, f"data must be a list of 2 to {MAX_BINS} bin counts")
     data = [_num(v, "data", 0.0, 1e6) for v in data]
-    if not isinstance(tmpl, dict) or not 1 <= len(tmpl) <= MAX_TEMPLATES:
+    if not isinstance(tmpl, dict) or not tmpl:
         raise ToyError(f"templates must map 1 to {MAX_TEMPLATES} names to histograms")
+    if not 1 <= len(tmpl) <= MAX_TEMPLATES:
+        _caps.exceed("template_fit templates", len(tmpl), MAX_TEMPLATES, ToyError,
+                     f"templates must map 1 to {MAX_TEMPLATES} names to histograms")
     names, w, c = list(tmpl), [], []
     for nme in names:
         row = tmpl[nme]
@@ -599,8 +610,10 @@ def _load_w(doc):
         t_tot.append(v)
     nuis = []
     raw = doc.get("nuisances", [])
-    if not isinstance(raw, list) or len(raw) > 8:
+    if not isinstance(raw, list):
         raise ToyError("nuisances must be a list of at most 8 entries")
+    if len(raw) > 8:
+        _caps.exceed("template_fit nuisances", len(raw), 8, ToyError, "nuisances must be a list of at most 8 entries")
     for k_, d in enumerate(raw):
         if not isinstance(d, dict) or d.get("kind") not in ("shape", "norm") or d.get("template") not in names:
             raise ToyError(f"nuisance {k_}: kind must be shape or norm and template one of {names}")
@@ -689,7 +702,7 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
     rng = random.Random(seed)
     res: dict[str, list[dict[str, list[Any]]]] = {kind: [{"fits": [], "pulls": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
     skipped, failed = 0, {"naive": 0, "barlow_beeston": 0}
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "template_fit toys"):
         mt = [[c[j][i] * poisson_draw(rng, eff[j][i]) for i in range(b)] for j in range(k)]
         dt = [poisson_draw(rng, sum(y_true[j] * p[j][i] for j in range(k))) for i in range(b)]
         if any(sum(row) == 0 for row in mt) or sum(dt) == 0:
@@ -733,27 +746,36 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
 
 
 # --------------------------------------------------------------------------------- CLI
+BB_INPUT_HELP = ('JSON file: {"data": [counts per bin], "templates": {NAME: [MC counts per bin]}, "mc_events"?: {NAME: M}, '
+                 '"true_yields"?: {NAME: Y}} (module --help)')
+WBB_INPUT_HELP = ('JSON file: as bb-fit, a template as counts or {"sumw": [...], "sumw2": [...]}, optional "nuisances": '
+                  '[{"name", "kind": "shape" | "norm", "template", "up"/"down" | "sigma"}] (module --help)')
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     a = sub.add_parser("bb-fit", help="naive versus Barlow-Beeston fit of the supplied data")
-    a.add_argument("--input", required=True)
+    a.add_argument("--input", required=True, help=BB_INPUT_HELP)
     b = sub.add_parser("bb-toys", help="seeded toys comparing the two fits")
-    b.add_argument("--input", required=True)
+    b.add_argument("--input", required=True, help=BB_INPUT_HELP)
     b.add_argument("--toys", type=int, default=200)
     b.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
     c = sub.add_parser("wbb-fit", help="weighted-MC fit with nuisances: naive versus full Barlow-Beeston")
-    c.add_argument("--input", required=True)
+    c.add_argument("--input", required=True, help=WBB_INPUT_HELP)
     d = sub.add_parser("wbb-toys", help="seeded toys for the weighted-MC fit with nuisances")
-    d.add_argument("--input", required=True)
+    d.add_argument("--input", required=True, help=WBB_INPUT_HELP)
     d.add_argument("--toys", type=int, default=100)
     d.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    for sp in sub.choices.values():
+        _caps.add_argument(sp)
     return parser
 
 
 @protected_main("core.stats.template_fit")
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    _caps.allow_outside(args.allow_outside_validated_range)
     try:
         try:
             doc = json.loads(Path(args.input).read_text())
@@ -769,6 +791,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2
     result.setdefault("status", "ok")  # the fits set ok or failed; toy studies report failed toys as a count
+    result.update(_caps.report())
     print(json.dumps(result, indent=2))
     return 1 if result["status"] == "failed" else 0
 

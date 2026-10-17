@@ -55,18 +55,25 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 | every Poisson routine (`_poisson.py` `MAX_MEAN`) | mean <= 1e5 | asymptotic or Gaussian treatment, labeled as such |
 | `poisson_diagnostics.py fc-interval` (`FC_MAX_TOTAL_MEAN`) | total mean <= 500 | `cls-limit`, or `likelihood_limits.py profile-fc` |
 | `likelihood_limits.py` single-bin subcommands (`_inputs1`: profile-*, neyman-*) | b <= 200, sigma_b <= 100 | the pyhf adapter, or the asymptotic formulas labeled as such |
-| `likelihood_limits.py multibin-limit` | bins <= 50, bin b <= 200, total n <= 400, mc_stat <= 100 | the pyhf adapter |
-| `likelihood_limits.py shape-limit` with toys, `shape-gof`, `contour` (`SHAPE_TOY_CAPS`) | bins <= 40, bin b <= 200, total n <= 400, mc_stat <= 100 | `shape-limit` without toys, or the pyhf adapter |
-| `likelihood_limits.py shape-limit` without toys (`SHAPE_ASYMPTOTIC_CAPS`) | bins <= 100, bin b <= 1e4, total n <= 1000000 | the pyhf adapter |
+| `likelihood_limits.py multibin-limit` | bins <= 50 (o), bin b <= 200, total n <= 400 (o), mc_stat <= 100 | the pyhf adapter |
+| `likelihood_limits.py shape-limit` with toys, `shape-gof`, `contour` (`SHAPE_TOY_CAPS`) | bins <= 40 (o), bin b <= 200, total n <= 400 (o), mc_stat <= 100, nuisances <= 8 (o) | `shape-limit` without toys, or the pyhf adapter |
+| `likelihood_limits.py shape-limit` without toys (`SHAPE_ASYMPTOTIC_CAPS`) | bins <= 100 (o), bin b <= 1e4, total n <= 1000000 (o), nuisances <= 8 (o) | the pyhf adapter |
 | `likelihood_limits.py` toy counts | toys 100 to 100000 | partition the toys (hep-computing) and merge |
 | `statistical_toys.py` toy counts (`MAX_TOYS`) | toys <= 200000 | partition the toys and merge |
 | `statistical_toys.py ratio-cov` | numerator, denominator <= 1e5 | `ratio-cov-analytic`, or `ratio-measured` (measured covariance, denominator <= 1e12) |
 | `statistical_toys.py ratio-cov-analytic` (`ANALYTIC_MIN_COUNTS`, `ANALYTIC_MAX_COUNTS`) | counts 1e4 to 1e12 | below: `ratio-cov` (toys) |
-| `statistical_toys.py unfold-scan` | reco and truth bins <= 60 | a dedicated unfolding framework |
+| `statistical_toys.py unfold-scan` | reco and truth bins <= 60 (o) | a dedicated unfolding framework |
 | `unfolding_diagnostics.py` response-stat, outer-coverage, response-covariance | mc_events <= 1e5 | the analytic response covariance by hand, labeled |
 | `unfolding_diagnostics.py` response-covariance, response-measured | response cells <= 400 | rebin, or a dedicated framework |
+| `unfolding_diagnostics.py response-stat` with `tsvd` | truth bins <= 20 (o) | `tikhonov`, or a dedicated framework |
+| `unfolding_diagnostics.py` Jacobian diagnostics (response-covariance, response-measured) with `tsvd` | bins <= 15 (o) | `tikhonov` |
 | `unfolding_diagnostics.py dagostini-unfold` (`UNFOLD_MAX_COUNTS`, `UNFOLD_MAX_MC_EVENTS`) | data <= 1e9, mc_events <= 1e12 | a dedicated framework |
-| `template_fit.py` (`MAX_TEMPLATES`, `MAX_BINS`) | templates <= 6, bins <= 60 | the pyhf adapter |
+| `template_fit.py` (`MAX_TEMPLATES`, `MAX_BINS`) | templates <= 6 (o), bins <= 60 (o), nuisances <= 8 (o) | the pyhf adapter |
+
+  (o): overridable with `--allow-outside-validated-range` (`_caps.py`): the run goes ahead, lists each cap exceeded
+  and is labeled `outside-validated-range`, which the publication gate refuses without a validation record. The
+  other caps protect numerical accuracy or are handled by partitioning; a toy loop whose estimated runtime exceeds
+  10 s prints the estimate to stderr first.
 - **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
   `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
   at most 1e-5 (stricter than iminuit's default: Migrad stops at EDM < 0.002 x tol x errordef, with tol 0.1,

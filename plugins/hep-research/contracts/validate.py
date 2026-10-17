@@ -1819,7 +1819,8 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) 
 
     failed: the artifact has errors under strict validation, carries the 'failed' status, carries 'synthetic' or
     'asimov' (gate.not_observed_data, contracts 2.6.0: nothing makes such a result publishable as data) or 'projection'
-    (gate.projection, upgrade plan S2), its fit failed
+    (gate.projection, upgrade plan S2) or 'outside-validated-range' without a valid inline extension.validation_record
+    (gate.outside_validated_range, gate.validation_record_invalid, S7), its fit failed
     or was not run, its fit diagnostics failed, or toy coverage is short: the upper end of the 68.27% Clopper-Pearson
     interval of round(coverage x n_toys) of n_toys lies below the nominal level by more than 0.01 (gate.undercoverage;
     without n_toys the recorded interval or value is used). unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
@@ -1859,6 +1860,17 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) 
     if "projection" in status:
         add("failed", "gate.projection", "the artifact carries 'projection': a projection to another exposure (S2) is "
                                          "never a result")
+    if "outside-validated-range" in status:
+        rec: Any = ext.get("validation_record")
+        if rec is None:
+            add("failed", "gate.outside_validated_range", "the artifact carries 'outside-validated-range' (a tool ran "
+                "beyond its validated range, S7) and extension.validation_record is missing")
+        else:
+            from contracts.schema import validate as _schema_validate
+            vr = _schema_validate(rec, "validation_record.json") if isinstance(rec, dict) else None
+            if vr is None or any(f.severity == "error" for f in vr.findings):
+                add("failed", "gate.validation_record_invalid", "extension.validation_record must be an inline "
+                    "validation record (contracts/schemas/validation_record.json)")
     for s in ("unvalidated", "preliminary"):
         if s in status:
             add("unresolved", "gate.status_label", f"the artifact carries '{s}': an archival artifact, not a validated result")
