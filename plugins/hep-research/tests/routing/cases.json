@@ -3405,6 +3405,26 @@
    "trigger_terms": [
     "the physical sources of systematic uncertainties and their evaluation plan"
    ]
+  },
+  {
+   "id": "ml-a-split-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build grouped train/validation/test splits by run and lumi block, stratified by class so the rare signal reaches every split, then run leakage checks.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ]
+  },
+  {
+   "id": "ml-a-split-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "依 run 分組切 train/val/test，並按訊號與背景分層，確認每個 split 都有稀有類別而且沒有洩漏。",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ]
   }
  ]
 }

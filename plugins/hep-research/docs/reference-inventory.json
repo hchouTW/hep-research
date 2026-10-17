@@ -25,7 +25,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 183585,
+   "bytes": 183891,
    "uncited": 0
   },
   "hep-statistics": {
@@ -2906,8 +2906,8 @@
   {
    "path": "skills/hep-ml/references/ml-analysis.md",
    "owner": "hep-ml",
-   "bytes": 7000,
-   "lines": 83,
+   "bytes": 7306,
+   "lines": 86,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -3573,7 +3573,7 @@
     "tests/skills/hep_theory/test_charge_sign_modulation_th3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5a4d9ad 2026-10-17"
+   "last_commit": "505eb43 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",

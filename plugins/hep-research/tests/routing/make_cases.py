@@ -323,6 +323,9 @@ C = [
  ("th-a-drift-1", "en", "direct", "Can I fit one force-field phi to positron and electron fluxes across the solar polarity reversal, or do drift effects break the approximation?", "hep-theory", ["approximations and validity domains"], None, None, {}),
  ("th-a-drift-2", "zh-Hant", "direct", "太陽磁場極性反轉前後的反質子比，用 force-field 近似還適用嗎？漂移效應要怎麼處理？", "hep-theory", ["approximations and validity domains"], None, None, {}),
  ("ms-a-scaling-2", "zh-Hant", "direct", "我的系統誤差哪些會隨控制樣本變大而縮小、哪些是下限？請幫我規劃評估方式。", "hep-measurement", ["the physical sources of systematic uncertainties and their evaluation plan"], None, None, {}),
+ # batch A, ML2: stratified grouped splits and composite keys
+ ("ml-a-split-1", "en", "direct", "Build grouped train/validation/test splits by run and lumi block, stratified by class so the rare signal reaches every split, then run leakage checks.", "hep-ml", ["grouped train/validation/test splits and leakage checks"], None, None, {}),
+ ("ml-a-split-2", "zh-Hant", "direct", "依 run 分組切 train/val/test，並按訊號與背景分層，確認每個 split 都有稀有類別而且沒有洩漏。", "hep-ml", ["grouped train/validation/test splits and leakage checks"], None, None, {}),
 ]
 
 cases = []

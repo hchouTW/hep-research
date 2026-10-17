@@ -44,6 +44,9 @@ and calibration only from permitted training/validation partitions.
 - **k-fold by event number** (for example `event % k`) is the standard way to use all simulated and data events: each
   event is evaluated by the model that did not see it. Keep the fold assignment deterministic and record it. The same
   rule applies when the classifier is applied to data in a weakly supervised search.
+- **Composite keys and strata:** `make_grouped_splits.py --group-column run lumi` keeps each combination whole;
+  `--stratify-column label` (or a period) splits each stratum on its own, so a rare class or period reaches every
+  split, and lists strata with fewer groups than splits instead of hiding them.
 - **Never `random_split` on rows** when a grouping key exists. Build the split from the key, then check it with
   `<plugin root>/skills/hep-ml/scripts/check_split_integrity.py`.
 

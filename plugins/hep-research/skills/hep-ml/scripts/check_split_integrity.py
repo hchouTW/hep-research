@@ -25,7 +25,9 @@ pipeline; "incomplete" is never a pass.
 Usage notes / assumptions: standard library only; PyTorch is not required. Input is a
 JSON object mapping split names to ID lists, optionally with "groups" (ID -> group),
 "timestamps" (ID -> finite number or ISO-8601 date/time string, all of one kind) and
-"temporal_order" (at least two split names, each a split of the file), and "roles" ({"test": NAME}, read by
+"temporal_order" (at least two split names, each a split of the file), "strata" (ID -> stratum, written by
+make_grouped_splits.py --stratify-column; reported as the coverage of each stratum: rows per split and the splits a
+stratum never reaches, a report that does not change the outcome), and "roles" ({"test": NAME}, read by
 write_ml_artifact.py to find the test split). IDs and group values are compared after
 normalization, so that a cosmetic difference cannot hide leakage: surrounding
 whitespace is stripped, a number with a zero fraction is written as an integer (1, 1.0, "1" and "1.0" are the
@@ -51,7 +53,7 @@ import sys
 
 STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
             "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
-RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "roles", "_comment"}
+RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "roles", "strata", "_comment"}
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 
 
@@ -211,6 +213,26 @@ def _coverage(splits, mapping):
             "missing_ids": missing}
 
 
+def stratum_coverage(splits, strata, case_sensitive=False):
+    """Rows of each stratum per split, and the splits each stratum never reaches (None without strata)."""
+    if not strata:
+        return None
+    by_id, _ = _normalize_mapping(strata, case_sensitive, lambda v: v)
+    report = {}
+    for name, ids in splits.items():
+        for value in ids:
+            if value in by_id:
+                stratum = canonical_key(by_id[value], case_sensitive)
+                entry = report.setdefault(stratum, {name_: 0 for name_ in splits})
+                entry[name] += 1
+    strata_out = {stratum: {"splits": counts, "missing_from": sorted(n for n, c in counts.items() if c == 0)}
+                  for stratum, counts in sorted(report.items())}
+    all_ids = {value for ids in splits.values() for value in ids}
+    return {"strata": strata_out,
+            "strata_missing_splits": [s for s, entry in strata_out.items() if entry["missing_from"]],
+            "ids_with_stratum": len(all_ids & set(by_id)), "ids": len(all_ids)}
+
+
 def _normalize_mapping(mapping, case_sensitive, value_key):
     """Re-key an ID -> value object by normalized ID; keys colliding with different values are conflicts."""
     out, conflicts = {}, set()
@@ -230,8 +252,9 @@ def check(payload, strict=False, case_sensitive=False):
     groups = payload.get("groups") or {}
     timestamps = payload.get("timestamps") or {}
     order = payload.get("temporal_order") or []
-    if not isinstance(groups, dict) or not isinstance(timestamps, dict):
-        raise ValueError("'groups' and 'timestamps' must be objects mapping ID -> value")
+    strata = payload.get("strata") or {}
+    if not isinstance(groups, dict) or not isinstance(timestamps, dict) or not isinstance(strata, dict):
+        raise ValueError("'groups', 'timestamps' and 'strata' must be objects mapping ID -> value")
     if not isinstance(order, list):
         raise ValueError("'temporal_order' must be a list of split names")
     if order:
@@ -292,6 +315,7 @@ def check(payload, strict=False, case_sensitive=False):
         "normalization": {"strip_whitespace": True, "case_sensitive": case_sensitive},
         "normalization_conflicts": {"groups": group_conflicts, "timestamps": time_conflicts},
         "timestamp_coverage": time_cov,
+        "stratum_coverage": stratum_coverage(splits, strata, case_sensitive),
         "groups_checked": groups_complete,
         "timestamps_checked": bool(order) and times_complete and len(
             [name for name in order if any(value in timestamps for value in splits[name])]) >= 2,
@@ -350,6 +374,14 @@ def _format(report):
         if not report["timestamps_checked"]:
             lines.append(f"MISS  timestamps: {tcov['covered']}/{tcov['total']} IDs have one "
                          f"(missing e.g. {tcov['missing_ids'][:3]})")
+
+    scov = report.get("stratum_coverage")
+    if scov:
+        for stratum, entry in scov["strata"].items():
+            counts = ", ".join(f"{name} {count}" for name, count in entry["splits"].items())
+            flag = "MISS " if entry["missing_from"] else "ok   "
+            lines.append(f"{flag} stratum {stratum!r}: {counts}"
+                         + (f" (never in {', '.join(entry['missing_from'])})" if entry["missing_from"] else ""))
 
     lines.append("")
     if report["status"] == "passed":
