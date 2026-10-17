@@ -1913,6 +1913,56 @@ Commands, from the plugin root with `PYTHONDONTWRITEBYTECODE=1`, on the final tr
 Skipped tests are unverified, not passed: they need PyTorch, pyhf, ROOT, uproot, network access or
 `HEP_SLOW_TESTS=1`. Not run: the slow tier, live routing (no description changed), the CLI host checks.
 
+## UPGRADE-A (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
+
+Upgrade plan v1.3, batch A on branch `upgrade/A` from main `b1f4d8e`: Th9 (with one sci-fix commit), Th7, D7, D1,
+M5, Th3, ML2, Com1, Com3, X3, X1, X2. Gate decisions (maintainer, 2026-10-17): Th9 sources fetched (G6) and the
+optional `pdg` extra (G5); PDG subset of about 30 particles; M5's `scaling` field (G4); D7 under
+`skills/hep-detector/scripts/`; analysis-check inputs written only on request. Each item's tests, run on the parent
+with the item's test files, then on the item's commit:
+
+| Item | Parent | Commit |
+|---|---|---|
+| Th9 (`84c0a68`) | fail (7 failures, 8 errors) | pass (1 skipped: the `pdg` cross-check) |
+| Th9 sci-fix (`2391008`) | fail (2) | pass |
+| Th7 (`16e1690`) | fail (6 failures, 5 errors) | pass |
+| D7 (`a1a1400`) | fail (1 error) | pass (1 skipped: slow tier) |
+| D1 (`bb4e145`) | fail (10) | pass |
+| M5 (`7cd0b7e`) | fail (2) | pass |
+| Th3 (`505eb43`) | fail (3) | pass |
+| ML2 (`03d2387`) | fail (2 failures, 9 errors) | pass |
+| Com1 (`e5427f1`) | fail (6) | pass |
+| Com3 (`064f60f`) | fail (13 failures, 3 errors) | pass |
+| X3 (`cc72047`) | fail (1 error) | pass |
+| X1 (`12b46ca`) | fail (1 failure, 4 errors) | pass |
+| X2 (`2697017`) | fail (4 failures, 3 errors) | pass |
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, `17979a6` | 23 pass, 0 fail, 2 skipped (the `claude` and `codex` CLI checks); 3783 tests, 3609 pass, 0 failures, 174 skipped |
+| `check_relocation.py`, `17979a6` | pass; 3783 tests, 3603 pass, 0 failures, 180 skipped |
+| `ruff check core contracts`, `mypy` (CI pins) | pass |
+| `measure_entrypoints.py --no-cli` | ok, no warnings: SKILL.md 7,943-9,509 bytes |
+| `check_routing_static.py` | ok, 282 cases, every domain outside v1 has a limited-support case; `check_ownership.py` pass; `check_layering.py` ok |
+| `reference_inventory.py --check` | pass; no cross-skill overlap; 5 soft-budget warnings (references above 24 KB) |
+| `tests/core/test_constants.py` with `pdg` 2026.0 installed (scratch venv) | pass, 16 tests: the 31 bundled masses equal the package's summary-table text |
+| `tests/examples` | pass (no committed example output changed) |
+
+Sources read for Th9 (2026-10-17, generic User-Agent): the NIST CODATA 2022 listing (allascii.txt, full table), the
+`pdg` 2026.0 database (summary values of 32 particles), the AMDC files mass_1.mas20 and nubase_4.mas20 (40 nuclides).
+Not read: the NUBASE2020 year length, so year-unit half-lives are not converted to seconds (to-verify). Th3 read the
+abstract page of arXiv:2606.15259 only.
+
+Gate G2 runs on the batch 0b tree (main `b1f4d8e`, Claude Code 2.1.302, claude-sonnet-5-5; recorded under the
+repository's `evals/`): full routing 249/259 ($21.15), with four cases that passed in the 2.1.293 baseline missing
+now (`co-neighbor-1`, `j06`, `rc-t3-neg`: hep-theory answered without a skill; `underspec-1`: a skill instead of a
+question) and B-04's 18 cases 17/18 (`th-const-1`); the communication evaluation loaded hep-communication in 10 of 11
+cases ($0.73). These are single runs.
+
+Not run: live routing of the 23 batch A cases (gate G2), the slow tier, the CLI host checks. The run left
+`__pycache__` folders from tests that start `python -I` (the known issue, present on main). Skipped tests are
+unverified, not passed.
+
 ## UPGRADE-0B (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
 
 Upgrade plan v1.3, batch 0b (B-01 to B-05) on branch `upgrade/0b` from main `b02cd98`, with the validator-label
