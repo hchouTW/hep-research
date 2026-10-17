@@ -132,12 +132,12 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
 - `roofit_fit_check.py` (needs PyROOT): fit status (status 0, covQual 3, EDM below `--edm-max`), `weighted`, `toys` (pulls), `crosscheck` (against core/stats); [RooFit and RooStats](roofit-and-roostats-methods.md).
-- `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure, systematics by
-  their M5 scaling class, and the reach; every output is labeled `projection` and fails the publication gate.
+- `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure (M5 scaling
+  classes) and the reach; outputs are labeled `projection` and fail the publication gate.
 - `tail_extrapolation.py`: a control-region tail fitted by several model families and extrapolated into the signal
   region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy are imported at run time.
-- `periodicity_scan.py`: weighted generalized Lomb-Scargle, band-maximum global p from white, AR(1) or OU
-  surrogates; NumPy at run time.
+- `periodicity_scan.py`: generalized Lomb-Scargle with a surrogate global p (white, AR(1), OU);
+  `time_structure.py`: change points (toy-calibrated false alarms) and lags with surrogates. NumPy at run time.
 - Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command
   reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 

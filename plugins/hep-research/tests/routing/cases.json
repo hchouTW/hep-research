@@ -4325,6 +4325,26 @@
    "trigger_terms": [
     "significance and look-elsewhere effects"
    ]
+  },
+  {
+   "id": "d-st-time-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Did my detector-rate series change level at some point? Calibrate the change-point threshold to a 5% false-alarm rate, with the correlated noise I have.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "d-st-time-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "宇宙線強度落後太陽活動幾個月？上升段與下降段的遲滯要怎麼量，顯著性怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
   }
  ]
 }

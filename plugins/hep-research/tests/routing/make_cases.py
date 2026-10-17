@@ -459,6 +459,9 @@ C = [
     # batch D, S5: periodicity with red-noise surrogates
  ("d-st-period-1", "en", "direct", "Is there a periodic signal in my unevenly sampled light curve? Calibrate the Lomb-Scargle peak against red noise.", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
  ("d-st-period-2", "zh-Hant", "direct", "這條時間序列有沒有週期性？紅噪聲背景下全域顯著性要怎麼算？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+    # batch D, S9: change points and lags
+ ("d-st-time-1", "en", "direct", "Did my detector-rate series change level at some point? Calibrate the change-point threshold to a 5% false-alarm rate, with the correlated noise I have.", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+ ("d-st-time-2", "zh-Hant", "direct", "宇宙線強度落後太陽活動幾個月？上升段與下降段的遲滯要怎麼量，顯著性怎麼算？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
 ]
 
 cases = []

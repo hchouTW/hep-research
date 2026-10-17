@@ -79,6 +79,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-statistics/scripts/split_consistency.py": ["--input", M],
     "skills/hep-statistics/scripts/build_covariance.py": ["build", "--input", M],
     "skills/hep-statistics/scripts/periodicity_scan.py": ["--input", M, "--null", "white", "--surrogates", "10", "--seed", "1"],
+    "skills/hep-statistics/scripts/time_structure.py": ["lag", "--input", M, "--max-lag", "2", "--surrogates", "5", "--seed", "1"],
     "skills/hep-statistics/scripts/project_uncertainty.py": [M, "--k", "2"],
     "skills/hep-statistics/scripts/tail_extrapolation.py": ["--input", M],
     "skills/hep-statistics/scripts/result_artifact.py": ["--cli-output", M, "--poi", "mu", "--construction", "asymptotic",
