@@ -92,5 +92,45 @@ class MapFile(unittest.TestCase):
         self.assertNotEqual(cm.render_into(stale, cm.load()), stale)
 
 
+class ScopeDeclaration(unittest.TestCase):
+    """X1: docs/routing-contract.md lists what v1 covers and what it does not, generated from the map."""
+
+    def test_contract_lists_the_map_scope(self):
+        text = (ROOT / "docs" / "routing-contract.md").read_text(encoding="utf-8")
+        self.assertIn(cm.SCOPE_BEGIN, text)
+        self.assertEqual(cm.render_scope_into(text, cm.load()), text)
+        block = text.split(cm.SCOPE_BEGIN, 1)[1].split(cm.SCOPE_END, 1)[0]
+        for e in cm.load()["capabilities"]:
+            self.assertIn(e["id"], block)
+
+    def test_stale_declaration_is_detected(self):
+        text = (ROOT / "docs" / "routing-contract.md").read_text(encoding="utf-8")
+        stale = text.replace("(heavy-ions)", "(heavy-ion-old)")
+        self.assertNotEqual(cm.render_scope_into(stale, cm.load()), stale)
+
+    def test_neutrino_and_ckm_are_outside_v1_with_their_cases(self):
+        rows = {e["id"]: e for e in cm.load()["capabilities"]}
+        self.assertFalse(rows["neutrino-oscillations"]["v1"])
+        self.assertEqual(rows["neutrino-oscillations"].get("enters_v1_with"), "Th4")
+        self.assertEqual(rows["neutrino-oscillations"]["cases"], ["th-scope-2"])
+        self.assertFalse(rows["ckm-global-fits"]["v1"])
+        self.assertEqual(rows["ckm-global-fits"]["cases"], ["th-flavour-2"])
+
+    def test_x1_routing_cases(self):
+        cases = {c["id"]: c for c in json.loads((ROOT / "tests" / "routing" / "cases.json").read_text(
+            encoding="utf-8"))["cases"]}
+        for cid, prompt in (("th-scope-2", "幫我推導微中子振盪機率在物質中的修正。"), ("th-flavour-2", "幫我做 CKM 全域擬合。")):
+            c = cases[cid]
+            self.assertEqual((c["lang"], c["kind"], c["prompt"], c["expected_primary"]),
+                             ("zh-Hant", "out-of-v1", prompt, "hep-theory"))
+            self.assertTrue(c["limited_support"])
+
+    def test_skill_outside_v1_rows_point_to_the_declaration(self):
+        for skill in ("hep-theory", "hep-statistics"):
+            text = (ROOT / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+            row = next(line for line in text.splitlines() if line.startswith("| Outside v1"))
+            self.assertIn("docs/routing-contract.md", row)
+
+
 if __name__ == "__main__":
     unittest.main()

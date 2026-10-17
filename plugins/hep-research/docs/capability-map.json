@@ -433,6 +433,16 @@
    ]
   },
   {
+   "id": "ckm-global-fits",
+   "capability": "CKM global fits",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th-flavour-2"
+   ]
+  },
+  {
    "id": "propagation-global-fits",
    "capability": "Global cosmic-ray propagation fits that run a propagation code",
    "owner": "hep-statistics",
@@ -484,6 +494,18 @@
    "cases": [
     "th-relic-1"
    ]
+  },
+  {
+   "id": "neutrino-oscillations",
+   "capability": "Neutrino-oscillation probabilities, including matter effects",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th-scope-2"
+   ],
+   "enters_v1_with": "Th4",
+   "note": "th-scope-2 becomes a direct case when Th4 lands"
   }
  ]
 }

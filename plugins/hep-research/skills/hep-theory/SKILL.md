@@ -59,7 +59,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | HEPData table to a dataset record, or a record back to HEPData | `<plugin root>/adapters/hepdata/assets/hepdata_record.py`, `<plugin root>/adapters/hepdata/assets/hepdata_export.py` |
 | Scientific-ML boundaries (surrogates of a theory) | `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md` |
 | Shipped theory-domain profiles | `<plugin root>/profiles/registry.json` |
-| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; general discipline |
+| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; general discipline; full list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |
 
 Folder guide for people: [README.md](README.md).
 

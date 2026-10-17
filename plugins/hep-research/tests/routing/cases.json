@@ -1349,6 +1349,26 @@
    "limited_support": true
   },
   {
+   "id": "th-scope-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "幫我推導微中子振盪機率在物質中的修正。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X1",
+   "limited_support": true
+  },
+  {
+   "id": "th-flavour-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "幫我做 CKM 全域擬合。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X1",
+   "limited_support": true
+  },
+  {
    "id": "underspec-1",
    "lang": "en",
    "kind": "underspecified",

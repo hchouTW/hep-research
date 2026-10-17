@@ -61,7 +61,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | MCMC convergence, prior reweighting | `bayes_diagnostics.py` |
 | Write the statistical-result artifact | `result_artifact.py` |
 | Unbinned fits | `<plugin root>/adapters/unbinned-fit/` |
-| Outside v1 (global propagation fits, EFT global fits) | say so; general discipline |
+| Outside v1 (global propagation fits, EFT global fits) | say so; general discipline; full list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |
 
 Scripts in `<plugin root>/skills/hep-statistics/scripts/`, modules in `<plugin root>/core/stats/` (read `--help` first). Folder guide: [README.md](README.md).
 

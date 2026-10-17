@@ -60,9 +60,11 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-communication | documentation | yes | Com4, Com5, Com6, Com7 |  |
 | lattice-qcd | Lattice QCD and its global analyses | hep-theory | none | no |  | j12 |
 | eft-global-fits | EFT global fits | hep-theory | none | no |  | out-of-v1-2 |
+| ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |
 | propagation-global-fits | Global cosmic-ray propagation fits that run a propagation code | hep-statistics | none | no |  | out-of-v1-1 |
 | dark-matter-phenomenology | Dark-matter phenomenology and interpretation of excesses | hep-theory | none | no (enters with Th5) |  | wp11-bound-dm-1, wp11-bound-dm-2 |
 | heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1 |
 | nuclear-structure | Nuclear-structure calculations (shell model, density functionals) | hep-theory | none | no |  | th-nucstruct-1 |
 | relic-density-solvers | Full relic-density Boltzmann solvers | hep-theory | none | no |  | th-relic-1 |
+| neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | none | no (enters with Th4) |  | th-scope-2 |
 <!-- /capability-map -->
