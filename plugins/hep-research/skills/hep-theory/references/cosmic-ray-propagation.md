@@ -156,6 +156,23 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
 - **Breaks:** a hardening in primaries alone does not tell injection from propagation; the ratio of secondaries to
   primaries above the break does.
 
+## Electron and positron energy losses
+
+Electrons and positrons lose energy fast enough that their losses, not escape, set how far they travel. For an
+isotropic electron of Lorentz factor gamma (Moderski et al. 2005, Eqs. 1, 3, 7, A10, A12):
+
+- synchrotron: b_sync = (4/3) sigma_T c (gamma^2 - 1) U_B, with U_B = B^2 / 8 pi (Gaussian units);
+- inverse Compton on a photon field of energy density U: b_IC = (4/3) sigma_T c (gamma^2 - 1) U F_KN, where
+  F_KN = 1 in the Thomson limit b~ = 4 gamma eps0 / (m_e c^2) << 1 and falls as (9 / 2 b~^2)(ln b~ - 11/6) for
+  b~ >> 1 (Klein-Nishina). A Planck field is well approximated as mono-energetic at eps0 = 2.8 kT. The closed form
+  F_KN = (1 + b~)^-1.5 is within 3% for b~ <= 1 but up to a factor 3 off at b~ = 1e4: state which one was used;
+- loss time tau = E / b, and diffusion distance sqrt(4 D tau) with D at that energy. In the Thomson limit
+  tau is proportional to 1/E, so high-energy electrons come from nearby sources.
+
+`<plugin root>/skills/hep-theory/scripts/lepton_energy_losses.py` computes these per energy for declared fields (no
+built-in field values, magnetic field or diffusion coefficient). Ionization, bremsstrahlung and adiabatic losses are
+not included; it gives rates, not a transport solution.
+
 ## What to report with any propagation statement
 
 - The model (terms kept, geometry, diffusion parametrization, modulation treatment) and the code and version used;
@@ -196,7 +213,7 @@ The closed-form secondary-ratio and source-term benchmarks of the two theory-dom
 end-to-end example (`examples/bc-propagation-fit`, synthetic B/C data, D0/L recovered and the flat direction reported),
 remain at demonstrated-on-synthetic-data. No fit to real data is tested.
 
-## Sources read (for the kinematics, force-field and antiproton sections; on 2026-10-13 unless dated)
+## Sources read (for the kinematics, force-field, antiproton and lepton-loss sections; on 2026-10-13 unless dated)
 
 - L.J. Gleeson and W.I. Axford, "Solar modulation of galactic cosmic rays", ApJ 154 (1968) 1011,
   https://articles.adsabs.harvard.edu/pdf/1968ApJ...154.1011G (scan); Secs. I-III, Eqs. (5), (11), (13)-(16).
@@ -205,6 +222,8 @@ remain at demonstrated-on-synthetic-data. No fit to real data is tested.
 - Y. Li, S. Yang, Y. Zhang, Q. Song, G. Zhou, Y. Deng, J. Wang, "Polarity Reversal of the Polar Magnetic Fields in
   Solar Cycle 25", arXiv:2606.15259 (2026); abstract page only, read 2026-10-17 (body not read).
 - M. di Mauro, F. Donato, A. Goudelis, P.D. Serpico, PRD 90 (2014) 085017, arXiv:1408.0288v3; Secs. I, II, IV, V.
+- R. Moderski, M. Sikora, P.S. Coppi, F. Aharonian, MNRAS 363 (2005) 954, arXiv:astro-ph/0504388; Secs. 2.1, 2.2 and
+  Appendix A (Eqs. 1-3, 7, A1-A12), read 2026-10-17.
 - M.W. Winkler, JCAP 02 (2017) 048, arXiv:1701.04866v1; Secs. 2, 3, 8, 9, 10.
 - M. Korsmeier, F. Donato, M. Di Mauro, PRD 97 (2018) 103019, arXiv:1802.03030v2; Secs. I-V.
 

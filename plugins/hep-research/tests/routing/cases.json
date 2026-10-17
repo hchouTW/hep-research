@@ -4365,6 +4365,26 @@
    "trigger_terms": [
     "unfolding with regularization and coverage"
    ]
+  },
+  {
+   "id": "d-th-lepton-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How far can a 1 TeV electron travel before synchrotron and inverse-Compton losses on the CMB drain it, with Klein-Nishina corrections?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
+  },
+  {
+   "id": "d-th-lepton-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "1 TeV 正電子在 3 μG 磁場與星際輻射場中的能量損失時間是多少？要考慮 Klein-Nishina 效應。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
   }
  ]
 }

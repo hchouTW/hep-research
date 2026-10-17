@@ -35,7 +35,7 @@
   },
   "hep-theory": {
    "references": 15,
-   "bytes": 105349,
+   "bytes": 106798,
    "uncited": 0
   }
  },
@@ -3468,7 +3468,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "829f9fbe 2026-10-17"
+   "last_commit": "0f4d7c4c 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3691,7 +3691,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "0f4d7c4c 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/amplitudes-and-widths.md",
@@ -3709,8 +3709,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 18732,
-   "lines": 212,
+   "bytes": 20181,
+   "lines": 231,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",
@@ -3726,6 +3726,7 @@
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/nuclear-cross-sections.md",
+    "skills/hep-theory/scripts/lepton_energy_losses.py",
     "tests/skills/hep_theory/test_charge_sign_modulation_th3.py",
     "tests/skills/test_one_owner_per_topic_x2.py"
    ],

@@ -465,6 +465,9 @@ C = [
     # batch D, S10: unfolding through an external package, validated
  ("d-st-unfold-1", "en", "direct", "Unfold my spectrum with pyunfold, with the number of iterations fixed in advance, and show closure, stress tests and toy coverage.", "hep-statistics", ["unfolding with regularization and coverage"], None, None, {}),
  ("d-st-unfold-2", "zh-Hant", "direct", "用 RooUnfold 的 Bayes 方法反摺積，迭代次數要怎麼先決定？閉合測試與覆蓋率怎麼檢查？", "hep-statistics", ["unfolding with regularization and coverage"], None, None, {}),
+    # batch D, Th2: electron and positron energy losses (lepton_energy_losses.py)
+ ("d-th-lepton-1", "en", "direct", "How far can a 1 TeV electron travel before synchrotron and inverse-Compton losses on the CMB drain it, with Klein-Nishina corrections?", "hep-theory", ["astroparticle physics"], None, None, {}),
+ ("d-th-lepton-2", "zh-Hant", "direct", "1 TeV 正電子在 3 μG 磁場與星際輻射場中的能量損失時間是多少？要考慮 Klein-Nishina 效應。", "hep-theory", ["astroparticle physics"], None, None, {}),
 ]
 
 cases = []
