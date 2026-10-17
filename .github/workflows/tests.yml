@@ -76,6 +76,13 @@ jobs:
         if: matrix.part.key == 'static'
         working-directory: .
         run: python -m unittest discover -s evals/research_communication/tests -t evals/research_communication/tests
+      - name: Behavioral-harness tests, case validation and invariant coverage (fake host, no model calls)
+        if: matrix.part.key == 'static'
+        working-directory: .
+        run: |
+          python -m unittest discover -s evals/behavior/tests -t evals/behavior/tests
+          python evals/behavior/run.py validate
+          python evals/behavior/run.py coverage
       - name: Keep the check-run record
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2

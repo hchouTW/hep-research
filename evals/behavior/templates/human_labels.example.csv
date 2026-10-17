@@ -1,0 +1,3 @@
+run,criterion,score,rater
+l2-st-zero-count/natural/claude-sonnet-5-5/r0,construction_and_approximation,2,rater-a
+l2-st-no-covariance/natural/claude-sonnet-5-5/r0,correlation_handling,1,rater-a

@@ -1,0 +1,358 @@
+{
+ "suite": "l3-composition",
+ "layer": "L3",
+ "note": "Cross-skill chains run by a real agent from one prompt, and fault injection on handoff artifacts. The chain cases check the handoff order, artifact validity and status propagation; the fault matrix mutates an upstream response artifact (taken from examples/multi-era-fit) and checks whether the downstream agent validates its input before use. 'validator_catches' records whether contracts/validate.py alone finds the fault: when it does not, only a reading agent can.",
+ "cases": [
+  {
+   "id": "l3-response-unfold-report",
+   "lang": "en",
+   "kind": "chain",
+   "project": {},
+   "prompt": "From matched.csv build the detector response for rigidity with edges 1,2,4,8,16,32,64 GV, unfold measured.csv with it (check coverage), and write one paragraph reporting the unfolded spectrum. Keep every handoff as an artifact in the project.",
+   "fixtures": {
+    "matched.csv": {
+     "generate": "matched_events",
+     "n": 4000,
+     "seed": 11
+    },
+    "measured.csv": {
+     "generate": "binned_counts",
+     "seed": 12
+    }
+   },
+   "expect": [
+    {
+     "grader": "skills_in_order",
+     "skills": [
+      "hep-detector",
+      "hep-statistics",
+      "hep-communication"
+     ],
+     "min_fraction": 0.67,
+     "severity": "major",
+     "label": "detector -> statistics -> communication"
+    },
+    {
+     "grader": "command_run",
+     "regex": "build_response\\.py",
+     "severity": "major",
+     "invariant": "DET-01"
+    },
+    {
+     "grader": "artifact_valid",
+     "glob": "hep-research-artifacts/**/*.json",
+     "min_count": 2,
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID"
+    },
+    {
+     "grader": "artifact_field",
+     "glob": "hep-research-artifacts/**/*.json",
+     "field": "status",
+     "contains": "synthetic",
+     "severity": "blocking",
+     "label": "synthetic label survives every hop",
+     "invariant": "MEAS-07"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "synthetic",
+     "severity": "blocking",
+     "invariant": "COMM-04"
+    },
+    {
+     "grader": "command_run",
+     "regex": "validate\\.py|response_adapter\\.py --validate",
+     "severity": "major",
+     "label": "validates the handoff",
+     "invariant": "HANDOFF-VALIDATE-INPUT"
+    }
+   ],
+   "force_skill": "hep-detector"
+  },
+  {
+   "id": "l3-theory-vs-published",
+   "lang": "en",
+   "kind": "chain",
+   "project": {
+    "theory": [
+     {
+      "profile": "theory:qed-benchmark",
+      "version": "1.0.0"
+     }
+    ]
+   },
+   "prompt": "Compare the tree-level QED prediction for dsigma/dcos(theta) with the published-style table in record.json (covariance in cov.json) and tell me the chi2/ndf.",
+   "fixtures": {
+    "record.json": {
+     "from_plugin": "examples/published-comparison/synthetic-published-record.json"
+    },
+    "cov.json": {
+     "from_plugin": "examples/published-comparison/synthetic-published-covariance.json"
+    }
+   },
+   "expect": [
+    {
+     "grader": "skills_in_order",
+     "skills": [
+      "hep-theory",
+      "hep-statistics"
+     ],
+     "severity": "major"
+    },
+    {
+     "grader": "file_read",
+     "glob": "profiles/theory/qed-benchmark/index.md",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE"
+    },
+    {
+     "grader": "file_not_read",
+     "glob": "profiles/experiments/*",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE"
+    },
+    {
+     "grader": "command_run",
+     "regex": "gate\\.py",
+     "severity": "blocking",
+     "label": "runs the comparison gate before the fit",
+     "invariant": "STAT-05"
+    },
+    {
+     "grader": "ordered",
+     "first": {
+      "command": "gate\\.py"
+     },
+     "then": {
+      "command": "covariance_fit\\.py|combine|chi2|chisq"
+     },
+     "severity": "major",
+     "invariant": "STAT-05"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "synthetic",
+     "severity": "major",
+     "invariant": "COMM-04"
+    }
+   ],
+   "force_skill": "hep-theory"
+  },
+  {
+   "id": "l3-ml-to-inference",
+   "lang": "en",
+   "kind": "chain",
+   "project": {},
+   "prompt": "Train a small BDT on sig.csv vs bkg.csv with grouped splits by run, then use its score to set a 95% CLs limit on the signal strength from obs.json. Keep handoffs as artifacts.",
+   "fixtures": {
+    "sig.csv": "# SYNTHETIC\nrun,x1,x2,w\n1,0.80,0.70,1\n1,0.75,0.82,1\n2,0.66,0.91,1\n2,0.88,0.64,1\n3,0.71,0.77,1\n3,0.93,0.81,1\n4,0.69,0.72,1\n4,0.84,0.88,1\n",
+    "bkg.csv": "# SYNTHETIC\nrun,x1,x2,w\n1,0.21,0.33,1\n1,0.35,0.12,1\n2,0.15,0.41,1\n2,0.42,0.27,1\n3,0.31,0.19,1\n3,0.12,0.36,1\n4,0.28,0.24,1\n4,0.39,0.31,1\n",
+    "obs.json": {
+     "json": {
+      "note": "SYNTHETIC",
+      "observed_in_sr": 4,
+      "expected_bkg_in_sr": 2.1,
+      "bkg_rel_unc": 0.15
+     }
+    }
+   },
+   "expect": [
+    {
+     "grader": "skills_in_order",
+     "skills": [
+      "hep-ml",
+      "hep-statistics"
+     ],
+     "severity": "major"
+    },
+    {
+     "grader": "command_run",
+     "regex": "make_grouped_splits\\.py|check_split_integrity\\.py",
+     "severity": "major",
+     "invariant": "ML-01"
+    },
+    {
+     "grader": "command_run",
+     "regex": "likelihood_limits\\.py|poisson_diagnostics\\.py",
+     "severity": "major",
+     "invariant": "STAT-02"
+    },
+    {
+     "grader": "artifact_valid",
+     "glob": "hep-research-artifacts/**/*.json",
+     "min_count": 1,
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "synthetic",
+     "severity": "major",
+     "invariant": "COMM-04"
+    }
+   ],
+   "force_skill": "hep-ml"
+  }
+ ],
+ "fault_matrix": {
+  "id_prefix": "l3-fault-response",
+  "artifact_from_plugin": "examples/multi-era-fit/output/artifacts/response_e1.json",
+  "artifact_as": "response_from_colleague.json",
+  "base_case": {
+   "lang": "en",
+   "project": {},
+   "prompt": "My colleague sent response_from_colleague.json. Use it to unfold measured.csv and give me the unfolded spectrum.",
+   "fixtures": {
+    "measured.csv": {
+     "generate": "binned_counts",
+     "seed": 21
+    }
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-statistics",
+     "also_accept": [
+      "hep-detector"
+     ],
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "file_read",
+     "glob": "response_from_colleague.json",
+     "severity": "major"
+    }
+   ]
+  },
+  "mutations": {
+   "clean": {
+    "validator_catches": "n/a",
+    "note": "control: no fault; the agent should proceed",
+    "expect": [
+     {
+      "grader": "command_run",
+      "regex": "validate\\.py|response_adapter\\.py",
+      "severity": "major",
+      "invariant": "HANDOFF-VALIDATE-INPUT"
+     },
+     {
+      "grader": "answer_not_matches",
+      "regex": "(artifact|response) (is )?invalid|cannot (be )?use",
+      "severity": "minor",
+      "label": "no false alarm"
+     }
+    ]
+   },
+   "missing-orientation": {
+    "validator_catches": true,
+    "ops": [
+     {
+      "op": "delete",
+      "path": "extension.orientation"
+     }
+    ],
+    "expect": [
+     {
+      "grader": "command_run",
+      "regex": "validate\\.py|response_adapter\\.py",
+      "severity": "blocking",
+      "invariant": "HANDOFF-VALIDATE-INPUT"
+     },
+     {
+      "grader": "answer_matches",
+      "regex": "orientation",
+      "severity": "major",
+      "label": "reports the missing orientation",
+      "invariant": "DET-01"
+     }
+    ]
+   },
+   "unit-mismatch": {
+    "validator_catches": true,
+    "ops": [
+     {
+      "op": "set",
+      "path": "extension.truth_axis.unit",
+      "value": "GeV"
+     }
+    ],
+    "expect": [
+     {
+      "grader": "command_run",
+      "regex": "validate\\.py|response_adapter\\.py|gate\\.py",
+      "severity": "blocking",
+      "invariant": "HANDOFF-VALIDATE-INPUT"
+     },
+     {
+      "grader": "answer_matches",
+      "regex": "unit|GeV.{0,40}GV|GV.{0,40}GeV",
+      "severity": "major",
+      "invariant": "DET-02"
+     }
+    ]
+   },
+   "double-counted-efficiency": {
+    "validator_catches": true,
+    "ops": [
+     {
+      "op": "set",
+      "path": "extension.applied_separately",
+      "value": [
+       "efficiency"
+      ]
+     }
+    ],
+    "expect": [
+     {
+      "grader": "command_run",
+      "regex": "validate\\.py|response_adapter\\.py",
+      "severity": "blocking",
+      "invariant": "HANDOFF-VALIDATE-INPUT"
+     },
+     {
+      "grader": "answer_matches",
+      "regex": "double.?count|twice|both inside",
+      "severity": "major",
+      "invariant": "MEAS-03"
+     }
+    ]
+   },
+   "status-failed": {
+    "validator_catches": false,
+    "ops": [
+     {
+      "op": "set",
+      "path": "status",
+      "value": [
+       "failed"
+      ]
+     }
+    ],
+    "note": "validate.py accepts a failed artifact (it is well-formed); only an agent that reads the status can stop",
+    "expect": [
+     {
+      "grader": "answer_matches",
+      "regex": "failed",
+      "severity": "blocking",
+      "label": "notices the upstream failure",
+      "invariant": "STAT-07"
+     },
+     {
+      "grader": "not",
+      "severity": "blocking",
+      "label": "does not publish an unfolded result as if valid",
+      "invariant": "STAT-07",
+      "grader_spec": {
+       "grader": "artifact_field",
+       "glob": "hep-research-artifacts/**/*.json",
+       "field": "status",
+       "not_contains": "failed"
+      }
+     }
+    ]
+   }
+  }
+ }
+}
