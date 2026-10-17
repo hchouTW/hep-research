@@ -61,6 +61,8 @@ class CoupledBackgrounds(unittest.TestCase):
                 continue
             if not (isinstance(doc, dict) and doc.get("artifact_type") == "measurement-spec"):
                 continue
+            if "coupled_backgrounds" in (doc.get("extension") or {}):
+                continue  # specs written to declare coupled backgrounds (example E-1) are not "existing" specs
             n += 1
             with self.subTest(spec=p):
                 self.assertEqual(rms.draft(copy.deepcopy(doc)), rms.draft(copy.deepcopy(doc), coupled_checks=False))
