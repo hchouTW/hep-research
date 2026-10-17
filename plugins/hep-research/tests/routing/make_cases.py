@@ -477,6 +477,9 @@ C = [
     # batch D, Th11: astroparticle essentials (secondary_gamma.py)
  ("d-th-astro-1", "en", "direct", "Compute the gamma-ray spectrum from pi0 decay for my pion spectrum, and the neutrino flavour ratio at Earth for a 1:2:0 source.", "hep-theory", ["astroparticle physics"], None, None, {}),
  ("d-th-astro-2", "zh-Hant", "direct", "質子撞 CMB 光子的 photopion 閾值能量是多少？順便說明 Hillas 判據與擴散激波加速的譜指數。", "hep-theory", ["astroparticle physics"], None, None, {}),
+    # batch D, C2: data and simulation software versions per era
+ ("d-cc-pairs-1", "en", "direct", "Check that the reconstruction and calibration versions of data and simulation match in each era of my analysis.", "hep-computing", ["environment and run manifests"], None, None, {}),
+ ("d-cc-pairs-2", "zh-Hant", "direct", "幫我檢查每個時期資料與模擬用的重建與校準軟體版本是否一致。", "hep-computing", ["environment and run manifests"], None, None, {}),
 ]
 
 cases = []

@@ -283,7 +283,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `time-series-inference.md` | hep-statistics | 18.8 | yes | 15 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
 | `unfolding.md` | hep-statistics | 7.3 | yes | 27 | hep-detector, hep-measurement | 0f4d7c4c 2026-10-17 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
-| `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | untracked |
+| `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |
 | `cosmic-ray-propagation.md` | hep-theory | 20.2 | yes | 19 | hep-detector | 42ad7086 2026-10-17 |
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 5 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b5 2026-10-15 |

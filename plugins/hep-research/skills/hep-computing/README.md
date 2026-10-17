@@ -33,7 +33,7 @@ State after the 2026-10 remediation (CMP-08); checked by `tests/skills/test_cli_
 | `check_root_cpp_env.sh` | `--json` | private temporary folder | 0/1/2/3 | root, root-config: exit 3 | user |
 | `check_histogram_errors.py` | always | none | 0/1/2/3 | PyROOT or uproot (ROOT files only): exit 3 | user |
 | `compare_root_histograms.py` | always | none | 0/1/2/3 | PyROOT or uproot: exit 3 | user |
-| `environment_manifest.py` | always | `--out` (folders created) | 0/1/2 | none | user |
+| `environment_manifest.py` | always | `--out` (folders created) | 0/1/2/3 (`pairs`: 1 a data/MC version mismatch, 3 an undeclared version) | none | user |
 | `find_python.py` | always | none | 0/1/2 | reports candidates | user |
 | `inspect_root_file.C` | exempt (ROOT macro) | none | ROOT's | runs inside ROOT | user |
 | `inspect_root_file.py` | `--json` | none | 0/2/3 | PyROOT: exit 3 | user |

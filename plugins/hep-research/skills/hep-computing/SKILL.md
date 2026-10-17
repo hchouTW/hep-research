@@ -50,7 +50,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 | Slow or large code | [performance profiling](references/performance-profiling.md) |
 | CMake and root-config builds | [CMake](references/cmake-and-build.md); `check_root_cpp_env.sh`, `new_root_cpp_project.sh` |
 | SymPy, integrals, ODEs, convergence | [symbolic and numerical computation](references/symbolic-and-numerical-computation.md), [numerical methods](references/numerical-and-computational-methods.md) |
-| Environments, containers, run manifests; interpreter for package-dependent work | [environments](references/environments-and-containers.md); `environment_manifest.py`; `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH) |
+| Environments, containers, run manifests, data/MC version pairs per era; interpreter for package-dependent work | [environments](references/environments-and-containers.md); `environment_manifest.py` (`pairs`); `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH) |
 | Inspect or compare ROOT files and histograms; histogram errors, TEfficiency, RooWorkspace import, ROOT install | `inspect_root_file.py`, `compare_root_histograms.py`, `check_histogram_errors.py`; [ROOT usage](references/root-usage-patterns.md) |
 | Partition, resubmit, merge | `local_partition.py`; Slurm and HTCondor: [batch scheduling](references/batch-scheduling.md) |
 | Time-sliced records: deduplicate by key, then sum; mergeable partial sums | `assets/time_slice_reduction.py`; [analysis pipelines](references/analysis-data-pipelines.md) |

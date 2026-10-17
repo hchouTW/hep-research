@@ -4445,6 +4445,26 @@
    "trigger_terms": [
     "astroparticle physics"
    ]
+  },
+  {
+   "id": "d-cc-pairs-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check that the reconstruction and calibration versions of data and simulation match in each era of my analysis.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
+  },
+  {
+   "id": "d-cc-pairs-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "幫我檢查每個時期資料與模擬用的重建與校準軟體版本是否一致。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
   }
  ]
 }

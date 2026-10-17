@@ -3717,7 +3717,7 @@
     "tests/skills/hep_theory/test_astroparticle_essentials.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "4cedacd8 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
