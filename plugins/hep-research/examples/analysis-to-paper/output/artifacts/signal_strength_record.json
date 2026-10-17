@@ -1,0 +1,93 @@
+{
+ "contract_version": "2.11.0",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.13.1",
+  "contracts": "2.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-17",
+  "evidence_ids": []
+ },
+ "status": [
+  "synthetic"
+ ],
+ "artifact_id": "synthetic-e4-mu-mu-record",
+ "artifact_type": "dataset-record",
+ "objective": "single value Mu of synthetic-e4-mu as a one-bin record for HEPData",
+ "inputs": [
+  {
+   "ref": "signal_strength.json",
+   "sha256": "95402810920ea17003db01dc6f6ce3b7516d13fc729d05011e6696fb2f35fb4b",
+   "role": "statistical-result"
+  }
+ ],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "extension": {
+  "dataset_id": "render:synthetic-e4-mu.Mu",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "parameter",
+   "process": "SYNTHETIC signal plus background",
+   "variables": [
+    {
+     "name": "parameter",
+     "unit": "1",
+     "edges": [
+      0.0,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "single value of synthetic-e4-mu",
+    "fiducial": false
+   },
+   "level": "detector",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 1.0,
+    "unit": "fb^-1"
+   },
+   "bin_semantics": "point",
+   "unit": "1"
+  },
+  "data": {
+   "edges": [
+    0.0,
+    1.0
+   ],
+   "values": [
+    1.0350824146909174
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "sigma_mu",
+     "kind": "statistical",
+     "correlation": "uncorrelated",
+     "values": [
+      0.05816330553603167
+     ]
+    }
+   ]
+  },
+  "covariance": {
+   "status": "present",
+   "ref": "signal_strength.json#extension.results.sigma_mu",
+   "note": "one bin: the uncertainty is the whole covariance"
+  },
+  "period": "not-applicable",
+  "status": "synthetic"
+ }
+}

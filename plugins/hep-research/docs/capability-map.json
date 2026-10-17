@@ -403,7 +403,7 @@
    "id": "papers-and-numbers",
    "capability": "Paper types, venues, numbers from artifacts and spectrum plots",
    "owner": "hep-communication",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "Com4",

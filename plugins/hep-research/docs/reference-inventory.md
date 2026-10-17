@@ -93,7 +93,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-and-cosmic-ray-papers.md` | hep-communication | 13.4 | yes | 13 | hep-measurement | 9257d7b5 2026-10-15 |
 | `citation-verification.md` | hep-communication | 6.5 | yes | 12 | - | e5427f10 2026-10-17 |
 | `citations-and-bibliography.md` | hep-communication | 19.9 | yes | 12 | - | 9257d7b5 2026-10-15 |
-| `claim-evidence-mapping.md` | hep-communication | 5.2 | yes | 9 | hep-statistics, hep-theory | 9257d7b5 2026-10-15 |
+| `claim-evidence-mapping.md` | hep-communication | 5.2 | yes | 9 | hep-statistics, hep-theory | fe9839a2 2026-10-17 |
 | `code-review-report.md` | hep-communication | 5.5 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `code-to-methodology-synthesis.md` | hep-communication | 5.7 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `collaboration-results-lifecycle.md` | hep-communication | 3.7 | no | 2 | - | 9257d7b5 2026-10-15 |

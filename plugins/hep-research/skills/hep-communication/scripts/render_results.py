@@ -197,7 +197,8 @@ def one_bin_record(name: str, entry: dict, out: str, args) -> dict:
     unc = entry["source_uncertainty"]
     rec.update({"artifact_id": f"{entry['artifact_id']}-{name.lower()}-record", "artifact_type": "dataset-record",
                 "objective": f"single value {name} of {entry['artifact_id']} as a one-bin record for HEPData",
-                "inputs": [{"ref": entry["artifact"], "sha256": entry["artifact_sha256"], "role": "statistical-result"}],
+                "inputs": [{"ref": Path(entry["artifact"]).name, "sha256": entry["artifact_sha256"],
+                            "role": "statistical-result"}],
                 "outputs": [], "unresolved_inputs": [],
                 "extension": {"dataset_id": f"render:{entry['artifact_id']}.{name}", "source_evidence_ids": [],
                               "observable": {"quantity": quantity, "process": args.record_process,

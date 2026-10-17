@@ -57,7 +57,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | ml-eras | Era changes in machine-learning studies | hep-ml | documentation | yes | ML1 |  |
 | claims-and-literature | Claims linked to results, literature and citation verification, manuscript checks | hep-communication | tool | yes | Com1, Com2 |  |
 | terminology | Terminology and notation against a glossary | hep-communication | tool | yes | Com3 |  |
-| papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-communication | documentation | yes | Com4, Com5, Com6, Com7 |  |
+| papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-communication | tool | yes | Com4, Com5, Com6, Com7 |  |
 | lattice-qcd | Lattice QCD and its global analyses | hep-theory | none | no |  | j12 |
 | eft-global-fits | EFT global fits | hep-theory | none | no |  | out-of-v1-2 |
 | ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |
