@@ -1,0 +1,6 @@
+{
+ "note": "Release gate. Thresholds apply to the LOWER 95% bound for rates that must be high and to the point estimate for leaks, so a small or lucky sample cannot pass.",
+ "L1_loaded_expected_low": {"claude-sonnet-5-5": 0.90, "claude-haiku-4-5": 0.60},
+ "max_blocking_failures": 0,
+ "L4_enforced_leak_high": 0.0
+}

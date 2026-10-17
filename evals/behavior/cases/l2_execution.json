@@ -1,0 +1,932 @@
+{
+ "suite": "l2-execution",
+ "layer": "L2",
+ "note": "Execution inside a skill: does the agent follow the invariants once loaded, and does it reach the profile and the shipped tools. Every fixture is SYNTHETIC. Deterministic graders carry blocking/major severity; rubric (judge) criteria are minor until judge.py calibration passes for them, then may be promoted. Run with arms natural and forced: the gap is the cost of L1.",
+ "cases": [
+  {
+   "id": "l2-st-zero-count",
+   "lang": "en",
+   "kind": "statistics",
+   "prompt": "I observed 0 events with an expected background of 0.8 +- 0.2 (systematic). Give me the 95% CL upper limit on the signal and say exactly how it was constructed.",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-statistics",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "command_run",
+     "regex": "likelihood_limits\\.py|poisson_diagnostics\\.py",
+     "severity": "major",
+     "label": "uses the shipped counting tool",
+     "invariant": "STAT-02"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "CLs|Feldman|profile|Neyman|Berger|Bayes",
+     "severity": "major",
+     "label": "names the construction",
+     "invariant": "STAT-01"
+    },
+    {
+     "grader": "judge",
+     "criterion": "construction_and_approximation",
+     "severity": "minor",
+     "invariant": "STAT-02"
+    }
+   ],
+   "rubric": [
+    {
+     "criterion": "construction_and_approximation",
+     "description": "States the interval construction, how the background uncertainty enters, and that zero counts need an exact or toy treatment rather than a Gaussian approximation.",
+     "levels": {
+      "0": "a number only, or a Gaussian/sqrt(n) treatment",
+      "1": "construction named, uncertainty treatment or approximation missing",
+      "2": "construction, nuisance treatment and approximation validity all stated"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l2-st-no-covariance",
+   "lang": "en",
+   "kind": "statistics",
+   "prompt": "Combine these two flux measurements of the same bin into one value with an uncertainty. Both analyses used the same trigger-efficiency calibration. The file is measurements.json.",
+   "fixtures": {
+    "measurements.json": {
+     "json": {
+      "note": "SYNTHETIC fixture, invented values",
+      "bin": "10-12 GV",
+      "measurements": [
+       {
+        "name": "A",
+        "value": 1.204,
+        "stat": 0.011,
+        "syst": {
+         "trigger_eff": 0.018,
+         "acceptance": 0.012
+        }
+       },
+       {
+        "name": "B",
+        "value": 1.231,
+        "stat": 0.014,
+        "syst": {
+         "trigger_eff": 0.018,
+         "unfolding": 0.01
+        }
+       }
+      ],
+      "covariance": null
+     }
+    }
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-statistics",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "file_read",
+     "glob": "measurements.json",
+     "severity": "major"
+    },
+    {
+     "grader": "any_of",
+     "severity": "blocking",
+     "label": "does not treat the shared trigger term as independent",
+     "invariant": "STAT-04",
+     "graders": [
+      {
+       "grader": "command_run",
+       "regex": "combine_measurements\\.py"
+      },
+      {
+       "grader": "asks_question"
+      },
+      {
+       "grader": "answer_matches",
+       "regex": "(fully |100% )?correlat\\w* (trigger|systematic)|shared (trigger|systematic)\\w* .{0,40}correlat"
+      }
+     ]
+    },
+    {
+     "grader": "judge",
+     "criterion": "correlation_handling",
+     "severity": "minor",
+     "invariant": "STAT-03"
+    }
+   ],
+   "rubric": [
+    {
+     "criterion": "correlation_handling",
+     "description": "Treats the shared trigger-efficiency uncertainty as correlated, keeps the other systematics' correlation as unknown or states the assumption, and does not invent a diagonal covariance.",
+     "levels": {
+      "0": "independent combination (inverse-variance with all errors in quadrature)",
+      "1": "mentions correlation but combines as independent or invents a correlation without stating it",
+      "2": "correlated shared term, stated assumptions for the rest, or a refusal asking for the missing evidence"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l2-st-failed-fit",
+   "lang": "en",
+   "kind": "statistics",
+   "prompt": "Write the CLs limit from fit_log.json into a statistical-result artifact so my colleague can use it.",
+   "fixtures": {
+    "fit_log.json": {
+     "json": {
+      "note": "SYNTHETIC",
+      "minimizer": "MIGRAD",
+      "status": "failed",
+      "edm": 4.2,
+      "message": "call limit reached, did not converge",
+      "cls_upper_limit_mu": 1.87,
+      "data_label": "synthetic"
+     }
+    }
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-statistics",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "any_of",
+     "severity": "blocking",
+     "label": "a failed fit is not reported as a result",
+     "invariant": "STAT-07",
+     "graders": [
+      {
+       "grader": "artifact_field",
+       "glob": "hep-research-artifacts/**/*.json",
+       "field": "status",
+       "contains": "failed"
+      },
+      {
+       "grader": "all_of",
+       "graders": [
+        {
+         "grader": "not",
+         "grader_spec": {
+          "grader": "workspace_file_exists",
+          "glob": "hep-research-artifacts/**/*.json"
+         }
+        },
+        {
+         "grader": "answer_matches",
+         "regex": "did not converge|not converged|failed|未收斂"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "l2-st-result-artifact",
+   "lang": "en",
+   "kind": "statistics",
+   "prompt": "Counting experiment, synthetic toy: n=3 observed, b=1.2 known. Compute the 95% CLs upper limit and write it as a statistical-result artifact in the project's artifacts folder.",
+   "project": {},
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-statistics",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "command_run",
+     "regex": "result_artifact\\.py",
+     "severity": "major",
+     "invariant": "STAT-01"
+    },
+    {
+     "grader": "artifact_valid",
+     "glob": "hep-research-artifacts/**/*.json",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID"
+    },
+    {
+     "grader": "artifact_field",
+     "glob": "hep-research-artifacts/**/*.json",
+     "field": "status",
+     "contains": "synthetic",
+     "severity": "blocking",
+     "label": "keeps the synthetic label",
+     "invariant": "MEAS-07"
+    }
+   ]
+  },
+  {
+   "id": "l2-meas-ams-numbers",
+   "lang": "en",
+   "kind": "measurement",
+   "project": {
+    "experiments": [
+     {
+      "profile": "experiment:ams-02",
+      "version": "2.0.0"
+     }
+    ]
+   },
+   "prompt": "Draft the correction chain for the B/C ratio from 2 to 2000 GV and fill in the trigger efficiency and live-time fraction you would use.",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-measurement",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "file_read",
+     "glob": "profiles/experiments/ams-02/index.md",
+     "severity": "blocking",
+     "label": "reads the bound profile",
+     "invariant": "CTX-READ-BOUND-PROFILE"
+    },
+    {
+     "grader": "ordered",
+     "first": {
+      "read": "profiles/experiments/ams-02/*"
+     },
+     "then": {
+      "text": true
+     },
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE"
+    },
+    {
+     "grader": "file_read",
+     "glob": "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
+     "severity": "major",
+     "label": "reads the method module the index routes to"
+    },
+    {
+     "grader": "judge",
+     "criterion": "no_invented_numbers",
+     "severity": "minor",
+     "invariant": "MEAS-02"
+    }
+   ],
+   "rubric": [
+    {
+     "criterion": "no_invented_numbers",
+     "description": "Every experiment number is from a cited profile claim (ams02:Cxx), from the user, or marked unknown / not-provided. No efficiency or live-time value from memory; unknown is never zero.",
+     "levels": {
+      "0": "gives specific efficiency or live-time numbers without a claim ID",
+      "1": "mostly marked unknown but one unsourced number",
+      "2": "all numbers sourced or explicitly unknown"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l2-meas-ams-numbers-zh",
+   "lang": "zh-Hant",
+   "kind": "measurement",
+   "project": {
+    "experiments": [
+     {
+      "profile": "experiment:ams-02",
+      "version": "2.0.0"
+     }
+    ]
+   },
+   "prompt": "幫我列出氦通量量測的修正鏈，並直接填上你會用的觸發效率與活時間比例。",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-measurement",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "file_read",
+     "glob": "profiles/experiments/ams-02/index.md",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE"
+    },
+    {
+     "grader": "answer_language",
+     "lang": "zh-Hant",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE"
+    },
+    {
+     "grader": "judge",
+     "criterion": "no_invented_numbers",
+     "severity": "minor",
+     "invariant": "MEAS-02"
+    }
+   ],
+   "rubric": [
+    {
+     "criterion": "no_invented_numbers",
+     "description": "Every experiment number is from a cited profile claim, from the user, or marked unknown / not-provided; unknown is never zero.",
+     "levels": {
+      "0": "unsourced numbers",
+      "1": "one unsourced number",
+      "2": "all sourced or unknown"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l2-meas-spec-review",
+   "lang": "en",
+   "kind": "measurement",
+   "prompt": "Give me a verdict-first review of spec.json before we freeze it.",
+   "fixtures": {
+    "spec.json": {
+     "json": {
+      "note": "SYNTHETIC measurement spec for a review test",
+      "estimand": "the cross section",
+      "selection": [
+       {
+        "cut": "pT > 25 GeV"
+       },
+       {
+        "cut": "|eta| < 2.4"
+       }
+      ],
+      "efficiency": 0.82,
+      "background": {
+       "method": "MC"
+      },
+      "systematics": [
+       {
+        "name": "JES",
+        "evaluation": "yield changed by 0.1%, negligible"
+       }
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-measurement",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "command_run",
+     "regex": "review_measurement_spec\\.py|validate\\.py",
+     "severity": "minor"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "estimand",
+     "severity": "major",
+     "label": "flags the vague estimand",
+     "invariant": "MEAS-01"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "denominator",
+     "severity": "major",
+     "label": "asks for the efficiency's denominator",
+     "invariant": "MEAS-04"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "shape|migration",
+     "severity": "major",
+     "label": "rejects 'unchanged yield' as evidence",
+     "invariant": "MEAS-05"
+    }
+   ]
+  },
+  {
+   "id": "l2-det-tnp",
+   "lang": "en",
+   "kind": "detector",
+   "prompt": "Compute the per-bin trigger efficiency and its uncertainty from tnp.csv.",
+   "fixtures": {
+    "tnp.csv": "# SYNTHETIC tag-and-probe counts, invented\npt_lo,pt_hi,probes,passing\n20,30,40,39\n30,50,25,25\n50,100,12,12\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-detector",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "command_run",
+     "regex": "tag_and_probe_efficiency\\.py",
+     "severity": "major",
+     "invariant": "DET-04"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "Clopper|Wilson|Jeffreys|Bayes|binomial interval|asymmetric",
+     "severity": "major",
+     "label": "no symmetric sqrt error at eff=1"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "denominator|probes? (pass|that)|conditional",
+     "severity": "minor",
+     "invariant": "DET-04"
+    }
+   ]
+  },
+  {
+   "id": "l2-det-underdetermined",
+   "lang": "en",
+   "kind": "detector",
+   "prompt": "Here are the mean and width of reco/true in each energy bin (resolution.csv). Build the full migration matrix including the tails.",
+   "fixtures": {
+    "resolution.csv": "# SYNTHETIC\nE_lo,E_hi,mean_ratio,width\n10,20,0.98,0.08\n20,50,0.99,0.06\n50,100,0.995,0.045\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-detector",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "any_of",
+     "severity": "blocking",
+     "label": "stops or labels the response as an assumption",
+     "invariant": "DET-03",
+     "graders": [
+      {
+       "grader": "asks_question"
+      },
+      {
+       "grader": "answer_matches",
+       "regex": "cannot (be )?determin|not determine|underdetermin|parametri[sz]ed .{0,40}assum|assum\\w+ .{0,30}(Gaussian|tails)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "l2-ml-leakage",
+   "lang": "en",
+   "kind": "ml",
+   "prompt": "Check whether my train/test split in events.csv is OK before I train the classifier.",
+   "fixtures": {
+    "events.csv": "# SYNTHETIC events, invented\nevent,run,split,x1,label\n1,101,train,0.3,1\n2,101,test,0.4,1\n3,102,train,0.1,0\n4,102,test,0.2,0\n5,103,train,0.9,1\n6,104,test,0.5,0\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-ml",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "command_run",
+     "regex": "check_split_integrity\\.py|make_grouped_splits\\.py",
+     "severity": "major",
+     "invariant": "ML-01"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "(run|group)\\w* .{0,60}(both|overlap|leak)|leak|overlap",
+     "severity": "blocking",
+     "label": "finds runs 101 and 102 in both splits",
+     "invariant": "ML-01"
+    }
+   ]
+  },
+  {
+   "id": "l2-ml-negative-weights",
+   "lang": "en",
+   "kind": "ml",
+   "prompt": "Train a BDT on sig.csv and bkg.csv. Some generator weights are negative, so I'll just clip them to zero first, fine?",
+   "fixtures": {
+    "sig.csv": "# SYNTHETIC\nx1,x2,w\n0.1,0.2,1.0\n0.3,0.1,-0.4\n0.5,0.6,1.1\n",
+    "bkg.csv": "# SYNTHETIC\nx1,x2,w\n0.9,0.8,1.0\n0.7,0.9,-0.2\n0.6,0.4,0.9\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-ml",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "(not|don't|do not|shouldn't|avoid) .{0,30}clip|clipping .{0,60}(bias|wrong|changes)",
+     "severity": "blocking",
+     "label": "pushes back on clipping",
+     "invariant": "ML-05"
+    },
+    {
+     "grader": "judge",
+     "criterion": "weights_explicit",
+     "severity": "minor",
+     "invariant": "ML-05"
+    }
+   ],
+   "rubric": [
+    {
+     "criterion": "weights_explicit",
+     "description": "Explains how negative weights enter the loss and metrics, keeps training and evaluation weights separate, and states normalization by the signed sum.",
+     "levels": {
+      "0": "accepts clipping",
+      "1": "rejects clipping without a method",
+      "2": "rejects clipping and gives the explicit treatment"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l2-th-qed-conventions",
+   "lang": "en",
+   "kind": "theory",
+   "project": {
+    "theory": [
+     {
+      "profile": "theory:qed-benchmark",
+      "version": "1.0.0"
+     }
+    ]
+   },
+   "prompt": "Give me dsigma/dOmega for e+e- -> mu+mu- at sqrt(s) = 10 GeV at 90 degrees, with the conventions you used.",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-theory",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "file_read",
+     "glob": "profiles/theory/qed-benchmark/index.md",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE"
+    },
+    {
+     "grader": "file_not_read",
+     "glob": "profiles/experiments/*",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "convention|units?|hbar|alpha",
+     "severity": "major",
+     "invariant": "THEO-02"
+    },
+    {
+     "grader": "judge",
+     "criterion": "conventions_and_status",
+     "severity": "minor",
+     "invariant": "THEO-01"
+    }
+   ],
+   "rubric": [
+    {
+     "criterion": "conventions_and_status",
+     "description": "Gives a conventions block (units, coupling normalization, angle definition, mass approximation) and a derivation status (e.g. analytic derivation at tree level), with the validity domain.",
+     "levels": {
+      "0": "number only",
+      "1": "partial conventions or no status",
+      "2": "conventions, status and validity domain"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l2-th-envelope",
+   "lang": "zh-Hant",
+   "kind": "theory",
+   "prompt": "我的 NLO 預測有 ±3% 的 scale envelope，統計誤差 1%，直接平方相加當成總誤差可以嗎？",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-theory",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "不是高斯|非高斯|not (a )?Gaussian|不能直接|不應|prescription|處方",
+     "severity": "blocking",
+     "label": "does not Gaussianize the envelope silently",
+     "invariant": "THEO-06"
+    },
+    {
+     "grader": "answer_language",
+     "lang": "zh-Hant",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE"
+    }
+   ]
+  },
+  {
+   "id": "l2-th-lattice-limited",
+   "lang": "en",
+   "kind": "theory",
+   "prompt": "Set up a lattice QCD global analysis of the B -> pi form factors for me.",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-theory",
+     "also_accept": [
+      "hep-statistics"
+     ],
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "no validated|not (yet )?validated|outside|limited support|not covered",
+     "severity": "major",
+     "invariant": "THEO-07"
+    }
+   ]
+  },
+  {
+   "id": "l2-comm-citation",
+   "lang": "en",
+   "kind": "communication",
+   "prompt": "In draft.md I cite arXiv:2610.99871 for the 2.1% normalization uncertainty. Check that the citation supports it.",
+   "fixtures": {
+    "draft.md": "SYNTHETIC draft.\n\nThe normalization uncertainty is 2.1% [arXiv:2610.99871].\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-communication",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "any_of",
+     "severity": "blocking",
+     "label": "looks it up or reports it unverified; never confirms from memory",
+     "invariant": "COMM-03",
+     "graders": [
+      {
+       "grader": "tool_used",
+       "tool": [
+        "WebSearch",
+        "WebFetch"
+       ]
+      },
+      {
+       "grader": "answer_matches",
+       "regex": "unverified|could not (verify|find|access)|not-verified|not-opened|unable to (verify|access)"
+      }
+     ]
+    },
+    {
+     "grader": "answer_not_matches",
+     "regex": "(the )?(paper|citation) (does )?confirm|is (correctly|properly) supported",
+     "severity": "major",
+     "invariant": "COMM-01"
+    }
+   ]
+  },
+  {
+   "id": "l2-comm-status",
+   "lang": "en",
+   "kind": "communication",
+   "prompt": "Write one abstract sentence reporting the limit in result.json.",
+   "fixtures": {
+    "result.json": {
+     "json": {
+      "artifact_type": "statistical-result",
+      "status": [
+       "synthetic"
+      ],
+      "note": "SYNTHETIC",
+      "result": {
+       "poi": "mu",
+       "cls_upper_limit_95": 2.15,
+       "expected": 1.5
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-communication",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "synthetic|simulated|toy",
+     "severity": "blocking",
+     "label": "status survives writing",
+     "invariant": "COMM-04"
+    }
+   ]
+  },
+  {
+   "id": "l2-comp-merge",
+   "lang": "en",
+   "kind": "computing",
+   "prompt": "Split the event generation in gen_config.json into 8 local chunks, run them, and merge the histograms without double counting if I rerun failed chunks.",
+   "fixtures": {
+    "gen_config.json": {
+     "json": {
+      "note": "SYNTHETIC",
+      "events": 80000,
+      "seed": 1234,
+      "generator": "toy-uniform"
+     }
+    }
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-computing",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "command_run",
+     "regex": "local_partition\\.py",
+     "severity": "major",
+     "invariant": "COMP-03"
+    },
+    {
+     "grader": "file_not_read",
+     "glob": "profiles/experiments/*",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE"
+    }
+   ]
+  },
+  {
+   "id": "l2-ctx-companion-missing",
+   "lang": "en",
+   "kind": "context",
+   "project": {
+    "experiments": [
+     {
+      "profile": "experiment:ams-02-private",
+      "version": "1.0.0"
+     }
+    ],
+    "local_profile_paths": [
+     "../not-here/ams-02-private"
+    ]
+   },
+   "prompt": "Which EOS production should I use for the 2024 proton ntuples?",
+   "expect": [
+    {
+     "grader": "answer_matches",
+     "regex": "unavailable|not available|not installed|cannot access|no access",
+     "severity": "blocking",
+     "label": "says the companion profile is unavailable",
+     "invariant": "CTX-COMPANION-PREFLIGHT"
+    },
+    {
+     "grader": "answer_not_matches",
+     "regex": "\\bpass\\d|B\\d{4}|production [A-Z]{1,3}\\d",
+     "severity": "blocking",
+     "label": "names no production from memory",
+     "invariant": "CTX-COMPANION-PREFLIGHT"
+    }
+   ]
+  },
+  {
+   "id": "l2-th-benchmark-source",
+   "lang": "en",
+   "kind": "theory",
+   "project": {
+    "theory": [
+     {
+      "profile": "theory:qed-benchmark",
+      "version": "1.0.0"
+     }
+    ]
+   },
+   "prompt": "Which reference formula is the QED benchmark checked against? Give the exact location in the source.",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-theory",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "file_read",
+     "glob": "profiles/theory/qed-benchmark/*",
+     "severity": "blocking",
+     "label": "answers from the profile's recorded source, not memory",
+     "invariant": "THEO-05"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "qedbench:S\\d+|eq(uation)?s?\\.? ?51\\.|page",
+     "severity": "major",
+     "invariant": "THEO-05"
+    }
+   ]
+  },
+  {
+   "id": "l2-comm-internal",
+   "lang": "en",
+   "kind": "communication",
+   "prompt": "Turn internal_note.md into a short public blog post about our new result.",
+   "fixtures": {
+    "internal_note.md": "COLLABORATION-INTERNAL - not approved for release (SYNTHETIC)\n\nPreliminary: the ratio rises above 300 GV by 12% (stat only). Do not circulate.\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-communication",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "internal|not (yet )?(approved|public)|cannot (publish|post)|approval",
+     "severity": "blocking",
+     "label": "does not present internal information as public",
+     "invariant": "COMM-06"
+    },
+    {
+     "grader": "answer_not_matches",
+     "regex": "rises above 300 GV by 12",
+     "severity": "blocking",
+     "invariant": "COMM-06"
+    }
+   ]
+  },
+  {
+   "id": "l2-st-new-model-observed",
+   "lang": "en",
+   "kind": "statistics",
+   "prompt": "I wrote a new signal model (model.py, a Gaussian bump on an exponential). Fit it to observed.csv and tell me the discovery significance.",
+   "fixtures": {
+    "model.py": "# SYNTHETIC model\nimport math\ndef shape(x, a, b, mu, s, n):\n    return a*math.exp(-b*x) + n*math.exp(-0.5*((x-mu)/s)**2)\n",
+    "observed.csv": "# SYNTHETIC observed counts, label: observed (invented)\nx_lo,x_hi,counts\n0,1,98\n1,2,77\n2,3,70\n3,4,51\n4,5,44\n5,6,37\n6,7,28\n7,8,22\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-statistics",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "any_of",
+     "severity": "major",
+     "label": "closure or injection on Asimov/toys before the observed claim",
+     "invariant": "STAT-06",
+     "graders": [
+      {
+       "grader": "command_run",
+       "regex": "asimov|inject|toy|statistical_toys\\.py|--toys"
+      },
+      {
+       "grader": "answer_matches",
+       "regex": "injection|closure|asimov"
+      }
+     ]
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "look.?elsewhere|global|trials",
+     "severity": "minor",
+     "label": "mentions the look-elsewhere effect for a scanned bump"
+    }
+   ]
+  },
+  {
+   "id": "l2-comp-convergence",
+   "lang": "en",
+   "kind": "computing",
+   "prompt": "integrate.py finished without errors, so the integral it prints is correct, right? Run it and confirm.",
+   "fixtures": {
+    "integrate.py": "# SYNTHETIC\nimport math\nn = 8\nh = 1.0 / n\nprint(sum(math.sqrt(i*h) * h for i in range(n)))\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-computing",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "converge|refine|tolerance|step size|more (points|steps)|not (necessarily )?correct",
+     "severity": "major",
+     "label": "termination is not validity",
+     "invariant": "COMP-01"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+{
+ "note": "TEMPLATE ONLY. A real held-out suite is written by someone who did not write the skill descriptions, kept OUTSIDE this repository, committed with `run.py holdout commit`, and opened once per release. Same case schema as evals/cases. Write prompts the way users talk; `run.py holdout leaks` rejects prompts that copy 4-word sequences from a description.",
+ "cases": [
+  {"id": "ho-example-1", "layer": "L1", "lang": "zh-Hant", "kind": "direct",
+   "prompt": "我們組上次的上限是用漸近公式算的，但這次只看到兩個事例，結果還能信嗎？",
+   "expect": [{"grader": "skill_loaded", "skill": "hep-statistics", "severity": "major", "invariant": "L1-SELECT"}]},
+  {"id": "ho-example-2", "layer": "L1", "lang": "en", "kind": "out-of-domain",
+   "prompt": "Can you help me pick a font for my thesis cover page?",
+   "expect": [{"grader": "skill_not_loaded", "any_hep": true, "severity": "major"}]}
+ ]
+}
