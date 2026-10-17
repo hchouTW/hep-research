@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 114385,
+   "bytes": 114837,
    "uncited": 0
   },
   "hep-ml": {
@@ -2497,13 +2497,13 @@
     "hep-detector",
     "hep-theory"
    ],
-   "last_commit": "ccc1eb2a 2026-10-17"
+   "last_commit": "ecd989f1 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
    "owner": "hep-measurement",
-   "bytes": 19925,
-   "lines": 189,
+   "bytes": 20377,
+   "lines": 190,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-measurement/README.md",
@@ -2560,7 +2560,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "172a3335 2026-10-17"
+   "last_commit": "ecd989f1 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",

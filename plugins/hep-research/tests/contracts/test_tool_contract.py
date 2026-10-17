@@ -52,10 +52,11 @@ class ShippedContractTests(unittest.TestCase):
                ["--counts", "3", "--exposure", "0", "--bin-width", "1"] + UNIT,
                ["--counts", "3", "--exposure", "1", "--bin-width", "nan"] + UNIT,
                ["--counts", "3", "--exposure", "1", "--bin-width", "1", "--background", "1", "--method", "garwood"] + UNIT,
-               ["--counts", "480", "--exposure", "1", "--bin-width", "1", "--background", "10"] + UNIT,
+               ["--counts", "480", "--exposure", "1", "--bin-width", "1", "--background", "10",
+                "--method", "feldman-cousins"] + UNIT,  # M6: auto takes the asymptotic interval there
                FLUX_ARGS + ["--level", "0"], FLUX_ARGS + ["--level", "1"], FLUX_ARGS + ["--level", "nan"],
                FLUX_ARGS + ["--background", "-1"], ["--exposure", "1", "--bin-width", "1"],
-               ["--counts", "3", "--exposure", "1", "--bin-width", "1"], FLUX_ARGS[:-1] + ["MV"],
+               ["--counts", "3", "--exposure", "1", "--bin-width", "1"], FLUX_ARGS[:-1] + [""],  # M6: free unit
                ["--counts", "3", "--exposure", "1e-200", "--bin-width", "1e-200"] + UNIT,
                ["--counts", "3", "--exposure", "1e200", "--bin-width", "1e200"] + UNIT,
                ["--counts", "10", "--exposure", "1", "--bin-width", "1", "--background-sigma", "1e200"] + UNIT]

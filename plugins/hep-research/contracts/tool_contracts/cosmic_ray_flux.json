@@ -5,7 +5,7 @@
  "operations": [
   {
    "operation_id": "flux",
-   "summary": "Differential flux of one bin: signal mean / (exposure * bin_width). No background: Garwood interval for any count; known background: Feldman-Cousins on s >= 0; uncertain background: Cousins-Highland by default or a seeded profile-FC; naive subtraction only on request, labelled approximate. No bound is negative; flux_upper_limit is added when the lower end is 0, flux_syst_exposure when an exposure uncertainty is given",
+   "summary": "Differential flux of one bin: signal mean / (exposure * bin_width). No background: Garwood interval for any count; known background: Feldman-Cousins on s >= 0; uncertain background: Cousins-Highland by default or a seeded profile-FC; beyond the Feldman-Cousins grid an asymptotic profile-likelihood interval (auto selects it); naive subtraction only on request, labelled approximate. No bound is negative; flux_upper_limit is added when the lower end is 0, flux_syst_exposure when an exposure uncertainty is given",
    "invocation": {
     "kind": "cli",
     "output": "json-stdout",
@@ -66,7 +66,7 @@
      "kind": "counts",
      "unit": "1",
      "required": true,
-     "constraint": "integer >= 0, up to the core/stats mean limit (1e5); with a background the Feldman-Cousins grid needs a total mean <= 500 (exit 3 otherwise)"
+     "constraint": "integer >= 0, up to the core/stats mean limit (1e5); with a background the Feldman-Cousins grid needs a total mean <= 500: beyond it auto uses the asymptotic interval, an explicit feldman-cousins or cousins-highland exits 3"
     },
     {
      "name": "exposure",
@@ -87,7 +87,7 @@
      "kind": "parameter",
      "unit": "n/a",
      "required": true,
-     "constraint": "one of GV, GeV, GeV/n, TeV, TV; names the unit {E} of bin_width and is echoed in the output"
+     "constraint": "a non-empty free string naming the unit {E} of bin_width; reported in the output, never converted"
     },
     {
      "name": "background",
@@ -118,7 +118,7 @@
      "kind": "parameter",
      "unit": "n/a",
      "required": false,
-     "constraint": "auto, garwood, feldman-cousins, cousins-highland, profile-fc or naive",
+     "constraint": "auto, garwood, feldman-cousins, cousins-highland, profile-fc, asymptotic or naive",
      "default": "auto"
     },
     {
@@ -217,12 +217,12 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument is missing, malformed or out of range (including a missing --bin-width-unit, or a method that does not fit the background inputs); the reason is on stderr and nothing is printed on stdout"
+     "meaning": "an argument is missing, malformed or out of range (including a missing or empty --bin-width-unit, or a method that does not fit the background inputs); the reason is on stderr and nothing is printed on stdout"
     },
     {
      "exit_code": 3,
      "status": "unsupported-range",
-     "meaning": "the method's grid or mean limit is exceeded (Feldman-Cousins total mean above 500); the message names the alternative (profile-fc or an asymptotic construction); nothing is printed on stdout"
+     "meaning": "an explicitly requested method's grid or mean limit is exceeded (Feldman-Cousins total mean above 500); the message names the alternative (asymptotic, which auto selects, or profile-fc); nothing is printed on stdout"
     }
    ],
    "required_capabilities": [],

@@ -33,8 +33,12 @@ class BinWidthUnitTests(unittest.TestCase):
         self.assertIn('600 for a 1.2-1.8 TV bin', p.stderr)
         self.assertNotIn('Traceback', p.stderr)
 
-    def test_unknown_unit_is_refused(self):
+    def test_unit_is_a_free_string_and_an_empty_one_is_refused(self):
+        # M6: the unit is reported, never converted (until M6 only GV, GeV, GeV/n, TeV, TV were accepted)
         p = run('--counts', '4', '--exposure', '2.0e7', '--bin-width', '700', '--bin-width-unit', 'MV')
+        self.assertEqual(p.returncode, 0)
+        self.assertEqual(json.loads(p.stdout)['bin_width_unit'], 'MV')
+        p = run('--counts', '4', '--exposure', '2.0e7', '--bin-width', '700', '--bin-width-unit', '')
         self.assertEqual(p.returncode, 2)
 
     def test_help_states_the_rule(self):
@@ -147,10 +151,13 @@ class BoundedBackgroundTests(unittest.TestCase):
         self.assertEqual((a['toys'], a['seed']), (200, 3))
 
     def test_above_the_fc_grid_exits_3_and_names_the_alternative(self):
-        p = run('--counts', '480', '--exposure', '1', '--bin-width', '1', '--background', '10', '--bin-width-unit', 'GV')
+        # M6: an explicit feldman-cousins still stops; auto now takes the asymptotic interval there
+        p = run('--counts', '480', '--exposure', '1', '--bin-width', '1', '--background', '10',
+                '--method', 'feldman-cousins', '--bin-width-unit', 'GV')
         self.assertEqual(p.returncode, 3)
         self.assertEqual(p.stdout, '')
         self.assertIn('profile-fc', p.stderr)
+        self.assertIn('asymptotic', p.stderr)
 
 
 if __name__ == '__main__':
