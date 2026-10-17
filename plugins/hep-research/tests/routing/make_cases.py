@@ -351,6 +351,9 @@ C = [
     # batch B, D5: era responses
  ("b-flux-d5-1", "en", "direct", "My detector added a layer midway; how do I combine the two era response matrices with their exposures before folding the prediction?", "hep-detector", ["response matrices", "folding a prediction through the response"], None, None, {}),
  ("b-flux-d5-2", "zh-Hant", "direct", "兩個時期的響應矩陣要怎麼依各自的曝露量加權合併，或堆疊起來做聯合擬合？", "hep-detector", ["response matrices"], None, None, {}),
+    # batch B, D10: combining many samples (multisample_pid.py)
+ ("b-det-msp-1", "en", "direct", "Combine the dE/dx samples of eight silicon layers into a charge estimate with a truncated mean and give the leakage between neighbouring charges.", "hep-detector", ["particle identification"], None, None, {}),
+ ("b-det-msp-2", "zh-Hant", "direct", "TRD 每層的訊號要怎麼組成 likelihood ratio？效率與誤判率曲線怎麼算？", "hep-detector", ["TRD"], None, None, {}),
 ]
 
 cases = []

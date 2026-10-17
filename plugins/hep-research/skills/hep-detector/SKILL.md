@@ -49,7 +49,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Tracking, vertexing, multiple scattering | [tracking and vertexing](references/tracking-and-vertexing.md); `multiple_scattering.py` |
 | Synthetic spectrometer events and periods (test bed, seeded) | `toy_spectrometer.py`; `assets/toy-spectrometer.fictional.json` |
 | Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |
-| Particle identification, TOF, dE/dx, RICH | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py` |
+| Particle identification, TOF, dE/dx, RICH; many samples (charge, LLR) | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py`, `multisample_pid.py` |
 | Signal formation, readout, front-end electronics | [front-end electronics](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
 | Response matrices, forward folding; build one from matched events; mix or stack era responses | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py` |
 | Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |

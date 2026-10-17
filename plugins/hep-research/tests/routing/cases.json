@@ -3597,6 +3597,26 @@
    "trigger_terms": [
     "response matrices"
    ]
+  },
+  {
+   "id": "b-det-msp-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Combine the dE/dx samples of eight silicon layers into a charge estimate with a truncated mean and give the leakage between neighbouring charges.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "particle identification"
+   ]
+  },
+  {
+   "id": "b-det-msp-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "TRD 每層的訊號要怎麼組成 likelihood ratio？效率與誤判率曲線怎麼算？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "TRD"
+   ]
   }
  ]
 }

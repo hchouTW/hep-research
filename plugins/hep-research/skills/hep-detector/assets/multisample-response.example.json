@@ -1,0 +1,11 @@
+{
+ "note": "SYNTHETIC response curve for multisample_pid.py: signal = Z^2 (no saturation)",
+ "z2": [
+  0.0,
+  100.0
+ ],
+ "signal": [
+  0.0,
+  100.0
+ ]
+}

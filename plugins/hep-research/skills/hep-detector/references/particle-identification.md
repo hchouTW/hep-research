@@ -198,6 +198,30 @@ survive the absorber - plus **decay in flight** of pions and kaons producing gen
 muons that are not from the process of interest. Both are momentum-dependent and both
 are estimated from data control samples rather than trusted from simulation.
 
+## Combining many samples
+
+A detector that samples one particle many times (tracker or silicon layers, TRD layers, calorimeter samplings) turns
+the samples into one estimate. `<plugin root>/skills/hep-detector/scripts/multisample_pid.py` does it with every
+choice stated:
+
+- **Charge from many dE/dx samples** (`charge`). Each sample is corrected for the path length (signal x cos(theta);
+  skipping the correction must be said), then inverted through the measured response curve Z^2 -> signal, which may
+  saturate at high Z (the inversion uses the curve, never a pure Z^2 law). The per-layer estimates are combined by a
+  truncated mean (drop the highest fraction against the Landau tail), a weighted mean (weights 1/sigma^2, or the
+  generalized least-squares weights when a correlation between layers is declared) or a likelihood (per-layer
+  Landau-like Moyal densities at the response). The output gives, per true charge in simulation, the peak, the core
+  width sigma68 and the tail fraction, and the **leakage matrix** P(reco | true) between neighbouring charges with
+  Clopper-Pearson intervals. That matrix is a species-migration block for the correction chain (hep-measurement) and
+  for unfolding (hep-statistics); it is measured on simulation validated against data, and it depends on the
+  selection and the momentum range, which travel with it. `--toys` predicts the core width from the per-layer model,
+  so a data width far from it signals a wrong model (an extra tail, a miscalibrated layer).
+- **Log-likelihood ratio from per-layer PDFs** (`likelihood`). LLR = sum over layers of log(p_signal / p_background)
+  from binned per-layer PDFs (measured on control samples, as above), with the efficiency - mis-identification curve
+  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum.
+- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
+  declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
+  separation (see "Combining measurements" above).
+
 ## Combining measurements
 
 Multiple PID systems are combined into a likelihood: for each species hypothesis,

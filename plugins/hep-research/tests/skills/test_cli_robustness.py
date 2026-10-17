@@ -36,6 +36,8 @@ MISSING_FILE_ARGS = {
     "skills/hep-detector/scripts/mix_period_responses.py": ["stack", "--period", f"e1={M}", "--out", OUT],
     "skills/hep-detector/scripts/multiple_scattering.py": [M],
     "skills/hep-detector/scripts/pileup_reweight.py": [M],
+    "skills/hep-detector/scripts/multisample_pid.py": ["charge", M, "--layers", "a", "--response", M, "--method",
+                                                      "truncated-mean", "--truncate-high", "0.2", "--no-path-correction"],
     "skills/hep-detector/scripts/propagate_scale_distortion.py": ["response", M, "--mode", "scale", "--scale", "0.01"],
     "skills/hep-detector/scripts/toy_spectrometer.py": ["generate", M, "--seed", "1", "--events-out", OUT, "--periods-out", OUT + "p"],
     "skills/hep-measurement/scripts/check_systematic_variations.py": ["--json", M],

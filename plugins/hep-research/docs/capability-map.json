@@ -133,7 +133,7 @@
    "id": "multisample-pid",
    "capability": "Multi-sample particle identification (charge from many samples, likelihood ratios)",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D10"
