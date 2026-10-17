@@ -75,6 +75,28 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
   benchmark of a power-law spectrum against this script (synthetic). Do not add a second implementation under
   hep-theory.
 
+### Charge-sign-dependent modulation
+
+- Limits of drift effects. Gradient and curvature drifts in the heliospheric magnetic field move particles of opposite
+  charge sign along different paths, and which sign is favoured depends on the polarity of the Sun's polar field. The
+  force-field formula has no drift term; a different phi for each charge sign (Cholis et al., above) absorbs the
+  difference into an effective parameter only. Such a phi is a fit parameter, not a measured potential, and it does
+  not carry over from one polarity era to the other. Ratios of opposite-sign species (antiprotons or positrons to their
+  matter partners) are where this matters most; for them the force field gives a guide, not a prediction, and a
+  numerical heliospheric model with drifts is the tool (none ships here: say so).
+- Segment by polarity era. Split time-resolved data at the polar-field reversals and fit or compare each era on its
+  own. Around a reversal the field is disordered and neither era's pattern applies: keep those periods as a separate
+  transition segment, not averaged into either era. Name the reversal dates and their source.
+- One phi per period. Within an era, fit one phi per time period (per charge sign if both signs are fitted), never one
+  phi across periods or across a reversal. Report the period edges and the era of each.
+- Reversal dates come from a source, not from memory. For solar cycle 25, Li et al. (arXiv:2606.15259, abstract read
+  2026-10-17) find from Hinode vector magnetograms that the northern polar field changed from positive to negative and
+  the southern from negative to positive, and that the polarity reversals of the northern and southern polar caps
+  (above 70 deg latitude) "likely occurred in November 2024 and October 2024, respectively". Quote it with that hedging;
+  other methods (other instruments, other latitude cuts) date reversals differently.
+- The heliospheric-modulation profile (the theory-domain profile above, which holds the force-field derivation)
+  covers the force field only; it gives no drift model and no reversal dates.
+
 ## Inputs that dominate the uncertainty
 
 - **Production (spallation) cross sections** of secondaries (for example B from C and O, including ghost-nucleus
@@ -170,12 +192,14 @@ The closed-form secondary-ratio and source-term benchmarks of the two theory-dom
 end-to-end example (`examples/bc-propagation-fit`, synthetic B/C data, D0/L recovered and the flat direction reported),
 remain at demonstrated-on-synthetic-data. No fit to real data is tested.
 
-## Sources read (for the kinematics, force-field and antiproton sections; all on 2026-10-13)
+## Sources read (for the kinematics, force-field and antiproton sections; on 2026-10-13 unless dated)
 
 - L.J. Gleeson and W.I. Axford, "Solar modulation of galactic cosmic rays", ApJ 154 (1968) 1011,
   https://articles.adsabs.harvard.edu/pdf/1968ApJ...154.1011G (scan); Secs. I-III, Eqs. (5), (11), (13)-(16).
 - C. Ghelfi, F. Barao, L. Derome, D. Maurin, A&A 591 (2016) A94, arXiv:1511.08650; Sec. 2.1, Eq. (1).
 - I. Cholis, D. Hooper, T. Linden, arXiv:1511.01507v3; Sec. I, Eq. (1), pp. 1-2.
+- Y. Li, S. Yang, Y. Zhang, Q. Song, G. Zhou, Y. Deng, J. Wang, "Polarity Reversal of the Polar Magnetic Fields in
+  Solar Cycle 25", arXiv:2606.15259 (2026); abstract page only, read 2026-10-17 (body not read).
 - M. di Mauro, F. Donato, A. Goudelis, P.D. Serpico, PRD 90 (2014) 085017, arXiv:1408.0288v3; Secs. I, II, IV, V.
 - M.W. Winkler, JCAP 02 (2017) 048, arXiv:1701.04866v1; Secs. 2, 3, 8, 9, 10.
 - M. Korsmeier, F. Donato, M. Di Mauro, PRD 97 (2018) 103019, arXiv:1802.03030v2; Secs. I-V.

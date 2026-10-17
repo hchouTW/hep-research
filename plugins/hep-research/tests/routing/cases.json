@@ -3377,6 +3377,26 @@
    ]
   },
   {
+   "id": "th-a-drift-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Can I fit one force-field phi to positron and electron fluxes across the solar polarity reversal, or do drift effects break the approximation?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ]
+  },
+  {
+   "id": "th-a-drift-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "太陽磁場極性反轉前後的反質子比，用 force-field 近似還適用嗎？漂移效應要怎麼處理？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ]
+  },
+  {
    "id": "ms-a-scaling-2",
    "lang": "zh-Hant",
    "kind": "direct",

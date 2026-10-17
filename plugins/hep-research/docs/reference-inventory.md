@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 12 | 99 | 0 |
 | hep-ml | 42 | 184 | 0 |
 | hep-statistics | 12 | 171 | 0 |
-| hep-theory | 11 | 81 | 0 |
+| hep-theory | 11 | 84 | 0 |
 
 ## Overlapping pairs
 
@@ -219,7 +219,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 8 | hep-computing, hep-detector | 9257d7b 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a58495 2026-10-17 |
 | `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 77d2607 2026-10-16 |
-| `systematics.md` | hep-measurement | 10.1 | yes | 34 | hep-detector, hep-ml, hep-statistics, hep-theory | 9257d7b 2026-10-15 |
+| `systematics.md` | hep-measurement | 10.1 | yes | 34 | hep-detector, hep-ml, hep-statistics, hep-theory | 7cd0b7e 2026-10-17 |
 | `weights-normalization.md` | hep-measurement | 4.5 | yes | 10 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b 2026-10-15 |
 | `ablation-and-design-review.md` | hep-ml | 2.3 | no | 13 | hep-communication | 9257d7b 2026-10-15 |
 | `architecture-selection.md` | hep-ml | 3.4 | no | 2 | - | 9257d7b 2026-10-15 |
@@ -276,7 +276,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `time-series-inference.md` | hep-statistics | 15.5 | yes | 10 | hep-measurement | 7487999 2026-10-15 |
 | `unfolding.md` | hep-statistics | 7.0 | yes | 27 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 16.0 | yes | 10 | - | b723a52 2026-10-16 |
+| `cosmic-ray-propagation.md` | hep-theory | 18.3 | yes | 11 | - | 5a4d9ad 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b 2026-10-15 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c 2026-10-07 |

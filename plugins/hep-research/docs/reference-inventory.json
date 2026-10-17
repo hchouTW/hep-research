@@ -35,7 +35,7 @@
   },
   "hep-theory": {
    "references": 11,
-   "bytes": 81311,
+   "bytes": 83631,
    "uncited": 0
   }
  },
@@ -2524,7 +2524,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "7cd0b7e 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/weights-normalization.md",
@@ -3556,8 +3556,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 15974,
-   "lines": 184,
+   "bytes": 18294,
+   "lines": 208,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",
@@ -3569,10 +3569,11 @@
     "profiles/theory/heliospheric-modulation/derivations/derivation-record.md",
     "profiles/theory/heliospheric-modulation/evidence/sources.json",
     "skills/hep-theory/README.md",
-    "skills/hep-theory/SKILL.md"
+    "skills/hep-theory/SKILL.md",
+    "tests/skills/hep_theory/test_charge_sign_modulation_th3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b723a52 2026-10-16"
+   "last_commit": "5a4d9ad 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",

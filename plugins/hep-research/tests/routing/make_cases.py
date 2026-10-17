@@ -318,7 +318,10 @@ C = [
     ("dr-a-residual-1", "en", "direct", "Propagate my calibration and alignment residual, a curvature offset, into the antiproton-to-proton ratio bins and give me up and down variations.", "hep-detector", ["calibration and alignment"], None, None, {}),
     ("dr-a-residual-2", "zh-Hant", "direct", "動量尺度的 calibration and alignment 殘差要怎麼傳遞到每個能區的產額與共變異矩陣？", "hep-detector", ["calibration and alignment"], None, None, {}),
  # batch A docs track: M5 scaling class of systematics
+ # batch A docs track: M5 scaling class of systematics, Th3 charge-sign-dependent modulation
  ("ms-a-scaling-1", "en", "direct", "Which of my systematic uncertainties will shrink with a four times larger control sample, and which are a floor? I need the evaluation plan for the projection.", "hep-measurement", ["the physical sources of systematic uncertainties and their evaluation plan"], None, None, {}),
+ ("th-a-drift-1", "en", "direct", "Can I fit one force-field phi to positron and electron fluxes across the solar polarity reversal, or do drift effects break the approximation?", "hep-theory", ["approximations and validity domains"], None, None, {}),
+ ("th-a-drift-2", "zh-Hant", "direct", "太陽磁場極性反轉前後的反質子比，用 force-field 近似還適用嗎？漂移效應要怎麼處理？", "hep-theory", ["approximations and validity domains"], None, None, {}),
  ("ms-a-scaling-2", "zh-Hant", "direct", "我的系統誤差哪些會隨控制樣本變大而縮小、哪些是下限？請幫我規劃評估方式。", "hep-measurement", ["the physical sources of systematic uncertainties and their evaluation plan"], None, None, {}),
 ]
 
