@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.14.1 (2026-10-17)
+
+Routing fix after the first live run of the cases added in batches A-D (`evals/routing/`, 117/135 on 0.14.0).
+Contracts stay 2.12.0.
+
+- Descriptions: hep-detector names geomagnetic cutoff backtracing (OTSO); hep-theory names importing a published
+  HEPData, CSV or FITS table for a comparison; hep-computing's "Not for" names both owners. The four cases that went to
+  hep-computing in both languages now route to their owners; a 180-case check of the three skills showed no
+  regression (repeats against 0.14.0 for every case that changed).
+
 ## 0.14.0 (2026-10-17)
 
 The upgrade plan v1.3 (88 items in six batches, PRs #131-#136). Contracts 2.12.0: vocabulary and optional fields only
