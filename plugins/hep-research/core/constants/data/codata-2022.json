@@ -1,0 +1,225 @@
+{
+ "edition": "CODATA 2022",
+ "source": "E. Tiesinga et al. / P. J. Mohr et al., CODATA Recommended Values of the Fundamental Physical Constants: 2022; NIST table https://physics.nist.gov/cuu/Constants/Table/allascii.txt",
+ "read": "2026-10-17, full table read (machine-readable listing)",
+ "license": "NIST public data (U.S. Government work)",
+ "notes": "Exact values follow the 2019 SI. hbar, hbar c and (hbar c)^2 are derived in core/constants from the exact h, c and e, not stored.",
+ "constants": {
+  "speed_of_light": {
+   "symbol": "c",
+   "codata_name": "speed of light in vacuum",
+   "value": 299792458.0,
+   "uncertainty": 0.0,
+   "unit": "m s^-1",
+   "exact": true
+  },
+  "planck_constant": {
+   "symbol": "h",
+   "codata_name": "Planck constant",
+   "value": 6.62607015e-34,
+   "uncertainty": 0.0,
+   "unit": "J Hz^-1",
+   "exact": true
+  },
+  "elementary_charge": {
+   "symbol": "e",
+   "codata_name": "elementary charge",
+   "value": 1.602176634e-19,
+   "uncertainty": 0.0,
+   "unit": "C",
+   "exact": true
+  },
+  "boltzmann_constant": {
+   "symbol": "k",
+   "codata_name": "Boltzmann constant",
+   "value": 1.380649e-23,
+   "uncertainty": 0.0,
+   "unit": "J K^-1",
+   "exact": true
+  },
+  "avogadro_constant": {
+   "symbol": "N_A",
+   "codata_name": "Avogadro constant",
+   "value": 6.02214076e+23,
+   "uncertainty": 0.0,
+   "unit": "mol^-1",
+   "exact": true
+  },
+  "fine_structure_constant": {
+   "symbol": "alpha",
+   "codata_name": "fine-structure constant",
+   "value": 0.0072973525643,
+   "uncertainty": 1.1e-12,
+   "unit": "",
+   "exact": false
+  },
+  "inverse_fine_structure_constant": {
+   "symbol": "1/alpha",
+   "codata_name": "inverse fine-structure constant",
+   "value": 137.035999177,
+   "uncertainty": 2.1e-08,
+   "unit": "",
+   "exact": false
+  },
+  "vacuum_electric_permittivity": {
+   "symbol": "epsilon_0",
+   "codata_name": "vacuum electric permittivity",
+   "value": 8.8541878188e-12,
+   "uncertainty": 1.4e-21,
+   "unit": "F m^-1",
+   "exact": false
+  },
+  "newtonian_constant_of_gravitation": {
+   "symbol": "G",
+   "codata_name": "Newtonian constant of gravitation",
+   "value": 6.6743e-11,
+   "uncertainty": 1.5e-15,
+   "unit": "m^3 kg^-1 s^-2",
+   "exact": false
+  },
+  "fermi_coupling_constant": {
+   "symbol": "G_F/(hbar c)^3",
+   "codata_name": "Fermi coupling constant",
+   "value": 1.1663787e-05,
+   "uncertainty": 6e-12,
+   "unit": "GeV^-2",
+   "exact": false
+  },
+  "weak_mixing_angle": {
+   "symbol": "sin^2 theta_W",
+   "codata_name": "weak mixing angle",
+   "value": 0.22305,
+   "uncertainty": 0.00023,
+   "unit": "",
+   "exact": false
+  },
+  "classical_electron_radius": {
+   "symbol": "r_e",
+   "codata_name": "classical electron radius",
+   "value": 2.8179403205e-15,
+   "uncertainty": 1.3e-24,
+   "unit": "m",
+   "exact": false
+  },
+  "thomson_cross_section": {
+   "symbol": "sigma_e",
+   "codata_name": "Thomson cross section",
+   "value": 6.6524587051e-29,
+   "uncertainty": 6.2e-38,
+   "unit": "m^2",
+   "exact": false
+  },
+  "rydberg_constant": {
+   "symbol": "R_inf",
+   "codata_name": "Rydberg constant",
+   "value": 10973731.568157,
+   "uncertainty": 1.2e-05,
+   "unit": "m^-1",
+   "exact": false
+  },
+  "electron_mass_energy": {
+   "symbol": "m_e c^2",
+   "codata_name": "electron mass energy equivalent in MeV",
+   "value": 0.51099895069,
+   "uncertainty": 1.6e-10,
+   "unit": "MeV",
+   "exact": false
+  },
+  "electron_mass": {
+   "symbol": "m_e",
+   "codata_name": "electron mass",
+   "value": 9.1093837139e-31,
+   "uncertainty": 2.8e-40,
+   "unit": "kg",
+   "exact": false
+  },
+  "muon_mass_energy": {
+   "symbol": "m_mu c^2",
+   "codata_name": "muon mass energy equivalent in MeV",
+   "value": 105.6583755,
+   "uncertainty": 2.3e-06,
+   "unit": "MeV",
+   "exact": false
+  },
+  "proton_mass_energy": {
+   "symbol": "m_p c^2",
+   "codata_name": "proton mass energy equivalent in MeV",
+   "value": 938.27208943,
+   "uncertainty": 2.9e-07,
+   "unit": "MeV",
+   "exact": false
+  },
+  "proton_mass": {
+   "symbol": "m_p",
+   "codata_name": "proton mass",
+   "value": 1.67262192595e-27,
+   "uncertainty": 5.2e-37,
+   "unit": "kg",
+   "exact": false
+  },
+  "neutron_mass_energy": {
+   "symbol": "m_n c^2",
+   "codata_name": "neutron mass energy equivalent in MeV",
+   "value": 939.56542194,
+   "uncertainty": 4.8e-07,
+   "unit": "MeV",
+   "exact": false
+  },
+  "deuteron_mass_energy": {
+   "symbol": "m_d c^2",
+   "codata_name": "deuteron mass energy equivalent in MeV",
+   "value": 1875.612945,
+   "uncertainty": 5.8e-07,
+   "unit": "MeV",
+   "exact": false
+  },
+  "triton_mass_energy": {
+   "symbol": "m_t c^2",
+   "codata_name": "triton mass energy equivalent in MeV",
+   "value": 2808.92113668,
+   "uncertainty": 8.8e-07,
+   "unit": "MeV",
+   "exact": false
+  },
+  "helion_mass_energy": {
+   "symbol": "m_h c^2",
+   "codata_name": "helion mass energy equivalent in MeV",
+   "value": 2808.39161112,
+   "uncertainty": 8.8e-07,
+   "unit": "MeV",
+   "exact": false
+  },
+  "alpha_particle_mass_energy": {
+   "symbol": "m_alpha c^2",
+   "codata_name": "alpha particle mass energy equivalent in MeV",
+   "value": 3727.3794118,
+   "uncertainty": 1.2e-06,
+   "unit": "MeV",
+   "exact": false
+  },
+  "atomic_mass_constant_energy": {
+   "symbol": "m_u c^2",
+   "codata_name": "atomic mass constant energy equivalent in MeV",
+   "value": 931.49410372,
+   "uncertainty": 2.9e-07,
+   "unit": "MeV",
+   "exact": false
+  },
+  "atomic_mass_constant": {
+   "symbol": "m_u",
+   "codata_name": "atomic mass constant",
+   "value": 1.66053906892e-27,
+   "uncertainty": 5.2e-37,
+   "unit": "kg",
+   "exact": false
+  },
+  "proton_magnetic_moment_to_nuclear_magneton_ratio": {
+   "symbol": "mu_p/mu_N",
+   "codata_name": "proton mag. mom. to nuclear magneton ratio",
+   "value": 2.79284734463,
+   "uncertainty": 8.2e-10,
+   "unit": "",
+   "exact": false
+  }
+ }
+}

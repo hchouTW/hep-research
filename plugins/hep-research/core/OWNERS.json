@@ -104,6 +104,15 @@
     "tests/skills/test_cli_contract.py"
    ],
    "source": "new in this plugin (upgrade plan v1.3, F-04)"
+  },
+  "constants": {
+   "steward": "hep-theory",
+   "status": "implemented-Th9",
+   "purpose": "Physical constants, particle and nuclide data with value, uncertainty, unit, source and edition; unit conversions; decay Q values",
+   "files": [
+    "physical"
+   ],
+   "source": "CODATA 2022 (NIST), PDG 2026 subset (CC BY 4.0, via pdg 2026.0), AME2020 and NUBASE2020 subsets (AMDC), read 2026-10-17; data in core/constants/data; standard library only"
   }
  }
 }

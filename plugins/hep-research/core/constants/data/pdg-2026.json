@@ -1,0 +1,618 @@
+{
+ "edition": "PDG 2026",
+ "source": "Particle Data Group, Review of Particle Physics (2026 edition), summary values read through the PDG Python API, package pdg 2026.0 (https://pdg.lbl.gov)",
+ "read": "2026-10-17, summary-table values read from the pdg 2026.0 database",
+ "license": "PDG data CC BY 4.0; cite the Review of Particle Physics, 2026 edition",
+ "notes": "A small subset of common particles. Masses of e, mu, p, n are the PDG MeV entries. Full tables: use the optional pdg package (physical_data.py --backend pdg).",
+ "particles": {
+  "electron": {
+   "pdg_name": "e-",
+   "mcid": 11,
+   "charge": -1.0,
+   "pdg_identifier": "S003/2026",
+   "mass": {
+    "value": 0.51099895069,
+    "uncertainty": 1.6e-10,
+    "unit": "MeV",
+    "pdg_value_text": "0.51099895069+-0.00000000016",
+    "pdg_identifier": "S003M/2026"
+   }
+  },
+  "muon": {
+   "pdg_name": "mu-",
+   "mcid": 13,
+   "charge": -1.0,
+   "pdg_identifier": "S004/2026",
+   "mass": {
+    "value": 105.6583755,
+    "uncertainty": 2.3e-06,
+    "unit": "MeV",
+    "pdg_value_text": "105.6583755+-0.0000023",
+    "pdg_identifier": "S004M/2026"
+   },
+   "lifetime": {
+    "value": 2.1969811e-06,
+    "uncertainty": 2.2e-12,
+    "unit": "s",
+    "pdg_value_text": "(2.1969811+-0.0000022)E-6",
+    "pdg_identifier": "S004T/2026"
+   }
+  },
+  "tau": {
+   "pdg_name": "tau-",
+   "mcid": 15,
+   "charge": -1.0,
+   "pdg_identifier": "S035/2026",
+   "mass": {
+    "value": 1776.93,
+    "uncertainty": 0.09,
+    "unit": "MeV",
+    "pdg_value_text": "1776.93+-0.09",
+    "pdg_identifier": "S035M/2026"
+   },
+   "lifetime": {
+    "value": 2.903e-13,
+    "uncertainty": 5e-16,
+    "unit": "s",
+    "pdg_value_text": "(2.903+-0.005)E-13",
+    "pdg_identifier": "S035T/2026"
+   }
+  },
+  "W": {
+   "pdg_name": "W+",
+   "mcid": 24,
+   "charge": 1.0,
+   "pdg_identifier": "S043/2026",
+   "mass": {
+    "value": 80.3625,
+    "uncertainty": 0.0077,
+    "unit": "GeV",
+    "pdg_value_text": "80.3625 +-0.0077",
+    "pdg_identifier": "S043M/2026"
+   },
+   "width": {
+    "value": 2.14,
+    "uncertainty": 0.05,
+    "unit": "GeV",
+    "pdg_value_text": "2.14+-0.05",
+    "pdg_identifier": "S043W/2026"
+   }
+  },
+  "Z": {
+   "pdg_name": "Z0",
+   "mcid": 23,
+   "charge": 0.0,
+   "pdg_identifier": "S044/2026",
+   "mass": {
+    "value": 91.1879,
+    "uncertainty": 0.002,
+    "unit": "GeV",
+    "pdg_value_text": "91.1879+-0.0020",
+    "pdg_identifier": "S044M/2026"
+   },
+   "width": {
+    "value": 2.4955,
+    "uncertainty": 0.0023,
+    "unit": "GeV",
+    "pdg_value_text": "2.4955+-0.0023",
+    "pdg_identifier": "S044W/2026"
+   }
+  },
+  "higgs": {
+   "pdg_name": "H0",
+   "mcid": 25,
+   "charge": 0.0,
+   "pdg_identifier": "S126/2026",
+   "mass": {
+    "value": 125.13,
+    "uncertainty": 0.11,
+    "unit": "GeV",
+    "pdg_value_text": "125.13+-0.11",
+    "pdg_identifier": "S126M/2026"
+   },
+   "width": {
+    "value": 3.0,
+    "uncertainty": null,
+    "uncertainty_plus": 1.5,
+    "uncertainty_minus": 0.7,
+    "unit": "MeV",
+    "pdg_value_text": "3.0+1.5-0.7",
+    "pdg_identifier": "S126W/2026"
+   }
+  },
+  "top": {
+   "pdg_name": "t",
+   "mcid": 6,
+   "charge": 0.6666666666666666,
+   "pdg_identifier": "Q007/2026",
+   "mass": {
+    "value": 172.6,
+    "uncertainty": 0.27,
+    "unit": "GeV",
+    "pdg_value_text": "172.60+-0.27",
+    "pdg_identifier": "Q007TP/2026"
+   },
+   "width": {
+    "value": 1.42,
+    "uncertainty": null,
+    "uncertainty_plus": 0.19,
+    "uncertainty_minus": 0.15,
+    "unit": "GeV",
+    "pdg_value_text": "1.42+0.19-0.15",
+    "pdg_identifier": "Q007W/2026"
+   }
+  },
+  "pi+": {
+   "pdg_name": "pi+",
+   "mcid": 211,
+   "charge": 1.0,
+   "pdg_identifier": "S008/2026",
+   "mass": {
+    "value": 139.57039,
+    "uncertainty": 0.00018,
+    "unit": "MeV",
+    "pdg_value_text": "139.57039+-0.00018",
+    "pdg_identifier": "S008M/2026"
+   },
+   "lifetime": {
+    "value": 2.6033e-08,
+    "uncertainty": 5e-12,
+    "unit": "s",
+    "pdg_value_text": "(2.6033+-0.0005)E-8",
+    "pdg_identifier": "S008T/2026"
+   }
+  },
+  "pi0": {
+   "pdg_name": "pi0",
+   "mcid": 111,
+   "charge": 0.0,
+   "pdg_identifier": "S009/2026",
+   "mass": {
+    "value": 134.9768,
+    "uncertainty": 0.0005,
+    "unit": "MeV",
+    "pdg_value_text": "134.9768+-0.0005",
+    "pdg_identifier": "S009M/2026"
+   },
+   "lifetime": {
+    "value": 8.43e-17,
+    "uncertainty": 1.3e-18,
+    "unit": "s",
+    "pdg_value_text": "(8.43+-0.13)E-17",
+    "pdg_identifier": "S009T/2026"
+   }
+  },
+  "eta": {
+   "pdg_name": "eta",
+   "mcid": 221,
+   "charge": 0.0,
+   "pdg_identifier": "S014/2026",
+   "mass": {
+    "value": 547.862,
+    "uncertainty": 0.017,
+    "unit": "MeV",
+    "pdg_value_text": "547.862+-0.017",
+    "pdg_identifier": "S014M/2026"
+   },
+   "width": {
+    "value": 1.31,
+    "uncertainty": 0.05,
+    "unit": "keV",
+    "pdg_value_text": "1.31+-0.05",
+    "pdg_identifier": "S014W/2026"
+   }
+  },
+  "rho0": {
+   "pdg_name": "rho(770)0",
+   "mcid": 113,
+   "charge": 0.0,
+   "pdg_identifier": "M009/2026",
+   "mass": {
+    "value": 775.26,
+    "uncertainty": 0.23,
+    "unit": "MeV",
+    "pdg_value_text": "775.26+-0.23",
+    "pdg_identifier": "M009M0/2026"
+   },
+   "width": {
+    "value": 147.4,
+    "uncertainty": 0.8,
+    "unit": "MeV",
+    "pdg_value_text": "147.4+-0.8",
+    "pdg_identifier": "M009W0/2026"
+   }
+  },
+  "omega": {
+   "pdg_name": "omega(782)",
+   "mcid": 223,
+   "charge": 0.0,
+   "pdg_identifier": "M001/2026",
+   "mass": {
+    "value": 782.66,
+    "uncertainty": 0.13,
+    "unit": "MeV",
+    "pdg_value_text": "782.66+-0.13",
+    "pdg_identifier": "M001M/2026"
+   },
+   "width": {
+    "value": 8.68,
+    "uncertainty": 0.13,
+    "unit": "MeV",
+    "pdg_value_text": "8.68+-0.13",
+    "pdg_identifier": "M001W/2026"
+   }
+  },
+  "phi": {
+   "pdg_name": "phi(1020)",
+   "mcid": 333,
+   "charge": 0.0,
+   "pdg_identifier": "M004/2026",
+   "mass": {
+    "value": 1019.46,
+    "uncertainty": 0.016,
+    "unit": "MeV",
+    "pdg_value_text": "1019.460+-0.016",
+    "pdg_identifier": "M004M/2026"
+   },
+   "width": {
+    "value": 4.249,
+    "uncertainty": 0.013,
+    "unit": "MeV",
+    "pdg_value_text": "4.249+-0.013",
+    "pdg_identifier": "M004W/2026"
+   }
+  },
+  "K+": {
+   "pdg_name": "K+",
+   "mcid": 321,
+   "charge": 1.0,
+   "pdg_identifier": "S010/2026",
+   "mass": {
+    "value": 493.677,
+    "uncertainty": 0.015,
+    "unit": "MeV",
+    "pdg_value_text": "493.677+-0.015",
+    "pdg_identifier": "S010M/2026"
+   },
+   "lifetime": {
+    "value": 1.238e-08,
+    "uncertainty": 2e-11,
+    "unit": "s",
+    "pdg_value_text": "(1.2380+-0.0020)E-8",
+    "pdg_identifier": "S010T/2026"
+   }
+  },
+  "K0": {
+   "pdg_name": "K0",
+   "mcid": 311,
+   "charge": 0.0,
+   "pdg_identifier": "S011/2026",
+   "mass": {
+    "value": 497.611,
+    "uncertainty": 0.013,
+    "unit": "MeV",
+    "pdg_value_text": "497.611+-0.013",
+    "pdg_identifier": "S011M/2026"
+   }
+  },
+  "K_S0": {
+   "pdg_name": "K(S)0",
+   "mcid": 310,
+   "charge": 0.0,
+   "pdg_identifier": "S012/2026",
+   "lifetime": {
+    "value": 8.954e-11,
+    "uncertainty": 4e-14,
+    "unit": "s",
+    "pdg_value_text": "(8.954+-0.004)E-11",
+    "pdg_identifier": "S012T/2026"
+   }
+  },
+  "K_L0": {
+   "pdg_name": "K(L)0",
+   "mcid": 130,
+   "charge": 0.0,
+   "pdg_identifier": "S013/2026",
+   "lifetime": {
+    "value": 5.116e-08,
+    "uncertainty": 2.1e-10,
+    "unit": "s",
+    "pdg_value_text": "(5.116+-0.021)E-8",
+    "pdg_identifier": "S013T/2026"
+   }
+  },
+  "D+": {
+   "pdg_name": "D+",
+   "mcid": 411,
+   "charge": 1.0,
+   "pdg_identifier": "S031/2026",
+   "mass": {
+    "value": 1869.66,
+    "uncertainty": 0.05,
+    "unit": "MeV",
+    "pdg_value_text": "1869.66+-0.05",
+    "pdg_identifier": "S031M/2026"
+   },
+   "lifetime": {
+    "value": 1.033e-12,
+    "uncertainty": 5e-15,
+    "unit": "s",
+    "pdg_value_text": "(1.033+-0.005)E-12",
+    "pdg_identifier": "S031T/2026"
+   }
+  },
+  "D0": {
+   "pdg_name": "D0",
+   "mcid": 421,
+   "charge": 0.0,
+   "pdg_identifier": "S032/2026",
+   "mass": {
+    "value": 1864.84,
+    "uncertainty": 0.04,
+    "unit": "MeV",
+    "pdg_value_text": "1864.84+-0.04",
+    "pdg_identifier": "S032M/2026"
+   },
+   "lifetime": {
+    "value": 4.103e-13,
+    "uncertainty": 1e-15,
+    "unit": "s",
+    "pdg_value_text": "(4.103+-0.010)E-13",
+    "pdg_identifier": "S032T/2026"
+   }
+  },
+  "B+": {
+   "pdg_name": "B+",
+   "mcid": 521,
+   "charge": 1.0,
+   "pdg_identifier": "S041/2026",
+   "mass": {
+    "value": 5279.41,
+    "uncertainty": 0.07,
+    "unit": "MeV",
+    "pdg_value_text": "5279.41+-0.07",
+    "pdg_identifier": "S041M/2026"
+   },
+   "lifetime": {
+    "value": 1.637e-12,
+    "uncertainty": 4e-15,
+    "unit": "s",
+    "pdg_value_text": "1637+-4E-15",
+    "pdg_identifier": "S041T/2026"
+   }
+  },
+  "B0": {
+   "pdg_name": "B0",
+   "mcid": 511,
+   "charge": 0.0,
+   "pdg_identifier": "S042/2026",
+   "mass": {
+    "value": 5279.72,
+    "uncertainty": 0.08,
+    "unit": "MeV",
+    "pdg_value_text": "5279.72+-0.08",
+    "pdg_identifier": "S042M/2026"
+   },
+   "lifetime": {
+    "value": 1.5113e-12,
+    "uncertainty": 2.7e-15,
+    "unit": "s",
+    "pdg_value_text": "1511.3+-2.7E-15",
+    "pdg_identifier": "S042T/2026"
+   }
+  },
+  "J/psi": {
+   "pdg_name": "J/psi(1S)",
+   "mcid": 443,
+   "charge": 0.0,
+   "pdg_identifier": "M070/2026",
+   "mass": {
+    "value": 3096.9,
+    "uncertainty": 0.006,
+    "unit": "MeV",
+    "pdg_value_text": "3096.900+-0.006",
+    "pdg_identifier": "M070M/2026"
+   },
+   "width": {
+    "value": 92.6,
+    "uncertainty": 1.7,
+    "unit": "keV",
+    "pdg_value_text": "92.6+-1.7",
+    "pdg_identifier": "M070W/2026"
+   }
+  },
+  "Upsilon1S": {
+   "pdg_name": "Upsilon(1S)",
+   "mcid": 553,
+   "charge": 0.0,
+   "pdg_identifier": "M049/2026",
+   "mass": {
+    "value": 9460.4,
+    "uncertainty": 0.1,
+    "unit": "MeV",
+    "pdg_value_text": "9460.40+-0.10",
+    "pdg_identifier": "M049M/2026"
+   },
+   "width": {
+    "value": 54.02,
+    "uncertainty": 1.25,
+    "unit": "keV",
+    "pdg_value_text": "54.02+-1.25",
+    "pdg_identifier": "M049W/2026"
+   }
+  },
+  "proton": {
+   "pdg_name": "p",
+   "mcid": 2212,
+   "charge": 1.0,
+   "pdg_identifier": "S016/2026",
+   "mass": {
+    "value": 938.27208943,
+    "uncertainty": 2.9e-07,
+    "unit": "MeV",
+    "pdg_value_text": "938.27208943+-0.00000029",
+    "pdg_identifier": "S016M/2026"
+   }
+  },
+  "neutron": {
+   "pdg_name": "n",
+   "mcid": 2112,
+   "charge": 0.0,
+   "pdg_identifier": "S017/2026",
+   "mass": {
+    "value": 939.5654219,
+    "uncertainty": 5e-07,
+    "unit": "MeV",
+    "pdg_value_text": "939.5654219+-0.0000005",
+    "pdg_identifier": "S017M/2026"
+   },
+   "lifetime": {
+    "value": 878.3,
+    "uncertainty": 0.4,
+    "unit": "s",
+    "pdg_value_text": "878.3+-0.4",
+    "pdg_identifier": "S017T/2026"
+   }
+  },
+  "Lambda": {
+   "pdg_name": "Lambda0",
+   "mcid": 3122,
+   "charge": 0.0,
+   "pdg_identifier": "S018/2026",
+   "mass": {
+    "value": 1115.683,
+    "uncertainty": 0.006,
+    "unit": "MeV",
+    "pdg_value_text": "1115.683+-0.006",
+    "pdg_identifier": "S018M/2026"
+   },
+   "lifetime": {
+    "value": 2.617e-10,
+    "uncertainty": 1e-12,
+    "unit": "s",
+    "pdg_value_text": "(2.617+-0.010)E-10",
+    "pdg_identifier": "S018T/2026"
+   }
+  },
+  "Sigma+": {
+   "pdg_name": "Sigma+",
+   "mcid": 3222,
+   "charge": 1.0,
+   "pdg_identifier": "S019/2026",
+   "mass": {
+    "value": 1189.37,
+    "uncertainty": 0.07,
+    "unit": "MeV",
+    "pdg_value_text": "1189.37+-0.07",
+    "pdg_identifier": "S019M/2026"
+   },
+   "lifetime": {
+    "value": 8.018e-11,
+    "uncertainty": 2.6e-13,
+    "unit": "s",
+    "pdg_value_text": "(8.018+-0.026)E-11",
+    "pdg_identifier": "S019T/2026"
+   }
+  },
+  "Sigma0": {
+   "pdg_name": "Sigma0",
+   "mcid": 3212,
+   "charge": 0.0,
+   "pdg_identifier": "S021/2026",
+   "mass": {
+    "value": 1192.642,
+    "uncertainty": 0.024,
+    "unit": "MeV",
+    "pdg_value_text": "1192.642+-0.024",
+    "pdg_identifier": "S021M/2026"
+   },
+   "lifetime": {
+    "value": 7.4e-20,
+    "uncertainty": 7e-21,
+    "unit": "s",
+    "pdg_value_text": "74+-7E-21",
+    "pdg_identifier": "S021T/2026"
+   }
+  },
+  "Sigma-": {
+   "pdg_name": "Sigma-",
+   "mcid": 3112,
+   "charge": -1.0,
+   "pdg_identifier": "S020/2026",
+   "mass": {
+    "value": 1197.449,
+    "uncertainty": 0.029,
+    "unit": "MeV",
+    "pdg_value_text": "1197.449+-0.029",
+    "pdg_identifier": "S020M/2026"
+   },
+   "lifetime": {
+    "value": 1.479e-10,
+    "uncertainty": 1.1e-12,
+    "unit": "s",
+    "pdg_value_text": "(1.479+-0.011)E-10",
+    "pdg_identifier": "S020T/2026"
+   }
+  },
+  "Xi0": {
+   "pdg_name": "Xi0",
+   "mcid": 3322,
+   "charge": 0.0,
+   "pdg_identifier": "S023/2026",
+   "mass": {
+    "value": 1314.86,
+    "uncertainty": 0.2,
+    "unit": "MeV",
+    "pdg_value_text": "1314.86+-0.20",
+    "pdg_identifier": "S023M/2026"
+   },
+   "lifetime": {
+    "value": 2.9e-10,
+    "uncertainty": 9e-12,
+    "unit": "s",
+    "pdg_value_text": "(2.90+-0.09)E-10",
+    "pdg_identifier": "S023T/2026"
+   }
+  },
+  "Xi-": {
+   "pdg_name": "Xi-",
+   "mcid": 3312,
+   "charge": -1.0,
+   "pdg_identifier": "S022/2026",
+   "mass": {
+    "value": 1321.71,
+    "uncertainty": 0.07,
+    "unit": "MeV",
+    "pdg_value_text": "1321.71+-0.07",
+    "pdg_identifier": "S022M/2026"
+   },
+   "lifetime": {
+    "value": 1.639e-10,
+    "uncertainty": 1.5e-12,
+    "unit": "s",
+    "pdg_value_text": "(1.639+-0.015)E-10",
+    "pdg_identifier": "S022T/2026"
+   }
+  },
+  "Omega-": {
+   "pdg_name": "Omega-",
+   "mcid": 3334,
+   "charge": -1.0,
+   "pdg_identifier": "S024/2026",
+   "mass": {
+    "value": 1672.45,
+    "uncertainty": 0.29,
+    "unit": "MeV",
+    "pdg_value_text": "1672.45+-0.29",
+    "pdg_identifier": "S024M/2026"
+   },
+   "lifetime": {
+    "value": 8.21e-11,
+    "uncertainty": 1.1e-12,
+    "unit": "s",
+    "pdg_value_text": "(8.21+-0.11)E-11",
+    "pdg_identifier": "S024T/2026"
+   }
+  }
+ }
+}

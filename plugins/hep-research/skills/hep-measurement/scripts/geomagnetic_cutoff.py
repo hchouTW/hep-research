@@ -35,46 +35,28 @@ Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, 
 3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-measurement/scripts/geomagnetic_cutoff.py --latitude 0
      python3 <plugin root>/skills/hep-measurement/scripts/geomagnetic_cutoff.py --latitude 41.5 --radius-re 1.0009 --charge 1 --mass-number 2
-Nuclear masses: tabulated AME2020 values for 1H to 18O (see ATOMIC_MASS_U); other (Z, A) use A x u and the output
-says so (mass_source).
+Nuclear masses: AME2020 values from core/constants for 1H to 18O (Z <= TABULATED_MAX_Z); other (Z, A) use A x u and
+the output says so (mass_source). Constants: CODATA 2022 from core/constants.
 """
 import argparse
 import json
 import math
 import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from core import constants  # noqa: E402
 
 EARTH_RADIUS_CM = 6.371e8
 DEFAULT_DIPOLE_MOMENT_G_CM3 = 8.05e25  # IGRF-14 1955 dipole (igrf14coeffs.txt, NOAA/IAGA, read 2026-10-15)
 DEFAULT_DIPOLE_EPOCH = '1955'  # the epoch of DEFAULT_DIPOLE_MOMENT_G_CM3
-PROTON_MASS_GEV = 0.93827208943  # CODATA 2022 m_p c^2
-# Atomic masses in u from AME2020 (Wang et al., Chinese Phys. C 45 (2021) 030003; file mass.mas20, read
-# 2026-10-13 from https://www-nds.iaea.org/amdc/ame2020/mass_1.mas20.txt). Nuclear mass = atomic mass x m_u c^2 -
-# Z m_e c^2 (CODATA 2022: m_u c^2 = 931.49410372 MeV, m_e c^2 = 0.51099895069 MeV); the electron binding energy
-# (below 1 keV for Z <= 8) is neglected.
-ATOMIC_MASS_U = {
-    (1, 1): 1.007825031898,  # 1H
-    (1, 2): 2.014101777844,  # 2H
-    (1, 3): 3.01604928132,  # 3H
-    (2, 3): 3.01602932197,  # 3He
-    (2, 4): 4.00260325413,  # 4He
-    (3, 6): 6.01512288742,  # 6Li
-    (3, 7): 7.01600343426,  # 7Li
-    (4, 7): 7.016928714,  # 7Be
-    (4, 9): 9.012183062,  # 9Be
-    (4, 10): 10.013534692,  # 10Be
-    (5, 10): 10.012936862,  # 10B
-    (5, 11): 11.009305166,  # 11B
-    (6, 12): 12.0,  # 12C
-    (6, 13): 13.00335483534,  # 13C
-    (6, 14): 14.00324198862,  # 14C
-    (7, 14): 14.00307400425,  # 14N
-    (7, 15): 15.00010889827,  # 15N
-    (8, 16): 15.99491461926,  # 16O
-    (8, 17): 16.99913175595,  # 17O
-    (8, 18): 17.99915961214,  # 18O
-}
-ATOMIC_MASS_UNIT_GEV = 0.93149410372  # CODATA 2022 m_u c^2
-ELECTRON_MASS_GEV = 0.00051099895069  # CODATA 2022 m_e c^2
+# Masses from core/constants (Th9): CODATA 2022 m_p, m_u and m_e; AME2020 atomic masses. Nuclear mass = atomic mass x
+# m_u c^2 - Z m_e c^2; the electron binding energy (below 1 keV for Z <= 8) is neglected. Only Z <= 8 is tabulated here,
+# as before Th9: using the larger core subset would change the output for heavier nuclei (a sci-fix: decision).
+TABULATED_MAX_Z = 8
+PROTON_MASS_GEV = constants.constant('proton_mass_energy', unit='GeV').value
+ATOMIC_MASS_UNIT_GEV = constants.constant('atomic_mass_constant_energy', unit='GeV').value
 
 
 def nuclear_mass_gev(charge, mass_number):
@@ -82,8 +64,11 @@ def nuclear_mass_gev(charge, mass_number):
     key = (charge, mass_number)
     if key == (1, 1):
         return PROTON_MASS_GEV, 'CODATA 2022 proton mass'
-    if key in ATOMIC_MASS_U:
-        return ATOMIC_MASS_U[key] * ATOMIC_MASS_UNIT_GEV - charge * ELECTRON_MASS_GEV, 'AME2020 table'
+    if charge <= TABULATED_MAX_Z:
+        try:
+            return constants.nuclear_mass_gev(charge, mass_number), 'AME2020 table'
+        except constants.ConstantsError:
+            pass
     return mass_number * ATOMIC_MASS_UNIT_GEV, 'approximation A x u (binding energy ignored; not tabulated)'
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope')  # contracts/vocab/core.json artifact_statuses

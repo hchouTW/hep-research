@@ -306,6 +306,9 @@ C = [
  ("cm-numbers-1", "en", "direct", "Generate the LaTeX macros for my results table from this statistical result, with consistent numbers and units.", "hep-communication", ["numbers and units"], None, None, {}),
  ("cm-genre-2", "zh-Hant", "direct", "我要寫一篇 search 論文投 PRD，結果章節一定要有哪些內容？", "hep-communication", ["papers from results"], None, None, {}),
  ("cm-translate-1", "en", "direct", "Translate my Chinese draft abstract into English without changing the claim strength or any number.", "hep-communication", ["English or Chinese"], None, None, {}),
+    # batch A, Th9: physical constants, particle and nuclide data (physical_data.py)
+ ("th-a-qvalue-1", "en", "direct", "What is the Q value of the 238U alpha decay from AME2020 masses, and which edition and uncertainty should I quote?", "hep-theory", ["nuclear decays"], None, None, {}),
+ ("th-a-const-2", "zh-Hant", "direct", "π⁺ 的質量要用哪一版 PDG 的數值？請附上來源、版本與不確定度。", "hep-theory", ["constants"], None, None, {}),
 ]
 
 cases = []
