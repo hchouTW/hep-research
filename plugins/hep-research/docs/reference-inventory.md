@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-communication | 57 | 402 | 0 |
 | hep-computing | 32 | 299 | 0 |
 | hep-detector | 36 | 466 | 0 |
-| hep-measurement | 12 | 105 | 0 |
+| hep-measurement | 12 | 106 | 0 |
 | hep-ml | 42 | 189 | 0 |
 | hep-statistics | 12 | 175 | 0 |
 | hep-theory | 12 | 92 | 0 |
@@ -204,7 +204,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 18.5 | no | 11 | - | 9257d7b5 2026-10-15 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 11 | - | 9257d7b5 2026-10-15 |
-| `response-and-forward-folding.md` | hep-detector | 14.1 | yes | 13 | hep-measurement, hep-statistics | c98cc355 2026-10-17 |
+| `response-and-forward-folding.md` | hep-detector | 14.1 | yes | 13 | hep-measurement, hep-statistics | 11f66a20 2026-10-17 |
 | `signal-formation-and-readout.md` | hep-detector | 18.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
 | `space-based-direct-detection.md` | hep-detector | 19.2 | yes | 15 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
 | `timing-detectors.md` | hep-detector | 9.1 | no | 7 | - | 9257d7b5 2026-10-15 |
@@ -212,8 +212,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `triggers-luminosity-pileup.md` | hep-detector | 15.7 | yes | 13 | - | 9257d7b5 2026-10-15 |
 | `analysis-design.md` | hep-measurement | 13.1 | yes | 16 | hep-computing, hep-detector | fe71ebcf 2026-10-17 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
-| `backgrounds.md` | hep-measurement | 4.7 | yes | 21 | hep-detector | 9257d7b5 2026-10-15 |
-| `correction-chain.md` | hep-measurement | 12.7 | yes | 11 | hep-detector, hep-theory | 151889fb 2026-10-17 |
+| `backgrounds.md` | hep-measurement | 5.9 | yes | 25 | hep-detector | 9257d7b5 2026-10-15 |
+| `correction-chain.md` | hep-measurement | 12.8 | yes | 12 | hep-detector, hep-theory | 151889fb 2026-10-17 |
 | `cosmic-ray-measurements.md` | hep-measurement | 19.9 | yes | 4 | - | 485e96cb 2026-10-17 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 11 | hep-computing | 9257d7b5 2026-10-15 |
 | `hep-measurement-guide.md` | hep-measurement | 16.5 | yes | 9 | hep-detector | c17bfafe 2026-10-17 |

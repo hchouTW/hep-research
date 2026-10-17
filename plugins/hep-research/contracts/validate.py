@@ -1102,7 +1102,8 @@ NORMALIZATION_CORRECTIONS = {"luminosity": "integrated-luminosity", "exposure": 
 ESTIMAND_MIN_WORDS = 5
 MEASUREMENT_KEYS = {
     "extension": {"estimand", "observable", "species_or_process", "period", "selections", "backgrounds", "corrections",
-                  "systematics", "blinding", "experiment_fields", "ratio", "no_backgrounds_reason", "notes", "eras"},
+                  "systematics", "blinding", "experiment_fields", "ratio", "no_backgrounds_reason", "notes", "eras",
+                  "coupled_backgrounds"},
     "selections": {"name", "id", "definition", "conditional_denominator", "validation", "efficiency", "evidence_ids",
                    "notes", "status", "order", "applied_in", "variable", "value", "unit", "ref", "region"},
     "backgrounds": {"name", "id", "estimator", "control_region", "constraint", "closure", "normalization", "shape",
@@ -1116,6 +1117,7 @@ MEASUREMENT_KEYS = {
                     "proposed_scheme", "ref", "periods", "regions", "value", "unit", "scaling", "era_correlation"},
     "eras": {"id", "start", "end", "kind", "source", "corrections", "shared_corrections", "versions", "evidence_ids",
              "notes"},
+    "coupled_backgrounds": {"background", "species", "treatment", "source", "evidence_ids", "notes"},
 }
 # v6.3 D05a: correction keys of a measurement-spec, known only when the spec declares the capability (an older reader
 # refuses such a spec through contract.unknown_capability; without it the keys stay measurement.unknown_key warnings).
@@ -1353,6 +1355,8 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     _key_checks(ext, MEASUREMENT_KEYS["extension"], x, rep)
     for i, era in enumerate(ext.get("eras") or []):  # M3: the era rules themselves are review rules
         _key_checks(era, MEASUREMENT_KEYS["eras"], f"{x}.eras[{i}]", rep)
+    for i, cb in enumerate(ext.get("coupled_backgrounds") or []):  # M4: coupled.fixed_subtraction is a review rule
+        _key_checks(cb, MEASUREMENT_KEYS["coupled_backgrounds"], f"{x}.coupled_backgrounds[{i}]", rep)
 
 
 STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version

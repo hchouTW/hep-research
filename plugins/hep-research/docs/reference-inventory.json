@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 104672,
+   "bytes": 106025,
    "uncited": 0
   },
   "hep-ml": {
@@ -2157,7 +2157,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "c98cc355 2026-10-17"
+   "last_commit": "11f66a20 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -2334,8 +2334,8 @@
   {
    "path": "skills/hep-measurement/references/backgrounds.md",
    "owner": "hep-measurement",
-   "bytes": 4693,
-   "lines": 51,
+   "bytes": 5883,
+   "lines": 66,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -2355,9 +2355,13 @@
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-measurement/SKILL.md",
+    "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/analysis-design.md",
+    "skills/hep-measurement/references/correction-chain.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-measurement/scripts/review_measurement_spec.py",
+    "tests/skills/hep_measurement/test_coupled_backgrounds_m4.py",
     "tests/skills/hep_measurement/test_method_references.py"
    ],
    "cited_by_other_skills": [
@@ -2368,8 +2372,8 @@
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
    "owner": "hep-measurement",
-   "bytes": 12683,
-   "lines": 154,
+   "bytes": 12846,
+   "lines": 156,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2381,6 +2385,7 @@
     "skills/hep-measurement/scripts/collection_time.py",
     "skills/hep-theory/references/nuclear-cross-sections.md",
     "tests/skills/hep_detector/test_survival_feeddown.py",
+    "tests/skills/hep_measurement/test_coupled_backgrounds_m4.py",
     "tests/skills/hep_measurement/test_method_references.py",
     "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
    ],

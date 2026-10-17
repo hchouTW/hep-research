@@ -3898,6 +3898,26 @@
    "trigger_terms": [
     "response matrices"
    ]
+  },
+  {
+   "id": "c-nuc-coupled-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My boron background is carbon fragmenting above the detector, and I measure carbon in the same data; should I subtract it as a fixed number?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "background estimation"
+   ]
+  },
+  {
+   "id": "c-nuc-coupled-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "反質子樣本的背景來自同時量測的質子電荷誤判，背景估計要用固定扣除還是聯合擬合？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "background estimation"
+   ]
   }
  ]
 }

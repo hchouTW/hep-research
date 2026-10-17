@@ -396,6 +396,9 @@ C = [
     # batch C, D2: species-migration response
  ("c-nuc-mig-1", "en", "direct", "Build a species-migration response so carbon reconstructed as boron and protons reconstructed with the wrong sign fold into my prediction.", "hep-detector", ["response matrices"], None, None, {}),
  ("c-nuc-mig-2", "zh-Hant", "direct", "把每個物種的響應矩陣組成物種遷移響應，再把理論預測折疊到重建空間。", "hep-detector", ["response matrices"], None, None, {}),
+    # batch C, M4: coupled species
+ ("c-nuc-coupled-1", "en", "direct", "My boron background is carbon fragmenting above the detector, and I measure carbon in the same data; should I subtract it as a fixed number?", "hep-measurement", ["background estimation"], None, None, {}),
+ ("c-nuc-coupled-2", "zh-Hant", "direct", "反質子樣本的背景來自同時量測的質子電荷誤判，背景估計要用固定扣除還是聯合擬合？", "hep-measurement", ["background estimation"], None, None, {}),
 ]
 
 cases = []

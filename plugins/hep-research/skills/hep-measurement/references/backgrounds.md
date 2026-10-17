@@ -45,6 +45,21 @@ charge sign or the wrong identity.
 Worked example (synthetic): a true antiproton-to-proton ratio of 1.0e-4 with confusion `c+ = 1.0e-5` (and negligible
 `c-` contribution) is observed as `r(1 - c-) + c+` = 1.1e-4, a 10% bias that inverting `M` removes.
 
+## Coupled species
+
+Some backgrounds are another species measured in the same data: the feed-down of a heavier nucleus that fragments
+above the detector, the confused-sign partner of an antiparticle, the neighbouring charge in a charge ladder. Their
+size depends on a quantity the analysis measures at the same time, so a subtraction with a fixed number freezes a
+value that is itself uncertain and correlated with the result.
+- Fit the species together: a joint likelihood of the coupled samples with the migration between them
+  (`<plugin root>/skills/hep-detector/scripts/species_response.py` builds the blocks), or iterate the measurement of
+  the background species and the subtraction until both are stable, propagating the background species' uncertainty.
+- Declare the coupling in the spec: `coupled_backgrounds: [{background, species, treatment, source}]`, treatment
+  `joint-fit`, `iterative` or `fixed-subtraction`. `review_measurement_spec.py` warns with
+  `coupled.fixed_subtraction` on the last.
+- A fixed subtraction is acceptable only when the coupling is weak and the background species is measured
+  elsewhere with its uncertainty propagated; say so in the spec's notes.
+
 ## Deliverables
 
 Provide region definitions, contamination estimates, transfer factors/kappa, closure plots and uncertainties, the correlation evidence with a proposed scheme (hep-statistics encodes it), and an inventory of how each dataset enters the joint likelihood. Distinguish validation of normalization, shape, and extrapolation.

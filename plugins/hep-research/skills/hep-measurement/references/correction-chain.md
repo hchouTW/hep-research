@@ -96,7 +96,9 @@ two fluxes would be 1.25e-2, 15% higher.
 - **Fragmentation in the detector and above it.** A heavier nucleus that fragments in the upper material can be
   reconstructed as a lighter one (for example carbon into boron), so the lighter species gains a feed-down background
   `N_feed = N_heavy (1 - P_heavy) f(heavy -> light)`, with f the partial fragmentation fraction into that species;
-  subtract it, or fit the charge measured in several layers to tag fragmentation before the last layer.
+  subtract it, or fit the charge measured in several layers to tag fragmentation before the last layer. The heavy
+  species is measured in the same data, so the feed-down is a coupled background (`references/backgrounds.md`,
+  "Coupled species"), not a fixed number.
 - **Charge-ladder leakage.** Charge resolution spreads each species into its neighbours (Z +- 1); fit the charge
   templates of the neighbouring species together, and take the template tails from data where possible.
 - **Isotopes.** Separating isotopes needs mass, so velocity and rigidity (or energy) both enter; the mass resolution
