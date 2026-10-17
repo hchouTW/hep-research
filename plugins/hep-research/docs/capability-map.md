@@ -66,5 +66,5 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1 |
 | nuclear-structure | Nuclear-structure calculations (shell model, density functionals) | hep-theory | none | no |  | th-nucstruct-1 |
 | relic-density-solvers | Full relic-density Boltzmann solvers | hep-theory | none | no |  | th-relic-1 |
-| neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | none | no (enters with Th4) |  | th-scope-2 |
+| neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | tool | yes | Th4 |  |
 <!-- /capability-map -->

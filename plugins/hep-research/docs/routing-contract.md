@@ -79,7 +79,7 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 - hep-measurement: measurement-design, cosmic-ray-flux, systematic-scaling, collection-time, spectral-transform, acceptance-from-generation
 - hep-detector: response-folding, resolution-efficiency, fast-spectrometer-simulation, scale-distortion, response-construction, species-migration, multisample-pid, stability-monitoring, detector-design, geomagnetic-backtracing
 - hep-statistics: fits-and-limits, covariance-and-combinations, unfolding, bayesian, time-series, split-consistency, roofit-status
-- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry
+- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations
 - hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring
 - hep-ml: ml-training, bdt-pipeline, ml-eras
 - hep-communication: claims-and-literature, terminology, papers-and-numbers
@@ -94,7 +94,6 @@ Outside v1 (the closest owner answers with the limited-support notice):
 - Heavy-ion physics (quark-gluon plasma, collective flow) (heavy-ions) → hep-theory
 - Nuclear-structure calculations (shell model, density functionals) (nuclear-structure) → hep-theory
 - Full relic-density Boltzmann solvers (relic-density-solvers) → hep-theory
-- Neutrino-oscillation probabilities, including matter effects (neutrino-oscillations) → hep-theory; enters v1 with Th4
 <!-- /v1-scope -->
 
 ## Handoff chains (must terminate)

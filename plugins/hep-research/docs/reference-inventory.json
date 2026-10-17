@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 12,
-   "bytes": 91856,
+   "references": 13,
+   "bytes": 96418,
    "uncited": 0
   }
  },
@@ -3708,6 +3708,19 @@
     "hep-statistics"
    ],
    "last_commit": "db0a9cca 2026-10-17"
+  },
+  {
+   "path": "skills/hep-theory/references/neutrino-oscillations.md",
+   "owner": "hep-theory",
+   "bytes": 4562,
+   "lines": 77,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/scripts/neutrino_oscillation.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-theory/references/nuclear-cross-sections.md",

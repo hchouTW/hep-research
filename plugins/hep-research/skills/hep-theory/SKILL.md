@@ -54,6 +54,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |
 | Constants and their CODATA edition, particle masses and lifetimes, nuclide data, unit conversion (GeV^-2 to mb), Q values | `physical_data.py` |
 | Two-body decays, boosts, invariant mass, Mandelstam s t u, thresholds, Dalitz, rapidity, width/lifetime/c tau | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
+| Neutrino oscillations (PMNS, vacuum, constant-density matter, mass ordering, CP phase) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
 | Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
 | Schemes, running masses, regularization | [schemes](references/regularization-and-schemes.md) |
 | A published table (CSV, FITS, HEPData) to a dataset record, or back to HEPData | `import_published_table.py`; `<plugin root>/adapters/hepdata/assets/hepdata_record.py`, `<plugin root>/adapters/hepdata/assets/hepdata_export.py` |

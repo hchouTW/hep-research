@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 12 | 106 | 0 |
 | hep-ml | 42 | 189 | 0 |
 | hep-statistics | 12 | 175 | 0 |
-| hep-theory | 12 | 92 | 0 |
+| hep-theory | 13 | 96 | 0 |
 
 ## Overlapping pairs
 
@@ -282,6 +282,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c0 2026-10-07 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.2 | yes | 8 | hep-communication, hep-statistics | db0a9cca 2026-10-17 |
+| `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 2 | - | untracked |
 | `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 4 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
 | `pdfs-and-lhapdf.md` | hep-theory | 6.0 | yes | 2 | - | 6164b848 2026-10-13 |
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | 9257d7b5 2026-10-15 |

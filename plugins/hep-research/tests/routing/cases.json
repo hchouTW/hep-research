@@ -1351,12 +1351,13 @@
   {
    "id": "th-scope-2",
    "lang": "zh-Hant",
-   "kind": "out-of-v1",
+   "kind": "direct",
    "prompt": "幫我推導微中子振盪機率在物質中的修正。",
    "expected_primary": "hep-theory",
-   "trigger_terms": [],
-   "set": "X1",
-   "limited_support": true
+   "trigger_terms": [
+    "neutrino oscillations"
+   ],
+   "set": "X1"
   },
   {
    "id": "th-flavour-2",
@@ -3957,6 +3958,26 @@
    "expected_primary": "hep-theory",
    "trigger_terms": [
     "predictions"
+   ]
+  },
+  {
+   "id": "c-th-nu-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the nu_mu to nu_e appearance probability at 1300 km and 2.5 GeV in constant-density matter for both mass orderings.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "neutrino oscillations"
+   ]
+  },
+  {
+   "id": "c-th-nu-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "反微中子在真空中 295 公里、0.6 GeV 的振盪機率怎麼算？PMNS 的 CP 相位慣例要怎麼寫？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "neutrino oscillations"
    ]
   }
  ]

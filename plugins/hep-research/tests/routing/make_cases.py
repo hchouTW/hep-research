@@ -127,7 +127,7 @@ C = [
  ("th-nucstruct-1", "en", "out-of-v1", "Compute the ground-state quadrupole deformation of 154Sm with a nuclear energy density functional.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
  ("th-relic-1", "en", "out-of-v1", "Solve the Boltzmann equation for the relic density of my WIMP model, including coannihilations.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
  # X1: scope declaration (limited-support until Th4 lands for th-scope-2, then a direct case)
- ("th-scope-2", "zh-Hant", "out-of-v1", "幫我推導微中子振盪機率在物質中的修正。", "hep-theory", [], None, None, {"set": "X1", "limited_support": True}),
+ ("th-scope-2", "zh-Hant", "direct", "幫我推導微中子振盪機率在物質中的修正。", "hep-theory", ["neutrino oscillations"], None, None, {"set": "X1"}),  # direct since Th4
  ("th-flavour-2", "zh-Hant", "out-of-v1", "幫我做 CKM 全域擬合。", "hep-theory", [], None, None, {"set": "X1", "limited_support": True}),
  ("underspec-1", "en", "underspecified", "Compare the two experiments.", "ask", [], None, None, {"note": "ask which datasets and observables; never pick experiments"}),
  ("underspec-2", "zh-Hant", "underspecified", "比較這兩個實驗的結果。", "ask", [], None, None, {}),
@@ -405,6 +405,9 @@ C = [
     # batch C, Th8: published-data import (import_published_table.py)
  ("c-th-import-1", "en", "direct", "I downloaded the HEPData YAML and a CSV of this published spectrum; turn them into a dataset record so I can compare my model with it.", "hep-theory", ["comparing a model with an experiment's published data"], None, None, {}),
  ("c-th-import-2", "zh-Hant", "direct", "我下載了論文附的 FITS 表格，想拿來和我的模型比較，欄位、單位和誤差分解要怎麼讀進來？", "hep-theory", ["predictions"], None, None, {}),
+    # batch C, Th4: neutrino oscillations (neutrino_oscillation.py)
+ ("c-th-nu-1", "en", "direct", "Compute the nu_mu to nu_e appearance probability at 1300 km and 2.5 GeV in constant-density matter for both mass orderings.", "hep-theory", ["neutrino oscillations"], None, None, {}),
+ ("c-th-nu-2", "zh-Hant", "direct", "反微中子在真空中 295 公里、0.6 GeV 的振盪機率怎麼算？PMNS 的 CP 相位慣例要怎麼寫？", "hep-theory", ["neutrino oscillations"], None, None, {}),
 ]
 
 cases = []
