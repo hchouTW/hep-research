@@ -122,6 +122,10 @@ C = [
  ("recast-1", "zh-Hant", "recasting", "請重新詮釋（recasting a published analysis）這個 LHC 搜尋結果以限制我的模型。", "hep-theory", ["recasting a published analysis"], None, None, {"chain": ["hep-theory", "hep-detector", "hep-statistics"]}),
  ("out-of-v1-1", "en", "out-of-v1", "Fit cosmic-ray propagation parameters with GALPROP across all species.", "hep-statistics", [], None, None, {"limited_support": True}),
  ("out-of-v1-2", "zh-Hant", "out-of-v1", "幫我做 SMEFT 全域擬合。", "hep-theory", [], None, None, {"limited_support": True, "also_accept": ["hep-statistics"]}),  # hep-theory claims EFT global fits; both give the notice
+ # X3: every domain outside v1 on docs/capability-map.json has a limited-support case
+ ("th-heavyion-1", "en", "out-of-v1", "Extract the shear viscosity of the quark-gluon plasma from a hydrodynamic model of Pb-Pb elliptic flow.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
+ ("th-nucstruct-1", "en", "out-of-v1", "Compute the ground-state quadrupole deformation of 154Sm with a nuclear energy density functional.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
+ ("th-relic-1", "en", "out-of-v1", "Solve the Boltzmann equation for the relic density of my WIMP model, including coannihilations.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
  ("underspec-1", "en", "underspecified", "Compare the two experiments.", "ask", [], None, None, {"note": "ask which datasets and observables; never pick experiments"}),
  ("underspec-2", "zh-Hant", "underspecified", "比較這兩個實驗的結果。", "ask", [], None, None, {}),
  # EIC profile: facility, experiment, theory with no profile, underspecified

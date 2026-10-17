@@ -1319,6 +1319,36 @@
    ]
   },
   {
+   "id": "th-heavyion-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Extract the shear viscosity of the quark-gluon plasma from a hydrodynamic model of Pb-Pb elliptic flow.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X3",
+   "limited_support": true
+  },
+  {
+   "id": "th-nucstruct-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute the ground-state quadrupole deformation of 154Sm with a nuclear energy density functional.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X3",
+   "limited_support": true
+  },
+  {
+   "id": "th-relic-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Solve the Boltzmann equation for the relic density of my WIMP model, including coannihilations.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "X3",
+   "limited_support": true
+  },
+  {
    "id": "underspec-1",
    "lang": "en",
    "kind": "underspecified",

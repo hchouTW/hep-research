@@ -102,7 +102,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-computer-science.md` | hep-communication | 5.6 | no | 2 | - | 9257d7b 2026-10-15 |
 | `diagrams-hep.md` | hep-communication | 7.6 | no | 2 | - | 9257d7b 2026-10-15 |
 | `diagrams-statistics.md` | hep-communication | 6.3 | no | 2 | - | 9257d7b 2026-10-15 |
-| `equation-and-notation-auditing.md` | hep-communication | 4.4 | no | 6 | hep-statistics, hep-theory | 9257d7b 2026-10-15 |
+| `equation-and-notation-auditing.md` | hep-communication | 4.4 | no | 6 | hep-statistics, hep-theory | 064f60f 2026-10-17 |
 | `erratum-and-corrigendum-drafting.md` | hep-communication | 4.5 | no | 3 | - | 9257d7b 2026-10-15 |
 | `evidence-linked-writing.md` | hep-communication | 5.4 | yes | 5 | - | 9257d7b 2026-10-15 |
 | `figures-and-tables.md` | hep-communication | 9.3 | yes | 11 | - | 9257d7b 2026-10-15 |
