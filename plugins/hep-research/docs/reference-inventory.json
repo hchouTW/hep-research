@@ -9,8 +9,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 34,
-   "bytes": 309503,
+   "references": 35,
+   "bytes": 313976,
    "uncited": 0
   },
   "hep-detector": {
@@ -1040,6 +1040,7 @@
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/assets/time_slice_reduction.py",
+    "skills/hep-computing/references/columnar-and-large-scale-data.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/analysis-design.md",
     "skills/hep-measurement/references/correction-chain.md",
@@ -1130,6 +1131,20 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "fe8f71ef 2026-10-13"
+  },
+  {
+   "path": "skills/hep-computing/references/columnar-and-large-scale-data.md",
+   "owner": "hep-computing",
+   "bytes": 4473,
+   "lines": 59,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/assets/chunked_histogram.py",
+    "tests/skills/hep_computing/test_chunked_histogram_c5.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "6048a2f7 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
@@ -1324,7 +1339,7 @@
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "adb0c698 2026-10-17"
+   "last_commit": "76c520c1 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
@@ -1434,6 +1449,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/columnar-and-large-scale-data.md",
     "skills/hep-computing/scripts/check_histogram_errors.py",
     "skills/hep-ml/scripts/export_bdt.py"
    ],
@@ -2487,6 +2503,7 @@
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/assets/time_slice_reduction.py",
     "skills/hep-computing/references/analysis-data-pipelines.md",
+    "skills/hep-computing/references/columnar-and-large-scale-data.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-measurement/README.md",
@@ -4068,11 +4085,6 @@
   "core": [
    "skills/hep-statistics/references/core-stats-commands.md",
    "skills/hep-statistics/references/core-stats-guide.md"
-  ],
-  "data": [
-   "skills/hep-ml/references/data-loading.md",
-   "skills/hep-ml/references/data-strategy.md",
-   "skills/hep-ml/references/ml-analysis-training-and-data.md"
   ],
   "debugging": [
    "skills/hep-computing/references/crash-and-memory-debugging.md",

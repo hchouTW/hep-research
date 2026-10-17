@@ -4505,6 +4505,26 @@
    "trigger_terms": [
     "uproot/awkward"
    ]
+  },
+  {
+   "id": "d-cc-columnar-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My ntuples don't fit in memory: how do I fill histograms chunk by chunk with uproot and get the same result as one pass?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "data I/O and formats"
+   ]
+  },
+  {
+   "id": "d-cc-columnar-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "Parquet 與 HDF5 的大檔案記憶體放不下，要怎麼分批處理並確定結果和一次讀完相同？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "data I/O and formats"
+   ]
   }
  ]
 }

@@ -486,6 +486,9 @@ C = [
     # batch D, C4: uproot reader for histogram summaries
  ("d-cc-uproot-1", "en", "direct", "Summarize the mean, RMS and effective entries of a histogram in my ROOT file with uproot, without PyROOT.", "hep-computing", ["uproot/awkward"], None, None, {}),
  ("d-cc-uproot-2", "zh-Hant", "direct", "沒有 PyROOT，用 uproot 讀 ROOT 檔的直方圖並算平均值、RMS 與有效事件數。", "hep-computing", ["uproot/awkward"], None, None, {}),
+    # batch D, C5: columnar and large-scale data
+ ("d-cc-columnar-1", "en", "direct", "My ntuples don't fit in memory: how do I fill histograms chunk by chunk with uproot and get the same result as one pass?", "hep-computing", ["data I/O and formats"], None, None, {}),
+ ("d-cc-columnar-2", "zh-Hant", "direct", "Parquet 與 HDF5 的大檔案記憶體放不下，要怎麼分批處理並確定結果和一次讀完相同？", "hep-computing", ["data I/O and formats"], None, None, {}),
 ]
 
 cases = []
