@@ -21,14 +21,14 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 |---|---|---|---|---|---|---|
 | measurement-design | Measurement design and verdict-first review: estimand, selections and cutflows, backgrounds, correction chains, systematics plan, blinding policy | hep-measurement | tool | yes | M3, M4, M10 |  |
 | cosmic-ray-flux | Cosmic-ray flux from counts and its helpers (orbit cutoff, force field, broken power law, anisotropy design) | hep-measurement | tool | yes | M6, M9 |  |
-| systematic-scaling | Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection | hep-measurement | none | yes | M5, S2 |  |
+| systematic-scaling | Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection | hep-measurement | documentation | yes | M5, S2 |  |
 | collection-time | Collection time per period with quality cuts, cutoff transmission and eras | hep-measurement | none | yes | M1 |  |
 | spectral-transform | Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging) | hep-measurement | none | yes | M7, M8 |  |
 | acceptance-from-generation | Acceptance from generation records | hep-measurement | none | yes | M2 |  |
 | response-folding | Response objects, forward folding, double-counting checks | hep-detector | tool | yes | D5 |  |
 | resolution-efficiency | Resolution and efficiency at detector level (tag-and-probe, truth matching, weighted efficiency) | hep-detector | tool | yes | D8 |  |
-| fast-spectrometer-simulation | Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras) | hep-detector | none | yes | D7 |  |
-| scale-distortion | Propagating a calibration residual (scale, inverse offset, resolution) to yields, ratios and covariance | hep-detector | none | yes | D1 |  |
+| fast-spectrometer-simulation | Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras) | hep-detector | tool | yes | D7 |  |
+| scale-distortion | Propagating a calibration residual (scale, inverse offset, resolution) to yields, ratios and covariance | hep-detector | tool | yes | D1 |  |
 | response-construction | Response construction from matched truth and reconstructed events | hep-detector | none | yes | D9 |  |
 | species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | documentation | yes | D2, D3, D4 |  |
 | multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | none | yes | D10 |  |
@@ -44,8 +44,8 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | roofit-status | RooFit/RooStats fit-status mapping and cross-checks | hep-statistics | none | yes | S11 |  |
 | theory-predictions | Conventions, derivations, cross sections, decay rates, higher-order and PDF uncertainties, predictions for published data | hep-theory | tool | yes | Th8, Th10 |  |
 | recasting | Recasting a published analysis with a parametrized response | hep-theory | tool | yes |  |  |
-| physical-data | Physical constants and particle and nuclear data with source and edition | hep-theory | none | yes | Th9 |  |
-| relativistic-kinematics | Relativistic kinematics: two-body decays, boosts, invariant mass, Mandelstam variables, thresholds | hep-theory | none | yes | Th7 |  |
+| physical-data | Physical constants and particle and nuclear data with source and edition | hep-theory | tool | yes | Th9 |  |
+| relativistic-kinematics | Relativistic kinematics: two-body decays, boosts, invariant mass, Mandelstam variables, thresholds | hep-theory | tool | yes | Th7 |  |
 | cosmic-ray-propagation | Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation | hep-theory | tool | yes | Th1, Th2, Th3, Th6, Th11 |  |
 | nuclear-physics-entry | Nuclear cross-section conventions, nuclear decays and Q-values | hep-theory | documentation | yes | Th1, Th12 |  |
 | partition-and-batch | Local partition, batch campaigns, resubmission and duplicate-safe merges | hep-computing | tool | yes | C1 |  |

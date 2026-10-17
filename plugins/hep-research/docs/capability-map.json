@@ -29,7 +29,7 @@
    "id": "systematic-scaling",
    "capability": "Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection",
    "owner": "hep-measurement",
-   "state": "none",
+   "state": "documentation",
    "v1": true,
    "items": [
     "M5",
@@ -91,7 +91,7 @@
    "id": "fast-spectrometer-simulation",
    "capability": "Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras)",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D7"
@@ -101,7 +101,7 @@
    "id": "scale-distortion",
    "capability": "Propagating a calibration residual (scale, inverse offset, resolution) to yields, ratios and covariance",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D1"
@@ -264,7 +264,7 @@
    "id": "physical-data",
    "capability": "Physical constants and particle and nuclear data with source and edition",
    "owner": "hep-theory",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "Th9"
@@ -274,7 +274,7 @@
    "id": "relativistic-kinematics",
    "capability": "Relativistic kinematics: two-body decays, boosts, invariant mass, Mandelstam variables, thresholds",
    "owner": "hep-theory",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "Th7"
