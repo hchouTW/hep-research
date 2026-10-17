@@ -4465,6 +4465,26 @@
    "trigger_terms": [
     "environment and run manifests"
    ]
+  },
+  {
+   "id": "d-cc-preserve-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What must I archive so my analysis can be rerun and re-folded after the experiment ends?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "reproducible scientific software"
+   ]
+  },
+  {
+   "id": "d-cc-preserve-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "實驗結束後要保存哪些東西，分析才能重跑？請給我保存清單。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "reproducible scientific software"
+   ]
   }
  ]
 }

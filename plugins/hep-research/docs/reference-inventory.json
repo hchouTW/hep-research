@@ -9,8 +9,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 33,
-   "bytes": 305064,
+   "references": 34,
+   "bytes": 309503,
    "uncited": 0
   },
   "hep-detector": {
@@ -1082,6 +1082,7 @@
     "skills/hep-computing/references/batch-site-nstccore-slurm.md",
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/performance-profiling.md",
+    "skills/hep-computing/references/preservation-checklist.md",
     "tests/adapters/batch_shims/shimlib.py",
     "tests/adapters/test_batch_reference.py",
     "tools/check_instruction_text.py"
@@ -1204,6 +1205,7 @@
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/bash-balanced-design-guidelines.md",
     "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/preservation-checklist.md",
     "skills/hep-computing/references/root-usage-patterns.md"
    ],
    "cited_by_other_skills": [],
@@ -1310,6 +1312,19 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
+  },
+  {
+   "path": "skills/hep-computing/references/preservation-checklist.md",
+   "owner": "hep-computing",
+   "bytes": 4439,
+   "lines": 71,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md",
+    "tests/skills/hep_computing/test_preservation_checklist_c3.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "adb0c698 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
@@ -1531,6 +1546,7 @@
     "skills/hep-computing/references/agile-development-guide.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/implementation-discipline.md",
+    "skills/hep-computing/references/preservation-checklist.md",
     "skills/hep-computing/references/software-architecture.md"
    ],
    "cited_by_other_skills": [],
@@ -2181,6 +2197,7 @@
    "lines": 166,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-computing/references/preservation-checklist.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -2196,6 +2213,7 @@
     "skills/hep-statistics/references/unfolding.md"
    ],
    "cited_by_other_skills": [
+    "hep-computing",
     "hep-measurement",
     "hep-statistics"
    ],
@@ -4026,6 +4044,10 @@
   "cern": [
    "skills/hep-computing/references/batch-site-cern-htcondor.md",
    "skills/hep-computing/references/storage-cern-eos.md"
+  ],
+  "checklist": [
+   "skills/hep-computing/references/preservation-checklist.md",
+   "skills/hep-computing/references/task-quality-checklist.md"
   ],
   "cherenkov": [
    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",

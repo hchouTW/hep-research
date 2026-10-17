@@ -55,6 +55,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 | Partition, resubmit, merge | `local_partition.py`; Slurm and HTCondor: [batch scheduling](references/batch-scheduling.md) |
 | Time-sliced records: deduplicate by key, then sum; mergeable partial sums | `assets/time_slice_reduction.py`; [analysis pipelines](references/analysis-data-pipelines.md) |
 | CERN EOS storage | [CERN EOS](references/storage-cern-eos.md) |
+| Analysis preservation: what to archive, rehearse a rerun | [preservation checklist](references/preservation-checklist.md) |
 | Blinding checks of outputs, logs, caches | `audit_blinded_outputs.py` (synthetic sentinels only) |
 | Implementation-ready research task | [task authoring](references/task-authoring-guide.md); `lint_task.py` |
 | Agile delivery, definition of done | [agile delivery](references/agile-development-guide.md), [validation and done](references/validation-and-done.md) |

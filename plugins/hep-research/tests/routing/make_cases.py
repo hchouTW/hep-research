@@ -480,6 +480,9 @@ C = [
     # batch D, C2: data and simulation software versions per era
  ("d-cc-pairs-1", "en", "direct", "Check that the reconstruction and calibration versions of data and simulation match in each era of my analysis.", "hep-computing", ["environment and run manifests"], None, None, {}),
  ("d-cc-pairs-2", "zh-Hant", "direct", "幫我檢查每個時期資料與模擬用的重建與校準軟體版本是否一致。", "hep-computing", ["environment and run manifests"], None, None, {}),
+    # batch D, C3: analysis preservation
+ ("d-cc-preserve-1", "en", "direct", "What must I archive so my analysis can be rerun and re-folded after the experiment ends?", "hep-computing", ["reproducible scientific software"], None, None, {}),
+ ("d-cc-preserve-2", "zh-Hant", "direct", "實驗結束後要保存哪些東西，分析才能重跑？請給我保存清單。", "hep-computing", ["reproducible scientific software"], None, None, {}),
 ]
 
 cases = []

@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | hep-communication | 57 | 405 | 0 |
-| hep-computing | 33 | 305 | 0 |
+| hep-computing | 34 | 310 | 0 |
 | hep-detector | 37 | 471 | 0 |
 | hep-measurement | 13 | 113 | 0 |
 | hep-ml | 42 | 192 | 0 |
@@ -34,6 +34,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **based**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **batch**: `batch-scheduling.md`, `batch-site-cern-htcondor.md`, `batch-site-nstccore-slurm.md`
 - **cern**: `batch-site-cern-htcondor.md`, `storage-cern-eos.md`
+- **checklist**: `preservation-checklist.md`, `task-quality-checklist.md`
 - **cherenkov**: `cherenkov-imaging-variants-and-photosensors.md`, `imaging-atmospheric-cherenkov.md`
 - **citation**: `citation-verification.md`, `citations-and-bibliography.md`
 - **code**: `code-review-report.md`, `code-to-methodology-synthesis.md`
@@ -148,7 +149,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
 | `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 8 | hep-measurement | a57e22cf 2026-10-17 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 30.4 | yes | 12 | - | 9257d7b5 2026-10-15 |
+| `batch-scheduling.md` | hep-computing | 30.4 | yes | 13 | - | 9257d7b5 2026-10-15 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4b 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.7 | no | 1 | - | 746f13aa 2026-10-15 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | - | fe8f71ef 2026-10-13 |
@@ -156,13 +157,14 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `crash-and-memory-debugging.md` | hep-computing | 8.2 | yes | 7 | - | 9257d7b5 2026-10-15 |
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f4372374 2026-10-13 |
 | `engineering-playbook.md` | hep-computing | 10.7 | yes | 3 | - | b7b159f4 2026-10-17 |
-| `environments-and-containers.md` | hep-computing | 4.0 | yes | 5 | - | efa283c7 2026-10-13 |
+| `environments-and-containers.md` | hep-computing | 4.0 | yes | 6 | - | efa283c7 2026-10-13 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e6 2026-10-09 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | f4372374 2026-10-13 |
 | `loop-engineering.md` | hep-computing | 7.0 | no | 7 | - | 4665f433 2026-10-13 |
 | `numerical-and-computational-methods.md` | hep-computing | 9.3 | yes | 7 | hep-communication, hep-theory | 9257d7b5 2026-10-15 |
 | `performance-profiling.md` | hep-computing | 6.7 | yes | 5 | - | 9257d7b5 2026-10-15 |
+| `preservation-checklist.md` | hep-computing | 4.4 | yes | 2 | - | adb0c698 2026-10-17 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 5.7 | yes | 5 | hep-ml | 8eefac0f 2026-10-13 |
 | `python-hep-coding-patterns.md` | hep-computing | 6.6 | yes | 7 | - | 9257d7b5 2026-10-15 |
@@ -176,7 +178,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `symbolic-and-numerical-computation.md` | hep-computing | 7.0 | yes | 4 | - | 46cea2cb 2026-10-13 |
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 9257d7b5 2026-10-15 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c0 2026-10-07 |
-| `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 9257d7b5 2026-10-15 |
+| `validation-and-done.md` | hep-computing | 3.7 | yes | 7 | - | 9257d7b5 2026-10-15 |
 | `calibration-and-alignment.md` | hep-detector | 19.0 | yes | 22 | - | 1d03565d 2026-10-17 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 13.0 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `charge-confusion.md` | hep-detector | 12.3 | yes | 5 | - | 4c1cb871 2026-10-17 |
@@ -208,7 +210,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 18.5 | no | 11 | - | 9257d7b5 2026-10-15 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 11 | - | 9257d7b5 2026-10-15 |
-| `response-and-forward-folding.md` | hep-detector | 14.1 | yes | 13 | hep-measurement, hep-statistics | 11f66a20 2026-10-17 |
+| `response-and-forward-folding.md` | hep-detector | 14.1 | yes | 14 | hep-computing, hep-measurement, hep-statistics | 11f66a20 2026-10-17 |
 | `signal-formation-and-readout.md` | hep-detector | 18.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
 | `space-based-direct-detection.md` | hep-detector | 19.2 | yes | 15 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
 | `timing-detectors.md` | hep-detector | 9.1 | no | 7 | - | 9257d7b5 2026-10-15 |
