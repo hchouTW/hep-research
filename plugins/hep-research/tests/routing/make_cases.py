@@ -402,6 +402,9 @@ C = [
     # batch C, M8: isotope fractions
  ("c-nuc-iso-1", "en", "direct", "Fit the 7Be, 9Be and 10Be fractions per rigidity bin from mass templates built from my rigidity and velocity resolution.", "hep-measurement", ["correction chains"], None, None, {}),
  ("c-nuc-iso-2", "zh-Hant", "direct", "用質量模板擬合每個剛度區間的鈹同位素比例，速度解析度的尾巴還沒用資料驗證怎麼辦？", "hep-measurement", ["correction chains"], None, None, {}),
+    # batch C, Th8: published-data import (import_published_table.py)
+ ("c-th-import-1", "en", "direct", "I downloaded the HEPData YAML and a CSV of this published spectrum; turn them into a dataset record so I can compare my model with it.", "hep-theory", ["comparing a model with an experiment's published data"], None, None, {}),
+ ("c-th-import-2", "zh-Hant", "direct", "我下載了論文附的 FITS 表格，想拿來和我的模型比較，欄位、單位和誤差分解要怎麼讀進來？", "hep-theory", ["predictions"], None, None, {}),
 ]
 
 cases = []

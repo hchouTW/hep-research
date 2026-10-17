@@ -85,6 +85,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-theory/scripts/event_weights.py": [M],
     "skills/hep-theory/scripts/pdf_uncertainty.py": [M],
     "skills/hep-theory/scripts/physical_data.py": ["nuclide", "4He", "--ame", M],
+    "skills/hep-theory/scripts/import_published_table.py": ["--table", M, "--spec", M, "--out", M],
     "skills/hep-ml/scripts/check_split_integrity.py": [M],
     "skills/hep-ml/scripts/check_surrogate_domain.py": [M],
     "skills/hep-ml/scripts/compare_model_runs.py": [M],

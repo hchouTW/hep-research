@@ -3938,6 +3938,26 @@
    "trigger_terms": [
     "correction chains"
    ]
+  },
+  {
+   "id": "c-th-import-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "I downloaded the HEPData YAML and a CSV of this published spectrum; turn them into a dataset record so I can compare my model with it.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "comparing a model with an experiment's published data"
+   ]
+  },
+  {
+   "id": "c-th-import-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我下載了論文附的 FITS 表格，想拿來和我的模型比較，欄位、單位和誤差分解要怎麼讀進來？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ]
   }
  ]
 }

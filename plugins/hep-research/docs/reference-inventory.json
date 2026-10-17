@@ -2455,7 +2455,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "c17bfafe 2026-10-17"
+   "last_commit": "b92ecb24 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -3718,7 +3718,6 @@
    "cited_by": [
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-measurement/references/correction-chain.md",
-    "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
    ],
