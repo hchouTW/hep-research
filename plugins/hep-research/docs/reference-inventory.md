@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| hep-communication | 57 | 402 | 0 |
+| hep-communication | 57 | 404 | 0 |
 | hep-computing | 33 | 305 | 0 |
 | hep-detector | 36 | 466 | 0 |
 | hep-measurement | 13 | 113 | 0 |
@@ -113,7 +113,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `graphviz-patterns.md` | hep-communication | 3.5 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `interpreting-scientific-graphics.md` | hep-communication | 8.3 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `latex-mechanics-and-tooling.md` | hep-communication | 13.4 | no | 7 | - | 9257d7b5 2026-10-15 |
-| `latex-venue-setup.md` | hep-communication | 25.7 | yes | 9 | - | 9257d7b5 2026-10-15 |
+| `latex-venue-setup.md` | hep-communication | 25.7 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `legends-panels-and-export.md` | hep-communication | 6.6 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `literature-discovery-and-search.md` | hep-communication | 5.1 | yes | 3 | - | e5427f10 2026-10-17 |
 | `literature-lookup-recipes.md` | hep-communication | 5.9 | yes | 7 | - | 14eeda45 2026-10-15 |
@@ -123,7 +123,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `mermaid-patterns.md` | hep-communication | 4.5 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `multi-venue-reformatting.md` | hep-communication | 3.0 | no | 1 | - | 9257d7b5 2026-10-15 |
 | `outreach-and-public-facing-summaries.md` | hep-communication | 4.2 | yes | 6 | - | 9257d7b5 2026-10-15 |
-| `paper-genre-variants.md` | hep-communication | 5.2 | yes | 5 | - | 9257d7b5 2026-10-15 |
+| `paper-genre-variants.md` | hep-communication | 7.6 | yes | 6 | - | 1cfd2077 2026-10-17 |
 | `paper-structure.md` | hep-communication | 11.1 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `papers-review-modes-and-reference-index.md` | hep-communication | 14.1 | no | 2 | - | 485e96cb 2026-10-17 |
 | `physics-plots.md` | hep-communication | 6.9 | yes | 7 | - | 9257d7b5 2026-10-15 |
@@ -169,7 +169,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `risk-and-quality.md` | hep-computing | 7.4 | no | 3 | - | f4372374 2026-10-13 |
 | `root-balanced-design-guidelines.md` | hep-computing | 37.2 | yes | 10 | - | 9257d7b5 2026-10-15 |
 | `root-debugging.md` | hep-computing | 3.6 | yes | 4 | - | 9257d7b5 2026-10-15 |
-| `root-usage-patterns.md` | hep-computing | 5.6 | yes | 3 | hep-ml | untracked |
+| `root-usage-patterns.md` | hep-computing | 5.6 | yes | 3 | hep-ml | 3b3dca7d 2026-10-17 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c0 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 2 | - | 351029c0 2026-10-07 |
 | `storage-cern-eos.md` | hep-computing | 13.4 | yes | 4 | - | 50decbd0 2026-10-17 |

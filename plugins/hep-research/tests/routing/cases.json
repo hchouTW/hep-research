@@ -4101,6 +4101,26 @@
    "trigger_terms": [
     "ROOT/PyROOT"
    ]
+  },
+  {
+   "id": "c-ml-genre-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check my search paper draft against what a search paper must contain: is a systematic-uncertainty table or the statistical method missing?",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "papers from results"
+   ]
+  },
+  {
+   "id": "c-ml-genre-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我在寫探測器性能（instrumentation）論文，內容一定要包含哪些部分？請幫我檢查草稿缺了什麼。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ]
   }
  ]
 }

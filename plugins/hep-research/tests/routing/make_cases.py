@@ -426,6 +426,9 @@ C = [
     # batch C, C7: ROOT usage and histogram errors (check_histogram_errors.py)
  ("c-ml-roothist-1", "en", "direct", "My weighted histogram has error bars that look like sqrt(N); did I forget Sumw2, and are the TEfficiency passed counts ever above the totals?", "hep-computing", ["histogram and TEfficiency objects"], None, None, {}),
  ("c-ml-roothist-2", "zh-Hant", "direct", "RooWorkspace 匯入第二個 dataset 時變數名稱衝突，import 被取消，要怎麼改程式？", "hep-computing", ["ROOT/PyROOT"], None, None, {}),
+    # batch C, Com6: paper types and blueprints (check_manuscript.py --blueprint)
+ ("c-ml-genre-1", "en", "direct", "Check my search paper draft against what a search paper must contain: is a systematic-uncertainty table or the statistical method missing?", "hep-communication", ["papers from results"], None, None, {}),
+ ("c-ml-genre-3", "zh-Hant", "direct", "我在寫探測器性能（instrumentation）論文，內容一定要包含哪些部分？請幫我檢查草稿缺了什麼。", "hep-communication", ["drafting or revising paper sections"], None, None, {}),
 ]
 
 cases = []

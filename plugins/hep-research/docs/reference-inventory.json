@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-communication": {
    "references": 57,
-   "bytes": 401532,
+   "bytes": 403951,
    "uncited": 0
   },
   "hep-computing": {
@@ -474,14 +474,17 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/SKILL.md",
+    "skills/hep-communication/assets/paper-blueprints.json",
     "skills/hep-communication/references/academic-papers-guide.md",
     "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/hep-communication/references/comment-and-reply-exchange.md",
     "skills/hep-communication/references/latex-mechanics-and-tooling.md",
     "skills/hep-communication/references/multi-venue-reformatting.md",
+    "skills/hep-communication/references/paper-genre-variants.md",
     "skills/hep-communication/references/paper-structure.md",
     "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/submission-and-peer-review.md"
+    "skills/hep-communication/references/submission-and-peer-review.md",
+    "tests/skills/hep_communication/test_paper_blueprints.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
@@ -626,18 +629,19 @@
   {
    "path": "skills/hep-communication/references/paper-genre-variants.md",
    "owner": "hep-communication",
-   "bytes": 5202,
-   "lines": 98,
+   "bytes": 7621,
+   "lines": 133,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/SKILL.md",
     "skills/hep-communication/references/academic-papers-guide.md",
     "skills/hep-communication/references/paper-structure.md",
     "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md"
+    "skills/hep-communication/references/thesis-by-publication-assembly.md",
+    "tests/skills/hep_communication/test_paper_blueprints.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "1cfd2077 2026-10-17"
   },
   {
    "path": "skills/hep-communication/references/paper-structure.md",
@@ -1421,7 +1425,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "untracked"
+   "last_commit": "3b3dca7d 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",

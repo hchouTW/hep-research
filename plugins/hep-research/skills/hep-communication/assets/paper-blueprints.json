@@ -1,0 +1,365 @@
+{
+ "version": "1.0.0",
+ "note": "Advisory content lists per paper type for check_manuscript.py --blueprint TYPE. An item cites the public author guideline it was read from, or says to-verify when it is field practice that no guideline states. Length limits are not repeated here: references/latex-venue-setup.md holds them. Detection is a keyword heuristic: a listed item may be present in other words.",
+ "sources": {
+  "aps-prl-authors": {
+   "url": "https://journals.aps.org/prl/authors",
+   "title": "Physical Review Letters, Information for Authors",
+   "read": "2026-10-17, sections Article Types and Length Limits, Writing the Paper (Audience), Data Availability Statements (heading)"
+  },
+  "aps-prd-authors": {
+   "url": "https://journals.aps.org/prd/authors",
+   "title": "Physical Review D, Information for Authors",
+   "read": "2026-10-17, sections Article Types and Length Limits, General content"
+  },
+  "jhep-authors": {
+   "url": "https://jhep.sissa.it/jhep/help/helpLoader.jsp?pgType=author",
+   "title": "JHEP author guidelines (SISSA)",
+   "read": "2026-10-17, sections Manuscript preparation, Text and style, Tables and figures, Data files and computer codes"
+  }
+ },
+ "types": {
+  "search": {
+   "genre_section": "## Search papers",
+   "items": [
+    {
+     "id": "abstract",
+     "description": "an abstract that concisely summarizes the results",
+     "detect": [
+      "\\\\begin\\{abstract\\}",
+      "\\\\abstract\\{"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "relation-to-previous-work",
+     "description": "an introduction that states the relation to previously published work and what is new",
+     "detect": [
+      "\\\\section\\*?\\{\\s*Introduction"
+     ],
+     "where": "text",
+     "source": "aps-prd-authors"
+    },
+    {
+     "id": "signal-model",
+     "description": "the signal model or hypothesis and its parameters",
+     "detect": [
+      "signal model",
+      "benchmark model",
+      "signal hypothes"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "event-selection",
+     "description": "the event selection",
+     "detect": [
+      "\\\\section\\*?\\{[^}]*[Ss]election",
+      "selection requires",
+      "event selection"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "background-estimation",
+     "description": "how each background is estimated (control regions, simulation, data-driven)",
+     "detect": [
+      "background (is |are )?(estimat|model|predict)",
+      "control region"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "systematics-table",
+     "description": "a table of systematic uncertainties (a table whose caption names them)",
+     "detect": [
+      "systematic"
+     ],
+     "where": "table-caption",
+     "source": "to-verify"
+    },
+    {
+     "id": "observed-and-expected",
+     "description": "observed and expected results side by side",
+     "detect": [
+      "observed"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "statistical-method",
+     "description": "the statistical method and confidence level of limits or significances",
+     "detect": [
+      "confidence level",
+      "\\bCL_?s\\b",
+      "\\\\CLs",
+      "significance"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "data-availability",
+     "description": "where the numerical results are available (HEPData or a repository)",
+     "detect": [
+      "HEPData",
+      "[Dd]ata availability",
+      "repositor(y|ies)"
+     ],
+     "where": "text",
+     "source": "jhep-authors"
+    },
+    {
+     "id": "conclusion",
+     "description": "a concluding section that summarizes the results",
+     "detect": [
+      "\\\\section\\*?\\{\\s*(Conclusions?|Summary)"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    }
+   ]
+  },
+  "precision-measurement": {
+   "genre_section": "## Precision measurements",
+   "items": [
+    {
+     "id": "abstract",
+     "description": "an abstract that concisely summarizes the results",
+     "detect": [
+      "\\\\begin\\{abstract\\}",
+      "\\\\abstract\\{"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "relation-to-previous-work",
+     "description": "an introduction that states the relation to previously published work and what is new",
+     "detect": [
+      "\\\\section\\*?\\{\\s*Introduction"
+     ],
+     "where": "text",
+     "source": "aps-prd-authors"
+    },
+    {
+     "id": "measured-quantity",
+     "description": "the definition of the measured quantity (fiducial region, phase space, units)",
+     "detect": [
+      "fiducial",
+      "measured quantity",
+      "is defined as",
+      "definition of the"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "corrections",
+     "description": "the corrections applied (efficiency, acceptance, unfolding) and how they were validated",
+     "detect": [
+      "unfold",
+      "efficienc",
+      "acceptance"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "systematics-table",
+     "description": "a table of systematic uncertainties (a table whose caption names them)",
+     "detect": [
+      "systematic"
+     ],
+     "where": "table-caption",
+     "source": "to-verify"
+    },
+    {
+     "id": "uncertainty-breakdown",
+     "description": "the result with its statistical and systematic uncertainties quoted separately",
+     "detect": [
+      "\\(stat",
+      "\\(syst",
+      "statistical and systematic"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "comparison",
+     "description": "a comparison with predictions or previous measurements",
+     "detect": [
+      "compar\\w* (with|to)"
+     ],
+     "where": "text",
+     "source": "aps-prd-authors"
+    },
+    {
+     "id": "data-availability",
+     "description": "where the numerical results are available (HEPData or a repository)",
+     "detect": [
+      "HEPData",
+      "[Dd]ata availability",
+      "repositor(y|ies)"
+     ],
+     "where": "text",
+     "source": "jhep-authors"
+    },
+    {
+     "id": "conclusion",
+     "description": "a concluding section that summarizes the results",
+     "detect": [
+      "\\\\section\\*?\\{\\s*(Conclusions?|Summary)"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    }
+   ]
+  },
+  "instrumentation": {
+   "genre_section": "## Instrumentation and performance papers",
+   "items": [
+    {
+     "id": "abstract",
+     "description": "an abstract that concisely summarizes the results",
+     "detect": [
+      "\\\\begin\\{abstract\\}",
+      "\\\\abstract\\{"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "relation-to-previous-work",
+     "description": "an introduction that states the relation to previously published work and what is new",
+     "detect": [
+      "\\\\section\\*?\\{\\s*Introduction"
+     ],
+     "where": "text",
+     "source": "aps-prd-authors"
+    },
+    {
+     "id": "setup",
+     "description": "the detector, prototype or test setup",
+     "detect": [
+      "setup",
+      "(test|beam) beam",
+      "beam test",
+      "prototype",
+      "detector description"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "performance-conditions",
+     "description": "performance figures with the conditions under which they hold",
+     "detect": [
+      "resolution",
+      "efficienc",
+      "performance"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "calibration",
+     "description": "the calibration procedure and its stability",
+     "detect": [
+      "calibrat"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "performance-uncertainties",
+     "description": "the uncertainties of the quoted performance",
+     "detect": [
+      "uncertaint"
+     ],
+     "where": "text",
+     "source": "to-verify"
+    },
+    {
+     "id": "conclusion",
+     "description": "a concluding section that summarizes the results",
+     "detect": [
+      "\\\\section\\*?\\{\\s*(Conclusions?|Summary)"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    }
+   ]
+  },
+  "letter": {
+   "genre_section": "## Letters",
+   "items": [
+    {
+     "id": "title-states-result",
+     "description": "a title that conveys the main result (read by eye; detected only as a \\title)",
+     "detect": [
+      "\\\\title\\{"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "abstract",
+     "description": "an abstract that concisely summarizes the results",
+     "detect": [
+      "\\\\begin\\{abstract\\}",
+      "\\\\abstract\\{"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "introduction-context",
+     "description": "an introduction that gives the general reader background and context",
+     "detect": [
+      "\\\\section\\*?\\{\\s*Introduction",
+      "\\\\textit\\{Introduction",
+      "\\\\emph\\{Introduction"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "central-results",
+     "description": "a central set of sections that explain and establish the results",
+     "detect": [
+      "\\\\section",
+      "\\\\paragraph",
+      "\\\\textit\\{"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "conclusion",
+     "description": "a concluding section that summarizes the results",
+     "detect": [
+      "\\\\section\\*?\\{\\s*(Conclusions?|Summary)"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    },
+    {
+     "id": "justification",
+     "description": "a short justification of the importance for the editors (submission form, not the manuscript)",
+     "detect": [
+      "importan",
+      "impact"
+     ],
+     "where": "text",
+     "source": "aps-prl-authors"
+    }
+   ]
+  }
+ }
+}
