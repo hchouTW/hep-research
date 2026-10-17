@@ -339,6 +339,9 @@ C = [
  # batch A, Com3: glossary of normalization terms
  ("cm-a-terms-1", "en", "direct", "Check the terminology of my cosmic-ray paper draft: it mixes exposure, collection time and data exposure, and quotes momenta in GV.", "hep-communication", ["terminology"], None, None, {}),
  ("cm-a-terms-2", "zh-Hant", "direct", "幫我檢查論文草稿的術語：曝露量、收集時間和資料曝光混用，剛度和動量也分不清。", "hep-communication", ["terminology"], None, None, {}),
+    # batch B, C1: time-sliced records and mergeable reductions
+ ("b-flux-c1-1", "en", "direct", "My per-period live-time records are split over many files and some periods appear twice; how do I merge the partial sums from my job array without double counting?", "hep-computing", ["merging and recovery"], None, None, {}),
+ ("b-flux-c1-2", "zh-Hant", "direct", "每個時段的活時間紀錄分散在好幾個檔案，有些時段重複出現；分批處理後要怎麼合併部分和才不會重複計算？", "hep-computing", ["partitioning"], None, None, {}),
 ]
 
 cases = []

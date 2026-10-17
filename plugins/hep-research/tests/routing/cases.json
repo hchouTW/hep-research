@@ -3515,6 +3515,26 @@
    "trigger_terms": [
     "terminology"
    ]
+  },
+  {
+   "id": "b-flux-c1-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My per-period live-time records are split over many files and some periods appear twice; how do I merge the partial sums from my job array without double counting?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "merging and recovery"
+   ]
+  },
+  {
+   "id": "b-flux-c1-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "每個時段的活時間紀錄分散在好幾個檔案，有些時段重複出現；分批處理後要怎麼合併部分和才不會重複計算？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "partitioning"
+   ]
   }
  ]
 }
