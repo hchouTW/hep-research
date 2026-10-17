@@ -16,6 +16,7 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
 SCRIPT = PLUGIN / "skills" / "hep-detector" / "scripts" / "detector_atlas.py"
+N_CLAIMS = len(json.loads((PLUGIN / "profiles" / "reference" / "detector-atlas" / "evidence" / "claims.json").read_text(encoding="utf-8")))
 ATLAS = PLUGIN / "profiles" / "reference" / "detector-atlas"
 TABLES = PLUGIN / "skills" / "hep-detector" / "references" / "detector-comparison-tables.md"
 
@@ -41,7 +42,7 @@ class Validate(unittest.TestCase):
         code, out, err = run("validate", "--today", "2026-10-17")
         self.assertEqual(code, 0, err)
         self.assertEqual(out["status"], "ok")
-        self.assertEqual(out["claims"], 60)
+        self.assertEqual(out["claims"], N_CLAIMS)
 
     def test_release_fails_on_stale_notes(self):
         code, out, _ = run("validate", "--release", "--today", "2030-01-01")
@@ -95,10 +96,11 @@ class Query(unittest.TestCase):
     def test_paging(self):
         code, out, _ = run("query")
         self.assertEqual(code, 0)
-        self.assertEqual((len(out["rows"]), out["total"], out["next_page"]), (20, 60, 1))
+        self.assertEqual((len(out["rows"]), out["total"], out["next_page"]), (20, N_CLAIMS, 1))
         self.assertLessEqual(len(json.dumps(out).encode()), 16384)
-        code, last, _ = run("query", "--page", "2")
-        self.assertEqual((len(last["rows"]), last["next_page"]), (20, None))
+        last_page = (N_CLAIMS - 1) // 20
+        code, last, _ = run("query", "--page", str(last_page))
+        self.assertEqual((len(last["rows"]), last["next_page"]), (N_CLAIMS - 20 * last_page, None))
 
     def test_unknown_and_profile_link(self):
         code, out, _ = run("query", "--experiment", "no such experiment")

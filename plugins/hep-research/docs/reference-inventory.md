@@ -213,7 +213,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 11 | - | 9257d7b5 2026-10-15 |
 | `response-and-forward-folding.md` | hep-detector | 14.1 | yes | 14 | hep-computing, hep-measurement, hep-statistics | 11f66a20 2026-10-17 |
 | `signal-formation-and-readout.md` | hep-detector | 18.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
-| `space-based-direct-detection.md` | hep-detector | 19.7 | yes | 15 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
+| `space-based-direct-detection.md` | hep-detector | 19.7 | yes | 15 | hep-communication, hep-measurement, hep-statistics | ed36cea3 2026-10-17 |
 | `timing-detectors.md` | hep-detector | 9.1 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `tracking-and-vertexing.md` | hep-detector | 16.1 | yes | 18 | hep-communication | 9257d7b5 2026-10-15 |
 | `triggers-luminosity-pileup.md` | hep-detector | 15.7 | yes | 14 | - | 9257d7b5 2026-10-15 |

@@ -2,7 +2,7 @@
  "id": "reference:detector-atlas",
  "kind": "reference",
  "version": "0.1.0",
- "scope": "Sourced facts on large experiments' detectors: design, achieved and operating values as separate ledger claims, each with its source, location, configuration (valid_for) and read level. v1: ATLAS, CMS, LHCb, IceCube, Super-Kamiokande and Fermi-LAT, about ten claims each.",
+ "scope": "Sourced facts on large experiments' detectors: design, achieved and operating values as separate ledger claims, each with its source, location, configuration (valid_for) and read level. ATLAS, CMS, LHCb, IceCube, Super-Kamiokande and Fermi-LAT (v1); Belle II, ALICE, DUNE, JUNO, XENONnT and the Pierre Auger Observatory (batch D); about ten claims each.",
  "exclusions": [
   "Numbers not in the ledger: the atlas answers unknown, never from memory",
   "AMS-02: only a link to its experiment profile (experiment:ams-02)",
