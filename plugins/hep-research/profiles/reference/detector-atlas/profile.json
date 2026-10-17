@@ -1,0 +1,43 @@
+{
+ "id": "reference:detector-atlas",
+ "kind": "reference",
+ "version": "0.1.0",
+ "scope": "Sourced facts on large experiments' detectors: design, achieved and operating values as separate ledger claims, each with its source, location, configuration (valid_for) and read level. v1: ATLAS, CMS, LHCb, IceCube, Super-Kamiokande and Fermi-LAT, about ten claims each.",
+ "exclusions": [
+  "Numbers not in the ledger: the atlas answers unknown, never from memory",
+  "AMS-02: only a link to its experiment profile (experiment:ams-02)",
+  "ALICE, Belle II, DUNE, JUNO, XENONnT or LZ and the Pierre Auger Observatory: deferred to the batch D expansion (D13)",
+  "Internal or unpublished collaboration numbers; performance claims beyond what the cited paper states for the stated configuration"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-detector"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "evidence": "evidence/",
+  "evidence_index": "evidence/index.md"
+ },
+ "vocabulary_extensions": {},
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "detector-atlas",
+ "maintainer": "hchouTW (public-document reference; not endorsed by any collaboration)",
+ "capabilities": [
+  {
+   "name": "sourced-detector-atlas",
+   "status": "tested-in-declared-environment",
+   "scope": "Structural validity of the ledger and its atlas blocks (complete block, allowed kind, values as written in the claim sentence), index sync and coverage; not the truth of any claim",
+   "tests": [
+    "tests/test_atlas_ledger.py"
+   ]
+  }
+ ]
+}

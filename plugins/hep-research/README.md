@@ -6,7 +6,7 @@ has:
 - a shared library (`core/`);
 - artifact contracts (`contracts/`), including an opt-in cross-artifact analysis check (see
   [Cross-artifact analysis check](#cross-artifact-analysis-check-opt-in-advisory));
-- optional experiment and theory-domain profiles (`profiles/`);
+- optional experiment and theory-domain profiles, and the reference profile of the sourced detector atlas (`profiles/`);
 - tool adapters (`adapters/`).
 
 Version 0.13.1, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is

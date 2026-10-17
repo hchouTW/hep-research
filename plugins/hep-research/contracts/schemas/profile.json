@@ -3,7 +3,7 @@
  "required": ["id", "kind", "version", "scope", "exclusions", "compatible", "related_skills", "resources", "vocabulary_extensions", "adapters", "depends_on", "evidence_namespace", "maintainer", "capabilities"],
  "properties": {
   "id": {"$ref": "common.json#/$defs/profile_id"},
-  "kind": {"type": "string", "enum": ["experiment", "theory-domain"]},
+  "kind": {"type": "string", "enum": ["experiment", "theory-domain", "reference"]},
   "version": {"$ref": "common.json#/$defs/version"},
   "scope": {"type": "string", "minLength": 1}, "exclusions": {"type": "array", "items": {"type": "string"}},
   "illustrative": {"type": "boolean"},

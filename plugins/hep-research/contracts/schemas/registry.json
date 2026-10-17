@@ -3,6 +3,6 @@
  "properties": {
   "registry_version": {"$ref": "common.json#/$defs/version"},
   "profiles": {"type": "array", "items": {"type": "object", "required": ["id", "kind", "version", "scope", "path"], "additionalProperties": false,
-    "properties": {"id": {"$ref": "common.json#/$defs/profile_id"}, "kind": {"type": "string", "enum": ["experiment", "theory-domain"]},
+    "properties": {"id": {"$ref": "common.json#/$defs/profile_id"}, "kind": {"type": "string", "enum": ["experiment", "theory-domain", "reference"]},
                    "version": {"$ref": "common.json#/$defs/version"}, "scope": {"type": "string", "minLength": 1}, "path": {"type": "string", "minLength": 1}}}}
  }}

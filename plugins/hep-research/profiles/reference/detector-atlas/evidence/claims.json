@@ -1,0 +1,2042 @@
+[
+ {
+  "id": "detector-atlas:C001",
+  "claim": "The inner detector is immersed in a 2 T solenoidal field.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "magnet",
+   "quantity": "solenoid field",
+   "value": "2",
+   "unit": "T",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C002",
+  "claim": "Tracking: required resolution sigma_pT/pT = 0.05% pT (+) 1%, eta coverage +-2.5 (pT in GeV).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "table 1.1",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "inner detector",
+   "quantity": "transverse-momentum resolution goal",
+   "value": "0.05% pT (+) 1%",
+   "unit": "relative (pT in GeV)",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": "|eta| < 2.5"
+  }
+ },
+ {
+  "id": "detector-atlas:C003",
+  "claim": "EM calorimetry: required resolution sigma_E/E = 10%/sqrt(E) (+) 0.7% (E in GeV).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "table 1.1",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "electromagnetic calorimeter",
+   "quantity": "energy resolution goal",
+   "value": "10%/sqrt(E) (+) 0.7%",
+   "unit": "relative (E in GeV)",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": "|eta| < 3.2"
+  }
+ },
+ {
+  "id": "detector-atlas:C004",
+  "claim": "Hadronic calorimetry (jets), barrel and end-cap: required resolution sigma_E/E = 50%/sqrt(E) (+) 3%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "table 1.1",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "hadronic calorimeter",
+   "quantity": "jet energy resolution goal",
+   "value": "50%/sqrt(E) (+) 3%",
+   "unit": "relative (E in GeV)",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": "barrel and end-cap, |eta| < 3.2"
+  }
+ },
+ {
+  "id": "detector-atlas:C005",
+  "claim": "Muon spectrometer: required resolution sigma_pT/pT = 10% at pT = 1 TeV.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "table 1.1",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "muon spectrometer",
+   "quantity": "momentum resolution goal at 1 TeV",
+   "value": "10",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": "pT = 1 TeV, |eta| < 2.7"
+  }
+ },
+ {
+  "id": "detector-atlas:C006",
+  "claim": "The pixel intrinsic accuracies in the barrel are 10 um (R-phi) and 115 um (z).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "pixel detector",
+   "quantity": "intrinsic accuracy (R-phi, z), barrel",
+   "value": "10; 115",
+   "unit": "um",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C007",
+  "claim": "The SCT intrinsic accuracies per module in the barrel are 17 um (R-phi) and 580 um (z).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "silicon microstrip tracker",
+   "quantity": "intrinsic accuracy (R-phi, z), barrel",
+   "value": "17; 580",
+   "unit": "um",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C008",
+  "claim": "The TRT provides typically 36 hits per track and has an intrinsic accuracy of 130 um per straw (R-phi only).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "transition radiation tracker",
+   "quantity": "intrinsic accuracy per straw",
+   "value": "130",
+   "unit": "um",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C009",
+  "claim": "The pixel detector has approximately 80.4 million readout channels.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "section 1.2",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "pixel detector",
+   "quantity": "readout channels",
+   "value": "80.4 million (approximately)",
+   "unit": "channels",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C010",
+  "claim": "The dimensions of the detector are 25 m in height and 44 m in length; the overall weight is approximately 7000 tonnes.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "figure 1.1 caption",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "whole detector",
+   "quantity": "height; length; weight",
+   "value": "25; 44; 7000 (approximately)",
+   "unit": "m; m; t",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C011",
+  "claim": "The Level-1 trigger reduces the data rate to approximately 75 kHz (limited by the readout bandwidth, upgradeable to 100 kHz).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S01"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "ATLAS: detector as described in 2008 (design)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ATLAS",
+   "subsystem": "trigger",
+   "quantity": "Level-1 output rate",
+   "value": "75 (approximately)",
+   "unit": "kHz",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C012",
+  "claim": "At the heart of CMS sits a 13-m-long, 6-m-inner-diameter, 4-T superconducting solenoid providing a large bending power (12 Tm).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "magnet",
+   "quantity": "solenoid field; bending power",
+   "value": "4; 12",
+   "unit": "T; T m",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C013",
+  "claim": "The tracking volume is given by a cylinder of 5.8-m length and 2.6-m diameter.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "tracker",
+   "quantity": "tracking volume length; diameter",
+   "value": "5.8; 2.6",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C014",
+  "claim": "CMS employs 10 layers of silicon microstrip detectors, and 3 layers of silicon pixel detectors close to the interaction region.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "tracker",
+   "quantity": "silicon strip layers; pixel layers",
+   "value": "10; 3",
+   "unit": "layers",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C015",
+  "claim": "The electromagnetic calorimeter uses lead tungstate (PbWO4) crystals with coverage in pseudorapidity up to |eta| < 3.0.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "electromagnetic calorimeter",
+   "quantity": "pseudorapidity coverage",
+   "value": "|eta| < 3.0",
+   "unit": "pseudorapidity",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C016",
+  "claim": "The ECAL energy resolution for incident electrons measured in a beam test has stochastic, noise and constant terms S = 2.8% GeV^1/2, N = 0.12 GeV, C = 0.3%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1, figure 1.3",
+  "scope": {
+   "text": "CMS: ECAL beam test reported in 2008",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "electromagnetic calorimeter",
+   "quantity": "energy resolution terms S; N; C (beam test)",
+   "value": "2.8; 0.12; 0.3",
+   "unit": "% GeV^1/2; GeV; %",
+   "kind": "achieved",
+   "valid_for": "ECAL beam test reported in 2008",
+   "conditions": "incident electrons, beam test; sigma/E fitted to (S/sqrt(E))^2 + (N/E)^2 + C^2"
+  }
+ },
+ {
+  "id": "detector-atlas:C017",
+  "claim": "The ECAL thickness is larger than 25 X0; the HCAL thickness varies in the range 7-11 lambda_I (10-15 lambda_I with the HO included), depending on eta.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "calorimeters",
+   "quantity": "ECAL depth; HCAL depth",
+   "value": "> 25; 7-11 (10-15 with HO)",
+   "unit": "X0; lambda_I",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C018",
+  "claim": "Coverage up to a pseudorapidity of 5.0 is provided by an iron/quartz-fibre calorimeter.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "forward calorimeter",
+   "quantity": "pseudorapidity reach",
+   "value": "5.0",
+   "unit": "pseudorapidity",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C019",
+  "claim": "The CMS detector is 21.6-m long and has a diameter of 14.6 m; it has a total weight of 12 500 t.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "whole detector",
+   "quantity": "length; diameter; weight",
+   "value": "21.6; 14.6; 12500",
+   "unit": "m; m; t",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C020",
+  "claim": "The return field allows 4 muon stations to be integrated; each consists of drift tubes in the barrel and cathode strip chambers in the endcap, complemented by resistive plate chambers.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 1.1",
+  "scope": {
+   "text": "CMS: detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system",
+   "quantity": "muon stations",
+   "value": "4",
+   "unit": "stations",
+   "kind": "design",
+   "valid_for": "detector as described in 2008 (design; before the 2017 pixel upgrade)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C021",
+  "claim": "LHCb is a single-arm forward spectrometer covering the pseudorapidity range 2 < eta < 5.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 2.1",
+  "scope": {
+   "text": "LHCb: upgraded detector (Upgrade I, from 2022)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "whole detector",
+   "quantity": "pseudorapidity acceptance",
+   "value": "2 < eta < 5",
+   "unit": "pseudorapidity",
+   "kind": "design",
+   "valid_for": "upgraded detector (Upgrade I, from 2022)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C022",
+  "claim": "The dipole magnet, unchanged with respect to Run 1-2, provides a vertical magnetic field with a bending power of about 4 Tm.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 2.2",
+  "scope": {
+   "text": "LHCb: original and upgraded detector",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "magnet",
+   "quantity": "bending power",
+   "value": "4 (approximately)",
+   "unit": "T m",
+   "kind": "design",
+   "valid_for": "original and upgraded detector",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C023",
+  "claim": "LHCb was originally designed to take data at a maximum instantaneous luminosity of 2 x 10^32 cm^-2 s^-1.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "LHCb: original detector (2009-2018)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "whole detector",
+   "quantity": "design instantaneous luminosity",
+   "value": "2 x 10^32",
+   "unit": "cm^-2 s^-1",
+   "kind": "design",
+   "valid_for": "original detector (2009-2018)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C024",
+  "claim": "LHCb was operated for most of Run 1 and Run 2 at about 4 x 10^32 cm^-2 s^-1.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "LHCb: Run 1 and Run 2 (2010-2018)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "whole detector",
+   "quantity": "operating instantaneous luminosity",
+   "value": "4 x 10^32 (approximately)",
+   "unit": "cm^-2 s^-1",
+   "kind": "operating",
+   "valid_for": "Run 1 and Run 2 (2010-2018)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C025",
+  "claim": "The upgrade is designed to run at a nominal instantaneous luminosity of 2 x 10^33 cm^-2 s^-1 and to collect events at the LHC crossing rate of 40 MHz.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "LHCb: upgraded detector (Upgrade I, from 2022)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "whole detector",
+   "quantity": "nominal instantaneous luminosity; readout rate",
+   "value": "2 x 10^33; 40",
+   "unit": "cm^-2 s^-1; MHz",
+   "kind": "design",
+   "valid_for": "upgraded detector (Upgrade I, from 2022)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C026",
+  "claim": "Inner radius of the active silicon detector of the VELO: 8.2 mm (2009-2018).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 3.1, table 1",
+  "scope": {
+   "text": "LHCb: original detector (2009-2018)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "vertex locator",
+   "quantity": "inner radius of active silicon",
+   "value": "8.2",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "original detector (2009-2018)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C027",
+  "claim": "Inner radius of the active silicon detector of the VELO: 5.1 mm (2022).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 3.1, table 1",
+  "scope": {
+   "text": "LHCb: upgraded detector (Upgrade I, from 2022)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "vertex locator",
+   "quantity": "inner radius of active silicon",
+   "value": "5.1",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "upgraded detector (Upgrade I, from 2022)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C028",
+  "claim": "VELO pitch: 37-97 um r-phi strips (2009-2018); 55 um square pixels (2022).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 3.1, table 1",
+  "scope": {
+   "text": "LHCb: original (2009-2018) and upgraded (2022) VELO",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "vertex locator",
+   "quantity": "pitch",
+   "value": "37-97 (strips); 55 (pixels)",
+   "unit": "um",
+   "kind": "design",
+   "valid_for": "original (2009-2018) and upgraded (2022) VELO",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C029",
+  "claim": "VELO total number of channels: 172 thousand (2009-2018); 41 million (2022).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 3.1, table 1",
+  "scope": {
+   "text": "LHCb: original (2009-2018) and upgraded (2022) VELO",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "vertex locator",
+   "quantity": "readout channels",
+   "value": "172 thousand; 41 million",
+   "unit": "channels",
+   "kind": "design",
+   "valid_for": "original (2009-2018) and upgraded (2022) VELO",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C030",
+  "claim": "LHCb collected a total of 9 fb^-1 of proton-proton data during Run 1 and Run 2.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 1",
+  "scope": {
+   "text": "LHCb: Run 1 and Run 2 (2010-2018)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "whole detector",
+   "quantity": "integrated pp luminosity",
+   "value": "9",
+   "unit": "fb^-1",
+   "kind": "operating",
+   "valid_for": "Run 1 and Run 2 (2010-2018)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C031",
+  "claim": "5160 DOMs are deployed between 1450 m and 2450 m below the surface of the ice on 86 vertical strings; each string consists of 60 DOMs.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "section 1.1.1",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "in-ice array",
+   "quantity": "DOMs; strings; depth range",
+   "value": "5160; 86; 1450-2450",
+   "unit": "DOMs; strings; m",
+   "kind": "design",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C032",
+  "claim": "The primary in-ice array consists of 78 strings with a vertical DOM separation of 17 m on a triangular grid with 125 m horizontal spacing, instrumenting one cubic kilometer of ice.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "section 1.1.1",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "in-ice array",
+   "quantity": "vertical DOM spacing; horizontal string spacing",
+   "value": "17; 125",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C033",
+  "claim": "The angular resolution for muon tracks is typically 0.6 degrees, confirmed by the shadows of the Moon and Sun in cosmic rays.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "section 1.1.1",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "in-ice array",
+   "quantity": "muon-track angular resolution",
+   "value": "0.6 (typical)",
+   "unit": "degree",
+   "kind": "achieved",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C034",
+  "claim": "The eight specialized DeepCore strings have a DOM-to-DOM spacing of 7 m for the bottom 50 DOMs, deployed at depths of 2100 m to 2450 m.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "section 1.1.2",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "DeepCore",
+   "quantity": "DOM spacing; depth range",
+   "value": "7; 2100-2450",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C035",
+  "claim": "DeepCore's denser geometry and increased efficiency result in an energy threshold of about 10 GeV, compared to about 100 GeV for most IceCube analyses.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "section 1.1.2",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "DeepCore",
+   "quantity": "energy threshold",
+   "value": "10 (approximately)",
+   "unit": "GeV",
+   "kind": "achieved",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C036",
+  "claim": "IceTop, at 2835 m above sea level, consists of 162 ice-filled tanks arranged in 81 stations.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "section 1.1.3",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "IceTop",
+   "quantity": "tanks; stations; altitude",
+   "value": "162; 81; 2835",
+   "unit": "tanks; stations; m a.s.l.",
+   "kind": "design",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C037",
+  "claim": "The measured photon arrival-time accuracy is 1.2 ns (from flasher data with 7 m DOM spacing).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "time-calibration section, figure 18",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "in-ice DOMs",
+   "quantity": "relative timing accuracy",
+   "value": "1.2",
+   "unit": "ns",
+   "kind": "achieved",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": "flasher data, DeepCore DOMs with 7 m spacing"
+  }
+ },
+ {
+  "id": "detector-atlas:C038",
+  "claim": "As of 2016, 5397 of the 5484 deployed DOMs (98.4%) are operating in data-taking mode.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "DOM reliability section",
+  "scope": {
+   "text": "IceCube: status in 2016",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "all DOMs",
+   "quantity": "fraction of DOMs operating",
+   "value": "98.4",
+   "unit": "%",
+   "kind": "operating",
+   "valid_for": "status in 2016",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C039",
+  "claim": "IceCube routinely achieves a detector uptime of 99%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "IceCube: operations after construction (as of 2016)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "whole detector",
+   "quantity": "uptime",
+   "value": "99",
+   "unit": "%",
+   "kind": "operating",
+   "valid_for": "operations after construction (as of 2016)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C040",
+  "claim": "Construction of IceCube was completed in 2011.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S04"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "IceCube: full detector after completion of construction (2011), as described in the 2017 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "IceCube",
+   "subsystem": "whole detector",
+   "quantity": "construction completed",
+   "value": "2011",
+   "unit": "year",
+   "kind": "operating",
+   "valid_for": "full detector after completion of construction (2011), as described in the 2017 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C041",
+  "claim": "The SK detector is a cylindrical tank (39.3 m diameter and 41.4 m height) filled with 50 kilotons of ultra-pure water.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "section 2.1",
+  "scope": {
+   "text": "Super-K: all phases",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "tank",
+   "quantity": "diameter; height; water mass",
+   "value": "39.3; 41.4; 50",
+   "unit": "m; m; kt",
+   "kind": "design",
+   "valid_for": "all phases",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C042",
+  "claim": "The detector is located 1000 m underground (2,700 m water equivalent) in the Kamioka mine.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "section 2.1",
+  "scope": {
+   "text": "Super-K: all phases",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "site",
+   "quantity": "overburden",
+   "value": "1000; 2700",
+   "unit": "m; m water equivalent",
+   "kind": "design",
+   "valid_for": "all phases",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C043",
+  "claim": "SK-I (1996 Apr. - 2001 Jul.) had 11146 inner-detector PMTs (40% photo-coverage).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Super-K: SK-I (April 1996 - July 2001)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "inner detector",
+   "quantity": "PMTs; photo-coverage",
+   "value": "11146; 40",
+   "unit": "PMTs; %",
+   "kind": "operating",
+   "valid_for": "SK-I (April 1996 - July 2001)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C044",
+  "claim": "SK-II (2002 Oct. - 2005 Oct.) had 5182 inner-detector PMTs (19% photo-coverage).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Super-K: SK-II (October 2002 - October 2005)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "inner detector",
+   "quantity": "PMTs; photo-coverage",
+   "value": "5182; 19",
+   "unit": "PMTs; %",
+   "kind": "operating",
+   "valid_for": "SK-II (October 2002 - October 2005)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C045",
+  "claim": "SK-III (2006 Jul. - 2008 Sep.) and SK-IV (from 2008 Sep.) had 11129 inner-detector PMTs (40% photo-coverage).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Super-K: SK-III and SK-IV (from July 2006)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "inner detector",
+   "quantity": "PMTs; photo-coverage",
+   "value": "11129; 40",
+   "unit": "PMTs; %",
+   "kind": "operating",
+   "valid_for": "SK-III and SK-IV (from July 2006)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C046",
+  "claim": "The outer detector has 1885 PMTs.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Super-K: SK-I to SK-IV (as tabulated)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "outer detector",
+   "quantity": "PMTs",
+   "value": "1885",
+   "unit": "PMTs",
+   "kind": "operating",
+   "valid_for": "SK-I to SK-IV (as tabulated)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C047",
+  "claim": "The electronics were upgraded in September 2008; SK-IV uses the QBEE front-end electronics.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "section 2.1, table 1",
+  "scope": {
+   "text": "Super-K: SK-IV (from September 2008)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "electronics",
+   "quantity": "front-end electronics",
+   "value": "QBEE",
+   "unit": "-",
+   "kind": "operating",
+   "valid_for": "SK-IV (from September 2008)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C048",
+  "claim": "The timing resolution was 2.1 ns at the one-photoelectron charge level and 0.5 ns at the 100-photoelectron charge level.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "Super-K: SK-IV calibration (paper of 2013)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "inner detector PMTs",
+   "quantity": "timing resolution at 1 p.e.; at 100 p.e.",
+   "value": "2.1; 0.5",
+   "unit": "ns",
+   "kind": "achieved",
+   "valid_for": "SK-IV calibration (paper of 2013)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C049",
+  "claim": "Charge determination was at the level of 1%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "Super-K: SK-IV calibration (paper of 2013)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "inner detector PMTs",
+   "quantity": "charge determination",
+   "value": "1 (level of)",
+   "unit": "%",
+   "kind": "achieved",
+   "valid_for": "SK-IV calibration (paper of 2013)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C050",
+  "claim": "Anti-implosion containers were added from SK-II on; OD segmentation from SK-III on.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S05"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Super-K: detector configuration per phase (SK-I to SK-IV)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Super-K",
+   "subsystem": "inner and outer detector",
+   "quantity": "anti-implosion containers; OD segmentation",
+   "value": "yes from SK-II; yes from SK-III",
+   "unit": "-",
+   "kind": "operating",
+   "valid_for": "detector configuration per phase (SK-I to SK-IV)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C051",
+  "claim": "The tracker and calorimeter each consist of a 4 x 4 array of 16 modules.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "whole instrument",
+   "quantity": "modules",
+   "value": "16 (4 x 4)",
+   "unit": "modules",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C052",
+  "claim": "Each tracker module has a vertical stack of 18 x, y tracking planes, with tungsten converter material.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "tracker",
+   "quantity": "x, y tracking planes per module",
+   "value": "18",
+   "unit": "planes",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C053",
+  "claim": "Every calorimeter module has 96 CsI(Tl) crystals in 8 layers, with a total depth of 8.6 radiation lengths (10.1 for the whole instrument).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "abstract; section 2.2",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "calorimeter",
+   "quantity": "crystals per module; depth; instrument depth",
+   "value": "96; 8.6; 10.1",
+   "unit": "crystals; X0; X0",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C054",
+  "claim": "Field of view: 2.4 sr.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "whole instrument",
+   "quantity": "field of view",
+   "value": "2.4",
+   "unit": "sr",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": "integral of the effective area over solid angle relative to on-axis, at 1 GeV"
+  }
+ },
+ {
+  "id": "detector-atlas:C055",
+  "claim": "Energy range: 20 MeV - 300 GeV.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "whole instrument",
+   "quantity": "energy range",
+   "value": "20 MeV - 300 GeV",
+   "unit": "MeV to GeV, as written",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C056",
+  "claim": "Effective area at normal incidence: 9,500 cm^2 (maximum as a function of energy).",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "whole instrument",
+   "quantity": "peak effective area at normal incidence",
+   "value": "9500",
+   "unit": "cm^2",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": "maximum over energy; includes the inefficiencies needed for the background rejection"
+  }
+ },
+ {
+  "id": "detector-atlas:C057",
+  "claim": "Energy resolution (equivalent Gaussian 1 sigma), 1 GeV - 10 GeV on axis: 8%-9%.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "calorimeter",
+   "quantity": "energy resolution 1-10 GeV, on axis",
+   "value": "8-9",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C058",
+  "claim": "Single-photon angular resolution, on-axis 68% containment radius: <= 0.15 deg above 10 GeV, 0.6 deg at 1 GeV, 3.5 deg at 100 MeV.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "tracker",
+   "quantity": "68% containment radius at >10 GeV; 1 GeV; 100 MeV",
+   "value": "<= 0.15; 0.6; 3.5",
+   "unit": "degree",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C059",
+  "claim": "Event readout time (dead time): 26.5 us.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "data acquisition",
+   "quantity": "dead time per event",
+   "value": "26.5",
+   "unit": "us",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C060",
+  "claim": "Timing accuracy: < 10 us.",
+  "claim_types": [
+   "performance_number"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S06"
+  ],
+  "location": "table 1",
+  "scope": {
+   "text": "Fermi-LAT: pre-flight expected performance (2009 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-17",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "Fermi-LAT",
+   "subsystem": "data acquisition",
+   "quantity": "timing accuracy",
+   "value": "< 10",
+   "unit": "us",
+   "kind": "design",
+   "valid_for": "pre-flight expected performance (2009 paper)",
+   "conditions": null
+  }
+ }
+]

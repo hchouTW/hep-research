@@ -1730,7 +1730,7 @@
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "6721da68 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/detector-glossary.md",

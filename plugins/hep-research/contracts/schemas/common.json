@@ -4,7 +4,7 @@
     "missing": {"type": "string", "enum": ["unknown", "not-applicable", "not-provided"]},
     "nonempty": {"type": "string", "minLength": 1},
     "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
-    "profile_id": {"type": "string", "pattern": "^(experiment|theory):[a-z0-9][a-z0-9-]*$"},
+    "profile_id": {"type": "string", "pattern": "^(experiment|theory|reference):[a-z0-9][a-z0-9-]*$"},
     "namespaced_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*:[A-Za-z0-9_.-]+$"},
     "edges": {"type": "array", "items": {"type": "number"}, "minItems": 2},
     "variable": {
