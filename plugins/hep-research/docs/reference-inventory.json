@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 106025,
+   "bytes": 106002,
    "uncited": 0
   },
   "hep-ml": {
@@ -2383,6 +2383,7 @@
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/systematics.md",
     "skills/hep-measurement/scripts/collection_time.py",
+    "skills/hep-measurement/scripts/isotope_fraction.py",
     "skills/hep-theory/references/nuclear-cross-sections.md",
     "tests/skills/hep_detector/test_survival_feeddown.py",
     "tests/skills/hep_measurement/test_coupled_backgrounds_m4.py",
@@ -2437,7 +2438,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16543,
+   "bytes": 16520,
    "lines": 112,
    "linked_from_skill_md": true,
    "cited_by": [

@@ -11,12 +11,12 @@ Formerly `hep-analysis`; the old name is a deprecated alias in contracts 2.9.0.
 |---|---|
 | `SKILL.md` | entry point: invariants, workflow, context resolution, resources, handoffs |
 | `references/` | twelve method references, routed from `hep-measurement-guide.md` (`data-pipelines.md` is a pointer: the code-level pipeline material moved to hep-computing's `analysis-data-pipelines.md`) |
-| `scripts/` | fifteen command-line helpers (systematic variations, yield and systematics tables, counting reference, blinded-bin masking, analysis-change and spec review, collection time, cosmic-ray helpers, spectral-variable transformation) |
+| `scripts/` | sixteen command-line helpers (systematic variations, yield and systematics tables, counting reference, blinded-bin masking, analysis-change and spec review, collection time, cosmic-ray helpers, spectral-variable transformation, isotope fractions) |
 | `assets/` | the `measurement-spec` template and its field guide, a synthetic cosmic-ray worked spec, the systematics ledger (CSV), the report template, the measurement-review template and a synthetic review example, a synthetic cosmic-ray spectrum example |
 
 ## Scripts
 
-The scripts cover systematic variations, yield and systematics tables, a Poisson counting reference, a ratio of two yields, blinded-bin masking (synthetic data and tests only), analysis-change and spec review, collection time per era and bin (live time above the cutoff, with partial accumulation and merge), and cosmic-ray helpers (flux from counts, power-law fit, geomagnetic cutoff, force-field modulation), and the transformation of a flux to another spectral variable with an isotope composition. Each one is described once, in the "Executable resources" section of `references/hep-measurement-guide.md`. Every script takes `--status`, emits JSON or a labelled table, and exits 0 ok, 1 finding or failed computation, 2 invalid input, 3 incomplete. Read `--help` first.
+The scripts cover systematic variations, yield and systematics tables, a Poisson counting reference, a ratio of two yields, blinded-bin masking (synthetic data and tests only), analysis-change and spec review, collection time per era and bin (live time above the cutoff, with partial accumulation and merge), and cosmic-ray helpers (flux from counts, power-law fit, geomagnetic cutoff, force-field modulation), the transformation of a flux to another spectral variable with an isotope composition, and isotope fractions from mass templates. Each one is described once, in the "Executable resources" section of `references/hep-measurement-guide.md`. Every script takes `--status`, emits JSON or a labelled table, and exits 0 ok, 1 finding or failed computation, 2 invalid input, 3 incomplete. Read `--help` first.
 
 ## References
 

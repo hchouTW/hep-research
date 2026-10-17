@@ -55,12 +55,12 @@ description: "Use when the deliverable is the design or review of an experimenta
 | Histograms, efficiencies with uncertainties | [histograms and efficiencies](references/histograms-efficiencies.md) |
 | Validation, review checks, preservation | [analysis validation](references/analysis-validation.md) |
 | Review a spec or a change; deliverables | [review and artifacts](references/review-and-artifacts.md); `review_measurement_spec.py`, `review_analysis_change.py` |
-| Cosmic-ray flux, ratios, isotopes, anisotropy; flux in another variable | [cosmic-ray measurements](references/cosmic-ray-measurements.md); `cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py`, `spectrum_transform.py` |
+| Cosmic-ray flux, ratios, isotopes, anisotropy; flux in another variable | [cosmic-ray measurements](references/cosmic-ray-measurements.md); `cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py`, `spectrum_transform.py`, `isotope_fraction.py` |
 | Geomagnetic cutoff, solar modulation | `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py` |
 | Counting reference, ratio of two yields | `counting_reference.py`, `particle_ratio_with_uncertainty.py` |
 | A named experiment's beams or run conditions | the bound profile's `index.md` |
 
-Scripts in `<plugin root>/skills/hep-measurement/scripts/` (read `--help` first; the analysis guide's "Executable resources" describes each). Spec template and field guide: `assets/measurement_spec.template.{json,md}`. Unfolding and combination methods belong to hep-statistics; detector data/MC validation to hep-detector. Folder guide: [README.md](README.md).
+Scripts in `<plugin root>/skills/hep-measurement/scripts/` (read `--help` first; each is described in the guide's "Executable resources"). Spec template and field guide: `assets/measurement_spec.template.{json,md}`. Unfolding and combination methods belong to hep-statistics; detector data/MC validation to hep-detector. Folder guide: [README.md](README.md).
 
 ## Handoffs
 

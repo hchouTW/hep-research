@@ -35,6 +35,7 @@ MISSING_FILE_ARGS = {
                                                        "--residual", "difference", "--intended-use", "forward_folding",
                                                        "--artifact-id", "a", "--objective", "o", "--out", OUT],
     "skills/hep-detector/scripts/calorimeter_resolution.py": ["--fit", M],
+    "skills/hep-measurement/scripts/isotope_fraction.py": ["fit", "--config", M, "--data", M, "--seed", "1"],
     "skills/hep-measurement/scripts/collection_time.py": ["accumulate", "--config", M, M],
     "skills/hep-detector/scripts/mix_period_responses.py": ["stack", "--period", f"e1={M}", "--out", OUT],
     "skills/hep-detector/scripts/multiple_scattering.py": [M],

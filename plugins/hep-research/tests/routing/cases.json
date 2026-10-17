@@ -3918,6 +3918,26 @@
    "trigger_terms": [
     "background estimation"
    ]
+  },
+  {
+   "id": "c-nuc-iso-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit the 7Be, 9Be and 10Be fractions per rigidity bin from mass templates built from my rigidity and velocity resolution.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "c-nuc-iso-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用質量模板擬合每個剛度區間的鈹同位素比例，速度解析度的尾巴還沒用資料驗證怎麼辦？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
   }
  ]
 }

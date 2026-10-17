@@ -399,6 +399,9 @@ C = [
     # batch C, M4: coupled species
  ("c-nuc-coupled-1", "en", "direct", "My boron background is carbon fragmenting above the detector, and I measure carbon in the same data; should I subtract it as a fixed number?", "hep-measurement", ["background estimation"], None, None, {}),
  ("c-nuc-coupled-2", "zh-Hant", "direct", "反質子樣本的背景來自同時量測的質子電荷誤判，背景估計要用固定扣除還是聯合擬合？", "hep-measurement", ["background estimation"], None, None, {}),
+    # batch C, M8: isotope fractions
+ ("c-nuc-iso-1", "en", "direct", "Fit the 7Be, 9Be and 10Be fractions per rigidity bin from mass templates built from my rigidity and velocity resolution.", "hep-measurement", ["correction chains"], None, None, {}),
+ ("c-nuc-iso-2", "zh-Hant", "direct", "用質量模板擬合每個剛度區間的鈹同位素比例，速度解析度的尾巴還沒用資料驗證怎麼辦？", "hep-measurement", ["correction chains"], None, None, {}),
 ]
 
 cases = []
