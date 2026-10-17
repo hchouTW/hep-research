@@ -456,6 +456,9 @@ C = [
     # batch D, S4: per-dataset scale nuisance in fits to published points
  ("d-st-scale-1", "en", "direct", "Fit one spectral model to two experiments' published fluxes where one has a 3% energy-scale uncertainty; add it as a nuisance on the energy axis.", "hep-statistics", ["fits of model parameters to published data points with their covariance", "nuisance parameters"], None, None, {}),
  ("d-st-scale-2", "zh-Hant", "direct", "兩組已發表的能譜一起擬合，其中一組的能量刻度有 2% 不確定度，要怎麼放成 nuisance？", "hep-statistics", ["nuisance parameters"], None, None, {}),
+    # batch D, S5: periodicity with red-noise surrogates
+ ("d-st-period-1", "en", "direct", "Is there a periodic signal in my unevenly sampled light curve? Calibrate the Lomb-Scargle peak against red noise.", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+ ("d-st-period-2", "zh-Hant", "direct", "這條時間序列有沒有週期性？紅噪聲背景下全域顯著性要怎麼算？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
 ]
 
 cases = []

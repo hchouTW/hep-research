@@ -136,6 +136,8 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
   their M5 scaling class, and the reach; every output is labeled `projection` and fails the publication gate.
 - `tail_extrapolation.py`: a control-region tail fitted by several model families and extrapolated into the signal
   region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy are imported at run time.
+- `periodicity_scan.py`: weighted generalized Lomb-Scargle, band-maximum global p from white, AR(1) or OU
+  surrogates; NumPy at run time.
 - Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command
   reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 

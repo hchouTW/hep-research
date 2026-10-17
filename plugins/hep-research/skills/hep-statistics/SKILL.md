@@ -60,7 +60,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Combining measurements or experiments | [combinations](references/combinations.md); `combine_measurements.py`, `combine_asymmetric.py` |
 | Covariance from declared correlation models (length, AR(1), time), with a scan | `build_covariance.py` (labeled [Proposal]) |
 | ON/OFF counting, trials, exposure | [astroparticle statistics](references/astroparticle-statistics.md); `li_ma_significance.py`, `look_elsewhere.py` |
-| Binned time series, periodicity, multi-period fits, split consistency | [time-series inference](references/time-series-inference.md); `split_consistency.py` |
+| Time series, periodicity, multi-period fits, split consistency | [time-series inference](references/time-series-inference.md); `split_consistency.py`, `periodicity_scan.py` |
 | ML-assisted inference, SBC | [ML-assisted inference](references/ml-assisted-inference.md); `bayes_calibration.py` |
 | MCMC convergence, prior reweighting | `bayes_diagnostics.py` |
 | RooFit/RooStats: status, weights, pulls, calculators | [RooFit and RooStats](references/roofit-and-roostats-methods.md); `roofit_fit_check.py` |
