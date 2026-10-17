@@ -362,7 +362,7 @@
    "id": "bdt-pipeline",
    "capability": "BDT pipeline for analyses (cross-training, negative weights, working points)",
    "owner": "hep-ml",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "ML3"

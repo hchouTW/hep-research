@@ -79,7 +79,7 @@ per-era training, era conditioning (era as an input), common features only (inpu
 missing-feature indicators for inputs that exist in one era only. Keep per-era calibration and per-era working
 points chosen at the same signal efficiency, and use efficiencies measured in data for each era (control samples per
 period), because the simulation of a new configuration is the least validated. Splits group by period within era.
-The executable BDT path (cross-training, negative weights, working points) is in
+The executable BDT path (cross-training, negative weights, working points) is `train_bdt.py`, described in
 [multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md); the robustness view is in
 [robustness-and-distribution-shift.md](robustness-and-distribution-shift.md).
 

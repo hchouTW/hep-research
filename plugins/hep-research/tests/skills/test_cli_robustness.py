@@ -85,6 +85,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-ml/scripts/compare_model_runs.py": [M],
     "skills/hep-ml/scripts/inspect_checkpoint.py": [M],
     "skills/hep-ml/scripts/make_grouped_splits.py": [M, "--id-column", "id", "--group-column", "g", "--out", OUT],
+    "skills/hep-ml/scripts/train_bdt.py": ["--data", M, "--config", M, "--negative-weights", "drop", "--out-dir", OUT],
     "skills/hep-ml/scripts/write_ml_artifact.py": ["--run-summary", M, "--out", OUT],
     "skills/hep-communication/scripts/audit_claims.py": [M, "--project-root", "/tmp"],
     "skills/hep-communication/scripts/build_lit_matrix.py": [M],

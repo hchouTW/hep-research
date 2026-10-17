@@ -29,6 +29,8 @@ columnar = ["coffea>=2026.9", "pyarrow>=20", "uproot>=5.7,<6", "awkward>=2.14,<3
 hepdata = ["hepdata_lib>=0.21", "hepdata-validator>=0.3.6", "PyYAML>=6"]
 # skills/hep-theory/scripts/physical_data.py --backend pdg: full PDG tables (Modified BSD; data CC BY 4.0). core never imports it
 pdg = ["pdg>=2026.0,<2027"]
+# skills/hep-ml/scripts/train_bdt.py: BDT backends (xgboost Apache-2.0, scikit-learn BSD-3-Clause; gate G5, 2026-10-17)
+bdt = ["xgboost>=3.4,<4", "scikit-learn>=1.9,<2"]
 # skills/hep-ml scripts and assets (CPU wheels are enough for the tests)
 torch = ["torch>=2.4"]
 # diagram checks need system tools, not Python packages: Graphviz `dot`, the Mermaid CLI `mmdc` (npm) and PlantUML

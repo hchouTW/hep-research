@@ -36,5 +36,5 @@ eras: a domain shift with a known boundary, which the analysis records as eras i
 Whatever the choice: per-era calibration of the output, per-era working points (a fixed cut on the score does not
 give a fixed efficiency across eras), and efficiencies measured in data per era (tag-and-probe or control samples),
 not taken from simulation. Grouped splits keep each era's periods apart (`make_grouped_splits.py`, a composite key
-with the era). The executable BDT path is in [multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md).
+with the era). The executable BDT path is `train_bdt.py`, described in [multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md) ("XGBoost in an analysis").
 

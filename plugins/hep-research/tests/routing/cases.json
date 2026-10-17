@@ -3777,6 +3777,27 @@
    "trigger_terms": [
     "working points and mass decorrelation"
    ]
+  },
+  {
+   "id": "b-ml-bdt-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Cross-train an XGBoost BDT in three folds by event number, keep the test fold out of early stopping, and handle the negative weights of my NLO sample.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "XGBoost",
+    "event weights including negative ones"
+   ]
+  },
+  {
+   "id": "b-ml-bdt-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 XGBoost 做 k-fold 交叉訓練的 BDT，負權重要怎麼處理？過度訓練要怎麼檢查，不要用 KS 的 p 值？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "XGBoost"
+   ]
   }
  ]
 }

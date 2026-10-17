@@ -25,7 +25,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 186055,
+   "bytes": 189316,
    "uncited": 0
   },
   "hep-statistics": {
@@ -2974,8 +2974,8 @@
   {
    "path": "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
    "owner": "hep-ml",
-   "bytes": 9943,
-   "lines": 143,
+   "bytes": 13125,
+   "lines": 181,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -2988,6 +2988,7 @@
     "skills/hep-ml/references/robustness-and-distribution-shift.md",
     "skills/hep-ml/references/space-and-astroparticle-ml.md",
     "skills/hep-ml/references/uncertainty-and-calibration.md",
+    "skills/hep-ml/scripts/train_bdt.py",
     "tests/skills/hep_ml/test_era_changes_ml1.py"
    ],
    "cited_by_other_skills": [
@@ -3079,7 +3080,7 @@
   {
    "path": "skills/hep-ml/references/robustness-and-distribution-shift.md",
    "owner": "hep-ml",
-   "bytes": 3312,
+   "bytes": 3365,
    "lines": 41,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3095,7 +3096,7 @@
     "tests/skills/hep_ml/test_era_changes_ml1.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "6c1221a7 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/sbi-training.md",
@@ -3165,7 +3166,7 @@
   {
    "path": "skills/hep-ml/references/space-and-astroparticle-ml.md",
    "owner": "hep-ml",
-   "bytes": 9573,
+   "bytes": 9599,
    "lines": 131,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3178,7 +3179,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "6c1221a7 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/tensor-shapes.md",

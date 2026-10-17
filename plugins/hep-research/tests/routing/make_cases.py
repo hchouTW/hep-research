@@ -378,6 +378,9 @@ C = [
     # batch B, ML1: detector configuration changes (eras) in ML studies
  ("b-ml-era-1", "en", "direct", "Our detector added a tracking layer halfway through data taking; should I train one classifier per era or condition on the era, and how do I set the working points and calibration of model outputs?", "hep-ml", ["calibration of model outputs"], None, None, {}),
  ("b-ml-era-2", "zh-Hant", "direct", "探測器中途換了讀出系統，前後兩個時期的分類器要分開訓練還是把時期當輸入？工作點與效率要怎麼處理？", "hep-ml", ["working points and mass decorrelation"], None, None, {}),
+    # batch B, ML3: cross-trained BDT pipeline (train_bdt.py)
+ ("b-ml-bdt-1", "en", "direct", "Cross-train an XGBoost BDT in three folds by event number, keep the test fold out of early stopping, and handle the negative weights of my NLO sample.", "hep-ml", ["XGBoost", "event weights including negative ones"], None, None, {}),
+ ("b-ml-bdt-2", "zh-Hant", "direct", "用 XGBoost 做 k-fold 交叉訓練的 BDT，負權重要怎麼處理？過度訓練要怎麼檢查，不要用 KS 的 p 值？", "hep-ml", ["XGBoost"], None, None, {}),
 ]
 
 cases = []

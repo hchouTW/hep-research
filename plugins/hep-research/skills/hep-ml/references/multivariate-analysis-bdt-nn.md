@@ -133,6 +133,44 @@ and fixed in advance; the analysis uses only held-out scores; hyperparameters ar
 (choosing them by the held-out AUC, as this illustration does, would itself leak); the cut on the score is fixed before
 unblinding.
 
+## XGBoost in an analysis
+
+`<plugin root>/skills/hep-ml/scripts/train_bdt.py` is the executable path (backends xgboost, or scikit-learn
+HistGradientBoosting as a fallback; optional extra `bdt`; exit 3 with the pip command when missing). Read `--help`.
+- **Cross-training.** Folds come from the event number (mod K) or a hash of a composite key such as (run, event), so
+  the fold manifest passes `check_split_integrity.py` and every event is scored by a model that never saw it.
+  Early stopping and the hyperparameter choice use a validation part inside the training folds, never the test fold.
+- **Negative weights.** XGBoost refuses negative weights ("Weights must be positive values"; checked with xgboost
+  3.4.1). `--negative-weights` has no default: `reject`, `abs-train-signed-eval` (train on |w|, which biases the
+  learned density where negative weights matter: show the effect is small) or `drop` (from training only). Yields,
+  metrics and working points always use the signed physical weights; the run records the negative fraction and sum
+  and keeps training and physical weights apart. Resampling (`assets/hep_metrics.py` `cell_resample`) is the
+  alternative that keeps positive weights without |w|.
+- **Selection.** Weighted AUC or the Asimov significance Z_A = sqrt(2((s+b) ln(1+s/b) - s)) at the best cut, on
+  the validation parts; test-fold metrics are reported once.
+- **Overtraining.** Compare training and test score distributions with a distance and the effective entries
+  n_eff = (sum w)^2 / sum w^2. A weighted Kolmogorov-Smirnov p-value is not a valid test with weighted or signed
+  events and correlated folds; do not quote one.
+- **Importance.** Gain and cover from the boosters, TreeSHAP from `pred_contribs` on the test folds.
+- **Persistence.** `save_model` as JSON or UBJSON only; never pickle (it runs code on load). scikit-learn has no
+  pickle-free format, so its models are hashed, not saved.
+- **Working points** come from the out-of-fold scores with physical weights on simulation; their efficiencies in data
+  are measured separately (tag-and-probe or control samples).
+
+TMVA options for the same choices (`MethodBDT`, checked against ROOT master `tmva/tmva/src/MethodBDT.cxx`, read
+2026-10-17; classification defaults):
+
+| Option | Default | Meaning and analysis choice |
+|---|---|---|
+| `NTrees` | 800 | number of trees; with `BoostType=Grad` pair with a small `Shrinkage` |
+| `MaxDepth` | 3 | depth of each tree (50 for regression) |
+| `BoostType` | AdaBoost | AdaBoost, RealAdaBoost, Bagging, AdaBoostR2, Grad (gradient boosting, closest to XGBoost) |
+| `Shrinkage` | 1.0 | learning rate of `BoostType=Grad`; typically 0.05-0.3 |
+| `UseBaggedBoost`, `BaggedSampleFraction` | false, 0.6 | random subsample per iteration (stochastic boosting) |
+| `MinNodeSize` | 5% | minimum fraction of training events in a leaf (0.2% for regression) |
+| `nCuts` | 20 | grid points per variable for the split search (-1: all values) |
+| `NegWeightTreatment` | InverseBoostNegWeights | also IgnoreNegWeightsInTraining, PairNegWeightsGlobal; for `BoostType=Grad` the inverse boost does not exist and TMVA switches to `Pray` (keeps the signed weights) |
+
 ## Deliverables
 
 The family chosen against a simpler baseline; features with their motivation and the correlation with the fitted
