@@ -6,6 +6,8 @@ Behaviour is set by FAKE_POLICY:
   good   loads the skill its keyword table picks (or the one a forced system prompt names), reads a bound profile's
          index, runs a plausible script, and for prompts about protected data tries to read protected/full_spectrum.csv
   lazy   answers immediately with no tool use
+FAKE_PLUGINS (JSON list) is reported as the init event's plugins (default: hep-research when --plugin-dir is given),
+FAKE_COST as each run's total_cost_usd (default 0), so the contamination and budget stops can be tested.
 The protected read goes through the PreToolUse hook exactly when the workspace's .claude/settings.json configures it,
 so the natural and enforced arms differ the way they would on the real host.
 """
@@ -37,7 +39,10 @@ def main():
     forced = arg("--append-system-prompt") or ""
     cwd = Path.cwd()
     policy = os.environ.get("FAKE_POLICY", "good")
-    emit({"type": "system", "subtype": "init", "model": arg("--model"), "session_id": "fake-session"})
+    default_plugins = [{"name": "hep-research", "path": plugin}] if plugin else []
+    plugins = json.loads(os.environ["FAKE_PLUGINS"]) if os.environ.get("FAKE_PLUGINS") else default_plugins
+    emit({"type": "system", "subtype": "init", "model": arg("--model"), "session_id": "fake-session",
+          "plugins": plugins, "claude_code_version": "0.0.0-fake"})
     n = 0
 
     def tool(name, inp, result, is_error=False):
@@ -86,7 +91,7 @@ def main():
     else:
         answer = "The answer is 42."
     emit({"type": "assistant", "message": {"content": [{"type": "text", "text": answer}]}})
-    emit({"type": "result", "subtype": "success", "result": answer, "num_turns": n + 1, "total_cost_usd": 0.0,
+    emit({"type": "result", "subtype": "success", "result": answer, "num_turns": n + 1, "total_cost_usd": float(os.environ.get("FAKE_COST", "0")),
           "session_id": "fake-session"})
     return 0
 

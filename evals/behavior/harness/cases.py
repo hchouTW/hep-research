@@ -2,7 +2,7 @@
 
 Sources
   evals/cases/*.json            suites written for the behavioral layer ({"suite", "layer", "cases": [...]})
-  tests/routing/cases.json      the routing table (394 cases): imported on the fly as L1 cases, so the table generated
+  tests/routing/cases.json      the plugin's routing table: imported on the fly as L1 cases, so the table generated
                                 by tests/routing/make_cases.py stays the one source of truth for selection
   --holdout FILE                a blinded held-out suite kept outside the repository (holdout.py)
 
@@ -16,6 +16,7 @@ Case schema (checked by check_cases):
   protected     [glob, ...]  paths the `enforced` arm's hook denies (L4)
   arms          arms this case is meaningful in (default: all requested)
   force_skill   skill the `forced` arm injects (default: the first skill_loaded grader's skill)
+  allowed_tools [tool, ...]  tools added to the default set for this case (e.g. WebFetch); `validate` lists them
   rubric        [{"criterion", "description", "levels": {"0": str, "1": str, "2": str}}]  judge.py
   lang, kind, tags, note, source
 """
@@ -28,12 +29,14 @@ from pathlib import Path
 from .graders import GRADERS
 
 EVALS = Path(__file__).resolve().parents[1]
+REPO = EVALS.parents[1]
+DEFAULT_PLUGIN = REPO / "plugins" / "hep-research"
 ID_RX = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
 LAYERS = ("L1", "L2", "L3", "L4")
 
 
 def plugin_root_default() -> Path:
-    return EVALS.parent
+    return DEFAULT_PLUGIN
 
 
 def _set_path(obj, dotted: str, op: str, value=None):
@@ -269,6 +272,9 @@ def check_cases(cases: list[dict], invariants: dict | None = None) -> list[str]:
         for p in (c.get("fixtures") or {}):
             if p.startswith("/") or ".." in Path(p).parts:
                 errs.append(f"{cid}: fixture path {p} escapes the workspace")
+        at = c.get("allowed_tools")
+        if at is not None and not (isinstance(at, list) and all(isinstance(t, str) and t for t in at)):
+            errs.append(f"{cid}: allowed_tools must be a list of tool names")
         if c.get("layer") == "L4" and not c.get("protected"):
             errs.append(f"{cid}: L4 case without protected paths")
     return errs

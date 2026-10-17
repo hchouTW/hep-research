@@ -12,10 +12,21 @@ Arms (the ablations that separate the layers):
   baseline   no plugin: what the skills add at all
   enforced   natural, plus the PreToolUse protection hook (hooks/protect_paths.py): L4 with host enforcement
 
-Host: Claude Code headless (`claude -p --output-format stream-json --verbose`). The command template is in
-HOST_COMMAND and can be replaced for another host whose transcript trace.py can parse.
+Host: Claude Code headless (`claude -p --output-format stream-json --verbose`). The command is built by
+host_command and can be replaced for another host whose transcript trace.py can parse.
 
-Live runs call a paid model. `plan` prints the matrix and the run count; `run` needs --yes.
+Isolation (the same two modes as evals/routing/run_routing_eval.py; recorded in the manifest):
+  setting-sources  the user's login with --setting-sources project,local: user settings, user instructions and
+                   user-enabled plugins do not load; the workspace's own .claude/settings.json (the enforced arm's
+                   hook) still does
+  config-dir       CLAUDE_CONFIG_DIR points at a separate, logged-in configuration
+Every command adds --strict-mcp-config. A run whose session reports a plugin other than hep-research (or reports
+hep-research in the baseline arm) is contaminated: it fails, and the campaign stops. Plugins built into the CLI
+("path": "builtin") are recorded, not counted.
+
+Live runs call a paid model. `plan` prints the matrix and the run count; `run` needs --yes and both budgets:
+--case-budget-usd (passed to the host as --max-budget-usd) and --budget-usd (no new run starts once the total spent
+reaches it).
 """
 from __future__ import annotations
 
@@ -24,9 +35,11 @@ import datetime as dt
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -38,7 +51,10 @@ from .trace import Trace, load_trace, merge_turns
 EVALS = Path(__file__).resolve().parents[1]
 HOOK = EVALS / "hooks" / "protect_paths.py"
 ARMS = ("natural", "forced", "baseline", "enforced")
-DEFAULT_TOOLS = "Bash,Read,Write,Edit,Glob,Grep,Skill,WebFetch,WebSearch"
+DEFAULT_TOOLS = "Bash,Read,Write,Edit,Glob,Grep,Skill"
+WEB_TOOLS = ("WebFetch", "WebSearch")   # denied unless a case lists them in allowed_tools
+PLUGIN_NAME = "hep-research"
+ISOLATIONS = ("setting-sources", "config-dir")
 
 FORCE_TEMPLATE = ("Before you answer or run anything, load the skill hep-research:{skill} with the Skill tool and "
                   "follow its context-resolution steps.")
@@ -89,11 +105,23 @@ def write_workspace(case: dict, ws: Path, plugin_root: Path, arm: str) -> None:
     (claude_dir / "settings.json").write_text(json.dumps(settings, indent=1))
 
 
+def allowed_tools(case: dict, opts: dict) -> list[str]:
+    tools = [t for t in (opts.get("allowed_tools") or DEFAULT_TOOLS).split(",") if t]
+    return tools + [t for t in case.get("allowed_tools", []) if t not in tools]
+
+
 def host_command(prompt: str, model: str, arm: str, case: dict, plugin_root: Path, opts: dict,
                  resume: str | None = None) -> list[str]:
+    tools = allowed_tools(case, opts)
+    budget = opts.get("case_budget_usd")
     cmd = [opts.get("claude_bin", "claude"), "-p", prompt, "--output-format", "stream-json", "--verbose",
-           "--model", model, "--allowedTools", opts.get("allowed_tools", DEFAULT_TOOLS),
-           "--max-turns", str(opts.get("max_turns", 40))]
+           "--model", model, "--allowedTools", ",".join(tools), "--max-turns", str(opts.get("max_turns") or 40),
+           "--max-budget-usd", f"{budget:g}" if budget is not None else "<case-budget-usd>", "--strict-mcp-config"]
+    denied = [t for t in WEB_TOOLS if t not in tools]
+    if denied:
+        cmd += ["--disallowedTools", ",".join(denied)]
+    if opts.get("isolation", "setting-sources") == "setting-sources":
+        cmd += ["--setting-sources", "project,local"]
     if arm != "baseline":
         cmd += ["--plugin-dir", str(plugin_root)]
     if arm == "forced":
@@ -105,6 +133,29 @@ def host_command(prompt: str, model: str, arm: str, case: dict, plugin_root: Pat
     elif not case.get("turns"):
         cmd += ["--no-session-persistence"]
     return cmd
+
+
+def session_dir(ws: Path, opts: dict) -> Path:
+    """The folder the Claude CLI keeps for a working directory (sessions, auto memory)."""
+    root = Path(opts["config_dir"]) if opts.get("config_dir") else \
+        Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    return root / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(ws.resolve()))
+
+
+def _builtin(p) -> bool:
+    return isinstance(p, dict) and (p.get("path") == "builtin" or str(p.get("source", "")).endswith("@builtin"))
+
+
+def contamination(tr: Trace, arm: str | None) -> str | None:
+    """Why a run is not a measurement of this plugin alone, or None."""
+    names = sorted({p.get("name") if isinstance(p, dict) else str(p) for p in tr.meta.get("plugins") or []
+                    if not _builtin(p)})
+    extra = [n for n in names if n != PLUGIN_NAME]
+    if extra:
+        return f"other plugins loaded: {', '.join(extra)}"
+    if arm == "baseline" and PLUGIN_NAME in names:
+        return "hep-research loaded in the baseline arm"
+    return None
 
 
 def run_one(case: dict, arm: str, model: str, repeat: int, run_dir: Path, plugin_root: Path, opts: dict) -> dict:
@@ -120,12 +171,16 @@ def run_one(case: dict, arm: str, model: str, repeat: int, run_dir: Path, plugin
             "started": dt.datetime.now(dt.timezone.utc).isoformat(), "turns": []}
     session = None
     traces = []
+    env = {**os.environ, "HEP_EVAL_RUN": "1"}
+    if opts.get("config_dir"):
+        env["CLAUDE_CONFIG_DIR"] = str(opts["config_dir"])
+    sdir = session_dir(ws, opts)
+    sdir_existed = sdir.exists()
     for t_no, prompt in enumerate(prompts):
         cmd = host_command(prompt, model, arm, case, plugin_root, opts, resume=session)
         t0 = time.time()
         try:
-            p = subprocess.run(cmd, cwd=ws, capture_output=True, text=True, timeout=opts.get("timeout", 900),
-                               env={**os.environ, "HEP_EVAL_RUN": "1"})
+            p = subprocess.run(cmd, cwd=ws, capture_output=True, text=True, timeout=opts.get("timeout", 900), env=env)
             out, err, code = p.stdout, p.stderr, p.returncode
         except subprocess.TimeoutExpired as exc:
             out, err, code = (exc.stdout or b"").decode() if isinstance(exc.stdout, bytes) else (exc.stdout or ""), \
@@ -136,8 +191,11 @@ def run_one(case: dict, arm: str, model: str, repeat: int, run_dir: Path, plugin
         session = tr.meta.get("session_id") or session
         meta["turns"].append({"returncode": code, "seconds": round(time.time() - t0, 1), "stderr_tail": err[-2000:],
                               "argv": [a if a != prompt else "<prompt>" for a in cmd]})
-        if code != 0:
+        if code != 0 or contamination(tr, arm):
             break
+    # the CLI keeps a folder per working directory; remove the one this run's workspace created
+    if not sdir_existed and sdir.name.endswith("-workspace") and sdir.is_dir():
+        shutil.rmtree(sdir, ignore_errors=True)
     meta["finished"] = dt.datetime.now(dt.timezone.utc).isoformat()
     (rdir / "meta.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
     return grade_run(rdir, case, plugin_root)
@@ -163,10 +221,15 @@ def grade_run(rdir: Path, case: dict, plugin_root: Path) -> dict:
            "repeat": meta.get("repeat"), "expected_skill": expected,
            "first_hep_skill": hep[0] if hep else None, "skills": tr.skills,
            "loaded_expected": bool(expected and expected in tr.skills),
-           "host_error": host_failed, "trace": tr.summary(), **verdict}
+           "host_error": host_failed, "cost_usd": tr.meta.get("total_cost_usd") or 0.0,
+           "cli_version": tr.meta.get("cli_version"), "contaminated": contamination(tr, meta.get("arm")),
+           "trace": tr.summary(), **verdict}
     if host_failed:
         out["pass"] = False
         out.setdefault("unverified", []).append("host")
+    if out["contaminated"]:
+        out["pass"] = False
+        out.setdefault("unverified", []).append("isolation")
     (rdir / "grade.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     return out
 
@@ -190,15 +253,42 @@ def plan(cases: list[dict], arms: list[str], models: list[str], repeats: int) ->
     return out
 
 
+def _git(plugin_root: Path) -> dict:
+    def g(*a):
+        return subprocess.run(["git", "-C", str(plugin_root), *a], capture_output=True, text=True, check=False).stdout.strip()
+    return {"commit": g("rev-parse", "HEAD") or None, "dirty": bool(g("status", "--porcelain", "--", "."))}
+
+
 def run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dict, jobs: int = 4) -> list[dict]:
+    """Run the matrix. No new run starts once opts["budget_usd"] is spent or a run is contaminated; the stop and
+    the number of runs completed are recorded in manifest.json."""
     run_dir.mkdir(parents=True, exist_ok=True)
     manifest = {"created": dt.datetime.now(dt.timezone.utc).isoformat(), "plugin": plugin_fingerprint(plugin_root),
-                "opts": {k: v for k, v in opts.items() if k != "claude_bin"}, "runs": len(matrix),
-                "holdout": opts.get("holdout_record")}
+                "plugin_git": _git(plugin_root), "isolation": opts.get("isolation", "setting-sources"),
+                "opts": {k: v for k, v in opts.items() if k not in ("claude_bin", "config_dir", "holdout_record")},
+                "allowed_tools_default": (opts.get("allowed_tools") or DEFAULT_TOOLS).split(","),
+                "runs": len(matrix), "holdout": opts.get("holdout_record")}
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    budget = opts.get("budget_usd")
+    lock = threading.Lock()
+    state = {"spent": 0.0, "stop": None}
+
+    def task(c, a, m, r):
+        with lock:
+            if state["stop"] is None and budget is not None and state["spent"] >= budget:
+                state["stop"] = f"budget: {state['spent']:.4f} USD spent of {budget:g}"
+            if state["stop"]:
+                return None
+        res = run_one(c, a, m, r, run_dir, plugin_root, opts)
+        with lock:
+            state["spent"] += res.get("cost_usd") or 0.0
+            if res.get("contaminated") and not state["stop"]:
+                state["stop"] = f"contaminated: {c['id']} {a} {m} r{r}: {res['contaminated']}"
+        return res
+
     results = []
     with cf.ThreadPoolExecutor(max_workers=jobs) as pool:
-        futs = {pool.submit(run_one, c, a, m, r, run_dir, plugin_root, opts): (c["id"], a, m, r) for c, a, m, r in matrix}
+        futs = {pool.submit(task, c, a, m, r): (c["id"], a, m, r) for c, a, m, r in matrix}
         for i, f in enumerate(cf.as_completed(futs), 1):
             key = futs[f]
             try:
@@ -206,9 +296,17 @@ def run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dict
             except Exception as exc:  # keep the campaign going; the failure is recorded as a host error
                 res = {"case": key[0], "arm": key[1], "model": key[2], "repeat": key[3], "pass": False,
                        "host_error": True, "error": f"{exc.__class__.__name__}: {exc}"}
+            if res is None:
+                continue
             results.append(res)
             mark = "PASS" if res.get("pass") else ("HOST" if res.get("host_error") else "fail")
             print(f"[{i}/{len(matrix)}] {mark} {key[0]} {key[1]} {key[2]} r{key[3]}", file=sys.stderr)
+    manifest.update({"completed": len(results), "skipped": len(matrix) - len(results),
+                     "spent_usd": round(state["spent"], 4), "stopped": state["stop"],
+                     "cli_versions": sorted({r["cli_version"] for r in results if r.get("cli_version")})})
+    (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    if state["stop"]:
+        print(f"stopped: {state['stop']} ({len(results)} of {len(matrix)} runs completed)", file=sys.stderr)
     return results
 
 

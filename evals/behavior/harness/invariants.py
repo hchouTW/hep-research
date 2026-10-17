@@ -30,7 +30,7 @@ import json
 import re
 from pathlib import Path
 
-from .cases import EVALS, _walk_specs, all_expects
+from .cases import EVALS, REPO, _walk_specs, all_expects
 
 PLANE_RANK = {"knowledge": 0, "mechanism": 1, "authority": 2}
 
@@ -81,7 +81,7 @@ def coverage(plugin_root: Path, registry: dict, cases: list[dict]) -> dict:
     rows, missing = [], []
     for k, e in sorted(registry.items()):
         for p in e.get("enforced_by", []) + e.get("deterministic_tests", []):
-            if not (plugin_root / p.split("::")[0]).exists() and not (EVALS.parent / p.split("::")[0]).exists():
+            if not (plugin_root / p.split("::")[0]).exists() and not (REPO / p.split("::")[0]).exists():
                 missing.append(f"{k}: {p}")
         rows.append({"id": k, "skill": e.get("skill"), "severity": e["severity"], "plane": e["plane"],
                      "target_plane": e.get("target_plane", e["plane"]), "behavioral_cases": len(cases_for[k]),

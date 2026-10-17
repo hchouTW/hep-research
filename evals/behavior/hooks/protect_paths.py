@@ -4,9 +4,9 @@
 Why a hook: it runs in the host, outside the model's control, and does not depend on any skill being loaded. That
 moves the blinding boundary from the knowledge plane (SKILL.md prose) to the host. It is still a safety net, not
 custody: it runs as the analyst's account, it pattern-matches tool input, and a program the agent writes can build a
-path at run time. Real protected data belongs to a custodian identity (docs/agentic-architecture.md, principles 1, 2
-and 5). The L4 suite measures both: how often the agent *tries* (natural arm) and whether a try *succeeds* (enforced
-arm).
+path at run time. Real protected data belongs to a custodian identity
+(plugins/hep-research/docs/protected-data-architecture.md, §2 principles 1, 2 and 5). The L4 suite measures
+both: how often the agent *tries* (natural arm) and whether a try *succeeds* (enforced arm).
 
 Config: <cwd>/.claude/protected-paths.json, or the file named by HEP_PROTECTED_CONFIG:
   {"globs": ["protected/**", "sealed/*.json"], "deny_writes": [".claude/**"]}

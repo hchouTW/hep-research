@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -54,15 +55,28 @@ def build_prompt(case: dict, trace: Trace, max_answer: int = 12000) -> str:
                          answer=trace.final_text[:max_answer] or "(empty)", rubric=rubric)
 
 
-def cli_caller(model: str, claude_bin: str = "claude") -> Callable[[str], str]:
+def cli_caller(model: str, claude_bin: str = "claude", case_budget_usd: float | None = None,
+               isolation: str = "setting-sources", config_dir: str | None = None) -> Callable[[str], str]:
+    """A judge call through the host CLI, with no tools, one turn, a per-call budget and the harness's isolation.
+    The returned callable's `spent` attribute is the cost so far (USD)."""
+    env = {**os.environ, **({"CLAUDE_CONFIG_DIR": str(config_dir)} if config_dir else {})}
+
     def call(prompt: str) -> str:
-        p = subprocess.run([claude_bin, "-p", prompt, "--output-format", "json", "--model", model,
-                            "--max-turns", "1", "--disallowedTools",
-                            "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill",
-                            "--no-session-persistence"], capture_output=True, text=True, timeout=300)
+        cmd = [claude_bin, "-p", prompt, "--output-format", "json", "--model", model,
+               "--max-turns", "1", "--disallowedTools",
+               "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill",
+               "--no-session-persistence", "--strict-mcp-config"]
+        if case_budget_usd is not None:
+            cmd += ["--max-budget-usd", f"{case_budget_usd:g}"]
+        if isolation == "setting-sources":
+            cmd += ["--setting-sources", "project,local"]
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)
         if p.returncode != 0:
             raise RuntimeError(p.stderr[-500:])
-        return json.loads(p.stdout).get("result", "")
+        out = json.loads(p.stdout)
+        call.spent += float(out.get("total_cost_usd") or 0.0)
+        return out.get("result", "")
+    call.spent = 0.0
     return call
 
 

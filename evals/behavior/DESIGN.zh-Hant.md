@@ -93,7 +93,7 @@ invariants.json ──────┴────────── coverage ◄
 以下是建置 L3 故障注入時，對 `contracts/validate.py` 實際執行的結果，不是推測：
 
 - **`status: ["failed"]` 的 response artifact 通過驗證。** 這在設計上可能是正確的（格式合法），但代表只有會讀 status 的 agent 才能擋下失敗結果往下游傳。`l3-fault-response-status-failed` 專門測這件事。
-- **`contract_version` 改成 1.0.0 或 2.0.0 時，驗證沒有任何 finding；改成 9.0.0 才報 `contract.unsupported_major`。** 如果舊版契約是刻意相容，建議至少給一個 warning，讓接手的 agent 知道。
+- **`contract_version` 改成 1.0.0 或 2.0.0 時，驗證仍通過（`ok: true`），只給一個 warning `contract.version_mismatch`（`versions.contracts` 與 `contract_version` 不一致）；改成 9.0.0 才報 error `contract.unsupported_major`。**（2026-10-17 在 `examples/multi-era-fit/output/artifacts/response_e1.json` 上重跑確認；原稿寫「沒有任何 finding」有誤。）舊版契約被當成相容接受，接手的 agent 必須讀 warning 才會注意到。
 - **缺 orientation、單位不符、效率重複計算** 這三種故障，validator 都能抓到。所以這三個 L3 案例測的是 agent 有沒有**去跑** validator，而不是 validator 本身。
 - `VALIDATION.md` 的標題寫的是 0.3.0，但外掛目前是 0.14.1；Haiku 37/118 的數字是在 0.2.6 上量的。建議用這套體系在 0.14.1 上重新量一次基準。
 
@@ -101,7 +101,7 @@ invariants.json ──────┴────────── coverage ◄
 
 | 時機 | 跑什麼 | 規模（單一模型） |
 |---|---|---|
-| 每次 commit（CI） | `unittest evals/tests`、`validate`、`coverage` | 免費 |
+| 每次 commit（CI） | `unittest evals/behavior/tests`、`validate`、`coverage` | 免費 |
 | 改 description | `--preset selection`，Haiku 與 Sonnet 各一次，再用 `compare` 和上一版配對比較 | 約 1,260 次 |
 | 改 SKILL.md 或 profile | `--preset boundary` 與 `--preset execution` | 約 165 + 195 次 |
 | 改契約或交接 | `--preset composition` | 約 48 次 |
@@ -113,8 +113,9 @@ invariants.json ──────┴────────── coverage ◄
 先回答最關鍵的因果問題：失敗究竟來自 L1 還是 L2？
 
 ```bash
-python3 evals/run.py run --preset boundary --models claude-haiku-4-5,claude-sonnet-5-5 --yes
-python3 evals/run.py report --run evals/runs/<id>
+python3 evals/behavior/run.py run --preset boundary --models claude-haiku-5-5,claude-sonnet-5-5 \
+    --case-budget-usd 0.5 --budget-usd <預算> --yes
+python3 evals/behavior/run.py report --run evals/behavior/runs/<id>
 ```
 
 看分解表中 forced arm 的 P(pass | load)：

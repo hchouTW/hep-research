@@ -9,15 +9,15 @@ import unittest
 from pathlib import Path
 
 EVALS = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(EVALS.parent))
+sys.path.insert(0, str(EVALS))
 
-from evals.harness import cases as casemod  # noqa: E402
-from evals.harness import fixtures, graders, invariants, report, runner, stats  # noqa: E402
-from evals.harness.trace import merge_turns, parse_stream  # noqa: E402
+from harness import cases as casemod  # noqa: E402
+from harness import fixtures, graders, invariants, report, runner, stats  # noqa: E402
+from harness.trace import merge_turns, parse_stream  # noqa: E402
 
 
 def plugin_root():
-    for cand in (os.environ.get("HEP_PLUGIN_ROOT"), str(EVALS.parent)):
+    for cand in (os.environ.get("HEP_PLUGIN_ROOT"), str(casemod.DEFAULT_PLUGIN)):
         if cand and (Path(cand) / "skills").is_dir() and (Path(cand) / ".claude-plugin").is_dir():
             return Path(cand)
     return None
@@ -185,7 +185,7 @@ class TraceAndGraders(unittest.TestCase):
 class Holdout(unittest.TestCase):
     def test_commit_verify_open_and_tamper(self):
         from unittest import mock
-        from evals.harness import holdout
+        from harness import holdout
         with tempfile.TemporaryDirectory() as d:
             d = Path(d)
             suite = d / "ho.json"
@@ -204,7 +204,7 @@ class Holdout(unittest.TestCase):
                     holdout.commit(suite, "ho-test", "x")
 
     def test_leak_check(self):
-        from evals.harness import holdout
+        from harness import holdout
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / "h.json"
             p.write_text(json.dumps({"cases": [{"id": "a", "prompt": "please do combinations across datasets or experiments now"}]}))

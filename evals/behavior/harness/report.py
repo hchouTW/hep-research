@@ -283,3 +283,32 @@ def write(rep: dict, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "report.json").write_text(json.dumps(rep, indent=1, ensure_ascii=False, default=str))
     (out_dir / "report.md").write_text(to_markdown(rep), encoding="utf-8")
+
+
+# ------------------------------------------------------------------ committed summary
+RUN_FIELDS = ("case", "layer", "suite", "lang", "kind", "arm", "model", "repeat", "expected_skill", "first_hep_skill",
+              "skills", "loaded_expected", "pass", "blocking_failure", "score", "host_error", "contaminated",
+              "unverified", "cost_usd", "cli_version")
+
+
+def summary(rows: list[dict], manifest: dict, run_id: str) -> dict:
+    """The scored summary that may be committed (evals/behavior/results/): run metadata, per-run outcomes per grader,
+    costs and the report's rates. No prompts, answers, tool results, transcripts or grader details (a detail can
+    quote what the agent read or wrote); those stay in the ignored run folder."""
+    rep = build(rows, manifest)
+    rep["blocking_failures"] = [{k: f[k] for k in ("case", "arm", "model", "repeat")} for f in rep["blocking_failures"]]
+    runs = []
+    for r in sorted(rows, key=lambda r: (r["case"], str(r.get("arm")), str(r.get("model")), r.get("repeat") or 0)):
+        row = {k: r.get(k) for k in RUN_FIELDS}
+        row["num_turns"] = ((r.get("trace") or {}).get("meta") or {}).get("num_turns")
+        row["graders"] = [{k: x.get(k) for k in ("grader", "severity", "invariant", "passed") if k in x}
+                          for x in r.get("results", [])]
+        runs.append(row)
+    costs = [r.get("cost_usd") or 0.0 for r in rows]
+    return {"run_id": run_id, "manifest": manifest, "runs": runs,
+            "cost_usd": {"total": round(sum(costs), 4), "per_run": round(sum(costs) / len(costs), 4) if costs else None},
+            "contaminated": [f"{r['case']}|{r.get('arm')}|{r.get('model')}|r{r.get('repeat')}" for r in rows
+                             if r.get("contaminated")],
+            "report": rep,
+            "note": "scored summary only: prompts, answers, tool results and transcripts are not stored here (they stay "
+                    "in evals/behavior/runs/<id>/, which is not committed)"}

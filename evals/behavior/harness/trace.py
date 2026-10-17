@@ -179,6 +179,7 @@ def parse_stream(lines: Iterable[str], turn: int = 0, start_index: int = 0) -> T
             tr.meta.setdefault("tools", obj.get("tools"))
             tr.meta.setdefault("skills_available", obj.get("skills") or obj.get("slash_commands"))
             tr.meta.setdefault("plugins", obj.get("plugins"))
+            tr.meta.setdefault("cli_version", obj.get("claude_code_version"))
         elif typ == "assistant":
             for c in (obj.get("message") or {}).get("content") or []:
                 if not isinstance(c, dict):

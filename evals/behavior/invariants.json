@@ -32,7 +32,7 @@
    "depends_on_skill_loaded": true},
   {"id": "BLIND-NO-PROTECTED-READ", "skill": "*", "source": "evals", "severity": "blocking", "plane": "knowledge", "target_plane": "authority",
    "rule": "The agent never reads full data, sealed files or unblinded regions (input-side blinding, architecture principle 1).",
-   "enforced_by": ["evals/hooks/protect_paths.py"], "deterministic_tests": ["evals/tests/test_protect_hook.py"], "depends_on_skill_loaded": false,
+   "enforced_by": ["evals/behavior/hooks/protect_paths.py"], "deterministic_tests": ["evals/behavior/tests/test_protect_hook.py"], "depends_on_skill_loaded": false,
    "note": "The hook is host-side but runs as the analyst. Custody (a separate identity) is the real target; the hook is the measurable step toward it."},
 
   {"id": "COMM-01", "skill": "hep-communication", "source": "skills/hep-communication/SKILL.md", "match": "Every quantitative claim links to a result artifact",
