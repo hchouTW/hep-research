@@ -62,7 +62,8 @@
    "covers": [
     "exposure",
     "acceptance",
-    "livetime"
+    "livetime",
+    "cutoff_transmission"
    ],
    "class_coverage": {},
    "factors": [
@@ -78,7 +79,8 @@
    "covers": [
     "exposure",
     "acceptance",
-    "livetime"
+    "livetime",
+    "cutoff_transmission"
    ],
    "class_coverage": {
     "efficiency": {

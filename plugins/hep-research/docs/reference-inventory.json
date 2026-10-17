@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 99314,
+   "bytes": 100588,
    "uncited": 0
   },
   "hep-ml": {
@@ -1038,6 +1038,7 @@
     "skills/hep-computing/assets/time_slice_reduction.py",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/analysis-design.md",
+    "skills/hep-measurement/references/correction-chain.md",
     "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/weights-normalization.md"
@@ -2339,8 +2340,8 @@
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
    "owner": "hep-measurement",
-   "bytes": 9558,
-   "lines": 117,
+   "bytes": 10733,
+   "lines": 129,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-measurement/SKILL.md",
@@ -2348,6 +2349,7 @@
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/systematics.md",
+    "skills/hep-measurement/scripts/collection_time.py",
     "tests/skills/hep_measurement/test_method_references.py"
    ],
    "cited_by_other_skills": [],
@@ -2382,6 +2384,7 @@
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/analysis-design.md",
+    "skills/hep-measurement/references/correction-chain.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/weights-normalization.md",
     "tests/skills/hep_measurement/test_method_references.py"
@@ -2394,8 +2397,8 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16495,
-   "lines": 111,
+   "bytes": 16594,
+   "lines": 112,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",

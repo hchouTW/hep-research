@@ -22,7 +22,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | measurement-design | Measurement design and verdict-first review: estimand, selections and cutflows, backgrounds, correction chains, systematics plan, blinding policy | hep-measurement | tool | yes | M3, M4, M10 |  |
 | cosmic-ray-flux | Cosmic-ray flux from counts and its helpers (orbit cutoff, force field, broken power law, anisotropy design) | hep-measurement | tool | yes | M6, M9 |  |
 | systematic-scaling | Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection | hep-measurement | documentation | yes | M5, S2 |  |
-| collection-time | Collection time per period with quality cuts, cutoff transmission and eras | hep-measurement | none | yes | M1 |  |
+| collection-time | Collection time per period with quality cuts, cutoff transmission and eras | hep-measurement | tool | yes | M1 |  |
 | spectral-transform | Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging) | hep-measurement | none | yes | M7, M8 |  |
 | acceptance-from-generation | Acceptance from generation records | hep-measurement | none | yes | M2 |  |
 | response-folding | Response objects, forward folding, double-counting checks | hep-detector | tool | yes | D5 |  |

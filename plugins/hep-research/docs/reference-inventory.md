@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-communication | 57 | 402 | 0 |
 | hep-computing | 32 | 299 | 0 |
 | hep-detector | 35 | 449 | 0 |
-| hep-measurement | 12 | 99 | 0 |
+| hep-measurement | 12 | 101 | 0 |
 | hep-ml | 42 | 184 | 0 |
 | hep-statistics | 12 | 172 | 0 |
 | hep-theory | 11 | 84 | 0 |
@@ -144,7 +144,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `tikz-patterns.md` | hep-communication | 5.9 | no | 8 | - | 9257d7b5 2026-10-15 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
-| `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 7 | hep-measurement | a57e22cf 2026-10-17 |
+| `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 8 | hep-measurement | a57e22cf 2026-10-17 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
 | `batch-scheduling.md` | hep-computing | 30.4 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4b 2026-10-10 |
@@ -212,10 +212,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-design.md` | hep-measurement | 10.9 | yes | 14 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `backgrounds.md` | hep-measurement | 4.7 | yes | 20 | hep-detector | 9257d7b5 2026-10-15 |
-| `correction-chain.md` | hep-measurement | 9.6 | yes | 6 | - | 9257d7b5 2026-10-15 |
+| `correction-chain.md` | hep-measurement | 10.7 | yes | 7 | - | 9257d7b5 2026-10-15 |
 | `cosmic-ray-measurements.md` | hep-measurement | 19.9 | yes | 4 | - | 485e96cb 2026-10-17 |
-| `data-pipelines.md` | hep-measurement | 0.4 | no | 10 | hep-computing | 9257d7b5 2026-10-15 |
-| `hep-measurement-guide.md` | hep-measurement | 16.5 | yes | 9 | hep-detector | 26970179 2026-10-17 |
+| `data-pipelines.md` | hep-measurement | 0.4 | no | 11 | hep-computing | 9257d7b5 2026-10-15 |
+| `hep-measurement-guide.md` | hep-measurement | 16.6 | yes | 9 | hep-detector | 26970179 2026-10-17 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 8 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a584954 2026-10-17 |
 | `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 77d2607e 2026-10-16 |

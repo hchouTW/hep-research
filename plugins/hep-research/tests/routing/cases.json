@@ -3535,6 +3535,27 @@
    "trigger_terms": [
     "partitioning"
    ]
+  },
+  {
+   "id": "b-flux-m1-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I compute the collection time per rigidity bin and era from my period table, with quality cuts and a cutoff safety factor, for the flux normalization?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "live time",
+    "correction chains"
+   ]
+  },
+  {
+   "id": "b-flux-m1-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "通量正規化要用的收集時間怎麼算？每個時段有活時間比例與截止剛度，還要分 era 和品質條件。",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "live time"
+   ]
   }
  ]
 }

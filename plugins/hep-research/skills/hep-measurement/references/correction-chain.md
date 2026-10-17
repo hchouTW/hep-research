@@ -71,6 +71,18 @@ already includes the trigger and reconstruction), multiplying it with the other 
   after arguing that instrument, exposure, composition and other time effects are controlled there. It is a check
   within one experiment, not a general oracle across experiments.
 
+- **Collection time.** Near a cutoff, the normalization of a bin is its collection time T: the live time of the
+  periods in which the bin lies above the cutoff threshold (cutoff x a declared safety factor), times the acceptance
+  for the exposure (catalog composition `exposure_acceptance_livetime_transmission`: acceptance x `livetime` x
+  `cutoff_transmission`). Declare everything: the period key, duration, live fraction, quality cuts, the cutoff column
+  and safety factors, the variable and time binning, and the eras; nothing has a default. Count a period split across
+  files once, refuse overlapping periods and periods that cross an era or time-bin boundary, and report how many
+  periods each condition removed. T must not grow when the safety factor grows. "Collection time" is this quantity
+  in seconds; the contracts' `exposure_record` is the blinding record of data exposure, a different thing.
+  `scripts/collection_time.py` computes it (`accumulate`, `--emit-partial` and `merge`, which agree with a single
+  run); the generic pattern for partitioned time-sliced records is in
+  `<plugin root>/skills/hep-computing/references/analysis-data-pipelines.md`.
+
 Worked example (synthetic): period 1 has N = 100 in exposure 1.0e4, period 2 has N = 30 in exposure 2.0e3 (a short
 period). Fluxes 1.0e-2 and 1.5e-2; the exposure-weighted average is 130 / 1.2e4 = 1.083e-2, while the plain mean of the
 two fluxes would be 1.25e-2, 15% higher.

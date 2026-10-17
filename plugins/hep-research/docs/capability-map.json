@@ -40,7 +40,7 @@
    "id": "collection-time",
    "capability": "Collection time per period with quality cuts, cutoff transmission and eras",
    "owner": "hep-measurement",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "M1"

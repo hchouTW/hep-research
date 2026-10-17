@@ -342,6 +342,9 @@ C = [
     # batch B, C1: time-sliced records and mergeable reductions
  ("b-flux-c1-1", "en", "direct", "My per-period live-time records are split over many files and some periods appear twice; how do I merge the partial sums from my job array without double counting?", "hep-computing", ["merging and recovery"], None, None, {}),
  ("b-flux-c1-2", "zh-Hant", "direct", "每個時段的活時間紀錄分散在好幾個檔案，有些時段重複出現；分批處理後要怎麼合併部分和才不會重複計算？", "hep-computing", ["partitioning"], None, None, {}),
+    # batch B, M1: collection time
+ ("b-flux-m1-1", "en", "direct", "How do I compute the collection time per rigidity bin and era from my period table, with quality cuts and a cutoff safety factor, for the flux normalization?", "hep-measurement", ["live time", "correction chains"], None, None, {}),
+ ("b-flux-m1-2", "zh-Hant", "direct", "通量正規化要用的收集時間怎麼算？每個時段有活時間比例與截止剛度，還要分 era 和品質條件。", "hep-measurement", ["live time"], None, None, {}),
 ]
 
 cases = []
