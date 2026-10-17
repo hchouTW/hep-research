@@ -105,6 +105,7 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/batch-partition/` (fake Slurm and HTCondor schedulers) | - |
 | `examples/end-to-end-sample/` | - |
 | `examples/unfolding-coverage/` | J3 |
+| `examples/multi-era-fit/` (E-3, first part: two eras, collection time, era responses, split consistency, joint fit) | - |
 | `examples/stats-benchmarks/<name>/` (hep-statistics audit benchmarks: `coverage-grid`, ...; `--toys` sets the budget) | - |
 
 `tests/examples/` compares a fresh run with the

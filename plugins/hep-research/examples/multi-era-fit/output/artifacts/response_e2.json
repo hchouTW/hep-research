@@ -1,0 +1,299 @@
+{
+ "contract_version": "2.11.0",
+ "artifact_id": "multi-era-response-e2",
+ "artifact_type": "response",
+ "objective": "SYNTHETIC E-3 example",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.13.1",
+  "contracts": "2.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-17",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "truth_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.0,
+    2.0,
+    4.0,
+    8.0,
+    16.0,
+    32.0,
+    64.0
+   ]
+  },
+  "reco_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.0,
+    2.0,
+    4.0,
+    8.0,
+    16.0,
+    32.0,
+    64.0
+   ]
+  },
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_generated",
+  "inefficiency": "inside_matrix",
+  "acceptance": "inside_matrix",
+  "includes": [
+   "migration",
+   "efficiency"
+  ],
+  "applied_separately": [],
+  "underflow_overflow": "explicit_bins",
+  "intended_use": "forward_folding",
+  "conditions": "built by build_response.py from ev_e2.csv: 107496 events, 14053 with truth outside the truth axis (not used)",
+  "provenance": "matched truth/reco sample supplied by the user",
+  "form": "matrix",
+  "matrix": [
+   [
+    0.9765313606071235,
+    0.011736341718600737,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.00851375912757884,
+    0.9806213892553337,
+    0.010069266290405336,
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.007642269026065596,
+    0.9829399692149821,
+    0.009107956067506027,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.006990764494612622,
+    0.9823198499866059,
+    0.010455660255582807,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.008572193945888026,
+    0.9807667484187428,
+    0.012947311634598094
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.008777591325674454,
+    0.9784211472756699
+   ]
+  ],
+  "underflow": [
+   0.014954880265297663,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "overflow": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.008631541089732063
+  ],
+  "generated_per_truth_bin": [
+   31361.0,
+   21983.0,
+   15592.0,
+   11199.0,
+   7747.0,
+   5561.0
+  ],
+  "build_diagnostics": {
+   "mc_uncertainty": [
+    [
+     0.0008548543031005152,
+     0.0007263723527721287,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0005188108787847677,
+     0.0009297549956906347,
+     0.0007995587934353,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0005873565411388071,
+     0.0010370566716382187,
+     0.0008977057603080327,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0006672492075887402,
+     0.0012453166953261324,
+     0.0011556506900390429,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.000871137921573626,
+     0.0015604233659641123,
+     0.0015159452654497005
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0010597573960602683,
+     0.001948501046419116
+    ]
+   ],
+   "mc_uncertainty_method": "delta-method weighted multinomial",
+   "underflow_uncertainty": [
+    0.0006853691954063403,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overflow_uncertainty": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0012404671629108464
+   ],
+   "residual": "inverse",
+   "resolution": [
+    {
+     "n": 31361,
+     "sum_w": 31361.0,
+     "median": -6.357391287570291e-05,
+     "sigma68": 0.014166920687273939,
+     "mad": 0.009376450036718387,
+     "sigma_mad": 0.013901545626145614,
+     "tail_fraction": 0.010235642996077932,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 21983,
+     "sum_w": 21983.0,
+     "median": -1.2162800807735685e-05,
+     "sigma68": 0.006133338543797284,
+     "mad": 0.004073034914112761,
+     "sigma_mad": 0.006038690599714354,
+     "tail_fraction": 0.008825001137242414,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 15592,
+     "sum_w": 15592.0,
+     "median": -4.398131641204749e-05,
+     "sigma68": 0.0029422961590830415,
+     "mad": 0.00196474182740157,
+     "sigma_mad": 0.0029129305920963184,
+     "tail_fraction": 0.006349409953822473,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 11199,
+     "sum_w": 11199.0,
+     "median": -1.7091805730853893e-05,
+     "sigma68": 0.001458204389155763,
+     "mad": 0.0009654723526652947,
+     "sigma_mad": 0.001431411451967389,
+     "tail_fraction": 0.007232788641843022,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 7747,
+     "sum_w": 7747.0,
+     "median": -1.3323009628675442e-05,
+     "sigma68": 0.0007585909635474824,
+     "mad": 0.0004988733675267906,
+     "sigma_mad": 0.0007396307614485803,
+     "tail_fraction": 0.006583193494255841,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 5561,
+     "sum_w": 5561.0,
+     "median": -1.6521864028666566e-06,
+     "sigma68": 0.00042272504757735795,
+     "mad": 0.0002840279791054279,
+     "sigma_mad": 0.00042110051193937017,
+     "tail_fraction": 0.004495594317568782,
+     "tail_definition": "|r - median| > 3 sigma68"
+    }
+   ],
+   "effective_entries": [
+    31361.0,
+    21983.0,
+    15592.0,
+    11199.0,
+    7747.0,
+    5561.0
+   ],
+   "empty_truth_bins": []
+  },
+  "mc_stat": {
+   "kind": "generated_counts",
+   "weighted": false,
+   "events_per_truth_bin": [
+    31361,
+    21983,
+    15592,
+    11199,
+    7747,
+    5561
+   ]
+  }
+ }
+}

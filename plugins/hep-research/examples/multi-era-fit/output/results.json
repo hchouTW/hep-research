@@ -1,0 +1,120 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: fictional toy spectrometer; describes no experiment",
+ "seed": 20261017,
+ "toys": 1000,
+ "edges_gv": [
+  1.0,
+  2.0,
+  4.0,
+  8.0,
+  16.0,
+  32.0,
+  64.0
+ ],
+ "eras": [
+  "e1",
+  "e2"
+ ],
+ "toy_resolution": {
+  "e1": {
+   "a_per_gv": 0.000516755,
+   "b": 0.0231316
+  },
+  "e2": {
+   "a_per_gv": 0.000220659,
+   "b": 0.0160032
+  }
+ },
+ "checks": {
+  "c1_duplicates_removed": 2,
+  "c1_livetime_s": 18000.0,
+  "m1_collection_time_s": {
+   "e1": [
+    4500.0,
+    4500.0,
+    9000.0,
+    9000.0,
+    9000.0,
+    9000.0
+   ],
+   "e2": [
+    4500.0,
+    4500.0,
+    9000.0,
+    9000.0,
+    9000.0,
+    9000.0
+   ]
+  },
+  "d5_mix_vs_sum_of_folds_rel": 4.05e-16,
+  "s1_nominal": {
+   "exit": 0,
+   "verdict": "consistent",
+   "chi2": 10.434,
+   "ndf": 6,
+   "p": 0.1075,
+   "warnings": [
+    "shared systematic uncertainties not subtracted: no cross_covariance declared for e1-e2"
+   ]
+  },
+  "s1_offset": {
+   "exit": 1,
+   "verdict": "inconsistent",
+   "chi2": 120.78,
+   "ndf": 6,
+   "p": 1.117e-23,
+   "warnings": [
+    "shared systematic uncertainties not subtracted: no cross_covariance declared for e1-e2"
+   ]
+  }
+ },
+ "flux_true_per_gv": [
+  16.2874,
+  2.50652,
+  0.385735,
+  0.059362,
+  0.0091354,
+  0.00140587
+ ],
+ "flux_joint_per_gv": [
+  16.2569,
+  2.52521,
+  0.386833,
+  0.0592348,
+  0.00901367,
+  0.00142109
+ ],
+ "flux_joint_sigma_per_gv": [
+  0.0432413,
+  0.0122562,
+  0.00236909,
+  0.000659982,
+  0.000182637,
+  5.13485e-05
+ ],
+ "joint_fit_pulls": [
+  -0.7055,
+  1.526,
+  0.4633,
+  -0.1928,
+  -0.6665,
+  0.2964
+ ],
+ "coverage_1sigma": 0.6887,
+ "coverage_cells": 6000,
+ "criteria": {
+  "coverage_target": 0.68,
+  "coverage_tolerance": 0.03,
+  "split_alpha": 0.01,
+  "runtime_s_max": 60.0
+ },
+ "pass": {
+  "c1_period_split_across_files_counted_once": true,
+  "m1_partials_merged_equal_single_run": true,
+  "d5_fold_of_mix_equals_sum_of_era_folds": true,
+  "s1_no_difference_is_consistent": true,
+  "s1_injected_offset_is_caught": true,
+  "joint_fit_coverage_0p68_pm_0p03": true,
+  "runtime_below_60_s": true
+ }
+}
