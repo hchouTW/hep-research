@@ -89,7 +89,7 @@ class Override(unittest.TestCase):
 
 class LabelAndGate(unittest.TestCase):
     def base(self):
-        return json.loads((PLUGIN / "examples" / "collider-angular" / "output" / "artifacts" / "result.json").read_text())
+        return json.loads((PLUGIN / "contracts" / "fixtures" / "artifacts" / "valid" / "statres_frequentist.json").read_text())
 
     def test_vocabulary(self):
         vocab = json.loads((PLUGIN / "contracts" / "vocab" / "core.json").read_text())["vocabularies"]

@@ -159,7 +159,7 @@ class ProjectionLabelAndGate(unittest.TestCase):
         from contracts.validate import publication_gate
         vocab = json.loads((PLUGIN / "contracts" / "vocab" / "core.json").read_text())["vocabularies"]
         self.assertIn("projection", vocab["artifact_statuses"])
-        doc = json.loads((PLUGIN / "examples" / "collider-angular" / "output" / "artifacts" / "result.json").read_text())
+        doc = json.loads((PLUGIN / "contracts" / "fixtures" / "artifacts" / "valid" / "statres_frequentist.json").read_text())
         doc["status"] = ["projection"]
         g = publication_gate(doc)
         self.assertEqual(g["status"], "failed")
