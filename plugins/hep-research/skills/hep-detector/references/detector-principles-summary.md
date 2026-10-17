@@ -1,8 +1,7 @@
 # High-Energy-Physics Detectors: A Quick Reference
 
-A self-contained summary of a unified framework for understanding, comparing, and
-validating HEP detectors. Symbols and acronyms are defined in the [detector glossary](detector-glossary.md). Relations
-are labeled *exact*, *approximate*, *asymptotic*, *empirical*, or *detector-specific*.
+A summary of one framework for understanding, comparing and validating HEP detectors.
+Symbols and acronyms: [glossary](detector-glossary.md). Relations are labeled *exact*, *approximate*, *asymptotic*, *empirical*, or *detector-specific*.
 No experiment-specific performance number appears here; quote such numbers only with the
 apparatus, configuration, phase space, conditions, and source.
 
@@ -50,35 +49,11 @@ repeat them.
 
 ## 4. Detector families at a glance
 
-| Family | Earliest signal | Inferred quantity | Characteristic ambiguity | Distinctive residual / diagnostic |
-|---|---|---|---|---|
-| Hybrid pixel / MAPS | charge in silicon | 2D position, vertex | merged clusters | unbiased hit residual vs angle, cluster size |
-| Silicon strip | charge in silicon | 1D position | stereo ghosts | residual vs incidence angle; occupancy |
-| Drift chamber / tube / straw | drift time | radius | left-right; `t0` vs alignment | residual vs drift distance |
-| TPC (gas or liquid) | 3D charge + time | 3D track, `dE/dx` | crossing time `t_0`; distortion vs alignment | cluster-track residual vs `(r,z,rate)` |
-| RPC / MRPC | gas-gap avalanche | position, time | multi-hit | efficiency vs voltage (plateau) and rate |
-| GEM / Micromegas | micropattern gain | position, angle | angle dependence | residual vs angle; gain map |
-| Scintillating fiber | light amplitude | position | stereo ghosts | residual vs position along fiber |
-| Emulsion | grains | tracks, vertices | no timing | base-track agreement |
-| TOF / LGAD / MCP timing | pulse time | `beta`, time | multi-hit, `t_0`, wrong bunch | time residual vs species/amplitude/run |
-| RICH / DIRC / TOP | Cherenkov photons | `beta`, species | photon path; emission/chromatic terms | photon-angle residual vs momentum |
-| Threshold/differential Cherenkov | photon count | species by threshold | near-threshold Poisson | turn-on curve vs momentum |
-| TRD | transition X-rays + `dE/dx` | `e/pi` | `dE/dx` overlap | rejection at fixed efficiency vs momentum |
-| `dE/dx` / cluster counting | ionization samples | species | band crossings, saturation | band position vs `beta gamma` |
-| ECAL | EM shower | energy, position | overlap, conversions | `E/p`, resonance mass vs `eta` and `E` |
-| HCAL / jets | hadron shower | energy | `e/h`, leakage | response vs `pT`, flavor |
-| Muon system | ionization hits | `p`, `q`, ID | left-right, weak modes | dimuon mass and `q/p` vs `q*eta` |
-| Noble-liquid TPC | scintillation `S1` + charge `S2` | energy, position, species | `S1`-`S2` pairing; recombination | charge, light vs depth and time |
-| Water / scintillator | Cherenkov / scintillation | vertex, direction, energy | ring counting, optics | Michel electron, `pi^0` closure |
-| Bolometer / semiconductor | phonons / ionization | energy, recoil type | noise vs signal at threshold | calibration lines, leakage vs energy |
-| Air-shower, IACT, neutrino telescope | sparse light/particle samples | direction, energy, composition | topology, atmosphere/medium | hybrid/independent cross-check |
-
-**Common exceptions to the shared principles.** Drift and TPC systems can hide a timing
-error in a spatial residual. Timing systems have clock/reference terms that do not average
-across channels. Emulsion has no intrinsic timing. Muon systems fail at high momentum
-through charge misidentification and alignment weak modes. Rare-event searches are
-dominated by threshold and fiducial-mass systematics. Astroparticle systems have
-the atmosphere or medium optics as the largest nuisance, and the normalization is exposure (acceptance integrated over live time).
+Per family (interaction, direct observable, inferred quantity, ambiguity, calibration, validation, systematics):
+[comparison tables, Table 1](detector-comparison-tables.md#table-1-master-detector-table); natural residual, essential
+plot and failure signature per family: [Table 7](detector-comparison-tables.md#table-7-detector-specific-reconstructionperformance);
+common principles and family exceptions:
+[one-page synthesis](detector-case-studies-and-checklists.md#one-page-synthesis-common-principles-and-family-exceptions).
 
 ## 5. Performance metrics
 
@@ -130,15 +105,8 @@ driven by one event, so quote core bias, core width, and tail separately.
 
 ## 7. Calibration, alignment, validation, systematics
 
-| Concept | Question | Typical mistake |
-|---|---|---|
-| Response | What does the detector do? | Equated with calibration |
-| Calibration | Which constants map `y` to physical units? | Tuned on the measured observable (circular) |
-| Alignment | Where are the elements? | Conflated with timing or drift calibration |
-| Reconstruction | Which objects best explain `y`? | Treated as truth |
-| Performance | How good is it? | Denominators unstated |
-| Validation | Does the model match data? | 1D agreement only |
-| Systematic | What uncertainty remains? | Double counting; arbitrary envelopes |
+Response, calibration, alignment, reconstruction, performance, validation and systematics (question, output,
+typical mistake): [comparison tables, Table 6](detector-comparison-tables.md#table-6-calibration-vs-alignment-vs-reconstruction-vs-performance-vs-validation-vs-systematics).
 
 **Simulation levels.** Generator truth, simulation truth, digitized signals,
 reconstructed objects. Only the last two exist in data; every data-side performance
@@ -170,17 +138,9 @@ sideband, cosmic ray) whose own bias is part of the uncertainty.
 - Avoid double counting, noisy (finite-MC) variations promoted to shapes, excessive
   smoothing, arbitrary envelopes, and unjustified decorrelation.
 
-| Nuisance | Reconstructed effect | Physics effect |
-|---|---|---|
-| Gain/pedestal | energy/charge scale | mass, yields |
-| Time offset | time, `beta`, drift coordinate | PID, momentum |
-| Field map / alignment weak mode | momentum scale, charge-dependent `q/p` | mass, charge asymmetry |
-| Material | scattering, conversions | efficiency, scale |
-| Optical attenuation / refractive index | light yield, angle, threshold | energy scale, PID |
-| Electron lifetime | charge vs depth | energy scale, threshold |
-| Dead channels | acceptance holes | rate, efficiency |
-| Pileup/noise | clusters, `MET` | jets, isolation |
-| Atmosphere / ice / water optics | shower/light profile | flux, composition, effective volume |
+Nuisance -> reconstructed effect -> physics effect: the general mapping in
+[data/MC validation](data-mc-validation-and-detector-systematics.md), the specialized-detector nuisances in
+[comparison tables, Table 8](detector-comparison-tables.md#table-8-systematics-mapping).
 
 ## 8. Detector combination
 
@@ -210,40 +170,20 @@ mode.
 
 ## 10. A reusable checklist for an unfamiliar detector
 
-1. Answer the fourteen questions. 2. Name `x`, `y`, `theta`, `epsilon`; list irreducible
-fluctuations and correctable variations. 3. State the direct observable, the inferred
-quantity, and the degeneracy. 4. Name the natural local and global objects and residual.
-5. Identify the topology (sparse points, image, waveform, ring, shower, segment, time
-series, distributed array). 6. List mechanisms for inefficiency, fakes, duplicates,
-mis-ID, migration, and tails. 7. State scalings with energy, momentum, angle, occupancy,
-pileup, dose, rate, time. 8. Name the data-driven calibration and performance samples
-and the simulation-only quantities. 9. Fill the chain and trace a defect to a physics
-observable.
-
-**Reading a performance plot.** Which quantity, estimator, center, width, tail
-definition, selection? Binned in truth or reco? Denominator and matching rule? Statistical
-uncertainty (binomial)? Simulation or data, and what proxy? Plateau (insensitive) or
-turn-on (sensitive)? Tails on a log scale? Equivalent definitions across curves?
-
-**Diagnosing a data/MC discrepancy.** Confirm like-for-like comparison -> check
-conditions and period -> localize in the chain -> inspect conditional and joint
-distributions and tails -> test candidate causes with independent controls -> fix the
-cause, validate independently -> assign a systematic for the remaining freedom.
-
-**Calibration/alignment validation.** Closure on an independent sample without
-circularity; relative vs absolute and local vs global stated; intervals of validity
-monitored; weak modes tested with an independent constraint (resonance mass, cosmics,
-`E/p`); calibration-alignment coupling checked; the same constants applied in data and
-simulation.
+In [case studies and checklists](detector-case-studies-and-checklists.md): the
+[reusable checklist](detector-case-studies-and-checklists.md#reusable-checklist-for-any-unfamiliar-detector),
+[reading a performance plot](detector-case-studies-and-checklists.md#checklist-for-reading-a-performance-plot),
+[diagnosing a data/MC discrepancy](detector-case-studies-and-checklists.md#diagnostic-sequence-for-a-datamc-discrepancy) and
+[calibration and alignment validation](detector-case-studies-and-checklists.md#calibration-and-alignment-validation-checklist).
 
 ## 11. Reference index
 
-One file per topic under `references/`; load only what the task needs.
+Load only what the task needs.
 
-- Framework and equations: [measurement framework](detector-measurement-framework.md), [core equations](core-detector-equations.md), [signal formation and readout](signal-formation-and-readout.md), [front-end electronics and signal processing](front-end-electronics-and-signal-processing.md), [detector systems](detector-systems-overview.md).
-- Subsystems: [tracking](tracking-and-vertexing.md), [gaseous and specialized tracking](gaseous-and-specialized-tracking-technologies.md), [timing](timing-detectors.md), [calorimetry](calorimetry-ecal-hcal.md), [particle identification](particle-identification.md), [Cherenkov imaging and photosensors](cherenkov-imaging-variants-and-photosensors.md), [muon systems](muon-systems.md), [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md).
-- Reconstruction and performance: [physics objects](physics-objects-jets-btagging-met.md), [triggers, luminosity and pileup](triggers-luminosity-pileup.md), [event reconstruction](event-reconstruction.md), [truth matching](reconstruction-performance-and-truth-matching.md), [performance metrics](performance-metrics-and-residual-diagnostics.md), [response and forward folding](response-and-forward-folding.md), [charge-sign confusion](charge-confusion.md) (synthesis: mechanisms, measuring the rate, handoff to hep-measurement).
-- Validation and conditions: [data/MC validation and detector systematics](data-mc-validation-and-detector-systematics.md), [detector simulation](detector-simulation.md), [calibration and alignment](calibration-and-alignment.md).
+- Framework and equations: [measurement framework](detector-measurement-framework.md), [core equations](core-detector-equations.md), [signal formation and readout](signal-formation-and-readout.md), [front-end electronics](front-end-electronics-and-signal-processing.md), [detector systems](detector-systems-overview.md).
+- Subsystems: [tracking](tracking-and-vertexing.md), [gaseous and specialized tracking](gaseous-and-specialized-tracking-technologies.md), [timing](timing-detectors.md), [calorimetry](calorimetry-ecal-hcal.md), [particle identification](particle-identification.md), [Cherenkov imaging and photosensors](cherenkov-imaging-variants-and-photosensors.md), [muon systems](muon-systems.md), [noble-liquid and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md).
+- Reconstruction and performance: [physics objects](physics-objects-jets-btagging-met.md), [triggers, luminosity and pileup](triggers-luminosity-pileup.md), [event reconstruction](event-reconstruction.md), [truth matching](reconstruction-performance-and-truth-matching.md), [performance metrics](performance-metrics-and-residual-diagnostics.md), [response and forward folding](response-and-forward-folding.md), [charge-sign confusion](charge-confusion.md).
+- Validation and conditions: [data/MC validation](data-mc-validation-and-detector-systematics.md), [detector simulation](detector-simulation.md), [calibration and alignment](calibration-and-alignment.md).
 - Lookup: [case studies and checklists](detector-case-studies-and-checklists.md), [comparison tables](detector-comparison-tables.md), [glossary](detector-glossary.md), [bibliography](detector-principles-bibliography.md).
 - Astroparticle instruments: [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md), [extensive air showers](extensive-air-showers.md), [ground-based arrays](ground-based-detection-arrays.md), [imaging atmospheric Cherenkov telescopes](imaging-atmospheric-cherenkov.md), [neutrino telescopes](neutrino-astronomy.md), [space-based direct detection](space-based-direct-detection.md), [multimessenger analysis](multimessenger-analysis.md).
 
@@ -252,7 +192,7 @@ One file per topic under `references/`; load only what the task needs.
 | Task | Confirm first | Start with |
 |---|---|---|
 | Concept explanation | whether experiment-specific facts are needed (then the profile, not memory) | the subsystem file |
-| Design estimate | approximations, validity range, neglected terms; script outputs carry their validity flags | [core equations](core-detector-equations.md), the scripts |
+| Design estimate | approximations, validity range, neglected terms (script outputs flag validity) | [core equations](core-detector-equations.md), the scripts |
 | Performance measurement | data sample, denominator, matching definition, estimator, uncertainty (unweighted binomial counts only for a Clopper-Pearson interval) | [performance metrics](performance-metrics-and-residual-diagnostics.md), [truth matching](reconstruction-performance-and-truth-matching.md) |
 | Response construction | event mapping, weights, misses and fakes, binning, MC statistics, intended use; a mean and width alone do not determine a migration matrix | [response and forward folding](response-and-forward-folding.md) |
 | Charge-sign confusion rate | species and sign, denominator, true-rigidity binning, which routes (simulation, templates, known-sign control sample) are available | [charge-sign confusion](charge-confusion.md) |

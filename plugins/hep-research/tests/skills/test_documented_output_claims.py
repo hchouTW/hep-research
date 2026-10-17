@@ -27,9 +27,8 @@ T = "tests.skills.test_documented_output_claims"
 # (document, quoted statement, test id)
 CLAIMS = [
     # hep-statistics entry reference (core/stats guide)
-    (GUIDE, "output is JSON labeled `[General method]` (validators: status and findings)",
-     f"{T}.GeneralMethodLabel.test_computing_modules_label_their_output"),
-    (GUIDE, "(validators: status and findings)", f"{T}.GeneralMethodLabel.test_validators_report_status_and_findings"),
+    (GUIDE, "output is JSON labeled `[General method]`", f"{T}.GeneralMethodLabel.test_computing_modules_label_their_output"),
+    (GUIDE, "output is JSON labeled `[General method]`", f"{T}.GeneralMethodLabel.test_validators_label_their_output"),
     (GUIDE, "Every toy-based subcommand requires `--seed` and echoes it",
      "tests.core.test_stats_likelihood_limits.CliTests.test_subcommands_ok_and_seed_echoed"),
     (GUIDE, "Every toy-based subcommand requires `--seed` and echoes it",
@@ -125,7 +124,9 @@ class GeneralMethodLabel(unittest.TestCase):
                     self.assertEqual(code, 0, out)
                     self.assertEqual(out["label"], "[General method]")
 
-    def test_validators_report_status_and_findings(self):
+    def test_validators_label_their_output(self):
+        """The validators label their CLI output like the other modules (until batch 0b they did not, and the guide
+        named them as the exception); a refused input carries the label too."""
         with tempfile.TemporaryDirectory() as td:
             cov = Path(td) / "cov.json"
             cov.write_text(json.dumps({"matrix": [[1.0, 0.0], [0.0, 1.0]]}))
@@ -135,7 +136,10 @@ class GeneralMethodLabel(unittest.TestCase):
                                          capture_output=True, text=True, timeout=300)
                     out = json.loads(res.stdout)
                     self.assertIn("status", out)
-                    self.assertNotIn("label", out)
+                    self.assertEqual(out["label"], "[General method]")
+                    bad = subprocess.run([sys.executable, "-I", str(ROOT / "core" / "stats" / script),
+                                          str(Path(td) / "missing.json")], capture_output=True, text=True, timeout=300)
+                    self.assertEqual(json.loads(bad.stdout)["label"], "[General method]")
 
 
 class DetectorScriptCount(unittest.TestCase):

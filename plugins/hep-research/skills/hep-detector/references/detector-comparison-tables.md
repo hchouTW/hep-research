@@ -113,16 +113,21 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | Drift | residual vs drift distance | `r(t)` residual | left/right offset | per-layer efficiency vs distance |
 | TPC | cluster-track residual | residual vs `(r, z, rate)` | distortion | tracking efficiency vs `p`, `eta` |
 | MPGD | residual vs angle | gain map | discharges, angle bias | plateau scan |
+| RPC/MRPC | — | efficiency vs voltage (plateau) and rate | rate-dependent inefficiency, multi-hit | cosmics |
 | Fibers | residual vs position along fiber | amplitude vs position | attenuation | per-channel efficiency |
 | Emulsion | slope/position agreement | link efficiency | fake links | scanning efficiency |
 | TOF/timing | time residual vs species | time vs amplitude/run | walk, offset | core width + tail |
 | RICH/DIRC | photon-angle residual | angle vs `p` | index shift | efficiency/mis-ID at a likelihood cut |
+| Threshold Cherenkov | — | turn-on curve vs momentum | near-threshold Poisson | known-species samples |
+| `dE/dx` | — | band position vs `beta gamma` | band crossings, saturation | tag samples |
 | TRD | layer likelihood | pion rejection vs electron efficiency (`e/pi`) | gas/gain drift | rejection at fixed efficiency |
 | ECAL | `E/p`, `Z->ee` mass | scale vs `eta`, `E` | material/nonlinearity | resolution from `Z` line shape |
 | HCAL/jets | response vs `pT`, flavor | JES closure | non-compensation | response and `sigma_68` |
 | Muon | mass/`q/p` vs `q*eta` | dimuon mass maps | weak modes | tag-and-probe; charge misID |
 | Noble liquid | charge/light vs `z`, time | lifetime | purity drift | threshold efficiency |
 | Rare-event | line scale, leakage vs `E` | leakage plot | wall events | threshold and fiducial efficiency |
+| Water / scintillator | — | Michel electron, `pi^0` closure | ring counting, optics | containment |
+| Air-shower / IACT / neutrino telescope | — | hybrid or independent cross-check | topology, atmosphere/medium optics | — |
 
 ## Table 8: Systematics mapping
 

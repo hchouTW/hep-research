@@ -21,7 +21,7 @@ from pooling, so the output does not depend on padding values or padding length.
 gives a finite output: zeros after pooling, masked_softmax returns zeros for a fully masked row. ParTLite also
 feeds log(1 + multiplicity) to the head, because masked-mean pooling alone does not see the multiplicity.
 
-Weights. Training uses hep_losses.weighted_bce with signed weights normalized by sum|w| (ml-analysis.md, "Negative
+Weights. Training uses hep_losses.weighted_bce with signed weights normalized by sum|w| (ml-analysis-weights.md, "Negative
 weights"); the per-batch net weight per class is monitored and the count of batches with sum(w) <= 0 reported.
 torch is imported inside functions, so --help and the NumPy helpers work without it.
 """

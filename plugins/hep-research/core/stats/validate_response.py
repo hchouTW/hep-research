@@ -79,6 +79,8 @@ CLOSURE_BLOCKING = ("shape", "entries", "normalization", "metadata.normalization
                     "orientation", "dimensions")
 
 
+LABEL = "[General method]"  # the CLI output label of every core/stats module
+
 def _num(x) -> bool:
     return not isinstance(x, bool) and isinstance(x, (int, float)) and math.isfinite(x)
 
@@ -399,10 +401,10 @@ def main(argv: list[str] | None = None) -> int:
         if not isinstance(doc, dict):
             raise ValueError("top level must be a JSON object")
     except (OSError, ValueError) as exc:
-        print(json.dumps({"status": "unreadable", "error": str(exc)}, indent=2))
+        print(json.dumps({"label": LABEL, "status": "unreadable", "error": str(exc)}, indent=2))
         return 2
     result = validate_response(doc)
-    print(json.dumps(result, indent=2))
+    print(json.dumps({"label": LABEL, **result}, indent=2))
     if result["status"] == "fail" or (args.strict and result["status"] == "warn"):
         return 1
     return 0

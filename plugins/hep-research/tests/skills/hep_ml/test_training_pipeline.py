@@ -263,7 +263,7 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         self.assertGreater(best["metadata"]["weights"]["training"]["n_negative"], 0)
         self.assertEqual(best["metadata"]["weights"]["evaluation"]["treatment"], "signed, unmodified")
 
-        # dropping negative-weight events is no longer offered (ml-analysis.md forbids it; PML-WP1.5, ML-R06)
+        # dropping negative-weight events is no longer offered (ml-analysis-weights.md forbids it; PML-WP1.5, ML-R06)
         result = run(train_cmd(data, manifest, data_dir / "dropped", "--epochs", "1", "--negative-weights", "dropped"),
                      data_dir)
         self.assertEqual(result.returncode, 2)

@@ -287,6 +287,25 @@ C = [
  ('wp11-bound-dm-2', 'zh-Hant', 'out-of-v1', '哪一種暗物質模型可以解釋正電子超出？', 'hep-theory', [], None, None, {"set": "WP11", "limited_support": True, "note": "interpretation beyond the validated profiles: hep-theory gives the limited-support notice"}),
  ('wp11-bound-bc-1', 'en', 'direct', "Which is AMS's latest B/C paper?", 'hep-communication', ['which result is the latest'], None, None, {"set": "WP11", "profiles": ["experiment:ams-02"], "note": "publication-record question"}),
  ('wp11-bound-bc-2', 'zh-Hant', 'direct', 'AMS 最新的 B/C 論文是哪一篇？', 'hep-communication', ['which result is the latest'], None, None, {"set": "WP11", "profiles": ["experiment:ams-02"], "note": "publication-record question"}),
+ # v1.3 plan: BDT, RooFit/ROOT, detector design, theory domains, paper writing
+ ("ml-bdt-1", "en", "direct", "Train an XGBoost BDT with 5-fold cross-training by event number; my NLO signal sample has negative weights.", "hep-ml", ["XGBoost", "event weights including negative ones"], None, None, {}),
+ ("ml-bdt-2", "zh-Hant", "direct", "用 XGBoost 訓練 BDT 分辨訊號與背景，k-fold 依事件編號切，再選一個 90% 訊號效率的 working point。", "hep-ml", ["XGBoost", "working points"], None, None, {}),
+ ("st-roofit-1", "en", "direct", "My RooFit fit returns covQual 1 and asymmetric MINOS errors; can I quote the result?", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
+ ("st-roofit-2", "zh-Hant", "direct", "加權事件的 unbinned RooFit 擬合，誤差要用 SumW2Error 還是 AsymptoticError？", "hep-statistics", ["RooFit/RooStats", "unbinned fits"], None, None, {}),
+ ("co-roofit-neg-1", "en", "negative", "My RooWorkspace crashes when I import a second dataset with the same variable names.", "hep-computing", ["crashes"], "hep-statistics", None, {}),
+ ("co-rntuple-1", "en", "direct", "Convert my TTree to RNTuple and run the same RDataFrame selection with systematic variations through Vary.", "hep-computing", ["RNTuple", "RDataFrame"], None, None, {}),
+ ("co-teff-1", "zh-Hant", "neighboring", "TEfficiency 的通過數比總數多，程式一直報錯，怎麼修？", "hep-computing", ["histogram and TEfficiency objects"], "hep-detector", None, {}),
+ ("st-teff-2", "en", "neighboring", "Which interval should I quote for a trigger efficiency with only three failing events, Clopper-Pearson or Wilson?", "hep-statistics", ["intervals and limits"], "hep-computing", None, {}),
+ ("dr-design-1", "en", "direct", "Compare the magnetic field configuration and momentum resolution of the ATLAS and CMS trackers, with sources.", "hep-detector", ["sourced facts on large experiments' detectors", "tracking"], None, None, {}),
+ ("dr-design-2", "zh-Hant", "direct", "設計一個在 1 TeV 時動量解析度 10% 的磁譜儀，磁場、槓桿臂與層數要怎麼取捨？", "hep-detector", ["design principles and trade-offs"], None, None, {}),
+ ("ms-design-neg-1", "zh-Hant", "negative", "這個截面量測的 estimand 與 fiducial 區域要怎麼定義？", "hep-measurement", ["estimand and observable definition"], "hep-detector", None, {}),
+ ("th-const-1", "en", "direct", "Which CODATA edition gives the proton mass in my kinematics, and convert 1 GeV^-2 to millibarn.", "hep-theory", ["constants"], None, None, {}),
+ ("th-alphas-2", "zh-Hant", "direct", "把 αs(mZ) 用四迴圈跑到 mτ，味閾值要怎麼處理？", "hep-theory", ["schemes"], None, None, {}),
+ ("th-pi0-1", "en", "direct", "Given this neutral-pion spectrum, compute the gamma-ray spectrum from pi0 decay in astroparticle physics terms.", "hep-theory", ["astroparticle physics"], None, None, {}),
+ ("th-decay-2", "zh-Hant", "direct", "計算 238U 衰變鏈在 10 年後各子核的活度，有沒有達到長期平衡？", "hep-theory", ["nuclear decays"], None, None, {}),
+ ("cm-numbers-1", "en", "direct", "Generate the LaTeX macros for my results table from this statistical result, with consistent numbers and units.", "hep-communication", ["numbers and units"], None, None, {}),
+ ("cm-genre-2", "zh-Hant", "direct", "我要寫一篇 search 論文投 PRD，結果章節一定要有哪些內容？", "hep-communication", ["papers from results"], None, None, {}),
+ ("cm-translate-1", "en", "direct", "Translate my Chinese draft abstract into English without changing the claim strength or any number.", "hep-communication", ["English or Chinese"], None, None, {}),
 ]
 
 cases = []

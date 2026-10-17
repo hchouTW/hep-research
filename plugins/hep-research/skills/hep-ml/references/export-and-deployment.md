@@ -6,7 +6,7 @@ checkpoint format, see [checkpointing.md](checkpointing.md). For `torch.compile`
 training and eager inference, see [performance-memory.md](performance-memory.md). For
 deployment inside experiment software and hardware triggers (score agreement between
 environments, FPGA latency budgets, trigger systematics) see
-[ml-analysis.md](ml-analysis.md), "Deployment in experiment software and triggers"; this
+[ml-analysis-validation-and-deployment.md](ml-analysis-validation-and-deployment.md), "Deployment in experiment software and triggers"; this
 file covers the PyTorch side of the export.
 
 ## Before exporting anything

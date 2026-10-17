@@ -43,9 +43,24 @@ description: "Use when the deliverable is the design or review of an experimenta
 
 ## Resources
 
-Folder guide: [README.md](README.md). Start with [the analysis guide](references/hep-measurement-guide.md): it routes to one reference per question (design and blinding, weights, histograms and efficiencies, backgrounds, systematics, measurement definitions, validation); cosmic-ray measurement types and anisotropy: [index](references/cosmic-ray-measurements.md). Unfolding and combination methods belong to hep-statistics; detector data/MC validation to hep-detector.
+| Request | Read or run |
+|---|---|
+| Any measurement question: check-first proposals, invariants, routing | [analysis guide](references/hep-measurement-guide.md) |
+| Design, triggers, optimization, blinding | [analysis design](references/analysis-design.md); `mask_blinded_bins.py` (synthetic only) |
+| Estimand, fiducial definitions, result levels | [measurements and unfolding](references/measurements-and-unfolding.md) |
+| Efficiencies, exposure, live time, luminosity, POT | [correction chain](references/correction-chain.md) |
+| Backgrounds: control regions, ABCD, sidebands | [backgrounds](references/backgrounds.md) |
+| Physical sources of systematics, variations | [systematics](references/systematics.md); `check_systematic_variations.py`, `systematics_table_tex.py` |
+| Normalization, signed weights, cutflows, yields | [weights and normalization](references/weights-normalization.md); `make_yield_table.py` |
+| Histograms, efficiencies with uncertainties | [histograms and efficiencies](references/histograms-efficiencies.md) |
+| Validation, review checks, preservation | [analysis validation](references/analysis-validation.md) |
+| Review a spec or a change; deliverables | [review and artifacts](references/review-and-artifacts.md); `review_measurement_spec.py`, `review_analysis_change.py` |
+| Cosmic-ray flux, ratios, isotopes, anisotropy | [cosmic-ray measurements](references/cosmic-ray-measurements.md); `cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py` |
+| Geomagnetic cutoff, solar modulation | `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py` |
+| Counting reference, ratio of two yields | `counting_reference.py`, `particle_ratio_with_uncertainty.py` |
+| A named experiment's beams or run conditions | the bound profile's `index.md` |
 
-Scripts in `<plugin root>/skills/hep-measurement/scripts/` (read `--help` first; the README describes each): `check_systematic_variations.py`, `make_yield_table.py`, `systematics_table_tex.py`, `counting_reference.py`, `particle_ratio_with_uncertainty.py`, `mask_blinded_bins.py` (synthetic data and tests only), `review_analysis_change.py`, `review_measurement_spec.py`, and cosmic-ray helpers (`cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py`, `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py`). Spec template and field guide: `assets/measurement_spec.template.{json,md}`.
+Scripts in `<plugin root>/skills/hep-measurement/scripts/` (read `--help` first; the README describes each). Spec template and field guide: `assets/measurement_spec.template.{json,md}`. Unfolding and combination methods belong to hep-statistics; detector data/MC validation to hep-detector. Folder guide: [README.md](README.md).
 
 ## Handoffs
 

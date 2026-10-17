@@ -54,7 +54,7 @@ needed:
   (it refuses negative weights unless cells are merged).
 - **Prior correction** - a classifier trained under one class ratio estimates p(s|x)
   under that ratio; `f_phys = r·f / (r·f + 1 − f)` maps it to the physics ratio
-  ([ml-analysis.md](ml-analysis.md), "Class balancing and the prior";
+  ([ml-analysis-weights.md](ml-analysis-weights.md), "Class balancing and the prior";
   `assets/hep_metrics.py undo_prior_shift`, `calibration.py --prior-ratio-change`).
   Temperature scaling cannot do this.
 - **Conformal prediction** - wraps any trained model in prediction sets that contain the

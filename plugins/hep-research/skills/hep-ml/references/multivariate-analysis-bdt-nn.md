@@ -23,7 +23,7 @@ Prefer physically motivated features (masses, angular separations, known discrim
 low-level variable. Exclude features that encode the region definitions or the target itself (target leakage: a
 variable built from the selection that defines signal and control regions leaks across them and shows up only when a
 closure test fails). Check each feature's correlation with the fitted observable (typically a mass): a correlated
-feature sculpts the background after a cut on the score ([ml-analysis.md](ml-analysis.md), "Mass sculpting and
+feature sculpts the background after a cut on the score ([ml-analysis-decorrelation-and-systematics.md](ml-analysis-decorrelation-and-systematics.md), "Mass sculpting and
 decorrelation").
 
 ## Training practicalities: BDTs
@@ -36,15 +36,15 @@ decorrelation").
 - Choose the number of trees by early stopping on the validation fold, rechecked when the input samples change.
 - Tree libraries assume non-negative weights (a negative weight gives a negative Hessian). Since 1.3.0, XGBoost
   raises a fatal error on negative instance weights, so signed samples need a deliberate treatment before training
-  (options and costs: [ml-analysis.md](ml-analysis.md), "Negative weights"). Evaluate with the signed physics weights
+  (options and costs: [ml-analysis-weights.md](ml-analysis-weights.md), "Negative weights"). Evaluate with the signed physics weights
   and never drop the sign silently.
 - A hyperparameter search optimizes the analysis metric (expected sensitivity), not raw AUC or accuracy, with grouped
-  folds ([ml-analysis.md](ml-analysis.md), "Hyperparameter search").
+  folds ([ml-analysis-training-and-data.md](ml-analysis-training-and-data.md), "Hyperparameter search").
 
 ## Training practicalities: neural networks
 
 - Balance the class totals in the training weights (rescale each class to equal summed weight) and keep the relative
-  physics weights within a class; never oversample or flatten inside a class ([ml-analysis.md](ml-analysis.md),
+  physics weights within a class; never oversample or flatten inside a class ([ml-analysis-weights.md](ml-analysis-weights.md),
   "Event weights" and "Class balancing and the prior").
 - A batch with a few very high-weight events can dominate a step: monitor the effective sample size per batch, or cap
   extreme weights and document the cap. PyTorch practice: [deep-learning-guide.md](deep-learning-guide.md).

@@ -28,8 +28,8 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 ## Common conventions
 
 - **Dependencies.** Standard library only (the covariance and response validators use NumPy for eigenvalues when
-  installed and record the solver in `eigen_solver`); output is JSON labeled `[General method]` (validators: status
-  and findings). Nothing in it is any experiment's performance.
+  installed and record the solver in `eigen_solver`); output is JSON labeled `[General method]`. Nothing in it is
+  any experiment's performance.
 - **Run, do not hand-compute.** When a shell is available, run the matching subcommand for an exact limit or
   interval and quote its JSON output; a value worked by hand (no shell, or a quick check) is labeled as such and is
   not presented as the script's result.
@@ -150,25 +150,4 @@ convergence live outside `core/stats` (the reference index and skill scripts).
 
 ## Failure modes
 
-- Quoting the classical limit when it is zero or negative; reading a Feldman-Cousins lower bound of 0 as a failure or
-  as evidence for zero signal; quoting a CLs limit without its expected band, or as an exact-coverage confidence
-  interval or a Bayesian bound.
-- Quoting an asymptotic limit or significance at small counts without the toy calibration; a boundary significance
-  from naive Wilks; reporting a profile limit as CLs.
-- Treating a profile-construction interval or limit as having guaranteed coverage, or the finite-grid `neyman-limit` as
-  a proof of coverage; reading one coverage number as proof of coverage; omitting the seed.
-- Using an exact interval for a count whose background is uncertain, as if it were known; reporting a marginalized
-  result without varying `sigma_b`; choosing a Gaussian, log-normal or gamma constraint by convenience.
-- Ignoring finite MC statistics in a response or template; quoting a naive-fit error when `bb-fit` shows it inflated;
-  using independent response cells for a high-efficiency column; ignoring an efficiency systematic that scales whole
-  columns.
-- Choosing a regularization or iteration count from a scan that used the same truth as its prior; picking one
-  criterion without a toy comparison; ignoring a strongly negative adjacent-bin correlation; letting a fitted index
-  depend on the regularization without `fold-compare`; quoting a Laplace error of a penalized fit without toys;
-  treating a pull width near 1 on one truth as validation on another; comparing forward-fold priors by their ranking
-  on one truth.
-- Using a diagonal-only covariance for a ratio or fit whose bins share systematics; assuming a ratio cancels a
-  systematic without a stated correlation.
-- Feeding a `failed` template fit into an inference, or applying a script outside its stated range (means above 1e5,
-  or 500 for `fc-interval`; more than 60 bins, more than 6 templates or 8 nuisances) without a validated
-  approximation.
+The failure modes of quoting these results are listed in the [command reference](core-stats-commands.md#failure-modes).

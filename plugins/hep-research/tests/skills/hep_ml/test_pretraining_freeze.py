@@ -1,4 +1,4 @@
-"""Pre-training freeze (ml-analysis.md, "Training on data and blinding"): the shipped example decision record binds
+"""Pre-training freeze (ml-analysis-training-and-data.md, "Training on data and blinding"): the shipped example decision record binds
 its exposure record (contracts/lineage.py decision exits 0, exposure at decision time unexposed) and names the split
 manifest by its file SHA-256 in both `artifacts` and the `decision` text. Tampered copies fail: an edited exposure
 history, an understated `seen`, a decision dated before what it counts as seen, a changed split manifest or an

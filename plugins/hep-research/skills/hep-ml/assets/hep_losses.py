@@ -23,7 +23,7 @@ def weighted_bce(logits: torch.Tensor, targets: torch.Tensor, weights: torch.Ten
     norm="abs": divide by sum|w| (default; stable when sum(w) is near zero, keeps the sign of each term).
     norm="sum": divide by sum(w) (the unbiased weighted mean; unstable with strong cancellation).
     norm="none": return the weighted sum.
-    With signed weights a flexible model can make the loss unbounded below; see ml-analysis.md, "Negative
+    With signed weights a flexible model can make the loss unbounded below; see ml-analysis-weights.md, "Negative
     weights", for batch sizing, monitoring and the resampling alternatives.
     """
     logits = logits.reshape(-1)

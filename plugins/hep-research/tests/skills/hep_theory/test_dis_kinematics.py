@@ -249,7 +249,9 @@ class ContentTests(unittest.TestCase):
         text = SKILL.read_text(encoding="utf-8")
         self.assertIn("(references/dis-kinematics.md)", text)
         self.assertIn("`dis_kinematics.py`", text)
-        self.assertLessEqual(len(text.encode("utf-8")), 8192)
+        sys.path.insert(0, str(PLUGIN))
+        from tools.measure_entrypoints import BUDGET      # the budget's hard limit (B-01), not a copy of it
+        self.assertLessEqual(len(text.encode("utf-8")), BUDGET["skill_bytes_max"])
 
 
 if __name__ == "__main__":

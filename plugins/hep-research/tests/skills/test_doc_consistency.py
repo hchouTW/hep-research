@@ -5,7 +5,7 @@
 2. The hep-computing README says uproot only of the ROOT inspection tool that has an uproot backend.
 3. The capability-matrix row of the communication evaluation names the latest live run recorded in VALIDATION.md.
 4. The SKILL.md size record in docs/maintenance.md names every skill, within the budget.
-5. The hep-measurement guide states a rule to look the solar cycle up in SILSO, not a remembered chronology.
+5. The hep-measurement cosmic-ray invariants state a rule to look the solar cycle up in SILSO, not a remembered chronology.
 6. train_classifier.py reports no accuracy (its reference advises the analysis metric instead).
 7. Every mention of RooFit's AsymptoticError in likelihood-fitting.md and sweighted_fit.py says it treats the weights
    as known constants, not that it is the asymptotically correct covariance for sWeights.
@@ -99,11 +99,14 @@ class SizeRecord(unittest.TestCase):
 
 class SolarCycleRule(unittest.TestCase):
     def test_guide_states_a_lookup_rule(self):
-        guide = flat(text("skills/hep-measurement/references/hep-measurement-guide.md"))
-        self.assertIn("SILSO", guide)
-        self.assertIn("never from memory", guide)
-        for remembered in ("Dec 2008", "Apr 2014", "Nov 2011"):
-            self.assertNotIn(remembered, guide)
+        # the cosmic-ray invariants moved from the analysis guide to cosmic-ray-measurements.md (B-03)
+        rule = flat(text("skills/hep-measurement/references/cosmic-ray-measurements.md"))
+        self.assertIn("SILSO", rule)
+        self.assertIn("never from memory", rule)
+        for rel in ("skills/hep-measurement/references/cosmic-ray-measurements.md",
+                    "skills/hep-measurement/references/hep-measurement-guide.md"):
+            for remembered in ("Dec 2008", "Apr 2014", "Nov 2011"):
+                self.assertNotIn(remembered, flat(text(rel)), rel)
 
 
 class NoAccuracyMetric(unittest.TestCase):

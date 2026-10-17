@@ -71,6 +71,11 @@ SemVer for plugin (`.claude-plugin/plugin.json`), contracts (`contracts.CONTRACT
 
 ## 7. Loading budget (measured)
 
+Budget since the upgrade plan v1.3 (B-01, 2026-10-17): each SKILL.md has a 12,288-byte target (a warning, which
+`tools/budget_exceptions.json` may waive) and a 16,384-byte and 500-line hard limit (never waived); a description is
+at most 1,024 characters ([Agent Skills specification](https://agentskills.io/specification)); the registry is at
+most 3,072 bytes. Earlier measurements against the former 8,192-byte budget:
+
 `tools/measure_entrypoints.py` on 2026-10-08 (0.3.0): seven SKILL.md files 5,602–8,185 bytes each (budget 8,192), descriptions 765–990 characters (working budget 1,024), registry 1,240 B, host estimate **~2,205 always-on tokens** for all seven descriptions (`claude --plugin-dir ... plugin details hep-research`, CLI 2.1.292). SKILL.md line counts (52–65) are below the 100–180 guide because paragraphs are unwrapped; bytes are the binding budget. At M1 (2026-10-02) the files were 4.4–6.0 KiB with descriptions of 773–919 characters and ~2,005 always-on tokens.
 
 ## 8. Risk register

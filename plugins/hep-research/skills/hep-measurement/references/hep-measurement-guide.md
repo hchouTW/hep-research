@@ -1,9 +1,43 @@
 # Measurement design and review: routing and invariants (guide)
 
-Routing and rules of the hep-measurement skill: check-first corrections, working procedure, analysis invariants, the
-routing table and this skill's scripts. Links are relative to this file. Follow the user's language and project
-conventions; do not assume an experiment, energy, era or input format. Preserve existing physics behaviour (cuts,
-weights, binning, fit models) unless the user asks for a physics change.
+Routing and rules of the hep-measurement skill: the routing table first, then check-first corrections, working
+procedure, analysis invariants and this skill's scripts. Links are relative to this file.
+
+## Reference routing
+
+| Task | Read |
+|---|---|
+| Analysis design, quality masks, triggers, blinding, event keys | [Analysis design](analysis-design.md) |
+| Trigger efficiency from data: orthogonal and bootstrap triggers, prescaled unbiased samples, bias checks | [Analysis design, triggers](analysis-design.md#trigger-efficiency-from-data) |
+| Selection optimization: figures of merit (Asimov Z, Punzi), disjoint optimization samples | [Analysis design, optimization](analysis-design.md#selection-optimization-without-bias) |
+| Look-elsewhere at the design stage: scan grid and trials method fixed before unblinding | [Analysis design, look-elsewhere](analysis-design.md#look-elsewhere-at-the-design-stage) |
+| Review an analysis, note or spec; which deliverable to produce; measurement brief | [Review and deliverables](review-and-artifacts.md) |
+| The measurement-spec fields and template | [Field guide](../assets/measurement_spec.template.md) |
+| Correction chain: efficiency factors and their denominators, exposure, luminosity, POT, data/MC ratios | [Correction chain](correction-chain.md) |
+| Cosmic-ray measurement types (absolute flux, ratios, isotopes, time dependence, rare events) and anisotropy design (dipole, directional exposure, amplitude limits) | [Cosmic-ray measurements](cosmic-ray-measurements.md) |
+| Time-dependent measurements: per-period exposure, Bartels rotations, efficiency drift | [Correction chain, time dependence](correction-chain.md#time-dependent-measurements) |
+| Nuclei and isotopes: survival probability, fragmentation feed-down, charge-ladder leakage | [Correction chain, nuclei](correction-chain.md#nuclei-and-isotopes) |
+| Neutrino and fixed-target: POT, near/far extrapolation, target absorption, empty-target subtraction | [Correction chain, neutrino and fixed target](correction-chain.md#neutrino-and-fixed-target-specifics) |
+| Luminosity, cross sections, signed weights, cutflows | [Normalization](weights-normalization.md) |
+| Histograms, efficiencies, covariance, plotting | [Histograms and uncertainties](histograms-efficiencies.md) |
+| Control regions, ABCD, fake rates, sidebands, transfer factors | [Background estimation](backgrounds.md) |
+| Antiparticle backgrounds: charge-sign confusion, species-specific effects, misidentified-proton templates | [Backgrounds, antiparticles](backgrounds.md#antiparticles-and-charge-sign-confusion) |
+| Physical sources of systematics, correlation evidence, variation registry | [Systematics](systematics.md) |
+| Estimand sentence, truth-level and fiducial definitions, result levels; cross sections, response, unfolding inputs, combinations | [Measurements and unfolding](measurements-and-unfolding.md) |
+| Steeply falling spectra: spillover, forward-fold or unfold, binning, resolution tails | [Measurements, spillover](measurements-and-unfolding.md#steeply-falling-spectra-and-spillover) |
+| Debugging, verification, preservation, review checks | [Validation](analysis-validation.md) |
+
+## Handoffs to other skills
+
+| Task | Read |
+|---|---|
+| Detector response, efficiencies, resolution, triggers, calibration, cosmic-ray detection | hep-detector: [detector measurement framework](../../hep-detector/references/detector-measurement-framework.md) |
+| Likelihoods, nuisance modeling, intervals, significance, unfolding, combinations | hep-statistics: [core statistics guide](../../hep-statistics/references/core-stats-guide.md) |
+| Predictions, generators, theory uncertainties | hep-theory: [event generation](../../hep-theory/references/event-generation.md) |
+| Classifiers, BDTs, leakage, mass sculpting | hep-ml: [ML in analyses](../../hep-ml/references/ml-analysis.md) |
+| Analysis code, ROOT/columnar pipelines, builds, batch jobs | hep-computing: [analysis data pipelines](../../hep-computing/references/analysis-data-pipelines.md) |
+| Citations, versions and methodological sources; diagrams | hep-communication: [primary sources](../../hep-communication/references/primary-sources-and-version-checks.md) |
+| Experiment-specific practice and results | The bound experiment profile's `index.md` (`<plugin root>/profiles/registry.json`) |
 
 ## Check first: proposals to correct before answering
 
@@ -31,8 +65,11 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 
 1. Classify the task (design, review, quick question). Inspect the project's spec, configs and a small sample before proposing changes.
 2. Establish the estimand, data/MC distinction, units, observables, selections, normalization, regions and blinding state. State assumptions; never invent luminosities, cross sections, calibration values or correlations for a reported result.
-3. Read only the references the task needs (routing table below). When a bundled script computes the number asked for (flux and Poisson interval, cutoff, ratio uncertainty), run it and quote its output instead of computing by hand. Code itself belongs to hep-computing ([analysis data pipelines](../../hep-computing/references/analysis-data-pipelines.md)).
+3. Read only the references the task needs (routing table above). When a bundled script computes the number asked for (flux and Poisson interval, cutoff, ratio uncertainty), run it and quote its output instead of computing by hand. Code itself belongs to hep-computing ([analysis data pipelines](../../hep-computing/references/analysis-data-pipelines.md)).
 4. Deliver the spec or answer with its assumptions, validation evidence and limitations, scaled to the question; state which checks were not run and why.
+
+Follow the user's language and project conventions; do not assume an experiment, energy, era or input format.
+Preserve existing physics behaviour (cuts, weights, binning, fit models) unless the user asks for a physics change.
 
 ## Analysis invariants
 
@@ -52,42 +89,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 
 ### Astroparticle and cosmic-ray
 
-- In an ON/OFF or blind sky-scan search, the OFF/background region must not overlap the ON region, and a reported significance must account for the number of independent trials (positions, energy bins, time windows, source catalogs) actually tested, not just the one presented.
-- Distinguish a flux measured at the top of the atmosphere or at an instrument from one corrected to the local interstellar spectrum; state the solar-modulation epoch/potential and the geomagnetic cutoff applied whenever a low-rigidity cosmic-ray flux is reported. Keep an event in a rigidity bin only if the bin's lower edge is above f times the maximum cutoff over the acceptance cone, backtraced through a realistic field model at that time; f is an experiment's convention taken from its profile, and the same rule defines the exposure, E_i = sum over t of T_live(t) A_i step(R_low,i > f Rc_max(t)) ([selection rule](../../hep-detector/references/space-based-direct-detection.md)); a Stormer formula is only a planning estimate. Take the epoch's solar phase from the SILSO sunspot record, never from memory: look up in the [SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm) the minimum and the 13-month smoothed maximum of the cycle that contains the data-taking period, and state them with the date the table was read (smoothed values are revised); a multi-peaked maximum is solar maximum, not a declining phase. The detector reference gives a worked reading for cycles 24 and 25 ([space-based direct detection](../../hep-detector/references/space-based-direct-detection.md)).
-- Do not draw a composition conclusion from a single shower observable (X_max or muon content alone) without stating the hadronic interaction model assumed (quote more than one) and checking consistency against the other observable, given the current muon-content/X_max modeling discrepancy. Use the X_max distribution width (sigma(X_max)), not only the mean: simulations give about 60 g/cm2 for protons and about 20 g/cm2 for iron near 1e18 eV, far wider than the naive superposition value sigma_p/sqrt(A) (about 8 g/cm2); a mixed composition adds the spread of the component means, sigma(X_max)^2 = <sigma_i^2> + (spread of <X_max>_i), so the width measures the variance of lnA; convert mean and width to lnA moments for each hadronic model ([Kampert & Unger 2012, arXiv:1201.0018](https://arxiv.org/abs/1201.0018), Sec. 2).
-- A flux or rate reported from raw counts must use an exact Poisson interval, not a Gaussian sqrt(N) approximation, whenever counts are low enough for the two to disagree (routine in a steeply falling spectrum's high-energy tail); state the exposure (effective area/geometric factor times live time times solid angle) and bin width used, separately from the raw count. If asked whether `sqrt(N)` is right for a few-count bin, answer no (not "approximately right"), run `<plugin root>/skills/hep-measurement/scripts/cosmic_ray_flux.py` for the interval, and for a high-rigidity/energy bin also address resolution spillover and background ([space-based direct detection, low-count bins](../../hep-detector/references/space-based-direct-detection.md#low-count-high-rigidity-bins)).
-- A ratio or fraction of two yields (e.g. a positron fraction or an antiproton/proton ratio) must use the yields' actual covariance, not an independence assumption, whenever they share a systematic (the same acceptance, exposure, or background-template shape) - state which systematics are shared and whether they were treated as correlated. Species-specific effects (e.g. charge confusion, which feeds protons into the antiproton sample) belong to one yield only and do not cancel.
-
-## Reference routing
-
-| Task | Read |
-|---|---|
-| Analysis design, quality masks, triggers, blinding, event keys | [Analysis design](analysis-design.md) |
-| Trigger efficiency from data: orthogonal and bootstrap triggers, prescaled unbiased samples, bias checks | [Analysis design, triggers](analysis-design.md#trigger-efficiency-from-data) |
-| Selection optimization: figures of merit (Asimov Z, Punzi), disjoint optimization samples | [Analysis design, optimization](analysis-design.md#selection-optimization-without-bias) |
-| Look-elsewhere at the design stage: scan grid and trials method fixed before unblinding | [Analysis design, look-elsewhere](analysis-design.md#look-elsewhere-at-the-design-stage) |
-| Review an analysis, note or spec; which deliverable to produce; measurement brief | [Review and deliverables](review-and-artifacts.md) |
-| The measurement-spec fields and template | [Field guide](../assets/measurement_spec.template.md) |
-| Correction chain: efficiency factors and their denominators, exposure, luminosity, POT, data/MC ratios | [Correction chain](correction-chain.md) |
-| Cosmic-ray measurement types (absolute flux, ratios, isotopes, time dependence, rare events) and anisotropy design (dipole, directional exposure, amplitude limits) | [Cosmic-ray measurements](cosmic-ray-measurements.md) |
-| Time-dependent measurements: per-period exposure, Bartels rotations, efficiency drift | [Correction chain, time dependence](correction-chain.md#time-dependent-measurements) |
-| Nuclei and isotopes: survival probability, fragmentation feed-down, charge-ladder leakage | [Correction chain, nuclei](correction-chain.md#nuclei-and-isotopes) |
-| Neutrino and fixed-target: POT, near/far extrapolation, target absorption, empty-target subtraction | [Correction chain, neutrino and fixed target](correction-chain.md#neutrino-and-fixed-target-specifics) |
-| Luminosity, cross sections, signed weights, cutflows | [Normalization](weights-normalization.md) |
-| Histograms, efficiencies, covariance, plotting | [Histograms and uncertainties](histograms-efficiencies.md) |
-| Control regions, ABCD, fake rates, sidebands, transfer factors | [Background estimation](backgrounds.md) |
-| Antiparticle backgrounds: charge-sign confusion, species-specific effects, misidentified-proton templates | [Backgrounds, antiparticles](backgrounds.md#antiparticles-and-charge-sign-confusion) |
-| Physical sources of systematics, correlation evidence, variation registry | [Systematics](systematics.md) |
-| Estimand sentence, truth-level and fiducial definitions, result levels; cross sections, response, unfolding inputs, combinations | [Measurements and unfolding](measurements-and-unfolding.md) |
-| Steeply falling spectra: spillover, forward-fold or unfold, binning, resolution tails | [Measurements, spillover](measurements-and-unfolding.md#steeply-falling-spectra-and-spillover) |
-| Debugging, verification, preservation, review checks | [Validation](analysis-validation.md) |
-| Detector response, efficiencies, resolution, triggers, calibration, cosmic-ray detection | hep-detector: [detector measurement framework](../../hep-detector/references/detector-measurement-framework.md) |
-| Likelihoods, nuisance modeling, intervals, significance, unfolding, combinations | hep-statistics: [core statistics guide](../../hep-statistics/references/core-stats-guide.md) |
-| Predictions, generators, theory uncertainties | hep-theory: [event generation](../../hep-theory/references/event-generation.md) |
-| Classifiers, BDTs, leakage, mass sculpting | hep-ml: [ML in analyses](../../hep-ml/references/ml-analysis.md) |
-| Analysis code, ROOT/columnar pipelines, builds, batch jobs | hep-computing: [analysis data pipelines](../../hep-computing/references/analysis-data-pipelines.md) |
-| Citations, versions and methodological sources; diagrams | hep-communication: [primary sources](../../hep-communication/references/primary-sources-and-version-checks.md) |
-| Experiment-specific practice and results | The bound experiment profile's `index.md` (`<plugin root>/profiles/registry.json`) |
+The astroparticle and cosmic-ray invariants (ON/OFF trials, flux level, cutoff and solar phase, shower composition, low-count intervals, correlated ratios) are in [cosmic-ray measurements, invariants](cosmic-ray-measurements.md#astroparticle-and-cosmic-ray-invariants).
 
 ## Executable resources
 
@@ -106,14 +108,3 @@ Scripts in `<plugin root>/skills/hep-measurement/scripts/`; each takes `--status
 Assets in `<plugin root>/skills/hep-measurement/assets/`: `measurement_spec.template.json` and its field guide, `worked-spec.cosmic-ray.synthetic.json`, `measurement-review-template.md`, `review-example.synthetic.json`, `systematics.csv`, `report-template.md`, `cosmic-ray-spectrum.example.json` (synthetic input for the power-law fit).
 
 Worked end to end (estimand, ledgers, spec, validation, review verdict): `<plugin root>/examples/collider-angular/` and `<plugin root>/examples/ams-flux-ratio/` (each run writes `review.md` with `review_measurement_spec.py`, subtracts a sideband background with a closure test and masks a blinded bin with `mask_blinded_bins.py`); specs with backgrounds, control regions, closure and an active blinding mask: `assets/measurement_spec.template.json` (collider) and `assets/worked-spec.cosmic-ray.synthetic.json` (cosmic ray).
-
-## Example requests
-
-- "Review this measurement spec and tell me whether it is ready."
-- "Design the selection, background estimate and correction chain for a flux measurement over two periods."
-- "Which systematics should I evaluate for this cross section, and how does each reach the result?"
-- "Review this NanoAOD selection and explain the yield difference for the negative-weight sample."
-- "Is a 4.8-sigma excess in my ON/OFF gamma-ray source search significant after accounting for the sky scan?"
-- "Convert this local-interstellar proton spectrum to what we'd expect at 1 AU during solar minimum vs. solar maximum."
-- "Propagate the uncertainty on a positron fraction from independent positron and electron template-fit yields."
-- "Compute the differential flux and its statistical uncertainty from these raw counts, exposure, and bin width."

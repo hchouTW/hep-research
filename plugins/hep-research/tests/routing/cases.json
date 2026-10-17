@@ -3069,6 +3069,222 @@
     "experiment:ams-02"
    ],
    "note": "publication-record question"
+  },
+  {
+   "id": "ml-bdt-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train an XGBoost BDT with 5-fold cross-training by event number; my NLO signal sample has negative weights.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "XGBoost",
+    "event weights including negative ones"
+   ],
+   "inputs": {
+    "signal_nlo.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nevent_number,pt,eta,mass,weight,label\n1001,52.1,0.3,118.2,1.12,1\n1002,47.8,-1.1,121.0,-0.94,1\n1003,61.0,0.8,124.9,1.05,1\n2001,33.2,1.9,96.4,1.00,0\n"
+   }
+  },
+  {
+   "id": "ml-bdt-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 XGBoost 訓練 BDT 分辨訊號與背景，k-fold 依事件編號切，再選一個 90% 訊號效率的 working point。",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "XGBoost",
+    "working points"
+   ]
+  },
+  {
+   "id": "st-roofit-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My RooFit fit returns covQual 1 and asymmetric MINOS errors; can I quote the result?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats"
+   ],
+   "inputs": {
+    "fit_log.txt": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nRooFitResult: minimized FCN value: 1234.56, estimated distance to minimum: 3.2e-05\n  covariance matrix quality: Approximation only, not accurate (covQual 1)\n  Status : MINIMIZE=0 HESSE=0 MINOS=0\n  nsig = 152 +21.4 -18.9\n  nbkg = 980 +/- 35\n"
+   }
+  },
+  {
+   "id": "st-roofit-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "加權事件的 unbinned RooFit 擬合，誤差要用 SumW2Error 還是 AsymptoticError？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats",
+    "unbinned fits"
+   ]
+  },
+  {
+   "id": "co-roofit-neg-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "My RooWorkspace crashes when I import a second dataset with the same variable names.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes"
+   ],
+   "not": "hep-statistics",
+   "inputs": {
+    "build_ws.C": "// SYNTHETIC routing fixture: invented values, not data from any experiment.\nvoid build_ws() {\n  RooRealVar x(\"x\", \"x\", 0, 10);\n  RooWorkspace w(\"w\");\n  RooDataSet d1(\"d1\", \"\", RooArgSet(x));\n  RooDataSet d2(\"d2\", \"\", RooArgSet(x));\n  w.import(d1);\n  w.import(d2);  // crashes here\n}\n"
+   }
+  },
+  {
+   "id": "co-rntuple-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Convert my TTree to RNTuple and run the same RDataFrame selection with systematic variations through Vary.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "RNTuple",
+    "RDataFrame"
+   ],
+   "inputs": {
+    "selection.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport ROOT\ndf = ROOT.RDataFrame('Events', 'events.root')\nh = df.Filter('nMuon >= 2').Define('pt0', 'Muon_pt[0]').Histo1D(('pt0', '', 50, 0, 200), 'pt0')\n"
+   }
+  },
+  {
+   "id": "co-teff-1",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "TEfficiency 的通過數比總數多，程式一直報錯，怎麼修？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "histogram and TEfficiency objects"
+   ],
+   "not": "hep-detector",
+   "inputs": {
+    "eff.C": "// SYNTHETIC routing fixture: invented values, not data from any experiment.\nvoid eff() {\n  TH1D pass(\"pass\", \"\", 10, 0, 100);\n  TH1D total(\"total\", \"\", 10, 0, 100);\n  pass.Fill(50); pass.Fill(50);\n  total.Fill(50);\n  TEfficiency e(pass, total);\n}\n"
+   }
+  },
+  {
+   "id": "st-teff-2",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Which interval should I quote for a trigger efficiency with only three failing events, Clopper-Pearson or Wilson?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "intervals and limits"
+   ],
+   "not": "hep-computing"
+  },
+  {
+   "id": "dr-design-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compare the magnetic field configuration and momentum resolution of the ATLAS and CMS trackers, with sources.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "sourced facts on large experiments' detectors",
+    "tracking"
+   ]
+  },
+  {
+   "id": "dr-design-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "設計一個在 1 TeV 時動量解析度 10% 的磁譜儀，磁場、槓桿臂與層數要怎麼取捨？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ]
+  },
+  {
+   "id": "ms-design-neg-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "這個截面量測的 estimand 與 fiducial 區域要怎麼定義？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "estimand and observable definition"
+   ],
+   "not": "hep-detector",
+   "inputs": {
+    "analysis_plan.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n# 截面量測計畫（草稿）\n目標：雙噴流事件的截面。\n選擇：兩個噴流 pT > 30 GeV，|eta| < 2.5。\n尚未定義 fiducial 區域。\n"
+   }
+  },
+  {
+   "id": "th-const-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which CODATA edition gives the proton mass in my kinematics, and convert 1 GeV^-2 to millibarn.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "constants"
+   ]
+  },
+  {
+   "id": "th-alphas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把 αs(mZ) 用四迴圈跑到 mτ，味閾值要怎麼處理？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "schemes"
+   ]
+  },
+  {
+   "id": "th-pi0-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Given this neutral-pion spectrum, compute the gamma-ray spectrum from pi0 decay in astroparticle physics terms.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ],
+   "inputs": {
+    "pi0_spectrum.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nE_pi0_GeV,dN_dE_per_GeV\n1,2.0e3\n3,1.1e2\n10,4.0e0\n30,1.5e-1\n100,4.8e-3\n"
+   }
+  },
+  {
+   "id": "th-decay-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "計算 238U 衰變鏈在 10 年後各子核的活度，有沒有達到長期平衡？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nuclear decays"
+   ]
+  },
+  {
+   "id": "cm-numbers-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Generate the LaTeX macros for my results table from this statistical result, with consistent numbers and units.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "numbers and units"
+   ],
+   "inputs": {
+    "statistical_result.json": "{\n \"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\",\n \"artifact_type\": \"statistical-result\",\n \"status\": [\n  \"synthetic\"\n ],\n \"extension\": {\n  \"results\": {\n   \"mu_hat\": 1.04,\n   \"mu_err_up\": 0.21,\n   \"mu_err_down\": 0.19,\n   \"upper_limit_95\": 1.46\n  }\n }\n}\n"
+   }
+  },
+  {
+   "id": "cm-genre-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要寫一篇 search 論文投 PRD，結果章節一定要有哪些內容？",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "papers from results"
+   ]
+  },
+  {
+   "id": "cm-translate-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Translate my Chinese draft abstract into English without changing the claim strength or any number.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "English or Chinese"
+   ],
+   "inputs": {
+    "abstract_zh.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n我們以 3.2 fb⁻¹ 的合成資料量測截面，得到 σ = 12.4 ± 0.8 (stat) ± 1.1 (syst) pb，與理論預測一致。\n"
+   }
   }
  ]
 }

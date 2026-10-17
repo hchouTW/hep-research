@@ -54,6 +54,8 @@ DEFAULT_TOL = {"symmetry": 1e-8, "psd": 1e-8, "correlation": 1e-8,
 EPS = sys.float_info.epsilon
 
 
+LABEL = "[General method]"  # the CLI output label of every core/stats module
+
 def jacobi_eigh(matrix: list[list[float]], max_sweeps: int = 100, info: dict | None = None) -> tuple[list[float], list[list[float]]]:
     """Eigen-decomposition of a real symmetric matrix by cyclic Jacobi rotations (core/stats/_linalg.py).
     Returns (eigenvalues ascending, eigenvectors as columns in matching order); info receives whether it converged."""
@@ -295,10 +297,10 @@ def main(argv: list[str] | None = None) -> int:
         if not isinstance(doc, dict):
             raise ValueError("top level must be a JSON object")
     except (OSError, ValueError) as exc:
-        print(json.dumps({"status": "unreadable", "error": str(exc)}, indent=2))
+        print(json.dumps({"label": LABEL, "status": "unreadable", "error": str(exc)}, indent=2))
         return 2
     result = validate_covariance(doc, demo_clip=args.demo_psd_clip)
-    print(json.dumps(result, indent=2))
+    print(json.dumps({"label": LABEL, **result}, indent=2))
     if result["status"] == "fail" or (args.strict and result["status"] == "warn"):
         return 1
     return 0
