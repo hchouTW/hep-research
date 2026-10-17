@@ -132,22 +132,12 @@ detailed acceleration model.
 
 ## Propagation
 
-Once accelerated, charged cosmic rays do not travel in straight lines - Galactic (and,
-for UHECRs, extragalactic) magnetic fields scatter them, and propagation is normally
-treated as diffusion. The transport equation for species `i` (set the time derivative to zero for the steady state) is
+Owner: hep-theory. The transport equation and its terms (diffusion, convection, reacceleration, losses,
+fragmentation and decay), the halo geometry, the diffusion coefficient, and what secondary-to-primary ratios such as
+B/C constrain (the path length, separating a propagation effect from a source-spectrum effect) are in
+[cosmic-ray propagation](../../hep-theory/references/cosmic-ray-propagation.md#the-model-families). What matters for
+interpreting a measured spectrum on the detector side:
 
-    dN_i/dt = div(D grad N_i) - div(V N_i) + d/dE (b_i N_i) - N_i/tau_i + Q_i + sum_{j>i} N_j/tau_{j->i}
-
-with diffusion coefficient `D(E)` (typically rising with rigidity), convection velocity `V`, loss rate `b = -dE/dt > 0` (adiabatic, ionization, or - for extragalactic protons above the pion-production threshold - photopion losses on the CMB), fragmentation (and decay) time `tau_i`, source term `Q_i` and, last, the secondary source from heavier parents; reacceleration adds a momentum-diffusion term.
-Consequences that matter for interpreting a measured spectrum:
-
-- **Secondary-to-primary ratios** (boron/carbon, or sub-iron/iron) measure the
-  *path length* traversed, since secondaries are produced by spallation of primaries
-  on the interstellar medium. A falling B/C ratio with rising energy is direct
-  evidence that higher-energy particles escape the Galaxy faster (a rigidity-dependent
-  diffusion coefficient), independent of any assumption about the source spectrum
-  itself - the standard way to separate an acceleration-spectrum effect from a
-  propagation effect.
 - **Anisotropy** is expected to grow with energy in a diffusive picture (fewer
   scatterings before escape, so the arrival direction retains more memory of the
   source), and a measured anisotropy amplitude and phase is one of the few
@@ -158,8 +148,9 @@ Consequences that matter for interpreting a measured spectrum:
   suppresses the flux reaching the inner heliosphere in a way that varies with the
   solar cycle. Any low-rigidity spectrum measurement must state the solar-activity
   epoch (and ideally the force-field modulation potential) it was taken under - see
-  [space-based direct detection](space-based-direct-detection.md) for the
-  force-field approximation used to compare measurements taken at different times.
+  [space-based direct detection](space-based-direct-detection.md#solar-modulation) for what to state, and
+  hep-theory's [force-field section](../../hep-theory/references/cosmic-ray-propagation.md#force-field-solar-modulation)
+  for the formula used to compare measurements taken at different times.
 
 ## Deliverables
 

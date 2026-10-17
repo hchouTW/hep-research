@@ -46,6 +46,10 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
 - **Leaky box and weighted slab.** Older effective descriptions (an escape length or path-length distribution). They
   reproduce stable secondary ratios but carry no spatial information, so they cannot use radioactive clocks or
   lepton losses consistently.
+- **Secondary-to-primary ratios.** Secondaries (B, sub-iron) are made by spallation of primaries on the interstellar
+  gas, so a ratio such as B/C measures the path length traversed. A ratio falling with energy shows that higher-rigidity
+  particles escape faster (a rigidity-dependent diffusion coefficient), independently of the source spectrum: the
+  standard way to separate a propagation effect from an acceleration-spectrum effect.
 - **Solar modulation.** Below a few tens of GV the interplanetary heliosphere modifies the local interstellar spectrum.
   The force-field approximation has one parameter (the modulation potential phi, per time period) and ignores charge-
   sign and drift effects; numerical heliospheric models do not. Time-resolved data need a time-dependent modulation.

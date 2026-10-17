@@ -15,12 +15,12 @@
   },
   "hep-detector": {
    "references": 35,
-   "bytes": 452056,
+   "bytes": 449215,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 99222,
+   "bytes": 99314,
    "uncited": 0
   },
   "hep-ml": {
@@ -30,12 +30,12 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 170753,
+   "bytes": 171603,
    "uncited": 0
   },
   "hep-theory": {
    "references": 11,
-   "bytes": 83631,
+   "bytes": 84069,
    "uncited": 0
   }
  },
@@ -1617,8 +1617,8 @@
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
    "owner": "hep-detector",
-   "bytes": 12486,
-   "lines": 182,
+   "bytes": 11748,
+   "lines": 173,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1632,7 +1632,8 @@
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/scripts/cr_spectrum_powerlaw_fit.py",
     "skills/hep-statistics/references/astroparticle-statistics.md",
-    "tests/skills/hep_detector/test_reference_values.py"
+    "tests/skills/hep_detector/test_reference_values.py",
+    "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
     "hep-communication",
@@ -2155,8 +2156,8 @@
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
    "owner": "hep-detector",
-   "bytes": 21340,
-   "lines": 295,
+   "bytes": 19237,
+   "lines": 260,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -2172,7 +2173,8 @@
     "skills/hep-measurement/scripts/geomagnetic_cutoff.py",
     "skills/hep-measurement/scripts/orbit_averaged_geomagnetic_cutoff.py",
     "skills/hep-measurement/scripts/solar_modulation_force_field.py",
-    "skills/hep-statistics/references/astroparticle-statistics.md"
+    "skills/hep-statistics/references/astroparticle-statistics.md",
+    "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
     "hep-communication",
@@ -2390,7 +2392,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16403,
+   "bytes": 16495,
    "lines": 111,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2401,7 +2403,8 @@
     "tests/skills/hep_detector/test_reference_values.py",
     "tests/skills/hep_measurement/test_method_references.py",
     "tests/skills/hep_measurement/test_reference_links.py",
-    "tests/skills/test_doc_consistency.py"
+    "tests/skills/test_doc_consistency.py",
+    "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"
@@ -3267,7 +3270,6 @@
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
-    "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/measurements-and-unfolding.md",
     "skills/hep-measurement/scripts/cosmic_ray_flux.py",
@@ -3480,22 +3482,25 @@
   {
    "path": "skills/hep-statistics/references/time-series-inference.md",
    "owner": "hep-statistics",
-   "bytes": 15520,
-   "lines": 194,
+   "bytes": 16370,
+   "lines": 203,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/heliospheric-modulation/README.md",
     "profiles/theory/heliospheric-modulation/index.md",
     "profiles/theory/heliospheric-modulation/models/heliospheric-modulation-models.md",
     "profiles/theory/heliospheric-modulation/profile.json",
+    "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
-    "tests/skills/hep_statistics/test_time_series_covariance.py"
+    "tests/skills/hep_statistics/test_time_series_covariance.py",
+    "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
+    "hep-detector",
     "hep-measurement"
    ],
    "last_commit": "7487999 2026-10-15"
@@ -3556,8 +3561,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 18294,
-   "lines": 208,
+   "bytes": 18732,
+   "lines": 212,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",
@@ -3568,11 +3573,16 @@
     "profiles/theory/cr-secondary-antiprotons/scripts/predict.py",
     "profiles/theory/heliospheric-modulation/derivations/derivation-record.md",
     "profiles/theory/heliospheric-modulation/evidence/sources.json",
+    "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
+    "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
-    "tests/skills/hep_theory/test_charge_sign_modulation_th3.py"
+    "tests/skills/hep_theory/test_charge_sign_modulation_th3.py",
+    "tests/skills/test_one_owner_per_topic_x2.py"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-detector"
+   ],
    "last_commit": "505eb43 2026-10-17"
   },
   {

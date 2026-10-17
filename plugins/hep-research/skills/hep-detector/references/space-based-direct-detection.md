@@ -108,22 +108,12 @@ through the heliosphere, producing measurable differences between particle and
 antiparticle modulation, e.g. electrons versus positrons, that a purely diffusive
 treatment does not capture).
 
-The standard first-order correction is the **force-field approximation**: treating
-modulation as an effective energy loss characterized by a single **modulation
-potential** `phi` (units of rigidity/potential, typically hundreds of MV), relating
-the flux at 1 AU, `J(E)`, to the flux outside the heliosphere (the local interstellar
-spectrum, LIS), `J_LIS(E_LIS)`, via
-
-    J(E) = (2 m E + E^2) / (2 m E_LIS + E_LIS^2) * J_LIS(E_LIS),   E_LIS = E + |Z|*phi
-
-for a particle of total rest mass `m`, total kinetic energy `E` and charge `|Z|`
-(Gleeson & Axford 1968), evaluated at the same time as the measurement. In kinetic
-energy per nucleon the shift is `(|Z|/A)*phi` with `m` the nucleon mass - mixing
-per-nucleon `E` with `|Z|*phi` over-modulates every `A > 1` nucleus. This is an effective, not physical, one-parameter model - it does not
-capture charge-sign dependence, latitude dependence, or short-timescale transients -
-and its use should be limited to what it is good for: comparing or combining
-measurements made in similar solar conditions, and providing a rough LIS estimate
-outside the range where a direct low-cutoff, low-solar-activity measurement exists.
+The standard first-order correction is the **force-field approximation**, one effective modulation potential `phi`
+per period. Its formula (total and per-nucleon forms), validity range and charge-sign limits are owned by hep-theory:
+[force-field solar modulation](../../hep-theory/references/cosmic-ray-propagation.md#force-field-solar-modulation),
+implemented by `solar_modulation_force_field.py` (hep-measurement; worked example below). On the detector side, use it
+only for comparing or combining measurements made in similar solar conditions and for a rough local interstellar
+spectrum estimate where no direct low-cutoff, low-activity measurement exists.
 Any comparison of fluxes from different epochs, instruments, or even different
 detectors on the same mission across a long enough mission duration to span a
 meaningful change in `phi`, must state the modulation potential (or the neutron-
@@ -150,44 +140,19 @@ exclude from the integration time window, rather than average over silently.
 
 ## Searching for periodicity and time structure in a flux time series
 
-Beyond excluding transients, a long-duration mission's flux time series is itself
-a measurement: heliospheric transport imprints known periodicities on top of the
-smooth force-field trend, and finding or bounding them is a distinct statistical
-task from fitting the time-averaged spectrum.
+Beyond excluding transients, a long-duration mission's flux time series is itself a measurement. The statistical
+method (a known period tested alone, a periodogram against a red-noise null for an unknown one, the trials across
+periods and energy bins, comparing species of opposite charge sign) is owned by hep-statistics:
+[time-series inference](../../hep-statistics/references/time-series-inference.md#periodicity-in-a-binned-series).
+What the detector side must supply:
 
-- **Know what period you're looking for before choosing a method.** A **known**
-  period (the ~27-day solar (Bartels) rotation and its harmonics, or a diurnal
-  cycle tied to the detector's own orbital/attitude geometry) is best tested with
-  **epoch-folding / superposed-epoch analysis**: fold the time series at the
-  candidate period and look for a coherent, above-noise modulation, rather than a
-  free periodogram search, which pays an unnecessary trials penalty for a period
-  you already have a physical reason to test. Reserve a periodogram (e.g.
-  Lomb-Scargle, which handles the uneven sampling and data gaps a satellite
-  time series generally has) for a genuinely unknown or approximate period, and
-  correct its detection significance for the number of independent frequencies
-  scanned - the same look-elsewhere-effect discipline as
-  [astroparticle-statistics.md](../../hep-statistics/references/astroparticle-statistics.md)'s trials-factor
-  treatment, applied to frequency space instead of a sky position or mass bin.
-- **Bin fine enough to resolve the structure, coarse enough to keep bins
-  statistics-limited rather than systematics-limited.** A daily-flux time series
-  needs per-day acceptance, livetime, and geomagnetic-cutoff corrections at that
-  same cadence (see the per-event cutoff treatment above) - a periodicity search
-  is only as good as the systematic stability of the bin-to-bin normalization it
-  sits on top of.
-- **Charge-sign dependence is itself a diagnostic, not just a nuisance.** Because
-  the heliospheric magnetic polarity cycle produces genuinely different transport
-  (gradient/curvature drift-dominated vs. diffusion-dominated, alternating roughly
-  every 11 years) for positively- and negatively-charged particles, comparing the
-  *same* candidate periodicity's amplitude and phase between a particle and its
-  antiparticle (or between species of opposite sign, e.g. protons vs. electrons)
-  tests whether an observed structure is drift-related or a shared instrumental/
-  environmental artifact that would affect both signs identically.
-- **State the epoch and solar-activity phase a periodicity claim covers.** A
-  periodicity's amplitude and even its presence is not stationary across a solar
-  cycle - report the date range and solar-activity phase (rising/maximum/
-  declining/minimum) a detection or non-detection applies to, the same way the
-  solar-modulation discussion above requires stating the modulation potential
-  for a spectrum.
+- **Corrections at the cadence of the series.** A daily-flux series needs per-day acceptance, livetime and
+  geomagnetic-cutoff corrections (see the per-event cutoff treatment above); a periodicity search is only as good as
+  the bin-to-bin stability of that normalization, and the time-bin covariance it hands to hep-statistics.
+- **Instrumental periods.** List the periods the instrument itself imposes (orbit, attitude, precession, calibration
+  cycles) so that they are tested as candidates or vetoed, not found as signals.
+- **The epoch and solar-activity phase** each series covers (rising, maximum, declining, minimum, and the polarity
+  era), as the solar-modulation discussion above requires for a spectrum.
 
 ## Direct-detection composition and the local antiparticle excesses
 
