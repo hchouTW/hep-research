@@ -15,7 +15,7 @@
   },
   "hep-detector": {
    "references": 36,
-   "bytes": 462796,
+   "bytes": 463929,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1571,17 +1571,18 @@
   {
    "path": "skills/hep-detector/references/charge-confusion.md",
    "owner": "hep-detector",
-   "bytes": 11179,
-   "lines": 136,
+   "bytes": 12312,
+   "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/detector-principles-summary.md",
-    "skills/hep-detector/references/tracking-and-vertexing.md"
+    "skills/hep-detector/references/tracking-and-vertexing.md",
+    "skills/hep-detector/scripts/charge_confusion_rate.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "1acbdded 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -2028,7 +2029,7 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "c3afd32c 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/particle-identification.md",

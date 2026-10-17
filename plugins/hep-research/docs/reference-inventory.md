@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | hep-communication | 57 | 402 | 0 |
 | hep-computing | 32 | 299 | 0 |
-| hep-detector | 36 | 463 | 0 |
+| hep-detector | 36 | 464 | 0 |
 | hep-measurement | 12 | 105 | 0 |
 | hep-ml | 42 | 189 | 0 |
 | hep-statistics | 12 | 175 | 0 |
@@ -176,7 +176,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 9257d7b5 2026-10-15 |
 | `calibration-and-alignment.md` | hep-detector | 19.0 | yes | 21 | - | 1d03565d 2026-10-17 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 13.0 | yes | 11 | - | 9257d7b5 2026-10-15 |
-| `charge-confusion.md` | hep-detector | 11.2 | yes | 4 | - | 9257d7b5 2026-10-15 |
+| `charge-confusion.md` | hep-detector | 12.3 | yes | 5 | - | 1acbdded 2026-10-17 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
 | `core-detector-equations.md` | hep-detector | 6.9 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `cosmic-ray-spectrum-and-composition.md` | hep-detector | 11.7 | no | 13 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
@@ -199,7 +199,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `muon-systems.md` | hep-detector | 8.4 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
 | `neutrino-astronomy.md` | hep-detector | 10.2 | no | 7 | hep-statistics | 9257d7b5 2026-10-15 |
 | `noble-liquid-neutrino-and-rare-event-detectors.md` | hep-detector | 12.5 | no | 7 | - | 9257d7b5 2026-10-15 |
-| `nuclear-interactions-in-detector-material.md` | hep-detector | 4.3 | yes | 3 | hep-theory | untracked |
+| `nuclear-interactions-in-detector-material.md` | hep-detector | 4.3 | yes | 3 | hep-theory | c3afd32c 2026-10-17 |
 | `particle-identification.md` | hep-detector | 18.2 | yes | 23 | hep-measurement | f7d5722d 2026-10-17 |
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 18.5 | no | 11 | - | 9257d7b5 2026-10-15 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |

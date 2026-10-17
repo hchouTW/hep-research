@@ -305,6 +305,7 @@ STATUS_CASES = {
 # and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic; propagate_scale_distortion.py, build_response.py and mix_period_responses.py take --status).
 OUTDIR = Path(tempfile.gettempdir())
 F04_CASES = {
+    'charge_confusion_rate.py': ['gaussian-core', '--edges', '10', '100', '--sigma-inv-r', '0.002'],
     'survival_feeddown.py': ['compute', '--layers', ASSETS / 'survival-layers.example.json', '--species',
                              ASSETS / 'survival-species.example.json', '--xs', ASSETS / 'survival-xs.example.json'],
     'mix_period_responses.py': ['stack', '--period', f"e1={ASSETS / 'response-synthetic.example.json'}", '--out',

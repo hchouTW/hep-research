@@ -25,6 +25,7 @@ M = "/nonexistent/hep-research-cli-check/input.json"
 OUT = "/nonexistent/hep-research-cli-check/out"
 
 MISSING_FILE_ARGS = {
+    "skills/hep-detector/scripts/charge_confusion_rate.py": ["template", "--input", M],
     "skills/hep-detector/scripts/survival_feeddown.py": ["compute", "--layers", M, "--species", M, "--xs", M],
     "skills/hep-detector/scripts/build_response.py": ["build", M, "--truth-col", "t", "--reco-col", "r", "--unweighted",
                                                        "--all-selected", "--truth-edges", "0", "1", "--reco-edges", "0",

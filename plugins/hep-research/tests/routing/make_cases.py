@@ -390,6 +390,9 @@ C = [
     # batch C, D4: nuclear interactions in detector material
  ("c-nuc-surv-1", "en", "direct", "What fraction of boron nuclei survive the material above my detector's charge layers, and how many carbon fragments feed down into boron?", "hep-detector", ["calibration"], None, None, {}),
  ("c-nuc-surv-2", "zh-Hant", "direct", "碳核穿過偵測器上方物質的存活機率怎麼算？碎裂成硼的 feed-down 要怎麼扣？", "hep-detector", ["calibration"], None, None, {}),
+    # batch C, D3: charge-sign confusion rate
+ ("c-nuc-cc-1", "en", "direct", "Measure the charge-sign confusion rate per rigidity bin with right- and wrong-sign templates; how do I get its interval near zero?", "hep-detector", ["tracking"], None, None, {}),
+ ("c-nuc-cc-2", "zh-Hant", "direct", "用已知電荷符號的控制樣本量測每個剛度區間的電荷混淆率，資料與模擬的比例因子怎麼算？", "hep-detector", ["tracking"], None, None, {}),
 ]
 
 cases = []

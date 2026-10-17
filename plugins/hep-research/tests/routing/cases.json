@@ -3858,6 +3858,26 @@
    "trigger_terms": [
     "calibration"
    ]
+  },
+  {
+   "id": "c-nuc-cc-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Measure the charge-sign confusion rate per rigidity bin with right- and wrong-sign templates; how do I get its interval near zero?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking"
+   ]
+  },
+  {
+   "id": "c-nuc-cc-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用已知電荷符號的控制樣本量測每個剛度區間的電荷混淆率，資料與模擬的比例因子怎麼算？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking"
+   ]
   }
  ]
 }

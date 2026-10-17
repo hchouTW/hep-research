@@ -44,7 +44,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 | Request | Read or run |
 |---|---|
-| Any detector question: the chain, the fourteen questions, task routing | [principles summary](references/detector-principles-summary.md) (section 11 indexes every file) |
+| Any detector question: the chain, the fourteen questions, task routing | [principles summary](references/detector-principles-summary.md) |
 | Resolution, efficiency (weighted, binned), tag-and-probe, truth matching | [reconstruction performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
 | Tracking, vertexing, multiple scattering | [tracking and vertexing](references/tracking-and-vertexing.md); `multiple_scattering.py` |
 | Synthetic spectrometer events and periods (seeded) | `toy_spectrometer.py`; `assets/toy-spectrometer.fictional.json` |
@@ -57,7 +57,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |
 | Triggers, luminosity, pileup | [triggers and pileup](references/triggers-luminosity-pileup.md); `pileup_reweight.py` |
 | Simulation (Geant4) | [detector simulation](references/detector-simulation.md) |
-| Charge-sign confusion; nuclei in material (survival, feed-down) | [charge confusion](references/charge-confusion.md), [nuclear interactions](references/nuclear-interactions-in-detector-material.md); `survival_feeddown.py` |
+| Charge-sign confusion; nuclei in material (survival, feed-down) | [charge confusion](references/charge-confusion.md), [nuclear interactions](references/nuclear-interactions-in-detector-material.md); `charge_confusion_rate.py`, `survival_feeddown.py` |
 | Space-based and balloon instruments | [space-based direct detection](references/space-based-direct-detection.md) |
 | Air showers, X_max | [extensive air showers](references/extensive-air-showers.md); `xmax_gaisser_hillas.py` |
 | A named experiment's detector | the bound profile; ask which configuration is meant |
