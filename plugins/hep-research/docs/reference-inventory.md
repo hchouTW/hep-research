@@ -144,7 +144,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `tikz-patterns.md` | hep-communication | 5.9 | no | 8 | - | 9257d7b5 2026-10-15 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
-| `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 7 | hep-measurement | bec2301c 2026-10-17 |
+| `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 7 | hep-measurement | a57e22cf 2026-10-17 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
 | `batch-scheduling.md` | hep-computing | 30.4 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4b 2026-10-10 |

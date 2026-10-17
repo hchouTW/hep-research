@@ -197,7 +197,7 @@ def _load_merge_inputs(paths: list[Path], settings: dict) -> tuple[list, list, d
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="command", required=True)
     for name in ("reduce", "partial", "finalize"):
         p = sub.add_parser(name)
