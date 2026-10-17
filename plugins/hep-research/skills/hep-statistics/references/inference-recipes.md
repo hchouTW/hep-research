@@ -191,6 +191,35 @@ Specify priors and parameterization, and check posterior propriety. A flat prior
 No production sampler is shipped: run one (Stan, PyMC, emcee or a framework's own) and feed its chains to
 `diagnose`.
 
+## Extrapolating a background tail
+
+A background that is only known in a control region (CR) and must be carried into a signal region (SR) further along
+a falling tail (a mass, an energy, a score) is an extrapolation, not a measurement: the shape outside the CR is an
+assumption, and the uncertainty has two parts that must stay apart.
+
+1. **Fit the CR with more than one model family.** An exponential, a power law, their sum, or a declared model of
+   your own. Fit binned Poisson likelihoods over the CR bins; the statistical uncertainty of each SR prediction comes
+   from the fit covariance.
+2. **Validate before you extrapolate.** Cut a validation region (VR) from the CR at the edge facing the SR, refit
+   without it, predict the VR and compare with its observed count (a Poisson p-value with the prediction's
+   uncertainty folded in). A model that fails is not used; if the nominal model fails, there is no background
+   estimate. The VR test only has power against deviations the VR can show: a model that passes may still fail
+   further out.
+3. **Report the envelope between models separately.** The spread of the central SR predictions over the models that
+   passed is a model uncertainty. It is not a Gaussian standard deviation; it becomes one only through a prescription
+   the analysis declares and owns (half-range, or a uniform distribution over the range), and the choice is stated with
+   the result.
+4. **State the extrapolation distance.** Declare how far beyond the CR the prediction may reach; beyond it, the result
+   carries a warning.
+5. **Hand over.** The nominal SR prediction and its statistical sigma (and, with a declared prescription, the envelope
+   sigma) go to `<plugin root>/core/stats/poisson_diagnostics.py cls-limit` or `likelihood_limits.py profile-cls`; the
+   envelope is stated next to the limit.
+
+Run: `<plugin root>/skills/hep-statistics/scripts/tail_extrapolation.py --input tail.json` (input format in its
+`--help`; a user model only with `--allow-plugin`). Its tests check that the envelope interval covers a known
+exponential tail at least at the declared rate, and that a wrong model is rejected by the VR test with the power its
+Asimov fit predicts.
+
 ## Minimal cross-check
 
 `counting_reference.py` assumes nonnegative signal, exactly known background, and a flat prior in signal yield. Its credible bound is not expected to match CLs with background uncertainty. With zero observations and zero background, its 95% upper bound is `-log(0.05)≈2.995732`; this is a reference for that specific model.

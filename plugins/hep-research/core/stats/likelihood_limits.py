@@ -117,7 +117,7 @@ from pathlib import Path
 from statistics import NormalDist
 from typing import Any
 
-from core.stats import _validate
+from core.stats import _caps, _validate
 from core.stats._linalg import bisect, cholesky, solve
 from core.stats._poisson import MAX_MEAN, ppf
 from core.stats.fit_diagnostics import DNLL_TOL, INVALID, FitLog, boundary_kkt, newton_fit
@@ -262,7 +262,7 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
     bh = _b_hat(n, 0.0, b, sig)
     rng = random.Random(seed)
     hits = zero = 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "profile-significance toys"):
         nn = _ppf(rng.random(), bh)
         bb = max(bh + sig * rng.gauss(0.0, 1.0), 0.0) if sig > 0 else bh
         q = _q0(nn, bb, sig)
@@ -469,8 +469,10 @@ def _load_model(doc):
     if not isinstance(doc, dict):
         raise LikelihoodError("input must be a JSON object")
     raw = doc.get("bins")
-    if not isinstance(raw, list) or not 1 <= len(raw) <= 50:
+    if not isinstance(raw, list) or not raw:
         raise LikelihoodError("bins must be a list of 1 to 50 bins")
+    if not 1 <= len(raw) <= 50:
+        _caps.exceed("multibin-limit bins", len(raw), 50, LikelihoodError, "bins must be a list of 1 to 50 bins")
     bins = []
     for i, x in enumerate(raw):
         if not isinstance(x, dict):
@@ -482,7 +484,8 @@ def _load_model(doc):
     if sum(x["s"] for x in bins) <= 0:
         raise LikelihoodError("at least one bin needs a positive signal expectation s")
     if sum(x["n"] for x in bins) > 400:
-        raise LikelihoodError("total counts above 400 are outside this script's range")
+        _caps.exceed("multibin-limit total n", sum(x["n"] for x in bins), 400, LikelihoodError,
+                     "total counts above 400 are outside this script's range")
     mc = None
     if any("mc_stat" in x for x in raw):
         mc = [_num(x.get("mc_stat", 0.0), f"bin {i} mc_stat", 0.0, 100.0) for i, x in enumerate(raw)]
@@ -535,7 +538,7 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
         _, cond = model._prof_nu(ns, aux, obs)
         rng = random.Random(seed)
         hits = 0
-        for _ in range(toys):
+        for _ in _caps.timed_range(toys, "multibin-limit toys"):
             if kind == "none":
                 means = [obs * s + b for s, b in zip(model.s, model.b)]
                 a = []
@@ -746,6 +749,7 @@ def _interp_shape(theta: float, nom: float, up: float, down: float, code: str) -
 # (no toys) accepts ordinary analysis sizes, order question Q10: up to 100 bins x 1e4 expected events per bin
 SHAPE_TOY_CAPS = {"bins": 40, "bin_b": 200.0, "total_n": 400}
 SHAPE_ASYMPTOTIC_CAPS = {"bins": 100, "bin_b": 1e4, "total_n": 1000000}
+SHAPE_MAX_NUISANCES = 8  # shape-limit, shape-significance, shape-gof and contour (each nuisance is profiled per fit)
 
 
 def _load_shape(doc, asymptotic: bool = False):
@@ -753,10 +757,14 @@ def _load_shape(doc, asymptotic: bool = False):
         raise LikelihoodError("input must be a JSON object")
     caps = SHAPE_ASYMPTOTIC_CAPS if asymptotic else SHAPE_TOY_CAPS
     raw = doc.get("bins")
-    if not isinstance(raw, list) or not 1 <= len(raw) <= caps["bins"]:
+    path = "shape-limit asymptotic" if asymptotic else "shape-limit toys"
+    if not isinstance(raw, list) or not raw:
+        raise LikelihoodError(f"bins must be a list of 1 to {caps['bins']} bins")
+    if not 1 <= len(raw) <= caps["bins"]:
         more = "" if asymptotic else (f"; up to {SHAPE_ASYMPTOTIC_CAPS['bins']} bins without toys (asymptotic path), "
                                       "beyond that use the pyhf adapter")
-        raise LikelihoodError(f"bins must be a list of 1 to {caps['bins']} bins{more}")
+        _caps.exceed(f"{path} bins", len(raw), caps["bins"], LikelihoodError,
+                     f"bins must be a list of 1 to {caps['bins']} bins{more}")
     bins = []
     for i, x in enumerate(raw):
         if not isinstance(x, dict):
@@ -769,10 +777,14 @@ def _load_shape(doc, asymptotic: bool = False):
         raise LikelihoodError("at least one bin needs a positive signal expectation s")
     if sum(x["n"] for x in bins) > caps["total_n"]:
         hint = "" if asymptotic else "; larger samples run on the asymptotic path (no toys) or with the pyhf adapter"
-        raise LikelihoodError(f"total counts above {caps['total_n']} are outside this path's range{hint}")
+        _caps.exceed(f"{path} total n", sum(x["n"] for x in bins), caps["total_n"], LikelihoodError,
+                     f"total counts above {caps['total_n']} are outside this path's range{hint}")
     nuis = doc.get("nuisances", [])
-    if not isinstance(nuis, list) or len(nuis) > 8:
+    if not isinstance(nuis, list):
         raise LikelihoodError("nuisances must be a list of at most 8 entries")
+    if len(nuis) > SHAPE_MAX_NUISANCES:
+        _caps.exceed("shape-limit nuisances", len(nuis), SHAPE_MAX_NUISANCES, LikelihoodError,
+                     f"nuisances must be a list of at most {SHAPE_MAX_NUISANCES} entries")
     parsed = []
     for k, d in enumerate(nuis):
         if not isinstance(d, dict) or d.get("kind") not in ("background_norm", "signal_norm", "background_shape", "signal_shape"):
@@ -1273,7 +1285,7 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
         rng = random.Random(seed)
         hits = 0
         model.log.context = "toy"
-        for _ in range(toys):
+        for _ in _caps.timed_range(toys, "shape-limit toys"):
             ns = [_ppf(rng.random(), m) for m in mean]
             aux = _draw_aux(model, th_c, rng, gam_c)
             before = model.log.failures("toy")
@@ -1382,7 +1394,7 @@ def shape_significance(doc: dict, toys: int, seed: int) -> dict:
     if toys:
         gen = shape_toy_generator(model, aux0, 0.0, "conditional-fluctuated-aux")
         hits, failed = 0, 0
-        for i in range(toys):
+        for i in _caps.timed_range(toys, "shape-significance toys"):
             ns, aux = gen(random.Random(seed * 1000003 + i), i)
             model.log.context = "toy"
             before = model.log.failures("toy")
@@ -1432,7 +1444,7 @@ def shape_gof(doc: dict, toys: int, seed: int, mu: float | None = None) -> dict:
         hits = 0
         values = []
         model.log.context = "toy"
-        for _ in range(toys):
+        for _ in _caps.timed_range(toys, "shape-gof toys"):
             ns = [_ppf(rng.random(), m) for m in mean]
             before = model.log.failures("toy")
             tv = _gof_stat(model, ns, _draw_aux(model, th_hat, rng, gam), mu)[0]
@@ -1826,6 +1838,10 @@ def neyman_coverage_scan(true_points, cl: float, beta: float, outer: int, inner:
 
 
 # -------------------------------------------------------------------------- CLI
+SHAPE_INPUT_HELP = ('JSON file (shape-limit input, module --help): {"bins": [{"n", "b", "s", "mc_stat"?}], "cl"?, '
+                    '"nuisances": [{"kind", "sigma" | "hi"/"lo" | "up"/"down", ...}], "correlation"?}')
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1846,7 +1862,8 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--sigma-b", type=float, default=0.0)
     common(c, 20000)
     m = sub.add_parser("multibin-limit", help="multi-bin profile-likelihood upper limit")
-    m.add_argument("--input", required=True)
+    m.add_argument("--input", required=True, help='JSON file: {"bins": [{"n", "b", "s", "mc_stat"?}], "cl"?, '
+                   '"background_uncertainty": {"kind": "none" | "independent" | "common_scale", "sigma"}} (module --help)')
     m.add_argument("--cl", type=float, default=0.95, help="used when the file has no cl")
     common(m, 500)
     f = sub.add_parser("profile-fc", help="Feldman-Cousins-style interval with a profiled nuisance")
@@ -1882,18 +1899,19 @@ def build_parser() -> argparse.ArgumentParser:
     nc.add_argument("--points", type=int, default=9)
     nc.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
     sx = sub.add_parser("shape-significance", help="multi-bin discovery q0 of a shape-limit model (asymptotic and toys)")
-    sx.add_argument("--input", required=True)
+    sx.add_argument("--input", required=True, help=SHAPE_INPUT_HELP)
     common(sx, 0)
     gf = sub.add_parser("shape-gof", help="saturated-model goodness of fit of a shape-limit model")
-    gf.add_argument("--input", required=True)
+    gf.add_argument("--input", required=True, help=SHAPE_INPUT_HELP)
     gf.add_argument("--mu", type=float, default=None, help="fix mu (default: fitted, mu >= 0)")
     common(gf, 500)
     ct = sub.add_parser("contour", help="profile-likelihood contours of two signal strengths")
-    ct.add_argument("--input", required=True)
+    ct.add_argument("--input", required=True, help='JSON file: {"bins": [{"n", "b", "s1", "s2", "mc_stat"?}], '
+                    '"nuisances": [shape-limit nuisances except signal shapes]} (module --help)')
     ct.add_argument("--cl", default="0.6827,0.95", help="comma-separated confidence levels of the contours")
     ct.add_argument("--rays", type=int, default=36)
     h = sub.add_parser("shape-limit", help="multi-bin limit with shape and normalization nuisances")
-    h.add_argument("--input", required=True)
+    h.add_argument("--input", required=True, help=SHAPE_INPUT_HELP)
     h.add_argument("--cl", type=float, default=0.95, help="used when the file has no cl")
     h.add_argument("--cls-toys", type=int, default=0,
                    help="toys per hypothesis and grid point for toy-based CLs (0: none); cost about 2 x toys x points "
@@ -1903,11 +1921,14 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"refuse toy CLs whose estimated runtime exceeds this many seconds (default {CLS_MAX_RUNTIME_S:g})")
     h.add_argument("--cls-points", type=int, default=16, help="grid points in mu for toy-based CLs")
     common(h, 0)
+    for sp in sub.choices.values():
+        _caps.add_argument(sp)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    _caps.allow_outside(args.allow_outside_validated_range)
     try:
         if args.command == "neyman-limit":
             result = neyman_limit(args.n, args.b, args.sigma_b, args.cl, args.beta, args.toys, args.seed, args.points)
@@ -1956,6 +1977,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2
     result.setdefault("status", "ok")
+    result.update(_caps.report())
     print(json.dumps(result, indent=2))
     return {"ok": 0, "failed": 1, "incomplete": 3}[result["status"]]
 

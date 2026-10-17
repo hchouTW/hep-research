@@ -175,7 +175,7 @@ def build(a: argparse.Namespace) -> dict:
     ext: dict = {"task": summary["task"], "labels": summary["labels"], "features": summary["features"],
                  "splits": splits, "training_domain": summary["training_domain"],
                  "preprocessing": summary.get("preprocessing") or [], "model_hash": summary["model_hash"]}
-    for key in ("units", "weights", "environment", "metrics"):
+    for key in ("units", "weights", "environment", "metrics", "regression_validation", "notes"):
         if summary.get(key) is not None:
             ext[key] = summary[key]
     semantics = a.output_semantics or summary.get("output_semantics")

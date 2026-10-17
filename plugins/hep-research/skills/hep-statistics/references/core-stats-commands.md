@@ -129,6 +129,8 @@ add to the result; only a model or method uncertainty prescribed before the resu
 combined. A profile limit is not a CLs limit (no CLs protection). Always report the expected sensitivity next to an observed limit. Near a boundary
 or at small counts quote the toy value, not the asymptotic one.
 
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
+
 ## `statistical_toys.py`: narrow toy studies
 
 Each subcommand answers one question under stated simplifications.
@@ -167,6 +169,8 @@ Each subcommand answers one question under stated simplifications.
   circular: repeat with a different truth and prior before choosing an iteration count, and document the stopping rule
   separately.
 
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
+
 ## `template_fit.py`: Barlow-Beeston template fits
 
 Several templates with free yields and the full per-template Barlow-Beeston likelihood (Barlow & Beeston 1993): one
@@ -192,6 +196,8 @@ follows the Barlow-Beeston fit: unconverged (or infeasible) means `failed` with 
 Decision rule: use `bb-fit`/`bb-toys` instead of the one-parameter `template-bb` whenever there are several templates,
 and quote the full-fit error when `bb-fit` shows it inflated. Use either Barlow-Beeston or a per-bin `staterror`-type
 nuisance for one statistical source, never both ([nuisance modeling](nuisance-modeling.md)).
+
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
 
 ## `unfolding_diagnostics.py`: regularization, closure, folding
 
@@ -259,6 +265,8 @@ from data, compare the criteria on toys with `choose-regularization`; the L-curv
 fixed setting. Quote the response covariance as a full matrix with the data covariance when the unfolded result is
 fitted, run `fold-compare` when a parameter is fitted from an unfolded spectrum, and `response-stat` when the response
 comes from a finite MC sample.
+
+Every subcommand also takes `--allow-outside-validated-range` (S7): it lifts the caps marked (o) in the [caps table](core-stats-guide.md#common-conventions), lists each cap exceeded and labels the output `outside-validated-range`.
 
 ## `validate_covariance.py` and `validate_response.py`
 
@@ -406,6 +414,29 @@ Measured on synthetic grids (`tests/skills/hep_statistics/test_grid_fit.py`): As
 only gives one flat direction along (1, 1)/sqrt(2), matched to `D0/L`, with D0/L recovered within 2%. Not validated:
 grids from a real propagation code, more than a few parameters (the start scans every node), and interval coverage
 along a near-flat direction.
+
+
+## Conventions in detail
+
+- **EDM threshold.** The fit verdict's EDM limit of 1e-5 is stricter than iminuit's default: Migrad stops at
+  EDM < 0.002 x tol x errordef, with tol 0.1, that is 1e-4 for a negative log-likelihood with errordef 0.5; the
+  threshold depends on the tolerance (iminuit reference documentation).
+- **Poisson domain.** A negative or non-finite Poisson mean is outside every likelihood here (NLL = +inf); a mean of
+  0 is allowed only for an empty bin. A shape template that interpolates below zero is therefore excluded by the fit
+  instead of being read as an empty bin.
+
+## Inference scripts outside hep-statistics
+
+Read `--help` first. `cr_spectrum_powerlaw_fit.py` fits a single or
+continuous broken power law in log flux (a full covariance, linearized); a free break is calibrated here
+(`break-scan`, `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the
+delta method with one optional correlation coefficient: with correlated points or bin-to-bin correlated
+systematics use `covariance_fit.py fit` or
+`statistical_toys.py ratio-cov` / `ratio-measured` here, and at low counts an exact construction
+(`pcl_efficiency_ratio.py ratio`, Fieller or Clopper-Pearson). Two different "counting references":
+`skills/hep-measurement/scripts/counting_reference.py` is a flat-prior Bayesian upper bound with an exactly known
+background (not CLs, no nuisances); the frequentist counting constructions are `core/stats/poisson_diagnostics.py`
+(and `likelihood_limits.py` with an uncertain background). pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
 
 ## Failure modes
 

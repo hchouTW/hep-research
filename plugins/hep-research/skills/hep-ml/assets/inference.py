@@ -18,6 +18,14 @@ names another model is refused (exit 2); one without a model_hash is applied wit
 --split-manifest FILE compares a manifest with the split_manifest_sha256 recorded at training and reports a
 difference (split_manifest_check, warnings). The summary carries the checkpoint's model_hash.
 
+External scores (ML3 extensions): --external-scores SCORES.csv (columns id, score) from another tool (TMVA, LightGBM)
+go through the same checks without a checkpoint and without PyTorch: --model-file (the external model; its sha256 is
+the model_hash a calibration must name), --input (feature rows of the scored events) with --training-features (the
+training rows: the same DomainModel is fitted on them and flags each scored row), --split-manifest (every scored id
+must be in the manifest's test part, or, for a k-fold manifest {fold0.., } with a "fold" column in SCORES, in the fold
+whose model scored it: a score on an event the model was trained on is refused, exit 1), --calibration as above, and
+--run-summary-out (with --labels and --grouping-key) for write_ml_artifact.py.
+
 The checkpoint is loaded with weights_only=True (tensors and plain containers only); --unsafe-full-unpickle runs a
 full unpickle, which can execute arbitrary code: only for files you trust.
 Output: per-row CSV (--output) or, without it, the rows inside the JSON summary on stdout.
@@ -47,8 +55,15 @@ from core.status import add_status_argument  # noqa: E402
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("checkpoint")
+    parser.add_argument("checkpoint", nargs="?", help="train_classifier.py checkpoint (not with --external-scores)")
     parser.add_argument("--input", required=True, help="CSV with (at least) the training feature columns")
+    parser.add_argument("--external-scores", help="CSV id,score[,fold] from an external tool (TMVA, LightGBM)")
+    parser.add_argument("--external-tool", choices=("tmva", "lightgbm", "other"), help="tool that wrote the scores")
+    parser.add_argument("--model-file", help="the external model file; its sha256 is the model_hash")
+    parser.add_argument("--training-features", help="CSV of the training rows (external scores: domain model)")
+    parser.add_argument("--run-summary-out", help="external scores: write a run summary for write_ml_artifact.py")
+    parser.add_argument("--labels", help="external scores: comma-separated class labels for the run summary")
+    parser.add_argument("--grouping-key", help="external scores: the split's grouping key for the run summary")
     parser.add_argument("--id-col", default="id", help="row id column, if present (default: id)")
     parser.add_argument("--output", help="per-row CSV to write (default: rows in the JSON summary)")
     parser.add_argument("--on-out-of-domain", choices=("flag", "reject"), default="flag")
@@ -66,26 +81,29 @@ def build_parser() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     build_parser().parse_args()  # --help and usage errors work without PyTorch
 
-try:
-    import torch
-except ModuleNotFoundError as _exc:
-    if __name__ != "__main__":
-        raise
-    print(json.dumps({"status": "missing-dependency", "error": f"torch not available ({_exc}); check the environment "
-                      "with scripts/check_pytorch_env.py"}))
-    sys.exit(3)
-
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from check_surrogate_domain import DomainModel  # noqa: E402  (one domain method; PML-WP0.7)
-from models import MLPClassifier, state_dict_hash  # noqa: E402
+
+_EXTERNAL = __name__ == "__main__" and "--external-scores" in sys.argv[1:]
+try:
+    import torch
+    from models import MLPClassifier, state_dict_hash
+except ModuleNotFoundError as _exc:
+    if __name__ != "__main__":
+        raise
+    if not _EXTERNAL:  # external scores need no PyTorch
+        print(json.dumps({"status": "missing-dependency", "error": f"torch not available ({_exc}); check the "
+                          "environment with scripts/check_pytorch_env.py"}))
+        sys.exit(3)
+    torch = None
 
 
 class InputError(Exception):
     pass
 
 
-def get_device(name: str) -> torch.device:
+def get_device(name: str) -> "torch.device":
     if name != "auto":
         return torch.device(name)
     if torch.cuda.is_available():
@@ -269,9 +287,132 @@ def run(args) -> int:
     return 0
 
 
+def _read_scores(path: str) -> tuple[list[str], np.ndarray, list[str] | None]:
+    with open(path, newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        header = reader.fieldnames or []
+        if "id" not in header or "score" not in header:
+            raise InputError(f"{path}: needs columns id and score")
+        rows = list(reader)
+    if not rows:
+        raise InputError(f"{path}: no rows")
+    try:
+        scores = np.array([float(r["score"]) for r in rows], dtype=np.float64)
+    except ValueError as exc:
+        raise InputError(f"{path}: {exc}") from exc
+    return [r["id"] for r in rows], scores, ([r["fold"] for r in rows] if "fold" in header else None)
+
+
+def leakage_check(ids: list[str], folds: list[str] | None, manifest_path: str) -> dict:
+    """Scored ids must be test events of the manifest (or of the fold whose model scored them)."""
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    kfold = sorted(k for k in manifest if k.startswith("fold"))
+    bad, missing = [], []
+    if kfold:
+        if folds is None:
+            raise InputError("a k-fold manifest needs a 'fold' column in the score file (the fold whose model scored it)")
+        where = {i: k[len("fold"):] for k in kfold for i in manifest[k]}
+        for i, f in zip(ids, folds):
+            if i not in where:
+                missing.append(i)
+            elif where[i] != str(f).strip():
+                bad.append(i)
+        rule = "each event scored by the model of its own fold (the model that did not see it)"
+    else:
+        train = set(manifest.get("train", [])) | set(manifest.get("val", [])) | set(manifest.get("validation", []))
+        test = set(manifest.get("test", []))
+        bad = [i for i in ids if i in train]
+        missing = [i for i in ids if i not in train and i not in test]
+        rule = "every scored event in the manifest's test part"
+    return {"manifest": manifest_path, "rule": rule, "scored_training_ids": len(bad), "examples": bad[:20],
+            "ids_not_in_manifest": len(missing),
+            "sha256": "sha256:" + hashlib.sha256(Path(manifest_path).read_bytes()).hexdigest()}
+
+
+def run_external(args) -> int:
+    for need in ("external_tool", "model_file", "training_features"):
+        if not getattr(args, need):
+            raise InputError(f"--external-scores needs --{need.replace('_', '-')}")
+    model_hash = "sha256:" + hashlib.sha256(Path(args.model_file).read_bytes()).hexdigest()
+    ids, scores, folds = _read_scores(args.external_scores)
+    leak = leakage_check(ids, folds, args.split_manifest) if args.split_manifest else None
+    if leak and leak["scored_training_ids"]:
+        print(json.dumps({"status": "refused", "external": {"tool": args.external_tool}, "model_hash": model_hash,
+                          "leakage_check": leak, "status_label": args.status,
+                          "reason": "scores on events the model was trained on: not usable for evaluation; no scores "
+                                    "written"}, indent=2))
+        return 1
+    with open(args.training_features, newline="", encoding="utf-8") as handle:
+        header = csv.DictReader(handle).fieldnames or []
+    features = [c for c in header if c != args.id_col]
+    _, x_train = read_inputs(args.training_features, features, args.id_col)
+    in_ids, x = read_inputs(args.input, features, args.id_col)
+    pos = {i: k for k, i in enumerate(in_ids)}
+    absent = [i for i in ids if i not in pos]
+    if absent:
+        raise InputError(f"{len(absent)} scored id(s) have no feature row in {args.input} (e.g. {absent[:3]})")
+    x = x[[pos[i] for i in ids]]
+    model = DomainModel.fit(x_train[np.all(np.isfinite(x_train), axis=1)], seed=0)
+    status, reasons = model.classify(x)
+    reasons = [[] if st == "inside" else [f"{st}:" + "; ".join(why)] for st, why in zip(status, reasons)]
+    n_ood = sum(bool(r) for r in reasons)
+    summary = {"external": {"tool": args.external_tool, "scores": args.external_scores, "model_file": args.model_file},
+               "model_hash": model_hash, "n_rows": len(ids), "n_out_of_domain": n_ood, "features": features,
+               "domain_method": "check_surrogate_domain.DomainModel fitted on --training-features",
+               "on_out_of_domain": args.on_out_of_domain, "status_label": args.status, "warnings": []}
+    if leak:
+        summary["leakage_check"] = leak
+        if leak["ids_not_in_manifest"]:
+            summary["warnings"].append(f"{leak['ids_not_in_manifest']} scored id(s) are not in the split manifest: "
+                                       "their train/test role is unknown")
+    else:
+        summary["warnings"].append("no --split-manifest: the scores were not checked for training events")
+    if n_ood and args.on_out_of_domain == "reject":
+        summary["status"] = "refused"
+        summary["reason"] = f"{n_ood} row(s) outside the training domain; no scores written"
+        print(json.dumps(summary, indent=2))
+        return 1
+    if args.calibration:
+        scores, summary["calibration"] = apply_calibration(scores, args.calibration, model_hash, summary["warnings"])
+    rows = [{"id": i, "score": float(sc), "out_of_domain": int(bool(r)), "ood_reasons": ";".join(r)}
+            for i, sc, r in zip(ids, scores, reasons)]
+    if args.output:
+        with open(args.output, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+        summary["output"] = args.output
+    else:
+        summary["rows"] = rows
+    if args.run_summary_out:
+        if not (args.labels and args.grouping_key):
+            raise InputError("--run-summary-out needs --labels and --grouping-key")
+        finite = np.isfinite(x_train)
+        rs = {"task": "classification", "features": features,
+              "labels": [t.strip() for t in args.labels.split(",") if t.strip()], "grouping_key": args.grouping_key,
+              "training_domain": {f: [float(np.min(x_train[finite[:, j], j])), float(np.max(x_train[finite[:, j], j]))]
+                                  for j, f in enumerate(features) if finite[:, j].any()},
+              "model_hash": model_hash, "output_semantics": "probability" if args.calibration else "score",
+              "environment": {"framework": f"external: {args.external_tool}", "device": "cpu", "precision": "fp32"},
+              "notes": f"scores written by {args.external_tool} and checked by assets/inference.py --external-scores",
+              "scores": {"test": args.output} if args.output else {}}
+        if "leakage_check" in summary:
+            rs["split_manifest"] = args.split_manifest
+            rs["split_manifest_sha256"] = summary["leakage_check"]["sha256"].split(":", 1)[1]
+        Path(args.run_summary_out).write_text(json.dumps(rs, indent=1), encoding="utf-8")
+        summary["run_summary"] = args.run_summary_out
+    summary["status"] = "ok"
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
 def main() -> int:
     args = build_parser().parse_args()
     try:
+        if args.external_scores:
+            return run_external(args)
+        if not args.checkpoint:
+            raise InputError("give a checkpoint, or --external-scores")
         return run(args)
     except (InputError, OSError, KeyError) as exc:
         print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))

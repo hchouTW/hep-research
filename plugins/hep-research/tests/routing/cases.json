@@ -1351,12 +1351,13 @@
   {
    "id": "th-scope-2",
    "lang": "zh-Hant",
-   "kind": "out-of-v1",
+   "kind": "direct",
    "prompt": "幫我推導微中子振盪機率在物質中的修正。",
    "expected_primary": "hep-theory",
-   "trigger_terms": [],
-   "set": "X1",
-   "limited_support": true
+   "trigger_terms": [
+    "neutrino oscillations"
+   ],
+   "set": "X1"
   },
   {
    "id": "th-flavour-2",
@@ -3817,6 +3818,451 @@
    "expected_primary": "hep-statistics",
    "trigger_terms": [
     "RooFit/RooStats"
+   ]
+  },
+  {
+   "id": "c-nuc-xs-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Should I use inelastic or charge-changing cross sections for boron fragmentation, and is the straight-ahead approximation valid here?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ]
+  },
+  {
+   "id": "c-nuc-xs-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "碳打在氫與氦上的同位素產生截面要怎麼處理短壽命中間核的累積截面？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ]
+  },
+  {
+   "id": "c-nuc-surv-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What fraction of boron nuclei survive the material above my detector's charge layers, and how many carbon fragments feed down into boron?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration"
+   ]
+  },
+  {
+   "id": "c-nuc-surv-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "碳核穿過偵測器上方物質的存活機率怎麼算？碎裂成硼的 feed-down 要怎麼扣？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration"
+   ]
+  },
+  {
+   "id": "c-nuc-cc-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Measure the charge-sign confusion rate per rigidity bin with right- and wrong-sign templates; how do I get its interval near zero?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking"
+   ]
+  },
+  {
+   "id": "c-nuc-cc-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用已知電荷符號的控制樣本量測每個剛度區間的電荷混淆率，資料與模擬的比例因子怎麼算？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking"
+   ]
+  },
+  {
+   "id": "c-nuc-mig-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a species-migration response so carbon reconstructed as boron and protons reconstructed with the wrong sign fold into my prediction.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
+  },
+  {
+   "id": "c-nuc-mig-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把每個物種的響應矩陣組成物種遷移響應，再把理論預測折疊到重建空間。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
+  },
+  {
+   "id": "c-nuc-coupled-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My boron background is carbon fragmenting above the detector, and I measure carbon in the same data; should I subtract it as a fixed number?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "background estimation"
+   ]
+  },
+  {
+   "id": "c-nuc-coupled-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "反質子樣本的背景來自同時量測的質子電荷誤判，背景估計要用固定扣除還是聯合擬合？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "background estimation"
+   ]
+  },
+  {
+   "id": "c-nuc-iso-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit the 7Be, 9Be and 10Be fractions per rigidity bin from mass templates built from my rigidity and velocity resolution.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "c-nuc-iso-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用質量模板擬合每個剛度區間的鈹同位素比例，速度解析度的尾巴還沒用資料驗證怎麼辦？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "c-th-import-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "I downloaded the HEPData YAML and a CSV of this published spectrum; turn them into a dataset record so I can compare my model with it.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "comparing a model with an experiment's published data"
+   ]
+  },
+  {
+   "id": "c-th-import-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我下載了論文附的 FITS 表格，想拿來和我的模型比較，欄位、單位和誤差分解要怎麼讀進來？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ]
+  },
+  {
+   "id": "c-th-nu-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the nu_mu to nu_e appearance probability at 1300 km and 2.5 GeV in constant-density matter for both mass orderings.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "neutrino oscillations"
+   ]
+  },
+  {
+   "id": "c-th-nu-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "反微中子在真空中 295 公里、0.6 GeV 的振盪機率怎麼算？PMNS 的 CP 相位慣例要怎麼寫？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "neutrino oscillations"
+   ]
+  },
+  {
+   "id": "c-th-alphas-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run alpha_s(mZ) = 0.118 down to 10 GeV at four loops with MS-bar quark-mass thresholds; which scheme conventions should I state?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "schemes"
+   ]
+  },
+  {
+   "id": "c-th-alphas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "CKM 矩陣的標準參數化與 Wolfenstein 參數的慣例是什麼？我的預測要怎麼註明？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
+  },
+  {
+   "id": "c-th-chain-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How long until 226Ra and its daughters reach secular equilibrium, and what are the activities after 30 days?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nuclear decays"
+   ]
+  },
+  {
+   "id": "c-th-chain-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "β+ 衰變的 Q 值為什麼要扣掉兩個電子質量？用原子質量怎麼算？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nuclear decays"
+   ]
+  },
+  {
+   "id": "c-th-rare-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "live time",
+    "blinding policy"
+   ]
+  },
+  {
+   "id": "c-th-rare-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "c-ml-shift-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compare my simulation and data control sample feature by feature and tell me which inputs drive the difference before I trust the classifier.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "domain shift between simulation and data"
+   ]
+  },
+  {
+   "id": "c-ml-shift-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "模擬和資料的控制樣本在輸入變數上有沒有偏移？哪些變數造成分類器表現不同？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "domain shift between simulation and data"
+   ]
+  },
+  {
+   "id": "c-ml-bdtext-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My BDT cut sculpts the background mass peak; how do I quantify it, and can I export the XGBoost model for TMVA inference?",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "mass decorrelation",
+    "BDTs in analyses"
+   ]
+  },
+  {
+   "id": "c-ml-bdtext-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 XGBoost BDT 做能量回歸校正，怎麼檢查各能量區間的 response 與 resolution？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "regressors for events, particles, jets or detector signals"
+   ]
+  },
+  {
+   "id": "c-ml-roothist-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My weighted histogram has error bars that look like sqrt(N); did I forget Sumw2, and are the TEfficiency passed counts ever above the totals?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "histogram and TEfficiency objects"
+   ]
+  },
+  {
+   "id": "c-ml-roothist-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "RooWorkspace 匯入第二個 dataset 時變數名稱衝突，import 被取消，要怎麼改程式？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "ROOT/PyROOT"
+   ]
+  },
+  {
+   "id": "c-ml-genre-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check my search paper draft against what a search paper must contain: is a systematic-uncertainty table or the statistical method missing?",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "papers from results"
+   ]
+  },
+  {
+   "id": "c-ml-genre-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我在寫探測器性能（instrumentation）論文，內容一定要包含哪些部分？請幫我檢查草稿缺了什麼。",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ]
+  },
+  {
+   "id": "c-ml-numbers-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Make sure the signal strength in my abstract, tables and conclusion is the same number, rounded the PDG way from the fit result.",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "numbers and units"
+   ]
+  },
+  {
+   "id": "c-ml-numbers-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "中英文兩版論文草稿的數字、不確定度和「證據」與「觀測」的用詞一致嗎？",
+   "expected_primary": "hep-communication",
+   "trigger_terms": [
+    "English or Chinese"
+   ]
+  },
+  {
+   "id": "c-det-design-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How many tracking layers and what lever arm do I need for 5% momentum resolution at 100 GeV in a 0.5 T field?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ]
+  },
+  {
+   "id": "c-det-design-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "比較四層與八層矽追蹤器的動量解析度，精確最小平方與 Gluckstern 近似差多少？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking"
+   ]
+  },
+  {
+   "id": "c-det-atlas-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What solenoid field and tracker volume does the CMS detector paper give, with the source for each number?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "sourced facts on large experiments' detectors"
+   ]
+  },
+  {
+   "id": "c-det-atlas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "IceCube 的 DOM 數量與垂直間距是多少？請附上出處，不要憑記憶。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "sourced facts on large experiments' detectors"
+   ]
+  },
+  {
+   "id": "c-st-proj-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How does my uncertainty budget scale at four times the exposure, with the floor systematics kept, and what Asimov significance do I reach?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "toys and Asimov datasets",
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "c-st-proj-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "資料量變成三倍時，統計誤差與各項系統誤差會降到多少？要多少曝光才能達到 5σ？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "c-st-caps-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My template fit has 72 bins and the core tool refuses above 60; can I run it anyway, and what does the output then claim?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits"
+   ]
+  },
+  {
+   "id": "c-st-caps-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "多組 bin 的極限計算超過工具的上限，可以強制執行嗎？結果還能當成發表的結果嗎？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "intervals and limits"
+   ]
+  },
+  {
+   "id": "c-st-tail-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Extrapolate the background tail from my sideband into the signal region with an exponential and a power law, and tell me whether the extrapolation validates.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "low or zero counts",
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "c-st-tail-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "背景尾巴只在控制區量到，要怎麼外推到訊號區？不同函數形式的差異要怎麼當成不確定度？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "model comparison"
+   ]
+  },
+  {
+   "id": "c-st-roofit-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run a RooMCStudy pull study of my RooFit model and check its HypoTestInverter CLs limit against an independent implementation.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats"
+   ]
+  },
+  {
+   "id": "c-st-roofit-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "RooFit 的 MINOS 區間和 profile likelihood 掃描要怎麼跟另一套程式交叉檢查？低計數時漸近 CLs 可靠嗎？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats",
+    "low or zero counts"
    ]
   }
  ]

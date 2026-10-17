@@ -21,7 +21,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 |---|---|---|---|---|---|---|
 | measurement-design | Measurement design and verdict-first review: estimand, selections and cutflows, backgrounds, correction chains, systematics plan, blinding policy | hep-measurement | tool | yes | M3, M4, M10 |  |
 | cosmic-ray-flux | Cosmic-ray flux from counts and its helpers (orbit cutoff, force field, broken power law, anisotropy design) | hep-measurement | tool | yes | M6, M9 |  |
-| systematic-scaling | Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection | hep-measurement | documentation | yes | M5, S2 |  |
+| systematic-scaling | Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection | hep-measurement | tool | yes | M5, S2 |  |
 | collection-time | Collection time per period with quality cuts, cutoff transmission and eras | hep-measurement | tool | yes | M1 |  |
 | spectral-transform | Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging) | hep-measurement | tool | yes | M7, M8 |  |
 | acceptance-from-generation | Acceptance from generation records | hep-measurement | none | yes | M2 |  |
@@ -30,10 +30,10 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | fast-spectrometer-simulation | Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras) | hep-detector | tool | yes | D7 |  |
 | scale-distortion | Propagating a calibration residual (scale, inverse offset, resolution) to yields, ratios and covariance | hep-detector | tool | yes | D1 |  |
 | response-construction | Response construction from matched truth and reconstructed events | hep-detector | tool | yes | D9 |  |
-| species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | documentation | yes | D2, D3, D4 |  |
+| species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | tool | yes | D2, D3, D4 |  |
 | multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | tool | yes | D10 |  |
 | stability-monitoring | Stability monitoring over time (trends, change points, era boundaries) | hep-detector | tool | yes | D11 |  |
-| detector-design | Detector design principles and a sourced detector atlas | hep-detector | documentation | yes | D6, D13, D14 |  |
+| detector-design | Detector design principles and a sourced detector atlas | hep-detector | tool | yes | D6, D13, D14 |  |
 | geomagnetic-backtracing | Geomagnetic backtracing with an external tracer | hep-detector | none | yes | D12 |  |
 | fits-and-limits | Likelihoods, binned and unbinned fits, template fits, intervals and limits, significance and look-elsewhere effects | hep-statistics | tool | yes | S7, S8 |  |
 | covariance-and-combinations | Covariance assembly and validation, combinations, comparisons with published records | hep-statistics | tool | yes | S3, S4 |  |
@@ -47,7 +47,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | physical-data | Physical constants and particle and nuclear data with source and edition | hep-theory | tool | yes | Th9 |  |
 | relativistic-kinematics | Relativistic kinematics: two-body decays, boosts, invariant mass, Mandelstam variables, thresholds | hep-theory | tool | yes | Th7 |  |
 | cosmic-ray-propagation | Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation | hep-theory | tool | yes | Th1, Th2, Th3, Th6, Th11 |  |
-| nuclear-physics-entry | Nuclear cross-section conventions, nuclear decays and Q-values | hep-theory | documentation | yes | Th1, Th12 |  |
+| nuclear-physics-entry | Nuclear cross-section conventions, nuclear decays and Q-values | hep-theory | tool | yes | Th1, Th12 |  |
 | partition-and-batch | Local partition, batch campaigns, resubmission and duplicate-safe merges | hep-computing | tool | yes | C1 |  |
 | root-and-columnar-io | ROOT, PyROOT, uproot/awkward and columnar data tools | hep-computing | tool | yes | C4, C5, C7 |  |
 | reproducibility | Environment manifests, run records, workflows and preservation | hep-computing | tool | yes | C2, C3, C6 |  |
@@ -57,7 +57,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | ml-eras | Era changes in machine-learning studies | hep-ml | documentation | yes | ML1 |  |
 | claims-and-literature | Claims linked to results, literature and citation verification, manuscript checks | hep-communication | tool | yes | Com1, Com2 |  |
 | terminology | Terminology and notation against a glossary | hep-communication | tool | yes | Com3 |  |
-| papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-communication | documentation | yes | Com4, Com5, Com6, Com7 |  |
+| papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-communication | tool | yes | Com4, Com5, Com6, Com7 |  |
 | lattice-qcd | Lattice QCD and its global analyses | hep-theory | none | no |  | j12 |
 | eft-global-fits | EFT global fits | hep-theory | none | no |  | out-of-v1-2 |
 | ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |
@@ -66,5 +66,5 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1 |
 | nuclear-structure | Nuclear-structure calculations (shell model, density functionals) | hep-theory | none | no |  | th-nucstruct-1 |
 | relic-density-solvers | Full relic-density Boltzmann solvers | hep-theory | none | no |  | th-relic-1 |
-| neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | none | no (enters with Th4) |  | th-scope-2 |
+| neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | tool | yes | Th4 |  |
 <!-- /capability-map -->

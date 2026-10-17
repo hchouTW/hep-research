@@ -127,7 +127,7 @@ C = [
  ("th-nucstruct-1", "en", "out-of-v1", "Compute the ground-state quadrupole deformation of 154Sm with a nuclear energy density functional.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
  ("th-relic-1", "en", "out-of-v1", "Solve the Boltzmann equation for the relic density of my WIMP model, including coannihilations.", "hep-theory", [], None, None, {"set": "X3", "limited_support": True}),
  # X1: scope declaration (limited-support until Th4 lands for th-scope-2, then a direct case)
- ("th-scope-2", "zh-Hant", "out-of-v1", "幫我推導微中子振盪機率在物質中的修正。", "hep-theory", [], None, None, {"set": "X1", "limited_support": True}),
+ ("th-scope-2", "zh-Hant", "direct", "幫我推導微中子振盪機率在物質中的修正。", "hep-theory", ["neutrino oscillations"], None, None, {"set": "X1"}),  # direct since Th4
  ("th-flavour-2", "zh-Hant", "out-of-v1", "幫我做 CKM 全域擬合。", "hep-theory", [], None, None, {"set": "X1", "limited_support": True}),
  ("underspec-1", "en", "underspecified", "Compare the two experiments.", "ask", [], None, None, {"note": "ask which datasets and observables; never pick experiments"}),
  ("underspec-2", "zh-Hant", "underspecified", "比較這兩個實驗的結果。", "ask", [], None, None, {}),
@@ -384,6 +384,72 @@ C = [
     # batch B, S11: RooFit fit-status mapping (roofit_fit_check.py)
  ("b-ml-roofit-1", "en", "direct", "My saved RooFitResult has covQual 2 and status 0 after MIGRAD; can I quote the fit, and which errors do I use for my weighted unbinned fit?", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
  ("b-ml-roofit-2", "zh-Hant", "direct", "RooFit 擬合的 covQual 不是 3、EDM 也偏大，這個結果可以用嗎？加權資料的誤差要選哪一種？", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
+    # batch C, Th1: nuclear cross-section conventions
+ ("c-nuc-xs-1", "en", "direct", "Should I use inelastic or charge-changing cross sections for boron fragmentation, and is the straight-ahead approximation valid here?", "hep-theory", ["cross sections"], None, None, {}),
+ ("c-nuc-xs-2", "zh-Hant", "direct", "碳打在氫與氦上的同位素產生截面要怎麼處理短壽命中間核的累積截面？", "hep-theory", ["cross sections"], None, None, {}),
+    # batch C, D4: nuclear interactions in detector material
+ ("c-nuc-surv-1", "en", "direct", "What fraction of boron nuclei survive the material above my detector's charge layers, and how many carbon fragments feed down into boron?", "hep-detector", ["calibration"], None, None, {}),
+ ("c-nuc-surv-2", "zh-Hant", "direct", "碳核穿過偵測器上方物質的存活機率怎麼算？碎裂成硼的 feed-down 要怎麼扣？", "hep-detector", ["calibration"], None, None, {}),
+    # batch C, D3: charge-sign confusion rate
+ ("c-nuc-cc-1", "en", "direct", "Measure the charge-sign confusion rate per rigidity bin with right- and wrong-sign templates; how do I get its interval near zero?", "hep-detector", ["tracking"], None, None, {}),
+ ("c-nuc-cc-2", "zh-Hant", "direct", "用已知電荷符號的控制樣本量測每個剛度區間的電荷混淆率，資料與模擬的比例因子怎麼算？", "hep-detector", ["tracking"], None, None, {}),
+    # batch C, D2: species-migration response
+ ("c-nuc-mig-1", "en", "direct", "Build a species-migration response so carbon reconstructed as boron and protons reconstructed with the wrong sign fold into my prediction.", "hep-detector", ["response matrices"], None, None, {}),
+ ("c-nuc-mig-2", "zh-Hant", "direct", "把每個物種的響應矩陣組成物種遷移響應，再把理論預測折疊到重建空間。", "hep-detector", ["response matrices"], None, None, {}),
+    # batch C, M4: coupled species
+ ("c-nuc-coupled-1", "en", "direct", "My boron background is carbon fragmenting above the detector, and I measure carbon in the same data; should I subtract it as a fixed number?", "hep-measurement", ["background estimation"], None, None, {}),
+ ("c-nuc-coupled-2", "zh-Hant", "direct", "反質子樣本的背景來自同時量測的質子電荷誤判，背景估計要用固定扣除還是聯合擬合？", "hep-measurement", ["background estimation"], None, None, {}),
+    # batch C, M8: isotope fractions
+ ("c-nuc-iso-1", "en", "direct", "Fit the 7Be, 9Be and 10Be fractions per rigidity bin from mass templates built from my rigidity and velocity resolution.", "hep-measurement", ["correction chains"], None, None, {}),
+ ("c-nuc-iso-2", "zh-Hant", "direct", "用質量模板擬合每個剛度區間的鈹同位素比例，速度解析度的尾巴還沒用資料驗證怎麼辦？", "hep-measurement", ["correction chains"], None, None, {}),
+    # batch C, Th8: published-data import (import_published_table.py)
+ ("c-th-import-1", "en", "direct", "I downloaded the HEPData YAML and a CSV of this published spectrum; turn them into a dataset record so I can compare my model with it.", "hep-theory", ["comparing a model with an experiment's published data"], None, None, {}),
+ ("c-th-import-2", "zh-Hant", "direct", "我下載了論文附的 FITS 表格，想拿來和我的模型比較，欄位、單位和誤差分解要怎麼讀進來？", "hep-theory", ["predictions"], None, None, {}),
+    # batch C, Th4: neutrino oscillations (neutrino_oscillation.py)
+ ("c-th-nu-1", "en", "direct", "Compute the nu_mu to nu_e appearance probability at 1300 km and 2.5 GeV in constant-density matter for both mass orderings.", "hep-theory", ["neutrino oscillations"], None, None, {}),
+ ("c-th-nu-2", "zh-Hant", "direct", "反微中子在真空中 295 公里、0.6 GeV 的振盪機率怎麼算？PMNS 的 CP 相位慣例要怎麼寫？", "hep-theory", ["neutrino oscillations"], None, None, {}),
+    # batch C, Th10: running coupling and particle-physics entry (running_coupling.py)
+ ("c-th-alphas-1", "en", "direct", "Run alpha_s(mZ) = 0.118 down to 10 GeV at four loops with MS-bar quark-mass thresholds; which scheme conventions should I state?", "hep-theory", ["schemes"], None, None, {}),
+ ("c-th-alphas-2", "zh-Hant", "direct", "CKM 矩陣的標準參數化與 Wolfenstein 參數的慣例是什麼？我的預測要怎麼註明？", "hep-theory", ["conventions"], None, None, {}),
+    # batch C, Th12: nuclear-physics entry (decay_chain.py)
+ ("c-th-chain-1", "en", "direct", "How long until 226Ra and its daughters reach secular equilibrium, and what are the activities after 30 days?", "hep-theory", ["nuclear decays"], None, None, {}),
+ ("c-th-chain-2", "zh-Hant", "direct", "β+ 衰變的 Q 值為什麼要扣掉兩個電子質量？用原子質量怎麼算？", "hep-theory", ["nuclear decays"], None, None, {}),
+    # batch C, M10: rare-event and neutrino measurements (reference)
+ ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
+ ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),
+    # batch C, ML4: domain-shift report (domain_shift_report.py)
+ ("c-ml-shift-1", "en", "direct", "Compare my simulation and data control sample feature by feature and tell me which inputs drive the difference before I trust the classifier.", "hep-ml", ["domain shift between simulation and data"], None, None, {}),
+ ("c-ml-shift-2", "zh-Hant", "direct", "模擬和資料的控制樣本在輸入變數上有沒有偏移？哪些變數造成分類器表現不同？", "hep-ml", ["domain shift between simulation and data"], None, None, {}),
+    # batch C, ML3 extensions: BDT regression, mass sculpting, export, external scores
+ ("c-ml-bdtext-1", "en", "direct", "My BDT cut sculpts the background mass peak; how do I quantify it, and can I export the XGBoost model for TMVA inference?", "hep-ml", ["mass decorrelation", "BDTs in analyses"], None, None, {}),
+ ("c-ml-bdtext-2", "zh-Hant", "direct", "用 XGBoost BDT 做能量回歸校正，怎麼檢查各能量區間的 response 與 resolution？", "hep-ml", ["regressors for events, particles, jets or detector signals"], None, None, {}),
+    # batch C, C7: ROOT usage and histogram errors (check_histogram_errors.py)
+ ("c-ml-roothist-1", "en", "direct", "My weighted histogram has error bars that look like sqrt(N); did I forget Sumw2, and are the TEfficiency passed counts ever above the totals?", "hep-computing", ["histogram and TEfficiency objects"], None, None, {}),
+ ("c-ml-roothist-2", "zh-Hant", "direct", "RooWorkspace 匯入第二個 dataset 時變數名稱衝突，import 被取消，要怎麼改程式？", "hep-computing", ["ROOT/PyROOT"], None, None, {}),
+    # batch C, Com6: paper types and blueprints (check_manuscript.py --blueprint)
+ ("c-ml-genre-1", "en", "direct", "Check my search paper draft against what a search paper must contain: is a systematic-uncertainty table or the statistical method missing?", "hep-communication", ["papers from results"], None, None, {}),
+ ("c-ml-genre-3", "zh-Hant", "direct", "我在寫探測器性能（instrumentation）論文，內容一定要包含哪些部分？請幫我檢查草稿缺了什麼。", "hep-communication", ["drafting or revising paper sections"], None, None, {}),
+    # batch C, Com7: numbers from artifacts (render_results.py, --numbers, --compare)
+ ("c-ml-numbers-1", "en", "direct", "Make sure the signal strength in my abstract, tables and conclusion is the same number, rounded the PDG way from the fit result.", "hep-communication", ["numbers and units"], None, None, {}),
+ ("c-ml-numbers-2", "zh-Hant", "direct", "中英文兩版論文草稿的數字、不確定度和「證據」與「觀測」的用詞一致嗎？", "hep-communication", ["English or Chinese"], None, None, {}),
+    # batch C, D14: detector design principles (tracker_resolution.py)
+ ("c-det-design-1", "en", "direct", "How many tracking layers and what lever arm do I need for 5% momentum resolution at 100 GeV in a 0.5 T field?", "hep-detector", ["design principles and trade-offs"], None, None, {}),
+ ("c-det-design-2", "zh-Hant", "direct", "比較四層與八層矽追蹤器的動量解析度，精確最小平方與 Gluckstern 近似差多少？", "hep-detector", ["tracking"], None, None, {}),
+    # batch C, D13: sourced detector atlas (detector_atlas.py)
+ ("c-det-atlas-1", "en", "direct", "What solenoid field and tracker volume does the CMS detector paper give, with the source for each number?", "hep-detector", ["sourced facts on large experiments' detectors"], None, None, {}),
+ ("c-det-atlas-2", "zh-Hant", "direct", "IceCube 的 DOM 數量與垂直間距是多少？請附上出處，不要憑記憶。", "hep-detector", ["sourced facts on large experiments' detectors"], None, None, {}),
+    # batch C, S2: uncertainty projection (project_uncertainty.py)
+ ("c-st-proj-1", "en", "direct", "How does my uncertainty budget scale at four times the exposure, with the floor systematics kept, and what Asimov significance do I reach?", "hep-statistics", ["toys and Asimov datasets", "nuisance parameters"], None, None, {}),
+ ("c-st-proj-2", "zh-Hant", "direct", "資料量變成三倍時，統計誤差與各項系統誤差會降到多少？要多少曝光才能達到 5σ？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
+    # batch C, S7: validated-range caps and their override
+ ("c-st-caps-1", "en", "direct", "My template fit has 72 bins and the core tool refuses above 60; can I run it anyway, and what does the output then claim?", "hep-statistics", ["template fits"], None, None, {}),
+ ("c-st-caps-2", "zh-Hant", "direct", "多組 bin 的極限計算超過工具的上限，可以強制執行嗎？結果還能當成發表的結果嗎？", "hep-statistics", ["intervals and limits"], None, None, {}),
+    # batch C, S8: background tail extrapolation (tail_extrapolation.py)
+ ("c-st-tail-1", "en", "direct", "Extrapolate the background tail from my sideband into the signal region with an exponential and a power law, and tell me whether the extrapolation validates.", "hep-statistics", ["low or zero counts", "nuisance parameters"], None, None, {}),
+ ("c-st-tail-2", "zh-Hant", "direct", "背景尾巴只在控制區量到，要怎麼外推到訊號區？不同函數形式的差異要怎麼當成不確定度？", "hep-statistics", ["model comparison"], None, None, {}),
+    # batch C, S11 extensions: RooMCStudy pulls and RooFit/RooStats against core (roofit_fit_check.py)
+ ("c-st-roofit-1", "en", "direct", "Run a RooMCStudy pull study of my RooFit model and check its HypoTestInverter CLs limit against an independent implementation.", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
+ ("c-st-roofit-2", "zh-Hant", "direct", "RooFit 的 MINOS 區間和 profile likelihood 掃描要怎麼跟另一套程式交叉檢查？低計數時漸近 CLs 可靠嗎？", "hep-statistics", ["RooFit/RooStats", "low or zero counts"], None, None, {}),
 ]
 
 cases = []

@@ -25,6 +25,18 @@ matter physically is diagnostic; and whether calibration and uncertainty survive
 predictions. Deliver which stages ran and which were skipped, per-nuisance slices, the simulation changes tested, and
 the conditions under which the output should not be trusted.
 
+## Domain-shift report
+
+`<plugin root>/skills/hep-ml/scripts/domain_shift_report.py` compares a reference sample (simulation) with a target
+sample (data or a control region): per feature the weighted Kolmogorov-Smirnov distance and p-value (effective sample
+sizes), the Wasserstein-1 distance and a binned chi2; a classifier two-sample test (grouped K-fold logistic regression
+on the standardized features and their squares, out-of-fold AUC against its null spread); a per-period breakdown; and
+the drivers (features passing a Bonferroni threshold, by distance). It writes the `domain_shift` block of the
+ml-artifact (`--domain-shift-out`, for `write_ml_artifact.py --domain-shift`) with status `checked`; what was done
+about a shift (`--outcome`, with `--nuisance` for bounded-by-nuisance or uncorrected) is the analyst's declaration.
+With large samples tiny shifts are significant: read the distances and the driver ranking, then decide whether the
+shift matters for the output (slices of the score, not only the inputs).
+
 ## Detector configuration change (eras)
 
 A hardware or calibration change (an added or removed layer, a new readout, a changed trigger) splits the data into

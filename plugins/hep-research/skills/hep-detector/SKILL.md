@@ -5,9 +5,9 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 # hep-detector: detector performance and response
 
-**Owns:** signal formation, reconstruction, detector calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks.
+**Owns:** signal formation, reconstruction, detector calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks, detector design principles, sourced detector atlas.
 **Typical artifacts:** `response` (truth/reco axes, orientation, normalization, what sits inside the matrix, intended use), folded `prediction`, performance reports, conditions provenance.
-**Never:** invent detector facts; detector specifics come from an experiment profile, the user, or are `unknown`. Inference on top of a response belongs to hep-statistics.
+**Never:** invent detector facts; detector specifics come from an experiment profile, the user, the sourced detector atlas, or are `unknown`. Inference on top of a response belongs to hep-statistics.
 
 ## Invariants
 
@@ -44,23 +44,24 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 | Request | Read or run |
 |---|---|
-| Any detector question: the chain, the fourteen questions, task routing | [principles summary](references/detector-principles-summary.md) (section 11 indexes every file) |
-| Resolution, efficiency (weighted, binned), tag-and-probe, truth matching | [reconstruction performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
-| Tracking, vertexing, multiple scattering | [tracking and vertexing](references/tracking-and-vertexing.md); `multiple_scattering.py` |
-| Synthetic spectrometer events and periods (test bed, seeded) | `toy_spectrometer.py`; `assets/toy-spectrometer.fictional.json` |
+| Any detector question, routing | [principles summary](references/detector-principles-summary.md) |
+| Resolution, efficiency (weighted, binned), tag-and-probe, truth matching | [performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
+| Tracking, vertexing, multiple scattering | [tracking](references/tracking-and-vertexing.md); `multiple_scattering.py` |
+| Design, trade-offs, layouts meeting a resolution | [design principles](references/detector-design-principles.md); `tracker_resolution.py` |
+| Synthetic spectrometer events and periods (seeded) | `toy_spectrometer.py` |
 | Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |
-| Particle identification, TOF, dE/dx, RICH; many samples (charge, LLR) | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py`, `multisample_pid.py` |
-| Signal formation, readout, front-end electronics | [front-end electronics](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
-| Response matrices, forward folding; build one from matched events; mix or stack era responses | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py` |
+| PID: TOF, dE/dx, RICH; many samples (charge, LLR) | [PID](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py`, `multisample_pid.py` |
+| Signal formation, readout, front-end electronics | [front end](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
+| Response matrices, folding; build from events; mix or stack eras; species migration | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py`, `species_response.py` |
 | Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |
-| Calibration, alignment, conditions; stability over time, eras, an added layer | [calibration and alignment](references/calibration-and-alignment.md); `stability_monitor.py` |
-| Propagating a calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |
+| Calibration, alignment, conditions; stability, eras, an added layer | [calibration](references/calibration-and-alignment.md); `stability_monitor.py` |
+| Calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py` |
 | Triggers, luminosity, pileup | [triggers and pileup](references/triggers-luminosity-pileup.md); `pileup_reweight.py` |
-| Simulation (Geant4) | [detector simulation](references/detector-simulation.md) |
-| Charge-sign confusion | [charge confusion](references/charge-confusion.md) |
-| Space-based and balloon instruments | [space-based direct detection](references/space-based-direct-detection.md) |
-| Air showers, X_max | [extensive air showers](references/extensive-air-showers.md); `xmax_gaisser_hillas.py` |
-| A named experiment's detector | the bound profile; ask which configuration is meant |
+| Simulation (Geant4) | [simulation](references/detector-simulation.md) |
+| Charge-sign confusion; nuclei in material (survival, feed-down) | [charge confusion](references/charge-confusion.md), [nuclear interactions](references/nuclear-interactions-in-detector-material.md); `charge_confusion_rate.py`, `survival_feeddown.py` |
+| Space-based and balloon instruments | [space-based](references/space-based-direct-detection.md) |
+| Air showers, X_max | [air showers](references/extensive-air-showers.md); `xmax_gaisser_hillas.py` |
+| A named experiment's detector | the bound profile, else `detector_atlas.py query` (claim ids; `unknown` if absent); ask which configuration |
 
 Scripts in `<plugin root>/skills/hep-detector/scripts/` (read `--help` first); example inputs in `assets/`. Folder guide for people: [README.md](README.md).
 

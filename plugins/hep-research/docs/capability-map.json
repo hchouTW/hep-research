@@ -29,7 +29,7 @@
    "id": "systematic-scaling",
    "capability": "Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection",
    "owner": "hep-measurement",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "M5",
@@ -121,7 +121,7 @@
    "id": "species-migration",
    "capability": "Charge-sign confusion, nuclear interactions in material and species-migration responses",
    "owner": "hep-detector",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "D2",
@@ -153,7 +153,7 @@
    "id": "detector-design",
    "capability": "Detector design principles and a sourced detector atlas",
    "owner": "hep-detector",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "D6",
@@ -299,7 +299,7 @@
    "id": "nuclear-physics-entry",
    "capability": "Nuclear cross-section conventions, nuclear decays and Q-values",
    "owner": "hep-theory",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "Th1",
@@ -403,7 +403,7 @@
    "id": "papers-and-numbers",
    "capability": "Paper types, venues, numbers from artifacts and spectrum plots",
    "owner": "hep-communication",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "Com4",
@@ -499,13 +499,12 @@
    "id": "neutrino-oscillations",
    "capability": "Neutrino-oscillation probabilities, including matter effects",
    "owner": "hep-theory",
-   "state": "none",
-   "v1": false,
-   "cases": [
-    "th-scope-2"
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th4"
    ],
-   "enters_v1_with": "Th4",
-   "note": "th-scope-2 becomes a direct case when Th4 lands"
+   "note": "in v1 since Th4 (batch C): three flavours, vacuum and constant density; global fits of the parameters stay outside v1"
   }
  ]
 }

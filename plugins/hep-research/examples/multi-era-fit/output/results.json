@@ -66,6 +66,33 @@
    "warnings": [
     "shared systematic uncertainties not subtracted: no cross_covariance declared for e1-e2"
    ]
+  },
+  "s2_projection": {
+   "k": 2.0,
+   "projected_sigma_per_gv": [
+    0.0305762,
+    0.00866642,
+    0.0016752,
+    0.000466677,
+    0.000129144,
+    3.63089e-05
+   ],
+   "toy_sigma_per_gv": [
+    0.0293231,
+    0.00902008,
+    0.0017197,
+    0.000491704,
+    0.000134677,
+    3.67373e-05
+   ],
+   "ratio": [
+    1.043,
+    0.9608,
+    0.9741,
+    0.9491,
+    0.9589,
+    0.9883
+   ]
   }
  },
  "flux_true_per_gv": [
@@ -106,7 +133,10 @@
   "coverage_target": 0.68,
   "coverage_tolerance": 0.03,
   "split_alpha": 0.01,
-  "runtime_s_max": 60.0
+  "runtime_s_max": 60.0,
+  "projection_k": 2.0,
+  "projection_toys": 400,
+  "projection_tolerance": 0.1
  },
  "pass": {
   "c1_period_split_across_files_counted_once": true,
@@ -115,6 +145,7 @@
   "s1_no_difference_is_consistent": true,
   "s1_injected_offset_is_caught": true,
   "joint_fit_coverage_0p68_pm_0p03": true,
+  "s2_projection_within_10pct_of_toys_at_2x": true,
   "runtime_below_60_s": true
  }
 }

@@ -71,7 +71,7 @@ def nuclear_mass_gev(charge, mass_number):
             pass
     return mass_number * ATOMIC_MASS_UNIT_GEV, 'approximation A x u (binding energy ignored; not tabulated)'
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 def _finite(value, name):

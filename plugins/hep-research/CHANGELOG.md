@@ -141,6 +141,43 @@ changes behind gate G4 (one effect, one composition, optional spec fields); no v
   midway; joint-fit coverage 0.689 over 1,000 toys; S1 catches a 5% offset in one era.
 - Routing cases: 312 (30 new).
 
+
+Upgrade plan v1.3, batch C (Th1, D4, D3, D2, M4, E-1, Th8, M8, M10, Th4, Th10, Th12, S2 with the E-3 projection, S7,
+S8, ML4, ML3 extensions, S11 extensions, C7, Com6, Com7, D13, D14, E-2, E-4) (VALIDATION UPGRADE-C). Contracts stay
+2.11.0 with additive changes behind gate G4 (two effects, two artifact status labels, an optional spec field, a
+profile kind); no version bump.
+
+- Nuclear physics in material and species (Th1, D4, D3, D2, M4, M8): nuclear cross-section conventions;
+  `survival_feeddown.py` (survival probability and first-order feed-down; effects `survival` and
+  `fragmentation_feeddown`); `charge_confusion_rate.py` (template, control, gaussian-core reference);
+  `species_response.py` (block responses for species migration; a double count between a block and the correction
+  chain fails); spec field `coupled_backgrounds` with rule `coupled.fixed_subtraction`; `isotope_fraction.py`.
+- Theory (Th8, Th4, Th10, Th12): `import_published_table.py` (CSV, FITS, HEPData to a dataset record with a
+  provenance sidecar; no network); `neutrino_oscillation.py` (PDG PMNS convention, vacuum and constant-density
+  matter; neutrino oscillations enter v1); `running_coupling.py` (alpha_s at 1-4 loops with threshold matching) and
+  `particle-physics-essentials.md`; `decay_chain.py` (Bateman and matrix exponential) and
+  `nuclear-physics-essentials.md`; `core/constants` converts year-unit half-lives with the NUBASE2020 year
+  (365.2422 d).
+- Measurement (M10): rare-event and neutrino measurements (exposure and live time, ROI without unblinding, salting,
+  background budget, quenching, near/far).
+- Statistics (S2, S7, S8, S11): `project_uncertainty.py` (label `projection`, refused by the publication gate);
+  `--allow-outside-validated-range` on every overridable core/stats cap (label `outside-validated-range`, refused
+  without a validation record); `tail_extrapolation.py`; `roofit_fit_check.py toys` and `crosscheck`, and
+  `roofit-and-roostats-methods.md` (the RooFit sections of `likelihood-fitting.md` moved there).
+- hep-ml (ML4, ML3): `domain_shift_report.py` fills the ml-artifact `domain_shift` block; `train_bdt.py` regression
+  and mass-sculpting report; `export_bdt.py`; external TMVA or LightGBM scores through the inference checks.
+- Computing (C7): ROOT usage patterns and `check_histogram_errors.py` (PyROOT or uproot); the object / interval /
+  efficiency boundary in `docs/routing-contract.md`.
+- Communication (Com6, Com7): paper blueprints and `check_manuscript.py --blueprint` (advisory);
+  `render_results.py` (macros and tables traced to artifacts, synthetic watermarks a final build refuses), the PDG
+  rounding rule, `check_manuscript.py --numbers`, `audit_claims.py --compare`.
+- Detector (D14, D13): `detector-design-principles.md` and `tracker_resolution.py`; the sourced detector atlas, a
+  new profile kind `reference` at `profiles/reference/detector-atlas/` (60 claims for six experiments) with
+  `detector_atlas.py`; hep-detector owns `detector design principles` and `sourced detector atlas` (gate G3).
+- Examples: `examples/bc-fragmentation/` (E-1), `examples/pbar-p-curvature-offset/` (E-2),
+  `examples/analysis-to-paper/` (E-4); `examples/multi-era-fit/` gains the S2 projection check (new keys only).
+- Routing cases: 356 (44 new; `th-scope-2` becomes a direct case).
+
 ## 0.13.1 (2026-10-17)
 
 G-ENFORCE inputs completed for the full v6.3 suite set, and README updates. Contracts stay 2.11.0, and every

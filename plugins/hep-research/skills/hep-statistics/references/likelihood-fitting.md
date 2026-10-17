@@ -52,18 +52,8 @@ Check degeneracies before fitting: indistinguishable signal/background shapes, u
 
 ## RooFit/RooStats checks
 
-Specify observable and yield ranges, extended mode, constraints, global observables, and ModelConfig. Preserve fit results and inspect status, covariance quality, EDM, invalid evaluations, and boundary hits. Check exact APIs against the installed release.
-
-Use several reasonable initial values and scan POIs/nuisances to identify local minima. Hessian errors can be unreliable at boundaries or for nonquadratic likelihoods; supplement them with profile scans. State the method for asymmetric intervals. Optimizer bounds are not confidence intervals.
-
-Preserve workspace data, PDFs, parameter snapshots, and name mappings, plus external payloads and versions. Ownership, scope, and automatic reuse of identically named objects can connect the wrong components; inspect the actual dependency graph.
-
-Before using a workspace downstream, inspect: variables and their ranges, values,
-errors, and constant flags; PDFs and their server dependencies; datasets and entry
-counts; functions and normalization objects; and snapshots, named sets, and
-categories. Confirm the expected model, data, and observable names match what the
-statistical tool expects. `<plugin root>/skills/hep-computing/scripts/roofit_workspace_summary.py` prints this inventory
-for a `RooWorkspace` inside a ROOT file.
+Moved to [RooFit and RooStats methods](roofit-and-roostats-methods.md): the workspace checks, HESSE versus MINOS,
+RooMCStudy pulls, the RooStats calculators and the verified signal-plus-background walkthrough.
 
 ## Diagnostics
 
@@ -72,25 +62,3 @@ Provide pre/postfit yields, residuals, estimates, correlations, and pulls/constr
 Use goodness-of-fit statistics consistent with the data model. Sparse counts do not automatically justify Gaussian per-bin chi-square tests. Treat zero-count terms in saturated deviance through their limits. Fitted parameters, boundaries, and nuisances affect the reference distribution; use refitted toys when needed. A good goodness-of-fit value does not establish absence of bias; perform closure or injection tests.
 
 Judge injection tests and pulls on an ensemble: a single fit is not expected to return the injected value, so report the ensemble bias, coverage and failure rate. Pulls are standard normal only when the asymptotic approximation holds, the uncertainty definition fits and the parameter is far from a boundary; for low counts or non-Gaussian cases compare against the pull distribution of toys instead.
-
-## Worked walkthrough: a RooFit signal + background fit (verified 2026-09-24)
-
-Run from the skill directory with a ROOT-capable Python (e.g. Homebrew `python3.14`):
-
-```bash
-python3 <plugin root>/tests/skills/hep_computing/make_root_fixtures.py fx          # synthetic mass peak (m=91, sigma=2.5, 3000 sig) on an exponential
-python3 <plugin root>/adapters/root-uproot/assets/pyroot_roofit_signal_background.py --input fx/histograms.root --hist mass_hist \
-    --output fit.root --min 60 --max 120
-python3 <plugin root>/skills/hep-computing/scripts/roofit_workspace_summary.py --input fit.root --workspace workspace
-```
-
-Observed on the fixture: status 0, covQual 3; mean 90.89 +- 0.06, sigma 2.43 +- 0.05,
-nsig 2944 +- 67 (3000 generated), nbkg 5488 +- 84 (about 5440 expected in range).
-Checks to do on a real fit, in this order: status and covQual; parameters away from their
-bounds; pulls of the generated truth in a toy study before trusting the errors; and the fit
-repeated with an alternative background shape, whose difference is a systematic. Weighted
-histograms with known, constant per-event weights can use `SumW2Error(True)` (the template sets it). It and RooFit's
-`AsymptoticError` (the sandwich estimate) both treat the weights as known constants, so neither carries the
-uncertainty of sWeights or of weights estimated from the data: for those use the asymptotically correct covariance
-below (Langenbruch, EPJC 82 (2022) 393), which `sweighted_fit.py` computes, or a bootstrap of the whole chain, and
-check coverage either way.

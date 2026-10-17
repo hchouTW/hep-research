@@ -51,7 +51,7 @@ from core.kinematics.relativistic import KinematicsError, Species, convert  # no
 from core.kinematics.relativistic import flux_jacobian as kin_flux_jacobian  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 def _finite(value, name, allow_zero=True):

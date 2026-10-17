@@ -1,7 +1,8 @@
-"""Example E-3, first part (multi-era fit): SYNTHETIC two-era chain D7 -> C1 -> M1 -> D9 -> D5 -> S1 -> S6.
+"""Example E-3 (multi-era fit): SYNTHETIC two-era chain D7 -> C1 -> M1 -> D9 -> D5 -> S1 -> S6 -> S2.
 Reproduction against the committed output, every pre-declared criterion (joint-fit coverage 0.68 +- 0.03, S1 passes
 without a difference and catches an injected offset, partial + merge = single run, a period split across files counted
-once, fold of the mix = sum of the era folds, under 60 s) and synthetic labels."""
+once, fold of the mix = sum of the era folds, the S2 projection within 10% of toys at twice the exposure, under 60 s)
+and synthetic labels."""
 import contextlib
 import importlib.util
 import io
@@ -46,6 +47,12 @@ class MultiEraFitExample(unittest.TestCase):
         self.assertEqual(self.r["checks"]["s1_nominal"]["exit"], 0)
         self.assertEqual(self.r["checks"]["s1_offset"]["exit"], 1)
         self.assertIn("shared systematic uncertainties not subtracted", " ".join(self.r["checks"]["s1_nominal"]["warnings"]))
+
+    def test_s2_projection_against_toys_at_twice_the_exposure(self):
+        p = self.r["checks"]["s2_projection"]
+        self.assertEqual(p["k"], 2.0)
+        for ratio in p["ratio"]:
+            self.assertLessEqual(abs(ratio - 1.0), 0.10)
 
     def test_reproduces_committed_output(self):
         committed = (SCRIPT.parent / "output" / "results.json").read_bytes()

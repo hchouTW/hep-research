@@ -87,6 +87,8 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.protected.guard import protected_main  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from communication_lib import blueprints as _blueprints  # noqa: E402
 
 # Any natbib/biblatex/plain citation command (\cite, \citep, \Citet, \citeauthor,
 # \parencite, \textcite, \autocite, \footcite, \nocite, ...). Arguments are read by
@@ -764,6 +766,11 @@ def main(argv=None) -> int:
     parser.add_argument("--style", action="store_true",
                         help="Also report advisory typography checks (ref ties, number-unit spacing); exit code unaffected")
     parser.add_argument("--format", choices=("text", "json"), default="text", help="text (default) or one JSON report object")
+    parser.add_argument("--numbers", action="store_true",
+                        help="exit 1 when a quantity written as SYMBOL = VALUE \\pm UNC differs between the abstract, "
+                             "body, tables and conclusions (macros expanded)")
+    parser.add_argument("--blueprint", choices=sorted(_blueprints.load()["types"]),
+                        help="advisory content list of a paper type (assets/paper-blueprints.json); exit code unaffected")
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
@@ -797,16 +804,56 @@ def main(argv=None) -> int:
             return fail(f"no manuscript files (.tex) under {args.path}: nothing was checked")
         style_root = args.path
     style_findings = style_scan(style_root) if args.style else None
+    blueprint = numbers = None
+    tex = "\n".join(Path(p).read_text(encoding="utf-8", errors="replace") for p in results["tex_files"])
+    if args.numbers:
+        numbers = _blueprints.number_consistency(tex)
+    if args.blueprint:
+        doc = _blueprints.load()
+        blueprint = dict(_blueprints.check(tex, doc["types"][args.blueprint], doc["sources"]), type=args.blueprint)
     if args.format == "json":
         import contextlib
         import io
         with contextlib.redirect_stdout(io.StringIO()):
             code = report(results, strict=args.strict)
-        print(json.dumps(json_report(results, args.strict, code, style_findings), indent=1))
+        if numbers and numbers["mismatches"]:
+            code = 1
+        rep = json_report(results, args.strict, code, style_findings)
+        if numbers is not None:
+            rep["numbers"] = numbers
+            rep["checks_run"].append("numbers")
+            for mm in numbers["mismatches"]:
+                shown = ", ".join(f"{o['value']} +- {o['uncertainty']} ({o['region']})" for o in mm["occurrences"])
+                rep["findings"].append({"code": "manuscript.number_mismatch", "severity": "error", "location": "-",
+                                        "message": f"{mm['quantity']}: {shown}",
+                                        "suggested_action": "render every occurrence from one artifact (render_results.py)"})
+        if blueprint is not None:
+            rep["blueprint"] = blueprint
+            rep["checks_run"].append("blueprint (advisory)")
+            for item in blueprint["items"]:
+                if not item["present"]:
+                    rep["findings"].append({"code": "manuscript.blueprint_missing", "severity": "advisory",
+                                            "location": "-", "message": f"{item['id']}: {item['description']}",
+                                            "suggested_action": f"add it if this {args.blueprint} paper needs it "
+                                                                f"(source: {item['source']})"})
+        print(json.dumps(rep, indent=1))
         return code
     if args.style:
         report_style(style_findings)
-    return report(results, strict=args.strict)
+    code = report(results, strict=args.strict)
+    if numbers is not None:
+        print(f"\nNumbers: {len(numbers['quantities'])} quantit(ies) checked across abstract, body, tables, conclusions")
+        for mm in numbers["mismatches"]:
+            print(f"  MISMATCH {mm['quantity']}: " + ", ".join(f"{o['value']} +- {o['uncertainty']} ({o['region']}, line "
+                                                              f"{o['line']})" for o in mm["occurrences"]))
+        if numbers["mismatches"]:
+            code = 1
+    if blueprint is not None:
+        print(f"\nBlueprint {args.blueprint} (advisory; the exit code is unaffected):")
+        for item in blueprint["items"]:
+            print(f"  [{'x' if item['present'] else ' '}] {item['id']}: {item['description']}")
+        print("  missing: " + (", ".join(blueprint["missing"]) or "none"))
+    return code
 
 
 if __name__ == "__main__":

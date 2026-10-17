@@ -67,6 +67,25 @@ and validates the mixed artifact like any other response. Record the eras in the
 `exposure_weight`, `matrix` or `matrix_ref`) rather than in the free `conditions` string
 ([calibration and alignment](calibration-and-alignment.md)).
 
+## Species migration
+
+When a particle of one species can be reconstructed as another (charge-sign confusion, charge-ladder leakage,
+fragmentation into a lighter nucleus), every reco species is a fold of every true species:
+`reco_s' = sum_s R(s -> s') truth_s`. Each nonzero block R(s -> s') is an ordinary response (rows reco, columns truth,
+normalized per generated true particle), so nothing in the response contract changes; a block manifest ties the
+blocks together: `{"manifest_version": "0.1.0", "species": [...], "variable": {...}, "inefficiency_location":
+"outside", "blocks": [{"true", "reco", "response", "source", "effects"}]}`.
+- Every block shares the same truth and reco axes; for each true species the column sums over all reco species are
+  at most 1, the rest being lost outside the blocks (survival, inefficiency).
+- An effect modelled by a block (charge confusion, feed-down) is not also corrected in the chain: a fragmentation
+  block and a feed-down subtraction, or a sign-confusion block and a confusion background, count it twice.
+- The flattened matrix has (species x bins) rows and columns; above about 60 a joint fit is better done with
+  parametrized forward folding than with one large matrix.
+`scripts/species_response.py` assembles and checks a manifest (`assemble`), folds truth spectra through it (`fold`),
+finds an effect both in a block and in the correction chain (`check`, exit 1), and builds sign-migration blocks from
+the rates `scripts/charge_confusion_rate.py` measures (`from-rates`). Survival and feed-down as corrections instead
+of blocks: [nuclear interactions in material](nuclear-interactions-in-detector-material.md).
+
 ## Forward folding a prediction
 
 Fold a truth-level prediction as

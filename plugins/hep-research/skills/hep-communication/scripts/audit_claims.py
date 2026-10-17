@@ -3,6 +3,8 @@
 and units, reporting completeness; emit a claim matrix, draft-ready facts and handoffs.
 
 Usage: python3 audit_claims.py RECORD.json --project-root ROOT [--policy POLICY.json] [--format json|markdown] [--out REPORT]
+       python3 audit_claims.py --compare A.txt B.txt   (two versions of one text, e.g. the English and Chinese drafts:
+       exit 1 when numbers, uncertainties, status words or the claim-strength level differ; Com7)
 
 The policy (default: the skill's assets/reporting-policies.json) lists per result type the fields a report needs and
 the method conditions under which they apply; it checks supplied metadata and never chooses a method. Deterministic
@@ -31,7 +33,30 @@ DEFAULT_POLICY = HERE.parent / "assets" / "reporting-policies.json"
 CHECKS = ("schema", "assessments", "sources", "wording", "numbers", "reporting")
 
 
+def compare_main(argv) -> int:
+    """--compare A B: numbers, status words and claim-strength levels of two versions (exit 1 when they differ)."""
+    import json
+    from communication_lib.claims import compare_versions
+    paths = argv[argv.index("--compare") + 1:argv.index("--compare") + 3]
+    if len(paths) != 2:
+        print(json.dumps({"tool": "audit_claims", "status": "input-error", "error": "--compare needs two files"}))
+        return 2
+    try:
+        texts = [Path(p).read_text(encoding="utf-8") for p in paths]
+    except OSError as exc:
+        print(json.dumps({"tool": "audit_claims", "status": "input-error", "error": str(exc)}))
+        return 2
+    rep = compare_versions(*texts)
+    rep.update(tool="audit_claims", mode="compare", files=paths, status="fail" if rep["differences"] else "pass")
+    print(json.dumps(rep, indent=1, ensure_ascii=False))
+    return 1 if rep["differences"] else 0
+
+
 def main(argv=None) -> int:
+    args_list = list(sys.argv[1:] if argv is None else argv)
+    if "--compare" in args_list:
+        return compare_main(args_list)
+
     def add_args(ap):
         ap.add_argument("--policy", type=Path, default=DEFAULT_POLICY, help=f"reporting policy JSON (default: {DEFAULT_POLICY})")
 

@@ -34,6 +34,9 @@ SYST_CSV = ('name,source,effect,applied_via,affected_processes,correlation_key,p
 
 PERIODS_CFG = json.dumps({"key": "period", "start_column": "start_s", "duration_column": "duration_s", "live_fraction_column": "live_fraction", "quality_cuts": [], "transmission": {"cutoff_column": "cutoff_gv", "safety_factors": [1.0]}, "x": {"variable": "rigidity", "unit": "GV", "edges": [1, 2, 4]}, "time_edges": [0, 1000], "eras": [{"id": "e1", "start": 0, "end": 1000}]})
 PERIODS = 'period,start_s,duration_s,live_fraction,cutoff_gv\np1,0,100,0.9,1.5\n'
+ISO_CFG = json.dumps(dict(json.loads((ROOT / 'skills' / 'hep-measurement' / 'assets' / 'isotope-fraction.example.json')
+                                     .read_text(encoding='utf-8')), mc_events_per_isotope=2000))
+ISO_DATA = json.dumps({'bins': [[3] * 15, [3] * 15]})
 
 # script: (valid args, NaN args, malformed-file args or None, how the status is reported)
 # '{f}' is replaced by a file written from the given text; a dict of texts writes one file per placeholder ('{f}',
@@ -82,6 +85,12 @@ CASES = {
     'spectrum_transform.py': ((['{f}', '--to', 'kinetic_energy_per_nucleon'], json.dumps(TRANSFORM)),
                               (['{f}', '--to', 'kinetic_energy_per_nucleon'], json.dumps(TRANSFORM).replace('0.2', 'NaN')),
                               (['{f}', '--to', 'kinetic_energy_per_nucleon'], '{"variable": '), 'run-json'),
+    'isotope_fraction.py': ((['fit', '--config', '{f}', '--data', '{g}', '--seed', '1', '--no-nuisances'],
+                             {'{f}': ISO_CFG, '{g}': ISO_DATA}),
+                            (['fit', '--config', '{f}', '--data', '{g}', '--seed', '1', '--no-nuisances'],
+                             {'{f}': ISO_CFG, '{g}': ISO_DATA.replace('3', 'NaN', 1)}),
+                            (['fit', '--config', '{f}', '--data', '{g}', '--seed', '1'], {'{f}': ISO_CFG, '{g}': '{"bins": ['}),
+                            'run-json'),
     'systematics_table_tex.py': ((['--input', '{f}', '--status', 'synthetic'], SYST_CSV),
                                  (['--input', '{f}', '--status', 'synthetic'], SYST_CSV.replace(',p,v', ',nan,v')),
                                  (['--input', '{f}', '--status', 'synthetic', '--columns', 'nonexistent'], SYST_CSV),

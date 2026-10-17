@@ -55,23 +55,28 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 | every Poisson routine (`_poisson.py` `MAX_MEAN`) | mean <= 1e5 | asymptotic or Gaussian treatment, labeled as such |
 | `poisson_diagnostics.py fc-interval` (`FC_MAX_TOTAL_MEAN`) | total mean <= 500 | `cls-limit`, or `likelihood_limits.py profile-fc` |
 | `likelihood_limits.py` single-bin subcommands (`_inputs1`: profile-*, neyman-*) | b <= 200, sigma_b <= 100 | the pyhf adapter, or the asymptotic formulas labeled as such |
-| `likelihood_limits.py multibin-limit` | bins <= 50, bin b <= 200, total n <= 400, mc_stat <= 100 | the pyhf adapter |
-| `likelihood_limits.py shape-limit` with toys, `shape-gof`, `contour` (`SHAPE_TOY_CAPS`) | bins <= 40, bin b <= 200, total n <= 400, mc_stat <= 100 | `shape-limit` without toys, or the pyhf adapter |
-| `likelihood_limits.py shape-limit` without toys (`SHAPE_ASYMPTOTIC_CAPS`) | bins <= 100, bin b <= 1e4, total n <= 1000000 | the pyhf adapter |
+| `likelihood_limits.py multibin-limit` | bins <= 50 (o), bin b <= 200, total n <= 400 (o), mc_stat <= 100 | the pyhf adapter |
+| `likelihood_limits.py shape-limit` with toys, `shape-gof`, `contour` (`SHAPE_TOY_CAPS`) | bins <= 40 (o), bin b <= 200, total n <= 400 (o), mc_stat <= 100, nuisances <= 8 (o) | `shape-limit` without toys, or the pyhf adapter |
+| `likelihood_limits.py shape-limit` without toys (`SHAPE_ASYMPTOTIC_CAPS`) | bins <= 100 (o), bin b <= 1e4, total n <= 1000000 (o), nuisances <= 8 (o) | the pyhf adapter |
 | `likelihood_limits.py` toy counts | toys 100 to 100000 | partition the toys (hep-computing) and merge |
 | `statistical_toys.py` toy counts (`MAX_TOYS`) | toys <= 200000 | partition the toys and merge |
 | `statistical_toys.py ratio-cov` | numerator, denominator <= 1e5 | `ratio-cov-analytic`, or `ratio-measured` (measured covariance, denominator <= 1e12) |
 | `statistical_toys.py ratio-cov-analytic` (`ANALYTIC_MIN_COUNTS`, `ANALYTIC_MAX_COUNTS`) | counts 1e4 to 1e12 | below: `ratio-cov` (toys) |
-| `statistical_toys.py unfold-scan` | reco and truth bins <= 60 | a dedicated unfolding framework |
+| `statistical_toys.py unfold-scan` | reco and truth bins <= 60 (o) | a dedicated unfolding framework |
 | `unfolding_diagnostics.py` response-stat, outer-coverage, response-covariance | mc_events <= 1e5 | the analytic response covariance by hand, labeled |
 | `unfolding_diagnostics.py` response-covariance, response-measured | response cells <= 400 | rebin, or a dedicated framework |
+| `unfolding_diagnostics.py response-stat` with `tsvd` | truth bins <= 20 (o) | `tikhonov`, or a dedicated framework |
+| `unfolding_diagnostics.py` Jacobian diagnostics (response-covariance, response-measured) with `tsvd` | bins <= 15 (o) | `tikhonov` |
 | `unfolding_diagnostics.py dagostini-unfold` (`UNFOLD_MAX_COUNTS`, `UNFOLD_MAX_MC_EVENTS`) | data <= 1e9, mc_events <= 1e12 | a dedicated framework |
-| `template_fit.py` (`MAX_TEMPLATES`, `MAX_BINS`) | templates <= 6, bins <= 60 | the pyhf adapter |
+| `template_fit.py` (`MAX_TEMPLATES`, `MAX_BINS`) | templates <= 6 (o), bins <= 60 (o), nuisances <= 8 (o) | the pyhf adapter |
+
+  (o): overridable with `--allow-outside-validated-range` (`_caps.py`): the run goes ahead, lists each cap exceeded
+  and is labeled `outside-validated-range`, which the publication gate refuses without a validation record. The
+  other caps protect numerical accuracy or are handled by partitioning; a toy loop whose estimated runtime exceeds
+  10 s prints the estimate to stderr first.
 - **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
   `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
-  at most 1e-5 (stricter than iminuit's default: Migrad stops at EDM < 0.002 x tol x errordef, with tol 0.1,
-  that is 1e-4 for a negative log-likelihood with errordef 0.5; the threshold depends on the tolerance, iminuit
-  reference documentation); otherwise `failed` with reasons (`invalid_domain`,
+  at most 1e-5 (stricter than iminuit's default; [details](core-stats-commands.md#conventions-in-detail)); otherwise `failed` with reasons (`invalid_domain`,
   `hessian_not_positive_definite`, `gradient_not_small`, `max_iterations`, `line_search_stalled`). A best fit on the
   boundary `mu = 0` is checked by the KKT condition (the profile rises into `mu > 0`), not by an interior Hessian. A
   conditional NLL below the global one by more than 1e-4 triggers a global refit from the conditional point and, if
@@ -79,9 +84,6 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
   reasons for the observed data and for toys) and `status`: `failed` (exit 1) when a fit on the data failed,
   `incomplete` (exit 3) when only toy fits failed; failed toys are counted, never dropped, and toy p-values then
   carry the range `[k/N, (k+F)/N]`.
-- **Poisson domain.** A negative or non-finite Poisson mean is outside every likelihood here (NLL = +inf); a mean of
-  0 is allowed only for an empty bin. A shape template that interpolates below zero is therefore excluded by the fit
-  instead of being read as an empty bin.
 - **Toy tails** (`tail_estimation.py`, helper, no CLI). A toy p-value is k exceedances of N toys. Outputs carry
   `toy_tail`: k, N, the estimate k/N (None at k = 0), the Clopper-Pearson interval at 68.27%, and at k = 0 a one-sided
   95% upper bound `1 - 0.05^(1/N)` (0.0295 for N = 100); the legacy `p_value_toys` and binomial-error fields are None
@@ -129,17 +131,13 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); a worked SYNTHETIC input (2 experiments, 3 bins, shared luminosity) is `skills/hep-statistics/assets/combine.example.json`; `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples (eras, halves) agree, from d = x1 - x2 with Cov(d) = C1 + C2 - C12 - C21, a generalized chi2 for K splits and Sidak or toy-corrected pairwise tests; without declared shared blocks it says so; NumPy and SciPy are imported at run time.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics (constant, line, normalized exponential, sharp or smooth broken power law, plug-in `function(theta, x)`, `tabulated-grid`); `break-scan`: toy-calibrated break interval and no-break test (no Wilks); `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
-- `roofit_fit_check.py` (needs PyROOT): a saved RooFitResult is ok only with status 0, covQual 3 and an EDM below the declared `--edm-max`; `weighted` requires `--weighted-errors` for weighted data.
-- Inference scripts of hep-measurement (read `--help`). `cr_spectrum_powerlaw_fit.py` fits a single or
-  continuous broken power law in log flux (a full covariance, linearized); a free break is calibrated here
-  (`break-scan`, `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the
-  delta method with one optional correlation coefficient: with correlated points or bin-to-bin correlated
-  systematics use `covariance_fit.py fit` or
-  `statistical_toys.py ratio-cov` / `ratio-measured` here, and at low counts an exact construction
-  (`pcl_efficiency_ratio.py ratio`, Fieller or Clopper-Pearson). Two different "counting references":
-  `skills/hep-measurement/scripts/counting_reference.py` is a flat-prior Bayesian upper bound with an exactly known
-  background (not CLs, no nuisances); the frequentist counting constructions are `core/stats/poisson_diagnostics.py`
-  (and `likelihood_limits.py` with an uncertain background). pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
+- `roofit_fit_check.py` (needs PyROOT): fit status (status 0, covQual 3, EDM below `--edm-max`), `weighted`, `toys` (pulls), `crosscheck` (against core/stats); [RooFit and RooStats](roofit-and-roostats-methods.md).
+- `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure, systematics by
+  their M5 scaling class, and the reach; every output is labeled `projection` and fails the publication gate.
+- `tail_extrapolation.py`: a control-region tail fitted by several model families and extrapolated into the signal
+  region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy are imported at run time.
+- Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command
+  reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 
 ## Not implemented
 

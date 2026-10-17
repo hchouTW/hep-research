@@ -55,7 +55,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # plugin root: core.stats for the interval
 
 STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
-            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
+            "validated-in-scope", "projection", "outside-validated-range")  # contracts/vocab/core.json artifact_statuses
 MIN_HELD_OUT = 10
 EIGEN_RTOL = 1e-10  # eigenvalues below this fraction of the largest are treated as zero variance
 CONSTANT_RTOL = 1e-12  # a feature whose spread is below this (relative to its magnitude) is constant

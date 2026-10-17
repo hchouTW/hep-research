@@ -1,0 +1,180 @@
+{
+ "contract_version": "2.11.0",
+ "artifact_id": "synthetic-e4-selected-mass",
+ "artifact_type": "dataset-record",
+ "objective": "SYNTHETIC selected mass spectrum (score > 0)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.13.1",
+  "contracts": "2.11.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-measurement",
+  "created": "2026-10-17",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "dataset_id": "synthetic:e4-selected-mass",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "event-count",
+   "process": "SYNTHETIC signal plus background",
+   "variables": [
+    {
+     "name": "m",
+     "unit": "GeV",
+     "edges": [
+      100.0,
+      102.0,
+      104.0,
+      106.0,
+      108.0,
+      110.0,
+      112.0,
+      114.0,
+      116.0,
+      118.0,
+      120.0,
+      122.0,
+      124.0,
+      126.0,
+      128.0,
+      130.0,
+      132.0,
+      134.0,
+      136.0,
+      138.0,
+      140.0,
+      142.0,
+      144.0,
+      146.0,
+      148.0,
+      150.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: score > 0",
+    "fiducial": false
+   },
+   "level": "detector",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 1.0,
+    "unit": "fb^-1",
+    "convention": "SYNTHETIC: one invented data set"
+   },
+   "bin_semantics": "bin-integrated",
+   "unit": "1"
+  },
+  "data": {
+   "edges": [
+    100.0,
+    102.0,
+    104.0,
+    106.0,
+    108.0,
+    110.0,
+    112.0,
+    114.0,
+    116.0,
+    118.0,
+    120.0,
+    122.0,
+    124.0,
+    126.0,
+    128.0,
+    130.0,
+    132.0,
+    134.0,
+    136.0,
+    138.0,
+    140.0,
+    142.0,
+    144.0,
+    146.0,
+    148.0,
+    150.0
+   ],
+   "values": [
+    107,
+    96,
+    92,
+    84,
+    71,
+    80,
+    66,
+    52,
+    55,
+    55,
+    92,
+    148,
+    235,
+    140,
+    62,
+    28,
+    35,
+    20,
+    16,
+    21,
+    22,
+    18,
+    17,
+    28,
+    20
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "stat",
+     "kind": "statistical",
+     "correlation": "uncorrelated",
+     "values": [
+      10.344080432788601,
+      9.797958971132712,
+      9.591663046625438,
+      9.16515138991168,
+      8.426149773176359,
+      8.94427190999916,
+      8.12403840463596,
+      7.211102550927978,
+      7.416198487095663,
+      7.416198487095663,
+      9.591663046625438,
+      12.165525060596439,
+      15.329709716755891,
+      11.832159566199232,
+      7.874007874011811,
+      5.291502622129181,
+      5.916079783099616,
+      4.47213595499958,
+      4.0,
+      4.58257569495584,
+      4.69041575982343,
+      4.242640687119285,
+      4.123105625617661,
+      5.291502622129181,
+      4.47213595499958
+     ]
+    }
+   ]
+  },
+  "covariance": {
+   "status": "present",
+   "ref": "selected_mass.json#extension.data.uncertainties",
+   "note": "Poisson, bins independent"
+  },
+  "period": "not-applicable",
+  "status": "synthetic"
+ }
+}

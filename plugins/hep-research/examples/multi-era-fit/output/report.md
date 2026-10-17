@@ -12,7 +12,9 @@ Two eras of a fictional spectrometer; e2 adds a ninth layer (resolution terms {'
 | s1_no_difference_is_consistent | pass |
 | s1_injected_offset_is_caught | pass |
 | joint_fit_coverage_0p68_pm_0p03 | pass |
+| s2_projection_within_10pct_of_toys_at_2x | pass |
 | runtime_below_60_s | pass |
 
 Joint-fit coverage of the +-1 sigma intervals: 0.6887 over 6000 cells (1000 toys).
 S1 without a difference: chi2 10.434 / 6, p 0.1075; with a 5% offset in e2: chi2 120.78, p 1.117e-23.
+S2 projection to k = 2: projected / toy sigma per bin [1.043, 0.9608, 0.9741, 0.9491, 0.9589, 0.9883].

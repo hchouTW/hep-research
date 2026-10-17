@@ -1,0 +1,35 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: invented signal and background; describes no experiment",
+ "seed": 20261017,
+ "score": "Bayes-optimal log-likelihood ratio (fallback: no ML backend used; --with-bdt runs train_bdt.py)",
+ "bayes_auc": 0.846089,
+ "auc": 0.845322,
+ "auc_sigma": 0.00248845,
+ "auc_pull": -0.3083,
+ "selected_data_events": 1660,
+ "generated_signal_in_data": 600,
+ "expected_signal_after_cut": 456.12,
+ "signal_yield": 621.049,
+ "mu": 1.03508,
+ "sigma_mu": 0.0581633,
+ "macros": {
+  "MuValue": "1.04",
+  "MuUnc": "0.06",
+  "rounding": "pdg"
+ },
+ "numbers_check_exit": 0,
+ "criteria": {
+  "auc_pull_abs": 3.0,
+  "mu_pull_abs": 3.0
+ },
+ "pass": {
+  "auc_within_statistical_range_of_bayes_limit": true,
+  "mu_consistent_with_injected_1": true,
+  "macros_round_trip_to_the_artifact": true,
+  "table_equals_the_record": true,
+  "hepdata_values_equal_the_artifacts": true,
+  "draft_numbers_consistent": true,
+  "roofit_step_ran_or_exited_3": true,
+  "synthetic_watermark_in_macros": true
+ }
+}

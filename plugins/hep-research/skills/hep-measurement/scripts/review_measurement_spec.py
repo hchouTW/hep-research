@@ -16,6 +16,9 @@ era.bin_straddles_boundary (error: a period or a time-variable bin crosses an er
 (warning: with two or more eras, a systematic without era_correlation) and era.version_mismatch (warning: eras with
 different versions where the later era is not a declared software or calibration change). Times are numbers or ISO
 dates; values that cannot be compared are not checked. Specs without eras are reviewed as before.
+Coupled backgrounds (M4): when the spec declares `coupled_backgrounds` ([{background, species, treatment, source}]),
+coupled.fixed_subtraction (warning) flags one subtracted as a fixed amount: the other species is measured at the same
+time, so fit them jointly or iterate (references/backgrounds.md, "Coupled species").
 --check-bundle (opt-in) adds "analysis_check": the bounded summary of contracts/analysis_check.py on a v2 analysis
 bundle (violated and unverified obligations, missing bindings, next steps); it never changes the verdict or exit code.
 Output: JSON {"status", "verdict", "reason", "defects": [...ranked...], "unresolved": [...], "warnings": [...],
@@ -38,7 +41,7 @@ from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 # Defects that move the central value beyond its quoted uncertainty or break blinding, in impact order.
 BLOCKING = ('measurement.normalization_double_counted', 'measurement.duplicate_correction',
             'measurement.correction_category_repeated', 'measurement.correction_in_observable_and_chain',
@@ -124,13 +127,27 @@ def era_findings(ext: dict) -> list[tuple[str, str, str, str]]:
     return out
 
 
-def draft(doc: dict, vocab: Vocabulary | None = None, era_checks: bool = True) -> dict:
+def coupled_findings(ext: dict) -> list[tuple[str, str, str, str]]:
+    """(severity, code, field, message) of the M4 rule; empty when the spec declares no coupled backgrounds."""
+    out = []
+    for i, cb in enumerate(ext.get('coupled_backgrounds') or []):
+        if isinstance(cb, dict) and cb.get('treatment') == 'fixed-subtraction':
+            out.append(('warning', 'coupled.fixed_subtraction', f'$.extension.coupled_backgrounds[{i}]',
+                        f"background '{cb.get('background')}' comes from {cb.get('species')}, which is measured at the "
+                        'same time, but is subtracted as a fixed amount: its uncertainty and its dependence on the '
+                        'result are lost; fit the species jointly or iterate'))
+    return out
+
+
+def draft(doc: dict, vocab: Vocabulary | None = None, era_checks: bool = True, coupled_checks: bool = True) -> dict:
     if not isinstance(doc, dict) or doc.get('artifact_type') != 'measurement-spec':
         raise ValueError('input is not a measurement-spec artifact')
     rep = validate_artifact(doc, vocab, strict=True)
     found = [(f.severity, f.code, f.path, f.message) for f in rep.findings]
     if era_checks and isinstance(doc.get('extension'), dict):
         found += era_findings(doc['extension'])
+    if coupled_checks and isinstance(doc.get('extension'), dict):
+        found += coupled_findings(doc['extension'])
     rank = {c: i for i, c in enumerate(BLOCKING)}
     errors = sorted((f for f in found if f[0] == 'error'), key=lambda f: (rank.get(f[1], len(BLOCKING)), f[2]))
     defects = [{'rank': i + 1, 'code': c, 'evidence': p, 'why': m,

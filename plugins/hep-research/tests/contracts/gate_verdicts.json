@@ -930,6 +930,27 @@
   "ok": true,
   "strict_ok": true
  },
+ "examples/analysis-to-paper/output/artifacts/selected_mass.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/analysis-to-paper/output/artifacts/signal_strength.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/analysis-to-paper/output/artifacts/signal_strength_record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/bc-fragmentation/output/artifacts/spec_fixed_subtraction.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/bc-fragmentation/output/artifacts/spec_joint_fit.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "examples/collider-angular/output/artifacts/dataset_record.json": {
   "ok": true,
   "strict_ok": true

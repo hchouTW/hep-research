@@ -1,0 +1,57 @@
+{
+ "contract_version": "2.11.0",
+ "artifact_id": "synthetic-e4-mu",
+ "artifact_type": "statistical-result",
+ "objective": "SYNTHETIC signal strength from a Barlow-Beeston template fit",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.13.1",
+  "contracts": "2.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-17",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "see results",
+   "backend": "core/stats"
+  },
+  "parameters_of_interest": [
+   "mu"
+  ],
+  "nuisances": [],
+  "fit_status": "converged",
+  "test_statistic": "q_mu",
+  "construction": "asymptotic",
+  "coverage": {
+   "check": "not-checked",
+   "method": "not studied by this run"
+  },
+  "results": {
+   "mu_hat": 1.0350824146909174,
+   "sigma_mu": 0.05816330553603167,
+   "cl": 0.68,
+   "cli_status": "ok"
+  }
+ }
+}

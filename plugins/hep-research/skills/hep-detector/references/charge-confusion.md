@@ -89,6 +89,19 @@ variations, and the extrapolation outside the control-sample range
 A closure test (method run on simulation with known `c`) shows the procedure recovers its input, not that the
 simulated tails are right.
 
+### With the tool
+
+`<plugin root>/skills/hep-detector/scripts/charge_confusion_rate.py` implements routes 2 and 3 per bin:
+- `template`: right-sign, wrong-sign and optional background templates fitted to the discriminant histogram with the
+  full Barlow-Beeston treatment of the template statistics (`core/stats/template_fit.py`, at most 6 templates and 60
+  bins); the rate's 68% interval is the profile-likelihood interval in the rate, which stays calibrated near zero
+  (200 toys per rate from 1e-3 to 1e-1 cover within 0.05 of 68% in its tests, with the MC templates redrawn);
+- `control`: a sample of known sign, the Clopper-Pearson interval per bin, and the data/MC scale factor against a
+  simulated control sample; integer frequency weights only (with them it equals counting duplicated events);
+- `gaussian-core`: Phi(-|1/R| / sigma(1/R)) from a Gaussian curvature core, a lower-bound reference labelled "not an
+  estimate". It ignores the tails that dominate real confusion and never yields an estimate.
+`template` and `control` write `sign_rates`, which `species_response.py from-rates` turns into sign-migration blocks.
+
 ## Handoff: hep-measurement subtracts it as a background
 
 hep-detector measures `c`; hep-measurement decides how the measurement uses it, and hep-statistics fits it.

@@ -124,6 +124,9 @@ def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
     labels = list(dict.fromkeys(a.label))
     if status == "failed" and "failed" not in labels:
         labels.append("failed")
+    for carried in ("range_label", "label"):  # S7 and S2: a tool's own label travels with the result
+        if cli.get(carried) in ("outside-validated-range", "projection") and cli[carried] not in labels:
+            labels.append(cli[carried])
     ext: dict = {"paradigm": a.paradigm,
                  "likelihood": {"form": cli.get("method", "see results"), "backend": a.backend or cli.get("label", "core/stats")},
                  "parameters_of_interest": a.poi, "nuisances": cli.get("nuisances", []),

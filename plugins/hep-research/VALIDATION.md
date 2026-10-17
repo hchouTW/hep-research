@@ -1913,6 +1913,79 @@ Commands, from the plugin root with `PYTHONDONTWRITEBYTECODE=1`, on the final tr
 Skipped tests are unverified, not passed: they need PyTorch, pyhf, ROOT, uproot, network access or
 `HEP_SLOW_TESTS=1`. Not run: the slow tier, live routing (no description changed), the CLI host checks.
 
+## UPGRADE-C (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
+
+Upgrade plan v1.3, batch C on branch `upgrade/C` from main `8dab2bb2`: Th1, D4, D3, D2, M4, E-1, Th8, M8, M10, Th4,
+Th10, Th12, S2 (with the E-3 projection), S7, S8, ML4, ML3 extensions, S11 extensions, C7, Com6, Com7, D13, D14, E-2,
+E-4. Gate decisions (maintainer, 2026-10-17): every named public source may be fetched (G6); effects `survival` and
+`fragmentation_feeddown`, spec field `coupled_backgrounds`, artifact statuses `projection` and
+`outside-validated-range`, and the profile kind `reference` (G4); hep-detector owns `detector design principles` and
+`sourced detector atlas` (G3); no new dependencies for the ML3 extensions (G5); the atlas covers six experiments in
+v1. Each item's tests, run on the parent with the item's test files, then on the item's commit (counts in
+parentheses):
+
+| Item | Parent | Commit |
+|---|---|---|
+| Th1 (`151889fb`) | fail (errors=5) | pass |
+| D4 (`c3afd32c`) | fail (failures=5, errors=5) | pass |
+| D3 (`4c1cb871`) | fail (failures=3, errors=1, skipped=1) | pass (skipped=1) |
+| D2 (`11f66a20`) | fail (failures=4, errors=1) | pass |
+| M4 (`ccc1eb2a`) | fail (failures=4, errors=47) | pass |
+| E-1 (`d4251e05`) | fail (errors=1) | pass |
+| M8 (`b92ecb24`) | fail (failures=1, errors=2, skipped=1) | pass (skipped=1) |
+| Th8 (`40d8c519`) | fail (failures=4, errors=5, skipped=1) | pass (skipped=1) |
+| Th4 (`69f359f5`) | fail (errors=1) | pass |
+| Th10 (`c0b6b6d8`) | fail (errors=4) | pass |
+| Th12 (`87421c11`) | fail (errors=4) | pass |
+| M10 (`c4d801c4`) | fail (errors=4) | pass |
+| ML4 (`1a844ba0`) | fail (failures=4, errors=2, skipped=1) | pass (skipped=1) |
+| ML3 extensions (`3398e5c3`) | fail (failures=8, errors=2, skipped=1) | pass (skipped=1) |
+| C7 (`3b3dca7d`) | fail (failures=6, errors=1, skipped=2) | pass (skipped=2) |
+| Com6 (`ac1eb235`) | fail (failures=2, errors=1) | pass |
+| Com7 (`fe9839a2`) | fail (failures=9, errors=3) | pass |
+| E-4 (`0cedf447`) | fail (errors=1) | pass (skipped=2) |
+| D14 (`6721da68`) | fail (failures=8, errors=4) | pass |
+| D13 (`1f95aab2`) | fail (failures=1, errors=3) | pass |
+| D13 (`cbcf6c34`) | fail (failures=10, errors=2) | pass |
+| S2 (`f598f1ae`) | fail (failures=7, errors=9) | pass |
+| S7 (`ca23333b`) | fail (errors=1) | pass (skipped=2) |
+| S8 (`a73d421e`) | fail (failures=5, errors=8) | pass |
+| S11 extensions (`09237aee`), with local ROOT 6.38.04 | fail (3, the parent script; recorded by the track) | pass |
+| E-2 (`8c671849`) | fail (errors=1) | pass |
+
+ML3 extensions ran in a venv with xgboost 3.4.1 and scikit-learn 1.9.1; the other rows in the CI lock venv. The
+atlas profile's own ledger test passed before D13 too: `core/evidence/ledger.py` already accepted the extra `atlas`
+claim field (the work order's "Inferred" note, now confirmed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, `8c671849` | 23 pass, 1 fail (`ams_optional`: two S2/S7 tests read an example's committed output, which that check's copy omits), 2 skipped (CLI host checks); 4118 tests, 3903 pass, 0 failures, 215 skipped |
+| `check_ams_optional.py`, `3b80cc0d` (tests read a contracts fixture) | pass |
+| `check_relocation.py`, `3b80cc0d` | pass; 4118 tests, 3897 pass, 0 failures, 221 skipped |
+| `ruff check core contracts`, `mypy` (CI pins) | pass |
+| `measure_entrypoints.py --no-cli` | ok, no warnings: SKILL.md 8,142-9,997 bytes; registry 2,517 of 3,072 bytes |
+| SKILL.md plus entry reference | hep-measurement and hep-statistics within 25,600 bytes after wording-only trims |
+| `check_routing_static.py` | ok, 356 cases; `check_ownership.py` pass; `check_layering.py` ok; `check_instruction_text.py` 0 findings |
+| `reference_inventory.py --check` | pass; soft-budget warnings only |
+| Examples | E-1: B/C pull means within 0.07 of zero, widths 0.95-1.02 over 400 toys; the fixed-subtraction control biased and flagged. E-2: ratio shift equals the difference of the signed shifts to 2e-16; the injected 2e-4 recovered as 2.063e-4 +- 1.0e-5. E-3 projection: projected / toy uncertainty 0.949-1.043 at twice the exposure. E-4: macros, table and HEPData values identical; draft build passes, final build stops on the watermark (pdflatex, local) |
+| Local optional runs | pyhf 0.7.6: a 72-bin model under the cap override agrees with pyhf asymptotic CLs within 1%. ROOT 6.38.04 (Python 3.14.8, `HEP_ROOT_PYTHON`): S11 crosscheck (MLE 3e-7, interval 3e-5, CLs 0.3%), pulls N(0,1), AsymptoticError covers 0.71 vs naive Hessian 0.46 (slow tier); C7 PyROOT and uproot 5.7.6 agree |
+| Slow tier, run for these items | D3 coverage within +-0.05 at rates 1e-3, 1e-2, 1e-1 (200 toys); M8 pull widths 0.85-1.15 (400 toys); S8 envelope coverage and validation power (400 toys); ML4 p-value uniformity |
+
+Sources read (2026-10-17, generic User-Agent): PDG 2026 reviews (neutrino mixing sections 14.3-14.5; QCD 9.1.1; CKM
+introduction; Monte Carlo numbering; dark matter 27.6.3; neutrino cross sections, passages), PDG RPP 2025
+Introduction section 5.3 (rounding), van Ritbergen, Vermaseren and Larin (hep-ph/9701390, Eqs. 4, 11, 12), NUBASE2020
+section 2.3, Genolini et al. 2018 and Evoli et al. 2018 (full text), the PDG atomic and nuclear properties table, the
+ROOT 6.40 class reference (14 pages), root.cern TH1/TEfficiency/RooWorkspace references, 6.38 release notes and
+install page, the PyPI record of `root`, APS PRL/PRD and JHEP author guidelines. The detector atlas: the ATLAS and
+CMS JINST detector papers (2008), LHCb Upgrade I (arXiv:2305.10515), IceCube instrumentation (arXiv:1612.05093),
+Super-Kamiokande calibration (arXiv:1307.0162), Fermi-LAT instrument (arXiv:0902.1089): each claim's passage and the
+overview sections were read in the full text; none of these papers was read cover to cover, and each source record
+says so. Not read: the EPJC author page (did not load).
+
+Not run: live routing of the 44 new cases (gate G2), the full slow tier, the CLI host checks, ONNX and TMVA export
+(their packages are not installed; only the missing-package path is tested). The run left `__pycache__` folders
+from tests that start `python -I` (the known issue, present on main). Skipped tests are unverified, not passed.
+
 ## UPGRADE-B (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
 
 Upgrade plan v1.3, batch B on branch `upgrade/B` from main `0687ad2`: C1, M1, D9, D5, D10, D11, M7, D8, M3, D6, S1,

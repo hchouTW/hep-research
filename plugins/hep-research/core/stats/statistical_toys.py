@@ -73,7 +73,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from core.stats import _poisson, _validate
+from core.stats import _caps, _poisson, _validate
 from core.stats._linalg import chol_solve, cholesky, golden_min, scan_then_golden
 from core.stats._poisson import MAX_MEAN  # per-draw mean; a draw costs O(mean)
 
@@ -205,7 +205,7 @@ def template_stat(sig, bkg, n_data: float, f: float, mc_sig: float, mc_bkg: floa
     toys, seed = _toys(toys), _seed(seed)
     rng = random.Random(seed)
     exact_fits, finite_fits, skipped = [], [], 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "statistical_toys toys"):
         mu = [n_data * (f * s[i] + (1.0 - f) * b[i]) for i in range(len(s))]
         counts = [poisson_draw(rng, m) for m in mu]
         ms = [poisson_draw(rng, mc_sig * p) for p in s]
@@ -253,7 +253,7 @@ def _load_response(doc: dict) -> tuple[list[list[float]], list[float], list[floa
         m = [list(c) for c in zip(*m)]
     n_reco, n_truth = len(m), len(m[0])
     if max(n_reco, n_truth) > 60:
-        raise ToyError("at most 60 bins per axis")
+        _caps.exceed("unfold-scan bins", max(n_reco, n_truth), 60, ToyError, "at most 60 bins per axis")
     truth = doc.get("truth")
     if not isinstance(truth, list) or len(truth) != n_truth:
         raise ToyError(f"truth must list {n_truth} expected counts")
@@ -304,7 +304,7 @@ def unfold_scan(doc: dict, toys: int, seed: int) -> dict:
     mu = [sum(m[i][j] * truth[j] for j in range(n_truth)) for i in range(n_reco)]
     rng = random.Random(seed)
     per_iter: list[list[list[float]]] = [[[] for _ in range(n_truth)] for _ in range(iters)]
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "statistical_toys toys"):
         counts = [poisson_draw(rng, x) for x in mu]
         for k, vec in enumerate(_unfold(counts, m, eff, start, iters)):
             for j in range(n_truth):
@@ -360,7 +360,7 @@ def ratio_toys(n1: float, n2: float, systematics: list[str], toys: int, seed: in
         return math.exp(e1 - e2)
 
     full, stat_only, sys_only, lost = [], [], [], 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "statistical_toys toys"):
         a, d = poisson_draw(rng, n1), poisson_draw(rng, n2)
         g = draw_sys()
         sys_only.append(nominal * g)
@@ -442,7 +442,7 @@ def template_bb(sig, bkg, n_data: float, f: float, mc_sig: float, mc_bkg: float,
     names = ("true_templates", "naive_finite_templates", "barlow_beeston_lite")
     res: dict[str, dict[str, Any]] = {n: {"fits": [], "pulls": [], "covered": [], "no_pull": 0} for n in names}
     skipped = 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "statistical_toys toys"):
         counts = [poisson_draw(rng, n_data * (f * s_true[i] + (1.0 - f) * b_true[i])) for i in range(k)]
         ms = [poisson_draw(rng, mc_sig * p) for p in s_true]
         mb = [poisson_draw(rng, mc_bkg * p) for p in b_true]
@@ -544,7 +544,7 @@ def ratio_cov(doc: dict, toys: int, seed: int) -> dict:
         return [sum(spec["chol"][i][j] * z[j] for j in range(i + 1)) for i in range(n)]
 
     log_sys, full, stat_only, lost = [], [], [], 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "statistical_toys toys"):
         e = [0.0] * n
         for sp in specs:
             z1, z2 = across_bins(sp), across_bins(sp)
@@ -737,7 +737,7 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
     rng = random.Random(seed)
     base = x + y
     draws, bad = [], 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "statistical_toys toys"):
         z = [rng.gauss(0, 1) for _ in range(2 * n)]
         v = [base[i] + sum(chol[i][j] * z[j] for j in range(i + 1)) for i in range(2 * n)]
         if min(v[n:]) <= 0:
@@ -757,7 +757,7 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
     mean_d, sig_d, chi2_d = _gls_constant(r0, diag, "diagonal of the linearized ratio covariance")
     null = [mean_g * y[i] for i in range(n)]
     hits = skipped = 0
-    for _ in range(toys):
+    for _ in _caps.timed_range(toys, "statistical_toys toys"):
         z = [rng.gauss(0, 1) for _ in range(2 * n)]
         v = [(null + y)[i] + sum(chol[i][j] * z[j] for j in range(i + 1)) for i in range(2 * n)]
         if min(v[n:]) <= 0:
@@ -823,26 +823,31 @@ def build_parser() -> argparse.ArgumentParser:
     bb.add_argument("--mc-bkg", type=float, required=True)
     common(bb, 1000)
     rc = sub.add_parser("ratio-cov", help="ratios with across-bin correlated systematics")
-    rc.add_argument("--input", required=True, help="JSON file: numerator, denominator, systematics")
+    rc.add_argument("--input", required=True, help='JSON file: {"numerator": [...], "denominator": [...] (expected counts per bin), '
+                    '"systematics": [{"name", "sigma_num", "sigma_den", "num_den_rho", "bin_correlation"}]} (module --help)')
     common(rc, 5000)
     ra = sub.add_parser("ratio-cov-analytic", help="full ratio covariance without toys, every count >= 1e4")
-    ra.add_argument("--input", required=True, help="JSON file: numerator, denominator, systematics (as ratio-cov)")
+    ra.add_argument("--input", required=True, help='JSON file: as ratio-cov, {"numerator", "denominator", "systematics"}, every count >= 1e4 (module --help)')
     rm = sub.add_parser("ratio-measured", help="ratios with a supplied measured joint covariance")
-    rm.add_argument("--input", required=True, help="JSON file: numerator, denominator, covariance (2n x 2n)")
+    rm.add_argument("--input", required=True, help='JSON file: {"numerator": [x_1..x_n], "denominator": [y_1..y_n], "covariance": [[...]] (2n x 2n)} (module --help)')
     common(rm, 20000)
     u = sub.add_parser("unfold-scan", help="iterative unfolding bias/spread scan")
-    u.add_argument("--input", required=True, help="JSON file with response, truth, optional prior and max_iterations")
+    u.add_argument("--input", required=True, help='JSON file: {"response": [[...]], "truth": [...], "prior"?: [...], "max_iterations"?: N, "orientation"?} '
+                   '(module --help)')
     common(u, 500)
     r = sub.add_parser("ratio-toys", help="ratio with correlated systematics")
     r.add_argument("--n1", type=float, required=True, help="expected numerator counts")
     r.add_argument("--n2", type=float, required=True, help="expected denominator counts")
     r.add_argument("--sys", action="append", default=[], metavar="NAME:SIG_NUM:SIG_DEN:RHO")
     common(r)
+    for sp in sub.choices.values():
+        _caps.add_argument(sp)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    _caps.allow_outside(args.allow_outside_validated_range)
     try:
         if args.command == "boundary":
             result = boundary(args.n, args.b, args.toys, args.seed)
@@ -880,6 +885,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2
     result["status"] = "ok"
+    result.update(_caps.report())
     print(json.dumps(result, indent=2))
     return 0
 

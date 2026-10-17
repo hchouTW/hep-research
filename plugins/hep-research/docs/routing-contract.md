@@ -44,6 +44,8 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Correlation evidence and a proposed correlation scheme for systematics | hep-measurement | `correlation evidence` | — |
 | Detector calibration (energy scale, alignment constants, conditions) | hep-detector | `detector calibration` | — |
 | Validation of a fast or learned simulation against full detector simulation | hep-detector | `detector simulation` | — |
+| Instrument design: requirements flow-down, trade-offs, figures of merit, layout optimization | hep-detector | `detector design principles` | Detector design principles and tracker resolution |
+| Sourced facts on named experiments' detectors (design, achieved, operating values with claim ids) | hep-detector | `sourced detector atlas` | Sourced detector atlas |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in
@@ -60,10 +62,12 @@ normalization and systematics around a score.
 
 - Detector subsystem performance study → hep-detector + the experiment profile's subsystem module.
 - Measurement design for a named experiment → hep-measurement + that experiment profile.
+- Instrument design (layers, field, material, granularity, a layout meeting a resolution) → hep-detector; the design of the measurement or analysis that uses the instrument → hep-measurement.
 - Symbolic derivation → hep-theory with no experiment.
 - Theory request that mentions an experiment's **published** data → hep-theory with a dataset record, not hep-measurement.
 - Recasting → hep-theory (predictions in the published observable space), then hep-statistics for the limit.
 - Code problem in an experiment's script → hep-computing; the profile is read only if a data format or convention matters.
+- ROOT histogram and TEfficiency objects: using the objects (Sumw2, errors, Divide, flow bins, TEfficiency construction, RooWorkspace imports) → hep-computing; which interval to quote → hep-statistics; measuring an efficiency (tag-and-probe, truth matching) → hep-detector.
 - Domain outside v1 → closest core owner with an explicit "no validated domain profile" notice (stanza step 4). The domains are listed under "Scope of v1" below.
 - Underspecified cross-experiment request (for example "compare the two experiments") → ask which datasets and observables; never pick experiments from vague wording.
 
@@ -79,7 +83,7 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 - hep-measurement: measurement-design, cosmic-ray-flux, systematic-scaling, collection-time, spectral-transform, acceptance-from-generation
 - hep-detector: response-folding, resolution-efficiency, fast-spectrometer-simulation, scale-distortion, response-construction, species-migration, multisample-pid, stability-monitoring, detector-design, geomagnetic-backtracing
 - hep-statistics: fits-and-limits, covariance-and-combinations, unfolding, bayesian, time-series, split-consistency, roofit-status
-- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry
+- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations
 - hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring
 - hep-ml: ml-training, bdt-pipeline, ml-eras
 - hep-communication: claims-and-literature, terminology, papers-and-numbers
@@ -94,7 +98,6 @@ Outside v1 (the closest owner answers with the limited-support notice):
 - Heavy-ion physics (quark-gluon plasma, collective flow) (heavy-ions) → hep-theory
 - Nuclear-structure calculations (shell model, density functionals) (nuclear-structure) → hep-theory
 - Full relic-density Boltzmann solvers (relic-density-solvers) → hep-theory
-- Neutrino-oscillation probabilities, including matter effects (neutrino-oscillations) → hep-theory; enters v1 with Th4
 <!-- /v1-scope -->
 
 ## Handoff chains (must terminate)

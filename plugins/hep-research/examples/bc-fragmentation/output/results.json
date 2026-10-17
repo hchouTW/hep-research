@@ -1,0 +1,92 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: invented material, cross sections, fluxes and response; describes no experiment",
+ "seed": 20261017,
+ "toys": 400,
+ "edges_gv": [
+  2.0,
+  4.0,
+  8.0,
+  16.0,
+  32.0
+ ],
+ "checks": {
+  "m4_review": {
+   "spec_joint_fit.json": {
+    "verdict": "acceptable-with-open-inputs",
+    "coupled_warnings": []
+   },
+   "spec_fixed_subtraction.json": {
+    "verdict": "acceptable-with-open-inputs",
+    "coupled_warnings": [
+     "coupled.fixed_subtraction"
+    ]
+   }
+  },
+  "d4": {
+   "P_B": 0.770496,
+   "P_C": 0.755198,
+   "fraction_C_to_B": 0.12,
+   "recipe_effects": [
+    "fragmentation_feeddown",
+    "survival"
+   ]
+  },
+  "d2_fold_vs_matrix_rel": 0.0,
+  "d2_double_count_check": {
+   "exit": 1,
+   "effects": [
+    "fragmentation_feeddown",
+    "survival"
+   ]
+  }
+ },
+ "bc_true": [
+  0.333333,
+  0.333333,
+  0.333333,
+  0.333333
+ ],
+ "pull_mean": [
+  0.06464,
+  -0.05161,
+  -0.02021,
+  -0.01128
+ ],
+ "pull_width": [
+  1.021,
+  0.9475,
+  1.002,
+  1.022
+ ],
+ "fixed_subtraction_relative_bias": [
+  0.01904,
+  0.01604,
+  0.01922,
+  0.02628
+ ],
+ "fixed_subtraction_bias_error": [
+  0.00119,
+  0.00194,
+  0.00349,
+  0.0065
+ ],
+ "fixed_subtraction_bias_combined_sigmas": 19.1,
+ "criteria": {
+  "pull_mean_abs_max": 0.2,
+  "pull_width": [
+   0.85,
+   1.15
+  ],
+  "control_bias_combined_sigmas_min": 5.0
+ },
+ "pass": {
+  "m4_joint_fit_spec_not_flagged": true,
+  "m4_fixed_subtraction_flagged": true,
+  "d2_fold_equals_block_matrix": true,
+  "d2_planted_double_count_caught": true,
+  "pull_mean_abs_below_0p2": true,
+  "pull_width_0p85_to_1p15": true,
+  "fixed_subtraction_bias_measurable": true
+ },
+ "advisory_analysis_check": "not run: counting-chain/v1 reports unsupported until forward folding and the new catalog effects enter the suite"
+}

@@ -16,8 +16,8 @@ Subcommands:
   qvalue PARENT --mode alpha|beta-|beta+|ec [--ame FILE]   ground-state decay energy from AME2020 mass excesses
   edition                                 the bundled editions, sources, read levels and licenses
   list                                    the bundled names
-Assumptions and validity: particle masses and widths are energies (c = 1); year-unit half-lives are not converted to
-seconds (the NUBASE2020 year length was not read; to-verify); Q values are ground state to ground state, with
+Assumptions and validity: particle masses and widths are energies (c = 1); year-unit half-lives convert with the
+NUBASE2020 year, 1 y = 365.2422 d; Q values are ground state to ground state, with
 mass-excess uncertainties added in quadrature (correlations ignored).
 Output JSON: "status" (run status, core/status.py), "status_label" (--status, default unvalidated), "inputs",
 "defaults_used" and the result with its "source" and "edition".

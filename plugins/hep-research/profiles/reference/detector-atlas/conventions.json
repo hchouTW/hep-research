@@ -1,0 +1,6 @@
+{
+ "unit_system": "each value carries its unit as the source states it; no conversion is applied inside the ledger",
+ "detector-atlas:value": "the value as written in the source (a string), with its unit; ranges, approximate values and several values separated by '; ' keep the source's wording",
+ "detector-atlas:kind": "design (a goal, requirement or as-designed parameter), achieved (measured, for example in a beam test or calibration) or operating (a value during data taking); the three are separate claims",
+ "detector-atlas:valid_for": "the configuration or period the value describes (for example before and after an upgrade); a value is never carried to another configuration"
+}

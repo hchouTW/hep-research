@@ -123,7 +123,11 @@ class NuclideTests(unittest.TestCase):
         self.assertTrue(K.nuclide("12C")["half_life"]["stable"])
         hl = K.half_life("3H")
         self.assertEqual((hl.value, hl.unit), (12.32, "y"))
-        self.assertIsNone(K.half_life_seconds("3H")["value"])  # NUBASE year length: to-verify, so no seconds
+        # NUBASE2020 (Kondev et al. 2021, Sec. 2.3): 1 y = 365.2422 d (tropical year); the paper rounds to 31 556 926 s
+        self.assertAlmostEqual(K.half_life_seconds("3H")["value"], 12.32 * 365.2422 * 86400, delta=1e-3)
+        self.assertAlmostEqual(K.half_life_seconds("238U")["value"], 4.463e9 * 365.2422 * 86400, delta=1e3)
+        self.assertAlmostEqual(K.half_life_seconds("238U")["uncertainty"], 0.003e9 * 365.2422 * 86400, delta=1e3)
+        self.assertIn("365.2422", K.half_life_seconds("14C")["note"])
         self.assertEqual(K.half_life_seconds("n")["value"], 609.8)
         self.assertAlmostEqual(K.half_life_seconds("234Pa")["value"], 6.70 * 3600.0, delta=1e-9)
 

@@ -96,11 +96,15 @@ two fluxes would be 1.25e-2, 15% higher.
 - **Fragmentation in the detector and above it.** A heavier nucleus that fragments in the upper material can be
   reconstructed as a lighter one (for example carbon into boron), so the lighter species gains a feed-down background
   `N_feed = N_heavy (1 - P_heavy) f(heavy -> light)`, with f the partial fragmentation fraction into that species;
-  subtract it, or fit the charge measured in several layers to tag fragmentation before the last layer.
+  subtract it, or fit the charge measured in several layers to tag fragmentation before the last layer. The heavy
+  species is measured in the same data, so the feed-down is a coupled background (`references/backgrounds.md`,
+  "Coupled species"), not a fixed number.
 - **Charge-ladder leakage.** Charge resolution spreads each species into its neighbours (Z +- 1); fit the charge
   templates of the neighbouring species together, and take the template tails from data where possible.
 - **Isotopes.** Separating isotopes needs mass, so velocity and rigidity (or energy) both enter; the mass resolution
   degrades with gamma, so the isotope ratio has a limited energy range set by the resolution, not by the statistics.
+- **Cross sections.** Their kinds (inelastic, charge-changing, production), targets and uncertainty model are in
+  `<plugin root>/skills/hep-theory/references/nuclear-cross-sections.md`.
 
 Worked example (synthetic, invented interaction lengths): with x = 10 g/cm2 above the detector and lambda_int =
 20 g/cm2 for the light species, P = 0.607 and the flux is corrected by 1/P = 1.65. If 1000 heavy nuclei arrive with

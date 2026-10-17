@@ -174,6 +174,14 @@ class CapsTable(unittest.TestCase):
             ("`unfolding_diagnostics.py dagostini-unfold`", "mc_events", _nums(ud, r"^UNFOLD_MAX_MC_EVENTS = ([0-9.e+]+)")),
             ("`template_fit.py`", "templates", _nums("template_fit", r"^MAX_TEMPLATES, MAX_BINS = (\d+), \d+")),
             ("`template_fit.py`", "bins", _nums("template_fit", r"^MAX_TEMPLATES, MAX_BINS = \d+, (\d+)")),
+            # S7: the shape-limit nuisance cap, the TSVD caps and the template-fit nuisance cap
+            ("`likelihood_limits.py shape-limit` with toys", "nuisances", _nums(ll, r"^SHAPE_MAX_NUISANCES = (\d+)")),
+            ("`likelihood_limits.py shape-limit` without toys", "nuisances", _nums(ll, r"^SHAPE_MAX_NUISANCES = (\d+)")),
+            ("`unfolding_diagnostics.py response-stat` with `tsvd`", "truth bins",
+             _nums(ud, r'method == "tsvd" and n_truth > (\d+)')),
+            ("`unfolding_diagnostics.py` Jacobian diagnostics", "bins",
+             _nums(ud, r'method == "tsvd" and max\(n_truth, n_reco\) > (\d+)')),
+            ("`template_fit.py`", "nuisances", _nums("template_fit", r"    if len\(raw\) > (\d+):")),
         ]
         for row, label, code_values in checks:
             with self.subTest(row=row, cap=label):
@@ -235,6 +243,13 @@ ROUTES = {
     ("skills/hep-statistics/scripts/split_consistency.py", None): (["--input", "@IN"], {"splits": [
         {"id": "a", "values": [1.0, 2.0], "covariance": [[0.04, 0.0], [0.0, 0.09]]},
         {"id": "b", "values": [1.1, 1.8], "covariance": [[0.05, 0.0], [0.0, 0.08]]}]}),
+    ("skills/hep-statistics/scripts/project_uncertainty.py", None): (["@IN", "--k", "2,4"], {"stat": 0.04, "systematics": [
+        {"name": "theory", "scaling": "floor", "sigma": 0.03, "control_grows_with_exposure": False}]}),
+    ("skills/hep-statistics/scripts/tail_extrapolation.py", None): (["--input", "@IN"], {
+        "edges": [100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0], "counts": [500, 300, 180, 110, 66, 40, 24],
+        "control_region": [100.0, 160.0], "validation_region": [140.0, 160.0], "signal_region": [160.0, 170.0],
+        "models": ["exponential"], "nominal": "exponential", "max_extrapolation": 20.0, "validation_alpha": 0.05,
+        "cl": 0.6827}),
     ("core/stats/statistical_toys.py", "unfold-scan"): (["--input", "@IN", "--toys", "50", "--seed", "1"], dict(RESP, max_iterations=4)),
     ("core/stats/unfolding_diagnostics.py", "closure"): (["--input", "@IN", "--method", "dagostini", "--param", "3",
                                                           "--toys", "50", "--seed", "1"], RESP),

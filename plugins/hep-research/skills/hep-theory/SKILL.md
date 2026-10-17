@@ -44,22 +44,25 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 
 | Request | Read or run |
 |---|---|
-| Derivation status, proof, approximation validity, checks | [mathematical reasoning and proof](references/mathematical-reasoning-and-proof.md) |
-| NLO/NNLO predictions, scale envelopes, truncation | [higher-order predictions](references/higher-order-predictions.md) |
-| PDF sets, LHAPDF, PDF uncertainty from members | [PDFs and LHAPDF](references/pdfs-and-lhapdf.md); `pdf_uncertainty.py` |
-| SMEFT and EFT conventions, truncation | [SMEFT and EFT](references/smeft-and-eft.md); `eft_truncation.py` |
-| Cosmic-ray propagation models, degeneracies (fits outside v1) | [cosmic-ray propagation](references/cosmic-ray-propagation.md) |
-| Event-generation physics (ME order, shower, matching), event weights | [event generation](references/event-generation.md); `event_weights.py` |
-| Recasting a published analysis (MadGraph, Rivet, Delphes, SModelS) | [recasting toolchain](references/recasting-toolchain.md) (documented, not run) |
+| Derivation status, proof, validity, checks | [proof](references/mathematical-reasoning-and-proof.md) |
+| NLO/NNLO predictions, scale envelopes, truncation | [higher orders](references/higher-order-predictions.md) |
+| PDF sets, LHAPDF, PDF uncertainty | [PDFs](references/pdfs-and-lhapdf.md); `pdf_uncertainty.py` |
+| SMEFT and EFT conventions, truncation | [SMEFT](references/smeft-and-eft.md); `eft_truncation.py` |
+| Cosmic-ray propagation (fits outside v1); nuclear cross sections | [propagation](references/cosmic-ray-propagation.md); [nuclear xs](references/nuclear-cross-sections.md) |
+| Event generation (ME order, shower, matching), event weights | [event generation](references/event-generation.md); `event_weights.py` |
+| Recasting (MadGraph, Rivet, Delphes, SModelS) | [recasting](references/recasting-toolchain.md) (documented, not run) |
 | DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |
-| Constants, particle masses and lifetimes, nuclide masses and half-lives, unit conversions, decay Q values (with source and edition) | `physical_data.py` (`<plugin root>/core/constants`: CODATA 2022, PDG 2026 subset, AME2020/NUBASE2020) |
-| Phase space, decay widths, narrow width, Breit-Wigner | [amplitudes and widths](references/amplitudes-and-widths.md); `kinematics.py` (two-body, boosts, Mandelstam, thresholds, Dalitz, rapidity, width/lifetime/c tau) |
+| Constants and their CODATA edition, particle masses and lifetimes, nuclide data, unit conversion (GeV^-2 to mb), Q values | `physical_data.py` |
+| Two-body decays, boosts, invariant mass, Mandelstam s t u, thresholds, Dalitz, rapidity, width/lifetime/c tau | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
+| Neutrino oscillations (PMNS, vacuum, constant-density matter) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
+| Nuclear masses and Q values, decay chains (Bateman), equilibrium, S factor | [nuclear essentials](references/nuclear-physics-essentials.md); `decay_chain.py` |
 | Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
+| alpha_s running (1-4 loops, thresholds); CKM and PMNS conventions; PDG MC codes | [essentials](references/particle-physics-essentials.md); `running_coupling.py` |
 | Schemes, running masses, regularization | [schemes](references/regularization-and-schemes.md) |
-| HEPData table to a dataset record, or a record back to HEPData | `<plugin root>/adapters/hepdata/assets/hepdata_record.py`, `<plugin root>/adapters/hepdata/assets/hepdata_export.py` |
-| Scientific-ML boundaries (surrogates of a theory) | `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md` |
+| A published table (CSV, FITS, HEPData) to a dataset record, or back to HEPData | `import_published_table.py`; `<plugin root>/adapters/hepdata/assets/hepdata_record.py`, `<plugin root>/adapters/hepdata/assets/hepdata_export.py` |
+| Surrogates of a theory | `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md` |
 | Shipped theory-domain profiles | `<plugin root>/profiles/registry.json` |
-| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; general discipline; full list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |
+| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |
 
 Folder guide for people: [README.md](README.md).
 

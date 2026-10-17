@@ -63,6 +63,13 @@
    "version": "0.1.0",
    "scope": "Force-field solar modulation (via the hep-measurement script): validity, limits, power-law benchmark",
    "path": "theory/heliospheric-modulation"
+  },
+  {
+   "id": "reference:detector-atlas",
+   "kind": "reference",
+   "version": "0.1.0",
+   "scope": "Sourced detector facts (design, achieved, operating) for six large experiments; read via detector_atlas.py",
+   "path": "reference/detector-atlas"
   }
  ]
 }

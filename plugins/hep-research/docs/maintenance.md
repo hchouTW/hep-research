@@ -105,7 +105,10 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/batch-partition/` (fake Slurm and HTCondor schedulers) | - |
 | `examples/end-to-end-sample/` | - |
 | `examples/unfolding-coverage/` | J3 |
-| `examples/multi-era-fit/` (E-3, first part: two eras, collection time, era responses, split consistency, joint fit) | - |
+| `examples/analysis-to-paper/` (E-4: score, cut, template fit, result artifact, rendered macros, draft, HEPData; `--with-bdt`, `--root-python` optional) | - |
+| `examples/bc-fragmentation/` (E-1: coupled feed-down, survival in material, species-migration blocks, joint fit) | - |
+| `examples/multi-era-fit/` (E-3: two eras, collection time, era responses, split consistency, joint fit, S2 projection) | - |
+| `examples/pbar-p-curvature-offset/` (E-2: a curvature offset in one era, its ratio shift, its ledger entry and its fit) | - |
 | `examples/stats-benchmarks/<name>/` (hep-statistics audit benchmarks: `coverage-grid`, ...; `--toys` sets the budget) | - |
 
 `tests/examples/` compares a fresh run with the

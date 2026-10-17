@@ -31,6 +31,8 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Multi-bin limit, nuisances; two POIs | `cs/likelihood_limits.py shape-limit`; `contour` | beyond the caps: pyhf adapter |
 | Scan look-elsewhere | `sc/look_elsewhere.py brute`, `gross-vitells` | `sc/global_significance.py run` |
 | Do split samples agree (eras, halves) | `sc/split_consistency.py --input` (chi2 of d = x1 - x2, shared blocks subtracted) | toy p-values: `--toys N --seed S` |
+| Uncertainty or reach at k times the exposure | `sc/project_uncertainty.py budget.json --k 2,4` (M5 scaling classes; label `projection`) | Asimov Z: `counting` in the input |
+| Background tail from a control region | `sc/tail_extrapolation.py --input` (validated; envelope kept apart) | then `cls-limit`, `profile-cls` |
 | Combination | `sc/combine_measurements.py` | asymmetric errors: `sc/combine_asymmetric.py` |
 | D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `cs/unfolding_diagnostics.py closure` | unfold data with covariance: `dagostini-unfold` |
 | MCMC posterior | user's sampler, `sc/bayes_diagnostics.py diagnose`, then `result_artifact.py --paradigm bayesian` | SBC: `sc/bayes_calibration.py sbc` |
@@ -60,7 +62,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Binned time series, periodicity, multi-period fits, split consistency | [time-series inference](references/time-series-inference.md); `split_consistency.py` |
 | ML-assisted inference, SBC | [ML-assisted inference](references/ml-assisted-inference.md); `bayes_calibration.py` |
 | MCMC convergence, prior reweighting | `bayes_diagnostics.py` |
-| RooFit fit status (status, covQual, EDM, MINOS), errors for weighted data | `roofit_fit_check.py` |
+| RooFit/RooStats: status, weights, pulls, calculators | [RooFit and RooStats](references/roofit-and-roostats-methods.md); `roofit_fit_check.py` |
 | Write the statistical-result artifact | `result_artifact.py` |
 | Unbinned fits | `<plugin root>/adapters/unbinned-fit/` |
 | Outside v1 (global propagation fits, EFT global fits) | say so; general discipline; full list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |

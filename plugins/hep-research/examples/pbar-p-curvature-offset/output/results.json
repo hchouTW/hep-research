@@ -1,0 +1,85 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: invented spectra and offset; describes no experiment",
+ "seed": 20261017,
+ "edges_gv": [
+  20.0,
+  29.084309,
+  42.294851,
+  61.505824,
+  89.442719,
+  130.068983,
+  189.148322,
+  275.062409,
+  400.0
+ ],
+ "index": 2.8,
+ "ratio_true": 0.01,
+ "delta_true": 0.0002,
+ "checks": {
+  "d1": {
+   "delta": 0.0002,
+   "proton_shift": [
+    -0.0038028,
+    -0.0055313,
+    -0.0080463,
+    -0.011707,
+    -0.017035,
+    -0.024798,
+    -0.036114,
+    -0.052631
+   ],
+   "antiproton_shift": [
+    0.0037992,
+    0.0055236,
+    0.00803,
+    0.011672,
+    0.016962,
+    0.024643,
+    0.035787,
+    0.051939
+   ],
+   "ratio_shift": [
+    0.007631,
+    0.011116,
+    0.016207,
+    0.023655,
+    0.034587,
+    0.050698,
+    0.074595,
+    0.11038
+   ],
+   "signed_shift_difference": [
+    0.007602,
+    0.011055,
+    0.016076,
+    0.023379,
+    0.033998,
+    0.049441,
+    0.071901,
+    0.10457
+   ],
+   "max_abs_r(1+s_p)-(s_pbar-s_p)": 1.87e-16
+  },
+  "fit": {
+   "delta_hat": 0.000206344,
+   "delta_error": 1.025e-05,
+   "pull": 0.619,
+   "chi2": 3.2165,
+   "dof": 7,
+   "p_value": 0.8643
+  },
+  "advisory_ratio_subset_v1": "not run: it needs a frozen chain bundle; expected unverified until a test shows how r-ratio.cancellation treats per-sign factor tables",
+  "delta_significance": 20.14
+ },
+ "criteria": {
+  "ratio_identity_abs": 1e-12,
+  "delta_pull_abs_max": 3.0
+ },
+ "pass": {
+  "ratio_shift_equals_difference_of_signed_shifts": true,
+  "shifts_have_opposite_signs_and_magnitudes_add": true,
+  "m5_ledger_entry_validates": true,
+  "injected_delta_recovered_within_3_sigma": true,
+  "delta_measured_at_5_sigma_or_more": true
+ }
+}

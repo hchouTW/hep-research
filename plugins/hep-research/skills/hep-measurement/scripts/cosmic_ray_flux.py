@@ -73,7 +73,7 @@ BIN_WIDTH_UNITS = ('GV', 'GeV', 'GeV/n', 'TeV', 'TV')
 METHODS = ('auto', 'garwood', 'feldman-cousins', 'cousins-highland', 'profile-fc', 'naive')
 APPROXIMATE_METHODS = ('naive', 'cousins-highland')
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 class UnsupportedRange(ValueError):

@@ -26,6 +26,9 @@ Checks and tolerances (fixed here before any comparison; model scale: total coun
   nominal model, so they agree only where the nuisances are not pulled.
 Combine: not run by this script (no Combine in the environment checked); its comparison is a release-gate item.
 
+Size: the conversion runs no toys, so it takes the core asymptotic path and its caps (SHAPE_ASYMPTOTIC_CAPS: up to 100
+bins), not the toy caps (S7).
+
 Usage: backend_comparison.py --model SHAPE_MODEL.json [--mu-grid 0,0.5,1,2,3] [--out REPORT.json]
 Exit codes: 0 every pointwise and profiled check within tolerance; 1 a check outside tolerance; 2 the model cannot be
 mapped (refused, with the reason) or pyhf is not installed. Needs pyhf (tested with 0.7.6) and NumPy.
@@ -52,7 +55,7 @@ class MappingRefused(ValueError):
 
 def to_pyhf(doc: dict, normsys_code: str = "code4") -> tuple[dict, list[str]]:
     """pyhf workspace spec and the pyhf parameter name of each core nuisance (in core order)."""
-    bins, nuis, chol = ll._load_shape(doc)
+    bins, nuis, chol = ll._load_shape(doc, asymptotic=True)  # S7: no toys here, so the asymptotic caps
     if chol is not None:
         raise MappingRefused("a correlation matrix between nuisances has no pyhf equivalent here")
     sig = {"name": "signal", "data": [x["s"] for x in bins], "modifiers": [{"name": "mu", "type": "normfactor", "data": None}]}
@@ -113,7 +116,7 @@ def compare(doc: dict, mu_grid=(0.0, 0.5, 1.0, 2.0, 3.0), normsys_code: str = "c
     pyhf.set_backend("numpy", pyhf.optimize.scipy_optimizer(tolerance=1e-10))
     try:
         model, data = _model(spec)
-        core = ll._ShapeModel(*ll._load_shape(doc))
+        core = ll._ShapeModel(*ll._load_shape(doc, asymptotic=True))
         aux = core.aux_obs()
         idx = {n: model.config.par_slice(n).start for n in model.config.par_order}
         init = np.asarray(model.config.suggested_init(), dtype=float)

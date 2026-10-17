@@ -1102,7 +1102,8 @@ NORMALIZATION_CORRECTIONS = {"luminosity": "integrated-luminosity", "exposure": 
 ESTIMAND_MIN_WORDS = 5
 MEASUREMENT_KEYS = {
     "extension": {"estimand", "observable", "species_or_process", "period", "selections", "backgrounds", "corrections",
-                  "systematics", "blinding", "experiment_fields", "ratio", "no_backgrounds_reason", "notes", "eras"},
+                  "systematics", "blinding", "experiment_fields", "ratio", "no_backgrounds_reason", "notes", "eras",
+                  "coupled_backgrounds"},
     "selections": {"name", "id", "definition", "conditional_denominator", "validation", "efficiency", "evidence_ids",
                    "notes", "status", "order", "applied_in", "variable", "value", "unit", "ref", "region"},
     "backgrounds": {"name", "id", "estimator", "control_region", "constraint", "closure", "normalization", "shape",
@@ -1116,6 +1117,7 @@ MEASUREMENT_KEYS = {
                     "proposed_scheme", "ref", "periods", "regions", "value", "unit", "scaling", "era_correlation"},
     "eras": {"id", "start", "end", "kind", "source", "corrections", "shared_corrections", "versions", "evidence_ids",
              "notes"},
+    "coupled_backgrounds": {"background", "species", "treatment", "source", "evidence_ids", "notes"},
 }
 # v6.3 D05a: correction keys of a measurement-spec, known only when the spec declares the capability (an older reader
 # refuses such a spec through contract.unknown_capability; without it the keys stay measurement.unknown_key warnings).
@@ -1353,6 +1355,8 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     _key_checks(ext, MEASUREMENT_KEYS["extension"], x, rep)
     for i, era in enumerate(ext.get("eras") or []):  # M3: the era rules themselves are review rules
         _key_checks(era, MEASUREMENT_KEYS["eras"], f"{x}.eras[{i}]", rep)
+    for i, cb in enumerate(ext.get("coupled_backgrounds") or []):  # M4: coupled.fixed_subtraction is a review rule
+        _key_checks(cb, MEASUREMENT_KEYS["coupled_backgrounds"], f"{x}.coupled_backgrounds[{i}]", rep)
 
 
 STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version
@@ -1814,7 +1818,9 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) 
     """Publication gate of a statistical-result (T07): status passed, unresolved or failed, with reasons.
 
     failed: the artifact has errors under strict validation, carries the 'failed' status, carries 'synthetic' or
-    'asimov' (gate.not_observed_data, contracts 2.6.0: nothing makes such a result publishable as data), its fit failed
+    'asimov' (gate.not_observed_data, contracts 2.6.0: nothing makes such a result publishable as data) or 'projection'
+    (gate.projection, upgrade plan S2) or 'outside-validated-range' without a valid inline extension.validation_record
+    (gate.outside_validated_range, gate.validation_record_invalid, S7), its fit failed
     or was not run, its fit diagnostics failed, or toy coverage is short: the upper end of the 68.27% Clopper-Pearson
     interval of round(coverage x n_toys) of n_toys lies below the nominal level by more than 0.01 (gate.undercoverage;
     without n_toys the recorded interval or value is used). unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
@@ -1851,6 +1857,20 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) 
         if s in status:
             add("failed", "gate.not_observed_data", f"the artifact carries '{s}': no further evidence makes a result on "
                                                     "synthetic or Asimov data publishable as a result on data")
+    if "projection" in status:
+        add("failed", "gate.projection", "the artifact carries 'projection': a projection to another exposure (S2) is "
+                                         "never a result")
+    if "outside-validated-range" in status:
+        rec: Any = ext.get("validation_record")
+        if rec is None:
+            add("failed", "gate.outside_validated_range", "the artifact carries 'outside-validated-range' (a tool ran "
+                "beyond its validated range, S7) and extension.validation_record is missing")
+        else:
+            from contracts.schema import validate as _schema_validate
+            vr = _schema_validate(rec, "validation_record.json") if isinstance(rec, dict) else None
+            if vr is None or any(f.severity == "error" for f in vr.findings):
+                add("failed", "gate.validation_record_invalid", "extension.validation_record must be an inline "
+                    "validation record (contracts/schemas/validation_record.json)")
     for s in ("unvalidated", "preliminary"):
         if s in status:
             add("unresolved", "gate.status_label", f"the artifact carries '{s}': an archival artifact, not a validated result")

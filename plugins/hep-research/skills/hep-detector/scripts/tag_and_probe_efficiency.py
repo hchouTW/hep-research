@@ -49,7 +49,7 @@ from core.stats.tail_estimation import beta_ppf  # noqa: E402
 from core.stats.tail_estimation import clopper_pearson as _core_clopper_pearson  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
 
 
 class JsonArgumentParser(argparse.ArgumentParser):

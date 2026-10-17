@@ -14,6 +14,7 @@ subsection rather than the whole file.
 - [Astroparticle and cosmic-ray papers](#astroparticle-and-cosmic-ray-papers)
 - [Combination papers](#combination-papers)
 - [Statistics and ML papers](#statistics-and-ml-papers)
+- [Search papers](#search-papers), [Precision measurements](#precision-measurements), [Instrumentation and performance papers](#instrumentation-and-performance-papers), [Letters](#letters)
 
 ## Theory papers
 
@@ -93,5 +94,39 @@ physics paper's supplemental material, which a referee may or may not open. See
 conventions (NeurIPS/ICML/ICLR/ACL vs. JMLR/TMLR vs. statistics journals),
 author-contribution statements, arXiv-first citation practice, and the
 single-shot rebuttal process that replaces a journal's multi-round revision.
+
+The four experimental types below have machine-readable content lists in `assets/paper-blueprints.json`;
+`check_manuscript.py --blueprint TYPE` lists what a draft seems to lack (advisory, keyword-based; the exit code is
+unchanged). An item cites the author guideline it was read from (APS PRL and PRD Information for Authors, the JHEP
+author guidelines; read 2026-10-17) or says to-verify when it is field practice no guideline states. Length limits
+are in `latex-venue-setup.md`, not repeated here.
+
+## Search papers
+
+The signal model or hypothesis; the selection; how each background is estimated (control regions, simulation,
+data-driven) with its validation; a table of systematic uncertainties; observed and expected results side by side;
+the statistical method and confidence level of limits or significances, with the look-elsewhere treatment when a
+significance is quoted; where the numbers are available (HEPData or a repository, as JHEP asks for data files).
+
+## Precision measurements
+
+The definition of the measured quantity (fiducial region, phase space, units); the corrections (efficiency,
+acceptance, unfolding) and their validation; a systematics table; the result with statistical and systematic
+uncertainties quoted separately and their correlations when several values are given; the comparison with
+predictions and with earlier measurements (PRD: state how the result corrects, supplements or supersedes earlier
+ones).
+
+## Instrumentation and performance papers
+
+The detector, prototype or test setup; the performance figures with the conditions under which they hold (beam,
+rate, temperature, configuration); the calibration and its stability; the uncertainties of the quoted performance;
+what was measured as opposed to designed or simulated.
+
+## Letters
+
+PRL's structure: a title that conveys the main result, an abstract that summarizes it, an introduction that gives
+the general reader the context, a central set of sections that establish the result, a concluding section; End
+Matter (up to two pages) for specialists; a justification of the importance submitted with the paper. A PRD Letter
+may be followed by a longer Regular Article. Run-in heads replace `\section` in PRL (`latex-venue-setup.md`).
 
 **Done when:** the draft follows the genre's backbone and its genre-specific sections are present.

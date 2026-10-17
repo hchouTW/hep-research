@@ -108,22 +108,25 @@ class ScopeDeclaration(unittest.TestCase):
         stale = text.replace("(heavy-ions)", "(heavy-ion-old)")
         self.assertNotEqual(cm.render_scope_into(stale, cm.load()), stale)
 
-    def test_neutrino_and_ckm_are_outside_v1_with_their_cases(self):
+    def test_neutrino_in_v1_since_th4_and_ckm_outside_with_its_case(self):
         rows = {e["id"]: e for e in cm.load()["capabilities"]}
-        self.assertFalse(rows["neutrino-oscillations"]["v1"])
-        self.assertEqual(rows["neutrino-oscillations"].get("enters_v1_with"), "Th4")
-        self.assertEqual(rows["neutrino-oscillations"]["cases"], ["th-scope-2"])
+        self.assertTrue(rows["neutrino-oscillations"]["v1"])
+        self.assertEqual(rows["neutrino-oscillations"]["state"], "tool")
+        self.assertIn("Th4", rows["neutrino-oscillations"]["items"])
         self.assertFalse(rows["ckm-global-fits"]["v1"])
         self.assertEqual(rows["ckm-global-fits"]["cases"], ["th-flavour-2"])
 
     def test_x1_routing_cases(self):
         cases = {c["id"]: c for c in json.loads((ROOT / "tests" / "routing" / "cases.json").read_text(
             encoding="utf-8"))["cases"]}
-        for cid, prompt in (("th-scope-2", "幫我推導微中子振盪機率在物質中的修正。"), ("th-flavour-2", "幫我做 CKM 全域擬合。")):
-            c = cases[cid]
-            self.assertEqual((c["lang"], c["kind"], c["prompt"], c["expected_primary"]),
-                             ("zh-Hant", "out-of-v1", prompt, "hep-theory"))
-            self.assertTrue(c["limited_support"])
+        c = cases["th-flavour-2"]
+        self.assertEqual((c["lang"], c["kind"], c["prompt"], c["expected_primary"]),
+                         ("zh-Hant", "out-of-v1", "幫我做 CKM 全域擬合。", "hep-theory"))
+        self.assertTrue(c["limited_support"])
+        c = cases["th-scope-2"]  # a direct case since Th4 put neutrino oscillations in v1
+        self.assertEqual((c["lang"], c["kind"], c["prompt"], c["expected_primary"]),
+                         ("zh-Hant", "direct", "幫我推導微中子振盪機率在物質中的修正。", "hep-theory"))
+        self.assertFalse(c.get("limited_support", False))
 
     def test_skill_outside_v1_rows_point_to_the_declaration(self):
         for skill in ("hep-theory", "hep-statistics"):

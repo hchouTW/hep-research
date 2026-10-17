@@ -315,6 +315,53 @@
      }
     }
    }
+  },
+  "coupled_backgrounds": {
+   "type": "array",
+   "minItems": 1,
+   "$comment": "Optional (M4): backgrounds that are another species measured at the same time (feed-down, charge-sign confusion of the partner species, charge-ladder leakage); review_measurement_spec.py warns (coupled.fixed_subtraction) when one is subtracted as a fixed amount instead of being fitted jointly or iterated",
+   "items": {
+    "type": "object",
+    "required": [
+     "background",
+     "species",
+     "treatment",
+     "source"
+    ],
+    "properties": {
+     "background": {
+      "type": "string",
+      "minLength": 1,
+      "$comment": "name of the entry in backgrounds"
+     },
+     "species": {
+      "type": "string",
+      "minLength": 1,
+      "$comment": "the other species whose measurement sets this background"
+     },
+     "treatment": {
+      "type": "string",
+      "enum": [
+       "joint-fit",
+       "iterative",
+       "fixed-subtraction"
+      ]
+     },
+     "source": {
+      "type": "string",
+      "minLength": 1
+     },
+     "evidence_ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "notes": {
+      "type": "string"
+     }
+    }
+   }
   }
  }
 }
