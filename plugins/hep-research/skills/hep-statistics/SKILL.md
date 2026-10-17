@@ -31,6 +31,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Multi-bin limit, nuisances; two POIs | `cs/likelihood_limits.py shape-limit`; `contour` | beyond the caps: pyhf adapter |
 | Scan look-elsewhere | `sc/look_elsewhere.py brute`, `gross-vitells` | `sc/global_significance.py run` |
 | Do split samples agree (eras, halves) | `sc/split_consistency.py --input` (chi2 of d = x1 - x2, shared blocks subtracted) | toy p-values: `--toys N --seed S` |
+| Uncertainty or reach at k times the exposure | `sc/project_uncertainty.py budget.json --k 2,4` (M5 scaling classes; label `projection`) | Asimov Z: `counting` in the input |
 | Combination | `sc/combine_measurements.py` | asymmetric errors: `sc/combine_asymmetric.py` |
 | D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `cs/unfolding_diagnostics.py closure` | unfold data with covariance: `dagostini-unfold` |
 | MCMC posterior | user's sampler, `sc/bayes_diagnostics.py diagnose`, then `result_artifact.py --paradigm bayesian` | SBC: `sc/bayes_calibration.py sbc` |

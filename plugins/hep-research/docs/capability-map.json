@@ -29,7 +29,7 @@
    "id": "systematic-scaling",
    "capability": "Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection",
    "owner": "hep-measurement",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "M5",

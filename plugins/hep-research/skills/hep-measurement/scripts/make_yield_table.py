@@ -20,7 +20,7 @@ from pathlib import Path
 
 REQUIRED_COLUMNS = {"region", "sample", "yield"}
 STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
-            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
+            "validated-in-scope", "projection")  # contracts/vocab/core.json artifact_statuses
 
 
 def parse_args() -> argparse.Namespace:

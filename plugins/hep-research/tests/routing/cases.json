@@ -4181,6 +4181,27 @@
    "trigger_terms": [
     "sourced facts on large experiments' detectors"
    ]
+  },
+  {
+   "id": "c-st-proj-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How does my uncertainty budget scale at four times the exposure, with the floor systematics kept, and what Asimov significance do I reach?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "toys and Asimov datasets",
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "c-st-proj-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "資料量變成三倍時，統計誤差與各項系統誤差會降到多少？要多少曝光才能達到 5σ？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
   }
  ]
 }

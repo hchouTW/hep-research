@@ -1818,7 +1818,8 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) 
     """Publication gate of a statistical-result (T07): status passed, unresolved or failed, with reasons.
 
     failed: the artifact has errors under strict validation, carries the 'failed' status, carries 'synthetic' or
-    'asimov' (gate.not_observed_data, contracts 2.6.0: nothing makes such a result publishable as data), its fit failed
+    'asimov' (gate.not_observed_data, contracts 2.6.0: nothing makes such a result publishable as data) or 'projection'
+    (gate.projection, upgrade plan S2), its fit failed
     or was not run, its fit diagnostics failed, or toy coverage is short: the upper end of the 68.27% Clopper-Pearson
     interval of round(coverage x n_toys) of n_toys lies below the nominal level by more than 0.01 (gate.undercoverage;
     without n_toys the recorded interval or value is used). unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
@@ -1855,6 +1856,9 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) 
         if s in status:
             add("failed", "gate.not_observed_data", f"the artifact carries '{s}': no further evidence makes a result on "
                                                     "synthetic or Asimov data publishable as a result on data")
+    if "projection" in status:
+        add("failed", "gate.projection", "the artifact carries 'projection': a projection to another exposure (S2) is "
+                                         "never a result")
     for s in ("unvalidated", "preliminary"):
         if s in status:
             add("unresolved", "gate.status_label", f"the artifact carries '{s}': an archival artifact, not a validated result")

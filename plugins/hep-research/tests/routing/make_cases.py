@@ -438,6 +438,9 @@ C = [
     # batch C, D13: sourced detector atlas (detector_atlas.py)
  ("c-det-atlas-1", "en", "direct", "What solenoid field and tracker volume does the CMS detector paper give, with the source for each number?", "hep-detector", ["sourced facts on large experiments' detectors"], None, None, {}),
  ("c-det-atlas-2", "zh-Hant", "direct", "IceCube 的 DOM 數量與垂直間距是多少？請附上出處，不要憑記憶。", "hep-detector", ["sourced facts on large experiments' detectors"], None, None, {}),
+    # batch C, S2: uncertainty projection (project_uncertainty.py)
+ ("c-st-proj-1", "en", "direct", "How does my uncertainty budget scale at four times the exposure, with the floor systematics kept, and what Asimov significance do I reach?", "hep-statistics", ["toys and Asimov datasets", "nuisance parameters"], None, None, {}),
+ ("c-st-proj-2", "zh-Hant", "direct", "資料量變成三倍時，統計誤差與各項系統誤差會降到多少？要多少曝光才能達到 5σ？", "hep-statistics", ["significance and look-elsewhere effects"], None, None, {}),
 ]
 
 cases = []

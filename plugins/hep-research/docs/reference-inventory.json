@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 174753,
+   "bytes": 175157,
    "uncited": 0
   },
   "hep-theory": {
@@ -2504,7 +2504,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "c4d801c4 2026-10-17"
+   "last_commit": "172a3335 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -2628,9 +2628,11 @@
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/hep-ml/references/robustness-and-distribution-shift.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
+    "skills/hep-statistics/scripts/project_uncertainty.py",
     "skills/hep-theory/references/event-generation.md",
     "tests/contracts/test_systematics_scaling_m5.py",
-    "tests/skills/hep_measurement/test_method_references.py"
+    "tests/skills/hep_measurement/test_method_references.py",
+    "tests/skills/hep_statistics/test_project_uncertainty.py"
    ],
    "cited_by_other_skills": [
     "hep-detector",
@@ -3425,8 +3427,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 40103,
-   "lines": 434,
+   "bytes": 41283,
+   "lines": 447,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -3445,8 +3447,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15794,
-   "lines": 157,
+   "bytes": 15018,
+   "lines": 151,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3484,7 +3486,8 @@
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
-    "skills/hep-statistics/references/ml-assisted-inference.md"
+    "skills/hep-statistics/references/ml-assisted-inference.md",
+    "skills/hep-statistics/scripts/project_uncertainty.py"
    ],
    "cited_by_other_skills": [
     "hep-detector",

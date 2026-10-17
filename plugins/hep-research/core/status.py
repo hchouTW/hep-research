@@ -34,7 +34,7 @@ RUN_STATUSES = {
 
 # contracts/vocab/core.json artifact_statuses (tests/core/test_status.py keeps the two equal; core does not read contracts)
 ARTIFACT_LABELS = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
-                   "validated-in-scope")
+                   "validated-in-scope", "projection")
 DEFAULT_LABEL = "unvalidated"
 
 # what a run status does to the labels of an artifact written from the run. None: no artifact may be written (the

@@ -407,6 +407,19 @@ only gives one flat direction along (1, 1)/sqrt(2), matched to `D0/L`, with D0/L
 grids from a real propagation code, more than a few parameters (the start scans every node), and interval coverage
 along a near-flat direction.
 
+## Inference scripts outside hep-statistics
+
+Read `--help` first. `cr_spectrum_powerlaw_fit.py` fits a single or
+continuous broken power law in log flux (a full covariance, linearized); a free break is calibrated here
+(`break-scan`, `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the
+delta method with one optional correlation coefficient: with correlated points or bin-to-bin correlated
+systematics use `covariance_fit.py fit` or
+`statistical_toys.py ratio-cov` / `ratio-measured` here, and at low counts an exact construction
+(`pcl_efficiency_ratio.py ratio`, Fieller or Clopper-Pearson). Two different "counting references":
+`skills/hep-measurement/scripts/counting_reference.py` is a flat-prior Bayesian upper bound with an exactly known
+background (not CLs, no nuisances); the frequentist counting constructions are `core/stats/poisson_diagnostics.py`
+(and `likelihood_limits.py` with an uncertain background). pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
+
 ## Failure modes
 
 - Quoting the classical limit when it is zero or negative; reading a Feldman-Cousins lower bound of 0 as a failure or

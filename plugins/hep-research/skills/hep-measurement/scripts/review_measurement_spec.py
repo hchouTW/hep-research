@@ -41,7 +41,7 @@ from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection')  # contracts/vocab/core.json artifact_statuses
 # Defects that move the central value beyond its quoted uncertainty or break blinding, in impact order.
 BLOCKING = ('measurement.normalization_double_counted', 'measurement.duplicate_correction',
             'measurement.correction_category_repeated', 'measurement.correction_in_observable_and_chain',

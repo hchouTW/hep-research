@@ -48,7 +48,8 @@
    "asimov": "Asimov (expected) dataset",
    "observed": "Real observed data",
    "user-supplied": "Supplied by the user without independent verification",
-   "validated-in-scope": "Passed declared checks within a declared scope (not physical validity)"
+   "validated-in-scope": "Passed declared checks within a declared scope (not physical validity)",
+   "projection": "A projection to another exposure or data set (S2), never a result; fails the publication gate"
   },
   "dataset_statuses": {
    "published": "Formally published",

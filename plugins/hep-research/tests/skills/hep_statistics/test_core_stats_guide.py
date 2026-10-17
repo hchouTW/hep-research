@@ -235,6 +235,8 @@ ROUTES = {
     ("skills/hep-statistics/scripts/split_consistency.py", None): (["--input", "@IN"], {"splits": [
         {"id": "a", "values": [1.0, 2.0], "covariance": [[0.04, 0.0], [0.0, 0.09]]},
         {"id": "b", "values": [1.1, 1.8], "covariance": [[0.05, 0.0], [0.0, 0.08]]}]}),
+    ("skills/hep-statistics/scripts/project_uncertainty.py", None): (["@IN", "--k", "2,4"], {"stat": 0.04, "systematics": [
+        {"name": "theory", "scaling": "floor", "sigma": 0.03, "control_grows_with_exposure": False}]}),
     ("core/stats/statistical_toys.py", "unfold-scan"): (["--input", "@IN", "--toys", "50", "--seed", "1"], dict(RESP, max_iterations=4)),
     ("core/stats/unfolding_diagnostics.py", "closure"): (["--input", "@IN", "--method", "dagostini", "--param", "3",
                                                           "--toys", "50", "--seed", "1"], RESP),

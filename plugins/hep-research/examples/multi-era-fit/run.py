@@ -22,6 +22,8 @@ Chain (each step runs the plugin's command-line tool, as a user would):
    era e2 the test fails.
 8. S6 joint fit (time-series-inference.md, "Multi-era joint fits"): Poisson maximum likelihood of Phi over both eras
    with S; seeded toys give the coverage of the +-1 sigma intervals.
+9. hep-statistics S2 `project_uncertainty.py`: the joint-fit uncertainties projected to twice the exposure agree within
+   10% with the spread of joint fits on toys generated at twice the exposure.
 
 Usage (from the plugin root): python3 examples/multi-era-fit/run.py [--toys 1000] [--seed 20261017] [--out DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Requires numpy (the tools it runs need numpy too).
@@ -47,6 +49,7 @@ TOOLS = {
     "response": PLUGIN / "skills" / "hep-detector" / "scripts" / "build_response.py",
     "eras": PLUGIN / "skills" / "hep-detector" / "scripts" / "mix_period_responses.py",
     "split": PLUGIN / "skills" / "hep-statistics" / "scripts" / "split_consistency.py",
+    "project": PLUGIN / "skills" / "hep-statistics" / "scripts" / "project_uncertainty.py",
 }
 TOY_CONFIG = PLUGIN / "skills" / "hep-detector" / "assets" / "toy-spectrometer.fictional.json"
 EDGES = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]  # rigidity bins, GV (truth and reco)
@@ -55,7 +58,8 @@ PERIOD_S = 1000.0
 INDEX = 2.7  # power-law index of the synthetic flux
 K_FLUX = 40.0  # flux normalization: events / s / GV at 1 GV per unit acceptance (invented)
 OFFSET = 1.05  # injected scale offset of era e2 for the S1 check
-CRITERIA = {"coverage_target": 0.68, "coverage_tolerance": 0.03, "split_alpha": 0.01, "runtime_s_max": 60.0}
+CRITERIA = {"coverage_target": 0.68, "coverage_tolerance": 0.03, "split_alpha": 0.01, "runtime_s_max": 60.0,
+            "projection_k": 2.0, "projection_toys": 400, "projection_tolerance": 0.10}
 LABEL = "SYNTHETIC and ILLUSTRATIVE: fictional toy spectrometer; describes no experiment"
 
 
@@ -251,6 +255,21 @@ def main(argv=None) -> int:
         covered += int(np.sum(np.abs(p_hat - ph) <= np.sqrt(np.diag(c))))
         total += len(ph)
     coverage = covered / total
+    # 9. S2: the joint-fit uncertainty projected to twice the exposure against the spread of toys at twice the exposure
+    k = CRITERIA["projection_k"]
+    projected = []
+    for j, s_j in enumerate(sig):
+        doc = {"quantity": f"SYNTHETIC flux, bin {j}", "stat": float(s_j), "systematics": []}
+        (work / f"budget_{j}.json").write_text(json.dumps(doc), encoding="utf-8")
+        pr = tool("project", work / f"budget_{j}.json", "--k", k, "--status", "synthetic")
+        assert pr["status"] == "ok" and pr["label"] == "projection", pr
+        projected.append(pr["projections"][0]["stat"])
+    S_k = S * k
+    fits_k = np.array([fit(S_k, rng.poisson(S_k @ ph).astype(float), ph)[0] for _ in range(CRITERIA["projection_toys"])])
+    spread_k = fits_k.std(axis=0, ddof=1)
+    proj_ratio = np.array(projected) / spread_k
+    checks["s2_projection"] = {"k": k, "projected_sigma_per_gv": rnd(np.array(projected) / np.diff(EDGES)),
+                               "toy_sigma_per_gv": rnd(spread_k / np.diff(EDGES)), "ratio": rnd(proj_ratio, 4)}
     width = np.diff(EDGES)
     runtime = time.perf_counter() - t0
 
@@ -261,6 +280,7 @@ def main(argv=None) -> int:
         "s1_no_difference_is_consistent": s1_nominal["exit"] == 0,
         "s1_injected_offset_is_caught": s1_offset["exit"] == 1,
         "joint_fit_coverage_0p68_pm_0p03": abs(coverage - CRITERIA["coverage_target"]) <= CRITERIA["coverage_tolerance"],
+        "s2_projection_within_10pct_of_toys_at_2x": bool(np.all(np.abs(proj_ratio - 1.0) <= CRITERIA["projection_tolerance"])),
         "runtime_below_60_s": runtime < CRITERIA["runtime_s_max"],
     }
     results = {
@@ -277,7 +297,8 @@ def main(argv=None) -> int:
     lines += [f"| {k} | {'pass' if v else 'FAIL'} |" for k, v in passed.items()]
     lines += ["", f"Joint-fit coverage of the +-1 sigma intervals: {coverage:.4f} over {total} cells ({a.toys} toys).",
               f"S1 without a difference: chi2 {s1_nominal['chi2']} / {s1_nominal['ndf']}, p {s1_nominal['p']}; "
-              f"with a {OFFSET - 1:.0%} offset in e2: chi2 {s1_offset['chi2']}, p {s1_offset['p']}.", ""]
+              f"with a {OFFSET - 1:.0%} offset in e2: chi2 {s1_offset['chi2']}, p {s1_offset['p']}.",
+              f"S2 projection to k = {k:g}: projected / toy sigma per bin {checks['s2_projection']['ratio']}.", ""]
     (out / "report.md").write_text("\n".join(lines), encoding="utf-8")
     work_dir.cleanup()
     print(json.dumps({"pass": passed, "coverage": coverage, "runtime_s": round(runtime, 1)}, indent=1))

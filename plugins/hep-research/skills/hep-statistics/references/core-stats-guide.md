@@ -130,16 +130,10 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics (constant, line, normalized exponential, sharp or smooth broken power law, plug-in `function(theta, x)`, `tabulated-grid`); `break-scan`: toy-calibrated break interval and no-break test (no Wilks); `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
 - `roofit_fit_check.py` (needs PyROOT): a saved RooFitResult is ok only with status 0, covQual 3 and an EDM below the declared `--edm-max`; `weighted` requires `--weighted-errors` for weighted data.
-- Inference scripts of hep-measurement (read `--help`). `cr_spectrum_powerlaw_fit.py` fits a single or
-  continuous broken power law in log flux (a full covariance, linearized); a free break is calibrated here
-  (`break-scan`, `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the
-  delta method with one optional correlation coefficient: with correlated points or bin-to-bin correlated
-  systematics use `covariance_fit.py fit` or
-  `statistical_toys.py ratio-cov` / `ratio-measured` here, and at low counts an exact construction
-  (`pcl_efficiency_ratio.py ratio`, Fieller or Clopper-Pearson). Two different "counting references":
-  `skills/hep-measurement/scripts/counting_reference.py` is a flat-prior Bayesian upper bound with an exactly known
-  background (not CLs, no nuisances); the frequentist counting constructions are `core/stats/poisson_diagnostics.py`
-  (and `likelihood_limits.py` with an uncertain background). pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
+- `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure, systematics by
+  their M5 scaling class, and the reach; every output is labeled `projection` and fails the publication gate.
+- Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command
+  reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 
 ## Not implemented
 

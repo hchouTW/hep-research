@@ -29,7 +29,7 @@ HEADERS = {"name": "Name", "source": "Source", "effect": "Effect", "applied_via"
            "validation": "Validation", "status": "Status"}
 EFFECTS = ("normalization", "shape", "migration", "mixed")  # the measurement-spec systematics vocabulary
 STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
-            "validated-in-scope", "published")  # core artifact_statuses + published (tables only)
+            "validated-in-scope", "projection", "published")  # core artifact_statuses + published (tables only)
 FLAGGED = ("failed", "synthetic", "asimov", "preliminary", "unvalidated")  # said in the caption itself
 NON_FINITE = {"nan", "+nan", "-nan", "inf", "+inf", "-inf", "infinity", "+infinity", "-infinity"}
 SPECIAL = {"\\": r"\textbackslash{}", "&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#", "_": r"\_", "{": r"\{",

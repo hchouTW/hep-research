@@ -41,7 +41,7 @@ import math
 import sys
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection')  # contracts/vocab/core.json artifact_statuses
 
 
 class JsonArgumentParser(argparse.ArgumentParser):

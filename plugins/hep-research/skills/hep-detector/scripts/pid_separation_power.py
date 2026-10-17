@@ -60,7 +60,7 @@ DEFAULTS = {'path': 1.0, 'time_resolution': 60.0, 'material': 'silicon', 'relati
 MODE_PARAMETERS = {'tof': ('path', 'time_resolution'), 'dedx': ('material', 'relative_resolution'),
                    'velocity': ('beta_resolution',)}  # detector parameters per mode: a default is warned (F-06)
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
-            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+            'validated-in-scope', 'projection')  # contracts/vocab/core.json artifact_statuses
 
 
 class JsonArgumentParser(argparse.ArgumentParser):
