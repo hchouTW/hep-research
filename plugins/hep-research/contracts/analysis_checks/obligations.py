@@ -115,13 +115,31 @@ def _subjects(kind: str, view: dict, structural: bool) -> list[tuple[str, dict]]
     if kind == "instance_factor":
         for i in sorted(insts):
             cals = insts[i].get("calibrations") or {}
-            for c in comps:
-                item = cals.get(c["parent"])
+            for parent in sorted({c["parent"] for c in comps}):
+                item = cals.get(parent)
                 doc = (view.get("items", {}).get(item) or {}).get("doc")
                 if isinstance(doc, dict) and "factor_table_version" in doc:
-                    out.append((f"{i}#{c['composition_id']}", {"instance": i, "composition": c["composition_id"],
-                                                               "factor_table": item}))
+                    for c in factor_compositions([c for c in comps if c["parent"] == parent], doc):
+                        out.append((f"{i}#{c['composition_id']}", {"instance": i, "composition": c["composition_id"],
+                                                                   "factor_table": item}))
     return out
+
+
+def factor_compositions(candidates: list[dict], table: dict) -> list[dict]:
+    """The compositions of one parent that a factor table is checked against. With several compositions of the same
+    parent (exposure = acceptance x livetime, and acceptance x livetime x cutoff_transmission), the table's own factors
+    choose: the compositions whose factors are all in the table, without one whose factors are a strict subset of
+    another's; if none is complete, the one with most factors present (ties: fewest factors), whose check then
+    reports the missing factors. One parent with one composition is checked as before."""
+    if len(candidates) <= 1:
+        return list(candidates)
+    present = set((table.get("factors") or {}).keys()) if isinstance(table.get("factors"), dict) else set()
+    kids = {c["composition_id"]: {ch["effect"] for ch in c["children"]} for c in candidates}
+    full = [c for c in candidates if kids[c["composition_id"]] <= present]
+    if full:
+        return [c for c in full if not any(kids[c["composition_id"]] < kids[o["composition_id"]] for o in full)]
+    best = max(candidates, key=lambda c: (len(kids[c["composition_id"]] & present), -len(kids[c["composition_id"]])))
+    return [best]
 
 
 def _covered_on_path(view: dict, insts: list[dict]) -> set[str]:

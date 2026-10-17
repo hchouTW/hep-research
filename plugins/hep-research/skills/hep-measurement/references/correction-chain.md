@@ -71,6 +71,18 @@ already includes the trigger and reconstruction), multiplying it with the other 
   after arguing that instrument, exposure, composition and other time effects are controlled there. It is a check
   within one experiment, not a general oracle across experiments.
 
+- **Collection time.** Near a cutoff, the normalization of a bin is its collection time T: the live time of the
+  periods in which the bin lies above the cutoff threshold (cutoff x a declared safety factor), times the acceptance
+  for the exposure (catalog composition `exposure_acceptance_livetime_transmission`: acceptance x `livetime` x
+  `cutoff_transmission`). Declare everything: the period key, duration, live fraction, quality cuts, the cutoff column
+  and safety factors, the variable and time binning, and the eras; nothing has a default. Count a period split across
+  files once, refuse overlapping periods and periods that cross an era or time-bin boundary, and report how many
+  periods each condition removed. T must not grow when the safety factor grows. "Collection time" is this quantity
+  in seconds; the contracts' `exposure_record` is the blinding record of data exposure, a different thing.
+  `scripts/collection_time.py` computes it (`accumulate`, `--emit-partial` and `merge`, which agree with a single
+  run); the generic pattern for partitioned time-sliced records is in
+  `<plugin root>/skills/hep-computing/references/analysis-data-pipelines.md`.
+
 Worked example (synthetic): period 1 has N = 100 in exposure 1.0e4, period 2 has N = 30 in exposure 2.0e3 (a short
 period). Fluxes 1.0e-2 and 1.5e-2; the exposure-weighted average is 130 / 1.2e4 = 1.083e-2, while the plain mean of the
 two fluxes would be 1.25e-2, 15% higher.
@@ -94,6 +106,29 @@ Worked example (synthetic, invented interaction lengths): with x = 10 g/cm2 abov
 20 g/cm2 for the light species, P = 0.607 and the flux is corrected by 1/P = 1.65. If 1000 heavy nuclei arrive with
 P_heavy = 0.55 and 10% of their fragments are reconstructed as the light species, the feed-down is
 1000 x 0.45 x 0.10 = 45 events, to be subtracted before the survival correction.
+
+## Spectral variables
+
+A flux measured in one variable (rigidity, as a magnetic spectrometer measures it) is often compared in another
+(kinetic energy per nucleon, the variable of propagation models). The conversion is a Jacobian and a bin average,
+never a relabeling of the bin edges: the target bin [y1, y2] holds
+`Phi_y = (1 / (y2 - y1)) * sum_i integral over x_i(y1)..x_i(y2) of f_i(x) Phi(x) dx`, with x_i(y) the inverse map for
+isotope i and f_i the isotope fraction at equal source-variable value.
+
+- **One isotope.** With the mapped source edges as target edges the result is exact,
+  `Phi_y = Phi_x (x2 - x1) / (y2 - y1)`, and the statistical covariance scales with the same factors.
+- **Several isotopes.** Each isotope maps the edges differently (A and the mass differ), so the edges of an element in
+  rigidity correspond to different kinetic energies per nucleon for 3He and 4He. The transform then integrates inside
+  source bins and needs a declared within-bin shape (constant, or a local power law). The isotope composition is an
+  input with an uncertainty, and its covariance is reported separately from the statistical one; a published
+  element flux in rigidity converted with an assumed composition is model-dependent, and the comparison carries the
+  composition with it.
+- **Refuse what is missing.** No default Z, A, mass or composition; a target bin that needs the flux outside the
+  measured range is refused, not extrapolated.
+
+`<plugin root>/skills/hep-measurement/scripts/spectrum_transform.py` does this (masses from `core/constants`, the
+variables of `core/kinematics/relativistic.py`), and writes a transformation record (variables, isotopes, masses and
+their sources, composition, shape, input checksum) for the comparison gate.
 
 ## Neutrino and fixed-target specifics
 

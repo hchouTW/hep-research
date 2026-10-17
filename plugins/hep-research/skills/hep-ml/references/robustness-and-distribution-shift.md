@@ -24,3 +24,17 @@ simulator artifacts (a seed, a generator-specific correlation): a drop under a s
 matter physically is diagnostic; and whether calibration and uncertainty survive the move, not only point
 predictions. Deliver which stages ran and which were skipped, per-nuisance slices, the simulation changes tested, and
 the conditions under which the output should not be trusted.
+
+## Detector configuration change (eras)
+
+A hardware or calibration change (an added or removed layer, a new readout, a changed trigger) splits the data into
+eras: a domain shift with a known boundary, which the analysis records as eras in its measurement spec. Choose one of:
+- **per-era training**: one model per era; simplest to validate, but each era needs enough training data;
+- **era conditioning**: one model with the era as an input; it shares statistics but must be checked era by era;
+- **common features only**: train on inputs that exist and mean the same in every era; loses what the change added;
+- **missing-feature indicators**: the new inputs plus an indicator that they are absent, never a silent fill value.
+Whatever the choice: per-era calibration of the output, per-era working points (a fixed cut on the score does not
+give a fixed efficiency across eras), and efficiencies measured in data per era (tag-and-probe or control samples),
+not taken from simulation. Grouped splits keep each era's periods apart (`make_grouped_splits.py`, a composite key
+with the era). The executable BDT path is `train_bdt.py`, described in [multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md) ("XGBoost in an analysis").
+

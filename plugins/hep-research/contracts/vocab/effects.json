@@ -82,6 +82,11 @@
    "definition": "Detector live time"
   },
   {
+   "effect_id": "cutoff_transmission",
+   "class": null,
+   "definition": "Cutoff transmission: per bin of the variable, the fraction of the live time in which that bin lies above the declared geomagnetic (or other) cutoff threshold, with its safety factor"
+  },
+  {
    "effect_id": "bin_width",
    "class": null,
    "definition": "division by the bin width of the variable the result is differential in"
@@ -108,6 +113,31 @@
     "any further factor (for example a geomagnetic cutoff fraction) is listed as its own child; without it this composition does not apply"
    ],
    "convention": "exposure = acceptance x live time under the conditions above; an effective exposure that contains efficiency is not this composition"
+  },
+  {
+   "composition_id": "exposure_acceptance_livetime_transmission",
+   "parent": "exposure",
+   "children": [
+    {
+     "effect": "acceptance",
+     "power": 1
+    },
+    {
+     "effect": "livetime",
+     "power": 1
+    },
+    {
+     "effect": "cutoff_transmission",
+     "power": 1
+    }
+   ],
+   "normalization_kind": "exposure",
+   "conditions": [
+    "acceptance is geometric (area times solid angle) and contains no efficiency",
+    "live time is the detector live time of the same data selection",
+    "cutoff transmission is evaluated per bin of the variable from the same periods as the live time (the product live time x transmission is the collection time per bin)"
+   ],
+   "convention": "exposure = acceptance x live time x cutoff transmission (collection time) under the conditions above; the two-child composition exposure_acceptance_livetime applies only where no cutoff factor is needed"
   }
  ]
 }

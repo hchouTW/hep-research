@@ -123,3 +123,26 @@ Avoid SetBranchAddress bindings to expired local storage. Snapshot branch select
 Measure I/O, decompression, selection, correction lookup, and histogramming separately before optimizing. Bound memory per worker and avoid oversubscription from Python workers multiplied by ROOT threads. Distributed merges must compare expected and processed files/counts and prevent duplicate outputs from retries.
 
 Preserve input manifests, commits and uncommitted diffs, configuration checksums, software versions, calibration payload checksums, seed strategies, commands, and failed-file lists. Do not include authentication tokens or credentials in manifests.
+
+## Time-sliced records and mergeable reductions
+
+Per-period records (live time, counts, sums of weights per time slice) reach an analysis split over files and jobs,
+and a slice can appear twice: at a file boundary, in a resubmitted job, or in two overlapping productions. A reduction
+is mergeable only if it is made in two steps.
+
+1. **Deduplicate by a stable key.** Key each record by what identifies the slice (a period id, or run and slice
+   number), never by the file or the row index. Keep one copy of identical duplicates and report how many were
+   removed; refuse a key whose copies differ, because one slice cannot have two live times.
+2. **Then sum** the additive columns (counts, live times, sums of weights and their squares). Means, medians, rates
+   and fractions are not additive: recompute them from the merged sums, or declare a merge rule for them
+   (`local_partition.py merge --rule KEY=RULE`; an undeclared non-additive key is refused).
+
+Partitioned, the same two steps go through `core/partition`: each chunk returns its records and sources unreduced, the
+chunks are merged with `concat` rules, and the deduplication and sum happen once, on the merged records, in key order,
+so the partitioned and the single-run results agree to the last bit. Record the merge inputs (chunks merged and
+expected, the source file digests): a run-lineage result binding can then show that the merge was complete. A merge
+that is incomplete gives no reduced number.
+
+`<plugin root>/skills/hep-computing/assets/time_slice_reduction.py` implements this (`reduce`, `partial` as a
+`local_partition.py` worker, `finalize`); its tests show a slice split across two files counted once and the
+partitioned result equal to a single run.

@@ -302,8 +302,23 @@ STATUS_CASES = {
 
 
 # Scripts written after F-04 follow the plugin-wide contract of core/status.py instead: "status" is the run status
-# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic; propagate_scale_distortion.py takes --status).
+# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic; propagate_scale_distortion.py, build_response.py and mix_period_responses.py take --status).
+OUTDIR = Path(tempfile.gettempdir())
 F04_CASES = {
+    'mix_period_responses.py': ['stack', '--period', f"e1={ASSETS / 'response-synthetic.example.json'}", '--out',
+                                OUTDIR / 'stack.json'],
+    'build_response.py': ['build', ASSETS / 'response-events.example.csv', '--truth-col', 'truth', '--reco-col',
+                          'reco', '--weight-col', 'weight', '--selected-col', 'selected', '--truth-edges', '0', '10',
+                          '20', '30', '--reco-edges', '0', '10', '20', '30', '--variable', 'x', '--unit', 'GeV',
+                          '--normalization', 'conditional_on_generated', '--acceptance', 'outside_matrix',
+                          '--residual', 'difference', '--intended-use', 'forward_folding', '--artifact-id', 'a',
+                          '--objective', 'SYNTHETIC', '--created', '2026-10-17', '--out', OUTDIR / 'resp.json'],
+    'stability_monitor.py': [ASSETS / 'stability-series.example.csv', '--time-column', 'time_s', '--value-column',
+                             'value', '--error-column', 'error', '--false-alarm', '0.05', '--toys', '500',
+                             '--seed', '1'],
+    'multisample_pid.py': ['charge', ASSETS / 'multisample-events.example.csv', '--layers', 'l1,l2,l3,l4',
+                           '--response', ASSETS / 'multisample-response.example.json', '--method',
+                           'truncated-mean', '--truncate-high', '0.25', '--no-path-correction'],
     'toy_spectrometer.py': ['resolution', ASSETS / 'toy-spectrometer.fictional.json', '--species', 'p',
                             '--rigidity', '10'],
     'propagate_scale_distortion.py': ['events', ASSETS / 'scale-distortion-events.example.csv', '--column', 'x',

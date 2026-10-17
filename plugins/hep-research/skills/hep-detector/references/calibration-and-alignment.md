@@ -110,6 +110,45 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
   absolute scale still needs a reference.
 - **Hadronic calorimeters**: `E/p` of isolated single hadrons, with its own selection bias from the isolation cut.
 
+## Adding a tracking layer to a running detector
+
+A layer added to a spectrometer that is already taking data changes the tracking, the alignment and the acceptance at
+once, so data before and after it are separate detector eras (see "Monitoring stability over time" below for the
+boundary between them):
+
+- **Outer lever arm and weak modes.** A layer far from the others lengthens the lever arm, so the curvature
+  resolution improves (the intrinsic term scales as 1/(B L^2)), but the curvature of tracks that use it depends on
+  the position of one plane far outside the rest: a shift of that plane is a curvature offset, the weak mode that
+  fakes a charge-antisymmetric rigidity bias. Its alignment needs a constraint that residuals alone do not give
+  (beam-test or survey positions, the momentum scale from a known mass or from cosmic-ray tracks of both charges
+  with the same rigidity spectrum, the energy-momentum match of electrons in a calorimeter).
+- **Stereo planes.** If the layer measures one coordinate, or both with a stereo angle, state which track parameters
+  it improves; a layer without a measurement in the bending plane adds material and acceptance, not resolution.
+- **Alignment with existing tracks.** Align the new layer with tracks reconstructed by the existing layers alone (an
+  extrapolation that is independent of it), then refit with it; check the residual widths against the extrapolation
+  error, and the residual means against the charge sign separately.
+- **Time dependence.** A new structure settles mechanically and thermally after installation; monitor its alignment
+  per period (stability_monitor.py) and expect a calibration era of its own at the start.
+- **The rigidity scale with and without the new layer.** On the same events of the new era, refit without the new
+  layer and compare the two rigidity scales per charge sign; on independent samples (before and after), compare the
+  flux or ratio in the overlap with a split-consistency test (hep-statistics). A difference is a residual of the
+  scale or of the curvature offset: hand the per-era residuals to `propagate_scale_distortion.py` to turn them into
+  yield shifts and a correlated covariance block.
+- **Acceptance and exposure change with the era.** The geometric acceptance, the selection efficiency and the
+  response matrix are era-dependent: build them per era and combine eras with their exposure, never by averaging
+  the detector configurations.
+
+<!-- example: a planned outer silicon layer on a space-based spectrometer -->
+The AMS-02 Layer-0 upgrade (public sources only) adds a new silicon microstrip tracker layer on top of the existing
+detector. The beam-test paper arXiv:2603.25085 (abstract read 2026-10-17; full text not read) reports flight-model
+ladders of 8 to 12 silicon microstrip sensors in series, tested in a 350 GeV mixed hadron beam at the CERN SPS, with
+an intrinsic spatial resolution at normal incidence from 9.5 um to 11.4 um, and states that the layer increases the
+cosmic-ray acceptance by a factor of 3; the profile claim ams02:C101 records the same gain as quoted by the AMS
+website and a CERN news item (promotional wording, not an analysis acceptance). For an analysis this means a new
+detector era with its own acceptance, alignment and rigidity scale; the era boundary must come from the
+experiment's own sources (the installation and commissioning dates), not from a change point found in the data.
+<!-- /example -->
+
 ## Time dependence and conditions data
 
 Detectors change: gains drift with temperature, sensors accumulate radiation damage,
@@ -138,6 +177,25 @@ requirements:
   can pick up the wrong payload if the intervals are misaligned with the run
   structure, producing a small population of badly-calibrated events that shows up as
   a non-Gaussian tail rather than a shift.
+
+## Monitoring stability over time
+
+A per-period value with its uncertainty (a gain, a scale, a resolution, an efficiency) is tested for stability with
+`<plugin root>/skills/hep-detector/scripts/stability_monitor.py` (statistics in `core/stats/change_point.py`):
+
+- **Trends first.** Weighted constant and linear fits with chi2 and p-value. A poor constant fit without any step
+  means a drift, or uncertainties that are too small; fix the uncertainties before trusting any threshold.
+- **Change points with a declared false-alarm rate.** A step is tested with z = |m2 - m1| / sqrt(1/W1 + 1/W2) at the
+  best split (binary segmentation for several steps), and a two-sided CUSUM catches slow onsets. Both thresholds
+  are calibrated by seeded toys with the series' own uncertainties so that the chance of a false change anywhere in
+  the series is the declared rate; quote the rate, the toy count and the seed with the result. A threshold "at
+  3 sigma" on the largest of many splits is not a 3 sigma test.
+- **Tolerance is separate from significance.** Periods out of a declared tolerance around a reference are listed
+  apart from change points: a significant 0.1% step may be harmless, a 2% excursion of one period may matter.
+- **Era boundaries are proposals.** Each change point is proposed as a boundary of kind `calibration`, with the step
+  and the times around it. The tool never writes it into a measurement spec: the analyst checks it against the
+  run log (a magnet ramp, a reprocessing, a hardware change) and enters an accepted boundary with its source. A
+  hardware change such as an added layer is an era of its own even when no step is visible.
 
 ## Propagating a calibration change
 

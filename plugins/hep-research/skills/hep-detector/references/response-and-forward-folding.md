@@ -24,22 +24,48 @@ truth bins are independent. With weights, use `sum w` and `sum w^2` per cell (ef
 artifact's `mc_stat` (`kind: generated_counts` with `events_per_truth_bin`, or `sumw2`): from contracts 2.8.0 a
 response for unfolding without it is unresolved.
 
+**Building one.** `scripts/build_response.py build` makes the artifact from a matched sample (truth, reco, weight,
+selection flag) with every convention declared: rows reco and columns truth, `conditional_on_generated` (columns plus
+the explicit under/overflow sum to the selection efficiency) or `conditional_on_selected` (they sum to one and the
+efficiency is listed under `applied_separately`), the acceptance placement, `mc_stat` (event counts, or per-cell sums
+of w^2 with weights), the delta-method multinomial uncertainty of each entry, and per truth bin the resolution core and
+tails of a declared residual (median, sigma68, MAD, tail fraction). Negative weights are refused (hep-statistics). The
+artifact must pass `contracts/validate.py` (strict) and `contracts/response_adapter.py --validate`, or nothing is
+written; `--fold` folds a truth spectrum through it.
+
 **Fakes.** Reconstructed events with no truth match under the matching criterion of
 [reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md) form a reco-space
 vector `b_fake`, estimated from simulation with that criterion and validated in a control region; they belong in `b`,
 not in `R`. Keeping them as an extra truth column is possible if declared; the validator warns
 (`response.fakes_inside`) when `fakes` is listed in `includes`.
 
-**Time-dependent responses.** Conditions change, so a response built for one period does not describe another. Build
-one matrix per period with stable conditions and combine them with exposure (or luminosity) weights,
-`R_eff = sum_t w_t R_t / sum_t w_t`, or fold each period separately; record them in the artifact's `periods`
-(`id`, `exposure_weight`, `matrix` or `matrix_ref`) rather than in the free `conditions` string
-([calibration and alignment](calibration-and-alignment.md)).
+Time-dependent responses: see the section of that name below.
 
 Truth and reco variables are named with units; if they differ (for example rigidity and its inverse), state the
 conversion. A binned response is a conditional distribution `p(reco bin | truth bin)` and needs no Jacobian; a Jacobian
 applies only when a continuous density is transformed from one variable to the other. Record the conditions (period,
 geometry, calibration version) the response was built with; a response is time-dependent until shown otherwise.
+
+## Time-dependent responses
+
+Conditions change (an added layer, a new calibration era), so a response built for one period does not describe
+another. Build one matrix per era with stable conditions (`build_response.py`), record each with its conditions, and
+then either
+
+- **mix** them per truth bin: `R_eff[:, j] = sum_t w_tj R_t[:, j] / sum_t w_tj` with `w_tj = A_tj T_tj` (acceptance x
+  collection time in that truth bin, from hep-measurement's `collection_time.py`). Folding `R_eff` with the summed
+  weights equals the sum of the per-era folds exactly; the per-truth-bin weights matter, because acceptance and
+  collection time depend on the variable. A single exposure weight per era (`R_eff = sum_t w_t R_t / sum_t w_t`) is
+  the special case of flat weights; or
+- **stack** them for a joint fit over eras: `S = [R_1 diag(w_1); R_2 diag(w_2); ...]`, an (n_era x n_reco) x n_truth
+  matrix whose blocks give each era's expected reco counts (hep-statistics fits it; S1 and S6).
+
+Mix only responses that agree on the truth and reco axes, orientation, normalization (a probability, not
+`joint_counts`), inefficiency and acceptance placement, flow handling and intended use; refuse a truth bin with zero
+total weight; record the checksum of the weight source. `scripts/mix_period_responses.py` (`mix`, `stack`) does this
+and validates the mixed artifact like any other response. Record the eras in the artifact's `periods` (`id`,
+`exposure_weight`, `matrix` or `matrix_ref`) rather than in the free `conditions` string
+([calibration and alignment](calibration-and-alignment.md)).
 
 ## Forward folding a prediction
 

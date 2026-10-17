@@ -1,0 +1,186 @@
+{
+ "contract_version": "2.11.0",
+ "artifact_id": "multi-era-mixed",
+ "artifact_type": "response",
+ "objective": "SYNTHETIC E-3 example",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.13.1",
+  "contracts": "2.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-17",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "truth_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.0,
+    2.0,
+    4.0,
+    8.0,
+    16.0,
+    32.0,
+    64.0
+   ]
+  },
+  "reco_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.0,
+    2.0,
+    4.0,
+    8.0,
+    16.0,
+    32.0,
+    64.0
+   ]
+  },
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_generated",
+  "inefficiency": "inside_matrix",
+  "acceptance": "inside_matrix",
+  "underflow_overflow": "explicit_bins",
+  "intended_use": "forward_folding",
+  "includes": [
+   "migration",
+   "efficiency"
+  ],
+  "form": "matrix",
+  "matrix": [
+   [
+    0.9709297413260669,
+    0.01460209096762806,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.010608137207362516,
+    0.9753930688095671,
+    0.013288380536259527,
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.010004840222804859,
+    0.9777137389557295,
+    0.012639622626760511,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.008997880508010883,
+    0.9774278805448433,
+    0.013251263647913665,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.009932496828396177,
+    0.9757374241329577,
+    0.01669420449938619
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.011011312219128617,
+    0.9701142853107774
+   ]
+  ],
+  "conditions": "mixed over eras e1, e2 with per-truth-bin weights (mix_period_responses.py)",
+  "provenance": "exposure-weighted mixture of the era responses e1 (sha256 0bdf06ae0dc6), e2 (sha256 3cf9d717c2c0)",
+  "applied_separately": [],
+  "underflow": [
+   0.018462121466570537,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "overflow": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.013191510189836445
+  ],
+  "mc_stat": {
+   "kind": "effective_counts",
+   "weighted": true,
+   "events_per_truth_bin": [
+    63084.888233709,
+    44137.32973854728,
+    31401.472725535776,
+    22267.241063409376,
+    15598.293223924611,
+    11137.977015622195
+   ]
+  },
+  "mixing": {
+   "rule": "R_eff[:, j] = sum_t w_tj R_t[:, j] / sum_t w_tj",
+   "eras": [
+    "e1",
+    "e2"
+   ],
+   "weights": {
+    "e1": [
+     4500.0,
+     4500.0,
+     9000.0,
+     9000.0,
+     9000.0,
+     9000.0
+    ],
+    "e2": [
+     4500.0,
+     4500.0,
+     9000.0,
+     9000.0,
+     9000.0,
+     9000.0
+    ]
+   },
+   "total_weight": [
+    9000.0,
+    9000.0,
+    18000.0,
+    18000.0,
+    18000.0,
+    18000.0
+   ],
+   "fold_identity": "R_eff (W_j Phi_j) = sum_t R_t (w_tj Phi_j)",
+   "weights_sha256": "c0a961d474fe0b1f23b6ff890a07fccc9c19ec4284ee6832927907031d21c954",
+   "weights_source": "collection_time.py accumulate (this example), acceptance 1"
+  }
+ }
+}

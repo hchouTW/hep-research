@@ -40,7 +40,7 @@
    "id": "collection-time",
    "capability": "Collection time per period with quality cuts, cutoff transmission and eras",
    "owner": "hep-measurement",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "M1"
@@ -50,7 +50,7 @@
    "id": "spectral-transform",
    "capability": "Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging)",
    "owner": "hep-measurement",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "M7",
@@ -111,7 +111,7 @@
    "id": "response-construction",
    "capability": "Response construction from matched truth and reconstructed events",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D9"
@@ -133,7 +133,7 @@
    "id": "multisample-pid",
    "capability": "Multi-sample particle identification (charge from many samples, likelihood ratios)",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D10"
@@ -143,7 +143,7 @@
    "id": "stability-monitoring",
    "capability": "Stability monitoring over time (trends, change points, era boundaries)",
    "owner": "hep-detector",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "D11"
@@ -225,7 +225,7 @@
    "id": "split-consistency",
    "capability": "Consistency of split samples and multi-era joint fits",
    "owner": "hep-statistics",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "S1",
@@ -236,7 +236,7 @@
    "id": "roofit-status",
    "capability": "RooFit/RooStats fit-status mapping and cross-checks",
    "owner": "hep-statistics",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "S11"
@@ -362,7 +362,7 @@
    "id": "bdt-pipeline",
    "capability": "BDT pipeline for analyses (cross-training, negative weights, working points)",
    "owner": "hep-ml",
-   "state": "documentation",
+   "state": "tool",
    "v1": true,
    "items": [
     "ML3"
@@ -372,7 +372,7 @@
    "id": "ml-eras",
    "capability": "Era changes in machine-learning studies",
    "owner": "hep-ml",
-   "state": "none",
+   "state": "documentation",
    "v1": true,
    "items": [
     "ML1"

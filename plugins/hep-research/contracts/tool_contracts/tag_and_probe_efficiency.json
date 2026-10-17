@@ -5,7 +5,7 @@
  "operations": [
   {
    "operation_id": "efficiency",
-   "summary": "Binomial efficiency pass_count/total of one tag-and-probe bin with the exact two-sided (central) Clopper-Pearson interval at interval_level, by bisection on the exact binomial tail sum. total = 0 gives null efficiency and bounds with a reason. Only unweighted, independent, non-background-subtracted probes",
+   "summary": "Binomial efficiency of tag-and-probe probes with the exact two-sided (central) Clopper-Pearson interval at interval_level from beta quantiles (core/stats/tail_estimation.py), no cap on the total. Counts mode: one bin from pass_count/total; total = 0 gives null efficiency and bounds with a reason. Probes mode: a CSV of probes, optional weights (frequency: integer counts, exactly the duplicated probes; sampling: Kish effective sample size) and bins of a variable. Only independent, non-background-subtracted probes with positive weights",
    "invocation": {
     "kind": "cli",
     "output": "json-stdout",
@@ -17,6 +17,30 @@
      {
       "flag": "--total",
       "input": "total"
+     },
+     {
+      "flag": "--probes",
+      "input": "probes"
+     },
+     {
+      "flag": "--pass-column",
+      "input": "pass_column"
+     },
+     {
+      "flag": "--weights",
+      "input": "weights"
+     },
+     {
+      "flag": "--weight-kind",
+      "input": "weight_kind"
+     },
+     {
+      "flag": "--bins",
+      "input": "bins"
+     },
+     {
+      "flag": "--variable-column",
+      "input": "variable_column"
      },
      {
       "flag": "--level",
@@ -33,15 +57,57 @@
      "name": "pass_count",
      "kind": "counts",
      "unit": "1",
-     "required": true,
-     "constraint": "integer, 0 <= pass_count <= total"
+     "required": false,
+     "constraint": "integer, 0 <= pass_count <= total; counts mode (with total), not with probes"
     },
     {
      "name": "total",
      "kind": "counts",
      "unit": "1",
-     "required": true,
-     "constraint": "integer, 0..200000 (the exact tail sum costs O(total); about 15-20 s near efficiency 0.5 at the cap)"
+     "required": false,
+     "constraint": "integer >= 0, no upper cap; counts mode (with pass_count), not with probes"
+    },
+    {
+     "name": "probes",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "CSV, one row per probe; probes mode (needs pass_column); not with pass_count/total"
+    },
+    {
+     "name": "pass_column",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "column with 1 pass / 0 fail; probes mode"
+    },
+    {
+     "name": "weights",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "column of positive weights; needs weight_kind; zero or negative weights are refused (hep-statistics)"
+    },
+    {
+     "name": "weight_kind",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "frequency (integer counts) or sampling (Kish n_eff); no default, required with weights"
+    },
+    {
+     "name": "bins",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "JSON {edges: [...]} increasing; with variable_column"
+    },
+    {
+     "name": "variable_column",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "column binned by bins"
     },
     {
      "name": "level",
@@ -121,7 +187,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument is missing, not an integer, or out of range (pass_count > total, total > 200000, level outside (0, 1)); stdout carries {\"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr one line"
+     "meaning": "an argument is missing, not an integer, or out of range (pass_count > total, level outside (0, 1)), counts and probes both given, a probes file that cannot be read or has a missing column, a non-0/1 pass value, a zero or negative weight, a fractional frequency weight, weights without weight_kind, or bad bins; stdout carries {\"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr one line"
     }
    ],
    "required_capabilities": [],

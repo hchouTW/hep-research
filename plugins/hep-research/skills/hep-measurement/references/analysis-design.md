@@ -74,6 +74,33 @@ Choose binning using resolution, MC statistics, background stability, systematic
 Worked example (synthetic): s = 10, b = 100 gives `s / sqrt(s + b)` = 0.953 and `Z_A` = 0.984; with a signal efficiency
 of 0.5 and a = 3, the Punzi figure is 0.5 / (1.5 + 10) = 0.0435.
 
+## Detector configuration changes (eras)
+
+A detector that changes during data taking (a layer added, a trigger or readout upgrade, a recalibration, a new
+reconstruction release, a change of operating conditions) splits the data into eras. Each era can have its own
+acceptance, efficiencies, resolution and response, so the design names the eras before any result:
+
+- **Declare them in the spec.** `eras: [{id, start, end, kind, source}]`, with `kind` one of `configuration`,
+  `calibration`, `software`, `operating`, and `source` the run log, logbook entry or evidence id that fixes the
+  boundary. Optional: `corrections` (effect ids determined for that era), `shared_corrections` (corrections shown to hold
+  across eras, with their evidence), `versions` (reconstruction, calibration).
+- **No bin crosses a boundary.** A period or time bin that straddles an era boundary mixes two responses into one
+  number; split it at the boundary (`era.bin_straddles_boundary`, an error in the review).
+- **Corrections per era.** Every correction is either determined for each era or shown to be valid across eras
+  (`era.correction_missing`).
+- **Correlations across eras.** Each systematic says whether it is correlated, uncorrelated or partially correlated
+  across eras (`systematics[].era_correlation`; `era.correlation_undeclared`). A common calibration is usually
+  correlated, a per-era efficiency fit uncorrelated; the scheme is evidence for hep-statistics.
+- **One processing.** Eras processed with different reconstruction or calibration versions differ for software
+  reasons too; reprocess, or declare the change as its own `software` or `calibration` era (`era.version_mismatch`).
+- **Combine afterwards.** Check that the eras agree where no physical change is expected before combining them
+  (split consistency and the multi-era joint fit belong to hep-statistics: `split_consistency.py`, and "Joint fits of
+  several periods" in its time-series reference); a monitored quantity that drifts within an era is a stability
+  question for hep-detector.
+
+`review_measurement_spec.py` runs these four checks whenever the spec declares eras; specs without eras are reviewed as
+before.
+
 ## Look-elsewhere at the design stage
 
 A search over masses, energies, positions, time windows or catalogs tests many hypotheses; the global significance

@@ -1913,6 +1913,59 @@ Commands, from the plugin root with `PYTHONDONTWRITEBYTECODE=1`, on the final tr
 Skipped tests are unverified, not passed: they need PyTorch, pyhf, ROOT, uproot, network access or
 `HEP_SLOW_TESTS=1`. Not run: the slow tier, live routing (no description changed), the CLI host checks.
 
+## UPGRADE-B (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
+
+Upgrade plan v1.3, batch B on branch `upgrade/B` from main `0687ad2`: C1, M1, D9, D5, D10, D11, M7, D8, M3, D6, S1,
+S6, ML1, ML3, S11 and the first part of E-3. Gate decisions (maintainer, 2026-10-17): M1's effect `cutoff_transmission`
+and composition `exposure_acceptance_livetime_transmission` (G4); M3's `eras` field (G4); the optional extra `bdt`
+with xgboost and scikit-learn, tested in a recorded local run without a CI job (G5); D6 may read arXiv:2603.25085, and
+S11 may use a local ROOT. Each item's tests, run on the parent with the item's test files, then on the item's commit:
+
+| Item | Parent | Commit |
+|---|---|---|
+| C1 (`a57e22cf`) | fail (4 failures, 3 errors) | pass |
+| M1 (`97d6ec54`) | fail (8 failures, 14 errors) | pass |
+| D9 (`b25efa67`) | fail (5 failures, 5 errors) | pass |
+| D5 (`c98cc355`) | fail (3 failures, 1 error) | pass |
+| D10 (`f7d5722d`) | fail (11) | pass |
+| D11 (`0d506417`) | fail (5 failures, 1 error) | pass |
+| D8 (`fe6d9d65`) | fail (7) | pass |
+| M7 (`36140fee`) | fail (9 failures, 8 errors) | pass |
+| M3 (`fe71ebcf`) | fail (9 failures, 44 errors) | pass |
+| D6 (`1d03565d`) | fail (2) | pass |
+| S1 (`bb2e0465`) | fail (6 failures, 7 errors) | pass (1 skipped: slow tier) |
+| S6 (`e2cb73b9`) | fail (3) | pass |
+| ML1 (`6c1221a7`) | fail (2) | pass |
+| ML3 (`f3e0ff6d`), in a venv with the backends | fail (16 failures, 2 errors) | pass |
+| S11 (`23c707c9`), CI lock venv | fail (3 failures, 1 error) | pass (7 skipped: PyROOT) |
+| E-3 (`9d998742`) | fail (1 error) | pass |
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, `83f5b982` | 23 pass, 0 fail, 2 skipped (the `claude` and `codex` CLI checks); 3914 tests, 3718 pass, 0 failures, 196 skipped |
+| `check_relocation.py`, `83f5b982` | pass; 3914 tests, 3712 pass, 0 failures, 202 skipped |
+| `ruff check core contracts`, `mypy` (CI pins) | pass |
+| `measure_entrypoints.py --no-cli` | ok, no warnings |
+| SKILL.md plus entry reference | hep-measurement 25,599 bytes (limit 25,600) |
+| `check_routing_static.py` | ok, 312 cases; `check_ownership.py` pass; `check_layering.py` ok |
+| `reference_inventory.py --check` | pass; 5 soft-budget warnings (references above 24 KB) |
+| ML3 in a scratch venv (Python 3.13.2, xgboost 3.4.1, scikit-learn 1.9.1, NumPy 2.4.6, SciPy 1.17.1) | 18 tests pass; skipped, not failed, without the backends |
+| S11 with Homebrew ROOT 6.38.04 under Python 3.14.8 (`HEP_ROOT_PYTHON`) | 11 tests pass; ROOT does not load under the local Python 3.13 interpreters, so CI's optional ROOT job is the recurring check |
+| S1 slow tier (`HEP_SLOW_TESTS=1`): p-values uniform under the null, 20,000 toys | pass |
+| E-3 `examples/multi-era-fit/` | every criterion passes: joint-fit coverage of the +-1 sigma intervals 0.689 over 1,000 seeded toys (0.68 +- 0.03); S1 p 0.11 without a difference, a 5% offset in one era caught; partial + merge = single run; a period split across files counted once; about 5 s |
+| D11 on D7's "added layer" data (AC-B) | the era boundary is found at period 6 |
+
+Sources read: arXiv:2603.25085 (abstract only, D6); ROOT master `tmva/tmva/src/MethodBDT.cxx` for the TMVA option
+table (ML3), fetched 2026-10-17 with a generic User-Agent.
+
+Gate G2 runs (recorded under the repository's `evals/routing/`, Claude Code 2.1.302, claude-sonnet-5-5): repeats of
+the five batch-0b misses ($0.81) and a hep-theory description experiment for `j06` (41/49 on the fixed tree and on
+main, `j06` 0/3 vs 1/3; not merged, $11.33). Live routing of the 30 batch B cases was not run.
+
+Not run: the slow tier except S1's test, the CLI host checks, a CI job for xgboost and scikit-learn. The run left
+`__pycache__` folders from tests that start `python -I` (the known issue, present on main). Skipped tests are
+unverified, not passed.
+
 ## UPGRADE-A (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
 
 Upgrade plan v1.3, batch A on branch `upgrade/A` from main `b1f4d8e`: Th9 (with one sci-fix commit), Th7, D7, D1,

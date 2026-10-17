@@ -3515,6 +3515,309 @@
    "trigger_terms": [
     "terminology"
    ]
+  },
+  {
+   "id": "b-flux-c1-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My per-period live-time records are split over many files and some periods appear twice; how do I merge the partial sums from my job array without double counting?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "merging and recovery"
+   ]
+  },
+  {
+   "id": "b-flux-c1-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "每個時段的活時間紀錄分散在好幾個檔案，有些時段重複出現；分批處理後要怎麼合併部分和才不會重複計算？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "partitioning"
+   ]
+  },
+  {
+   "id": "b-flux-m1-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I compute the collection time per rigidity bin and era from my period table, with quality cuts and a cutoff safety factor, for the flux normalization?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "live time",
+    "correction chains"
+   ]
+  },
+  {
+   "id": "b-flux-m1-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "通量正規化要用的收集時間怎麼算？每個時段有活時間比例與截止剛度，還要分 era 和品質條件。",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "live time"
+   ]
+  },
+  {
+   "id": "b-flux-d9-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build the response matrix from my matched truth and reco simulation with weights and a selection flag, with its finite-MC uncertainty.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
+  },
+  {
+   "id": "b-flux-d9-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用模擬的真值與重建值配對事件建立響應矩陣，包含效率、溢出與每個真值區間的解析度。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
+  },
+  {
+   "id": "b-flux-d5-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My detector added a layer midway; how do I combine the two era response matrices with their exposures before folding the prediction?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices",
+    "folding a prediction through the response"
+   ]
+  },
+  {
+   "id": "b-flux-d5-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個時期的響應矩陣要怎麼依各自的曝露量加權合併，或堆疊起來做聯合擬合？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "response matrices"
+   ]
+  },
+  {
+   "id": "b-det-msp-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Combine the dE/dx samples of eight silicon layers into a charge estimate with a truncated mean and give the leakage between neighbouring charges.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "particle identification"
+   ]
+  },
+  {
+   "id": "b-det-msp-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "TRD 每層的訊號要怎麼組成 likelihood ratio？效率與誤判率曲線怎麼算？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "TRD"
+   ]
+  },
+  {
+   "id": "b-det-stab-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Is the gain calibration of my calorimeter stable over the last 200 runs, and where are the change points at a 1% false-alarm rate?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "b-det-stab-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "每天的 TOF 時間校正值有沒有漂移？要怎麼找出 era 的分界？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "b-det-eff-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My tag-and-probe sample has simulation event weights: what is the efficiency per pT bin with a proper interval?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tag-and-probe"
+   ]
+  },
+  {
+   "id": "b-det-eff-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "加權的 tag-and-probe 效率要怎麼算區間？每個 pT bin 都要。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tag-and-probe"
+   ]
+  },
+  {
+   "id": "b-ms-transform-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Convert my helium flux from rigidity bins to kinetic energy per nucleon, propagating the 3He/4He composition uncertainty.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "b-ms-transform-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把以剛度分箱的硼通量換成每核子動能，同位素比例的不確定度要怎麼傳遞？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "correction chains"
+   ]
+  },
+  {
+   "id": "b-ms-eras-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "A tracking layer was added halfway through data taking; how should my measurement spec handle the two detector eras before I review it?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "verdict-first measurement review"
+   ]
+  },
+  {
+   "id": "b-ms-eras-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "資料取樣期間偵測器換過組態，我的量測設計要怎麼切分時期，系統誤差在不同時期之間的相關性要怎麼宣告？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "verdict-first measurement review"
+   ]
+  },
+  {
+   "id": "b-det-layer-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "We are adding a new outer tracking layer to a running spectrometer: how do we align it and check the rigidity scale with and without it?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "b-det-layer-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "在運轉中的磁譜儀加裝一層外層矽徑跡層，對準與剛度尺度要怎麼處理？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ]
+  },
+  {
+   "id": "b-ms-split-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Do my two data-taking eras agree? I have both fluxes with covariances and a shared calibration uncertainty.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ]
+  },
+  {
+   "id": "b-ms-split-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把資料分成前後兩半各自量測，兩個結果一致嗎？共同的系統誤差要怎麼扣掉再算卡方？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit"
+   ]
+  },
+  {
+   "id": "b-ms-joint-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I fit one flux to two detector eras with different responses and acceptances, with era-correlated nuisances?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "b-ms-joint-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個偵測器時期的響應矩陣不同，要怎麼做聯合擬合同一個通量？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits that use a folded prediction"
+   ]
+  },
+  {
+   "id": "b-ml-era-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Our detector added a tracking layer halfway through data taking; should I train one classifier per era or condition on the era, and how do I set the working points and calibration of model outputs?",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "calibration of model outputs"
+   ]
+  },
+  {
+   "id": "b-ml-era-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "探測器中途換了讀出系統，前後兩個時期的分類器要分開訓練還是把時期當輸入？工作點與效率要怎麼處理？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "working points and mass decorrelation"
+   ]
+  },
+  {
+   "id": "b-ml-bdt-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Cross-train an XGBoost BDT in three folds by event number, keep the test fold out of early stopping, and handle the negative weights of my NLO sample.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "XGBoost",
+    "event weights including negative ones"
+   ]
+  },
+  {
+   "id": "b-ml-bdt-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 XGBoost 做 k-fold 交叉訓練的 BDT，負權重要怎麼處理？過度訓練要怎麼檢查，不要用 KS 的 p 值？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "XGBoost"
+   ]
+  },
+  {
+   "id": "b-ml-roofit-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My saved RooFitResult has covQual 2 and status 0 after MIGRAD; can I quote the fit, and which errors do I use for my weighted unbinned fit?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats"
+   ]
+  },
+  {
+   "id": "b-ml-roofit-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "RooFit 擬合的 covQual 不是 3、EDM 也偏大，這個結果可以用嗎？加權資料的誤差要選哪一種？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "RooFit/RooStats"
+   ]
   }
  ]
 }

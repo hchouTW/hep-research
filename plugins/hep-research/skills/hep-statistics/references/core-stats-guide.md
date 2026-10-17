@@ -90,6 +90,8 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
   outcome and never pools ensembles; details in the [command reference](core-stats-commands.md#toy-ensembles).
 - **Broken power law** (`broken_power_law.py`, helper, no CLI): one parametrization for `covariance_fit.py` and
   hep-measurement `cr_spectrum_powerlaw_fit.py` ([conventions](core-stats-commands.md#broken-power-law)).
+- **Change points** (`change_point.py`, helper, no CLI): weighted trends, binary segmentation, CUSUM and
+  toy-calibrated thresholds for a declared false-alarm rate; used by hep-detector `stability_monitor.py`.
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
@@ -124,9 +126,10 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `global_significance.py` (needs NumPy): toy-calibrated global significance for a recorded scan.
 - `sensitivity_and_gof.py` (needs NumPy): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
 - `bayes_diagnostics.py` (needs NumPy): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
-- `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); a worked SYNTHETIC input (2 experiments, 3 bins, shared luminosity) is `skills/hep-statistics/assets/combine.example.json`; `combine_asymmetric.py`: Barlow's asymmetric errors.
+- `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); a worked SYNTHETIC input (2 experiments, 3 bins, shared luminosity) is `skills/hep-statistics/assets/combine.example.json`; `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples (eras, halves) agree, from d = x1 - x2 with Cov(d) = C1 + C2 - C12 - C21, a generalized chi2 for K splits and Sidak or toy-corrected pairwise tests; without declared shared blocks it says so; NumPy and SciPy are imported at run time.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics (constant, line, normalized exponential, sharp or smooth broken power law, plug-in `function(theta, x)`, `tabulated-grid`); `break-scan`: toy-calibrated break interval and no-break test (no Wilks); `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
+- `roofit_fit_check.py` (needs PyROOT): a saved RooFitResult is ok only with status 0, covQual 3 and an EDM below the declared `--edm-max`; `weighted` requires `--weighted-errors` for weighted data.
 - Inference scripts of hep-measurement (read `--help`). `cr_spectrum_powerlaw_fit.py` fits a single or
   continuous broken power law in log flux (a full covariance, linearized); a free break is calibrated here
   (`break-scan`, `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the

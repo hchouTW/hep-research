@@ -339,6 +339,51 @@ C = [
  # batch A, Com3: glossary of normalization terms
  ("cm-a-terms-1", "en", "direct", "Check the terminology of my cosmic-ray paper draft: it mixes exposure, collection time and data exposure, and quotes momenta in GV.", "hep-communication", ["terminology"], None, None, {}),
  ("cm-a-terms-2", "zh-Hant", "direct", "幫我檢查論文草稿的術語：曝露量、收集時間和資料曝光混用，剛度和動量也分不清。", "hep-communication", ["terminology"], None, None, {}),
+    # batch B, C1: time-sliced records and mergeable reductions
+ ("b-flux-c1-1", "en", "direct", "My per-period live-time records are split over many files and some periods appear twice; how do I merge the partial sums from my job array without double counting?", "hep-computing", ["merging and recovery"], None, None, {}),
+ ("b-flux-c1-2", "zh-Hant", "direct", "每個時段的活時間紀錄分散在好幾個檔案，有些時段重複出現；分批處理後要怎麼合併部分和才不會重複計算？", "hep-computing", ["partitioning"], None, None, {}),
+    # batch B, M1: collection time
+ ("b-flux-m1-1", "en", "direct", "How do I compute the collection time per rigidity bin and era from my period table, with quality cuts and a cutoff safety factor, for the flux normalization?", "hep-measurement", ["live time", "correction chains"], None, None, {}),
+ ("b-flux-m1-2", "zh-Hant", "direct", "通量正規化要用的收集時間怎麼算？每個時段有活時間比例與截止剛度，還要分 era 和品質條件。", "hep-measurement", ["live time"], None, None, {}),
+    # batch B, D9: response construction
+ ("b-flux-d9-1", "en", "direct", "Build the response matrix from my matched truth and reco simulation with weights and a selection flag, with its finite-MC uncertainty.", "hep-detector", ["response matrices"], None, None, {}),
+ ("b-flux-d9-2", "zh-Hant", "direct", "用模擬的真值與重建值配對事件建立響應矩陣，包含效率、溢出與每個真值區間的解析度。", "hep-detector", ["response matrices"], None, None, {}),
+    # batch B, D5: era responses
+ ("b-flux-d5-1", "en", "direct", "My detector added a layer midway; how do I combine the two era response matrices with their exposures before folding the prediction?", "hep-detector", ["response matrices", "folding a prediction through the response"], None, None, {}),
+ ("b-flux-d5-2", "zh-Hant", "direct", "兩個時期的響應矩陣要怎麼依各自的曝露量加權合併，或堆疊起來做聯合擬合？", "hep-detector", ["response matrices"], None, None, {}),
+    # batch B, D10: combining many samples (multisample_pid.py)
+ ("b-det-msp-1", "en", "direct", "Combine the dE/dx samples of eight silicon layers into a charge estimate with a truncated mean and give the leakage between neighbouring charges.", "hep-detector", ["particle identification"], None, None, {}),
+ ("b-det-msp-2", "zh-Hant", "direct", "TRD 每層的訊號要怎麼組成 likelihood ratio？效率與誤判率曲線怎麼算？", "hep-detector", ["TRD"], None, None, {}),
+    # batch B, D11: stability monitoring (stability_monitor.py)
+ ("b-det-stab-1", "en", "direct", "Is the gain calibration of my calorimeter stable over the last 200 runs, and where are the change points at a 1% false-alarm rate?", "hep-detector", ["calibration and alignment"], None, None, {}),
+ ("b-det-stab-2", "zh-Hant", "direct", "每天的 TOF 時間校正值有沒有漂移？要怎麼找出 era 的分界？", "hep-detector", ["calibration and alignment"], None, None, {}),
+    # batch B, D8: weighted and binned tag-and-probe efficiency
+ ("b-det-eff-1", "en", "direct", "My tag-and-probe sample has simulation event weights: what is the efficiency per pT bin with a proper interval?", "hep-detector", ["tag-and-probe"], None, None, {}),
+ ("b-det-eff-2", "zh-Hant", "direct", "加權的 tag-and-probe 效率要怎麼算區間？每個 pT bin 都要。", "hep-detector", ["tag-and-probe"], None, None, {}),
+    # batch B, M7: spectral-variable transformation (spectrum_transform.py)
+ ("b-ms-transform-1", "en", "direct", "Convert my helium flux from rigidity bins to kinetic energy per nucleon, propagating the 3He/4He composition uncertainty.", "hep-measurement", ["correction chains"], None, None, {}),
+ ("b-ms-transform-2", "zh-Hant", "direct", "把以剛度分箱的硼通量換成每核子動能，同位素比例的不確定度要怎麼傳遞？", "hep-measurement", ["correction chains"], None, None, {}),
+    # batch B, M3: multi-era design (eras in the spec, review rules)
+ ("b-ms-eras-1", "en", "direct", "A tracking layer was added halfway through data taking; how should my measurement spec handle the two detector eras before I review it?", "hep-measurement", ["verdict-first measurement review"], None, None, {}),
+ ("b-ms-eras-2", "zh-Hant", "direct", "資料取樣期間偵測器換過組態，我的量測設計要怎麼切分時期，系統誤差在不同時期之間的相關性要怎麼宣告？", "hep-measurement", ["verdict-first measurement review"], None, None, {}),
+    # batch B, D6: adding a tracking layer to a running detector
+ ("b-det-layer-1", "en", "direct", "We are adding a new outer tracking layer to a running spectrometer: how do we align it and check the rigidity scale with and without it?", "hep-detector", ["calibration and alignment"], None, None, {}),
+ ("b-det-layer-2", "zh-Hant", "direct", "在運轉中的磁譜儀加裝一層外層矽徑跡層，對準與剛度尺度要怎麼處理？", "hep-detector", ["calibration and alignment"], None, None, {}),
+    # batch B, S1: split consistency (split_consistency.py)
+ ("b-ms-split-1", "en", "direct", "Do my two data-taking eras agree? I have both fluxes with covariances and a shared calibration uncertainty.", "hep-statistics", ["combinations across datasets or experiments"], None, None, {}),
+ ("b-ms-split-2", "zh-Hant", "direct", "把資料分成前後兩半各自量測，兩個結果一致嗎？共同的系統誤差要怎麼扣掉再算卡方？", "hep-statistics", ["goodness of fit"], None, None, {}),
+    # batch B, S6: multi-era joint fit (documentation)
+ ("b-ms-joint-1", "en", "direct", "How do I fit one flux to two detector eras with different responses and acceptances, with era-correlated nuisances?", "hep-statistics", ["nuisance parameters"], None, None, {}),
+ ("b-ms-joint-2", "zh-Hant", "direct", "兩個偵測器時期的響應矩陣不同，要怎麼做聯合擬合同一個通量？", "hep-statistics", ["fits that use a folded prediction"], None, None, {}),
+    # batch B, ML1: detector configuration changes (eras) in ML studies
+ ("b-ml-era-1", "en", "direct", "Our detector added a tracking layer halfway through data taking; should I train one classifier per era or condition on the era, and how do I set the working points and calibration of model outputs?", "hep-ml", ["calibration of model outputs"], None, None, {}),
+ ("b-ml-era-2", "zh-Hant", "direct", "探測器中途換了讀出系統，前後兩個時期的分類器要分開訓練還是把時期當輸入？工作點與效率要怎麼處理？", "hep-ml", ["working points and mass decorrelation"], None, None, {}),
+    # batch B, ML3: cross-trained BDT pipeline (train_bdt.py)
+ ("b-ml-bdt-1", "en", "direct", "Cross-train an XGBoost BDT in three folds by event number, keep the test fold out of early stopping, and handle the negative weights of my NLO sample.", "hep-ml", ["XGBoost", "event weights including negative ones"], None, None, {}),
+ ("b-ml-bdt-2", "zh-Hant", "direct", "用 XGBoost 做 k-fold 交叉訓練的 BDT，負權重要怎麼處理？過度訓練要怎麼檢查，不要用 KS 的 p 值？", "hep-ml", ["XGBoost"], None, None, {}),
+    # batch B, S11: RooFit fit-status mapping (roofit_fit_check.py)
+ ("b-ml-roofit-1", "en", "direct", "My saved RooFitResult has covQual 2 and status 0 after MIGRAD; can I quote the fit, and which errors do I use for my weighted unbinned fit?", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
+ ("b-ml-roofit-2", "zh-Hant", "direct", "RooFit 擬合的 covQual 不是 3、EDM 也偏大，這個結果可以用嗎？加權資料的誤差要選哪一種？", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
 ]
 
 cases = []

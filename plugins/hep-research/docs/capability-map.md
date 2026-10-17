@@ -22,17 +22,17 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | measurement-design | Measurement design and verdict-first review: estimand, selections and cutflows, backgrounds, correction chains, systematics plan, blinding policy | hep-measurement | tool | yes | M3, M4, M10 |  |
 | cosmic-ray-flux | Cosmic-ray flux from counts and its helpers (orbit cutoff, force field, broken power law, anisotropy design) | hep-measurement | tool | yes | M6, M9 |  |
 | systematic-scaling | Scaling class of systematics (statistical-like, floor, mixed) and uncertainty projection | hep-measurement | documentation | yes | M5, S2 |  |
-| collection-time | Collection time per period with quality cuts, cutoff transmission and eras | hep-measurement | none | yes | M1 |  |
-| spectral-transform | Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging) | hep-measurement | none | yes | M7, M8 |  |
+| collection-time | Collection time per period with quality cuts, cutoff transmission and eras | hep-measurement | tool | yes | M1 |  |
+| spectral-transform | Spectral-variable transformation with an isotope-composition model (Jacobian, bin averaging) | hep-measurement | tool | yes | M7, M8 |  |
 | acceptance-from-generation | Acceptance from generation records | hep-measurement | none | yes | M2 |  |
 | response-folding | Response objects, forward folding, double-counting checks | hep-detector | tool | yes | D5 |  |
 | resolution-efficiency | Resolution and efficiency at detector level (tag-and-probe, truth matching, weighted efficiency) | hep-detector | tool | yes | D8 |  |
 | fast-spectrometer-simulation | Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras) | hep-detector | tool | yes | D7 |  |
 | scale-distortion | Propagating a calibration residual (scale, inverse offset, resolution) to yields, ratios and covariance | hep-detector | tool | yes | D1 |  |
-| response-construction | Response construction from matched truth and reconstructed events | hep-detector | none | yes | D9 |  |
+| response-construction | Response construction from matched truth and reconstructed events | hep-detector | tool | yes | D9 |  |
 | species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | documentation | yes | D2, D3, D4 |  |
-| multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | none | yes | D10 |  |
-| stability-monitoring | Stability monitoring over time (trends, change points, era boundaries) | hep-detector | none | yes | D11 |  |
+| multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | tool | yes | D10 |  |
+| stability-monitoring | Stability monitoring over time (trends, change points, era boundaries) | hep-detector | tool | yes | D11 |  |
 | detector-design | Detector design principles and a sourced detector atlas | hep-detector | documentation | yes | D6, D13, D14 |  |
 | geomagnetic-backtracing | Geomagnetic backtracing with an external tracer | hep-detector | none | yes | D12 |  |
 | fits-and-limits | Likelihoods, binned and unbinned fits, template fits, intervals and limits, significance and look-elsewhere effects | hep-statistics | tool | yes | S7, S8 |  |
@@ -40,8 +40,8 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | unfolding | Unfolding with regularization and coverage | hep-statistics | tool | yes | S10 |  |
 | bayesian | Bayesian posteriors, priors, samplers and convergence diagnostics | hep-statistics | tool | yes |  |  |
 | time-series | Binned time-series inference and periodicity | hep-statistics | documentation | yes | S5, S9 |  |
-| split-consistency | Consistency of split samples and multi-era joint fits | hep-statistics | none | yes | S1, S6 |  |
-| roofit-status | RooFit/RooStats fit-status mapping and cross-checks | hep-statistics | none | yes | S11 |  |
+| split-consistency | Consistency of split samples and multi-era joint fits | hep-statistics | tool | yes | S1, S6 |  |
+| roofit-status | RooFit/RooStats fit-status mapping and cross-checks | hep-statistics | tool | yes | S11 |  |
 | theory-predictions | Conventions, derivations, cross sections, decay rates, higher-order and PDF uncertainties, predictions for published data | hep-theory | tool | yes | Th8, Th10 |  |
 | recasting | Recasting a published analysis with a parametrized response | hep-theory | tool | yes |  |  |
 | physical-data | Physical constants and particle and nuclear data with source and edition | hep-theory | tool | yes | Th9 |  |
@@ -53,8 +53,8 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | reproducibility | Environment manifests, run records, workflows and preservation | hep-computing | tool | yes | C2, C3, C6 |  |
 | task-authoring | Implementation-ready research tasks for coding agents | hep-computing | tool | yes |  |  |
 | ml-training | Grouped splits, training, inference domain flags, calibration and ML artifacts | hep-ml | tool | yes | ML2, ML4 |  |
-| bdt-pipeline | BDT pipeline for analyses (cross-training, negative weights, working points) | hep-ml | documentation | yes | ML3 |  |
-| ml-eras | Era changes in machine-learning studies | hep-ml | none | yes | ML1 |  |
+| bdt-pipeline | BDT pipeline for analyses (cross-training, negative weights, working points) | hep-ml | tool | yes | ML3 |  |
+| ml-eras | Era changes in machine-learning studies | hep-ml | documentation | yes | ML1 |  |
 | claims-and-literature | Claims linked to results, literature and citation verification, manuscript checks | hep-communication | tool | yes | Com1, Com2 |  |
 | terminology | Terminology and notation against a glossary | hep-communication | tool | yes | Com3 |  |
 | papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-communication | documentation | yes | Com4, Com5, Com6, Com7 |  |

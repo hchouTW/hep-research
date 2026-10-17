@@ -68,7 +68,8 @@ class TagAndProbeTests(unittest.TestCase):
                 self.assertLessEqual(point, hi)
 
     def test_invalid_input_rejected(self):
-        for k, n in ((-1, 10), (11, 10), (1.5, 10), (True, 10), (1, -1), (1, 200001)):
+        # (1, 200001) was refused by the old 200,000 cap, which D8 removes (test_tag_and_probe_weighted.NoCap)
+        for k, n in ((-1, 10), (11, 10), (1.5, 10), (True, 10), (1, -1), (0, 0)):
             with self.subTest(k=k, n=n):
                 with self.assertRaises(ValueError):
                     clopper_pearson(k, n)

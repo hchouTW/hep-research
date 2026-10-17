@@ -21,8 +21,9 @@ from hep-measurement and hep-detector; this file never supplies them.
 2. [Periodicity in a binned series](#periodicity-in-a-binned-series)
 3. [Trials across periods and energy bins](#trials-across-periods-and-energy-bins)
 4. [Joint fits of several periods](#joint-fits-of-several-periods)
-5. [Deliverables](#deliverables)
-6. [Sources](#sources)
+5. [Multi-era joint fits](#multi-era-joint-fits)
+6. [Deliverables](#deliverables)
+7. [Sources](#sources)
 
 ## Time-bin covariance
 
@@ -169,6 +170,35 @@ together rather than one at a time:
   validity range belong to hep-measurement and hep-theory.
 - **Closure first.** Generate synthetic series from known `phi_p` and `theta` with the full covariance, fit them, and
   check bias and pull widths before any fit to data (the skill's injection-and-closure invariant).
+
+## Multi-era joint fits
+
+When the detector changes during data taking (an added layer, a new readout, a recalibration), the eras have different
+responses, acceptances and collection times, and one spectrum is fitted to all of them:
+
+- **Model.** For era e and reconstructed bin i, `mu^e_i = sum_j (R^e A^e T^e)_ij Phi_j Delta_j + b^e_i`, with `R^e`
+  the era's response (migration from truth bin j), `A^e` its acceptance, `T^e` its collection time, `Phi_j` the
+  common flux in truth bin j of width `Delta_j` and `b^e_i` the era's background. The flux parameters are shared;
+  responses, acceptances and backgrounds are per era.
+- **Era nuisances.** Each systematic enters with the correlation across eras that the measurement spec declares
+  (`systematics[].era_correlation`, M3 in hep-measurement's analysis design): one shared nuisance when correlated,
+  one per era when uncorrelated, and a stated scheme when partial. Per-era corrections (`eras[].corrections`) give
+  per-era nuisances.
+- **Check consistency first.** Before the joint fit, test that the eras agree where no physical change is expected:
+  `<plugin root>/skills/hep-statistics/scripts/split_consistency.py` on the per-era results, with the shared blocks
+  declared. A failed test is a finding about the eras (a correction or response that differs), not a reason to inflate
+  uncertainties until the joint fit passes.
+- **Size.** The core tools stop at their caps (template fits: 60 bins, 6 templates; see the core/stats guide). Above
+  them, use parametrized forward folding: fold `Phi(theta)` through each era's response
+  (hep-detector, response and forward folding) and fit `theta` with `covariance_fit.py fit` and a plug-in model, or with
+  the pyhf adapter (one channel per era).
+- **Model-card diagnostic (opt-in).** When the joint fit is described by model cards, freeze them with
+  `python3 <plugin root>/contracts/analysis_check.py freeze ... --mode model` and run `check`: the model-card suite
+  reports whether each auxiliary measurement is used once (`r-aux.use`) and whether parameters shared across eras are
+  declared as shared (`r-share.parameters`). The rules run in shadow mode: the report is a diagnostic and never
+  changes a fit's status.
+- **Report.** The per-era and joint results, the split-consistency p-values, the era-nuisance scheme, and the joint
+  fit's parameter covariance; closure on synthetic eras before data.
 
 ## Deliverables
 

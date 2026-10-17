@@ -12,7 +12,10 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from core.status import RUN_STATUSES  # noqa: E402
 SCRIPTS = ROOT / 'skills' / 'hep-measurement' / 'scripts'
+sys.path.insert(0, str(ROOT))
 CORE_STATUSES = sorted(json.loads((ROOT / 'contracts' / 'vocab' / 'core.json').read_text(encoding='utf-8'))
                        ['vocabularies']['artifact_statuses'])
 
@@ -23,16 +26,28 @@ SPECTRUM = {'points': [[10, 1.0], [20, 0.18], [40, 0.03], [80, 0.006]]}
 CHANGES = {'changes': [{'id': 'c1', 'parameter': 'p', 'old': 1, 'new': 2, 'motivation': 'new calibration',
                         'evidence': {'control_sample': 'Z->ee', 'evidence_ids': [], 'independent_of_signal_region': True},
                         'looked_at': ['control-region data']}]}
+TRANSFORM = {'variable': 'rigidity', 'edges': [2, 4, 8], 'values': [1.0, 0.2], 'Z': 2,
+             'composition': {'kind': 'fixed', 'isotopes': [{'A': 4, 'fraction': 1.0}]}}
 YIELDS = 'region,sample,yield,uncertainty\nSR,ttbar,10.5,1.2\n'
 SYST_CSV = ('name,source,effect,applied_via,affected_processes,correlation_key,payload,validation\n'
             'jes,calibration,shape,rerun,all,jes,p,v\n')
 
+PERIODS_CFG = json.dumps({"key": "period", "start_column": "start_s", "duration_column": "duration_s", "live_fraction_column": "live_fraction", "quality_cuts": [], "transmission": {"cutoff_column": "cutoff_gv", "safety_factors": [1.0]}, "x": {"variable": "rigidity", "unit": "GV", "edges": [1, 2, 4]}, "time_edges": [0, 1000], "eras": [{"id": "e1", "start": 0, "end": 1000}]})
+PERIODS = 'period,start_s,duration_s,live_fraction,cutoff_gv\np1,0,100,0.9,1.5\n'
+
 # script: (valid args, NaN args, malformed-file args or None, how the status is reported)
-# '{f}' is replaced by a file written from the given text.
+# '{f}' is replaced by a file written from the given text; a dict of texts writes one file per placeholder ('{f}',
+# '{g}'). 'json' reports the status label under status; 'run-json' (core/status.py, F-04) a run status under status
+# and the label under status_label.
 CASES = {
     'check_systematic_variations.py': ((['--json', '{f}'], json.dumps(SYS_JSON)),
                                        (['--json', '{f}'], '{"nominal": [1, NaN], "up": [1, 2], "down": [1, 2]}'),
                                        (['--json', '{f}'], '{"nominal": [1, 2'), 'json'),
+    'collection_time.py': ((['accumulate', '--config', '{f}', '{g}'], {'{f}': PERIODS_CFG, '{g}': PERIODS}),
+                           (['accumulate', '--config', '{f}', '{g}'],
+                            {'{f}': PERIODS_CFG.replace('"time_edges": [0, 1000]', '"time_edges": [0, NaN]'),
+                             '{g}': PERIODS}),
+                           (['accumulate', '--config', '{f}', '{g}'], {'{f}': '{"key": ', '{g}': PERIODS}), 'run-json'),
     'cosmic_ray_flux.py': ((['--counts', '4', '--exposure', '2e7', '--bin-width', '700', '--bin-width-unit', 'GV'], None),
                            (['--counts', '4', '--exposure', 'nan', '--bin-width', '700', '--bin-width-unit', 'GV'], None),
                            None, 'json'),
@@ -64,6 +79,9 @@ CASES = {
                                         (['--modulate', '--energy', '1', '--mass', '0.938272', '--charge', '1',
                                           '--phi', '0.5', '--lis-normalization', '1e4', '--lis-index=nan'], None),
                                         None, 'json'),
+    'spectrum_transform.py': ((['{f}', '--to', 'kinetic_energy_per_nucleon'], json.dumps(TRANSFORM)),
+                              (['{f}', '--to', 'kinetic_energy_per_nucleon'], json.dumps(TRANSFORM).replace('0.2', 'NaN')),
+                              (['{f}', '--to', 'kinetic_energy_per_nucleon'], '{"variable": '), 'run-json'),
     'systematics_table_tex.py': ((['--input', '{f}', '--status', 'synthetic'], SYST_CSV),
                                  (['--input', '{f}', '--status', 'synthetic'], SYST_CSV.replace(',p,v', ',nan,v')),
                                  (['--input', '{f}', '--status', 'synthetic', '--columns', 'nonexistent'], SYST_CSV),
@@ -74,10 +92,11 @@ CASES = {
 def run(script, spec):
     args, text = spec
     with tempfile.TemporaryDirectory() as tmp:
-        if text is not None:
-            f = Path(tmp) / 'input.txt'
-            f.write_text(text, encoding='utf-8')
-            args = [str(f) if a == '{f}' else a for a in args]
+        texts = text if isinstance(text, dict) else {} if text is None else {'{f}': text}
+        for k, (placeholder, body) in enumerate(texts.items()):
+            f = Path(tmp) / f'input{k}.txt'
+            f.write_text(body, encoding='utf-8')
+            args = [str(f) if a == placeholder else a for a in args]
         return subprocess.run([sys.executable, '-I', '-B', str(SCRIPTS / script), *args], capture_output=True,
                               text=True, timeout=120, cwd=tmp)
 
@@ -102,6 +121,10 @@ class CliContractTests(unittest.TestCase):
                 self.assertIn(p.returncode, (0, 1), p.stderr)
                 if kind == 'json':
                     self.assertIn(json.loads(p.stdout)['status'], CORE_STATUSES)
+                elif kind == 'run-json':
+                    doc = json.loads(p.stdout)
+                    self.assertIn(doc['status'], RUN_STATUSES)
+                    self.assertIn(doc['status_label'], CORE_STATUSES)
                 else:
                     self.assertTrue('synthetic' in p.stdout.lower(), p.stdout)
 
