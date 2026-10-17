@@ -4264,6 +4264,26 @@
     "RooFit/RooStats",
     "low or zero counts"
    ]
+  },
+  {
+   "id": "d-st-cov-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a covariance for my energy-scale uncertainty correlated over log energy with a correlation length, and show how the fit changes with that length.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ]
+  },
+  {
+   "id": "d-st-cov-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "時間相關的系統誤差要怎麼組成協方差矩陣？相關長度不知道時要怎麼掃描？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ]
   }
  ]
 }

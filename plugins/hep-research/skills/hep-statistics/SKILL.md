@@ -58,6 +58,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | pyhf, HistFactory, Combine | [statistical tools](references/statistical-tools.md); `<plugin root>/adapters/pyhf-combine/` |
 | Unfolding, regularization, coverage | [unfolding](references/unfolding.md) |
 | Combining measurements or experiments | [combinations](references/combinations.md); `combine_measurements.py`, `combine_asymmetric.py` |
+| Covariance from declared correlation models (length, AR(1), time), with a scan | `build_covariance.py` (labeled [Proposal]) |
 | ON/OFF counting, trials, exposure | [astroparticle statistics](references/astroparticle-statistics.md); `li_ma_significance.py`, `look_elsewhere.py` |
 | Binned time series, periodicity, multi-period fits, split consistency | [time-series inference](references/time-series-inference.md); `split_consistency.py` |
 | ML-assisted inference, SBC | [ML-assisted inference](references/ml-assisted-inference.md); `bayes_calibration.py` |

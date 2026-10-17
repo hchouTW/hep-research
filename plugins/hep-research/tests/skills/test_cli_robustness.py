@@ -77,6 +77,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-statistics/scripts/combine_asymmetric.py": ["measurements", "--input", M],
     "skills/hep-statistics/scripts/combine_measurements.py": [M],
     "skills/hep-statistics/scripts/split_consistency.py": ["--input", M],
+    "skills/hep-statistics/scripts/build_covariance.py": ["build", "--input", M],
     "skills/hep-statistics/scripts/project_uncertainty.py": [M, "--k", "2"],
     "skills/hep-statistics/scripts/tail_extrapolation.py": ["--input", M],
     "skills/hep-statistics/scripts/result_artifact.py": ["--cli-output", M, "--poi", "mu", "--construction", "asymptotic",

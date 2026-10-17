@@ -450,6 +450,9 @@ C = [
     # batch C, S11 extensions: RooMCStudy pulls and RooFit/RooStats against core (roofit_fit_check.py)
  ("c-st-roofit-1", "en", "direct", "Run a RooMCStudy pull study of my RooFit model and check its HypoTestInverter CLs limit against an independent implementation.", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
  ("c-st-roofit-2", "zh-Hant", "direct", "RooFit 的 MINOS 區間和 profile likelihood 掃描要怎麼跟另一套程式交叉檢查？低計數時漸近 CLs 可靠嗎？", "hep-statistics", ["RooFit/RooStats", "low or zero counts"], None, None, {}),
+    # batch D, S3: covariance proposal from declared correlation models
+ ("d-st-cov-1", "en", "direct", "Build a covariance for my energy-scale uncertainty correlated over log energy with a correlation length, and show how the fit changes with that length.", "hep-statistics", ["covariance assembly and validation"], None, None, {}),
+ ("d-st-cov-2", "zh-Hant", "direct", "時間相關的系統誤差要怎麼組成協方差矩陣？相關長度不知道時要怎麼掃描？", "hep-statistics", ["covariance assembly and validation"], None, None, {}),
 ]
 
 cases = []
