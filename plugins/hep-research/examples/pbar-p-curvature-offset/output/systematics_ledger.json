@@ -1,0 +1,34 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: invented spectra and offset; describes no experiment",
+ "systematics": [
+  {
+   "name": "curvature offset, era e2",
+   "source": "alignment residual (signed curvature offset delta)",
+   "effect": "shape",
+   "applied_via": "propagate_scale_distortion.py inverse-offset variations",
+   "scaling": "statistical-like",
+   "era_correlation": "uncorrelated",
+   "notes": "the alignment sample that sets delta grows with the exposure; e1 carries no offset",
+   "ratio_relative_shift_up": [
+    0.007631,
+    0.011116,
+    0.016207,
+    0.023655,
+    0.034587,
+    0.050698,
+    0.074595,
+    0.11038
+   ],
+   "ratio_relative_shift_down": [
+    -0.0075732,
+    -0.010994,
+    -0.015948,
+    -0.023109,
+    -0.033431,
+    -0.048252,
+    -0.069417,
+    -0.099406
+   ]
+  }
+ ]
+}

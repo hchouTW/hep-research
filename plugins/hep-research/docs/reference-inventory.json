@@ -3468,7 +3468,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "a73d421e 2026-10-17"
+   "last_commit": "09237aee 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3520,7 +3520,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "db0a9cca 2026-10-17"
+   "last_commit": "09237aee 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -3578,7 +3578,7 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "09237aee 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
