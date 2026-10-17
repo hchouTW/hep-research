@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -83,9 +84,9 @@ print(json.dumps({"nsig": ns.getVal(), "nsig_err": ns.getError(), "status": r.st
 '''
 
 
-def tool(name, *args, python=None, cwd=None):
+def tool(name, *args, python=None, cwd=None, env=None):
     p = subprocess.run([python or sys.executable, "-B", str(SC[name]), *map(str, args)], capture_output=True,
-                       text=True, timeout=900, cwd=cwd)
+                       text=True, timeout=900, cwd=cwd, env=env)
     try:
         out = json.loads(p.stdout)
     except ValueError:
@@ -266,8 +267,14 @@ def main(argv=None) -> int:
             roofit.update(ran=False, error=p.stderr[-400:])
     else:
         (work / "absent.root").write_bytes(b"")  # a file to check; without PyROOT the tool stops before reading it
+        # Hide PyROOT even where it is installed (CI's ROOT job), so the default run takes the same path everywhere.
+        hide = work / "no-pyroot"
+        hide.mkdir(exist_ok=True)
+        (hide / "ROOT.py").write_text("raise ImportError('PyROOT hidden: run with --root-python for the RooFit step')\n",
+                                      encoding="utf-8")
+        env = dict(os.environ, PYTHONPATH=str(hide), PYTHONDONTWRITEBYTECODE="1")
         code, chk, _ = tool("roofit", "result", "--file", work / "absent.root", "--name", "fitresult", "--edm-max",
-                            "0.001")
+                            "0.001", env=env)
         roofit.update(ran=False, exit_code=code, status=chk.get("status"),
                       note="no --root-python: the RooFit step exits 3 (missing dependency); the rest completes")
 
