@@ -101,6 +101,8 @@ two fluxes would be 1.25e-2, 15% higher.
   templates of the neighbouring species together, and take the template tails from data where possible.
 - **Isotopes.** Separating isotopes needs mass, so velocity and rigidity (or energy) both enter; the mass resolution
   degrades with gamma, so the isotope ratio has a limited energy range set by the resolution, not by the statistics.
+- **Cross sections.** Their kinds (inelastic, charge-changing, production), targets and uncertainty model are in
+  `<plugin root>/skills/hep-theory/references/nuclear-cross-sections.md`.
 
 Worked example (synthetic, invented interaction lengths): with x = 10 g/cm2 above the detector and lambda_int =
 20 g/cm2 for the light species, P = 0.607 and the flux is corrected by 1/P = 1.65. If 1000 heavy nuclei arrive with

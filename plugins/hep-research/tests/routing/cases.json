@@ -3818,6 +3818,26 @@
    "trigger_terms": [
     "RooFit/RooStats"
    ]
+  },
+  {
+   "id": "c-nuc-xs-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Should I use inelastic or charge-changing cross sections for boron fragmentation, and is the straight-ahead approximation valid here?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ]
+  },
+  {
+   "id": "c-nuc-xs-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "碳打在氫與氦上的同位素產生截面要怎麼處理短壽命中間核的累積截面？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ]
   }
  ]
 }

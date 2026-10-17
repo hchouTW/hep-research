@@ -48,7 +48,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | NLO/NNLO predictions, scale envelopes, truncation | [higher-order predictions](references/higher-order-predictions.md) |
 | PDF sets, LHAPDF, PDF uncertainty from members | [PDFs and LHAPDF](references/pdfs-and-lhapdf.md); `pdf_uncertainty.py` |
 | SMEFT and EFT conventions, truncation | [SMEFT and EFT](references/smeft-and-eft.md); `eft_truncation.py` |
-| Cosmic-ray propagation models, degeneracies (fits outside v1) | [cosmic-ray propagation](references/cosmic-ray-propagation.md) |
+| Cosmic-ray propagation models, degeneracies (fits outside v1); nuclear cross sections | [cosmic-ray propagation](references/cosmic-ray-propagation.md); [nuclear cross sections](references/nuclear-cross-sections.md) |
 | Event-generation physics (ME order, shower, matching), event weights | [event generation](references/event-generation.md); `event_weights.py` |
 | Recasting a published analysis (MadGraph, Rivet, Delphes, SModelS) | [recasting toolchain](references/recasting-toolchain.md) (documented, not run) |
 | DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |

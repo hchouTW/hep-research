@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 104485,
+   "bytes": 104672,
    "uncited": 0
   },
   "hep-ml": {
@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 11,
-   "bytes": 84069,
+   "references": 12,
+   "bytes": 91856,
    "uncited": 0
   }
  },
@@ -2347,8 +2347,8 @@
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
    "owner": "hep-measurement",
-   "bytes": 12496,
-   "lines": 152,
+   "bytes": 12683,
+   "lines": 154,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-measurement/SKILL.md",
@@ -2357,10 +2357,14 @@
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/systematics.md",
     "skills/hep-measurement/scripts/collection_time.py",
-    "tests/skills/hep_measurement/test_method_references.py"
+    "skills/hep-theory/references/nuclear-cross-sections.md",
+    "tests/skills/hep_measurement/test_method_references.py",
+    "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "36140fee 2026-10-17"
+   "cited_by_other_skills": [
+    "hep-theory"
+   ],
+   "last_commit": "5f6ffb5d 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -3364,7 +3368,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "23c707c9 2026-10-17"
+   "last_commit": "83f5b982 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3599,6 +3603,7 @@
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/nuclear-cross-sections.md",
     "tests/skills/hep_theory/test_charge_sign_modulation_th3.py",
     "tests/skills/test_one_owner_per_topic_x2.py"
    ],
@@ -3673,6 +3678,23 @@
     "hep-statistics"
    ],
    "last_commit": "db0a9cca 2026-10-17"
+  },
+  {
+   "path": "skills/hep-theory/references/nuclear-cross-sections.md",
+   "owner": "hep-theory",
+   "bytes": 7787,
+   "lines": 105,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-measurement/references/correction-chain.md",
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/SKILL.md",
+    "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-measurement"
+   ],
+   "last_commit": "5f6ffb5d 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",

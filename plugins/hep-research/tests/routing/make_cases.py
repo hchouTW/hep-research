@@ -384,6 +384,9 @@ C = [
     # batch B, S11: RooFit fit-status mapping (roofit_fit_check.py)
  ("b-ml-roofit-1", "en", "direct", "My saved RooFitResult has covQual 2 and status 0 after MIGRAD; can I quote the fit, and which errors do I use for my weighted unbinned fit?", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
  ("b-ml-roofit-2", "zh-Hant", "direct", "RooFit 擬合的 covQual 不是 3、EDM 也偏大，這個結果可以用嗎？加權資料的誤差要選哪一種？", "hep-statistics", ["RooFit/RooStats"], None, None, {}),
+    # batch C, Th1: nuclear cross-section conventions
+ ("c-nuc-xs-1", "en", "direct", "Should I use inelastic or charge-changing cross sections for boron fragmentation, and is the straight-ahead approximation valid here?", "hep-theory", ["cross sections"], None, None, {}),
+ ("c-nuc-xs-2", "zh-Hant", "direct", "碳打在氫與氦上的同位素產生截面要怎麼處理短壽命中間核的累積截面？", "hep-theory", ["cross sections"], None, None, {}),
 ]
 
 cases = []
