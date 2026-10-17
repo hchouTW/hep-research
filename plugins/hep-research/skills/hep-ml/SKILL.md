@@ -49,7 +49,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 | Space or ground-based astroparticle detectors (with the bound profile) | [space-and-astroparticle-ml.md](references/space-and-astroparticle-ml.md) |
 | Fast simulation, generative models | [fast-simulation-validation.md](references/fast-simulation-validation.md), [generative-models.md](references/generative-models.md) |
 | Surrogates, SBI training | [scientific-machine-learning.md](references/scientific-machine-learning.md), [sbi-training.md](references/sbi-training.md) |
-| Calibration, uncertainty, distribution shift | [uncertainty-and-calibration.md](references/uncertainty-and-calibration.md), [robustness-and-distribution-shift.md](references/robustness-and-distribution-shift.md) |
+| Calibration, uncertainty, distribution shift; simulation-vs-data shift report | [uncertainty-and-calibration.md](references/uncertainty-and-calibration.md), [robustness-and-distribution-shift.md](references/robustness-and-distribution-shift.md); `domain_shift_report.py` |
 | Grouped splits and leakage checks (composite keys, stratified by class or period) | `make_grouped_splits.py`, `check_split_integrity.py` |
 | Train, calibrate, infer | `assets/train_classifier.py`, `assets/calibration.py`, `assets/inference.py` |
 | Record the model for inference | `write_ml_artifact.py` |

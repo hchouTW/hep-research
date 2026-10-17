@@ -12,7 +12,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 32 | 299 | 0 |
 | hep-detector | 36 | 466 | 0 |
 | hep-measurement | 13 | 113 | 0 |
-| hep-ml | 42 | 189 | 0 |
+| hep-ml | 42 | 190 | 0 |
 | hep-statistics | 12 | 175 | 0 |
 | hep-theory | 15 | 105 | 0 |
 
@@ -219,10 +219,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `correction-chain.md` | hep-measurement | 12.8 | yes | 14 | hep-detector, hep-theory | ccc1eb2a 2026-10-17 |
 | `cosmic-ray-measurements.md` | hep-measurement | 19.9 | yes | 4 | - | 485e96cb 2026-10-17 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 11 | hep-computing | 9257d7b5 2026-10-15 |
-| `hep-measurement-guide.md` | hep-measurement | 16.5 | yes | 10 | hep-detector | b92ecb24 2026-10-17 |
+| `hep-measurement-guide.md` | hep-measurement | 16.5 | yes | 10 | hep-detector | c4d801c4 2026-10-17 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 8 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a584954 2026-10-17 |
-| `rare-event-and-neutrino-measurements.md` | hep-measurement | 7.0 | no | 3 | - | untracked |
+| `rare-event-and-neutrino-measurements.md` | hep-measurement | 7.0 | no | 3 | - | c4d801c4 2026-10-17 |
 | `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 77d2607e 2026-10-16 |
 | `systematics.md` | hep-measurement | 10.1 | yes | 35 | hep-detector, hep-ml, hep-statistics, hep-theory | 7cd0b7ec 2026-10-17 |
 | `weights-normalization.md` | hep-measurement | 4.5 | yes | 10 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b5 2026-10-15 |
@@ -256,7 +256,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `particle-and-jet-architectures.md` | hep-ml | 8.5 | yes | 8 | - | 9257d7b5 2026-10-15 |
 | `performance-memory.md` | hep-ml | 3.4 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `reproducibility.md` | hep-ml | 5.1 | no | 6 | - | 485e96cb 2026-10-17 |
-| `robustness-and-distribution-shift.md` | hep-ml | 3.4 | yes | 10 | - | f3e0ff6d 2026-10-17 |
+| `robustness-and-distribution-shift.md` | hep-ml | 4.4 | yes | 11 | - | f3e0ff6d 2026-10-17 |
 | `sbi-training.md` | hep-ml | 4.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `scientific-machine-learning.md` | hep-ml | 3.1 | yes | 8 | hep-statistics, hep-theory | 9257d7b5 2026-10-15 |
 | `sequence-models.md` | hep-ml | 2.2 | no | 4 | - | 9257d7b5 2026-10-15 |

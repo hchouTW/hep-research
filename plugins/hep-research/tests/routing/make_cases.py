@@ -417,6 +417,9 @@ C = [
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),
+    # batch C, ML4: domain-shift report (domain_shift_report.py)
+ ("c-ml-shift-1", "en", "direct", "Compare my simulation and data control sample feature by feature and tell me which inputs drive the difference before I trust the classifier.", "hep-ml", ["domain shift between simulation and data"], None, None, {}),
+ ("c-ml-shift-2", "zh-Hant", "direct", "模擬和資料的控制樣本在輸入變數上有沒有偏移？哪些變數造成分類器表現不同？", "hep-ml", ["domain shift between simulation and data"], None, None, {}),
 ]
 
 cases = []

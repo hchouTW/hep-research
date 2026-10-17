@@ -4040,6 +4040,26 @@
    "trigger_terms": [
     "correction chains"
    ]
+  },
+  {
+   "id": "c-ml-shift-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compare my simulation and data control sample feature by feature and tell me which inputs drive the difference before I trust the classifier.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "domain shift between simulation and data"
+   ]
+  },
+  {
+   "id": "c-ml-shift-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "模擬和資料的控制樣本在輸入變數上有沒有偏移？哪些變數造成分類器表現不同？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "domain shift between simulation and data"
+   ]
   }
  ]
 }
