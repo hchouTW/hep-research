@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | hep-communication | 57 | 402 | 0 |
 | hep-computing | 32 | 299 | 0 |
-| hep-detector | 35 | 450 | 0 |
+| hep-detector | 35 | 451 | 0 |
 | hep-measurement | 12 | 101 | 0 |
 | hep-ml | 42 | 184 | 0 |
 | hep-statistics | 12 | 172 | 0 |
@@ -203,7 +203,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 18.5 | no | 11 | - | 9257d7b5 2026-10-15 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 11 | - | 9257d7b5 2026-10-15 |
-| `response-and-forward-folding.md` | hep-detector | 11.3 | yes | 10 | hep-measurement, hep-statistics | 2f52c3b6 2026-10-17 |
+| `response-and-forward-folding.md` | hep-detector | 12.5 | yes | 11 | hep-measurement, hep-statistics | b25efa67 2026-10-17 |
 | `signal-formation-and-readout.md` | hep-detector | 18.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
 | `space-based-direct-detection.md` | hep-detector | 19.2 | yes | 15 | hep-communication, hep-measurement, hep-statistics | 26970179 2026-10-17 |
 | `timing-detectors.md` | hep-detector | 9.1 | no | 7 | - | 9257d7b5 2026-10-15 |

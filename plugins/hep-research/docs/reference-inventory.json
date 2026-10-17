@@ -15,7 +15,7 @@
   },
   "hep-detector": {
    "references": 35,
-   "bytes": 450088,
+   "bytes": 451250,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2114,8 +2114,8 @@
   {
    "path": "skills/hep-detector/references/response-and-forward-folding.md",
    "owner": "hep-detector",
-   "bytes": 11293,
-   "lines": 130,
+   "bytes": 12455,
+   "lines": 147,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2126,6 +2126,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/scripts/build_response.py",
+    "skills/hep-detector/scripts/mix_period_responses.py",
     "skills/hep-measurement/references/measurements-and-unfolding.md",
     "skills/hep-statistics/references/unfolding.md"
    ],
@@ -2133,7 +2134,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "2f52c3b6 2026-10-17"
+   "last_commit": "b25efa67 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",

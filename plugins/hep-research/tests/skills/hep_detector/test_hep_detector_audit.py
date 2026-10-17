@@ -302,9 +302,11 @@ STATUS_CASES = {
 
 
 # Scripts written after F-04 follow the plugin-wide contract of core/status.py instead: "status" is the run status
-# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic; propagate_scale_distortion.py and build_response.py take --status).
+# and the artifact label is echoed as "status_label" (toy_spectrometer.py: its output is always synthetic; propagate_scale_distortion.py, build_response.py and mix_period_responses.py take --status).
 OUTDIR = Path(tempfile.gettempdir())
 F04_CASES = {
+    'mix_period_responses.py': ['stack', '--period', f"e1={ASSETS / 'response-synthetic.example.json'}", '--out',
+                                OUTDIR / 'stack.json'],
     'build_response.py': ['build', ASSETS / 'response-events.example.csv', '--truth-col', 'truth', '--reco-col',
                           'reco', '--weight-col', 'weight', '--selected-col', 'selected', '--truth-edges', '0', '10',
                           '20', '30', '--reco-edges', '0', '10', '20', '30', '--variable', 'x', '--unit', 'GeV',

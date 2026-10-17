@@ -33,6 +33,7 @@ MISSING_FILE_ARGS = {
                                                        "--artifact-id", "a", "--objective", "o", "--out", OUT],
     "skills/hep-detector/scripts/calorimeter_resolution.py": ["--fit", M],
     "skills/hep-measurement/scripts/collection_time.py": ["accumulate", "--config", M, M],
+    "skills/hep-detector/scripts/mix_period_responses.py": ["stack", "--period", f"e1={M}", "--out", OUT],
     "skills/hep-detector/scripts/multiple_scattering.py": [M],
     "skills/hep-detector/scripts/pileup_reweight.py": [M],
     "skills/hep-detector/scripts/propagate_scale_distortion.py": ["response", M, "--mode", "scale", "--scale", "0.01"],
