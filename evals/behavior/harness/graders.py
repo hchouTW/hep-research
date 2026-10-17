@@ -119,7 +119,22 @@ def _touches(e: Event, pattern: str, in_shell: bool = True) -> bool:
             return True
     if in_shell and e.command:
         core = _literal_core(pattern)
-        return bool(core) and core in _shell_text(e.command)
+        text = _shell_text(e.command)
+        return bool(core) and (core in text or _shell_glob_hits(core, text))
+    return False
+
+
+def _shell_glob_hits(core: str, text: str) -> bool:
+    """A shell word with wildcards (`cat experiments/*ams*/index.md`) that matches the path's last components; at
+    least two components, so `*.md` alone does not count."""
+    parts = core.split("/")
+    for w in _WORD.findall(text):
+        if not any(c in w for c in "*?["):
+            continue
+        wp = w.split("/")
+        k = min(len(parts), len(wp))
+        if k >= 2 and fnmatch.fnmatch("/".join(parts[-k:]), "/".join(wp[-k:])):
+            return True
     return False
 
 

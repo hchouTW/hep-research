@@ -184,11 +184,15 @@ class ShellReads(unittest.TestCase):
         self.assertTrue(self.touches(f"cd {p}/experiments/eic && ls -R . | head -50; cat index.md"))
         self.assertTrue(self.touches(f"cd {p} && cd experiments/eic && cat index.md"))
         self.assertTrue(self.touches(f"cat {p}/experiments/eic/index.md"), "the literal form still works")
+        self.assertTrue(self.touches(f"cd {p}; ls experiments/*eic*; cat experiments/*eic*/index.md | head"))
 
     def test_other_paths_do_not_match(self):
         p = "/r/plugins/hep-research/profiles"
         self.assertFalse(self.touches(f"P={p}/experiments/ams-02; cat $P/index.md"))
         self.assertFalse(self.touches(f"cd {p}/experiments/eic && ls"))
+        self.assertFalse(self.touches(f"cat {p}/experiments/*ams*/index.md"))
+        self.assertFalse(self.touches("cat *.md"), "one wildcard component is not enough")
+        self.assertTrue(self.touches(f"cd {p}/experiments/eic && cat *.md"), "*.md in that folder reads index.md")
         self.assertFalse(self.touches(f"cat $Q/experiments/eic/index.md; P={p}"), "assigned after its use")
 
     def test_turn_limit_is_not_a_host_error(self):
