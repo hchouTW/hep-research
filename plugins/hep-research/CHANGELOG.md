@@ -109,6 +109,38 @@ Upgrade plan v1.3, batch A (Th9, Th7, D7, D1, M5, Th3, ML2, Com1, Com3, X3, X1, 
   an error.
 - Routing cases: 282 (23 new).
 
+
+Upgrade plan v1.3, batch B (C1, M1, D9, D5, D10, D11, M7, D8, M3, D6, S1, S6, ML1, ML3, S11, and the first part of
+E-3): tools needed before a detector-configuration change (VALIDATION UPGRADE-B). Contracts stay 2.11.0 with additive
+changes behind gate G4 (one effect, one composition, optional spec fields); no version bump.
+
+- Time-sliced inputs and collection time (C1, M1): `skills/hep-computing/assets/time_slice_reduction.py`
+  (deduplicate by a stable key, then sum; partials merged through `core/partition`); `collection_time.py`
+  (`accumulate`, `--emit-partial`, `merge`): live time above the cutoff per era, time bin and variable bin, from a
+  declarative configuration with no defaults. Effect catalog: `cutoff_transmission` and the composition
+  `exposure_acceptance_livetime_transmission`, with coverage entries; the analysis check picks the composition a
+  factor table completes, so existing reports are unchanged.
+- Responses (D9, D5): `build_response.py` writes a validated response artifact from matched truth, reco, weight and
+  selection (resolution core and tails, multinomial MC uncertainty, `--fold`); `mix_period_responses.py` mixes era
+  responses per truth bin with acceptance x collection time, or stacks them for a joint fit.
+- Detector (D10, D11, D8, D6): `multisample_pid.py` (charge from many samples with the leakage matrix; likelihood
+  ratio with the efficiency-rejection curve); `stability_monitor.py` with `core/stats/change_point.py` (trends,
+  change points and CUSUM with toy-calibrated thresholds, proposed calibration eras never written into a spec);
+  `tag_and_probe_efficiency.py --probes` with frequency or sampling weights (Kish n_eff), `--bins`, and no cap on the
+  total; "Adding a tracking layer to a running detector".
+- Measurement (M7, M3): `spectrum_transform.py` (a bin-averaged flux in another spectral variable with an isotope
+  composition and its covariance); optional spec fields `eras[]` and `systematics[].era_correlation` with four era
+  review rules in `review_measurement_spec.py` (gate G4).
+- Statistics (S1, S6, S11): `split_consistency.py` (split samples with the shared covariance subtracted; asymptotic
+  and toy p-values; Sidak correction for several splits); "Multi-era joint fits"; `roofit_fit_check.py` maps a saved
+  RooFitResult (status, covQual, EDM) to the result status and requires a declared error treatment for weighted data.
+- hep-ml (ML1, ML3): era changes in ML studies; `train_bdt.py`, a cross-trained BDT (xgboost or scikit-learn
+  HistGradientBoosting; new optional extra `bdt`, gate G5) with a declared negative-weight policy, Asimov or AUC
+  selection on validation folds, no pickle.
+- Example `examples/multi-era-fit/` (E-3, first part): the chain above on two synthetic eras with a layer added
+  midway; joint-fit coverage 0.689 over 1,000 toys; S1 catches a 5% offset in one era.
+- Routing cases: 312 (30 new).
+
 ## 0.13.1 (2026-10-17)
 
 G-ENFORCE inputs completed for the full v6.3 suite set, and README updates. Contracts stay 2.11.0, and every
