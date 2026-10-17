@@ -1,0 +1,118 @@
+{
+ "meta": {
+  "run_id": "theory-main-j06-r2",
+  "date": "2026-10-17",
+  "cli": "claude",
+  "cli_version": "2.1.302",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "0bd9d799ee0e766a81ad64fd5e3636493b9f02cd",
+  "plugin_dirty": false,
+  "cases_file_sha256": "4ca5707196156b3f5dac8ef92686d883c7f6959eac4d77267ac4d502c32f410b",
+  "selected": 1,
+  "completed": 1,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 0.3,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 1,
+   "strict_pass": 1,
+   "lenient_pass": 1
+  },
+  "by_lang": {
+   "zh-Hant": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_kind": {
+   "journey": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_expected_primary": {
+   "hep-theory": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "outcomes": {
+   "pass": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.0527,
+   "per_case": 0.0527,
+   "per_turn": 0.0176
+  }
+ },
+ "cases": [
+  {
+   "id": "j06",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.052681,
+   "n_turns": 3,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/theory-main-j06-r2/raw/, not committed)"
+}

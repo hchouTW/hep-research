@@ -1,0 +1,310 @@
+{
+ "meta": {
+  "run_id": "repeat-0b-misses-1",
+  "date": "2026-10-17",
+  "cli": "claude",
+  "cli_version": "2.1.302",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "0bd9d799ee0e766a81ad64fd5e3636493b9f02cd",
+  "plugin_dirty": false,
+  "cases_file_sha256": "1a477ca844874a81d1046c8bf540e05cedfb7c7befbd2c0967f9537f5ae9bbbe",
+  "selected": 5,
+  "completed": 5,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 0.8,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 5,
+   "strict_pass": 4,
+   "lenient_pass": 4
+  },
+  "by_lang": {
+   "en": {
+    "cases": 3,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   },
+   "zh-Hant": {
+    "cases": 2,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "journey": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "negative": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "neighboring": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "underspecified": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 5,
+    "strict_pass": 4,
+    "lenient_pass": 4
+   }
+  },
+  "by_expected_primary": {
+   "ask": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "hep-theory": {
+    "cases": 4,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 4,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   },
+   "T3": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "outcomes": {
+   "pass": 4,
+   "no-skill": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.2742,
+   "per_case": 0.0548,
+   "per_turn": 0.0144
+  }
+ },
+ "cases": [
+  {
+   "id": "co-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.065521,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "j06",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.035144,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.078852,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "th-const-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.057585,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "underspec-1",
+   "lang": "en",
+   "kind": "underspecified",
+   "variant": null,
+   "set": null,
+   "expected_primary": "ask",
+   "turns": [
+    {
+     "expected": "ask",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": true,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.302",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.037063,
+   "n_turns": 2,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/repeat-0b-misses-1/raw/, not committed)"
+}
