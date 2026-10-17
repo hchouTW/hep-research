@@ -2367,7 +2367,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "ccc1eb2a 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
@@ -2393,7 +2393,7 @@
     "hep-detector",
     "hep-theory"
    ],
-   "last_commit": "151889fb 2026-10-17"
+   "last_commit": "ccc1eb2a 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",

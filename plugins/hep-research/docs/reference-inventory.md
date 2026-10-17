@@ -212,8 +212,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `triggers-luminosity-pileup.md` | hep-detector | 15.7 | yes | 13 | - | 9257d7b5 2026-10-15 |
 | `analysis-design.md` | hep-measurement | 13.1 | yes | 16 | hep-computing, hep-detector | fe71ebcf 2026-10-17 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
-| `backgrounds.md` | hep-measurement | 5.9 | yes | 25 | hep-detector | 9257d7b5 2026-10-15 |
-| `correction-chain.md` | hep-measurement | 12.8 | yes | 12 | hep-detector, hep-theory | 151889fb 2026-10-17 |
+| `backgrounds.md` | hep-measurement | 5.9 | yes | 25 | hep-detector | ccc1eb2a 2026-10-17 |
+| `correction-chain.md` | hep-measurement | 12.8 | yes | 12 | hep-detector, hep-theory | ccc1eb2a 2026-10-17 |
 | `cosmic-ray-measurements.md` | hep-measurement | 19.9 | yes | 4 | - | 485e96cb 2026-10-17 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 11 | hep-computing | 9257d7b5 2026-10-15 |
 | `hep-measurement-guide.md` | hep-measurement | 16.5 | yes | 9 | hep-detector | c17bfafe 2026-10-17 |
