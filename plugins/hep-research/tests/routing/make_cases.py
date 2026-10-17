@@ -471,6 +471,9 @@ C = [
     # batch D, Th5: dark-matter conventions (dm_direct_rate.py)
  ("d-th-dm-1", "en", "direct", "Compute the spin-independent recoil spectrum of a 100 GeV WIMP on xenon with the Helm form factor and the standard halo model, stating every convention.", "hep-theory", ["conventions"], None, None, {}),
  ("d-th-dm-2", "zh-Hant", "direct", "暗物質湮滅的 J 因子要怎麼定義？NFW 輪廓要積分到多大的角度？自共軛因子用 1/2 還是 1/4？", "hep-theory", ["conventions"], None, None, {}),
+    # batch D, Th6: coalescence of light (anti)nuclei (coalescence.py)
+ ("d-th-coal-1", "en", "direct", "Convert a coalescence momentum p0 = 80 MeV into B_2 for antideuterons and build the antideuteron yield from my antiproton yield.", "hep-theory", ["conventions"], None, None, {}),
+ ("d-th-coal-2", "zh-Hant", "direct", "反氘核的 coalescence 參數 B_A 和 p0 怎麼互換？Wigner 函數模型的權重又是什麼？", "hep-theory", ["conventions"], None, None, {}),
 ]
 
 cases = []

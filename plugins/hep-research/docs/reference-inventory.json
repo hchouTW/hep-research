@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 16,
-   "bytes": 111940,
+   "references": 17,
+   "bytes": 115978,
    "uncited": 0
   }
  },
@@ -3227,13 +3227,11 @@
     "skills/hep-ml/references/geometric-and-equivariant-learning.md",
     "skills/hep-ml/references/sbi-training.md",
     "skills/hep-statistics/references/ml-assisted-inference.md",
-    "skills/hep-theory/SKILL.md",
     "tests/routing/test_ml_inference_routing.py",
     "tests/routing/test_theory_routing.py"
    ],
    "cited_by_other_skills": [
-    "hep-statistics",
-    "hep-theory"
+    "hep-statistics"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -3726,6 +3724,7 @@
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dark-matter-phenomenology.md",
+    "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/references/nuclear-cross-sections.md",
     "skills/hep-theory/scripts/lepton_energy_losses.py",
     "tests/skills/hep_theory/test_charge_sign_modulation_th3.py",
@@ -3744,11 +3743,12 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/scripts/dm_direct_rate.py",
     "tests/skills/hep_theory/test_dark_matter_phenomenology.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "98460703 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
@@ -3795,6 +3795,20 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
+  },
+  {
+   "path": "skills/hep-theory/references/light-nuclei-coalescence.md",
+   "owner": "hep-theory",
+   "bytes": 4038,
+   "lines": 61,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/scripts/coalescence.py",
+    "tests/skills/hep_theory/test_light_nuclei_coalescence.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-theory/references/mathematical-reasoning-and-proof.md",

@@ -4405,6 +4405,26 @@
    "trigger_terms": [
     "conventions"
    ]
+  },
+  {
+   "id": "d-th-coal-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Convert a coalescence momentum p0 = 80 MeV into B_2 for antideuterons and build the antideuteron yield from my antiproton yield.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
+  },
+  {
+   "id": "d-th-coal-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "反氘核的 coalescence 參數 B_A 和 p0 怎麼互換？Wigner 函數模型的權重又是什麼？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ]
   }
  ]
 }

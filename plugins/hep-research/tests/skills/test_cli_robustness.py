@@ -92,6 +92,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-theory/scripts/pdf_uncertainty.py": [M],
     "skills/hep-theory/scripts/physical_data.py": ["nuclide", "4He", "--ame", M],
     "skills/hep-theory/scripts/import_published_table.py": ["--table", M, "--spec", M, "--out", M],
+    "skills/hep-theory/scripts/coalescence.py": ["yield", "--spectrum", M, "--mass-number", "2", "--b-a", "0.004"],
     "skills/hep-computing/scripts/check_histogram_errors.py": [M],
     "skills/hep-communication/scripts/render_results.py": ["--quantity", f"Mu={M}:a:b", "--out", OUT],
     "skills/hep-ml/scripts/check_split_integrity.py": [M],
