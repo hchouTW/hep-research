@@ -489,6 +489,9 @@ C = [
     # batch D, C5: columnar and large-scale data
  ("d-cc-columnar-1", "en", "direct", "My ntuples don't fit in memory: how do I fill histograms chunk by chunk with uproot and get the same result as one pass?", "hep-computing", ["data I/O and formats"], None, None, {}),
  ("d-cc-columnar-2", "zh-Hant", "direct", "Parquet 與 HDF5 的大檔案記憶體放不下，要怎麼分批處理並確定結果和一次讀完相同？", "hep-computing", ["data I/O and formats"], None, None, {}),
+    # batch D, C6: analysis workflows
+ ("d-cc-workflow-1", "en", "direct", "Turn my analysis steps into a Snakemake workflow with a run record per step that reruns byte for byte.", "hep-computing", ["environment and run manifests"], None, None, {}),
+ ("d-cc-workflow-2", "zh-Hant", "direct", "把分析步驟寫成一個工作流程（DAG），每一步都留下執行紀錄，重跑結果完全相同。", "hep-computing", ["environment and run manifests"], None, None, {}),
 ]
 
 cases = []

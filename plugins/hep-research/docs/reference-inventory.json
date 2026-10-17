@@ -9,8 +9,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 35,
-   "bytes": 313976,
+   "references": 36,
+   "bytes": 317640,
    "uncited": 0
   },
   "hep-detector": {
@@ -1054,6 +1054,21 @@
    "last_commit": "a57e22cf 2026-10-17"
   },
   {
+   "path": "skills/hep-computing/references/analysis-workflows.md",
+   "owner": "hep-computing",
+   "bytes": 3657,
+   "lines": 53,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/preservation-checklist.md",
+    "skills/hep-computing/scripts/run_workflow.py",
+    "tests/skills/hep_computing/test_workflow_c6.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
    "owner": "hep-computing",
    "bytes": 7570,
@@ -1078,6 +1093,7 @@
     "adapters/batch-schedulers/slurm_backend.py",
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/analysis-workflows.md",
     "skills/hep-computing/references/bash-balanced-design-guidelines.md",
     "skills/hep-computing/references/batch-site-cern-htcondor.md",
     "skills/hep-computing/references/batch-site-nstccore-slurm.md",
@@ -1141,10 +1157,11 @@
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/assets/chunked_histogram.py",
+    "skills/hep-computing/references/analysis-workflows.md",
     "tests/skills/hep_computing/test_chunked_histogram_c5.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6048a2f7 2026-10-17"
+   "last_commit": "63d31062 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
@@ -1331,11 +1348,12 @@
   {
    "path": "skills/hep-computing/references/preservation-checklist.md",
    "owner": "hep-computing",
-   "bytes": 4439,
+   "bytes": 4446,
    "lines": 71,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/analysis-workflows.md",
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],

@@ -4525,6 +4525,26 @@
    "trigger_terms": [
     "data I/O and formats"
    ]
+  },
+  {
+   "id": "d-cc-workflow-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Turn my analysis steps into a Snakemake workflow with a run record per step that reruns byte for byte.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
+  },
+  {
+   "id": "d-cc-workflow-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把分析步驟寫成一個工作流程（DAG），每一步都留下執行紀錄，重跑結果完全相同。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ]
   }
  ]
 }

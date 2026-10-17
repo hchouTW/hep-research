@@ -63,6 +63,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-computing/scripts/inspect_root_file.py": ["--input", M],
     "skills/hep-computing/scripts/lint_task.py": [M],
     "skills/hep-computing/scripts/local_partition.py": ["status", "--manifest", M, "--state", OUT],
+    "skills/hep-computing/scripts/run_workflow.py": [M, "--work", OUT],
     "skills/hep-computing/scripts/roofit_workspace_summary.py": ["--input", M, "--workspace", "w"],
     "skills/hep-computing/scripts/summarize_histogram_statistics.py": ["--input", M, "--hist", "h"],
     "skills/hep-computing/scripts/validate_agile_notes.py": [M],
@@ -233,6 +234,8 @@ HC_CONTRACT = {
                            (["plan", "--job", "j", "--items", "4", "--chunk-size", "2", "--seed", "1", "--out", "{OUT}"], 2)],
     "make_synthetic_nanoaod.py": [(["--out", "{OUT}", "--events", "5"], None)],  # 2, or 3 without numpy/awkward/uproot
     "roofit_workspace_summary.py": [(["--input", M, "--workspace", "w", "--json"], 2)],
+    "run_workflow.py": [([M, "--work", "{TMP}"], 2),
+                        ([str(ROOT / "skills/hep-computing/assets/workflow/workflow.json"), "--work", "{OUT}"], 2)],
     "summarize_histogram_statistics.py": [(["--input", M, "--hist", "h", "--json"], 2)],
     "validate_agile_notes.py": [([M, "--json"], 2)],
     "validate_skill_bundle.py": [(["--json"], 0)],

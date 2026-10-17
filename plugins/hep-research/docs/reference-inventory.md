@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | hep-communication | 57 | 405 | 0 |
-| hep-computing | 35 | 314 | 0 |
+| hep-computing | 36 | 318 | 0 |
 | hep-detector | 37 | 471 | 0 |
 | hep-measurement | 13 | 113 | 0 |
 | hep-ml | 42 | 192 | 0 |
@@ -147,12 +147,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
 | `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 9 | hep-measurement | a57e22cf 2026-10-17 |
+| `analysis-workflows.md` | hep-computing | 3.7 | yes | 4 | - | untracked |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 30.4 | yes | 13 | - | 9257d7b5 2026-10-15 |
+| `batch-scheduling.md` | hep-computing | 30.4 | yes | 14 | - | 9257d7b5 2026-10-15 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4b 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.7 | no | 1 | - | 746f13aa 2026-10-15 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | - | fe8f71ef 2026-10-13 |
-| `columnar-and-large-scale-data.md` | hep-computing | 4.5 | yes | 3 | - | 6048a2f7 2026-10-17 |
+| `columnar-and-large-scale-data.md` | hep-computing | 4.5 | yes | 4 | - | 63d31062 2026-10-17 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 6.6 | yes | 4 | hep-ml | 8eefac0f 2026-10-13 |
 | `crash-and-memory-debugging.md` | hep-computing | 8.2 | yes | 7 | - | 9257d7b5 2026-10-15 |
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f4372374 2026-10-13 |
@@ -164,7 +165,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `loop-engineering.md` | hep-computing | 7.0 | no | 7 | - | 4665f433 2026-10-13 |
 | `numerical-and-computational-methods.md` | hep-computing | 9.3 | yes | 7 | hep-communication, hep-theory | 9257d7b5 2026-10-15 |
 | `performance-profiling.md` | hep-computing | 6.7 | yes | 5 | - | 9257d7b5 2026-10-15 |
-| `preservation-checklist.md` | hep-computing | 4.4 | yes | 2 | - | 76c520c1 2026-10-17 |
+| `preservation-checklist.md` | hep-computing | 4.4 | yes | 3 | - | 76c520c1 2026-10-17 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 5.7 | yes | 5 | hep-ml | 8eefac0f 2026-10-13 |
 | `python-hep-coding-patterns.md` | hep-computing | 6.6 | yes | 7 | - | 9257d7b5 2026-10-15 |

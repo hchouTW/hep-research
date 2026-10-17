@@ -47,13 +47,14 @@ description: "Use when the deliverable is working, reproducible scientific softw
 | ROOT and PyROOT design | [ROOT design](references/root-balanced-design-guidelines.md) |
 | Crashes, memory leaks | [crashes](references/crash-and-memory-debugging.md), [ROOT debugging](references/root-debugging.md) |
 | uproot, awkward, RDataFrame, analysis pipelines | [Python HEP](references/python-hep-coding-patterns.md), [pipelines](references/analysis-data-pipelines.md) |
-| Large or columnar data: Parquet, Arrow, HDF5, chunked and out-of-core passes, memory budgets | [columnar data](references/columnar-and-large-scale-data.md); `assets/chunked_histogram.py` |
+| Large or columnar data: Parquet, HDF5, chunked passes, memory | [columnar data](references/columnar-and-large-scale-data.md); `assets/chunked_histogram.py` |
 | Slow or large code | [profiling](references/performance-profiling.md) |
 | CMake and root-config builds | [CMake](references/cmake-and-build.md); `check_root_cpp_env.sh`, `new_root_cpp_project.sh` |
 | SymPy, integrals, ODEs, convergence | [symbolic](references/symbolic-and-numerical-computation.md), [numerical](references/numerical-and-computational-methods.md) |
-| Environments, containers, run manifests, data/MC version pairs per era; interpreter for package-dependent work | [environments](references/environments-and-containers.md); `environment_manifest.py` (`pairs`); `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH) |
+| Environments, containers, run manifests, data/MC version pairs per era; interpreter for package-dependent work | [environments](references/environments-and-containers.md); `environment_manifest.py` (`pairs`); `find_python.py` (`--python`, `HEP_RESEARCH_PYTHON`, caller, PATH) |
 | Inspect or compare ROOT files; histogram errors, TEfficiency, RooWorkspace import, ROOT install | `inspect_root_file.py`, `compare_root_histograms.py`, `check_histogram_errors.py`, `summarize_histogram_statistics.py` (PyROOT or uproot); [ROOT usage](references/root-usage-patterns.md) |
 | Partition, resubmit, merge | `local_partition.py`; Slurm and HTCondor: [batch scheduling](references/batch-scheduling.md) |
+| Workflows (DAG, run record per step, Snakemake) | [workflows](references/analysis-workflows.md); `run_workflow.py`; `assets/workflow/` |
 | Time-sliced records: deduplicate by key, then sum | `assets/time_slice_reduction.py`; [pipelines](references/analysis-data-pipelines.md) |
 | CERN EOS storage | [CERN EOS](references/storage-cern-eos.md) |
 | Analysis preservation: what to archive, rehearse a rerun | [preservation checklist](references/preservation-checklist.md) |

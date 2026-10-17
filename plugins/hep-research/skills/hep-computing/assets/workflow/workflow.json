@@ -1,0 +1,16 @@
+{
+ "workflow": "synthetic-histogram",
+ "note": "SYNTHETIC example DAG: generate events, histogram them chunk by chunk, report. Run with scripts/run_workflow.py or the Snakefile next to this file. Placeholders: {python} the interpreter, {plugin} the plugin root, {workflow} this folder; paths without a placeholder are relative to the work folder.",
+ "steps": [
+  {"id": "generate", "needs": [], "inputs": [], "outputs": ["events.csv"],
+   "argv": ["{python}", "{workflow}/steps/generate_events.py", "--seed", "7", "--n", "2000", "--out", "events.csv"],
+   "seeds": {"generate": 7}},
+  {"id": "histogram", "needs": ["generate"], "inputs": ["events.csv"], "outputs": ["histogram.json"],
+   "argv": ["{python}", "{plugin}/skills/hep-computing/assets/chunked_histogram.py", "events.csv", "--source", "csv",
+            "--column", "x", "--weight", "w", "--edges", "0", "1", "2", "5", "10", "--chunk-size", "500",
+            "--status", "synthetic"],
+   "stdout": "histogram.json"},
+  {"id": "report", "needs": ["histogram"], "inputs": ["histogram.json"], "outputs": ["report.json"],
+   "argv": ["{python}", "{workflow}/steps/report.py", "histogram.json", "--out", "report.json"]}
+ ]
+}

@@ -1,0 +1,41 @@
+# SYNTHETIC example workflow (C6), the same DAG as workflow.json in this folder. Run:
+#   snakemake -s <plugin root>/skills/hep-computing/assets/workflow/Snakefile --cores 1 --directory WORK \
+#       --config plugin=<plugin root> python=$(which python3)
+# The standard-library runner skills/hep-computing/scripts/run_workflow.py runs workflow.json and writes a
+# computational-run per step; keep the rules here and the steps there in step.
+from pathlib import Path
+
+PLUGIN = config["plugin"]
+PY = config.get("python", "python3")
+WORKFLOW = str(Path(PLUGIN) / "skills" / "hep-computing" / "assets" / "workflow")
+
+
+rule all:
+    input:
+        "report.json",
+
+
+rule generate:
+    output:
+        "events.csv",
+    shell:
+        '"{PY}" "{WORKFLOW}/steps/generate_events.py" --seed 7 --n 2000 --out {output}'
+
+
+rule histogram:
+    input:
+        "events.csv",
+    output:
+        "histogram.json",
+    shell:
+        '"{PY}" "{PLUGIN}/skills/hep-computing/assets/chunked_histogram.py" {input} --source csv --column x '
+        '--weight w --edges 0 1 2 5 10 --chunk-size 500 --status synthetic > {output}'
+
+
+rule report:
+    input:
+        "histogram.json",
+    output:
+        "report.json",
+    shell:
+        '"{PY}" "{WORKFLOW}/steps/report.py" {input} --out {output}'

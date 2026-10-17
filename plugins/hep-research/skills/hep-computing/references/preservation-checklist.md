@@ -31,7 +31,7 @@ Each item names the file or command that holds it. Paths are relative to the plu
 - [ ] The exact commands, seeds, tolerances and exit statuses of every step, as computational-run artifacts
       (`<plugin root>/contracts/validate.py` checks them).
 - [ ] The workflow that chains the steps is in version control and reruns end to end
-      (see the analysis-workflows reference).
+      ([analysis workflows](analysis-workflows.md)).
 - [ ] Each correction is a recipe step with its correction key, so a later reader can see which factor was applied
       where.
 
