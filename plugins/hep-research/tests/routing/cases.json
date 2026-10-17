@@ -4625,6 +4625,26 @@
    "trigger_terms": [
     "correction chains"
    ]
+  },
+  {
+   "id": "d-ms-aniso-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I test my cosmic-ray arrival directions for a first-harmonic anisotropy in right ascension, with the exposure and an upper limit on the amplitude?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "cosmic-ray measurements"
+   ]
+  },
+  {
+   "id": "d-ms-aniso-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "宇宙線到達方向在赤經上的一次諧波各向異性要怎麼分析？曝光怎麼算，振幅上限怎麼給？",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "cosmic-ray measurements"
+   ]
   }
  ]
 }

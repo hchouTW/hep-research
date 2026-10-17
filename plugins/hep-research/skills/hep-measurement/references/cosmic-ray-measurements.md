@@ -169,6 +169,23 @@ simulated skies drawn with the real exposure, and the trials over energy bins
 ([inference recipes](../../hep-statistics/references/inference-recipes.md#cls-and-upper-limits),
 [astroparticle look-elsewhere](../../hep-statistics/references/astroparticle-statistics.md#the-look-elsewhere-effect-in-its-astroparticle-forms)).
 
+### Script
+
+`<plugin root>/skills/hep-measurement/scripts/anisotropy.py` implements the right-ascension part of this section:
+
+- `exposure`: the relative exposure per right-ascension bin from data-taking periods (the period table of
+  `collection_time.py`), for a top-hat field of view of declared half-width around the zenith right ascension, which
+  advances one turn per sidereal day from the user's local sidereal time at the clock's zero (no default). A planning
+  model; a real exposure comes from the acceptance per direction and can be passed as the map.
+- `harmonic`: the weighted first harmonic (amplitude, phase, Rayleigh probability with the effective count), `d_perp`
+  when declinations are given, the amplitude upper limit (Neyman, from the Rice distribution, power-constrained at the
+  expected limit so it is never empty; its coverage is checked on toys) and, with event times, the solar, sidereal and
+  anti-sidereal harmonics: a significant anti-sidereal amplitude makes the run `failed` (exit 1). Without an exposure
+  map it warns that uniform exposure is assumed; without times the checks are reported as not run.
+
+The full three-dimensional dipole (whole-sky exposure) and the joint multipole fit for partial coverage are not
+implemented; they belong to hep-statistics.
+
 ### Deliverables
 
 - Estimand sentence: species, range, frame, quantity (r, `d_perp` or `d`), and the declination distribution if r is

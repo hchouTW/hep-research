@@ -41,12 +41,15 @@ AFG_CFG = json.dumps({'generation': {'surface': 'plane', 'area_m2': 1.0, 'angula
                                      'spectrum': {'kind': 'power-law', 'index': 2.0, 'x_min': 1, 'x_max': 8}},
                       'x': {'variable': 'rigidity', 'unit': 'GV', 'edges': [1, 2, 4, 8]}})
 AFG_EVENTS = 'x\n1.5\n3.0\n'
+ANI_EVENTS = 'ra_deg\n10.0\n200.0\n300.0\n'
 
 # script: (valid args, NaN args, malformed-file args or None, how the status is reported)
 # '{f}' is replaced by a file written from the given text; a dict of texts writes one file per placeholder ('{f}',
 # '{g}'). 'json' reports the status label under status; 'run-json' (core/status.py, F-04) a run status under status
 # and the label under status_label.
 CASES = {
+    'anisotropy.py': ((['harmonic', '--events', '{f}'], ANI_EVENTS), (['harmonic', '--events', '{f}'], 'ra_deg\nnan\n'),
+                      (['harmonic', '--events', '{f}'], 'ra_deg\n"x'), 'run-json'),
     'acceptance_from_generation.py': ((['--config', '{f}', '--events', '{g}'], {'{f}': AFG_CFG, '{g}': AFG_EVENTS}),
                                       (['--config', '{f}', '--events', '{g}'],
                                        {'{f}': AFG_CFG.replace('"area_m2": 1.0', '"area_m2": NaN'), '{g}': AFG_EVENTS}),

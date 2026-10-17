@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 114837,
+   "bytes": 116116,
    "uncited": 0
   },
   "hep-ml": {
@@ -2502,17 +2502,18 @@
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
    "owner": "hep-measurement",
-   "bytes": 20377,
-   "lines": 190,
+   "bytes": 21671,
+   "lines": 207,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-measurement/scripts/anisotropy.py",
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "19424afc 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/data-pipelines.md",
@@ -2542,7 +2543,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16465,
+   "bytes": 16450,
    "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
