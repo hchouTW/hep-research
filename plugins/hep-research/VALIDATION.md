@@ -1874,6 +1874,11 @@ What changed:
 | `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3), `1d18f860` | 24 pass, 0 fail, 2 skipped (CLI host checks); 4278 tests, 4163 pass, 0 failures, 115 skipped |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 24 pass, 0 fail, 2 skipped; 4278 tests, 4046 pass, 0 failures, 232 skipped |
 
+The release PR's first CI run failed one test in every job: the E-4 example test compared artifacts byte for byte,
+and a tree identical to its release manifest gives `versions.plugin_release` the version and digest instead of
+"unreleased". The test now compares those artifacts without the release identity and the hashes that cover it;
+`tests/examples` passes in a clean checkout whose identity is 0.14.0 (147 tests, 21 skipped).
+
 Not run: live routing of the cases added in batches A-D (gate G2), the slow tier, the CLI host checks.
 
 ## 0.13.1 release check (2026-10-17, E2 and the CI lock)

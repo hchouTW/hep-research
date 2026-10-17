@@ -5,7 +5,7 @@
  "hash_algorithm": "sha256",
  "path_order": "UTF-8 bytes, ascending",
  "file_count": 2011,
- "digest": "34563f643f9c2a224d2a2db829df59595dfabd36b0b8563a957b71934c76a5c5",
+ "digest": "2e6d030b7205f7086f380c08b0f822b80092e8539ff8a10af802b86d8ed3ed64",
  "files": [
   {
    "path": ".claude-plugin/plugin.json",
@@ -45,8 +45,8 @@
   },
   {
    "path": "VALIDATION.md",
-   "sha256": "7ac84ba27fd788bf29ef27a8b33f9471c9d647504edd12f56cd98d57c6744aec",
-   "size": 240835,
+   "sha256": "d9f6ec722d4731494caad11c58f828d60217b35ec90299c44bac9c0710288336",
+   "size": 241267,
    "mode": "100644"
   },
   {
@@ -10515,8 +10515,8 @@
   },
   {
    "path": "tests/examples/test_analysis_to_paper.py",
-   "sha256": "96bcbf5d95ab0237f5576ba04e45290d4396e14ecbd458bfb71bd063ecba0376",
-   "size": 4642,
+   "sha256": "ff04ecda8d4eaee652cde6f97c9a9412f4437fced490c1131c878bcec43528cb",
+   "size": 5909,
    "mode": "100644"
   },
   {
