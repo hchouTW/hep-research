@@ -3717,6 +3717,26 @@
    "trigger_terms": [
     "calibration and alignment"
    ]
+  },
+  {
+   "id": "b-ms-split-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Do my two data-taking eras agree? I have both fluxes with covariances and a shared calibration uncertainty.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ]
+  },
+  {
+   "id": "b-ms-split-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "把資料分成前後兩半各自量測，兩個結果一致嗎？共同的系統誤差要怎麼扣掉再算卡方？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit"
+   ]
   }
  ]
 }

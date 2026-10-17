@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 171603,
+   "bytes": 171878,
    "uncited": 0
   },
   "hep-theory": {
@@ -1544,7 +1544,7 @@
     "tests/skills/hep_detector/test_adding_layer_d6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0d506417 2026-10-17"
+   "last_commit": "1d03565d 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -3337,7 +3337,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15109,
+   "bytes": 15384,
    "lines": 154,
    "linked_from_skill_md": true,
    "cited_by": [

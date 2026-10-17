@@ -174,7 +174,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 9257d7b5 2026-10-15 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c0 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 9257d7b5 2026-10-15 |
-| `calibration-and-alignment.md` | hep-detector | 19.0 | yes | 21 | - | 0d506417 2026-10-17 |
+| `calibration-and-alignment.md` | hep-detector | 19.0 | yes | 21 | - | 1d03565d 2026-10-17 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 13.0 | yes | 11 | - | 9257d7b5 2026-10-15 |
 | `charge-confusion.md` | hep-detector | 11.2 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 8 | hep-communication | 9257d7b5 2026-10-15 |
@@ -266,7 +266,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 11.6 | yes | 14 | hep-detector, hep-measurement | 14eeda45 2026-10-15 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 40.1 | yes | 6 | hep-detector, hep-measurement | 485e96cb 2026-10-17 |
-| `core-stats-guide.md` | hep-statistics | 15.1 | yes | 12 | hep-measurement | 485e96cb 2026-10-17 |
+| `core-stats-guide.md` | hep-statistics | 15.4 | yes | 12 | hep-measurement | 485e96cb 2026-10-17 |
 | `inference-recipes.md` | hep-statistics | 18.2 | yes | 10 | hep-detector, hep-measurement | 13868667 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.7 | yes | 9 | hep-computing, hep-detector | db0a9cca 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | hep-ml | 9257d7b5 2026-10-15 |

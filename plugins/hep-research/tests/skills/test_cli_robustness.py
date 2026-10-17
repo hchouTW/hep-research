@@ -70,6 +70,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-statistics/scripts/sweighted_fit.py": ["fit", "--input", M],
     "skills/hep-statistics/scripts/combine_asymmetric.py": ["measurements", "--input", M],
     "skills/hep-statistics/scripts/combine_measurements.py": [M],
+    "skills/hep-statistics/scripts/split_consistency.py": ["--input", M],
     "skills/hep-statistics/scripts/result_artifact.py": ["--cli-output", M, "--poi", "mu", "--construction", "asymptotic",
                                                          "--test-statistic", "q", "--label", "synthetic", "--artifact-id",
                                                          "x", "--out", OUT],

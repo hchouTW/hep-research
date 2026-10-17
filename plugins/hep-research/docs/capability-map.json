@@ -225,7 +225,7 @@
    "id": "split-consistency",
    "capability": "Consistency of split samples and multi-era joint fits",
    "owner": "hep-statistics",
-   "state": "none",
+   "state": "tool",
    "v1": true,
    "items": [
     "S1",

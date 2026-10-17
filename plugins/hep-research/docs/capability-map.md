@@ -40,7 +40,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | unfolding | Unfolding with regularization and coverage | hep-statistics | tool | yes | S10 |  |
 | bayesian | Bayesian posteriors, priors, samplers and convergence diagnostics | hep-statistics | tool | yes |  |  |
 | time-series | Binned time-series inference and periodicity | hep-statistics | documentation | yes | S5, S9 |  |
-| split-consistency | Consistency of split samples and multi-era joint fits | hep-statistics | none | yes | S1, S6 |  |
+| split-consistency | Consistency of split samples and multi-era joint fits | hep-statistics | tool | yes | S1, S6 |  |
 | roofit-status | RooFit/RooStats fit-status mapping and cross-checks | hep-statistics | none | yes | S11 |  |
 | theory-predictions | Conventions, derivations, cross sections, decay rates, higher-order and PDF uncertainties, predictions for published data | hep-theory | tool | yes | Th8, Th10 |  |
 | recasting | Recasting a published analysis with a parametrized response | hep-theory | tool | yes |  |  |

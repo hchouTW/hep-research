@@ -369,6 +369,9 @@ C = [
     # batch B, D6: adding a tracking layer to a running detector
  ("b-det-layer-1", "en", "direct", "We are adding a new outer tracking layer to a running spectrometer: how do we align it and check the rigidity scale with and without it?", "hep-detector", ["calibration and alignment"], None, None, {}),
  ("b-det-layer-2", "zh-Hant", "direct", "在運轉中的磁譜儀加裝一層外層矽徑跡層，對準與剛度尺度要怎麼處理？", "hep-detector", ["calibration and alignment"], None, None, {}),
+    # batch B, S1: split consistency (split_consistency.py)
+ ("b-ms-split-1", "en", "direct", "Do my two data-taking eras agree? I have both fluxes with covariances and a shared calibration uncertainty.", "hep-statistics", ["combinations across datasets or experiments"], None, None, {}),
+ ("b-ms-split-2", "zh-Hant", "direct", "把資料分成前後兩半各自量測，兩個結果一致嗎？共同的系統誤差要怎麼扣掉再算卡方？", "hep-statistics", ["goodness of fit"], None, None, {}),
 ]
 
 cases = []
