@@ -1855,6 +1855,23 @@ that decides the same question.
 | Ruff 0.16.10, mypy 2.4.0 | clean |
 | Registry | 80 of 80 V parts passing |
 
+## 0.14.1 release check (2026-10-17, E2 and the CI lock)
+
+Release branch `release/0.14.1` from main `61ef58aa` (#139: the hep-detector, hep-theory and hep-computing
+descriptions name geomagnetic cutoff backtracing and published-table import; evidence in `evals/routing/README.md`:
+the four targeted cases pass, and a 180-case check with repeats against 0.14.0 shows no regression). Contracts stay
+2.12.0.
+
+What changed: version 0.14.1 in both manifests, `pyproject.toml`, the README, the two assets and the profile
+scripts that record it; examples regenerated (E2; `bc-propagation-fit` with the CI lock), only version strings and the
+hashes that cover them change; the sbottom benchmark artifacts' `plugin` string edited by hand; theory-profile
+artifacts regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3), `e25f2b15` | 24 pass, 0 fail, 2 skipped (CLI host checks); 4278 tests, 4163 pass, 0 failures, 115 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 24 pass, 0 fail, 2 skipped; 4278 tests, 4046 pass, 0 failures, 232 skipped |
+
 ## 0.14.0 release check (2026-10-17, E2 and the CI lock)
 
 Release branch `release/0.14.0` from main `5d918484`, which carries the upgrade plan v1.3 (batches 0a-D, PRs
