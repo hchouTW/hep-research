@@ -106,7 +106,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-statistics.md` | hep-communication | 6.3 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `equation-and-notation-auditing.md` | hep-communication | 4.4 | no | 6 | hep-statistics, hep-theory | 064f60fb 2026-10-17 |
 | `erratum-and-corrigendum-drafting.md` | hep-communication | 4.5 | no | 3 | - | 9257d7b5 2026-10-15 |
-| `evidence-linked-writing.md` | hep-communication | 5.7 | yes | 5 | - | 9257d7b5 2026-10-15 |
+| `evidence-linked-writing.md` | hep-communication | 5.7 | yes | 5 | - | 1b7ae5b0 2026-10-17 |
 | `figures-and-tables.md` | hep-communication | 9.3 | yes | 11 | - | 9257d7b5 2026-10-15 |
 | `general-diagram-principles.md` | hep-communication | 7.8 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `grant-and-fellowship-proposal-writing.md` | hep-communication | 4.8 | no | 1 | - | 9257d7b5 2026-10-15 |
