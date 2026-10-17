@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 13 | 113 | 0 |
 | hep-ml | 42 | 192 | 0 |
 | hep-statistics | 13 | 185 | 0 |
-| hep-theory | 17 | 116 | 0 |
+| hep-theory | 18 | 121 | 0 |
 
 ## Overlapping pairs
 
@@ -44,7 +44,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **deployment**: `export-and-deployment.md`, `ml-analysis-validation-and-deployment.md`
 - **detection**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **engineering**: `engineering-playbook.md`, `loop-engineering.md`, `prompt-engineering-and-token-optimization.md`
-- **essential**: `nuclear-physics-essentials.md`, `particle-physics-essentials.md`
+- **essential**: `astroparticle-essentials.md`, `nuclear-physics-essentials.md`, `particle-physics-essentials.md`
 - **evaluation**: `evaluation-metrics.md`, `evaluation-strategy.md`
 - **event**: `event-reconstruction.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
 - **evidence**: `claim-evidence-mapping.md`, `evidence-linked-writing.md`
@@ -283,14 +283,15 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `time-series-inference.md` | hep-statistics | 18.8 | yes | 15 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
 | `unfolding.md` | hep-statistics | 7.3 | yes | 27 | hep-detector, hep-measurement | 0f4d7c4c 2026-10-17 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 20.2 | yes | 18 | hep-detector | 42ad7086 2026-10-17 |
-| `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 4 | - | 98460703 2026-10-17 |
+| `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | untracked |
+| `cosmic-ray-propagation.md` | hep-theory | 20.2 | yes | 19 | hep-detector | 42ad7086 2026-10-17 |
+| `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 5 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 2 | - | 351029c0 2026-10-07 |
-| `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 3 | - | untracked |
+| `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 4 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.2 | yes | 8 | hep-communication, hep-statistics | db0a9cca 2026-10-17 |
-| `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 4 | hep-measurement | 69f359f5 2026-10-17 |
+| `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 5 | hep-measurement | 69f359f5 2026-10-17 |
 | `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 4 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
 | `nuclear-physics-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 87421c11 2026-10-17 |
 | `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | c0b6b6d8 2026-10-17 |

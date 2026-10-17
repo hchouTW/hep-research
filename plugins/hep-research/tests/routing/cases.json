@@ -4425,6 +4425,26 @@
    "trigger_terms": [
     "conventions"
    ]
+  },
+  {
+   "id": "d-th-astro-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the gamma-ray spectrum from pi0 decay for my pion spectrum, and the neutrino flavour ratio at Earth for a 1:2:0 source.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
+  },
+  {
+   "id": "d-th-astro-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "質子撞 CMB 光子的 photopion 閾值能量是多少？順便說明 Hillas 判據與擴散激波加速的譜指數。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "astroparticle physics"
+   ]
   }
  ]
 }

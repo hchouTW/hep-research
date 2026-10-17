@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 17,
-   "bytes": 115978,
+   "references": 18,
+   "bytes": 120559,
    "uncited": 0
   }
  },
@@ -3705,6 +3705,21 @@
    "last_commit": "83ae4f6b 2026-10-13"
   },
   {
+   "path": "skills/hep-theory/references/astroparticle-essentials.md",
+   "owner": "hep-theory",
+   "bytes": 4581,
+   "lines": 68,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/scripts/secondary_gamma.py",
+    "tests/skills/hep_theory/test_astroparticle_essentials.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
    "bytes": 20181,
@@ -3723,6 +3738,7 @@
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/astroparticle-essentials.md",
     "skills/hep-theory/references/dark-matter-phenomenology.md",
     "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/references/nuclear-cross-sections.md",
@@ -3743,6 +3759,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/astroparticle-essentials.md",
     "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/scripts/dm_direct_rate.py",
     "tests/skills/hep_theory/test_dark_matter_phenomenology.py"
@@ -3804,11 +3821,12 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/astroparticle-essentials.md",
     "skills/hep-theory/scripts/coalescence.py",
     "tests/skills/hep_theory/test_light_nuclei_coalescence.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "7321e6dc 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
@@ -3841,6 +3859,7 @@
    "cited_by": [
     "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/astroparticle-essentials.md",
     "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/neutrino_oscillation.py"
    ],
@@ -4051,6 +4070,7 @@
    "skills/hep-computing/references/prompt-engineering-and-token-optimization.md"
   ],
   "essential": [
+   "skills/hep-theory/references/astroparticle-essentials.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md",
    "skills/hep-theory/references/particle-physics-essentials.md"
   ],

@@ -474,6 +474,9 @@ C = [
     # batch D, Th6: coalescence of light (anti)nuclei (coalescence.py)
  ("d-th-coal-1", "en", "direct", "Convert a coalescence momentum p0 = 80 MeV into B_2 for antideuterons and build the antideuteron yield from my antiproton yield.", "hep-theory", ["conventions"], None, None, {}),
  ("d-th-coal-2", "zh-Hant", "direct", "反氘核的 coalescence 參數 B_A 和 p0 怎麼互換？Wigner 函數模型的權重又是什麼？", "hep-theory", ["conventions"], None, None, {}),
+    # batch D, Th11: astroparticle essentials (secondary_gamma.py)
+ ("d-th-astro-1", "en", "direct", "Compute the gamma-ray spectrum from pi0 decay for my pion spectrum, and the neutrino flavour ratio at Earth for a 1:2:0 source.", "hep-theory", ["astroparticle physics"], None, None, {}),
+ ("d-th-astro-2", "zh-Hant", "direct", "質子撞 CMB 光子的 photopion 閾值能量是多少？順便說明 Hillas 判據與擴散激波加速的譜指數。", "hep-theory", ["astroparticle physics"], None, None, {}),
 ]
 
 cases = []

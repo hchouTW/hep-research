@@ -56,7 +56,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | Two-body decays, boosts, Mandelstam, thresholds, Dalitz, rapidity, lifetimes | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
 | Neutrino oscillations (vacuum, constant density) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
 | Dark matter: recoil rates (SHM, Helm), J factors, relic estimates | [dark matter](references/dark-matter-phenomenology.md); `dm_direct_rate.py` |
-| Coalescence of (anti)nuclei (B_A, p0, Wigner) | [coalescence](references/light-nuclei-coalescence.md); `coalescence.py` |
+| Astroparticle: DSA, Hillas, pi0 gammas, flavour ratios, thresholds; coalescence (B_A, p0) | [astroparticle](references/astroparticle-essentials.md); [coalescence](references/light-nuclei-coalescence.md); `secondary_gamma.py`, `coalescence.py` |
 | Nuclear masses, Q values, decay chains, equilibrium, S factor | [nuclear](references/nuclear-physics-essentials.md); `decay_chain.py` |
 | alpha_s running; CKM, PMNS conventions; PDG MC codes | [essentials](references/particle-physics-essentials.md); `running_coupling.py` |
 | Is a process or diagram allowed; schemes, running masses | [selection rules](references/selection-rules.md); [schemes](references/regularization-and-schemes.md) |
