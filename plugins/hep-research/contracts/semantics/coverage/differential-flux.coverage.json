@@ -9,7 +9,8 @@
    "operator_id": "subtract_background",
    "stage": "estimator",
    "covers": [
-    "background"
+    "background",
+    "fragmentation_feeddown"
    ],
    "class_coverage": {},
    "factors": []
@@ -80,7 +81,8 @@
     "exposure",
     "acceptance",
     "livetime",
-    "cutoff_transmission"
+    "cutoff_transmission",
+    "survival"
    ],
    "class_coverage": {
     "efficiency": {

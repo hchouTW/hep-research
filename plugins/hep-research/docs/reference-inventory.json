@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 35,
-   "bytes": 458516,
+   "references": 36,
+   "bytes": 462796,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2015,6 +2015,22 @@
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
+   "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
+   "owner": "hep-detector",
+   "bytes": 4280,
+   "lines": 58,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/scripts/survival_feeddown.py",
+    "skills/hep-theory/references/nuclear-cross-sections.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-theory"
+   ],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-detector/references/particle-identification.md",
    "owner": "hep-detector",
    "bytes": 18189,
@@ -2126,6 +2142,7 @@
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
+    "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/scripts/build_response.py",
@@ -2331,6 +2348,7 @@
     "profiles/experiments/ams-02/modules/working-rules.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
+    "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-measurement/SKILL.md",
@@ -2351,6 +2369,7 @@
    "lines": 154,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -2358,13 +2377,15 @@
     "skills/hep-measurement/references/systematics.md",
     "skills/hep-measurement/scripts/collection_time.py",
     "skills/hep-theory/references/nuclear-cross-sections.md",
+    "tests/skills/hep_detector/test_survival_feeddown.py",
     "tests/skills/hep_measurement/test_method_references.py",
     "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
    ],
    "cited_by_other_skills": [
+    "hep-detector",
     "hep-theory"
    ],
-   "last_commit": "5f6ffb5d 2026-10-17"
+   "last_commit": "151889fb 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -3686,15 +3707,17 @@
    "lines": 105,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-measurement/references/correction-chain.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
    ],
    "cited_by_other_skills": [
+    "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "5f6ffb5d 2026-10-17"
+   "last_commit": "151889fb 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",

@@ -90,6 +90,16 @@
    "effect_id": "bin_width",
    "class": null,
    "definition": "division by the bin width of the variable the result is differential in"
+  },
+  {
+   "effect_id": "survival",
+   "class": null,
+   "definition": "Survival of a species through the material above the measuring layers: the probability P = exp(-sum x/lambda) that it crosses without an inelastic interaction; the flux divides by P"
+  },
+  {
+   "effect_id": "fragmentation_feeddown",
+   "class": null,
+   "definition": "Fragmentation feed-down: events of a lighter species produced by heavier species fragmenting in the material above the measuring layers, subtracted like a background"
   }
  ],
  "compositions": [

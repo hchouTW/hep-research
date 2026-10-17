@@ -410,6 +410,11 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
             ('toy_spectrometer.py', 'resolution', ASSETS / 'toy-spectrometer.fictional.json', '--species', 'p', '--rigidity', '1e-308'),
             ('toy_spectrometer.py', 'resolution', ASSETS / 'toy-spectrometer.fictional.json', '--species', 'p', '--rigidity', 'nan'),
             ('toy_spectrometer.py', 'resolution', ASSETS / 'toy-spectrometer.fictional.json', '--species', 'xx', '--rigidity', '10'),
+            ('survival_feeddown.py', 'compute', '--layers', self.write('sl_big.json', json.dumps({'layers': [
+                {'name': 'x', 'grammage_g_cm2': 1e308, 'composition': [{'target': 'C', 'A': 12.0, 'mass_fraction': 1.0}]}]})),
+             '--species', ASSETS / 'survival-species.example.json', '--xs', ASSETS / 'survival-xs.example.json'),
+            ('survival_feeddown.py', 'compute', '--layers', ASSETS / 'survival-layers.example.json', '--species',
+             ASSETS / 'survival-species.example.json', '--xs', self.write('sx_nan.json', '{"unit": "mb", "inelastic": {"B": {"C": NaN}}}')),
             ('mix_period_responses.py', 'mix', '--period', f"e1={ASSETS / 'response-synthetic.example.json'}",
              '--weights', self.write('w_nan.json', '{"periods": {"e1": {"weight": [NaN, 1, 1]}}}'), '--artifact-id',
              'a', '--objective', 'o', '--out', self.tmp / 'm.json'),

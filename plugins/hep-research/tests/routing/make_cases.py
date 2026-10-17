@@ -387,6 +387,9 @@ C = [
     # batch C, Th1: nuclear cross-section conventions
  ("c-nuc-xs-1", "en", "direct", "Should I use inelastic or charge-changing cross sections for boron fragmentation, and is the straight-ahead approximation valid here?", "hep-theory", ["cross sections"], None, None, {}),
  ("c-nuc-xs-2", "zh-Hant", "direct", "碳打在氫與氦上的同位素產生截面要怎麼處理短壽命中間核的累積截面？", "hep-theory", ["cross sections"], None, None, {}),
+    # batch C, D4: nuclear interactions in detector material
+ ("c-nuc-surv-1", "en", "direct", "What fraction of boron nuclei survive the material above my detector's charge layers, and how many carbon fragments feed down into boron?", "hep-detector", ["calibration"], None, None, {}),
+ ("c-nuc-surv-2", "zh-Hant", "direct", "碳核穿過偵測器上方物質的存活機率怎麼算？碎裂成硼的 feed-down 要怎麼扣？", "hep-detector", ["calibration"], None, None, {}),
 ]
 
 cases = []

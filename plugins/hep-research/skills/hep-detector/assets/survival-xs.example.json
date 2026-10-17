@@ -1,0 +1,9 @@
+{
+ "source": "SYNTHETIC: invented round-number cross sections for tests and teaching; not measured values",
+ "unit": "mb",
+ "inelastic": {
+  "B": {"C": 260.0, "H": 220.0, "Al": 430.0},
+  "C": {"C": 280.0, "H": 230.0, "Al": 460.0}
+ },
+ "fragmentation_fraction": {"C": {"B": 0.12}}
+}

@@ -47,17 +47,17 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Any detector question: the chain, the fourteen questions, task routing | [principles summary](references/detector-principles-summary.md) (section 11 indexes every file) |
 | Resolution, efficiency (weighted, binned), tag-and-probe, truth matching | [reconstruction performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
 | Tracking, vertexing, multiple scattering | [tracking and vertexing](references/tracking-and-vertexing.md); `multiple_scattering.py` |
-| Synthetic spectrometer events and periods (test bed, seeded) | `toy_spectrometer.py`; `assets/toy-spectrometer.fictional.json` |
+| Synthetic spectrometer events and periods (seeded) | `toy_spectrometer.py`; `assets/toy-spectrometer.fictional.json` |
 | Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |
-| Particle identification, TOF, dE/dx, RICH; many samples (charge, LLR) | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py`, `multisample_pid.py` |
+| PID: TOF, dE/dx, RICH; many samples (charge, LLR) | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py`, `multisample_pid.py` |
 | Signal formation, readout, front-end electronics | [front-end electronics](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
-| Response matrices, forward folding; build one from matched events; mix or stack era responses | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py` |
+| Response matrices, forward folding; build from matched events; mix or stack eras | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py` |
 | Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |
-| Calibration, alignment, conditions; stability over time, eras, an added layer | [calibration and alignment](references/calibration-and-alignment.md); `stability_monitor.py` |
-| Propagating a calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |
+| Calibration, alignment, conditions; stability, eras, an added layer | [calibration and alignment](references/calibration-and-alignment.md); `stability_monitor.py` |
+| Calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py`; [calibration and alignment](references/calibration-and-alignment.md) |
 | Triggers, luminosity, pileup | [triggers and pileup](references/triggers-luminosity-pileup.md); `pileup_reweight.py` |
 | Simulation (Geant4) | [detector simulation](references/detector-simulation.md) |
-| Charge-sign confusion | [charge confusion](references/charge-confusion.md) |
+| Charge-sign confusion; nuclei in material (survival, feed-down) | [charge confusion](references/charge-confusion.md), [nuclear interactions](references/nuclear-interactions-in-detector-material.md); `survival_feeddown.py` |
 | Space-based and balloon instruments | [space-based direct detection](references/space-based-direct-detection.md) |
 | Air showers, X_max | [extensive air showers](references/extensive-air-showers.md); `xmax_gaisser_hillas.py` |
 | A named experiment's detector | the bound profile; ask which configuration is meant |

@@ -1,0 +1,4 @@
+{
+ "note": "SYNTHETIC: species for survival_feeddown.py; arriving = count above the material (invented).",
+ "species": [{"name": "B"}, {"name": "C", "arriving": 1000}]
+}

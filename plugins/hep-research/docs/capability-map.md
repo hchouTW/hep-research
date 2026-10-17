@@ -30,7 +30,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | fast-spectrometer-simulation | Fast spectrometer simulation (layers, field model, charge and velocity estimators, eras) | hep-detector | tool | yes | D7 |  |
 | scale-distortion | Propagating a calibration residual (scale, inverse offset, resolution) to yields, ratios and covariance | hep-detector | tool | yes | D1 |  |
 | response-construction | Response construction from matched truth and reconstructed events | hep-detector | tool | yes | D9 |  |
-| species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | documentation | yes | D2, D3, D4 |  |
+| species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | tool | yes | D2, D3, D4 |  |
 | multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | tool | yes | D10 |  |
 | stability-monitoring | Stability monitoring over time (trends, change points, era boundaries) | hep-detector | tool | yes | D11 |  |
 | detector-design | Detector design principles and a sourced detector atlas | hep-detector | documentation | yes | D6, D13, D14 |  |

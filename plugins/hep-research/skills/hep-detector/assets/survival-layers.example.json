@@ -1,0 +1,7 @@
+{
+ "note": "SYNTHETIC: invented layers above a fictional detector's measuring layers; grammage in g/cm2, target mass numbers A in g/mol, mass fractions sum to 1 per layer.",
+ "layers": [
+  {"name": "upper-support", "grammage_g_cm2": 4.0, "composition": [{"target": "C", "A": 12.011, "mass_fraction": 0.9}, {"target": "H", "A": 1.008, "mass_fraction": 0.1}]},
+  {"name": "shield", "grammage_g_cm2": 2.0, "composition": [{"target": "Al", "A": 26.98, "mass_fraction": 1.0}]}
+ ]
+}

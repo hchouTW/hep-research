@@ -3838,6 +3838,26 @@
    "trigger_terms": [
     "cross sections"
    ]
+  },
+  {
+   "id": "c-nuc-surv-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What fraction of boron nuclei survive the material above my detector's charge layers, and how many carbon fragments feed down into boron?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration"
+   ]
+  },
+  {
+   "id": "c-nuc-surv-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "碳核穿過偵測器上方物質的存活機率怎麼算？碎裂成硼的 feed-down 要怎麼扣？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration"
+   ]
   }
  ]
 }
