@@ -453,6 +453,9 @@ C = [
     # batch D, S3: covariance proposal from declared correlation models
  ("d-st-cov-1", "en", "direct", "Build a covariance for my energy-scale uncertainty correlated over log energy with a correlation length, and show how the fit changes with that length.", "hep-statistics", ["covariance assembly and validation"], None, None, {}),
  ("d-st-cov-2", "zh-Hant", "direct", "時間相關的系統誤差要怎麼組成協方差矩陣？相關長度不知道時要怎麼掃描？", "hep-statistics", ["covariance assembly and validation"], None, None, {}),
+    # batch D, S4: per-dataset scale nuisance in fits to published points
+ ("d-st-scale-1", "en", "direct", "Fit one spectral model to two experiments' published fluxes where one has a 3% energy-scale uncertainty; add it as a nuisance on the energy axis.", "hep-statistics", ["fits of model parameters to published data points with their covariance", "nuisance parameters"], None, None, {}),
+ ("d-st-scale-2", "zh-Hant", "direct", "兩組已發表的能譜一起擬合，其中一組的能量刻度有 2% 不確定度，要怎麼放成 nuisance？", "hep-statistics", ["nuisance parameters"], None, None, {}),
 ]
 
 cases = []

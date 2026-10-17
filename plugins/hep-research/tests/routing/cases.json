@@ -4284,6 +4284,27 @@
    "trigger_terms": [
     "covariance assembly and validation"
    ]
+  },
+  {
+   "id": "d-st-scale-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit one spectral model to two experiments' published fluxes where one has a 3% energy-scale uncertainty; add it as a nuisance on the energy axis.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits of model parameters to published data points with their covariance",
+    "nuisance parameters"
+   ]
+  },
+  {
+   "id": "d-st-scale-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩組已發表的能譜一起擬合，其中一組的能量刻度有 2% 不確定度，要怎麼放成 nuisance？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ]
   }
  ]
 }
