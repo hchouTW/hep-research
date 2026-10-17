@@ -90,6 +90,8 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
   outcome and never pools ensembles; details in the [command reference](core-stats-commands.md#toy-ensembles).
 - **Broken power law** (`broken_power_law.py`, helper, no CLI): one parametrization for `covariance_fit.py` and
   hep-measurement `cr_spectrum_powerlaw_fit.py` ([conventions](core-stats-commands.md#broken-power-law)).
+- **Change points** (`change_point.py`, helper, no CLI): weighted trends, binary segmentation, CUSUM and
+  toy-calibrated thresholds for a declared false-alarm rate; used by hep-detector `stability_monitor.py`.
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records

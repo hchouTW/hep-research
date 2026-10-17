@@ -969,6 +969,18 @@
   "ok": true,
   "strict_ok": true
  },
+ "examples/multi-era-fit/output/artifacts/response_e1.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/multi-era-fit/output/artifacts/response_e2.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/multi-era-fit/output/artifacts/response_mixed.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "examples/published-comparison/output/artifacts/comparison_spec.json": {
   "ok": true,
   "strict_ok": true

@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 174542,
+   "bytes": 174753,
    "uncited": 0
   },
   "hep-theory": {
@@ -3344,8 +3344,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15583,
-   "lines": 155,
+   "bytes": 15794,
+   "lines": 157,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3364,7 +3364,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "bb2e0465 2026-10-17"
+   "last_commit": "23c707c9 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3506,6 +3506,7 @@
    "lines": 233,
    "linked_from_skill_md": true,
    "cited_by": [
+    "examples/multi-era-fit/run.py",
     "profiles/theory/heliospheric-modulation/README.md",
     "profiles/theory/heliospheric-modulation/index.md",
     "profiles/theory/heliospheric-modulation/models/heliospheric-modulation-models.md",

@@ -3,6 +3,7 @@ core/partition. Oracles: a period split across two files is counted once; partia
 equal a single run byte for byte; a key whose duplicates disagree is refused; the merge inputs are recorded.
 All records are SYNTHETIC."""
 import json
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -60,7 +61,8 @@ class TimeSliceReduction(unittest.TestCase):
                             "--chunk-size", "1", "--seed", "1", "--out", str(manifest)],
                            capture_output=True, text=True, timeout=600)
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
-        cmd = (f"{sys.executable} -B {ASSET} partial --file-list {flist} --start {{start}} --stop {{stop}} "
+        q = shlex.quote  # the plugin may sit in a folder whose path has spaces (check_relocation, check_ams_optional)
+        cmd = (f"{q(sys.executable)} -B {q(str(ASSET))} partial --file-list {q(str(flist))} --start {{start}} --stop {{stop}} "
                f"--key period --sum livetime_s,n_events --group-by era --out {{out}}")
         p = subprocess.run([sys.executable, "-B", str(PARTITION), "run", "--manifest", str(manifest), "--state",
                             str(state), "--cmd", cmd], capture_output=True, text=True, timeout=600)

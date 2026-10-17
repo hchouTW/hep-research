@@ -266,14 +266,14 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 11.6 | yes | 14 | hep-detector, hep-measurement | 14eeda45 2026-10-15 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 40.1 | yes | 6 | hep-detector, hep-measurement | 485e96cb 2026-10-17 |
-| `core-stats-guide.md` | hep-statistics | 15.6 | yes | 12 | hep-measurement | bb2e0465 2026-10-17 |
+| `core-stats-guide.md` | hep-statistics | 15.8 | yes | 12 | hep-measurement | 23c707c9 2026-10-17 |
 | `inference-recipes.md` | hep-statistics | 18.2 | yes | 10 | hep-detector, hep-measurement | 13868667 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.7 | yes | 10 | hep-computing, hep-detector | db0a9cca 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `nuisance-modeling.md` | hep-statistics | 20.3 | yes | 9 | hep-measurement | 100eb1c3 2026-10-16 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.9 | yes | 11 | hep-communication, hep-computing, hep-theory | 9257d7b5 2026-10-15 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | hep-ml | 578c12ff 2026-10-13 |
-| `time-series-inference.md` | hep-statistics | 18.8 | yes | 13 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
+| `time-series-inference.md` | hep-statistics | 18.8 | yes | 14 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
 | `unfolding.md` | hep-statistics | 7.0 | yes | 27 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6b 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 18.7 | yes | 14 | hep-detector | 26970179 2026-10-17 |
