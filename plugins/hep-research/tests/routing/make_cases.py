@@ -317,6 +317,9 @@ C = [
     ("dr-a-toy-2", "zh-Hant", "direct", "用固定亂數種子產生一組合成的磁譜儀事件，作為 detector simulation (Geant4) 之外的快速版本，檢查各時段的剛度解析度。", "hep-detector", ["detector simulation (Geant4)"], None, None, {}),
     ("dr-a-residual-1", "en", "direct", "Propagate my calibration and alignment residual, a curvature offset, into the antiproton-to-proton ratio bins and give me up and down variations.", "hep-detector", ["calibration and alignment"], None, None, {}),
     ("dr-a-residual-2", "zh-Hant", "direct", "動量尺度的 calibration and alignment 殘差要怎麼傳遞到每個能區的產額與共變異矩陣？", "hep-detector", ["calibration and alignment"], None, None, {}),
+ # batch A docs track: M5 scaling class of systematics
+ ("ms-a-scaling-1", "en", "direct", "Which of my systematic uncertainties will shrink with a four times larger control sample, and which are a floor? I need the evaluation plan for the projection.", "hep-measurement", ["the physical sources of systematic uncertainties and their evaluation plan"], None, None, {}),
+ ("ms-a-scaling-2", "zh-Hant", "direct", "我的系統誤差哪些會隨控制樣本變大而縮小、哪些是下限？請幫我規劃評估方式。", "hep-measurement", ["the physical sources of systematic uncertainties and their evaluation plan"], None, None, {}),
 ]
 
 cases = []

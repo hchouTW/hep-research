@@ -50,7 +50,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 | Estimand, fiducial definitions, result levels | [measurements and unfolding](references/measurements-and-unfolding.md) |
 | Efficiencies, exposure, live time, luminosity, POT | [correction chain](references/correction-chain.md) |
 | Backgrounds: control regions, ABCD, sidebands | [backgrounds](references/backgrounds.md) |
-| Physical sources of systematics, variations | [systematics](references/systematics.md); `check_systematic_variations.py`, `systematics_table_tex.py` |
+| Physical sources of systematics, variations, scaling class | [systematics](references/systematics.md); `check_systematic_variations.py`, `systematics_table_tex.py` |
 | Normalization, signed weights, cutflows, yields | [weights and normalization](references/weights-normalization.md); `make_yield_table.py` |
 | Histograms, efficiencies with uncertainties | [histograms and efficiencies](references/histograms-efficiencies.md) |
 | Validation, review checks, preservation | [analysis validation](references/analysis-validation.md) |

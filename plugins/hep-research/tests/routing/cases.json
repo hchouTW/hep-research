@@ -3365,6 +3365,26 @@
    "trigger_terms": [
     "calibration and alignment"
    ]
+  },
+  {
+   "id": "ms-a-scaling-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which of my systematic uncertainties will shrink with a four times larger control sample, and which are a floor? I need the evaluation plan for the projection.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "the physical sources of systematic uncertainties and their evaluation plan"
+   ]
+  },
+  {
+   "id": "ms-a-scaling-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的系統誤差哪些會隨控制樣本變大而縮小、哪些是下限？請幫我規劃評估方式。",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "the physical sources of systematic uncertainties and their evaluation plan"
+   ]
   }
  ]
 }

@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 98025,
+   "bytes": 99222,
    "uncited": 0
   },
   "hep-ml": {
@@ -1540,7 +1540,7 @@
     "skills/hep-detector/scripts/propagate_scale_distortion.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7334012 2026-10-17"
+   "last_commit": "bb4e145 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2479,8 +2479,8 @@
   {
    "path": "skills/hep-measurement/references/systematics.md",
    "owner": "hep-measurement",
-   "bytes": 8901,
-   "lines": 89,
+   "bytes": 10098,
+   "lines": 106,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -2506,6 +2506,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-measurement/SKILL.md",
+    "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-ml/references/ml-analysis-validation-and-deployment.md",
@@ -2514,6 +2515,7 @@
     "skills/hep-ml/references/robustness-and-distribution-shift.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "skills/hep-theory/references/event-generation.md",
+    "tests/contracts/test_systematics_scaling_m5.py",
     "tests/skills/hep_measurement/test_method_references.py"
    ],
    "cited_by_other_skills": [

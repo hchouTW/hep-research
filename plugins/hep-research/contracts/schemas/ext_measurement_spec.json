@@ -113,6 +113,15 @@
        "migration",
        "mixed"
       ]
+     },
+     "scaling": {
+      "type": "string",
+      "enum": [
+       "statistical-like",
+       "floor",
+       "mixed"
+      ],
+      "$comment": "Optional (M5): how the size falls with the control-sample size N_ctrl; statistical-like sigma ~ 1/sqrt(N_ctrl), floor constant, mixed sigma^2 = a^2 + b^2/N_ctrl"
      }
     }
    }

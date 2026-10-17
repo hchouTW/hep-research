@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-communication | 57 | 400 | 0 |
 | hep-computing | 32 | 298 | 0 |
 | hep-detector | 35 | 452 | 0 |
-| hep-measurement | 12 | 98 | 0 |
+| hep-measurement | 12 | 99 | 0 |
 | hep-ml | 42 | 184 | 0 |
 | hep-statistics | 12 | 171 | 0 |
 | hep-theory | 11 | 81 | 0 |
@@ -174,7 +174,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 9257d7b 2026-10-15 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 9257d7b 2026-10-15 |
-| `calibration-and-alignment.md` | hep-detector | 13.9 | yes | 19 | - | 7334012 2026-10-17 |
+| `calibration-and-alignment.md` | hep-detector | 13.9 | yes | 19 | - | bb4e145 2026-10-17 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 13.0 | yes | 11 | - | 9257d7b 2026-10-15 |
 | `charge-confusion.md` | hep-detector | 11.2 | yes | 4 | - | 9257d7b 2026-10-15 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 8 | hep-communication | 9257d7b 2026-10-15 |
@@ -219,7 +219,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 8 | hep-computing, hep-detector | 9257d7b 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a58495 2026-10-17 |
 | `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 77d2607 2026-10-16 |
-| `systematics.md` | hep-measurement | 8.9 | yes | 32 | hep-detector, hep-ml, hep-statistics, hep-theory | 9257d7b 2026-10-15 |
+| `systematics.md` | hep-measurement | 10.1 | yes | 34 | hep-detector, hep-ml, hep-statistics, hep-theory | 9257d7b 2026-10-15 |
 | `weights-normalization.md` | hep-measurement | 4.5 | yes | 10 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b 2026-10-15 |
 | `ablation-and-design-review.md` | hep-ml | 2.3 | no | 13 | hep-communication | 9257d7b 2026-10-15 |
 | `architecture-selection.md` | hep-ml | 3.4 | no | 2 | - | 9257d7b 2026-10-15 |

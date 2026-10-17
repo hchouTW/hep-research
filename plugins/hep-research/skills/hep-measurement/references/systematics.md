@@ -75,6 +75,23 @@ while their RMS about zero would be 1.25% and has no meaning for four choices. A
 2.0%, 1.5% and 0.5% gives a total of `sqrt(2.0^2 + 1.5^2 + 0.5^2)` = 2.55% for that bin; if the 1.5% source were the
 control-sample statistics already in the fit's statistical uncertainty, the systematic total is 2.06%.
 
+### Scaling class
+
+Say how each source's size falls as its control sample grows, so a projection to more data (or a later era) does not
+treat every systematic as fixed or every one as statistical. The spec's `systematics` entries carry it in the optional
+field `scaling`:
+
+- `statistical-like`: sigma is proportional to 1/sqrt(N_ctrl), where N_ctrl is the size of the control sample or
+  calibration data set that sets it (a tag-and-probe efficiency from data, a transfer factor from a sideband);
+- `floor`: sigma does not fall with N_ctrl (a model choice, a theory envelope, an external normalization);
+- `mixed`: sigma^2 = a^2 + b^2/N_ctrl, a floor `a` plus a statistical part `b/sqrt(N_ctrl)`; record `a`, `b` and the
+  N_ctrl they were fitted at, from the size of the source at two or more control-sample sizes, not from a guess.
+
+Worked example (synthetic): a source of 1.41% at N_ctrl = 10^4 with a = 1.0% and b/sqrt(N_ctrl) = 1.0% falls to
+`sqrt(1.0^2 + 0.5^2)` = 1.12% when N_ctrl grows fourfold; as `statistical-like` it would fall to 0.71%, as `floor` it
+would stay at 1.41%. The class is evidence for the projection; hep-statistics owns how the projected budget enters
+the likelihood.
+
 ## Template validation
 
 Check edges, flow handling, finite values, variance bookkeeping, required sources, and units. Identical variations are an investigation flag, not proof of a bug. Migration may lower a bin for an Up variation; integral ordering cannot establish whether labels are reversed. Inspect payloads and generation code to establish direction.
