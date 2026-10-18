@@ -153,6 +153,15 @@ class UpperTailTests(unittest.TestCase):
             self.assertAlmostEqual(pd.poisson_sf(n, mu) / float(ref), 1.0, delta=1e-10, msg=(n, mu))
             self.assertAlmostEqual(pd.log_poisson_sf(n, mu), float(ref.ln()), delta=1e-10, msg=(n, mu))
 
+    def test_negative_control_complement_form_fails_the_reference(self):
+        """Negative control (sci-fix evidence, axis C): the pre-fix complement 1 - P(N <= n - 1) must fail the same
+        high-precision reference that poisson_sf passes, so the reference can tell the two forms apart."""
+        ref = float(decimal_sf(60, 5.0))  # 7.6496...e-43
+        naive = 1.0 - pd.poisson_cdf(59, 5.0)
+        self.assertLess(naive, 1e-15)  # cancels to (about) zero in double precision
+        self.assertGreater(abs(naive / ref - 1.0) if naive else 1.0, 1e-10)  # outside the tolerance used above
+        self.assertAlmostEqual(pd.poisson_sf(60, 5.0) / ref, 1.0, delta=1e-10)
+
     def test_log_tail_and_significance_stay_finite_to_n_1000(self):
         last = 0.0
         for n in range(1, 1001):

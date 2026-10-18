@@ -175,3 +175,65 @@ class SharedHelperTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover
+    np = None
+
+
+@unittest.skipUnless(np is not None, "NumPy not installed: the eigenvalue oracle is unverified")
+class EigenvalueOracleTests(unittest.TestCase):
+    """Independent oracle for sci-fix COV-NOREPAIR (axis C): the verdict of the strict Cholesky on random covariance
+    matrices against numpy.linalg.eigvalsh of the unit-diagonal (correlation) matrix, written here without
+    _linalg. Pivots and eigenvalues are different quantities, so only matrices clearly away from the boundary are
+    judged: smallest correlation eigenvalue above +1e-6 must factorize, below -1e-6 must be refused; the band
+    between is not asserted. Variances span 1e-12 to 1e12, so the verdict is also checked to be unit-free.
+    Negative control: the pre-fix repair (absolute jitter added until a factorization succeeds) accepts the
+    indefinite matrices that the oracle and the fix refuse."""
+
+    @staticmethod
+    def _jitter_repair(c):
+        a = np.array(c, dtype=float)
+        jitter = 1e-10
+        while jitter <= 1.0:
+            try:
+                np.linalg.cholesky(a + jitter * np.eye(len(a)))
+                return True
+            except np.linalg.LinAlgError:
+                jitter *= 10.0
+        return False
+
+    def test_verdict_matches_the_eigenvalues_at_any_scale(self):
+        rng = np.random.default_rng(20261018)
+        judged = {"pd": 0, "indefinite": 0}
+        repaired_indefinite = 0
+        for _ in range(400):
+            n = int(rng.integers(2, 7))
+            a = rng.normal(size=(n, n))
+            corr = a @ a.T
+            d = np.sqrt(np.diag(corr))
+            corr = corr / np.outer(d, d)
+            if rng.random() < 0.5:  # push one correlation past what the others allow
+                i, j = rng.choice(n, size=2, replace=False)
+                corr[i, j] = corr[j, i] = float(np.clip(corr[i, j] + rng.choice([-1.0, 1.0]) * rng.uniform(0.3, 1.5), -1.5, 1.5))
+            lam = float(np.linalg.eigvalsh(corr).min())
+            if abs(lam) <= 1e-6:
+                continue
+            sd = 10.0 ** rng.uniform(-6, 6, size=n)  # variances 1e-12 .. 1e12
+            cov = (corr * np.outer(sd, sd)).tolist()
+            if lam > 1e-6:
+                judged["pd"] += 1
+                cholesky(cov, "c")  # must not raise
+            else:
+                judged["indefinite"] += 1
+                with self.assertRaises(LinAlgError):
+                    cholesky(cov, "c")
+                with self.assertRaises(LinAlgError):
+                    cholesky(cov, "c", semidefinite=True)
+                if self._jitter_repair(corr.tolist()):
+                    repaired_indefinite += 1
+        self.assertGreater(judged["pd"], 50)
+        self.assertGreater(judged["indefinite"], 50)
+        self.assertGreater(repaired_indefinite, 0)  # negative control: the old repair hides some of them

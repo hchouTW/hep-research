@@ -79,12 +79,12 @@ class GaisserHillasBracketingTests(unittest.TestCase):
                    '--x0', '-60', '--lambda-param', '60')
         self.assertNotIn('Traceback', proc.stderr)
         payload = strict_json(proc.stdout)
-        if proc.returncode == 0:
-            self.assertAlmostEqual(payload['half_maximum_depths']['full_width_half_maximum'],
-                                   1.8240358e11, delta=1e-4 * 1.8240358e11)
-        else:
-            self.assertEqual(proc.returncode, 1)
-            self.assertFalse(payload['ok'])
+        # The fix computes the width (VALIDATION DR-WP1-02: FWHM 1.824036e11 in 0.03 s); a refusal (exit 1) would
+        # also have ended the hang but is not the fixed behavior, so it fails here.
+        self.assertEqual(proc.returncode, 0, msg=payload)
+        fwhm_gauss = 2.0 * math.sqrt(2.0 * math.log(2.0) * 60.0 * (1e20 + 60.0))  # Gaussian limit, computed here
+        self.assertAlmostEqual(payload['half_maximum_depths']['full_width_half_maximum'],
+                               fwhm_gauss, delta=1e-4 * fwhm_gauss)
 
     def test_falling_edge_for_large_lambda(self):
         """Guard for the new bracketing: lambda=3e5 g/cm^2, x_max=750, x0=-60 has its
@@ -123,8 +123,17 @@ class GaisserHillasBracketingTests(unittest.TestCase):
 class CherenkovChargeTests(unittest.TestCase):
     # n=1.05, p=40 GeV/c, L=2 cm, N0=100/cm, 5 mrad: He4 beta=0.995687, theta=0.296014 rad,
     # z=1 yield 17.0188937; with z^2: 68.0755750, sigma_theta = 5/sqrt(68.0756) = 0.6060024 mrad.
-    HE4_PHOTONS = 68.07557492992738  # with the CODATA 2022 alpha-particle mass (Th9); 68.07557496982115 with 3.72737940 GeV
-    HE4_SIGMA_MRAD = 0.6060024015969153
+    # Expected values are computed here from the closed forms (sci-fix DR-WP1-01, axis C), not copied from the
+    # script's output: beta = p / sqrt(p^2 + m^2), cos(theta) = 1 / (n beta), N = N0 L z^2 sin^2(theta),
+    # sigma_theta = 5 mrad / sqrt(N), p_threshold = m / sqrt(n^2 - 1). Mass: CODATA 2022 alpha-particle mass in GeV
+    # (m_alpha c^2 = 3727.3794118 MeV, NIST CODATA 2022), stated here independently of core/constants.
+    M_ALPHA, N_INDEX, P, L_CM, N0, Z = 3.7273794118, 1.05, 40.0, 2.0, 100.0, 2
+    _BETA = P / math.hypot(P, M_ALPHA)
+    HE4_ANGLE = math.acos(1.0 / (N_INDEX * _BETA))
+    HE4_PHOTONS = N0 * L_CM * Z ** 2 * math.sin(HE4_ANGLE) ** 2
+    HE4_SIGMA_MRAD = 5.0 / math.sqrt(HE4_PHOTONS)
+    HE4_THRESHOLD = M_ALPHA / math.sqrt(N_INDEX ** 2 - 1.0)
+    HE4_PHOTONS_WITHOUT_Z2 = HE4_PHOTONS / Z ** 2  # the pre-fix answer (17.02): negative control
 
     def test_helium_yield_scales_with_z_squared(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p', 'He4',
@@ -134,10 +143,14 @@ class CherenkovChargeTests(unittest.TestCase):
         self.assertAlmostEqual(he4['expected_photons'], self.HE4_PHOTONS, delta=1e-9)
         self.assertAlmostEqual(he4['track_angular_resolution_mrad'], self.HE4_SIGMA_MRAD, delta=1e-9)
         # The threshold and the angle depend on beta only, not on z.
-        # 11.642377294538912 with the CODATA 2022 alpha-particle mass (Th9); 11.642377257681904 with 3.72737940 GeV
-        self.assertAlmostEqual(he4['threshold_momentum_gev'], 11.642377294538912, delta=1e-9)
-        # 0.2960136490467237 with the CODATA 2022 alpha-particle mass (Th9); 0.2960136491360844 with 3.72737940 GeV
-        self.assertAlmostEqual(he4['cherenkov_angle_rad'], 0.2960136490467237, delta=1e-12)
+        self.assertAlmostEqual(he4['threshold_momentum_gev'], self.HE4_THRESHOLD, delta=1e-9)
+        self.assertAlmostEqual(he4['cherenkov_angle_rad'], self.HE4_ANGLE, delta=1e-12)
+        # Negative control: the pre-fix yield (no z^2) is 4x low and must fail the same tolerance.
+        self.assertGreater(abs(he4['expected_photons'] - self.HE4_PHOTONS_WITHOUT_Z2), 1.0)
+        # z = 1 is unchanged by the fix: the proton yield follows the same closed form with z = 1.
+        beta_p = self.P / math.hypot(self.P, 0.93827208943)  # CODATA 2022 proton mass, GeV
+        p_yield = self.N0 * self.L_CM * (1.0 - 1.0 / (self.N_INDEX * beta_p) ** 2)
+        self.assertAlmostEqual(payload['species_a']['expected_photons'], p_yield, delta=1e-9)
 
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
