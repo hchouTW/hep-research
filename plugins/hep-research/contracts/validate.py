@@ -713,6 +713,11 @@ def _ml_weights_calibration_v2(ext: dict, rep: Report, native: bool) -> None:
                         "used_in names 'calibration' but the artifact records no calibration")
             if len(set(used)) != len(used):
                 rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_inconsistent", "used_in lists an entry twice")
+            if "loss" in used and not (isinstance(w.get("training"), dict) and isinstance(w.get("evaluation"), dict)):
+                # hep-ml invariant ML-05: training and evaluation weights are recorded separately
+                rep.add("warning", f"{x}.weights", "ml.weights_not_separated",
+                        "weights enter the loss: record the training weights and the evaluation weights separately "
+                        "(weights.training and weights.evaluation)")
         top = w.get("negative_weight_treatment")
         tr: Any = w.get("training") if isinstance(w.get("training"), dict) else {}
         if top == "none-present" and (tr.get("negative_weight_treatment") not in (None, "none-present", "signed")
@@ -1626,6 +1631,11 @@ def _stat_hardening(ext: dict, rep: Report) -> None:
         if missing:
             rep.add("unresolved", "$.extension.expected", "stats.expected_bands_missing",
                     f"an observed limit needs its expected median and both bands for comparison (missing {', '.join(missing)})")
+        if _blank(cons):
+            # hep-statistics invariant STAT-02: an approximation is named (asymptotic, Wilks, exact Poisson, toys)
+            rep.add("warning", "$.extension.construction", "stats.construction_missing",
+                    "a frequentist limit names its construction (asymptotic, profile-likelihood-wilks, neyman, cls, "
+                    "toy-calibrated-profile, ...): an approximation that is not named cannot be validated")
     toys = _toy_based(ext)
     seeds: Any = ext.get("seeds")
     if toys and not (isinstance(seeds, dict) and seeds) and not (cov is not None and "seed" in cov):
