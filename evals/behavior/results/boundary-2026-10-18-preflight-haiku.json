@@ -1,0 +1,8813 @@
+{
+ "run_id": "boundary-2026-10-18-preflight-haiku",
+ "manifest": {
+  "created": "2026-10-18T00:54:25.833946+00:00",
+  "plugin": {
+   "version": "0.14.1",
+   "behavior_hash": "bdef9b6dd26d2d4d",
+   "files": 235
+  },
+  "plugin_git": {
+   "commit": "b7441006cd9e89149c55674a726a938e0e84e5a1",
+   "dirty": false
+  },
+  "isolation": "setting-sources",
+  "opts": {
+   "max_turns": 40,
+   "timeout": 900,
+   "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+   "rerun": false,
+   "isolation": "setting-sources",
+   "case_budget_usd": 0.5,
+   "budget_usd": 4.0
+  },
+  "allowed_tools_default": [
+   "Bash",
+   "Read",
+   "Write",
+   "Edit",
+   "Glob",
+   "Grep",
+   "Skill"
+  ],
+  "runs": 165,
+  "holdout": null,
+  "completed": 165,
+  "skipped": 0,
+  "spent_usd": 1.8625,
+  "stopped": null,
+  "cli_versions": [
+   "2.1.302"
+  ]
+ },
+ "runs": [
+  {
+   "case": "l2-ctx-companion-missing",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "context",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": null,
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00681099,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "answer_matches",
+     "severity": "blocking",
+     "invariant": "CTX-COMPANION-PREFLIGHT",
+     "passed": true
+    },
+    {
+     "grader": "answer_not_matches",
+     "severity": "blocking",
+     "invariant": "CTX-COMPANION-PREFLIGHT",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-ctx-companion-missing",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "context",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": null,
+   "first_hep_skill": null,
+   "skills": [],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00540002,
+   "cli_version": "2.1.302",
+   "num_turns": 5,
+   "graders": [
+    {
+     "grader": "answer_matches",
+     "severity": "blocking",
+     "invariant": "CTX-COMPANION-PREFLIGHT",
+     "passed": false
+    },
+    {
+     "grader": "answer_not_matches",
+     "severity": "blocking",
+     "invariant": "CTX-COMPANION-PREFLIGHT",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-ctx-companion-missing",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "context",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": null,
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.006643660000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "answer_matches",
+     "severity": "blocking",
+     "invariant": "CTX-COMPANION-PREFLIGHT",
+     "passed": false
+    },
+    {
+     "grader": "answer_not_matches",
+     "severity": "blocking",
+     "invariant": "CTX-COMPANION-PREFLIGHT",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "measurement",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.9,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.009541830000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "measurement",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.9,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.011426110000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "measurement",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.9,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.01059184,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "measurement",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.9,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.020288300000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "measurement",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.9,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.01029107,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "measurement",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.9,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.012140719999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers-zh",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "zh-Hant",
+   "kind": "measurement",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.8571,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.013135939999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_language",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers-zh",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "zh-Hant",
+   "kind": "measurement",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.8571,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.0124638,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_language",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers-zh",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "zh-Hant",
+   "kind": "measurement",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.8571,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.01230595,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_language",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers-zh",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "zh-Hant",
+   "kind": "measurement",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.8571,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.011662600000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_language",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers-zh",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "zh-Hant",
+   "kind": "measurement",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.8571,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.00912456,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_language",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-meas-ams-numbers-zh",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "zh-Hant",
+   "kind": "measurement",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.8571,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.01081696,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_language",
+     "severity": "minor",
+     "invariant": "CTX-USER-LANGUAGE",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "MEAS-02",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-th-benchmark-source",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00819319,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "THEO-05",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-05",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-th-benchmark-source",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.008199610000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "THEO-05",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-05",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-th-benchmark-source",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0067677300000000004,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "THEO-05",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-05",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-th-benchmark-source",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": null,
+   "skills": [],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": false,
+   "score": 0.7143,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00876666,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "THEO-05",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-05",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-th-benchmark-source",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": null,
+   "skills": [],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": false,
+   "score": 0.7143,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00550768,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "THEO-05",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-05",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-th-benchmark-source",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": null,
+   "skills": [],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": false,
+   "score": 0.7143,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.005014950000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 5,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "THEO-05",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-05",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-th-qed-conventions",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.6,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.005505009999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 3,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-02",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "THEO-01",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-th-qed-conventions",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.6,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.00547781,
+   "cli_version": "2.1.302",
+   "num_turns": 3,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-02",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "THEO-01",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-th-qed-conventions",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.6,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.00384153,
+   "cli_version": "2.1.302",
+   "num_turns": 3,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-02",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "THEO-01",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-th-qed-conventions",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.6,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.00556621,
+   "cli_version": "2.1.302",
+   "num_turns": 3,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-02",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "THEO-01",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-th-qed-conventions",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.6,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.0036829700000000003,
+   "cli_version": "2.1.302",
+   "num_turns": 3,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-02",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "THEO-01",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l2-th-qed-conventions",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "theory",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.6,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [
+    "judge"
+   ],
+   "cost_usd": 0.00380957,
+   "cli_version": "2.1.302",
+   "num_turns": 3,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "THEO-02",
+     "passed": true
+    },
+    {
+     "grader": "judge",
+     "severity": "minor",
+     "invariant": "THEO-01",
+     "passed": null
+    }
+   ]
+  },
+  {
+   "case": "l3-theory-vs-published",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": null,
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01095866,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "blocking",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-theory-vs-published",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": null,
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01005383,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "blocking",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-theory-vs-published",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": null,
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01037498,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "blocking",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-theory-vs-published",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": null,
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00852673,
+   "cli_version": "2.1.302",
+   "num_turns": 5,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "blocking",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-theory-vs-published",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": null,
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01022866,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "blocking",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-theory-vs-published",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": null,
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01584681,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "file_not_read",
+     "severity": "major",
+     "invariant": "CTX-NO-UNRELATED-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "blocking",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "STAT-05",
+     "passed": false
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-eic-facility-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.007396880000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-eic-facility-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00704733,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-eic-facility-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00548206,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-eic-facility-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00706981,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-eic-facility-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.006944540000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-eic-facility-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00699723,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00822895,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00687634,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0069957000000000005,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00811119,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00611914,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-epic-detector-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0071074,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.008365830000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.011487039999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.013363980000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00940991,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00846505,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j01",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "journey",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-measurement",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.007924629999999998,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j02",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01305027,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j02",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01232426,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j02",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.014272290000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j02",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00905416,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j02",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0195426,
+   "cli_version": "2.1.302",
+   "num_turns": 14,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-j02",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01079244,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skills_in_order",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-exists-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00847881,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-exists-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00704124,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-exists-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.005159530000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-exists-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00576122,
+   "cli_version": "2.1.302",
+   "num_turns": 4,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-exists-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00782126,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-exists-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0049602,
+   "cli_version": "2.1.302",
+   "num_turns": 5,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.014204829999999998,
+   "cli_version": "2.1.302",
+   "num_turns": 13,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01254839,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01101202,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.011843429999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00982081,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01241689,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01068371,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.014567759999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 17,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.012013209999999998,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01094048,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00876991,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-latest-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.015013400000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 13,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-paper-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0089096,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-paper-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.009244510000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-paper-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00845227,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-paper-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.009979130000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-paper-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.008583,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-paper-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00814363,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-support-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.012394589999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-support-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01036547,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-support-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00977849,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-support-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01182142,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-support-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00985541,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-rc-ams-support-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0072636,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.011389870000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.012776160000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.013098969999999998,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01029814,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01030629,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00925293,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.014658710000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01451306,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0090687,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.013841200000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01300359,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-bound-bc-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.010693810000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.024431760000000004,
+   "cli_version": "2.1.302",
+   "num_turns": 18,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01704833,
+   "cli_version": "2.1.302",
+   "num_turns": 13,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0172677,
+   "cli_version": "2.1.302",
+   "num_turns": 14,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.016479900000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 14,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.016698110000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 14,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01816018,
+   "cli_version": "2.1.302",
+   "num_turns": 14,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01809207,
+   "cli_version": "2.1.302",
+   "num_turns": 15,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01487995,
+   "cli_version": "2.1.302",
+   "num_turns": 13,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.014091790000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 14,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.012286999999999998,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.03480080000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 28,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.017796530000000005,
+   "cli_version": "2.1.302",
+   "num_turns": 15,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.011551150000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00963926,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.009482480000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01277704,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.02005946,
+   "cli_version": "2.1.302",
+   "num_turns": 13,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-crdb-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.010939220000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0120495,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01302854,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01288672,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01594325,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.008340170000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-theory",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.2857,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00811459,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.011660940000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01178728,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01031572,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.010968150000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00981972,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-3",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.012056270000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "neighboring",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01013698,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skill_not_loaded",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "neighboring",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00868919,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skill_not_loaded",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "neighboring",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.006711600000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skill_not_loaded",
+     "severity": "minor",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "neighboring",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01040038,
+   "cli_version": "2.1.302",
+   "num_turns": 13,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skill_not_loaded",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "neighboring",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory",
+    "hep-statistics",
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 0.875,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01045366,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "skill_not_loaded",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-interp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "neighboring",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-theory",
+   "skills": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01732238,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": false
+    },
+    {
+     "grader": "skill_not_loaded",
+     "severity": "minor",
+     "passed": false
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-prop-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00816957,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-prop-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00737606,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-prop-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0070671300000000005,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-prop-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.009304240000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-prop-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00844986,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-prop-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.006763440000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-ts-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.010540370000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-ts-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00881459,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-ts-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0100719,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-ts-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics",
+    "hep-measurement"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.014026580000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-ts-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00882088,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-ts-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-measurement",
+   "skills": [
+    "hep-measurement",
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01182728,
+   "cli_version": "2.1.302",
+   "num_turns": 12,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00960675,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00879997,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00919336,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00897101,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.009809510000000002,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-1",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01142829,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00925915,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0070231700000000005,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00795229,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics",
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.01141941,
+   "cli_version": "2.1.302",
+   "num_turns": 10,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.00685502,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-2",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-statistics",
+   "first_hep_skill": "hep-statistics",
+   "skills": [
+    "hep-statistics",
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": true,
+   "score": 0.5714,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.010064449999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 11,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": false
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.03184693999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 20,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.02276663,
+   "cli_version": "2.1.302",
+   "num_turns": 18,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "forced",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.025612330000000003,
+   "cli_version": "2.1.302",
+   "num_turns": 19,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.03906633,
+   "cli_version": "2.1.302",
+   "num_turns": 24,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.032803000000000006,
+   "cli_version": "2.1.302",
+   "num_turns": 24,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "rt-wp11-xexp-4",
+   "layer": "L1",
+   "suite": "routing-table",
+   "lang": "en",
+   "kind": "direct",
+   "arm": "natural",
+   "model": "claude-haiku-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.029511240000000005,
+   "cli_version": "2.1.302",
+   "num_turns": 20,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "file_read",
+     "severity": "blocking",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    },
+    {
+     "grader": "ordered",
+     "severity": "major",
+     "invariant": "CTX-READ-BOUND-PROFILE",
+     "passed": true
+    }
+   ]
+  }
+ ],
+ "cost_usd": {
+  "total": 1.8625,
+  "per_run": 0.0113
+ },
+ "contaminated": [],
+ "report": {
+  "manifest": {
+   "created": "2026-10-18T00:54:25.833946+00:00",
+   "plugin": {
+    "version": "0.14.1",
+    "behavior_hash": "bdef9b6dd26d2d4d",
+    "files": 235
+   },
+   "plugin_git": {
+    "commit": "b7441006cd9e89149c55674a726a938e0e84e5a1",
+    "dirty": false
+   },
+   "isolation": "setting-sources",
+   "opts": {
+    "max_turns": 40,
+    "timeout": 900,
+    "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+    "rerun": false,
+    "isolation": "setting-sources",
+    "case_budget_usd": 0.5,
+    "budget_usd": 4.0
+   },
+   "allowed_tools_default": [
+    "Bash",
+    "Read",
+    "Write",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Skill"
+   ],
+   "runs": 165,
+   "holdout": null,
+   "completed": 165,
+   "skipped": 0,
+   "spent_usd": 1.8625,
+   "stopped": null,
+   "cli_versions": [
+    "2.1.302"
+   ]
+  },
+  "runs": 165,
+  "host_errors": 0,
+  "by_layer_arm_model": {
+   "L1|forced|claude-haiku-5-5": {
+    "runs": 66,
+    "pass": [
+     0.9090909090909091,
+     0.8155127011503412,
+     0.9576670249294886
+    ],
+    "blocking_failure": [
+     0.09090909090909091,
+     0.04233297507051138,
+     0.18448729884965875
+    ],
+    "mean_score": 0.9467
+   },
+   "L1|natural|claude-haiku-5-5": {
+    "runs": 66,
+    "pass": [
+     0.7424242424242424,
+     0.6256690145359198,
+     0.8325115638817573
+    ],
+    "blocking_failure": [
+     0.25757575757575757,
+     0.1674884361182428,
+     0.3743309854640803
+    ],
+    "mean_score": 0.8368
+   },
+   "L2|forced|claude-haiku-5-5": {
+    "runs": 12,
+    "pass": [
+     0.75,
+     0.4676946650664344,
+     0.9110583316059453
+    ],
+    "blocking_failure": [
+     0.25,
+     0.08894166839405476,
+     0.5323053349335656
+    ],
+    "mean_score": 0.8393
+   },
+   "L2|natural|claude-haiku-5-5": {
+    "runs": 15,
+    "pass": [
+     0.4666666666666667,
+     0.24809535365737398,
+     0.698830199745016
+    ],
+    "blocking_failure": [
+     0.3333333333333333,
+     0.15176324439714733,
+     0.5828645226148021
+    ],
+    "mean_score": 0.7476
+   },
+   "L3|forced|claude-haiku-5-5": {
+    "runs": 3,
+    "pass": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ],
+    "blocking_failure": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "mean_score": 0.5
+   },
+   "L3|natural|claude-haiku-5-5": {
+    "runs": 3,
+    "pass": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ],
+    "blocking_failure": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "mean_score": 0.4286
+   }
+  },
+  "L1_selection": {
+   "claude-haiku-5-5": {
+    "runs": 78,
+    "loaded_expected": [
+     0.9615384615384616,
+     0.8929155395249817,
+     0.986834174586839
+    ],
+    "first_is_expected": [
+     0.9102564102564102,
+     0.8261527543939476,
+     0.9558469914832263
+    ],
+    "loaded_nothing": [
+     0.038461538461538464,
+     0.013165825413161053,
+     0.10708446047501825
+    ],
+    "by_lang": {
+     "en": [
+      0.9473684210526315,
+      0.8563044960283647,
+      0.9819397043663384
+     ],
+     "zh-Hant": [
+      1.0,
+      0.8453609810751531,
+      0.9999999999999999
+     ]
+    },
+    "by_kind": {
+     "direct": [
+      1.0,
+      0.9368611651470211,
+      1.0
+     ],
+     "journey": [
+      1.0,
+      0.6096657120978348,
+      1.0
+     ],
+     "measurement": [
+      1.0,
+      0.6096657120978348,
+      1.0
+     ],
+     "neighboring": [
+      1.0,
+      0.4385029682449546,
+      1.0
+     ],
+     "theory": [
+      0.5,
+      0.18761630648265054,
+      0.8123836935173494
+     ]
+    },
+    "confusion": {
+     "hep-communication -> hep-communication": 30,
+     "hep-detector -> hep-detector": 6,
+     "hep-measurement -> hep-measurement": 12,
+     "hep-statistics -> hep-measurement": 1,
+     "hep-statistics -> hep-statistics": 11,
+     "hep-statistics -> hep-theory": 3,
+     "hep-theory -> hep-theory": 12,
+     "hep-theory -> none": 3
+    }
+   }
+  },
+  "L1_out_of_domain": {},
+  "L1_L2_decomposition": {
+   "claude-haiku-5-5|forced": {
+    "runs": 78,
+    "p_load": [
+     1.0,
+     0.9530621902878059,
+     1.0
+    ],
+    "p_pass_given_load": [
+     0.8846153846153846,
+     0.7950298680151837,
+     0.9380948937446667
+    ],
+    "p_pass_given_no_load": [
+     NaN,
+     0.0,
+     1.0
+    ],
+    "p_pass": [
+     0.8846153846153846,
+     0.7950298680151837,
+     0.9380948937446667
+    ],
+    "p_pass_if_always_loaded": 0.8846153846153846,
+    "failures_from_not_loading": 0.0
+   },
+   "claude-haiku-5-5|natural": {
+    "runs": 78,
+    "p_load": [
+     0.9615384615384616,
+     0.8929155395249817,
+     0.986834174586839
+    ],
+    "p_pass_given_load": [
+     0.7333333333333333,
+     0.6236920098227623,
+     0.8202368636852615
+    ],
+    "p_pass_given_no_load": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "p_pass": [
+     0.7435897435897436,
+     0.6368667271880386,
+     0.8274456219265334
+    ],
+    "p_pass_if_always_loaded": 0.7333333333333333,
+    "failures_from_not_loading": 0.0
+   }
+  },
+  "natural_vs_forced": {
+   "claude-haiku-5-5": {
+    "natural": [
+     0.3888888888888889,
+     0.20305246572163635,
+     0.613809583977621
+    ],
+    "forced": [
+     0.6,
+     0.3574683012062462,
+     0.8017550385865843
+    ],
+    "paired": {
+     "a_only": 0,
+     "b_only": 3,
+     "concordant": 12,
+     "p_value": 0.25,
+     "direction": "B better"
+    }
+   }
+  },
+  "L2_by_skill": {
+   "None|natural|claude-haiku-5-5": {
+    "runs": 3,
+    "pass": [
+     0.3333333333333333,
+     0.06149194472039626,
+     0.7923403991979521
+    ],
+    "blocking_failure": [
+     0.6666666666666666,
+     0.20765960080204776,
+     0.9385080552796037
+    ]
+   },
+   "hep-measurement|forced|claude-haiku-5-5": {
+    "runs": 6,
+    "pass": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.3903342879021652
+    ]
+   },
+   "hep-measurement|natural|claude-haiku-5-5": {
+    "runs": 6,
+    "pass": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.3903342879021652
+    ]
+   },
+   "hep-theory|forced|claude-haiku-5-5": {
+    "runs": 6,
+    "pass": [
+     0.5,
+     0.18761630648265054,
+     0.8123836935173494
+    ],
+    "blocking_failure": [
+     0.5,
+     0.18761630648265054,
+     0.8123836935173494
+    ]
+   },
+   "hep-theory|natural|claude-haiku-5-5": {
+    "runs": 6,
+    "pass": [
+     0.0,
+     0.0,
+     0.3903342879021652
+    ],
+    "blocking_failure": [
+     0.5,
+     0.18761630648265054,
+     0.8123836935173494
+    ]
+   }
+  },
+  "invariants": {
+   "COMM-04|forced": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "COMM-04|natural": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "CTX-COMPANION-PREFLIGHT|natural": [
+    0.6666666666666666,
+    0.2999933151383921,
+    0.9032285888942194
+   ],
+   "CTX-NO-UNRELATED-PROFILE|forced": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "CTX-NO-UNRELATED-PROFILE|natural": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "CTX-READ-BOUND-PROFILE|forced": [
+    0.9251700680272109,
+    0.8709796447833846,
+    0.9577049952172669
+   ],
+   "CTX-READ-BOUND-PROFILE|natural": [
+    0.7959183673469388,
+    0.7236255200226551,
+    0.8531389894177983
+   ],
+   "CTX-USER-LANGUAGE|forced": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "CTX-USER-LANGUAGE|natural": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "L1-SELECT|forced": [
+    1.0,
+    0.9530621902878059,
+    1.0
+   ],
+   "L1-SELECT|natural": [
+    0.9487179487179487,
+    0.8754332345270551,
+    0.9798789875261039
+   ],
+   "MEAS-02|forced": [
+    0.0,
+    0.0,
+    0.3903342879021652
+   ],
+   "MEAS-02|natural": [
+    0.0,
+    0.0,
+    0.3903342879021652
+   ],
+   "STAT-05|forced": [
+    0.0,
+    0.0,
+    0.3903342879021652
+   ],
+   "STAT-05|natural": [
+    0.0,
+    0.0,
+    0.3903342879021652
+   ],
+   "THEO-01|forced": [
+    0.0,
+    0.0,
+    0.5614970317550454
+   ],
+   "THEO-01|natural": [
+    0.0,
+    0.0,
+    0.5614970317550454
+   ],
+   "THEO-02|forced": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "THEO-02|natural": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "THEO-05|forced": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "THEO-05|natural": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ]
+  },
+  "blocking_failures": [
+   {
+    "case": "l2-ctx-companion-missing",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "l2-ctx-companion-missing",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "l2-th-qed-conventions",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "l2-th-qed-conventions",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "l2-th-qed-conventions",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "l2-th-qed-conventions",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "l2-th-qed-conventions",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "l2-th-qed-conventions",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "l3-theory-vs-published",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "l3-theory-vs-published",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "l3-theory-vs-published",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "l3-theory-vs-published",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "l3-theory-vs-published",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "l3-theory-vs-published",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-rc-ams-exists-1",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "rt-rc-ams-exists-1",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-rc-ams-exists-1",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-rc-ams-exists-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "rt-rc-ams-exists-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-rc-ams-exists-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-rc-ams-latest-2",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "rt-wp11-bound-bc-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "rt-wp11-bound-bc-2",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-wp11-crdb-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 0
+   },
+   {
+    "case": "rt-wp11-crdb-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-wp11-crdb-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-wp11-crdb-2",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-wp11-crdb-3",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-wp11-interp-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-wp11-interp-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-wp11-interp-3",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-wp11-interp-4",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-wp11-xexp-1",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-wp11-xexp-1",
+    "arm": "forced",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-wp11-xexp-1",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   },
+   {
+    "case": "rt-wp11-xexp-2",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 1
+   },
+   {
+    "case": "rt-wp11-xexp-2",
+    "arm": "natural",
+    "model": "claude-haiku-5-5",
+    "repeat": 2
+   }
+  ],
+  "L3": {
+   "forced|claude-haiku-5-5": {
+    "runs": 3,
+    "pass": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ],
+    "chain_complete": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ],
+    "artifacts_valid": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "fault_detected": [
+     NaN,
+     0.0,
+     1.0
+    ]
+   },
+   "natural|claude-haiku-5-5": {
+    "runs": 3,
+    "pass": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ],
+    "chain_complete": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ],
+    "artifacts_valid": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "fault_detected": [
+     NaN,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  "L4": {},
+  "reliability": {
+   "L1|forced|claude-haiku-5-5": {
+    "cases": 22,
+    "k": 3,
+    "pass_at_k": 0.9545454545454546,
+    "pass_hat_k": 0.8636363636363636,
+    "flaky_cases": [
+     "rt-wp11-bound-bc-2",
+     "rt-wp11-xexp-1"
+    ],
+    "flaky_fraction": 0.09090909090909091
+   },
+   "L1|natural|claude-haiku-5-5": {
+    "cases": 22,
+    "k": 3,
+    "pass_at_k": 0.9090909090909091,
+    "pass_hat_k": 0.5,
+    "flaky_cases": [
+     "rt-rc-ams-latest-2",
+     "rt-wp11-bound-bc-1",
+     "rt-wp11-crdb-2",
+     "rt-wp11-crdb-3",
+     "rt-wp11-interp-1",
+     "rt-wp11-interp-3",
+     "rt-wp11-interp-4",
+     "rt-wp11-xexp-1",
+     "rt-wp11-xexp-2"
+    ],
+    "flaky_fraction": 0.4090909090909091
+   },
+   "L2|forced|claude-haiku-5-5": {
+    "cases": 4,
+    "k": 3,
+    "pass_at_k": 0.75,
+    "pass_hat_k": 0.75,
+    "flaky_cases": [],
+    "flaky_fraction": 0.0
+   },
+   "L2|natural|claude-haiku-5-5": {
+    "cases": 5,
+    "k": 3,
+    "pass_at_k": 0.6,
+    "pass_hat_k": 0.4,
+    "flaky_cases": [
+     "l2-ctx-companion-missing"
+    ],
+    "flaky_fraction": 0.2
+   },
+   "L3|forced|claude-haiku-5-5": {
+    "cases": 1,
+    "k": 3,
+    "pass_at_k": 0.0,
+    "pass_hat_k": 0.0,
+    "flaky_cases": [],
+    "flaky_fraction": 0.0
+   },
+   "L3|natural|claude-haiku-5-5": {
+    "cases": 1,
+    "k": 3,
+    "pass_at_k": 0.0,
+    "pass_hat_k": 0.0,
+    "flaky_cases": [],
+    "flaky_fraction": 0.0
+   }
+  },
+  "unverified_graders": {
+   "judge": 18
+  }
+ },
+ "note": "scored summary only: prompts, answers, tool results and transcripts are not stored here (they stay in evals/behavior/runs/<id>/, which is not committed)"
+}
