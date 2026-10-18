@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Producing skills now hand their results to the next skill.**
+  - hep-theory: after the comparison gate, it loads hep-statistics for the chi2 or fit and never computes it
+    inline.
+  - hep-detector: after its two validators, it loads hep-statistics for unfolding or a fit.
+  - hep-ml: it writes the `ml-artifact` with `scripts/write_ml_artifact.py` into `artifacts_dir`, and loads
+    hep-statistics for a limit or fit.
+  - hep-statistics: it writes the `statistical-result` with `scripts/result_artifact.py` into `artifacts_dir`, and
+    loads hep-communication for a written report.
+  - hep-detector and hep-ml: working files stay outside `artifacts_dir`.
+  - In the 2026-10-18 L3 runs, the chain cases failed on scratch JSON in `artifacts_dir` and on hand-written
+    artifacts, and most runs never loaded the next skill.
 - **The L3 checks are now on the path the agent takes.**
   - hep-theory's workflow step 5 runs `contracts/comparison/gate.py` before any chi2, pull or fit against data. On
     exit 1 it declares transformations or stops.

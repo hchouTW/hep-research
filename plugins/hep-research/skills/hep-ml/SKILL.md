@@ -24,7 +24,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 2. Define the task, labels, features and grouping key; build grouped splits and check leakage.
 3. Train with recorded seeds and environment; monitor; checkpoint.
 4. Evaluate on held-out groups with physics-weighted metrics at the working point, calibrate, assess domain shift and the downstream effect.
-5. Write the `ml-artifact` and validate it.
+5. Write the `ml-artifact` with `scripts/write_ml_artifact.py --out <artifacts_dir>/<name>.json` and validate it; working files stay outside `artifacts_dir`. A limit or fit with the model: load hep-statistics.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution

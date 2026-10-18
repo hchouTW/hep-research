@@ -42,10 +42,10 @@ One number: when a shell is available, run its row's tool, state the constructio
 
 ## Workflow
 
-1. Resolve context (stanza below); collect inputs as artifacts (measurement spec, response, prediction, dataset records) and validate each with `contracts/validate.py` (a response also with `contracts/response_adapter.py --validate`); stop on a contract error.
+1. Resolve context (stanza below); collect inputs as artifacts (measurement spec, response, prediction, dataset records) and validate each (`contracts/validate.py`; a response also `response_adapter.py --validate`); stop on a contract error.
 2. Inputs from different producers: run `<plugin root>/contracts/comparison/gate.py` (exit 1 lists each mismatch).
 3. Build the model: observables, POIs, nuisances and constraints, correlations with their evidence.
-4. Validate on Asimov and toys (bias, pulls, coverage); fit; write and validate the `statistical-result`.
+4. Validate on Asimov and toys (bias, pulls, coverage); fit; write the `statistical-result` to `artifacts_dir` with `scripts/result_artifact.py`; validate it. A report: load hep-communication.
 
 ## Resources
 
