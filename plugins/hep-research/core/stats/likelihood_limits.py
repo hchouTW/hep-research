@@ -1156,6 +1156,18 @@ def shape_q_evaluator(model, mu: float):
     return evaluate
 
 
+def _log_cls_crossing(grid, values, alpha: float):
+    """First crossing of CLs = alpha on a grid of mu (CLs = 1 at mu = 0), interpolated linearly in log CLs between the
+    grid points that bracket it; None when the curve never falls below alpha."""
+    prev_mu, prev = 0.0, 1.0
+    for mu, v in zip(grid, values):
+        if v < alpha:
+            lp, lv = math.log(max(prev, 1e-300)), math.log(max(v, 1e-300))
+            return prev_mu + (mu - prev_mu) * (lp - math.log(alpha)) / (lp - lv) if lp != lv else mu
+        prev_mu, prev = mu, v
+    return None
+
+
 def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, points: int) -> dict:
     """Toy-based CLs on a grid of mu in (0, hi]: at each mu, q-tilde_mu of the data against seeded toys generated at
     (mu, nuisances profiled on the data at mu) for CLs+b and at (0, nuisances profiled at mu = 0) for CLb, with the
@@ -1211,13 +1223,7 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
             curves[name].append(cls_at(dist["b"][idx]))
 
     def crossing(values):
-        prev_mu, prev = 0.0, 1.0
-        for mu, v in zip(grid, values):
-            if v < alpha:
-                lp, lv = math.log(max(prev, 1e-300)), math.log(max(v, 1e-300))
-                return prev_mu + (mu - prev_mu) * (lp - math.log(alpha)) / (lp - lv) if lp != lv else mu
-            prev_mu, prev = mu, v
-        return None
+        return _log_cls_crossing(grid, values, alpha)
     limits = {name: crossing(vals) for name, vals in curves.items()}
     obs = limits["observed"]
     range_lo, range_hi = crossing(cls_lo), crossing([min(v, 1e300) for v in cls_hi])
