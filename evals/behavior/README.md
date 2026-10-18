@@ -176,6 +176,20 @@ Still failing after the change: `l3-theory-vs-published` runs the gate but never
 grader); the two chain cases, `l3-response-unfold-report` and `l3-ml-to-inference`, are 0/6 on both models, on
 CTX-ARTIFACTS-VALID (handoff artifacts that do not validate) and MEAS-07 (the synthetic label lost on a hop).
 
+**L3 chains (2026-10-18, PR #148).** Two changes were each measured paired against `l3-after-*` (#147), with all eight
+L3 cases, natural and forced, 3 repeats.
+- v1: the producing skills name their writer and load the next skill.
+- v2: context-resolution step 5 also says no scratch goes in `artifacts_dir`.
+
+| Model | L3 pass: #147 → v1 → v2 | `l3-theory-vs-published` | Chain cases (unfold, ML) | Chain runs whose artifacts all validate | Cost v1 + v2 |
+|---|---|---|---|---|---|
+| claude-sonnet-5-5 | 22 → 31 → 29 of 48 | 0/6 → 6/6 → 6/6 | 0/12 → 0/12 → 0/12 | 0 → 0 → 0 of 12 | $7.74 + $7.58 |
+| claude-haiku-5-5 | 27 → 30 → 28 of 48 | 0/6 → 0/6 → 2/6 | 0/12 → 1/12 → 1/12 | 0 → 2 → 1 of 12 | $0.76 + $0.76 |
+
+Handing off to hep-statistics fixed the theory comparison for Sonnet. The chain cases still fail. The real artifacts (the
+response, the `ml-artifact`) validate, but the agent also leaves raw tool outputs in `artifacts_dir` (unfolded spectra,
+coverage logs, per-fold models), and a stated rule did not stop it (v2).
+
 ## What is committed
 
 | Path | Content | Committed |
