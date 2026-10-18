@@ -147,19 +147,6 @@ fault-matrix response case's validator is not run), `l2-th-qed-conventions` neve
 `profiles/theory/qed-benchmark/index.md` (6 of 6), and 18 judge-scored criteria are unverified because no `judge`
 run was made (they are `minor` and count as not passed).
 
-**L3 handoffs (2026-10-18, PR #147).** All eight L3 cases, natural and forced, 3 repeats, before (main `b7441006`) and
-after hep-theory's workflow named the comparison gate and hep-statistics' workflow required validating handed-over
-artifacts (`results/l3-{before,after}-2026-10-18-*.json`, `results/compare-2026-10-18-l3-*.md`):
-
-| Model | L3 pass, before → after | Natural (McNemar p) | Forced (McNemar p) | Gate run (STAT-05) | Handoff validated | Cost |
-|---|---|---|---|---|---|---|
-| claude-sonnet-5-5 | 16.7% [8.7, 29.6] → 45.8% [32.6, 59.7] | 12.5% → 37.5% (0.031) | 20.8% → 54.2% (0.0078) | 0/6 → 6/6 | 0/18 → 10/18 | $6.46 + $6.77 |
-| claude-haiku-5-5 | 25.0% [14.9, 38.8] → 56.2% [42.3, 69.3] | 20.8% → 50.0% (0.016) | 29.2% → 62.5% (0.0078) | 0/6 → 6/6 | 4/18 → 17/18 | $0.65 + $0.80 |
-
-Still failing after the change: `l3-theory-vs-published` runs the gate but never loads hep-statistics (a major
-grader); the two chain cases, `l3-response-unfold-report` and `l3-ml-to-inference`, are 0/6 on both models, on
-CTX-ARTIFACTS-VALID (handoff artifacts that do not validate) and MEAS-07 (the synthetic label lost on a hop).
-
 **Reading (DESIGN §10).** The failures are mostly L2, not L1. The expected skill loads in 94-96% of runs, and of the natural-arm L1+L2 failures only 8 of 40 (Sonnet) and 4 of 38
 (Haiku) are runs without it. What fails after the load is context resolution step 2,
 reading the bound profile's `index.md` (of Sonnet's 30 natural-arm L1 failures, 15 read other files in the profile, such
@@ -175,6 +162,19 @@ read one command moved the dominant failure. Sonnet's natural-arm L1 pass rate r
 with a blocking failure fell from 47 to 15; Haiku's fell from 68 to 37, but Haiku still skips the preflight or the
 index in 30 of the 37. Neither model passes `gate.json` yet. L3 (`gate.py` before the comparison, STAT-05) is
 unchanged at 0 of 6 and is the next gap; it is a handoff-validation task, not a coverage gap.
+
+**L3 handoffs (2026-10-18, PR #147).** All eight L3 cases, natural and forced, 3 repeats, before (main `b7441006`) and
+after hep-theory's workflow named the comparison gate and hep-statistics' workflow required validating handed-over
+artifacts (`results/l3-{before,after}-2026-10-18-*.json`, `results/compare-2026-10-18-l3-*.md`):
+
+| Model | L3 pass, before → after | Natural (McNemar p) | Forced (McNemar p) | Gate run (STAT-05) | Handoff validated | Cost |
+|---|---|---|---|---|---|---|
+| claude-sonnet-5-5 | 16.7% [8.7, 29.6] → 45.8% [32.6, 59.7] | 12.5% → 37.5% (0.031) | 20.8% → 54.2% (0.0078) | 0/6 → 6/6 | 0/18 → 10/18 | $6.46 + $6.77 |
+| claude-haiku-5-5 | 25.0% [14.9, 38.8] → 56.2% [42.3, 69.3] | 20.8% → 50.0% (0.016) | 29.2% → 62.5% (0.0078) | 0/6 → 6/6 | 4/18 → 17/18 | $0.65 + $0.80 |
+
+Still failing after the change: `l3-theory-vs-published` runs the gate but never loads hep-statistics (a major
+grader); the two chain cases, `l3-response-unfold-report` and `l3-ml-to-inference`, are 0/6 on both models, on
+CTX-ARTIFACTS-VALID (handoff artifacts that do not validate) and MEAS-07 (the synthetic label lost on a hop).
 
 ## What is committed
 
