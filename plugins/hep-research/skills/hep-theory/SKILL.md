@@ -25,7 +25,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 2. Write the theory spec: model, assumptions, conventions, order, parameters, scales, validity domain.
 3. Derive (symbolically where useful), recording status and each check. Before SymPy work, run `python3 "<plugin root>/skills/hep-computing/scripts/find_python.py"` and use the interpreter it returns; if it reports `failed`, say so and never install anything without approval. Record that interpreter and its Python and SymPy versions with the derivation (`tools` and `environment` of a `computational-run`). Use hep-computing for heavy numerics.
 4. Produce the prediction in the observable space it will be compared in, with uncertainties by type and allowed transformations.
-5. For comparisons with data, state the dataset record and hand the inference to hep-statistics.
+5. Comparison with data (chi2, pull, fit): first run `python3 "<plugin root>/contracts/comparison/gate.py" <prediction.json> <record.json>`; on exit 1 declare transformations (`--plan`) or stop. Then hand the inference to hep-statistics.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
