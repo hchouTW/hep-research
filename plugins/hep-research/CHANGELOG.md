@@ -13,7 +13,8 @@ Software checks establish contract consistency only, not physical validity.
     hep-statistics for a limit or fit.
   - hep-statistics: it writes the `statistical-result` with `scripts/result_artifact.py` into `artifacts_dir`, and
     loads hep-communication for a written report.
-  - hep-detector and hep-ml: working files stay outside `artifacts_dir`.
+  - Context-resolution step 5, in every `SKILL.md`, now says that durable results and handoffs in `artifacts_dir`
+    pass `contracts/validate.py`, and that no scratch files go there. The step is the same length as before.
   - In the 2026-10-18 L3 runs, the chain cases failed on scratch JSON in `artifacts_dir` and on hand-written
     artifacts, and most runs never loaded the next skill.
 - **The L3 checks are now on the path the agent takes.**
