@@ -9,14 +9,6 @@ The scripts are **diagnostics, not frameworks**: small counting, template and un
 simplifications. A many-nuisance shape model, a workspace combination or a production sampler goes through the
 pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script with `--help` for its input format.
 
-## Contents
-
-1. [Common conventions](#common-conventions)
-2. [Choosing a tool](#choosing-a-tool)
-3. [Skill scripts](#skill-scripts)
-4. [Not implemented](#not-implemented)
-5. [Failure modes](#failure-modes)
-
 **Reference index**: the [command reference](core-stats-commands.md) (per-module
 subcommands, inputs and outputs, validation tools outside `core/stats`, publication-gate rules),
 [nuisance modeling](nuisance-modeling.md), [likelihood fitting](likelihood-fitting.md) (with sWeights),

@@ -5,6 +5,14 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **The L3 checks are now on the path the agent takes.**
+  - hep-theory's workflow step 5 runs `contracts/comparison/gate.py` before any chi2, pull or fit against data. On
+    exit 1 it declares transformations or stops.
+  - hep-statistics' workflow step 1 validates each handed-over artifact (`contracts/validate.py`, and for a
+    response also `response_adapter.py --validate`) and stops on a contract error.
+  - In the 2026-10-18 behavioral runs, no L3 run did either.
+  - The duplicated Contents list of `skills/hep-statistics/references/core-stats-guide.md` is removed, to keep the
+    quick-question load within 25,600 bytes.
 - **Profile preflight.** `contracts/project.py <project-dir> --preflight` adds a `preflight` list to its output.
   - Each profile the project binds that ships in the plugin is listed with its `index.md` path, sha256 and text.
   - A bound profile outside the plugin (a local profile or a companion's) is listed as `not-in-plugin`; it is read
