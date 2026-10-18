@@ -176,19 +176,27 @@ Still failing after the change: `l3-theory-vs-published` runs the gate but never
 grader); the two chain cases, `l3-response-unfold-report` and `l3-ml-to-inference`, are 0/6 on both models, on
 CTX-ARTIFACTS-VALID (handoff artifacts that do not validate) and MEAS-07 (the synthetic label lost on a hop).
 
-**L3 chains (2026-10-18, PR #148).** Two changes were each measured paired against `l3-after-*` (#147), with all eight
-L3 cases, natural and forced, 3 repeats.
+**L3 chains (2026-10-18 and 2026-10-19, PR #148).** Three changes were each measured paired against `l3-after-*`
+(#147), with all eight L3 cases, natural and forced, 3 repeats.
 - v1: the producing skills name their writer and load the next skill.
 - v2: context-resolution step 5 also says no scratch goes in `artifacts_dir`.
+- v3: `contracts/validate.py` checks a whole `artifacts_dir` (a JSON file without `artifact_type` is an error), and
+  step 5 and the producing skills' final step run it on `<artifacts_dir>`.
 
-| Model | L3 pass: #147 → v1 → v2 | `l3-theory-vs-published` | Chain cases (unfold, ML) | Chain runs whose artifacts all validate | Cost v1 + v2 |
-|---|---|---|---|---|---|
-| claude-sonnet-5-5 | 22 → 31 → 29 of 48 | 0/6 → 6/6 → 6/6 | 0/12 → 0/12 → 0/12 | 0 → 0 → 0 of 12 | $7.74 + $7.58 |
-| claude-haiku-5-5 | 27 → 30 → 28 of 48 | 0/6 → 0/6 → 2/6 | 0/12 → 1/12 → 1/12 | 0 → 2 → 1 of 12 | $0.76 + $0.76 |
+| Model | L3 pass: #147 → v1 → v2 → v3 | `l3-theory-vs-published` | Chain cases (unfold, ML) | Chain runs whose artifacts all validate | Fault cases | Cost v1 + v2 + v3 |
+|---|---|---|---|---|---|---|
+| claude-sonnet-5-5 | 22 → 31 → 29 → 34 of 48 | 0 → 6 → 6 → 4 of 6 | 0 → 0 → 0 → 4 of 12 | 0 → 0 → 0 → 10 of 12 | 22 → 25 → 23 → 26 of 30 | $7.74 + $7.58 + $8.62 |
+| claude-haiku-5-5 | 27 → 30 → 28 → 28 of 48 | 0 → 0 → 2 → 0 of 6 | 0 → 1 → 1 → 9 of 12 | 0 → 2 → 1 → 11 of 12 | 27 → 29 → 25 → 19 of 30 | $0.76 + $0.76 + $0.86 |
 
-Handing off to hep-statistics fixed the theory comparison for Sonnet. The chain cases still fail. The real artifacts (the
-response, the `ml-artifact`) validate, but the agent also leaves raw tool outputs in `artifacts_dir` (unfolded spectra,
-coverage logs, per-fold models), and a stated rule did not stop it (v2).
+Handing off to hep-statistics fixed the theory comparison for Sonnet. Text alone did not keep raw tool outputs out of
+`artifacts_dir` (v1, v2); the directory check did (v3). The remaining chain failures are mostly a missing hop: Sonnet
+often stops after hep-detector in the unfold case. v3 also brought a Haiku regression on the fault cases: the agent
+no longer validates the colleague's response before use (validator run 22 → 13 of 30, McNemar p = 0.012), plausibly
+because the final step now names `<artifacts_dir>` and the handed-over file sits outside it.
+
+`l3-response-unfold-report` asked for `min_fraction` 0.67 of three hops, which `ceil` made all three; it is now 0.66,
+two hops, as the grader's docstring intends. All L3 runs (before, after, v1-v3) are regraded with it; no earlier
+pass or fail changed.
 
 ## What is committed
 

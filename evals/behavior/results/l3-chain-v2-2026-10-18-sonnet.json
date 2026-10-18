@@ -2118,7 +2118,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -2130,7 +2130,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2750,7 +2750,7 @@
      0.17972190327297757,
      0.5329368316186824
     ],
-    "mean_score": 0.8464
+    "mean_score": 0.852
    }
   },
   "L1_selection": {
@@ -3154,9 +3154,9 @@
      0.7884063244045121
     ],
     "chain_complete": [
-     0.875,
-     0.6899611872949993,
-     0.9565566591987655
+     0.9166666666666666,
+     0.741511978067893,
+     0.9768411847029564
     ],
     "artifacts_valid": [
      0.75,

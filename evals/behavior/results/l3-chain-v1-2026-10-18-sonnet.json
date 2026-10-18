@@ -2055,7 +2055,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -2067,7 +2067,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2119,7 +2119,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -2131,7 +2131,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2246,7 +2246,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -2258,7 +2258,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2738,7 +2738,7 @@
      0.11999366228595004,
      0.44899444005153993
     ],
-    "mean_score": 0.8717
+    "mean_score": 0.8773
    },
    "L3|natural|claude-sonnet-5-5": {
     "runs": 24,
@@ -2752,7 +2752,7 @@
      0.27891333731210993,
      0.649251346410805
     ],
-    "mean_score": 0.8222
+    "mean_score": 0.8333
    }
   },
   "L1_selection": {
@@ -3127,9 +3127,9 @@
      0.8800063377140499
     ],
     "chain_complete": [
-     0.7916666666666666,
-     0.5952954674681132,
-     0.9075517464714813
+     0.8333333333333334,
+     0.6414692935030094,
+     0.9332132367136704
     ],
     "artifacts_valid": [
      0.75,
@@ -3150,9 +3150,9 @@
      0.72108666268789
     ],
     "chain_complete": [
-     0.875,
-     0.6899611872949993,
-     0.9565566591987655
+     0.9583333333333334,
+     0.7975819352134407,
+     0.9926065438344941
     ],
     "artifacts_valid": [
      0.75,
