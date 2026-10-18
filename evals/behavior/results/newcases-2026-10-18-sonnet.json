@@ -1,0 +1,1150 @@
+{
+ "run_id": "newcases-2026-10-18-sonnet",
+ "manifest": {
+  "created": "2026-10-18T00:53:15.690296+00:00",
+  "plugin": {
+   "version": "0.14.1",
+   "behavior_hash": "bdef9b6dd26d2d4d",
+   "files": 235
+  },
+  "plugin_git": {
+   "commit": "b7441006cd9e89149c55674a726a938e0e84e5a1",
+   "dirty": false
+  },
+  "isolation": "setting-sources",
+  "opts": {
+   "max_turns": 40,
+   "timeout": 900,
+   "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+   "rerun": false,
+   "isolation": "setting-sources",
+   "case_budget_usd": 0.5,
+   "budget_usd": 3.0
+  },
+  "allowed_tools_default": [
+   "Bash",
+   "Read",
+   "Write",
+   "Edit",
+   "Glob",
+   "Grep",
+   "Skill"
+  ],
+  "runs": 18,
+  "holdout": null,
+  "completed": 18,
+  "skipped": 0,
+  "spent_usd": 1.4016,
+  "stopped": null,
+  "cli_versions": [
+   "2.1.302"
+  ]
+ },
+ "runs": [
+  {
+   "case": "l2-comm-newer-than-ledger",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "communication",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.1064479,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-02",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comm-newer-than-ledger",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "communication",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0955771,
+   "cli_version": "2.1.302",
+   "num_turns": 9,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-02",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comm-newer-than-ledger",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "communication",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.07012089999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-02",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comm-newer-than-ledger",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "communication",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0974519,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-02",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comm-newer-than-ledger",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "communication",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": false,
+   "blocking_failure": false,
+   "score": 0.5,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.1170092,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": false
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-02",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comm-newer-than-ledger",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "communication",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-communication",
+   "first_hep_skill": "hep-communication",
+   "skills": [
+    "hep-communication"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.09471280000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 5,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-02",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comp-small-fix",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "computing",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-computing",
+   "first_hep_skill": "hep-computing",
+   "skills": [
+    "hep-computing"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.08948389999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comp-small-fix",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "computing",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-computing",
+   "first_hep_skill": "hep-computing",
+   "skills": [
+    "hep-computing"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0914243,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comp-small-fix",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "computing",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-computing",
+   "first_hep_skill": "hep-computing",
+   "skills": [
+    "hep-computing"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0629687,
+   "cli_version": "2.1.302",
+   "num_turns": 8,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comp-small-fix",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "computing",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-computing",
+   "first_hep_skill": "hep-computing",
+   "skills": [
+    "hep-computing"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.084539,
+   "cli_version": "2.1.302",
+   "num_turns": 6,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comp-small-fix",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "computing",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-computing",
+   "first_hep_skill": "hep-computing",
+   "skills": [
+    "hep-computing"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0612369,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-comp-small-fix",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "computing",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-computing",
+   "first_hep_skill": "hep-computing",
+   "skills": [
+    "hep-computing"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.06144670000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 7,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMP-06",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-det-validator-not-physics",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "detector",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.07897889999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 4,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "DET-07",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-det-validator-not-physics",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "detector",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.0521586,
+   "cli_version": "2.1.302",
+   "num_turns": 4,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "DET-07",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-det-validator-not-physics",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "detector",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.04990460000000001,
+   "cli_version": "2.1.302",
+   "num_turns": 4,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "DET-07",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-det-validator-not-physics",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "detector",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.08071829999999999,
+   "cli_version": "2.1.302",
+   "num_turns": 4,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "DET-07",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-det-validator-not-physics",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "detector",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.053084,
+   "cli_version": "2.1.302",
+   "num_turns": 4,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "DET-07",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l2-det-validator-not-physics",
+   "layer": "L2",
+   "suite": "l2-execution",
+   "lang": "en",
+   "kind": "detector",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": "hep-detector",
+   "first_hep_skill": "hep-detector",
+   "skills": [
+    "hep-detector"
+   ],
+   "loaded_expected": true,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.054356,
+   "cli_version": "2.1.302",
+   "num_turns": 4,
+   "graders": [
+    {
+     "grader": "skill_loaded",
+     "severity": "major",
+     "invariant": "L1-SELECT",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "DET-07",
+     "passed": true
+    }
+   ]
+  }
+ ],
+ "cost_usd": {
+  "total": 1.4016,
+  "per_run": 0.0779
+ },
+ "contaminated": [],
+ "report": {
+  "manifest": {
+   "created": "2026-10-18T00:53:15.690296+00:00",
+   "plugin": {
+    "version": "0.14.1",
+    "behavior_hash": "bdef9b6dd26d2d4d",
+    "files": 235
+   },
+   "plugin_git": {
+    "commit": "b7441006cd9e89149c55674a726a938e0e84e5a1",
+    "dirty": false
+   },
+   "isolation": "setting-sources",
+   "opts": {
+    "max_turns": 40,
+    "timeout": 900,
+    "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+    "rerun": false,
+    "isolation": "setting-sources",
+    "case_budget_usd": 0.5,
+    "budget_usd": 3.0
+   },
+   "allowed_tools_default": [
+    "Bash",
+    "Read",
+    "Write",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Skill"
+   ],
+   "runs": 18,
+   "holdout": null,
+   "completed": 18,
+   "skipped": 0,
+   "spent_usd": 1.4016,
+   "stopped": null,
+   "cli_versions": [
+    "2.1.302"
+   ]
+  },
+  "runs": 18,
+  "host_errors": 0,
+  "by_layer_arm_model": {
+   "L2|forced|claude-sonnet-5-5": {
+    "runs": 9,
+    "pass": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.2991450484195439
+    ],
+    "mean_score": 1.0
+   },
+   "L2|natural|claude-sonnet-5-5": {
+    "runs": 9,
+    "pass": [
+     0.8888888888888888,
+     0.565000294423344,
+     0.980109112361455
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.2991450484195439
+    ],
+    "mean_score": 0.9444
+   }
+  },
+  "L1_selection": {
+   "claude-sonnet-5-5": {
+    "runs": 9,
+    "loaded_expected": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "first_is_expected": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "loaded_nothing": [
+     0.0,
+     0.0,
+     0.2991450484195439
+    ],
+    "by_lang": {
+     "en": [
+      1.0,
+      0.700854951580456,
+      0.9999999999999999
+     ]
+    },
+    "by_kind": {
+     "communication": [
+      1.0,
+      0.4385029682449546,
+      1.0
+     ],
+     "computing": [
+      1.0,
+      0.4385029682449546,
+      1.0
+     ],
+     "detector": [
+      1.0,
+      0.4385029682449546,
+      1.0
+     ]
+    },
+    "confusion": {
+     "hep-communication -> hep-communication": 3,
+     "hep-computing -> hep-computing": 3,
+     "hep-detector -> hep-detector": 3
+    }
+   }
+  },
+  "L1_out_of_domain": {},
+  "L1_L2_decomposition": {
+   "claude-sonnet-5-5|forced": {
+    "runs": 9,
+    "p_load": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "p_pass_given_load": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "p_pass_given_no_load": [
+     NaN,
+     0.0,
+     1.0
+    ],
+    "p_pass": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "p_pass_if_always_loaded": 1.0,
+    "failures_from_not_loading": 0.0
+   },
+   "claude-sonnet-5-5|natural": {
+    "runs": 9,
+    "p_load": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "p_pass_given_load": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "p_pass_given_no_load": [
+     NaN,
+     0.0,
+     1.0
+    ],
+    "p_pass": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "p_pass_if_always_loaded": 1.0,
+    "failures_from_not_loading": 0.0
+   }
+  },
+  "natural_vs_forced": {
+   "claude-sonnet-5-5": {
+    "natural": [
+     0.8888888888888888,
+     0.565000294423344,
+     0.980109112361455
+    ],
+    "forced": [
+     1.0,
+     0.700854951580456,
+     0.9999999999999999
+    ],
+    "paired": {
+     "a_only": 0,
+     "b_only": 1,
+     "concordant": 8,
+     "p_value": 1.0,
+     "direction": "B better"
+    }
+   }
+  },
+  "L2_by_skill": {
+   "hep-communication|forced|claude-sonnet-5-5": {
+    "runs": 3,
+    "pass": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ]
+   },
+   "hep-communication|natural|claude-sonnet-5-5": {
+    "runs": 3,
+    "pass": [
+     0.6666666666666666,
+     0.20765960080204776,
+     0.9385080552796037
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ]
+   },
+   "hep-computing|forced|claude-sonnet-5-5": {
+    "runs": 3,
+    "pass": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ]
+   },
+   "hep-computing|natural|claude-sonnet-5-5": {
+    "runs": 3,
+    "pass": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ]
+   },
+   "hep-detector|forced|claude-sonnet-5-5": {
+    "runs": 3,
+    "pass": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ]
+   },
+   "hep-detector|natural|claude-sonnet-5-5": {
+    "runs": 3,
+    "pass": [
+     1.0,
+     0.4385029682449546,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.5614970317550454
+    ]
+   }
+  },
+  "invariants": {
+   "COMM-02|forced": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "COMM-02|natural": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "COMP-06|forced": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "COMP-06|natural": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "DET-07|forced": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "DET-07|natural": [
+    1.0,
+    0.4385029682449546,
+    1.0
+   ],
+   "L1-SELECT|forced": [
+    1.0,
+    0.700854951580456,
+    0.9999999999999999
+   ],
+   "L1-SELECT|natural": [
+    0.8888888888888888,
+    0.565000294423344,
+    0.980109112361455
+   ]
+  },
+  "blocking_failures": [],
+  "L3": {},
+  "L4": {},
+  "reliability": {
+   "L2|forced|claude-sonnet-5-5": {
+    "cases": 3,
+    "k": 3,
+    "pass_at_k": 1.0,
+    "pass_hat_k": 1.0,
+    "flaky_cases": [],
+    "flaky_fraction": 0.0
+   },
+   "L2|natural|claude-sonnet-5-5": {
+    "cases": 3,
+    "k": 3,
+    "pass_at_k": 1.0,
+    "pass_hat_k": 0.6666666666666666,
+    "flaky_cases": [
+     "l2-comm-newer-than-ledger"
+    ],
+    "flaky_fraction": 0.3333333333333333
+   }
+  },
+  "unverified_graders": {}
+ },
+ "note": "scored summary only: prompts, answers, tool results and transcripts are not stored here (they stay in evals/behavior/runs/<id>/, which is not committed)"
+}
