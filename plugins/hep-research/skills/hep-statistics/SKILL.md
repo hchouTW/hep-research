@@ -45,7 +45,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 1. Resolve context (stanza below); collect inputs as artifacts (measurement spec, response, prediction, dataset records) and validate each (`contracts/validate.py`; a response also `response_adapter.py --validate`); stop on a contract error.
 2. Inputs from different producers: run `<plugin root>/contracts/comparison/gate.py` (exit 1 lists each mismatch).
 3. Build the model: observables, POIs, nuisances and constraints, correlations with their evidence.
-4. Validate on Asimov and toys (bias, pulls, coverage); fit; write the `statistical-result` to `artifacts_dir` with `scripts/result_artifact.py`; validate it. A report: load hep-communication.
+4. Validate on Asimov and toys (bias, pulls, coverage); fit; write the `statistical-result` with `scripts/result_artifact.py`; validate `artifacts_dir`. A report: load hep-communication.
 
 ## Resources
 
@@ -79,7 +79,7 @@ Scripts in `<plugin root>/skills/hep-statistics/scripts/`, modules in `<plugin r
 2. Only when a profile is needed, read `<plugin root>/profiles/registry.json`, then that profile's `index.md`, then only the modules or dataset records the task needs. Never load an unrelated experiment or theory profile.
 3. Local profiles live in the project (`local_profile_paths`), never in the plugin; `--preflight` checks them. A bound profile in neither place, or at a local path known to be a companion's, is used only via the installed `<plugin>:profile` skill that names it, after its preflight, from its folder; never scan for companions. If none is installed, the preflight fails, or a non-public profile lacks `agent_policy` approval for this host (none has it yet), say it is unavailable, do other work; never answer its topics from memory.
 4. No profile needed: use general methods. Domain without a validated profile (for example lattice QCD, EFT global fits, global cosmic-ray propagation fits): say so, then apply this skill's general discipline.
-5. Durable results and handoffs are files in the project's `artifacts_dir` (default ./hep-research-artifacts/), never the plugin, and pass `python3 "<plugin root>/contracts/validate.py" <artifact.json>`; no scratch. Keep every status label (`synthetic`, `asimov`, `observed`, `preliminary`, `failed`, `unvalidated`, `user-supplied`) on everything derived from it.
+5. Durable results and handoffs are files in the project's `artifacts_dir` (default ./hep-research-artifacts/), never the plugin, and pass `python3 "<plugin root>/contracts/validate.py" <artifacts_dir>`; no scratch. Keep every status label (`synthetic`, `asimov`, `observed`, `preliminary`, `failed`, `unvalidated`, `user-supplied`) on everything derived from it.
 6. Answer in the user's language; keep artifact fields, identifiers and file names in English.
 <!-- END context-resolution -->
 

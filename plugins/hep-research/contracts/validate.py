@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate a hep-research artifact: common envelope + typed extension + semantic rules.
 
-Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json] [--protected]
+Usage: python3 contracts/validate.py ARTIFACT.json|ARTIFACTS_DIR [--profiles-from PROJECT_CONFIG.json] [--protected]
            [--strict-versions] [--strict] [--gate publication]
 Exit codes: 0 valid (and, with --gate, the gate passed), 1 findings with errors (or the gate failed or is unresolved),
 2 unreadable input or bad usage. Output: JSON report on stdout.
@@ -42,7 +42,9 @@ never raises a rule's level. Flags may come before or after ARTIFACT.json. --gat
 gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons (from 2.6.0 a
 'synthetic' or 'asimov' result fails it); an archived artifact may be valid and still not pass it. Passing the gate
 is a contract-level prerequisite for
-reporting a result as validated, not evidence of scientific validity.
+reporting a result as validated, not evidence of scientific validity. Given a directory (an artifacts_dir), every
+JSON file under it is validated and must be an artifact; a JSON file without artifact_type is an error
+(artifacts_dir.not_artifact), another file a warning; the report lists each file (validate_directory).
 """
 from __future__ import annotations
 
@@ -2091,6 +2093,36 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     return rep
 
 
+def validate_directory(root: Path, vocab: Vocabulary, **flags) -> dict:
+    """Validate every JSON file under an artifacts_dir: each must be a valid artifact. A JSON file without an
+    artifact_type is an error (artifacts_dir.not_artifact: working files and raw tool outputs belong outside
+    artifacts_dir); any other file is a warning (artifacts_dir.non_json), since sidecars such as a model file may be
+    referenced from an artifact. Hidden files are skipped."""
+    top, files = Report(), []
+    paths = sorted(f for f in root.rglob("*") if f.is_file()
+                   and not any(part.startswith(".") for part in f.relative_to(root).parts))
+    for f in paths:
+        rel = f.relative_to(root).as_posix()
+        if f.suffix != ".json":
+            top.add("warning", rel, "artifacts_dir.non_json", "not a JSON artifact; keep it only if an artifact refers to it")
+            continue
+        try:
+            doc = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            top.add("error", rel, "artifacts_dir.unreadable", f"cannot read: {exc}")
+            continue
+        if not (isinstance(doc, dict) and "artifact_type" in doc):
+            top.add("error", rel, "artifacts_dir.not_artifact",
+                    "no artifact_type: write it as an artifact or move this working file out of artifacts_dir")
+            continue
+        rep = validate_artifact(doc, vocab, **flags)
+        files.append({"path": rel, **rep.as_dict()})
+    if not paths:
+        top.add("warning", ".", "artifacts_dir.empty", "no files in the directory")
+    ok = top.ok and all(e["ok"] for e in files)
+    return {"ok": ok, "directory": str(root), "findings": [f.as_dict() for f in top.findings], "files": files}
+
+
 @protected_main("contracts.validate", keep_flag=True, capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
@@ -2102,11 +2134,17 @@ def main(argv=None) -> int:
     if not positional:
         print(json.dumps({"ok": False, "error": "no artifact path given"}))
         return 2
-    try:
-        doc = json.loads(Path(positional[0]).read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
-        print(json.dumps({"ok": False, "error": f"cannot read {positional[0]}: {exc}"}))
+    target = Path(positional[0])
+    if target.is_dir() and "--gate" in args:
+        print(json.dumps({"ok": False, "error": "--gate takes one artifact, not a directory"}))
         return 2
+    doc: Any = None
+    if not target.is_dir():
+        try:
+            doc = json.loads(target.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(json.dumps({"ok": False, "error": f"cannot read {positional[0]}: {exc}"}))
+            return 2
     vocab, pre = Vocabulary(), Report()
     if "--profiles-from" in args:
         from contracts.project import load_project
@@ -2130,8 +2168,15 @@ def main(argv=None) -> int:
             print(json.dumps({"ok": False, "error": "--gate takes 'publication'"}))
             return 2
         gate = publication_gate(doc, vocab, base_dir=Path(positional[0]).resolve().parent)
-    rep = validate_artifact(doc, vocab, protected="--protected" in args, strict="--strict" in args,
-                            strict_versions="--strict-versions" in args)
+    flags = {"protected": "--protected" in args, "strict": "--strict" in args,
+             "strict_versions": "--strict-versions" in args}
+    if doc is None:
+        out = validate_directory(target, vocab, **flags)
+        out["findings"][:0] = [f.as_dict() for f in pre.findings]
+        out["ok"] = out["ok"] and pre.ok
+        print(json.dumps(out, indent=1))
+        return 0 if out["ok"] else 1
+    rep = validate_artifact(doc, vocab, **flags)
     rep.findings[:0] = pre.findings
     out = rep.as_dict()
     if gate is not None:
