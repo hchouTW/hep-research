@@ -1,0 +1,575 @@
+{
+ "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review",
+ "fixes": [
+  {
+   "id": "CLS-LOGINTERP",
+   "title": "CLs crossings interpolate log CLs",
+   "changelog": "CHANGELOG 0.6.13",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/examples/test_stats_benchmarks.py",
+    "tests/core/test_stats_likelihood_limits.py"
+   ],
+   "oracle_kinds": [
+    "analytic"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "per-test parent record"
+   ],
+   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18"
+  },
+  {
+   "id": "F01",
+   "title": "Poisson domain in the likelihoods",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_p0_regressions.py",
+    "tests/core/test_stats_counting_asymptotic_oracles.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "independent-implementation"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "per-test parent record",
+    "second oracle kind",
+    "negative control",
+    "property test"
+   ]
+  },
+  {
+   "id": "F02",
+   "title": "Toy tails are bounds at zero exceedances",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_p0_regressions.py",
+    "tests/core/test_stats_statistical_toys.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "per-test parent record",
+    "negative control for the Clopper-Pearson part",
+    "property test"
+   ],
+   "note": "toys_not_evaluated path tested 2026-10-18"
+  },
+  {
+   "id": "F03",
+   "title": "Fit verdicts",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_stats_p0_regressions.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "independent numeric oracle (analytic minimum and Hessian of a small model)",
+    "per-test parent record"
+   ]
+  },
+  {
+   "id": "BAYES-T24",
+   "title": "bayes_diagnostics ties, constant chains, ESS and MCSE",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py",
+    "tests/skills/hep_statistics/test_bayes_diagnostics.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic"
+   ],
+   "correctness": "C2",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent record",
+    "oracle that runs without ArviZ",
+    "negative control"
+   ],
+   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate"
+  },
+  {
+   "id": "FC-MONOTONE",
+   "title": "Feldman-Cousins upper ends follow the published construction",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_poisson.py",
+    "tests/core/test_published_tables.py",
+    "tests/core/test_properties.py",
+    "tests/core/test_stats_counting_asymptotic_oracles.py"
+   ],
+   "oracle_kinds": [
+    "published",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "parent record"
+   ],
+   "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only"
+  },
+  {
+   "id": "POISSON-SF",
+   "title": "Exact Poisson p-values no longer underflow",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_poisson.py",
+    "tests/core/test_stats_likelihood_limits.py",
+    "tests/core/test_stats_statistical_toys.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "parent record"
+   ],
+   "note": "negative control added 2026-10-18"
+  },
+  {
+   "id": "COV-NOREPAIR",
+   "title": "Covariance matrices are no longer repaired silently",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_linalg.py",
+    "tests/core/test_stats_statistical_toys.py",
+    "tests/core/test_properties.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "closure",
+    "invariant"
+   ],
+   "correctness": "C2",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "second independent oracle kind",
+    "parent record"
+   ],
+   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18"
+  },
+  {
+   "id": "POISSON-500",
+   "title": "Poisson limits and intervals no longer clipped at 500",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_poisson.py",
+    "tests/core/test_stats_poisson_numerics.py",
+    "tests/core/test_stats_edge_cases.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C2",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent record",
+    "negative control",
+    "second oracle kind (chi2 relation)"
+   ]
+  },
+  {
+   "id": "TH9-MASSES",
+   "title": "PID and Cherenkov masses from CODATA 2022 / PDG 2026",
+   "changelog": "CHANGELOG 0.14.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py",
+    "tests/core/test_constant_literals.py",
+    "tests/core/test_constants.py"
+   ],
+   "oracle_kinds": [
+    "published",
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test over masses",
+    "pdg cross-check in CI"
+   ],
+   "note": "expected values computed from closed forms in the test since 2026-10-18"
+  },
+  {
+   "id": "DR-WP1-01",
+   "title": "Cherenkov photon yield carries z^2",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py"
+   ],
+   "oracle_kinds": [
+    "analytic"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "property test yield(z)/yield(1) = z^2",
+    "second oracle kind"
+   ],
+   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18"
+  },
+  {
+   "id": "DR-WP1-02",
+   "title": "Gaisser-Hillas profile stable at any X_max",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py",
+    "tests/skills/hep_measurement/test_astroparticle.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test over x_max and lambda",
+    "negative control"
+   ],
+   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes)"
+  },
+  {
+   "id": "DR-WP2-06",
+   "title": "Script physics (calorimeter, PID, multiple scattering, tag-and-probe, pileup)",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py",
+    "tests/skills/hep_detector/test_reference_values.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic",
+    "published",
+    "closure"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "bring the 2000-toy bias study into the suite",
+    "negative controls",
+    "property tests"
+   ]
+  },
+  {
+   "id": "ROBUST-MALFORMED",
+   "title": "Malformed input gives findings, not tracebacks",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S4",
+   "evidence_tests": [
+    "tests/contracts/test_robustness.py",
+    "tests/core/test_evidence_ledger.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "invariant"
+   ],
+   "correctness": "C1",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent record"
+   ]
+  },
+  {
+   "id": "BLINDING-SCANNER",
+   "title": "Blinding scanner: fewer false alarms, no silent passes",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_blinding.py",
+    "tests/core/test_blinding_u11.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent record",
+    "property test over encodings and sealed values"
+   ]
+  },
+  {
+   "id": "ROBUST-CAMPAIGN",
+   "title": "Batch campaigns survive interruptions and concurrent commands",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_partition_safety.py",
+    "tests/core/test_partition_robustness.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "closure"
+   ],
+   "correctness": "C1",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent record",
+    "independent sum in the closure reference",
+    "real two-process lock test"
+   ],
+   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md"
+  },
+  {
+   "id": "RC-A2",
+   "title": "Displayed number that disagrees with its passage fails",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py",
+    "tests/skills/hep_authoring/test_communication_audit.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test over generated numbers and passages",
+    "independent tokenizer"
+   ]
+  },
+  {
+   "id": "RC-A3",
+   "title": "Adaptation drafts read numbers at sentence end and next to Chinese text",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "generated-context property test"
+   ]
+  },
+  {
+   "id": "RC-A5",
+   "title": "Every display is checked against its source",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py",
+    "tests/skills/hep_authoring/test_claim_audit.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "exhaustive grid of source and display digits"
+   ]
+  },
+  {
+   "id": "RC-A6",
+   "title": "Rounding rules round half up",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "exhaustive integer-arithmetic check on a stated domain added 2026-10-18"
+  },
+  {
+   "id": "ML-SPLITS",
+   "title": "Split tools check what they claim",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_split_tools.py",
+    "tests/skills/hep_ml/test_audit_train_keys.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "invariant"
+   ],
+   "correctness": "C1",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent records for C14, C16, C28",
+    "property test of canonical keys"
+   ]
+  },
+  {
+   "id": "ML-CALIBRATION",
+   "title": "A calibration evaluated on its fit sample never validates",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_calibration_identity.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test"
+   ]
+  },
+  {
+   "id": "ML-K05",
+   "title": "Domain-shift outcome",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_ml_mutation_probe.py",
+    "tests/skills/hep_ml/test_domain_shift_report.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "closure"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "assert the nuisance and the mu shift in a test"
+   ]
+  },
+  {
+   "id": "ML-DOMAIN",
+   "title": "One training-domain method",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_domain_method.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "two-sided FPR bound",
+    "Clopper-Pearson against scipy.stats.beta",
+    "run the torch tests"
+   ]
+  },
+  {
+   "id": "ML-NEGWEIGHTS",
+   "title": "Negative weights are never dropped; the metric layer flags or refuses",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_metric_layer.py",
+    "tests/skills/hep_ml/test_training_pipeline.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C2",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent record",
+    "independent Asimov reference",
+    "cell resampling against arXiv:2109.07851 eq. 2.2"
+   ]
+  },
+  {
+   "id": "ML-SMALL",
+   "title": "Small corrections (C10, C24, C25, C26, K13)",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_small_corrections.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "published",
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "parent records for C24-C26 and K13",
+    "more trials for C10",
+    "cite the t-table"
+   ],
+   "note": "C10 alone is C2 / D2"
+  }
+ ],
+ "documentation_fixes": [
+  {
+   "id": "DR-REFS",
+   "title": "Detector references corrected (DR-WP1-05, -06, WP3)",
+   "severity": "S3",
+   "sources_with_locators": "mostly; one source without a page or section"
+  },
+  {
+   "id": "ML-REFS",
+   "title": "ML physics references (ML-R01..R25)",
+   "severity": "S3",
+   "sources_with_locators": "yes; not every citation has an opened date"
+  }
+ ]
+}
