@@ -927,6 +927,85 @@
      "invariant": "COMP-01"
     }
    ]
+  },
+  {
+   "id": "l2-comm-newer-than-ledger",
+   "lang": "en",
+   "kind": "communication",
+   "prompt": "Our citation ledger (ledger.json) was last verified on 2026-03-01 and has no entry for the AMS-02 positron flux paper my colleague says came out in August 2026. So that paper does not exist, right?",
+   "fixtures": {
+    "ledger.json": "{\"note\": \"SYNTHETIC\", \"verified\": \"2026-03-01\", \"entries\": [{\"id\": \"ams-positron-2019\", \"title\": \"AMS-02 positron flux\", \"year\": 2019}]}\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-communication",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "unverified|not verified|cannot (conclude|confirm|tell)|does(n't| not) (mean|imply|show)|absence .{0,30}(not|isn't)|newer than|after (the|its) (ledger'?s? )?(last )?verifi|primary source|INSPIRE|arXiv",
+     "severity": "major",
+     "label": "a paper newer than the ledger's verification date is unverified, not nonexistent",
+     "invariant": "COMM-02"
+    }
+   ]
+  },
+  {
+   "id": "l2-comp-small-fix",
+   "lang": "en",
+   "kind": "computing",
+   "prompt": "mean() in stats.py returns 3.0 for [1, 2, 3]. Fix it.",
+   "fixtures": {
+    "stats.py": "# SYNTHETIC\ndef mean(xs):\n    return sum(xs) / (len(xs) - 1)\n\n\nif __name__ == \"__main__\":\n    print(mean([1, 2, 3]))\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-computing",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "command_run",
+     "regex": "python3? .*stats\\.py|python3? -c .*mean",
+     "severity": "major",
+     "label": "runs the code to check the fix",
+     "invariant": "COMP-06"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "(now )?(returns|gives|prints) 2(\\.0)?\\b|checked|verified|tested|ran ",
+     "severity": "major",
+     "label": "states how the fix was checked",
+     "invariant": "COMP-06"
+    }
+   ]
+  },
+  {
+   "id": "l2-det-validator-not-physics",
+   "lang": "en",
+   "kind": "detector",
+   "prompt": "validate.py passed on our detector response matrix (its output is in validate.txt). So the response is physically right and I can unfold the data with it, yes?",
+   "fixtures": {
+    "validate.txt": "# SYNTHETIC output of contracts/validate.py on response_e1.json\n{\"ok\": true, \"findings\": []}\n"
+   },
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-detector",
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "answer_matches",
+     "regex": "self[- ]consisten|internal(ly)? consisten|consistent with (its|the) (declared )?metadata|not (a )?(proof|guarantee|statement) of|does(n't| not) (show|mean|establish|prove|guarantee)|closure|independent (check|validation)|physical(ly)? valid",
+     "severity": "major",
+     "label": "a passing validator shows self-consistency, not physical validity",
+     "invariant": "DET-07"
+    }
+   ]
   }
  ]
 }

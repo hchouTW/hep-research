@@ -5,6 +5,24 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Profile preflight.** `contracts/project.py <project-dir> --preflight` adds a `preflight` list to its output.
+  - Each profile the project binds that ships in the plugin is listed with its `index.md` path, sha256 and text.
+  - A bound profile outside the plugin (a local profile or a companion's) is listed as `not-in-plugin`; it is read
+    as context-resolution step 3 says.
+  - An invalid config lists nothing.
+  - Without the flag the output is unchanged.
+
+  Context-resolution step 1, in every `SKILL.md`, now makes this the first action in a project. In the 2026-10-18
+  behavioral baseline, the bound profile's `index.md` was not read in 40 of Sonnet 5.5's 47 runs with a blocking
+  failure and 63 of Haiku 5.5's 68 (`evals/behavior/README.md`).
+- **Two new validator warnings**, for SKILL.md invariants that had no check:
+  - `stats.construction_missing`: a frequentist limit names no construction (hep-statistics: approximations are
+    named);
+  - `ml.weights_not_separated`: weights enter the loss without separate `weights.training` and
+    `weights.evaluation` blocks (hep-ml).
+
+  Both are warnings, so artifacts that validated before still validate; contracts stay 2.12.0.
+
 - `docs/agentic-architecture.md` is renamed `docs/protected-data-architecture.md` and retitled "Protected-Data
   Architecture: Blinding, Custodianship and Egress": it describes how blinded and private data are protected when
   an agent takes part, not an agent workflow. Section numbers and constraint IDs are unchanged. Every live
