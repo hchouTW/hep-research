@@ -210,6 +210,43 @@ class ShellReads(unittest.TestCase):
             self.assertTrue(runner.grade_run(rdir, case, ROOT)["host_error"], "another nonzero exit still is")
 
 
+class PreflightRead(unittest.TestCase):
+    """`contracts/project.py <dir> --preflight` prints each bound profile's index.md, so it counts as reading it."""
+    GLOB = "profiles/experiments/ams-02/index.md"
+
+    def trace(self, command, result, *, final_text=True):
+        from harness.trace import parse_stream
+        lines = [{"type": "system", "subtype": "init", "model": "m", "session_id": "s"},
+                 {"type": "assistant", "message": {"content": [
+                     {"type": "tool_use", "id": "t0", "name": "Bash", "input": {"command": command}}]}},
+                 {"type": "user", "message": {"content": [
+                     {"type": "tool_result", "tool_use_id": "t0", "content": result}]}}]
+        if final_text:
+            lines.append({"type": "assistant", "message": {"content": [{"type": "text", "text": "y" * 300}]}})
+        lines.append({"type": "result", "result": "done", "num_turns": 2})
+        return parse_stream([json.dumps(x) for x in lines])
+
+    def grade(self, t, spec):
+        return graders.run_grader(spec, graders.GradeContext(trace=t, case={}, plugin_root=ROOT))
+
+    def test_preflight_counts_as_the_read(self):
+        out = json.dumps({"ok": True, "preflight": [{"id": "experiment:ams-02", "status": "ok",
+                                                     "index_path": "profiles/experiments/ams-02/index.md"}]}, indent=1)
+        t = self.trace("python3 /p/plugins/hep-research/contracts/project.py . --preflight", out)
+        self.assertTrue(self.grade(t, {"grader": "file_read", "glob": self.GLOB}).passed)
+        ordered = {"grader": "ordered", "first": {"read": "profiles/experiments/ams-02/*"}, "then": {"text": True}}
+        self.assertTrue(self.grade(t, ordered).passed)
+        self.assertTrue(self.grade(t, {"grader": "file_not_read", "glob": "profiles/experiments/eic/*"}).passed,
+                        "a preflight does not count as reading a profile it did not print")
+
+    def test_preflight_without_that_profile_or_no_read_fails(self):
+        out = json.dumps({"ok": True, "preflight": []})
+        t = self.trace("python3 /p/plugins/hep-research/contracts/project.py . --preflight", out)
+        self.assertFalse(self.grade(t, {"grader": "file_read", "glob": self.GLOB}).passed)
+        t = self.trace("python3 /p/plugins/hep-research/contracts/project.py .", '{"ok": true}')
+        self.assertFalse(self.grade(t, {"grader": "file_read", "glob": self.GLOB}).passed)
+
+
 class CommittedSummary(unittest.TestCase):
     def test_summary_holds_no_prompt_answer_or_tool_result(self):
         allc = {c["id"]: c for c in casemod.load_suite_files(plugin_root=ROOT)}

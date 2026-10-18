@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Project configuration (hep-research.project.json): validation, local profiles, context resolution.
 
-Usage: python3 contracts/project.py PROJECT_DIR_OR_CONFIG [--registry PATH] [--local DIR ...]
+Usage: python3 contracts/project.py PROJECT_DIR_OR_CONFIG [--registry PATH] [--local DIR ...] [--preflight]
 Exit 0 valid, 1 errors, 2 unreadable. Output: JSON with resolved bindings and findings.
+--preflight also prints, for each bound profile shipped in the plugin, its index.md (path, sha256 and text): the
+read that context resolution requires before any answer. A bound profile outside the plugin (local or a
+companion's) is listed as not-in-plugin; it is read as context resolution step 3 says. Nothing is printed for an
+invalid config, whose profiles may not be used.
 --local DIR adds a profile folder supplied at run time (for example by a companion plugin's `<plugin>:profile`
 skill) to the config's `local_profile_paths`; it is validated like any local profile.
 
@@ -193,6 +197,28 @@ def load_blinding(path: Path) -> dict:
     return proj.config.get("blinding") or {"blinded": [], "allowed_outputs": []}
 
 
+def preflight(p: Project) -> list[dict]:
+    """The bound profiles' index.md, for the agent to read before answering (CTX-READ-BOUND-PROFILE)."""
+    if not p.report.ok:
+        return []
+    usable = {prof["id"]: prof for prof in p.profiles}
+    out = []
+    for pid in p.bound_ids:
+        prof = usable.get(pid)
+        if prof is None:
+            out.append({"id": pid, "status": "rejected"})
+            continue
+        d = Path(prof["_dir"]).resolve()
+        if PLUGIN_ROOT.resolve() not in d.parents:
+            out.append({"id": pid, "status": "not-in-plugin"})
+            continue
+        index = d / "index.md"
+        raw = index.read_bytes()
+        out.append({"id": pid, "status": "ok", "index_path": index.relative_to(PLUGIN_ROOT.resolve()).as_posix(),
+                    "index_sha256": hashlib.sha256(raw).hexdigest(), "index_text": raw.decode("utf-8")})
+    return out
+
+
 def resolve_context(request: dict, project: Project | None, needs_profile: bool) -> dict:
     """Decide which profiles a task uses. `request` holds only IDs the user stated explicitly:
     {"experiments": [...], "theory": [...]}. Returns {"decision", "source", "experiments", "theory"}; decision "invalid"
@@ -215,6 +241,8 @@ def resolve_context(request: dict, project: Project | None, needs_profile: bool)
 @protected_main("contracts.project")
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
+    want_preflight = "--preflight" in args
+    args = [a for a in args if a != "--preflight"]
     if not args:
         print(__doc__)
         return 2
@@ -227,6 +255,8 @@ def main(argv=None) -> int:
         return 2
     out = {**p.report.as_dict(), "profiles": p.bound_ids, "artifacts_dir": str(p.artifacts_dir),
            "note": "advisory check: a valid config, including agent_policy, does not enforce or authorize anything"}
+    if want_preflight:
+        out["preflight"] = preflight(p)
     print(json.dumps(out, indent=1))
     return 0 if p.report.ok else 1
 
