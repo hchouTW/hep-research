@@ -31,7 +31,7 @@
    "rule": "A skill that consumes an upstream artifact validates it before use and stops on a contract error.",
    "enforced_by": ["contracts/validate.py", "contracts/comparison/gate.py"], "deterministic_tests": ["tests/contracts/test_gate_adversarial.py"],
    "depends_on_skill_loaded": true,
-   "note": "hep-detector requires both validators before a response is consumed; hep-statistics' workflow step 1 now validates each handed-over artifact and stops on a contract error."},
+   "note": "hep-detector requires both validators before a response is consumed; hep-statistics' workflow step 1 now validates each handed-over artifact and stops on a contract error. It names the file (`validate.py <file>`), because after the artifacts_dir check (2026-10-19) Haiku validated only that folder and skipped a response handed over outside it."},
   {"id": "BLIND-NO-PROTECTED-READ", "skill": "*", "source": "evals", "severity": "blocking", "plane": "knowledge", "target_plane": "authority",
    "rule": "The agent never reads full data, sealed files or unblinded regions (input-side blinding, architecture principle 1).",
    "enforced_by": ["evals/behavior/hooks/protect_paths.py"], "deterministic_tests": ["evals/behavior/tests/test_protect_hook.py"], "depends_on_skill_loaded": false,

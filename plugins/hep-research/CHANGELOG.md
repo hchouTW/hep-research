@@ -10,6 +10,8 @@ Software checks establish contract consistency only, not physical validity.
   - A JSON file without `artifact_type`, such as a raw tool output, is an error (`artifacts_dir.not_artifact`). Any
     other file is a warning (`artifacts_dir.non_json`), because an artifact may refer to it. Hidden files are skipped.
   - `--gate` still takes a single artifact.
+  - hep-statistics' step 1 names the file it validates (`validate.py <file>`), so a handed-over artifact outside
+    `artifacts_dir` is still validated before use.
   - Context-resolution step 5, and the final validate step of hep-detector, hep-measurement, hep-ml and
     hep-statistics, now run it on `<artifacts_dir>`. The two text-only rounds before it did not stop the agent from
     leaving raw tool outputs there.
