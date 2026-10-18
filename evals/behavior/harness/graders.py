@@ -138,9 +138,24 @@ def _shell_glob_hits(core: str, text: str) -> bool:
     return False
 
 
-def _matcher(spec: dict) -> Callable[[Event], bool]:
+_PREFLIGHT = re.compile(r"contracts/project\.py\b.*--preflight")
+_INDEX_PATH = re.compile(r'"index_path":\s*"([^"]+)"')
+
+
+def _preflight_reads(t: Trace, pattern: str) -> list[Event]:
+    """`contracts/project.py <dir> --preflight` calls whose output printed a profile index matching the pattern: the
+    preflight prints each bound profile's index.md, so running it reads that file."""
+    hits = []
+    for e in t.commands():
+        if _PREFLIGHT.search(e.command) and (r := t.result_for(e)) is not None and not r.is_error:
+            if any(_path_match(p, pattern) for p in _INDEX_PATH.findall(r.text)):
+                hits.append(e)
+    return hits
+
+
+def _matcher(spec: dict, trace: Trace | None = None) -> Callable[[Event], bool]:
     """Event predicate for ordering graders: {"skill": x} | {"read": glob} | {"command": regex} | {"tool": name} |
-    {"text": true} (substantive assistant text)."""
+    {"text": true} (substantive assistant text). With the trace, a read also counts a preflight that printed the file."""
     if "skill" in spec:
         wanted = {normalize_skill(s) for s in _as_list(spec["skill"])}
 
@@ -152,7 +167,8 @@ def _matcher(spec: dict) -> Callable[[Event], bool]:
             return any(e.path.endswith(f"skills/{w}/SKILL.md") for w in wanted)
         return m
     if "read" in spec:
-        return lambda e: _touches(e, spec["read"], spec.get("in_shell", True))
+        pre = {e.index for e in _preflight_reads(trace, spec["read"])} if trace is not None else set()
+        return lambda e: _touches(e, spec["read"], spec.get("in_shell", True)) or e.index in pre
     if "command" in spec:
         rx = re.compile(spec["command"])
         return lambda e: e.kind == "tool_use" and bool(e.command) and bool(rx.search(e.command))
@@ -251,6 +267,7 @@ def g_asks(spec, ctx):
 def g_file_read(spec, ctx):
     t = _view(ctx, spec)
     hits = [e for e in t.events if _touches(e, spec["glob"], spec.get("in_shell", True))]
+    hits += _preflight_reads(t, spec["glob"])
     return bool(hits), (hits[0].path or hits[0].command[:120]) if hits else f"never read {spec['glob']}"
 
 
@@ -305,8 +322,8 @@ def g_tool_not_used(spec, ctx):
 def g_ordered(spec, ctx):
     """`first` must occur, and must occur before `then` if `then` occurs (or always, with require_then)."""
     t = _view(ctx, spec)
-    a = t.first_index(_matcher(spec["first"]))
-    b = t.first_index(_matcher(spec["then"]))
+    a = t.first_index(_matcher(spec["first"], t))
+    b = t.first_index(_matcher(spec["then"], t))
     if a is None:
         return False, f"{spec['first']} never happened"
     if b is None:

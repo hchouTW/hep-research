@@ -65,6 +65,9 @@ Presets (`--preset`): `selection` (L1, natural, 3 repeats, 6 turns as in `evals/
   (the plugin's own rule: no outcome, no satisfaction).
 * **Attempts count.** `file_not_read` fails on a denied attempt: the natural arm measures intent, the enforced arm
   measures the host.
+* **Shell and preflight reads count.** A read inside a shell command counts when the path is written through a
+  variable, after a `cd`, or with a wildcard. A `contracts/project.py <dir> --preflight` call counts as reading every
+  profile `index.md` its output lists, and only those.
 * **Judge criteria are minor until calibrated.** `judge.py calibrate` compares judge scores with human labels
   (`templates/human_labels.example.csv`); a criterion is calibrated at kappa >= 0.6 on >= 30 labels. Promote it to
   major only then.
