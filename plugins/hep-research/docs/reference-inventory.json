@@ -3113,7 +3113,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "03d23875 2026-10-17"
+   "last_commit": "97471b3f 2026-10-19"
   },
   {
    "path": "skills/hep-ml/references/monitoring-and-lifecycle.md",
@@ -3152,7 +3152,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "3398e5c3 2026-10-17"
+   "last_commit": "97471b3f 2026-10-19"
   },
   {
    "path": "skills/hep-ml/references/optimization-and-training-dynamics.md",
@@ -3746,7 +3746,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "894eec20 2026-10-19"
+   "last_commit": "97471b3f 2026-10-19"
   },
   {
    "path": "skills/hep-theory/references/amplitudes-and-widths.md",

@@ -7,7 +7,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 
 **Owns:** classification and regression, generation (fast simulation training), surrogates, ML-assisted inference (training side), calibration of model outputs, domain shift, and PyTorch engineering; BDT and classical MVA guidance for analyses.
 **Typical artifacts:** `ml-artifact` (labels, features, grouped splits, training domain, preprocessing, weights, model hash, calibration, downstream validation).
-**Never:** let a metric such as AUC stand in for physics validity; extrapolate a surrogate outside its declared domain without saying so.
+**Never:** let a metric such as AUC stand in for physics validity; extrapolate a surrogate outside its declared domain without saying so. A limit, fit or significance with the model is hep-statistics': load that skill before computing one, even when this skill was loaded first.
 
 ## Invariants
 
