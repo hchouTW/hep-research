@@ -1,5 +1,7 @@
 # Unfolding: algorithms, regularization and coverage
 
+Part of hep-statistics: load that skill first if it is not loaded (its step 1 validates the response).
+
 This is the one place for unfolding methods in the plugin (ownership table in `docs/routing-contract.md`). The response
 object, forward folding of a prediction and the double-counting checks belong to hep-detector
 ([response and forward folding](../../hep-detector/references/response-and-forward-folding.md)); whether a

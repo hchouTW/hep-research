@@ -21,7 +21,7 @@ description: "Use when the deliverable is a statistical inference or its diagnos
 
 ## Step 0: quick question, and task to tool
 
-One number: when a shell is available, run its row's tool, state the construction and approximation, and label a value worked by hand as such; the workflow is for new models. `cs/` = `<plugin root>/core/stats/`, `sc/` = `<plugin root>/skills/hep-statistics/scripts/`; read `--help` first; caps and more rows in the guide.
+A handed-over artifact, even for one number: first `contracts/validate.py <file>`; stop on a contract error. One number: when a shell is available, run its row's tool, state the construction and approximation, and label a value worked by hand as such; the workflow is for new models. `cs/` = `<plugin root>/core/stats/`, `sc/` = `<plugin root>/skills/hep-statistics/scripts/`; read `--help` first; caps and more rows in the guide.
 
 | Request | Default | Fallback |
 |---|---|---|
@@ -68,7 +68,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Unbinned fits | `<plugin root>/adapters/unbinned-fit/` |
 | Outside v1 (global propagation fits, EFT global fits) | say so; general discipline; full list: `<plugin root>/docs/routing-contract.md`, Scope of v1 |
 
-Scripts in `<plugin root>/skills/hep-statistics/scripts/`, modules in `<plugin root>/core/stats/` (read `--help` first). Folder guide: [README.md](README.md).
+Folder guide: [README.md](README.md).
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution

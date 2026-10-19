@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Handed-over artifacts are validated on the quick path too, and unfolding loads hep-statistics.**
+  - hep-statistics' Step 0 validates a handed-over artifact (`contracts/validate.py <file>`) before running a row's
+    tool, even for one number. In the L3 fault cases Haiku took the quick path and skipped step 1's validation.
+  - hep-detector's response reference says to load hep-statistics before unfolding or fitting, not to work from its
+    unfolding reference alone; `skills/hep-statistics/references/unfolding.md` opens with the same instruction. In
+    the L3 unfold chain Sonnet followed the direct link and never loaded hep-statistics.
+  - The Resources note that repeated Step 0's script paths is removed, to stay within the 25,600-byte quick load.
 - **`contracts/validate.py` checks a whole `artifacts_dir`.** Given a directory, it validates every JSON file under it
   and lists each one.
   - A JSON file without `artifact_type`, such as a raw tool output, is an error (`artifacts_dir.not_artifact`). Any
