@@ -21,6 +21,9 @@ named in that skill's "Use when" text.
 Scope (X3): every domain outside v1 in docs/capability-map.json names limited-support cases that exist and are routed to
 the domain's closest owner (or accept it); cases the map does not name are not checked by this rule.
 Also checks that no SKILL.md mentions a dispatch API. This is a static check of descriptions, not a live routing run.
+Report, not a failure (plan 6.1): `unpinned_phrases` lists, per skill, the phrases of the "Use when" part that no
+trigger term of a case routed to that skill and no description-topics entry overlaps. They are the first candidates to
+trim when a routing fix needs description space under the 1,024-character limit; nothing guards them.
 
 Usage: python3 tools/check_routing_static.py   Exit 0 all pass, 1 otherwise. Output: JSON.
 """
@@ -100,6 +103,30 @@ def descriptions() -> dict:
         desc = m.group(1) if m else ""
         use, _, excl = desc.partition("Not for")
         out[s] = {"use": use.lower(), "not_for": excl.lower(), "body": text}
+    return out
+
+
+PHRASE_SPLIT = re.compile(r"[,;:()]|\.(?:\s|$)")  # a description phrase runs between these separators
+
+
+def unpinned_phrases(d: dict, cases: list, topics: dict) -> dict:
+    """{skill: {"phrases": [...], "chars": n}}: "Use when" phrases that no trigger term of a case (or later turn)
+    expecting the skill and no description-topics entry for it overlaps (one contains the other)."""
+    pins: dict[str, set] = {s: {t.lower() for t in topics.get(s, [])} for s in d}
+    for c in cases:
+        if c.get("expected_primary") in pins:
+            pins[c["expected_primary"]].update(t.lower() for t in c.get("trigger_terms", []))
+        for turn in c.get("turns") or []:
+            if turn.get("expected") in pins:
+                pins[turn["expected"]].update(t.lower() for t in turn.get("trigger_terms", []))
+    out = {}
+    for s, parts in d.items():
+        free = []
+        for ph in (x.strip(" .\"'") for x in PHRASE_SPLIT.split(parts["use"])):
+            if len(ph) < 3 or any(t in ph or ph in t for t in pins[s]):
+                continue
+            free.append(ph)
+        out[s] = {"phrases": free, "chars": sum(len(x) for x in free)}
     return out
 
 
@@ -185,8 +212,8 @@ def main() -> int:
     langs = {c["lang"] for c in cases}
     coverage_errors += [f"no {lang} cases" for lang in LANGS if lang not in langs]
     coverage_errors += [f"no {v} case" for v in VARIANTS if not any(c.get("variant") == v for c in cases)]
-    topic_errors = []
-    for skill, topics in description_topics().items():
+    topic_errors, topics_table = [], description_topics()
+    for skill, topics in topics_table.items():
         if skill not in d:
             topic_errors.append(f"description-topics names unknown skill {skill}")
             continue
@@ -198,6 +225,7 @@ def main() -> int:
     rep = {"cases": len(cases), "failed": [r for r in results if not r["ok"]], "coverage_errors": coverage_errors,
            "topic_errors": topic_errors, "scope_errors": scope, "natural_cases": sum(1 for c in cases if c.get("natural")),
            "dispatch_api_mentions": dispatch, "languages": sorted(langs),
+           "unpinned_phrases": unpinned_phrases(d, cases, topics_table),
            "note": "static check only: descriptions cover the cases; a live routing run needs approval (paid model calls)"}
     rep["ok"] = not rep["failed"] and not coverage_errors and not dispatch and not topic_errors and not scope
     print(json.dumps(rep, indent=1, ensure_ascii=False))

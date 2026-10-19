@@ -157,7 +157,7 @@
   "tests.skills.hep_computing.test_audit_histograms": 0.1,
   "tests.skills.hep_computing.test_compare_histograms": 0.3,
   "tests.skills.hep_computing.test_environment_manifest": 2.7,
-  "tests.skills.hep_computing.test_example_authoring": 0.5,
+  "tests.tools.test_example_authoring": 0.5,
   "tests.skills.hep_computing.test_find_python": 1.1,
   "tests.skills.hep_computing.test_lint_task": 0.5,
   "tests.skills.hep_computing.test_local_partition": 2.4,

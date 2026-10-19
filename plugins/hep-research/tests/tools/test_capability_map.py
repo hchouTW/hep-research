@@ -31,6 +31,18 @@ def case(cid, expected="hep-theory", limited=True, also=None):
 
 
 class ScopeRule(unittest.TestCase):
+    def test_owners_are_the_skill_folders_plus_shared_layers(self):
+        folders = {p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md")}
+        self.assertEqual(cm.OWNERS, folders | {"core", "contracts"})
+
+    def test_stale_owner_fails(self):
+        # a skill name with no skill folder (removed or renamed) is not a valid owner, alone or in a list
+        for owner in ("hep-retired", "hep-theory, hep-retired"):
+            with self.subTest(owner=owner):
+                errs = cm.validate({"capabilities": [entry(owner=owner, v1=True, cases=[])]})
+                self.assertTrue(any("unknown owner" in e for e in errs), errs)
+        self.assertEqual(cm.validate({"capabilities": [entry(owner="hep-theory, core", v1=True, cases=[])]}), [])
+
     def test_v1_out_domain_without_case_fails(self):
         errs = crs.scope_errors({"capabilities": [entry(cases=[])]}, [case("c1")])
         self.assertTrue(errs and "no limited-support routing case" in errs[0], errs)

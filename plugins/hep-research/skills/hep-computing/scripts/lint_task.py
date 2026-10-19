@@ -8,7 +8,7 @@ cannot judge whether the content is good; `references/task-quality-checklist.md`
 still applies.
 
 What it does: reads one task file and reports ERRORS (exit 1) and WARNINGS (exit 0).
-Errors: the 12-section contract is broken (same check as `validate_skill_bundle.py`),
+Errors: the 12-section contract is broken (`check_template_sections()`, also used by the maintenance check `tools/validate_skill_bundle.py`),
 a section body is empty, a `{{...}}`, `<!-- ... -->` or `FIXME` placeholder is left, "Open Questions" has no item, a backtick path that looks like a repository file
 does not exist under `--repo`, or the task describes an agent/retry loop but never
 mentions a maximum-iteration limit. A path is found if it exists under `--repo` or inside this skill bundle (a task may
@@ -32,9 +32,53 @@ import re
 import sys
 from pathlib import Path
 
-sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate_skill_bundle import check_template_sections  # noqa: E402
+# The task section contract ("Task Generation Requirements" in references/task-authoring-guide.md): one top-level
+# title, then these ## / ### sections in order. tools/validate_skill_bundle.py checks assets/task-template.md with it.
+REQUIRED_TEMPLATE_SECTIONS = [
+    "## Background",
+    "## Objective",
+    "## Scope",
+    "### In Scope",
+    "### Out of Scope",
+    "## Repository Context",
+    "## Technical Approach",
+    "## Deliverables",
+    "## Acceptance Criteria",
+    "## Validation",
+    "## Open Questions",
+    "## References",
+]
+
+HEADING_RE = re.compile(r"^(#{1,3} .+)$", re.MULTILINE)
+
+
+def extract_headings(text: str) -> list[str]:
+    """Return every level-1/2/3 Markdown heading line in `text`, in order."""
+    return HEADING_RE.findall(text)
+
+
+def check_template_sections(text: str) -> list[str]:
+    """Return a list of problems with the template's section contract; empty
+    if the template has exactly one top-level title followed by exactly the
+    required sections, in order."""
+    headings = extract_headings(text)
+    top_level = [h for h in headings if not h.startswith("## ") and not h.startswith("### ")]
+    sections = [h for h in headings if h.startswith("## ") or h.startswith("### ")]
+
+    problems = []
+    if len(top_level) != 1:
+        problems.append(f"expected exactly one top-level title heading, found {len(top_level)}")
+    if sections != REQUIRED_TEMPLATE_SECTIONS:
+        missing = [s for s in REQUIRED_TEMPLATE_SECTIONS if s not in sections]
+        extra = [s for s in sections if s not in REQUIRED_TEMPLATE_SECTIONS]
+        if missing:
+            problems.append(f"missing sections: {missing}")
+        if extra:
+            problems.append(f"unexpected extra sections: {extra}")
+        if not missing and not extra:
+            problems.append(f"sections present but out of order: {sections}")
+    return problems
+
 
 PATH_RE = re.compile(r"`((?:[\w.-]+/)+[\w.-]+\.\w{1,8})`")
 CREATE_RE = re.compile(r"\b(creat\w*|add\w*|new|propos\w*|writ\w*|introduc\w*|generat\w*)\b", re.I)

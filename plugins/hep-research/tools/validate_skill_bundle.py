@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the structural integrity of the task-authoring material in hep-computing.
+"""Validate the structural integrity of the task-authoring material in hep-computing (a maintenance tool).
 
 Purpose: catch accidental deletions or truncations of files this skill's SKILL.md
 depends on, and confirm the generated-task output contract
@@ -14,14 +14,21 @@ assets/task-template.md's heading structure exactly matches the section
 contract (one top-level title, then the fixed list of ## / ### sections in order).
 
 Usage: run with no arguments from anywhere; it resolves paths relative to its own
-location. `python3 <plugin root>/skills/hep-computing/scripts/validate_skill_bundle.py`. No third-party dependencies.
+location. `python3 tools/validate_skill_bundle.py` from the plugin root. No third-party dependencies.
+The section contract itself lives in skills/hep-computing/scripts/lint_task.py.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1] / "skills" / "hep-computing"
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(ROOT / "scripts"))
+from lint_task import REQUIRED_TEMPLATE_SECTIONS, check_template_sections  # noqa: E402
 
 REQUIRED_PATHS = [
     "SKILL.md",
@@ -29,7 +36,6 @@ REQUIRED_PATHS = [
     "references/task-authoring-guide.md",
     "references/acceptance-criteria.md",
     "references/task-quality-checklist.md",
-    "references/example-authoring.md",
     "references/prompt-engineering-and-token-optimization.md",
     "references/loop-engineering.md",
     "references/host-notes.md",
@@ -39,62 +45,10 @@ REQUIRED_PATHS = [
     "examples/migration-task.md",
     "examples/agentic-loop-task.md",
     "examples/data-ml-task.md",
-    "scripts/validate_skill_bundle.py",
-    "scripts/generate_skill_example.py",
-    "scripts/validate_skill_example.py",
-    "scripts/check_example_diversity.py",
     "scripts/lint_task.py",
 ]
 
-# The exact, ordered section contract from "Task Generation Requirements" in
-# references/task-authoring-guide.md: Title (a single top-level
-# heading, checked separately), then these ## / ### sections in order.
 DESCRIPTION_LIMIT = 1024  # characters; the sibling skills stay under it
-
-REQUIRED_TEMPLATE_SECTIONS = [
-    "## Background",
-    "## Objective",
-    "## Scope",
-    "### In Scope",
-    "### Out of Scope",
-    "## Repository Context",
-    "## Technical Approach",
-    "## Deliverables",
-    "## Acceptance Criteria",
-    "## Validation",
-    "## Open Questions",
-    "## References",
-]
-
-HEADING_RE = re.compile(r"^(#{1,3} .+)$", re.MULTILINE)
-
-
-def extract_headings(text: str) -> list[str]:
-    """Return every level-1/2/3 Markdown heading line in `text`, in order."""
-    return HEADING_RE.findall(text)
-
-
-def check_template_sections(text: str) -> list[str]:
-    """Return a list of problems with the template's section contract; empty
-    if the template has exactly one top-level title followed by exactly the
-    required sections, in order."""
-    headings = extract_headings(text)
-    top_level = [h for h in headings if not h.startswith("## ") and not h.startswith("### ")]
-    sections = [h for h in headings if h.startswith("## ") or h.startswith("### ")]
-
-    problems = []
-    if len(top_level) != 1:
-        problems.append(f"expected exactly one top-level title heading, found {len(top_level)}")
-    if sections != REQUIRED_TEMPLATE_SECTIONS:
-        missing = [s for s in REQUIRED_TEMPLATE_SECTIONS if s not in sections]
-        extra = [s for s in sections if s not in REQUIRED_TEMPLATE_SECTIONS]
-        if missing:
-            problems.append(f"missing sections: {missing}")
-        if extra:
-            problems.append(f"unexpected extra sections: {extra}")
-        if not missing and not extra:
-            problems.append(f"sections present but out of order: {sections}")
-    return problems
 
 
 def problems_of(root: Path) -> list[str]:
@@ -122,8 +76,7 @@ def main(argv: list[str] | None = None) -> int:
                                  epilog="Paths resolve relative to this script. Exit 0 intact, 1 problems found.")
     ap.add_argument("--json", action="store_true", help='print {"status": "ok" | "problems", "problems": [...]}')
     args = ap.parse_args(argv)
-    root = Path(__file__).resolve().parents[1]
-    problems = problems_of(root)
+    problems = problems_of(ROOT)
     if args.json:
         print(json.dumps({"status": "problems" if problems else "ok", "problems": problems}))
         return 1 if problems else 0

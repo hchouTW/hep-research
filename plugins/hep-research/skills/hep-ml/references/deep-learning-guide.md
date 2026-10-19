@@ -123,7 +123,7 @@ PyTorch engineering:
   [training-at-scale.md](training-at-scale.md); serving and monitoring (generic) ->
   [serving-architecture.md](serving-architecture.md), [monitoring-and-lifecycle.md](monitoring-and-lifecycle.md);
   data and evaluation design -> [data-strategy.md](data-strategy.md), [evaluation-strategy.md](evaluation-strategy.md)
-- Worked `examples/` entries -> hep-computing's [example-authoring.md](../../hep-computing/references/example-authoring.md)
+- Worked `examples/` entries -> the plugin's [example authoring](../../../docs/dev/example-authoring.md) (developer documentation)
 
 Scripts and assets are listed in the skill's [README.md](../README.md); read `--help` first and report the top few
 offending items of a diagnostic, not the raw dump.

@@ -2,14 +2,18 @@
 general method; the placement inventory covers every module; no module copies general DIS identities or names
 another profile's path; the detector module refuses to supply performance numbers."""
 import re
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT.parents[2]
+sys.path.insert(0, str(PLUGIN))
+from contracts.skill_names import SKILLS as SKILL_NAMES  # noqa: E402
+
 MODULES = sorted(p for p in (ROOT / "modules").rglob("*.md") if p.name != "placement-inventory.md")
 INVENTORY = (ROOT / "modules" / "placement-inventory.md").read_text(encoding="utf-8")
-SKILLS = {"hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-communication"}
+SKILLS = set(SKILL_NAMES)  # the plugin's skill names (contracts/skill_names.py)
 PLACEMENTS = {"general HEP method", "EIC facility context", "ePIC configuration", "project-local"}
 
 

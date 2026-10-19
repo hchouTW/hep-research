@@ -4,7 +4,7 @@
 Purpose: enforce the diversity rule for a batch of canonical examples - no two
 files sharing an `archetype:` frontmatter value should also share a `skill:`
 value, so a 3-example batch is guaranteed to span 3 different skills. See
-references/example-authoring.md's "Diversity rule" for what this does and does
+docs/dev/example-authoring.md's "Diversity rule" for what this does and does
 not guarantee.
 
 What it does: reads the `archetype:`/`skill:` frontmatter fields from each
@@ -15,9 +15,9 @@ archetype, and reports any archetype group where two or more files share a
 distinct across files - that is a curation responsibility, not a mechanical
 one.
 
-Usage: `python3 <plugin root>/skills/hep-computing/scripts/check_example_diversity.py <file1.md> <file2.md> ...`
+Usage: `python3 <plugin root>/tools/check_example_diversity.py <file1.md> <file2.md> ...`
 (rely on shell globbing for a whole batch, e.g.
-`python3 <plugin root>/skills/hep-computing/scripts/check_example_diversity.py ../*/examples/*.md`). Exits 0 and
+`python3 <plugin root>/tools/check_example_diversity.py ../*/examples/*.md`). Exits 0 and
 prints "ok: no diversity violations across N file(s)" on success; exits 1 and
 lists every violation (archetype, skill, and the offending files) on failure.
 Standard library only.

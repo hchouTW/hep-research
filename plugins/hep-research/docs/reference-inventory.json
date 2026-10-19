@@ -9,8 +9,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 36,
-   "bytes": 317640,
+   "references": 35,
+   "bytes": 297680,
    "uncited": 0
   },
   "hep-detector": {
@@ -25,7 +25,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 192061,
+   "bytes": 192068,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1007,7 +1007,7 @@
    "cited_by": [
     "skills/hep-computing/assets/task-template.md",
     "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
@@ -1209,7 +1209,7 @@
    "cited_by": [
     "skills/hep-computing/references/agile-development-guide.md",
     "skills/hep-computing/references/software-architecture.md",
-    "tests/skills/hep_computing/test_example_authoring.py"
+    "tests/tools/test_example_authoring.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "f4372374 2026-10-13"
@@ -1217,7 +1217,7 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 10737,
+   "bytes": 10710,
    "lines": 148,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1246,26 +1246,6 @@
    "last_commit": "efa283c7 2026-10-13"
   },
   {
-   "path": "skills/hep-computing/references/example-authoring.md",
-   "owner": "hep-computing",
-   "bytes": 19977,
-   "lines": 339,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/check_example_diversity.py",
-    "skills/hep-computing/scripts/generate_skill_example.py",
-    "skills/hep-computing/scripts/validate_skill_bundle.py",
-    "skills/hep-computing/scripts/validate_skill_example.py",
-    "skills/hep-ml/references/deep-learning-guide.md",
-    "tests/skills/hep_computing/test_example_authoring.py"
-   ],
-   "cited_by_other_skills": [
-    "hep-ml"
-   ],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
    "path": "skills/hep-computing/references/host-notes.md",
    "owner": "hep-computing",
    "bytes": 5648,
@@ -1273,7 +1253,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "364918e6 2026-10-09"
@@ -1305,7 +1285,7 @@
     "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
     "skills/hep-computing/references/task-authoring-guide.md",
     "skills/hep-computing/references/task-quality-checklist.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "4665f433 2026-10-13"
@@ -1370,7 +1350,7 @@
    "cited_by": [
     "skills/hep-computing/references/loop-engineering.md",
     "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
@@ -1539,7 +1519,7 @@
   {
    "path": "skills/hep-computing/references/task-authoring-guide.md",
    "owner": "hep-computing",
-   "bytes": 11892,
+   "bytes": 11936,
    "lines": 201,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1550,7 +1530,8 @@
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/host-notes.md",
     "skills/hep-computing/references/loop-engineering.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "skills/hep-computing/scripts/lint_task.py",
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
@@ -1565,7 +1546,7 @@
     "skills/hep-computing/examples/bug-task.md",
     "skills/hep-computing/references/task-authoring-guide.md",
     "skills/hep-computing/scripts/lint_task.py",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
@@ -2841,7 +2822,7 @@
   {
    "path": "skills/hep-ml/references/deep-learning-guide.md",
    "owner": "hep-ml",
-   "bytes": 11686,
+   "bytes": 11693,
    "lines": 151,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4060,10 +4041,6 @@
    "skills/hep-communication/references/equation-and-notation-auditing.md",
    "skills/hep-communication/references/manuscript-consistency-auditing.md",
    "skills/hep-communication/references/reproducibility-auditing.md"
-  ],
-  "authoring": [
-   "skills/hep-computing/references/example-authoring.md",
-   "skills/hep-computing/references/task-authoring-guide.md"
   ],
   "balanced": [
    "skills/hep-computing/references/bash-balanced-design-guidelines.md",

@@ -11,11 +11,11 @@ What it does: prints (or writes) a markdown skeleton for one of eight archetypes
 `adversarial-audit`, `test-first`, `postmortem`), each with its own frontmatter
 scenario field and fixed section headers, one HTML-comment placeholder per
 section, and (for `contrast` only) one placeholder bullet per requested
-takeaway. It does not generate content - see references/example-authoring.md
+takeaway. It does not generate content - see docs/dev/example-authoring.md
 for the eight generation prompts and format spec, and
 `validate_skill_example.py` for checking a filled-in file.
 
-Usage: `python3 <plugin root>/skills/hep-computing/scripts/generate_skill_example.py --archetype
+Usage: `python3 <plugin root>/tools/generate_skill_example.py --archetype
 {contrast,trajectory,gated-pipeline,decision-tree,elicitation,adversarial-audit,test-first,postmortem}
 --skill hep-measurement --role "Senior Experimental Particle Physicist"
 <scenario-flag> "..." [--output ../hep-measurement/examples/01-slug.md]`. The

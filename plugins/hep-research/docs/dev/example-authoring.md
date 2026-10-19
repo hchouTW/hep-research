@@ -3,8 +3,8 @@
 How to produce a `<skill>/examples/` entry: a complete, production-ready worked
 example for a realistic scenario in that skill's domain, in whichever of eight
 **archetypes** fits the scenario. Use this when asked to "author," "generate,"
-or "add a canonical example" (in any archetype) for `hep-computing` itself
-or for another skill.
+or "add a canonical example" (in any archetype) for any skill. This is plugin maintenance
+documentation (moved out of hep-computing with the example tools in `<plugin root>/tools/`), not skill content.
 
 ## Which archetype fits?
 
@@ -166,7 +166,7 @@ they do not write or judge the domain content itself.
 
 ## Workflow
 
-1. **Scaffold.** Run `<plugin root>/skills/hep-computing/scripts/generate_skill_example.py` with `--archetype`,
+1. **Scaffold.** Run `<plugin root>/tools/generate_skill_example.py` with `--archetype`,
    `--skill`, `--role`, and that archetype's scenario flag (`--use-case` /
    `--problem-input` / `--high-stakes-task` / `--scenario` / `--user-request` /
    `--candidate-artifact` / `--target` / `--incident`; `--takeaways` is
@@ -176,18 +176,16 @@ they do not write or judge the domain content itself.
    inventing the story.
 2. **Fill.** Replace every skeleton placeholder with real content per that
    archetype's format spec below. Zero placeholders (see below).
-3. **Validate.** Run `<plugin root>/skills/hep-computing/scripts/validate_skill_example.py <file>` - it reads the
+3. **Validate.** Run `<plugin root>/tools/validate_skill_example.py <file>` - it reads the
    `archetype:` frontmatter field to pick the rule set, then mechanically
    rejects structural defects and placeholder content. It cannot judge domain
    correctness (see Correctness review below).
 4. **Index.** Add or update `<skill>/examples/README.md`, a one-row-per-example
    table: `Example | Archetype | Scenario | One-line takeaway`.
 5. **Wire it up.** If this is the first example for that skill, add
-   `examples/README.md` and the new example file to that skill's own
-   `scripts/validate_skill_bundle.py` `REQUIRED_PATHS` (or, for a skill whose
-   validator checks orphaned files by scanning `references/`/`scripts/`/`assets/`
-   only, no change is needed there - confirm which kind the target skill has
-   before assuming). Log the pass in that skill's `VALIDATION.md`.
+   `examples/README.md` and the new example file to the skill's bundle check if it
+   has one (for hep-computing, `REQUIRED_PATHS` in `<plugin root>/tools/validate_skill_bundle.py`; a skill
+   without one needs no change there). Log the pass in that skill's `VALIDATION.md`.
 
 ## Format specification
 
@@ -220,7 +218,7 @@ Shared conventions across all eight archetypes:
   responsibility: nothing mechanically checks conceptual distinctness within a
   skill, the same way nothing has ever checked it for the four original
   archetypes.
-  `<plugin root>/skills/hep-computing/scripts/check_example_diversity.py` is retained but historical: an earlier,
+  `<plugin root>/tools/check_example_diversity.py` is retained but historical: an earlier,
   narrower release of `[E]/[R]/[T]/[P]` shipped only 3 examples *total* per
   archetype (one per skill, no skill repeated), and that script enforced the
   no-repeated-skill constraint for that specific batch. It no longer reflects
@@ -328,10 +326,10 @@ now-historical constraint - see the Diversity rule above.)
 
 ## Cross-skill use
 
-This reference lives only in `hep-computing` and is shared by cross-link
-rather than copied into each skill - each rollout skill's own "When to Load
-References"-equivalent section points back here. The plugin ships every skill
-together, so the pointer always resolves.
+This document lives in the plugin's developer documentation (`docs/dev/`) and is
+shared by cross-link rather than copied into each skill; a skill reference that
+needs it links here. The plugin ships `docs/dev/` with the skills, so the pointer
+always resolves.
 
 Don't add `examples/` to a skill's `REQUIRED_PATHS` (or equivalent orphan
 check) until that skill actually has a populated `examples/` directory - an

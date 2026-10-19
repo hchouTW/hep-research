@@ -4,10 +4,9 @@ Purpose: cover `generate_skill_example.py` (scaffold), `validate_skill_example.p
 (structural + placeholder checks), and `check_example_diversity.py` across all
 eight archetypes (contrast, trajectory, gated-pipeline, decision-tree,
 elicitation, adversarial-audit, test-first, postmortem) - the tooling behind
-references/example-authoring.md.
+docs/dev/example-authoring.md.
 
-Usage: run from the skill directory with
-`python3 -m unittest discover -s tests -v`. Standard library only; no external
+Usage: from the plugin root, `python3 -m unittest tests.tools.test_example_authoring`. Standard library only; no external
 services or dependencies are needed.
 """
 from __future__ import annotations
@@ -19,8 +18,8 @@ import unittest
 from pathlib import Path
 
 TESTS_DIR = Path(__file__).resolve().parent
-ROOT = Path(__file__).resolve().parents[3] / "skills" / "hep-computing"
-sys.path.insert(0, str(ROOT / "scripts"))
+ROOT = Path(__file__).resolve().parents[2] / "tools"
+sys.path.insert(0, str(ROOT))
 
 import check_example_diversity  # noqa: E402
 import generate_skill_example  # noqa: E402
@@ -528,7 +527,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
 
     def test_cli_rejects_takeaways_out_of_range(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
+            [sys.executable, str(ROOT / "generate_skill_example.py"),
              "--archetype", "contrast", "--skill", "agile-development", "--role", "X",
              "--use-case", "Y", "--takeaways", "10"],
             capture_output=True, text=True, timeout=600
@@ -538,7 +537,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
 
     def test_cli_rejects_takeaways_for_non_contrast_archetype(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
+            [sys.executable, str(ROOT / "generate_skill_example.py"),
              "--archetype", "trajectory", "--skill", "agile-development", "--role", "X",
              "--problem-input", "Y", "--takeaways", "4"],
             capture_output=True, text=True, timeout=600
@@ -548,7 +547,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
 
     def test_cli_missing_required_flag_fails_with_usage(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/generate_skill_example.py"), "--skill", "x"],
+            [sys.executable, str(ROOT / "generate_skill_example.py"), "--skill", "x"],
             capture_output=True, text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
@@ -556,7 +555,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
 
     def test_cli_missing_scenario_flag_for_archetype_fails(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
+            [sys.executable, str(ROOT / "generate_skill_example.py"),
              "--archetype", "decision-tree", "--skill", "agile-development", "--role", "X"],
             capture_output=True, text=True, timeout=600
         )
@@ -565,7 +564,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
 
     def test_cli_rejects_wrong_scenario_flag_for_archetype(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
+            [sys.executable, str(ROOT / "generate_skill_example.py"),
              "--archetype", "contrast", "--skill", "agile-development", "--role", "X",
              "--use-case", "Y", "--scenario", "Z"],
             capture_output=True, text=True, timeout=600
@@ -577,7 +576,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
         out_path = TESTS_DIR / "_scratch_scaffold.md"
         try:
             result = subprocess.run(
-                [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
+                [sys.executable, str(ROOT / "generate_skill_example.py"),
                  "--archetype", "contrast", "--skill", "agile-development", "--role", "X",
                  "--use-case", "Y", "--output", str(out_path)],
                 capture_output=True, text=True, timeout=600
@@ -673,7 +672,7 @@ class ValidateContrastTests(unittest.TestCase):
         path.write_text(GOOD_CONTRAST, encoding="utf-8")
         try:
             result = subprocess.run(
-                [sys.executable, str(ROOT / "scripts/validate_skill_example.py"), str(path)],
+                [sys.executable, str(ROOT / "validate_skill_example.py"), str(path)],
                 capture_output=True, text=True, timeout=600
             )
             self.assertEqual(result.returncode, 0, result.stdout)
@@ -683,7 +682,7 @@ class ValidateContrastTests(unittest.TestCase):
 
     def test_cli_missing_file_fails_cleanly_not_with_traceback(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/validate_skill_example.py"),
+            [sys.executable, str(ROOT / "validate_skill_example.py"),
              str(TESTS_DIR / "does-not-exist.md")],
             capture_output=True, text=True, timeout=600
         )
@@ -987,7 +986,7 @@ class DiversityCheckerTests(unittest.TestCase):
                 tmp_path, "b.md", GOOD_ADVERSARIAL_AUDIT.replace("skill: deep-learning", "skill: hep-measurement")
             )
             result = subprocess.run(
-                [sys.executable, str(ROOT / "scripts/check_example_diversity.py"), str(a), str(b)],
+                [sys.executable, str(ROOT / "check_example_diversity.py"), str(a), str(b)],
                 capture_output=True, text=True, timeout=600
             )
             self.assertEqual(result.returncode, 0, result.stdout)
@@ -1001,7 +1000,7 @@ class DiversityCheckerTests(unittest.TestCase):
             a = self._write(tmp_path, "a.md", GOOD_ADVERSARIAL_AUDIT)
             b = self._write(tmp_path, "b.md", GOOD_ADVERSARIAL_AUDIT)
             result = subprocess.run(
-                [sys.executable, str(ROOT / "scripts/check_example_diversity.py"), str(a), str(b)],
+                [sys.executable, str(ROOT / "check_example_diversity.py"), str(a), str(b)],
                 capture_output=True, text=True, timeout=600
             )
             self.assertEqual(result.returncode, 1)

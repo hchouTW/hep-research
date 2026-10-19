@@ -3,7 +3,7 @@
 
 Purpose: mechanically reject structural defects and placeholder content in a
 worked example before it ships - mirrors `validate_agile_notes.py`'s role for
-delivery notes. See references/example-authoring.md for the four archetypes and
+delivery notes. See docs/dev/example-authoring.md for the four archetypes and
 the format each checks against.
 
 What it does: reads the frontmatter `archetype:` field (`contrast`, `trajectory`,
@@ -41,7 +41,7 @@ Archetype-specific rules:
   a fenced diff block; "5. Blameless Postmortem & Preventative Monitoring
   Rules" names a concrete metric+threshold monitoring rule.
 
-Usage: `python3 <plugin root>/skills/hep-computing/scripts/validate_skill_example.py <file.md>`. Exits 0 and prints
+Usage: `python3 <plugin root>/tools/validate_skill_example.py <file.md>`. Exits 0 and prints
 "<file>: ok" on success; exits 1 with a description of every problem found;
 exits 2 with a one-line message (no traceback) if the file cannot be read.
 Standard library only.

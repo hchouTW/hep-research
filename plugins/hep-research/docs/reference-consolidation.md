@@ -25,8 +25,11 @@ design guidelines (P1), move only the web, sprint, feature-flag and accessibilit
   [dev/engineering/web-and-delivery-practices.md](dev/engineering/web-and-delivery-practices.md). Each old place keeps
   a one-line pointer; the skill's links point to the new paths. Kept in the skill: `agile-development-guide.md`
   (cited by hep-ml), `prompt-engineering-and-token-optimization.md` and `loop-engineering.md` (required by
-  `scripts/validate_skill_bundle.py` and the task guide), and the six task- and example-authoring scripts (CMP-27
-  deferred).
+  the bundle check and the task guide), and the task-authoring scripts. Since the restructuring plan step 0
+  (2026-10-19) the example-authoring tools (`generate_skill_example.py`, `validate_skill_example.py`,
+  `check_example_diversity.py`) and the bundle check `validate_skill_bundle.py` are maintenance tools in `tools/`,
+  `example-authoring.md` is [dev/example-authoring.md](dev/example-authoring.md), and the task section contract
+  (`check_template_sections()`) lives in `lint_task.py`.
 
 ## What the inventory shows
 

@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | hep-communication | 57 | 412 | 0 |
-| hep-computing | 36 | 318 | 0 |
+| hep-computing | 35 | 298 | 0 |
 | hep-detector | 37 | 472 | 0 |
 | hep-measurement | 13 | 116 | 0 |
 | hep-ml | 42 | 192 | 0 |
@@ -29,7 +29,6 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **academic**: `academic-diagrams-guide.md`, `academic-papers-guide.md`
 - **architecture**: `architecture-selection.md`, `particle-and-jet-architectures.md`, `serving-architecture.md`, `transformer-architectures.md`
 - **auditing**: `equation-and-notation-auditing.md`, `manuscript-consistency-auditing.md`, `reproducibility-auditing.md`
-- **authoring**: `example-authoring.md`, `task-authoring-guide.md`
 - **balanced**: `bash-balanced-design-guidelines.md`, `cpp-balanced-design-guidelines.md`, `python-balanced-design-guidelines.md`, `root-balanced-design-guidelines.md`
 - **based**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **batch**: `batch-scheduling.md`, `batch-site-cern-htcondor.md`, `batch-site-nstccore-slurm.md`
@@ -159,7 +158,6 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f4372374 2026-10-13 |
 | `engineering-playbook.md` | hep-computing | 10.7 | yes | 3 | - | b7b159f4 2026-10-17 |
 | `environments-and-containers.md` | hep-computing | 4.0 | yes | 6 | - | efa283c7 2026-10-13 |
-| `example-authoring.md` | hep-computing | 20.0 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e6 2026-10-09 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | f4372374 2026-10-13 |
 | `loop-engineering.md` | hep-computing | 7.0 | no | 7 | - | 4665f433 2026-10-13 |
@@ -177,7 +175,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 2 | - | 351029c0 2026-10-07 |
 | `storage-cern-eos.md` | hep-computing | 13.4 | yes | 4 | - | 50decbd0 2026-10-17 |
 | `symbolic-and-numerical-computation.md` | hep-computing | 7.0 | yes | 4 | - | 46cea2cb 2026-10-13 |
-| `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 9257d7b5 2026-10-15 |
+| `task-authoring-guide.md` | hep-computing | 11.9 | yes | 9 | - | 9257d7b5 2026-10-15 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c0 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 7 | - | 9257d7b5 2026-10-15 |
 | `calibration-and-alignment.md` | hep-detector | 19.0 | yes | 22 | - | 1d03565d 2026-10-17 |
