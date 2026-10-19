@@ -14,7 +14,7 @@ Method:
            manifest (fold0..foldK-1, groups) is checked with check_split_integrity.py before training.
   training for test fold k the model trains on the other folds; a validation part of those folds (sha256 of the key,
            fraction validation_fraction) drives early stopping and the hyperparameter choice, never the test fold.
-           A validation part with no events or one class is refused before any training (exit 2).
+           With no fold's validation part holding both classes the run is refused before training (exit 2).
   selection every grid point of "hyperparameters" is trained for every fold; the point with the best mean objective
            on the validation parts is kept: weighted AUC ("auc") or the Asimov significance
            Z_A = sqrt(2((s+b) ln(1+s/b) - s)) maximized over the score cut ("asimov", s and b = physical-weight sums
@@ -53,9 +53,9 @@ Output (--out-dir): fold_manifest.json, split_report.json, scores.csv (id, fold,
 run_summary.json (accepted by write_ml_artifact.py); JSON on stdout with "status", "status_label", "inputs",
 "defaults_used", metrics, working points, overtraining, importance and weights.
 Validity: binary classification; deterministic for a fixed seed and thread count on one machine and library version.
-Exit codes: 0 ok; 2 bad input (missing column, bad config, missing --negative-weights, a fold or validation part
-too small); 3 incomplete or a missing dependency (numpy, xgboost or scikit-learn, pyarrow, uproot: the output gives
-the pip command; negative weights under reject; a leaky or incomplete fold manifest).
+Exit codes: 0 ok; 2 bad input (missing column, bad config, missing --negative-weights, a fold or all validation
+parts too small); 3 incomplete or a missing dependency (numpy, xgboost or scikit-learn, pyarrow, uproot: the output
+gives the pip command; negative weights under reject; a leaky or incomplete fold manifest).
 Run: python3 <plugin root>/skills/hep-ml/scripts/train_bdt.py --data events.csv --config bdt.json \
        --negative-weights abs-train-signed-eval --out-dir bdt_run
 """
@@ -547,17 +547,19 @@ def run(args) -> tuple[str, dict]:
     if check.returncode != 0:
         raise Stop("incomplete", reason="the fold manifest did not pass check_split_integrity.py --strict",
                    split_report=str(out_dir / "split_report.json"))
+    usable, parts = [], []
     for k in range(K):
         if not reg and len(np.unique(y[fold == k])) < 2:
             raise InputError(f"fold {k} lacks a class; use more events or fewer folds")
-        # hyperparameter selection scores each fold's validation part: with no events or one class it is NaN for
-        # every grid point, so refuse before training rather than pick a model on no evidence
         va = (fold != k) & is_val
-        if not va.any() or (not reg and len(np.unique(y[va])) < 2):
-            counts = "" if reg else f" ({int((y[va] == 1).sum())} signal, {int((y[va] == 0).sum())} background)"
-            raise InputError(f"the validation part of fold {k} has {int(va.sum())} events{counts}; whole "
-                             f"event_number keys ({len(set(keys))} here) go to validation, so raise "
-                             "validation_fraction, use fewer folds, a finer key or more events")
+        usable.append(bool(va.any()) and (reg or len(np.unique(y[va])) == 2))
+        parts.append(f"fold {k}: {int(va.sum())}" + ("" if reg else f" ({int((y[va] == 1).sum())} signal)"))
+    # hyperparameter selection averages the folds' validation objectives; a fold whose validation part is empty or
+    # has one class adds nothing, but with no usable part every grid point is NaN, so refuse before training
+    if not any(usable):
+        raise InputError(f"no fold has a validation part with both classes ({'; '.join(parts)} events); whole "
+                         f"event_number keys ({len(set(keys))} here) go to validation, so raise "
+                         "validation_fraction, use fewer folds, a finer key or more events")
 
     grid_names = sorted(cfg["hyperparameters"])
     grid = [dict(zip(grid_names, combo)) for combo in itertools.product(*(cfg["hyperparameters"][g] for g in grid_names))]
@@ -573,6 +575,9 @@ def run(args) -> tuple[str, dict]:
             model = backend.fit(np, x[tr], y[tr], w_train[tr], x[va & train_ok], y[va & train_ok],
                                 w_train[va & train_ok], hp)
             trained[(gi, k)] = model
+            if not usable[k]:  # nothing to score (scikit-learn refuses an empty array); nanmean skips it
+                vals.append(float("nan"))
+                continue
             sv = backend.predict(np, model, x[va])
             if reg:
                 vals.append(-weighted_rmse(np, sv, y[va], np.abs(w[va])))

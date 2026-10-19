@@ -253,6 +253,21 @@ runs (5 of 6 at #151; 8 of 12 over both, 1 of 12 before #151). The three that di
 `ml-work/` and then failed as Haiku did before #151: one computed the CLs limit in its own script, one stopped asking
 for inputs, and one stopped when `train_bdt.py` gave NaN metrics on the 16-event sample.
 
+**Full L3 on main after #153 (2026-10-19)**, both arms, 3 repeats, paired against #150 (`l3-rem-*`).
+
+| Model | L3 pass: #150 → main | Chain cases (unfold, ML, theory) | Fault cases | Runs writing outside the workspace | Cost |
+|---|---|---|---|---|---|
+| claude-sonnet-5-5 | 46 → 43 of 48 (+2 / -5) | 16 → 13 of 18 | 30 → 30 of 30 | 0 | $7.44 |
+| claude-haiku-5-5 | 38 → 39 of 48 (+4 / -3) | 8 → 10 of 18 | 30 → 29 of 30 | 0 | $0.72 |
+
+Sonnet's ML case fell to 2 of 6. Two of the four failures were #153: it refused a run when any fold's validation
+part was empty, where the old code let the other folds choose the hyperparameters, so Sonnet stopped on "the
+validation part of fold N has 0 events" in every configuration it tried. On those runs' data, all 9 fold and
+`validation_fraction` settings trained before #153 and were refused after it. The guard now refuses only when no
+fold's part is usable. The other two skip the grouped-split scripts, as at #152. Haiku's ML case is 5 of 6 and its
+theory comparison stays at 1 of 6. 33 Sonnet runs first failed to start (`Exec format error: 'claude'`, the CLI was
+reinstalled during the run) and were filled by a rerun into the same folder.
+
 `l3-response-unfold-report` asked for `min_fraction` 0.67 of three hops, which `ceil` made all three; it is now 0.66,
 two hops, as the grader's docstring intends. All L3 runs (before, after, v1-v3) are regraded with it; no earlier
 pass or fail changed.
