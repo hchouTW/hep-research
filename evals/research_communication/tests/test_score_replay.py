@@ -23,7 +23,8 @@ BY_ID = {c["id"]: c for c in CASES["cases"]}
 
 
 def output(case_id, prose, *, skill=None, structured=None, semantic="pass", unresolved=None):
-    skill = skill or BY_ID[case_id]["expected"]["skill"]  # the skill the case expects (hep-literature or hep-writing)
+    # the skill the case expects (hep-literature or hep-writing); an unknown case id gets hep-writing
+    skill = skill or BY_ID.get(case_id, {}).get("expected", {}).get("skill", "hep-writing")
     return {"case_id": case_id, "skill_loaded": skill, "prose": prose, "structured": structured or {},
             "unresolved": unresolved if unresolved is not None else [], "judgments": {"semantic": semantic}}
 
