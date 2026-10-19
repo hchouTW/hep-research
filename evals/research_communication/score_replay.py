@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Replay scorer for the hep-communication behavioral evaluation (plan T10).
+"""Replay scorer for the communication behavioral evaluation (hep-literature and hep-writing; plan T10).
 
 Scores captured agent outputs (prose plus any structured findings) against the fixture-driven cases in cases/cases.json,
 one dimension at a time: source identity and locators, numerical fidelity, status preservation, scope and caveats,

@@ -1,5 +1,9 @@
 # Live routing evaluation
 
+The split of hep-communication into hep-literature and hep-writing changes 40 expected owners and adds 10
+cases; the committed baseline keeps the old names. The rerun is prepared, not run: see
+[the split eval plan](../split-communication-eval-plan.md).
+
 `run_routing_eval.py` runs the routing cases of the plugin
 (`plugins/hep-research/tests/routing/cases.json`, written by `tests/routing/make_cases.py`) through a headless agent
 CLI, one pass per case, and scores which plugin skill each run loads first against the case's expected owner. It

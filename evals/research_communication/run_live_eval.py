@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Live run of the hep-communication behavioral cases through a headless `claude -p` session (plan T10).
+"""Live run of the communication behavioral cases (hep-literature and hep-writing) through a headless `claude -p` session (plan T10).
 
 For each case in cases/cases.json: a fresh temporary folder holding only the case's fixture inputs (copied under the
 same relative path the prompt names), one `claude -p` pass with the plugin from --plugin-dir, read-only tools

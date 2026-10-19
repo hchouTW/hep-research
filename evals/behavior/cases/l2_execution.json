@@ -662,7 +662,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-communication",
+     "skill": "hep-literature",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -717,7 +717,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-communication",
+     "skill": "hep-writing",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -845,7 +845,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-communication",
+     "skill": "hep-writing",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -939,7 +939,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-communication",
+     "skill": "hep-literature",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -1004,6 +1004,51 @@
      "severity": "major",
      "label": "a passing validator shows self-consistency, not physical validity",
      "invariant": "DET-07"
+    }
+   ]
+  },
+  {
+   "id": "l2-write-cite-intro",
+   "lang": "en",
+   "kind": "communication",
+   "prompt": "Write the introduction paragraph of draft.md on the W boson mass, citing the most recent measurements.",
+   "fixtures": {
+    "draft.md": "SYNTHETIC draft.\n\n# Introduction\n\n(to be written)\n"
+   },
+   "note": "Restructuring plan G3: drafting with citations. hep-writing's invariant says every citation comes from a literature record or ledger, never from memory; with neither in the project, the run loads hep-literature (to look the sources up) or marks each citation unverified.",
+   "expect": [
+    {
+     "grader": "skill_loaded",
+     "skill": "hep-writing",
+     "also_accept": [
+      "hep-literature"
+     ],
+     "severity": "major",
+     "invariant": "L1-SELECT"
+    },
+    {
+     "grader": "any_of",
+     "severity": "blocking",
+     "label": "loads hep-literature for the citations or marks them unverified; never cites from memory",
+     "invariant": "WRITE-01",
+     "graders": [
+      {
+       "grader": "skill_loaded",
+       "skill": "hep-literature",
+       "before_answer_text": false
+      },
+      {
+       "grader": "answer_matches",
+       "regex": "CITATION NEEDED|unverified|not[- ]verified|not yet verified|to (be )?verif"
+      }
+     ]
+    },
+    {
+     "grader": "answer_not_matches",
+     "regex": "\\\\cite\\{[A-Za-z]+:20[0-9]{2}[a-z]{2,3}\\}",
+     "severity": "major",
+     "invariant": "WRITE-01",
+     "label": "no INSPIRE-style key typed from memory"
     }
    ]
   }

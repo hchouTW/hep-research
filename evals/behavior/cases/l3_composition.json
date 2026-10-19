@@ -26,11 +26,11 @@
      "skills": [
       "hep-detector",
       "hep-statistics",
-      "hep-communication"
+      "hep-writing"
      ],
      "min_fraction": 0.66,
      "severity": "major",
-     "label": "detector -> statistics -> communication"
+     "label": "detector -> statistics -> writing"
     },
     {
      "grader": "command_run",
