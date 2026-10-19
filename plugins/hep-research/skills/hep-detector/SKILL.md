@@ -25,7 +25,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 2. State the quantity (efficiency, resolution, scale, response matrix) and its conditioning.
 3. Choose the reference: truth matching in simulation, tag-and-probe or control sample in data, or both with a data/MC comparison.
 4. Report central value, statistical and systematic parts, validity range, and conditions.
-5. Write the `response` artifact, then run `python3 "<plugin root>/contracts/validate.py" <artifact>` and `python3 "<plugin root>/contracts/response_adapter.py" <artifact> --validate`; both must pass before another skill consumes it.
+5. Write the `response` artifact, then run `python3 "<plugin root>/contracts/validate.py" <artifacts_dir>` and `python3 "<plugin root>/contracts/response_adapter.py" <artifact> --validate`; both must pass before another skill consumes it. Unfolding or a fit with the response: load hep-statistics.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
@@ -36,7 +36,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 2. Only when a profile is needed, read `<plugin root>/profiles/registry.json`, then that profile's `index.md`, then only the modules or dataset records the task needs. Never load an unrelated experiment or theory profile.
 3. Local profiles live in the project (`local_profile_paths`), never in the plugin; `--preflight` checks them. A bound profile in neither place, or at a local path known to be a companion's, is used only via the installed `<plugin>:profile` skill that names it, after its preflight, from its folder; never scan for companions. If none is installed, the preflight fails, or a non-public profile lacks `agent_policy` approval for this host (none has it yet), say it is unavailable, do other work; never answer its topics from memory.
 4. No profile needed: use general methods. Domain without a validated profile (for example lattice QCD, EFT global fits, global cosmic-ray propagation fits): say so, then apply this skill's general discipline.
-5. Durable results and handoffs are files in the project's `artifacts_dir` (default `./hep-research-artifacts/`), never in the plugin; check them with `python3 "<plugin root>/contracts/validate.py" <artifact.json>`. Keep every status label (`synthetic`, `asimov`, `observed`, `preliminary`, `failed`, `unvalidated`, `user-supplied`) on everything derived from it.
+5. Durable results and handoffs are files in the project's `artifacts_dir` (default ./hep-research-artifacts/), never the plugin, and pass `python3 "<plugin root>/contracts/validate.py" <artifacts_dir>`; no scratch. Keep every status label (`synthetic`, `asimov`, `observed`, `preliminary`, `failed`, `unvalidated`, `user-supplied`) on everything derived from it.
 6. Answer in the user's language; keep artifact fields, identifiers and file names in English.
 <!-- END context-resolution -->
 

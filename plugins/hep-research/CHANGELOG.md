@@ -5,6 +5,28 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **`contracts/validate.py` checks a whole `artifacts_dir`.** Given a directory, it validates every JSON file under it
+  and lists each one.
+  - A JSON file without `artifact_type`, such as a raw tool output, is an error (`artifacts_dir.not_artifact`). Any
+    other file is a warning (`artifacts_dir.non_json`), because an artifact may refer to it. Hidden files are skipped.
+  - `--gate` still takes a single artifact.
+  - hep-statistics' step 1 names the file it validates (`validate.py <file>`), so a handed-over artifact outside
+    `artifacts_dir` is still validated before use.
+  - Context-resolution step 5, and the final validate step of hep-detector, hep-measurement, hep-ml and
+    hep-statistics, now run it on `<artifacts_dir>`. The two text-only rounds before it did not stop the agent from
+    leaving raw tool outputs there.
+- **Producing skills now hand their results to the next skill.**
+  - hep-theory: after the comparison gate, it loads hep-statistics for the chi2 or fit and never computes it
+    inline.
+  - hep-detector: after its two validators, it loads hep-statistics for unfolding or a fit.
+  - hep-ml: it writes the `ml-artifact` with `scripts/write_ml_artifact.py` into `artifacts_dir`, and loads
+    hep-statistics for a limit or fit.
+  - hep-statistics: it writes the `statistical-result` with `scripts/result_artifact.py` into `artifacts_dir`, and
+    loads hep-communication for a written report.
+  - Context-resolution step 5, in every `SKILL.md`, now says that durable results and handoffs in `artifacts_dir`
+    pass `contracts/validate.py`, and that no scratch files go there. The step is the same length as before.
+  - In the 2026-10-18 L3 runs, the chain cases failed on scratch JSON in `artifacts_dir` and on hand-written
+    artifacts, and most runs never loaded the next skill.
 - **The L3 checks are now on the path the agent takes.**
   - hep-theory's workflow step 5 runs `contracts/comparison/gate.py` before any chi2, pull or fit against data. On
     exit 1 it declares transformations or stops.

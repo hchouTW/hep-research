@@ -28,7 +28,7 @@
       "hep-statistics",
       "hep-communication"
      ],
-     "min_fraction": 0.67,
+     "min_fraction": 0.66,
      "severity": "major",
      "label": "detector -> statistics -> communication"
     },

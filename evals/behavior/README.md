@@ -176,6 +176,33 @@ Still failing after the change: `l3-theory-vs-published` runs the gate but never
 grader); the two chain cases, `l3-response-unfold-report` and `l3-ml-to-inference`, are 0/6 on both models, on
 CTX-ARTIFACTS-VALID (handoff artifacts that do not validate) and MEAS-07 (the synthetic label lost on a hop).
 
+**L3 chains (2026-10-18 and 2026-10-19, PR #148).** Four changes were each measured paired against `l3-after-*`
+(#147), with all eight L3 cases, natural and forced, 3 repeats.
+- v1: the producing skills name their writer and load the next skill.
+- v2: context-resolution step 5 also says no scratch goes in `artifacts_dir`.
+- v3: `contracts/validate.py` checks a whole `artifacts_dir` (a JSON file without `artifact_type` is an error), and
+  step 5 and the producing skills' final step run it on `<artifacts_dir>`.
+- v4: hep-statistics' step 1 names the file it validates (`validate.py <file>`).
+
+| Model | L3 pass: #147 → v1 → v2 → v3 → v4 | `l3-theory-vs-published` | Chain cases (unfold, ML) | Chain runs whose artifacts all validate | Fault cases | Validator run on the handed-over response |
+|---|---|---|---|---|---|---|
+| claude-sonnet-5-5 | 22 → 31 → 29 → 34 → 38 of 48 | 0 → 6 → 6 → 4 → 6 of 6 | 0 → 0 → 0 → 4 → 2 of 12 | 0 → 0 → 0 → 10 → 7 of 12 | 22 → 25 → 23 → 26 → 30 of 30 | 16 → 17 (v2) → 20 → 24 of 30 |
+| claude-haiku-5-5 | 27 → 30 → 28 → 28 → 28 of 48 | 0 → 0 → 2 → 0 → 2 of 6 | 0 → 1 → 1 → 9 → 4 of 12 | 0 → 2 → 1 → 11 → 8 of 12 | 27 → 29 → 25 → 19 → 22 of 30 | 22 → 19 (v2) → 13 → 16 of 30 |
+
+Costs: Sonnet $7.74, $7.58, $8.62, $7.81; Haiku $0.76, $0.76, $0.86, $0.84 (v1-v4). The v4 Haiku run was completed by
+a second invocation into the same folder after 26 runs failed to start (the CLI was reinstalled mid-run).
+
+Handing off to hep-statistics fixed the theory comparison for Sonnet. Text alone did not keep raw tool outputs out of
+`artifacts_dir` (v1, v2); the directory check did (v3). With v4, Sonnet passes 38 of 48 (McNemar p = 0.002 natural,
+0.03 forced), every fault case, and validates the handed-over response in 24 of 30 runs (16 at #147, p = 0.008). The
+remaining Sonnet chain failures are mostly a missing hop: it often stops after hep-detector in the unfold case. Haiku
+is flat overall (28 of 48); v4 recovered part of the v3 drop in validating the handed-over response (13 → 16 of 30),
+still below #147 (22; p = 0.11).
+
+`l3-response-unfold-report` asked for `min_fraction` 0.67 of three hops, which `ceil` made all three; it is now 0.66,
+two hops, as the grader's docstring intends. All L3 runs (before, after, v1-v3) are regraded with it; no earlier
+pass or fail changed.
+
 ## What is committed
 
 | Path | Content | Committed |

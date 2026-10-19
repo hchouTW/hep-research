@@ -298,6 +298,12 @@ def run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dict
             except Exception as exc:  # keep the campaign going; the failure is recorded as a host error
                 res = {"case": key[0], "arm": key[1], "model": key[2], "repeat": key[3], "pass": False,
                        "host_error": True, "error": f"{exc.__class__.__name__}: {exc}"}
+                rdir = run_dir / key[0] / key[1] / key[2].replace("/", "_") / f"r{key[3]}"
+                try:  # no grade.json is written, so a rerun into run_dir repeats this run
+                    rdir.mkdir(parents=True, exist_ok=True)
+                    (rdir / "host_error.txt").write_text(res["error"] + "\n", encoding="utf-8")
+                except OSError:
+                    pass
             if res is None:
                 continue
             results.append(res)

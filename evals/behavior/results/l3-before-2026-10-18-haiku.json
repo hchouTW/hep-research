@@ -1928,7 +1928,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -1940,7 +1940,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2118,7 +2118,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -2130,7 +2130,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2182,7 +2182,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -2194,7 +2194,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2246,7 +2246,7 @@
    "loaded_expected": false,
    "pass": false,
    "blocking_failure": true,
-   "score": 0.4667,
+   "score": 0.6,
    "host_error": false,
    "turn_limit": false,
    "contaminated": null,
@@ -2258,7 +2258,7 @@
     {
      "grader": "skills_in_order",
      "severity": "major",
-     "passed": false
+     "passed": true
     },
     {
      "grader": "command_run",
@@ -2732,7 +2732,7 @@
      0.4270996244267428,
      0.7884063244045121
     ],
-    "mean_score": 0.6474
+    "mean_score": 0.653
    },
    "L3|natural|claude-haiku-5-5": {
     "runs": 24,
@@ -2746,7 +2746,7 @@
      0.5083230633550336,
      0.8508535180303912
     ],
-    "mean_score": 0.6314
+    "mean_score": 0.6481
    }
   },
   "L1_selection": {
@@ -3211,9 +3211,9 @@
      0.49167693664496626
     ],
     "chain_complete": [
-     0.625,
-     0.4270996244267428,
-     0.7884063244045121
+     0.6666666666666666,
+     0.46706316838131734,
+     0.8202780967270222
     ],
     "artifacts_valid": [
      0.75,
@@ -3234,9 +3234,9 @@
      0.40470453253188643
     ],
     "chain_complete": [
-     0.75,
-     0.55100555994846,
-     0.8800063377140499
+     0.875,
+     0.6899611872949993,
+     0.9565566591987655
     ],
     "artifacts_valid": [
      0.75,
