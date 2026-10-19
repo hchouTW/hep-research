@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.16.0 (2026-10-20)
 
 The communication skill is split into **hep-citations** (sources, citations, literature records) and **hep-authoring**
 (papers, figures, diagrams, talks), with a literature-record artifact type and a citation check (restructuring plan,
@@ -63,6 +63,12 @@ back at main's level; a final full run scores 371 of main's 394 cases (main 369)
 - **Citation follow-up hops to hep-citations.** Asked mid-draft whether its citations are verified, hep-authoring
   now loads hep-citations instead of answering from its own resource table (`lit-turns-1` second turn: no skill in 7
   earlier runs, 2/3 live after the change; VALIDATION SPLIT-LIVE-EVAL).
+- **Old skill names: one more release.** Migration option A of the restructuring plan: 0.16.0 keeps every deprecated
+  name (the four 0.11.0 names and hep-communication) as a warning, and the message now names 0.16.0 as the release of
+  the split. 0.17.0 (contracts 3.0.0) removes the aliases and `contracts/migrate_skill_names.py`; migrate old
+  artifacts with 0.16.x.
+- **Removed:** the pointer `docs/agentic-architecture.md` (renamed `docs/protected-data-architecture.md` after
+  0.14.1; removal moved from 0.15.0 to here).
 
 ## 0.15.0 (2026-10-19)
 

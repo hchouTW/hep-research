@@ -58,7 +58,7 @@
     "skills/hep-authoring/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/academic-papers-guide.md",
@@ -86,7 +86,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/artifact-packaging-for-release.md",
@@ -100,7 +100,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
@@ -127,7 +127,7 @@
     "hep-citations",
     "hep-measurement"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/citations-and-bibliography.md",
@@ -153,7 +153,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/code-review-report.md",
@@ -167,7 +167,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/code-to-methodology-synthesis.md",
@@ -180,7 +180,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/collaboration-results-lifecycle.md",
@@ -193,7 +193,7 @@
     "skills/hep-authoring/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/comment-and-reply-exchange.md",
@@ -208,7 +208,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/conflict-of-interest-and-ethics-statements.md",
@@ -220,7 +220,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagram-captions.md",
@@ -233,7 +233,7 @@
     "skills/hep-authoring/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagram-figure-style.md",
@@ -247,7 +247,7 @@
     "skills/hep-authoring/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagrams-computer-science.md",
@@ -260,7 +260,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagrams-hep.md",
@@ -273,7 +273,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagrams-statistics.md",
@@ -286,7 +286,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/equation-and-notation-auditing.md",
@@ -306,7 +306,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
@@ -320,7 +320,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/evidence-linked-writing.md",
@@ -338,7 +338,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/figures-and-tables.md",
@@ -362,7 +362,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/general-diagram-principles.md",
@@ -375,7 +375,7 @@
     "skills/hep-authoring/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
@@ -387,7 +387,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/graphviz-patterns.md",
@@ -400,7 +400,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -418,7 +418,7 @@
     "tools/layering_whitelist.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/latex-venue-setup.md",
@@ -442,7 +442,7 @@
     "tests/skills/hep_authoring/test_venues_and_sources_com4.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/legends-panels-and-export.md",
@@ -455,7 +455,7 @@
     "skills/hep-authoring/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
@@ -474,7 +474,7 @@
     "hep-citations",
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/manuscript-consistency-auditing.md",
@@ -491,7 +491,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/mermaid-patterns.md",
@@ -504,7 +504,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/multi-venue-reformatting.md",
@@ -516,7 +516,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/outreach-and-public-facing-summaries.md",
@@ -533,7 +533,7 @@
     "skills/hep-authoring/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/paper-genre-variants.md",
@@ -550,7 +550,7 @@
     "tests/skills/hep_authoring/test_paper_blueprints.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/paper-structure.md",
@@ -575,7 +575,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
@@ -588,7 +588,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/physics-plots.md",
@@ -607,7 +607,7 @@
     "skills/hep-authoring/scripts/spectrum_plot.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
@@ -620,7 +620,7 @@
     "skills/hep-authoring/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/plantuml-patterns.md",
@@ -632,7 +632,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/poster-and-talk-design.md",
@@ -648,7 +648,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/preprint-to-journal-reconciliation.md",
@@ -662,7 +662,7 @@
     "skills/hep-authoring/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/preregistration-and-registered-reports.md",
@@ -674,7 +674,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/reproducibility-auditing.md",
@@ -697,7 +697,7 @@
     "hep-citations",
     "hep-computing"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/reviewer-style-assessment.md",
@@ -710,7 +710,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/revision-impact-tracking.md",
@@ -735,7 +735,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/scientific-style.md",
@@ -763,7 +763,7 @@
     "hep-citations",
     "hep-statistics"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/statistics-and-ml-papers.md",
@@ -786,7 +786,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/submission-and-peer-review.md",
@@ -809,7 +809,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/supplementary-material-planning.md",
@@ -821,7 +821,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/thesis-by-publication-assembly.md",
@@ -834,7 +834,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/tikz-patterns.md",
@@ -853,7 +853,7 @@
     "skills/hep-authoring/scripts/check_diagram_sources.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/citation-databases.md",
@@ -872,7 +872,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/citation-verification.md",
@@ -897,7 +897,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/claim-evidence-mapping.md",
@@ -922,7 +922,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/interpreting-scientific-graphics.md",
@@ -942,7 +942,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-discovery-and-search.md",
@@ -955,7 +955,7 @@
     "skills/hep-citations/references/literature-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-guide.md",
@@ -973,7 +973,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-lookup-recipes.md",
@@ -991,7 +991,7 @@
     "tests/adapters/fixtures/literature_lookup/rate-limit/inspire-arxiv-2501.99999-429.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-review.md",
@@ -1011,7 +1011,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -1034,7 +1034,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/reading-papers.md",
@@ -1058,7 +1058,7 @@
     "hep-authoring",
     "hep-statistics"
    ],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/systematic-review-screening.md",
@@ -1072,7 +1072,7 @@
     "skills/hep-citations/references/literature-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/acceptance-criteria.md",
@@ -1386,7 +1386,7 @@
     "hep-citations",
     "hep-theory"
    ],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/performance-profiling.md",
@@ -1780,7 +1780,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -1814,7 +1814,7 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/detector-comparison-tables.md",
@@ -1828,7 +1828,7 @@
     "tests/skills/hep_detector/test_detector_atlas.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
@@ -2092,7 +2092,7 @@
     "hep-ml",
     "hep-statistics"
    ],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/multimessenger-analysis.md",
@@ -2571,7 +2571,7 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-measurement/references/data-pipelines.md",
@@ -2619,7 +2619,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -2916,7 +2916,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-ml/references/distributed-training.md",
@@ -3718,7 +3718,7 @@
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
@@ -3965,7 +3965,7 @@
     "hep-citations",
     "hep-statistics"
    ],
-   "last_commit": "541e3dff 2026-10-19"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-theory/references/neutrino-oscillations.md",

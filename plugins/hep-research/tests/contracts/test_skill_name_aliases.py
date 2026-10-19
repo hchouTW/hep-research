@@ -139,7 +139,7 @@ class ArtifactAliasTests(unittest.TestCase):
         rep = validate.validate_artifact(doc)
         msgs = {f.path: f.message for f in rep.findings if f.code == skill_names.CODE and f.severity == "warning"}
         self.assertIn("'hep-authoring'", msgs["$.provenance.producer_skill"])
-        self.assertIn("after 0.15.0", msgs["$.provenance.producer_skill"])
+        self.assertIn("hep-research 0.16.0", msgs["$.provenance.producer_skill"])
         self.assertIn("0.11.0", msgs["$.handoff.to_skill"])
         new, report = migrate_skill_names.migrate(doc)
         self.assertEqual((new["provenance"]["producer_skill"], new["handoff"]["to_skill"]), ("hep-authoring", "hep-authoring"))

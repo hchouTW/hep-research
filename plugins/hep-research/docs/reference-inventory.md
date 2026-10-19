@@ -85,65 +85,65 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 
 | Reference | Owner | KB | In SKILL.md | Cited by (files) | Other skills citing | Last commit |
 |---|---|---|---|---|---|---|
-| `academic-diagrams-guide.md` | hep-authoring | 10.8 | yes | 4 | - | untracked |
-| `academic-papers-guide.md` | hep-authoring | 13.3 | yes | 15 | hep-citations | untracked |
-| `artifact-packaging-for-release.md` | hep-authoring | 2.9 | no | 3 | - | untracked |
-| `astroparticle-and-cosmic-ray-papers.md` | hep-authoring | 13.4 | yes | 13 | hep-citations, hep-measurement | untracked |
-| `citations-and-bibliography.md` | hep-authoring | 14.3 | yes | 13 | hep-citations | untracked |
-| `code-review-report.md` | hep-authoring | 5.5 | no | 3 | - | untracked |
-| `code-to-methodology-synthesis.md` | hep-authoring | 5.7 | no | 2 | - | untracked |
-| `collaboration-results-lifecycle.md` | hep-authoring | 3.7 | no | 2 | - | untracked |
-| `comment-and-reply-exchange.md` | hep-authoring | 3.4 | yes | 4 | - | untracked |
-| `conflict-of-interest-and-ethics-statements.md` | hep-authoring | 2.6 | no | 1 | - | untracked |
-| `diagram-captions.md` | hep-authoring | 3.7 | no | 2 | - | untracked |
-| `diagram-figure-style.md` | hep-authoring | 6.7 | no | 3 | - | untracked |
-| `diagrams-computer-science.md` | hep-authoring | 5.6 | no | 2 | - | untracked |
-| `diagrams-hep.md` | hep-authoring | 7.6 | no | 2 | - | untracked |
-| `diagrams-statistics.md` | hep-authoring | 6.3 | no | 2 | - | untracked |
-| `equation-and-notation-auditing.md` | hep-authoring | 4.4 | no | 6 | hep-statistics, hep-theory | untracked |
-| `erratum-and-corrigendum-drafting.md` | hep-authoring | 4.5 | no | 3 | - | untracked |
-| `evidence-linked-writing.md` | hep-authoring | 5.7 | yes | 5 | hep-citations | untracked |
-| `figures-and-tables.md` | hep-authoring | 9.3 | yes | 11 | hep-citations | untracked |
-| `general-diagram-principles.md` | hep-authoring | 7.8 | no | 2 | - | untracked |
-| `grant-and-fellowship-proposal-writing.md` | hep-authoring | 4.8 | no | 1 | - | untracked |
-| `graphviz-patterns.md` | hep-authoring | 3.5 | no | 2 | - | untracked |
-| `latex-mechanics-and-tooling.md` | hep-authoring | 13.4 | no | 7 | - | untracked |
-| `latex-venue-setup.md` | hep-authoring | 30.4 | yes | 13 | - | untracked |
-| `legends-panels-and-export.md` | hep-authoring | 6.6 | no | 2 | - | untracked |
-| `logical-consistency-and-argument-uniformity.md` | hep-authoring | 5.0 | no | 5 | hep-citations, hep-theory | untracked |
-| `manuscript-consistency-auditing.md` | hep-authoring | 3.6 | no | 4 | hep-citations | untracked |
-| `mermaid-patterns.md` | hep-authoring | 4.5 | no | 2 | - | untracked |
-| `multi-venue-reformatting.md` | hep-authoring | 3.0 | no | 1 | - | untracked |
-| `outreach-and-public-facing-summaries.md` | hep-authoring | 4.2 | yes | 6 | - | untracked |
-| `paper-genre-variants.md` | hep-authoring | 7.6 | yes | 6 | - | untracked |
-| `paper-structure.md` | hep-authoring | 11.1 | yes | 12 | hep-citations | untracked |
-| `papers-review-modes-and-reference-index.md` | hep-authoring | 12.4 | no | 2 | - | untracked |
-| `physics-plots.md` | hep-authoring | 8.2 | yes | 8 | - | untracked |
-| `plagiarism-and-text-reuse-checking.md` | hep-authoring | 3.0 | no | 2 | - | untracked |
-| `plantuml-patterns.md` | hep-authoring | 3.6 | no | 1 | - | untracked |
-| `poster-and-talk-design.md` | hep-authoring | 6.2 | yes | 5 | - | untracked |
-| `preprint-to-journal-reconciliation.md` | hep-authoring | 2.9 | no | 3 | - | untracked |
-| `preregistration-and-registered-reports.md` | hep-authoring | 3.5 | no | 1 | - | untracked |
-| `reproducibility-auditing.md` | hep-authoring | 3.1 | no | 9 | hep-citations, hep-computing | untracked |
-| `reviewer-style-assessment.md` | hep-authoring | 2.1 | yes | 2 | - | untracked |
-| `revision-impact-tracking.md` | hep-authoring | 4.0 | yes | 14 | - | untracked |
-| `scientific-style.md` | hep-authoring | 11.7 | no | 14 | hep-citations, hep-statistics | untracked |
-| `statistics-and-ml-papers.md` | hep-authoring | 14.2 | yes | 10 | hep-citations | untracked |
-| `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | untracked |
-| `supplementary-material-planning.md` | hep-authoring | 2.1 | no | 1 | - | untracked |
-| `thesis-by-publication-assembly.md` | hep-authoring | 4.0 | no | 2 | - | untracked |
-| `tikz-patterns.md` | hep-authoring | 5.9 | no | 8 | - | untracked |
-| `citation-databases.md` | hep-citations | 7.5 | yes | 6 | hep-authoring | untracked |
-| `citation-verification.md` | hep-citations | 6.6 | yes | 12 | hep-authoring | untracked |
-| `claim-evidence-mapping.md` | hep-citations | 5.3 | yes | 10 | hep-authoring, hep-statistics, hep-theory | untracked |
-| `interpreting-scientific-graphics.md` | hep-citations | 8.5 | yes | 7 | hep-authoring | untracked |
-| `literature-discovery-and-search.md` | hep-citations | 5.2 | yes | 2 | - | untracked |
-| `literature-guide.md` | hep-citations | 9.6 | yes | 5 | hep-authoring | untracked |
-| `literature-lookup-recipes.md` | hep-citations | 6.0 | yes | 7 | - | untracked |
-| `literature-review.md` | hep-citations | 7.9 | yes | 7 | hep-authoring | untracked |
-| `primary-sources-and-version-checks.md` | hep-citations | 12.6 | yes | 9 | hep-detector, hep-measurement | untracked |
-| `reading-papers.md` | hep-citations | 9.9 | yes | 10 | hep-authoring, hep-statistics | untracked |
-| `systematic-review-screening.md` | hep-citations | 3.1 | yes | 3 | - | untracked |
+| `academic-diagrams-guide.md` | hep-authoring | 10.8 | yes | 4 | - | ebb58136 2026-10-19 |
+| `academic-papers-guide.md` | hep-authoring | 13.3 | yes | 15 | hep-citations | ebb58136 2026-10-19 |
+| `artifact-packaging-for-release.md` | hep-authoring | 2.9 | no | 3 | - | ebb58136 2026-10-19 |
+| `astroparticle-and-cosmic-ray-papers.md` | hep-authoring | 13.4 | yes | 13 | hep-citations, hep-measurement | ebb58136 2026-10-19 |
+| `citations-and-bibliography.md` | hep-authoring | 14.3 | yes | 13 | hep-citations | ebb58136 2026-10-19 |
+| `code-review-report.md` | hep-authoring | 5.5 | no | 3 | - | ebb58136 2026-10-19 |
+| `code-to-methodology-synthesis.md` | hep-authoring | 5.7 | no | 2 | - | ebb58136 2026-10-19 |
+| `collaboration-results-lifecycle.md` | hep-authoring | 3.7 | no | 2 | - | ebb58136 2026-10-19 |
+| `comment-and-reply-exchange.md` | hep-authoring | 3.4 | yes | 4 | - | ebb58136 2026-10-19 |
+| `conflict-of-interest-and-ethics-statements.md` | hep-authoring | 2.6 | no | 1 | - | ebb58136 2026-10-19 |
+| `diagram-captions.md` | hep-authoring | 3.7 | no | 2 | - | ebb58136 2026-10-19 |
+| `diagram-figure-style.md` | hep-authoring | 6.7 | no | 3 | - | ebb58136 2026-10-19 |
+| `diagrams-computer-science.md` | hep-authoring | 5.6 | no | 2 | - | ebb58136 2026-10-19 |
+| `diagrams-hep.md` | hep-authoring | 7.6 | no | 2 | - | ebb58136 2026-10-19 |
+| `diagrams-statistics.md` | hep-authoring | 6.3 | no | 2 | - | ebb58136 2026-10-19 |
+| `equation-and-notation-auditing.md` | hep-authoring | 4.4 | no | 6 | hep-statistics, hep-theory | ebb58136 2026-10-19 |
+| `erratum-and-corrigendum-drafting.md` | hep-authoring | 4.5 | no | 3 | - | ebb58136 2026-10-19 |
+| `evidence-linked-writing.md` | hep-authoring | 5.7 | yes | 5 | hep-citations | ebb58136 2026-10-19 |
+| `figures-and-tables.md` | hep-authoring | 9.3 | yes | 11 | hep-citations | ebb58136 2026-10-19 |
+| `general-diagram-principles.md` | hep-authoring | 7.8 | no | 2 | - | ebb58136 2026-10-19 |
+| `grant-and-fellowship-proposal-writing.md` | hep-authoring | 4.8 | no | 1 | - | ebb58136 2026-10-19 |
+| `graphviz-patterns.md` | hep-authoring | 3.5 | no | 2 | - | ebb58136 2026-10-19 |
+| `latex-mechanics-and-tooling.md` | hep-authoring | 13.4 | no | 7 | - | ebb58136 2026-10-19 |
+| `latex-venue-setup.md` | hep-authoring | 30.4 | yes | 13 | - | ebb58136 2026-10-19 |
+| `legends-panels-and-export.md` | hep-authoring | 6.6 | no | 2 | - | ebb58136 2026-10-19 |
+| `logical-consistency-and-argument-uniformity.md` | hep-authoring | 5.0 | no | 5 | hep-citations, hep-theory | ebb58136 2026-10-19 |
+| `manuscript-consistency-auditing.md` | hep-authoring | 3.6 | no | 4 | hep-citations | ebb58136 2026-10-19 |
+| `mermaid-patterns.md` | hep-authoring | 4.5 | no | 2 | - | ebb58136 2026-10-19 |
+| `multi-venue-reformatting.md` | hep-authoring | 3.0 | no | 1 | - | ebb58136 2026-10-19 |
+| `outreach-and-public-facing-summaries.md` | hep-authoring | 4.2 | yes | 6 | - | ebb58136 2026-10-19 |
+| `paper-genre-variants.md` | hep-authoring | 7.6 | yes | 6 | - | ebb58136 2026-10-19 |
+| `paper-structure.md` | hep-authoring | 11.1 | yes | 12 | hep-citations | ebb58136 2026-10-19 |
+| `papers-review-modes-and-reference-index.md` | hep-authoring | 12.4 | no | 2 | - | ebb58136 2026-10-19 |
+| `physics-plots.md` | hep-authoring | 8.2 | yes | 8 | - | ebb58136 2026-10-19 |
+| `plagiarism-and-text-reuse-checking.md` | hep-authoring | 3.0 | no | 2 | - | ebb58136 2026-10-19 |
+| `plantuml-patterns.md` | hep-authoring | 3.6 | no | 1 | - | ebb58136 2026-10-19 |
+| `poster-and-talk-design.md` | hep-authoring | 6.2 | yes | 5 | - | ebb58136 2026-10-19 |
+| `preprint-to-journal-reconciliation.md` | hep-authoring | 2.9 | no | 3 | - | ebb58136 2026-10-19 |
+| `preregistration-and-registered-reports.md` | hep-authoring | 3.5 | no | 1 | - | ebb58136 2026-10-19 |
+| `reproducibility-auditing.md` | hep-authoring | 3.1 | no | 9 | hep-citations, hep-computing | ebb58136 2026-10-19 |
+| `reviewer-style-assessment.md` | hep-authoring | 2.1 | yes | 2 | - | ebb58136 2026-10-19 |
+| `revision-impact-tracking.md` | hep-authoring | 4.0 | yes | 14 | - | ebb58136 2026-10-19 |
+| `scientific-style.md` | hep-authoring | 11.7 | no | 14 | hep-citations, hep-statistics | ebb58136 2026-10-19 |
+| `statistics-and-ml-papers.md` | hep-authoring | 14.2 | yes | 10 | hep-citations | ebb58136 2026-10-19 |
+| `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | ebb58136 2026-10-19 |
+| `supplementary-material-planning.md` | hep-authoring | 2.1 | no | 1 | - | ebb58136 2026-10-19 |
+| `thesis-by-publication-assembly.md` | hep-authoring | 4.0 | no | 2 | - | ebb58136 2026-10-19 |
+| `tikz-patterns.md` | hep-authoring | 5.9 | no | 8 | - | ebb58136 2026-10-19 |
+| `citation-databases.md` | hep-citations | 7.5 | yes | 6 | hep-authoring | ebb58136 2026-10-19 |
+| `citation-verification.md` | hep-citations | 6.6 | yes | 12 | hep-authoring | ebb58136 2026-10-19 |
+| `claim-evidence-mapping.md` | hep-citations | 5.3 | yes | 10 | hep-authoring, hep-statistics, hep-theory | ebb58136 2026-10-19 |
+| `interpreting-scientific-graphics.md` | hep-citations | 8.5 | yes | 7 | hep-authoring | ebb58136 2026-10-19 |
+| `literature-discovery-and-search.md` | hep-citations | 5.2 | yes | 2 | - | ebb58136 2026-10-19 |
+| `literature-guide.md` | hep-citations | 9.6 | yes | 5 | hep-authoring | ebb58136 2026-10-19 |
+| `literature-lookup-recipes.md` | hep-citations | 6.0 | yes | 7 | - | ebb58136 2026-10-19 |
+| `literature-review.md` | hep-citations | 7.9 | yes | 7 | hep-authoring | ebb58136 2026-10-19 |
+| `primary-sources-and-version-checks.md` | hep-citations | 12.6 | yes | 9 | hep-detector, hep-measurement | ebb58136 2026-10-19 |
+| `reading-papers.md` | hep-citations | 9.9 | yes | 10 | hep-authoring, hep-statistics | ebb58136 2026-10-19 |
+| `systematic-review-screening.md` | hep-citations | 3.1 | yes | 3 | - | ebb58136 2026-10-19 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
 | `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 9 | hep-measurement | a57e22cf 2026-10-17 |
@@ -162,7 +162,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e6 2026-10-09 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | f4372374 2026-10-13 |
 | `loop-engineering.md` | hep-computing | 7.0 | no | 7 | - | 4665f433 2026-10-13 |
-| `numerical-and-computational-methods.md` | hep-computing | 9.3 | yes | 7 | hep-authoring, hep-citations, hep-theory | 541e3dff 2026-10-19 |
+| `numerical-and-computational-methods.md` | hep-computing | 9.3 | yes | 7 | hep-authoring, hep-citations, hep-theory | ebb58136 2026-10-19 |
 | `performance-profiling.md` | hep-computing | 6.7 | yes | 5 | - | 9257d7b5 2026-10-15 |
 | `preservation-checklist.md` | hep-computing | 4.4 | yes | 3 | - | 98159ba5 2026-10-17 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
@@ -184,10 +184,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `charge-confusion.md` | hep-detector | 12.3 | yes | 5 | - | 4c1cb871 2026-10-17 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `core-detector-equations.md` | hep-detector | 6.9 | no | 4 | - | 9257d7b5 2026-10-15 |
-| `cosmic-ray-spectrum-and-composition.md` | hep-detector | 11.7 | no | 13 | hep-citations, hep-measurement, hep-statistics | 541e3dff 2026-10-19 |
+| `cosmic-ray-spectrum-and-composition.md` | hep-detector | 11.7 | no | 13 | hep-citations, hep-measurement, hep-statistics | ebb58136 2026-10-19 |
 | `data-mc-validation-and-detector-systematics.md` | hep-detector | 12.9 | yes | 9 | - | 9257d7b5 2026-10-15 |
-| `detector-case-studies-and-checklists.md` | hep-detector | 14.1 | no | 3 | - | 541e3dff 2026-10-19 |
-| `detector-comparison-tables.md` | hep-detector | 15.4 | no | 3 | - | 541e3dff 2026-10-19 |
+| `detector-case-studies-and-checklists.md` | hep-detector | 14.1 | no | 3 | - | ebb58136 2026-10-19 |
+| `detector-comparison-tables.md` | hep-detector | 15.4 | no | 3 | - | ebb58136 2026-10-19 |
 | `detector-design-principles.md` | hep-detector | 5.4 | yes | 3 | - | cbcf6c34 2026-10-17 |
 | `detector-glossary.md` | hep-detector | 6.0 | no | 5 | - | 9257d7b5 2026-10-15 |
 | `detector-measurement-framework.md` | hep-detector | 11.0 | no | 11 | hep-citations, hep-measurement | 9257d7b5 2026-10-15 |
@@ -200,7 +200,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `front-end-electronics-and-signal-processing.md` | hep-detector | 24.9 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |
-| `imaging-atmospheric-cherenkov.md` | hep-detector | 11.4 | no | 10 | hep-citations, hep-ml, hep-statistics | 541e3dff 2026-10-19 |
+| `imaging-atmospheric-cherenkov.md` | hep-detector | 11.4 | no | 10 | hep-citations, hep-ml, hep-statistics | ebb58136 2026-10-19 |
 | `multimessenger-analysis.md` | hep-detector | 6.9 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `muon-systems.md` | hep-detector | 8.4 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `neutrino-astronomy.md` | hep-detector | 10.2 | no | 7 | hep-statistics | 9257d7b5 2026-10-15 |
@@ -220,9 +220,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `backgrounds.md` | hep-measurement | 5.9 | yes | 26 | hep-detector | ccc1eb2a 2026-10-17 |
 | `correction-chain.md` | hep-measurement | 14.3 | yes | 15 | hep-detector, hep-theory | ecd989f1 2026-10-17 |
-| `cosmic-ray-measurements.md` | hep-measurement | 21.6 | yes | 5 | - | 541e3dff 2026-10-19 |
+| `cosmic-ray-measurements.md` | hep-measurement | 21.6 | yes | 5 | - | ebb58136 2026-10-19 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 12 | hep-computing | 9257d7b5 2026-10-15 |
-| `hep-measurement-guide.md` | hep-measurement | 16.4 | yes | 10 | hep-detector | 541e3dff 2026-10-19 |
+| `hep-measurement-guide.md` | hep-measurement | 16.4 | yes | 10 | hep-detector | ebb58136 2026-10-19 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 9 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a584954 2026-10-17 |
 | `rare-event-and-neutrino-measurements.md` | hep-measurement | 7.0 | no | 3 | - | c4d801c4 2026-10-17 |
@@ -236,7 +236,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `data-loading.md` | hep-ml | 1.8 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `data-strategy.md` | hep-ml | 3.0 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `debugging-pytorch.md` | hep-ml | 1.2 | no | 5 | - | 9257d7b5 2026-10-15 |
-| `deep-learning-guide.md` | hep-ml | 11.7 | yes | 9 | hep-computing | 541e3dff 2026-10-19 |
+| `deep-learning-guide.md` | hep-ml | 11.7 | yes | 9 | hep-computing | ebb58136 2026-10-19 |
 | `distributed-training.md` | hep-ml | 4.6 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `efficient-finetuning.md` | hep-ml | 2.5 | no | 5 | - | 9257d7b5 2026-10-15 |
 | `evaluation-metrics.md` | hep-ml | 2.0 | no | 4 | - | 9257d7b5 2026-10-15 |
@@ -280,7 +280,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `nuisance-modeling.md` | hep-statistics | 20.3 | yes | 9 | hep-measurement | 100eb1c3 2026-10-16 |
 | `roofit-and-roostats-methods.md` | hep-statistics | 7.6 | yes | 5 | - | 09237aee 2026-10-17 |
-| `statistical-inference-for-physics.md` | hep-statistics | 12.8 | yes | 11 | hep-authoring, hep-citations, hep-computing, hep-theory | 541e3dff 2026-10-19 |
+| `statistical-inference-for-physics.md` | hep-statistics | 12.8 | yes | 11 | hep-authoring, hep-citations, hep-computing, hep-theory | ebb58136 2026-10-19 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | hep-ml | 578c12ff 2026-10-13 |
 | `time-series-inference.md` | hep-statistics | 18.8 | yes | 15 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
 | `unfolding.md` | hep-statistics | 7.9 | yes | 27 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
@@ -292,7 +292,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 2 | - | 351029c0 2026-10-07 |
 | `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 4 | - | 7321e6dc 2026-10-17 |
-| `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | 541e3dff 2026-10-19 |
+| `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
 | `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 5 | hep-measurement | 69f359f5 2026-10-17 |
 | `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 4 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
 | `nuclear-physics-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 87421c11 2026-10-17 |
