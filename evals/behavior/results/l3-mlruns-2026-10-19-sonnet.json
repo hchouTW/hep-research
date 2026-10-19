@@ -1,0 +1,972 @@
+{
+ "run_id": "l3-mlruns-2026-10-19-sonnet",
+ "manifest": {
+  "created": "2026-10-19T06:45:52.552538+00:00",
+  "plugin": {
+   "version": "0.14.1",
+   "behavior_hash": "93f3333823640429",
+   "files": 235
+  },
+  "plugin_git": {
+   "commit": "34271aad4e8858fc606474cc381b269fa36d063d",
+   "dirty": false
+  },
+  "isolation": "setting-sources",
+  "opts": {
+   "max_turns": 40,
+   "timeout": 900,
+   "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+   "rerun": false,
+   "isolation": "setting-sources",
+   "case_budget_usd": 0.5,
+   "budget_usd": 4.0
+  },
+  "allowed_tools_default": [
+   "Bash",
+   "Read",
+   "Write",
+   "Edit",
+   "Glob",
+   "Grep",
+   "Skill"
+  ],
+  "runs": 12,
+  "holdout": null,
+  "completed": 12,
+  "skipped": 0,
+  "spent_usd": 2.6443,
+  "stopped": null,
+  "cli_versions": [
+   "2.1.303"
+  ]
+ },
+ "runs": [
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.22212300000000001,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 15,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.21162660000000005,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 17,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.2294404,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 16,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 3,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.20788399999999996,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 16,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 4,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.1757709,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 14,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "forced",
+   "model": "claude-sonnet-5-5",
+   "repeat": 5,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.1834614,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 15,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.22284969999999998,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 15,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 1,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.241064,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 16,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 2,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": false,
+   "score": 0.8182,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.25296330000000006,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 16,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": false
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 3,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.2963801000000001,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 20,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 4,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": true,
+   "blocking_failure": false,
+   "score": 1.0,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.1674136,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 13,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  },
+  {
+   "case": "l3-ml-to-inference",
+   "layer": "L3",
+   "suite": "l3-composition",
+   "lang": "en",
+   "kind": "chain",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 5,
+   "expected_skill": null,
+   "first_hep_skill": "hep-ml",
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ],
+   "loaded_expected": false,
+   "pass": false,
+   "blocking_failure": false,
+   "score": 0.8182,
+   "host_error": false,
+   "turn_limit": false,
+   "contaminated": null,
+   "unverified": [],
+   "cost_usd": 0.23327820000000002,
+   "cli_version": "2.1.303",
+   "outside_writes": [],
+   "num_turns": 18,
+   "graders": [
+    {
+     "grader": "skills_in_order",
+     "severity": "major",
+     "passed": true
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "ML-01",
+     "passed": false
+    },
+    {
+     "grader": "command_run",
+     "severity": "major",
+     "invariant": "STAT-02",
+     "passed": true
+    },
+    {
+     "grader": "artifact_valid",
+     "severity": "blocking",
+     "invariant": "CTX-ARTIFACTS-VALID",
+     "passed": true
+    },
+    {
+     "grader": "answer_matches",
+     "severity": "major",
+     "invariant": "COMM-04",
+     "passed": true
+    }
+   ]
+  }
+ ],
+ "cost_usd": {
+  "total": 2.6443,
+  "per_run": 0.2204
+ },
+ "contaminated": [],
+ "report": {
+  "manifest": {
+   "created": "2026-10-19T06:45:52.552538+00:00",
+   "plugin": {
+    "version": "0.14.1",
+    "behavior_hash": "93f3333823640429",
+    "files": 235
+   },
+   "plugin_git": {
+    "commit": "34271aad4e8858fc606474cc381b269fa36d063d",
+    "dirty": false
+   },
+   "isolation": "setting-sources",
+   "opts": {
+    "max_turns": 40,
+    "timeout": 900,
+    "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+    "rerun": false,
+    "isolation": "setting-sources",
+    "case_budget_usd": 0.5,
+    "budget_usd": 4.0
+   },
+   "allowed_tools_default": [
+    "Bash",
+    "Read",
+    "Write",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Skill"
+   ],
+   "runs": 12,
+   "holdout": null,
+   "completed": 12,
+   "skipped": 0,
+   "spent_usd": 2.6443,
+   "stopped": null,
+   "cli_versions": [
+    "2.1.303"
+   ]
+  },
+  "runs": 12,
+  "host_errors": 0,
+  "outside_writes": {},
+  "by_layer_arm_model": {
+   "L3|forced|claude-sonnet-5-5": {
+    "runs": 6,
+    "pass": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.3903342879021652
+    ],
+    "mean_score": 1.0
+   },
+   "L3|natural|claude-sonnet-5-5": {
+    "runs": 6,
+    "pass": [
+     0.6666666666666666,
+     0.2999933151383921,
+     0.9032285888942194
+    ],
+    "blocking_failure": [
+     0.0,
+     0.0,
+     0.3903342879021652
+    ],
+    "mean_score": 0.9394
+   }
+  },
+  "L1_selection": {},
+  "L1_out_of_domain": {},
+  "L1_L2_decomposition": {},
+  "natural_vs_forced": {
+   "claude-sonnet-5-5": {
+    "natural": [
+     0.6666666666666666,
+     0.2999933151383921,
+     0.9032285888942194
+    ],
+    "forced": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "paired": {
+     "a_only": 0,
+     "b_only": 2,
+     "concordant": 4,
+     "p_value": 0.5,
+     "direction": "B better"
+    }
+   }
+  },
+  "L2_by_skill": {},
+  "invariants": {
+   "COMM-04|forced": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "COMM-04|natural": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "CTX-ARTIFACTS-VALID|forced": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "CTX-ARTIFACTS-VALID|natural": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "ML-01|forced": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "ML-01|natural": [
+    0.6666666666666666,
+    0.2999933151383921,
+    0.9032285888942194
+   ],
+   "STAT-02|forced": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ],
+   "STAT-02|natural": [
+    1.0,
+    0.6096657120978348,
+    1.0
+   ]
+  },
+  "blocking_failures": [],
+  "L3": {
+   "forced|claude-sonnet-5-5": {
+    "runs": 6,
+    "pass": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "chain_complete": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "artifacts_valid": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "fault_detected": [
+     NaN,
+     0.0,
+     1.0
+    ]
+   },
+   "natural|claude-sonnet-5-5": {
+    "runs": 6,
+    "pass": [
+     0.6666666666666666,
+     0.2999933151383921,
+     0.9032285888942194
+    ],
+    "chain_complete": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "artifacts_valid": [
+     1.0,
+     0.6096657120978348,
+     1.0
+    ],
+    "fault_detected": [
+     NaN,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  "L4": {},
+  "reliability": {
+   "L3|forced|claude-sonnet-5-5": {
+    "cases": 1,
+    "k": 6,
+    "pass_at_k": 1.0,
+    "pass_hat_k": 1.0,
+    "flaky_cases": [],
+    "flaky_fraction": 0.0
+   },
+   "L3|natural|claude-sonnet-5-5": {
+    "cases": 1,
+    "k": 6,
+    "pass_at_k": 1.0,
+    "pass_hat_k": 0.0,
+    "flaky_cases": [
+     "l3-ml-to-inference"
+    ],
+    "flaky_fraction": 1.0
+   }
+  },
+  "unverified_graders": {}
+ },
+ "note": "scored summary only: prompts, answers, tool results and transcripts are not stored here (they stay in evals/behavior/runs/<id>/, which is not committed)"
+}

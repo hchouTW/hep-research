@@ -200,6 +200,13 @@ class Backend:
             self.assertIn("seed", json.dumps(summary["environment"]))
             names = {p.suffix for p in o.iterdir()}
             self.assertFalse(names & {".pkl", ".pickle", ".joblib"})
+            # the run folder kept in artifacts_dir passes the folder check: the artifact names every file in it
+            doc = json.loads((o / "ml_artifact.json").read_text())
+            self.assertEqual(sorted(x["ref"] for x in doc["outputs"] if x["kind"].startswith("checkpoint")),
+                             sorted(summary.get("models") or []))
+            d_check = subprocess.run([sys.executable, "-B", str(PLUGIN / "contracts" / "validate.py"), str(o)],
+                                     capture_output=True, text=True, timeout=600)
+            self.assertEqual(d_check.returncode, 0, d_check.stdout + d_check.stderr)
 
 
 def manifest_train_ids(manifest, fold):

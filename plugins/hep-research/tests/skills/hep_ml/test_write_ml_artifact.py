@@ -85,6 +85,17 @@ class WriteMlArtifactTests(unittest.TestCase):
         self.assertTrue(rep.ok, rep.as_dict())
         self.assertEqual([f.code for f in rep.findings], [])
 
+    def test_per_fold_models_are_outputs(self):
+        # train_bdt.py lists one model per fold under "models" and has no "checkpoint"
+        summary = {k: v for k, v in SUMMARY.items() if k != "checkpoint"} | {"models": ["m0.json", "m1.json"]}
+        code, out = self.run_main("--run-summary", self.write("bdt_summary.json", summary), "--output-semantics",
+                                  "score", "--status", "synthetic")
+        self.assertEqual(code, 0, out)
+        doc = json.loads((self.tmp / "ml.json").read_text())
+        self.assertEqual([(o["ref"], o["kind"]) for o in doc["outputs"]],
+                         [("m0.json", "checkpoint:fold0"), ("m1.json", "checkpoint:fold1"),
+                          ("scores_test.npz", "scores:test")])
+
     def test_validate_cli_accepts_the_output(self):
         code, _ = self.run_main(*self.full_args())
         self.assertEqual(code, 0)

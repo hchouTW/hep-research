@@ -22,7 +22,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 
 1. Resolve context (stanza below).
 2. Define the task, labels, features and grouping key; build grouped splits and check leakage.
-3. Train with recorded seeds and environment; monitor; checkpoint.
+3. Train with recorded seeds and environment; monitor; checkpoint. Configs, run folders (`--out-dir`) and raw tool outputs go in a work folder such as `./ml-work/`, not `artifacts_dir`.
 4. Evaluate on held-out groups with physics-weighted metrics at the working point, calibrate, assess domain shift and the downstream effect.
 5. Write the `ml-artifact` with `scripts/write_ml_artifact.py --out <artifacts_dir>/<name>.json`, then validate `artifacts_dir`. A limit or fit with the model: load hep-statistics.
 
