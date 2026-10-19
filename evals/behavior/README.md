@@ -199,6 +199,19 @@ remaining Sonnet chain failures are mostly a missing hop: it often stops after h
 is flat overall (28 of 48); v4 recovered part of the v3 drop in validating the handed-over response (13 → 16 of 30),
 still below #147 (22; p = 0.11).
 
+**L3 follow-ups (2026-10-19, PR #149)**, paired against v4 (`l3-chain4-*`). hep-statistics' Step 0 validates a
+handed-over artifact before a quick-path tool (Haiku had taken that path and skipped step 1), and hep-detector's
+response reference and `unfolding.md` say to load hep-statistics rather than work from its unfolding reference
+(Sonnet had followed that link and never loaded the skill).
+
+| Model | L3 pass: #147 → v4 → #149 | Validator run on the handed-over response | Unfold runs that load hep-statistics | Chain cases (unfold, ML) | Cost |
+|---|---|---|---|---|---|
+| claude-sonnet-5-5 | 22 → 38 → 43 of 48 | 16 → 24 → 24 of 30 | 0 → 1 → 6 of 6 | 0 → 2 → 7 of 12 | $7.73 |
+| claude-haiku-5-5 | 27 → 28 → 39 of 48 | 22 → 16 → 24 of 30 | 4 → 6 → 6 of 6 | 0 → 4 → 6 of 12 | $0.78 |
+
+Against v4: Haiku L3 pass +14 / -3 (McNemar p = 0.013), validator +8 / -0 (p = 0.008), every fault case passes;
+Sonnet L3 pass +6 / -1 (p = 0.13), the unfold hop +5 / -0 (p = 0.06).
+
 `l3-response-unfold-report` asked for `min_fraction` 0.67 of three hops, which `ceil` made all three; it is now 0.66,
 two hops, as the grader's docstring intends. All L3 runs (before, after, v1-v3) are regraded with it; no earlier
 pass or fail changed.
