@@ -1,48 +1,45 @@
-"""Skill names a contract may record, and the deprecated aliases kept after the renames (contracts 2.9.0, 2.13.0).
+"""Skill names a contract may record (contracts 3.0.0).
 
-hep-research 0.11.0 renamed four skills (contracts 2.9.0). In 0.16.0, hep-communication was split into
-hep-citations and hep-authoring (contracts 2.13.0); hep-communication is a deprecated alias of hep-authoring, the owner of
-the communication extension it produced and the skill every other skill hands write-ups to, and the 0.11.0 alias
-research-communication now points to hep-authoring as well. The literature-record type is new, so no artifact written
-under the old name needs hep-citations. Artifacts and profiles written before the rename keep validating: an old name
-is a deprecated alias of the new one, reported as `skill.deprecated_name` (artifacts) or `profile.deprecated_skill_name`
-(profiles), a warning by default and an error under the version and name policy (`--strict-versions`, and protected
-use). `contracts/migrate_skill_names.py` rewrites an artifact's `provenance.producer_skill` and `handoff.to_skill`.
+hep-research 0.11.0 renamed four skills (contracts 2.9.0) and 0.16.0 split the communication skill into hep-citations
+and hep-authoring (contracts 2.13.0); through 0.16.x the old names were deprecated aliases. Contracts 3.0.0
+(hep-research 0.17.0) retires them: a skill name that is not in SKILLS is an error, `skill.unknown_name`, in an
+artifact (provenance.producer_skill, handoff.to_skill, an extension handoff) and in a profile's related_skills. For a
+retired name the message says to migrate with hep-research 0.16.x, whose contracts/migrate_skill_names.py rewrites
+them. The retired names are kept only as SHA-256 hashes (RETIRED_SHA256), so the maintained tree never spells them;
+tools/check_retired_names.py fails on any maintained file that does.
 
-This module and `contracts/schemas/skill_names.json` are the only places that define the aliases; the schema's enum is
-SKILLS followed by the deprecated names (tests/contracts/test_skill_name_aliases.py checks that they agree). All aliases
-are removed in 0.17.0 (contracts 3.0.0); migrate old artifacts with 0.16.x.
+This module and `contracts/schemas/skill_names.json` (its enum is SKILLS) are the only places that define the names;
+tests/contracts/test_skill_names.py checks that they agree.
 """
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 SKILLS = ("hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml",
           "hep-citations", "hep-authoring")
-DEPRECATED_SKILL_ALIASES = {
-    "hep-analysis": "hep-measurement",
-    "detector-response": "hep-detector",
-    "research-communication": "hep-authoring",
-    "physics-ml": "hep-ml",
-    "hep-communication": "hep-authoring",
-}
-RENAMED_IN = "0.11.0"  # the hep-research release that renamed the skills
-# Names retired after RENAMED_IN, with the release that retired them.
-RETIRED_LATER = {"hep-communication": "0.16.0 (split into hep-citations and hep-authoring)"}
-ALL_SKILL_NAMES = frozenset(SKILLS) | frozenset(DEPRECATED_SKILL_ALIASES)
-CODE = "skill.deprecated_name"
-PROFILE_CODE = "profile.deprecated_skill_name"
+# SHA-256 of the five names retired in contracts 3.0.0 (the four renamed in 0.11.0 and the one split in 0.16.0)
+RETIRED_SHA256 = frozenset({
+    "e57ccb9f1698d58cd4d0aba82fa54e14c8799f828060f1763db2889bdb80d55a",
+    "36bb3054af3554092713f0db80534b1cf93207e69fe88a1d4593f5125f073a77",
+    "32dc019263b6b3ebe7cc482c8d821031662a2e92c24cead48871798b79ade41e",
+    "7b9795f0bb101a9bc93cad8d18771640ea200b4cd5cf068cce72acf673f4a67f",
+    "c72c64c287c44783986b4f679da661c7dd58f47545112220bcdacf82ece01e0e",
+})
+RETIRED_IN = "0.17.0"  # the hep-research release that retired them (contracts 3.0.0)
+CODE = "skill.unknown_name"
 
 
-def canonical(name: Any) -> Any:
-    """The current name for a skill name; any other value unchanged."""
-    return DEPRECATED_SKILL_ALIASES.get(name, name) if isinstance(name, str) else name
+def is_retired(name: Any) -> bool:
+    """Whether a value is one of the retired skill names."""
+    return isinstance(name, str) and hashlib.sha256(name.encode("utf-8")).hexdigest() in RETIRED_SHA256
 
 
-def message(field: str, old: str, hint: str = "rewrite it with contracts/migrate_skill_names.py") -> str:
-    when = RETIRED_LATER.get(old, RENAMED_IN)
-    return (f"{field} '{old}' is the deprecated name of '{DEPRECATED_SKILL_ALIASES[old]}' (renamed in hep-research "
-            f"{when}); {hint}")
+def message(field: str, name: str) -> str:
+    if is_retired(name):
+        return (f"{field} '{name}' is a skill name retired in hep-research {RETIRED_IN} (contracts 3.0.0); migrate "
+                "the file with hep-research 0.16.x (contracts/migrate_skill_names.py), then validate it here")
+    return f"{field} '{name}' is not a skill of this plugin ({', '.join(SKILLS)})"
 
 
 def _ext_handoffs(value: Any, path: str):
@@ -73,17 +70,20 @@ def artifact_name_fields(doc: Any):
     yield from _ext_handoffs(doc.get("extension"), "$.extension")
 
 
-def check_artifact(doc: Any, rep: Any, strict: bool = False) -> None:
-    """Report each deprecated skill name in an artifact: a warning, or an error under the version and name policy."""
+def check_artifact(doc: Any, rep: Any) -> None:
+    """Report each skill name an artifact records that is not a current skill. producer_skill and extension handoffs
+    are also checked by the schema enum and the ml-artifact rules; this adds the finding only for a retired name there,
+    and for any unknown handoff.to_skill, which no other rule checks."""
     for path, value in artifact_name_fields(doc):
-        if value in DEPRECATED_SKILL_ALIASES:
-            rep.add("error" if strict else "warning", path, CODE, message(path.rsplit(".", 1)[-1], value))
+        if value in SKILLS:
+            continue
+        if is_retired(value) or path == "$.handoff.to_skill":
+            rep.add("error", path, CODE, message(path.rsplit(".", 1)[-1], value))
 
 
-def check_profile(prof: Any, rep: Any, where: str, strict: bool = False) -> None:
-    """Report each deprecated name in a profile's related_skills: a warning, or an error under the name policy."""
+def check_profile(prof: Any, rep: Any, where: str) -> None:
+    """Report each retired name in a profile's related_skills (the schema enum reports any other unknown name)."""
     skills = prof.get("related_skills") if isinstance(prof, dict) else None
     for i, name in enumerate(skills if isinstance(skills, list) else []):
-        if name in DEPRECATED_SKILL_ALIASES:
-            rep.add("error" if strict else "warning", f"{where}.related_skills[{i}]", PROFILE_CODE,
-                    message("related_skills entry", name, "write the new name in profile.json"))
+        if is_retired(name):
+            rep.add("error", f"{where}.related_skills[{i}]", CODE, message("related_skills entry", name))

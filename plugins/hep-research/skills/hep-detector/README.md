@@ -2,8 +2,6 @@
 
 Use when the deliverable is about how a detector responds: signal formation and readout, reconstruction (tracking, vertexing, calorimetry, particle identification, timing, Cherenkov, transition radiation, time of flight, muon systems), calibration and alignment, efficiency and resolution measurement, detector simulation, data/MC agreement, conditions and their provenance, response matrices, folding a prediction through the response, and parametrized response for recasting. Load it first even for a quick question on a named experiment's detector: it reads the profile and asks which configuration is meant instead of quoting from memory.
 
-Formerly `detector-response`; the old name is a deprecated alias in contracts 2.9.0.
-
 **Owns:** signal formation, reconstruction, calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks. Typical artifact: `response`.
 
 **Never:** invent detector facts; detector specifics come from an experiment profile, the user, the sourced detector atlas, or are `unknown`. Inference on top of a response belongs to hep-statistics.

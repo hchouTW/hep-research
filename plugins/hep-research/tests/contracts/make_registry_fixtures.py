@@ -19,7 +19,7 @@ TH_DIRS = ["models", "derivations", "predictions", "benchmarks", "evidence", "te
 
 def profile(pid, kind, ns, **kw):
     p = {"id": pid, "kind": kind, "version": "1.0.0", "scope": "structural fixture", "exclusions": [],
-         "compatible": {"core": ">=1.0,<2.0", "contracts": ">=2.0,<3.0"}, "related_skills": ["hep-measurement"],
+         "compatible": {"core": ">=1.0,<2.0", "contracts": ">=2.0,<4.0"}, "related_skills": ["hep-measurement"],
          "resources": {"index": "index.md", "conventions": "conventions.json"},
          "vocabulary_extensions": {}, "adapters": {"required": [], "optional": []}, "depends_on": [],
          "evidence_namespace": ns, "maintainer": "fixture", "capabilities": [
@@ -68,7 +68,7 @@ def main() -> None:
     package("valid", ok)
     cases = {"valid": []}
     package("duplicate_id", [("experiments/a", exp_a, {}), ("experiments/a2", dict(exp_a), {})]); cases["duplicate_id"] = ["registry.duplicate_id"]
-    package("incompatible_version", [("experiments/a", {**exp_a, "compatible": {"core": ">=2.0,<3.0", "contracts": ">=2.0,<3.0"}}, {})]); cases["incompatible_version"] = ["profile.incompatible_version"]
+    package("incompatible_version", [("experiments/a", {**exp_a, "compatible": {"core": ">=2.0,<3.0", "contracts": ">=2.0,<4.0"}}, {})]); cases["incompatible_version"] = ["profile.incompatible_version"]
     package("missing_resource", [("experiments/a", exp_a, {"skip": ["conventions.json"]})]); cases["missing_resource"] = ["profile.missing_resource"]
     package("template_violation", [("theory/a", th_a, {"skip": ["derivations"], "extra": ["notes"]})]); cases["template_violation"] = ["profile.template_violation"]
     package("escaping_path", [("experiments/a", {**exp_a, "resources": {"index": "../../../../outside.md", "conventions": "conventions.json"}}, {})],

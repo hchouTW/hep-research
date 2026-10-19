@@ -8,9 +8,9 @@ Exit codes: 0 valid (and, with --gate, the gate passed), 1 findings with errors 
 A valid artifact is self-consistent under the contract; that says nothing about physical validity, and this check is
 advisory: it never authorizes a use. --protected switches protected mode on (core.protected.guard: the protected
 inputs of the project's authoritative agent_policy must be established, else the run is refused) and with it the
-stricter version and name policy; --strict-versions applies only that version and name policy (a newer minor contract
-version, or a deprecated skill name in provenance.producer_skill, handoff.to_skill or an extension handoff, is an
-error, not a warning; contracts.skill_names), without protected mode. --strict applies the statistical-result
+stricter version policy; --strict-versions applies only that version policy (a newer minor contract version is an
+error, not a warning), without protected mode. A skill name that is not a current skill (contracts.skill_names) is
+always an error. --strict applies the statistical-result
 semantic rules of contracts 2.2.0 (p-values and confidence levels in range, ordered expected bands, typed coverage and global
 calibration) and the response semantic rules of contracts 2.4.0 (controlled correction vocabulary, a matrix or
 matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
@@ -703,7 +703,7 @@ TASK_BLOCKS = {
     "surrogate": ("extrapolation_policy", ("action", "consumer")),
     "reweighting": ("reweighting_validation", ("closure", "prior_dependence", "unmatched_events")),
 }
-KNOWN_SKILLS = skill_names.ALL_SKILL_NAMES  # current names and deprecated aliases (reported by skill_names.check_artifact)
+KNOWN_SKILLS = frozenset(skill_names.SKILLS)
 MODEL_HASH_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 UNBOUNDED = 1e30
 ROW_LEVEL_KEYS = {"row", "row_id", "rowid", "row index", "index", "idx", "entry", "entry_number", "sample_index",
@@ -2082,8 +2082,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
                       context=None, strict_versions: bool = False) -> Report:
     """Schema and semantic rules of one artifact. In protected mode (the project declares agent_policy, or protected is
     true; core.protected.guard) the protected inputs are checked first, a refusal is an error finding, and the stricter
-    version and name policy applies. strict_versions applies only that policy (a newer minor or a deprecated skill name
-    is an error), without protected mode. `context` reuses an established protected-use context (core.protected.guard.Context)."""
+    version policy applies. strict_versions applies only that policy (a newer minor is an error), without protected
+    mode. `context` reuses an established protected-use context (core.protected.guard.Context)."""
     vocab = vocab or Vocabulary()
     rep = validate(doc, "envelope.json", vocab)
     ctx = guard_report("contracts.validate.validate_artifact", rep, flag=protected, context=context)
@@ -2092,7 +2092,7 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     if not isinstance(doc, dict):
         return rep
     check_contract_version(doc, rep, protected or strict_versions)
-    skill_names.check_artifact(doc, rep, protected or strict_versions)  # version and name policy (contracts 2.9.0)
+    skill_names.check_artifact(doc, rep)  # retired and unknown skill names (contracts 3.0.0)
     check_unknown_keys(doc, rep)
     at = doc.get("artifact_type")
     ext_schema = EXTENSION_SCHEMAS.get(at) if isinstance(at, str) else None  # a wrong type is already a finding

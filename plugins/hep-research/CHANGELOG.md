@@ -3,6 +3,26 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 3.0.0 (major): the deprecated skill names are retired, as planned for migration option A (restructuring plan
+section 9). Unreleased; the plugin version is unchanged until the release is decided.
+
+- **Retired skill names.** The schema enum lists only the eight current skills. A name retired here (the four aliases
+  of the 0.11.0 rename and the communication skill's name from the 0.16.0 split) in `provenance.producer_skill`,
+  `handoff.to_skill`, an extension `handoff` or a profile's `related_skills` is an error, `skill.unknown_name`, with
+  or without `--strict-versions`, and the message says to migrate with hep-research 0.16.x. Any other unknown
+  `handoff.to_skill` is the same error (it was unchecked). `--strict-versions` now carries only the version policy.
+- **Removed:** `contracts/migrate_skill_names.py`, its fixture and test, and the "Formerly" lines in the skill
+  READMEs.
+- **`tools/check_retired_names.py`** (a static check of `run_all_checks.py`): fails on any maintained file that
+  spells a retired name; the names are kept only as SHA-256 hashes (`contracts.skill_names.RETIRED_SHA256`). History
+  files, release manifests, `docs/dev/` and evidence ledgers are not scanned. It replaces the retired-folder check of
+  `tests/skills/test_reference_links.py`.
+- **Profile ranges.** The ten shipped profiles and the registry fixtures accept contracts `<4.0` (was `<3.0`); the
+  ams02-research companion declares `>=2.0` and is unaffected. Older 2.x artifacts with current names keep their
+  outcome; fixtures, templates, theory-profile artifacts and examples move to 3.0.0.
+
 ## 0.16.0 (2026-10-20)
 
 The communication skill is split into **hep-citations** (sources, citations, literature records) and **hep-authoring**

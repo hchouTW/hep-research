@@ -2,8 +2,6 @@
 
 Use when the deliverable is physics writing or its presentation: drafting or revising paper sections, abstracts and captions, papers from results (short summaries, terminology, numbers and units; English or Chinese), figures and tables, diagrams as editable sources, talks and posters, referee reports, theses, proposals, handover notes, and packaging results with claim-to-result links and honest status. Every citation comes from a hep-citations record or a profile evidence ledger, never from memory; what a paper states, the latest result and citations themselves are hep-citations's.
 
-Formerly the writing half of the communication skill, split into hep-citations and hep-authoring; the old name and the older `research-communication` are deprecated aliases of hep-authoring in contracts 2.13.0 (`contracts/skill_names.py`).
-
 **Owns:** writing, diagrams and their rendering, talks, referee replies, handover, packaging; the `communication` extension and the shared audit report shape (`contracts/audit_report.py`, also used by hep-citations). Typical artifacts: `communication` (claims linked to results and sources, read levels, figure inputs, limitations; the traceability format adds evidence edges, occurrences and assessments), manuscripts, figures with captions.
 
 **Never:** invent a result, a number or a citation; cite from memory; upgrade a derivation or result status; describe synthetic or Asimov results as measurements.

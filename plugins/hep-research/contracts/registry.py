@@ -8,8 +8,8 @@ Checks: registry schema; duplicate IDs; registry/profile.json agreement; core an
 compatibility; required resources present; folder template; paths that escape the package
 (including via symlinks); dependency existence and cycles; namespaced vocabulary extensions; one owner per
 namespace across the registry and the local profiles (profile.namespace_collision);
-capability claims backed by existing tests; deprecated skill names in related_skills (contracts.skill_names: a
-warning, an error with --strict-versions, the version and name policy). Metadata is read; module content is not.
+capability claims backed by existing tests; retired skill names in related_skills (contracts.skill_names: an
+error that points to migration with hep-research 0.16.x). Metadata is read; module content is not.
 """
 from __future__ import annotations
 
@@ -74,7 +74,7 @@ def check_profile_dir(pdir: Path, boundary: Path, rep: Report, where: str, expec
     sub = validate(prof, "profile.json", Vocabulary())
     for f in sub.findings:
         rep.add(f.severity, f"{where}{f.path[1:]}", f.code, f.message)
-    skill_names.check_profile(prof, rep, where, strict_versions)
+    skill_names.check_profile(prof, rep, where)
     if expect:
         for k in ("id", "kind", "version"):
             if k in expect and prof.get(k) != expect[k]:
@@ -169,7 +169,7 @@ def validate_registry(registry_path: Path | None = None, local_dirs=(), package_
                       strict_versions: bool = False) -> tuple[Report, dict]:
     """Validate the registry plus optional local profile folders. Returns (report, {id: profile}), every loaded
     profile included even when it has errors (the CLI's listing); consumers that use profiles call load_registry and
-    take only its usable profiles. strict_versions: a deprecated skill name in related_skills is an error."""
+    take only its usable profiles. strict_versions: the stricter version policy."""
     res = load_registry(registry_path, local_dirs, package_root, strict_versions)
     return res.report, res.every_profile
 
