@@ -1900,6 +1900,23 @@ Round 1 still fails criteria 3 and 5. The persistent regressions in `dr-a-toy-1`
 involve hep-detector, hep-theory and hep-computing only, whose descriptions the split did not change; they point to the
 eight-skill listing itself, which a description round of the two new skills cannot address.
 
+Cause of the regressions outside the split (about $6.60, 5 runs per arm; `evals/routing/results/cause-*`):
+
+| Arm | `dr-a-toy-1` (hep-detector) | `t19-quick-3` (hep-detector) | `th-nucstruct-1` (hep-theory) |
+|---|---|---|---|
+| A main (7 skills) | 5/5 | 4/5 | 3/5 |
+| B branch (8 skills) | 1/5 | 2/5 | 2/5 |
+| C branch without hep-literature (7) | 0/5 | 1/5 | 3/5 |
+| E as C, hep-writing with the old hep-communication description | 0/5 | 3/5 | - |
+| F phase 0 only (338f8d78) | 5/5 | 5/5 | - |
+| G branch, the two skills renamed hep-citations / hep-authoring | 5/5 | 5/5 | - |
+
+`th-nucstruct-1` is noise on every arm. The other two follow the alphabetical position of the skills in the host's
+listing, not the description text: with hep-communication gone, hep-computing is listed first and draws ambiguous
+detector requests (`dr-a-toy-1` loads hep-computing); names that sort before hep-computing (arm G) restore main's
+outcome. A name change is therefore the candidate for description round 2 (plan section 8 allows names or
+descriptions); the working names and `hep-sources`/`hep-manuscript` all sort after hep-computing.
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the
