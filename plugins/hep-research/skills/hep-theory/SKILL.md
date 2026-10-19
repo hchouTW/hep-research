@@ -1,6 +1,6 @@
 ---
 name: hep-theory
-description: "Use when the deliverable is a theoretical or phenomenological result in particle, nuclear, astroparticle physics: conventions (units, constants, couplings, schemes, scales), derivations, amplitudes, cross sections, decay rates and widths, neutrino oscillations, nuclear decays, whether a process or Feynman diagram is allowed (selection rules), approximations and validity domains, theory uncertainties (scale envelopes, truncation, PDFs, model alternatives), event-generation physics, SMEFT conventions, consistency checks, predictions for comparing a model with an experiment's published data (importing its HEPData, CSV or FITS table), and recasting a published analysis. Load it first even for a quick derivation, cross section or recast, and for topics outside v1 (lattice QCD and its global analyses, EFT global fits), saying what it cannot cover. Not for: measurement design (hep-measurement), detector response (hep-detector), fits and limits (hep-statistics), code (hep-computing), manuscripts (hep-communication)."
+description: "Use when the deliverable is a theoretical or phenomenological result in particle, nuclear, astroparticle physics: conventions (units, constants, couplings, schemes, scales), derivations, amplitudes, cross sections, decay rates and widths, neutrino oscillations, nuclear decays, whether a process or Feynman diagram is allowed (selection rules), approximations and validity domains, theory uncertainties (scale envelopes, truncation, PDFs, model alternatives), event-generation physics, SMEFT conventions, consistency checks, predictions for comparing a model with an experiment's published data (importing its HEPData, CSV or FITS table), and recasting a published analysis. Load it first even for a quick derivation, cross section or recast, and for topics outside v1 (lattice QCD and its global analyses, EFT global fits), saying what it cannot cover. Not for: measurement design (hep-measurement), detector response (hep-detector), fits and limits (hep-statistics), code (hep-computing), manuscripts (hep-writing)."
 ---
 
 # hep-theory: models, derivations, predictions
@@ -74,4 +74,4 @@ Folder guide for people: [README.md](README.md).
 | Numerical convergence, symbolic/numeric cross-check code | hep-computing | `computational-run` |
 | Folding into detector space | hep-detector then hep-statistics | `prediction` |
 | Surrogate of an expensive prediction | hep-ml | `prediction` (validity domain) |
-| Paper section or Feynman diagram rendering | hep-communication | `communication` |
+| Paper section or Feynman diagram rendering | hep-writing | `communication` |

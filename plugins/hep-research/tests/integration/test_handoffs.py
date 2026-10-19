@@ -143,7 +143,7 @@ class FailurePropagationT20(unittest.TestCase):
         comm_in = [{"ref": "result.json", "artifact_type": "statistical-result", "status": ["failed", "synthetic"]}]
         comm = envelope("communication", {"claims": [{"text": "mu = 1.02", "result_ref": "result.json", "status": ["synthetic"]}],
                                           "sources_read": [], "limitations": []}, status=["failed", "synthetic"], inputs=comm_in,
-                        producer="hep-communication")
+                        producer="hep-writing")
         self.assertIn("communication.status_upgraded", codes(validate_artifact(comm)))
         comm["extension"]["claims"][0]["status"] = ["failed", "synthetic"]
         self.assertTrue(validate_artifact(comm).ok)
@@ -166,7 +166,7 @@ class FailurePropagationT20(unittest.TestCase):
     def test_synthetic_result_cannot_be_communicated_as_observed(self):
         ins = [{"ref": "r.json", "artifact_type": "statistical-result", "status": ["synthetic"]}]
         comm = envelope("communication", {"claims": [{"text": "x", "result_ref": "r.json", "status": ["observed", "synthetic"]}],
-                                          "sources_read": [], "limitations": []}, inputs=ins, producer="hep-communication")
+                                          "sources_read": [], "limitations": []}, inputs=ins, producer="hep-writing")
         self.assertIn("communication.status_upgraded", codes(validate_artifact(comm)))
 
 

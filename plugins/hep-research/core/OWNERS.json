@@ -51,15 +51,22 @@
    "source": "new in this plugin"
   },
   "evidence": {
-   "steward": "hep-communication",
+   "steward": "hep-literature",
    "status": "implemented-M2",
-   "purpose": "Evidence-ledger validation, index rendering and bounded paged queries",
+   "purpose": "Evidence-ledger validation, index rendering, bounded paged queries and stable literature identifiers (DOI, arXiv, INSPIRE) shared by the literature import and the citation check",
    "files": [
     "ledger",
     "render_index",
-    "query"
+    "query",
+    "identifiers"
    ],
-   "source": "explicit paths, optional ID namespace, verification_date with access_date fallback, generic messages"
+   "source": "explicit paths, optional ID namespace, verification_date with access_date fallback, generic messages",
+   "consumers": [
+    "contracts/validate.py",
+    "contracts/communication_project.py",
+    "skills/hep-literature/scripts",
+    "skills/hep-writing/scripts/check_citations.py"
+   ]
   },
   "partition": {
    "steward": "hep-computing",

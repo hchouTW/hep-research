@@ -13,7 +13,7 @@ source-traced facts (selections, templates, unfolding, isotope methods, cutoff f
 data periods) and the public-evidence boundary. This file deliberately keeps no AMS
 numbers, publication lists, or hardware-history dates so there is one place, not two, to
 keep correct; anything AMS-specific must be checked against the collaboration's
-publications (see [primary-sources-and-version-checks.md](../../../../../skills/hep-communication/references/primary-sources-and-version-checks.md)).
+publications (see [primary-sources-and-version-checks.md](../../../../../skills/hep-literature/references/primary-sources-and-version-checks.md)).
 
 ## Subsystem stack (roles only)
 

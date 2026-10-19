@@ -1,0 +1,274 @@
+{
+ "contract_version": "2.2.0",
+ "artifact_id": "fixture-synthetic-golden-communication",
+ "artifact_type": "communication",
+ "objective": "SYNTHETIC worked example of evidence-linked writing; every number is a placeholder, the observed label is simulated",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.12",
+  "contracts": "2.2.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-writing",
+  "created": "2026-10-12",
+  "evidence_ids": []
+ },
+ "required_capabilities": [
+  "communication:traceability-v1"
+ ],
+ "inputs": [
+  {
+   "ref": "artifacts/obs_v2.json",
+   "artifact_type": "statistical-result",
+   "artifact_id": "fixture-synthetic-obs",
+   "sha256": "4c3dde86a4deb2ef7176f22367343a16f1940bf8c08b5a7e09716e8f0e6de425",
+   "version": "1.0.0",
+   "status": [
+    "observed"
+   ]
+  },
+  {
+   "ref": "artifacts/syn.json",
+   "artifact_type": "prediction",
+   "artifact_id": "fixture-synthetic-syn",
+   "sha256": "24e21e06f1a9e6a3aa758676cc191e1935bd86f8165c58904c0881b390531822",
+   "version": "1.0.0",
+   "status": [
+    "synthetic",
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "traceability_version": "1.0.0",
+  "scope": {
+   "occurrences": true,
+   "sources": false
+  },
+  "documents": [
+   {
+    "id": "doc:paper",
+    "path": "paper/main.md",
+    "format": "markdown",
+    "audience": "journal readers",
+    "purpose": "main text"
+   }
+  ],
+  "claims": [
+   {
+    "id": "claim:C1",
+    "text": "The ratio R is 1.02 +/- 0.05 (synthetic fixture).",
+    "claim_type": "measurement",
+    "scope": {
+     "text": "synthetic fixture sample; statistical uncertainty only"
+    },
+    "status": [
+     "observed"
+    ],
+    "evidence": [
+     {
+      "id": "ev:C1-a",
+      "target_kind": "artifact",
+      "target": "artifacts/obs_v2.json",
+      "locator": "extension.results.ratio",
+      "role": "supports",
+      "usage": "used-in-claim"
+     }
+    ],
+    "unresolved_inputs": [],
+    "workflow_state": "edited",
+    "assessment": {
+     "verdict": "supported",
+     "rationale": "value and uncertainty read from the named artifact field",
+     "evidence_ids": [
+      "ev:C1-a"
+     ],
+     "assessor": {
+      "identity": "fixture",
+      "role": "author"
+     },
+     "date": "2026-10-12",
+     "claim_digest": "5506ddf642feaebf1d0860c4ff870b3da7127e93979477245cf06b9c14ae63e9",
+     "evidence_fingerprints": {
+      "ev:C1-a": "sha256:e2a25c204bc67102b8462957a1a20439b635b0634975a74d558481e8bda75db7"
+     },
+     "currency": "stale"
+    }
+   },
+   {
+    "id": "claim:C2",
+    "text": "A synthetic illustration gives R = 0.98 (synthetic fixture).",
+    "claim_type": "illustration",
+    "scope": {
+     "text": "illustration only"
+    },
+    "status": [
+     "synthetic",
+     "unvalidated"
+    ],
+    "evidence": [
+     {
+      "id": "ev:C2-b",
+      "target_kind": "artifact",
+      "target": "artifacts/syn.json",
+      "locator": "extension.results.ratio",
+      "role": "supports",
+      "usage": "used-in-claim"
+     }
+    ],
+    "unresolved_inputs": [],
+    "assessment": {
+     "verdict": "supported",
+     "rationale": "value and uncertainty read from the named artifact field",
+     "evidence_ids": [
+      "ev:C2-b"
+     ],
+     "assessor": {
+      "identity": "fixture",
+      "role": "author"
+     },
+     "date": "2026-10-12",
+     "claim_digest": "72274572d14c84e439ae8adb6ad79cdeb255c128be951df8a1b4b91b8c690d6c",
+     "evidence_fingerprints": {
+      "ev:C2-b": "sha256:24e21e06f1a9e6a3aa758676cc191e1935bd86f8165c58904c0881b390531822"
+     },
+     "currency": "current"
+    }
+   }
+  ],
+  "occurrences": [
+   {
+    "id": "occ:abstract",
+    "claim_id": "claim:C1",
+    "document_id": "doc:paper",
+    "locator": "section:Abstract",
+    "passage": "We measure the ratio R = 1.02 +/- 0.05 in the synthetic fixture sample.",
+    "value": {
+     "value": "1.02",
+     "unit": "1",
+     "rounding": "decimals:2"
+    },
+    "state": "mapped"
+   },
+   {
+    "id": "occ:body",
+    "claim_id": "claim:C1",
+    "document_id": "doc:paper",
+    "locator": "section:Results",
+    "passage": "The fitted ratio is R = 1.02 +/- 0.05 (stat), consistent with unity.",
+    "value": {
+     "value": "1.02",
+     "unit": "1",
+     "rounding": "decimals:2"
+    },
+    "state": "mapped"
+   },
+   {
+    "id": "occ:caption",
+    "claim_id": "claim:C1",
+    "document_id": "doc:paper",
+    "locator": "section:Figures",
+    "passage": "Figure 1: the ratio R = 1.02 +/- 0.05 compared with the synthetic illustration at 0.98.",
+    "value": {
+     "value": "1.02",
+     "unit": "1",
+     "rounding": "decimals:2"
+    },
+    "state": "mapped"
+   },
+   {
+    "id": "occ:illustration",
+    "claim_id": "claim:C2",
+    "document_id": "doc:paper",
+    "locator": "section:Results",
+    "passage": "A synthetic illustration gives R = 0.98 for orientation only.",
+    "state": "mapped"
+   }
+  ],
+  "sources_read": [],
+  "evidence_ledgers": [],
+  "reporting_context": {
+   "result_type": "measurement",
+   "method": {
+    "uncertainty_split": "stat-only"
+   },
+   "fields": {
+    "value": {
+     "state": "provided",
+     "value": "1.02"
+    },
+    "unit": {
+     "state": "provided",
+     "value": "1"
+    },
+    "uncertainty_definition": {
+     "state": "provided",
+     "value": "68% interval, statistical"
+    },
+    "statistical_uncertainty": {
+     "state": "provided",
+     "value": "0.05"
+    },
+    "systematic_uncertainty": {
+     "state": "not-applicable",
+     "reason": "fixture: statistical only by construction"
+    },
+    "scope": {
+     "state": "provided",
+     "value": "synthetic fixture sample"
+    },
+    "corrections_applied": {
+     "state": "provided",
+     "value": "none (fixture)"
+    }
+   }
+  },
+  "limitations": [
+   "synthetic fixture: the observed label simulates a measured input and is not real data"
+  ],
+  "revision_items": [
+   {
+    "id": "rev:1",
+    "cause": "new calibration: result artifact obs_v2.json",
+    "kind": "analysis-rerun",
+    "impacted_claims": [
+     "claim:C1"
+    ],
+    "impacted_occurrences": [
+     "occ:abstract",
+     "occ:body",
+     "occ:caption"
+    ],
+    "required_actions": [
+     "inspect obs_v2.json, re-assess claim:C1, update the three occurrences"
+    ],
+    "state": "pending-evidence"
+   }
+  ],
+  "reviewer_items": [
+   {
+    "id": "rev:R1",
+    "comment": "Please rerun the fit with the updated calibration and update the abstract.",
+    "requested_action": "rerun the fit with the updated calibration and update the abstract",
+    "claims": [
+     "claim:C1"
+    ],
+    "revision_items": [
+     "rev:1"
+    ],
+    "disposition": "changed",
+    "response_draft": "We have rerun the fit and updated the abstract."
+   }
+  ]
+ }
+}

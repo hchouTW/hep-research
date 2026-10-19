@@ -136,7 +136,7 @@ def cli_entries(env: Env):
          ["record", "--inputs", a], False, False),
         ("core/evidence/ledger.py", load_script("core/evidence/ledger.py").main, [a], False, False),
         ("core/evidence/query.py", load_script("core/evidence/query.py").main, [a], False, False),
-        ("check_manuscript.py", load_script("skills/hep-communication/scripts/check_manuscript.py").main,
+        ("check_manuscript.py", load_script("skills/hep-writing/scripts/check_manuscript.py").main,
          [str(env.proj)], False, False),
     ]
 

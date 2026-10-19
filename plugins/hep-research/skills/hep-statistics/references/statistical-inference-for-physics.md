@@ -10,10 +10,10 @@ prediction or approximation is `hep-theory`
 (`../../hep-theory/references/mathematical-reasoning-and-proof.md`); designing the
 selection, cutflow or systematic variations is `hep-measurement`; an ML evaluation
 harness is `hep-ml`; explaining or writing up the result is
-`hep-communication`.
-Cross-references: `../../hep-communication/references/claim-evidence-mapping.md` for whether the conclusion follows
-from the result; `../../hep-communication/references/equation-and-notation-auditing.md` for whether the likelihood's
-algebra/dimensions are internally consistent; `../../hep-communication/references/scientific-style.md` for how to
+`hep-writing`.
+Cross-references: `../../hep-literature/references/claim-evidence-mapping.md` for whether the conclusion follows
+from the result; `../../hep-writing/references/equation-and-notation-auditing.md` for whether the likelihood's
+algebra/dimensions are internally consistent; `../../hep-writing/references/scientific-style.md` for how to
 phrase the resulting claim once it's calibrated correctly.
 
 ## Table of contents
@@ -94,7 +94,7 @@ Other checks:
   a trials-corrected global significance is also given [Gross & Vitells 2010].
   A 3σ local excess scanned over dozens of independent bins is routinely well
   below 3σ globally.
-  See `../../hep-communication/references/reading-papers.md`'s look-elsewhere-effect check for where this surfaces
+  See `../../hep-literature/references/reading-papers.md`'s look-elsewhere-effect check for where this surfaces
   during a first read.
 - **Upper limits and exclusion**: identify the test statistic and confidence
   construction (e.g. CLs [Junk 1999; Read 2002], the Feldman-Cousins unified
@@ -130,7 +130,7 @@ Other checks:
   interchangeable.** A 95% CI is a statement about the procedure's long-run
   coverage; a 95% credible interval is a posterior probability statement
   conditional on the prior. Reusing one's numeric value while calling it the
-  other misstates what was computed. See `../../hep-communication/references/scientific-style.md`'s statistical
+  other misstates what was computed. See `../../hep-writing/references/scientific-style.md`'s statistical
   reporting section for how to phrase this once verified.
 
 ## Systematic uncertainty
@@ -199,8 +199,8 @@ When a paper's abstract or conclusion uses the stronger phrase, check the
 Results section for the evidence needed to support it (a dedicated equivalence
 test with a stated margin, a global-significance calculation, an actual
 posterior) — if that evidence isn't there, the calibration gap is the finding.
-See `../../hep-communication/references/scientific-style.md`'s significance-language table for the physics σ-based
-convention this pairs with, and `../../hep-communication/references/claim-evidence-mapping.md` for recording the
+See `../../hep-writing/references/scientific-style.md`'s significance-language table for the physics σ-based
+convention this pairs with, and `../../hep-literature/references/claim-evidence-mapping.md` for recording the
 gap against the paper's central claim.
 
 ## Sources

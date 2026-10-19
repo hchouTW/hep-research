@@ -75,7 +75,7 @@ Scripts in `<plugin root>/skills/hep-detector/scripts/` (read `--help` first); e
 | Measurement design using these numbers | hep-measurement | `response` / report |
 | Simulation production, conditions code | hep-computing | `computational-run` |
 | ML-based reconstruction or calibration; training a learned fast simulation or ML response model | hep-ml | `ml-artifact` |
-| Writing up results | hep-communication | report |
+| Writing up results | hep-writing | report |
 
 <!-- example: routing -->
 - "AMS-02 RICH velocity resolution vs charge" → this skill + `experiment:ams-02` subsystem module only.

@@ -1,5 +1,5 @@
 """Static routing checks (Section 12 theory-routing fix): derivation -> hep-theory, inference -> hep-statistics,
-explanation -> hep-communication. Reads skill text only; nothing is executed."""
+explanation -> hep-writing. Reads skill text only; nothing is executed."""
 import re
 import unittest
 from pathlib import Path
@@ -21,19 +21,22 @@ class OwnershipTests(unittest.TestCase):
     def test_derivation_reasoning_lives_in_hep_theory(self):
         self.assertTrue((SKILLS / "hep-theory/references/mathematical-reasoning-and-proof.md").is_file())
         self.assertFalse(any((SKILLS / s / "references/mathematical-reasoning-and-proof.md").exists()
-                             for s in ("hep-communication", "hep-statistics", "hep-measurement")))
+                             for s in ("hep-writing", "hep-statistics", "hep-measurement")))
 
     def test_inference_reasoning_lives_in_hep_statistics(self):
         self.assertTrue((SKILLS / "hep-statistics/references/statistical-inference-for-physics.md").is_file())
 
     def test_descriptions_route_by_kind_of_work(self):
-        theory, stats, comm = description("hep-theory"), description("hep-statistics"), description("hep-communication")
+        theory, stats = description("hep-theory"), description("hep-statistics")
+        lit, writing = description("hep-literature"), description("hep-writing")
         self.assertIn("derivations", theory)
         self.assertRegex(theory, r"fits and limits \(hep-statistics\)")
-        self.assertRegex(theory, r"manuscripts \(hep-communication\)")
+        self.assertRegex(theory, r"manuscripts \(hep-writing\)")
         self.assertRegex(stats, r"predictions \(hep-theory\)")
-        self.assertRegex(comm, r"hep-theory \(derivations[,)]")
-        self.assertRegex(comm, r"hep-statistics \(fits, limits[,)]")
+        # since the split (plan 4.1): hep-literature sends published-data work to its owners, hep-writing every result
+        self.assertRegex(lit, r"Not for[^.]*hep-theory \(CRDB, HEPData import\)")
+        self.assertRegex(lit, r"Not for[^.]*hep-statistics \(compatibility\)")
+        self.assertRegex(writing, r"Not for[^.]*producing results \([^)]*hep-theory, hep-statistics")
 
 
 class ReferenceRoutingTests(unittest.TestCase):
@@ -43,10 +46,10 @@ class ReferenceRoutingTests(unittest.TestCase):
         self.assertNotIn("`deep-learning`", head)
         self.assertRegex(head, r"also `hep-statistics` work")
         self.assertRegex(head, r"`hep-theory`\s*\(`\.\./\.\./hep-theory/references/mathematical-reasoning-and-proof\.md`\)")
-        self.assertRegex(head, r"writing up the result is\s*`hep-communication`")
+        self.assertRegex(head, r"writing up the result is\s*`hep-writing`")
 
     def test_no_reference_routes_fits_or_limits_away_from_hep_statistics(self):
-        bad = re.compile(r"use `(hep-measurement|deep-learning|hep-theory|hep-communication)`[^.]{0,80}"
+        bad = re.compile(r"use `(hep-measurement|deep-learning|hep-theory|hep-writing)`[^.]{0,80}"
                          r"(pyhf|Combine|RooStats|limit-setting|run the fit)", re.S)
         hits = [str(p.relative_to(PLUGIN)) for p in SKILLS.glob("*/references/*.md") if bad.search(p.read_text(encoding="utf-8"))]
         self.assertEqual(hits, [])
@@ -58,7 +61,7 @@ class ReferenceRoutingTests(unittest.TestCase):
             self.assertIn("`hep-statistics`", t, rel)
 
     def test_equation_auditing_hands_derivation_validity_to_hep_theory(self):
-        t = text("hep-communication/references/equation-and-notation-auditing.md")[:1500]
+        t = text("hep-writing/references/equation-and-notation-auditing.md")[:1500]
         self.assertIn("../../hep-theory/references/mathematical-reasoning-and-proof.md", t)
 
 

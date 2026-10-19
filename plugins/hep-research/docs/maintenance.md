@@ -72,9 +72,10 @@ and the profile registry at or under 3,072 bytes (`REGISTRY_BUDGET` in `contract
 the budget was 8,192 bytes per `SKILL.md`. On 2026-10-13 the three files that sat at the limit were trimmed by moving their reference and script lists into index
 sections of their primary reference (`hep-detector`: section 11 of the principles summary; `hep-statistics`:
 "Skill scripts" in the core/stats guide; `hep-computing`: "Scripts" in the engineering playbook); they now measure
-6,566, 7,545 and 7,598 bytes. Measured on 2026-10-17 (upgrade batch 0b, after the routing tables of B-02, `tools/measure_entrypoints.py --no-cli`):
-hep-communication 9,322, hep-computing 8,767, hep-detector 8,771, hep-measurement 8,918, hep-ml 7,895,
-hep-statistics 9,257, hep-theory 8,341 bytes. Keep new material in those index sections, not in `SKILL.md`. A change to what a skill
+6,566, 7,545 and 7,598 bytes. On 2026-10-17 (upgrade batch 0b) the communication skill measured 9,322 bytes before it
+was split. Measured on 2026-10-19 (split of the communication skill, `tools/measure_entrypoints.py`):
+hep-computing 9,366, hep-detector 9,512, hep-literature 8,693, hep-measurement 9,138, hep-ml 8,543,
+hep-statistics 10,410, hep-theory 9,166, hep-writing 8,347 bytes. Keep new material in those index sections, not in `SKILL.md`. A change to what a skill
 reads before it acts needs the routing checks (`check_routing_static.py`, `check_ownership.py`) and a live routing
 rerun of the cases that involve the skill before it is merged (VALIDATION SKILL-TRIM shows the shape of that record).
 

@@ -1,4 +1,4 @@
-"""Communication contracts (hep-communication plan T1): typed legacy fields, the capability-gated traceability
+"""Communication contracts (hep-writing plan T1): typed legacy fields, the capability-gated traceability
 format (communication:traceability-v1), claim-scoped status propagation, and the layering of pure validation.
 
 All records are SYNTHETIC structural fixtures; the numbers are placeholders, not physics."""
@@ -40,7 +40,7 @@ def envelope(ext, inputs, status=("synthetic", "unvalidated"), caps=(CAP,)):
     return {"contract_version": CONTRACTS_VERSION, "artifact_id": "fixture-synthetic-communication-rich",
             "artifact_type": "communication", "objective": SYN, "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": "0.6.12", "contracts": CONTRACTS_VERSION, "profiles": {}},
-            "provenance": {"producer_skill": "hep-communication", "created": "2026-10-12", "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-writing", "created": "2026-10-12", "evidence_ids": []},
             "required_capabilities": list(caps), "inputs": copy.deepcopy(list(inputs)), "outputs": [], "status": list(status),
             "unresolved_inputs": [], "extension": ext}
 

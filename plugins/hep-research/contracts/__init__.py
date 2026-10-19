@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.12.0"
+CONTRACTS_VERSION = "2.13.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -39,7 +39,7 @@ CONTRACTS_VERSION = "2.12.0"
 # declares a dependency on them. Add an ID when an artifact type starts to require one.
 # 2.8.0 adds rule families that only refuse false or incomplete declarations, each with its own *_FROM constant and
 # helper in contracts.validate: ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM; hep-ml audit) and, joining the same
-# minor, response hardening (hep-detector audit) and communication result types (hep-communication audit).
+# minor, response hardening (hep-detector audit) and communication result types (audit of the communication skill, now hep-writing).
 # New fields are optional and no capability is added: a 2.7 reader misreads no new field, it only does not apply the
 # new rules. Older artifacts get the new rules under --strict and at the gate.
 # Response hardening (contracts.validate, _response_hardening, RESPONSE_HARDENING_FROM; hep-detector audit DR-WP2)
@@ -71,6 +71,13 @@ CONTRACTS_VERSION = "2.12.0"
 # optional measurement-spec fields systematics[].scaling, systematics[].era_correlation, eras[] and
 # coupled_backgrounds; the profile kind reference. No capability is added; a 2.11 artifact keeps its outcome, and a
 # 2.11 reader refuses the new labels, fields and profile kind (schema enums, additionalProperties).
+# 2.13.0 (split of the communication skill into hep-literature and hep-writing) adds the artifact type
+# literature-record (contracts/schemas/ext_literature_record.json; rules in contracts.validate, _literature_semantics):
+# the record manage_literature.py wrote before, unchanged in content, now inside the envelope so a literature handoff to
+# hep-writing validates instead of failing as artifacts_dir.not_artifact. It also adds the skill names hep-literature
+# and hep-writing; hep-communication becomes a deprecated alias of hep-writing and research-communication now points to
+# hep-writing (contracts.skill_names). No capability is added; a 2.12 artifact keeps its outcome apart from the alias
+# warning, and a 2.12 reader refuses the new type and the new skill names (schema enums) instead of misreading them.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

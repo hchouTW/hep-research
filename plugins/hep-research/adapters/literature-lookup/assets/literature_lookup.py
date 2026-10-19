@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Look up one literature identifier in INSPIRE-HEP, ADS and arXiv and print a metadata record per source.
 
-Purpose: an optional, executable form of the hep-communication lookup recipes
-(`skills/hep-communication/references/literature-lookup-recipes.md`). It answers "does this identifier resolve,
+Purpose: an optional, executable form of the hep-literature lookup recipes
+(`skills/hep-literature/references/literature-lookup-recipes.md`). It answers "does this identifier resolve,
 to what, and is the cited arXiv version the latest", with the source URL and the UTC retrieval time, so an answer can
 name its source instead of quoting memory. No skill requires it: without it (or without network) a citation stays
 `not-verified`.

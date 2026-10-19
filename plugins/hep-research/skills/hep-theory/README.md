@@ -30,7 +30,7 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 | Numerical convergence, symbolic/numeric cross-check code | hep-computing |
 | Folding into detector space | hep-detector, then hep-statistics |
 | Surrogate of an expensive prediction | hep-ml |
-| Paper section or Feynman-diagram rendering | hep-communication |
+| Paper section or Feynman-diagram rendering | hep-writing |
 
 ## Tests and validation
 

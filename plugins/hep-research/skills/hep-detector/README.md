@@ -33,7 +33,7 @@ Start with `references/detector-principles-summary.md`, then the topic file the 
 | Measurement design using these numbers | hep-measurement |
 | Simulation production, conditions code | hep-computing |
 | ML-based reconstruction or calibration | hep-ml |
-| Writing up results | hep-communication |
+| Writing up results | hep-writing |
 
 ## Tests and validation
 

@@ -18,7 +18,7 @@ from core.partition.executors import LocalExecutor
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNNER = ROOT / "core" / "partition" / "runner.py"
-DIAGRAMS = ROOT / "skills" / "hep-communication" / "scripts" / "check_diagram_sources.py"
+DIAGRAMS = ROOT / "skills" / "hep-writing" / "scripts" / "check_diagram_sources.py"
 
 
 class LocalWorkerTimeout(unittest.TestCase):

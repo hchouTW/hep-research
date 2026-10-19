@@ -12,11 +12,12 @@ Choose the primary skill by the **deliverable**, never by an experiment, model, 
 |---|---|---|---|
 | hep-measurement | "Design the selection and background estimate for my flux measurement"; "Review this measurement spec"; "Which systematics should I evaluate?" | "What is the tracker resolution?" → hep-detector; "Set a CLs limit" → hep-statistics | "Fix the segfault in my analysis code" → hep-computing |
 | hep-detector | "Measure the trigger efficiency with tag-and-probe"; "Build the response matrix"; "RICH velocity resolution vs charge" | "Unfold with this matrix" → hep-statistics | "Design the full measurement" → hep-measurement |
-| hep-theory | "Derive the tree-level cross section with these conventions"; "Compare my model with the published flux"; "Recast this search for my model" | "Fit my model's coupling to the data" → hep-statistics after the prediction; "Fold my prediction through the response" → hep-detector | "Write the paper section" → hep-communication |
+| hep-theory | "Derive the tree-level cross section with these conventions"; "Compare my model with the published flux"; "Recast this search for my model" | "Fit my model's coupling to the data" → hep-statistics after the prediction; "Fold my prediction through the response" → hep-detector | "Write the paper section" → hep-writing |
 | hep-statistics | "Feldman–Cousins interval for zero observed events"; "Combine these two measurements with shared systematics"; "Bayesian posterior with these priors" | "Which correlation should I assume?" → evidence owner (hep-measurement / hep-detector / hep-theory) | "Choose my selection cuts" → hep-measurement |
 | hep-computing | "Memory leak in my ROOT macro"; "Batch submission with resubmission and merge"; "Convergence study of this integral" | "Is this result physically right?" → owning physics skill | General non-physics software questions outside research code: no special handling |
 | hep-ml | "Train a classifier with grouped splits"; "Train a BDT for my event selection"; "ECAL energy regression with a neural network"; "Surrogate for my simulation"; "Domain shift between MC and data" | "What physics should the surrogate respect?" → hep-theory; "Is my SBI posterior's coverage valid?" → hep-statistics; "Validate the fast simulation against Geant4" → hep-detector | TensorFlow/JAX-only questions: plugin gives general advice only |
-| hep-communication | "Check that this citation supports the number"; "Draft the results section"; "Draw the analysis workflow" | "Is this Feynman diagram physically correct?" → hep-theory | "Run the fit for the paper" → hep-statistics |
+| hep-literature | "Check that this citation supports the number"; "What did the collaboration publish on this, latest first?"; "Collect the literature on this topic into a table" | "Import the published table and compare it with my model" → hep-theory | "Are these two published fluxes compatible?" → hep-statistics |
+| hep-writing | "Draft the results section"; "Draw the analysis workflow"; "Write the referee report" | "Is this Feynman diagram physically correct?" → hep-theory; "Has every citation in my draft been verified?" → hep-literature | "Run the fit for the paper" → hep-statistics |
 
 ## Topic ownership (single source)
 
@@ -46,6 +47,11 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Validation of a fast or learned simulation against full detector simulation | hep-detector | `detector simulation` | — |
 | Instrument design: requirements flow-down, trade-offs, figures of merit, layout optimization | hep-detector | `detector design principles` | Detector design principles and tracker resolution |
 | Sourced facts on named experiments' detectors (design, achieved, operating values with claim ids) | hep-detector | `sourced detector atlas` | Sourced detector atlas |
+| Citation verification and read levels of sources | hep-literature | `literature discovery and verification`, `read levels` | Literature and citation verification online |
+| Source and claim ledgers in a project; planned claims to recheck | hep-literature | `source and claim ledgers` | Planned claims (Com1): `kind: planned` with `recheck_by` in evidence ledgers |
+| Literature matrices with identifiers and read levels | hep-literature | `literature matrices` | — |
+| Claim-to-result links in a manuscript or a packaged result | hep-writing | `claim-to-result links` | Claims linked to results, status preserved in text |
+| Writing a literature review or a related-work section from the sources | hep-writing | `related-work and review sections` | — |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in
@@ -87,7 +93,8 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 - hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology
 - hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring
 - hep-ml: ml-training, bdt-pipeline, ml-eras
-- hep-communication: claims-and-literature, terminology, papers-and-numbers
+- hep-literature: literature-verification
+- hep-writing: claims-to-results, terminology, papers-and-numbers
 
 Outside v1 (the closest owner answers with the limited-support notice):
 
@@ -104,10 +111,11 @@ Outside v1 (the closest owner answers with the limited-support notice):
 ## Handoff chains (must terminate)
 
 ```text
-J1  hep-measurement -> hep-detector -> hep-statistics -> hep-communication   (ends: report)
+J1  hep-measurement -> hep-detector -> hep-statistics -> hep-writing   (ends: report)
 J3  hep-measurement -> hep-detector -> hep-statistics                            (ends: corrected distribution)
 J4  hep-theory <-> hep-computing                                                   (ends: prediction + checks; at most one round trip per check)
-J5  hep-theory -> hep-detector -> hep-statistics -> hep-communication   (ends: fit result + note)
+J5  hep-theory -> hep-detector -> hep-statistics -> hep-writing   (ends: fit result + note)
+J13 hep-literature -> hep-theory -> hep-statistics -> hep-writing   (ends: published-data comparison written up)
 J7  hep-theory -> hep-detector -> hep-statistics                               (ends: limit)
 J9  hep-ml -> hep-statistics                                                    (ends: validated inference)
 ```
@@ -148,3 +156,5 @@ removed. Skills may add their rows.
 | Skill | Topics the description must name |
 |---|---|
 | hep-statistics | likelihoods; binned and unbinned fits; template fits; published data points; intervals and limits; Feldman-Cousins; CLs; profile likelihood; Bayesian posteriors; significance and look-elsewhere effects; low or zero counts; nuisance parameters; covariance assembly; unfolding; folded prediction; toys and Asimov datasets; goodness of fit; model comparison; combinations |
+| hep-literature | what a named experiment published; whether a paper exists; which result is the latest; what a paper states; whether a result supports a claim; finding and verifying literature and citations; source and claim ledgers; planned claims to recheck; literature matrices and reviews |
+| hep-writing | drafting or revising paper sections; abstracts and captions; figures and tables; diagrams as editable sources; talks and posters; referee reports; theses; proposals; handover notes; claim-to-result links; never cites from memory |

@@ -1,6 +1,6 @@
 ---
 name: hep-measurement
-description: "Use when the deliverable is the design or review of an experimental measurement in particle or astroparticle physics: estimand and observable definition, event/candidate selection and cutflows, background estimation (control regions, ABCD, sidebands), correction chains (efficiency, acceptance, exposure, live time, luminosity), the physical sources of systematic uncertainties and their evaluation plan, blinding policy, and verdict-first measurement review. For collider, fixed-target, neutrino and cosmic-ray measurements, with or without a profile. Load it first even for a quick question on a named experiment's beams or run conditions for a measurement. Not for: detector performance (hep-detector); likelihoods, limits, unfolding, combinations (hep-statistics); theory or model-vs-data comparison (hep-theory); code (hep-computing); ML (hep-ml); write-ups (hep-communication)."
+description: "Use when the deliverable is the design or review of an experimental measurement in particle or astroparticle physics: estimand and observable definition, event/candidate selection and cutflows, background estimation (control regions, ABCD, sidebands), correction chains (efficiency, acceptance, exposure, live time, luminosity), the physical sources of systematic uncertainties and their evaluation plan, blinding policy, and verdict-first measurement review. For collider, fixed-target, neutrino and cosmic-ray measurements, with or without a profile. Load it first even for a quick question on a named experiment's beams or run conditions for a measurement. Not for: detector performance (hep-detector); likelihoods, limits, unfolding, combinations (hep-statistics); theory or model-vs-data comparison (hep-theory); code (hep-computing); ML (hep-ml); write-ups (hep-writing)."
 ---
 
 # hep-measurement: measurement design and review
@@ -71,7 +71,7 @@ Scripts in `<plugin root>/skills/hep-measurement/scripts/` (read `--help` first;
 | Prediction to compare against | hep-theory | `prediction` |
 | Classifier or BDT training, working point | hep-ml | `ml-artifact` |
 | Pipeline code, partition/merge, run manifests | hep-computing | `computational-run` |
-| Write-up | hep-communication | `communication` |
+| Write-up | hep-writing | `communication` |
 
 Name the consuming skill and the artifact path; no other skill runs automatically; a handoff chain ends at the deliverable or a reported blocker.
 

@@ -1,4 +1,4 @@
-"""Project-level resolution of communication records (hep-communication plan T1, second increment):
+"""Project-level resolution of communication records (hep-writing plan T1, second increment):
 contracts/communication_project.py composes the dependency checker, the evidence ledgers and the declared documents
 without network access, and normalizes outcomes for the communication CLIs. All records are SYNTHETIC fixtures."""
 from __future__ import annotations

@@ -1,0 +1,191 @@
+# Scientific Style
+
+Sentence- and paragraph-level guidance for physics prose. Most of this applies
+to scientific writing generally; a few items are physics-specific conventions.
+
+## Table of contents
+- [Tense and voice](#tense-and-voice)
+- [Hedging and precision](#hedging-and-precision)
+- [Significance language](#significance-language)
+- [Reporting limits and nulls](#reporting-limits-and-nulls)
+- [Statistical and ML reporting language](#statistical-and-ml-reporting-language)
+- [Sentence and paragraph shape](#sentence-and-paragraph-shape)
+- [Common non-native-English pitfalls](#common-non-native-english-pitfalls)
+- [Words and phrases to cut](#words-and-phrases-to-cut)
+
+## Tense and voice
+
+- **Past tense** for what was done in this analysis ("Events were selected
+  requiring...", or active: "We selected events requiring...").
+- **Present tense** for statements that remain true independent of when the
+  paper was written: physical laws, the current state of the theory, and the
+  paper's own stated conclusions ("The measured mass is consistent with...").
+- Active voice ("We fit the distribution...") is now standard and preferred
+  in most physics venues over passive ("The distribution was fit..."),
+  though PRL/APS style has historically tolerated more passive
+  construction. Follow the venue's existing papers if unsure, but default to
+  active voice — it is shorter and clearer.
+- Be internally consistent: don't alternate active/passive for the same kind
+  of action within one section without reason.
+
+## Hedging and precision
+
+- Physics readers read hedges literally. "May suggest" and "could indicate"
+  are appropriate for genuinely tentative results; do not use them as a
+  reflexive softener for a result that is actually solid.
+- Conversely, do not overstate: a 2σ excess is "an excess" or "a mild
+  tension," not "evidence for" (conventionally ≥3σ) or "observation of"
+  (conventionally ≥5σ) new physics. See the significance table below.
+- Quantify wherever possible instead of hedging in words: "significantly
+  larger" should become "34% larger" if the number is available.
+
+## Significance language
+
+Standard HEP convention (not universal, but widely expected by referees):
+
+| Significance | Conventional language |
+|---|---|
+| < 2σ | "consistent with the background-only hypothesis"; do not call it an excess |
+| 2–3σ | "an excess," "a mild/moderate tension" |
+| 3–5σ | "evidence for" |
+| ≥ 5σ | "observation of" |
+
+State the exact significance number alongside the word, not instead of it
+("a 3.4σ excess, corresponding to evidence for...").
+
+The table applies only to a search's significance statement about a signal
+hypothesis, under the conventions of the source's own field and venue (check the
+collaboration's or journal's policy where one exists; some fields quote Bayes
+factors or p-values without the σ words). The everyday sense of "evidence" (a
+source, result or figure that supports a claim, as in the claim-evidence matrix of
+`../../hep-literature/references/claim-evidence-mapping.md`) is not a significance claim and carries no σ
+threshold: never rewrite "the evidence for this choice is Table 2" as if it needed
+3σ, and never let a 3σ convention decide whether a cited source supports a sentence.
+
+The σ values are one-sided Gaussian tail probabilities: 3σ is p = 1.35 × 10⁻³ and
+5σ is p = 2.87 × 10⁻⁷ (computed 2026-09-26). The 3σ/5σ thresholds are a field
+convention, not a statistical law; L. Lyons, "Discovering the significance of 5
+sigma", arXiv:1310.1284 (`Lyons:2013yja`), discusses why and when a different
+threshold is argued for. Whenever a look-elsewhere effect applies (a scan over
+mass, sky position, energy or time), the thresholds apply to the global
+(post-trial) significance; always state which one is quoted. Collider searches
+usually quote local and global side by side. Astroparticle point-source searches
+say "pre-trial" and "post-trial" (see below).
+
+### Pre-trial and post-trial (scans of directions, energies, times)
+
+- When a search scanned more than one direction, energy bin, time window or source
+  candidate, state both the **pre-trial** (local) and the **post-trial** (global)
+  significance, and say which one each number is; a bare "5σ" for a point-source
+  search is ambiguous. "Detection", "hint" and "evidence" for a source or transient
+  follow the table above applied to the post-trial number: a "5σ pre-trial" excess
+  is not an observation if the trials factor brings it below 5σ post-trial.
+- For an ON/OFF count the pre-trial significance is usually Li & Ma's eq. 17
+  (T.-P. Li and Y.-Q. Ma, ApJ 272, 317 (1983), doi:10.1086/161295; checked
+  2026-09-26): cite it and state the ON/OFF exposure ratio α. Computing it, and any
+  trials correction, belongs to `hep-statistics`.
+
+This section is the single home for significance wording; other references point here.
+Astroparticle terms that are not about significance (exposure vs. livetime, composition
+language) are in `astroparticle-and-cosmic-ray-papers.md`.
+
+## Reporting limits and nulls
+
+The numbers (limits, intervals, significances) are hep-statistics'; the words are this skill's. One home: other
+references point here.
+
+| Situation | Write | Do not write |
+|---|---|---|
+| No excess | "No significant excess over the expected background is observed"; quote the largest local (and global) deviation | "no signal exists", "the model is excluded" (unless a limit says so) |
+| Observed vs. expected limit | both, with the expected median and its ±1σ and ±2σ bands; say which is stronger and by how much | an observed limit alone, or bands without saying they are the expected ones |
+| Confidence level | "95% CL upper limit" with the construction named (CLs, Feldman-Cousins, profile likelihood; asymptotic or toys) | "95% limit" with no level type or construction |
+| CLs | "CLs upper limit"; CLs is conservative by construction (it over-covers), so it is not a coverage statement (Junk 1999; Read 2002; see hep-statistics [Frequentist inference](../../hep-statistics/references/statistical-inference-for-physics.md#frequentist-inference)) | "excluded at 95% confidence" as if CLs were a frequentist coverage |
+| Bayesian | "95% credible upper limit" with the prior named | "confidence" for a credible interval |
+| One- vs. two-sided | state which; an upper limit is one-sided, a central interval two-sided; a switch decided from the data (flip-flopping) is named or avoided (Feldman-Cousins; Feldman & Cousins 1998, in the same hep-statistics reference) | an interval without its sidedness |
+| Significance of an excess | local and global, the look-elsewhere (trials) method named (Significance language above) | a bare "3σ" for a scan |
+| Parameter excluded | "values above X are excluded at 95% CL (CLs)", for the stated model and assumptions | "X is ruled out" without CL, model or assumptions |
+
+## Statistical and ML reporting language
+
+The physics significance-language table above (σ-based, "evidence"/"observation")
+doesn't transfer directly to statistics or ML writing, which has its own reporting
+conventions (see `statistics-and-ml-papers.md` for the venue/process context this
+phrasing sits inside):
+
+- **"Statistically significant" is not the same claim as "practically
+  meaningful."** A large sample size can make a tiny, unimportant effect reach
+  `p < 0.05`; state the effect size (not just the p-value) alongside any
+  significance claim, and say explicitly if a statistically significant effect is
+  too small to matter for the paper's actual conclusion.
+- **State the multiple-comparison correction applied**, if more than one
+  hypothesis/metric was tested (Bonferroni, Holm, false-discovery-rate/Benjamini-
+  Hochberg) — an uncorrected p-value reported alongside several other tests
+  overstates significance the same way an uncorrected local significance does in
+  physics (see the astroparticle pre-trial/post-trial convention above for the
+  direct analogue).
+- **Distinguish a confidence interval from a credible interval** explicitly when
+  reporting either — "95% CI" defaults to the frequentist reading unless the paper
+  is explicitly Bayesian, and conflating the two misstates what the interval
+  actually means (mirrors the frequentist/Bayesian distinction
+  `astroparticle-and-cosmic-ray-papers.md` and the physics literature draw for
+  intervals generally).
+- **Report variance across seeds/runs, not a single number**, for any ML result
+  claiming an improvement — "we observe a 1.2% improvement" with no variance
+  reported invites the same skepticism as an unstated systematic uncertainty in a
+  physics measurement. State how many runs/seeds and what the spread was.
+- **"Outperforms" is a comparison claim, not just a bigger number** — state
+  whether the comparison used a matched compute/tuning budget (see
+  `hep-ml`'s `../../hep-ml/references/ablation-and-design-review.md`); a claim of outperforming an
+  under-tuned baseline should be phrased accordingly, not as an unconditional win.
+
+## Sentence and paragraph shape
+
+- One idea per sentence; if a sentence needs more than one comma-separated
+  clause to state a single result, consider splitting it.
+- Topic-sentence-first paragraphs: state the paragraph's point in the first
+  sentence, then support it — physics referees skim, and a paragraph that
+  buries its conclusion in the last sentence is easy to misread.
+- Vary sentence length deliberately: a short sentence after several long ones
+  gives a result room to land ("The excess is not observed in data.").
+- Keep paragraphs to roughly 4-8 sentences in the main text; longer
+  paragraphs in a length-limited Letter format are a sign the paragraph is
+  doing two jobs and should split.
+
+## Common non-native-English pitfalls
+
+(Useful to check regardless of the author's first language — these show up
+across many drafts.)
+
+- **Article usage** ("a"/"the"/none): physics nouns for general categories
+  usually take no article ("Background is estimated from..." not "The
+  background is estimated..." when discussing backgrounds generally, but
+  "The background *in this analysis*..." when specific). When unsure, prefer
+  the more specific/definite reading if a specific instance is meant.
+- **"Respectively" misuse**: only use when there is a clear one-to-one
+  ordered correspondence already established in the same sentence.
+- **Confusing "which" and "that"**: "that" for restrictive clauses (no
+  comma), "which" for non-restrictive (with comma) — this changes meaning,
+  not just style, in technical writing.
+- **False friends in derived nouns**: "actual" (English: current/real) vs.
+  cognates in other languages that mean "current news"; "eventually"
+  (English: at some later point) vs. cognates meaning "possibly."
+- **Overuse of "in order to"**: "to" alone is almost always sufficient and
+  shorter.
+
+## Words and phrases to cut
+
+Common first-draft filler that rarely survives a careful edit — cutting these
+typically saves 10-20% of word count with no loss of meaning:
+
+- "It should be noted that...", "It is worth mentioning that..." → just state
+  the fact.
+- "In this paper, we...", repeated more than once → state it clearly once,
+  usually at the end of the introduction.
+- "Very," "quite," "fairly," "somewhat" as intensifiers on quantitative
+  claims → replace with the actual number, or cut.
+- "In order to" → "to".
+- "Due to the fact that" → "because".
+- Redundant pairs: "past history," "future plans," "completely eliminate,"
+  "each and every" → drop the redundant word.
+
+**Done when:** significance and limit wording follow the tables here, every hedge is quantified or removed, and status labels survive in text and captions.

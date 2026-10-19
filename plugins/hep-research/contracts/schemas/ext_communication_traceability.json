@@ -1,4 +1,4 @@
-{"$comment": "Owner: hep-communication. Communication extension under the capability communication:traceability-v1 (traceability_version 1.0.0): claims with evidence edges, document occurrences, source read events, declared evidence ledgers and support assessments. Structural only: relationships, status propagation and assessment currency are checked by contracts/communication.py; files, ledgers and manuscripts are resolved by contracts/communication_project.py. Never upgrades derivation or result status.",
+{"$comment": "Owner: hep-writing. Communication extension under the capability communication:traceability-v1 (traceability_version 1.0.0): claims with evidence edges, document occurrences, source read events, declared evidence ledgers and support assessments. Structural only: relationships, status propagation and assessment currency are checked by contracts/communication.py; files, ledgers and manuscripts are resolved by contracts/communication_project.py. Never upgrades derivation or result status.",
  "type": "object",
  "required": ["traceability_version", "scope", "claims", "sources_read", "evidence_ledgers", "limitations"],
  "properties": {

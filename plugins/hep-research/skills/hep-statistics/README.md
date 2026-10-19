@@ -21,7 +21,7 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 
 ## References
 
-`references/core-stats-guide.md` for choosing and reading the executable checks; `references/statistical-inference-for-physics.md` for checking a likelihood, test, interval or limit against the stated conclusion (its claim-calibration table is what hep-communication cites).
+`references/core-stats-guide.md` for choosing and reading the executable checks; `references/statistical-inference-for-physics.md` for checking a likelihood, test, interval or limit against the stated conclusion (its claim-calibration table is what hep-writing cites).
 
 ## Handoffs
 
@@ -30,7 +30,7 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 | Missing systematic or correlation evidence | hep-measurement or hep-detector |
 | Theory-uncertainty prescription | hep-theory |
 | Large toy campaigns, batch partitioning | hep-computing |
-| Reporting the result | hep-communication |
+| Reporting the result | hep-writing |
 | SBI, neural likelihoods | hep-ml |
 
 ## Tests and validation
