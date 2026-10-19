@@ -81,7 +81,8 @@ with these changes:
 A raw score is not a probability: calibrate it (Platt, isotonic, prior correction:
 [uncertainty-and-calibration.md](uncertainty-and-calibration.md)) or use it only through its rank and a threshold, and
 state which, since statistical combinations may assume one
-([statistical-tools.md](../../hep-statistics/references/statistical-tools.md)). Apply the model in the production event
+([statistical-tools.md](../../hep-statistics/references/statistical-tools.md)); the limit or fit itself is
+hep-statistics': load that skill. Apply the model in the production event
 loop with the training preprocessing (feature order, units, scaling constants), for example
 `TMVA::Experimental::RBDT`/`RReader` or an ONNX model inside `RDataFrame::Define()`; version weights, preprocessing and
 library together, and keep comparing training and deployment scores on a held-out sample.

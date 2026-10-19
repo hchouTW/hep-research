@@ -77,6 +77,35 @@ class ValidateDirectory(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(codes(out), ["artifacts_dir.empty"])
 
+    def _refer(self, ref: str):
+        run = json.loads((self.d / "run.json").read_text())
+        run["outputs"] = [{"ref": ref}]
+        (self.d / "run.json").write_text(json.dumps(run))
+
+    def test_referenced_sidecar_passes(self):
+        (self.d / "bdt_run").mkdir()
+        (self.d / "bdt_run" / "split_report.json").write_text(json.dumps({"status": "ok", "overlap": 0}))
+        for ref in ("bdt_run/split_report.json", f"{self.d.name}/bdt_run/split_report.json",
+                    str(self.d / "bdt_run" / "split_report.json")):
+            with self.subTest(ref=ref):
+                self._refer(ref)
+                rc, out = run(self.d)
+                self.assertEqual(rc, 0, out)
+                self.assertEqual(out["sidecars"], ["bdt_run/split_report.json"])
+
+    def test_unreferenced_sidecar_still_fails(self):
+        (self.d / "split_report.json").write_text(json.dumps({"status": "ok"}))
+        self._refer("other_report.json")
+        rc, out = run(self.d)
+        self.assertEqual(rc, 1)
+        self.assertIn("artifacts_dir.not_artifact", codes(out))
+
+    def test_referenced_non_json_file_has_no_warning(self):
+        (self.d / "model.onnx").write_bytes(b"\0")
+        self._refer("model.onnx")
+        rc, out = run(self.d)
+        self.assertEqual((rc, codes(out), out["sidecars"]), (0, [], ["model.onnx"]))
+
     def test_gate_refuses_a_directory(self):
         rc, out = run(self.d, "--gate", "publication")
         self.assertEqual(rc, 2)

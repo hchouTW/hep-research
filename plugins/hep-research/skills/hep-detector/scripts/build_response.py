@@ -106,7 +106,8 @@ def read_rows(path: Path) -> list[dict]:
     s = text.lstrip()
     try:
         if path.suffix == ".csv" or not s.startswith(("{", "[")):
-            rows = list(csv.DictReader(io.StringIO(text)))
+            # '#' lines are comments (a SYNTHETIC label header), as in the other hep-detector scripts
+            rows = list(csv.DictReader(line for line in io.StringIO(text) if not line.startswith("#")))
         elif s.startswith("["):
             rows = json.loads(text)
         else:

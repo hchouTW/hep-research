@@ -2,6 +2,12 @@
 
 Part of hep-statistics: load that skill first if it is not loaded (its step 1 validates the response).
 
+The unfolded spectrum is a `statistical-result`: write it from the `dagostini-unfold` output with
+`<plugin root>/skills/hep-statistics/scripts/result_artifact.py --cli-output <unfold.json> --paradigm likelihood-only
+--construction other --test-statistic none --poi unfolded_spectrum --label <label> --artifact-id <id> --out
+<artifacts_dir>/<name>.json` (it keeps estimate, sigma_total and the covariances), and keep scan, closure and coverage
+outputs outside `artifacts_dir`.
+
 This is the one place for unfolding methods in the plugin (ownership table in `docs/routing-contract.md`). The response
 object, forward folding of a prediction and the double-counting checks belong to hep-detector
 ([response and forward folding](../../hep-detector/references/response-and-forward-folding.md)); whether a

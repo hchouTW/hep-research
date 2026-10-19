@@ -17,6 +17,10 @@ not-converged -> failed, incomplete -> incomplete), needs one --prior PARAM=FORM
 max_treedepth_hits), writes priors, sampler and convergence (R-hat, bulk and tail ESS per parameter) and the posterior
 quantiles as results.<param>_q<p>, and refuses the frequentist fields (construction, test statistic, coverage).
 --paradigm likelihood-only writes construction and test statistic only when given.
+Numbers in the CLI output, and vectors or matrices of numbers, are copied into results (frequentist and
+likelihood-only); the --out folder is created. An unfolded spectrum (core/stats/unfolding_diagnostics.py
+dagostini-unfold): --paradigm likelihood-only --construction other --test-statistic none --poi unfolded_spectrum,
+which keeps estimate, sigma_total and the covariances.
 
 Usage:
   python3 result_artifact.py --cli-output OUT.json --poi mu --construction asymptotic --test-statistic q_mu_tilde \
@@ -110,6 +114,15 @@ def _bayesian(cli: dict, a: argparse.Namespace, ext: dict) -> None:
                       for q, v in (p.get("quantiles") or {}).items() if isinstance(v, dict) and isinstance(v.get("value"), (int, float))}
 
 
+def _numeric(v, depth: int = 0) -> bool:
+    """A number, or a non-empty vector or matrix of numbers (an unfolded spectrum, its sigma, its covariance)."""
+    if isinstance(v, bool):
+        return False
+    if isinstance(v, (int, float)):
+        return True
+    return depth < 2 and isinstance(v, list) and bool(v) and all(_numeric(x, depth + 1) for x in v)
+
+
 def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
     status = effective_status(cli, a)
     if a.coverage_check == "not-checked" and (a.coverage_value is not None or a.coverage_n_toys is not None):
@@ -159,7 +172,7 @@ def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
         else:
             ext["significance"] = {"local_p": tail["estimate"]}
     if a.paradigm != "bayesian":
-        ext["results"] = {k: v for k, v in cli.items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
+        ext["results"] = {k: v for k, v in cli.items() if _numeric(v)}
     ext["results"]["cli_status"] = status
     if "status" not in cli:
         ext["results"]["cli_status_assumed"] = status
@@ -208,7 +221,12 @@ def main(argv=None) -> int:
     if not rep.ok:
         print(json.dumps({"status": "invalid", "findings": rep.as_dict()["findings"]}, indent=1))
         return 1
-    Path(a.out).write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+    try:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+    except OSError as exc:
+        print(json.dumps({"status": "rejected", "error": f"cannot write {a.out}: {exc}"}))
+        return 2
     print(json.dumps({"status": "written", "out": a.out, "fit_status": doc["extension"]["fit_status"],
                       "labels": doc["status"], "findings": rep.as_dict()["findings"]}, indent=1))
     return 0 if effective_status(cli, a) == "ok" else 1

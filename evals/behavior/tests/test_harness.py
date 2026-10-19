@@ -177,6 +177,47 @@ class TraceAndGraders(unittest.TestCase):
         self.assertFalse(graders.grade_case(case, graders.GradeContext(trace=merged))["pass"],
                          "turn 0 is graded on turn 0 only")
 
+    @unittest.skipIf(ROOT is None, "plugin not found")
+    def test_artifact_valid_uses_the_folder_check(self):
+        import shutil
+        spec = {"grader": "artifact_valid", "glob": "hep-research-artifacts/**/*.json", "min_count": 1}
+        t = stream(("text", "done"))
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = Path(tmp)
+            self.assertEqual(grade(t, spec, ws=ws)[0].passed, False)  # no folder: 0 artifacts
+            art = ws / "hep-research-artifacts"
+            art.mkdir()
+            shutil.copy(ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "computational_run.json", art / "run.json")
+            self.assertTrue(grade(t, spec, ws=ws)[0].passed)
+            (art / "split_report.json").write_text(json.dumps({"status": "ok"}))
+            r = grade(t, spec, ws=ws)[0]
+            self.assertFalse(r.passed)
+            self.assertIn("artifacts_dir.not_artifact", r.detail)
+            run = json.loads((art / "run.json").read_text())
+            run["outputs"] = [{"ref": "split_report.json"}]  # now a sidecar the artifact refers to
+            (art / "run.json").write_text(json.dumps(run))
+            self.assertTrue(grade(t, spec, ws=ws)[0].passed)
+
+    def test_outside_writes_are_attributed_by_name(self):
+        import time
+        with tempfile.TemporaryDirectory() as tmp:
+            root, t0 = Path(tmp), time.time() - 1
+            (root / "l3-ml-scratch").mkdir()
+            (root / "unrelated").mkdir()
+            found = runner.outside_writes([root], t0, f"mkdir -p {root}/l3-ml-scratch && cd {root}/l3-ml-scratch")
+            self.assertEqual([Path(f).name for f in found], ["l3-ml-scratch"])  # not the entry this run never names
+            self.assertEqual(runner.outside_writes([root], time.time() + 60, str(root / "l3-ml-scratch")), [])
+
+    def test_one_campaign_per_run_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            held = runner._lock(d)
+            with self.assertRaises(runner.CampaignLocked):
+                runner._lock(d)  # this process is alive
+            held.unlink()
+            (d / ".campaign.lock").write_text("999999999")  # a dead pid: stale, taken over
+            runner._lock(d).unlink()
+
     def test_broken_grader_is_unverified_not_pass(self):
         r = grade(stream(), {"grader": "ordered", "first": {"bogus": 1}, "then": {"text": True}})[0]
         self.assertIsNone(r.passed)

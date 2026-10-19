@@ -38,7 +38,7 @@ A handed-over artifact, even for one number: first `contracts/validate.py <file>
 | MCMC posterior | user's sampler, `sc/bayes_diagnostics.py diagnose`, then `result_artifact.py --paradigm bayesian` | SBC: `sc/bayes_calibration.py sbc` |
 | Fit to published points, covariance | `sc/covariance_fit.py fit` (line, exponential, broken power law, plug-in with `--allow-plugin`) | break position: `break-scan` |
 | Ratio with covariance | `cs/statistical_toys.py ratio-cov` (counts <= 1e5) | counts >= 1e4: `ratio-cov-analytic` |
-| Write the result | `sc/result_artifact.py` | then `contracts/validate.py --gate publication` |
+| Write the result (also unfolded) | `sc/result_artifact.py` | then `contracts/validate.py --gate publication` |
 
 ## Workflow
 

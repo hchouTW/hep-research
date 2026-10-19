@@ -25,12 +25,12 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 191852,
+   "bytes": 192061,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 184468,
+   "bytes": 184945,
    "uncited": 0
   },
   "hep-theory": {
@@ -2253,7 +2253,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "11f66a20 2026-10-17"
+   "last_commit": "894eec20 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -3079,8 +3079,8 @@
   {
    "path": "skills/hep-ml/references/ml-analysis.md",
    "owner": "hep-ml",
-   "bytes": 7306,
-   "lines": 86,
+   "bytes": 7454,
+   "lines": 88,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -3132,8 +3132,8 @@
   {
    "path": "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
    "owner": "hep-ml",
-   "bytes": 14636,
-   "lines": 196,
+   "bytes": 14697,
+   "lines": 197,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -3710,8 +3710,8 @@
   {
    "path": "skills/hep-statistics/references/unfolding.md",
    "owner": "hep-statistics",
-   "bytes": 7452,
-   "lines": 96,
+   "bytes": 7929,
+   "lines": 102,
    "linked_from_skill_md": true,
    "cited_by": [
     "core/stats/unfolding_diagnostics.py",
@@ -3746,7 +3746,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "0f4d7c4c 2026-10-17"
+   "last_commit": "894eec20 2026-10-19"
   },
   {
    "path": "skills/hep-theory/references/amplitudes-and-widths.md",

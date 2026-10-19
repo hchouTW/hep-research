@@ -5,6 +5,18 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **The L3 chains' remaining failures.**
+  - `skills/hep-statistics/scripts/result_artifact.py` copies vectors and matrices of numbers into `results`, so an
+    unfolded spectrum keeps its estimate, sigma and covariances. It also creates the `--out` folder: before, a missing
+    folder raised a traceback. `references/unfolding.md` gives the command for an unfolded spectrum
+    (`--paradigm likelihood-only --construction other --test-statistic none`). In the L3 unfold runs, agents left the
+    result out, saying there was no artifact type for it.
+  - `contracts/validate.py` on a directory accepts a file that an artifact there refers to by path, such as the
+    `split_report.json` of `train_bdt.py`. The file is listed under `sidecars`. Before, such a file was an error.
+  - hep-ml's references say to load hep-statistics for a limit, fit or significance with the model. Before, they
+    linked straight into hep-statistics' references.
+  - `skills/hep-detector/scripts/build_response.py` skips `#` comment lines in a CSV, as the other hep-detector
+    scripts do. Before, every L3 unfold run had to strip a `# SYNTHETIC` header first.
 - **Handed-over artifacts are validated on the quick path too, and unfolding loads hep-statistics.**
   - hep-statistics' Step 0 validates a handed-over artifact (`contracts/validate.py <file>`) before running a row's
     tool, even for one number. In the L3 fault cases Haiku took the quick path and skipped step 1's validation.

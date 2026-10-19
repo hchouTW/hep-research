@@ -158,6 +158,43 @@ def contamination(tr: Trace, arm: str | None) -> str | None:
     return None
 
 
+def outside_roots(plugin_root: Path) -> list[Path]:
+    """Folders whose new top-level entries count as writes outside the workspace: the home folder, ~/hep-work,
+    ~/.venvs and the repository holding the plugin (where earlier runs left scratch folders and virtual environments)."""
+    home = Path.home()
+    roots = [home, home / "hep-work", home / ".venvs"]
+    repo = plugin_root.resolve().parents[1]
+    if (repo / ".git").exists():
+        roots.append(repo)
+    return [r for r in roots if r.is_dir()]
+
+
+def outside_writes(roots: list[Path], since: float, text: str) -> list[str]:
+    """New top-level entries of roots created at or after `since` that this run names (in its commands or tool
+    inputs, so concurrent runs are not blamed for each other's files); hidden entries of the home folder are skipped.
+    Paths are written with ~ for the home folder."""
+    home = Path.home()
+    found = []
+    for root in roots:
+        try:
+            entries = list(root.iterdir())
+        except OSError:
+            continue
+        for e in entries:
+            if root == home and e.name.startswith("."):
+                continue
+            try:
+                st = e.lstat()
+            except OSError:
+                continue
+            born = getattr(st, "st_birthtime", st.st_ctime)
+            rel = e.relative_to(home) if e.is_relative_to(home) else None
+            if born >= since and (str(e) in text or (rel is not None and
+                                                     (f"~/{rel}" in text or f"$HOME/{rel}" in text))):
+                found.append(str(e).replace(str(home), "~", 1))
+    return sorted(set(found))
+
+
 def run_one(case: dict, arm: str, model: str, repeat: int, run_dir: Path, plugin_root: Path, opts: dict) -> dict:
     rdir = run_dir / case["id"] / arm / model.replace("/", "_") / f"r{repeat}"
     if (rdir / "grade.json").exists() and not opts.get("rerun"):
@@ -176,6 +213,7 @@ def run_one(case: dict, arm: str, model: str, repeat: int, run_dir: Path, plugin
         env["CLAUDE_CONFIG_DIR"] = str(opts["config_dir"])
     sdir = session_dir(ws, opts)
     sdir_existed = sdir.exists()
+    started = time.time()
     for t_no, prompt in enumerate(prompts):
         cmd = host_command(prompt, model, arm, case, plugin_root, opts, resume=session)
         t0 = time.time()
@@ -196,6 +234,8 @@ def run_one(case: dict, arm: str, model: str, repeat: int, run_dir: Path, plugin
     # the CLI keeps a folder per working directory; remove the one this run's workspace created
     if not sdir_existed and sdir.name.endswith("-workspace") and sdir.is_dir():
         shutil.rmtree(sdir, ignore_errors=True)
+    text = "\n".join(p.read_text(encoding="utf-8", errors="replace") for p in rdir.glob("transcript.t*.jsonl"))
+    meta["outside_writes"] = outside_writes(outside_roots(plugin_root), started - 1, text)
     meta["finished"] = dt.datetime.now(dt.timezone.utc).isoformat()
     (rdir / "meta.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
     return grade_run(rdir, case, plugin_root)
@@ -225,6 +265,7 @@ def grade_run(rdir: Path, case: dict, plugin_root: Path) -> dict:
            "loaded_expected": bool(expected and expected in tr.skills),
            "host_error": host_failed, "turn_limit": turn_limit, "cost_usd": tr.meta.get("total_cost_usd") or 0.0,
            "cli_version": tr.meta.get("cli_version"), "contaminated": contamination(tr, meta.get("arm")),
+           "outside_writes": meta.get("outside_writes"),
            "trace": tr.summary(), **verdict}
     if host_failed:
         out["pass"] = False
@@ -261,10 +302,43 @@ def _git(plugin_root: Path) -> dict:
     return {"commit": g("rev-parse", "HEAD") or None, "dirty": bool(g("status", "--porcelain", "--", "."))}
 
 
+class CampaignLocked(RuntimeError):
+    """Another live campaign is writing to the same run directory."""
+
+
+def _lock(run_dir: Path) -> Path:
+    """Take run_dir/.campaign.lock (pid inside), or raise CampaignLocked while the process that holds it is alive.
+    Two campaigns in one folder delete and regrade each other's runs (2026-10-19), so the second is refused."""
+    lock = run_dir / ".campaign.lock"
+    for _ in range(2):
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                pid = int(lock.read_text().strip() or 0)
+                os.kill(pid, 0)
+            except (ValueError, ProcessLookupError, OSError):
+                lock.unlink(missing_ok=True)  # stale: its process is gone
+                continue
+            raise CampaignLocked(f"{run_dir} is in use by campaign pid {pid}; wait for it or pick another --out")
+        with os.fdopen(fd, "w") as fh:
+            fh.write(str(os.getpid()))
+        return lock
+    raise CampaignLocked(f"cannot take {lock}")
+
+
 def run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dict, jobs: int = 4) -> list[dict]:
     """Run the matrix. No new run starts once opts["budget_usd"] is spent or a run is contaminated; the stop and
-    the number of runs completed are recorded in manifest.json."""
+    the number of runs completed are recorded in manifest.json. One campaign at a time per run directory."""
     run_dir.mkdir(parents=True, exist_ok=True)
+    held = _lock(run_dir)
+    try:
+        return _run_matrix(matrix, run_dir, plugin_root, opts, jobs)
+    finally:
+        held.unlink(missing_ok=True)
+
+
+def _run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dict, jobs: int) -> list[dict]:
     manifest = {"created": dt.datetime.now(dt.timezone.utc).isoformat(), "plugin": plugin_fingerprint(plugin_root),
                 "plugin_git": _git(plugin_root), "isolation": opts.get("isolation", "setting-sources"),
                 "opts": {k: v for k, v in opts.items() if k not in ("claude_bin", "config_dir", "holdout_record")},

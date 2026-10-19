@@ -425,20 +425,30 @@ def g_ws_exists(spec, ctx):
 
 @grader("artifact_valid")
 def g_artifact_valid(spec, ctx):
-    files = _ws_files(ctx, spec.get("glob", "hep-research-artifacts/**/*.json"))
-    if files is None:
+    """The plugin's own check of the artifacts folder (contracts/validate.py on the directory) passes: every JSON file
+    is a valid artifact or a sidecar an artifact refers to, and at least min_count artifacts are there. The folder is
+    the glob's leading part without wildcards."""
+    if ctx.workspace is None or not ctx.workspace.exists():
         return None, "no workspace"
     if ctx.plugin_root is None:
         return None, "no plugin root"
-    if len(files) < int(spec.get("min_count", 1)):
-        return False, f"{len(files)} artifact(s) found"
-    bad = []
-    for f in files:
-        p = subprocess.run([sys.executable, str(ctx.plugin_root / "contracts" / "validate.py"), str(f)],
-                           capture_output=True, text=True, timeout=120)
-        if p.returncode != 0:
-            bad.append(f"{f.name}: exit {p.returncode}")
-    return (not bad), "; ".join(bad[:4]) or f"{len(files)} valid"
+    parts = Path(spec.get("glob", "hep-research-artifacts/**/*.json")).parts
+    root = ctx.workspace.joinpath(*[x for x in parts[:next((k for k, x in enumerate(parts) if "*" in x), len(parts))]])
+    n_min = int(spec.get("min_count", 1))
+    if not root.is_dir():
+        return n_min <= 0, "0 artifact(s) found"
+    p = subprocess.run([sys.executable, str(ctx.plugin_root / "contracts" / "validate.py"), str(root)],
+                       capture_output=True, text=True, timeout=300)
+    try:
+        out = json.loads(p.stdout)
+    except ValueError:
+        return False, f"validate.py exit {p.returncode}, unreadable report"
+    arts = out.get("files", [])
+    if len(arts) < n_min:
+        return False, f"{len(arts)} artifact(s) found"
+    bad = [f"{f['path']}: {f['code']}" for f in out.get("findings", []) if f.get("severity") == "error"]
+    bad += [f"{e['path']}: invalid" for e in arts if not e.get("ok")]
+    return p.returncode == 0 and not bad, "; ".join(bad[:4]) or f"{len(arts)} valid, {len(out.get('sidecars', []))} sidecar(s)"
 
 
 def _json_get(obj: Any, dotted: str):
