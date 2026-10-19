@@ -129,8 +129,17 @@ class Backend:
             code, out, err = self.fit(d, n=16, event_number="run", folds=2, validation_fraction=0.01)
             self.assertEqual(code, 2, err)
             self.assertEqual(out["status"], "rejected")
-            self.assertIn("validation part of fold", out["error"])
+            self.assertIn("no fold has a validation part", out["error"])
             self.assertFalse(list(Path(d, "out").glob("model_fold*")))
+
+    def test_one_empty_validation_part_still_trains(self):
+        """SYNTHETIC, runs 7, 8, 9 keyed by run with 3 folds (run mod 3): validation_fraction 0.67 sends only run 8
+        to validation (sha256 0.666; runs 7 and 9 hash to 0.944 and 0.679), so fold 2's validation part is empty and
+        folds 0 and 1 choose the hyperparameters. This trains, as before #153 (which refused it)."""
+        with tempfile.TemporaryDirectory() as d:
+            code, out, err = self.fit(d, n=60, event_number="run", folds=3, validation_fraction=0.67)
+            self.assertEqual(code, 0, (out, err))
+            self.assertEqual(len(list(Path(d, "out").glob("model_fold*"))), 3 if self.backend == "xgboost" else 0)
 
     def test_auc_of_two_gaussians(self):
         with tempfile.TemporaryDirectory() as d:
