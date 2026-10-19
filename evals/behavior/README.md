@@ -212,6 +212,21 @@ response reference and `unfolding.md` say to load hep-statistics rather than wor
 Against v4: Haiku L3 pass +14 / -3 (McNemar p = 0.013), validator +8 / -0 (p = 0.008), every fault case passes;
 Sonnet L3 pass +6 / -1 (p = 0.13), the unfold hop +5 / -0 (p = 0.06).
 
+**L3 remaining chains (2026-10-19, PR #150)**, paired against #149 (`l3-fu-*`, regraded with the directory-check
+grader; no outcome changed). `result_artifact.py` writes an unfolded spectrum with its vectors, the folder check
+accepts sidecars an artifact refers to, hep-ml's references load hep-statistics, and `build_response.py` skips `#`
+lines.
+
+| Model | L3 pass: #149 → #150 | Chain cases (unfold, ML) | Other L3 cases | Runs writing outside the workspace | Cost |
+|---|---|---|---|---|---|
+| claude-sonnet-5-5 | 43 → 46 of 48 | 7 → 10 of 12 (+4 / -1, p = 0.38) | 36 → 36 of 36 | 0 | $6.08 |
+| claude-haiku-5-5 | 39 → 38 of 48 | 6 → 7 of 12 (+3 / -4, p = 1) | 33 → 31 of 36 | 0 | $0.57 |
+
+Sonnet passes every unfold run and 4 of 6 ML runs. Haiku is flat: in the ML case it still stops after hep-ml in 3 of 6
+runs, and its theory comparison varies (3 → 1 of 6; that path did not change). A first measurement of this PR ran
+twice at once into the same folders and is set aside (`l3-rem-*-collided`, $15.03); the runner now refuses a second
+campaign in a folder that is in use.
+
 `l3-response-unfold-report` asked for `min_fraction` 0.67 of three hops, which `ceil` made all three; it is now 0.66,
 two hops, as the grader's docstring intends. All L3 runs (before, after, v1-v3) are regraded with it; no earlier
 pass or fail changed.
