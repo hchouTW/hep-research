@@ -237,7 +237,21 @@ significance, even when hep-ml was loaded first.
 | claude-sonnet-5-5 | 6 of 12 (#147-#150) → 6 of 6 | 2 of 3 → 2 of 6 | 2 of 3 → 4 of 6 | $3.23 |
 
 Every Sonnet failure, and none of Haiku's, is the folder check: the agent writes `train_bdt.py`'s fold models and
-configs into `artifacts_dir` (5 of 12 runs, 2 of 6 at #150, p = 0.57). That path did not change; it is the next fix.
+configs into `artifacts_dir` (6 of 12 runs, 2 of 6 at #150, p = 0.44). That path did not change; it is the next fix.
+
+**ML run outputs (2026-10-19, PR #152)**, `l3-ml-to-inference` only, 6 repeats per arm, paired against #151
+(`l3-mlh-*`). `write_ml_artifact.py` lists `train_bdt.py`'s fold models as outputs, and hep-ml's step 3 sends configs,
+run folders and raw tool outputs to a work folder.
+
+| Model | Runs failing the folder check | Forced pass | Natural pass | Cost |
+|---|---|---|---|---|
+| claude-sonnet-5-5 | 6 of 12 → 0 of 12 (Fisher p = 0.007) | 2 of 6 → 6 of 6 (paired +4 / -0, p = 0.13) | 4 of 6 → 4 of 6 | $2.64 |
+| claude-haiku-5-5 | 0 of 12 → 0 of 12 | 5 of 6 → 2 of 6 (paired +0 / -3, p = 0.25) | 4 of 6 → 5 of 6 | $0.24 |
+
+Sonnet's two remaining failures skip the grouped-split scripts. Haiku's forced arm loaded hep-statistics in 3 of 6
+runs (5 of 6 at #151; 8 of 12 over both, 1 of 12 before #151). The three that did not each kept their files in
+`ml-work/` and then failed as Haiku did before #151: one computed the CLs limit in its own script, one stopped asking
+for inputs, and one stopped when `train_bdt.py` gave NaN metrics on the 16-event sample.
 
 `l3-response-unfold-report` asked for `min_fraction` 0.67 of three hops, which `ceil` made all three; it is now 0.66,
 two hops, as the grader's docstring intends. All L3 runs (before, after, v1-v3) are regraded with it; no earlier
