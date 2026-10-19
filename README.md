@@ -2,7 +2,7 @@
 
 **hep-research** is a Claude Code and Codex plugin for experimental and theoretical high-energy physics research.
 - **Eight core skills:** `hep-measurement`, `hep-detector`, `hep-theory`, `hep-statistics`, `hep-computing`, `hep-ml`,
-  `hep-literature` and `hep-writing`.
+  `hep-citations` and `hep-authoring`.
 - **Optional profiles** for experiments and theory domains.
 - **An opt-in cross-artifact analysis check.** It runs in shadow mode and is advisory only.
 

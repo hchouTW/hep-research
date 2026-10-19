@@ -38,7 +38,7 @@ Start with `references/ml-analysis.md` for physics work and `references/deep-lea
 | Pipeline, I/O, batch training jobs | hep-computing |
 | Selection design, normalization, systematics plan around a score | hep-measurement |
 | Scale factors, tag-and-probe, fast-simulation validation against full simulation | hep-detector |
-| Writing up results and figures | hep-writing |
+| Writing up results and figures | hep-authoring |
 
 ## Tests and validation
 

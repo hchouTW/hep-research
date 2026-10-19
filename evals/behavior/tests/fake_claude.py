@@ -20,7 +20,7 @@ from pathlib import Path
 
 KEYWORDS = [("limit|CLs|interval|combine|fit", "hep-statistics"), ("efficien|tag-and-probe|response|migration", "hep-detector"),
             ("correction chain|spec|blinding", "hep-measurement"), ("BDT|classifier|split", "hep-ml"),
-            ("cross section|dsigma|decay|envelope", "hep-theory"), ("citation", "hep-literature"), ("abstract|blog", "hep-writing"),
+            ("cross section|dsigma|decay|envelope", "hep-theory"), ("citation", "hep-citations"), ("abstract|blog", "hep-authoring"),
             ("CMake|chunk|script", "hep-computing")]
 
 

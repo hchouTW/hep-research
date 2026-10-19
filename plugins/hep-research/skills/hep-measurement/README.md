@@ -31,7 +31,7 @@ Start with `references/hep-measurement-guide.md`, which routes to one reference 
 | Prediction to compare against | hep-theory |
 | Classifier or BDT training, working point | hep-ml |
 | Pipeline code, partition and merge, run manifests | hep-computing |
-| Write-up | hep-writing |
+| Write-up | hep-authoring |
 
 ## Tests and validation
 

@@ -2,7 +2,7 @@
 """Make a scratch copy of the plugin with the two halves of the communication split renamed (plan 10.2, G14).
 
 The live routing eval compares candidate names (for example hep-sources / hep-manuscript) with the working names
-hep-literature / hep-writing. This script copies the plugin to --out, renames the two skill folders and their test
+hep-citations / hep-authoring. This script copies the plugin to --out, renames the two skill folders and their test
 folders, rewrites every maintained text file (SKILL.md names and descriptions, references, the routing table and
 cases, the skill-name contract, docs, profiles, fixtures), runs the static routing check on the copy, and writes the
 ids of the cases that involve either skill to <out>/name-variant-ids.txt. The repository is never modified; history
@@ -27,7 +27,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[1] / "plugins" / "hep-research"
-OLD = ("hep-literature", "hep-writing")
+OLD = ("hep-citations", "hep-authoring")
 NAME_RE = re.compile(r"^hep-[a-z]+$")
 HISTORY = ("CHANGELOG.md", "VALIDATION.md", "release-manifests/")
 TEXT = {".md", ".py", ".json", ".txt", ".toml", ".tex", ".sh", ".bib", ".yml", ".yaml", ".csv", ".cfg"}
@@ -54,8 +54,8 @@ def involved_ids(cases: list, names: set) -> list[str]:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], epilog=__doc__.split("\n\n", 1)[1],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--literature", required=True, help="new name of hep-literature")
-    ap.add_argument("--writing", required=True, help="new name of hep-writing")
+    ap.add_argument("--literature", required=True, help="new name of hep-citations")
+    ap.add_argument("--writing", required=True, help="new name of hep-authoring")
     ap.add_argument("--out", type=Path, required=True, help="new folder for the copy (must not exist)")
     ap.add_argument("--plugin", type=Path, default=PLUGIN)
     try:

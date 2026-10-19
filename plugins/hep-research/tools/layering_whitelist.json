@@ -1,6 +1,6 @@
 [
  {
-  "file": "skills/hep-writing/references/latex-mechanics-and-tooling.md",
+  "file": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
   "pattern": "^AMS$",
   "reason": "the only AMS in this LaTeX reference is the American Mathematical Society (amsmath/amssymb), not an experiment"
  }

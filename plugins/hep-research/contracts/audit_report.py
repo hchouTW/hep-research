@@ -1,7 +1,7 @@
 """Shared report shape, Markdown rendering and CLI plumbing of the communication audits and the literature import.
 
-Used by the scripts of hep-writing (communication audits) and hep-literature (manage_literature.py); steward:
-hep-writing. It lives in contracts/, not core/, because it reads contracts.communication_project (core imports only
+Used by the scripts of hep-authoring (communication audits) and hep-citations (manage_literature.py); steward:
+hep-authoring. It lives in contracts/, not core/, because it reads contracts.communication_project (core imports only
 core; tools/check_layering.py).
 
 Every tool emits one report object: report_version 1.0.0, tool, scope, status (pass, fail, incomplete, input-error),

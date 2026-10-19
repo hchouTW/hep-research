@@ -71,7 +71,7 @@ Scripts in `<plugin root>/skills/hep-computing/scripts/` (read `--help` first; e
 | Physics meaning of a numerical result | hep-theory / hep-measurement | `computational-run` |
 | Statistical interpretation | hep-statistics | `computational-run` |
 | Model training issues | hep-ml | `ml-artifact` |
-| Reports, figures, write-ups | hep-writing | `computational-run` |
+| Reports, figures, write-ups | hep-authoring | `computational-run` |
 
 <!-- example: routing -->
 - "Memory leak in my AMS-02 ntuple script" → this skill; the AMS profile is read only if the data format matters.

@@ -1,6 +1,6 @@
 # Live routing evaluation
 
-The split of hep-communication into hep-literature and hep-writing changes 40 expected owners and adds 10
+The split of hep-communication into hep-citations and hep-authoring changes 40 expected owners and adds 10
 cases; the committed baseline keeps the old names. The rerun is prepared, not run: see
 [the split eval plan](../split-communication-eval-plan.md).
 

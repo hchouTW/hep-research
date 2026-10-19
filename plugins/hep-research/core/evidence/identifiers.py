@@ -1,7 +1,7 @@
 """Stable literature identifiers: normalized DOI, arXiv id (version kept apart) and INSPIRE record id.
 
 One paper, one entry: identifiers decide (DOI, else arXiv id without version, else INSPIRE record id), never citation
-keys or titles. Used by hep-literature (the literature-record import) and hep-writing (the citation check of a
+keys or titles. Used by hep-citations (the literature-record import) and hep-authoring (the citation check of a
 draft), so both read a source's identifiers the same way. Library module; standard library only.
 """
 from __future__ import annotations

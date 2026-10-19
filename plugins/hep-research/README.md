@@ -23,8 +23,8 @@ labeled synthetic in file names and metadata. What is and is not validated is li
 | `hep-statistics` | an inference: likelihoods, fits, intervals, limits, unfolding, combinations, comparisons with data |
 | `hep-computing` | working, reproducible software and its execution, including task files for coding agents |
 | `hep-ml` | a machine-learning model or study for physics (PyTorch) |
-| `hep-literature` | answers from cited sources: what a paper or experiment published, the latest result, citation verification, literature records and matrices |
-| `hep-writing` | papers, figures, diagrams, talks, referee reports, claims traced to results and sources; every citation from a literature record |
+| `hep-citations` | answers from cited sources: what a paper or experiment published, the latest result, citation verification, literature records and matrices |
+| `hep-authoring` | papers, figures, diagrams, talks, referee reports, claims traced to results and sources; every citation from a literature record |
 
 Each skill folder under `skills/` has a `README.md` (purpose, folder map, scripts, references, handoffs, tests); `SKILL.md` is the entry point the host loads. Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
 from are written as JSON artifacts in your project's `artifacts_dir` (default `./hep-research-artifacts/`).

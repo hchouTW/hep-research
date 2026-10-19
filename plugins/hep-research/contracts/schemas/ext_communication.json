@@ -1,4 +1,4 @@
-{"$comment": "Owner: hep-writing. Legacy communication extension (claims with result_ref and a scalar or array status). Never upgrades derivation or result status. The richer traceability format is selected by the capability communication:traceability-v1 (ext_communication_traceability.json).",
+{"$comment": "Owner: hep-authoring. Legacy communication extension (claims with result_ref and a scalar or array status). Never upgrades derivation or result status. The richer traceability format is selected by the capability communication:traceability-v1 (ext_communication_traceability.json).",
  "type": "object",
  "required": ["claims", "sources_read", "limitations"],
  "properties": {

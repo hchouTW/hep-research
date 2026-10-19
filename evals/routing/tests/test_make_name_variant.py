@@ -16,8 +16,8 @@ import run_routing_eval as rre  # noqa: E402
 
 class Rename(unittest.TestCase):
     def test_names_and_underscored_names_only_as_whole_words(self):
-        m = {"hep-literature": "hep-sources", "hep-writing": "hep-manuscript"}
-        text = "hep-literature, `hep-writing`; tests/skills/hep_writing/x.py; hep-literature-guide; xhep-writing"
+        m = {"hep-citations": "hep-sources", "hep-authoring": "hep-manuscript"}
+        text = "hep-citations, `hep-authoring`; tests/skills/hep_authoring/x.py; hep-literature-guide; xhep-writing"
         self.assertEqual(mnv.rename_text(text, m),
                          "hep-sources, `hep-manuscript`; tests/skills/hep_manuscript/x.py; hep-literature-guide; xhep-writing")
 
@@ -48,7 +48,7 @@ class Rename(unittest.TestCase):
             code, rep = self.run_main("--literature", "hep-sources", "--writing", "hep-manuscript", "--out", str(out))
             self.assertEqual(code, 0, rep)
             self.assertTrue((out / "skills" / "hep-sources" / "SKILL.md").is_file())
-            self.assertFalse((out / "skills" / "hep-writing").exists())
+            self.assertFalse((out / "skills" / "hep-authoring").exists())
             self.assertTrue((out / "tests" / "skills" / "hep_manuscript").is_dir())
             self.assertIn("name: hep-manuscript", (out / "skills" / "hep-manuscript" / "SKILL.md").read_text(encoding="utf-8"))
             self.assertGreater(rep["cases_involving_the_skills"], 40)

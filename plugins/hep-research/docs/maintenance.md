@@ -74,8 +74,8 @@ sections of their primary reference (`hep-detector`: section 11 of the principle
 "Skill scripts" in the core/stats guide; `hep-computing`: "Scripts" in the engineering playbook); they now measure
 6,566, 7,545 and 7,598 bytes. On 2026-10-17 (upgrade batch 0b) the communication skill measured 9,322 bytes before it
 was split. Measured on 2026-10-19 (split of the communication skill, `tools/measure_entrypoints.py`):
-hep-computing 9,366, hep-detector 9,512, hep-literature 8,693, hep-measurement 9,138, hep-ml 8,543,
-hep-statistics 10,410, hep-theory 9,166, hep-writing 8,347 bytes. Keep new material in those index sections, not in `SKILL.md`. A change to what a skill
+hep-computing 9,366, hep-detector 9,512, hep-citations 8,693, hep-measurement 9,138, hep-ml 8,543,
+hep-statistics 10,410, hep-theory 9,166, hep-authoring 8,347 bytes. Keep new material in those index sections, not in `SKILL.md`. A change to what a skill
 reads before it acts needs the routing checks (`check_routing_static.py`, `check_ownership.py`) and a live routing
 rerun of the cases that involve the skill before it is merged (VALIDATION SKILL-TRIM shows the shape of that record).
 

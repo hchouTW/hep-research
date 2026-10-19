@@ -16,7 +16,7 @@ Chain:
    saved RooFitResult; without it the RooFit step exits 3 (missing dependency) and the rest completes.
 4. result_artifact.py writes the statistical-result (signal strength); a binned dataset-record holds the selected
    mass spectrum.
-5. render_results.py (hep-writing, Com7) writes the macros, the result table and a one-bin dataset-record of
+5. render_results.py (hep-authoring, Com7) writes the macros, the result table and a one-bin dataset-record of
    mu; a draft (draft/main.tex) uses only the macros; check_manuscript.py --numbers checks the draft.
 6. hepdata_export.py writes the HEPData tables from both records; their values are compared with the artifacts.
 results.json holds only environment-independent numbers; the RooFit and LaTeX outcomes, which vary with the
@@ -50,8 +50,8 @@ from contracts.validate import validate_artifact  # noqa: E402
 SC = {"bdt": PLUGIN / "skills/hep-ml/scripts/train_bdt.py", "fit": PLUGIN / "core/stats/template_fit.py",
       "result": PLUGIN / "skills/hep-statistics/scripts/result_artifact.py",
       "roofit": PLUGIN / "skills/hep-statistics/scripts/roofit_fit_check.py",
-      "render": PLUGIN / "skills/hep-writing/scripts/render_results.py",
-      "manuscript": PLUGIN / "skills/hep-writing/scripts/check_manuscript.py",
+      "render": PLUGIN / "skills/hep-authoring/scripts/render_results.py",
+      "manuscript": PLUGIN / "skills/hep-authoring/scripts/check_manuscript.py",
       "hepdata": PLUGIN / "adapters/hepdata/assets/hepdata_export.py"}
 D = (1.2, 0.8)  # class separation of the two features (in units of their width)
 MASS_EDGES = np.linspace(100.0, 150.0, 26)

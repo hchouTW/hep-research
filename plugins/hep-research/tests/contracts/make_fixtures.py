@@ -189,7 +189,7 @@ def communication_rich(**extra):
                     [edge("ev:C2-b", "artifacts/syn.json")]),
               claim("claim:C3", "The synthetic illustration is compatible with the ratio (synthetic fixture).", "comparison",
                     ["synthetic", "unvalidated"], [edge("ev:C3-a", "artifacts/obs.json"), edge("ev:C3-b", "artifacts/syn.json", "qualifies")])]
-    doc = envelope("communication", {}, "hep-writing", contract_version=CONTRACTS_VERSION,
+    doc = envelope("communication", {}, "hep-authoring", contract_version=CONTRACTS_VERSION,
                    versions={"plugin": "0.6.12", "contracts": CONTRACTS_VERSION, "profiles": {}},
                    required_capabilities=["communication:traceability-v1"], inputs=inputs)
     for c in claims:
@@ -232,7 +232,7 @@ def literature_record(**extra):
            "notices": [], "relations": [], "proposed_merges": [], "flags": [],
            "verification": {"online": "not-performed", "note": "SYNTHETIC fixture"}}
     ext.update(extra)
-    return envelope("literature-record", ext, "hep-literature", status=("synthetic", "user-supplied"),
+    return envelope("literature-record", ext, "hep-citations", status=("synthetic", "user-supplied"),
                     contract_version=CONTRACTS_VERSION,
                     versions={"plugin": "0.15.0", "contracts": CONTRACTS_VERSION, "profiles": {}})
 
@@ -368,7 +368,7 @@ VALID = {
                                                              "output_hashes": {}}, "hep-computing"),
     "communication.json": envelope("communication", {"claims": [{"text": "placeholder", "result_ref": "x.json", "status": "synthetic"}],
                                                      "sources_read": [{"id": "user:S1", "level": "full-text"}],
-                                                     "limitations": ["fixture"]}, "hep-writing"),
+                                                     "limitations": ["fixture"]}, "hep-authoring"),
     "communication_traceability.json": communication_rich(),
     "literature_record.json": literature_record(),
     "response_v24.json": response_v24(),

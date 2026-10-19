@@ -1,6 +1,6 @@
-"""RC-D7, extended for the hep-communication split (plan G7, G15): in hep-literature and hep-writing every relative
+"""RC-D7, extended for the hep-communication split (plan G7, G15): in hep-citations and hep-authoring every relative
 link and anchor resolves, including links into another skill or a profile; every reference named in backticks
-(`name.md` in the skill, or a relative path such as `../../hep-literature/references/name.md`) exists; every
+(`name.md` in the skill, or a relative path such as `../../hep-citations/references/name.md`) exists; every
 reference ends its task with a 'Done when' line. Repository-wide, no maintained file links to the retired
 skills/hep-communication/ folder (history files keep the old name)."""
 import re
@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILLS = [ROOT / 'skills' / 'hep-literature', ROOT / 'skills' / 'hep-writing']
+SKILLS = [ROOT / 'skills' / 'hep-citations', ROOT / 'skills' / 'hep-authoring']
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')
 FENCE = re.compile(r'^```.*?^```', re.S | re.M)
 NAMED = re.compile(r'`([a-z0-9][a-z0-9\-]*\.md)`')

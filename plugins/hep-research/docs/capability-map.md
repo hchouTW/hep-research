@@ -55,10 +55,10 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | ml-training | Grouped splits, training, inference domain flags, calibration and ML artifacts | hep-ml | tool | yes | ML2, ML4 |  |
 | bdt-pipeline | BDT pipeline for analyses (cross-training, negative weights, working points) | hep-ml | tool | yes | ML3 |  |
 | ml-eras | Era changes in machine-learning studies | hep-ml | documentation | yes | ML1 |  |
-| literature-verification | Literature and citation verification, read levels, literature records, planned claims to recheck | hep-literature | tool | yes | Com1 |  |
-| claims-to-results | Claims linked to results, manuscript checks, citations checked against literature records | hep-writing | tool | yes | Com2 |  |
-| terminology | Terminology and notation against a glossary | hep-writing | tool | yes | Com3 |  |
-| papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-writing | tool | yes | Com4, Com5, Com6, Com7 |  |
+| literature-verification | Literature and citation verification, read levels, literature records, planned claims to recheck | hep-citations | tool | yes | Com1 |  |
+| claims-to-results | Claims linked to results, manuscript checks, citations checked against literature records | hep-authoring | tool | yes | Com2 |  |
+| terminology | Terminology and notation against a glossary | hep-authoring | tool | yes | Com3 |  |
+| papers-and-numbers | Paper types, venues, numbers from artifacts and spectrum plots | hep-authoring | tool | yes | Com4, Com5, Com6, Com7 |  |
 | lattice-qcd | Lattice QCD and its global analyses | hep-theory | none | no |  | j12 |
 | eft-global-fits | EFT global fits | hep-theory | none | no |  | out-of-v1-2 |
 | ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |

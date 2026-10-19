@@ -662,7 +662,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-literature",
+     "skill": "hep-citations",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -717,7 +717,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-writing",
+     "skill": "hep-authoring",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -845,7 +845,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-writing",
+     "skill": "hep-authoring",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -939,7 +939,7 @@
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-literature",
+     "skill": "hep-citations",
      "severity": "major",
      "invariant": "L1-SELECT"
     },
@@ -1015,13 +1015,13 @@
    "fixtures": {
     "draft.md": "SYNTHETIC draft.\n\n# Introduction\n\n(to be written)\n"
    },
-   "note": "Restructuring plan G3: drafting with citations. hep-writing's invariant says every citation comes from a literature record or ledger, never from memory; with neither in the project, the run loads hep-literature (to look the sources up) or marks each citation unverified.",
+   "note": "Restructuring plan G3: drafting with citations. hep-authoring's invariant says every citation comes from a literature record or ledger, never from memory; with neither in the project, the run loads hep-citations (to look the sources up) or marks each citation unverified.",
    "expect": [
     {
      "grader": "skill_loaded",
-     "skill": "hep-writing",
+     "skill": "hep-authoring",
      "also_accept": [
-      "hep-literature"
+      "hep-citations"
      ],
      "severity": "major",
      "invariant": "L1-SELECT"
@@ -1029,12 +1029,12 @@
     {
      "grader": "any_of",
      "severity": "blocking",
-     "label": "loads hep-literature for the citations or marks them unverified; never cites from memory",
+     "label": "loads hep-citations for the citations or marks them unverified; never cites from memory",
      "invariant": "WRITE-01",
      "graders": [
       {
        "grader": "skill_loaded",
-       "skill": "hep-literature",
+       "skill": "hep-citations",
        "before_answer_text": false
       },
       {

@@ -45,7 +45,7 @@ A handed-over artifact, even for one number: first `contracts/validate.py <file>
 1. Resolve context (stanza); collect inputs as artifacts (measurement spec, response, prediction, dataset records) and validate each file (`contracts/validate.py <file>`; a response also `response_adapter.py --validate`); stop on a contract error.
 2. Inputs from different producers: run `<plugin root>/contracts/comparison/gate.py` (exit 1 lists each mismatch).
 3. Build the model: observables, POIs, nuisances and constraints, correlations with their evidence.
-4. Validate on Asimov and toys (bias, pulls, coverage); fit; write the `statistical-result` with `scripts/result_artifact.py`; validate `artifacts_dir`. A report: load hep-writing.
+4. Validate on Asimov and toys (bias, pulls, coverage); fit; write the `statistical-result` with `scripts/result_artifact.py`; validate `artifacts_dir`. A report: load hep-authoring.
 
 ## Resources
 
@@ -85,4 +85,4 @@ Folder guide: [README.md](README.md).
 
 ## Handoffs
 
-Missing systematic or correlation evidence: hep-measurement, hep-detector (`unresolved_inputs`); theory-uncertainty prescriptions: hep-theory; toy campaigns, batch jobs: hep-computing; reporting: hep-writing; SBI, neural likelihoods: hep-ml.
+Missing systematic or correlation evidence: hep-measurement, hep-detector (`unresolved_inputs`); theory-uncertainty prescriptions: hep-theory; toy campaigns, batch jobs: hep-computing; reporting: hep-authoring; SBI, neural likelihoods: hep-ml.

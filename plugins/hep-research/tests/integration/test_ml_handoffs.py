@@ -82,7 +82,7 @@ def write(path, doc):
 
 
 class ComputingAndCommunicationHandoff(unittest.TestCase):
-    """hep-computing (a computational-run that used the model) and hep-writing (a write-up that cites
+    """hep-computing (a computational-run that used the model) and hep-authoring (a write-up that cites
     it): the downstream artifact resolves the ml-artifact by hash and must carry its 'synthetic' label."""
 
     def chain(self, consumer_name, carry_label):

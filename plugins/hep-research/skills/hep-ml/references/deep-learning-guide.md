@@ -146,5 +146,5 @@ checkpoints, `torch.load` without `map_location`, train/validation leakage.
 - Guard `torch.compile` behind `hasattr(torch, "compile")`; deterministic cuDNN trades speed for reproducibility.
 - Engineering process (scoping, testing, review): hep-computing
   ([agile-development-guide.md](../../hep-computing/references/agile-development-guide.md)).
-- Statistical validity of conclusions drawn from model outputs: `hep-statistics` (and `hep-writing` for the
+- Statistical validity of conclusions drawn from model outputs: `hep-statistics` (and `hep-authoring` for the
   write-up); this guide covers whether the model is trained, evaluated, calibrated and robust.

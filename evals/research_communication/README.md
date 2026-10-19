@@ -1,7 +1,7 @@
 # Behavioral evaluation of the communication skills
 
 Since the split of hep-communication (branch `feat/split-communication`), each case names the skill it should
-load: hep-literature or hep-writing. The live rerun is prepared, not run: see
+load: hep-citations or hep-authoring. The live rerun is prepared, not run: see
 [the split eval plan](../split-communication-eval-plan.md).
 
 Fixture-driven cases that measure what an agent answers, not only which skill it loads. `cases/cases.json` lists

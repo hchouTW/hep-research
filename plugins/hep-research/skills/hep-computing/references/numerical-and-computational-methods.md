@@ -117,7 +117,7 @@ reproducibility — not general software engineering, which belongs to
 |---|---|
 | Code architecture, service boundaries, deployment | [agile-development-guide.md](agile-development-guide.md) |
 | Numerical convergence, precision, reproducible seeds | this file |
-| Provenance of a specific reported number (code version, config, inputs) | this file / `../../hep-writing/references/reproducibility-auditing.md` |
+| Provenance of a specific reported number (code version, config, inputs) | this file / `../../hep-authoring/references/reproducibility-auditing.md` |
 | General CI/testing practice for a codebase | [agile-development-guide.md](agile-development-guide.md) |
 | Monte Carlo/statistical validation of a scientific result | this file / `../../hep-statistics/references/statistical-inference-for-physics.md` |
 

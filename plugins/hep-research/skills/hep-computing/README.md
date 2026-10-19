@@ -65,7 +65,7 @@ State after the 2026-10 remediation (CMP-08); checked by `tests/skills/test_cli_
 | Physics meaning of a numerical result | hep-theory or hep-measurement |
 | Statistical interpretation | hep-statistics |
 | Model training issues | hep-ml |
-| Reports, figures, write-ups | hep-writing |
+| Reports, figures, write-ups | hep-authoring |
 
 ## Tests and validation
 

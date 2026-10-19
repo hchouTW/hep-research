@@ -33,6 +33,6 @@
  "tests": [
   "../../tests/adapters/test_literature_lookup.py"
  ],
- "owner_skill": "hep-literature",
+ "owner_skill": "hep-citations",
  "status_rule": "the adapter status is the lowest of its tools' statuses; a source is raised to tested-in-declared-environment only by a live run recorded in VALIDATION.md; ADS stays demonstrated-on-synthetic-data until a run with a token; no skill requires this adapter"
 }
