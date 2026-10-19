@@ -1961,6 +1961,27 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## 0.16.0 release check (2026-10-20, E2 and the CI lock)
+
+Release branch `release/0.16.0` from main `47687ea5` (#157 communication split, contracts 2.13.0; #158 and #161
+routing-harness fixes; #159 citation follow-up). Evidence for the split in SPLIT-LIVE-EVAL above. Migration option A
+of the restructuring plan: every deprecated skill name still validates with a warning in 0.16.0; 0.17.0 (contracts
+3.0.0) removes them. The deprecation message for hep-communication now names 0.16.0. The `docs/agentic-architecture.md`
+pointer is removed. The ams02-research companion (1.5.0, requires `>=0.11.0`) names no retired skill outside its
+CHANGELOG and needs no change.
+
+What changed: version 0.16.0 in both manifests, `pyproject.toml`, the README, the two assets and the profile
+scripts that record it (the assets and theory-profile artifacts also move to contracts 2.13.0, the version this
+release ships); examples regenerated (E2; `bc-propagation-fit` with the CI lock), only version strings and the hashes
+that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as committed); the sbottom benchmark
+artifacts' `plugin` string edited by hand; theory-profile artifacts regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 24 pass, 0 fail, 2 skipped (CLI host checks); 4775 tests, 4656 pass, 0 failures, 119 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 24 pass, 0 fail, 2 skipped; 4775 tests, 4562 pass, 0 failures, 213 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the

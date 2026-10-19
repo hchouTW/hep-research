@@ -1,6 +1,6 @@
 """Skill names a contract may record, and the deprecated aliases kept after the renames (contracts 2.9.0, 2.13.0).
 
-hep-research 0.11.0 renamed four skills (contracts 2.9.0). After 0.15.0, hep-communication was split into
+hep-research 0.11.0 renamed four skills (contracts 2.9.0). In 0.16.0, hep-communication was split into
 hep-citations and hep-authoring (contracts 2.13.0); hep-communication is a deprecated alias of hep-authoring, the owner of
 the communication extension it produced and the skill every other skill hands write-ups to, and the 0.11.0 alias
 research-communication now points to hep-authoring as well. The literature-record type is new, so no artifact written
@@ -10,8 +10,8 @@ is a deprecated alias of the new one, reported as `skill.deprecated_name` (artif
 use). `contracts/migrate_skill_names.py` rewrites an artifact's `provenance.producer_skill` and `handoff.to_skill`.
 
 This module and `contracts/schemas/skill_names.json` are the only places that define the aliases; the schema's enum is
-SKILLS followed by the deprecated names (tests/contracts/test_skill_name_aliases.py checks that they agree). The aliases
-are removed one or two releases after the rename.
+SKILLS followed by the deprecated names (tests/contracts/test_skill_name_aliases.py checks that they agree). All aliases
+are removed in 0.17.0 (contracts 3.0.0); migrate old artifacts with 0.16.x.
 """
 from __future__ import annotations
 
@@ -27,8 +27,8 @@ DEPRECATED_SKILL_ALIASES = {
     "hep-communication": "hep-authoring",
 }
 RENAMED_IN = "0.11.0"  # the hep-research release that renamed the skills
-# Names retired after RENAMED_IN, with when: the split is unreleased, so the message names the last release before it.
-RETIRED_LATER = {"hep-communication": "the release after 0.15.0 (split into hep-citations and hep-authoring)"}
+# Names retired after RENAMED_IN, with the release that retired them.
+RETIRED_LATER = {"hep-communication": "0.16.0 (split into hep-citations and hep-authoring)"}
 ALL_SKILL_NAMES = frozenset(SKILLS) | frozenset(DEPRECATED_SKILL_ALIASES)
 CODE = "skill.deprecated_name"
 PROFILE_CODE = "profile.deprecated_skill_name"
