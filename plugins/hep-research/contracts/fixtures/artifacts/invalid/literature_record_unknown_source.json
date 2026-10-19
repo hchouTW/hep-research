@@ -1,0 +1,120 @@
+{
+ "contract_version": "2.13.0",
+ "artifact_id": "fixture-synthetic-literature-record",
+ "artifact_type": "literature-record",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.15.0",
+  "contracts": "2.13.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-citations",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "user-supplied"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "record_version": "1.0.0",
+  "created": "2026-10-19",
+  "imported": [
+   {
+    "path": "in.json",
+    "sha256": "71f3f1dec81423f0644e882f0111eb603773533d5a43c7bd19c95f2ceca781ee",
+    "date": "2026-10-19",
+    "counts": {
+     "sources": 1,
+     "claims": 1,
+     "searches": 1,
+     "notices": 0
+    }
+   }
+  ],
+  "sources": {
+   "fixture:S01": {
+    "id": "fixture:S01",
+    "title": "SYNTHETIC fixture paper",
+    "authors": "Fixture et al.",
+    "year": 2026,
+    "tier": 2,
+    "verification_level": "abstract+metadata",
+    "verification_date": "2026-10-12",
+    "formal_status": "published",
+    "supersedes": [],
+    "superseded_by": [],
+    "verification_limitations": "fixture",
+    "citation_key": "Fixture:2026abc",
+    "identifiers": {
+     "doi": "10.0000/fixture.1",
+     "arxiv": "2610.00001",
+     "arxiv_version": "v1",
+     "inspire": null
+    },
+    "read_events": [
+     {
+      "level": "abstract+metadata",
+      "date": "2026-10-12",
+      "locators": [],
+      "imported_from": "in.json"
+     }
+    ],
+    "versions": [
+     {
+      "version": "v1",
+      "date": "2026-10-12",
+      "imported_from": "in.json"
+     }
+    ],
+    "notices": [],
+    "status": "as-imported",
+    "imported_from": "in.json"
+   }
+  },
+  "claims": {
+   "fixture:C01": {
+    "id": "fixture:C01",
+    "claim": "the fixture paper reports a placeholder value",
+    "claim_types": [
+     "published_result"
+    ],
+    "source_ids": [
+     "fixture:S99"
+    ],
+    "location": "abstract",
+    "scope": {
+     "text": "fixture"
+    },
+    "verification_strength": "abstract+metadata",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-10-12"
+   }
+  },
+  "searches": [
+   {
+    "database": "INSPIRE-HEP",
+    "query": "t fixture",
+    "date": "2026-10-12",
+    "export_count": 1,
+    "imported_from": "in.json"
+   }
+  ],
+  "notices": [],
+  "relations": [],
+  "proposed_merges": [],
+  "flags": [],
+  "verification": {
+   "online": "not-performed",
+   "note": "SYNTHETIC fixture"
+  }
+ }
+}

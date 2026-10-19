@@ -61,7 +61,7 @@ sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pid_separation_power import resolve_species  # noqa: E402
 
-# PDG Highland constant, in GeV; see <plugin root>/skills/hep-communication/references/primary-sources-and-version-checks.md.
+# PDG Highland constant, in GeV; see <plugin root>/skills/hep-citations/references/primary-sources-and-version-checks.md.
 HIGHLAND_MEV = 13.6
 HIGHLAND_GEV = HIGHLAND_MEV / 1000.0
 # p[GeV/c] = 0.299792458 * B[T] * r[m] for unit charge.

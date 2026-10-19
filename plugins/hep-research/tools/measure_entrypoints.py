@@ -7,6 +7,9 @@ tools/budget_exceptions.json may waive ("<skill>:bytes": reason); above skill_by
 skill_lines_max (500 lines) it fails, with no exception. A description is at most 1,024 characters (the Agent Skills
 specification, https://agentskills.io/specification) and the profile registry at most 3,072 bytes
 (contracts/registry.py REGISTRY_BUDGET); a profile index.md above 4,096 bytes fails unless excepted ("<id>:index").
+Each skill row also records its quick-question load (plan G13): SKILL.md plus its entry reference, the first reference
+its Resources section links, against the 25,600-byte limit of B-03 (tests/skills/test_routing_tables.py fails above
+it; here it is a warning), so the two halves of a split skill are measured separately.
 
 Usage: python3 tools/measure_entrypoints.py [--no-cli] [--root PLUGIN_ROOT]
 Exit 0 when nothing is over budget (warnings do not change it), 1 otherwise. Output: JSON with over_budget and
@@ -22,6 +25,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+QUICK_LOAD_BYTES = 25600  # SKILL.md plus its entry reference (B-03)
+ENTRY_REF = re.compile(r"\((references/[^)#\s]+\.md)")
 BUDGET = {"skill_bytes_target": 12288, "skill_bytes_max": 16384, "skill_lines_max": 500, "description_chars": 1024, "registry_bytes": 3072, "index_bytes": 4096}
 
 
@@ -53,6 +58,12 @@ def main(argv=None) -> int:
         m = re.search(r'^description:\s*"?(.*?)"?\s*$', text, re.M)
         desc = m.group(1) if m else ""
         row = {"skill": skill.parent.name, "lines": text.count("\n"), "bytes": len(text.encode()), "description_chars": len(desc)}
+        entry = ENTRY_REF.search(text.split("## Resources", 1)[1]) if "## Resources" in text else None
+        if entry and (skill.parent / entry.group(1)).is_file():
+            row["entry_reference"] = entry.group(1)
+            row["quick_load_bytes"] = row["bytes"] + (skill.parent / entry.group(1)).stat().st_size
+            if row["quick_load_bytes"] > QUICK_LOAD_BYTES:
+                warnings.append(f"{row['skill']} quick load {row['quick_load_bytes']} B (SKILL.md + {entry.group(1)}) > {QUICK_LOAD_BYTES}")
         rows.append(row)
         # hard limits: never waived
         for key, limit in (("bytes", BUDGET["skill_bytes_max"]), ("lines", BUDGET["skill_lines_max"]),

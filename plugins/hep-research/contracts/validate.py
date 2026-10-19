@@ -53,6 +53,7 @@ import json
 import math
 import re
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -72,6 +73,7 @@ EXTENSION_SCHEMAS = {
     "comparison-spec": "ext_comparison_spec.json", "statistical-result": "ext_statistical_result.json",
     "ml-artifact": "ext_ml_artifact.json", "computational-run": "ext_computational_run.json",
     "communication": "ext_communication.json", "dataset-record": "ext_dataset_record.json",
+    "literature-record": "ext_literature_record.json",
 }
 # Statuses that must survive every handoff: a consumer of such an input carries the label.
 STICKY_STATUSES = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]
@@ -289,6 +291,29 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
     elif t == "communication":
         from contracts.communication import validate_extension  # lazy: communication imports this module's constants
         validate_extension(doc, vocab, rep)
+    elif t == "literature-record":
+        _literature_semantics(ext, rep)
+
+
+def _literature_semantics(ext: dict, rep: Report) -> None:
+    """literature-record (contracts 2.13.0): the record's sources and claims are keyed by their own ids and still pass
+    the evidence-ledger check (core.evidence.ledger) they were imported under; dates are judged at the record's
+    creation date, so a record does not age into failure."""
+    from core.evidence.ledger import check_ledger
+    sources, claims = ext.get("sources") or {}, ext.get("claims") or {}
+    for kind, table in (("source", sources), ("claim", claims)):
+        for key, entry in table.items():
+            if isinstance(entry, dict) and entry.get("id") != key:
+                rep.add("error", f"$.extension.{kind}s.{key}", f"literature.{kind}_key_mismatch",
+                        f"{kind} keyed '{key}' has id {entry.get('id')!r}; a record keys each {kind} by its own id")
+    try:
+        created = date.fromisoformat(str(ext.get("created")))
+    except ValueError:
+        created = None
+    ledger = check_ledger(list(sources.values()), list(claims.values()), today=created)
+    for e in ledger.get("errors", []):
+        rep.add("error", f"$.extension ({e.get('where')})", "literature.ledger_invalid",
+                f"{e.get('code')}: {e.get('message')} (the evidence-ledger rules of core/evidence/ledger.py)")
 
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch

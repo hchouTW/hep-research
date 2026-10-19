@@ -22,6 +22,21 @@ class StaticRoutingTests(unittest.TestCase):
         self.assertEqual((ROOT / "tests" / "routing" / "cases.json").read_bytes(), generated)
 
 
+    def test_unpinned_phrase_report(self):
+        # a report, not a failure: phrases no trigger term or description-topics entry overlaps
+        sys.path.insert(0, str(ROOT / "tools"))
+        import check_routing_static as crs
+        d = {"s": {"use": "use when x: alpha beta, gamma delta (epsilon), pinned phrase here. ", "not_for": "", "body": ""}}
+        cases = [{"expected_primary": "s", "trigger_terms": ["Pinned phrase"]},
+                 {"expected_primary": "other", "trigger_terms": ["alpha beta"]},
+                 {"expected_primary": "x", "turns": [{"expected": "s", "trigger_terms": ["epsilon"]}]}]
+        rep = crs.unpinned_phrases(d, cases, {"s": ["gamma"]})
+        self.assertEqual(rep["s"]["phrases"], ["use when x", "alpha beta"])
+        self.assertEqual(rep["s"]["chars"], len("use when x") + len("alpha beta"))
+        p = subprocess.run([sys.executable, str(ROOT / "tools" / "check_routing_static.py")], capture_output=True, text=True, timeout=600)
+        full = json.loads(p.stdout)["unpinned_phrases"]
+        self.assertEqual(set(full), set(crs.SKILLS))
+
 
 class LanguageIndependenceSTH46(unittest.TestCase):
     """STH-T4.6: natural non-English prompts need no English trigger terms; they may not quote the description; the

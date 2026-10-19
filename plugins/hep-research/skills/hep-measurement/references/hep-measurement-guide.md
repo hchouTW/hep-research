@@ -37,7 +37,7 @@ procedure, analysis invariants and this skill's scripts. Links are relative to t
 | Predictions, generators, theory uncertainties | hep-theory: [event generation](../../hep-theory/references/event-generation.md) |
 | Classifiers, BDTs, leakage, mass sculpting | hep-ml: [ML in analyses](../../hep-ml/references/ml-analysis.md) |
 | Analysis code, ROOT/columnar pipelines, builds, batch jobs | hep-computing: [analysis data pipelines](../../hep-computing/references/analysis-data-pipelines.md) |
-| Citations, versions and methodological sources; diagrams | hep-communication: [primary sources](../../hep-communication/references/primary-sources-and-version-checks.md) |
+| Citations, versions and methodological sources; diagrams | hep-citations: [primary sources](../../hep-citations/references/primary-sources-and-version-checks.md) |
 | Experiment-specific practice and results | The bound experiment profile's `index.md` (`<plugin root>/profiles/registry.json`) |
 
 ## Check first: proposals to correct before answering

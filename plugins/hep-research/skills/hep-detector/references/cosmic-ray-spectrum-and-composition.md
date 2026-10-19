@@ -28,7 +28,7 @@ targets of composition and origin measurements:
 
 Feature energies and indices below were checked 2026-09-25 against the PDG 2026
 cosmic-ray review (revised March 2026); see the latest-results policy in
-[sources](../../hep-communication/references/primary-sources-and-version-checks.md).
+[sources](../../hep-citations/references/primary-sources-and-version-checks.md).
 
 - **The knee** (a few PeV): the spectrum steepens from `gamma ~ 2.7` to `gamma ~ 3`.
   The leading interpretation is a rigidity-dependent maximum energy of Galactic

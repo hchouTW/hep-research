@@ -3,7 +3,7 @@
 Eight end-to-end cases across distinct detector families, then the practical checklists
 and a one-page synthesis. All cases are generic *mechanism* studies: they name no
 experiment and quote no performance number; any real instance needs the apparatus,
-configuration, and source ([primary sources and version checks](../../hep-communication/references/primary-sources-and-version-checks.md)). Each follows the same eight steps:
+configuration, and source ([primary sources and version checks](../../hep-citations/references/primary-sources-and-version-checks.md)). Each follows the same eight steps:
 (1) defect, (2) low-level effect, (3) reconstruction effect, (4) performance-plot
 signature, (5) how data/MC or controls reveal it, (6) correction/model update,
 (7) assigned systematic, (8) possible final physics bias. Framework:

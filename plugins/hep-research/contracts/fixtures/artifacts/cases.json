@@ -6,6 +6,7 @@
   "comparison_spec.json",
   "computational_run.json",
   "dataset_record.json",
+  "literature_record.json",
   "measurement_collider.json",
   "measurement_exposure.json",
   "measurement_protons_on_target.json",
@@ -146,6 +147,18 @@
   ],
   "communication_claim_status_conflict.json": [
    "communication.claim_status_conflict"
+  ],
+  "literature_record_unknown_version.json": [
+   "schema.enum"
+  ],
+  "literature_record_key_mismatch.json": [
+   "literature.source_key_mismatch"
+  ],
+  "literature_record_unknown_source.json": [
+   "literature.ledger_invalid"
+  ],
+  "literature_record_no_verification.json": [
+   "schema.required"
   ],
   "prediction_v26_observed.json": [
    "prediction.status_upgraded"

@@ -3,334 +3,301 @@
  "shingle_words": 8,
  "threshold": 0.08,
  "by_skill": {
-  "hep-communication": {
-   "references": 57,
-   "bytes": 411532,
+  "hep-authoring": {
+   "references": 48,
+   "bytes": 338846,
+   "uncited": 0
+  },
+  "hep-citations": {
+   "references": 11,
+   "bytes": 82225,
    "uncited": 0
   },
   "hep-computing": {
-   "references": 36,
-   "bytes": 317640,
+   "references": 35,
+   "bytes": 297676,
    "uncited": 0
   },
   "hep-detector": {
    "references": 37,
-   "bytes": 471846,
+   "bytes": 471830,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 116116,
+   "bytes": 116084,
    "uncited": 0
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 192061,
+   "bytes": 192064,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 184945,
+   "bytes": 184913,
    "uncited": 0
   },
   "hep-theory": {
    "references": 18,
-   "bytes": 120559,
+   "bytes": 120543,
    "uncited": 0
   }
  },
  "references": [
   {
-   "path": "skills/hep-communication/references/academic-diagrams-guide.md",
-   "owner": "hep-communication",
-   "bytes": 10798,
+   "path": "skills/hep-authoring/references/academic-diagrams-guide.md",
+   "owner": "hep-authoring",
+   "bytes": 10825,
    "lines": 189,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/README.md",
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/figures-and-tables.md"
+    "skills/hep-authoring/README.md",
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/academic-papers-guide.md",
-   "owner": "hep-communication",
-   "bytes": 14637,
-   "lines": 200,
+   "path": "skills/hep-authoring/references/academic-papers-guide.md",
+   "owner": "hep-authoring",
+   "bytes": 13282,
+   "lines": 179,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/README.md",
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/citation-verification.md",
-    "skills/hep-communication/references/citations-and-bibliography.md",
-    "skills/hep-communication/references/code-to-methodology-synthesis.md",
-    "skills/hep-communication/references/evidence-linked-writing.md",
-    "skills/hep-communication/references/interpreting-scientific-graphics.md",
-    "skills/hep-communication/references/literature-lookup-recipes.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/submission-and-peer-review.md",
-    "tests/skills/hep_communication/test_handoff_text.py"
+    "skills/hep-authoring/README.md",
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/citations-and-bibliography.md",
+    "skills/hep-authoring/references/code-to-methodology-synthesis.md",
+    "skills/hep-authoring/references/evidence-linked-writing.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/submission-and-peer-review.md",
+    "skills/hep-citations/references/citation-databases.md",
+    "skills/hep-citations/references/citation-verification.md",
+    "skills/hep-citations/references/interpreting-scientific-graphics.md",
+    "skills/hep-citations/references/literature-guide.md",
+    "skills/hep-citations/references/literature-lookup-recipes.md",
+    "tests/skills/hep_authoring/test_handoff_text.py"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "cited_by_other_skills": [
+    "hep-citations"
+   ],
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/artifact-packaging-for-release.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/artifact-packaging-for-release.md",
+   "owner": "hep-authoring",
    "bytes": 2924,
    "lines": 48,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/code-review-report.md",
-    "skills/hep-communication/references/code-to-methodology-synthesis.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/references/code-review-report.md",
+    "skills/hep-authoring/references/code-to-methodology-synthesis.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-   "owner": "hep-communication",
-   "bytes": 13382,
+   "path": "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+   "owner": "hep-authoring",
+   "bytes": 13444,
    "lines": 210,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/citations-and-bibliography.md",
-    "skills/hep-communication/references/figures-and-tables.md",
-    "skills/hep-communication/references/interpreting-scientific-graphics.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/paper-genre-variants.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reading-papers.md",
-    "skills/hep-communication/references/scientific-style.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
-    "skills/hep-communication/references/submission-and-peer-review.md",
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/figures-and-tables.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/paper-genre-variants.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/scientific-style.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
+    "skills/hep-authoring/references/submission-and-peer-review.md",
+    "skills/hep-citations/references/citation-databases.md",
+    "skills/hep-citations/references/interpreting-scientific-graphics.md",
+    "skills/hep-citations/references/reading-papers.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md"
    ],
    "cited_by_other_skills": [
+    "hep-citations",
     "hep-measurement"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/citation-verification.md",
-   "owner": "hep-communication",
-   "bytes": 6465,
-   "lines": 99,
+   "path": "skills/hep-authoring/references/citations-and-bibliography.md",
+   "owner": "hep-authoring",
+   "bytes": 14270,
+   "lines": 227,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/README.md",
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/claim-evidence-mapping.md",
-    "skills/hep-communication/references/evidence-linked-writing.md",
-    "skills/hep-communication/references/literature-discovery-and-search.md",
-    "skills/hep-communication/references/literature-lookup-recipes.md",
-    "skills/hep-communication/references/literature-review.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/plagiarism-and-text-reuse-checking.md",
-    "tests/skills/hep_communication/test_handoff_text.py"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "e5427f10 2026-10-17"
-  },
-  {
-   "path": "skills/hep-communication/references/citations-and-bibliography.md",
-   "owner": "hep-communication",
-   "bytes": 19851,
-   "lines": 320,
-   "linked_from_skill_md": true,
-   "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/artifact-packaging-for-release.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/citation-verification.md",
-    "skills/hep-communication/references/interpreting-scientific-graphics.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/literature-discovery-and-search.md",
-    "skills/hep-communication/references/literature-review.md",
-    "skills/hep-communication/references/outreach-and-public-facing-summaries.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/claim-evidence-mapping.md",
-   "owner": "hep-communication",
-   "bytes": 5207,
-   "lines": 85,
-   "linked_from_skill_md": true,
-   "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/interpreting-scientific-graphics.md",
-    "skills/hep-communication/references/logical-consistency-and-argument-uniformity.md",
-    "skills/hep-communication/references/paper-structure.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reviewer-style-assessment.md",
-    "skills/hep-communication/references/scientific-style.md",
-    "skills/hep-statistics/references/statistical-inference-for-physics.md",
-    "skills/hep-theory/references/mathematical-reasoning-and-proof.md"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/artifact-packaging-for-release.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/outreach-and-public-facing-summaries.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
+    "skills/hep-citations/references/citation-databases.md",
+    "skills/hep-citations/references/citation-verification.md",
+    "skills/hep-citations/references/interpreting-scientific-graphics.md",
+    "skills/hep-citations/references/literature-discovery-and-search.md",
+    "skills/hep-citations/references/literature-review.md"
    ],
    "cited_by_other_skills": [
-    "hep-statistics",
-    "hep-theory"
+    "hep-citations"
    ],
-   "last_commit": "fe9839a2 2026-10-17"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/code-review-report.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/code-review-report.md",
+   "owner": "hep-authoring",
    "bytes": 5499,
    "lines": 102,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/code-to-methodology-synthesis.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "tests/skills/hep_communication/test_handoff_text.py"
+    "skills/hep-authoring/references/code-to-methodology-synthesis.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/code-to-methodology-synthesis.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/code-to-methodology-synthesis.md",
+   "owner": "hep-authoring",
    "bytes": 5720,
    "lines": 101,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/assets/paper/code-to-methodology-manual-template.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/assets/paper/code-to-methodology-manual-template.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/collaboration-results-lifecycle.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/collaboration-results-lifecycle.md",
+   "owner": "hep-authoring",
    "bytes": 3683,
    "lines": 58,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/physics-plots.md"
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/comment-and-reply-exchange.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/comment-and-reply-exchange.md",
+   "owner": "hep-authoring",
    "bytes": 3355,
    "lines": 53,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/erratum-and-corrigendum-drafting.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/conflict-of-interest-and-ethics-statements.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/conflict-of-interest-and-ethics-statements.md",
+   "owner": "hep-authoring",
    "bytes": 2591,
    "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/diagram-captions.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/diagram-captions.md",
+   "owner": "hep-authoring",
    "bytes": 3692,
    "lines": 60,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/figures-and-tables.md"
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/diagram-figure-style.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/diagram-figure-style.md",
+   "owner": "hep-authoring",
    "bytes": 6670,
    "lines": 99,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/physics-plots.md"
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/diagrams-computer-science.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/diagrams-computer-science.md",
+   "owner": "hep-authoring",
    "bytes": 5616,
    "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/assets/diagrams/ml-pipeline.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md"
+    "skills/hep-authoring/assets/diagrams/ml-pipeline.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/diagrams-hep.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/diagrams-hep.md",
+   "owner": "hep-authoring",
    "bytes": 7612,
    "lines": 132,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/assets/diagrams/hep-measurement-pipeline.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md"
+    "skills/hep-authoring/assets/diagrams/hep-measurement-pipeline.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/diagrams-statistics.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/diagrams-statistics.md",
+   "owner": "hep-authoring",
    "bytes": 6325,
    "lines": 111,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/assets/diagrams/bayesian-model.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md"
+    "skills/hep-authoring/assets/diagrams/bayesian-model.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/equation-and-notation-auditing.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/equation-and-notation-auditing.md",
+   "owner": "hep-authoring",
    "bytes": 4386,
    "lines": 67,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
     "tests/routing/test_theory_routing.py"
@@ -339,443 +306,723 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "064f60fb 2026-10-17"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/erratum-and-corrigendum-drafting.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
+   "owner": "hep-authoring",
    "bytes": 4549,
    "lines": 67,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/comment-and-reply-exchange.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/references/comment-and-reply-exchange.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/evidence-linked-writing.md",
-   "owner": "hep-communication",
-   "bytes": 5650,
+   "path": "skills/hep-authoring/references/evidence-linked-writing.md",
+   "owner": "hep-authoring",
+   "bytes": 5669,
    "lines": 71,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/README.md",
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/literature-lookup-recipes.md",
-    "skills/hep-communication/references/revision-impact-tracking.md"
+    "skills/hep-authoring/README.md",
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/revision-impact-tracking.md",
+    "skills/hep-citations/references/literature-lookup-recipes.md"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "1b7ae5b0 2026-10-17"
+   "cited_by_other_skills": [
+    "hep-citations"
+   ],
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/figures-and-tables.md",
-   "owner": "hep-communication",
-   "bytes": 9293,
+   "path": "skills/hep-authoring/references/figures-and-tables.md",
+   "owner": "hep-authoring",
+   "bytes": 9324,
    "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/diagram-captions.md",
-    "skills/hep-communication/references/interpreting-scientific-graphics.md",
-    "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-    "skills/hep-communication/references/paper-structure.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/physics-plots.md",
-    "skills/hep-communication/references/poster-and-talk-design.md"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/diagram-captions.md",
+    "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+    "skills/hep-authoring/references/paper-structure.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/physics-plots.md",
+    "skills/hep-authoring/references/poster-and-talk-design.md",
+    "skills/hep-citations/references/interpreting-scientific-graphics.md"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "cited_by_other_skills": [
+    "hep-citations"
+   ],
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/general-diagram-principles.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/general-diagram-principles.md",
+   "owner": "hep-authoring",
    "bytes": 7812,
    "lines": 140,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/poster-and-talk-design.md"
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/grant-and-fellowship-proposal-writing.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
+   "owner": "hep-authoring",
    "bytes": 4810,
    "lines": 72,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/graphviz-patterns.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/graphviz-patterns.md",
+   "owner": "hep-authoring",
    "bytes": 3460,
    "lines": 79,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/examples/statistics/02-hierarchical-bayesian-model-plate.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md"
+    "skills/hep-authoring/examples/statistics/02-hierarchical-bayesian-model-plate.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/interpreting-scientific-graphics.md",
-   "owner": "hep-communication",
-   "bytes": 8314,
-   "lines": 140,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/figures-and-tables.md",
-    "skills/hep-communication/references/manuscript-consistency-auditing.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reading-papers.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-   "owner": "hep-communication",
-   "bytes": 13436,
+   "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+   "owner": "hep-authoring",
+   "bytes": 13432,
    "lines": 239,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/equation-and-notation-auditing.md",
-    "skills/hep-communication/references/figures-and-tables.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/submission-and-peer-review.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md",
+    "skills/hep-authoring/references/equation-and-notation-auditing.md",
+    "skills/hep-authoring/references/figures-and-tables.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/submission-and-peer-review.md",
+    "skills/hep-authoring/references/thesis-by-publication-assembly.md",
     "tools/layering_whitelist.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/latex-venue-setup.md",
-   "owner": "hep-communication",
-   "bytes": 30419,
+   "path": "skills/hep-authoring/references/latex-venue-setup.md",
+   "owner": "hep-authoring",
+   "bytes": 30415,
    "lines": 413,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/assets/paper-blueprints.json",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/comment-and-reply-exchange.md",
-    "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-    "skills/hep-communication/references/multi-venue-reformatting.md",
-    "skills/hep-communication/references/paper-genre-variants.md",
-    "skills/hep-communication/references/paper-structure.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/submission-and-peer-review.md",
-    "tests/skills/hep_communication/test_paper_blueprints.py",
-    "tests/skills/hep_communication/test_venues_and_sources_com4.py"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/assets/paper-blueprints.json",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/comment-and-reply-exchange.md",
+    "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+    "skills/hep-authoring/references/multi-venue-reformatting.md",
+    "skills/hep-authoring/references/paper-genre-variants.md",
+    "skills/hep-authoring/references/paper-structure.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/submission-and-peer-review.md",
+    "tests/skills/hep_authoring/test_paper_blueprints.py",
+    "tests/skills/hep_authoring/test_venues_and_sources_com4.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "655033a5 2026-10-17"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/legends-panels-and-export.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/legends-panels-and-export.md",
+   "owner": "hep-authoring",
    "bytes": 6618,
    "lines": 110,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/diagram-figure-style.md"
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/literature-discovery-and-search.md",
-   "owner": "hep-communication",
-   "bytes": 5134,
-   "lines": 75,
-   "linked_from_skill_md": true,
-   "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "e5427f10 2026-10-17"
-  },
-  {
-   "path": "skills/hep-communication/references/literature-lookup-recipes.md",
-   "owner": "hep-communication",
-   "bytes": 5905,
-   "lines": 97,
-   "linked_from_skill_md": true,
-   "cited_by": [
-    "adapters/literature-lookup/assets/literature_lookup.py",
-    "skills/hep-communication/README.md",
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/citation-verification.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "tests/adapters/fixtures/literature_lookup/rate-limit/inspire-arxiv-2501.99999-429.json"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "14eeda45 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/literature-review.md",
-   "owner": "hep-communication",
-   "bytes": 7850,
-   "lines": 148,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/literature-discovery-and-search.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reading-papers.md",
-    "skills/hep-communication/references/systematic-review-screening.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/logical-consistency-and-argument-uniformity.md",
-   "owner": "hep-communication",
-   "bytes": 4919,
+   "path": "skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
+   "owner": "hep-authoring",
+   "bytes": 4981,
    "lines": 87,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/claim-evidence-mapping.md",
-    "skills/hep-communication/references/manuscript-consistency-auditing.md",
-    "skills/hep-communication/references/paper-structure.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/manuscript-consistency-auditing.md",
+    "skills/hep-authoring/references/paper-structure.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-citations/references/claim-evidence-mapping.md",
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md"
    ],
    "cited_by_other_skills": [
+    "hep-citations",
     "hep-theory"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/manuscript-consistency-auditing.md",
-   "owner": "hep-communication",
-   "bytes": 3594,
+   "path": "skills/hep-authoring/references/manuscript-consistency-auditing.md",
+   "owner": "hep-authoring",
+   "bytes": 3625,
    "lines": 64,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/interpreting-scientific-graphics.md",
-    "skills/hep-communication/references/logical-consistency-and-argument-uniformity.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/revision-impact-tracking.md"
+    "skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/revision-impact-tracking.md",
+    "skills/hep-citations/references/interpreting-scientific-graphics.md"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "cited_by_other_skills": [
+    "hep-citations"
+   ],
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/mermaid-patterns.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/mermaid-patterns.md",
+   "owner": "hep-authoring",
    "bytes": 4497,
    "lines": 114,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/examples/computer-science/07-database-architecture.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md"
+    "skills/hep-authoring/examples/computer-science/07-database-architecture.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/multi-venue-reformatting.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/multi-venue-reformatting.md",
+   "owner": "hep-authoring",
    "bytes": 3042,
    "lines": 48,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/outreach-and-public-facing-summaries.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/outreach-and-public-facing-summaries.md",
+   "owner": "hep-authoring",
    "bytes": 4202,
    "lines": 73,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/citations-and-bibliography.md",
-    "skills/hep-communication/references/paper-structure.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/poster-and-talk-design.md"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/citations-and-bibliography.md",
+    "skills/hep-authoring/references/paper-structure.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/paper-genre-variants.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/paper-genre-variants.md",
+   "owner": "hep-authoring",
    "bytes": 7621,
    "lines": 133,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/paper-structure.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md",
-    "tests/skills/hep_communication/test_paper_blueprints.py"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/paper-structure.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/thesis-by-publication-assembly.md",
+    "tests/skills/hep_authoring/test_paper_blueprints.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ac1eb235 2026-10-17"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/paper-structure.md",
-   "owner": "hep-communication",
-   "bytes": 11060,
+   "path": "skills/hep-authoring/references/paper-structure.md",
+   "owner": "hep-authoring",
+   "bytes": 11091,
    "lines": 206,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/grant-and-fellowship-proposal-writing.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/literature-review.md",
-    "skills/hep-communication/references/logical-consistency-and-argument-uniformity.md",
-    "skills/hep-communication/references/multi-venue-reformatting.md",
-    "skills/hep-communication/references/paper-genre-variants.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
-    "skills/hep-communication/references/supplementary-material-planning.md"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
+    "skills/hep-authoring/references/multi-venue-reformatting.md",
+    "skills/hep-authoring/references/paper-genre-variants.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
+    "skills/hep-authoring/references/supplementary-material-planning.md",
+    "skills/hep-citations/references/literature-review.md"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "cited_by_other_skills": [
+    "hep-citations"
+   ],
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-   "owner": "hep-communication",
-   "bytes": 14121,
-   "lines": 175,
+   "path": "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+   "owner": "hep-authoring",
+   "bytes": 12422,
+   "lines": 155,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "tests/skills/hep_communication/test_handoff_text.py"
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/physics-plots.md",
-   "owner": "hep-communication",
-   "bytes": 8253,
+   "path": "skills/hep-authoring/references/physics-plots.md",
+   "owner": "hep-authoring",
+   "bytes": 8249,
    "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/collaboration-results-lifecycle.md",
-    "skills/hep-communication/references/diagrams-hep.md",
-    "skills/hep-communication/references/figures-and-tables.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/legends-panels-and-export.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/scripts/spectrum_plot.py"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/collaboration-results-lifecycle.md",
+    "skills/hep-authoring/references/diagrams-hep.md",
+    "skills/hep-authoring/references/figures-and-tables.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/legends-panels-and-export.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/scripts/spectrum_plot.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "01c56589 2026-10-17"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/plagiarism-and-text-reuse-checking.md",
-   "owner": "hep-communication",
-   "bytes": 3000,
+   "path": "skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
+   "owner": "hep-authoring",
+   "bytes": 3031,
    "lines": 49,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md"
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/plantuml-patterns.md",
-   "owner": "hep-communication",
-   "bytes": 3582,
+   "path": "skills/hep-authoring/references/plantuml-patterns.md",
+   "owner": "hep-authoring",
+   "bytes": 3578,
    "lines": 96,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/academic-diagrams-guide.md"
+    "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/poster-and-talk-design.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/poster-and-talk-design.md",
+   "owner": "hep-authoring",
    "bytes": 6244,
    "lines": 106,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/diagram-figure-style.md",
-    "skills/hep-communication/references/legends-panels-and-export.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/diagram-figure-style.md",
+    "skills/hep-authoring/references/legends-panels-and-export.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/preprint-to-journal-reconciliation.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/preprint-to-journal-reconciliation.md",
+   "owner": "hep-authoring",
    "bytes": 2900,
    "lines": 47,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/erratum-and-corrigendum-drafting.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md"
+    "skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/preregistration-and-registered-reports.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/preregistration-and-registered-reports.md",
+   "owner": "hep-authoring",
    "bytes": 3523,
    "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/primary-sources-and-version-checks.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-authoring/references/reproducibility-auditing.md",
+   "owner": "hep-authoring",
+   "bytes": 3144,
+   "lines": 59,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-authoring/references/artifact-packaging-for-release.md",
+    "skills/hep-authoring/references/citations-and-bibliography.md",
+    "skills/hep-authoring/references/code-review-report.md",
+    "skills/hep-authoring/references/code-to-methodology-synthesis.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/preregistration-and-registered-reports.md",
+    "skills/hep-authoring/references/supplementary-material-planning.md",
+    "skills/hep-citations/references/claim-evidence-mapping.md",
+    "skills/hep-computing/references/numerical-and-computational-methods.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-citations",
+    "hep-computing"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/reviewer-style-assessment.md",
+   "owner": "hep-authoring",
+   "bytes": 2130,
+   "lines": 37,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/revision-impact-tracking.md",
+   "owner": "hep-authoring",
+   "bytes": 4015,
+   "lines": 68,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/README.md",
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/collaboration-results-lifecycle.md",
+    "skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
+    "skills/hep-authoring/references/evidence-linked-writing.md",
+    "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+    "skills/hep-authoring/references/multi-venue-reformatting.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/preprint-to-journal-reconciliation.md",
+    "skills/hep-authoring/references/preregistration-and-registered-reports.md",
+    "skills/hep-authoring/references/submission-and-peer-review.md",
+    "skills/hep-authoring/references/thesis-by-publication-assembly.md",
+    "tests/skills/hep_authoring/test_handoff_text.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/scientific-style.md",
+   "owner": "hep-authoring",
+   "bytes": 11725,
+   "lines": 192,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-authoring/assets/reporting-policies.json",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/figures-and-tables.md",
+    "skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/outreach-and-public-facing-summaries.md",
+    "skills/hep-authoring/references/paper-genre-variants.md",
+    "skills/hep-authoring/references/paper-structure.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
+    "skills/hep-citations/references/reading-papers.md",
+    "skills/hep-statistics/references/statistical-inference-for-physics.md",
+    "tests/skills/hep_authoring/test_handoff_text.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-citations",
+    "hep-statistics"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/statistics-and-ml-papers.md",
+   "owner": "hep-authoring",
+   "bytes": 14160,
+   "lines": 210,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/paper-genre-variants.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/preregistration-and-registered-reports.md",
+    "skills/hep-authoring/references/scientific-style.md",
+    "skills/hep-authoring/references/submission-and-peer-review.md",
+    "skills/hep-citations/references/citation-databases.md",
+    "skills/hep-citations/references/reading-papers.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-citations"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/submission-and-peer-review.md",
+   "owner": "hep-authoring",
+   "bytes": 16728,
+   "lines": 251,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/comment-and-reply-exchange.md",
+    "skills/hep-authoring/references/conflict-of-interest-and-ethics-statements.md",
+    "skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
+    "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+    "skills/hep-authoring/references/latex-venue-setup.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/reviewer-style-assessment.md",
+    "skills/hep-authoring/references/revision-impact-tracking.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
+    "skills/hep-authoring/references/thesis-by-publication-assembly.md",
+    "tests/skills/hep_authoring/test_handoff_text.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/supplementary-material-planning.md",
+   "owner": "hep-authoring",
+   "bytes": 2107,
+   "lines": 35,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/thesis-by-publication-assembly.md",
+   "owner": "hep-authoring",
+   "bytes": 3969,
+   "lines": 62,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-authoring/references/tikz-patterns.md",
+   "owner": "hep-authoring",
+   "bytes": 5879,
+   "lines": 130,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-authoring/assets/diagrams/bayesian-model.md",
+    "skills/hep-authoring/assets/diagrams/probabilistic-graphical-model.md",
+    "skills/hep-authoring/examples/hep/03-simplified-detector-architecture.md",
+    "skills/hep-authoring/examples/hep/07-feynman-style-interaction.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/diagrams-hep.md",
+    "skills/hep-authoring/references/poster-and-talk-design.md",
+    "skills/hep-authoring/scripts/check_diagram_sources.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/citation-databases.md",
+   "owner": "hep-citations",
+   "bytes": 7542,
+   "lines": 123,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/citations-and-bibliography.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/citation-verification.md",
+    "skills/hep-citations/references/literature-discovery-and-search.md",
+    "skills/hep-citations/references/literature-guide.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/citation-verification.md",
+   "owner": "hep-citations",
+   "bytes": 6569,
+   "lines": 99,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/evidence-linked-writing.md",
+    "skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
+    "skills/hep-citations/README.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/citation-databases.md",
+    "skills/hep-citations/references/claim-evidence-mapping.md",
+    "skills/hep-citations/references/literature-discovery-and-search.md",
+    "skills/hep-citations/references/literature-guide.md",
+    "skills/hep-citations/references/literature-lookup-recipes.md",
+    "skills/hep-citations/references/literature-review.md",
+    "tests/skills/hep_authoring/test_handoff_text.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/claim-evidence-mapping.md",
+   "owner": "hep-citations",
+   "bytes": 5269,
+   "lines": 85,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
+    "skills/hep-authoring/references/paper-structure.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/reviewer-style-assessment.md",
+    "skills/hep-authoring/references/scientific-style.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/interpreting-scientific-graphics.md",
+    "skills/hep-citations/references/literature-guide.md",
+    "skills/hep-statistics/references/statistical-inference-for-physics.md",
+    "skills/hep-theory/references/mathematical-reasoning-and-proof.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring",
+    "hep-statistics",
+    "hep-theory"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/interpreting-scientific-graphics.md",
+   "owner": "hep-citations",
+   "bytes": 8500,
+   "lines": 140,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/figures-and-tables.md",
+    "skills/hep-authoring/references/manuscript-consistency-auditing.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/literature-guide.md",
+    "skills/hep-citations/references/reading-papers.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/literature-discovery-and-search.md",
+   "owner": "hep-citations",
+   "bytes": 5153,
+   "lines": 75,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/literature-guide.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/literature-guide.md",
+   "owner": "hep-citations",
+   "bytes": 9606,
+   "lines": 121,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/README.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-citations/README.md",
+    "skills/hep-citations/SKILL.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/literature-lookup-recipes.md",
+   "owner": "hep-citations",
+   "bytes": 5967,
+   "lines": 97,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "adapters/literature-lookup/assets/literature_lookup.py",
+    "skills/hep-citations/README.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/citation-databases.md",
+    "skills/hep-citations/references/citation-verification.md",
+    "skills/hep-citations/references/literature-guide.md",
+    "tests/adapters/fixtures/literature_lookup/rate-limit/inspire-arxiv-2501.99999-429.json"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/literature-review.md",
+   "owner": "hep-citations",
+   "bytes": 7904,
+   "lines": 148,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/thesis-by-publication-assembly.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/literature-discovery-and-search.md",
+    "skills/hep-citations/references/literature-guide.md",
+    "skills/hep-citations/references/reading-papers.md",
+    "skills/hep-citations/references/systematic-review-screening.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring"
+   ],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-citations/references/primary-sources-and-version-checks.md",
+   "owner": "hep-citations",
    "bytes": 12626,
    "lines": 90,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/literature-guide.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
@@ -787,216 +1034,45 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/reading-papers.md",
-   "owner": "hep-communication",
-   "bytes": 9833,
+   "path": "skills/hep-citations/references/reading-papers.md",
+   "owner": "hep-citations",
+   "bytes": 9947,
    "lines": 169,
-   "linked_from_skill_md": false,
+   "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/assets/paper/reading-notes-template.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/literature-discovery-and-search.md",
-    "skills/hep-communication/references/literature-review.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reviewer-style-assessment.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
+    "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/hep-authoring/references/reviewer-style-assessment.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
+    "skills/hep-citations/README.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/assets/reading-notes-template.md",
+    "skills/hep-citations/references/literature-discovery-and-search.md",
+    "skills/hep-citations/references/literature-guide.md",
+    "skills/hep-citations/references/literature-review.md",
     "skills/hep-statistics/references/statistical-inference-for-physics.md"
    ],
    "cited_by_other_skills": [
+    "hep-authoring",
     "hep-statistics"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
-   "path": "skills/hep-communication/references/reproducibility-auditing.md",
-   "owner": "hep-communication",
-   "bytes": 3144,
-   "lines": 59,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/references/artifact-packaging-for-release.md",
-    "skills/hep-communication/references/citations-and-bibliography.md",
-    "skills/hep-communication/references/claim-evidence-mapping.md",
-    "skills/hep-communication/references/code-review-report.md",
-    "skills/hep-communication/references/code-to-methodology-synthesis.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/preregistration-and-registered-reports.md",
-    "skills/hep-communication/references/supplementary-material-planning.md",
-    "skills/hep-computing/references/numerical-and-computational-methods.md"
-   ],
-   "cited_by_other_skills": [
-    "hep-computing"
-   ],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/reviewer-style-assessment.md",
-   "owner": "hep-communication",
-   "bytes": 2068,
-   "lines": 37,
-   "linked_from_skill_md": true,
-   "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/revision-impact-tracking.md",
-   "owner": "hep-communication",
-   "bytes": 4019,
-   "lines": 68,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/README.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/collaboration-results-lifecycle.md",
-    "skills/hep-communication/references/erratum-and-corrigendum-drafting.md",
-    "skills/hep-communication/references/evidence-linked-writing.md",
-    "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-    "skills/hep-communication/references/multi-venue-reformatting.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/preprint-to-journal-reconciliation.md",
-    "skills/hep-communication/references/preregistration-and-registered-reports.md",
-    "skills/hep-communication/references/submission-and-peer-review.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md",
-    "tests/skills/hep_communication/test_handoff_text.py"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/scientific-style.md",
-   "owner": "hep-communication",
-   "bytes": 11694,
-   "lines": 192,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/assets/reporting-policies.json",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/astroparticle-and-cosmic-ray-papers.md",
-    "skills/hep-communication/references/figures-and-tables.md",
-    "skills/hep-communication/references/grant-and-fellowship-proposal-writing.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/outreach-and-public-facing-summaries.md",
-    "skills/hep-communication/references/paper-genre-variants.md",
-    "skills/hep-communication/references/paper-structure.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reading-papers.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
-    "skills/hep-statistics/references/statistical-inference-for-physics.md",
-    "tests/skills/hep_communication/test_handoff_text.py"
-   ],
-   "cited_by_other_skills": [
-    "hep-statistics"
-   ],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/statistics-and-ml-papers.md",
-   "owner": "hep-communication",
-   "bytes": 14129,
-   "lines": 210,
-   "linked_from_skill_md": true,
-   "cited_by": [
-    "skills/hep-communication/SKILL.md",
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/citations-and-bibliography.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/paper-genre-variants.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/preregistration-and-registered-reports.md",
-    "skills/hep-communication/references/reading-papers.md",
-    "skills/hep-communication/references/scientific-style.md",
-    "skills/hep-communication/references/submission-and-peer-review.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/submission-and-peer-review.md",
-   "owner": "hep-communication",
-   "bytes": 16732,
-   "lines": 251,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/references/academic-papers-guide.md",
-    "skills/hep-communication/references/comment-and-reply-exchange.md",
-    "skills/hep-communication/references/conflict-of-interest-and-ethics-statements.md",
-    "skills/hep-communication/references/grant-and-fellowship-proposal-writing.md",
-    "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-    "skills/hep-communication/references/latex-venue-setup.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reviewer-style-assessment.md",
-    "skills/hep-communication/references/revision-impact-tracking.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
-    "skills/hep-communication/references/thesis-by-publication-assembly.md",
-    "tests/skills/hep_communication/test_handoff_text.py"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/supplementary-material-planning.md",
-   "owner": "hep-communication",
-   "bytes": 2107,
-   "lines": 35,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/systematic-review-screening.md",
-   "owner": "hep-communication",
+   "path": "skills/hep-citations/references/systematic-review-screening.md",
+   "owner": "hep-citations",
    "bytes": 3142,
    "lines": 55,
-   "linked_from_skill_md": false,
+   "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/references/literature-discovery-and-search.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-citations/references/literature-discovery-and-search.md",
+    "skills/hep-citations/references/literature-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/thesis-by-publication-assembly.md",
-   "owner": "hep-communication",
-   "bytes": 3938,
-   "lines": 62,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
-   "path": "skills/hep-communication/references/tikz-patterns.md",
-   "owner": "hep-communication",
-   "bytes": 5879,
-   "lines": 130,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-communication/assets/diagrams/bayesian-model.md",
-    "skills/hep-communication/assets/diagrams/probabilistic-graphical-model.md",
-    "skills/hep-communication/examples/hep/03-simplified-detector-architecture.md",
-    "skills/hep-communication/examples/hep/07-feynman-style-interaction.md",
-    "skills/hep-communication/references/academic-diagrams-guide.md",
-    "skills/hep-communication/references/diagrams-hep.md",
-    "skills/hep-communication/references/poster-and-talk-design.md",
-    "skills/hep-communication/scripts/check_diagram_sources.py"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-computing/references/acceptance-criteria.md",
@@ -1007,7 +1083,7 @@
    "cited_by": [
     "skills/hep-computing/assets/task-template.md",
     "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
@@ -1209,7 +1285,7 @@
    "cited_by": [
     "skills/hep-computing/references/agile-development-guide.md",
     "skills/hep-computing/references/software-architecture.md",
-    "tests/skills/hep_computing/test_example_authoring.py"
+    "tests/tools/test_example_authoring.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "f4372374 2026-10-13"
@@ -1217,7 +1293,7 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 10737,
+   "bytes": 10710,
    "lines": 148,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1226,7 +1302,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b7b159f4 2026-10-17"
+   "last_commit": "338f8d78 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1246,26 +1322,6 @@
    "last_commit": "efa283c7 2026-10-13"
   },
   {
-   "path": "skills/hep-computing/references/example-authoring.md",
-   "owner": "hep-computing",
-   "bytes": 19977,
-   "lines": 339,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/check_example_diversity.py",
-    "skills/hep-computing/scripts/generate_skill_example.py",
-    "skills/hep-computing/scripts/validate_skill_bundle.py",
-    "skills/hep-computing/scripts/validate_skill_example.py",
-    "skills/hep-ml/references/deep-learning-guide.md",
-    "tests/skills/hep_computing/test_example_authoring.py"
-   ],
-   "cited_by_other_skills": [
-    "hep-ml"
-   ],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
    "path": "skills/hep-computing/references/host-notes.md",
    "owner": "hep-computing",
    "bytes": 5648,
@@ -1273,7 +1329,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "364918e6 2026-10-09"
@@ -1305,7 +1361,7 @@
     "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
     "skills/hep-computing/references/task-authoring-guide.md",
     "skills/hep-computing/references/task-quality-checklist.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "4665f433 2026-10-13"
@@ -1313,23 +1369,24 @@
   {
    "path": "skills/hep-computing/references/numerical-and-computational-methods.md",
    "owner": "hep-computing",
-   "bytes": 9275,
+   "bytes": 9271,
    "lines": 176,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reading-papers.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
+    "skills/hep-citations/references/reading-papers.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-computing/references/symbolic-and-numerical-computation.md",
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md"
    ],
    "cited_by_other_skills": [
-    "hep-communication",
+    "hep-authoring",
+    "hep-citations",
     "hep-theory"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/performance-profiling.md",
@@ -1370,7 +1427,7 @@
    "cited_by": [
     "skills/hep-computing/references/loop-engineering.md",
     "skills/hep-computing/references/task-authoring-guide.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
@@ -1539,7 +1596,7 @@
   {
    "path": "skills/hep-computing/references/task-authoring-guide.md",
    "owner": "hep-computing",
-   "bytes": 11892,
+   "bytes": 11936,
    "lines": 201,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1550,10 +1607,11 @@
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/host-notes.md",
     "skills/hep-computing/references/loop-engineering.md",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "skills/hep-computing/scripts/lint_task.py",
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "338f8d78 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/task-quality-checklist.md",
@@ -1565,7 +1623,7 @@
     "skills/hep-computing/examples/bug-task.md",
     "skills/hep-computing/references/task-authoring-guide.md",
     "skills/hep-computing/scripts/lint_task.py",
-    "skills/hep-computing/scripts/validate_skill_bundle.py"
+    "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c0 2026-10-07"
@@ -1667,7 +1725,7 @@
    "lines": 162,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
@@ -1677,7 +1735,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-citations"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -1699,12 +1757,12 @@
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
    "owner": "hep-detector",
-   "bytes": 11748,
+   "bytes": 11744,
    "lines": 173,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/extensive-air-showers.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -1718,11 +1776,11 @@
     "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication",
+    "hep-citations",
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "26970179 2026-10-17"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -1747,7 +1805,7 @@
   {
    "path": "skills/hep-detector/references/detector-case-studies-and-checklists.md",
    "owner": "hep-detector",
-   "bytes": 14109,
+   "bytes": 14105,
    "lines": 210,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1756,12 +1814,12 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/detector-comparison-tables.md",
    "owner": "hep-detector",
-   "bytes": 15376,
+   "bytes": 15372,
    "lines": 163,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1770,7 +1828,7 @@
     "tests/skills/hep_detector/test_detector_atlas.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cbcf6c34 2026-10-17"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
@@ -1809,7 +1867,7 @@
    "lines": 189,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-glossary.md",
@@ -1822,7 +1880,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication",
+    "hep-citations",
     "hep-measurement"
    ],
    "last_commit": "9257d7b5 2026-10-15"
@@ -1933,7 +1991,7 @@
    "lines": 132,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -1945,7 +2003,7 @@
     "skills/hep-detector/scripts/xmax_gaisser_hillas.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-citations"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -1979,7 +2037,7 @@
    "lines": 256,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/muon-systems.md",
@@ -1989,7 +2047,7 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-citations"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -2014,11 +2072,11 @@
   {
    "path": "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
    "owner": "hep-detector",
-   "bytes": 11360,
+   "bytes": 11356,
    "lines": 168,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2030,11 +2088,11 @@
     "skills/hep-statistics/scripts/li_ma_significance.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication",
+    "hep-citations",
     "hep-ml",
     "hep-statistics"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/multimessenger-analysis.md",
@@ -2056,7 +2114,7 @@
    "lines": 130,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-glossary.md",
@@ -2066,7 +2124,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-citations"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -2262,7 +2320,7 @@
    "lines": 247,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -2272,7 +2330,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-citations"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -2284,7 +2342,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2300,7 +2358,7 @@
     "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication",
+    "hep-citations",
     "hep-measurement",
     "hep-statistics"
    ],
@@ -2331,7 +2389,7 @@
    "lines": 244,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/references/primary-sources-and-version-checks.md",
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/charge-confusion.md",
@@ -2351,7 +2409,7 @@
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-citations"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -2502,7 +2560,7 @@
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
    "owner": "hep-measurement",
-   "bytes": 21671,
+   "bytes": 21647,
    "lines": 207,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2513,7 +2571,7 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f79b4c5f 2026-10-17"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-measurement/references/data-pipelines.md",
@@ -2543,7 +2601,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16450,
+   "bytes": 16442,
    "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2561,7 +2619,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "f79b4c5f 2026-10-17"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -2732,9 +2790,9 @@
    "lines": 31,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/figures-and-tables.md",
-    "skills/hep-communication/references/scientific-style.md",
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
+    "skills/hep-authoring/references/figures-and-tables.md",
+    "skills/hep-authoring/references/scientific-style.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
     "skills/hep-ml/references/deep-learning-guide.md",
     "skills/hep-ml/references/evaluation-strategy.md",
     "skills/hep-ml/references/geometric-and-equivariant-learning.md",
@@ -2747,7 +2805,7 @@
     "skills/hep-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-authoring"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -2841,7 +2899,7 @@
   {
    "path": "skills/hep-ml/references/deep-learning-guide.md",
    "owner": "hep-ml",
-   "bytes": 11686,
+   "bytes": 11689,
    "lines": 151,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2858,7 +2916,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-ml/references/distributed-training.md",
@@ -2912,13 +2970,13 @@
    "lines": 34,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-communication/references/statistics-and-ml-papers.md",
+    "skills/hep-authoring/references/statistics-and-ml-papers.md",
     "skills/hep-ml/references/deep-learning-guide.md",
     "skills/hep-ml/references/robustness-and-distribution-shift.md",
     "tests/routing/test_theory_routing.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication"
+    "hep-authoring"
    ],
    "last_commit": "9257d7b5 2026-10-15"
   },
@@ -3638,14 +3696,14 @@
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
    "owner": "hep-statistics",
-   "bytes": 12879,
+   "bytes": 12847,
    "lines": 227,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/references/claim-evidence-mapping.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-communication/references/reading-papers.md",
-    "skills/hep-communication/references/scientific-style.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/scientific-style.md",
+    "skills/hep-citations/references/claim-evidence-mapping.md",
+    "skills/hep-citations/references/reading-papers.md",
     "skills/hep-computing/references/numerical-and-computational-methods.md",
     "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
@@ -3655,11 +3713,12 @@
     "tests/routing/test_theory_routing.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication",
+    "hep-authoring",
+    "hep-citations",
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
@@ -3888,13 +3947,13 @@
   {
    "path": "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
    "owner": "hep-theory",
-   "bytes": 9157,
+   "bytes": 9141,
    "lines": 179,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-communication/references/claim-evidence-mapping.md",
-    "skills/hep-communication/references/equation-and-notation-auditing.md",
-    "skills/hep-communication/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-authoring/references/equation-and-notation-auditing.md",
+    "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+    "skills/hep-citations/references/claim-evidence-mapping.md",
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
@@ -3902,10 +3961,11 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [
-    "hep-communication",
+    "hep-authoring",
+    "hep-citations",
     "hep-statistics"
    ],
-   "last_commit": "db0a9cca 2026-10-17"
+   "last_commit": "541e3dff 2026-10-19"
   },
   {
    "path": "skills/hep-theory/references/neutrino-oscillations.md",
@@ -4047,8 +4107,8 @@
  "overlap_pairs": [],
  "name_groups": {
   "academic": [
-   "skills/hep-communication/references/academic-diagrams-guide.md",
-   "skills/hep-communication/references/academic-papers-guide.md"
+   "skills/hep-authoring/references/academic-diagrams-guide.md",
+   "skills/hep-authoring/references/academic-papers-guide.md"
   ],
   "architecture": [
    "skills/hep-ml/references/architecture-selection.md",
@@ -4057,13 +4117,9 @@
    "skills/hep-ml/references/transformer-architectures.md"
   ],
   "auditing": [
-   "skills/hep-communication/references/equation-and-notation-auditing.md",
-   "skills/hep-communication/references/manuscript-consistency-auditing.md",
-   "skills/hep-communication/references/reproducibility-auditing.md"
-  ],
-  "authoring": [
-   "skills/hep-computing/references/example-authoring.md",
-   "skills/hep-computing/references/task-authoring-guide.md"
+   "skills/hep-authoring/references/equation-and-notation-auditing.md",
+   "skills/hep-authoring/references/manuscript-consistency-auditing.md",
+   "skills/hep-authoring/references/reproducibility-auditing.md"
   ],
   "balanced": [
    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -4093,16 +4149,16 @@
    "skills/hep-detector/references/imaging-atmospheric-cherenkov.md"
   ],
   "citation": [
-   "skills/hep-communication/references/citation-verification.md",
-   "skills/hep-communication/references/citations-and-bibliography.md"
+   "skills/hep-citations/references/citation-databases.md",
+   "skills/hep-citations/references/citation-verification.md"
   ],
   "code": [
-   "skills/hep-communication/references/code-review-report.md",
-   "skills/hep-communication/references/code-to-methodology-synthesis.md"
+   "skills/hep-authoring/references/code-review-report.md",
+   "skills/hep-authoring/references/code-to-methodology-synthesis.md"
   ],
   "consistency": [
-   "skills/hep-communication/references/logical-consistency-and-argument-uniformity.md",
-   "skills/hep-communication/references/manuscript-consistency-auditing.md"
+   "skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
+   "skills/hep-authoring/references/manuscript-consistency-auditing.md"
   ],
   "core": [
    "skills/hep-statistics/references/core-stats-commands.md",
@@ -4138,13 +4194,9 @@
    "skills/hep-detector/references/event-reconstruction.md",
    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
   ],
-  "evidence": [
-   "skills/hep-communication/references/claim-evidence-mapping.md",
-   "skills/hep-communication/references/evidence-linked-writing.md"
-  ],
   "figure": [
-   "skills/hep-communication/references/diagram-figure-style.md",
-   "skills/hep-communication/references/figures-and-tables.md"
+   "skills/hep-authoring/references/diagram-figure-style.md",
+   "skills/hep-authoring/references/figures-and-tables.md"
   ],
   "guideline": [
    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -4163,8 +4215,8 @@
    "skills/hep-statistics/references/time-series-inference.md"
   ],
   "latex": [
-   "skills/hep-communication/references/latex-mechanics-and-tooling.md",
-   "skills/hep-communication/references/latex-venue-setup.md"
+   "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+   "skills/hep-authoring/references/latex-venue-setup.md"
   ],
   "learning": [
    "skills/hep-ml/references/deep-learning-guide.md",
@@ -4173,9 +4225,10 @@
    "skills/hep-ml/references/transfer-learning.md"
   ],
   "literature": [
-   "skills/hep-communication/references/literature-discovery-and-search.md",
-   "skills/hep-communication/references/literature-lookup-recipes.md",
-   "skills/hep-communication/references/literature-review.md"
+   "skills/hep-citations/references/literature-discovery-and-search.md",
+   "skills/hep-citations/references/literature-guide.md",
+   "skills/hep-citations/references/literature-lookup-recipes.md",
+   "skills/hep-citations/references/literature-review.md"
   ],
   "measurement": [
    "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -4225,17 +4278,13 @@
    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
   ],
   "report": [
-   "skills/hep-communication/references/code-review-report.md",
-   "skills/hep-communication/references/preregistration-and-registered-reports.md"
+   "skills/hep-authoring/references/code-review-report.md",
+   "skills/hep-authoring/references/preregistration-and-registered-reports.md"
   ],
   "root": [
    "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "skills/hep-computing/references/root-debugging.md",
    "skills/hep-computing/references/root-usage-patterns.md"
-  ],
-  "scientific": [
-   "skills/hep-communication/references/interpreting-scientific-graphics.md",
-   "skills/hep-communication/references/scientific-style.md"
   ],
   "signal": [
    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
@@ -4250,8 +4299,8 @@
    "skills/hep-statistics/references/core-stats-guide.md"
   ],
   "statistic": [
-   "skills/hep-communication/references/diagrams-statistics.md",
-   "skills/hep-communication/references/statistics-and-ml-papers.md"
+   "skills/hep-authoring/references/diagrams-statistics.md",
+   "skills/hep-authoring/references/statistics-and-ml-papers.md"
   ],
   "statistical": [
    "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -4263,9 +4312,9 @@
    "skills/hep-ml/references/parallelism-strategy.md"
   ],
   "style": [
-   "skills/hep-communication/references/diagram-figure-style.md",
-   "skills/hep-communication/references/reviewer-style-assessment.md",
-   "skills/hep-communication/references/scientific-style.md"
+   "skills/hep-authoring/references/diagram-figure-style.md",
+   "skills/hep-authoring/references/reviewer-style-assessment.md",
+   "skills/hep-authoring/references/scientific-style.md"
   ],
   "system": [
    "skills/hep-detector/references/detector-systems-overview.md",
@@ -4284,12 +4333,12 @@
    "skills/hep-ml/references/ml-analysis-validation-and-deployment.md"
   ],
   "venue": [
-   "skills/hep-communication/references/latex-venue-setup.md",
-   "skills/hep-communication/references/multi-venue-reformatting.md"
+   "skills/hep-authoring/references/latex-venue-setup.md",
+   "skills/hep-authoring/references/multi-venue-reformatting.md"
   ],
   "writing": [
-   "skills/hep-communication/references/evidence-linked-writing.md",
-   "skills/hep-communication/references/grant-and-fellowship-proposal-writing.md"
+   "skills/hep-authoring/references/evidence-linked-writing.md",
+   "skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md"
   ]
  },
  "git_note": "full history"

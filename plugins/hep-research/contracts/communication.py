@@ -1,4 +1,4 @@
-"""Pure structural semantics of the communication extension (owner: hep-communication).
+"""Pure structural semantics of the communication extension (owner: hep-authoring).
 
 Two formats share the artifact type `communication`:
 - legacy: claims with `result_ref` and a scalar or array status (ext_communication.json); every claim must carry the

@@ -101,7 +101,7 @@ task:
   Decision-Tree, Interactive Elicitation ("Grill-Me"), Adversarial Audit /
   Red-Teaming, Test-First / Red-to-Green, or Incident Postmortem & RCA - for
   this or another skill's `examples/` directory ->
-  [references/example-authoring.md](example-authoring.md)
+  [example authoring](../../../docs/dev/example-authoring.md) in the plugin's developer documentation
 - **Designing or budgeting a prompt for an LLM call** - agent skills, prompt
   templates, structured-output contracts, model-tier choice, token budgets ->
   [references/prompt-engineering-and-token-optimization.md](prompt-engineering-and-token-optimization.md)

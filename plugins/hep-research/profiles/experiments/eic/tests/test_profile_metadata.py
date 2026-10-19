@@ -8,10 +8,11 @@ ROOT = Path(__file__).resolve().parents[1]          # the eic profile folder
 PLUGIN = ROOT.parents[2]
 sys.path.insert(0, str(PLUGIN))
 from contracts.registry import REGISTRY_BUDGET, validate_registry  # noqa: E402
+from contracts.skill_names import SKILLS as SKILL_NAMES  # noqa: E402
 
 PROFILE = json.loads((ROOT / "profile.json").read_text(encoding="utf-8"))
 REGISTRY = PLUGIN / "profiles" / "registry.json"
-SKILLS = {"hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-communication"}
+SKILLS = set(SKILL_NAMES)  # the plugin's skill names (contracts/skill_names.py)
 
 
 class IdentityTests(unittest.TestCase):

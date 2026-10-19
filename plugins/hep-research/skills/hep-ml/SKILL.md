@@ -67,4 +67,4 @@ Pipeline (scripts in `<plugin root>/skills/hep-ml/scripts/`, assets in `assets/`
 | Selection design, normalization, systematics plan around a score | hep-measurement | `ml-artifact` |
 | Scale factors, tag-and-probe, fast-simulation validation against full simulation | hep-detector | `ml-artifact` |
 | Pipeline, I/O, batch training jobs | hep-computing | `computational-run` |
-| Writing up results and figures | hep-communication | `ml-artifact` |
+| Writing up results and figures | hep-authoring | `ml-artifact` |

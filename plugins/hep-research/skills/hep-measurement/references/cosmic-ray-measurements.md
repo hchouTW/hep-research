@@ -1,7 +1,7 @@
 # Cosmic-ray measurements: index and anisotropy design
 
 An index for designing a cosmic-ray measurement: for each measurement type it points to the sections that already
-cover it, in this skill and in hep-detector, hep-statistics and hep-communication. Only the anisotropy
+cover it, in this skill and in hep-detector, hep-statistics and hep-authoring. Only the anisotropy
 section has its own content. Links are relative to this file. Experiment conventions (cutoff safety factor, binning,
 periods, resolutions) come from the bound profile, never from this file.
 
@@ -29,7 +29,7 @@ periods, resolutions) come from the bound profile, never from this file.
 | Spillover near the resolution limit; forward-fold or unfold | [Steeply falling spectra](measurements-and-unfolding.md#steeply-falling-spectra-and-spillover) |
 | Spectral features and what they mean | hep-detector: [all-particle spectrum](../../hep-detector/references/cosmic-ray-spectrum-and-composition.md#the-all-particle-spectrum-and-its-features); script `cr_spectrum_powerlaw_fit.py` |
 | Corrected-measurement checklist | [Design checklist](measurements-and-unfolding.md#design-checklist-for-a-corrected-measurement) |
-| Figures (flux scaled by a power of energy, exposure curves) | hep-communication: [figures](../../hep-communication/references/astroparticle-and-cosmic-ray-papers.md#figures-spectra-skymaps-and-exposure) |
+| Figures (flux scaled by a power of energy, exposure curves) | hep-authoring: [figures](../../hep-authoring/references/astroparticle-and-cosmic-ray-papers.md#figures-spectra-skymaps-and-exposure) |
 
 ## Flux ratios
 
@@ -76,9 +76,9 @@ periods, resolutions) come from the bound profile, never from this file.
 Context already covered elsewhere: why anisotropy constrains diffusion
 ([propagation](../../hep-detector/references/cosmic-ray-spectrum-and-composition.md#propagation)); how papers
 present it as its own block, skymap conventions and trials
-([structure](../../hep-communication/references/astroparticle-and-cosmic-ray-papers.md#how-the-structure-differs-from-collider-hep),
-[figures](../../hep-communication/references/astroparticle-and-cosmic-ray-papers.md#figures-spectra-skymaps-and-exposure),
-[reading checklist](../../hep-communication/references/astroparticle-and-cosmic-ray-papers.md#reading-checklist-additions));
+([structure](../../hep-authoring/references/astroparticle-and-cosmic-ray-papers.md#how-the-structure-differs-from-collider-hep),
+[figures](../../hep-authoring/references/astroparticle-and-cosmic-ray-papers.md#figures-spectra-skymaps-and-exposure),
+[reading checklist](../../hep-authoring/references/astroparticle-and-cosmic-ray-papers.md#reading-checklist-additions));
 arrival directions near the cutoff ([geomagnetic cutoff](../../hep-detector/references/space-based-direct-detection.md#geomagnetic-cutoff)).
 A review of the observations and methods: Ahlers & Mertsch, Prog. Part. Nucl. Phys. 94 (2017) 184, arXiv:1612.01873.
 

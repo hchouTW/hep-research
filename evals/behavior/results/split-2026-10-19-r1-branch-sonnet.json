@@ -1,0 +1,273 @@
+{
+ "manifest": {
+  "created": "2026-10-19T14:33:16.919464+00:00",
+  "plugin": {
+   "version": "0.15.0",
+   "behavior_hash": "307e74ad16041886",
+   "files": 237
+  },
+  "plugin_git": {
+   "commit": "dbb5ed02433a6898403d6d1e8c6d488c355cd5a8",
+   "dirty": false
+  },
+  "isolation": "setting-sources",
+  "opts": {
+   "max_turns": 40,
+   "timeout": 900,
+   "allowed_tools": "Bash,Read,Write,Edit,Glob,Grep,Skill",
+   "rerun": false,
+   "isolation": "setting-sources",
+   "case_budget_usd": 1.0,
+   "budget_usd": 2.0
+  },
+  "allowed_tools_default": [
+   "Bash",
+   "Read",
+   "Write",
+   "Edit",
+   "Glob",
+   "Grep",
+   "Skill"
+  ],
+  "runs": 8,
+  "holdout": null,
+  "completed": 8,
+  "skipped": 0,
+  "reused": 0,
+  "spent_usd": 0.606,
+  "stopped": null,
+  "cli_versions": [
+   "2.1.303"
+  ]
+ },
+ "runs": 8,
+ "host_errors": 0,
+ "outside_writes": {},
+ "by_layer_arm_model": {
+  "L1|natural|claude-sonnet-5-5": {
+   "runs": 3,
+   "pass": [
+    0.0,
+    0.0,
+    0.5614970317550454
+   ],
+   "blocking_failure": [
+    0.6666666666666666,
+    0.20765960080204776,
+    0.9385080552796037
+   ],
+   "mean_score": 0.3238
+  },
+  "L2|natural|claude-sonnet-5-5": {
+   "runs": 5,
+   "pass": [
+    0.6,
+    0.23072428127601302,
+    0.882379225767352
+   ],
+   "blocking_failure": [
+    0.4,
+    0.117620774232648,
+    0.7692757187239869
+   ],
+   "mean_score": 0.8393
+  }
+ },
+ "L1_selection": {
+  "claude-sonnet-5-5": {
+   "runs": 8,
+   "loaded_expected": [
+    0.75,
+    0.40927543031016905,
+    0.9285207872478909
+   ],
+   "first_is_expected": [
+    0.625,
+    0.30574239460262737,
+    0.8631557141764026
+   ],
+   "loaded_nothing": [
+    0.125,
+    0.02241749145005667,
+    0.47088818221285345
+   ],
+   "by_lang": {
+    "en": [
+     0.8333333333333334,
+     0.4364971778135298,
+     0.9699466302516933
+    ],
+    "zh-Hant": [
+     0.5,
+     0.09453120573423074,
+     0.9054687942657693
+    ]
+   },
+   "by_kind": {
+    "communication": [
+     1.0,
+     0.5655175352168255,
+     1.0
+    ],
+    "quick": [
+     0.3333333333333333,
+     0.06149194472039626,
+     0.7923403991979521
+    ]
+   },
+   "confusion": {
+    "hep-detector -> hep-literature": 1,
+    "hep-literature -> hep-literature": 3,
+    "hep-theory -> none": 1,
+    "hep-writing -> hep-literature": 1,
+    "hep-writing -> hep-writing": 2
+   }
+  }
+ },
+ "L1_out_of_domain": {},
+ "L1_L2_decomposition": {
+  "claude-sonnet-5-5|natural": {
+   "runs": 8,
+   "p_load": [
+    0.75,
+    0.40927543031016905,
+    0.9285207872478909
+   ],
+   "p_pass_given_load": [
+    0.5,
+    0.18761630648265054,
+    0.8123836935173494
+   ],
+   "p_pass_given_no_load": [
+    0.5,
+    0.09453120573423074,
+    0.9054687942657693
+   ],
+   "p_pass": [
+    0.5,
+    0.21521606221387762,
+    0.7847839377861223
+   ],
+   "p_pass_if_always_loaded": 0.5,
+   "failures_from_not_loading": 0.25
+  }
+ },
+ "natural_vs_forced": {},
+ "L2_by_skill": {
+  "hep-literature|natural|claude-sonnet-5-5": {
+   "runs": 2,
+   "pass": [
+    0.5,
+    0.09453120573423074,
+    0.9054687942657693
+   ],
+   "blocking_failure": [
+    0.5,
+    0.09453120573423074,
+    0.9054687942657693
+   ]
+  },
+  "hep-writing|natural|claude-sonnet-5-5": {
+   "runs": 3,
+   "pass": [
+    0.6666666666666666,
+    0.20765960080204776,
+    0.9385080552796037
+   ],
+   "blocking_failure": [
+    0.3333333333333333,
+    0.06149194472039626,
+    0.7923403991979521
+   ]
+  }
+ },
+ "invariants": {
+  "COMM-01|natural": [
+   1.0,
+   0.2065493143772375,
+   1.0
+  ],
+  "COMM-02|natural": [
+   1.0,
+   0.2065493143772375,
+   1.0
+  ],
+  "COMM-03|natural": [
+   0.0,
+   0.0,
+   0.6576197724933468
+  ],
+  "COMM-04|natural": [
+   1.0,
+   0.2065493143772375,
+   1.0
+  ],
+  "COMM-06|natural": [
+   0.5,
+   0.09453120573423074,
+   0.9054687942657693
+  ],
+  "CTX-READ-BOUND-PROFILE|natural": [
+   0.0,
+   0.0,
+   0.7934506856227624
+  ],
+  "L1-SELECT|natural": [
+   0.875,
+   0.5291118177871466,
+   0.9775825085499434
+  ],
+  "LIT-02|natural": [
+   1.0,
+   0.2065493143772375,
+   1.0
+  ],
+  "WRITE-01|natural": [
+   1.0,
+   0.3423802275066532,
+   1.0
+  ]
+ },
+ "blocking_failures": [
+  {
+   "case": "l2-comm-citation",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "failed": [
+    "looks it up or reports it unverified; never confirms from memory: tool_used:False | answer_matches:False"
+   ]
+  },
+  {
+   "case": "l2-comm-internal",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "failed": [
+    "answer_not_matches: found 'rises above 300 GV by 12'"
+   ]
+  },
+  {
+   "case": "quick-ams-1",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "failed": [
+    "answers AMS facts from the profile, not memory: never read profiles/experiments/ams-02/*"
+   ]
+  },
+  {
+   "case": "quick-ams-2",
+   "arm": "natural",
+   "model": "claude-sonnet-5-5",
+   "repeat": 0,
+   "failed": [
+    "verifies at a source or marks unverified: tool_used:False | file_read:False | answer_matches:False"
+   ]
+  }
+ ],
+ "L3": {},
+ "L4": {},
+ "reliability": {},
+ "unverified_graders": {}
+}

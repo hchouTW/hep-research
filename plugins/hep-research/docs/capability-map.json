@@ -379,20 +379,29 @@
    ]
   },
   {
-   "id": "claims-and-literature",
-   "capability": "Claims linked to results, literature and citation verification, manuscript checks",
-   "owner": "hep-communication",
+   "id": "literature-verification",
+   "capability": "Literature and citation verification, read levels, literature records, planned claims to recheck",
+   "owner": "hep-citations",
    "state": "tool",
    "v1": true,
    "items": [
-    "Com1",
+    "Com1"
+   ]
+  },
+  {
+   "id": "claims-to-results",
+   "capability": "Claims linked to results, manuscript checks, citations checked against literature records",
+   "owner": "hep-authoring",
+   "state": "tool",
+   "v1": true,
+   "items": [
     "Com2"
    ]
   },
   {
    "id": "terminology",
    "capability": "Terminology and notation against a glossary",
-   "owner": "hep-communication",
+   "owner": "hep-authoring",
    "state": "tool",
    "v1": true,
    "items": [
@@ -402,7 +411,7 @@
   {
    "id": "papers-and-numbers",
    "capability": "Paper types, venues, numbers from artifacts and spectrum plots",
-   "owner": "hep-communication",
+   "owner": "hep-authoring",
    "state": "tool",
    "v1": true,
    "items": [

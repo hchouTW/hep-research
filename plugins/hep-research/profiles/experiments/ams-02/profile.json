@@ -19,7 +19,8 @@
   "hep-detector",
   "hep-statistics",
   "hep-theory",
-  "hep-communication",
+  "hep-citations",
+  "hep-authoring",
   "hep-computing",
   "hep-ml"
  ],

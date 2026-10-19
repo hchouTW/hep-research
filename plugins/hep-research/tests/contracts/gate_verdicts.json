@@ -31,6 +31,22 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/literature_record_key_mismatch.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/literature_record_no_verification.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/literature_record_unknown_source.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/literature_record_unknown_version.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/measurement_duplicate_correction.json": {
   "ok": false,
   "strict_ok": false
@@ -723,6 +739,10 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/dataset_record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/literature_record.json": {
   "ok": true,
   "strict_ok": true
  },

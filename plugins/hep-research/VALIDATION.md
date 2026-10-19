@@ -1855,6 +1855,103 @@ that decides the same question.
 | Ruff 0.16.10, mypy 2.4.0 | clean |
 | Registry | 80 of 80 V parts passing |
 
+## SPLIT-LIVE-EVAL (2026-10-19, Claude Code 2.1.303, claude-sonnet-5-5)
+
+Live evals of the split of hep-communication into hep-literature and hep-writing (restructuring plan v6, section 8),
+branch `feat/split-communication` at 80201cde against main ee6b8b83 (0.15.0), one campaign, about $74 in model
+calls. Results in the repository's `evals/` (`routing/results/split-*`, `research_communication/results/split-*`,
+`behavior/results/split-2026-10-19-*`). Single samples are noisy; doubtful cases were repeated twice on both sides.
+
+| Plan section 8 criterion | Main | Branch | Verdict |
+|---|---|---|---|
+| Full routing set, strict | 369/394 | 369/404 (lenient 372) | baseline re-measured |
+| 2. The 53 cases that named hep-communication, strict | 51 | 51 | pass (not below) |
+| New split cases (`lit-*`, `j13`) | - | 7/10; repeats: `lit-turns-1` 0/3, `lit-bound-table-1` 1/3, `lit-bound-related-1` 1/3 | weak spots |
+| 3. Communication eval, cases loading no skill | 2/11 | 4/11 (01 trace, 06 zh status, 10 summary, 11 injection) | **fail** (limit 2/11) |
+| 4. Publication-record questions loading no skill (12 cases) | 0 | 0 | pass |
+| 5. Other skills' cases: pass on main, fail on branch | - | 11 in one run; with 3 runs each: `wp11-xexp-2` 3/3 -> 0/3 (loads hep-literature), `dr-a-toy-1` 3/3 -> 1/3, `th-nucstruct-1` 3/3 -> 1/3, `t19-quick-3` 3/3 -> 1/3, `dr-a-toy-2` 3/3 -> 2/3; `th-a-const-2` 1/3 -> 0/3 and `wp11-bound-dm-2` 1/3 -> 0/3 now load hep-literature instead of hep-communication; `c-nuc-iso-2`, `co-roofit-neg-1`, `d-ms-aniso-1` flaky on both | **fail** |
+| 5. Plan 6.7 cases (`wp11-xexp-3`, `eic-underspec-1`, `t19-turns-3`) | fail | fail, same outcome | not worse |
+| 6. G3 behavior case `l2-write-cite-intro` | - | pass (loads hep-literature) | pass |
+| 7. Always-on growth | 2,417 | 2,529 tokens (+112) | pass |
+| Behavior subset (communication cases, 1 run) | 2/8 | 5/9; `l2-comm-status` (short abstract sentence) loads no skill | - |
+| Name comparison (63 cases involving the two skills) | - | working names 58/63, `hep-sources`/`hep-manuscript` 53/63 | keep working names |
+
+Outcome: the round fails criteria 3 and 5. The split pulls published-result questions that belong to hep-theory or
+hep-statistics (`wp11-xexp-2`, `th-a-const-2`, `wp11-bound-dm-2`) into hep-literature, and short writing requests
+(abstract sentence, one-line summary, a status sentence in Chinese) load no skill more often than before. Per plan
+section 8 the next step is a description round (at most two) before the split may proceed; plan step 0 stands either
+way.
+
+Description round 1 (dbb5ed02, about $8; plan section 8 allows two). hep-literature names a source's status and whether
+citations are verified, and its "Not for" sends models and constants to hep-theory and p-values to hep-statistics (687
+characters); hep-writing adds "even one sentence for an abstract or summary; load it first" (652); always-on 2,534
+(+117). Rerun of the 93 cases that involve the two skills, the wp11 set and the doubtful cases, one run:
+
+| Measure | Round 0 | Round 1 | Main |
+|---|---|---|---|
+| The 93 cases, strict | 76 | 78 | 80 of the 83 that exist on main |
+| Communication eval, no skill loaded (criterion 3, limit 2/11) | 4/11 | 3/11 (01, 06, 09) | 2/11 |
+| `wp11-xexp-2` (hep-statistics) | hep-literature | hep-literature (0/4 over all branch runs) | 3/3 |
+| `th-a-const-2`, `wp11-bound-dm-2` (hep-theory) | hep-literature | hep-theory; no skill | 1/3 each |
+| `lit-turns-1` second turn (citations verified?) | no skill | no skill | - |
+| `dr-a-toy-1`, `th-nucstruct-1`, `t19-quick-3` (outside the split) | fail | fail (now 0/4, 1/4, 1/4 on the branch) | 3/3 each |
+
+Round 1 still fails criteria 3 and 5. The persistent regressions in `dr-a-toy-1`, `th-nucstruct-1` and `t19-quick-3`
+involve hep-detector, hep-theory and hep-computing only, whose descriptions the split did not change; they point to the
+eight-skill listing itself, which a description round of the two new skills cannot address.
+
+Cause of the regressions outside the split (about $6.60, 5 runs per arm; `evals/routing/results/cause-*`):
+
+| Arm | `dr-a-toy-1` (hep-detector) | `t19-quick-3` (hep-detector) | `th-nucstruct-1` (hep-theory) |
+|---|---|---|---|
+| A main (7 skills) | 5/5 | 4/5 | 3/5 |
+| B branch (8 skills) | 1/5 | 2/5 | 2/5 |
+| C branch without hep-literature (7) | 0/5 | 1/5 | 3/5 |
+| E as C, hep-writing with the old hep-communication description | 0/5 | 3/5 | - |
+| F phase 0 only (338f8d78) | 5/5 | 5/5 | - |
+| G branch, the two skills renamed hep-citations / hep-authoring | 5/5 | 5/5 | - |
+
+`th-nucstruct-1` is noise on every arm. The other two follow the alphabetical position of the skills in the host's
+listing, not the description text: with hep-communication gone, hep-computing is listed first and draws ambiguous
+detector requests (`dr-a-toy-1` loads hep-computing); names that sort before hep-computing (arm G) restore main's
+outcome. A name change is therefore the candidate for description round 2 (plan section 8 allows names or
+descriptions); the working names and `hep-sources`/`hep-manuscript` all sort after hep-computing.
+
+Description round 2 (ebb58136, about $9.30; the last round plan section 8 allows): the two skills are renamed
+hep-citations and hep-authoring, which sort before hep-computing; descriptions as in round 1 (689 and 651 characters);
+always-on 2,538 (+121); offline gate 24 pass, 4,324 tests, 119 skipped. Same 93 cases, communication eval and
+behavior subset; doubtful cases repeated twice:
+
+| Measure | Main | Round 2 | Verdict |
+|---|---|---|---|
+| The 93 cases, strict (83 exist on main) | 80/83 | 74/83; all 93: 82 (round 1 78, round 0 76) | - |
+| 3. Communication eval, no skill loaded | 2/11 | 1/11 (01) | pass |
+| 4. Publication-record questions | 0 no-skill | 0 no-skill | pass |
+| 6. `l2-write-cite-intro` | - | pass | pass |
+| Behavior subset (communication) | 2/8 | 4/8 | - |
+| `dr-a-toy-1`, `t19-quick-3` (listing order) | 5/5, 4/5 | 5/5 (cause arm G), 2/3 | fixed |
+| `th-a-const-2`, `co-roofit-neg-1`, `wp11-bound-dm-1` (3 runs) | 1/3, 1/3, 1/1 | 2/3, 2/3, 2/3 | not worse |
+| `wp11-bound-dm-2` (3 runs) | 1/3 | 0/3 (no skill) | marginal |
+| `wp11-xexp-2`: compatibility p-value of two named experiments (3 runs) | 3/3 hep-statistics | 0/3, loads hep-citations | **regression** |
+| New split cases | - | 8/10 (`lit-negative-1`, `lit-turns-1` fail) | - |
+
+Round 2 passes criteria 2, 3, 4, 6 and 7 and fails criterion 5 on one case (`wp11-xexp-2`, every branch run since
+round 0 loads the literature skill) and marginally on `wp11-bound-dm-2`. By the plan's rule (two failed rounds) the
+split is abandoned unless the maintainer accepts or waives that case.
+
+Targeted fix after round 2 (769f34a0, about $2.60, maintainer-approved beyond the plan's two rounds): hep-citations
+drops the comparison ask-first clause and its "Not for" says hep-statistics owns whether two results agree (653
+characters, always-on 2,527, +110). The 28 cases that expect hep-citations, name it in `not` or accept it, plus
+`wp11-xexp-2`, `wp11-xexp-3` and `wp11-bound-dm-2`: 26/28 strict (round 2: 23). `wp11-xexp-2` 3/3 hep-statistics
+(main 3/3), `wp11-bound-dm-2` 1/3 (main 1/3), `lit-negative-1` now passes. With this, every regression measured in
+the rounds above is back at main's level; the full 404-case set was not rerun after the fix.
+
+Final full routing run on e79ccf80 (2026-10-20, about $32 plus $0.60 of repeats): 379/404 strict (380 lenient); on
+the 394 cases that exist on main 371 against main's 369. Four cases pass on main and fail here, six the other way;
+repeated: `c-det-atlas-2` 2/3 on both sides, `d-cc-preserve-1` 3/3 main vs 2/3, `st-sensitivity-1` and
+`wp11-bound-dm-2` flaky on main (2/3, 1/3). New split cases 8/10 (`lit-bound-related-1`, `lit-turns-1` fail). No
+regression beyond run-to-run noise; accepted by the maintainer and merged. Total live spend for the split about $134.
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the

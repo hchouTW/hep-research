@@ -422,7 +422,7 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "Write the results section of the paper from these fit outputs.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "drafting or revising paper sections"
    ],
@@ -737,7 +737,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Check whether this INSPIRE citation really supports the 2.1% number in my draft.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "citations",
     "INSPIRE-HEP"
@@ -751,7 +751,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請幫我回覆審稿人的 referee reports，並修改摘要。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "referee reports",
     "abstracts"
@@ -765,7 +765,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "What data period and rigidity range does the AMS-02 nitrogen flux paper report?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "what a paper states"
    ],
@@ -779,7 +779,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "A colleague cites an AMS-02 paper observing antihelium-4. Is that paper real?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "whether a paper exists"
    ],
@@ -793,7 +793,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "What has AMS-02 published most recently on cosmic-ray nuclei?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "what a named experiment published"
    ],
@@ -807,7 +807,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Is the 2016 AMS-02 boron-to-carbon ratio paper still the latest result I should cite?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "which result is the latest"
    ],
@@ -821,7 +821,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Does the AMS-02 hardening of the proton and helium spectra prove a second source population?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "whether a result supports a claim or interpretation"
    ],
@@ -839,7 +839,7 @@
    "trigger_terms": [
     "amplitudes"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "inputs": {
     "diagram.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nDiagram: e- e+ annihilate into a photon, which produces a single muon (no antimuon) at tree level.\n"
    }
@@ -853,7 +853,7 @@
    "trigger_terms": [
     "template fits"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "inputs": {
     "fit_config.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"templates\": [\"signal.csv\", \"background.csv\"], \"data\": \"data.csv\", \"poi\": \"mu\"}\n",
     "signal.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,3\n1,8\n2,4\n",
@@ -948,7 +948,7 @@
    "trigger_terms": [
     "likelihoods"
    ],
-   "not": "hep-communication"
+   "not": "hep-authoring"
   },
   {
    "id": "co-batch-sbatch-1",
@@ -1045,7 +1045,7 @@
     "hep-measurement",
     "hep-detector",
     "hep-statistics",
-    "hep-communication"
+    "hep-authoring"
    ]
   },
   {
@@ -1117,7 +1117,7 @@
    "chain": [
     "hep-detector",
     "hep-statistics",
-    "hep-communication"
+    "hep-authoring"
    ],
    "note": "T1: the prediction exists, so the chain starts at the fold (routing-contract ownership table)",
    "inputs": {
@@ -1196,13 +1196,13 @@
    "lang": "en",
    "kind": "journey",
    "prompt": "Draft the paper section and figures with claim-to-result links and honest status.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "claim-to-result links"
    ],
    "journey": "J10",
    "chain": [
-    "hep-communication"
+    "hep-authoring"
    ],
    "inputs": {
     "results.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"status\": [\"synthetic\"], \"sigma_pb\": 745.6, \"stat\": 6.6, \"syst\": 14.9}\n"
@@ -1865,7 +1865,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Build a literature matrix of recent W mass measurements with their methods and uncertainties.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "literature matrices and reviews"
    ],
@@ -1876,7 +1876,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請幫我把分析流程畫成 diagrams，輸出可編輯的原始檔。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "diagrams"
    ],
@@ -1887,7 +1887,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Turn my thesis results into a 15-minute conference talk and a poster version.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "talks and posters"
    ],
@@ -1898,7 +1898,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "幫我寫研究計畫書（proposals）的動機與方法章節。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "proposals"
    ],
@@ -1909,7 +1909,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Write handover notes for the student who takes over my analysis next month.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "handover notes"
    ],
@@ -1920,7 +1920,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Improve the captions and layout of the figures and tables in chapter 4 of my thesis.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "captions",
     "figures and tables"
@@ -1986,7 +1986,7 @@
    "trigger_terms": [
     "Feynman diagram is allowed"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "set": "T3",
    "inputs": {
     "diagram.tex": "% SYNTHETIC routing fixture: invented values, not data from any experiment.\n\\begin{tikzpicture}\n  \\begin{feynman}\n    \\vertex (a) {\\(e^-\\)};\n    \\vertex [below=2cm of a] (b) {\\(e^+\\)};\n    \\vertex [below right=1cm and 1.5cm of a] (v1);\n    \\vertex [right=2cm of v1] (v2);\n    \\vertex [above right=1cm and 1.5cm of v2] (c) {\\(\\gamma\\)};\n    \\vertex [below right=1cm and 1.5cm of v2] (d) {\\(\\gamma\\)};\n    \\diagram* {\n      (a) -- [fermion] (v1) -- [fermion] (b),\n      (v1) -- [photon, edge label=\\(\\gamma^*\\)] (v2),\n      (v2) -- [photon] (c),\n      (v2) -- [photon] (d),\n    };\n  \\end{feynman}\n\\end{tikzpicture}\n"
@@ -2025,7 +2025,7 @@
    "trigger_terms": [
     "crashes"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "set": "T4"
   },
   {
@@ -2037,7 +2037,7 @@
    "trigger_terms": [
     "significance and look-elsewhere effects"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "set": "T4"
   },
   {
@@ -2049,7 +2049,7 @@
    "trigger_terms": [
     "uncertainty estimation"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "set": "T4"
   },
   {
@@ -2061,7 +2061,7 @@
    "trigger_terms": [
     "resolution"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "set": "T4"
   },
   {
@@ -2069,7 +2069,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Write the code-review part of my referee report: does the released repository do what the paper says it does?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "referee reports"
    ],
@@ -2080,7 +2080,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "上次已經查證過這篇 citations 的 INSPIRE-HEP 紀錄，這次改稿能直接沿用嗎？",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "citations",
     "INSPIRE-HEP"
@@ -2139,7 +2139,7 @@
    "lang": "zh-Hans",
    "kind": "direct",
    "prompt": "请帮我改写论文的摘要（abstracts）和图注（captions）。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "abstracts",
     "captions"
@@ -2253,7 +2253,7 @@
    "lang": "de",
    "kind": "direct",
    "prompt": "Prüfe, ob dieses INSPIRE-Zitat (citations) die 2,1 % in meinem Entwurf wirklich stützt.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "citations",
     "INSPIRE-HEP"
@@ -2340,7 +2340,7 @@
     "systematic uncertainties",
     "evaluation plan"
    ],
-   "not": "hep-communication",
+   "not": "hep-authoring",
    "set": "T19",
    "variant": "adversarial"
   },
@@ -2399,7 +2399,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Quick: does arXiv:2405.01234 really exist?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "whether a paper exists"
    ],
@@ -2485,7 +2485,7 @@
    "turns": [
     {
      "prompt": "Write the results paragraph for the paper from that fit, keeping its status labels.",
-     "expected": "hep-communication",
+     "expected": "hep-authoring",
      "trigger_terms": [
       "drafting or revising paper sections"
      ]
@@ -2778,7 +2778,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "有人宣稱 AMS-02 的反質子/質子比支持暗物質的解釋，這個結果真的支持這種說法嗎？",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "whether a result supports a claim or interpretation"
    ],
@@ -2963,7 +2963,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Build a literature matrix of the published proton spectral-hardening measurements from AMS-02, PAMELA, CREAM and DAMPE with the break rigidity and its uncertainty.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "literature matrices and reviews"
    ],
@@ -3008,7 +3008,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "A CRDB entry for the AMS-02 positron flux looks different from what I remember. Which paper is it transcribed from, and what does that paper state?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "what a paper states"
    ],
@@ -3076,7 +3076,7 @@
    "set": "WP11",
    "limited_support": true,
    "also_accept": [
-    "hep-communication"
+    "hep-citations"
    ],
    "note": "interpretation beyond the validated profiles: hep-theory gives the limited-support notice"
   },
@@ -3096,7 +3096,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Which is AMS's latest B/C paper?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "which result is the latest"
    ],
@@ -3111,7 +3111,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "AMS 最新的 B/C 論文是哪一篇？",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "which result is the latest"
    ],
@@ -3306,7 +3306,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Generate the LaTeX macros for my results table from this statistical result, with consistent numbers and units.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "numbers and units"
    ],
@@ -3319,7 +3319,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我要寫一篇 search 論文投 PRD，結果章節一定要有哪些內容？",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "papers from results"
    ]
@@ -3329,7 +3329,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Translate my Chinese draft abstract into English without changing the claim strength or any number.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "English or Chinese"
    ],
@@ -3482,7 +3482,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "My citation ledger says a detector upgrade is planned for 2027; how do I cite that plan so it gets rechecked, and keep it from supporting the measured result in my paper?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "finding and verifying literature and citations"
    ]
@@ -3492,7 +3492,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "文獻紀錄裡有一條「預計 2027 年安裝」的計畫性敘述，引用時要怎麼寫，過了日期要怎麼提醒重新查核？",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-citations",
    "trigger_terms": [
     "finding and verifying literature and citations"
    ]
@@ -3502,7 +3502,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Check the terminology of my cosmic-ray paper draft: it mixes exposure, collection time and data exposure, and quotes momenta in GV.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "terminology"
    ]
@@ -3512,7 +3512,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "幫我檢查論文草稿的術語：曝露量、收集時間和資料曝光混用，剛度和動量也分不清。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "terminology"
    ]
@@ -4107,7 +4107,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Check my search paper draft against what a search paper must contain: is a systematic-uncertainty table or the statistical method missing?",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "papers from results"
    ]
@@ -4117,7 +4117,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我在寫探測器性能（instrumentation）論文，內容一定要包含哪些部分？請幫我檢查草稿缺了什麼。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "drafting or revising paper sections"
    ]
@@ -4127,7 +4127,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Make sure the signal strength in my abstract, tables and conclusion is the same number, rounded the PDG way from the fit result.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "numbers and units"
    ]
@@ -4137,7 +4137,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "中英文兩版論文草稿的數字、不確定度和「證據」與「觀測」的用詞一致嗎？",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "English or Chinese"
    ]
@@ -4551,7 +4551,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Set up my thesis in Chinese with XeLaTeX and ctex, and tell me the JINST class and bibliography rules for the paper version.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "theses"
    ]
@@ -4561,7 +4561,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我要用 xeCJK 排中文博士論文，也想知道投 JINST 要用哪個 class。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "theses"
    ]
@@ -4571,7 +4571,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Plot E^2.7 times the flux from these two dataset records with Lafferty-Wyatt bin positions and status labels in the caption.",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "figures and tables"
    ]
@@ -4581,7 +4581,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "把兩筆通量資料畫成 E^2.7 加權的能譜圖，圖說要標明資料狀態，而且不要看起來像合併結果。",
-   "expected_primary": "hep-communication",
+   "expected_primary": "hep-authoring",
    "trigger_terms": [
     "figures and tables"
    ]
@@ -4644,6 +4644,150 @@
    "expected_primary": "hep-measurement",
    "trigger_terms": [
     "cosmic-ray measurements"
+   ]
+  },
+  {
+   "id": "lit-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Import the AMS-02 B/C table from HEPData and compare it with my propagation model's prediction.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "comparing a model with an experiment's published data"
+   ],
+   "not": "hep-citations",
+   "set": "SPLIT",
+   "profiles": [
+    "experiment:ams-02"
+   ]
+  },
+  {
+   "id": "lit-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Are the AMS-02 and PAMELA proton fluxes compatible? Give me the goodness of fit with their covariances.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit"
+   ],
+   "not": "hep-citations",
+   "set": "SPLIT",
+   "profiles": [
+    "experiment:ams-02"
+   ]
+  },
+  {
+   "id": "lit-bound-related-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write the related-work paragraph of my paper citing recent W mass measurements.",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ],
+   "set": "SPLIT",
+   "note": "writing; the citations it needs go to hep-citations first (handoff)"
+  },
+  {
+   "id": "lit-bound-cited-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Is the number cited in my draft right? It says the paper reports 80.4335 GeV.",
+   "expected_primary": "hep-citations",
+   "trigger_terms": [
+    "what a paper states"
+   ],
+   "set": "SPLIT",
+   "note": "a draft is mentioned, but the question is what the source states"
+  },
+  {
+   "id": "lit-bound-referee-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Review this paper and write the referee report.",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "referee reports"
+   ],
+   "set": "SPLIT",
+   "note": "the paper must be read, but the deliverable is the report"
+  },
+  {
+   "id": "lit-bound-table-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Collect the literature on this topic into a table with identifiers and read levels.",
+   "expected_primary": "hep-citations",
+   "trigger_terms": [
+    "literature matrices and reviews"
+   ],
+   "set": "SPLIT",
+   "note": "a table is produced, but it is a literature matrix"
+  },
+  {
+   "id": "lit-zhs-1",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "prompt": "AMS-02 最近发表的宇宙线反质子论文是哪一篇？请注明查询日期。",
+   "expected_primary": "hep-citations",
+   "trigger_terms": [
+    "which result is the latest"
+   ],
+   "set": "SPLIT",
+   "profiles": [
+    "experiment:ams-02"
+   ]
+  },
+  {
+   "id": "lit-ja-1",
+   "lang": "ja",
+   "kind": "direct",
+   "prompt": "この論文（arXiv:2405.01234）は本当に存在しますか？",
+   "expected_primary": "hep-citations",
+   "trigger_terms": [
+    "whether a paper exists"
+   ],
+   "set": "SPLIT"
+  },
+  {
+   "id": "lit-turns-1",
+   "lang": "en",
+   "kind": "multi-turn",
+   "prompt": "Draft the introduction of my W mass paper with its citations.",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ],
+   "set": "SPLIT",
+   "turns": [
+    {
+     "prompt": "Have all these citations been verified?",
+     "expected": "hep-citations",
+     "trigger_terms": [
+      "finding and verifying literature and citations"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "j13",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Find what AMS-02 published on B/C, compare it with my propagation model, check the compatibility, and write it up.",
+   "expected_primary": "hep-citations",
+   "trigger_terms": [
+    "what a named experiment published"
+   ],
+   "journey": "J13",
+   "set": "SPLIT",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "chain": [
+    "hep-citations",
+    "hep-theory",
+    "hep-statistics",
+    "hep-authoring"
    ]
   }
  ]

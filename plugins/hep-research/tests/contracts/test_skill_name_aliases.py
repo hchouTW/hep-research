@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 from contracts import migrate_skill_names, registry, skill_names, validate  # noqa: E402
 
 OLD_NEW = {"hep-analysis": "hep-measurement", "detector-response": "hep-detector",
-           "research-communication": "hep-communication", "physics-ml": "hep-ml"}
+           "research-communication": "hep-authoring", "physics-ml": "hep-ml", "hep-communication": "hep-authoring"}
 FIXTURE = ROOT / "contracts" / "fixtures" / "skill_aliases" / "response_old_skill_names.json"
 REG = ROOT / "contracts" / "fixtures" / "registry"
 
@@ -130,6 +130,20 @@ class ArtifactAliasTests(unittest.TestCase):
 
     def test_old_ml_handoff_is_not_unknown(self):
         self.assertTrue({"physics-ml", "hep-ml"} <= validate.KNOWN_SKILLS)
+
+    def test_split_communication_name_maps_to_hep_authoring(self):
+        # the split (contracts 2.13.0): an artifact produced under hep-communication migrates to hep-authoring
+        doc = load(FIXTURE)
+        doc["provenance"]["producer_skill"] = "hep-communication"
+        doc["handoff"]["to_skill"] = "research-communication"
+        rep = validate.validate_artifact(doc)
+        msgs = {f.path: f.message for f in rep.findings if f.code == skill_names.CODE and f.severity == "warning"}
+        self.assertIn("'hep-authoring'", msgs["$.provenance.producer_skill"])
+        self.assertIn("after 0.15.0", msgs["$.provenance.producer_skill"])
+        self.assertIn("0.11.0", msgs["$.handoff.to_skill"])
+        new, report = migrate_skill_names.migrate(doc)
+        self.assertEqual((new["provenance"]["producer_skill"], new["handoff"]["to_skill"]), ("hep-authoring", "hep-authoring"))
+        self.assertTrue(validate.validate_artifact(new, strict_versions=True).ok)
 
 
 class ProfileAliasTests(unittest.TestCase):

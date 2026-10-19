@@ -22,7 +22,7 @@ class SubprocessTimeoutTests(unittest.TestCase):
     def test_every_call_is_bounded(self):
         files = (sorted((ROOT / "tests").rglob("*.py")) + sorted((ROOT / "profiles").rglob("tests/*.py"))
                  + sorted((ROOT / "tools").glob("*.py"))
-                 + [ROOT / "skills" / "hep-communication" / "scripts" / "check_diagram_sources.py"])
+                 + [ROOT / "skills" / "hep-authoring" / "scripts" / "check_diagram_sources.py"])
         missing = [m for f in files for m in unbounded(f)]
         self.assertEqual(missing, [], "add timeout=... to these subprocess calls")
 

@@ -3,7 +3,7 @@
 Reusable, qualitative comparison tables under one set of definitions
 ([performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md)). Entries give mechanism and
 scaling, not performance numbers; a numeric performance claim requires the apparatus,
-configuration, phase space, conditions, and source ([primary sources and version checks](../../hep-communication/references/primary-sources-and-version-checks.md)). Abbreviations
+configuration, phase space, conditions, and source ([primary sources and version checks](../../hep-citations/references/primary-sources-and-version-checks.md)). Abbreviations
 are defined in [detector glossary](detector-glossary.md). A number for a named experiment's
 detector comes from its profile or the sourced detector atlas with its claim id
 (`<plugin root>/skills/hep-detector/scripts/detector_atlas.py query`); `detector_atlas.py audit` lists numbers

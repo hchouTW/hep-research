@@ -1,6 +1,10 @@
-"""Skill names a contract may record, and the deprecated aliases kept after the rename (contracts 2.9.0).
+"""Skill names a contract may record, and the deprecated aliases kept after the renames (contracts 2.9.0, 2.13.0).
 
-hep-research 0.11.0 renamed four skills. Artifacts and profiles written before the rename keep validating: an old name
+hep-research 0.11.0 renamed four skills (contracts 2.9.0). After 0.15.0, hep-communication was split into
+hep-citations and hep-authoring (contracts 2.13.0); hep-communication is a deprecated alias of hep-authoring, the owner of
+the communication extension it produced and the skill every other skill hands write-ups to, and the 0.11.0 alias
+research-communication now points to hep-authoring as well. The literature-record type is new, so no artifact written
+under the old name needs hep-citations. Artifacts and profiles written before the rename keep validating: an old name
 is a deprecated alias of the new one, reported as `skill.deprecated_name` (artifacts) or `profile.deprecated_skill_name`
 (profiles), a warning by default and an error under the version and name policy (`--strict-versions`, and protected
 use). `contracts/migrate_skill_names.py` rewrites an artifact's `provenance.producer_skill` and `handoff.to_skill`.
@@ -14,14 +18,17 @@ from __future__ import annotations
 from typing import Any
 
 SKILLS = ("hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml",
-          "hep-communication")
+          "hep-citations", "hep-authoring")
 DEPRECATED_SKILL_ALIASES = {
     "hep-analysis": "hep-measurement",
     "detector-response": "hep-detector",
-    "research-communication": "hep-communication",
+    "research-communication": "hep-authoring",
     "physics-ml": "hep-ml",
+    "hep-communication": "hep-authoring",
 }
 RENAMED_IN = "0.11.0"  # the hep-research release that renamed the skills
+# Names retired after RENAMED_IN, with when: the split is unreleased, so the message names the last release before it.
+RETIRED_LATER = {"hep-communication": "the release after 0.15.0 (split into hep-citations and hep-authoring)"}
 ALL_SKILL_NAMES = frozenset(SKILLS) | frozenset(DEPRECATED_SKILL_ALIASES)
 CODE = "skill.deprecated_name"
 PROFILE_CODE = "profile.deprecated_skill_name"
@@ -33,8 +40,9 @@ def canonical(name: Any) -> Any:
 
 
 def message(field: str, old: str, hint: str = "rewrite it with contracts/migrate_skill_names.py") -> str:
+    when = RETIRED_LATER.get(old, RENAMED_IN)
     return (f"{field} '{old}' is the deprecated name of '{DEPRECATED_SKILL_ALIASES[old]}' (renamed in hep-research "
-            f"{RENAMED_IN}); {hint}")
+            f"{when}); {hint}")
 
 
 def _ext_handoffs(value: Any, path: str):

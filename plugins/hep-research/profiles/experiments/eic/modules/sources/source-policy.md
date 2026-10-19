@@ -1,6 +1,6 @@
 # Source policy: EIC profile
 
-> Method owner: [hep-communication](../../../../../skills/hep-communication/SKILL.md) for literature verification and citation practice; this module fixes the tiers and rules for EIC and ePIC material.
+> Method owner: [hep-citations](../../../../../skills/hep-citations/SKILL.md) for literature verification and citation practice; this module fixes the tiers and rules for EIC and ePIC material.
 
 ## Tiers
 

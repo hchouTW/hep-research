@@ -6,7 +6,7 @@ Status: M1, 2026-10-02. Responsibilities here are fixed; file names may still mo
 
 | Component | v1 | Why |
 |---|---|---|
-| Skills | Seven core skills under `skills/` | Description-routed entry points; plugin namespace `hep-research:<skill>` `[Confirmed]` (host fact 3) |
+| Skills | Eight core skills under `skills/` (the former communication skill was split into hep-citations and hep-authoring after 0.15.0) | Description-routed entry points; plugin namespace `hep-research:<skill>` `[Confirmed]` (host fact 3) |
 | Shared resources | `core/`, `contracts/`, `profiles/`, `adapters/` read on demand via `${CLAUDE_PLUGIN_ROOT}/...` | The whole plugin root is installed as one cached directory `[Confirmed]` (host fact 4), so no per-skill copies are needed |
 | Commands | None | Skills supersede commands `[Confirmed]` (host fact 8); D10 |
 | Hooks, MCP servers, background processes, required subagents | None | No implicit activity; handoffs are files |
@@ -20,7 +20,7 @@ Core skill ownership and contested-topic resolution are restated per skill in ea
 | kinematics | hep-theory | implemented |
 | stats | hep-statistics | implemented |
 | blinding | hep-computing | implemented |
-| evidence | hep-communication | implemented |
+| evidence | hep-citations | implemented |
 
 Admission rule: code enters `core/` only when more than one top-level component uses it; experiment and theory-domain specifics never do.
 
@@ -45,7 +45,7 @@ Enforced by `tools/check_layering.py` (AST imports + text scan + schema scan + s
 | Vocabularies | `contracts/vocab/core.json`, `contracts/vocab.py` | levels, normalization kinds (no collider-only default), quantity types, bin semantics, statuses, derivation statuses, uncertainty kinds, missing markers (`unknown` / `not-applicable` / `not-provided`), convention keys, evidence statuses, verification levels, capability statuses. Profiles extend only with namespaced terms. |
 | Observable spec, binned data, conventions block | `contracts/schemas/common.json` | Shared by measurements, predictions and dataset records |
 | Envelope | `contracts/schemas/envelope.json` | Versions, bindings, provenance, status labels, inputs (with their statuses), handoff, unresolved inputs |
-| Typed extensions | `contracts/schemas/ext_*.json` | measurement-spec, response, theory-spec, prediction, dataset-record, comparison-spec, statistical-result, ml-artifact, computational-run, communication |
+| Typed extensions | `contracts/schemas/ext_*.json` | measurement-spec, response, theory-spec, prediction, dataset-record, comparison-spec, statistical-result, ml-artifact, computational-run, communication, literature-record (contracts 2.13.0) |
 | Validator | `contracts/validate.py` | Schema subset engine (`contracts/schema.py`) + semantic rules (status propagation, double-counted corrections, auto-Gaussianized envelopes, paradigm completeness, synthetic labelling, theory independence) |
 | Registry and profiles | `contracts/registry.py`, `schemas/registry.json`, `schemas/profile.json` | Two-tier registry, templates, compatibility, escape and cycle checks |
 | Project config | `contracts/project.py`, `schemas/project_config.json` | Resolution order, local profiles, pins, overrides with provenance |

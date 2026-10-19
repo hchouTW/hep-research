@@ -5,6 +5,62 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+The communication skill is split into **hep-citations** (sources, citations, literature records) and **hep-authoring**
+(papers, figures, diagrams, talks), with a literature-record artifact type and a citation check (restructuring plan,
+version 6). Contracts 2.13.0. Static routing passes all 404 cases (394 original reassigned, none deleted, 10 added);
+live evals (VALIDATION SPLIT-LIVE-EVAL, about $98 over three rounds): the skills are named hep-citations and
+hep-authoring because the host lists skills alphabetically and names sorting after hep-computing let it draw
+ambiguous detector requests; after round 2 and a targeted fix (hep-statistics owns whether two results agree) every measured regression is
+back at main's level; a final full run scores 371 of main's 394 cases (main 369) plus 8 of the 10 new ones.
+
+- **Two skills replace hep-communication.** hep-citations answers what a paper or an experiment published, whether a
+  paper exists, the latest result, whether a source supports a claim and citation requests, from the bound profile's
+  ledger or a primary source, never from memory, and owns literature records, matrices and `core/evidence`.
+  hep-authoring drafts papers, theses, proposals, talks, figures, diagrams and referee reports. Each description names
+  the other in its "Not for" part. The other skills hand write-ups to hep-authoring; the ams-02 profile lists both.
+- **Skill names (contracts 2.13.0).** `hep-citations` and `hep-authoring` are skill names; `hep-communication` is a
+  deprecated alias of hep-authoring (a warning, an error under `--strict-versions` and protected use), and the 0.11.0
+  alias `research-communication` now points to hep-authoring. `contracts/migrate_skill_names.py` rewrites both to
+  hep-authoring.
+- **`literature-record` artifact type.** `manage_literature.py` (now hep-citations's) writes its record inside the
+  common envelope (`producer_skill` hep-citations, status `user-supplied`), so a record in `artifacts_dir` passes
+  `contracts/validate.py` instead of failing as `artifacts_dir.not_artifact`. The validator checks that sources and
+  claims are keyed by their ids and still pass the evidence-ledger rules. `--into` still reads a bare record written
+  before.
+- **Citations never from memory: `check_citations.py`.** hep-authoring's new invariant says every citation comes from a
+  literature record or a profile evidence ledger. The script reads `.tex`, `.bib` and `.md` drafts and matches each
+  citation by identifier (DOI, arXiv id, INSPIRE record), then by stored key. A citation found nowhere is
+  `not-verified` (exit 3). A citation recorded only at metadata level, or at another arXiv version, is a warning.
+- **hep-citations content.** A literature guide is its entry reference: routing, rules, the latest-result
+  procedure, reading profile evidence ledgers and handling a ledger that disagrees with a lookup, the reading
+  workflow and an index. The lookup adapter is in the quick-question table. There are three worked examples and a
+  citation-databases reference split out of `citations-and-bibliography.md` (hep-authoring keeps BibTeX hygiene and
+  style). The two papers indexes of hep-authoring point to the literature guide, and crossing links between the halves
+  are rewritten.
+- **Shared code.** The audit report shape moves to `contracts/audit_report.py`, used by both halves. It cannot go
+  into `core/`, because `core/` may import only `core/`. Literature identifier normalization moves to
+  `core/evidence/identifiers.py`.
+- **Routing.** The 40 cases that expected hep-communication now expect hep-citations (17) or hep-authoring (23). The
+  `not`, `chain`, `turns` and `also_accept` values that named it are reassigned too. Ten cases are new:
+  neighbouring and negative cases for hep-citations, four boundary cases between the halves, zh-Hans and ja
+  literature cases, a writing-to-literature multi-turn case, and journey J13 (hep-citations → hep-theory →
+  hep-statistics → hep-authoring). The ownership table gains five topics; the description-topics table gains rows for
+  both skills. The capability map splits `claims-and-literature` into `literature-verification` and
+  `claims-to-results`.
+- **Plan step 0 (independent of the split).**
+  - hep-computing's example-authoring tools (`generate_skill_example.py`, `validate_skill_example.py`,
+    `check_example_diversity.py`) and the bundle check `validate_skill_bundle.py` are maintenance tools in `tools/`.
+  - `example-authoring.md` is `docs/dev/example-authoring.md`. The task section contract lives in `lint_task.py`.
+  - The EIC profile tests read the skill names from `contracts/skill_names.py`.
+  - `tools/capability_map.py` derives its valid owners from the skill folders, so a stale owner fails.
+  - `tools/check_routing_static.py` reports the description phrases that no case or topic pins (a report, not a
+    failure).
+  - `tools/measure_entrypoints.py` records each skill's quick-question load (SKILL.md plus its entry reference;
+    a warning above 25,600 bytes): hep-citations 18,290 and hep-authoring 21,635 bytes, where hep-communication had
+    24,451.
+- **Link test.** `tests/skills/test_reference_links.py` checks both new skills, including links into the other skill
+  and into profiles, and fails on any maintained file that still names the old skill folder.
+
 ## 0.15.0 (2026-10-19)
 
 Behavioral-eval round (`evals/behavior/`, L3 handoff chains): artifact checks on handoffs and on whole

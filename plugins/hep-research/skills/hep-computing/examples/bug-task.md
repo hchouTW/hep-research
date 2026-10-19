@@ -53,8 +53,8 @@ a warning), or suffix matching is limited to the cases the docstring names
   such as `skills/hep-ml/assets/` and extension-less files are never
   checked. That is a separate gap, noted here and not fixed.
 - The section, placeholder and loop-limit checks of the linter.
-- `validate_skill_bundle.py` and `check_template_sections()`, which the linter
-  imports but does not change.
+- `check_template_sections()`, the section check the linter
+  shares with the bundle check; it does not change.
 
 ## Repository Context
 

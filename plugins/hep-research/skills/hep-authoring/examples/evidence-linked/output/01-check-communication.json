@@ -1,0 +1,135 @@
+{
+ "checks_not_run": [
+  {
+   "check": "traceability:ledgers",
+   "reason": "no evidence ledger declared and sources not in scope",
+   "required": false
+  }
+ ],
+ "checks_run": [
+  "schema",
+  "traceability",
+  "manuscript"
+ ],
+ "counts": {
+  "error": 0,
+  "unresolved": 0,
+  "warning": 0
+ },
+ "coverage": {
+  "claims": {
+   "assessed": 2,
+   "declared": 2,
+   "mapped": 2,
+   "stale": 0,
+   "unmapped": 0
+  },
+  "documents": {
+   "declared": 1,
+   "resolved": 1
+  },
+  "inputs": {
+   "declared": 2,
+   "resolved": 2
+  },
+  "occurrences": {
+   "checked": 4,
+   "declared": 4,
+   "located": 4,
+   "mismatched": 0,
+   "unresolved": 0
+  },
+  "sources": {
+   "cited": 0,
+   "resolved": 0
+  },
+  "whole_manuscript": "not-claimed"
+ },
+ "exit_code": 0,
+ "findings": [],
+ "inputs": {
+  "documents": {
+   "doc:paper": "903b132a6de23ae6715eb87367e226a1d27a8646d397aa8e65269fc654bbd9da"
+  },
+  "inputs": {
+   "artifacts/obs.json": {
+    "declared_sha256": "e2a25c204bc67102b8462957a1a20439b635b0634975a74d558481e8bda75db7",
+    "match": true,
+    "sha256": "e2a25c204bc67102b8462957a1a20439b635b0634975a74d558481e8bda75db7"
+   },
+   "artifacts/syn.json": {
+    "declared_sha256": "24e21e06f1a9e6a3aa758676cc191e1935bd86f8165c58904c0881b390531822",
+    "match": true,
+    "sha256": "24e21e06f1a9e6a3aa758676cc191e1935bd86f8165c58904c0881b390531822"
+   }
+  },
+  "record_sha256": "92fcc5fa667e2e4ce0165d43fa15824bcf64107db45eb0385f3a5b547531bd4e"
+ },
+ "note": "mechanical checks only: schema validity, dependency consistency and occurrence location say nothing about the scientific support of a claim; an assessment in the record is its assessor's statement, not verified here",
+ "notes": [
+  "manuscript coverage is limited to the declared occurrences; paraphrases and conceptual dependencies elsewhere in the documents were not read"
+ ],
+ "occurrences": [
+  {
+   "claim_id": "claim:C1",
+   "current": "We measure the ratio R = 1.02 +/- 0.05 in the synthetic fixture sample.",
+   "document_id": "doc:paper",
+   "id": "occ:abstract",
+   "locator": "section:Abstract",
+   "outcome": "located",
+   "reason": null
+  },
+  {
+   "claim_id": "claim:C1",
+   "current": "The fitted ratio is R = 1.02 +/- 0.05 (stat), consistent with unity.",
+   "document_id": "doc:paper",
+   "id": "occ:body",
+   "locator": "section:Results",
+   "outcome": "located",
+   "reason": null
+  },
+  {
+   "claim_id": "claim:C1",
+   "current": "Figure 1: the ratio R = 1.02 +/- 0.05 compared with the synthetic illustration at 0.98.",
+   "document_id": "doc:paper",
+   "id": "occ:caption",
+   "locator": "section:Figures",
+   "outcome": "located",
+   "reason": null
+  },
+  {
+   "claim_id": "claim:C2",
+   "current": "A synthetic illustration gives R = 0.98 for orientation only.",
+   "document_id": "doc:paper",
+   "id": "occ:illustration",
+   "locator": "section:Results",
+   "outcome": "located",
+   "reason": null
+  }
+ ],
+ "report_version": "1.0.0",
+ "schema": {
+  "ok": true
+ },
+ "scope": {
+  "checks": [
+   "schema",
+   "traceability",
+   "manuscript"
+  ],
+  "claims": [
+   "claim:C1",
+   "claim:C2"
+  ],
+  "documents": [
+   "doc:paper"
+  ],
+  "format": "traceability",
+  "project_root": ".",
+  "record": "artifacts/comm.json",
+  "source_versions": {}
+ },
+ "status": "pass",
+ "tool": "check_communication",
+ "traceability": "declared"
+}

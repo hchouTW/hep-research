@@ -189,7 +189,7 @@ def communication_rich(**extra):
                     [edge("ev:C2-b", "artifacts/syn.json")]),
               claim("claim:C3", "The synthetic illustration is compatible with the ratio (synthetic fixture).", "comparison",
                     ["synthetic", "unvalidated"], [edge("ev:C3-a", "artifacts/obs.json"), edge("ev:C3-b", "artifacts/syn.json", "qualifies")])]
-    doc = envelope("communication", {}, "hep-communication", contract_version=CONTRACTS_VERSION,
+    doc = envelope("communication", {}, "hep-authoring", contract_version=CONTRACTS_VERSION,
                    versions={"plugin": "0.6.12", "contracts": CONTRACTS_VERSION, "profiles": {}},
                    required_capabilities=["communication:traceability-v1"], inputs=inputs)
     for c in claims:
@@ -208,6 +208,33 @@ def communication_rich(**extra):
 
 
 SCAN = {"local_p": 1.0e-3, "local_z": 3.09, "scan": {"parameters": ["mass"], "ranges": [[100.0, 200.0]]}}
+
+
+def literature_record(**extra):
+    """literature-record (contracts 2.13.0): the record manage_literature.py imports, in the envelope. One source with a
+    DOI and an arXiv id read at abstract level, one claim citing it, one search; all SYNTHETIC placeholders."""
+    from contracts import CONTRACTS_VERSION
+    src = {"id": "fixture:S01", "title": "SYNTHETIC fixture paper", "authors": "Fixture et al.", "year": 2026, "tier": 2,
+           "verification_level": "abstract+metadata", "verification_date": "2026-10-12", "formal_status": "published",
+           "supersedes": [], "superseded_by": [], "verification_limitations": "fixture", "citation_key": "Fixture:2026abc",
+           "identifiers": {"doi": "10.0000/fixture.1", "arxiv": "2610.00001", "arxiv_version": "v1", "inspire": None},
+           "read_events": [{"level": "abstract+metadata", "date": "2026-10-12", "locators": [], "imported_from": "in.json"}],
+           "versions": [{"version": "v1", "date": "2026-10-12", "imported_from": "in.json"}], "notices": [],
+           "status": "as-imported", "imported_from": "in.json"}
+    claim = {"id": "fixture:C01", "claim": "the fixture paper reports a placeholder value", "claim_types": ["published_result"],
+             "source_ids": ["fixture:S01"], "location": "abstract", "scope": {"text": "fixture"},
+             "verification_strength": "abstract+metadata", "numeric_quotation_allowed": True, "last_reviewed": "2026-10-12"}
+    ext = {"record_version": "1.0.0", "created": "2026-10-19",
+           "imported": [{"path": "in.json", "sha256": hashlib.sha256(b"SYNTHETIC literature input").hexdigest(), "date": "2026-10-19",
+                         "counts": {"sources": 1, "claims": 1, "searches": 1, "notices": 0}}],
+           "sources": {"fixture:S01": src}, "claims": {"fixture:C01": claim},
+           "searches": [{"database": "INSPIRE-HEP", "query": "t fixture", "date": "2026-10-12", "export_count": 1, "imported_from": "in.json"}],
+           "notices": [], "relations": [], "proposed_merges": [], "flags": [],
+           "verification": {"online": "not-performed", "note": "SYNTHETIC fixture"}}
+    ext.update(extra)
+    return envelope("literature-record", ext, "hep-citations", status=("synthetic", "user-supplied"),
+                    contract_version=CONTRACTS_VERSION,
+                    versions={"plugin": "0.15.0", "contracts": CONTRACTS_VERSION, "profiles": {}})
 
 
 def response_v24(**extra):
@@ -341,8 +368,9 @@ VALID = {
                                                              "output_hashes": {}}, "hep-computing"),
     "communication.json": envelope("communication", {"claims": [{"text": "placeholder", "result_ref": "x.json", "status": "synthetic"}],
                                                      "sources_read": [{"id": "user:S1", "level": "full-text"}],
-                                                     "limitations": ["fixture"]}, "hep-communication"),
+                                                     "limitations": ["fixture"]}, "hep-authoring"),
     "communication_traceability.json": communication_rich(),
+    "literature_record.json": literature_record(),
     "response_v24.json": response_v24(),
     # contracts 2.8.0 response hardening (hep-detector audit): finite-MC statistics and correction space declared
     "response_v28.json": response_v24(intended_use="unfolding",
@@ -405,6 +433,11 @@ d = copy.deepcopy(VALID["communication.json"]); d["extension"]["claims"] = [{"te
 d = communication_rich(); d["required_capabilities"] = []; bad["communication_traceability_without_capability.json"] = (d, ["communication.capability_missing"])
 d = communication_rich(); d["extension"]["claims"][1]["status"] = ["observed"]; d["extension"]["claims"][1]["assessment"]["currency"] = "stale"; bad["communication_claim_status_upgraded.json"] = (d, ["communication.status_upgraded"])
 d = communication_rich(); d["extension"]["claims"][2]["status"] = ["observed", "synthetic", "unvalidated"]; d["extension"]["claims"][2]["assessment"]["currency"] = "stale"; bad["communication_claim_status_conflict.json"] = (d, ["communication.claim_status_conflict"])
+# literature-record (contracts 2.13.0)
+d = literature_record(record_version="2.0.0"); bad["literature_record_unknown_version.json"] = (d, ["schema.enum"])
+d = literature_record(); d["extension"]["sources"]["fixture:S02"] = d["extension"]["sources"].pop("fixture:S01"); bad["literature_record_key_mismatch.json"] = (d, ["literature.source_key_mismatch"])
+d = literature_record(); d["extension"]["claims"]["fixture:C01"]["source_ids"] = ["fixture:S99"]; bad["literature_record_unknown_source.json"] = (d, ["literature.ledger_invalid"])
+d = literature_record(); del d["extension"]["verification"]; bad["literature_record_no_verification.json"] = (d, ["schema.required"])
 
 # theory-spec and prediction rules of contracts 2.6.0 (hep-theory audit, THY-WP2.3)
 bad["prediction_v26_observed.json"] = (_v26(dict(prediction_v26(), status=["observed"])), ["prediction.status_upgraded"])

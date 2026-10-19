@@ -2,7 +2,7 @@
 
 A Claude Code and Codex plugin for experimental and theoretical high-energy and astroparticle physics research. It
 has:
-- seven core skills;
+- eight core skills;
 - a shared library (`core/`);
 - artifact contracts (`contracts/`), including an opt-in cross-artifact analysis check (see
   [Cross-artifact analysis check](#cross-artifact-analysis-check-opt-in-advisory));
@@ -23,7 +23,8 @@ labeled synthetic in file names and metadata. What is and is not validated is li
 | `hep-statistics` | an inference: likelihoods, fits, intervals, limits, unfolding, combinations, comparisons with data |
 | `hep-computing` | working, reproducible software and its execution, including task files for coding agents |
 | `hep-ml` | a machine-learning model or study for physics (PyTorch) |
-| `hep-communication` | papers, figures, diagrams, talks, literature and citation checks, claims traced to results and sources |
+| `hep-citations` | answers from cited sources: what a paper or experiment published, the latest result, citation verification, literature records and matrices |
+| `hep-authoring` | papers, figures, diagrams, talks, referee reports, claims traced to results and sources; every citation from a literature record |
 
 Each skill folder under `skills/` has a `README.md` (purpose, folder map, scripts, references, handoffs, tests); `SKILL.md` is the entry point the host loads. Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
 from are written as JSON artifacts in your project's `artifacts_dir` (default `./hep-research-artifacts/`).
