@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **`train_bdt.py` refuses a validation part it cannot score.** When a fold's validation part had no events or one
+  class, every hyperparameter point scored NaN; the script still trained and saved fold models, then crashed writing
+  `run_summary.json` (exit 1, a traceback and no JSON status). It now stops before training with exit 2,
+  `"status": "rejected"` and the part's counts, and says what to change (`validation_fraction`, fewer folds, a finer
+  `event_number` key or more events). Seen in the L3 ML chain, where Haiku retried four configurations on the
+  16-event sample and gave up.
 - **A BDT's ml-artifact names its fold models.** `skills/hep-ml/scripts/write_ml_artifact.py` read only a run
   summary's `checkpoint`, so `train_bdt.py`'s per-fold `models` were missing from `outputs`; they are now listed as
   `checkpoint:fold<k>`, and a `train_bdt.py` run folder with its ml-artifact passes the `artifacts_dir` check.

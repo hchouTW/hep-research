@@ -121,6 +121,17 @@ class Backend:
         return run("--data", Path(d, "x.csv"), "--config", Path(d, "c.json"), "--out-dir", Path(d, "out"),
                    "--negative-weights", neg or "drop")
 
+    def test_empty_validation_part_is_rejected_before_training(self):
+        """SYNTHETIC, 16 events in 3 runs keyed by run, as in an L3 eval run: validation_fraction 0.01 leaves the
+        validation parts empty. Before, every grid point scored NaN and the run crashed writing its summary (exit 1,
+        no JSON, fold models left behind); now it is refused with the counts and no model is trained."""
+        with tempfile.TemporaryDirectory() as d:
+            code, out, err = self.fit(d, n=16, event_number="run", folds=2, validation_fraction=0.01)
+            self.assertEqual(code, 2, err)
+            self.assertEqual(out["status"], "rejected")
+            self.assertIn("validation part of fold", out["error"])
+            self.assertFalse(list(Path(d, "out").glob("model_fold*")))
+
     def test_auc_of_two_gaussians(self):
         with tempfile.TemporaryDirectory() as d:
             code, out, err = self.fit(d)
