@@ -127,6 +127,23 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(res["meta"]["completed"], 1)
         self.assertEqual(res["contaminated"], [res["cases"][0]["id"]])
 
+    def test_missing_plugin_stops_the_run(self):
+        os.environ["FAKE_PLUGINS"] = ""
+        code, res = self.run_eval("--jobs", "1")
+        self.assertEqual(code, 1)
+        self.assertEqual(res["meta"]["completed"], 1)
+        self.assertIn("not loaded", res["cases"][0]["contaminated"])
+
+    def test_relative_plugin_dir_is_resolved(self):
+        cwd = os.getcwd()
+        os.chdir(rre.REPO)
+        try:
+            self.run_eval("--ids", "a", "--plugin-dir", "plugins/hep-research")
+        finally:
+            os.chdir(cwd)
+        argv = json.loads((self.dir / "calls.log").read_text().splitlines()[0])
+        self.assertTrue(Path(argv[argv.index("--plugin-dir") + 1]).is_absolute())
+
     def test_baseline_and_compare(self):
         self.run_eval()
         result = self.dir / "results" / "r1.json"

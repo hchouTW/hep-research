@@ -320,10 +320,13 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
     return row
 
 
-def contaminated(row: dict) -> str | None:
+def contaminated(row: dict, cli: str = "claude") -> str | None:
     extra = [p for p in row.get("plugins_reported") or [] if p != PLUGIN_NAME]
     if extra:
         return f"other plugins loaded: {', '.join(extra)}"
+    # Claude's init event lists the loaded plugins (Codex reports none); without this plugin every case scores no-skill
+    if cli == "claude" and row.get("turns") and PLUGIN_NAME not in (row.get("plugins_reported") or []):
+        return f"{PLUGIN_NAME} not loaded (check --plugin-dir)"
     return None
 
 
@@ -334,6 +337,7 @@ def skills_of(plugin_dir: Path) -> list[str]:
 
 def cmd_run(args) -> int:
     global SKILLS
+    args.plugin_dir = Path(args.plugin_dir).resolve()  # each case runs in a temporary folder: a relative path would not load
     SKILLS = skills_of(args.plugin_dir)  # a renamed copy (--plugin-dir, e.g. a name variant) brings its own skill names
     cases, case_sha = load_cases(args.cases, args.ids.split(",") if args.ids else None, args.sample, args.seed)
     if not cases:
@@ -374,7 +378,7 @@ def cmd_run(args) -> int:
         with lock:
             spent[0] += new_cost
             reused[0] += any(t.get("reused") for t in row["turns"])
-            why = contaminated(row)
+            why = contaminated(row, args.cli)
             if why:
                 row["contaminated"] = why
                 stop.set()
