@@ -1,6 +1,6 @@
 ---
 name: hep-writing
-description: "Use when the deliverable is physics writing or its presentation, even a short draft, translation, terminology or summary request: drafting or revising paper sections, abstracts and captions, papers from results (short summaries, terminology, numbers and units; English or Chinese), figures and tables, diagrams as editable sources, talks and posters, referee reports, theses, proposals, handover notes, and packaging results with claim-to-result links. Never cites from memory. Not for: what a paper states, the latest result, citations (hep-literature); producing results (hep-measurement, hep-detector, hep-theory, hep-statistics, hep-computing, hep-ml)."
+description: "Use when the deliverable is physics writing or its presentation, even one sentence for an abstract or summary; load it first: drafting or revising paper sections, abstracts and captions, papers from results (short summaries, terminology, numbers and units; English or Chinese), figures and tables, diagrams as editable sources, talks and posters, referee reports, theses, proposals, handover notes, and packaging results with claim-to-result links. Never cites from memory. Not for: what a paper states, the latest result, citations (hep-literature); producing results (hep-measurement, hep-detector, hep-theory, hep-statistics, hep-computing, hep-ml)."
 ---
 
 # hep-writing: papers, figures, diagrams, talks
