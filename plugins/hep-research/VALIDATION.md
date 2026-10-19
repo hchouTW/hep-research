@@ -1855,6 +1855,33 @@ that decides the same question.
 | Ruff 0.16.10, mypy 2.4.0 | clean |
 | Registry | 80 of 80 V parts passing |
 
+## SPLIT-LIVE-EVAL (2026-10-19, Claude Code 2.1.303, claude-sonnet-5-5)
+
+Live evals of the split of hep-communication into hep-literature and hep-writing (restructuring plan v6, section 8),
+branch `feat/split-communication` at 80201cde against main ee6b8b83 (0.15.0), one campaign, about $74 in model
+calls. Results in the repository's `evals/` (`routing/results/split-*`, `research_communication/results/split-*`,
+`behavior/results/split-2026-10-19-*`). Single samples are noisy; doubtful cases were repeated twice on both sides.
+
+| Plan section 8 criterion | Main | Branch | Verdict |
+|---|---|---|---|
+| Full routing set, strict | 369/394 | 369/404 (lenient 372) | baseline re-measured |
+| 2. The 53 cases that named hep-communication, strict | 51 | 51 | pass (not below) |
+| New split cases (`lit-*`, `j13`) | - | 7/10; repeats: `lit-turns-1` 0/3, `lit-bound-table-1` 1/3, `lit-bound-related-1` 1/3 | weak spots |
+| 3. Communication eval, cases loading no skill | 2/11 | 4/11 (01 trace, 06 zh status, 10 summary, 11 injection) | **fail** (limit 2/11) |
+| 4. Publication-record questions loading no skill (12 cases) | 0 | 0 | pass |
+| 5. Other skills' cases: pass on main, fail on branch | - | 11 in one run; with 3 runs each: `wp11-xexp-2` 3/3 -> 0/3 (loads hep-literature), `dr-a-toy-1` 3/3 -> 1/3, `th-nucstruct-1` 3/3 -> 1/3, `t19-quick-3` 3/3 -> 1/3, `dr-a-toy-2` 3/3 -> 2/3; `th-a-const-2` 1/3 -> 0/3 and `wp11-bound-dm-2` 1/3 -> 0/3 now load hep-literature instead of hep-communication; `c-nuc-iso-2`, `co-roofit-neg-1`, `d-ms-aniso-1` flaky on both | **fail** |
+| 5. Plan 6.7 cases (`wp11-xexp-3`, `eic-underspec-1`, `t19-turns-3`) | fail | fail, same outcome | not worse |
+| 6. G3 behavior case `l2-write-cite-intro` | - | pass (loads hep-literature) | pass |
+| 7. Always-on growth | 2,417 | 2,529 tokens (+112) | pass |
+| Behavior subset (communication cases, 1 run) | 2/8 | 5/9; `l2-comm-status` (short abstract sentence) loads no skill | - |
+| Name comparison (63 cases involving the two skills) | - | working names 58/63, `hep-sources`/`hep-manuscript` 53/63 | keep working names |
+
+Outcome: the round fails criteria 3 and 5. The split pulls published-result questions that belong to hep-theory or
+hep-statistics (`wp11-xexp-2`, `th-a-const-2`, `wp11-bound-dm-2`) into hep-literature, and short writing requests
+(abstract sentence, one-line summary, a status sentence in Chinese) load no skill more often than before. Per plan
+section 8 the next step is a description round (at most two) before the split may proceed; plan step 0 stands either
+way.
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the

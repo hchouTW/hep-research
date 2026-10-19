@@ -1,4 +1,9 @@
-# Live evals for the hep-communication split (prepared, not run)
+# Live evals for the hep-communication split
+
+**Round 1 ran on 2026-10-19 (about $74): fails criteria 3 and 5.** Results and the per-criterion table are in
+`plugins/hep-research/VALIDATION.md`, section SPLIT-LIVE-EVAL; result files are `routing/results/split-*`,
+`research_communication/results/split-*` and `behavior/results/split-2026-10-19-*`. The text below is the plan as
+prepared.
 
 Prepared on branch `feat/split-communication` (2026-10-19) for the restructuring plan's section 8. Nothing here has
 been run: every command below makes paid model calls and needs the maintainer's approval and budget. The plugin
