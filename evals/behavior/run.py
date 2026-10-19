@@ -179,7 +179,11 @@ def cmd_run(args):
     out = Path(args.out or HERE / "runs" / dt.datetime.now().strftime("%Y%m%d-%H%M%S"))
     if args.holdout:
         opts["holdout_record"] = holdout.open_suite(Path(args.holdout), args.holdout_name, args.release, str(out))
-    res = runner.run_matrix(matrix, out, root, opts, jobs=args.jobs)
+    try:
+        res = runner.run_matrix(matrix, out, root, opts, jobs=args.jobs)
+    except runner.CampaignLocked as exc:
+        print(json.dumps({"status": "refused", "error": str(exc)}))
+        return 2
     man = json.loads((out / "manifest.json").read_text())
     rep = report.build(runner.collect(out), man)
     report.write(rep, out)

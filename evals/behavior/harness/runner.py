@@ -302,10 +302,43 @@ def _git(plugin_root: Path) -> dict:
     return {"commit": g("rev-parse", "HEAD") or None, "dirty": bool(g("status", "--porcelain", "--", "."))}
 
 
+class CampaignLocked(RuntimeError):
+    """Another live campaign is writing to the same run directory."""
+
+
+def _lock(run_dir: Path) -> Path:
+    """Take run_dir/.campaign.lock (pid inside), or raise CampaignLocked while the process that holds it is alive.
+    Two campaigns in one folder delete and regrade each other's runs (2026-10-19), so the second is refused."""
+    lock = run_dir / ".campaign.lock"
+    for _ in range(2):
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                pid = int(lock.read_text().strip() or 0)
+                os.kill(pid, 0)
+            except (ValueError, ProcessLookupError, OSError):
+                lock.unlink(missing_ok=True)  # stale: its process is gone
+                continue
+            raise CampaignLocked(f"{run_dir} is in use by campaign pid {pid}; wait for it or pick another --out")
+        with os.fdopen(fd, "w") as fh:
+            fh.write(str(os.getpid()))
+        return lock
+    raise CampaignLocked(f"cannot take {lock}")
+
+
 def run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dict, jobs: int = 4) -> list[dict]:
     """Run the matrix. No new run starts once opts["budget_usd"] is spent or a run is contaminated; the stop and
-    the number of runs completed are recorded in manifest.json."""
+    the number of runs completed are recorded in manifest.json. One campaign at a time per run directory."""
     run_dir.mkdir(parents=True, exist_ok=True)
+    held = _lock(run_dir)
+    try:
+        return _run_matrix(matrix, run_dir, plugin_root, opts, jobs)
+    finally:
+        held.unlink(missing_ok=True)
+
+
+def _run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dict, jobs: int) -> list[dict]:
     manifest = {"created": dt.datetime.now(dt.timezone.utc).isoformat(), "plugin": plugin_fingerprint(plugin_root),
                 "plugin_git": _git(plugin_root), "isolation": opts.get("isolation", "setting-sources"),
                 "opts": {k: v for k, v in opts.items() if k not in ("claude_bin", "config_dir", "holdout_record")},

@@ -208,6 +208,16 @@ class TraceAndGraders(unittest.TestCase):
             self.assertEqual([Path(f).name for f in found], ["l3-ml-scratch"])  # not the entry this run never names
             self.assertEqual(runner.outside_writes([root], time.time() + 60, str(root / "l3-ml-scratch")), [])
 
+    def test_one_campaign_per_run_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            held = runner._lock(d)
+            with self.assertRaises(runner.CampaignLocked):
+                runner._lock(d)  # this process is alive
+            held.unlink()
+            (d / ".campaign.lock").write_text("999999999")  # a dead pid: stale, taken over
+            runner._lock(d).unlink()
+
     def test_broken_grader_is_unverified_not_pass(self):
         r = grade(stream(), {"grader": "ordered", "first": {"bogus": 1}, "then": {"text": True}})[0]
         self.assertIsNone(r.passed)
