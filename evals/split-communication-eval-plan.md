@@ -1,6 +1,6 @@
 # Live evals for the hep-communication split
 
-**Round 1 ran on 2026-10-19 (about $74): fails criteria 3 and 5.** Results and the per-criterion table are in
+**2026-10-19: round 1 ($74) and description round 1 ($8) fail criteria 3 and 5; the cause of the regressions outside the split was the skills' listing order ($6.60); description round 2 (rename to hep-citations / hep-authoring, $9.30) passes criteria 2, 3, 4, 6, 7 and fails criterion 5 on one case (`wp11-xexp-2`).** The names in the plan text below are the working names of round 1. Results and the per-criterion table are in
 `plugins/hep-research/VALIDATION.md`, section SPLIT-LIVE-EVAL; result files are `routing/results/split-*`,
 `research_communication/results/split-*` and `behavior/results/split-2026-10-19-*`. The text below is the plan as
 prepared.

@@ -8,9 +8,10 @@ Software checks establish contract consistency only, not physical validity.
 The communication skill is split into **hep-citations** (sources, citations, literature records) and **hep-authoring**
 (papers, figures, diagrams, talks), with a literature-record artifact type and a citation check (restructuring plan,
 version 6). Contracts 2.13.0. Static routing passes all 404 cases (394 original reassigned, none deleted, 10 added);
-a first live round (VALIDATION SPLIT-LIVE-EVAL, about $74) fails two of the plan's criteria: published-result questions
-that belong to hep-theory or hep-statistics drift to hep-citations, and short writing requests load no skill more often.
-Not ready to merge.
+live evals (VALIDATION SPLIT-LIVE-EVAL, about $98 over three rounds): the skills are named hep-citations and
+hep-authoring because the host lists skills alphabetically and names sorting after hep-computing let it draw
+ambiguous detector requests; round 2 passes the plan's criteria except one regression (`wp11-xexp-2`, a compatibility
+p-value question that now loads hep-citations). Not merged until the maintainer decides on that case.
 
 - **Two skills replace hep-communication.** hep-citations answers what a paper or an experiment published, whether a
   paper exists, the latest result, whether a source supports a claim and citation requests, from the bound profile's

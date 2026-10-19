@@ -1917,6 +1917,28 @@ detector requests (`dr-a-toy-1` loads hep-computing); names that sort before hep
 outcome. A name change is therefore the candidate for description round 2 (plan section 8 allows names or
 descriptions); the working names and `hep-sources`/`hep-manuscript` all sort after hep-computing.
 
+Description round 2 (ebb58136, about $9.30; the last round plan section 8 allows): the two skills are renamed
+hep-citations and hep-authoring, which sort before hep-computing; descriptions as in round 1 (689 and 651 characters);
+always-on 2,538 (+121); offline gate 24 pass, 4,324 tests, 119 skipped. Same 93 cases, communication eval and
+behavior subset; doubtful cases repeated twice:
+
+| Measure | Main | Round 2 | Verdict |
+|---|---|---|---|
+| The 93 cases, strict (83 exist on main) | 80/83 | 74/83; all 93: 82 (round 1 78, round 0 76) | - |
+| 3. Communication eval, no skill loaded | 2/11 | 1/11 (01) | pass |
+| 4. Publication-record questions | 0 no-skill | 0 no-skill | pass |
+| 6. `l2-write-cite-intro` | - | pass | pass |
+| Behavior subset (communication) | 2/8 | 4/8 | - |
+| `dr-a-toy-1`, `t19-quick-3` (listing order) | 5/5, 4/5 | 5/5 (cause arm G), 2/3 | fixed |
+| `th-a-const-2`, `co-roofit-neg-1`, `wp11-bound-dm-1` (3 runs) | 1/3, 1/3, 1/1 | 2/3, 2/3, 2/3 | not worse |
+| `wp11-bound-dm-2` (3 runs) | 1/3 | 0/3 (no skill) | marginal |
+| `wp11-xexp-2`: compatibility p-value of two named experiments (3 runs) | 3/3 hep-statistics | 0/3, loads hep-citations | **regression** |
+| New split cases | - | 8/10 (`lit-negative-1`, `lit-turns-1` fail) | - |
+
+Round 2 passes criteria 2, 3, 4, 6 and 7 and fails criterion 5 on one case (`wp11-xexp-2`, every branch run since
+round 0 loads the literature skill) and marginally on `wp11-bound-dm-2`. By the plan's rule (two failed rounds) the
+split is abandoned unless the maintainer accepts or waives that case.
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the
