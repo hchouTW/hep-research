@@ -260,7 +260,7 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
         env["CLAUDE_CONFIG_DIR" if args.cli == "claude" else "CODEX_HOME"] = str(args.config_dir)
     parse = parse_claude if args.cli == "claude" else parse_codex
     row = {k: case.get(k) for k in ("id", "lang", "kind", "variant", "set", "expected_primary")}
-    turn_rows, facts_all, session, cost, n_turns = [], [], None, 0.0, 0
+    turn_rows, facts_all, session, cost, new_cost, n_turns = [], [], None, 0.0, 0.0, 0
     with tempfile.TemporaryDirectory(prefix="hep-routing-") as tmp:
         cwd = Path(tmp)
         for name, text in (case.get("inputs") or {}).items():
@@ -300,6 +300,7 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
             facts_all.append(facts)
             session = facts["session_id"] or session
             cost += facts["cost_usd"]
+            new_cost += facts["cost_usd"]
             n_turns += facts["turns"]
             turn_rows.append(dict(score_turn(turn["expected"], facts, case, prior), exit_code=code))
             prior += facts["skills"]
@@ -314,7 +315,7 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
                 "other_skills": sorted({s for f in facts_all for s in f["other_skills"]}),
                 "plugins_reported": first["plugins"], "builtin_plugins": first.get("builtin_plugins", []),
                 "cli_version": first["cli_version"], "model_reported": first["model"],
-                "cost_usd": round(cost, 6), "n_turns": n_turns})
+                "cost_usd": round(cost, 6), "n_turns": n_turns, "new_cost_usd": new_cost})
     row["loading_violation"] = loading_violation(case, row["profile_reads"])
     return row
 
@@ -351,7 +352,7 @@ def cmd_run(args) -> int:
     run_id = args.run_id or f"{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}-{args.cli}-{args.model}"
     raw_dir = args.out / run_id / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
-    lock, spent, rows, stop = threading.Lock(), [0.0], [], threading.Event()
+    lock, spent, reused, rows, stop = threading.Lock(), [0.0], [0], [], threading.Event()
 
     def task(case):
         if stop.is_set():
@@ -368,14 +369,17 @@ def cmd_run(args) -> int:
                         "other_skills": [], "plugins_reported": [], "builtin_plugins": [], "cli_version": None,
                         "model_reported": None, "cost_usd": 0.0, "n_turns": 0, "loading_violation": False,
                         "harness_error": f"{type(exc).__name__}: {exc}"})
+        # turns re-scored from raw streams (--reuse-raw) were paid for by the earlier run, not against this budget
+        new_cost = row.pop("new_cost_usd", row["cost_usd"])
         with lock:
-            spent[0] += row["cost_usd"]
+            spent[0] += new_cost
+            reused[0] += any(t.get("reused") for t in row["turns"])
             why = contaminated(row)
             if why:
                 row["contaminated"] = why
                 stop.set()
         print(json.dumps({"case": row["id"], "outcome": row["outcome"], "skills": [t["skills"] for t in row["turns"]],
-                          "cost_usd": row["cost_usd"], "spent_usd": round(spent[0], 4)}, ensure_ascii=False), flush=True)
+                          "cost_usd": new_cost, "spent_usd": round(spent[0], 4)}, ensure_ascii=False), flush=True)
         return row
     with cf.ThreadPoolExecutor(max_workers=args.jobs) as pool:
         for row in pool.map(task, cases):
@@ -391,7 +395,7 @@ def cmd_run(args) -> int:
             "isolation": args.isolation, "plugin_commit": git, "plugin_dirty": dirty, "cases_file_sha256": case_sha,
             "selected": len(cases), "completed": len(rows), "full_set": len(cases) == len(json.loads(args.cases.read_text())["cases"]),
             "max_turns": args.max_turns, "case_budget_usd": args.case_budget_usd, "budget_usd": args.budget_usd,
-            "stopped_early": len(rows) < len(cases)}
+            "reused_cases": reused[0], "spent_usd": round(spent[0], 4), "stopped_early": len(rows) < len(cases)}
     rows.sort(key=lambda r: r["id"])
     summary = {"meta": meta, "summary": summarize(rows) if rows else {}, "cases": rows,
                "contaminated": [r["id"] for r in rows if r.get("contaminated")],

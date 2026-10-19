@@ -109,6 +109,17 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(res["meta"]["completed"], 2)
         self.assertTrue(res["meta"]["stopped_early"])
 
+    def test_resume_budget_counts_only_new_spending(self):
+        """Resuming a run stopped by its budget: the 2 recorded cases are re-scored and their 2.0 USD does not count,
+        so a 1.5 budget still starts the missing cases (before, the re-scored cost alone stopped the resume)."""
+        os.environ["FAKE_COST"] = "1.0"
+        self.run_eval("--jobs", "1", "--budget-usd", "1.5")
+        _, res = self.run_eval("--jobs", "1", "--budget-usd", "1.5", "--reuse-raw")
+        self.assertEqual(res["meta"]["reused_cases"], 2)
+        self.assertEqual(res["meta"]["completed"], 4)
+        self.assertAlmostEqual(res["meta"]["spent_usd"], 2.0)
+        self.assertAlmostEqual(res["summary"]["cost_usd"]["total"], 4.0)  # the summary still reports every case's cost
+
     def test_contamination_stops_the_run(self):
         os.environ["FAKE_PLUGINS"] = "hep-research,other-plugin"
         code, res = self.run_eval("--jobs", "1")
