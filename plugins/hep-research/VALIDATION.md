@@ -1882,6 +1882,24 @@ hep-statistics (`wp11-xexp-2`, `th-a-const-2`, `wp11-bound-dm-2`) into hep-liter
 section 8 the next step is a description round (at most two) before the split may proceed; plan step 0 stands either
 way.
 
+Description round 1 (dbb5ed02, about $8; plan section 8 allows two). hep-literature names a source's status and whether
+citations are verified, and its "Not for" sends models and constants to hep-theory and p-values to hep-statistics (687
+characters); hep-writing adds "even one sentence for an abstract or summary; load it first" (652); always-on 2,534
+(+117). Rerun of the 93 cases that involve the two skills, the wp11 set and the doubtful cases, one run:
+
+| Measure | Round 0 | Round 1 | Main |
+|---|---|---|---|
+| The 93 cases, strict | 76 | 78 | 80 of the 83 that exist on main |
+| Communication eval, no skill loaded (criterion 3, limit 2/11) | 4/11 | 3/11 (01, 06, 09) | 2/11 |
+| `wp11-xexp-2` (hep-statistics) | hep-literature | hep-literature (0/4 over all branch runs) | 3/3 |
+| `th-a-const-2`, `wp11-bound-dm-2` (hep-theory) | hep-literature | hep-theory; no skill | 1/3 each |
+| `lit-turns-1` second turn (citations verified?) | no skill | no skill | - |
+| `dr-a-toy-1`, `th-nucstruct-1`, `t19-quick-3` (outside the split) | fail | fail (now 0/4, 1/4, 1/4 on the branch) | 3/3 each |
+
+Round 1 still fails criteria 3 and 5. The persistent regressions in `dr-a-toy-1`, `th-nucstruct-1` and `t19-quick-3`
+involve hep-detector, hep-theory and hep-computing only, whose descriptions the split did not change; they point to the
+eight-skill listing itself, which a description round of the two new skills cannot address.
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the
