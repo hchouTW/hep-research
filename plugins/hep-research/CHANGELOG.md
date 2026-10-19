@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **hep-ml hands limits and fits to hep-statistics, even when it was loaded first.** Its opening "Never" line now
+  says that a limit, fit or significance with the model belongs to hep-statistics, which is loaded before computing
+  one. In the L3 ML chain, Haiku with hep-ml loaded first never loaded hep-statistics in 11 of 12 runs across four
+  versions, while workflow step 5 already said to load hep-statistics.
 - **The L3 chains' remaining failures.**
   - `skills/hep-statistics/scripts/result_artifact.py` copies vectors and matrices of numbers into `results`, so an
     unfolded spectrum keeps its estimate, sigma and covariances. It also creates the `--out` folder: before, a missing

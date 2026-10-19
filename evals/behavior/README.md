@@ -227,6 +227,18 @@ runs, and its theory comparison varies (3 → 1 of 6; that path did not change).
 twice at once into the same folders and is set aside (`l3-rem-*-collided`, $15.03); the runner now refuses a second
 campaign in a folder that is in use.
 
+**hep-ml hand-off (2026-10-19, PR #151)**, `l3-ml-to-inference` only, 6 repeats per arm; repeats 0-2 are paired
+against #150 (`l3-rem-*`). hep-ml's Never line now says to load hep-statistics before computing a limit, fit or
+significance, even when hep-ml was loaded first.
+
+| Model | Forced arm loads hep-statistics | Forced pass | Natural pass | Cost |
+|---|---|---|---|---|
+| claude-haiku-5-5 | 1 of 12 (#147-#150) → 5 of 6 (Fisher p = 0.004) | 0 of 3 → 5 of 6 (paired +3 / -0) | 3 of 3 → 4 of 6 | $0.37 |
+| claude-sonnet-5-5 | 6 of 12 (#147-#150) → 6 of 6 | 2 of 3 → 2 of 6 | 2 of 3 → 4 of 6 | $3.23 |
+
+Every Sonnet failure, and none of Haiku's, is the folder check: the agent writes `train_bdt.py`'s fold models and
+configs into `artifacts_dir` (5 of 12 runs, 2 of 6 at #150, p = 0.57). That path did not change; it is the next fix.
+
 `l3-response-unfold-report` asked for `min_fraction` 0.67 of three hops, which `ceil` made all three; it is now 0.66,
 two hops, as the grader's docstring intends. All L3 runs (before, after, v1-v3) are regraded with it; no earlier
 pass or fail changed.
