@@ -11,7 +11,7 @@ version 6). Contracts 2.13.0. Static routing passes all 404 cases (394 original 
 live evals (VALIDATION SPLIT-LIVE-EVAL, about $98 over three rounds): the skills are named hep-citations and
 hep-authoring because the host lists skills alphabetically and names sorting after hep-computing let it draw
 ambiguous detector requests; after round 2 and a targeted fix (hep-statistics owns whether two results agree) every measured regression is
-back at main's level; the full case set was not rerun after the fix.
+back at main's level; a final full run scores 371 of main's 394 cases (main 369) plus 8 of the 10 new ones.
 
 - **Two skills replace hep-communication.** hep-citations answers what a paper or an experiment published, whether a
   paper exists, the latest result, whether a source supports a claim and citation requests, from the bound profile's

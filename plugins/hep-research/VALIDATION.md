@@ -1946,6 +1946,12 @@ characters, always-on 2,527, +110). The 28 cases that expect hep-citations, name
 (main 3/3), `wp11-bound-dm-2` 1/3 (main 1/3), `lit-negative-1` now passes. With this, every regression measured in
 the rounds above is back at main's level; the full 404-case set was not rerun after the fix.
 
+Final full routing run on e79ccf80 (2026-10-20, about $32 plus $0.60 of repeats): 379/404 strict (380 lenient); on
+the 394 cases that exist on main 371 against main's 369. Four cases pass on main and fail here, six the other way;
+repeated: `c-det-atlas-2` 2/3 on both sides, `d-cc-preserve-1` 3/3 main vs 2/3, `st-sensitivity-1` and
+`wp11-bound-dm-2` flaky on main (2/3, 1/3). New split cases 8/10 (`lit-bound-related-1`, `lit-turns-1` fail). No
+regression beyond run-to-run noise; accepted by the maintainer and merged. Total live spend for the split about $134.
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the
