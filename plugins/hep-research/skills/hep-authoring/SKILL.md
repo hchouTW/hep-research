@@ -7,7 +7,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 
 **Owns:** writing and revising papers, theses, proposals and handover notes; related-work and review sections; figures, tables, diagrams and their rendering; talks and posters; referee reports and replies; packaging results with claim-to-result links; the `communication` extension and the shared audit report shape (`contracts/audit_report.py`).
 **Typical artifacts:** `communication` (claims linked to results, sources with their read levels, figure inputs, limitations), manuscripts, figures with captions, diagram sources.
-**Never:** invent a result, a number or a citation; cite from memory; upgrade a derivation or result status; describe synthetic or Asimov results as measurements.
+**Never:** invent a result, a number or a citation; cite from memory; answer whether citations are verified yourself (load hep-citations, even mid-draft); upgrade a derivation or result status; describe synthetic or Asimov results as measurements.
 
 ## Invariants
 
@@ -24,7 +24,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 3. List every citation the text needs; hand those without a literature record or ledger entry to hep-citations before drafting, or mark them unverified.
 4. Draft; mark limitations and statuses where they apply; run `check_citations.py` on the draft.
 5. Write the `communication` artifact for durable deliverables and validate it.
-6. Depth follows the request: **standard** (a durable deliverable with its `communication` record) or **audit** (the traceability record checked with the scripts below). A question about what a paper states, the latest result or a citation alone is hep-citations's.
+6. Depth follows the request: **standard** (a durable deliverable with its `communication` record) or **audit** (the traceability record checked with the scripts below). A question about what a paper states, the latest result, a citation alone, or whether a draft's citations are verified is hep-citations's: load it.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
@@ -45,7 +45,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 |---|---|
 | Writing, revising, reviewing papers | [papers guide](references/academic-papers-guide.md) |
 | Paper structure and genres (search, measurement, instrumentation, letter content lists) | [paper structure](references/paper-structure.md), [genre variants](references/paper-genre-variants.md); `check_manuscript.py --blueprint` |
-| Citations in a draft: each from a record or ledger | `check_citations.py`; sources and lookups: hep-citations |
+| Citations in a draft: each from a record or ledger | `check_citations.py` lists those without one; whether they are verified, sources and lookups: load hep-citations |
 | Bibliography hygiene and citation style | [bibliography](references/citations-and-bibliography.md) |
 | Claims linked to results; numbers from artifacts (macros, tables, PDG rounding, version compare) | [linked writing](references/evidence-linked-writing.md); `audit_claims.py`, `render_results.py` |
 | Figures, tables, physics plots; spectra from dataset-records (E^gamma, bin position, overlays) | [figures](references/figures-and-tables.md), [physics plots](references/physics-plots.md); `spectrum_plot.py` |
