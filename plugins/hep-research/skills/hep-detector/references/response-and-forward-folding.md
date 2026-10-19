@@ -2,7 +2,8 @@
 
 This is the one place for the response object, folding a prediction through it, and the double-counting checks
 (ownership table in `docs/routing-contract.md`). Unfolding algorithms, regularization, coverage and every fit that
-uses the response belong to hep-statistics ([unfolding](../../hep-statistics/references/unfolding.md)).
+uses the response belong to hep-statistics: load that skill before unfolding or fitting; do not work from its
+[unfolding](../../hep-statistics/references/unfolding.md) reference alone, which assumes its workflow.
 
 ## The response object
 
