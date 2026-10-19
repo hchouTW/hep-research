@@ -56,12 +56,23 @@ python3 evals/behavior/run.py run --ids 'l2-comm|l2-write|quick-ams|quick-width-
 | Routing, full, per checkout | 394 (main) / 404 (branch) | $0.077 per case (2026-10-15, 241 cases, $18.55) | about $30 each, $61 for both |
 | research_communication, per checkout | 11 | $0.73 for 11 (2026-10-17) | about $1 each |
 | Behavior subset (9 cases, 1 repeat; 3 repeats triple it) | 9 | planner at $0.15 per run | $1.35 per repeat |
-| Name comparison (plan 10.2: `hep-sources`/`hep-manuscript` against the working names) | the 50 communication cases | $0.077 per case | about $4 per name pair |
+| Name comparison (plan 10.2: `hep-sources`/`hep-manuscript` against the working names) | the 63 cases that involve either skill | $0.077 per case | about $5 per name pair |
 
-Total for one round with three behavior repeats: about $70.
+Total for one round with three behavior repeats: about $70; each name pair compared adds about $5.
 
-## Not prepared
+## Name comparison (plan 10.2)
 
-- The name comparison needs a scripted rename of the two skill folders, their `name` fields, the skill-name contract
-  and the routing table into a scratch copy; it is not written yet (plan 10.2, open question 1).
-- No held-out suite was touched.
+`evals/routing/make_name_variant.py` writes a renamed scratch copy of the plugin (skill folders, test folders and every
+maintained text file; history files unchanged), runs the static routing check on it, and lists the ids of the cases
+that involve either skill. `run_routing_eval.py run` now takes the skill names from the copy given in `--plugin-dir`.
+
+```sh
+python3 evals/routing/make_name_variant.py --literature hep-sources --writing hep-manuscript --out /tmp/hep-names-1
+python3 evals/routing/run_routing_eval.py run --model claude-sonnet-5-5 --plugin-dir /tmp/hep-names-1 \
+  --cases /tmp/hep-names-1/tests/routing/cases.json --ids "$(cat /tmp/hep-names-1/name-variant-ids.txt)" --budget-usd 6
+# the same ids on the branch itself give the working-name arm
+```
+
+Checked offline on 2026-10-19: the `hep-sources`/`hep-manuscript` copy passes the static check (404 cases), stanzas,
+host-neutral paths, ownership, layering, the capability map and the skill-name, link and routing-table tests; 63 cases
+involve the two skills. No held-out suite was touched.

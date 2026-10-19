@@ -326,7 +326,14 @@ def contaminated(row: dict) -> str | None:
     return None
 
 
+def skills_of(plugin_dir: Path) -> list[str]:
+    """The skill folders (with SKILL.md) of a plugin copy."""
+    return sorted(p.parent.name for p in (Path(plugin_dir) / "skills").glob("*/SKILL.md"))
+
+
 def cmd_run(args) -> int:
+    global SKILLS
+    SKILLS = skills_of(args.plugin_dir)  # a renamed copy (--plugin-dir, e.g. a name variant) brings its own skill names
     cases, case_sha = load_cases(args.cases, args.ids.split(",") if args.ids else None, args.sample, args.seed)
     if not cases:
         raise EvalError("no cases selected")

@@ -52,6 +52,9 @@ no live routing or behavior eval has been run on this change yet.
   - `tools/capability_map.py` derives its valid owners from the skill folders, so a stale owner fails.
   - `tools/check_routing_static.py` reports the description phrases that no case or topic pins (a report, not a
     failure).
+  - `tools/measure_entrypoints.py` records each skill's quick-question load (SKILL.md plus its entry reference;
+    a warning above 25,600 bytes): hep-literature 18,290 and hep-writing 21,635 bytes, where hep-communication had
+    24,451.
 - **Link test.** `tests/skills/test_reference_links.py` checks both new skills, including links into the other skill
   and into profiles, and fails on any maintained file that still names the old skill folder.
 
