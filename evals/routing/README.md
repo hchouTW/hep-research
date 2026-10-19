@@ -46,7 +46,8 @@ Isolation, recorded in every summary:
   `CLAUDE_CONFIG_DIR=DIR claude auth login`.
 - `--isolation setting-sources` (default, Claude only): the user's login with `--setting-sources project,local` and
   `--strict-mcp-config`. The run stops at the first session that reports a plugin other than `hep-research`
-  (plugins built into the CLI, reported with `path: builtin`, are recorded but are not contamination). The CLI
+  (plugins built into the CLI, reported with `path: builtin`, are recorded but are not contamination), or that
+  does not report `hep-research` at all (`--plugin-dir` is resolved to an absolute path first). The CLI
   keeps a folder per working directory under `~/.claude/projects/`; the harness removes the one each case's
   throwaway folder created.
 
