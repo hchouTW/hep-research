@@ -15,17 +15,18 @@ refused. test_groups_disjoint comes from its group leakage when the group metada
 named by the manifest's "roles": {"test": NAME} (default "test", case-insensitive). A summary split_check with no
 report behind it is recorded as not-run, never as pass; adds the calibration, domain-shift check and downstream
 validations when given; lists every file it read with its sha256 in extension.source_files (tool outputs, not
-artifacts, so not inputs[]) and the checkpoint and score files as outputs; fills the envelope (contract and plugin
-versions, plugin_release identity, status labels). It then validates the artifact with contracts/validate.py
-(validate_artifact) and writes it only when there is no error. Warnings and unresolved findings are reported and
-kept: an unresolved artifact is valid but not yet usable as a final result.
+artifacts, so not inputs[]) and the checkpoint (or train_bdt.py's per-fold "models") and score files as outputs;
+fills the envelope (contract and plugin versions, plugin_release identity, status labels). It then validates the
+artifact with contracts/validate.py (validate_artifact) and writes it only when there is no error. Warnings and
+unresolved findings are reported and kept: an unresolved artifact is valid but not yet usable as a final result.
 
 Input:
   --run-summary  JSON written by train_classifier.py: {"task", "features", "units", "labels", "grouping_key",
                  "split_manifest", "split_check": {"tool", "result": pass|fail|not-run, "report"}, "training_domain":
                  {f: [lo, hi]}, "preprocessing": [...], "weights": {"source", "negative_weight_treatment",
                  "class_balancing", "used_in"}, "model_hash", "checkpoint", "environment": {"torch_version", "device",
-                 "precision", "seeds"}, "metrics": {"val", "test"}, "scores": {"test": path}}
+                 "precision", "seeds"}, "metrics": {"val", "test"}, "scores": {"test": path}}; or train_bdt.py's,
+                 with "models": [path per fold] in place of "checkpoint"
   --calibration  JSON with a top-level "calibration": {"method", "params", "fit_sample", "validation": {"metric",
                  "sample", "before", "after", "bins", "binning"}}
   --domain-shift JSON {"control_sample", "method", "result", "status"} (or wrapped in "domain_shift")
@@ -205,6 +206,10 @@ def build(a: argparse.Namespace) -> dict:
         sources.append({"ref": a.downstream, "sha256": h, "role": "downstream-validation"})
     ext["source_files"] = sources
     outputs = [{"ref": summary["checkpoint"], "kind": "checkpoint"}] if summary.get("checkpoint") else []
+    # train_bdt.py saves one model per fold and lists them as "models"
+    models = summary.get("models")
+    if isinstance(models, list):
+        outputs += [{"ref": m, "kind": f"checkpoint:fold{k}"} for k, m in enumerate(models) if isinstance(m, str) and m]
     for split, path in sorted((summary.get("scores") or {}).items()):
         if path:
             outputs.append({"ref": path, "kind": f"scores:{split}"})

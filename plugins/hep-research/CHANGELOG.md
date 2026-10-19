@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **A BDT's ml-artifact names its fold models.** `skills/hep-ml/scripts/write_ml_artifact.py` read only a run
+  summary's `checkpoint`, so `train_bdt.py`'s per-fold `models` were missing from `outputs`; they are now listed as
+  `checkpoint:fold<k>`, and a `train_bdt.py` run folder with its ml-artifact passes the `artifacts_dir` check.
+  hep-ml's workflow step 3 says configs, run folders and raw tool outputs go in a work folder, not `artifacts_dir`.
+  In the L3 ML chain every Sonnet failure after #151 was these files left in `artifacts_dir`.
 - **hep-ml hands limits and fits to hep-statistics, even when it was loaded first.** Its opening "Never" line now
   says that a limit, fit or significance with the model belongs to hep-statistics, which is loaded before computing
   one. In the L3 ML chain, Haiku with hep-ml loaded first never loaded hep-statistics in 11 of 12 runs across four
