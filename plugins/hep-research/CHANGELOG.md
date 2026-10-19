@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+## 0.15.0 (2026-10-19)
+
+Behavioral-eval round (`evals/behavior/`, L3 handoff chains): artifact checks on handoffs and on whole
+`artifacts_dir` folders, skill handoffs to hep-statistics, and ML and unfolding tool fixes. Full L3 on main against
+#150: Sonnet 43 of 48, Haiku 39 of 48, every fault case passes for Sonnet. Contracts stay 2.12.0.
+
 - **`train_bdt.py` refuses validation parts it cannot score.** When no fold's validation part had both classes,
   every hyperparameter point scored NaN; the script still trained and saved fold models, then crashed writing
   `run_summary.json` (exit 1, a traceback and no JSON status). It now stops before training with exit 2,
