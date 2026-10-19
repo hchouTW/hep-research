@@ -35,7 +35,9 @@ python3 evals/routing/run_routing_eval.py baseline evals/routing/results/<run_id
 Each case runs in a fresh temporary folder that holds only the case's input files, with the plugin from
 `--plugin-dir` (default: this checkout), a pinned `--model`, `--max-turns` (default 6), a per-case `--max-budget-usd`,
 and read-only tools (Skill, Read, Glob, Grep; Bash, Write, Edit, web and agent tools denied). No new case starts once
-`--budget-usd` is spent. A multi-turn case resumes its session for each later turn.
+`--budget-usd` is spent. A multi-turn case resumes its session for each later turn. A resumed run (`--reuse-raw`,
+same `--run-id`) re-scores the raw streams already recorded and counts only new spending against `--budget-usd`, so
+its budget covers the missing cases (`reused_cases` and `spent_usd` in the summary's `meta`).
 
 Isolation, recorded in every summary:
 

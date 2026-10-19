@@ -10,8 +10,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
-import make_name_variant as mnv  # noqa: E402
-import run_routing_eval as rre  # noqa: E402
+import make_name_variant as mnv
+import run_routing_eval as rre
 
 
 class Rename(unittest.TestCase):

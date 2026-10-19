@@ -100,7 +100,7 @@ def main(argv=None) -> int:
             if src.exists():
                 src.rename(args.out / parent / (new if parent == "skills" else new.replace("-", "_")))
     check = subprocess.run([sys.executable, str(args.out / "tools" / "check_routing_static.py")],
-                           capture_output=True, text=True, timeout=600)
+                           capture_output=True, text=True, timeout=600, check=False)
     try:
         static = json.loads(check.stdout)
     except ValueError:
