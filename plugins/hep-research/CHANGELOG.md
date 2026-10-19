@@ -60,6 +60,9 @@ back at main's level; a final full run scores 371 of main's 394 cases (main 369)
     24,451.
 - **Link test.** `tests/skills/test_reference_links.py` checks both new skills, including links into the other skill
   and into profiles, and fails on any maintained file that still names the old skill folder.
+- **Citation follow-up hops to hep-citations.** Asked mid-draft whether its citations are verified, hep-authoring
+  now loads hep-citations instead of answering from its own resource table (`lit-turns-1` second turn: no skill in 7
+  earlier runs, 2/3 live after the change; VALIDATION SPLIT-LIVE-EVAL).
 
 ## 0.15.0 (2026-10-19)
 

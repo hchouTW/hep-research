@@ -1952,6 +1952,15 @@ repeated: `c-det-atlas-2` 2/3 on both sides, `d-cc-preserve-1` 3/3 main vs 2/3, 
 `wp11-bound-dm-2` flaky on main (2/3, 1/3). New split cases 8/10 (`lit-bound-related-1`, `lit-turns-1` fail). No
 regression beyond run-to-run noise; accepted by the maintainer and merged. Total live spend for the split about $134.
 
+Follow-up `lit-turns-1` (2026-10-20, Claude Code 2.1.304, claude-sonnet-5-5, branch `fix/authoring-citation-handoff`):
+the second turn ("have all these citations been verified?") had loaded no skill in all 7 earlier runs, because
+hep-authoring's resource table offered `check_citations.py` for it. hep-authoring now says to load hep-citations
+for it (Never line, table row, workflow step 6). Live: `lit-turns-1` 2/3 strict (`cithop-turns-r1..3`); the third
+run loaded hep-citations in turn 1, as the draft's citation handoff, and nothing new in turn 2 (lenient pass). The
+other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` loads hep-citations before
+hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
+`--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the
