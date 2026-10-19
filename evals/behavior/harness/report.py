@@ -47,6 +47,8 @@ def _non_selection_pass(r) -> bool:
 def build(rows: list[dict], manifest: dict | None = None, calibration: dict | None = None) -> dict:
     rep: dict = {"manifest": manifest or {}, "runs": len(rows)}
     rep["host_errors"] = sum(1 for r in rows if r.get("host_error"))
+    rep["outside_writes"] = {f"{r['case']} {r.get('arm')} r{r.get('repeat')}": r["outside_writes"]
+                             for r in rows if r.get("outside_writes")}
     rep["by_layer_arm_model"] = {
         "|".join(map(str, k)): {"runs": len(v), "pass": _rate(v), "blocking_failure": _rate(v, "blocking_failure"),
                                 "mean_score": round(sum(r.get("score", 0) for r in v) / len(v), 4)}
@@ -186,6 +188,9 @@ def to_markdown(rep: dict) -> str:
          f"Plugin {p.get('version', '?')} (behavior hash `{p.get('behavior_hash', '?')}`), {rep['runs']} runs, "
          f"{rep['host_errors']} host errors. Rates: point [95% Wilson interval].",
          ""]
+    if rep["outside_writes"]:
+        L += [f"Runs that wrote outside their workspace: {len(rep['outside_writes'])} "
+              f"({sum(len(v) for v in rep['outside_writes'].values())} new entries; see report.json outside_writes).", ""]
     if m.get("holdout"):
         h = m["holdout"]
         L += [f"**Held-out suite `{h.get('suite')}`: opening {h.get('openings')}.** Numbers below include it.", ""]
@@ -288,7 +293,7 @@ def write(rep: dict, out_dir: Path) -> None:
 # ------------------------------------------------------------------ committed summary
 RUN_FIELDS = ("case", "layer", "suite", "lang", "kind", "arm", "model", "repeat", "expected_skill", "first_hep_skill",
               "skills", "loaded_expected", "pass", "blocking_failure", "score", "host_error", "turn_limit", "contaminated",
-              "unverified", "cost_usd", "cli_version")
+              "unverified", "cost_usd", "cli_version", "outside_writes")
 
 
 def summary(rows: list[dict], manifest: dict, run_id: str) -> dict:

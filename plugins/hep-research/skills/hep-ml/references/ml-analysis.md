@@ -8,7 +8,9 @@ weak supervision, ML unfolding on the training side, and deployment. Model famil
 detectors in [space-and-astroparticle-ml.md](space-and-astroparticle-ml.md); fast simulation in
 [fast-simulation-validation.md](fast-simulation-validation.md); SBI training in [sbi-training.md](sbi-training.md).
 Validity of an inference built on a model is hep-statistics'
-([ml-assisted-inference.md](../../hep-statistics/references/ml-assisted-inference.md)); sample normalization is
+([ml-assisted-inference.md](../../hep-statistics/references/ml-assisted-inference.md)): for a limit, fit or
+significance with the model, load hep-statistics and use its tools, rather than computing it here or from its
+references alone; sample normalization is
 hep-measurement' ([weights-normalization.md](../../hep-measurement/references/weights-normalization.md)).
 
 Citations give arXiv identifiers looked up on INSPIRE-HEP or arXiv on 2026-10-13. They point to the method, not to

@@ -43,8 +43,9 @@ gate of a statistical-result (publication_gate): passed, unresolved or failed, w
 'synthetic' or 'asimov' result fails it); an archived artifact may be valid and still not pass it. Passing the gate
 is a contract-level prerequisite for
 reporting a result as validated, not evidence of scientific validity. Given a directory (an artifacts_dir), every
-JSON file under it is validated and must be an artifact; a JSON file without artifact_type is an error
-(artifacts_dir.not_artifact), another file a warning; the report lists each file (validate_directory).
+JSON file under it is validated and must be an artifact or a sidecar an artifact there refers to by path; another
+JSON file is an error (artifacts_dir.not_artifact), another file a warning; the report lists each file
+(validate_directory).
 """
 from __future__ import annotations
 
@@ -2093,34 +2094,73 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     return rep
 
 
+def _referenced_paths(doc: Any, root: Path) -> set[Path]:
+    """Resolved paths of the strings in an artifact that name a file under root (absolute, or relative to root or to
+    the project folder above it)."""
+    out: set[Path] = set()
+    stack = [doc]
+    while stack:
+        v = stack.pop()
+        if isinstance(v, dict):
+            stack.extend(v.values())
+        elif isinstance(v, list):
+            stack.extend(v)
+        elif isinstance(v, str) and 0 < len(v) < 4096 and "\n" not in v:
+            p = Path(v)
+            for cand in ([p] if p.is_absolute() else [root / p, root.parent / p]):
+                try:
+                    if cand.is_file():
+                        out.add(cand.resolve())
+                except (OSError, ValueError):
+                    pass
+    return out
+
+
 def validate_directory(root: Path, vocab: Vocabulary, **flags) -> dict:
-    """Validate every JSON file under an artifacts_dir: each must be a valid artifact. A JSON file without an
-    artifact_type is an error (artifacts_dir.not_artifact: working files and raw tool outputs belong outside
-    artifacts_dir); any other file is a warning (artifacts_dir.non_json), since sidecars such as a model file may be
-    referenced from an artifact. Hidden files are skipped."""
-    top, files = Report(), []
+    """Validate every JSON file under an artifacts_dir: each must be a valid artifact, or a sidecar that an artifact in
+    the directory refers to by path (a split report, a model file; listed under 'sidecars'). An unreferenced JSON
+    file without an artifact_type is an error (artifacts_dir.not_artifact: working files and raw tool outputs belong
+    outside artifacts_dir); an unreferenced file of another kind is a warning (artifacts_dir.non_json). Hidden files
+    are skipped."""
+    top, files, docs, other = Report(), [], {}, []
     paths = sorted(f for f in root.rglob("*") if f.is_file()
                    and not any(part.startswith(".") for part in f.relative_to(root).parts))
     for f in paths:
         rel = f.relative_to(root).as_posix()
         if f.suffix != ".json":
-            top.add("warning", rel, "artifacts_dir.non_json", "not a JSON artifact; keep it only if an artifact refers to it")
+            other.append(f)
             continue
         try:
             doc = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, ValueError) as exc:
             top.add("error", rel, "artifacts_dir.unreadable", f"cannot read: {exc}")
             continue
-        if not (isinstance(doc, dict) and "artifact_type" in doc):
+        if isinstance(doc, dict) and "artifact_type" in doc:
+            docs[f] = doc
+        else:
+            other.append(f)
+    referenced: set[Path] = set()
+    for doc in docs.values():
+        referenced |= _referenced_paths(doc, root)
+    sidecars = []
+    for f in other:
+        rel = f.relative_to(root).as_posix()
+        if f.resolve() in referenced:
+            sidecars.append(rel)
+        elif f.suffix == ".json":
             top.add("error", rel, "artifacts_dir.not_artifact",
-                    "no artifact_type: write it as an artifact or move this working file out of artifacts_dir")
-            continue
+                    "no artifact_type and no artifact refers to it: write it as an artifact or move this working file "
+                    "out of artifacts_dir")
+        else:
+            top.add("warning", rel, "artifacts_dir.non_json", "not a JSON artifact and no artifact refers to it")
+    for f, doc in docs.items():
         rep = validate_artifact(doc, vocab, **flags)
-        files.append({"path": rel, **rep.as_dict()})
+        files.append({"path": f.relative_to(root).as_posix(), **rep.as_dict()})
     if not paths:
         top.add("warning", ".", "artifacts_dir.empty", "no files in the directory")
     ok = top.ok and all(e["ok"] for e in files)
-    return {"ok": ok, "directory": str(root), "findings": [f.as_dict() for f in top.findings], "files": files}
+    return {"ok": ok, "directory": str(root), "findings": [f.as_dict() for f in top.findings], "files": files,
+            "sidecars": sidecars}
 
 
 @protected_main("contracts.validate", keep_flag=True, capabilities=KNOWN_CAPABILITIES)

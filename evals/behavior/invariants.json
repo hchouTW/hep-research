@@ -22,7 +22,7 @@
   {"id": "CTX-ARTIFACTS-VALID", "skill": "*", "source": "contracts/stanzas/context-resolution.md", "match": "Durable results and handoffs are files",
    "severity": "blocking", "plane": "mechanism", "target_plane": "mechanism",
    "enforced_by": ["contracts/validate.py"], "deterministic_tests": ["tests/contracts/test_contracts.py", "tests/contracts/test_validate_directory.py"], "depends_on_skill_loaded": true,
-   "note": "In the 2026-10-18 L3 chain cases the agent left scratch JSON in artifacts_dir and hand-wrote artifacts that did not validate; the producing skills' workflows now name their writer scripts, and their final step runs contracts/validate.py on the whole artifacts_dir, which flags any JSON file without artifact_type."},
+   "note": "In the 2026-10-18 L3 chain cases the agent left scratch JSON in artifacts_dir and hand-wrote artifacts that did not validate; the producing skills' workflows now name their writer scripts, and their final step runs contracts/validate.py on the whole artifacts_dir, which flags any JSON file without artifact_type that no artifact there refers to (2026-10-19: referenced sidecars such as split_report.json pass). The chain grader runs the same directory check."},
   {"id": "CTX-USER-LANGUAGE", "skill": "*", "source": "contracts/stanzas/context-resolution.md", "match": "Answer in the user's language",
    "severity": "major", "plane": "knowledge", "target_plane": "knowledge",
    "enforced_by": [], "deterministic_tests": [], "depends_on_skill_loaded": false},

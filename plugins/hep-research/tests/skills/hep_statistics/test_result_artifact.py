@@ -175,5 +175,41 @@ class ResultArtifactParadigm(unittest.TestCase):
             self.assertEqual(code, 2)
 
 
+
+class ResultArtifactUnfolding(unittest.TestCase):
+    """An unfolded spectrum (dagostini-unfold) becomes a likelihood-only statistical-result that keeps the vectors."""
+
+    def test_unfolded_spectrum_keeps_estimate_and_covariance(self):
+        from core.stats import unfolding_diagnostics as ud
+        cfg = {"response": [[0.8, 0.1], [0.1, 0.7]], "truth": [100.0, 50.0], "data": [90, 45],
+               "orientation": "rows_reco_cols_truth"}
+        with tempfile.TemporaryDirectory() as tmp:
+            inp, src = Path(tmp) / "in.json", Path(tmp) / "unfold.json"
+            inp.write_text(json.dumps(cfg))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = ud.main(["dagostini-unfold", "--input", str(inp), "--param", "4"])
+            self.assertEqual(code, 0, buf.getvalue())
+            src.write_text(buf.getvalue())
+            out = Path(tmp) / "new" / "folder" / "unfolded.json"  # the folder is created
+            with redirect_stdout(io.StringIO()):
+                code = ra.main(["--cli-output", str(src), "--poi", "unfolded_spectrum", "--paradigm", "likelihood-only",
+                                "--construction", "other", "--test-statistic", "none", "--label", "synthetic",
+                                "--artifact-id", "synthetic-unfold", "--out", str(out)])
+            self.assertEqual(code, 0)
+            art = json.loads(out.read_text())
+            res = art["extension"]["results"]
+            self.assertEqual(len(res["estimate"]), 2)
+            self.assertEqual(len(res["covariance_total"]), 2)
+            self.assertTrue(validate_artifact(art).ok)
+
+    def test_numeric_shapes(self):
+        self.assertTrue(ra._numeric([1.0, 2]))
+        self.assertTrue(ra._numeric([[1.0, 0.0], [0.0, 1.0]]))
+        self.assertFalse(ra._numeric([]))
+        self.assertFalse(ra._numeric([True, 1.0]))
+        self.assertFalse(ra._numeric(["a"]))
+        self.assertFalse(ra._numeric([[[1.0]]]))
+
 if __name__ == "__main__":
     unittest.main()

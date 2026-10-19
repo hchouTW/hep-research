@@ -498,3 +498,21 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class BuildResponseCommentLinesTests(_TempFiles, unittest.TestCase):
+    """A '#' header line (a SYNTHETIC label) is skipped, as in the other hep-detector scripts."""
+
+    def test_commented_csv_builds(self):
+        rows = ['# SYNTHETIC matched sample; invented', 'truth,reco,selected,weight']
+        rows += [f'{1.5 + (i % 3)},{1.4 + (i % 3)},{int(i % 5 != 0)},1.0' for i in range(60)]
+        events = self.write('matched.csv', '\n'.join(rows) + '\n')
+        out = self.tmp / 'response.json'
+        doc = run_json(self, 'build_response.py', 'build', events, '--truth-col', 'truth', '--reco-col', 'reco',
+                       '--weight-col', 'weight', '--selected-col', 'selected', '--truth-edges', 1, 2, 3, 4,
+                       '--reco-edges', 1, 2, 3, 4, '--variable', 'x', '--unit', 'GeV',
+                       '--normalization', 'conditional_on_generated', '--acceptance', 'inside_matrix',
+                       '--residual', 'ratio', '--intended-use', 'unfolding', '--artifact-id', 'synthetic-comment',
+                       '--objective', 'comment-line test', '--status', 'synthetic', '--out', out)
+        self.assertEqual(doc['status_label'], 'synthetic')
+        self.assertTrue(out.exists())
