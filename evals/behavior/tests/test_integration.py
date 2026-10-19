@@ -137,6 +137,19 @@ class Stops(unittest.TestCase):
         self.assertAlmostEqual(man["spent_usd"], 0.3)
         self.assertTrue(man["stopped"].startswith("budget:"))
 
+    def test_rerun_budget_counts_only_new_runs(self):
+        """Filling a campaign: the 3 graded runs are reused and their 0.3 USD does not count, so a 0.25 budget still
+        starts the missing runs (before, the reused cost alone stopped it)."""
+        os.environ["FAKE_COST"] = "0.1"
+        try:
+            self.run_matrix("fill", budget_usd=0.25)
+            res, man = self.run_matrix("fill", budget_usd=0.25)
+        finally:
+            os.environ.pop("FAKE_COST")
+        self.assertEqual(man["reused"], 3)
+        self.assertEqual(len(res), 5)
+        self.assertAlmostEqual(man["spent_usd"], 0.2)
+
 
 class CommandLine(unittest.TestCase):
     def test_run_without_budget_is_a_usage_error_and_calls_nothing(self):

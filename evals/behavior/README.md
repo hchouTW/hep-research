@@ -123,7 +123,9 @@ Live runs use the same isolation as `evals/routing/` (see its README), recorded 
   `baseline` arm, is **contaminated**: the run fails and no new run starts (`run` exits 1). Plugins built into the CLI
   (`"path": "builtin"`) are recorded, not counted.
 - Budgets are required for `run` and `judge`: `--case-budget-usd` (the host's `--max-budget-usd`) and `--budget-usd`
-  (no new run starts once the total is spent; the stop and the completed count are in `manifest.json`).
+  (no new run starts once the total is spent; the stop and the completed count are in `manifest.json`). A rerun into
+  the same `--out` reuses every graded run (`reused` in `manifest.json`) and counts only new spending, so its budget
+  covers the missing runs; runs that failed to start (`host_error.txt`) run again.
 - Default tools: `Bash,Read,Write,Edit,Glob,Grep,Skill`; `WebFetch` and `WebSearch` are denied unless a case lists
   them. Default `--max-turns` 40 (6 for the `selection` preset).
 - After each run the `~/.claude/projects/` folder its workspace created is removed.
