@@ -26,7 +26,8 @@ hep-research in the baseline arm) is contaminated: it fails, and the campaign st
 
 Live runs call a paid model. `plan` prints the matrix and the run count; `run` needs --yes and both budgets:
 --case-budget-usd (passed to the host as --max-budget-usd) and --budget-usd (no new run starts once the total spent
-reaches it).
+reaches it). A rerun into the same --out reuses every graded run; their earlier cost does not count against
+--budget-usd, so the budget covers only the runs still missing.
 """
 from __future__ import annotations
 
@@ -347,7 +348,7 @@ def _run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dic
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=1))
     budget = opts.get("budget_usd")
     lock = threading.Lock()
-    state = {"spent": 0.0, "stop": None}
+    state = {"spent": 0.0, "stop": None, "reused": 0}
 
     def task(c, a, m, r):
         with lock:
@@ -355,9 +356,15 @@ def _run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dic
                 state["stop"] = f"budget: {state['spent']:.4f} USD spent of {budget:g}"
             if state["stop"]:
                 return None
+        # a run graded by an earlier campaign in run_dir is reused; its cost was spent then, not against this budget
+        cached = (not opts.get("rerun")
+                  and (run_dir / c["id"] / a / m.replace("/", "_") / f"r{r}" / "grade.json").exists())
         res = run_one(c, a, m, r, run_dir, plugin_root, opts)
         with lock:
-            state["spent"] += res.get("cost_usd") or 0.0
+            if cached:
+                state["reused"] += 1
+            else:
+                state["spent"] += res.get("cost_usd") or 0.0
             if res.get("contaminated") and not state["stop"]:
                 state["stop"] = f"contaminated: {c['id']} {a} {m} r{r}: {res['contaminated']}"
         return res
@@ -383,7 +390,7 @@ def _run_matrix(matrix: list[tuple], run_dir: Path, plugin_root: Path, opts: dic
             results.append(res)
             mark = "PASS" if res.get("pass") else ("HOST" if res.get("host_error") else "fail")
             print(f"[{i}/{len(matrix)}] {mark} {key[0]} {key[1]} {key[2]} r{key[3]}", file=sys.stderr)
-    manifest.update({"completed": len(results), "skipped": len(matrix) - len(results),
+    manifest.update({"completed": len(results), "skipped": len(matrix) - len(results), "reused": state["reused"],
                      "spent_usd": round(state["spent"], 4), "stopped": state["stop"],
                      "cli_versions": sorted({r["cli_version"] for r in results if r.get("cli_version")})})
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=1))
