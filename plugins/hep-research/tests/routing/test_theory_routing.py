@@ -35,7 +35,7 @@ class OwnershipTests(unittest.TestCase):
         self.assertRegex(stats, r"predictions \(hep-theory\)")
         # since the split (plan 4.1): hep-citations sends published-data work to its owners, hep-authoring every result
         self.assertRegex(lit, r"Not for[^.]*hep-theory \(CRDB, HEPData import[,)]")
-        self.assertRegex(lit, r"Not for[^.]*hep-statistics \(compatibility[,)]")
+        self.assertRegex(lit, r"Not for[^.]*hep-statistics \([^)]*compatibility")
         self.assertRegex(writing, r"Not for[^.]*producing results \([^)]*hep-theory, hep-statistics")
 
 

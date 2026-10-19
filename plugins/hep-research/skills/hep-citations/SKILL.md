@@ -1,6 +1,6 @@
 ---
 name: hep-citations
-description: "Use when a request asks what a named experiment published, whether a paper exists, which result is the latest, what a paper states, whether a result supports a claim or interpretation, a source's status, whether citations are verified, or for a citation: load it first even for a quick question; if a comparison names no observable or experiments, ask first. Also finding and verifying literature and citations (INSPIRE-HEP, ADS, arXiv), source and claim ledgers, planned claims to recheck, literature matrices and reviews. Not for writing (hep-authoring) or results, even from published data: hep-theory (CRDB, HEPData import, models, constants), hep-statistics (compatibility, p-values)."
+description: "Use when a request asks what a named experiment published, whether a paper exists, which result is the latest, what a paper states, whether a result supports a claim or interpretation, a source's status, whether citations are verified, or for a citation: load it first even for a quick question. Also finding and verifying literature and citations (INSPIRE-HEP, ADS, arXiv), source and claim ledgers, planned claims to recheck, literature matrices and reviews. Not for writing (hep-authoring) or results, even from published data: hep-theory (CRDB, HEPData import, models, constants), hep-statistics (whether two results agree: compatibility, p-values)."
 ---
 
 # hep-citations: sources, citations, literature records
