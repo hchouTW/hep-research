@@ -10,8 +10,8 @@ The communication skill is split into **hep-citations** (sources, citations, lit
 version 6). Contracts 2.13.0. Static routing passes all 404 cases (394 original reassigned, none deleted, 10 added);
 live evals (VALIDATION SPLIT-LIVE-EVAL, about $98 over three rounds): the skills are named hep-citations and
 hep-authoring because the host lists skills alphabetically and names sorting after hep-computing let it draw
-ambiguous detector requests; round 2 passes the plan's criteria except one regression (`wp11-xexp-2`, a compatibility
-p-value question that now loads hep-citations). Not merged until the maintainer decides on that case.
+ambiguous detector requests; after round 2 and a targeted fix (hep-statistics owns whether two results agree) every measured regression is
+back at main's level; the full case set was not rerun after the fix.
 
 - **Two skills replace hep-communication.** hep-citations answers what a paper or an experiment published, whether a
   paper exists, the latest result, whether a source supports a claim and citation requests, from the bound profile's

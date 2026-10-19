@@ -1939,6 +1939,13 @@ Round 2 passes criteria 2, 3, 4, 6 and 7 and fails criterion 5 on one case (`wp1
 round 0 loads the literature skill) and marginally on `wp11-bound-dm-2`. By the plan's rule (two failed rounds) the
 split is abandoned unless the maintainer accepts or waives that case.
 
+Targeted fix after round 2 (769f34a0, about $2.60, maintainer-approved beyond the plan's two rounds): hep-citations
+drops the comparison ask-first clause and its "Not for" says hep-statistics owns whether two results agree (653
+characters, always-on 2,527, +110). The 28 cases that expect hep-citations, name it in `not` or accept it, plus
+`wp11-xexp-2`, `wp11-xexp-3` and `wp11-bound-dm-2`: 26/28 strict (round 2: 23). `wp11-xexp-2` 3/3 hep-statistics
+(main 3/3), `wp11-bound-dm-2` 1/3 (main 1/3), `lit-negative-1` now passes. With this, every regression measured in
+the rounds above is back at main's level; the full 404-case set was not rerun after the fix.
+
 ## 0.15.0 release check (2026-10-19, E2 and the CI lock)
 
 Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the
