@@ -15,7 +15,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.14.1",
+  "plugin": "0.15.0",
   "contracts": "2.12.0",
   "plugin_release": {
    "release": "unreleased",

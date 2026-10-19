@@ -1855,6 +1855,24 @@ that decides the same question.
 | Ruff 0.16.10, mypy 2.4.0 | clean |
 | Registry | 80 of 80 V parts passing |
 
+## 0.15.0 release check (2026-10-19, E2 and the CI lock)
+
+Release branch `release/0.15.0` from main `38cb740a` (#141-#154: behavioral evals and the L3 handoff fixes; the
+protected-data doc rename. Evidence in `evals/behavior/README.md`: full L3 on main against #150, Sonnet 43 of 48 and
+Haiku 39 of 48, no run writing outside its workspace). Contracts stay 2.12.0 (the one schema change since 0.14.1 is
+a `$comment` path from the rename).
+
+What changed: version 0.15.0 in both manifests, `pyproject.toml`, the README, the two assets and the profile
+scripts that record it; examples regenerated (E2; `bc-propagation-fit` with the CI lock), only version strings and the
+hashes that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as committed; its output holds no
+version); the sbottom benchmark artifacts' `plugin` string edited by hand; theory-profile artifacts regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3), `88bd43b0` | 24 pass, 0 fail, 2 skipped (CLI host checks); 4307 tests, 4188 pass, 0 failures, 119 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 24 pass, 0 fail, 2 skipped; 4307 tests, 4094 pass, 0 failures, 213 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
 ## 0.14.1 release check (2026-10-17, E2 and the CI lock)
 
 Release branch `release/0.14.1` from main `61ef58aa` (#139: the hep-detector, hep-theory and hep-computing
