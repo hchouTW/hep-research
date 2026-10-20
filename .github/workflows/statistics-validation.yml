@@ -9,6 +9,9 @@
 #                     fails the job, never a pass
 #   combine           CMS Combine 11.1.0 (conda-forge package cms-combine) with ROOT 6.36.14 (the build recorded in VALIDATION.md):
 #                     the datacard template against pyhf; Combine missing fails the job (no silent skip)
+#   slow-evidence     the sci-fix evidence that runs only in the slow tier (Feldman-Cousins Tables IV and VI in full,
+#                     PDG Table 40.4, the slow toy-CLs checks), with HEP_SLOW_TESTS=1; any skip fails the job
+#                     (tools/run_required_backends.py --no-skips; docs/maintenance.md, evidence that skips is unverified)
 name: statistics-validation
 on:
   schedule:
@@ -39,6 +42,22 @@ jobs:
         env:
           HEP_SLOW_TESTS: "1"
         run: python -m unittest tests.examples.test_stats_benchmarks -v
+
+  slow-evidence:
+    # about 20 min on one core of the E2 workstation (89 tests, 2026-10-20); the margin is for slower runners
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install the pinned set
+        run: python -m pip install -r requirements-ci.lock
+      - name: Slow-tier sci-fix evidence, no skip allowed
+        env:
+          HEP_SLOW_TESTS: "1"
+        run: python tools/run_required_backends.py --require numpy,scipy --no-skips --modules tests.core.test_published_tables,tests.core.test_stats_poisson,tests.core.test_stats_likelihood_limits
 
   published:
     runs-on: ubuntu-latest

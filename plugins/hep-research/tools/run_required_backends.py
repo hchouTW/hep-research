@@ -4,10 +4,13 @@
 The fast-tier tests skip a backend-dependent test when the backend is not installed (unverified, not passing). A
 gate that promises a backend must not pass through such skips. This tool (1) checks that each required backend
 imports at its pinned version, (2) runs the statistics and backend test modules, and (3) fails if any test fails or
-errors, or if any skip reason names a required backend.
+errors, or if any skip reason names a required backend. With --no-skips every skip fails, whatever its reason: for
+evidence modules that must run in full, such as the slow-tier sci-fix evidence in the release gate.
 
-Usage: python3 tools/run_required_backends.py --require pyhf==0.7.6,arviz==0.23.4 [--modules M1,M2] [--out REPORT.json]
-       (a requirement exe:NAME is an executable that must be on PATH, for example exe:combine)
+Usage: python3 tools/run_required_backends.py --require pyhf==0.7.6,arviz==0.23.4 [--modules M1,M2] [--no-skips]
+       [--out REPORT.json]
+       (a requirement exe:NAME is an executable that must be on PATH, for example exe:combine; a name without a
+       version only has to import)
 Exit codes: 0 every required backend present and no test failed or skipped for it; 1 otherwise; 2 bad usage.
 """
 from __future__ import annotations
@@ -23,7 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MODULES = [
     "tests.core.test_stats_p0_regressions", "tests.core.test_stats_counting_asymptotic_oracles",
     "tests.core.test_stats_toy_ensemble", "tests.core.test_stats_unfolding_outer", "tests.core.test_stats_weighted_mc",
-    "tests.core.test_stats_interpolation", "tests.contracts.test_statistical_semantics",
+    "tests.core.test_stats_interpolation", "tests.core.test_stats_linalg", "tests.core.test_properties",
+    "tests.contracts.test_statistical_semantics",
     "tests.adapters.test_backend_likelihood_equivalence", "tests.adapters.test_sr_cr_model_card",
     "tests.adapters.test_pyhf_counting", "tests.adapters.test_pyhf_shape", "tests.adapters.test_pyhf_publication",
     "tests.adapters.test_pyhf_published_reproduction", "tests.adapters.test_pyhf_nuisance_diagnostics",
@@ -44,6 +48,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--require", required=True, help="comma-separated name==version (version optional)")
     ap.add_argument("--modules", help="comma-separated test modules (default: the statistics and backend modules)")
+    ap.add_argument("--no-skips", action="store_true", help="fail on any skipped test, whatever its reason")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
     required = parse_require(a.require)
@@ -80,6 +85,9 @@ def main(argv=None) -> int:
         report["problems"].append(f"{len(result.failures)} failures and {len(result.errors)} errors")
     if skipped_for_backend:
         report["problems"].append("tests skipped for a required backend: " + "; ".join(skipped_for_backend))
+    if a.no_skips and result.skipped:
+        report["skipped_tests"] = [f"{t.id()}: {why}" for t, why in result.skipped]
+        report["problems"].append(f"{len(result.skipped)} tests skipped where --no-skips allows none")
     report["ok"] = not report["problems"]
     text = json.dumps(report, indent=1)
     if a.out:
