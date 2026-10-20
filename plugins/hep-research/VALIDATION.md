@@ -1961,7 +1961,25 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
-## CONTRACTS-3.0.0 (2026-10-20, E2 and the CI lock, unreleased)
+## 0.17.0 release check (2026-10-20, E2 and the CI lock)
+
+Release branch `release/0.17.0` from main `69a675c7` (#163: contracts 3.0.0 retires the deprecated skill names,
+section CONTRACTS-3.0.0 below; main CI green). Migration option A is complete: 0.16.0 was the last release that
+accepts the old names. The ams02-research companion (1.5.0, requires `>=0.11.0`, profile contracts `>=2.0`) records
+no retired name and needs no change.
+
+What changed: version 0.17.0 in both manifests, `pyproject.toml`, the README, the two assets and the profile scripts
+that record it; examples regenerated (E2; `bc-propagation-fit` with the CI lock), only version strings and the hashes
+that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as committed); the sbottom benchmark
+artifacts' `plugin` string edited by hand; theory-profile artifacts regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4770 tests, 4651 pass, 0 failures, 119 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4770 tests, 4557 pass, 0 failures, 213 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+## CONTRACTS-3.0.0 (2026-10-20, E2 and the CI lock, released in 0.17.0)
 
 Branch `feat/retire-skill-aliases` from main `61fec265` (0.16.0). Contracts 3.0.0 retires the deprecated skill names
 (migration option A, second step); plugin version unchanged. New tests: `tests/contracts/test_skill_names.py` (schema
