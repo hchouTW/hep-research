@@ -463,8 +463,8 @@ class CliTests(unittest.TestCase):
 
 
 class LogClsCrossingTests(unittest.TestCase):
-    """sci-fix CLS-LOGINTERP in the core toy CLs (likelihood_limits._toy_cls): the limit is the first crossing of
-    CLs = alpha, interpolated linearly in log CLs. Oracle: on an exactly exponential curve CLs = exp(-k mu) the
+    """The core toy CLs (likelihood_limits._toy_cls; log CLs since it was written, the sci-fix CLS-LOGINTERP changed
+    the sbottom benchmark): the limit is the first crossing of CLs = alpha, interpolated linearly in log CLs. Oracle: on an exactly exponential curve CLs = exp(-k mu) the
     log-linear interpolation is exact, so the crossing is -ln(alpha) / k for any grid. Negative control: linear
     interpolation in CLs on the same 1.0-wide grid misses it by more than 0.03 where the crossing falls mid-interval
     (k = 0.4: +0.050, k = 2.0: +0.231; at other slopes it can land within 0.002, so those are not used as controls)."""
