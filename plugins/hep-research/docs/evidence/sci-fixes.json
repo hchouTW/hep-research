@@ -1,6 +1,6 @@
 {
  "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -18,9 +18,9 @@
    "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "per-test parent record"
+    "parent record (a test that reaches the pre-fix crossing)"
    ],
-   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18"
+   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18; every parent failure of fix 99a18fd8 needs a function new in the fix; the old crossing was a closure in the pyhf toy run, so only before/after values exist (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20). The core toy CLs (likelihood_limits._toy_cls) interpolated log CLs since it was written (cc44988d): the fix changed the benchmark only"
   },
   {
    "id": "F01",
@@ -39,12 +39,10 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D1",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "per-test parent record"
-   ],
-   "note": "property test of ln L against n ln(mu) - mu with the pre-fix domain rule as negative control, 2026-10-20"
+   "gaps": [],
+   "note": "property test of ln L against n ln(mu) - mu with the pre-fix domain rule as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
   },
   {
    "id": "F02",
@@ -62,12 +60,10 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D1",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "per-test parent record"
-   ],
-   "note": "toys_not_evaluated path tested 2026-10-18; property test of the Clopper-Pearson ends against exact binomial sums (mpmath), Wald at k = 0 as negative control, 2026-10-20"
+   "gaps": [],
+   "note": "toys_not_evaluated path tested 2026-10-18; property test of the Clopper-Pearson ends against exact binomial sums (mpmath), Wald at k = 0 as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
   },
   {
    "id": "F03",
@@ -81,12 +77,12 @@
     "behavioral"
    ],
    "correctness": "C1",
-   "discrimination": "D1",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "independent numeric oracle (analytic minimum and Hessian of a small model)",
-    "per-test parent record"
-   ]
+    "independent numeric oracle (analytic minimum and Hessian of a small model)"
+   ],
+   "note": "per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the parent failure is a missing status key, the defect itself; the T05 tests need a method new in the fix"
   },
   {
    "id": "BAYES-T24",
@@ -102,14 +98,14 @@
     "analytic"
    ],
    "correctness": "C2",
-   "discrimination": "D0",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "parent record",
     "oracle that runs without ArviZ",
-    "negative control"
+    "negative control",
+    "parent record of the ArviZ oracle (needs ArviZ 0.23.4)"
    ],
-   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate"
+   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate; parent record of fix d161b3b7 for the tie and signed-weight parts; the ArviZ oracle of the ESS and MCSE values skipped on both (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
   },
   {
    "id": "FC-MONOTONE",
@@ -128,12 +124,10 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "parent record"
-   ],
-   "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only"
+   "gaps": [],
+   "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only; per-test parent record of fix 04338bbf (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "POISSON-SF",
@@ -151,12 +145,10 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "parent record"
-   ],
-   "note": "negative control added 2026-10-18"
+   "gaps": [],
+   "note": "negative control added 2026-10-18; per-test parent record of fix a2adc126 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "COV-NOREPAIR",
@@ -175,12 +167,10 @@
     "analytic"
    ],
    "correctness": "C3",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "parent record"
-   ],
-   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20"
+   "gaps": [],
+   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20; per-test parent record of fix 6a81109c (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "POISSON-500",
@@ -198,12 +188,10 @@
     "analytic"
    ],
    "correctness": "C3",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "parent record"
-   ],
-   "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20"
+   "gaps": [],
+   "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20; per-test parent record of fix b7b7825a (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "TH9-MASSES",
@@ -307,11 +295,10 @@
     "invariant"
    ],
    "correctness": "C1",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "parent record"
-   ]
+   "gaps": [],
+   "note": "per-test parent record of fix d7148901 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "BLINDING-SCANNER",
@@ -326,12 +313,12 @@
     "behavioral"
    ],
    "correctness": "C1",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "parent record",
     "property test over encodings and sealed values"
-   ]
+   ],
+   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "ROBUST-CAMPAIGN",
@@ -347,14 +334,13 @@
     "closure"
    ],
    "correctness": "C1",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "parent record",
     "independent sum in the closure reference",
     "real two-process lock test"
    ],
-   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md"
+   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "RC-A2",
@@ -444,12 +430,12 @@
     "invariant"
    ],
    "correctness": "C1",
-   "discrimination": "D1",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "parent records for C14, C16, C28",
     "property test of canonical keys"
-   ]
+   ],
+   "note": "per-test parent record of fix 811f02b6, adapted: the new canonical_key import guarded (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
   },
   {
    "id": "ML-CALIBRATION",
@@ -525,13 +511,13 @@
     "invariant"
    ],
    "correctness": "C2",
-   "discrimination": "D0",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "parent record",
     "independent Asimov reference",
     "cell resampling against arXiv:2109.07851 eq. 2.2"
-   ]
+   ],
+   "note": "per-test parent record of fix ef5d068f (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
   },
   {
    "id": "ML-SMALL",
@@ -550,11 +536,11 @@
    "discrimination": "D1",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "parent records for C24-C26 and K13",
     "more trials for C10",
-    "cite the t-table"
+    "cite the t-table",
+    "a K13 test that fails on the parent"
    ],
-   "note": "C10 alone is C2 / D2"
+   "note": "C10 alone is C2 / D2; parent record of fix fd637dcc: C10, C24, C25 and C26 fail on the parent; the K13 evidence (tests/examples/test_ml_classifier_to_inference.py) passes on it (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
   }
  ],
  "documentation_fixes": [

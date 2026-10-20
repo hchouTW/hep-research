@@ -132,6 +132,11 @@ Record each correction in `docs/evidence/sci-fixes.json` and in `VALIDATION.md` 
 A combined count ("8 of 20 fail") or before/after values without the tests is D1. Evidence files live inside the
 plugin; an artifact outside it cannot be rerun.
 
+Older records (VALIDATION.md, commit messages) name test folders as they were then; the history is not rewritten.
+Under `tests/skills/`: `physics_ml/` is now `hep_ml/`, `detector_response/` is `hep_detector/`, `hep_analysis/` is
+`hep_measurement/`, and `research_communication/` and `hep_communication/` are `hep_authoring/` (literature tests:
+`hep_citations/`). A parent record names the path at the fix commit, where its test ran.
+
 ## Rerunning comparisons and examples
 
 Each example writes byte-reproducible output with its seed and tolerances; run `python3 examples/<name>/run.py`
