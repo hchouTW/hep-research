@@ -64,7 +64,8 @@ def canonical_key(value, case_sensitive=False):
     """Comparison form of an ID or group value.
 
     A number with a zero fraction becomes its integer string, so 1, 1.0, "1" and "1.0" are one key; any other float
-    keeps its repr. Strings are stripped and case-folded unless case_sensitive; a string of digits keeps them ("007").
+    keeps its repr. Strings are stripped and case-folded unless case_sensitive; a string of digits keeps them as written
+    ("007", "+5"), and so does the same string with a zero fraction ("007.0" is "007", "+5.0" is "+5").
     Booleans, lists and objects are refused (ValueError): they are not keys.
     """
     if isinstance(value, bool) or isinstance(value, (list, dict, tuple, set)):
@@ -78,7 +79,7 @@ def canonical_key(value, case_sensitive=False):
     text = str(value).strip()
     match = ZERO_FRACTION.match(text)
     if match:
-        text = str(int(match.group(1)))
+        text = match.group(1)  # only the zero fraction goes: "007.0" is "007" and "+5.0" is "+5", as written
     return text if case_sensitive else text.casefold()
 
 

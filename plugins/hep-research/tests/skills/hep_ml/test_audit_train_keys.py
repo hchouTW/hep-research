@@ -21,7 +21,8 @@ TORCH = importlib.util.find_spec("torch") is not None
 sys.path.insert(0, str(SCRIPTS))
 from check_split_integrity import canonical_key  # noqa: E402
 
-KEYS = [1, 1.0, "1", " 1 ", "1.0", "1.", 1.5, "007", "Run7", " RUN7", "ev_A", 0, -3.0, "-3", "x.0", "1e3"]
+KEYS = [1, 1.0, "1", " 1 ", "1.0", "1.", 1.5, "007", "007.0", "+5", "+5.0", "Run7", " RUN7", "ev_A", 0, -3.0, "-3",
+        "x.0", "1e3"]
 
 
 def load_trainer():

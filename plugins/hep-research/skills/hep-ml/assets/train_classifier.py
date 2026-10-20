@@ -194,7 +194,7 @@ def canonical_key(value, case_sensitive=False):
     text = str(value).strip()
     match = _ZERO_FRACTION.match(text)
     if match:
-        text = str(int(match.group(1)))
+        text = match.group(1)  # only the zero fraction goes: "007.0" is "007" and "+5.0" is "+5", as written
     return text if case_sensitive else text.casefold()
 
 

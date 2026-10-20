@@ -150,8 +150,8 @@ class GroupKeyTests(unittest.TestCase):
         """sci-fix ML-SPLITS, independent implementation: the documented rule written again with decimal arithmetic
         and string splitting (no regex, no float.is_integer): a float equal to an integer becomes that integer's
         digits, any other float its repr; a string is stripped, a trailing '.' plus zeros after sign and digits is
-        dropped (the integer part read as a number; any Unicode decimal digits, as int() reads them, so '١.0' is 1
-        and '².0' is text), and case-folded unless case_sensitive. Over a generated domain
+        dropped and the integer part kept as written (sci-fix CANONICAL-KEY-ZERO-FRACTION: '+5.0' is '+5', '007.0'
+        is '007', '١.0' is '١'; '².0' is text), and case-folded unless case_sensitive. Over a generated domain
         (signed zero, subnormals, 2^53 and 1e300, NaN and infinities, numeric-looking text, Unicode case folding),
         both case modes. Invariant: an integer, its float and its text forms with or without a zero fraction are one
         key. Negative control: the pre-fix normalize_key (str, strip, casefold) splits 1 and 1.0."""
@@ -170,8 +170,7 @@ class GroupKeyTests(unittest.TestCase):
             head, dot, tail = text.partition(".")
             digits = head[1:] if head[:1] in "+-" else head
             if dot and digits and digits.isdecimal() and set(tail) <= {"0"}:
-                text = format(Decimal(head), "f").lstrip("+")
-                text = "0" if text == "-0" else text
+                text = head
             return text if case_sensitive else text.casefold()
 
         def pre_fix(value, case_sensitive=False):
@@ -195,6 +194,34 @@ class GroupKeyTests(unittest.TestCase):
             self.assertEqual({canonical_key(v) for v in forms}, {str(i)}, i)
             missed += len({pre_fix(v) for v in forms}) > 1
         self.assertEqual(missed, 64)
+
+    def test_text_with_a_zero_fraction_keeps_its_digits_exhaustively(self):
+        """sci-fix CANONICAL-KEY-ZERO-FRACTION, exhaustive over a stated domain: every ASCII digit string of 1 to 4
+        digits, unsigned, with '+' or with '-' (33,330 texts), with each of the zero fractions '.', '.0', '.000' has
+        the key of the text itself, in both case modes; before the fix the fraction form was read through int(), so
+        '007.0' was '7' against '007' and '+5.0' was '5' against '+5'. Negative control: that pre-fix rule splits
+        every text with a leading zero or a '+' (and '-0', '-00', ...) from its fraction forms."""
+        import itertools
+
+        def pre_fix(text):
+            head = text.split(".")[0]
+            return str(int(head)) if "." in text else text
+
+        split_before = checked = 0
+        for n in range(1, 5):
+            for digits in map("".join, itertools.product("0123456789", repeat=n)):
+                for sign in ("", "+", "-"):
+                    text = sign + digits
+                    for fraction in (".", ".0", ".000"):
+                        for case_sensitive in (False, True):
+                            if canonical_key(text + fraction, case_sensitive) != canonical_key(text, case_sensitive):
+                                self.fail(f"{text + fraction!r} and {text!r} are different keys")
+                        checked += 1
+                    split_before += pre_fix(text + ".0") != text
+        leading = sum(10 ** (n - 1) for n in range(2, 5))  # digit strings of 2 to 4 digits that start with 0
+        self.assertEqual(checked, 3 * 33_330)
+        # every '+' text; unsigned or '-' texts with a leading zero; '-0'
+        self.assertEqual(split_before, 11_110 + 2 * leading + 1)
 
     def test_canonical_key_property_over_generated_values(self):
         """The same rule over hypothesis-generated integers and text (skipped without hypothesis): an integer and
