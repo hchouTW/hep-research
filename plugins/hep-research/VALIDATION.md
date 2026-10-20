@@ -1961,6 +1961,24 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## 0.18.1 release check (2026-10-21, E2 and the CI lock)
+
+Release branch `release/0.18.1` from main `9298ab21` (#181: the sci-fix ledger review, SCIFIX-LEDGER-REVIEW below; main
+CI green). Patch release; contracts unchanged (3.0.1). The ams02-research companion (requires hep-research `>=0.11.0`)
+needs no change.
+
+What changed: version 0.18.1 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts that record it; CHANGELOG `Unreleased` is `0.18.1`. Examples regenerated (E2; `bc-propagation-fit` with the CI
+lock; `eic-profile-routing`): only version strings and the hashes that cover them change (`unfolding-coverage` drifted at
+1e-14 and was left as committed); the sbottom benchmark artifacts' `plugin` string edited by hand; theory-profile
+artifacts regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4405 tests, 4283 pass, 0 failures, 122 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4405 tests, 4190 pass, 0 failures, 215 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
 ## SCIFIX-LEDGER-REVIEW (2026-10-21, E2v and the CI lock; branch `docs/ledger-review`)
 
 The maintainer's review of `docs/evidence/sci-fixes.json` (decisions of 2026-10-20 and 2026-10-21, recorded in

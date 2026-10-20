@@ -1753,7 +1753,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "af7ad3bb 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2007,7 +2007,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "af7ad3bb 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
@@ -2414,7 +2414,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "af7ad3bb 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",

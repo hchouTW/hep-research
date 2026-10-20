@@ -183,7 +183,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `calorimetry-ecal-hcal.md` | hep-detector | 13.0 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `charge-confusion.md` | hep-detector | 12.3 | yes | 5 | - | 4c1cb871 2026-10-17 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
-| `core-detector-equations.md` | hep-detector | 7.8 | no | 5 | - | 9257d7b5 2026-10-15 |
+| `core-detector-equations.md` | hep-detector | 7.8 | no | 5 | - | af7ad3bb 2026-10-21 |
 | `cosmic-ray-spectrum-and-composition.md` | hep-detector | 11.7 | no | 13 | hep-citations, hep-measurement, hep-statistics | ebb58136 2026-10-19 |
 | `data-mc-validation-and-detector-systematics.md` | hep-detector | 12.9 | yes | 9 | - | 9257d7b5 2026-10-15 |
 | `detector-case-studies-and-checklists.md` | hep-detector | 14.1 | no | 3 | - | ebb58136 2026-10-19 |
@@ -196,7 +196,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-simulation.md` | hep-detector | 13.7 | yes | 11 | hep-ml, hep-theory | 9257d7b5 2026-10-15 |
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 14 | hep-measurement | 9257d7b5 2026-10-15 |
 | `event-reconstruction.md` | hep-detector | 12.7 | no | 6 | - | 9257d7b5 2026-10-15 |
-| `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | 9257d7b5 2026-10-15 |
+| `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
 | `front-end-electronics-and-signal-processing.md` | hep-detector | 24.9 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |
@@ -214,7 +214,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `signal-formation-and-readout.md` | hep-detector | 18.3 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `space-based-direct-detection.md` | hep-detector | 19.7 | yes | 15 | hep-citations, hep-measurement, hep-statistics | ed36cea3 2026-10-17 |
 | `timing-detectors.md` | hep-detector | 9.1 | no | 7 | - | 9257d7b5 2026-10-15 |
-| `tracking-and-vertexing.md` | hep-detector | 16.2 | yes | 19 | hep-citations | 9257d7b5 2026-10-15 |
+| `tracking-and-vertexing.md` | hep-detector | 16.2 | yes | 19 | hep-citations | af7ad3bb 2026-10-21 |
 | `triggers-luminosity-pileup.md` | hep-detector | 15.7 | yes | 14 | - | 9257d7b5 2026-10-15 |
 | `analysis-design.md` | hep-measurement | 13.1 | yes | 17 | hep-computing, hep-detector | fe71ebcf 2026-10-17 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |

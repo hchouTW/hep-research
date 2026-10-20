@@ -3,7 +3,9 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.18.1 (2026-10-21)
+
+Patch release: the sci-fix ledger review and a corrected citation. Contracts unchanged (3.0.1).
 
 - **Sci-fix ledger reviewed (maintainer decisions).** An AI-written oracle counts as an independent kind only with a
   basis: a located source (equation, table or page, read and recorded), a third-party implementation's own algorithm,
