@@ -1,0 +1,49 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-003",
+ "severity": "S2",
+ "ledger": [
+  "SAMPLE-NAME-DOT-SEGMENTS"
+ ],
+ "summary": "The validator compared calibration sample names after removing only a leading './', so a calibration evaluated on its fit sample written as 'work/./x.csv' passed ml.calibration_on_fit_sample.",
+ "affected": [
+  {
+   "paths": [
+    "contracts/validate.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "21a4a5b9a0752b8c39c2a6e8a03d9bca6d182a55",
+    "introduced_commit": "f7846755e9b47180fb6276250e2cb46617366fac"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "ml.calibration_on_fit_sample verdict of an ml-artifact (contracts/validate.py)"
+  ],
+  "bias": "a calibration validated on its own fit sample passed validation; the calibration metrics it reports are then optimistic",
+  "trigger": "fit_sample and validation.sample name one file, one of them with a '.' segment in the middle or a trailing separator, and no recorded sample_check hashes or disjointness showing the overlap"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "ml-artifact"
+  ],
+  "extension_keys": [
+   "calibration"
+  ]
+ },
+ "remedy": "validate the artifact again with a release that has the fix (python3 <plugin root>/contracts/validate.py <artifacts_dir>)",
+ "references": [
+  "https://github.com/hchouTW/hep-research/pull/175"
+ ]
+}
