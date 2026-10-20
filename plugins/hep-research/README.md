@@ -83,7 +83,7 @@ They have not been run with this plugin. Plugins need a paid plan (Pro, Max, Tea
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Alternatively, **Add > Upload plugin** accepts a `.zip` of this folder; the archive must hold exactly one
    `.claude-plugin/plugin.json`. Build it from a clean checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 2040 files, 22.4 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 2070 files, 25.3 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
 
 The plugin is saved to your account, so it is then available in Chat, in Cowork, and in Claude Code sessions signed
 in to the same account (Claude Code downloads it as a synced plugin; run `/reload-plugins`). Pick a skill by typing
