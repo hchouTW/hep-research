@@ -13,6 +13,18 @@ Software checks establish contract consistency only, not physical validity.
   (4730 for 4731.37); on the example outputs with random sealed values, files with a false alarm rose from 6.2% to
   6.7%.
 
+- **Split keys: a zero fraction keeps the digits as written (sci-fix, CANONICAL-KEY-ZERO-FRACTION).**
+  `canonical_key` (split tools and the copy in `assets/train_classifier.py`) read a text ID with a zero fraction
+  through int(), so "007.0" was 7 against "007" and "+5.0" was 5 against "+5": the same ID written both ways was two
+  groups, and a split check could miss the overlap. Only the zero fraction is dropped now ("007.0" is "007", "+5.0"
+  is "+5"); the documented rule that a string keeps its digits ("007" is not 7) is unchanged. The text "-0.0" is now
+  "-0", no longer the key of the float -0.0 ("0").
+
+- **Validator: sample names with '.' segments (sci-fix, SAMPLE-NAME-DOT-SEGMENTS; contracts patch, 3.0.1 at the
+  release).** `ml.calibration_on_fit_sample` compared sample names after removing only a leading './', so a
+  calibration validated on its fit sample written as 'work/./val_scores.csv' passed. The sample name now drops '.'
+  segments anywhere and repeated or trailing separators; '..' is kept (resolving it needs the file system).
+
 ## 0.17.0 (2026-10-20)
 
 Contracts 3.0.0 (major): the deprecated skill names are retired, as planned for migration option A (restructuring plan
