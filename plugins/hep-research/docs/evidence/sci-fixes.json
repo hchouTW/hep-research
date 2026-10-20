@@ -1,6 +1,6 @@
 {
  "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -95,17 +95,16 @@
    ],
    "oracle_kinds": [
     "independent-implementation",
-    "analytic"
+    "analytic",
+    "invariant"
    ],
-   "correctness": "C2",
-   "discrimination": "D1",
-   "negative_control_emulates_pre_fix": false,
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "oracle that runs without ArviZ",
-    "negative control",
     "parent record of the ArviZ oracle (needs ArviZ 0.23.4)"
    ],
-   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate; parent record of fix d161b3b7 for the tie and signed-weight parts; the ArviZ oracle of the ESS and MCSE values skipped on both (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate. A SciPy oracle written from Vehtari et al. 2021 runs without ArviZ (R-hat, bulk and tail ESS, quantile MCSE to 1e-12) with invariants and the pre-fix ESS and MCSE as negative control; it fails by assertion on parent bb0774f0 and passes on fix d161b3b7; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20; earlier tie and signed-weight parts: SCIFIX-PARENT-RECORDS)"
   },
   {
    "id": "FC-MONOTONE",
@@ -208,14 +207,13 @@
     "analytic",
     "invariant"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "property test over masses",
     "pdg cross-check in CI"
    ],
-   "note": "expected values computed from closed forms in the test since 2026-10-18"
+   "note": "expected values computed from closed forms in the test since 2026-10-18; binding energies of d, 3He, 4He from the CODATA 2022 masses against AME2020 mass excesses (a second evaluation), property tests over species and momenta, the pre-fix 10 eV table as negative control (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)"
   },
   {
    "id": "DR-WP1-01",
@@ -488,14 +486,13 @@
     "independent-implementation",
     "invariant"
    ],
-   "correctness": "C2",
-   "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "two-sided FPR bound",
-    "Clopper-Pearson against scipy.stats.beta",
     "run the torch tests"
-   ]
+   ],
+   "note": "per-statistic flag rates at the split-conformal value and the union in [a, 2a] (two-sided), the reported interval against scipy.stats.beta Clopper-Pearson, the pre-fix min/max box as negative control; 3 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)"
   },
   {
    "id": "ML-NEGWEIGHTS",
@@ -508,16 +505,14 @@
    ],
    "oracle_kinds": [
     "analytic",
+    "independent-implementation",
     "invariant"
    ],
-   "correctness": "C2",
-   "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "independent Asimov reference",
-    "cell resampling against arXiv:2109.07851 eq. 2.2"
-   ],
-   "note": "per-test parent record of fix ef5d068f (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "per-test parent record of fix ef5d068f (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); Asimov Z against q0 on the Asimov dataset and Eq. 20 against the profiled on/off likelihood (mpmath), cell resampling against a brute-force reading of eq. 2.2, the pre-fix float expression and dropped negative events as negative controls; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)"
   },
   {
    "id": "ML-SMALL",

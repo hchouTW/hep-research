@@ -1961,6 +1961,56 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-ORACLES-BATCH2 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-batch2`, plan PR-6 batch 2)
+
+Second oracles, invariants and negative controls for four S1 entries (axis C), a per-test parent record for the new
+BAYES-T24 oracle (axis D), and local mutants of the code under test (axis D3: `docs/maintenance.md`). Environments:
+E2v as in SCIFIX-PARENT-RECORDS below; the CI lock is `requirements-ci.lock` (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1,
+mpmath 1.3.0, no PyTorch, no ArviZ). The new tests pass in both. Software checks: they show that the tests agree with
+an independent calculation and tell the pre-fix behaviour apart, not that the methods suit a given analysis.
+
+| Entry | New evidence (test file) | Oracle kinds added | Negative control (pre-fix, emulated) | C, D now |
+|---|---|---|---|---|
+| ML-DOMAIN | `tests/skills/hep_ml/test_audit_domain_method.py` | analytic: each statistic's flag rate equals the split-conformal value a = 1 - min(r, n)/(n+1) and the union lies in [a, 2a], 40 to 200 training draws, 4 standard errors; independent implementation: the reported interval equals Clopper-Pearson from `scipy.stats.beta` | per-feature min/max box: 10.5% of fresh in-distribution queries at d = 32, n = 600, against 2a = 1.7% (q = 0.99) and 5.0% (q = 0.95) | C3, D3 |
+| ML-NEGWEIGHTS | `tests/skills/hep_ml/test_audit_metric_layer.py` | independent implementation: Z^2 as q0 on the Asimov dataset (mpmath, 50 digits; tolerance 1e-14 below the series switch at s/b = 1e-6, 1e-14 + 2 eps/x above); Cowan Eq. 20 against the profiled on/off likelihood (mpmath, 60 digits, numerical root of d ln L/db; agreement 5e-11 or better); cell resampling against a brute-force reading of arXiv:2109.07851 eq. 2.2 (full distance sort); invariants: Z falls as sigma_b grows and tends to the sigma_b = 0 value | the pre-fix float expression misses the reference on 212 of 483 grid points (Z = 0 at s/b = 1e-8); dropping negative events shifts the total weight | C3, D3 |
+| BAYES-T24 | `tests/skills/hep_statistics/test_bayes_arviz_oracle.py` (`IndependentOracle`, runs without ArviZ) | independent implementation from Vehtari et al. 2021 with SciPy primitives (rankdata, norm.ppf, beta.ppf), direct-sum autocovariances and Geyer's pair sums: R-hat, bulk and tail ESS, quantile MCSE to 1e-12 (observed 4e-15) on the six cases; invariants: increasing maps (ESS), exact scaling (R-hat, MCSE), chain order | the ESS and MCSE of `bb0774f0`: bulk ESS 0.6% to 0.7% off, tail ESS 0.2% to 0.5%, MCSE 0.1% to 11% | C3, D3 |
+| TH9-MASSES | `tests/skills/hep_detector/test_hep_detector_audit.py` (`SpeciesMassPropertyTests`) | published (second evaluation): binding energies of d, 3He, 4He from the CODATA 2022 masses equal those from AME2020 atomic mass excesses (bundled in core/constants), residuals 0.14, 0.18, 0.37 eV against 3 N sigma(m_n) + 0.1 eV; invariants over species and momenta: mass from beta inverts the kinematics, mass order, flight time grows with mass | the pre-fix table (`23910085^`, 10 eV steps): residuals 5.7, 12.4, 13.3 eV | C3, D2 |
+
+A general affine map (2.5 x - 7) moves R-hat by 6e-6 on the iid case: rounding breaks the exact tie of the two middle
+draws in |x - median|, two average ranks move by 1/2. Scaling by 4 (exact in floating point) leaves every value equal;
+the test uses it and allows 1e-4 for the general map.
+
+### BAYES-T24 (new oracle): fix `d161b3b7`, parent `bb0774f0`
+
+The test file of this branch, copied into worktrees of both commits; E2v.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_diagnostics_match_the_reference_and_the_pre_fix_rules_do_not` | independent implementation | fail (assertion): MCSE ratio 0.954 (iid), 1.036 (ar1), 0.956 (heavy tails) at p = 0.05; bulk ESS ratio 0.993 (two modes stuck), 0.994 (shifted chain); ValueError: Quantiles must be in the range [0, 1] (ties) | pass | no | E2v |
+| `tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_invariance_under_affine_and_increasing_maps_and_chain_order` | invariant | fail (ValueError): Quantiles must be in the range [0, 1] (ties case only; the invariants hold on the parent's other cases) | pass | no | E2v |
+
+- `Health` tests: as in SCIFIX-PARENT-RECORDS; `ArviZOracle::test_rhat_ess_and_mcse_match`: skipped on both (no ArviZ).
+
+### Local mutants (axis D3), CI lock
+
+Each mutant edits one line of the code under test in memory; killed means the new tests fail. All mutants are killed;
+the unmutated code passes.
+
+| Entry | Mutant | Killed by |
+|---|---|---|
+| ML-DOMAIN | threshold always the held-out maximum | per-statistic rate (falls below a) |
+| ML-DOMAIN | no halving of 1 - q across the two statistics (level = q) | per-statistic rate (about 2a) |
+| ML-DOMAIN | conformal rank one too low | per-statistic rate, small setting (n = 100, 200 draws) |
+| ML-NEGWEIGHTS | cell stops one event late | brute-force eq. 2.2; cell-sum test |
+| ML-NEGWEIGHTS | equal shares in a cell instead of proportional to abs(w_i) | brute-force eq. 2.2 |
+| ML-NEGWEIGHTS | Eq. 20 second term with log(1 + x) instead of log1p | profiled on/off reference |
+| ML-NEGWEIGHTS | series switch moved from s/b = 1e-6 to 1e-9 | Asimov likelihood-ratio reference |
+| BAYES-T24 | no improved last term in the ESS | independent oracle |
+| BAYES-T24 | no monotone step in the ESS | independent oracle |
+| BAYES-T24 | folded R-hat dropped | independent oracle |
+| BAYES-T24 | pre-fix MCSE rule | independent oracle |
+| BAYES-T24 | rank-normalization offsets (r - 1/2)/S instead of Blom's (r - 3/8)/(S + 1/4) | independent oracle |
+
 ## SCIFIX-PARENT-RECORDS (2026-10-20, E2v; branch `docs/scifix-parent-records`, plan PR-4)
 
 Per-test parent records (axis D, `docs/maintenance.md`, "Scientific corrections: scope and evidence") for the 13 fix

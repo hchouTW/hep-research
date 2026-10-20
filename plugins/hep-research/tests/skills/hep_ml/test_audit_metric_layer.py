@@ -93,6 +93,89 @@ class MetricTests(unittest.TestCase):
         _, capped = hm.cell_resample(x, w, max_cell=2)
         self.assertGreater(capped["cells_still_negative"], 0)
 
+    def test_asimov_against_the_likelihood_ratio_on_the_asimov_dataset(self):
+        """Independent oracle: Z^2 is q0 = 2[ln L(n | s+b) - ln L(n | b)] on the Asimov dataset n = s + b, computed with
+        mpmath at 50 digits. Tolerance 1e-14 below the series switch at x = s/b = 1e-6, and 1e-14 + 2 eps/x above it:
+        the closed form's cancellation, largest just above the switch. The pre-fix expression
+        sqrt(2[(s+b) ln(1+s/b) - s]) in floating point is the negative control: its cancellation is about eps/x^2 and
+        gives Z = 0 at x = 1e-8."""
+        import mpmath
+
+        def reference(s, b):
+            with mpmath.workdps(50):
+                s, b = mpmath.mpf(s), mpmath.mpf(b)
+                return mpmath.sqrt(2 * ((s + b) * mpmath.log((s + b) / b) - s))
+
+        def pre_fix(s, b):
+            return math.sqrt(max(2 * ((s + b) * math.log(1 + s / b) - s), 0.0))
+
+        missed = 0
+        for log_x in np.linspace(-12, 4, 161):
+            for b in (0.37, 37.0, 3.7e6):
+                x = 10.0 ** log_x
+                ref = reference(x * b, b)
+                tol = 1e-14 if x < 1e-6 else 1e-14 + 2 * 2.3e-16 / x
+                self.assertLess(float(abs(hm.asimov_significance(x * b, b) / ref - 1)), tol, (x, b))
+                missed += float(abs(pre_fix(x * b, b) / ref - 1)) > tol
+        self.assertGreater(missed, 100, missed)
+
+    def test_asimov_with_sigma_b_against_a_profiled_on_off_likelihood(self):
+        """Independent oracle for Cowan's Eq. 20: the on/off model it assumes (n ~ Pois(s + b), m ~ Pois(tau b),
+        tau = b / sigma_b^2) on the Asimov dataset n = s + b, m = tau b, the background profiled under s = 0 by a
+        numerical root of d ln L / db (mpmath, 60 digits), q0 = 2[ln L(s, b) - max_b' ln L(0, b')]. In double precision
+        the profiled difference loses about 1e-8 at tau = 1e4 (ln L ~ 1e7, q0 ~ 0.1), hence mpmath; Eq. 20 agrees to
+        5e-11 or better. Invariants: Z falls as sigma_b grows and tends to the sigma_b = 0 value."""
+        import mpmath
+
+        def reference(s, b, sigma_b):
+            with mpmath.workdps(60):
+                s, b, sigma_b = mpmath.mpf(s), mpmath.mpf(b), mpmath.mpf(sigma_b)
+                tau = b / sigma_b ** 2
+                n, m = s + b, tau * b
+
+                def log_l(mu, bkg):
+                    return n * mpmath.log(mu + bkg) - (mu + bkg) + m * mpmath.log(tau * bkg) - tau * bkg
+
+                profiled = mpmath.findroot(lambda bkg: mpmath.diff(lambda t: log_l(0, t), bkg), b)
+                return float(mpmath.sqrt(2 * (log_l(s, b) - log_l(0, profiled))))
+
+        for s, b in ((5.0, 100.0), (10.0, 50.0), (3.0, 10.0), (50.0, 1000.0), (1.0, 1.0), (20.0, 20.0)):
+            previous = hm.asimov_significance(s, b)
+            for frac in (1e-3, 0.01, 0.1, 0.3, 1.0, 3.0):
+                z = hm.asimov_significance(s, b, frac * b)
+                self.assertAlmostEqual(z / reference(s, b, frac * b), 1.0, delta=1e-9, msg=(s, b, frac))
+                self.assertLess(z, previous, (s, b, frac))
+                previous = z
+            self.assertAlmostEqual(hm.asimov_significance(s, b, 1e-6 * b) / hm.asimov_significance(s, b), 1.0,
+                                   delta=1e-6)
+
+    def test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2(self):
+        """Independent implementation of arXiv:2109.07851 eq. 2.2: seeds in index order, every event sorted by full
+        distance (no k-d tree, no doubling search), the cell grown until its summed weight is non-negative, weights
+        replaced by |w_i| sum_C w / sum_C |w|. Same weights to rounding; each cell's sum is preserved exactly. Dropping
+        the negative events (the pre-fix behaviour this entry corrects) is the negative control: it shifts the total."""
+        def brute_force(x, w):
+            w = w.copy()
+            for seed in range(len(w)):
+                if w[seed] >= 0:
+                    continue
+                order = np.argsort(np.linalg.norm(x - x[seed], axis=1), kind="stable")
+                size = int(np.argmax(np.cumsum(w[order]) >= 0)) + 1
+                cell = order[:size]
+                w[cell] = np.abs(w[cell]) * w[cell].sum() / np.abs(w[cell]).sum()
+            return w
+
+        for seed, (n, d, frac) in enumerate(((400, 2, 0.1), (300, 3, 0.3), (200, 1, 0.45))):
+            rng = np.random.default_rng(20 + seed)
+            x = rng.normal(size=(n, d))
+            w = np.where(rng.uniform(size=n) < frac, -1.0, 1.0) * rng.uniform(0.5, 1.5, size=n)
+            got, rep = hm.cell_resample(x, w)
+            want = brute_force(x, w)
+            np.testing.assert_allclose(got, want, rtol=1e-12, atol=1e-12)
+            self.assertEqual(rep["n_negative_after"], 0)
+            self.assertAlmostEqual(got.sum(), w.sum(), delta=1e-9 * np.abs(w).sum())
+            self.assertGreater(abs(np.where(w > 0, w, 0.0).sum() - w.sum()), 0.1 * abs(w.sum()))
+
 
 class CalibrationWarningTests(unittest.TestCase):
     def test_temperature_warns_about_prior_shift(self):

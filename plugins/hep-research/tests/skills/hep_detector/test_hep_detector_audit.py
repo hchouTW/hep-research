@@ -314,6 +314,56 @@ class PidElectronAndUnitTests(unittest.TestCase):
         self.assertAlmostEqual(loss, 2.03897039968383, delta=1e-9)
 
 
+class SpeciesMassPropertyTests(unittest.TestCase):
+    """TH9: the PID species masses come from core/constants. Second oracle kind: the binding energies of d, 3He and
+    4He from these (CODATA 2022) nuclear masses equal those from AME2020 atomic mass excesses, a separate evaluation
+    bundled in core/constants (electron binding: H 13.598 eV, He 24.587 + 54.418 eV, NIST). Tolerance 3 N sigma(m_n)
+    + 0.1 eV, sigma(m_n) = 0.44 eV (AME2020); observed 0.14 to 0.37 eV. The pre-fix table (8 decimals in GeV,
+    10 eV steps, 23910085^) is the negative control. Invariants over every species and momentum: mass from beta
+    inverts the kinematics, the masses are ordered e < mu < pi < K < p < d < 3He < 4He, and flight time grows with
+    mass at fixed momentum."""
+
+    PRE_FIX = {'p': 0.93827209, 'd': 1.87561294, 'He3': 2.80839160, 'He4': 3.72737940}
+    NUCLEI = (('d', '2H', 1, 2), ('He3', '3He', 2, 3), ('He4', '4He', 2, 4))
+
+    def binding_kev(self, masses_gev):
+        from core import constants
+        kev = {k: constants.constant(k, unit='GeV').value * 1e6 for k in ('proton_mass_energy', 'neutron_mass_energy')}
+        u = constants.constant('atomic_mass_constant_energy', unit='GeV').value * 1e6
+        m_h, m_n = (u + constants.nuclide(n)['mass_excess_keV'] for n in ('1H', 'n'))
+        electron_binding = {1: 0.013598, 2: 0.024587 + 0.054418}
+        out = {}
+        for species, nuclide, z, a in self.NUCLEI:
+            m_p = masses_gev.get('p', kev['proton_mass_energy'] / 1e6) * 1e6
+            codata = z * m_p + (a - z) * kev['neutron_mass_energy'] - masses_gev[species] * 1e6
+            m_atom = a * u + constants.nuclide(nuclide)['mass_excess_keV']
+            ame = z * m_h + (a - z) * m_n - m_atom + z * electron_binding[1] - electron_binding[z]
+            out[species] = (codata, ame, 3 * (a - z) * 0.44e-3 + 1e-4)
+        return out
+
+    def test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not(self):
+        for species, (codata, ame, tol) in self.binding_kev(pid_separation_power.MASSES_GEV).items():
+            self.assertLess(abs(codata - ame), tol, (species, codata, ame))
+        missed = [s for s, (codata, ame, tol) in self.binding_kev(self.PRE_FIX).items() if abs(codata - ame) > tol]
+        self.assertTrue(missed, 'the pre-fix masses agree with AME2020 too: not a negative control')
+
+    def test_mass_from_beta_inverts_the_kinematics_and_masses_are_ordered(self):
+        masses = pid_separation_power.MASSES_GEV
+        names = ('e', 'mu', 'pi', 'K', 'p', 'd', 'He3', 'He4')
+        self.assertEqual(sorted(masses, key=masses.get), list(names))
+        for name in names:
+            for p in (0.01, 0.1, 0.5, 1.0, 3.0, 10.0):
+                beta = pid_separation_power.kinematics(p, masses[name])['beta']
+                if beta < 1 - 1e-6:  # nearer beta = 1, 1/beta^2 - 1 cancels: ill-conditioned, not wrong
+                    with self.subTest(species=name, p=p):
+                        m = pid_separation_power.mass_from_beta(p, beta)
+                        self.assertAlmostEqual(m / masses[name], 1.0, delta=1e-15 / (1 - beta))
+        for p in (0.3, 1.0, 5.0):
+            times = [pid_separation_power.time_of_flight_ns(p, masses[n], 2.0) for n in names]
+            self.assertEqual(times, sorted(times))
+            self.assertTrue(all(b > a for a, b in zip(times, times[1:])), (p, times))
+
+
 # --------------------------------------------------------------------- E-M1..E-M3
 class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
     STACK = ASSETS / 'detector-stack.example.json'
