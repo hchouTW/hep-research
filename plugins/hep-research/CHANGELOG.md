@@ -25,6 +25,12 @@ Software checks establish contract consistency only, not physical validity.
   calibration validated on its fit sample written as 'work/./val_scores.csv' passed. The sample name now drops '.'
   segments anywhere and repeated or trailing separators; '..' is kept (resolving it needs the file system).
 
+- **Sci-fix advisories and impact scan (shadow mode).** `docs/evidence/advisories/` records a corrected defect for
+  people holding older results (OSV `introduced`/`fixed` ranges, the scientific impact apart, the ledger entries as
+  evidence): SFA-2026-001 to -003 for the three fixes above. `tools/scifix_advisories.py check | affected | scan
+  PROJECT_DIR` validates them, lists the affected releases from the release manifests, and reports read-only which of
+  a project's artifacts they touch (exit 0 whatever it finds). Format provisional.
+
 ## 0.17.0 (2026-10-20)
 
 Contracts 3.0.0 (major): the deprecated skill names are retired, as planned for migration option A (restructuring plan

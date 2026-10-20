@@ -1,0 +1,49 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-001",
+ "severity": "S2",
+ "ledger": [
+  "BLINDING-ROUNDING-ZEROS"
+ ],
+ "summary": "The blinding output scanner passed an output that printed a sealed value as an integer with rounding zeros (22000 or 22010 for a sealed 22014).",
+ "affected": [
+  {
+   "paths": [
+    "core/blinding/blinding.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "bd1064e2e406a706beba605ed0799fa7aac6fb60",
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "blinding scan verdict of outputs, logs and caches (core.blinding scan_text and scan_paths, skills/hep-computing/scripts/audit_blinded_outputs.py)"
+  ],
+  "bias": "a false pass: a sealed number printed as an integer rounded to tens or coarser (3 or more significant digits) was not reported; no analysis number changes",
+  "trigger": "a sealed value written in an output as an integer whose trailing zeros are rounding (22000, 22,000, 22010 for 22014)"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "measurement-spec"
+  ],
+  "extension_keys": [
+   "blinding"
+  ]
+ },
+ "remedy": "rescan the outputs of the blinded analysis with a release that has the fix (audit_blinded_outputs.py); a new hit means a blinded value was exposed and goes to the custodian",
+ "references": [
+  "https://github.com/hchouTW/hep-research/pull/174"
+ ]
+}

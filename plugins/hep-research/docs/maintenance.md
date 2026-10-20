@@ -137,6 +137,22 @@ Under `tests/skills/`: `physics_ml/` is now `hep_ml/`, `detector_response/` is `
 `hep_measurement/`, and `research_communication/` and `hep_communication/` are `hep_authoring/` (literature tests:
 `hep_citations/`). A parent record names the path at the fix commit, where its test ran.
 
+**Advisories (shadow mode).** A sci-fix that changed a released number or verdict gets an advisory,
+`docs/evidence/advisories/SFA-YYYY-NNN.json` (format `hep-research-scifix-advisory/1`, provisional), for people who
+hold results made before the fix. It names the ledger entries instead of repeating the evidence, gives the affected
+plugin files and an OSV `SEMVER` range (`introduced`, then `fixed` or `last_affected`; no closing event while the fix
+is unreleased, with `database_specific.fixed_commit`), the scientific impact apart from the range (`observables`,
+`bias`, `trigger`), which artifacts it touches (`applies_to`: artifact types and the extension keys that show the
+affected code ran) and a `remedy`. At the release that ships a fix, add its `fixed` event. `tools/scifix_advisories.py`:
+`check` validates every advisory against the ledger, the plugin tree and the release manifests
+(`tests/tools/test_scifix_advisories.py` runs it); `affected` lists the releases in range that hold an affected file,
+from `release-manifests/` (a file moved between skill folders is found by its path below the folder); `scan
+PROJECT_DIR` reports, read-only, which of a project's artifacts an advisory touches, with the release that made each
+(verified by the `versions.plugin_release` digest, claimed, or unknown; a build between releases claims the last
+release, so it is only possibly affected). Shadow mode: the scan exits 0 whatever it finds and blocks nothing. No
+`provenance.producer` field is added to the envelope: `versions.plugin_release` already identifies the code, and the
+artifact type and extension keys show which code path ran.
+
 ## Rerunning comparisons and examples
 
 Each example writes byte-reproducible output with its seed and tolerances; run `python3 examples/<name>/run.py`
