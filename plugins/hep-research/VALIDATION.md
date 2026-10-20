@@ -1961,6 +1961,38 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-ORACLES-BATCH3 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-batch3`, plan PR-6 batch 3)
+
+The last three S1 entries below their requirement: second oracles, invariants and negative controls (axis C), a
+per-test parent record for CLS-LOGINTERP (axis D) and local mutants for DR-WP2-06 (axis D3). Environments as in
+SCIFIX-ORACLES-BATCH2. The new tests pass in both. After this batch every S1 entry meets C3 and D2.
+
+| Entry | New evidence (test file) | Oracle kinds added | Negative control (pre-fix, emulated) | C, D now |
+|---|---|---|---|---|
+| CLS-LOGINTERP | `tests/examples/test_stats_benchmarks.py` (`PublishedLikelihood`) | independent implementation: the benchmark's `toy_based()` with its pool run in process and each grid point returning the exact counting CLs (n = 3, b = 3.232; expected-quantile counts 0, 1, 2, 3, 5), against the mpmath root (30 digits), tolerance the log-interpolation bound h^2/8 max abs(f'') / min abs(f') of f = ln CLs on the bracketing interval (0 at n = 0, 0.0024 to 0.019 otherwise; observed 0 to 0.015); invariant: at n = 0 the crossing is ln 20 for every b | linear interpolation of CLs: 0.036 to 0.127 high, outside every bound | C3, D2 |
+| DR-WP1-01 | `tests/skills/hep_detector/test_hep_detector_audit.py` (`CherenkovChargeTests`) | independent implementation: the Frank-Tamm spectrum 2 pi alpha z^2 / lambda^2 (1 - 1/(beta n)^2) integrated numerically over 300-600 nm (scipy quad, CODATA alpha) against the CLI given the ideal-detector N0 = 2 pi alpha (1/lambda1 - 1/lambda2), z = 1, 2, 3, 26, to 1e-11 | the yield without z^2 | C3, D2 |
+| DR-WP2-06 | `tests/skills/hep_detector/test_hep_detector_audit.py` (`ScriptPhysicsOracleTests`) | calorimeter fit: the fix's 2000-toy study (2% scatter, a = 0.10, b = 0.20, c = 0.0070) with numpy weighted lstsq on every toy (to 1e-10), bias of c -7.7e-6 = 0.06 sd (criterion 0.1 sd: weighting by the observed r is second order); closure on the model curve and energy-scale covariance; multiple scattering: crossover and MDR with beta(R) against their closed forms (quadratics in R^2), 45 stacks, masses and charges, to 1e-12 | calorimeter unit weights: c^2 < 0 in 24.8% of toys, mean c 0.00825 (about 10 sd); crossover with beta = 1: off by more than 1e-3 in 14 of 45 cases (slow heavy species) | C3, D3 |
+
+### CLS-LOGINTERP (new test): fix `99a18fd8`, parent `90388aa0`
+
+The test file of this branch, copied into worktrees of both commits; E2v. `toy_based()` and its crossing closure exist
+on both, so the test reaches the pre-fix crossing.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_toy_crossings_on_exact_counting_cls_meet_the_interpolation_bound` | independent implementation | fail (assertion): observed 5.3348 against 5.2844 (bound 0.0068); expected n = 0, 1, 2, 5: 3.118, 3.660, 4.411, 7.606 against 2.996, 3.613, 4.374, 7.478 | pass | no | E2v |
+
+### Local mutants (axis D3), CI lock
+
+| Entry | Mutant | Killed by |
+|---|---|---|
+| DR-WP2-06 | calorimeter fit with unit weights (pre-fix) | toy study |
+| DR-WP2-06 | calorimeter weights 1/r^2 instead of 1/r^4 | toy study (lstsq comparison) |
+| DR-WP2-06 | beta from R instead of zR | closed-form crossover |
+| DR-WP2-06 | crossover with beta = 1 (pre-fix) | closed-form crossover |
+| DR-WP2-06 | MDR with beta = 1 (pre-fix) | closed-form MDR |
+| DR-WP2-06 | bisection stopped after 20 steps | closed-form crossover (1e-12) |
+
 ## SCIFIX-ORACLES-BATCH2 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-batch2`, plan PR-6 batch 2)
 
 Second oracles, invariants and negative controls for four S1 entries (axis C), a per-test parent record for the new

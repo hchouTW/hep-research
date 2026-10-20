@@ -1,6 +1,6 @@
 {
  "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed; the remaining three S1 entries to C3 by plan PR-6 batch 3 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH3), also to be reviewed",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -12,15 +12,15 @@
     "tests/core/test_stats_likelihood_limits.py"
    ],
    "oracle_kinds": [
-    "analytic"
+    "analytic",
+    "independent-implementation",
+    "invariant"
    ],
-   "correctness": "C2",
-   "discrimination": "D1",
+   "correctness": "C3",
+   "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "parent record (a test that reaches the pre-fix crossing)"
-   ],
-   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18; every parent failure of fix 99a18fd8 needs a function new in the fix; the old crossing was a closure in the pyhf toy run, so only before/after values exist (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20). The core toy CLs (likelihood_limits._toy_cls) interpolated log CLs since it was written (cc44988d): the fix changed the benchmark only"
+   "gaps": [],
+   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18. The benchmark's toy_based() run in process on exact counting CLs (n = 3, b = 3.232 and the expected quantiles) against mpmath roots within the log-interpolation error bound; fails by assertion on parent 90388aa0 (observed 5.335 against 5.284) and passes on fix 99a18fd8; n = 0 crossing is ln 20 for any b (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20). The core toy CLs (likelihood_limits._toy_cls) interpolated log CLs since it was written (cc44988d): the fix changed the benchmark only"
   },
   {
    "id": "F01",
@@ -225,15 +225,14 @@
    ],
    "oracle_kinds": [
     "analytic",
+    "independent-implementation",
     "invariant"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "second oracle kind"
-   ],
-   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20"
+   "gaps": [],
+   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)"
   },
   {
    "id": "DR-WP1-02",
@@ -268,16 +267,16 @@
     "independent-implementation",
     "analytic",
     "published",
-    "closure"
+    "closure",
+    "invariant"
    ],
-   "correctness": "C2",
-   "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "bring the 2000-toy bias study into the suite",
-    "negative controls",
-    "property tests"
-   ]
+    "tag-and-probe and pileup parts: behavioral tests only"
+   ],
+   "note": "calorimeter fit: the fix's 2000-toy bias study in the suite (bias of c below 0.1 sd, against numpy weighted lstsq on every toy; pre-fix unit weights: c^2 < 0 in a quarter, c biased by about 10 sd), closure and energy-scale covariance; multiple scattering: crossover and MDR with beta(R) against their closed forms (quadratics in R^2) over stacks, masses, charges, pre-fix beta = 1 as negative control; 6 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)"
   },
   {
    "id": "ROBUST-MALFORMED",

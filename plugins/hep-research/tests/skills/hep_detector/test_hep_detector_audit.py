@@ -26,6 +26,8 @@ PLUGIN = Path(os.environ.get('HEP_PLUGIN') or Path(__file__).resolve().parents[3
 SCRIPTS = PLUGIN / 'skills' / 'hep-detector' / 'scripts'
 ASSETS = PLUGIN / 'skills' / 'hep-detector' / 'assets'
 sys.path.insert(0, str(SCRIPTS))
+import calorimeter_resolution  # noqa: E402
+import multiple_scattering  # noqa: E402
 import pid_separation_power  # noqa: E402
 import xmax_gaisser_hillas  # noqa: E402
 
@@ -226,6 +228,32 @@ class CherenkovChargeTests(unittest.TestCase):
                 self.assertEqual(b['threshold_momentum_gev'], a['threshold_momentum_gev'])
                 self.assertGreater(abs(b['expected_photons'] / a['expected_photons'] - 1.0), 1.0)
 
+    def test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength(self):
+        """sci-fix DR-WP1-01, second oracle kind (independent implementation): the Frank-Tamm spectrum
+        d2N/dx dlambda = 2 pi alpha z^2 / lambda^2 (1 - 1/(beta^2 n^2)) integrated numerically (scipy quad) over
+        300-600 nm and 2 cm, with alpha from CODATA 2022, against the script given the ideal-detector figure of merit
+        N0 = 2 pi alpha (1/lambda1 - 1/lambda2). That N0 is alpha/(hbar c) = 369.8 per eV cm times the window width
+        in energy, the coefficient of the PDG RPP review "Passage of particles through matter" (Cherenkov section,
+        about 370 z^2 sin^2 theta per eV cm). Negative control: the pre-fix yield (no z^2)."""
+        from scipy.integrate import quad
+
+        alpha, hbar_c_ev_cm = 1 / 137.035999177, 197.3269804e-7  # CODATA 2022
+        self.assertAlmostEqual(alpha / hbar_c_ev_cm, 369.8, delta=0.05)
+        lo, hi = 300e-7, 600e-7  # cm
+        n0 = 2 * math.pi * alpha * (1 / lo - 1 / hi)
+        for z, momentum in ((1, 40.0), (2, 40.0), (2, 12.0), (3, 25.0), (26, 400.0)):
+            with self.subTest(z=z, momentum=momentum):
+                payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
+                                   f'{self.M_ALPHA}:{z}', '--momentum', str(momentum), '--radiator-length', '2',
+                                   '--figure-of-merit', repr(n0))
+                beta = momentum / math.hypot(momentum, self.M_ALPHA)
+                spectrum, _ = quad(lambda lam: 2 * math.pi * alpha * z * z / lam ** 2 * (1 - 1 / (beta * 1.05) ** 2),
+                                   lo, hi, epsabs=0, epsrel=1e-13)
+                got = payload['species_b']['expected_photons']
+                self.assertAlmostEqual(got / (2.0 * spectrum), 1.0, delta=1e-11)
+                if z > 1:
+                    self.assertGreater(abs(got / z ** 2 / (2.0 * spectrum) - 1.0), 0.5)
+
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
                            '3.7273794118:2', '--momentum', '40')  # the CODATA 2022 mass, stated
@@ -365,6 +393,93 @@ class SpeciesMassPropertyTests(unittest.TestCase):
 
 
 # --------------------------------------------------------------------- E-M1..E-M3
+class ScriptPhysicsOracleTests(unittest.TestCase):
+    """sci-fix DR-WP2-06, axis C: the calorimeter fit and the beta(R) crossover and MDR of multiple_scattering.py
+    against independent calculations, with the pre-fix rules as negative controls."""
+
+    ENERGIES = (1, 2, 5, 10, 20, 50, 100, 200, 500, 1000)
+
+    def test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq(self):
+        """The fix commit's bias study in the suite: 2000 toys, 2% Gaussian relative scatter on sigma/E, truth
+        a = 0.10, b = 0.20, c = 0.0070. Independent implementation: numpy lstsq with weights 1/r^4 on every toy (the
+        coefficients to 1e-10 relative). Criterion: the bias of c below 10% of its per-fit spread (observed -7.7e-6,
+        0.06 sd: weighting by the observed r is a second-order effect) and no negative squared term. Negative control:
+        the pre-fix unit-weight fit, c^2 < 0 in about a quarter of the toys and c biased by about 10 sd."""
+        import numpy as np
+
+        e = np.array(self.ENERGIES, dtype=float)
+        a, b, c = 0.10, 0.20, 0.0070
+        truth = np.sqrt(a * a / e + b * b / e ** 2 + c * c)
+        design = np.c_[1 / e, 1 / e ** 2, np.ones_like(e)]
+        rng = np.random.default_rng(7)
+        fitted, unit, unit_negative = [], [], 0
+        for _ in range(2000):
+            r = truth * (1 + 0.02 * rng.standard_normal(e.size))
+            fit = calorimeter_resolution.fit_resolution([[float(x), float(y)] for x, y in zip(e, r)])
+            self.assertEqual(fit['negative_squared_terms'], [])
+            w = 1 / r ** 2
+            ref = np.linalg.lstsq(design * w[:, None], r ** 2 * w, rcond=None)[0]
+            got = [fit['stochastic_squared'], fit['noise_squared'], fit['constant_squared']]
+            np.testing.assert_allclose(got, ref, rtol=1e-10)
+            fitted.append(fit['constant'])
+            pre = np.linalg.lstsq(design, r ** 2, rcond=None)[0]
+            if pre[2] < 0:
+                unit_negative += 1
+            else:
+                unit.append(math.sqrt(pre[2]))
+        spread = np.std(fitted, ddof=1)
+        self.assertLess(abs(np.mean(fitted) - c), 0.1 * spread, (np.mean(fitted), spread))
+        self.assertGreater(unit_negative, 300)
+        self.assertGreater(abs(np.mean(unit) - c), 5 * spread, np.mean(unit))
+
+    def test_calorimeter_fit_closure_and_energy_scale_covariance(self):
+        """Property tests: points on the model are fitted exactly (a, b, c to 1e-9 relative) for a grid of terms;
+        with energies scaled by s, a^2 scales by s, b^2 by s^2 and c^2 not at all (the same curve in other units)."""
+        for a, b, c in ((0.03, 0.15, 0.002), (0.10, 0.20, 0.007), (0.5, 0.5, 0.05), (0.15, 0.01, 0.01)):
+            points = [[float(x), math.sqrt(a * a / x + b * b / x ** 2 + c * c)] for x in self.ENERGIES]
+            fit = calorimeter_resolution.fit_resolution(points)
+            for got, want in zip((fit['stochastic'], fit['noise'], fit['constant']), (a, b, c)):
+                self.assertAlmostEqual(got / want, 1.0, delta=1e-9, msg=(a, b, c))
+            for s in (1e-3, 0.5, 4.0):
+                scaled = calorimeter_resolution.fit_resolution([[x * s, r] for x, r in points])
+                self.assertAlmostEqual(scaled['stochastic_squared'] / (s * fit['stochastic_squared']), 1, delta=1e-9)
+                self.assertAlmostEqual(scaled['noise_squared'] / (s * s * fit['noise_squared']), 1, delta=1e-9)
+                self.assertAlmostEqual(scaled['constant_squared'] / fit['constant_squared'], 1, delta=1e-9)
+
+    def test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms(self):
+        """Analytic oracle: with beta(R) = zR / sqrt((zR)^2 + m^2), ms1/beta(R) = k R squares to
+        k^2 R^4 - ms1^2 R^2 - ms1^2 m^2/z^2 = 0 and hypot(ms1/beta(R), k R) = 1 to
+        k^2 R^4 - (1 - ms1^2) R^2 + ms1^2 m^2/z^2 = 0 (upper root), solved here as quadratics in R^2, against the
+        script's bisection, over stacks, masses and charges. Negative control: the pre-fix beta = 1 crossover ms1/k."""
+        stack = json.loads((ASSETS / 'detector-stack.example.json').read_text())
+        missed = 0
+        for budget_scale in (0.1, 1.0, 10.0):
+            for resolution_um in (2.0, 10.0, 50.0):
+                s = dict(stack, point_resolution_um=resolution_um,
+                         layers=[dict(layer, x_over_x0=layer['x_over_x0'] * budget_scale) for layer in stack['layers']])
+                # the spectrometer terms from the stack: Highland 13.6 MeV sqrt(x/X0) / (c B L) at beta = 1, and
+                # Gluckstern sigma sqrt(720/(N+4)) / (c B L^2) with N measuring layers (c = 0.299792458 GeV/(T m))
+                cbl = 0.299792458 * s['field_tesla'] * s['lever_arm_m']
+                ms1 = 0.0136 * math.sqrt(math.fsum(layer['x_over_x0'] for layer in s['layers'])) / cbl
+                n_meas = sum(1 for layer in s['layers'] if layer.get('measuring'))
+                k = resolution_um * 1e-6 * math.sqrt(720 / (n_meas + 4)) / (cbl * s['lever_arm_m'])
+                for mass, z in ((0.000511, 1), (0.10566, 1), (0.93827, 1), (3.72738, 2), (52.09, 26)):
+                    with self.subTest(budget=budget_scale, resolution=resolution_um, mass=mass, z=z):
+                        out = multiple_scattering.summarize(s, 10.0, charge=z, mass_gev=mass)
+                        self.assertAlmostEqual(out['mdr_intrinsic_only_gv'] * k, 1.0, delta=1e-13)
+                        q = ms1 * ms1 * mass * mass / (z * z)
+                        cross = math.sqrt((ms1 * ms1 + math.sqrt(ms1 ** 4 + 4 * k * k * q)) / (2 * k * k))
+                        self.assertAlmostEqual(out['crossover_rigidity_gv'] / cross, 1.0, delta=1e-12)
+                        disc = (1 - ms1 * ms1) ** 2 - 4 * k * k * q
+                        if ms1 < 1 and disc >= 0:
+                            mdr = math.sqrt((1 - ms1 * ms1 + math.sqrt(disc)) / (2 * k * k))
+                            self.assertAlmostEqual(out['maximum_detectable_rigidity_gv'] / mdr, 1.0, delta=1e-12)
+                        else:
+                            self.assertIsNone(out['maximum_detectable_rigidity_gv'])
+                        missed += abs(ms1 / k / cross - 1) > 1e-3
+        self.assertGreater(missed, 10, missed)  # 14 of 45: low crossovers of heavy, slow species
+
+
 class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
     STACK = ASSETS / 'detector-stack.example.json'
 
