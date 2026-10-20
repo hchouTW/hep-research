@@ -186,6 +186,67 @@ class T04FitStatus(unittest.TestCase):
             ll.newton_fit = orig
 
 
+class T04AnalyticOracle(unittest.TestCase):
+    """Sci-fix F03, axis C: newton_fit and its verdict against a model with a closed-form minimum and Hessian. Two
+    Poisson bins and a Gaussian constraint: n1 ~ Pois(mu s + theta b), n2 ~ Pois(theta c), theta ~ N(1, sigma). Bin 1
+    is saturated at the minimum (mu s + theta b = n1), so theta solves c - n2/theta + (theta - 1)/sigma^2 = 0, a
+    quadratic, and mu = (n1 - theta b)/s; the Hessian is n1/lambda1^2 (s, b)(s, b)^T + diag(0, n2/theta^2 + 1/sigma^2).
+    The EDM g^T H^-1 g / 2 is computed here from the analytic gradient and Hessian at the point the fit returns."""
+
+    N1, N2, S, B, C, SIGMA = 12, 40, 2.0, 3.0, 10.0, 0.1
+
+    def nll(self, p):
+        mu, theta = p
+        l1, l2 = mu * self.S + theta * self.B, theta * self.C
+        if l1 <= 0 or l2 <= 0:
+            return math.inf
+        return l1 - self.N1 * math.log(l1) + l2 - self.N2 * math.log(l2) + 0.5 * ((theta - 1) / self.SIGMA) ** 2
+
+    def minimum(self):
+        k = self.C * self.SIGMA ** 2 - 1
+        theta = (-k + math.sqrt(k * k + 4 * self.N2 * self.SIGMA ** 2)) / 2
+        return [(self.N1 - theta * self.B) / self.S, theta]
+
+    def analytic_edm(self, p):
+        import numpy as np
+        mu, theta = p
+        l1, v = mu * self.S + theta * self.B, np.array([self.S, self.B])
+        g = v * (1 - self.N1 / l1) + np.array([0.0, self.C - self.N2 / theta + (theta - 1) / self.SIGMA ** 2])
+        h = self.N1 / l1 ** 2 * np.outer(v, v) + np.diag([0.0, self.N2 / theta ** 2 + 1 / self.SIGMA ** 2])
+        return 0.5 * float(g @ np.linalg.solve(h, g)), np.linalg.inv(h)
+
+    def test_minimum_and_value_match_the_closed_form(self):
+        """Tolerances from the verdict itself: EDM <= 1e-5 bounds (x - x*)^T H (x - x*) by 2e-5, so each coordinate is
+        within sqrt(2e-5 (H^-1)_ii) and the value within 1e-5 above the minimum (observed 8e-9 and 1e-14)."""
+        best = self.minimum()
+        _, cov = self.analytic_edm(best)
+        for start in ([1.0, 1.0], [5.0, 0.8], [0.5, 1.3]):
+            r = newton_fit(self.nll, start)
+            self.assertEqual(r.status, "converged", r.reasons)
+            for i in range(2):
+                self.assertLess(abs(r.x[i] - best[i]), math.sqrt(2e-5 * cov[i][i]), (start, i, r.x))
+            self.assertLessEqual(r.fval - self.nll(best), 1e-5 + 1e-12)
+            self.assertGreaterEqual(r.fval - self.nll(best), -1e-12)
+
+    def test_edm_and_verdict_agree_with_the_analytic_edm(self):
+        """The reported EDM equals the analytic one to 1e-5 relative + 1e-11 (central differences with h = 1e-4:
+        truncation about h^2, roundoff about eps |f| / h in the gradient; observed 3e-7 relative where the EDM is above
+        1e-6), and the verdict is 'converged' exactly when the analytic EDM is at most 1e-5, at every stop of fits cut
+        after 0 to 5 iterations. Negative control: the pre-fix minimizer returned no verdict, so every stop was taken as
+        fitted; the analytic EDM shows most of them are not minima."""
+        not_minima = 0
+        for start in ([1.0, 1.0], [5.0, 0.8], [0.5, 1.3], [3.0, 1.05]):
+            for iterations in range(6):
+                with self.subTest(start=start, iterations=iterations):
+                    r = newton_fit(self.nll, start, max_iter=iterations)
+                    edm, _ = self.analytic_edm(r.x)
+                    self.assertAlmostEqual(r.edm, edm, delta=1e-5 * edm + 1e-11)
+                    self.assertFalse(0.5e-5 < edm < 2e-5, "too close to the threshold to judge")
+                    self.assertEqual(r.status == "converged", edm <= 1e-5, (r.status, r.reasons, edm))
+                    not_minima += edm > 1e-5
+        self.assertGreater(not_minima, 10)
+
+
 class T05GlobalVersusConditional(unittest.TestCase):
     DOC = {"bins": [{"n": 9, "b": 3.0, "s": 2.0}, {"n": 5, "b": 2.0, "s": 1.0}],
            "nuisances": [{"name": "bkg", "kind": "background_norm", "sigma": 0.2}]}

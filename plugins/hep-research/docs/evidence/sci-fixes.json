@@ -1,6 +1,6 @@
 {
  "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed; the remaining three S1 entries to C3 by plan PR-6 batch 3 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH3), also to be reviewed",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed; the remaining three S1 entries to C3 by plan PR-6 batch 3 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH3), also to be reviewed; the ten S2 entries below C2 raised (RC-A5 to C4) by plan PR-6 batch S2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-S2), also to be reviewed",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -74,15 +74,14 @@
     "tests/core/test_stats_p0_regressions.py"
    ],
    "oracle_kinds": [
-    "behavioral"
+    "behavioral",
+    "analytic"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "independent numeric oracle (analytic minimum and Hessian of a small model)"
-   ],
-   "note": "per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the parent failure is a missing status key, the defect itself; the T05 tests need a method new in the fix"
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the parent failure is a missing status key, the defect itself; the T05 tests need a method new in the fix; newton_fit's minimum, value, EDM and verdict against a closed-form two-parameter Poisson and Gaussian model at every stop of truncated fits; the pre-fix no-verdict rule as negative control (14 of 24 stops are not minima); 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "BAYES-T24",
@@ -307,15 +306,16 @@
     "tests/core/test_blinding_u11.py"
    ],
    "oracle_kinds": [
-    "behavioral"
+    "behavioral",
+    "independent-implementation"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "property test over encodings and sealed values"
+    "an integer printed with rounding zeros (22000 for 22014) is not flagged and not listed in OUT_OF_SCOPE_RENDERINGS"
    ],
-   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; every claimed rendering, generated independently, found in all seven claimed encodings; the printed-precision rule against exact Decimal arithmetic, with tokens that must not alarm; the pre-fix UTF-8 decoding and short-value rule as negative controls; 9 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "ROBUST-CAMPAIGN",
@@ -328,16 +328,14 @@
    ],
    "oracle_kinds": [
     "behavioral",
-    "closure"
+    "closure",
+    "analytic"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "independent sum in the closure reference",
-    "real two-process lock test"
-   ],
-   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "gaps": [],
+   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; the merged campaign equals closed forms that do not use engine merging, also after an interrupted then confirmed submit; a file-forced two-process test refuses the second submit with campaign.locked; 3 local mutants killed, including a _sum error that the single_run reference misses (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "RC-A2",
@@ -349,15 +347,14 @@
     "tests/skills/hep_authoring/test_communication_audit.py"
    ],
    "oracle_kinds": [
-    "behavioral"
+    "behavioral",
+    "independent-implementation"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "property test over generated numbers and passages",
-    "independent tokenizer"
-   ]
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "tokens and contains_value against 3000 generated passages with numbers known by construction (values as fractions, digits counted); the pre-fix substring rule as negative control (3368 of 14,344 checks wrong); 7 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "RC-A3",
@@ -368,14 +365,14 @@
     "tests/skills/hep_authoring/test_review_fixes2.py"
    ],
    "oracle_kinds": [
-    "behavioral"
+    "behavioral",
+    "independent-implementation"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "generated-context property test"
-   ]
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "adaptation numbers equal the constructed numbers of 3000 generated passages, and a wrong 9.99 fails end to end in 28 generated forms and contexts; the pre-fix regex misreads 2706 of 3000 passages (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "RC-A5",
@@ -387,14 +384,14 @@
     "tests/skills/hep_authoring/test_claim_audit.py"
    ],
    "oracle_kinds": [
-    "behavioral"
+    "behavioral",
+    "exhaustive"
    ],
-   "correctness": "C1",
+   "correctness": "C4",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "exhaustive grid of source and display digits"
-   ]
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "rule-less display classification exhaustive over 111,581 source and display cells (three-decimal sources in [-2, 2], displays with 0 to 4 decimals within two last-digit steps) against integer arithmetic, 12 cells end to end through audit_claims; the pre-fix 'never an error' rule as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "RC-A6",
@@ -424,15 +421,16 @@
    ],
    "oracle_kinds": [
     "behavioral",
-    "invariant"
+    "invariant",
+    "independent-implementation"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "property test of canonical keys"
+    "'+5' and '+5.0', '007' and '007.0' give different keys (a sign or leading zeros kept only without a zero fraction)"
    ],
-   "note": "per-test parent record of fix 811f02b6, adapted: the new canonical_key import guarded (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+   "note": "per-test parent record of fix 811f02b6, adapted: the new canonical_key import guarded (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); canonical_key against an independent decimal and string-splitting reading of its rule over a generated domain, an integer/float/text one-key invariant, the pre-fix str().strip().casefold() as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "ML-CALIBRATION",
@@ -443,14 +441,17 @@
     "tests/skills/hep_ml/test_audit_calibration_identity.py"
    ],
    "oracle_kinds": [
-    "behavioral"
+    "behavioral",
+    "exhaustive",
+    "independent-implementation"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "property test"
-   ]
+    "the validator's sample name does not collapse a middle './' (work/./x.csv)"
+   ],
+   "note": "the event-id check exhaustively right over all 4096 subset pairs of six ids; the validator's sample-name rule fires exactly for same-file spellings (PurePosixPath); the pre-fix exact-string comparison as negative control; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "ML-K05",
@@ -463,14 +464,14 @@
    ],
    "oracle_kinds": [
     "behavioral",
-    "closure"
+    "closure",
+    "independent-implementation"
    ],
-   "correctness": "C1",
+   "correctness": "C2",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "assert the nuisance and the mu shift in a test"
-   ]
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "J9's shape_model and fit_mu with the shift nuisance against an independent profile likelihood (SciPy) on a synthetic three-bin template; without the nuisance (pre-fix) the shifted Asimov interval misses mu = 1, with it the interval covers it; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   },
   {
    "id": "ML-DOMAIN",
@@ -524,17 +525,16 @@
    "oracle_kinds": [
     "analytic",
     "published",
+    "independent-implementation",
     "behavioral"
    ],
-   "correctness": "C1",
-   "discrimination": "D1",
-   "negative_control_emulates_pre_fix": false,
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "more trials for C10",
-    "cite the t-table",
-    "a K13 test that fails on the parent"
+    "K13 corrects a test, not code: no parent failure is possible; its discrimination is the in-test negative control"
    ],
-   "note": "C10 alone is C2 / D2; parent record of fix fd637dcc: C10, C24, C25 and C26 fail on the parent; the K13 evidence (tests/examples/test_ml_classifier_to_inference.py) passes on it (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+   "note": "C10 alone is C2 / D2; parent record of fix fd637dcc: C10, C24, C25 and C26 fail on the parent; the K13 evidence (tests/examples/test_ml_classifier_to_inference.py) passes on it (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the t quantile against scipy.stats.t and the NIST/SEMATECH e-Handbook t-table; the false-improvement rate equals the exact t-test size (two-sided, 2000 trials per n) against the pre-fix bootstrap; the two-sided test fails by assertion on parent f5cc59a7 (rate 0.22 at n = 3) and on fix fd637dcc (rate 0 at n <= 5: that fix over-corrected) and passes on follow-up db40e842; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
   }
  ],
  "documentation_fixes": [

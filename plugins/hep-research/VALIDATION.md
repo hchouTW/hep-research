@@ -1961,6 +1961,44 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-ORACLES-S2 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-s2`, plan PR-6 batch S2)
+
+One independent oracle (axis C) for each of the ten S2 entries at C1, with a negative control that emulates the
+pre-fix behaviour where one exists, and local mutants of the code under test (in memory or on a temporary copy of the
+plugin; each killed means the new tests fail, the unmutated code passes). Environments as in SCIFIX-ORACLES-BATCH2;
+hypothesis property tests skip in E2 (no hypothesis), and each such entry has a deterministic oracle that runs in both.
+After this batch all 26 ledger entries meet their severity's minimum on both axes.
+
+| Entry | New evidence (test file::class) | Oracle | Negative control (pre-fix, emulated) | Mutants killed | C now |
+|---|---|---|---|---|---|
+| F03 | `tests/core/test_stats_p0_regressions.py::T04AnalyticOracle` | analytic: two-parameter model n1 ~ Pois(mu s + theta b), n2 ~ Pois(theta c), theta ~ N(1, sigma) with closed-form minimum, gradient and Hessian; coordinates within sqrt(2e-5 (H^-1)_ii) (observed 8e-9), EDM equal to 1/2 g^T H^-1 g at every stop of fits cut after 0 to 5 iterations (24 stops), status converged exactly when that EDM is at most 1e-5 | no verdict: 14 of the 24 stops are not minima | 5 of 5 | C2 |
+| ML-K05 | `tests/skills/hep_ml/test_domain_shift_report.py::ShiftCarriedByNuisance` | independent implementation: the J9 example's shape_model and fit_mu against a separate profile likelihood (per-bin background profiled, nuisance by scipy minimize_scalar, interval at delta(-2 ln L) = 1) on a synthetic three-bin template, 4 Asimov fits; ends within 1e-5 (observed 1e-11) | no shift nuisance: the shifted Asimov interval [1.040, 1.843] misses mu = 1; with it, [0.747, 1.736] | 5 of 5 | C2 |
+| BLINDING-SCANNER | `tests/core/test_blinding.py::RenderingOracleTests` | independent implementation: 60 sealed values, about 34 renderings each written by the test, in the seven encodings decode_text claims, every one found with the right encoding; the printed-precision rule against exact Decimal arithmetic (over 500 must alarm, over 2000 must not); short values alarm only standalone | UTF-8 decoding with replacement misses all 8212 renderings in the UTF-16/32 files; the any-equal-token rule flags over 40 embedded short forms | 9 of 9 | C2 |
+| ROBUST-CAMPAIGN | `tests/core/test_partition_safety.py::IndependentClosureTests` | analytic: the merged campaign (scripted scheduler, real runner, N = 1 to 37) equals n = N, sum = N(N-1)/2 and the sum of the chunk seeds, without engine merging, also after an interrupted then confirmed submit; a real two-process lock test forced by files (second submit refused with campaign.locked, 20 of 20 runs in each venv) | not emulated (the pre-fix state save sat outside the test files) | 3 of 3 (one, a `_sum` error, passes every existing test) | C2 |
+| RC-A2 | `tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated` | independent implementation: 3000 seeded passages whose numbers are known by construction (signs, grouping, exponents, sentence ends, CJK neighbours, units, decoys), compared as fractions with digit counts; 14,344 contains_value checks | the substring rule: 3368 of 14,344 wrong | 7 of 7 | C2 |
+| RC-A3 | same file, `ReviewFixes2AdaptationContexts` and the generated-passage test | independent implementation: adaptation numbers equal the constructed numbers; a wrong 9.99 in 4 forms x 7 English and Chinese contexts fails end to end (28 of 28) | the pre-fix regex misreads 2706 of 3000 passages | (the RC-A2 tokenizer mutants) | C2 |
+| RC-A5 | same file, `ReviewFixes2Rounding` | exhaustive: every three-decimal source in [-2, 2] x every display with 0 to 4 decimals within two last-digit steps, 111,581 cells (8449 ok, 11,778 warning, 91,354 error) against integer arithmetic; 12 cells end to end through audit_claims | "no rule is never an error": all 91,354 error cells called warnings | 4 of 4 | C4 |
+| ML-SPLITS | `tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests` | independent implementation: canonical_key against a decimal and string-splitting reading of its rule (17 floats incl. -0.0, subnormals, 2^53 + 2, NaN, inf; 7 integers; 29 strings), both case modes; invariant: an integer's seven forms give one key (64 integers); a hypothesis property test (CI lock) | str().strip().casefold() splits all 64 | 4 of 4 | C2 |
+| ML-CALIBRATION | `tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests` | exhaustive: the event-id check over all 4096 subset pairs of six ids (729 disjoint); independent implementation: the validator's sample-name rule against PurePosixPath plus case folding over 1000 path-spelling pairs | without the id check all 4096 look disjoint (3367 share events); exact string comparison fires for none of the differing spellings | 5 of 5 | C2 |
+| ML-SMALL | `tests/skills/hep_ml/test_audit_small_corrections.py`, `tests/examples/test_ml_classifier_to_inference.py` | independent implementation and published: the Student-t quantile against scipy.stats.t (df 1 to 1e4, fractional df, 7 levels, observed 1.8e-11) and the NIST/SEMATECH e-Handbook t-table (95% two-sided, 9 rows, 5e-4); analytic: the false-improvement rate equals the t-test size 0.05 within 4 binomial standard errors (2000 trials at n = 3, 5, 9: 0.0425, 0.050, 0.050); K13: the artifact comparison reports every 1e-5 move at its path while results.json stays identical | the bootstrap decision: 26.7%, 17.4%, 10.6% | 4 of 4 | C2 |
+
+**ML-SMALL parent records** (E2v; the test files of this branch copied into worktrees, skill folder paths adapted to
+`physics-ml` on the older commits):
+
+| Evidence test | Commit | Result |
+|---|---|---|
+| `test_audit_small_corrections.py::...::test_false_improvement_rate_is_the_t_test_size_and_the_bootstrap_rate_is_not` | parent `f5cc59a7` | fail (assertion): rate 0.2175 at n = 3 against 0.05 +- 0.0195; n = 5 and 9 fail too |
+| same | fix `fd637dcc` | fail (assertion): rate 0.0 at n = 3 and 5 (the exact sign-flip test of that commit cannot reach p < 0.05 with 5 or fewer seeds) |
+| same | follow-up `db40e842` ("small-seed comparison decides with a Student-t interval") | pass |
+| `test_ml_classifier_to_inference.py` K13 tests | `f5cc59a7`, `fd637dcc` | pass on both: K13 corrected a test, not code, so no parent failure is possible; its discrimination is the in-test negative control |
+
+The t-quantile test errors on `f5cc59a7` (AttributeError: no student_t_quantile), which is not counted.
+
+**Found, not changed** (listed as gaps in the ledger): the blinding scanner does not flag an integer printed with
+rounding zeros (22000 for a sealed 22014; the rule reads the units digit as the last printed digit) and does not
+list it in OUT_OF_SCOPE_RENDERINGS; canonical_key gives "+5" and "+5.0" (and "007" and "007.0") different keys; the
+validator's sample name does not collapse a middle "./".
+
 ## SCIFIX-ORACLES-BATCH3 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-batch3`, plan PR-6 batch 3)
 
 The last three S1 entries below their requirement: second oracles, invariants and negative controls (axis C), a
