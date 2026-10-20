@@ -16,6 +16,7 @@ REQUIRED = {"S1": ("C3", "D2"), "S2": ("C2", "D2"), "S4": ("C1", "D2")}
 ORACLES = {"exhaustive", "symbolic", "analytic", "published", "independent-implementation", "invariant", "closure",
            "pinned-value", "behavioral"}
 INDEPENDENT = {"exhaustive", "symbolic", "analytic", "published", "independent-implementation"}
+BASES = {"locator", "third-party", "exhaustive", "person"}  # docs/maintenance.md, oracle independence
 
 
 def below(entry) -> bool:
@@ -53,6 +54,26 @@ class SciFixLedger(unittest.TestCase):
                     self.assertTrue(f["negative_control_emulates_pre_fix"])
                 if f["correctness"] == "C4":
                     self.assertTrue({"exhaustive", "symbolic"} & set(f["oracle_kinds"]))
+
+    def test_every_counted_kind_has_a_qualifying_basis(self):
+        """The maintainer's rule (docs/maintenance.md, oracle independence): an independent kind counts only with a
+        record naming its test and a basis, locator, third-party, exhaustive or person; C2 needs one such kind, C3
+        two distinct ones, C4 an exhaustive or symbolic one."""
+        for f in self.doc["fixes"]:
+            with self.subTest(f["id"]):
+                records = f.get("independence", [])
+                for rec in records:
+                    self.assertIn(rec["kind"], INDEPENDENT, rec)
+                    self.assertIn(rec["basis"], BASES, rec)
+                    self.assertTrue(rec["detail"], rec)
+                    self.assertTrue((ROOT / rec["test"].split("::")[0]).is_file(), rec["test"])
+                qualified = {rec["kind"] for rec in records}
+                self.assertEqual(set(f["oracle_kinds"]) & INDEPENDENT, qualified,
+                                 "an independent kind is listed exactly when a record qualifies it")
+                need = {"C1": 0, "C2": 1, "C3": 2, "C4": 1}[f["correctness"]] if f["correctness"] != "C0" else 0
+                self.assertGreaterEqual(len(qualified), need, (f["correctness"], qualified))
+                if f["correctness"] == "C4":
+                    self.assertTrue({"exhaustive", "symbolic"} & qualified, qualified)
 
     def test_entries_below_their_requirement_state_their_gaps(self):
         for f in self.doc["fixes"]:

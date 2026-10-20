@@ -149,6 +149,37 @@ class MetricTests(unittest.TestCase):
             self.assertAlmostEqual(hm.asimov_significance(s, b, 1e-6 * b) / hm.asimov_significance(s, b), 1.0,
                                    delta=1e-6)
 
+    def test_asimov_against_pyhf(self):
+        """Third-party oracle: pyhf's own likelihood and fitter on a one-bin counting model, Z = sqrt(q0) on the
+        Asimov dataset n = s + b, q0 = twice_nll(mu = 0, profiled) - twice_nll(best fit). Without sigma_b the
+        background is fixed; with it, pyhf's shapesys modifier is the on/off model Eq. 20 assumes (a Poisson auxiliary
+        measurement with tau = (b / sigma_b)^2 and its Asimov count). Agreement to 1e-9 relative (fitter tolerance
+        1e-14; observed 6e-13)."""
+        try:
+            import pyhf
+        except ImportError:
+            self.skipTest("pyhf not installed (the stats-backends gate requires it)")
+        pyhf.set_backend("numpy", pyhf.optimize.scipy_optimizer(tolerance=1e-14))
+
+        def z_pyhf(s, b, sigma_b=None):
+            bkg = {"name": "b", "data": [b], "modifiers": []}
+            if sigma_b:
+                bkg["modifiers"].append({"name": "aux", "type": "shapesys", "data": [sigma_b]})
+            signal = {"name": "s", "data": [s], "modifiers": [{"name": "mu", "type": "normfactor", "data": None}]}
+            model = pyhf.Model({"channels": [{"name": "c", "samples": [signal, bkg]}]}, poi_name="mu", validate=False)
+            data = [s + b] + model.config.auxdata
+            bounds = model.config.suggested_bounds()
+            bounds[model.config.poi_index] = (0.0, 50.0)
+            best = float(pyhf.infer.mle.fit(data, model, par_bounds=bounds, return_fitted_val=True)[1])
+            null = float(pyhf.infer.mle.fixed_poi_fit(0.0, data, model, par_bounds=bounds, return_fitted_val=True)[1])
+            return math.sqrt(max(null - best, 0.0))
+
+        for s, b, sigma_b in ((5.0, 100.0, None), (10.0, 50.0, None), (3.0, 10.0, None), (5.0, 100.0, 10.0),
+                              (10.0, 50.0, 1.0), (3.0, 10.0, 5.0), (50.0, 1000.0, 100.0), (1.0, 1.0, 0.1),
+                              (20.0, 20.0, 20.0)):
+            with self.subTest(s=s, b=b, sigma_b=sigma_b):
+                self.assertAlmostEqual(hm.asimov_significance(s, b, sigma_b) / z_pyhf(s, b, sigma_b), 1.0, delta=1e-9)
+
     def test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2(self):
         """Independent implementation of arXiv:2109.07851 eq. 2.2: seeds in index order, every event sorted by full
         distance (no k-d tree, no doubling search), the cell grown until its summed weight is non-negative, weights

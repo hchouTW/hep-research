@@ -50,6 +50,34 @@ class T01LikelihoodDomain(unittest.TestCase):
         self.assertLessEqual(ll._lnl(0, -1.0), ll.NEG)
         self.assertLessEqual(ll._lnl(1, 0.0), ll.NEG)
 
+    def test_lnl_against_scipy_and_sympy_poisson(self):
+        """F01, oracles from third-party implementations of the Poisson distribution (ledger review, 2026-10-20):
+        ln L + ln n! equals scipy.stats.poisson.logpmf (independent implementation) and the log of sympy.stats'
+        Poisson density (symbolic), for n = 0 to 30 and means from 1e-6 to 200; at mu = 0 scipy gives log 1 = 0 for
+        n = 0 and -inf otherwise, and a negative mean is outside both libraries' Poisson (scipy nan, sympy refuses
+        it), where ln L is NEG."""
+        import sympy
+        from sympy import stats as sst
+
+        rate = sympy.Symbol("mu", positive=True)
+        density = sst.density(sst.Poisson("N", rate))
+        for n in range(31):
+            for mu in (1e-6, 0.3, 1.0, 4.5, 30.0, 200.0):
+                with self.subTest(n=n, mu=mu):
+                    ref = float(sps.poisson.logpmf(n, mu)) + math.lgamma(n + 1)
+                    sym = float(sympy.log(density(n).subs(rate, mu)).evalf(30)) + math.lgamma(n + 1)
+                    tol = 1e-12 * max(1.0, abs(ref))
+                    self.assertAlmostEqual(ll._lnl(n, mu), ref, delta=tol)
+                    self.assertAlmostEqual(ll._lnl(n, mu), sym, delta=tol)
+            self.assertEqual(ll._lnl(n, 0.0), 0.0 if sps.poisson.logpmf(n, 0.0) == 0.0 else ll._lnl(n, 0.0))
+            if n:
+                self.assertEqual(sps.poisson.logpmf(n, 0.0), -math.inf)
+                self.assertLessEqual(ll._lnl(n, 0.0), ll.NEG)
+            self.assertTrue(math.isnan(sps.poisson.logpmf(n, -1.0)))
+            self.assertLessEqual(ll._lnl(n, -1.0), ll.NEG)
+        with self.assertRaises(ValueError):
+            sst.Poisson("M", -1)
+
     def test_profiled_background_stays_in_the_domain(self):
         # a negative signal (two-POI fits allow it) must not profile the background below -s
         for n in (0, 3):
@@ -88,6 +116,32 @@ class T02T03ToyTails(unittest.TestCase):
                 up = te.one_sided_upper(k, n, 0.95)
                 ref_up = 1.0 if k == n else sps.beta.ppf(0.95, k + 1, n - k)
                 self.assertAlmostEqual(up, ref_up, delta=1e-10 * ref_up + 1e-14, msg=(k, n))
+                # the defining tail equations, from scipy.stats.binom (not the beta identity): P(X >= k | lo) = a
+                # and P(X <= k | hi) = a (ledger review, 2026-10-20)
+                if k > 0:
+                    self.assertAlmostEqual(sps.binom.sf(k - 1, n, lo) / a, 1.0, delta=1e-8, msg=(k, n))
+                if k < n:
+                    self.assertAlmostEqual(sps.binom.cdf(k, n, hi) / a, 1.0, delta=1e-8, msg=(k, n))
+
+    def test_zero_exceedance_bound_solves_the_binomial_equation_symbolically(self):
+        """F02, symbolic oracle (sympy.stats.Binomial, ledger review 2026-10-20): the 95% upper bound for zero
+        exceedances in N toys is the p with P(K = 0 | N, p) = 0.05, sympy's own Binomial probability solved on
+        (0, 1) by bracketing at 30 digits (mpmath illinois); the code's 1 - 0.05^(1/N) must equal it. Tolerance
+        1e-12: the code's closed form loses about 1e-14 to cancellation at N = 1000."""
+        import mpmath
+        import sympy
+        from sympy import stats as sst
+
+        p = sympy.Symbol("p", positive=True)
+        for n in (1, 7, 100, 1000):
+            with self.subTest(n=n):
+                equation = sympy.lambdify(p, sst.P(sympy.Eq(sst.Binomial("K", n, p), 0)) - sympy.Rational(1, 20),
+                                          "mpmath")
+                with mpmath.workdps(30):
+                    root = float(mpmath.findroot(equation, (mpmath.mpf("1e-15"), 1 - mpmath.mpf("1e-15")),
+                                                 solver="illinois", tol=1e-25, maxsteps=500))
+                bound = te.toy_tail(0, n)["upper_bound"]["value"]
+                self.assertAlmostEqual(bound / root, 1.0, delta=1e-12)
 
     def test_tail_record_cases(self):
         n = 50
@@ -227,6 +281,33 @@ class T04AnalyticOracle(unittest.TestCase):
                 self.assertLess(abs(r.x[i] - best[i]), math.sqrt(2e-5 * cov[i][i]), (start, i, r.x))
             self.assertLessEqual(r.fval - self.nll(best), 1e-5 + 1e-12)
             self.assertGreaterEqual(r.fval - self.nll(best), -1e-12)
+
+    def test_converged_fits_match_a_third_party_minimum(self):
+        """Independent implementation (ledger review, 2026-10-20): the same model's negative log likelihood built from
+        scipy.stats.poisson.logpmf and scipy.stats.norm.logpdf (constants differ, the minimum does not) and
+        minimized by scipy.optimize.minimize (Nelder-Mead, xatol 1e-12); every converged newton_fit lands at that
+        minimum within sqrt(2e-5 (H^-1)_ii), the bound its EDM <= 1e-5 verdict implies, and its value is within
+        1e-5 of the third-party minimum value."""
+        from scipy import optimize
+
+        def nll(x):
+            mu, theta = x
+            l1, l2 = mu * self.S + theta * self.B, theta * self.C
+            if l1 <= 0 or l2 <= 0:
+                return math.inf
+            return -float(sps.poisson.logpmf(self.N1, l1) + sps.poisson.logpmf(self.N2, l2)
+                          + sps.norm.logpdf(theta, 1.0, self.SIGMA))
+
+        ref = optimize.minimize(nll, [1.0, 1.0], method="Nelder-Mead",
+                                options={"xatol": 1e-12, "fatol": 1e-14, "maxiter": 20000})
+        self.assertTrue(ref.success, ref.message)
+        _, cov = self.analytic_edm(ref.x)
+        for start in ([1.0, 1.0], [5.0, 0.8], [0.5, 1.3]):
+            r = newton_fit(self.nll, start)
+            self.assertEqual(r.status, "converged", r.reasons)
+            for i in range(2):
+                self.assertLess(abs(r.x[i] - ref.x[i]), math.sqrt(2e-5 * cov[i][i]), (start, i, r.x, ref.x))
+            self.assertLessEqual(nll(r.x) - ref.fun, 1e-5 + 1e-12)
 
     def test_edm_and_verdict_agree_with_the_analytic_edm(self):
         """The reported EDM equals the analytic one to 1e-5 relative + 1e-11 (central differences with h = 1e-4:

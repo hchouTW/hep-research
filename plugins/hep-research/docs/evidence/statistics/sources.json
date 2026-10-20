@@ -140,18 +140,22 @@
    "url": "https://arxiv.org/abs/1903.08008",
    "arxiv_ids": [
     "1903.08008"
+   ],
+   "journal_ref": "Bayesian Analysis 16 (2021) 667-718",
+   "dois": [
+    "10.1214/20-BA1221"
    ]
   },
   "tier": 1,
-  "verification_level": "abstract+metadata",
-  "verification_date": "2026-10-12",
-  "publication_date": "2019",
+  "verification_level": "full-text",
+  "verification_date": "2026-10-21",
+  "publication_date": "2021",
   "data_taking_period": null,
   "formal_status": "reference",
   "supersedes": [],
   "superseded_by": [],
   "attribution": "A. Vehtari, A. Gelman, D. Simpson, B. Carpenter, P.-C. Buerkner",
-  "notes": "arXiv metadata read 2026-10-12; the ESS and quantile-MCSE algorithms used were checked against the ArviZ 0.23.4 implementation (hepstats:S10), not against the paper's text."
+  "notes": "arXiv:1903.08008v5 read in full 2026-10-21 (DOI and journal reference from Crossref); arXiv v5 page numbers: split R-hat eqs. (1)-(4) pp. 5-6; combined autocorrelation eq. (10) p. 7; ESS eqs. (12)-(13) p. 8 with the truncation and improved-last-term text there; rank normalization eq. (14) and folding eq. (15) p. 9; tail ESS eq. (16) p. 10; quantile MCSE eq. (20) p. 11. bayes_diagnostics.py and its test reference follow the Stan/ArviZ implementation (hepstats:S10), which differs from the printed text in three small points: the lag term of eq. (10) uses the biased autocovariance (the printed form is larger by N/(N-1)); the 95% tail indicator is x >= q95, not theta <= q95 (equal unless draws tie at q95); the improved last term is added only when positive."
  },
  {
   "id": "hepstats:S08",

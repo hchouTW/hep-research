@@ -18,7 +18,7 @@ from core.evidence import query as q  # noqa: E402
 LEDGER = ROOT / "docs" / "evidence" / "statistics"
 PUBLIC_LEDGERS = [d for d in (LEDGER, ROOT / "profiles" / "experiments" / "eic" / "evidence",
                               ROOT / "profiles" / "experiments" / "ams-02" / "evidence") if (d / "claims.json").is_file()]
-TODAY = date(2026, 10, 16)
+TODAY = date(2026, 10, 21)  # the latest verification in the public ledgers (hepstats:S07)
 FILES = {"sources": "sources.json", "claims": "claims.json"}
 
 
@@ -95,7 +95,7 @@ class PublicLedger(unittest.TestCase):
                                 for r in p["rows"]])
 
     def test_default_page_respects_the_byte_cap(self):
-        code, page = cli("--sources", LEDGER / "sources.json", "--claims", LEDGER / "claims.json", "--today", "2026-10-16")
+        code, page = cli("--sources", LEDGER / "sources.json", "--claims", LEDGER / "claims.json", "--today", "2026-10-21")
         self.assertEqual(code, 0)
         self.assertLessEqual(page["returned"], q.PAGE_SIZE)
         self.assertLessEqual(len(q._dumps(page).encode()), q.MAX_BYTES)
@@ -144,7 +144,7 @@ class SyntheticLedger(unittest.TestCase):
             self.assertEqual([r["claim_id"] for r in p3["rows"]], ["C03"])
             fetch = p2["overflow"]["fetch"]
             self.assertEqual(fetch[:2], ["python3", "core/evidence/query.py"])
-            code, row = cli(*fetch[2:], "--today", "2026-10-16")
+            code, row = cli(*fetch[2:], "--today", "2026-10-21")
         self.assertEqual(code, 0, row)
         self.assertEqual([(r["claim_id"], r["claim"]) for r in row["rows"]], [("C02", big)])
 
@@ -157,7 +157,7 @@ class SyntheticLedger(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             (Path(td) / "s.json").write_bytes(sb)
             (Path(td) / "c.json").write_bytes(cb)
-            code, _ = cli("--sources", Path(td) / "s.json", "--claims", Path(td) / "c.json", "--today", "2026-10-16")
+            code, _ = cli("--sources", Path(td) / "s.json", "--claims", Path(td) / "c.json", "--today", "2026-10-21")
         self.assertEqual(code, 1)
 
     def test_access_date_fallback_is_named(self):

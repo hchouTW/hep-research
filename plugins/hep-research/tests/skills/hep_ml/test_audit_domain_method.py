@@ -139,6 +139,22 @@ class DomainModelTests(unittest.TestCase):
                     mean, se = mean_se(rates["box"])
                     self.assertGreater(mean - 4 * se, 2 * a, mean)
 
+    def test_the_split_conformal_rank_formula_by_enumeration(self):
+        """Exhaustive basis for the analytic value a used above: for n exchangeable continuous values and a fresh one,
+        all (n+1)! orderings are equally likely, so the probability that the fresh value exceeds the r-th smallest of
+        the n is the fraction of orderings where it does. Enumerated exactly (fractions) for every n = 1..7 and
+        r = 1..n, it equals (n+1-r)/(n+1), the a = 1 - r/(n+1) of the rate test (r <= n; a rank above n is capped at
+        the maximum, r = n)."""
+        import itertools
+        from fractions import Fraction
+
+        for n in range(1, 8):
+            orderings = list(itertools.permutations(range(n + 1)))
+            for r in range(1, n + 1):
+                exceed = sum(1 for o in orderings if o[-1] > sorted(o[:-1])[r - 1])
+                with self.subTest(n=n, r=r):
+                    self.assertEqual(Fraction(exceed, len(orderings)), Fraction(n + 1 - r, n + 1))
+
     def test_false_positive_interval_is_the_beta_quantile_clopper_pearson(self):
         """Second oracle kind for the reported interval: Clopper-Pearson from scipy.stats.beta quantiles at the
         stated 68.27% level, for the model's own count of flagged held-out points."""

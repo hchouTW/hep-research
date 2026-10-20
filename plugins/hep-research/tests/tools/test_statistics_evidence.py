@@ -19,7 +19,7 @@ class StatisticsEvidence(unittest.TestCase):
     def test_source_and_claim_ledger(self):
         sources = json.loads((DIR / "sources.json").read_text())
         claims = json.loads((DIR / "claims.json").read_text())
-        res = check_ledger(sources, claims, date(2026, 10, 13), 365)
+        res = check_ledger(sources, claims, date(2026, 10, 21), 365)  # the latest verification (hepstats:S07)
         self.assertEqual(res["errors"], [], res["errors"])
         self.assertEqual(res["warnings"], [], res["warnings"])
 

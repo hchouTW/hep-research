@@ -3,7 +3,7 @@
  "id": "SFA-2026-018",
  "severity": "S1",
  "ledger": [
-  "DR-WP2-06"
+  "DR-WP2-06-PID"
  ],
  "summary": "pid_separation_power.py applied the heavy-particle Bethe formula to electrons and positrons, reporting a dE/dx separation as valid, and used I = 75 eV for water instead of 79.7 eV.",
  "affected": [

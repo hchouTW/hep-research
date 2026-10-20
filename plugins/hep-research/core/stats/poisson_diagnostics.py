@@ -239,7 +239,7 @@ FC_MONOTONE_COARSE = 0.05
 def _fc_upper_monotone(n: int, b: float, cl: float, step: float) -> tuple[float, float]:
     """Upper end forced non-increasing in b: the supremum of the plain upper end over b' in [b, b + window].
 
-    Feldman and Cousins (1998), Sec. IV.B: "we force the function to be non-increasing, by lengthening selected
+    Feldman and Cousins (1998), Sec. IV.A, p. 8 (arXiv:physics/9711021v2): "we force the function to be non-increasing, by lengthening selected
     confidence intervals as necessary". Between its jumps the plain upper end falls with b' at a slope no steeper
     than -1, so a coarse scan bounds any jump inside a coarse cell by the cell's right end plus the cell width; only
     cells that could beat the running maximum are rescanned at the signal grid step, and each jump found there is
@@ -324,7 +324,7 @@ def fc_interval(n: int, b: float, cl: float = 0.90, step: float | None = None, s
            "b": b, "cl": cl, "grid_step": step, "lower": lo}
     if monotone:
         hi, b_at = _fc_upper_monotone(n, b, cl, step)
-        out.update({"upper": hi, "construction": "monotone-in-b (Feldman-Cousins 1998, Sec. IV.B)",
+        out.update({"upper": hi, "construction": "monotone-in-b (Feldman-Cousins 1998, Sec. IV.A)",
                     "upper_plain": plain, "upper_lengthened": hi > plain,
                     "monotonicity_search": {"b_range": [b, b + FC_MONOTONE_WINDOW], "coarse_step": FC_MONOTONE_COARSE,
                                             "upper_attained_at_b": b_at}})

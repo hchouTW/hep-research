@@ -219,6 +219,50 @@ class ShiftCarriedByNuisance(unittest.TestCase):
         self.assertLess(got["shifted+nuisance"][1], self.MU0)
         self.assertGreater(got["shifted+nuisance"][2], self.MU0)
 
+    def test_fit_against_pyhf(self):
+        """Third-party oracle: the same model in pyhf (HistFactory: the signal with a normfactor, the background with a
+        staterror of 5% and, with the nuisance, a histosys with the mirrored down template; pyhf's default
+        interpolation for histosys is piecewise linear, code0), its own likelihood and fitter; the profile interval
+        from Delta(-2 ln L) = 1 on pyhf's fixed-POI fits. Same tolerances as above (observed 2e-9)."""
+        try:
+            import pyhf
+        except ImportError:
+            self.skipTest("pyhf not installed (the stats-backends gate requires it)")
+        from scipy import optimize
+
+        pyhf.set_backend("numpy", pyhf.optimize.scipy_optimizer(tolerance=1e-12))
+
+        def interval(n, with_nuisance):
+            bkg = {"name": "background", "data": self.b.tolist(),
+                   "modifiers": [{"name": "mcstat", "type": "staterror", "data": (self.REL * self.b).tolist()}]}
+            if with_nuisance:
+                down = (2 * self.b - self.up).tolist()
+                bkg["modifiers"].append({"name": "shift", "type": "histosys",
+                                         "data": {"hi_data": self.up.tolist(), "lo_data": down}})
+            signal = {"name": "signal", "data": self.s.tolist(),
+                      "modifiers": [{"name": "mu", "type": "normfactor", "data": None}]}
+            model = pyhf.Model({"channels": [{"name": "c", "samples": [signal, bkg]}]}, poi_name="mu", validate=False)
+            data = list(n) + model.config.auxdata
+            init, bounds = model.config.suggested_init(), model.config.suggested_bounds()
+            bounds[model.config.poi_index] = (0.0, 10.0)
+            pars, best = pyhf.infer.mle.fit(data, model, init_pars=init, par_bounds=bounds, return_fitted_val=True)
+
+            def q(mu):
+                return float(pyhf.infer.mle.fixed_poi_fit(mu, data, model, init_pars=init, par_bounds=bounds,
+                                                          return_fitted_val=True)[1]) - float(best) - 1
+            mu_hat = float(pars[model.config.poi_index])
+            return mu_hat, optimize.brentq(q, 0.0, mu_hat, xtol=1e-8), optimize.brentq(q, mu_hat, mu_hat + 5, xtol=1e-8)
+
+        nominal, shifted = self.MU0 * self.s + self.b, self.MU0 * self.s + self.up
+        for label, n, nuisance in (("nominal", nominal, False), ("shifted", shifted, False),
+                                   ("nominal+nuisance", nominal, True), ("shifted+nuisance", shifted, True)):
+            with self.subTest(label):
+                mu_hat, lo, hi = self.fit(n, nuisance)
+                ref = interval(n, nuisance)
+                self.assertAlmostEqual(lo, ref[1], delta=1e-5)
+                self.assertAlmostEqual(hi, ref[2], delta=1e-5)
+                self.assertAlmostEqual(mu_hat, ref[0], delta=4e-3 * (hi - lo) / 2)
+
 
 if __name__ == "__main__":
     unittest.main()

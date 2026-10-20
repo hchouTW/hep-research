@@ -138,6 +138,29 @@ class SampleIdentityPropertyTests(unittest.TestCase):
         self.assertEqual(disjoint, 3 ** 6)  # each id in fit only, eval only, or neither
         self.assertEqual(wrong_without_ids, 4 ** 6 - 3 ** 6)
 
+    def test_event_id_check_on_larger_id_sets_sampled(self):
+        """Beyond the exhaustive six-id domain: 2000 seeded pairs of subsets of 200 ids (sizes 0 to 200, about a
+        fifth disjoint by construction), the overlap counted by Python's set intersection; id_overlap and disjoint
+        must equal it, and an overlapping pair must be refused. A sample, not an exhaustive claim."""
+        import random
+
+        sys.path.insert(0, str(ML / "assets"))
+        import calibration
+
+        rng = random.Random(20261020)
+        universe = [f"ev{i:04d}" for i in range(200)]
+        for _ in range(2000):
+            fit = rng.sample(universe, rng.randint(0, 200))
+            rest = [u for u in universe if u not in set(fit)]
+            ev = (rng.sample(rest, rng.randint(0, len(rest))) if rng.random() < 0.2
+                  else rng.sample(universe, rng.randint(0, 200)))
+            want = len(set(fit) & set(ev))
+            rec = calibration.sample_provenance("fit.csv", "eval.csv", fit, ev, allow_same_sample=True)
+            self.assertEqual((rec["id_overlap"], rec["disjoint"]), (want, want == 0))
+            if want:
+                with self.assertRaises(ValueError):
+                    calibration.sample_provenance("fit.csv", "eval.csv", fit, ev)
+
     def test_validator_names_one_sample_under_every_spelling_of_its_path(self):
         """Independent implementation: pathlib.PurePosixPath (after stripping and turning backslashes into slashes)
         and case folding decide whether two spellings name one file; the validator's ml.calibration_on_fit_sample

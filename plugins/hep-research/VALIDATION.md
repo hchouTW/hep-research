@@ -1961,6 +1961,49 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-LEDGER-REVIEW (2026-10-21, E2v and the CI lock; branch `docs/ledger-review`)
+
+The maintainer's review of `docs/evidence/sci-fixes.json` (decisions of 2026-10-20 and 2026-10-21, recorded in
+`docs/maintenance.md`): an AI-written oracle counts as an independent kind only with a basis (locator, third-party,
+exhaustive, person); a locator names an equation, table or page; adapted parent runs count when they only add imported
+modules or guard an import; DR-WP2-06 is split; C4 entries get sampled checks beyond their domain. Every counted kind is
+now an `independence` record (kind, test, basis, detail), checked by `tests/tools/test_scifix_ledger.py`.
+
+**Sources read for locators** (2026-10-21; never from memory; read level as stated):
+
+| Source | Identifier, URL | Read | Locators used |
+|---|---|---|---|
+| PDG RPP 2024, 34. Passage of Particles Through Matter (rev. Aug. 2023) | https://pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf | page | Bethe eq. (34.5) p. 4, W_max (34.4) p. 3, K Table 34.1 p. 2; Highland (34.16) p. 16; Cherenkov angle (34.41) p. 33, yield (34.43), (34.44) p. 34 |
+| PDG RPP 2024 and 2025, 35. Particle Detectors at Accelerators | https://pdg.lbl.gov/2024/reviews/rpp2024-rev-particle-detectors-accel.pdf, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf | page | calorimeter resolution (35.43) p. 82 (2024), (35.50) p. 92 (2025); Gluckstern (35.68), multiple scattering (35.70) p. 112 (2025) |
+| PDG Atomic and Nuclear Properties, water (liquid) | https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/water_liquid.html | page | I = 79.7 eV |
+| Vehtari, Gelman, Simpson, Carpenter, Buerkner, Bayesian Analysis 16 (2021) 667 | arXiv:1903.08008v5, DOI 10.1214/20-BA1221 | full text | R-hat eqs. (1)-(4), autocorrelation (10), ESS (12)-(13), rank normalization (14), folding (15), tail ESS (16), quantile MCSE (20) |
+| Feldman, Cousins, Phys. Rev. D 57 (1998) 3873 | arXiv:physics/9711021v2, DOI 10.1103/PhysRevD.57.3873 | full text | ordering ratio eq. (4.1) and the non-increasing adjustment, Sec. IV.A, p. 8; Table IV p. 37 matches the fixture |
+| Pierre Auger Collaboration, JCAP 03 (2019) 018 | arXiv:1811.04660v2 | full text | Gaisser-Hillas form eq. (2.1), p. 3 |
+| PDG RPP 2024, 30. Cosmic Rays | https://pdg.lbl.gov/2024/reviews/rpp2024-rev-cosmic-rays.pdf | full text | does not state the Gaisser-Hillas form |
+| Gaisser, Hillas, Proc. 15th ICRC 8 (1977) 353 | ADS 1977ICRC....8..353G | not opened | (no readable copy) |
+
+Found on the way: the repository cited the Feldman-Cousins adjustment as Sec. IV.B (the Gaussian case); it is Sec. IV.A
+(`core/stats/poisson_diagnostics.py` docstring and its `construction` string, `tests/core/test_stats_poisson.py`).
+Vehtari et al. eq. (10) as printed scales the lag term by N/(N-1); `bayes_diagnostics.py` and its reference follow the
+Stan/ArviZ implementation (biased autocovariance), take the 95% tail indicator as x >= q95 and add the improved last term
+only when positive (hepstats:S07 notes). `multiple_scattering.py` uses the Highland leading term (34.16), not the 0.016
+coefficient of (35.70), as `tracking-and-vertexing.md` states.
+
+**Grades after the review:** every entry meets its minimum except **BAYES-T24** (S1, C2): its two qualifying oracles
+(ArviZ, third-party; the located SciPy reference) are one kind, and the analytic AR(1) ESS check has no located source
+(gap recorded). DR-WP2-06 became DR-WP2-06-CALO (C3, D3), -PID (C3, D2) and -MS (C3, D3); its tag-and-probe, pileup and
+front-end parts (guards and labels) left the ledger; advisories SFA-2026-017..019 point to the new entries. Oracle kinds
+relabelled where the qualifying oracle is symbolic or an independent implementation (CLS-LOGINTERP, F01-F03,
+POISSON-SF, POISSON-500, COV-NOREPAIR, ROBUST-CAMPAIGN, ML-SPLITS) and kinds without a basis removed.
+
+**Tests added or extended** (CI lock and E2v pass): third-party cross-checks with scipy.stats, SymPy, numpy.linalg and
+Python's own formatting (F01, F02, F03, POISSON-SF, POISSON-500, CLS-LOGINTERP, RC-A2, RC-A3, ROBUST-CAMPAIGN); pyhf
+oracles for ML-K05 and ML-NEGWEIGHTS, added to the required stats-backends gate (`tools/run_required_backends.py`);
+exhaustive checks for COV-NOREPAIR (343 matrices), ML-SPLITS (19,999 integers in 7 forms) and the split-conformal rank
+(ML-DOMAIN); scipy.optimize.brentq roots and a (2m, 2z) invariant for DR-WP2-06-MS; the z^2 Bethe invariant and the
+I = 75 eV negative control for DR-WP2-06-PID; sampled checks beyond the exhaustive domains of BLINDING-ROUNDING-ZEROS,
+CANONICAL-KEY-ZERO-FRACTION, RC-A5, RC-A6 and ML-CALIBRATION; locators cited in the test docstrings.
+
 ## 0.18.0 release check (2026-10-20, E2 and the CI lock)
 
 Release branch `release/0.18.0` from main `5ad39f54` (#179: the advisory backfill; earlier #165-#178: the sci-fix

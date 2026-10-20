@@ -185,8 +185,12 @@ class IndependentClosureTests(unittest.TestCase):
     while the first is inside its locked submit is refused (campaign.locked), forced by files, not by timing."""
 
     def closed_form(self, manifest):
+        """The expected sum is Python's built-in sum over range(n), the whole range at once (no chunks, no engine
+        code); the closed form N(N-1)/2 is checked against it."""
         n = manifest["n_items"]
-        return {"n": n, "sum": n * (n - 1) // 2, "seed_sum": sum(c["seed"] for c in manifest["chunks"])}
+        total = sum(range(n))
+        self.assertEqual(total, n * (n - 1) // 2)
+        return {"n": n, "sum": total, "seed_sum": sum(c["seed"] for c in manifest["chunks"])}
 
     def test_merged_campaign_equals_the_closed_form(self):
         for n_items, chunk, seed in ((10, 4, 7), (1, 1, 1), (23, 23, 5), (37, 5, 3)):

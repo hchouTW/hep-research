@@ -236,6 +236,42 @@ class EigenvalueOracleTests(unittest.TestCase):
         self.assertGreater(repaired_indefinite, 0)  # negative control: the old repair hides some of them
 
 
+class ExhaustiveDefinitenessTests(unittest.TestCase):
+    def test_verdict_over_every_rational_unit_diagonal_3x3(self):
+        """Exhaustive oracle for sci-fix COV-NOREPAIR (ledger review, 2026-10-20): every symmetric 3x3 matrix with unit
+        diagonal and off-diagonal entries in {-3/2, -1, -1/2, 0, 1/2, 1, 3/2} (343 matrices: 23 positive definite,
+        26 singular semidefinite, 294 indefinite), classified exactly by sympy (is_positive_definite,
+        is_positive_semidefinite). The strict Cholesky accepts exactly the definite ones; with semidefinite=True it
+        also accepts the singular ones and refuses every indefinite one. Same verdicts with the variances scaled to
+        1e-12, 1 and 1e12 (sd 1e-6, 1, 1e6)."""
+        import itertools
+
+        import sympy
+
+        values = [sympy.Rational(k, 2) for k in range(-3, 4)]
+        counts = {"pd": 0, "psd": 0, "indefinite": 0}
+        for a, b, c in itertools.product(values, repeat=3):
+            m = sympy.Matrix([[1, a, b], [a, 1, c], [b, c, 1]])
+            kind = "pd" if m.is_positive_definite else ("psd" if m.is_positive_semidefinite else "indefinite")
+            counts[kind] += 1
+            want = {"pd": (True, True), "psd": (False, True), "indefinite": (False, False)}[kind]
+            unit = [[float(x) for x in row] for row in m.tolist()]
+            sd = (1e-6, 1.0, 1e6)
+            scaled = [[unit[i][j] * sd[i] * sd[j] for j in range(3)] for i in range(3)]
+            for cov in (unit, scaled):
+                with self.subTest(a=a, b=b, c=c, kind=kind, scaled=cov is scaled):
+                    self.assertEqual((self._accepts(cov), self._accepts(cov, semidefinite=True)), want)
+        self.assertEqual(counts, {"pd": 23, "psd": 26, "indefinite": 294})
+
+    @staticmethod
+    def _accepts(cov, **kw):
+        try:
+            cholesky(cov, "c", **kw)
+            return True
+        except LinAlgError:
+            return False
+
+
 @unittest.skipUnless(np is not None, "NumPy not installed: the GLS oracle is unverified")
 class GlsOracleTests(unittest.TestCase):
     """Second oracle kind for sci-fix COV-NOREPAIR (axis C): the generalized-least-squares constant fit that consumes

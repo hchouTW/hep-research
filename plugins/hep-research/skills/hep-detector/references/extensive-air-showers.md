@@ -52,6 +52,9 @@ The number of charged particles as a function of atmospheric slant depth `X` (in
     N(X) = N_max * ((X - X0) / (X_max - X0))^((X_max - X0)/lambda)
            * exp((X_max - X) / lambda)
 
+(the form of JCAP 03 (2019) 018, arXiv:1811.04660, eq. (2.1), p. 3, read in full
+2026-10-21, where it is written for the energy-deposit profile `dE/dX`; the same function with `N_max` for the
+particle number; the original, T.K. Gaisser and A.M. Hillas, Proc. 15th ICRC, Plovdiv 8 (1977) 353, was not opened)
 with four parameters: the peak size `N_max`, the depth of maximum `X_max`, a depth
 offset `X0` (the depth of first interaction, extrapolated back; not itself directly
 physical), and a shape/attenuation length `lambda`. `X_max` is the single most
