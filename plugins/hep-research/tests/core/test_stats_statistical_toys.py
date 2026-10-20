@@ -153,6 +153,28 @@ class RatioMeasuredTests(unittest.TestCase):
                 c[i][n + j] = c[n + j][i] = cross * sx[i] * sy[j] * (1.0 if i == j else 0.5)
         return {"numerator": x, "denominator": y, "covariance": c}
 
+    def test_toys_without_a_ratio_are_counted_and_bound_the_p_value(self):
+        """sci-fix F02 (statistical_toys ratio): toys whose denominator fluctuates to <= 0 have no ratio; they are
+        counted as toys_not_evaluated and widen the p-value to [k/N, (k + F)/N], never read as non-exceedances.
+        Before the fix no test reached this path. Negative control: dropping them (the pre-fix reading) would give
+        only the lower end, which differs from the upper end whenever F > 0."""
+        out = st.ratio_measured(self.doc(rel=0.45), toys=2000, seed=11)
+        fit = out["constant_ratio_fit_full_covariance"]
+        f, n = fit["toys_not_evaluated"], out["toys"]
+        self.assertGreater(f, 0)
+        k = round(fit["toy_tail"]["k"]) if "k" in fit["toy_tail"] else None
+        lo, hi = fit["p_value_toys_range_with_not_evaluated"]
+        if k is not None:
+            self.assertAlmostEqual(lo, k / n, places=12)
+            self.assertAlmostEqual(hi, (k + f) / n, places=12)
+        self.assertAlmostEqual(hi - lo, f / n, places=12)  # independent of how k is reported
+        self.assertGreater(hi, lo)  # negative control: the dropped-toy reading (lo only) is not the result
+        # the helper itself, on hand-picked counts
+        rec = st._toy_gof_p(3, 2, 100)
+        self.assertEqual(rec["toys_not_evaluated"], 2)
+        self.assertEqual(rec["p_value_toys_range_with_not_evaluated"], [0.03, 0.05])
+        self.assertNotIn("p_value_toys_range_with_not_evaluated", st._toy_gof_p(3, 0, 100))
+
     def test_chi2_survival_function_known_values(self):
         self.assertAlmostEqual(st.chi2_sf(3.841459, 1), 0.05, places=5)
         self.assertAlmostEqual(st.chi2_sf(9.487729, 4), 0.05, places=5)

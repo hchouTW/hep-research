@@ -12,6 +12,7 @@ features were treated as continuous. All data SYNTHETIC.
 import csv
 import importlib.util
 import json
+import math
 import subprocess
 import sys
 import tempfile
@@ -102,6 +103,60 @@ class DomainModelTests(unittest.TestCase):
         lo, hi = rep["false_positive_rate_interval_68"]
         self.assertLessEqual(lo, rep["estimated_false_positive_rate"])
         self.assertGreaterEqual(hi, rep["estimated_false_positive_rate"])
+
+    def test_flag_rates_match_the_split_conformal_rank(self):
+        """Two-sided oracle: each statistic's threshold is the r-th smallest of n held-out values, r = ceil((n+1) l),
+        l = 1 - (1 - q)/2, so a fresh exchangeable point exceeds it with probability exactly a = 1 - min(r, n)/(n+1)
+        (split-conformal ranks, continuous scores; expectation over training draws). Each of Mahalanobis and k-NN must
+        sit at a, and their union ('outside or sparse') in [a, 2a]. The old per-feature min/max box (the pre-fix
+        inference rule) is the negative control: about 10% at d = 32, n = 600, far above 2a. The small setting
+        (n = 100, d = 4: 20 held out) resolves a threshold one rank off (a shift of 1/(n+1) in a)."""
+        def mean_se(v):
+            return np.mean(v), np.std(v, ddof=1) / np.sqrt(len(v))
+
+        for quantile, n_train, d, draws in ((0.99, 600, 32, 40), (0.95, 600, 32, 40), (0.8, 100, 4, 200)):
+            rates = {"mahalanobis": [], "knn": [], "union": [], "box": []}
+            for rep in range(draws):
+                rng = np.random.default_rng(100 + rep)
+                x, fresh = rng.normal(size=(n_train, d)), rng.normal(size=(2000, d))
+                model = csd.DomainModel.fit(x, quantile=quantile, seed=rep)
+                rows = model.details(fresh)
+                stats = rows[0][2]
+                for name in ("mahalanobis", "knn"):
+                    rates[name].append(np.mean(stats[name] > model.thresholds[name]))
+                rates["union"].append(np.mean([r[0] != "inside" for r in rows]))
+                rates["box"].append(np.mean(np.any((fresh < x.min(axis=0)) | (fresh > x.max(axis=0)), axis=1)))
+            n = model.n_held
+            a = 1.0 - min(math.ceil((n + 1) * (1 - (1 - quantile) / 2)), n) / (n + 1)
+            with self.subTest(quantile=quantile):
+                for name in ("mahalanobis", "knn"):
+                    mean, se = mean_se(rates[name])
+                    self.assertLess(abs(mean - a), 4 * se, (name, mean, a, se))
+                mean, se = mean_se(rates["union"])
+                self.assertGreater(mean, a - 4 * se, (mean, a, se))
+                self.assertLess(mean, 2 * a + 4 * se, (mean, 2 * a, se))
+                if d == 32:
+                    mean, se = mean_se(rates["box"])
+                    self.assertGreater(mean - 4 * se, 2 * a, mean)
+
+    def test_false_positive_interval_is_the_beta_quantile_clopper_pearson(self):
+        """Second oracle kind for the reported interval: Clopper-Pearson from scipy.stats.beta quantiles at the
+        stated 68.27% level, for the model's own count of flagged held-out points."""
+        from scipy.stats import beta
+
+        alpha, counts = 1 - 0.6827, set()
+        for seed, (n, quantile) in enumerate(((200, 0.99), (200, 0.9), (400, 0.8), (60, 0.6), (1000, 0.95))):
+            rng = np.random.default_rng(40 + seed)
+            rep = csd.check({"features": ["a", "b", "c"], "training": rng.normal(size=(n, 3)).tolist(),
+                             "queries": [[0.0, 0.0, 0.0]]}, quantile=quantile)
+            m = rep["n_held_out"]  # the two cross-fit halves test every held-out point once
+            k = round(rep["estimated_false_positive_rate"] * m)
+            counts.add(k)
+            lo = 0.0 if k == 0 else beta.ppf(alpha / 2, k, m - k + 1)
+            hi = 1.0 if k == m else beta.ppf(1 - alpha / 2, k + 1, m - k)
+            for got, want in zip(rep["false_positive_rate_interval_68"], (lo, hi), strict=True):
+                self.assertAlmostEqual(got, want, delta=1e-9 * max(1.0, want), msg=(n, quantile, k, m))
+        self.assertGreater(len(counts), 3, counts)
 
     def test_cli_groups_and_categorical(self):
         rng = np.random.default_rng(8)

@@ -143,6 +143,45 @@ class MeanLimitTests(unittest.TestCase):
         with self.assertRaisesRegex(pd.DiagnosticsError, "limited to total means up to 500"):
             pd.fc_interval(0, 480.0)
 
+    def test_two_oracles_and_the_clipped_search_as_negative_control(self):
+        """sci-fix POISSON-500 (axis C). Oracle 1, analytic: the Garwood ends and the classical limit are chi-square
+        quantiles, upper = chi2.ppf(1 - a, 2n + 2) / 2 and lower = chi2.ppf(a, 2n) / 2 (SciPy, computed here).
+        Oracle 2, independent implementation: the root of the regularized upper incomplete gamma Q(n + 1, mu) =
+        P(N <= n | mu) found with mpmath at 50 digits, without core/stats. Invariant: the upper end increases
+        strictly with n across the old limit. Negative control: the pre-fix search, bisection on [0, 500], returns
+        500 for n = 490 and fails the oracles. Tolerance 1e-9 relative: both oracles are good to far better."""
+        import mpmath
+        from scipy import stats as sps
+
+        def gamma_root(n, target):  # mu with P(N <= n | mu) = target
+            with mpmath.workdps(50):
+                return float(mpmath.findroot(lambda mu: mpmath.gammainc(n + 1, mu, mpmath.inf, regularized=True)
+                                             - target, (n + 1, n + 10 * math.sqrt(n + 1)), solver="illinois",
+                                             tol=1e-30, maxsteps=200))
+
+        for n, cl in ((490, 0.6827), (495, 0.95), (600, 0.6827), (5000, 0.6827)):
+            with self.subTest(n=n, cl=cl):
+                a = (1.0 - cl) / 2.0
+                iv = pd.central_interval(n, cl)
+                analytic = sps.chi2.ppf(1.0 - a, 2 * n + 2) / 2.0
+                self.assertAlmostEqual(iv["upper"] / analytic, 1.0, delta=1e-9)
+                self.assertAlmostEqual(iv["lower"] / (sps.chi2.ppf(a, 2 * n) / 2.0), 1.0, delta=1e-9)
+                self.assertAlmostEqual(iv["upper"] / gamma_root(n, a), 1.0, delta=1e-9)
+                ul = pd.upper_limit(n, 0.0, cl)["upper_limit_on_total_mean"]
+                self.assertAlmostEqual(ul / gamma_root(n, 1.0 - cl), 1.0, delta=1e-9)
+                self.assertAlmostEqual(ul / (sps.chi2.ppf(cl, 2 * n + 2) / 2.0), 1.0, delta=1e-9)
+        uppers = [pd.central_interval(n)["upper"] for n in range(470, 531, 5)]
+        self.assertTrue(all(b > a + 1.0 for a, b in zip(uppers, uppers[1:])), uppers)
+
+        def clipped(n, target, lo=0.0, hi=500.0):  # the pre-fix search range, written here
+            for _ in range(200):
+                mid = 0.5 * (lo + hi)
+                lo, hi = (mid, hi) if pd.poisson_cdf(n, mid) > target else (lo, mid)
+            return 0.5 * (lo + hi)
+        old = clipped(490, (1.0 - 0.6827) / 2.0)
+        self.assertAlmostEqual(old, 500.0, delta=1e-9)
+        self.assertGreater(abs(old / gamma_root(490, (1.0 - 0.6827) / 2.0) - 1.0), 1e-3)
+
 
 class UpperTailTests(unittest.TestCase):
     """P(N >= n) far into the tail: 1 - P(N <= n - 1) in double precision cancels to 0 below about 1e-16."""
@@ -152,6 +191,15 @@ class UpperTailTests(unittest.TestCase):
             ref = decimal_sf(n, mu)
             self.assertAlmostEqual(pd.poisson_sf(n, mu) / float(ref), 1.0, delta=1e-10, msg=(n, mu))
             self.assertAlmostEqual(pd.log_poisson_sf(n, mu), float(ref.ln()), delta=1e-10, msg=(n, mu))
+
+    def test_negative_control_complement_form_fails_the_reference(self):
+        """Negative control (sci-fix evidence, axis C): the pre-fix complement 1 - P(N <= n - 1) must fail the same
+        high-precision reference that poisson_sf passes, so the reference can tell the two forms apart."""
+        ref = float(decimal_sf(60, 5.0))  # 7.6496...e-43
+        naive = 1.0 - pd.poisson_cdf(59, 5.0)
+        self.assertLess(naive, 1e-15)  # cancels to (about) zero in double precision
+        self.assertGreater(abs(naive / ref - 1.0) if naive else 1.0, 1e-10)  # outside the tolerance used above
+        self.assertAlmostEqual(pd.poisson_sf(60, 5.0) / ref, 1.0, delta=1e-10)
 
     def test_log_tail_and_significance_stay_finite_to_n_1000(self):
         last = 0.0

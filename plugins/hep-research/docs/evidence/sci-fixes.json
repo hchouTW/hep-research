@@ -1,0 +1,554 @@
+{
+ "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed; the remaining three S1 entries to C3 by plan PR-6 batch 3 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH3), also to be reviewed",
+ "fixes": [
+  {
+   "id": "CLS-LOGINTERP",
+   "title": "CLs crossings interpolate log CLs",
+   "changelog": "CHANGELOG 0.6.13",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/examples/test_stats_benchmarks.py",
+    "tests/core/test_stats_likelihood_limits.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18. The benchmark's toy_based() run in process on exact counting CLs (n = 3, b = 3.232 and the expected quantiles) against mpmath roots within the log-interpolation error bound; fails by assertion on parent 90388aa0 (observed 5.335 against 5.284) and passes on fix 99a18fd8; n = 0 crossing is ln 20 for any b (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20). The core toy CLs (likelihood_limits._toy_cls) interpolated log CLs since it was written (cc44988d): the fix changed the benchmark only"
+  },
+  {
+   "id": "F01",
+   "title": "Poisson domain in the likelihoods",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_p0_regressions.py",
+    "tests/core/test_stats_counting_asymptotic_oracles.py",
+    "tests/core/test_properties.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "independent-implementation",
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "property test of ln L against n ln(mu) - mu with the pre-fix domain rule as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+  },
+  {
+   "id": "F02",
+   "title": "Toy tails are bounds at zero exceedances",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_p0_regressions.py",
+    "tests/core/test_stats_statistical_toys.py",
+    "tests/core/test_properties.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "toys_not_evaluated path tested 2026-10-18; property test of the Clopper-Pearson ends against exact binomial sums (mpmath), Wald at k = 0 as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+  },
+  {
+   "id": "F03",
+   "title": "Fit verdicts",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_stats_p0_regressions.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "independent numeric oracle (analytic minimum and Hessian of a small model)"
+   ],
+   "note": "per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the parent failure is a missing status key, the defect itself; the T05 tests need a method new in the fix"
+  },
+  {
+   "id": "BAYES-T24",
+   "title": "bayes_diagnostics ties, constant chains, ESS and MCSE",
+   "changelog": "CHANGELOG 0.6.11",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py",
+    "tests/skills/hep_statistics/test_bayes_diagnostics.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "parent record of the ArviZ oracle (needs ArviZ 0.23.4)"
+   ],
+   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate. A SciPy oracle written from Vehtari et al. 2021 runs without ArviZ (R-hat, bulk and tail ESS, quantile MCSE to 1e-12) with invariants and the pre-fix ESS and MCSE as negative control; it fails by assertion on parent bb0774f0 and passes on fix d161b3b7; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20; earlier tie and signed-weight parts: SCIFIX-PARENT-RECORDS)"
+  },
+  {
+   "id": "FC-MONOTONE",
+   "title": "Feldman-Cousins upper ends follow the published construction",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_poisson.py",
+    "tests/core/test_published_tables.py",
+    "tests/core/test_properties.py",
+    "tests/core/test_stats_counting_asymptotic_oracles.py"
+   ],
+   "oracle_kinds": [
+    "published",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only; per-test parent record of fix 04338bbf (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+  },
+  {
+   "id": "POISSON-SF",
+   "title": "Exact Poisson p-values no longer underflow",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_poisson.py",
+    "tests/core/test_stats_likelihood_limits.py",
+    "tests/core/test_stats_statistical_toys.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "negative control added 2026-10-18; per-test parent record of fix a2adc126 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+  },
+  {
+   "id": "COV-NOREPAIR",
+   "title": "Covariance matrices are no longer repaired silently",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_linalg.py",
+    "tests/core/test_stats_statistical_toys.py",
+    "tests/core/test_properties.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "closure",
+    "invariant",
+    "analytic"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20; per-test parent record of fix 6a81109c (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+  },
+  {
+   "id": "POISSON-500",
+   "title": "Poisson limits and intervals no longer clipped at 500",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_stats_poisson.py",
+    "tests/core/test_stats_poisson_numerics.py",
+    "tests/core/test_stats_edge_cases.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "invariant",
+    "analytic"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20; per-test parent record of fix b7b7825a (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+  },
+  {
+   "id": "TH9-MASSES",
+   "title": "PID and Cherenkov masses from CODATA 2022 / PDG 2026",
+   "changelog": "CHANGELOG 0.14.0",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py",
+    "tests/core/test_constant_literals.py",
+    "tests/core/test_constants.py"
+   ],
+   "oracle_kinds": [
+    "published",
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "pdg cross-check in CI"
+   ],
+   "note": "expected values computed from closed forms in the test since 2026-10-18; binding energies of d, 3He, 4He from the CODATA 2022 masses against AME2020 mass excesses (a second evaluation), property tests over species and momenta, the pre-fix 10 eV table as negative control (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)"
+  },
+  {
+   "id": "DR-WP1-01",
+   "title": "Cherenkov photon yield carries z^2",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)"
+  },
+  {
+   "id": "DR-WP1-02",
+   "title": "Gaisser-Hillas profile stable at any X_max",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py",
+    "tests/skills/hep_measurement/test_astroparticle.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes); grid of x_max, lambda and depths against the textbook form in 60-digit decimal arithmetic, the pre-fix form as negative control, half-maximum bracketing, 2026-10-20"
+  },
+  {
+   "id": "DR-WP2-06",
+   "title": "Script physics (calorimeter, PID, multiple scattering, tag-and-probe, pileup)",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py",
+    "tests/skills/hep_detector/test_reference_values.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic",
+    "published",
+    "closure",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "tag-and-probe and pileup parts: behavioral tests only"
+   ],
+   "note": "calorimeter fit: the fix's 2000-toy bias study in the suite (bias of c below 0.1 sd, against numpy weighted lstsq on every toy; pre-fix unit weights: c^2 < 0 in a quarter, c biased by about 10 sd), closure and energy-scale covariance; multiple scattering: crossover and MDR with beta(R) against their closed forms (quadratics in R^2) over stacks, masses, charges, pre-fix beta = 1 as negative control; 6 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)"
+  },
+  {
+   "id": "ROBUST-MALFORMED",
+   "title": "Malformed input gives findings, not tracebacks",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S4",
+   "evidence_tests": [
+    "tests/contracts/test_robustness.py",
+    "tests/core/test_evidence_ledger.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "invariant"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "per-test parent record of fix d7148901 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+  },
+  {
+   "id": "BLINDING-SCANNER",
+   "title": "Blinding scanner: fewer false alarms, no silent passes",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_blinding.py",
+    "tests/core/test_blinding_u11.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test over encodings and sealed values"
+   ],
+   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+  },
+  {
+   "id": "ROBUST-CAMPAIGN",
+   "title": "Batch campaigns survive interruptions and concurrent commands",
+   "changelog": "CHANGELOG 0.4.0",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_partition_safety.py",
+    "tests/core/test_partition_robustness.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "closure"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "independent sum in the closure reference",
+    "real two-process lock test"
+   ],
+   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+  },
+  {
+   "id": "RC-A2",
+   "title": "Displayed number that disagrees with its passage fails",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py",
+    "tests/skills/hep_authoring/test_communication_audit.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test over generated numbers and passages",
+    "independent tokenizer"
+   ]
+  },
+  {
+   "id": "RC-A3",
+   "title": "Adaptation drafts read numbers at sentence end and next to Chinese text",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "generated-context property test"
+   ]
+  },
+  {
+   "id": "RC-A5",
+   "title": "Every display is checked against its source",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py",
+    "tests/skills/hep_authoring/test_claim_audit.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "exhaustive grid of source and display digits"
+   ]
+  },
+  {
+   "id": "RC-A6",
+   "title": "Rounding rules round half up",
+   "changelog": "CHANGELOG RC-AUDIT-2",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_authoring/test_review_fixes2.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "exhaustive integer-arithmetic check on a stated domain added 2026-10-18"
+  },
+  {
+   "id": "ML-SPLITS",
+   "title": "Split tools check what they claim",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_split_tools.py",
+    "tests/skills/hep_ml/test_audit_train_keys.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "invariant"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test of canonical keys"
+   ],
+   "note": "per-test parent record of fix 811f02b6, adapted: the new canonical_key import guarded (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+  },
+  {
+   "id": "ML-CALIBRATION",
+   "title": "A calibration evaluated on its fit sample never validates",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_calibration_identity.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "property test"
+   ]
+  },
+  {
+   "id": "ML-K05",
+   "title": "Domain-shift outcome",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_ml_mutation_probe.py",
+    "tests/skills/hep_ml/test_domain_shift_report.py"
+   ],
+   "oracle_kinds": [
+    "behavioral",
+    "closure"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "assert the nuisance and the mu shift in a test"
+   ]
+  },
+  {
+   "id": "ML-DOMAIN",
+   "title": "One training-domain method",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_domain_method.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "run the torch tests"
+   ],
+   "note": "per-statistic flag rates at the split-conformal value and the union in [a, 2a] (two-sided), the reported interval against scipy.stats.beta Clopper-Pearson, the pre-fix min/max box as negative control; 3 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)"
+  },
+  {
+   "id": "ML-NEGWEIGHTS",
+   "title": "Negative weights are never dropped; the metric layer flags or refuses",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_metric_layer.py",
+    "tests/skills/hep_ml/test_training_pipeline.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "per-test parent record of fix ef5d068f (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); Asimov Z against q0 on the Asimov dataset and Eq. 20 against the profiled on/off likelihood (mpmath), cell resampling against a brute-force reading of eq. 2.2, the pre-fix float expression and dropped negative events as negative controls; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)"
+  },
+  {
+   "id": "ML-SMALL",
+   "title": "Small corrections (C10, C24, C25, C26, K13)",
+   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_small_corrections.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "published",
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "more trials for C10",
+    "cite the t-table",
+    "a K13 test that fails on the parent"
+   ],
+   "note": "C10 alone is C2 / D2; parent record of fix fd637dcc: C10, C24, C25 and C26 fail on the parent; the K13 evidence (tests/examples/test_ml_classifier_to_inference.py) passes on it (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+  }
+ ],
+ "documentation_fixes": [
+  {
+   "id": "DR-REFS",
+   "title": "Detector references corrected (DR-WP1-05, -06, WP3)",
+   "severity": "S3",
+   "sources_with_locators": "mostly; one source without a page or section"
+  },
+  {
+   "id": "ML-REFS",
+   "title": "ML physics references (ML-R01..R25)",
+   "severity": "S3",
+   "sources_with_locators": "yes; not every citation has an opened date"
+  }
+ ]
+}

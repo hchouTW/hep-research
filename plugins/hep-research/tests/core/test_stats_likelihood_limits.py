@@ -461,5 +461,32 @@ class CliTests(unittest.TestCase):
             ll.main(["profile-limit", "--n", "1", "--b", "1"])
 
 
+
+class LogClsCrossingTests(unittest.TestCase):
+    """The core toy CLs (likelihood_limits._toy_cls; log CLs since it was written, the sci-fix CLS-LOGINTERP changed
+    the sbottom benchmark): the limit is the first crossing of CLs = alpha, interpolated linearly in log CLs. Oracle: on an exactly exponential curve CLs = exp(-k mu) the
+    log-linear interpolation is exact, so the crossing is -ln(alpha) / k for any grid. Negative control: linear
+    interpolation in CLs on the same 1.0-wide grid misses it by more than 0.03 where the crossing falls mid-interval
+    (k = 0.4: +0.050, k = 2.0: +0.231; at other slopes it can land within 0.002, so those are not used as controls)."""
+
+    def test_exponential_curve_crossing_is_exact_and_linear_interpolation_is_not(self):
+        alpha = 0.05
+        for k in (0.4, 0.75, 1.5, 2.0):
+            grid = [float(i) for i in range(1, 30)]
+            values = [math.exp(-k * mu) for mu in grid]
+            exact = -math.log(alpha) / k
+            self.assertAlmostEqual(ll._log_cls_crossing(grid, values, alpha), exact, places=12, msg=k)
+            i = next(j for j, v in enumerate(values) if v < alpha)
+            mu0, v0 = (grid[i - 1], values[i - 1]) if i else (0.0, 1.0)
+            linear = mu0 + (grid[i] - mu0) * (v0 - alpha) / (v0 - values[i])
+            if k in (0.4, 2.0):
+                self.assertGreater(abs(linear - exact), 0.03, msg=k)
+
+    def test_no_crossing_and_crossing_in_the_first_interval(self):
+        self.assertIsNone(ll._log_cls_crossing([1.0, 2.0], [0.5, 0.2], 0.05))
+        # first interval: CLs = 1 at mu = 0 is the left point
+        self.assertAlmostEqual(ll._log_cls_crossing([2.0], [0.01], 0.05), 2.0 * math.log(0.05) / math.log(0.01), places=12)
+
+
 if __name__ == "__main__":
     unittest.main()

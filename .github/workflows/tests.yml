@@ -9,7 +9,8 @@
 #              expected run present once, of this commit, passing, and the shards partition the module list; it
 #              runs even when a checks job failed and fails when a record is missing; required
 #   lint       ruff and mypy on core/ and contracts/; required
-#   stats-backends  the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4 required: a skip for either fails; required
+#   stats-backends  the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4 required, and NumPy and hypothesis from the
+#              lock (the sci-fix eigenvalue oracle and the property tests): a skip for any of them fails; required
 #   optional-* the same unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
 #              blocking a merge for now, but their results are shown on the run
 #   release-manifests  published release bundles unchanged (C10); required
@@ -111,8 +112,8 @@ jobs:
         run: python tools/reconcile_check_runs.py ../../check-runs --python 3.13 --shards 2 --parts static,ams-optional --sha "$GITHUB_SHA" --summary "$GITHUB_STEP_SUMMARY"
 
   stats-backends:
-    # hep-statistics audit (CI gate 1): the backends the statistics tests promise (pyhf 0.7.6, ArviZ 0.23.4) are
-    # required here; a test skipped for a missing one fails the job instead of passing silently
+    # hep-statistics audit (CI gate 1): the backends the statistics tests promise (pyhf 0.7.6, ArviZ 0.23.4; NumPy and
+    # hypothesis for sci-fix evidence, docs/maintenance.md) are required here; a test skipped for a missing one fails the job instead of passing silently
     # (tools/run_required_backends.py). Required.
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -128,7 +129,7 @@ jobs:
       - name: Statistics and backend tests, no skip allowed for a required backend
         run: |
           mkdir -p ../../check-runs
-          python tools/run_required_backends.py --require pyhf==0.7.6,arviz==0.23.4 --out ../../check-runs/required-backends.json
+          python tools/run_required_backends.py --require pyhf==0.7.6,arviz==0.23.4,numpy,hypothesis --out ../../check-runs/required-backends.json
       - name: Keep the report
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2

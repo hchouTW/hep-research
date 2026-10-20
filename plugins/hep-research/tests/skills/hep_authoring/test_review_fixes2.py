@@ -287,6 +287,40 @@ class ReviewFixes2Rounding(Project):
                 self.assertIn("occurrence.rounding_malformed", codes(rep, "error"), rep["findings"])
                 self.assertEqual(rep["exit_code"], 1)
 
+    def test_rounding_rules_exhaustively_against_integer_arithmetic(self):
+        """Exhaustive check (sci-fix RC-A6, axis C4) on a stated finite domain: every three-decimal value in
+        [-10, 10) to two decimals, and every four-significant-digit value with exponents -3..0 to three significant
+        digits, in both modes, against rounding written here in integer arithmetic (no Decimal quantize). Ties go
+        away from zero in half-up and to the even digit in half-even. Negative control: the half-even mode must
+        disagree with the half-up oracle on some ties, so the check can tell the modes apart."""
+        from decimal import Decimal
+        from communication_lib.claims import _round
+
+        def int_round(m, div, mode):  # round the integer m to a multiple of div
+            q, r = divmod(abs(m), div)
+            if 2 * r > div or (2 * r == div and (mode == "half-up" or q % 2 == 1)):
+                q += 1
+            return (-1 if m < 0 else 1) * q * div
+
+        mismatches = {"half-up": 0, "half-even": 0}
+        for mode in ("half-up", "half-even"):
+            for m in range(-10000, 10000):  # value = m / 1000
+                want = Decimal(int_round(m, 10, mode)).scaleb(-3)
+                got = _round(str(Decimal(m).scaleb(-3)), f"decimals:2:{mode}")
+                self.assertEqual(Decimal(got), want, msg=(m, mode))
+            for e in range(-3, 1):
+                for m in range(1000, 10000):  # value = m * 10^e, four significant digits
+                    want = Decimal(int_round(m, 10, mode)).scaleb(e)
+                    got = _round(str(Decimal(m).scaleb(e)), f"significant:3:{mode}")
+                    self.assertEqual(Decimal(got), want, msg=(m, e, mode))
+            for m in range(-10000, 10000):  # negative control: the other mode's oracle
+                other = "half-even" if mode == "half-up" else "half-up"
+                if Decimal(_round(str(Decimal(m).scaleb(-3)), f"decimals:2:{mode}")) != \
+                        Decimal(int_round(m, 10, other)).scaleb(-3):
+                    mismatches[mode] += 1
+        self.assertGreater(mismatches["half-up"], 0)
+        self.assertGreater(mismatches["half-even"], 0)
+
     def test_default_rounding_is_half_up_and_half_even_is_opt_in(self):
         from communication_lib.claims import _round
         self.assertEqual(_round("1.025", "decimals:2"), "1.03")

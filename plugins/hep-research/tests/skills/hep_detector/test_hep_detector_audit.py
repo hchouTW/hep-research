@@ -12,6 +12,7 @@ Standard library only; synthetic inputs only.
 Place in tests/skills/hep_detector/ to run with the suite; from the work dir set
 HEP_PLUGIN to the plugin root.
 """
+import decimal
 import json
 import math
 import os
@@ -25,6 +26,8 @@ PLUGIN = Path(os.environ.get('HEP_PLUGIN') or Path(__file__).resolve().parents[3
 SCRIPTS = PLUGIN / 'skills' / 'hep-detector' / 'scripts'
 ASSETS = PLUGIN / 'skills' / 'hep-detector' / 'assets'
 sys.path.insert(0, str(SCRIPTS))
+import calorimeter_resolution  # noqa: E402
+import multiple_scattering  # noqa: E402
 import pid_separation_power  # noqa: E402
 import xmax_gaisser_hillas  # noqa: E402
 
@@ -79,12 +82,12 @@ class GaisserHillasBracketingTests(unittest.TestCase):
                    '--x0', '-60', '--lambda-param', '60')
         self.assertNotIn('Traceback', proc.stderr)
         payload = strict_json(proc.stdout)
-        if proc.returncode == 0:
-            self.assertAlmostEqual(payload['half_maximum_depths']['full_width_half_maximum'],
-                                   1.8240358e11, delta=1e-4 * 1.8240358e11)
-        else:
-            self.assertEqual(proc.returncode, 1)
-            self.assertFalse(payload['ok'])
+        # The fix computes the width (VALIDATION DR-WP1-02: FWHM 1.824036e11 in 0.03 s); a refusal (exit 1) would
+        # also have ended the hang but is not the fixed behavior, so it fails here.
+        self.assertEqual(proc.returncode, 0, msg=payload)
+        fwhm_gauss = 2.0 * math.sqrt(2.0 * math.log(2.0) * 60.0 * (1e20 + 60.0))  # Gaussian limit, computed here
+        self.assertAlmostEqual(payload['half_maximum_depths']['full_width_half_maximum'],
+                               fwhm_gauss, delta=1e-4 * fwhm_gauss)
 
     def test_falling_edge_for_large_lambda(self):
         """Guard for the new bracketing: lambda=3e5 g/cm^2, x_max=750, x0=-60 has its
@@ -119,12 +122,80 @@ class GaisserHillasBracketingTests(unittest.TestCase):
         self.assertAlmostEqual(value, 0.47236662355903103, delta=1e-9)
 
 
+class GaisserHillasPropertyTests(unittest.TestCase):
+    """sci-fix DR-WP1-02 (axis C): the profile on a grid of x_max (750 to 1e15 g/cm^2), lambda (20 to 3e4) and depths
+    x_max + t sigma (sigma = sqrt(lambda (x_max - x0)), t = -3..3) against the textbook form
+    N_max ((X - x0)/(x_max - x0))^((x_max - x0)/lambda) exp((x_max - X)/lambda) in 60-digit decimal arithmetic,
+    written here (no cancellation at that precision). Invariants: N(x_max) = N_max, N <= N_max, and the half-maximum
+    depths bracket N = N_max / 2 within the search tolerance. Negative control: the pre-fix double-precision form
+    exp(e ln(base) + (x_max - X)/lambda) misses the oracle by more than 1e-6 on part of the grid. Tolerance: the
+    exponent E = e (log1p(u) - u) ~ -t^2/2 is computed with relative error about 2 eps / |u| (log1p(u) - u cancels
+    for small u), so N carries a relative error up to 4 eps |E| / |u| = 2 eps |t| sqrt((x_max - x0) / lambda) plus
+    1e-12 (1.8e-9 at x_max = 1e15, lambda = 20, t = 3, where the old form is off by 8e-4). A first draft with a
+    flat 1e-9 failed there; the bound above is derived, not fitted."""
+
+    X0 = -60.0
+
+    @staticmethod
+    def textbook(depth, x_max, x0, lam):
+        with decimal.localcontext() as ctx:
+            ctx.prec = 60
+            d, xm, z, la = (decimal.Decimal(repr(v)) for v in (depth, x_max, x0, lam))
+            span = xm - z
+            if d <= z:
+                return 0.0  # the model is undefined at or below x0; N -> 0 there
+            return float(((span / la) * ((d - z) / span).ln() + (xm - d) / la).exp())
+
+    def test_profile_against_high_precision_and_the_old_form(self):
+        old_misses = 0
+        for x_max in (750.0, 1e4, 1e8, 1e12, 1e15):
+            for lam in (20.0, 60.0, 300.0, 3e4):
+                sigma = math.sqrt(lam * (x_max - self.X0))
+                self.assertEqual(xmax_gaisser_hillas.gaisser_hillas(x_max, 1.0, x_max, self.X0, lam), 1.0)
+                for t in (-3.0, -1.0, -0.5, 0.25, 0.5, 1.0, 3.0):
+                    depth = x_max + t * sigma
+                    if depth <= self.X0 + 1.0:
+                        continue
+                    with self.subTest(x_max=x_max, lam=lam, t=t):
+                        got = xmax_gaisser_hillas.gaisser_hillas(depth, 1.0, x_max, self.X0, lam)
+                        want = self.textbook(depth, x_max, self.X0, lam)
+                        self.assertLessEqual(got, 1.0)
+                        if want > 1e-250:
+                            tol = 1e-12 + 2.0 * 2.3e-16 * abs(t) * math.sqrt((x_max - self.X0) / lam)
+                            self.assertAlmostEqual(got / want, 1.0, delta=tol)
+                            e, base = (x_max - self.X0) / lam, (depth - self.X0) / (x_max - self.X0)
+                            old = math.exp(e * math.log(base) + (x_max - depth) / lam)  # pre-fix form
+                            old_misses += abs(old / want - 1.0) > 1e-6
+        self.assertGreater(old_misses, 0)  # negative control: the pre-fix form fails part of this grid
+
+    def test_half_maximum_depths_bracket_half_the_maximum(self):
+        tol = 1e-6
+        for x_max, lam in ((750.0, 60.0), (750.0, 3e5), (5e6, 2e5), (1e12, 60.0), (1e15, 30.0)):
+            with self.subTest(x_max=x_max, lam=lam):
+                rising, falling = xmax_gaisser_hillas.half_max_depths(1.0, x_max, self.X0, lam, tolerance=tol)
+                self.assertLess(rising, x_max)
+                self.assertGreater(falling, x_max)
+                for edge, sign in ((rising, -1.0), (falling, 1.0)):  # N falls away from x_max on both sides
+                    step = max(2.0 * tol, 1e-14 * abs(edge))
+                    self.assertGreaterEqual(self.textbook(edge - sign * step, x_max, self.X0, lam), 0.5)
+                    self.assertLessEqual(self.textbook(edge + sign * step, x_max, self.X0, lam), 0.5)
+
+
 # --------------------------------------------------------------------- E-C1
 class CherenkovChargeTests(unittest.TestCase):
     # n=1.05, p=40 GeV/c, L=2 cm, N0=100/cm, 5 mrad: He4 beta=0.995687, theta=0.296014 rad,
     # z=1 yield 17.0188937; with z^2: 68.0755750, sigma_theta = 5/sqrt(68.0756) = 0.6060024 mrad.
-    HE4_PHOTONS = 68.07557492992738  # with the CODATA 2022 alpha-particle mass (Th9); 68.07557496982115 with 3.72737940 GeV
-    HE4_SIGMA_MRAD = 0.6060024015969153
+    # Expected values are computed here from the closed forms (sci-fix DR-WP1-01, axis C), not copied from the
+    # script's output: beta = p / sqrt(p^2 + m^2), cos(theta) = 1 / (n beta), N = N0 L z^2 sin^2(theta),
+    # sigma_theta = 5 mrad / sqrt(N), p_threshold = m / sqrt(n^2 - 1). Mass: CODATA 2022 alpha-particle mass in GeV
+    # (m_alpha c^2 = 3727.3794118 MeV, NIST CODATA 2022), stated here independently of core/constants.
+    M_ALPHA, N_INDEX, P, L_CM, N0, Z = 3.7273794118, 1.05, 40.0, 2.0, 100.0, 2
+    _BETA = P / math.hypot(P, M_ALPHA)
+    HE4_ANGLE = math.acos(1.0 / (N_INDEX * _BETA))
+    HE4_PHOTONS = N0 * L_CM * Z ** 2 * math.sin(HE4_ANGLE) ** 2
+    HE4_SIGMA_MRAD = 5.0 / math.sqrt(HE4_PHOTONS)
+    HE4_THRESHOLD = M_ALPHA / math.sqrt(N_INDEX ** 2 - 1.0)
+    HE4_PHOTONS_WITHOUT_Z2 = HE4_PHOTONS / Z ** 2  # the pre-fix answer (17.02): negative control
 
     def test_helium_yield_scales_with_z_squared(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p', 'He4',
@@ -134,10 +205,54 @@ class CherenkovChargeTests(unittest.TestCase):
         self.assertAlmostEqual(he4['expected_photons'], self.HE4_PHOTONS, delta=1e-9)
         self.assertAlmostEqual(he4['track_angular_resolution_mrad'], self.HE4_SIGMA_MRAD, delta=1e-9)
         # The threshold and the angle depend on beta only, not on z.
-        # 11.642377294538912 with the CODATA 2022 alpha-particle mass (Th9); 11.642377257681904 with 3.72737940 GeV
-        self.assertAlmostEqual(he4['threshold_momentum_gev'], 11.642377294538912, delta=1e-9)
-        # 0.2960136490467237 with the CODATA 2022 alpha-particle mass (Th9); 0.2960136491360844 with 3.72737940 GeV
-        self.assertAlmostEqual(he4['cherenkov_angle_rad'], 0.2960136490467237, delta=1e-12)
+        self.assertAlmostEqual(he4['threshold_momentum_gev'], self.HE4_THRESHOLD, delta=1e-9)
+        self.assertAlmostEqual(he4['cherenkov_angle_rad'], self.HE4_ANGLE, delta=1e-12)
+        # Negative control: the pre-fix yield (no z^2) is 4x low and must fail the same tolerance.
+        self.assertGreater(abs(he4['expected_photons'] - self.HE4_PHOTONS_WITHOUT_Z2), 1.0)
+        # z = 1 is unchanged by the fix: the proton yield follows the same closed form with z = 1.
+        beta_p = self.P / math.hypot(self.P, 0.93827208943)  # CODATA 2022 proton mass, GeV
+        p_yield = self.N0 * self.L_CM * (1.0 - 1.0 / (self.N_INDEX * beta_p) ** 2)
+        self.assertAlmostEqual(payload['species_a']['expected_photons'], p_yield, delta=1e-9)
+
+    def test_yield_scales_as_z_squared_at_fixed_velocity(self):
+        """sci-fix DR-WP1-01 invariant: two species of the same mass and momentum have the same velocity and angle, so
+        their yields differ by z^2 exactly (relative 1e-12, rounding only); the threshold and angle do not change.
+        Negative control: the pre-fix yield ratio is 1 for every z."""
+        for z in (2, 3, 6, 26):
+            with self.subTest(z=z):
+                payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', '3.7273794118:1',
+                                   f'3.7273794118:{z}', '--momentum', '40')
+                a, b = payload['species_a'], payload['species_b']
+                self.assertAlmostEqual(b['expected_photons'] / a['expected_photons'], z * z, delta=1e-12 * z * z)
+                self.assertEqual(b['cherenkov_angle_rad'], a['cherenkov_angle_rad'])
+                self.assertEqual(b['threshold_momentum_gev'], a['threshold_momentum_gev'])
+                self.assertGreater(abs(b['expected_photons'] / a['expected_photons'] - 1.0), 1.0)
+
+    def test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength(self):
+        """sci-fix DR-WP1-01, second oracle kind (independent implementation): the Frank-Tamm spectrum
+        d2N/dx dlambda = 2 pi alpha z^2 / lambda^2 (1 - 1/(beta^2 n^2)) integrated numerically (scipy quad) over
+        300-600 nm and 2 cm, with alpha from CODATA 2022, against the script given the ideal-detector figure of merit
+        N0 = 2 pi alpha (1/lambda1 - 1/lambda2). That N0 is alpha/(hbar c) = 369.8 per eV cm times the window width
+        in energy, the coefficient of the PDG RPP review "Passage of particles through matter" (Cherenkov section,
+        about 370 z^2 sin^2 theta per eV cm). Negative control: the pre-fix yield (no z^2)."""
+        from scipy.integrate import quad
+
+        alpha, hbar_c_ev_cm = 1 / 137.035999177, 197.3269804e-7  # CODATA 2022
+        self.assertAlmostEqual(alpha / hbar_c_ev_cm, 369.8, delta=0.05)
+        lo, hi = 300e-7, 600e-7  # cm
+        n0 = 2 * math.pi * alpha * (1 / lo - 1 / hi)
+        for z, momentum in ((1, 40.0), (2, 40.0), (2, 12.0), (3, 25.0), (26, 400.0)):
+            with self.subTest(z=z, momentum=momentum):
+                payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
+                                   f'{self.M_ALPHA}:{z}', '--momentum', str(momentum), '--radiator-length', '2',
+                                   '--figure-of-merit', repr(n0))
+                beta = momentum / math.hypot(momentum, self.M_ALPHA)
+                spectrum, _ = quad(lambda lam: 2 * math.pi * alpha * z * z / lam ** 2 * (1 - 1 / (beta * 1.05) ** 2),
+                                   lo, hi, epsabs=0, epsrel=1e-13)
+                got = payload['species_b']['expected_photons']
+                self.assertAlmostEqual(got / (2.0 * spectrum), 1.0, delta=1e-11)
+                if z > 1:
+                    self.assertGreater(abs(got / z ** 2 / (2.0 * spectrum) - 1.0), 0.5)
 
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
@@ -227,7 +342,144 @@ class PidElectronAndUnitTests(unittest.TestCase):
         self.assertAlmostEqual(loss, 2.03897039968383, delta=1e-9)
 
 
+class SpeciesMassPropertyTests(unittest.TestCase):
+    """TH9: the PID species masses come from core/constants. Second oracle kind: the binding energies of d, 3He and
+    4He from these (CODATA 2022) nuclear masses equal those from AME2020 atomic mass excesses, a separate evaluation
+    bundled in core/constants (electron binding: H 13.598 eV, He 24.587 + 54.418 eV, NIST). Tolerance 3 N sigma(m_n)
+    + 0.1 eV, sigma(m_n) = 0.44 eV (AME2020); observed 0.14 to 0.37 eV. The pre-fix table (8 decimals in GeV,
+    10 eV steps, 23910085^) is the negative control. Invariants over every species and momentum: mass from beta
+    inverts the kinematics, the masses are ordered e < mu < pi < K < p < d < 3He < 4He, and flight time grows with
+    mass at fixed momentum."""
+
+    PRE_FIX = {'p': 0.93827209, 'd': 1.87561294, 'He3': 2.80839160, 'He4': 3.72737940}
+    NUCLEI = (('d', '2H', 1, 2), ('He3', '3He', 2, 3), ('He4', '4He', 2, 4))
+
+    def binding_kev(self, masses_gev):
+        from core import constants
+        kev = {k: constants.constant(k, unit='GeV').value * 1e6 for k in ('proton_mass_energy', 'neutron_mass_energy')}
+        u = constants.constant('atomic_mass_constant_energy', unit='GeV').value * 1e6
+        m_h, m_n = (u + constants.nuclide(n)['mass_excess_keV'] for n in ('1H', 'n'))
+        electron_binding = {1: 0.013598, 2: 0.024587 + 0.054418}
+        out = {}
+        for species, nuclide, z, a in self.NUCLEI:
+            m_p = masses_gev.get('p', kev['proton_mass_energy'] / 1e6) * 1e6
+            codata = z * m_p + (a - z) * kev['neutron_mass_energy'] - masses_gev[species] * 1e6
+            m_atom = a * u + constants.nuclide(nuclide)['mass_excess_keV']
+            ame = z * m_h + (a - z) * m_n - m_atom + z * electron_binding[1] - electron_binding[z]
+            out[species] = (codata, ame, 3 * (a - z) * 0.44e-3 + 1e-4)
+        return out
+
+    def test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not(self):
+        for species, (codata, ame, tol) in self.binding_kev(pid_separation_power.MASSES_GEV).items():
+            self.assertLess(abs(codata - ame), tol, (species, codata, ame))
+        missed = [s for s, (codata, ame, tol) in self.binding_kev(self.PRE_FIX).items() if abs(codata - ame) > tol]
+        self.assertTrue(missed, 'the pre-fix masses agree with AME2020 too: not a negative control')
+
+    def test_mass_from_beta_inverts_the_kinematics_and_masses_are_ordered(self):
+        masses = pid_separation_power.MASSES_GEV
+        names = ('e', 'mu', 'pi', 'K', 'p', 'd', 'He3', 'He4')
+        self.assertEqual(sorted(masses, key=masses.get), list(names))
+        for name in names:
+            for p in (0.01, 0.1, 0.5, 1.0, 3.0, 10.0):
+                beta = pid_separation_power.kinematics(p, masses[name])['beta']
+                if beta < 1 - 1e-6:  # nearer beta = 1, 1/beta^2 - 1 cancels: ill-conditioned, not wrong
+                    with self.subTest(species=name, p=p):
+                        m = pid_separation_power.mass_from_beta(p, beta)
+                        self.assertAlmostEqual(m / masses[name], 1.0, delta=1e-15 / (1 - beta))
+        for p in (0.3, 1.0, 5.0):
+            times = [pid_separation_power.time_of_flight_ns(p, masses[n], 2.0) for n in names]
+            self.assertEqual(times, sorted(times))
+            self.assertTrue(all(b > a for a, b in zip(times, times[1:])), (p, times))
+
+
 # --------------------------------------------------------------------- E-M1..E-M3
+class ScriptPhysicsOracleTests(unittest.TestCase):
+    """sci-fix DR-WP2-06, axis C: the calorimeter fit and the beta(R) crossover and MDR of multiple_scattering.py
+    against independent calculations, with the pre-fix rules as negative controls."""
+
+    ENERGIES = (1, 2, 5, 10, 20, 50, 100, 200, 500, 1000)
+
+    def test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq(self):
+        """The fix commit's bias study in the suite: 2000 toys, 2% Gaussian relative scatter on sigma/E, truth
+        a = 0.10, b = 0.20, c = 0.0070. Independent implementation: numpy lstsq with weights 1/r^4 on every toy (the
+        coefficients to 1e-10 relative). Criterion: the bias of c below 10% of its per-fit spread (observed -7.7e-6,
+        0.06 sd: weighting by the observed r is a second-order effect) and no negative squared term. Negative control:
+        the pre-fix unit-weight fit, c^2 < 0 in about a quarter of the toys and c biased by about 10 sd."""
+        import numpy as np
+
+        e = np.array(self.ENERGIES, dtype=float)
+        a, b, c = 0.10, 0.20, 0.0070
+        truth = np.sqrt(a * a / e + b * b / e ** 2 + c * c)
+        design = np.c_[1 / e, 1 / e ** 2, np.ones_like(e)]
+        rng = np.random.default_rng(7)
+        fitted, unit, unit_negative = [], [], 0
+        for _ in range(2000):
+            r = truth * (1 + 0.02 * rng.standard_normal(e.size))
+            fit = calorimeter_resolution.fit_resolution([[float(x), float(y)] for x, y in zip(e, r)])
+            self.assertEqual(fit['negative_squared_terms'], [])
+            w = 1 / r ** 2
+            ref = np.linalg.lstsq(design * w[:, None], r ** 2 * w, rcond=None)[0]
+            got = [fit['stochastic_squared'], fit['noise_squared'], fit['constant_squared']]
+            np.testing.assert_allclose(got, ref, rtol=1e-10)
+            fitted.append(fit['constant'])
+            pre = np.linalg.lstsq(design, r ** 2, rcond=None)[0]
+            if pre[2] < 0:
+                unit_negative += 1
+            else:
+                unit.append(math.sqrt(pre[2]))
+        spread = np.std(fitted, ddof=1)
+        self.assertLess(abs(np.mean(fitted) - c), 0.1 * spread, (np.mean(fitted), spread))
+        self.assertGreater(unit_negative, 300)
+        self.assertGreater(abs(np.mean(unit) - c), 5 * spread, np.mean(unit))
+
+    def test_calorimeter_fit_closure_and_energy_scale_covariance(self):
+        """Property tests: points on the model are fitted exactly (a, b, c to 1e-9 relative) for a grid of terms;
+        with energies scaled by s, a^2 scales by s, b^2 by s^2 and c^2 not at all (the same curve in other units)."""
+        for a, b, c in ((0.03, 0.15, 0.002), (0.10, 0.20, 0.007), (0.5, 0.5, 0.05), (0.15, 0.01, 0.01)):
+            points = [[float(x), math.sqrt(a * a / x + b * b / x ** 2 + c * c)] for x in self.ENERGIES]
+            fit = calorimeter_resolution.fit_resolution(points)
+            for got, want in zip((fit['stochastic'], fit['noise'], fit['constant']), (a, b, c)):
+                self.assertAlmostEqual(got / want, 1.0, delta=1e-9, msg=(a, b, c))
+            for s in (1e-3, 0.5, 4.0):
+                scaled = calorimeter_resolution.fit_resolution([[x * s, r] for x, r in points])
+                self.assertAlmostEqual(scaled['stochastic_squared'] / (s * fit['stochastic_squared']), 1, delta=1e-9)
+                self.assertAlmostEqual(scaled['noise_squared'] / (s * s * fit['noise_squared']), 1, delta=1e-9)
+                self.assertAlmostEqual(scaled['constant_squared'] / fit['constant_squared'], 1, delta=1e-9)
+
+    def test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms(self):
+        """Analytic oracle: with beta(R) = zR / sqrt((zR)^2 + m^2), ms1/beta(R) = k R squares to
+        k^2 R^4 - ms1^2 R^2 - ms1^2 m^2/z^2 = 0 and hypot(ms1/beta(R), k R) = 1 to
+        k^2 R^4 - (1 - ms1^2) R^2 + ms1^2 m^2/z^2 = 0 (upper root), solved here as quadratics in R^2, against the
+        script's bisection, over stacks, masses and charges. Negative control: the pre-fix beta = 1 crossover ms1/k."""
+        stack = json.loads((ASSETS / 'detector-stack.example.json').read_text())
+        missed = 0
+        for budget_scale in (0.1, 1.0, 10.0):
+            for resolution_um in (2.0, 10.0, 50.0):
+                s = dict(stack, point_resolution_um=resolution_um,
+                         layers=[dict(layer, x_over_x0=layer['x_over_x0'] * budget_scale) for layer in stack['layers']])
+                # the spectrometer terms from the stack: Highland 13.6 MeV sqrt(x/X0) / (c B L) at beta = 1, and
+                # Gluckstern sigma sqrt(720/(N+4)) / (c B L^2) with N measuring layers (c = 0.299792458 GeV/(T m))
+                cbl = 0.299792458 * s['field_tesla'] * s['lever_arm_m']
+                ms1 = 0.0136 * math.sqrt(math.fsum(layer['x_over_x0'] for layer in s['layers'])) / cbl
+                n_meas = sum(1 for layer in s['layers'] if layer.get('measuring'))
+                k = resolution_um * 1e-6 * math.sqrt(720 / (n_meas + 4)) / (cbl * s['lever_arm_m'])
+                for mass, z in ((0.000511, 1), (0.10566, 1), (0.93827, 1), (3.72738, 2), (52.09, 26)):
+                    with self.subTest(budget=budget_scale, resolution=resolution_um, mass=mass, z=z):
+                        out = multiple_scattering.summarize(s, 10.0, charge=z, mass_gev=mass)
+                        self.assertAlmostEqual(out['mdr_intrinsic_only_gv'] * k, 1.0, delta=1e-13)
+                        q = ms1 * ms1 * mass * mass / (z * z)
+                        cross = math.sqrt((ms1 * ms1 + math.sqrt(ms1 ** 4 + 4 * k * k * q)) / (2 * k * k))
+                        self.assertAlmostEqual(out['crossover_rigidity_gv'] / cross, 1.0, delta=1e-12)
+                        disc = (1 - ms1 * ms1) ** 2 - 4 * k * k * q
+                        if ms1 < 1 and disc >= 0:
+                            mdr = math.sqrt((1 - ms1 * ms1 + math.sqrt(disc)) / (2 * k * k))
+                            self.assertAlmostEqual(out['maximum_detectable_rigidity_gv'] / mdr, 1.0, delta=1e-12)
+                        else:
+                            self.assertIsNone(out['maximum_detectable_rigidity_gv'])
+                        missed += abs(ms1 / k / cross - 1) > 1e-3
+        self.assertGreater(missed, 10, missed)  # 14 of 45: low crossovers of heavy, slow species
+
+
 class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
     STACK = ASSETS / 'detector-stack.example.json'
 

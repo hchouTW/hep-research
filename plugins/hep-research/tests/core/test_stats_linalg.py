@@ -173,5 +173,108 @@ class SharedHelperTests(unittest.TestCase):
             tf._solve([[0.0]], [[1.0]])
 
 
+
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover
+    np = None
+
+
+@unittest.skipUnless(np is not None, "NumPy not installed: the eigenvalue oracle is unverified")
+class EigenvalueOracleTests(unittest.TestCase):
+    """Independent oracle for sci-fix COV-NOREPAIR (axis C): the verdict of the strict Cholesky on random covariance
+    matrices against numpy.linalg.eigvalsh of the unit-diagonal (correlation) matrix, written here without
+    _linalg. Pivots and eigenvalues are different quantities, so only matrices clearly away from the boundary are
+    judged: smallest correlation eigenvalue above +1e-6 must factorize, below -1e-6 must be refused; the band
+    between is not asserted. Variances span 1e-12 to 1e12, so the verdict is also checked to be unit-free.
+    Negative control: the pre-fix repair (absolute jitter added until a factorization succeeds) accepts the
+    indefinite matrices that the oracle and the fix refuse."""
+
+    @staticmethod
+    def _jitter_repair(c):
+        a = np.array(c, dtype=float)
+        jitter = 1e-10
+        while jitter <= 1.0:
+            try:
+                np.linalg.cholesky(a + jitter * np.eye(len(a)))
+                return True
+            except np.linalg.LinAlgError:
+                jitter *= 10.0
+        return False
+
+    def test_verdict_matches_the_eigenvalues_at_any_scale(self):
+        rng = np.random.default_rng(20261018)
+        judged = {"pd": 0, "indefinite": 0}
+        repaired_indefinite = 0
+        for _ in range(400):
+            n = int(rng.integers(2, 7))
+            a = rng.normal(size=(n, n))
+            corr = a @ a.T
+            d = np.sqrt(np.diag(corr))
+            corr = corr / np.outer(d, d)
+            if rng.random() < 0.5:  # push one correlation past what the others allow
+                i, j = rng.choice(n, size=2, replace=False)
+                corr[i, j] = corr[j, i] = float(np.clip(corr[i, j] + rng.choice([-1.0, 1.0]) * rng.uniform(0.3, 1.5), -1.5, 1.5))
+            lam = float(np.linalg.eigvalsh(corr).min())
+            if abs(lam) <= 1e-6:
+                continue
+            sd = 10.0 ** rng.uniform(-6, 6, size=n)  # variances 1e-12 .. 1e12
+            cov = (corr * np.outer(sd, sd)).tolist()
+            if lam > 1e-6:
+                judged["pd"] += 1
+                cholesky(cov, "c")  # must not raise
+            else:
+                judged["indefinite"] += 1
+                with self.assertRaises(LinAlgError):
+                    cholesky(cov, "c")
+                with self.assertRaises(LinAlgError):
+                    cholesky(cov, "c", semidefinite=True)
+                if self._jitter_repair(corr.tolist()):
+                    repaired_indefinite += 1
+        self.assertGreater(judged["pd"], 50)
+        self.assertGreater(judged["indefinite"], 50)
+        self.assertGreater(repaired_indefinite, 0)  # negative control: the old repair hides some of them
+
+
+@unittest.skipUnless(np is not None, "NumPy not installed: the GLS oracle is unverified")
+class GlsOracleTests(unittest.TestCase):
+    """Second oracle kind for sci-fix COV-NOREPAIR (axis C): the generalized-least-squares constant fit that consumes
+    the strict Cholesky (statistical_toys._gls_constant) against (1) the closed form for two points, mean =
+    ((c22 - c12) r1 + (c11 - c12) r2) / (c11 + c22 - 2 c12), sigma^2 = det / (c11 + c22 - 2 c12) and chi2 =
+    (r1 - r2)^2 / (c11 + c22 - 2 c12), and (2) numpy.linalg.solve (LU, not Cholesky) for 2 to 6 points, with
+    variances 1e-12 to 1e12. Tolerance 1e-8 relative: double-precision solves of matrices whose correlation condition
+    number is kept below 1e6. An indefinite matrix gets no fit (negative control in EigenvalueOracleTests)."""
+
+    def test_fit_matches_the_closed_form_and_an_lu_solve_at_any_scale(self):
+        from core.stats import statistical_toys as st
+        rng = np.random.default_rng(20261020)
+        for trial in range(200):
+            n = 2 if trial < 60 else int(rng.integers(3, 7))
+            a = rng.normal(size=(n, n))
+            corr = a @ a.T + n * np.eye(n)
+            d = np.sqrt(np.diag(corr))
+            corr = corr / np.outer(d, d)
+            if np.linalg.cond(corr) > 1e6:
+                continue
+            sd = 10.0 ** rng.uniform(-6, 6) * rng.uniform(0.5, 2.0, size=n)  # one scale: the points are comparable
+            cov = corr * np.outer(sd, sd)
+            r = rng.normal(size=n) * sd + 3.0
+            mean, sigma, chi2 = st._gls_constant(r.tolist(), cov.tolist())
+            if n == 2:
+                c11, c12, c22 = cov[0, 0], cov[0, 1], cov[1, 1]
+                den = c11 + c22 - 2.0 * c12
+                want = (((c22 - c12) * r[0] + (c11 - c12) * r[1]) / den, math.sqrt((c11 * c22 - c12 ** 2) / den),
+                        (r[0] - r[1]) ** 2 / den)
+            else:
+                ones = np.ones(n)
+                ci1, cir = np.linalg.solve(cov, ones), np.linalg.solve(cov, r)
+                m = float(ones @ cir / (ones @ ci1))
+                res = r - m
+                want = (m, float(1.0 / math.sqrt(ones @ ci1)), float(res @ np.linalg.solve(cov, res)))
+            for got, ref, what in zip((mean, sigma, chi2), want, ("mean", "sigma", "chi2")):
+                self.assertAlmostEqual(got, ref, delta=1e-8 * max(abs(ref), sd.max() if what != "chi2" else 1.0),
+                                       msg=(trial, n, what))
+
+
 if __name__ == "__main__":
     unittest.main()

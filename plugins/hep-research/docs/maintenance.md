@@ -88,6 +88,55 @@ rerun of the cases that involve the skill before it is merged (VALIDATION SKILL-
    `move:`. Never silently clip negative bins, repair covariance or response matrices, invent correlations, or change
    cuts, weights, binning, bounds or constants.
 
+### Scientific corrections: scope and evidence
+
+`sci-fix:` is for changes that alter a number, a verdict or status, or method guidance for a valid input
+(severities S1 silently wrong number, S2 wrong verdict or status, S3 wrong guidance only). A change that turns a crash
+or hang into a finding, or makes concurrent or interrupted runs safe without changing any result, is S4 and uses
+`robust-fix:`; it still needs its regression test and parent record.
+
+Evidence is graded on two axes, reported separately and never combined (vocabulary in
+`docs/evidence/sci-fixes.json`):
+
+- **Correctness (C):** is the new behavior right? C1 pinned values or behavioral assertions only; C2 one independent
+  oracle kind; C3 two or more independent oracle kinds plus an invariant (property) test and a negative control;
+  C4 exhaustive or symbolic over a stated finite domain. Independent kinds: exhaustive, symbolic, analytic, published
+  (with a page, table or equation locator, pinned to the edition including errata), independent implementation.
+- **Discrimination (D):** would the evidence have caught the defect? D1 a combined count or before/after values;
+  D2 a per-test record that each evidence test failed on the parent commit and passes on the fix; D3 D2 plus local
+  mutants of the changed function killed (at least the revert of the fix).
+
+Minimum: S1 C3 and D2 (C4 where the domain is finite or a closed form exists); S2 C2 and D2; S3 a located source
+and a second source; S4 C1 and D2.
+
+Oracle rules:
+
+- An expected value is never copied from the code's output. Compute it in the test from a closed form, read it from
+  a fixture transcribed from the source, or freeze an external tool's value with the tool and version stated.
+- The oracle does not import the module under test or its private helpers. Two modules under test compared with each
+  other, or a closure through the module's own helpers, is a consistency check, not an oracle.
+- Independence means a different algorithm, specification source or author, and preferably two of them. When the fix
+  was written with an AI assistant, the oracle comes from a published value, an exhaustive check or a person.
+- Tolerances are fixed before the first run and justified (precision, grid step, Monte Carlo error); a failing
+  check is never repaired by widening its tolerance.
+- A negative control that emulates the pre-fix behavior inside the test is correctness evidence; it is not a parent
+  record.
+- Evidence that skips (an optional backend, the slow tier) is unverified, not passed: list such modules in the gate
+  that requires the backend (`tools/run_required_backends.py`), or run them in the release gate.
+
+Record each correction in `docs/evidence/sci-fixes.json` and in `VALIDATION.md` with one row per evidence test:
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+
+A combined count ("8 of 20 fail") or before/after values without the tests is D1. Evidence files live inside the
+plugin; an artifact outside it cannot be rerun.
+
+Older records (VALIDATION.md, commit messages) name test folders as they were then; the history is not rewritten.
+Under `tests/skills/`: `physics_ml/` is now `hep_ml/`, `detector_response/` is `hep_detector/`, `hep_analysis/` is
+`hep_measurement/`, and `research_communication/` and `hep_communication/` are `hep_authoring/` (literature tests:
+`hep_citations/`). A parent record names the path at the fix commit, where its test ran.
+
 ## Rerunning comparisons and examples
 
 Each example writes byte-reproducible output with its seed and tolerances; run `python3 examples/<name>/run.py`

@@ -8,6 +8,7 @@ Cowan, Cranmer, Gross and Vitells (2011), including the piecewise boundary case;
 numerical maximization; the calibration gate passes the half-chi2 approximation at large counts and declares it
 inapplicable at low counts, where the toys are the result. All inputs SYNTHETIC.
 """
+import json
 import math
 import sys
 import unittest
@@ -18,6 +19,7 @@ from scipy import optimize
 from scipy import stats as sps
 
 ROOT = Path(__file__).resolve().parents[2]
+FC_TABLES = Path(__file__).with_name("fixtures") / "fc1998_tables.json"
 sys.path.insert(0, str(ROOT))
 
 from core.stats import likelihood_limits as ll  # noqa: E402
@@ -86,6 +88,26 @@ class T09ExactCounting(unittest.TestCase):
                         got = pd.fc_interval(n, b, cl, step=step, monotone=False)
                         self.assertAlmostEqual(got["lower"], lo, delta=2 * step + 1e-9)
                         self.assertAlmostEqual(got["upper"], hi, delta=2 * step + 1e-9)
+
+
+    def test_monotone_upper_end_against_an_independent_envelope(self):
+        """Second independent oracle for the monotone construction (sci-fix FC-MONOTONE, axis C): the maximum over
+        b' in [b, b + 2] of the independently written plain upper end, on a uniform 0.01 grid in b' (a brute-force
+        scan, not the module's coarse-then-refine search). The peaks are narrow (n0 = 0, b = 2: 1.22 on a 0.1 grid,
+        1.26 on a 0.01 grid, attained at b' = 2.33), hence the fine grid. Published values are read from the FC 1998
+        Table IV fixture, never typed here. Negative control: the plain upper end must fail the same tolerance.
+        tol = 0.015: half a unit of the table's last digit plus one s-grid step."""
+        table = next(t for t in json.loads(FC_TABLES.read_text())["tables"] if t["table"] == "IV")
+        s_step, b_step, window, tol, cl = 0.01, 0.01, 2.0, 0.015, 0.90
+        for n, b in ((0, 2.0), (1, 4.0)):  # cells where the plain construction dips below the table
+            published = table["rows"][str(n)][table["b"].index(b)][1]
+            with self.subTest(n=n, b=b, cl=cl):
+                env = max(fc_oracle(n, b + k * b_step, cl, s_step)[1] for k in range(int(round(window / b_step)) + 1))
+                got = pd.fc_interval(n, b, cl)["upper"]
+                plain = pd.fc_interval(n, b, cl, monotone=False)["upper"]
+                self.assertAlmostEqual(env, published, delta=tol)   # the oracle reproduces the table
+                self.assertAlmostEqual(got, env, delta=tol)         # the fix agrees with the oracle
+                self.assertGreater(abs(plain - env), tol)           # negative control: the old answer fails
 
 
 class T10AsymptoticForms(unittest.TestCase):

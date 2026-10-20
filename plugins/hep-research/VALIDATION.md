@@ -1961,6 +1961,358 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-ORACLES-BATCH3 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-batch3`, plan PR-6 batch 3)
+
+The last three S1 entries below their requirement: second oracles, invariants and negative controls (axis C), a
+per-test parent record for CLS-LOGINTERP (axis D) and local mutants for DR-WP2-06 (axis D3). Environments as in
+SCIFIX-ORACLES-BATCH2. The new tests pass in both. After this batch every S1 entry meets C3 and D2.
+
+| Entry | New evidence (test file) | Oracle kinds added | Negative control (pre-fix, emulated) | C, D now |
+|---|---|---|---|---|
+| CLS-LOGINTERP | `tests/examples/test_stats_benchmarks.py` (`PublishedLikelihood`) | independent implementation: the benchmark's `toy_based()` with its pool run in process and each grid point returning the exact counting CLs (n = 3, b = 3.232; expected-quantile counts 0, 1, 2, 3, 5), against the mpmath root (30 digits), tolerance the log-interpolation bound h^2/8 max abs(f'') / min abs(f') of f = ln CLs on the bracketing interval (0 at n = 0, 0.0024 to 0.019 otherwise; observed 0 to 0.015); invariant: at n = 0 the crossing is ln 20 for every b | linear interpolation of CLs: 0.036 to 0.127 high, outside every bound | C3, D2 |
+| DR-WP1-01 | `tests/skills/hep_detector/test_hep_detector_audit.py` (`CherenkovChargeTests`) | independent implementation: the Frank-Tamm spectrum 2 pi alpha z^2 / lambda^2 (1 - 1/(beta n)^2) integrated numerically over 300-600 nm (scipy quad, CODATA alpha) against the CLI given the ideal-detector N0 = 2 pi alpha (1/lambda1 - 1/lambda2), z = 1, 2, 3, 26, to 1e-11 | the yield without z^2 | C3, D2 |
+| DR-WP2-06 | `tests/skills/hep_detector/test_hep_detector_audit.py` (`ScriptPhysicsOracleTests`) | calorimeter fit: the fix's 2000-toy study (2% scatter, a = 0.10, b = 0.20, c = 0.0070) with numpy weighted lstsq on every toy (to 1e-10), bias of c -7.7e-6 = 0.06 sd (criterion 0.1 sd: weighting by the observed r is second order); closure on the model curve and energy-scale covariance; multiple scattering: crossover and MDR with beta(R) against their closed forms (quadratics in R^2), 45 stacks, masses and charges, to 1e-12 | calorimeter unit weights: c^2 < 0 in 24.8% of toys, mean c 0.00825 (about 10 sd); crossover with beta = 1: off by more than 1e-3 in 14 of 45 cases (slow heavy species) | C3, D3 |
+
+### CLS-LOGINTERP (new test): fix `99a18fd8`, parent `90388aa0`
+
+The test file of this branch, copied into worktrees of both commits; E2v. `toy_based()` and its crossing closure exist
+on both, so the test reaches the pre-fix crossing.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_toy_crossings_on_exact_counting_cls_meet_the_interpolation_bound` | independent implementation | fail (assertion): observed 5.3348 against 5.2844 (bound 0.0068); expected n = 0, 1, 2, 5: 3.118, 3.660, 4.411, 7.606 against 2.996, 3.613, 4.374, 7.478 | pass | no | E2v |
+
+### Local mutants (axis D3), CI lock
+
+| Entry | Mutant | Killed by |
+|---|---|---|
+| DR-WP2-06 | calorimeter fit with unit weights (pre-fix) | toy study |
+| DR-WP2-06 | calorimeter weights 1/r^2 instead of 1/r^4 | toy study (lstsq comparison) |
+| DR-WP2-06 | beta from R instead of zR | closed-form crossover |
+| DR-WP2-06 | crossover with beta = 1 (pre-fix) | closed-form crossover |
+| DR-WP2-06 | MDR with beta = 1 (pre-fix) | closed-form MDR |
+| DR-WP2-06 | bisection stopped after 20 steps | closed-form crossover (1e-12) |
+
+## SCIFIX-ORACLES-BATCH2 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-batch2`, plan PR-6 batch 2)
+
+Second oracles, invariants and negative controls for four S1 entries (axis C), a per-test parent record for the new
+BAYES-T24 oracle (axis D), and local mutants of the code under test (axis D3: `docs/maintenance.md`). Environments:
+E2v as in SCIFIX-PARENT-RECORDS below; the CI lock is `requirements-ci.lock` (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1,
+mpmath 1.3.0, no PyTorch, no ArviZ). The new tests pass in both. Software checks: they show that the tests agree with
+an independent calculation and tell the pre-fix behaviour apart, not that the methods suit a given analysis.
+
+| Entry | New evidence (test file) | Oracle kinds added | Negative control (pre-fix, emulated) | C, D now |
+|---|---|---|---|---|
+| ML-DOMAIN | `tests/skills/hep_ml/test_audit_domain_method.py` | analytic: each statistic's flag rate equals the split-conformal value a = 1 - min(r, n)/(n+1) and the union lies in [a, 2a], 40 to 200 training draws, 4 standard errors; independent implementation: the reported interval equals Clopper-Pearson from `scipy.stats.beta` | per-feature min/max box: 10.5% of fresh in-distribution queries at d = 32, n = 600, against 2a = 1.7% (q = 0.99) and 5.0% (q = 0.95) | C3, D3 |
+| ML-NEGWEIGHTS | `tests/skills/hep_ml/test_audit_metric_layer.py` | independent implementation: Z^2 as q0 on the Asimov dataset (mpmath, 50 digits; tolerance 1e-14 below the series switch at s/b = 1e-6, 1e-14 + 2 eps/x above); Cowan Eq. 20 against the profiled on/off likelihood (mpmath, 60 digits, numerical root of d ln L/db; agreement 5e-11 or better); cell resampling against a brute-force reading of arXiv:2109.07851 eq. 2.2 (full distance sort); invariants: Z falls as sigma_b grows and tends to the sigma_b = 0 value | the pre-fix float expression misses the reference on 212 of 483 grid points (Z = 0 at s/b = 1e-8); dropping negative events shifts the total weight | C3, D3 |
+| BAYES-T24 | `tests/skills/hep_statistics/test_bayes_arviz_oracle.py` (`IndependentOracle`, runs without ArviZ) | independent implementation from Vehtari et al. 2021 with SciPy primitives (rankdata, norm.ppf, beta.ppf), direct-sum autocovariances and Geyer's pair sums: R-hat, bulk and tail ESS, quantile MCSE to 1e-12 (observed 4e-15) on the six cases; invariants: increasing maps (ESS), exact scaling (R-hat, MCSE), chain order | the ESS and MCSE of `bb0774f0`: bulk ESS 0.6% to 0.7% off, tail ESS 0.2% to 0.5%, MCSE 0.1% to 11% | C3, D3 |
+| TH9-MASSES | `tests/skills/hep_detector/test_hep_detector_audit.py` (`SpeciesMassPropertyTests`) | published (second evaluation): binding energies of d, 3He, 4He from the CODATA 2022 masses equal those from AME2020 atomic mass excesses (bundled in core/constants), residuals 0.14, 0.18, 0.37 eV against 3 N sigma(m_n) + 0.1 eV; invariants over species and momenta: mass from beta inverts the kinematics, mass order, flight time grows with mass | the pre-fix table (`23910085^`, 10 eV steps): residuals 5.7, 12.4, 13.3 eV | C3, D2 |
+
+A general affine map (2.5 x - 7) moves R-hat by 6e-6 on the iid case: rounding breaks the exact tie of the two middle
+draws in |x - median|, two average ranks move by 1/2. Scaling by 4 (exact in floating point) leaves every value equal;
+the test uses it and allows 1e-4 for the general map.
+
+### BAYES-T24 (new oracle): fix `d161b3b7`, parent `bb0774f0`
+
+The test file of this branch, copied into worktrees of both commits; E2v.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_diagnostics_match_the_reference_and_the_pre_fix_rules_do_not` | independent implementation | fail (assertion): MCSE ratio 0.954 (iid), 1.036 (ar1), 0.956 (heavy tails) at p = 0.05; bulk ESS ratio 0.993 (two modes stuck), 0.994 (shifted chain); ValueError: Quantiles must be in the range [0, 1] (ties) | pass | no | E2v |
+| `tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_invariance_under_affine_and_increasing_maps_and_chain_order` | invariant | fail (ValueError): Quantiles must be in the range [0, 1] (ties case only; the invariants hold on the parent's other cases) | pass | no | E2v |
+
+- `Health` tests: as in SCIFIX-PARENT-RECORDS; `ArviZOracle::test_rhat_ess_and_mcse_match`: skipped on both (no ArviZ).
+
+### Local mutants (axis D3), CI lock
+
+Each mutant edits one line of the code under test in memory; killed means the new tests fail. All mutants are killed;
+the unmutated code passes.
+
+| Entry | Mutant | Killed by |
+|---|---|---|
+| ML-DOMAIN | threshold always the held-out maximum | per-statistic rate (falls below a) |
+| ML-DOMAIN | no halving of 1 - q across the two statistics (level = q) | per-statistic rate (about 2a) |
+| ML-DOMAIN | conformal rank one too low | per-statistic rate, small setting (n = 100, 200 draws) |
+| ML-NEGWEIGHTS | cell stops one event late | brute-force eq. 2.2; cell-sum test |
+| ML-NEGWEIGHTS | equal shares in a cell instead of proportional to abs(w_i) | brute-force eq. 2.2 |
+| ML-NEGWEIGHTS | Eq. 20 second term with log(1 + x) instead of log1p | profiled on/off reference |
+| ML-NEGWEIGHTS | series switch moved from s/b = 1e-6 to 1e-9 | Asimov likelihood-ratio reference |
+| BAYES-T24 | no improved last term in the ESS | independent oracle |
+| BAYES-T24 | no monotone step in the ESS | independent oracle |
+| BAYES-T24 | folded R-hat dropped | independent oracle |
+| BAYES-T24 | pre-fix MCSE rule | independent oracle |
+| BAYES-T24 | rank-normalization offsets (r - 1/2)/S instead of Blom's (r - 3/8)/(S + 1/4) | independent oracle |
+
+## SCIFIX-PARENT-RECORDS (2026-10-20, E2v; branch `docs/scifix-parent-records`, plan PR-4)
+
+Per-test parent records (axis D, `docs/maintenance.md`, "Scientific corrections: scope and evidence") for the 13 fix
+commits behind the 15 ledger entries graded D0 or D1 in `docs/evidence/sci-fixes.json`. For each fix commit FIX, a
+worktree of FIX^ takes every file under `tests/` that FIX added or changed (test modules and fixtures) from FIX, and
+every changed test module runs on that tree and on FIX, one test at a time recorded (subtest failures count against
+their test). Only tests that fail on the parent and pass on the fix are listed; the others are counted. A parent
+failure is an assertion, an exception (named), or an import error of the whole module; an import error or a missing
+function shows that the test needs code new in the fix, not that it would catch the defect, and is not counted as
+discrimination. Two runs are adapted, as stated in their sections. Tests are named by their paths at the fix commit
+(`docs/maintenance.md` maps old folder names). Software checks: they show which tests tell the parent from the fix,
+not that either is physically right.
+
+**E2v:** the E2 workstation with `~/.venvs/hep-research-e2`: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, mpmath 1.3.0,
+pyhf 0.7.6, PyTorch 2.14.1 (CPU); no ArviZ, hypothesis or scikit-learn; `HEP_SLOW_TESTS=1` (slow tier on), no
+network tests. Skipped tests are listed; a skip is unverified, not a pass.
+
+**Result per ledger entry** (axis D after this record; the ledger has the details):
+
+| Entry | Fix commit | D before | D now | Basis |
+|---|---|---|---|---|
+| FC-MONOTONE | `04338bbf` | D0 | D2 | 4 assertion failures on the parent, including the full Tables IV/VI test (slow tier) |
+| POISSON-SF | `a2adc126` | D0 | D2 | 2 assertion failures (p-value 0 at n = 60, b = 5, in both CLIs); the reference tests need functions new in the fix |
+| COV-NOREPAIR | `6a81109c` | D0 | D2 | 4 assertion failures on matrices (indefinite or singular ones accepted or misnamed), 2 missing records; the guide test |
+| POISSON-500 | `b7b7825a` | D0 | D2 | assertion: 500.0 where 513.15 is right |
+| ROBUST-MALFORMED (S4) | `d7148901` | D0 | D2 | tracebacks on malformed input on the parent (TypeError, AttributeError on a record), the defect itself |
+| BLINDING-SCANNER | `b6334c04` | D0 | D2 | 2 assertion failures (low-count false alarm, undecodable log passed) |
+| ROBUST-CAMPAIGN | `f7b677c9` | D0 | D2 | assertion: two concurrent submits both ran; merge guards |
+| F01 | `9f1ee4a9` | D1 | D2 | adapted run: 3 assertion failures (negative mean accepted) |
+| F02 | `9f1ee4a9` | D1 | D2 | adapted run: assertion, p = 0.0 reported for zero exceedances |
+| F03 | `9f1ee4a9` | D1 | D2 | adapted run: the parent's shape-limit output has no `status` (the defect: no verdict); T05 tests need a method new in the fix |
+| BAYES-T24 | `d161b3b7` | D0 | D1 | tie and signed-weight parts fail on the parent; the ArviZ oracle (ESS, MCSE values) skipped on both: no record for the values |
+| CLS-LOGINTERP | `99a18fd8` | D1 | D1 | every parent failure needs a function new in the fix (`_crossing`); the old crossing was a closure inside the pyhf toy run. Before/after values only (5.34 -> 5.28) |
+| ML-SPLITS | `811f02b6` | D1 | D2 | adapted run: 12 assertion failures (C02-C05, C14, C16, C28 cases) |
+| ML-NEGWEIGHTS | `ef5d068f` | D0 | D2 | 6 assertion failures (negative weights not refused or flagged) |
+| ML-SMALL | `fd637dcc` | D1 | D1 | C10, C24, C25, C26 fail on the parent (C10: false-improvement rate 0.26 and 0.15 against a bound of 0.088); K13's evidence (`tests/examples/test_ml_classifier_to_inference.py`) passes on the parent |
+
+Evidence tests added after a fix commit (for example `tests/core/test_published_tables.py`, `tests/core/test_properties.py`,
+and the oracles of plan PR-2 and PR-6) were not run on the parent: they need later code. Their discrimination rests on the
+negative controls inside them (axis C), as the ledger says.
+
+### FC-MONOTONE: fix `04338bbf`, parent `b3734189`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_full_published_tables` | published (FC 1998 Table IV/VI fixture) | fail (assertion): 1.08 != 1.26 within 0.01 delta (0.17999999999999994 difference) : ('IV', 0, 2.0) | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips` | published (FC 1998 Table IV/VI fixture) | fail (assertion): 1.08 != 1.26 within 0.01 delta (0.17999999999999994 difference) : (0.9, 0, 2.0) | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_plain_construction_is_labelled_and_never_longer` | behavioral | fail (TypeError): fc_interval() got an unexpected keyword argument 'monotone' | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_published_values` | published (FC 1998 Table IV/VI fixture) | fail (assertion): 1.08 != 1.26 within 0.015 delta (0.17999999999999994 difference) : (0, 2.0) | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_upper_end_is_non_increasing_in_b` | invariant | fail (assertion): 1.22 not less than or equal to 1.09 : (0, 2.4000000000000004) | pass | no | E2v |
+
+- `tests/core/test_stats_poisson.py`: 21 tests pass on both (not discriminating)
+
+
+### POISSON-SF: fix `a2adc126`, parent `04338bbf`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_stats_likelihood_limits.py::SingleBinTests::test_exact_p_value_does_not_underflow` | independent implementation (decimal reference) | fail (assertion): 0.0 != 1.0 within 1e-06 delta (1.0 difference) | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::UpperTailTests::test_log_tail_and_significance_stay_finite_to_n_1000` | independent implementation (decimal reference) | fail (AttributeError): module 'core.stats.poisson_diagnostics' has no attribute 'log_poisson_sf' | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::UpperTailTests::test_matches_high_precision_reference` | independent implementation (decimal reference) | fail (AttributeError): module 'core.stats.poisson_diagnostics' has no attribute 'poisson_sf'. Did you mean:... | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::UpperTailTests::test_significance_from_log_p` | independent implementation (decimal reference) | fail (AttributeError): module 'core.stats.poisson_diagnostics' has no attribute 'z_from_log_p' | pass | no | E2v |
+| `tests/core/test_stats_statistical_toys.py::BoundaryTests::test_exact_p_value_does_not_underflow` | independent implementation (decimal reference) | fail (assertion): 0.0 != 1.0 within 1e-06 delta (1.0 difference) | pass | no | E2v |
+
+- `tests/core/test_stats_likelihood_limits.py`: 41 tests pass on both (not discriminating)
+- `tests/core/test_stats_poisson.py`: 26 tests pass on both (not discriminating)
+- `tests/core/test_stats_statistical_toys.py`: 28 tests pass on both (not discriminating)
+
+
+### COV-NOREPAIR: fix `6a81109c`, parent `a2adc126`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_stats_likelihood_limits.py::PriorTests::test_a_singular_correlation_is_rejected` | behavioral | fail (assertion): "correlation matrix of the nuisances is singular" does not match "correlation matrix... | pass | no | E2v |
+| `tests/core/test_stats_linalg.py (all 7 tests)` | closure | import error: No module named 'core.stats._linalg' | pass | no | E2v |
+| `tests/core/test_stats_statistical_toys.py::RatioMeasuredTests::test_gls_constant_rejects_an_impossible_correlation` | behavioral | fail (assertion): ToyError not raised | pass | no | E2v |
+| `tests/core/test_stats_statistical_toys.py::RatioMeasuredTests::test_indefinite_covariance_is_rejected_and_named` | behavioral | fail (assertion): ToyError not raised | pass | no | E2v |
+| `tests/core/test_stats_statistical_toys.py::RatioMeasuredTests::test_semidefinite_covariance_is_sampled_with_the_shift_recorded` | behavioral | fail (KeyError): 'regularization' | pass | no | E2v |
+| `tests/core/test_stats_unfolding_diagnostics.py::ResponseMeasuredTests::test_a_singular_supplied_covariance_is_accepted_and_reported` | behavioral | fail (KeyError): 'response_covariance_check' | pass | no | E2v |
+| `tests/core/test_stats_unfolding_diagnostics.py::ResponseMeasuredTests::test_rejections` | behavioral | fail (assertion): "response_covariance is not positive semi-definite" does not match "bin-correlation ... | pass | no | E2v |
+| `tests/skills/hep_statistics/test_core_stats_guide.py::CoreStatsGuide::test_every_module_has_a_section` | behavioral | fail (assertion): '`_linalg.py`' not found in '# Guide to the `core/stats` diagnostics\n\nThe owner\'s... | pass | no | E2v |
+
+- `tests/core/test_stats_likelihood_limits.py`: 42 tests pass on both (not discriminating)
+- `tests/core/test_stats_statistical_toys.py`: 30 tests pass on both (not discriminating)
+- `tests/core/test_stats_unfolding_diagnostics.py`: 42 tests pass on both (not discriminating)
+- `tests/skills/hep_statistics/test_core_stats_guide.py`: 5 tests pass on both (not discriminating)
+
+
+### POISSON-500: fix `b7b7825a`, parent `6a81109c`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_stats_poisson.py::MeanLimitTests::test_fc_scan_keeps_its_own_documented_limit` | analytic (SciPy chi-square values recorded) | fail (assertion): DiagnosticsError not raised | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::MeanLimitTests::test_garwood_and_classical_limit_beyond_500` | analytic (SciPy chi-square values recorded) | fail (assertion): 500.0 != 513.1515084417051 within 1e-06 delta (13.151508441705118 difference) | pass | no | E2v |
+| `tests/core/test_stats_poisson.py::MeanLimitTests::test_unbracketed_limit_fails_instead_of_returning_the_range_end` | analytic (SciPy chi-square values recorded) | fail (AttributeError): module 'core.stats.poisson_diagnostics' has no attribute 'SolveFailed' | pass | no | E2v |
+| `tests/core/test_stats_poisson_numerics.py (all 5 tests)` | analytic (SciPy chi-square values recorded) | import error: cannot import name '_poisson' from 'core.stats' | pass | no | E2v |
+| `tests/skills/hep_statistics/test_core_stats_guide.py::CoreStatsGuide::test_every_module_has_a_section` | analytic (SciPy chi-square values recorded) | fail (assertion): '`_poisson.py`' not found in '# Guide to the `core/stats` diagnostics\n\nThe owner\'... | pass | no | E2v |
+
+- `tests/core/test_stats_poisson.py`: 29 tests pass on both (not discriminating)
+- `tests/skills/hep_statistics/test_core_stats_guide.py`: 5 tests pass on both (not discriminating)
+
+
+### ROBUST-MALFORMED: fix `d7148901`, parent `b7b7825a`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/contracts/test_robustness.py::GateMalformedInputTests::test_artifact_type_of_the_wrong_json_type` | behavioral | fail (TypeError): unhashable type: 'list' | pass | no | E2v |
+| `tests/contracts/test_robustness.py::GateMalformedInputTests::test_explicit_null_phase_space_and_normalization` | behavioral | fail (AttributeError): module 'contracts.comparison.gate' has no attribute 'check' | pass | no | E2v |
+| `tests/contracts/test_robustness.py::GateMalformedInputTests::test_malformed_plan_entries_are_findings_and_not_applied` | behavioral | fail (AttributeError): module 'contracts.comparison.gate' has no attribute 'check' | pass | no | E2v |
+| `tests/contracts/test_robustness.py::GateMalformedInputTests::test_one_sided_cuts_with_null_bounds` | behavioral | fail (AttributeError): module 'contracts.comparison.gate' has no attribute 'check' | pass | no | E2v |
+| `tests/contracts/test_robustness.py::GateMalformedInputTests::test_seeded_mutations_never_raise` | behavioral | fail (AttributeError): module 'contracts.comparison.gate' has no attribute 'check' | pass | no | E2v |
+| `tests/contracts/test_robustness.py::GateMalformedInputTests::test_wrongly_typed_artifact_is_refused_with_paths` | behavioral | fail (AttributeError): module 'contracts.comparison.gate' has no attribute 'check' | pass | no | E2v |
+| `tests/core/test_evidence_ledger.py::LedgerTests::test_malformed_records_are_findings_with_field_paths` | behavioral | fail (AttributeError): 'str' object has no attribute 'get' | pass | no | E2v |
+
+- `tests/contracts/test_robustness.py`: 10 tests pass on both (not discriminating)
+- `tests/core/test_evidence_ledger.py`: 13 tests pass on both (not discriminating)
+
+
+### BLINDING-SCANNER: fix `b6334c04`, parent `d7148901`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_blinding.py::FigureTests::test_fill_between_hist2d_imshow_and_text_are_caught` | behavioral | fail (TypeError): check_figure() takes 2 positional arguments but 3 were given | pass | no | E2v |
+| `tests/core/test_blinding.py::FigureTests::test_masked_areas_images_and_a_blinded_label_pass` | behavioral | fail (TypeError): check_figure() takes 2 positional arguments but 3 were given | pass | no | E2v |
+| `tests/core/test_blinding.py::LowCountAndEncodingTests::test_low_counts_need_a_standalone_token` | behavioral | fail (assertion): 1, 'sealed_value': 0.0, 'token': '0'}] | pass | no | E2v |
+| `tests/core/test_blinding.py::LowCountAndEncodingTests::test_undecodable_text_is_incomplete_never_pass` | behavioral | fail (assertion): + incomplete | pass | no | E2v |
+| `tests/core/test_blinding.py::LowCountAndEncodingTests::test_utf16_and_latin1_logs_are_read` | behavioral | fail (KeyError): 'encoding' | pass | no | E2v |
+
+- `tests/core/test_blinding.py`: 25 tests pass on both (not discriminating)
+
+
+### ROBUST-CAMPAIGN: fix `f7b677c9`, parent `f5070718`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/adapters/test_batch_slurm.py::InterruptedSubmitCliTests::test_confirm_and_abandon` | behavioral | fail (SystemExit): 2 | pass | no | E2v |
+| `tests/core/test_partition_safety.py::MergeGuardTests::test_non_finite_results_are_refused` | behavioral | fail (assertion): ? ++ | pass | no | E2v |
+| `tests/core/test_partition_safety.py::MergeGuardTests::test_strings_are_not_concatenated` | behavioral | fail (assertion): ? ++ | pass | no | E2v |
+| `tests/core/test_partition_safety.py::SafetyTests::test_a_refused_submission_is_recorded_as_not_submitted` | behavioral | fail (IndexError): list index out of range | pass | no | E2v |
+| `tests/core/test_partition_safety.py::SafetyTests::test_an_abandoned_submission_needs_a_reset_to_run_again` | behavioral | fail (IndexError): list index out of range | pass | no | E2v |
+| `tests/core/test_partition_safety.py::SafetyTests::test_an_interrupted_submit_leaves_a_recoverable_intent_record` | behavioral | fail (IndexError): list index out of range | pass | no | E2v |
+| `tests/core/test_partition_safety.py::SafetyTests::test_concurrent_submits_cannot_both_run` | behavioral | fail (assertion): 2 != 1 | pass | no | E2v |
+| `tests/core/test_partition_safety.py::SafetyTests::test_the_lock_is_released_and_reentrant` | behavioral | fail (AttributeError): module 'core.partition.campaign' has no attribute 'campaign_lock' | pass | no | E2v |
+
+- tests/adapters/test_batch_slurm.py::RealSlurmTests::test_example_campaign_on_real_slurm: skipped (parent skipped, fix skipped): real Slurm not available (HEP_SLURM_TEST=1 and sbatch on PATH)
+- `tests/adapters/test_batch_slurm.py`: 9 tests pass on both (not discriminating)
+- `tests/core/test_partition_safety.py`: 0 tests pass on both (not discriminating)
+- `tests/core/test_partition_states.py`: 14 tests pass on both (not discriminating)
+
+
+### F01, F02, F03: fix `9f1ee4a9`, parent `1d42271a`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_stats_p0_regressions.py (all 20 tests)` | behavioral | import error: cannot import name 'tail_estimation' from 'core.stats' | pass | no | E2v |
+| `tests/skills/hep_statistics/test_core_stats_guide.py::CoreStatsGuide::test_every_module_has_a_section` | behavioral | fail (assertion): update the guide and this test together | pass | no | E2v |
+
+- `tests/core/test_stats_saturated_gof.py`: 5 tests pass on both (not discriminating)
+- `tests/skills/hep_statistics/test_core_stats_guide.py`: 5 tests pass on both (not discriminating)
+
+
+### F01, F02, F03 (adapted): fix `9f1ee4a9`, parent `1d42271a`
+
+Adapted run: the parent tree also takes `core/stats/fit_diagnostics.py`, `core/stats/tail_estimation.py` from the fix (modules new in the fix that the test imports; the code under test is the parent's).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_negative_mean_with_zero_count_is_invalid` | behavioral | fail (assertion): True is not false | pass | no | E2v |
+| `tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_single_bin_log_likelihood_rejects_negative_mean` | behavioral | fail (assertion): 0.0 not less than or equal to -1e+300 | pass | no | E2v |
+| `tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_zero_mean_zero_count_is_valid_and_positive_count_is_not` | behavioral | fail (assertion): True is not false | pass | no | E2v |
+| `tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedances_give_a_bound_not_a_zero` | behavioral | fail (assertion): 0.0 is not None | pass | no | E2v |
+| `tests/core/test_stats_p0_regressions.py::T04FitStatus::test_shape_limit_reports_failed_status_and_cli_exit` | behavioral | fail (KeyError): 'status' | pass | no | E2v |
+| `tests/core/test_stats_p0_regressions.py::T05GlobalVersusConditional::test_boundary_optimum_is_accepted_by_kkt` | behavioral | fail (AttributeError): '_ShapeModel' object has no attribute 'log' | pass | no | E2v |
+| `tests/core/test_stats_p0_regressions.py::T05GlobalVersusConditional::test_degraded_global_fit_is_refitted` | behavioral | fail (AttributeError): '_ShapeModel' object has no attribute 'log' | pass | no | E2v |
+| `tests/core/test_stats_p0_regressions.py::T05GlobalVersusConditional::test_unrepairable_violation_is_a_failure` | behavioral | fail (AttributeError): '_ShapeModel' object has no attribute 'log' | pass | no | E2v |
+
+- `tests/core/test_stats_p0_regressions.py`: 12 tests pass on both (not discriminating)
+
+
+### BAYES-T24: fix `d161b3b7`, parent `bb0774f0`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_stats_weighted_mc.py::SignedWeightTemplates::test_effective_count_likelihood_refuses_signed_weights` | behavioral | fail (assertion): ToyError not raised | pass | no | E2v |
+| `tests/skills/hep_statistics/test_bayes_arviz_oracle.py::Health::test_ties_do_not_crash_and_undefined_mcse_is_flagged` | behavioral | fail (ValueError): Quantiles must be in the range [0, 1] | pass | no | E2v |
+| `tests/skills/hep_statistics/test_bayes_arviz_oracle.py::Health::test_unhealthy_chains_are_never_converged` | behavioral | fail (ValueError): Quantiles must be in the range [0, 1] | pass | no | E2v |
+
+- `tests/core/test_stats_weighted_mc.py`: 1 tests pass on both (not discriminating)
+- tests/skills/hep_statistics/test_bayes_arviz_oracle.py::ArviZOracle::test_rhat_ess_and_mcse_match: skipped (parent skipped, fix skipped): ArviZ 0.23.4 not installed: the oracle comparison is unverified
+- `tests/skills/hep_statistics/test_bayes_arviz_oracle.py`: 0 tests pass on both (not discriminating)
+
+
+### CLS-LOGINTERP: fix `99a18fd8`, parent `90388aa0`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_crossing_interpolates_log_cls` | independent implementation (exact counting CLs) | fail (AttributeError): module 'bench_published_likelihood_sbottom' has no attribute '_crossing' | pass | no | E2v |
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_diagnosis_reruns_on_the_bare_model` | independent implementation (exact counting CLs) | fail (AttributeError): module 'bench_published_likelihood_sbottom' has no attribute 'toy_diagnosis' | pass | no | E2v |
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_exact_counting_limit` | independent implementation (exact counting CLs) | fail (AttributeError): module 'bench_published_likelihood_sbottom' has no attribute '_counting_limit' | pass | no | E2v |
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_toy_difference_is_diagnosed_post_hoc` | independent implementation (exact counting CLs) | fail (KeyError): 'toy_difference_explained_post_hoc' | pass | no | E2v |
+
+- tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_asymptotic_reproduction_reruns: skipped (parent skipped, fix skipped): network and slow (downloads the HEPData pallet): set HEP_NETWORK_TESTS=1 and HEP_SLOW_TESTS=1
+- `tests/examples/test_stats_benchmarks.py`: 10 tests pass on both (not discriminating)
+
+
+### ML-SPLITS: fix `811f02b6`, parent `2b439e74`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/physics_ml/test_audit_split_tools.py (all 15 tests)` | behavioral | import error: cannot import name 'canonical_key' from 'check_split_integrity' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_train_keys.py (all 3 tests)` | behavioral | import error: cannot import name 'canonical_key' from 'check_split_integrity' | pass | no | E2v |
+
+
+### ML-SPLITS (adapted): fix `811f02b6`, parent `2b439e74`
+
+Adapted run: in the fix's test file, the import of `canonical_key` (new in the fix) is guarded, so the other tests run against the parent's scripts; `test_canonical_numeric_keys` then errors.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/physics_ml/test_audit_split_tools.py::GroupKeyTests::test_a4_check_reports_leakage_across_numeric_spellings` | behavioral | fail (assertion): ?                       +++++++ | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::GroupKeyTests::test_a4_numeric_group_values_are_one_group` | behavioral | fail (assertion): '1.0' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::GroupKeyTests::test_boolean_list_object_groups_are_invalid` | behavioral | fail (assertion): PASSED | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::GroupKeyTests::test_canonical_numeric_keys` | behavioral | fail (TypeError): 'NoneType' object is not callable | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::GroupKeyTests::test_label_column_reports_class_counts_and_refuses_an_empty_class` | behavioral | fail (assertion): 'class' not found in '' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalCheckTests::test_a1_nan_timestamp_is_invalid_input` | behavioral | fail (assertion): } | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalCheckTests::test_a2_single_entry_temporal_order` | behavioral | fail (assertion): } | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalCheckTests::test_a2_unknown_split_names_in_temporal_order` | behavioral | fail (assertion): } | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalCheckTests::test_booleans_and_unpadded_dates_are_invalid` | behavioral | fail (assertion): 1 != 2 : error: '>' not supported between instances of 'bool' and 'str' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalCheckTests::test_empty_split_is_incomplete_under_strict` | behavioral | fail (assertion): } | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalCheckTests::test_misspelled_reserved_key_is_invalid` | behavioral | fail (assertion): 1 != 2 : error: split 'timestamp' must be a list of IDs | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalCheckTests::test_mixed_numbers_and_dates_are_invalid` | behavioral | fail (assertion): 1 != 2 : error: '>' not supported between instances of 'int' and 'str' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_split_tools.py::TemporalSplitTests::test_a3_unpadded_date_is_refused` | behavioral | fail (assertion): } | pass | no | E2v |
+
+- `tests/skills/physics_ml/test_audit_split_tools.py`: 2 tests pass on both (not discriminating)
+
+
+### ML-NEGWEIGHTS: fix `ef5d068f`, parent `153307a6`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/physics_ml/test_audit_metric_layer.py::CalibrationWarningTests::test_temperature_warns_about_prior_shift` | behavioral | fail (KeyError): 'warnings' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_metric_layer.py::DiscoTests::test_negative_weights_refused_by_default` | behavioral | fail (assertion): ValueError not raised | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_metric_layer.py::MetricTests::test_asimov_inputs_and_precision` | behavioral | fail (assertion): ValueError not raised | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_preserves_cell_sums_and_removes_negatives` | behavioral | fail (AttributeError): module 'hep_metrics' has no attribute 'cell_resample' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_metric_layer.py::MetricTests::test_fractional_label_is_refused_by_both_clis` | behavioral | fail (assertion): } | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_metric_layer.py::MetricTests::test_prior_shift_needs_positive_ratio` | behavioral | fail (assertion): ValueError not raised | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_metric_layer.py::MetricTests::test_signed_weight_out_of_range_flag` | behavioral | fail (AttributeError): module 'hep_metrics' has no attribute 'signed_weight_out_of_range' | pass | no | E2v |
+| `tests/skills/physics_ml/test_calibration.py::Cli::test_cli_strict_json_and_calibration_block` | behavioral | fail (assertion): 'warnings' | pass | no | E2v |
+| `tests/skills/physics_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_negative_weights_signed_with_net_weight_batch_report` | behavioral | fail (assertion): 0 != 2 | pass | no | E2v |
+
+- `tests/skills/physics_ml/test_audit_metric_layer.py`: 0 tests pass on both (not discriminating)
+- `tests/skills/physics_ml/test_calibration.py`: 20 tests pass on both (not discriminating)
+- `tests/skills/physics_ml/test_training_pipeline.py`: 20 tests pass on both (not discriminating)
+
+
+### ML-SMALL: fix `fd637dcc`, parent `f5cc59a7`
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/physics_ml/test_audit_small_corrections.py::SculptingBaselineTests::test_baseline_is_a_quantile_of_at_least_20_resamplings` | behavioral | fail (KeyError): 'n_baseline' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_false_improvement_rate_is_at_most_nominal_with_few_seeds` | behavioral | fail (assertion): 0.25666666666666665 not less than 0.08774917217635375 : 0.25666666666666665 | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_method_is_reported_and_a_real_effect_is_found` | behavioral | fail (KeyError): 'method' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_student_t_quantile` | behavioral | fail (AttributeError): module 'compare_model_runs' has no attribute 'student_t_quantile' | pass | no | E2v |
+| `tests/skills/physics_ml/test_audit_small_corrections.py::TrainerTests::test_constant_training_feature_is_exit_2` | behavioral | fail (assertion): 0 != 2 : WARNING: training-domain model not fitted (40 training points are too few t... | pass | no | E2v |
+| `tests/skills/physics_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_clean_manifest_summary_shape_and_hash` | behavioral | fail (assertion): + sha256:bfbee527f3511bf8d259964627917ab503e7b2dd2eaf77ed9b8d7c0ee907558e | pass | no | E2v |
+
+- `tests/examples/test_ml_classifier_to_inference.py`: 9 tests pass on both (not discriminating)
+- `tests/skills/physics_ml/test_audit_small_corrections.py`: 0 tests pass on both (not discriminating)
+- `tests/skills/physics_ml/test_training_pipeline.py`: 20 tests pass on both (not discriminating)
+
 ## 0.17.0 release check (2026-10-20, E2 and the CI lock)
 
 Release branch `release/0.17.0` from main `69a675c7` (#163: contracts 3.0.0 retires the deprecated skill names,

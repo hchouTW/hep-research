@@ -201,6 +201,81 @@ class PublishedLikelihood(unittest.TestCase):
         self.assertIsNone(self.mod._crossing(grid, [0.5, 0.4, 0.3]))            # not bracketed
         self.assertIsNone(self.mod._crossing(grid, [0.5, None, 0.01]))
 
+    def test_toy_crossings_on_exact_counting_cls_meet_the_interpolation_bound(self):
+        """sci-fix CLS-LOGINTERP through the benchmark's own toy path: toy_based() with its pool run in process and
+        each grid point returning the exact counting CLs P(N <= n | S + b) / P(N <= n | b) instead of toys (n = 3,
+        b = 3.232 observed; the expected quantiles of the count). Reference: the root of that CLs at 0.05 (mpmath,
+        30 digits). Tolerance: the log-interpolation error h^2/8 max|f''| / min|f'| of f = ln CLs on the bracketing
+        interval. The function under test exists before and after the fix, so the test also runs on the parent:
+        there the crossing interpolated CLs linearly and misses the bound (0.06 to 0.12 high in the fix's note);
+        the same linear rule is emulated here as negative control."""
+        from unittest import mock
+
+        import mpmath
+
+        b, n_obs, quantile_counts = 3.232, 3, (0, 1, 2, 3, 5)  # limits inside TOY_GRID
+
+        def cls(n, s):  # at the caller's precision (mpmath.diff raises it for its differences)
+            return mpmath.gammainc(n + 1, s + b, regularized=True) / mpmath.gammainc(n + 1, b, regularized=True)
+
+        def root(n):
+            with mpmath.workdps(30):
+                return float(mpmath.findroot(lambda s: cls(n, s) - mpmath.mpf("0.05"), 3.0 + n))
+
+        def bound(n, grid):
+            lo = max(s for s in grid if cls(n, s) >= 0.05)
+            hi = min(s for s in grid if s > lo)
+            with mpmath.workdps(30):
+                f = [mpmath.diff(lambda s: mpmath.log(cls(n, s)), lo + (hi - lo) * i / 40, k) for k in (1, 2)
+                     for i in range(41)]
+                d1, d2 = f[:41], f[41:]
+                return (hi - lo) ** 2 / 8 * float(max(abs(x) for x in d2) / min(abs(x) for x in d1))
+
+        def fake_toy_point(job):
+            s = float(job[1])
+            obs = float(cls(n_obs, s))  # double precision is ample for the CLs values themselves
+            return {"CLs_obs": obs, "CLs_obs_range_95": [obs, obs],
+                    "CLs_exp": [float(cls(n, s)) for n in quantile_counts]}
+
+        class Pool:
+            def __init__(self, *args):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def map(self, fn, jobs):
+                return [fn(j) for j in jobs]
+
+        grid = self.mod.TOY_GRID
+        with mock.patch.object(self.mod, "_toy_point", fake_toy_point), \
+                mock.patch("multiprocessing.get_context", lambda *a: mock.Mock(Pool=Pool)):
+            out = self.mod.toy_based({}, 1, 0, 1)
+        missed = 0
+        for n, got in [(n_obs, out["S95_obs"])] + list(zip(quantile_counts, out["S95_exp"])):
+            with self.subTest(n=n):
+                ref, tol = root(n), bound(n, grid)
+                self.assertLessEqual(abs(got - ref), tol + 1e-12, (got, ref, tol))
+                v = [float(cls(n, s)) for s in grid]
+                k = next(i for i in range(len(grid) - 1) if v[i] >= 0.05 > v[i + 1])
+                linear = grid[k] + (grid[k + 1] - grid[k]) * (v[k] - 0.05) / (v[k] - v[k + 1])
+                missed += abs(linear - ref) > tol
+        self.assertEqual(missed, 1 + len(quantile_counts))
+
+    def test_crossing_at_zero_events_is_ln_20_for_any_background(self):
+        """Invariant: at n = 0 the counting CLs is exp(-S) whatever b is, so the log-CLs crossing on the toy grid is
+        ln 20 exactly for every b; the pre-fix linear rule gives 3.118 on this grid (b-independent too, but wrong)."""
+        grid = self.mod.TOY_GRID
+        for b in (0.1, 1.0, 3.232, 10.0, 50.0):
+            vals = [math.exp(-(s + b)) / math.exp(-b) for s in grid]
+            self.assertAlmostEqual(self.mod._crossing(grid, vals), math.log(20.0), delta=1e-12, msg=b)
+            k = next(i for i in range(len(grid) - 1) if vals[i] >= 0.05 > vals[i + 1])
+            linear = grid[k] + (grid[k + 1] - grid[k]) * (vals[k] - 0.05) / (vals[k] - vals[k + 1])
+            self.assertGreater(linear - math.log(20.0), 0.1)
+
     def test_exact_counting_limit(self):
         try:
             import scipy  # noqa: F401
