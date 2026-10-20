@@ -101,6 +101,10 @@ class PublishedImmutabilityC10(unittest.TestCase):
         for name in ("core/__init__.py", "core/protected/__init__.py", "core/protected/identity.py"):
             shutil.copy2(ROOT / name, self.plugin / name)
         git(self.repo, "init", "-q")
+        # No detached auto-maintenance after commits (git >= 2.47): it writes .git/objects/maintenance.lock and races
+        # tearDown ("Directory not empty"). Repo config, so the tool's own git calls see it too.
+        git(self.repo, "config", "maintenance.auto", "false")
+        git(self.repo, "config", "gc.auto", "0")
         git(self.repo, "add", "-A")
         git(self.repo, "commit", "-qm", "release 9.9.9")
         git(self.repo, "tag", "hep-research--v9.9.9")
