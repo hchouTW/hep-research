@@ -126,6 +126,20 @@ class PyprojectTests(unittest.TestCase):
 
     @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
                          "repository checkout only (an installed plugin tree has no .github)")
+    def test_torch_backend_job_lists_every_module_with_pytorch_tests(self):
+        """The required torch-backend job names its modules: every test module that marks a PyTorch test (a torch
+        find_spec guard or a 'PyTorch not installed' / 'PyTorch is required' skip) must be listed, except the opt-in
+        GPU module, which needs a CUDA device the CI runners do not have (and this module, which spells the markers)."""
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        job = re.search(r"(?ms)^  torch-backend:\n(.*?)(?=^  [A-Za-z0-9_-]+:\n|\Z)", workflow).group(1)
+        listed = set(re.search(r"--modules (\S+)", job).group(1).split(","))
+        marker = re.compile(r'find_spec\("torch"\)|PyTorch not installed|PyTorch is required')
+        marked = {".".join(path.relative_to(ROOT).with_suffix("").parts) for path in (ROOT / "tests").rglob("test_*.py")
+                  if marker.search(path.read_text(encoding="utf-8"))}
+        self.assertEqual(listed, marked - {"tests.skills.hep_ml.test_gpu_real", "tests.tools.test_pyproject"})
+
+    @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
+                         "repository checkout only (an installed plugin tree has no .github)")
     def test_slow_tier_job_has_a_larger_module_timeout(self):
         """The weekly `latest` job runs the slow tier, where tests.examples.test_stats_benchmarks alone takes about
         525-545 s, near the default 600 s module limit: the job sets HEP_MODULE_TIMEOUT to at least 1800 s, and the

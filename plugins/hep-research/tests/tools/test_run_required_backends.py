@@ -1,6 +1,7 @@
 """tools/run_required_backends.py --no-skips: a module whose skips are unverified evidence (here the slow-tier
 published-table tests run without HEP_SLOW_TESTS) passes without the flag, since no skip names a required backend,
-and fails with it; the report lists every skipped test."""
+and fails with it; the report lists every skipped test. --allow-skip-reason: a skip meant for the backend's absence
+is allowed, any other skip naming the backend still fails."""
 from __future__ import annotations
 
 import json
@@ -15,9 +16,9 @@ TOOL = ROOT / "tools" / "run_required_backends.py"
 MODULE = "tests.core.test_published_tables"
 
 
-def run(*extra):
+def run(*extra, module=MODULE):
     env = {k: v for k, v in os.environ.items() if k != "HEP_SLOW_TESTS"}
-    proc = subprocess.run([sys.executable, str(TOOL), "--require", "json", "--modules", MODULE, *extra], cwd=ROOT,
+    proc = subprocess.run([sys.executable, str(TOOL), "--require", "json", "--modules", module, *extra], cwd=ROOT,
                           env=env, capture_output=True, text=True, timeout=300)
     return proc.returncode, json.loads(proc.stdout)
 
@@ -34,6 +35,21 @@ class NoSkipsTests(unittest.TestCase):
         self.assertEqual(len(report["skipped_tests"]), report["skipped"])
         self.assertTrue(all("HEP_SLOW_TESTS" in s for s in report["skipped_tests"]), report["skipped_tests"])
 
+
+class AllowSkipReasonTests(unittest.TestCase):
+    FIXTURE = "tests.tools.required_backend_fixture"
+
+    def test_only_the_allowed_reason_is_excused(self):
+        code, report = run(module=self.FIXTURE)
+        self.assertEqual((code, len(report["skipped_for_a_required_backend"])), (1, 2), report)
+        code, report = run("--allow-skip-reason", "only meaningful when json is not installed", module=self.FIXTURE)
+        self.assertEqual(code, 1, report)
+        self.assertEqual([s.split(": ")[0].rsplit(".", 1)[-1] for s in report["skipped_for_a_required_backend"]],
+                         ["test_needs_the_backend"])
+        self.assertEqual(len(report["skips_allowed_by_reason"]), 1)
+        code, report = run("--allow-skip-reason", "only meaningful when json is not installed",
+                           "--allow-skip-reason", "json not installed", module=self.FIXTURE)
+        self.assertEqual((code, report["ok"]), (0, True), report)
 
 if __name__ == "__main__":
     unittest.main()

@@ -8,7 +8,9 @@ errors, or if any skip reason names a required backend. With --no-skips every sk
 evidence modules that must run in full, such as the slow-tier sci-fix evidence in the release gate.
 
 Usage: python3 tools/run_required_backends.py --require pyhf==0.7.6,arviz==0.23.4 [--modules M1,M2] [--no-skips]
-       [--out REPORT.json]
+       [--allow-skip-reason TEXT ...] [--out REPORT.json]
+       (--allow-skip-reason: a test meant for the backend's absence, skipped where it is installed, is not a skip for
+       the backend; the gates without the backend run it)
        (a requirement exe:NAME is an executable that must be on PATH, for example exe:combine; a name without a
        version only has to import)
 Exit codes: 0 every required backend present and no test failed or skipped for it; 1 otherwise; 2 bad usage.
@@ -49,6 +51,9 @@ def main(argv=None) -> int:
     ap.add_argument("--require", required=True, help="comma-separated name==version (version optional)")
     ap.add_argument("--modules", help="comma-separated test modules (default: the statistics and backend modules)")
     ap.add_argument("--no-skips", action="store_true", help="fail on any skipped test, whatever its reason")
+    ap.add_argument("--allow-skip-reason", action="append", default=[], metavar="TEXT",
+                    help="a skip whose reason contains TEXT does not count as skipped for a backend (a test meant "
+                         "for the backend's absence, run by the gates without it); repeatable")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
     required = parse_require(a.require)
@@ -78,9 +83,13 @@ def main(argv=None) -> int:
     suite = unittest.defaultTestLoader.loadTestsFromNames(modules)
     result = unittest.TextTestRunner(stream=sys.stderr, verbosity=1).run(suite)
     names = [n[4:] if n.startswith("exe:") else n for n in required]
-    skipped_for_backend = [f"{t.id()}: {why}" for t, why in result.skipped if any(n.lower() in why.lower() for n in names)]
+    allowed = [f"{t.id()}: {why}" for t, why in result.skipped if any(s in why for s in a.allow_skip_reason)]
+    skipped_for_backend = [f"{t.id()}: {why}" for t, why in result.skipped
+                           if any(n.lower() in why.lower() for n in names)
+                           and not any(s in why for s in a.allow_skip_reason)]
     report.update({"run": result.testsRun, "failures": len(result.failures), "errors": len(result.errors),
-                   "skipped": len(result.skipped), "skipped_for_a_required_backend": skipped_for_backend})
+                   "skipped": len(result.skipped), "skipped_for_a_required_backend": skipped_for_backend,
+                   "skips_allowed_by_reason": allowed})
     if result.failures or result.errors:
         report["problems"].append(f"{len(result.failures)} failures and {len(result.errors)} errors")
     if skipped_for_backend:
