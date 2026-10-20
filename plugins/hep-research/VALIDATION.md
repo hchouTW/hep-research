@@ -1961,6 +1961,27 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## 0.18.0 release check (2026-10-20, E2 and the CI lock)
+
+Release branch `release/0.18.0` from main `5ad39f54` (#179: the advisory backfill; earlier #165-#178: the sci-fix
+correction plan PR-1 to PR-7, three sci-fixes, the pdg and torch-backend CI gates). Contracts 3.0.1 (patch: the
+validator's sample-name comparison, SCIFIX-SAMPLE-NAME). The ams02-research companion (requires hep-research
+`>=0.11.0`, profile contracts `>=2.0`) needs no change.
+
+What changed: version 0.18.0 in both manifests, `pyproject.toml`, the README, the three assets and the theory-profile
+scripts that record it; contracts 3.0.1 in `contracts/__init__.py` (with its history line), `contracts/vocab/core.json`,
+the two tests that pin it and the 131 fixtures (`tests/contracts/make_fixtures.py` regenerates them identically);
+CHANGELOG `Unreleased` is `0.18.0`; SFA-2026-001 to -003 gain their `fixed: 0.18.0` event (affected releases now end
+at 0.17.0). Examples regenerated (E2; `bc-propagation-fit` with the CI lock; `eic-profile-routing` too): only version
+strings and the hashes that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as committed); the
+sbottom benchmark artifacts' `plugin` string edited by hand; theory-profile artifacts regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4388 tests, 4266 pass, 0 failures, 122 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4388 tests, 4175 pass, 0 failures, 213 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
 ## SCIFIX-TORCH-GATE (2026-10-20, E2v and the CI lock; branch `ci/torch-backend-gate`)
 
 The last open ledger gap (ML-DOMAIN): its PyTorch tests ran only in the optional, continue-on-error `torch-cpu` job.

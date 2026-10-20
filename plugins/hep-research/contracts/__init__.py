@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.0.0"
+CONTRACTS_VERSION = "3.0.1"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -84,6 +84,10 @@ CONTRACTS_VERSION = "3.0.0"
 # contracts/migrate_skill_names.py is removed; old files are migrated with hep-research 0.16.x. Major, because removing
 # enum values turns artifacts that validated under 2.x into errors (docs/architecture.md section 5). No other rule
 # changes: a 2.x artifact with current names keeps its outcome, and older contract versions are still read.
+# 3.0.1 (hep-research 0.18.0, patch) fixes how ml.calibration_on_fit_sample compares sample names: '.' segments
+# anywhere and repeated or trailing separators are dropped (was a leading './' only), so a calibration evaluated on its
+# fit sample written as 'work/./x.csv' is the error it always should have been (sci-fix SAMPLE-NAME-DOT-SEGMENTS). No
+# field, enum or capability changes.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})
