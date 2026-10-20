@@ -21,8 +21,8 @@ is not thereby allowed).
 Every source is also validated as a contract artifact (contracts/validate.py). Protected mode (the project root
 declares agent_policy, or --protected; core.protected.guard) first checks the protected inputs and refuses before
 reading any source when they cannot be established; inside it the authoritative revocation log is always applied and
-the stricter version and name policy holds. --strict-versions applies only that version and name policy (a newer
-minor contract or a deprecated skill name is an error; contracts.skill_names) to every source.
+the stricter version policy holds. --strict-versions applies only that version policy (a newer minor contract is an
+error) to every source; a retired or unknown skill name is an error either way (contracts.skill_names).
 
 Revocations: --revocations names the hash-chained revocation log (contracts/revocation.py), which needs --revocation-head
 and --revocation-source; it is verified before any lookup (an empty, cut, edited or stale log, or one whose head does
@@ -307,8 +307,7 @@ def main(argv=None) -> int:
                     "protected inputs must be established, the authoritative revocation log applies, and the stricter "
                     "version policy holds")
     ap.add_argument("--strict-versions", dest="strict_versions", action="store_true",
-                    help="only the stricter version and name policy for every source (a newer minor contract or a "
-                         "deprecated skill name is an error), "
+                    help="only the stricter version policy for every source (a newer minor contract is an error), "
                          "without protected mode")
     try:
         args = ap.parse_args(argv)

@@ -1961,6 +1961,27 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## CONTRACTS-3.0.0 (2026-10-20, E2 and the CI lock, unreleased)
+
+Branch `feat/retire-skill-aliases` from main `61fec265` (0.16.0). Contracts 3.0.0 retires the deprecated skill names
+(migration option A, second step); plugin version unchanged. New tests: `tests/contracts/test_skill_names.py` (schema
+enum equals SKILLS; the five hashes are the retired names; each retired name in producer_skill and to_skill is
+`skill.unknown_name` pointing to 0.16.x, with and without `--strict-versions`; unknown to_skill is an error; unknown
+producer_skill stays a schema error; retired related_skills fails the registry) and
+`tests/tools/test_check_retired_names.py` (tree clean; planted name found; history not scanned; case-sensitive).
+The alias test (15 tests) and the retired-folder link test are removed. Fixtures, templates, theory-profile artifacts
+and examples moved to 3.0.0 (only the version pair and covering hashes change); profile and registry-fixture ranges
+`<4.0`.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass (new: `retired_names`), 0 fail, 2 skipped (CLI host checks); 4770 tests, 0 failures, 119 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4770 tests, 0 failures, 213 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| ams02-research `origin/main` (1.5.0) | no file records a retired name; profile range `>=2.0` admits 3.0.0 |
+
+Not run: a release (no version bump, manifest or tag), host installs, live evals (no routing text changed).
+
 ## 0.16.0 release check (2026-10-20, E2 and the CI lock)
 
 Release branch `release/0.16.0` from main `47687ea5` (#157 communication split, contracts 2.13.0; #158 and #161

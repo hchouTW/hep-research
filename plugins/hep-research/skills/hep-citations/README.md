@@ -2,8 +2,6 @@
 
 Use when a request asks what a named experiment published, whether a paper exists, which result is the latest, what a paper states, whether a result supports a claim, or for a citation; also for finding and verifying literature and citations (INSPIRE-HEP, ADS, arXiv), source and claim ledgers, planned claims to recheck, literature matrices and reviews. It answers from cited sources and the bound profile's evidence ledger, never from memory, and hands the writing to hep-authoring.
 
-Split from the former communication skill together with hep-authoring; the old name is a deprecated alias of hep-authoring in contracts 2.13.0 (`contracts/skill_names.py`) (the literature-record type is new, so no old artifact names this skill).
-
 **Owns:** answers from cited sources, literature discovery and verification, read levels and verification dates, source and claim ledgers in a project, literature records and matrices; stewardship of `core/evidence` and the `adapters/literature-lookup` adapter. Typical artifacts: `literature-record`, literature matrices, inline source-backed answers.
 
 **Never:** supply a citation, identifier, number or "latest result" from memory; treat a metadata hit as having read a paper; present collaboration-internal information as public.

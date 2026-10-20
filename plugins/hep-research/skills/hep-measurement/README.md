@@ -3,8 +3,6 @@
 Measurement design and review for particle and astroparticle physics. What the skill owns, never does, and its
 invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide for people. Correlations: hep-measurement supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness.
 
-Formerly `hep-analysis`; the old name is a deprecated alias in contracts 2.9.0.
-
 ## Folder map
 
 | Path | Content |

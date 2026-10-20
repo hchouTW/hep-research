@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.13.0"
+CONTRACTS_VERSION = "3.0.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -75,9 +75,15 @@ CONTRACTS_VERSION = "2.13.0"
 # literature-record (contracts/schemas/ext_literature_record.json; rules in contracts.validate, _literature_semantics):
 # the record manage_literature.py wrote before, unchanged in content, now inside the envelope so a literature handoff to
 # hep-authoring validates instead of failing as artifacts_dir.not_artifact. It also adds the skill names hep-citations
-# and hep-authoring; hep-communication becomes a deprecated alias of hep-authoring and research-communication now points to
-# hep-authoring (contracts.skill_names). No capability is added; a 2.12 artifact keeps its outcome apart from the alias
+# and hep-authoring; the communication skill's name becomes a deprecated alias of hep-authoring, and so does its 0.11.0
+# predecessor (contracts.skill_names). No capability is added; a 2.12 artifact keeps its outcome apart from the alias
 # warning, and a 2.12 reader refuses the new type and the new skill names (schema enums) instead of misreading them.
+# 3.0.0 (hep-research 0.17.0) retires the deprecated skill names (the four of 2.9.0 and the one of 2.13.0):
+# the schema enum lists only the eight current names, and contracts.skill_names reports a retired name in an artifact
+# or a profile, and any unknown handoff.to_skill, as skill.unknown_name (an error, with or without --strict-versions).
+# contracts/migrate_skill_names.py is removed; old files are migrated with hep-research 0.16.x. Major, because removing
+# enum values turns artifacts that validated under 2.x into errors (docs/architecture.md section 5). No other rule
+# changes: a 2.x artifact with current names keeps its outcome, and older contract versions are still read.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

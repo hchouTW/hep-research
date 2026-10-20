@@ -71,7 +71,7 @@ PUBLISHABLE["extension"]["significance"]["global_n_toys"] = 10000
 
 class T06Semantics(unittest.TestCase):
     def test_contract_version_is_minor_bump(self):
-        self.assertEqual(CONTRACTS_VERSION, "2.13.0")
+        self.assertEqual(CONTRACTS_VERSION, "3.0.0")
 
     def test_audit_mutations_rejected_natively_at_2_2(self):
         for name, (_, level, code) in MUTATIONS.items():
@@ -279,8 +279,10 @@ class Contracts26Hardening(unittest.TestCase):
 class T08Migration(unittest.TestCase):
     def test_old_reader_refuses_the_new_capability(self):
         old = frozenset(contracts.KNOWN_CAPABILITIES - {"stats:result-semantics"})
+        doc = copy.deepcopy(PUBLISHABLE)  # a 2.x artifact, so the 2.1 reader sees a newer minor, not a newer major
+        doc["contract_version"] = doc["versions"]["contracts"] = "2.13.0"
         with mock.patch.object(contracts, "KNOWN_CAPABILITIES", old), mock.patch.object(contracts, "CONTRACTS_VERSION", "2.1.0"):
-            rep = v.validate_artifact(PUBLISHABLE)
+            rep = v.validate_artifact(doc)
         self.assertIn("contract.unknown_capability", codes(rep, "error"))
         self.assertIn("contract.newer_minor", codes(rep))
 

@@ -76,7 +76,7 @@ class CompanionCLI(unittest.TestCase):
         self.assertIn(DEP, out["profiles"])
 
     def test_core_contracts_incompatible(self):
-        self.write_companion(compatible={"core": ">=99.0", "contracts": ">=2.0,<3.0"})
+        self.write_companion(compatible={"core": ">=99.0", "contracts": ">=2.0,<4.0"})
         rc, out, _ = run("registry.py", "--local", str(self.companion))
         self.assertEqual((rc, out["ok"]), (1, False))
         self.assertEqual(codes(out), ["profile.incompatible_version"])

@@ -134,13 +134,14 @@ Readers apply a version policy (`contracts/validate.py`, since 2.1.0): a newer m
 warning, or an error with `--strict-versions` or in protected mode (`--protected`, or a project with
 `agent_policy`); `versions.contracts` must equal `contract_version`; an unknown entry in
 `required_capabilities` is an error (add new capabilities to `contracts.KNOWN_CAPABILITIES` when a reader implements
-them). `contracts/dependencies.py` validates every source the same way. The same flag carries the name policy
-(contracts 2.9.0, "version and name policy"): a deprecated skill name (the four names renamed in 0.11.0, listed in
-`contracts/skill_names.py` and `contracts/schemas/skill_names.json`) in `provenance.producer_skill`, `handoff.to_skill`
-or an extension `handoff` is a warning (`skill.deprecated_name`), an error with `--strict-versions` or in protected
-mode; in a profile's `related_skills` it is `profile.deprecated_skill_name` (`contracts/registry.py
---strict-versions`). `contracts/migrate_skill_names.py OLD.json --out NEW.json` rewrites `producer_skill` and
-`to_skill` and nothing else. The aliases are removed one or two releases after the rename. Artifacts record the code identity in
+them). `contracts/dependencies.py` validates every source the same way. Skill names (contracts 3.0.0): only the names in
+`contracts/skill_names.py` (`SKILLS`) and `contracts/schemas/skill_names.json` are valid. A name retired in 0.17.0 (the
+deprecated aliases of the 0.11.0 rename and the 0.16.0 split) in `provenance.producer_skill`, `handoff.to_skill`, an
+extension `handoff` or a profile's `related_skills` is an error, `skill.unknown_name`, whose message says to migrate the
+file with hep-research 0.16.x (its `contracts/migrate_skill_names.py`); any other unknown `handoff.to_skill` is the same
+error. The retired names are kept only as SHA-256 hashes; `tools/check_retired_names.py` fails on any maintained file
+that spells one (history files excepted). When a skill is renamed, keep the old name as a deprecated alias for at least
+one release, with a migration tool, before retiring it in a major contract version. Artifacts record the code identity in
 `versions.plugin_release` through `contracts/identity.py`; older artifacts lack it and their identity is unknown.
 
 Communication records come in two formats. A legacy record (claims with `result_ref` and a status) stays valid and

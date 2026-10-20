@@ -1,5 +1,4 @@
-{"$comment": "Skill names a contract may record (contracts 2.9.0, 2.13.0). The enum lists the eight current names, then the deprecated names: the four of the hep-research 0.11.0 rename (hep-analysis -> hep-measurement, detector-response -> hep-detector, research-communication -> hep-authoring since 2.13.0, physics-ml -> hep-ml) and hep-communication -> hep-authoring (split into hep-citations and hep-authoring, contracts 2.13.0). A deprecated name passes the schema; contracts.skill_names reports it (warning, or an error under --strict-versions and protected use), and contracts/migrate_skill_names.py rewrites it. Keep in step with contracts/skill_names.py.",
+{"$comment": "Skill names a contract may record (contracts 3.0.0): the eight current names. The names retired in 3.0.0 (renamed in hep-research 0.11.0, or split in 0.16.0) fail the enum; contracts.skill_names adds skill.unknown_name with the migration path (hep-research 0.16.x). Keep in step with contracts/skill_names.py.",
  "$defs": {
-  "skill_name": {"type": "string", "enum": ["hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-citations", "hep-authoring",
-                                            "hep-analysis", "detector-response", "research-communication", "physics-ml", "hep-communication"]}
+  "skill_name": {"type": "string", "enum": ["hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-citations", "hep-authoring"]}
  }}
