@@ -10,8 +10,8 @@ Software checks establish contract consistency only, not physical validity.
   an exhaustive domain, or a person's check; every counted kind is an `independence` record in
   `docs/evidence/sci-fixes.json`, checked by its test. Locators read for the detector, Bayesian and Feldman-Cousins
   oracles (VALIDATION SCIFIX-LEDGER-REVIEW); new third-party, symbolic and exhaustive cross-checks in the tests; pyhf
-  oracles in the required stats-backends gate. BAYES-T24 is C2, below its S1 minimum (gap recorded). DR-WP2-06 is split
-  into calorimeter, PID and multiple-scattering entries.
+  oracles in the required stats-backends gate. Every entry meets its minimum (BAYES-T24's AR(1) check located in
+  Thompson, arXiv:1011.0175, eq. (7)). DR-WP2-06 is split into calorimeter, PID and multiple-scattering entries.
 - **Feldman-Cousins citation.** The monotone adjustment is Sec. IV.A of the paper (was cited as IV.B), also in the
   `construction` string of the Poisson diagnostics output.
 

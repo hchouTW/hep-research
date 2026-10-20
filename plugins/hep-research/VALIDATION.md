@@ -1979,6 +1979,7 @@ now an `independence` record (kind, test, basis, detail), checked by `tests/tool
 | Vehtari, Gelman, Simpson, Carpenter, Buerkner, Bayesian Analysis 16 (2021) 667 | arXiv:1903.08008v5, DOI 10.1214/20-BA1221 | full text | R-hat eqs. (1)-(4), autocorrelation (10), ESS (12)-(13), rank normalization (14), folding (15), tail ESS (16), quantile MCSE (20) |
 | Feldman, Cousins, Phys. Rev. D 57 (1998) 3873 | arXiv:physics/9711021v2, DOI 10.1103/PhysRevD.57.3873 | full text | ordering ratio eq. (4.1) and the non-increasing adjustment, Sec. IV.A, p. 8; Table IV p. 37 matches the fixture |
 | Pierre Auger Collaboration, JCAP 03 (2019) 018 | arXiv:1811.04660v2 | full text | Gaisser-Hillas form eq. (2.1), p. 3 |
+| M.B. Thompson, A Comparison of Methods for Computing Autocorrelation Time (2010) | arXiv:1011.0175v1 | full text | tau = 1 + 2 sum rho_k eq. (4); AR(p) autocorrelation time eq. (7), p. 2, giving (1 + rho)/(1 - rho) for AR(1); p. 3: rho = 0.98 gives 99 |
 | PDG RPP 2024, 30. Cosmic Rays | https://pdg.lbl.gov/2024/reviews/rpp2024-rev-cosmic-rays.pdf | full text | does not state the Gaisser-Hillas form |
 | Gaisser, Hillas, Proc. 15th ICRC 8 (1977) 353 | ADS 1977ICRC....8..353G | not opened | (no readable copy) |
 
@@ -1989,9 +1990,10 @@ Stan/ArviZ implementation (biased autocovariance), take the 95% tail indicator a
 only when positive (hepstats:S07 notes). `multiple_scattering.py` uses the Highland leading term (34.16), not the 0.016
 coefficient of (35.70), as `tracking-and-vertexing.md` states.
 
-**Grades after the review:** every entry meets its minimum except **BAYES-T24** (S1, C2): its two qualifying oracles
-(ArviZ, third-party; the located SciPy reference) are one kind, and the analytic AR(1) ESS check has no located source
-(gap recorded). DR-WP2-06 became DR-WP2-06-CALO (C3, D3), -PID (C3, D2) and -MS (C3, D3); its tag-and-probe, pileup and
+**Grades after the review:** every entry meets its minimum. BAYES-T24 (S1) first fell to C2: its ArviZ and located SciPy
+oracles are one kind, Vehtari et al. state no AR(1) ESS, and its analytic AR(1) check had no source; Thompson's eq. (7)
+located it (arXiv:1011.0175v1, read 2026-10-21), so it is C3 (independent implementation, analytic, invariant, negative
+control). DR-WP2-06 became DR-WP2-06-CALO (C3, D3), -PID (C3, D2) and -MS (C3, D3); its tag-and-probe, pileup and
 front-end parts (guards and labels) left the ledger; advisories SFA-2026-017..019 point to the new entries. Oracle kinds
 relabelled where the qualifying oracle is symbolic or an independent implementation (CLS-LOGINTERP, F01-F03,
 POISSON-SF, POISSON-500, COV-NOREPAIR, ROBUST-CAMPAIGN, ML-SPLITS) and kinds without a basis removed.
