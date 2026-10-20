@@ -46,6 +46,14 @@ def parse_require(text: str) -> dict[str, str | None]:
     return out
 
 
+def version_matches(installed, required: str) -> bool:
+    """name==required as PEP 440 reads it for a local label: '2.14.1' matches '2.14.1+cpu' (a requirement without a
+    label ignores the installed one's), while '2.14.1+cpu' must match exactly."""
+    if not isinstance(installed, str):
+        return False
+    return installed == required or ("+" not in required and installed.split("+", 1)[0] == required)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--require", required=True, help="comma-separated name==version (version optional)")
@@ -73,7 +81,7 @@ def main(argv=None) -> int:
             mod = importlib.import_module(name)
             got = getattr(mod, "__version__", None)
             report["backends"][name] = got
-            if version and got != version:
+            if version and not version_matches(got, version):
                 report["problems"].append(f"{name} {got} installed, {version} required")
         except ImportError as exc:
             report["backends"][name] = None

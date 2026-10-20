@@ -51,5 +51,16 @@ class AllowSkipReasonTests(unittest.TestCase):
                            "--allow-skip-reason", "json not installed", module=self.FIXTURE)
         self.assertEqual((code, report["ok"]), (0, True), report)
 
+class VersionMatchTests(unittest.TestCase):
+    def test_a_requirement_without_a_local_label_ignores_the_installed_label(self):
+        sys.path.insert(0, str(ROOT / "tools"))
+        from run_required_backends import version_matches
+        for installed, required, want in (("2.14.1+cpu", "2.14.1", True), ("2.14.1", "2.14.1", True),
+                                          ("2.14.1+cpu", "2.14.1+cpu", True), ("2.14.1", "2.14.1+cpu", False),
+                                          ("2.14.1+cu124", "2.14.1+cpu", False), ("2.14.10", "2.14.1", False),
+                                          ("2.14.1.post1", "2.14.1", False), (None, "2.14.1", False)):
+            with self.subTest(installed=installed, required=required):
+                self.assertEqual(version_matches(installed, required), want)
+
 if __name__ == "__main__":
     unittest.main()
