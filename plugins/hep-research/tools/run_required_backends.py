@@ -8,7 +8,9 @@ errors, or if any skip reason names a required backend. With --no-skips every sk
 evidence modules that must run in full, such as the slow-tier sci-fix evidence in the release gate.
 
 Usage: python3 tools/run_required_backends.py --require pyhf==0.7.6,arviz==0.23.4 [--modules M1,M2] [--no-skips]
-       [--out REPORT.json]
+       [--allow-skip-reason TEXT ...] [--out REPORT.json]
+       (--allow-skip-reason: a test meant for the backend's absence, skipped where it is installed, is not a skip for
+       the backend; the gates without the backend run it)
        (a requirement exe:NAME is an executable that must be on PATH, for example exe:combine; a name without a
        version only has to import)
 Exit codes: 0 every required backend present and no test failed or skipped for it; 1 otherwise; 2 bad usage.
@@ -44,11 +46,22 @@ def parse_require(text: str) -> dict[str, str | None]:
     return out
 
 
+def version_matches(installed, required: str) -> bool:
+    """name==required as PEP 440 reads it for a local label: '2.14.1' matches '2.14.1+cpu' (a requirement without a
+    label ignores the installed one's), while '2.14.1+cpu' must match exactly."""
+    if not isinstance(installed, str):
+        return False
+    return installed == required or ("+" not in required and installed.split("+", 1)[0] == required)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--require", required=True, help="comma-separated name==version (version optional)")
     ap.add_argument("--modules", help="comma-separated test modules (default: the statistics and backend modules)")
     ap.add_argument("--no-skips", action="store_true", help="fail on any skipped test, whatever its reason")
+    ap.add_argument("--allow-skip-reason", action="append", default=[], metavar="TEXT",
+                    help="a skip whose reason contains TEXT does not count as skipped for a backend (a test meant "
+                         "for the backend's absence, run by the gates without it); repeatable")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
     required = parse_require(a.require)
@@ -68,7 +81,7 @@ def main(argv=None) -> int:
             mod = importlib.import_module(name)
             got = getattr(mod, "__version__", None)
             report["backends"][name] = got
-            if version and got != version:
+            if version and not version_matches(got, version):
                 report["problems"].append(f"{name} {got} installed, {version} required")
         except ImportError as exc:
             report["backends"][name] = None
@@ -78,9 +91,13 @@ def main(argv=None) -> int:
     suite = unittest.defaultTestLoader.loadTestsFromNames(modules)
     result = unittest.TextTestRunner(stream=sys.stderr, verbosity=1).run(suite)
     names = [n[4:] if n.startswith("exe:") else n for n in required]
-    skipped_for_backend = [f"{t.id()}: {why}" for t, why in result.skipped if any(n.lower() in why.lower() for n in names)]
+    allowed = [f"{t.id()}: {why}" for t, why in result.skipped if any(s in why for s in a.allow_skip_reason)]
+    skipped_for_backend = [f"{t.id()}: {why}" for t, why in result.skipped
+                           if any(n.lower() in why.lower() for n in names)
+                           and not any(s in why for s in a.allow_skip_reason)]
     report.update({"run": result.testsRun, "failures": len(result.failures), "errors": len(result.errors),
-                   "skipped": len(result.skipped), "skipped_for_a_required_backend": skipped_for_backend})
+                   "skipped": len(result.skipped), "skipped_for_a_required_backend": skipped_for_backend,
+                   "skips_allowed_by_reason": allowed})
     if result.failures or result.errors:
         report["problems"].append(f"{len(result.failures)} failures and {len(result.errors)} errors")
     if skipped_for_backend:

@@ -1,6 +1,6 @@
 {
  "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed; the remaining three S1 entries to C3 by plan PR-6 batch 3 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH3), also to be reviewed; the ten S2 entries below C2 raised (RC-A5 to C4) by plan PR-6 batch S2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-S2), also to be reviewed; gaps closed on 2026-10-20 (VALIDATION SCIFIX-GAPS-CLOSED): ArviZ parent record, pdg in CI, torch-cpu record",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed; the remaining three S1 entries to C3 by plan PR-6 batch 3 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH3), also to be reviewed; the ten S2 entries below C2 raised (RC-A5 to C4) by plan PR-6 batch S2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-S2), also to be reviewed; gaps closed on 2026-10-20 (VALIDATION SCIFIX-GAPS-CLOSED): ArviZ parent record, pdg in CI, torch-cpu record; ML-DOMAIN's PyTorch tests in a required CI gate on 2026-10-20 (VALIDATION SCIFIX-TORCH-GATE)",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -534,10 +534,8 @@
    "correctness": "C3",
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "the PyTorch tests run only in the optional (continue-on-error) torch-cpu CI job: whether that job should block merges is a maintainer decision"
-   ],
-   "note": "per-statistic flag rates at the split-conformal value and the union in [a, 2a] (two-sided), the reported interval against scipy.stats.beta Clopper-Pearson, the pre-fix min/max box as negative control; 3 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the torch-cpu CI job ran tests.skills.hep_ml.test_audit_domain_method in full on 54ee003a (13 run, 0 skipped, pass) (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)"
+   "gaps": [],
+   "note": "per-statistic flag rates at the split-conformal value and the union in [a, 2a] (two-sided), the reported interval against scipy.stats.beta Clopper-Pearson, the pre-fix min/max box as negative control; 3 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the torch-cpu CI job ran tests.skills.hep_ml.test_audit_domain_method in full on 54ee003a (13 run, 0 skipped, pass) (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20); the PyTorch tests also run in the required CI job torch-backend (torch 2.14.1 pinned), where a skip for PyTorch fails (VALIDATION SCIFIX-TORCH-GATE 2026-10-20)"
   },
   {
    "id": "ML-NEGWEIGHTS",

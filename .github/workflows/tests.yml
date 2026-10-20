@@ -163,6 +163,38 @@ jobs:
           name: pdg-cross-check
           path: check-runs/
 
+  torch-backend:
+    # The hep-ml modules with PyTorch tests (sci-fix ML-DOMAIN among them) run with a pinned torch; a test skipped for
+    # PyTorch fails the job (tools/run_required_backends.py), except the clean-degradation tests meant for its absence,
+    # which the jobs without torch run. Required. The unpinned optional (torch-cpu) job stays as an early warning for
+    # new PyTorch releases; bump the pins here when it passes on a newer one.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: plugins/hep-research/requirements-ci.lock
+      - name: Install the pinned set with torch 2.14.1 (CPU)
+        run: |
+          python -m pip install -r requirements-ci.lock
+          python -m pip install "torch==2.14.1" "torchvision==0.29.1" --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
+      - name: PyTorch tests, no skip allowed for torch
+        run: |
+          mkdir -p ../../check-runs
+          python tools/run_required_backends.py --require torch==2.14.1,torchvision==0.29.1 \
+            --allow-skip-reason "only meaningful when PyTorch is not installed" \
+            --modules tests.skills.hep_ml.test_assets_smoke,tests.skills.hep_ml.test_audit_domain_method,tests.skills.hep_ml.test_audit_metric_layer,tests.skills.hep_ml.test_audit_small_corrections,tests.skills.hep_ml.test_audit_train_keys,tests.skills.hep_ml.test_hep_losses,tests.skills.hep_ml.test_hep_ml_skill,tests.skills.hep_ml.test_set_classifier,tests.skills.hep_ml.test_training_pipeline \
+            --out ../../check-runs/torch-backend.json
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: torch-backend
+          path: check-runs/
+
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 15

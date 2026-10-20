@@ -1961,6 +1961,21 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-TORCH-GATE (2026-10-20, E2v and the CI lock; branch `ci/torch-backend-gate`)
+
+The last open ledger gap (ML-DOMAIN): its PyTorch tests ran only in the optional, continue-on-error `torch-cpu` job.
+On `54ee003a` the required unit jobs skipped 258 tests and `torch-cpu` 201: 60 tests in 9 hep-ml modules run only
+with PyTorch (53 'PyTorch not installed', 4 'PyTorch is required to build datasets', 3 'PyTorch is required to
+measure real allocations'). New required job `torch-backend`: the CI lock plus torch 2.14.1 and torchvision 0.29.1
+(CPU wheels; the versions the unpinned job resolved and E2 runs), the 9 modules through
+`tools/run_required_backends.py --require torch==2.14.1,torchvision==0.29.1`, so a test skipped for PyTorch fails.
+Two clean-degradation tests meant for PyTorch's absence (`test_hep_ml_skill.CleanDegradationWithoutTorchTests`, run
+by the jobs without torch) are allowed by the new `--allow-skip-reason` option and listed under
+`skips_allowed_by_reason`. Locally (E2v): 211 run, 0 failures, those 2 skips allowed, exit 0, about 73 s; without
+PyTorch (CI lock): exit 1. `tests/tools/test_pyproject.py` checks that every module marking a PyTorch test is listed
+(the opt-in GPU module excepted); dropping one fails it. The optional job stays as an early warning for new PyTorch
+releases.
+
 ## SCIFIX-GAPS-CLOSED (2026-10-20, branch `ci/close-evidence-gaps`)
 
 Three ledger gaps that needed a backend, not a code change.
