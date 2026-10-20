@@ -1,0 +1,56 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-007",
+ "severity": "S1",
+ "ledger": [
+  "BAYES-T24"
+ ],
+ "summary": "bayes_diagnostics reported R-hat = 1.0 for constant chains, crashed on ties, and its ESS and quantile MCSE differed from Vehtari et al. (2021); the effective-count Barlow-Beeston fit accepted signed weights.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-statistics/scripts/bayes_diagnostics.py",
+    "core/stats/template_fit.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.6.11"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the defective lines are in the repository's first commit, the 0.3.0 import; earlier releases are not in this repository",
+    "fixed_commit": "d161b3b705f89de272edd7bded8104b203f696e5"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "R-hat, bulk and tail ESS and quantile MCSE (bayes_diagnostics.py)",
+   "template_fit.py wbb fits with weighted templates"
+  ],
+  "bias": "chains that never moved read as converged (R-hat 1.0); ESS and MCSE differed from ArviZ 0.23.4 by up to 0.7% and 7% for poorly mixed chains; chains with ties crashed the quantile MCSE; a template with negative weights was fitted by the effective-count likelihood, whose coverage fails there (0.526 for a 68% interval with 20% negative weights)",
+  "trigger": "stuck or constant chains, discrete (tied) draws, poorly mixed chains; templates from signed-weight Monte Carlo"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "statistical-result"
+  ],
+  "extension_keys": [
+   "convergence",
+   "sampler"
+  ]
+ },
+ "remedy": "rerun bayes_diagnostics.py (and any wbb-fit on signed-weight templates) with a release that has the fix (0.6.11 or later); a chain set reported converged before may now be not-converged",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/d161b3b705f89de272edd7bded8104b203f696e5"
+ ]
+}

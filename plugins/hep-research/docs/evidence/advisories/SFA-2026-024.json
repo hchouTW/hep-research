@@ -1,0 +1,60 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-024",
+ "severity": "S1",
+ "ledger": [
+  "ML-NEGWEIGHTS"
+ ],
+ "summary": "Negative event weights could be dropped in training, and the metric layer passed signed-weight metrics outside [0, 1], truncated fractional labels to 0 and accepted invalid Asimov inputs.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-ml/assets/train_classifier.py",
+    "skills/hep-ml/assets/hep_metrics.py",
+    "skills/hep-ml/assets/calibration.py",
+    "skills/hep-ml/assets/hep_losses.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.6.17"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "ef5d068fc18d206a23e590b55344a597b46f44f4",
+    "introduced_commit": "700402fa3c95b5539a33f247d93f8c725168863a",
+    "introduced_basis": "the first release of train_classifier.py --negative-weights dropped and of the metric layer"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "classifier trained with negative event weights",
+   "weighted AUC, efficiencies and ROC points",
+   "Asimov discovery significance",
+   "calibration fits on fractional labels"
+  ],
+  "bias": "dropping negative weights biases training and evaluation; signed-weight AUCs and efficiencies outside [0, 1] were printed without a flag; a fractional label became class 0; asimov_significance accepted a NaN or negative sigma_b and lost precision at s/b < 1e-6",
+  "trigger": "event weights with negative entries (NLO generators) with --negative-weights dropped, signed-weight metrics, labels that are not exactly 0 or 1, or a significance with a non-finite or negative sigma_b or s/b below 1e-6"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "ml-artifact"
+  ],
+  "extension_keys": [
+   "weights"
+  ]
+ },
+ "remedy": "retrain with --negative-weights signed, abs (bias recorded) or resample, and recompute the weighted metrics and significances with a release that has the fix",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/ef5d068fc18d206a23e590b55344a597b46f44f4",
+  "https://github.com/hchouTW/hep-research/pull/81"
+ ]
+}

@@ -1,0 +1,57 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-021",
+ "severity": "S2",
+ "ledger": [
+  "ML-CALIBRATION"
+ ],
+ "summary": "A calibration evaluated on its own fit sample could pass: calibration.py recorded no sample check and the validator compared fit and evaluation sample names only as exact strings.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-ml/assets/calibration.py",
+    "skills/hep-ml/scripts/write_ml_artifact.py",
+    "contracts/validate.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.6.17"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "f7846755e9b47180fb6276250e2cb46617366fac",
+    "introduced_commit": "fc0637e2cd693d1963871d7de48ea03f594a743e",
+    "introduced_basis": "the first release of calibration.py and of the ml-artifact calibration block and its exact-name rule"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "the calibration block of an ml-artifact and its ml.calibration_on_fit_sample verdict",
+   "reported calibration metrics (ECE, reliability) of a calibrated classifier"
+  ],
+  "bias": "calibration metrics computed on the sample the map was fit on are optimistic (the source brief's same-sample isotonic map gave ECE 6.5e-17), and validation did not catch it when the two names differed in whitespace, './' or case, or when one file was a copy of the other",
+  "trigger": "calibration.py run with --eval on the --fit sample (or a copy of it), with no event-id check, and the two sample names not exactly equal"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "ml-artifact"
+  ],
+  "extension_keys": [
+   "calibration"
+  ]
+ },
+ "remedy": "rerun calibration.py with a release that has the fix (with --id-col) on disjoint fit and evaluation samples, and validate the artifact again",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/f7846755e9b47180fb6276250e2cb46617366fac",
+  "https://github.com/hchouTW/hep-research/pull/81"
+ ]
+}

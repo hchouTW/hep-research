@@ -1,0 +1,55 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-017",
+ "severity": "S1",
+ "ledger": [
+  "DR-WP2-06"
+ ],
+ "summary": "calorimeter_resolution.py fitted sigma_E/E without per-point errors with unit weights on (sigma/E)^2, which biased the constant term and often gave a negative squared term.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-detector/scripts/calorimeter_resolution.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "fixed_commit": "6c7933634eb1ab1f43acb9368379fd362e5f642f",
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "stochastic, noise and constant terms of the calorimeter resolution fit (calorimeter_resolution.py --fit)"
+  ],
+  "bias": "in 2000 toys with 2% scatter and a true constant term c = 0.0070, unit weights gave c^2 < 0 in 26% of the fits and a mean c of 0.0083 in the rest (now 0.0070, sd 0.00013)",
+  "trigger": "a fit given points without per-point uncertainties (energy and resolution pairs only)"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "response",
+   "computational-run"
+  ],
+  "extension_keys": [
+   "parametrization",
+   "tools"
+  ]
+ },
+ "remedy": "refit with a release that has the fix (or give per-point uncertainties); a constant term from the old fit is biased high",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/6c7933634eb1ab1f43acb9368379fd362e5f642f"
+ ]
+}

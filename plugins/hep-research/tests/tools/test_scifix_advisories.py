@@ -35,7 +35,9 @@ class ShippedAdvisories(unittest.TestCase):
         self.assertEqual(sa.check(advisories, json.loads(sa.LEDGER.read_text()), manifests), [])
         for adv in advisories:
             with self.subTest(adv=adv["id"]):
-                self.assertTrue(sa.affected_releases(adv, manifests)["releases"])
+                got = sa.affected_releases(adv, manifests)
+                # fixed before the first manifest (0.5.0): only the earlier, unmanifested releases are affected
+                self.assertTrue(got["releases"] or got["before_first_manifest"], got)
 
     def test_cli_check_and_affected_exit_zero(self):
         for cmd in (["check"], ["affected"], ["affected", "--id", "SFA-2026-001"]):
@@ -106,6 +108,11 @@ class CheckProblems(unittest.TestCase):
         self.assertIn("no release", broken(lambda a: a["affected"][0]["ranges"][0].update(
             events=[{"introduced": "0.9.0"}, {"fixed": "1.0.0"}])))
         self.assertIn("duplicate", " ".join(sa.check([good, copy.deepcopy(good)], ledger, manifests)))
+        # a nested key ('overlap_check' sits under extension.splits) can never match: the scan reads top-level keys
+        self.assertIn("top-level property", broken(lambda a: a["applies_to"].update(extension_keys=["overlap_check"])))
+        # a key of a variant extension schema (the communication traceability capability) is a top-level key
+        self.assertNotIn("top-level property", broken(lambda a: a["applies_to"].update(
+            artifact_types=["communication"], extension_keys=["occurrences"])))
 
 
 class ProjectScan(unittest.TestCase):

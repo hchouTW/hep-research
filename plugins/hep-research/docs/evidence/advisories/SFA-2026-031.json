@@ -1,0 +1,53 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-031",
+ "severity": "S2",
+ "ledger": [
+  "ROBUST-CAMPAIGN"
+ ],
+ "summary": "Batch campaigns recorded a submission only after the scheduler call and took no lock, so an interrupted or concurrent submit could send the same chunks twice; the default merge concatenated string results silently.",
+ "affected": [
+  {
+   "paths": [
+    "core/partition/campaign.py",
+    "core/partition/engine.py",
+    "adapters/batch-schedulers/batch_campaign.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.4.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "f7b677c996b0e7639846c3e6396192e2da3b1c17",
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the root commit of the repository history (the 0.3.0 import) already has the defect; releases before 0.3.0 are not in this history",
+    "fixed_basis": "fixed in 0.4.0 (CHANGELOG 0.4.0; release commit 9870a35 holds the fix); 0.4.0 has no tag and no release manifest"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "merged result and submission record of a partitioned batch campaign (core/partition)"
+  ],
+  "bias": "jobs could run at the scheduler without a campaign record (a kill after executor.submit() returned), and the next submit sent the same chunks again; two concurrent submits shared a submission ID (len(submissions), no lock); the default merge concatenated string results instead of refusing them, and did not refuse NaN, infinite or overflowed values",
+  "trigger": "a submit interrupted after the scheduler accepted the jobs, two submits of one campaign at once, or chunk results that are strings or non-finite"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "computational-run"
+  ]
+ },
+ "remedy": "for a run made with a core/partition campaign in this range: check the scheduler accounting for chunks submitted twice and merge again with a release that has the fix; runs not made with a campaign are not affected (the scan lists every computational-run of the range: the artifact does not record whether a campaign was used)",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/f7b677c996b0e7639846c3e6396192e2da3b1c17"
+ ]
+}
