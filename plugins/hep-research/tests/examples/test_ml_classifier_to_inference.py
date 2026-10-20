@@ -35,6 +35,50 @@ def load():
     return mod
 
 
+SKIPPED_KEYS = {"plugin_release", "digest", "framework", "model_hash"}
+
+
+def artifact_differences(a, b, path, rtol=1e-7):
+    """(path, ...) for every difference between two JSON trees: numbers beyond rtol relative, other values unequal,
+    keys or lengths that differ. Digests and the keys in SKIPPED_KEYS are not compared (see the K13 test)."""
+    bad = []
+    if isinstance(a, dict) and isinstance(b, dict):
+        if set(a) != set(b):
+            bad.append((path, sorted(set(a) ^ set(b))))
+        for k in sorted(set(a) & set(b)):
+            if k not in SKIPPED_KEYS and not k.endswith("sha256"):
+                bad += artifact_differences(a[k], b[k], f"{path}.{k}", rtol)
+    elif isinstance(a, list) and isinstance(b, list):
+        if len(a) != len(b):
+            bad.append((path, len(a), len(b)))
+        for i, (x, y) in enumerate(zip(a, b)):
+            bad += artifact_differences(x, y, f"{path}[{i}]", rtol)
+    elif isinstance(a, float) or isinstance(b, float):
+        if not abs(a - b) <= rtol * max(abs(a), abs(b), 1e-300):
+            bad.append((path, a, b))
+    elif a != b:
+        bad.append((path, a, b))
+    return bad
+
+
+def float_leaves(tree, path):
+    """(path, value) of every float leaf that artifact_differences compares."""
+    if isinstance(tree, dict):
+        return [leaf for k in sorted(tree) if k not in SKIPPED_KEYS and not k.endswith("sha256")
+                for leaf in float_leaves(tree[k], f"{path}.{k}")]
+    if isinstance(tree, list):
+        return [leaf for i, x in enumerate(tree) for leaf in float_leaves(x, f"{path}[{i}]")]
+    return [(path, tree)] if isinstance(tree, float) else []
+
+
+def scale_floats(tree, factor):
+    if isinstance(tree, dict):
+        return {k: scale_floats(v, factor) for k, v in tree.items()}
+    if isinstance(tree, list):
+        return [scale_floats(x, factor) for x in tree]
+    return tree * factor if isinstance(tree, float) else tree
+
+
 @unittest.skipUnless(HAVE_DEPS, "numpy, scipy and matplotlib are required")
 class J9MlToInferenceTests(unittest.TestCase):
     @classmethod
@@ -80,32 +124,28 @@ class J9MlToInferenceTests(unittest.TestCase):
         and ECE differ by 2-6e-9 relative). Digests are skipped: input hashes move with the artifact bytes, and the
         model hash and score-file hashes are taken over float bytes, so a last-bit difference changes them. The
         framework version is skipped because it records the installed NumPy, not a result."""
-        skip = {"plugin_release", "digest", "framework", "model_hash"}
-
-        bad: list = []
-
-        def close(a, b, path):
-            if isinstance(a, dict) and isinstance(b, dict):
-                if set(a) != set(b):
-                    bad.append((path, sorted(set(a) ^ set(b))))
-                for k in set(a) & set(b):
-                    if k not in skip and not k.endswith("sha256"):
-                        close(a[k], b[k], f"{path}.{k}")
-            elif isinstance(a, list) and isinstance(b, list):
-                if len(a) != len(b):
-                    bad.append((path, len(a), len(b)))
-                for i, (x, y) in enumerate(zip(a, b)):
-                    close(x, y, f"{path}[{i}]")
-            elif isinstance(a, float) or isinstance(b, float):
-                if not abs(a - b) <= 1e-7 * max(abs(a), abs(b), 1e-300):
-                    bad.append((path, a, b))
-            elif a != b:
-                bad.append((path, a, b))
-
         committed = SCRIPT.parent / "output" / "artifacts"
-        close(json.loads((committed / "ml_artifact.json").read_text()), self.ml, "ml_artifact")
-        close(json.loads((committed / "statistical_result.json").read_text()), self.stat, "statistical_result")
+        bad = artifact_differences(json.loads((committed / "ml_artifact.json").read_text()), self.ml, "ml_artifact")
+        bad += artifact_differences(json.loads((committed / "statistical_result.json").read_text()), self.stat,
+                                    "statistical_result")
         self.assertEqual(bad, [], f"{len(bad)} differences (committed, rerun): {bad[:15]}")
+
+    def test_artifact_comparison_sees_what_the_rounded_results_do_not(self):
+        """ML-K13 negative control: the pre-fix check compared only results.json byte for byte, so a change inside the
+        artifacts that the rounded results do not carry passed it. Every float of the fresh ml-artifact moved by a
+        relative 1e-5 (100 times the tolerance) leaves results.json identical and is reported at each moved path;
+        moved by 1e-9 (below the tolerance) nothing is reported; a changed string is reported."""
+        committed = json.loads((SCRIPT.parent / "output" / "results.json").read_bytes())
+        self.assertEqual(json.loads((self.out / "results.json").read_bytes()), committed)  # the pre-fix check passes
+        moved = scale_floats(self.ml, 1 + 1e-5)
+        paths = [d[0] for d in artifact_differences(self.ml, moved, "ml_artifact")]
+        expected = [path for path, x in float_leaves(self.ml, "ml_artifact") if x != 0.0]
+        self.assertGreater(len(expected), 10)
+        self.assertEqual(sorted(paths), sorted(expected))
+        self.assertEqual(artifact_differences(self.ml, scale_floats(self.ml, 1 + 1e-9), "ml_artifact"), [])
+        renamed = json.loads(json.dumps(self.ml))
+        renamed["status"] = "observed" if renamed.get("status") != "observed" else "synthetic"
+        self.assertEqual([d[0] for d in artifact_differences(self.ml, renamed, "ml_artifact")], ["ml_artifact.status"])
 
     def test_artifacts_validate(self):
         from contracts.validate import validate_artifact

@@ -97,6 +97,88 @@ class CalibrationCliTests(unittest.TestCase):
         self.assertIn("ml.calibration_on_fit_sample", w.stdout)
 
 
+class SampleIdentityPropertyTests(unittest.TestCase):
+    """sci-fix ML-CALIBRATION, axis C: the sample checks against independent computations over finite domains."""
+
+    def test_event_id_check_is_exhaustively_right_over_all_subset_pairs(self):
+        """Exhaustive: every pair of subsets of six event ids (4096 pairs), the overlap counted here by a sorted
+        merge, not a set intersection; the record's id_overlap and disjoint flag must equal it, and the check must
+        refuse exactly the overlapping pairs. Negative control: the pre-fix decision without an id check (names and
+        file content differ, so 'disjoint') calls all 4096 pairs disjoint; 3367 of them share events."""
+        import itertools
+
+        sys.path.insert(0, str(ML / "assets"))
+        import calibration
+
+        universe = [f"e{i}" for i in range(6)]
+        subsets = [list(c) for r in range(7) for c in itertools.combinations(universe, r)]
+
+        def merge_overlap(a, b):
+            a, b, i, j, n = sorted(a), sorted(b), 0, 0, 0
+            while i < len(a) and j < len(b):
+                if a[i] == b[j]:
+                    n, i, j = n + 1, i + 1, j + 1
+                elif a[i] < b[j]:
+                    i += 1
+                else:
+                    j += 1
+            return n
+
+        wrong_without_ids = disjoint = 0
+        for fit, ev in itertools.product(subsets, subsets):
+            want = merge_overlap(fit, ev)
+            rec = calibration.sample_provenance("fit.csv", "eval.csv", fit, ev, allow_same_sample=True)
+            self.assertEqual((rec["id_overlap"], rec["disjoint"]), (want, want == 0), (fit, ev))
+            if want:
+                with self.assertRaises(ValueError):
+                    calibration.sample_provenance("fit.csv", "eval.csv", fit, ev)
+            disjoint += want == 0
+            wrong_without_ids += want > 0  # different names and bytes: the pre-fix check saw nothing
+        self.assertEqual(disjoint, 3 ** 6)  # each id in fit only, eval only, or neither
+        self.assertEqual(wrong_without_ids, 4 ** 6 - 3 ** 6)
+
+    def test_validator_names_one_sample_under_every_spelling_of_its_path(self):
+        """Independent implementation: pathlib.PurePosixPath (after stripping and turning backslashes into slashes)
+        and case folding decide whether two spellings name one file; the validator's ml.calibration_on_fit_sample
+        must fire exactly for the pairs that do. Spellings: leading './', doubled separators, backslashes, case,
+        surrounding whitespace, of two different files. Negative control: the pre-fix exact-string comparison
+        fires for none of the differing spellings."""
+        from pathlib import PurePosixPath
+
+        def spellings(path):
+            out = set()
+            for prefix in ("", "./", "././"):
+                for sep in ("/", "//", "\\"):
+                    for case in (str, str.upper):
+                        for pad in ("", " ", "\t"):
+                            out.add(pad + prefix + case(path).replace("/", sep) + pad)
+            return sorted(out)
+
+        def same_file(a, b):
+            def norm(x):
+                return str(PurePosixPath(x.strip().replace("\\", "/"))).casefold()
+            return norm(a) == norm(b)
+
+        names = spellings("work/val_scores.csv") + spellings("work/test_scores.csv")
+        fired = should = 0
+        for fit, ev in itertools_pairs(names):
+            doc = copy.deepcopy(CURRENT)
+            doc["extension"]["calibration"]["fit_sample"] = fit
+            doc["extension"]["calibration"]["validation"]["sample"] = ev
+            got = "ml.calibration_on_fit_sample" in codes(v.validate_artifact(doc))
+            with self.subTest(fit=fit, eval=ev):
+                self.assertEqual(got, same_file(fit, ev))
+            fired += got
+            should += same_file(fit, ev)
+        self.assertEqual(fired, should)
+        self.assertGreater(should, 1000)
+
+
+def itertools_pairs(names):
+    """Ordered pairs of distinct spellings (the exact-name case is the older 2.5.0 rule's)."""
+    return [(a, b) for a in names for b in names if a != b]
+
+
 class CalibrationIdentityRuleTests(unittest.TestCase):
     """Probe rows M01-M03 on the current valid fixture (contract 2.8.0, native) and on a 2.7.0 copy (--strict)."""
 

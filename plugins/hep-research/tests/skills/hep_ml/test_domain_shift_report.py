@@ -142,5 +142,83 @@ class DomainShiftReport(unittest.TestCase):
         self.assertLess(d, 1.36 / np.sqrt(400) + 0.02)
 
 
+@unittest.skipIf(np is None, "numpy is not installed")
+class ShiftCarriedByNuisance(unittest.TestCase):
+    """Sci-fix ML-K05, axis C: the J9 example (examples/ml-classifier-to-inference/run.py) records the domain shift as
+    bounded-by-nuisance because its template fit carries the measured shift as a Gaussian-constrained background-shape
+    nuisance. Its shape_model() and fit_mu() are checked here on a SYNTHETIC three-bin template (s = 2, 5, 9;
+    b = 40, 12, 3; MC statistics 5%; the +1 sigma template is the background shifted by 1.15, 1.35, 1.8, so the
+    mirrored -1 sigma template stays positive) against an independent implementation: Poisson bins with the
+    Barlow-Beeston-lite background profiled numerically per bin (normal of width 5% of the shifted background, as the
+    core model defines it), the nuisance profiled by scipy minimize_scalar, the 68.27% interval from
+    Delta(-2 ln L) = 1. Tolerances: interval ends 1e-5 (the core fit's EDM <= 1e-5 moves q by at most 2e-5, divided by
+    dq/dmu of about 4 at the ends; observed 1e-11), best fit 4e-3 sigma (sqrt(2 EDM/H); observed 1e-7). Negative
+    control (the pre-fix J9 fit had no nuisance, the shift was uncorrected): on Asimov data from the shifted
+    background the nominal-only interval misses mu = 1, while the fit with the nuisance covers it."""
+
+    MU0, S, B, UP_FACTOR, REL = 1.0, (2.0, 5.0, 9.0), (40.0, 12.0, 3.0), (1.15, 1.35, 1.8), 0.05
+
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        path = ROOT / "examples" / "ml-classifier-to-inference" / "run.py"
+        spec = importlib.util.spec_from_file_location("ml_classifier_to_inference_run", path)
+        cls.j9 = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.j9)
+        cls.s, cls.b = np.array(cls.S), np.array(cls.B)
+        cls.up = cls.b * np.array(cls.UP_FACTOR)
+        cls.t = {"signal": {"sumw": list(cls.S), "sumw2": [0.0] * 3},
+                 "background": {"sumw": list(cls.B), "sumw2": ((cls.REL * cls.b) ** 2).tolist()}}
+
+    def reference(self, n, with_nuisance):
+        from scipy import optimize
+
+        def nll(mu, theta):
+            bt = self.b + theta * (self.up - self.b)  # code0 with the mirrored down template: linear on both sides
+            if np.any(bt <= 0):
+                return np.inf  # outside the model's domain (a negative background), as in the core model
+            total = 0.5 * theta * theta if with_nuisance else 0.0
+            for ni, si, bi in zip(n, mu * self.s, bt):
+                sg = self.REL * bi
+                total += optimize.minimize_scalar(
+                    lambda bb: (si + bb) - ni * np.log(si + bb) + (bb - bi) ** 2 / (2 * sg * sg),
+                    bounds=(1e-12, bi + 20 * sg), method="bounded", options={"xatol": 1e-12}).fun
+            return total
+
+        def profile(mu):
+            if not with_nuisance:
+                return nll(mu, 0.0)
+            return optimize.minimize_scalar(lambda th: nll(mu, th), bounds=(-5, 5), method="bounded",
+                                            options={"xatol": 1e-10}).fun
+
+        best = optimize.minimize_scalar(profile, bounds=(0, 10), method="bounded", options={"xatol": 1e-10})
+        f = lambda mu: 2 * (profile(mu) - best.fun) - 1  # noqa: E731
+        return (best.x, optimize.brentq(f, 0.0, best.x, xtol=1e-10), optimize.brentq(f, best.x, best.x + 5, xtol=1e-10))
+
+    def fit(self, n, with_nuisance):
+        model = self.j9.shape_model(self.t, [0, 0, 0], b_up=self.up if with_nuisance else None)
+        r = self.j9.fit_mu(model, list(n), model.aux_obs())
+        return r["mu_hat"], r["lo"], r["hi"]
+
+    def test_fit_with_and_without_the_nuisance_against_an_independent_profile_likelihood(self):
+        nominal, shifted = self.MU0 * self.s + self.b, self.MU0 * self.s + self.up
+        got = {}
+        for label, n, nuisance in (("nominal", nominal, False), ("shifted", shifted, False),
+                                   ("nominal+nuisance", nominal, True), ("shifted+nuisance", shifted, True)):
+            with self.subTest(label):
+                mu_hat, lo, hi = got[label] = self.fit(n, nuisance)
+                ref = self.reference(n, nuisance)
+                self.assertAlmostEqual(lo, ref[1], delta=1e-5)
+                self.assertAlmostEqual(hi, ref[2], delta=1e-5)
+                self.assertAlmostEqual(mu_hat, ref[0], delta=4e-3 * (hi - lo) / 2)
+        self.assertEqual(got["nominal+nuisance"][0], self.MU0)  # Asimov at theta = 0: mu exactly recovered
+        self.assertLess(got["nominal+nuisance"][1], got["nominal"][1])  # the nuisance widens the interval
+        self.assertGreater(got["nominal+nuisance"][2], got["nominal"][2])
+        # negative control: the uncorrected shift moves mu out of the nominal-only interval; the nuisance covers it
+        self.assertGreater(got["shifted"][1], self.MU0)
+        self.assertLess(got["shifted+nuisance"][1], self.MU0)
+        self.assertGreater(got["shifted+nuisance"][2], self.MU0)
+
+
 if __name__ == "__main__":
     unittest.main()

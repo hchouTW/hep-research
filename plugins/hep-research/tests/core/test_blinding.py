@@ -275,6 +275,126 @@ class LowCountAndEncodingTests(unittest.TestCase):
         self.assertIn("cannot be decoded", rep["unscanned"][0]["reason"])
 
 
+class RenderingOracleTests(unittest.TestCase):
+    """sci-fix BLINDING-SCANNER, axis C. Independent implementation: the renderings scan_text claims to detect (plain
+    decimal and exponent forms with at least 3 significant digits, thousands commas, the Unicode minus, a flipped sign,
+    percentages) generated here with Python's own formatting, in every text encoding decode_text claims (UTF-8 with and
+    without BOM, UTF-16 and UTF-32 with BOM, UTF-16-LE/BE without, Latin-1), and the printed-precision rule ("the
+    token equals the target rounded at the token's own last printed digit") evaluated in exact decimal arithmetic.
+    Negative controls emulate the pre-fix scanner (b6334c04^): UTF-8 decoding with replacement, and short sealed
+    values matched as any equal token."""
+
+    ENCODINGS = ("utf-8", "utf-8-sig", "utf-16", "utf-16-le", "utf-16-be", "utf-32", "latin-1")
+
+    @staticmethod
+    def sealed_values(n, seed):
+        import random
+        rng = random.Random(seed)
+        out = []
+        while len(out) < n:  # 12 random significant digits, magnitudes 1e-4 to 1e7, either sign
+            t = rng.choice((-1, 1)) * rng.randrange(10 ** 11, 10 ** 12) * 10.0 ** rng.randint(-15, -4)
+            if bl._significant_digits(t) >= 3:
+                out.append(t)
+        return out
+
+    @staticmethod
+    def significant(token):
+        """Significant digits printed in a token (leading zeros, sign, exponent and separators excluded)."""
+        mant = token.replace(",", "").replace("−", "-").lstrip("+-").rstrip("%").lower().split("e")[0]
+        return len(mant.replace(".", "").lstrip("0"))
+
+    def renderings(self, t):
+        import math
+        e = math.floor(math.log10(abs(t)))
+        forms = [repr(t), f"{-t:.7g}", f"{100 * t:.6g}%", f"{100 * t:.4g} %"]
+        forms += [f"{t:.{k}g}" for k in range(3, 11)] + [f"{t:.{k}e}" for k in range(2, 9)]
+        forms += [f"{t:.{d}f}" for d in (max(0, 2 - e), max(0, 2 - e) + 3)]
+        if abs(t) >= 1000:
+            forms += [f"{t:,.{max(0, 2 - e)}f}", f"{t:,.3f}"]
+        forms += [s.replace("-", "−") for s in forms if s.startswith("-")]
+        return [s for s in forms if self.significant(s) >= 3]
+
+    def test_every_claimed_rendering_is_found_in_every_claimed_encoding(self):
+        missed_before = wide = 0
+        for t in self.sealed_values(60, seed=11):
+            forms = self.renderings(t)
+            for enc in self.ENCODINGS:
+                lines = [s for s in forms if enc != "latin-1" or "−" not in s]  # Latin-1 has no U+2212
+                body = "".join(f"value: {s} (synthetic)\n" for s in lines)
+                if enc == "latin-1":
+                    body = "résumé\n" + body  # a non-ASCII character, so the bytes are not UTF-8
+                raw = body.encode(enc)
+                text, used = bl.decode_text(raw)
+                self.assertEqual(used, enc)  # recorded with the hits (scan_file) for a non-UTF-8 file
+                hit_lines = {h["line"] for h in bl.scan_text(text, [t])}
+                first = 2 if enc == "latin-1" else 1
+                want = set(range(first, first + len(lines)))
+                with self.subTest(t=t, encoding=enc):
+                    self.assertEqual(want - hit_lines, set(), [lines[i - first] for i in sorted(want - hit_lines)])
+                if enc in ("utf-16", "utf-16-le", "utf-16-be", "utf-32"):  # pre-fix: UTF-8 with replacement
+                    before = {h["line"] for h in bl.scan_text(raw.decode("utf-8", errors="replace"), [t])}
+                    missed_before += len(want - before)
+                    wide += len(want)
+        self.assertGreater(missed_before, 0.9 * wide, (missed_before, wide))  # observed: all 8212 missed
+
+    def test_printed_precision_rule_against_exact_decimal_arithmetic(self):
+        """Tokens at k = 3..9 significant digits, j = -2..2 steps from the correctly rounded value, with either sign:
+        the scanner flags a token exactly when |token - |t|| <= step/2 (Decimal, exact) or |token - |t|| <= 1e-9 |t|.
+        j = +-1, +-2 are the numbers that must not alarm. Cases within 1e-6 step of the boundary are not asserted
+        (the scanner compares in floating point with a 1e-9 slack). A step above 1 is printed in exponent form: the
+        rule reads the last printed digit, so 22000 for 22014 (an integer ending in rounding zeros) is not flagged."""
+        from decimal import Decimal, localcontext
+
+        flagged = silent = 0
+        for t in self.sealed_values(80, seed=12):
+            exact = abs(Decimal(t))
+            for k in range(3, 10):
+                with localcontext() as ctx:
+                    ctx.prec = k
+                    rounded = +exact
+                step = Decimal(1).scaleb(rounded.adjusted() - k + 1)
+                for j in (-2, -1, 0, 1, 2):
+                    value = rounded + j * step
+                    if value <= 0:
+                        continue
+                    diff = abs(value - exact)
+                    if abs(diff - step / 2) < step * Decimal("1e-6"):
+                        continue
+                    expected = diff <= step / 2 or diff <= Decimal("1e-9") * exact
+                    decimals = max(0, -(rounded.adjusted() - k + 1))
+                    for sign in ("", "-"):
+                        fixed = step <= 1 and rounded.adjusted() >= -5  # an integer ending in rounding zeros is not
+                        tok = sign + (f"{value:.{decimals}f}" if fixed else f"{value:.{k - 1}e}")  # read as rounded
+                        with self.subTest(t=t, k=k, j=j, token=tok):
+                            self.assertEqual(bool(bl.scan_text(f"x = {tok} ;\n", [t])), expected)
+                    flagged += expected
+                    silent += not expected
+        self.assertGreater(flagged, 500)
+        self.assertGreater(silent, 2000)
+
+    def test_low_counts_alarm_only_standalone_and_the_pre_fix_rule_does_not(self):
+        """Short sealed values (fewer than 3 significant digits): every standalone rendering is a weak hit, and the
+        same digits inside a name, version, date, range or path are not. The pre-fix rule (any equal token) flags
+        the embedded ones."""
+        embedded = ("run_{v} ok", "v{v}.0.1", "2023-10-{v}", "1-{v} GeV", "/data/{v}/x", "h{v}.root", "{v}rd try",
+                    "item_{v}", "x{v} y")
+        standalone = ("count: {v}", "{v} events", "n = {v},", "({v})", "[{v}]", "= {v};")
+        pre_fix = 0
+        for v in ("0", "3", "7", "12", "50", "99", "0.5", "2.5", "100"):
+            t = float(v)
+            self.assertLess(bl._significant_digits(t), bl.WEAK_DIGITS)
+            for form in embedded:
+                text = form.format(v=v) + "\n"
+                with self.subTest(v=v, text=text):
+                    self.assertEqual(bl.scan_text(text, [t]), [])
+                pre_fix += any(bl._close(float(m.group(0)), t, 1e-9) for m in bl.NUMBER.finditer(text))
+            for form in standalone:
+                hits = bl.scan_text(form.format(v=v) + "\n", [t])
+                with self.subTest(v=v, form=form):
+                    self.assertEqual([(h["sealed_value"], h.get("weak")) for h in hits], [(t, True)])
+        self.assertGreater(pre_fix, 40, pre_fix)
+
+
 @unittest.skipUnless(HAVE, "numpy and matplotlib required")
 class FigureTests(unittest.TestCase):
     def centers(self):

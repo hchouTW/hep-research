@@ -100,6 +100,142 @@ class ReviewFixes2Numbers(unittest.TestCase):
         self.assertTrue(N.contains_value("12,000 events", "12000"))
 
 
+def _generated_passages(seed, count):
+    """Seeded passages with the numbers they contain known by construction (the oracle: no tokenizer involved).
+    Each number has an optional sign (-, +, Unicode minus), an integer part (grouped with ',', '{,}', a thin space
+    or '\\,' from 1000 up), an optional fraction (trailing zeros kept) and exponent; it sits between a left and a
+    right context (sentence end, CJK text and full-width punctuation with no space, brackets, relation signs, LaTeX
+    '$', units), sometimes as 'x +/- y' or 'x \\pm y', with identifier decoys (C1, x86, 2nd) that are no numbers.
+    Yields (passage, [(canonical token, digits after the point counting the exponent)])."""
+    import random
+    rng = random.Random(seed)
+    left = ["", "R = ", "R為", "比值為", "（", "(", "[", "：", "$", "~", "is ", "≈ "]
+    right = ["", ".", "。", "，", ",", "）", ")", "]", "；", "合成資料", "$", " GeV", "%", "!", "?"]
+    decoys = ["C1", "x86", "2nd", "H2O", "run_3", "v2.1b"]
+
+    def number(signed=True):
+        sign = rng.choice(["", "", "-", "+", "−"]) if signed else ""
+        n = rng.choice([0, rng.randint(1, 999), rng.randint(1000, 999999)])
+        digits = str(n)
+        grouped = n >= 1000 and rng.random() < 0.5
+        if grouped:
+            sep = rng.choice([",", "{,}", " ", "\\,"])
+            head, rest = digits[:len(digits) % 3 or 3], digits[len(digits) % 3 or 3:]
+            text = head + "".join(sep + rest[i:i + 3] for i in range(0, len(rest), 3))
+        else:
+            text = digits
+        frac = "".join(rng.choice("0123456789") for _ in range(rng.choice([0, 0, 1, 2, 3, 4])))
+        if frac:
+            text += "." + frac
+        exp = ""
+        if not grouped and rng.random() < 0.2:
+            exp = rng.choice(["e", "E"]) + rng.choice(["", "-", "+"]) + str(rng.randint(0, 12))
+            text += exp
+        canon = ("-" if sign in ("-", "−") else "") + digits + ("." + frac if frac else "") + \
+            ("e" + exp[1:] if exp else "")
+        places = len(frac) - (int(exp[1:]) if exp else 0)
+        return sign + text, (canon, places)
+
+    for _ in range(count):
+        parts, want = [], []
+        for _ in range(rng.randint(1, 4)):
+            if rng.random() < 0.2:
+                parts.append(rng.choice(decoys))
+            a, ta_ = number()
+            if rng.random() < 0.2:
+                b, tb = number(signed=False)
+                pm = rng.choice([" +/- ", " \\pm ", " ± "])
+                parts.append(rng.choice(left) + a + pm + b + rng.choice(right))
+                want += [ta_, tb]
+            else:
+                parts.append(rng.choice(left) + a + rng.choice(right))
+                want.append(ta_)
+        yield " ".join(parts), want
+
+
+class ReviewFixes2NumbersGenerated(unittest.TestCase):
+    """Second oracle for RC-A2 and RC-A3 (axis C): 3000 generated passages whose numbers are known by construction,
+    so the expected tokens come from the generator, not from a tokenizer. Negative controls: the pre-fix rules
+    emulated here, the substring test of check_communication and audit_claims before ffd7804e (RC-A2) and the
+    adaptation regex before dc97a00c (RC-A3)."""
+
+    PRE_A3 = __import__("re").compile(r"(?<![\w.])\d+(?:\.\d+)?(?![\w.])")
+
+    def test_tokens_equal_the_numbers_put_into_generated_passages(self):
+        pre_a3_wrong = 0
+        for passage, want in _generated_passages(20261020, 3000):
+            canon = [c for c, _ in want]
+            self.assertEqual(N.tokens(passage), canon, passage)
+            self.assertEqual(_numbers(passage), set(canon), passage)            # RC-A3: adaptation reads the same set
+            pre = {m.group(0) for m in self.PRE_A3.finditer(passage.replace("±", "+/-"))}
+            pre_a3_wrong += pre != set(canon)
+        self.assertGreater(pre_a3_wrong, 1000, pre_a3_wrong)
+
+    def test_contains_value_against_value_and_digits_of_the_inserted_numbers(self):
+        """contains_value(passage, display) must be true exactly when an inserted number has the display's value
+        (compared as fractions here, not Decimal) and at least its digits after the point (RC-A2b). Displays: each
+        inserted number, the same value with one digit fewer or one trailing zero more, and the last digit changed."""
+        from fractions import Fraction
+
+        def frac_value(s):
+            mant, _, exp = s.lower().partition("e")
+            return Fraction(mant) * Fraction(10) ** int(exp or 0)
+
+        def places(s):
+            mant, _, exp = s.lower().partition("e")
+            return len(mant.partition(".")[2]) - int(exp or 0)
+
+        pre_a2_wrong, checked = 0, 0
+        for passage, want in _generated_passages(7, 1500):
+            displays = set()
+            for canon, _ in want:
+                displays.add(canon)
+                if "e" not in canon:
+                    displays.add(canon + ("0" if "." in canon else ".0"))
+                    if "." in canon:
+                        displays.add(canon[:-1].rstrip("."))
+                    displays.add(canon[:-1] + str((int(canon[-1]) + 1) % 10))
+            for d in sorted(displays):
+                if not d or d in ("-", "-0"):
+                    continue
+                expect = any(frac_value(c) == frac_value(d) and p >= places(d) for c, p in want)
+                self.assertEqual(N.contains_value(passage, d), expect, (passage, d))
+                pre_a2_wrong += (d in passage) != expect
+                checked += 1
+        self.assertGreater(checked, 10000)
+        self.assertGreater(pre_a2_wrong, 500, pre_a2_wrong)
+
+
+class ReviewFixes2AdaptationContexts(ta.Base):
+    """RC-A3 end to end over generated contexts: a 9.99 draft against the 1.02 record fails wherever the number sits
+    (sentence end, CJK text and full-width punctuation with no space, brackets, a signed, trailing-zero or exponent form
+    of the same wrong value). Negative control: the pre-fix adaptation regex (before dc97a00c) reads 9.99 in none of
+    the contexts where it ends a sentence or touches CJK letters (Python's \\w matches CJK; full-width brackets it
+    does read), for every unsigned form ('+9.99' after CJK it reads: the sign hides the letter)."""
+
+    FORMS = ["9.99", "+9.99", "9.990", "999e-2"]
+    CONTEXTS = [("In this sample the ratio is ", "."), ("在此樣本中比值為", "。"),
+                ("比值（", "）為合成資料"), ("the ratio is ", "!"), ("R為", "，統計"), ("ratio [", "]"), ("$R = ", "$.")]
+    PRE_FIX_BLIND = (0, 1, 4)  # sentence end, CJK on both sides, CJK before
+
+    def test_wrong_value_fails_in_every_generated_context(self):
+        pre = ReviewFixes2NumbersGenerated.PRE_A3
+        pre_read = 0
+        for form in self.FORMS:
+            for i, (left, right) in enumerate(self.CONTEXTS):
+                st = left + form + right
+                with self.subTest(statement=st):
+                    self.setUp()
+                    draft = st + " The uncertainty quoted is statistical only. Synthetic fixture."
+                    man = ta.manifest(self.p["record"], statements=[{"id": "st:1", "text": st, "claim_ids": ["claim:C1"],
+                                                                      "kind": "quantitative"}])
+                    rep = self.check(draft=draft, man=man)
+                    self.assertIn("adaptation.number_mismatch", self.codes(rep, "error"), rep["findings"])
+                    if i in self.PRE_FIX_BLIND and not form.startswith("+"):
+                        pre_read += any(N.same(m.group(0), "9.99") for m in pre.finditer(st))
+        self.assertEqual(pre_read, 0)
+
+
 class ReviewFixes2ValueVsPassage(Project):
     """RC-A2: a displayed value absent from its located passage is an error in check_communication and audit_claims."""
 
@@ -277,6 +413,63 @@ class ReviewFixes2Rounding(Project):
         rep = self.claims()
         self.assertIn("occurrence.value_unrounded_comparison", codes(rep, "warning"))
         self.assertNotIn("occurrence.value_mismatch", codes(rep))
+
+    @staticmethod
+    def no_rule_class(m, k, d):
+        """Integer-arithmetic oracle for a display with no rounding rule (RC-A5): source m/1000, display k/10^d.
+        'ok' when the values are equal; 'warning' when the display is the source rounded to the display's last digit
+        (strictly nearest, or a tie resolved away from zero or to the even digit: half up and half even both count);
+        'error' otherwise."""
+        if d <= 3:
+            scale = 10 ** (3 - d)
+            if k * scale == m:
+                return "ok"
+            diff, half = abs(m - k * scale), scale / 2
+            if diff < half:
+                return "warning"
+            if diff == half and (abs(k) * scale > abs(m) or k % 2 == 0):
+                return "warning"
+            return "error"
+        return "ok" if k == m * 10 ** (d - 3) else "error"   # more digits than the source: only equal values
+
+    def test_no_rule_classification_exhaustively_against_integer_arithmetic(self):
+        """Exhaustive on a stated finite domain (sci-fix RC-A5): every source with three decimals in [-2, 2] and every
+        display with 0 to 4 decimals within two of its last-digit steps of the source (k from floor(s 10^d) - 2 to
+        ceil(s 10^d) + 2), classified as the claim check does without a rule (equal; else a rounding of the source,
+        _rounds_somehow; else no rounding) against the integer oracle. Negative control: before 7e0ee239 every
+        unequal display without a rule was a warning, never an error."""
+        from decimal import Decimal
+        from communication_lib.claims import _rounds_somehow
+
+        counts, pre_fix_wrong = {"ok": 0, "warning": 0, "error": 0}, 0
+        for m in range(-2000, 2001):
+            src = Decimal(m).scaleb(-3)
+            for d in range(5):
+                lo, hi = (m * 10 ** d) // 1000 - 2, -((-m * 10 ** d) // 1000) + 2
+                for k in range(lo, hi + 1):
+                    shown = Decimal(k).scaleb(-d)
+                    got = "ok" if src == shown else ("warning" if _rounds_somehow(src, shown) else "error")
+                    want = self.no_rule_class(m, k, d)
+                    self.assertEqual(got, want, (str(src), str(shown)))
+                    counts[want] += 1
+                    pre_fix_wrong += want == "error"          # the pre-fix rule called these a warning
+        self.assertGreater(min(counts.values()), 1000, counts)
+        self.assertEqual(pre_fix_wrong, counts["error"])
+
+    def test_no_rule_classification_end_to_end_on_grid_cells(self):
+        """The same oracle through audit_claims on cells of each class, ties of both signs included."""
+        cells = [(1090, 11, 1), (1090, 102, 2), (1025, 103, 2), (1025, 102, 2), (1035, 103, 2), (-1025, -103, 2),
+                 (-1025, -102, 2), (1250, 1, 0), (1500, 2, 0), (2500, 2, 0), (2500, 3, 0), (1090, 1090, 3)]
+        from decimal import Decimal
+        for m, k, d in cells:
+            with self.subTest(source=m, display=(k, d)):
+                self.setUp()
+                self.set_source(str(Decimal(m).scaleb(-3)))
+                self.set_c1_values(str(Decimal(k).scaleb(-d)), rounding=None)
+                found = codes(self.claims())
+                want = self.no_rule_class(m, k, d)
+                self.assertEqual("occurrence.value_mismatch" in found, want == "error", found)
+                self.assertEqual("occurrence.value_unrounded_comparison" in found, want == "warning", found)
 
     def test_malformed_rule_is_an_error(self):
         for rule in ("decimals:x", "decimals:2:banker", "rounded:2", "decimals:999999"):

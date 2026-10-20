@@ -49,6 +49,41 @@ class SmallSeedComparisonTests(unittest.TestCase):
         for df, expected in ((1, 12.7062), (4, 2.77645), (8, 2.30600)):
             self.assertAlmostEqual(cmr.student_t_quantile(0.975, df), expected, places=4)
 
+    def test_student_t_quantile_against_scipy_and_the_published_table(self):
+        """sci-fix ML-SMALL (C10), independent implementation: scipy.stats.t.ppf over df 1-60, large and fractional
+        df (the Welch case) and seven levels, to 1e-9 relative (the bisection reaches about 2e-11). Published: the
+        two-sided 95% column of the NIST/SEMATECH e-Handbook of Statistical Methods table of critical values of
+        Student's t (three decimals), within half a unit of the last digit."""
+        from scipy import stats
+
+        for df in [*range(1, 61), 80, 120, 500, 1e4, 2.7, 5.5]:
+            for p in (0.6, 0.9, 0.95, 0.975, 0.99, 0.995, 0.9995):
+                with self.subTest(df=df, p=p):
+                    self.assertAlmostEqual(cmr.student_t_quantile(p, df) / stats.t.ppf(p, df), 1.0, delta=1e-9)
+        table = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 10: 2.228, 20: 2.086, 30: 2.042, 100: 1.984}
+        for df, value in table.items():
+            self.assertAlmostEqual(cmr.student_t_quantile(0.975, df), value, delta=5e-4, msg=df)
+
+    def test_false_improvement_rate_is_the_t_test_size_and_the_bootstrap_rate_is_not(self):
+        """Analytic oracle, two-sided: with fewer than 10 seeds the decision is the one-sample t test on the paired
+        differences, whose size for Gaussian differences is exactly 5%; 2000 null trials per seed count, rate within
+        4 binomial standard errors (0.0195) of 0.05 (observed 0.0425, 0.050, 0.050). Negative control: the pre-fix
+        rule, a percentile bootstrap interval of the paired differences, on the same trials (observed 26.7%, 17.4%,
+        10.6%, the first pass's 26%, 15%, 11%)."""
+        rng, trials = random.Random(11), 2000
+        sigma = (0.05 * 0.95 / trials) ** 0.5
+        for n in (3, 5, 9):
+            hits = pre_fix = 0
+            for _ in range(trials):
+                base = [rng.gauss(0, 1) for _ in range(n)]
+                var = [b + rng.gauss(0, 0.5) for b in base]
+                hits += cmr.compare(base, var, resamples=200, seed=rng.randrange(10 ** 6))["interval_excludes_zero"]
+                lo, hi = cmr.bootstrap_interval([v - b for b, v in zip(base, var)], 0.95, 200, rng.randrange(10 ** 6))
+                pre_fix += lo > 0 or hi < 0
+            with self.subTest(n=n):
+                self.assertLess(abs(hits / trials - 0.05), 4 * sigma, hits / trials)
+                self.assertGreater(pre_fix / trials, 0.05 + 4 * sigma, pre_fix / trials)
+
 
 class SculptingBaselineTests(unittest.TestCase):
     def test_baseline_is_a_quantile_of_at_least_20_resamplings(self):

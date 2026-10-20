@@ -146,6 +146,76 @@ class GroupKeyTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 canonical_key(bad)
 
+    def test_canonical_key_against_an_independent_reading_of_its_rule(self):
+        """sci-fix ML-SPLITS, independent implementation: the documented rule written again with decimal arithmetic
+        and string splitting (no regex, no float.is_integer): a float equal to an integer becomes that integer's
+        digits, any other float its repr; a string is stripped, a trailing '.' plus zeros after sign and digits is
+        dropped (the integer part read as a number; any Unicode decimal digits, as int() reads them, so '١.0' is 1
+        and '².0' is text), and case-folded unless case_sensitive. Over a generated domain
+        (signed zero, subnormals, 2^53 and 1e300, NaN and infinities, numeric-looking text, Unicode case folding),
+        both case modes. Invariant: an integer, its float and its text forms with or without a zero fraction are one
+        key. Negative control: the pre-fix normalize_key (str, strip, casefold) splits 1 and 1.0."""
+        from decimal import Decimal
+
+        def reference(value, case_sensitive=False):
+            if isinstance(value, int):
+                return format(Decimal(value), "f")
+            if isinstance(value, float):
+                if value == value and value not in (float("inf"), float("-inf")):
+                    d = Decimal(value)
+                    if d == d.to_integral_value():
+                        return format(d.copy_abs(), "f") if d >= 0 else "-" + format(d.copy_abs(), "f")
+                return repr(value)
+            text = str(value).strip()
+            head, dot, tail = text.partition(".")
+            digits = head[1:] if head[:1] in "+-" else head
+            if dot and digits and digits.isdecimal() and set(tail) <= {"0"}:
+                text = format(Decimal(head), "f").lstrip("+")
+                text = "0" if text == "-0" else text
+            return text if case_sensitive else text.casefold()
+
+        def pre_fix(value, case_sensitive=False):
+            text = str(value).strip()
+            return text if case_sensitive else text.casefold()
+
+        floats = [0.0, -0.0, 1e-300, 5e-324, -5e-324, 0.1, 1.5, -2.0, 2.0 ** 53, 2.0 ** 53 + 2, 1e300, -1e300,
+                  float("nan"), float("inf"), float("-inf"), 123456789.0, 1e16]
+        ints = [0, 1, -1, 7, 10 ** 20, -(10 ** 20), 2 ** 53 + 1]
+        texts = ["1", "1.0", "1.", " 1 ", "\t-3.000\n", "+5", "+5.0", "-0.0", "0.0", "007", "1e3", "0x10", "1.50",
+                 "1.05", ".0", "-.0", "+.", "Run7", "STRASSE", "Straße", "ǅx", "", "  ", "nan", "1_000", "١.0",
+                 "².0",
+                 "x.0", "1.0.0"]
+        for case_sensitive in (False, True):
+            for value in floats + ints + texts:
+                with self.subTest(value=value, case_sensitive=case_sensitive):
+                    self.assertEqual(canonical_key(value, case_sensitive), reference(value, case_sensitive))
+        missed = 0
+        for i in (*range(-30, 31), 10 ** 12, -(10 ** 12), 2 ** 53):
+            forms = (i, float(i), str(i), f" {i} ", f"{i}.0", f"{i}.", f"{i}.000")
+            self.assertEqual({canonical_key(v) for v in forms}, {str(i)}, i)
+            missed += len({pre_fix(v) for v in forms}) > 1
+        self.assertEqual(missed, 64)
+
+    def test_canonical_key_property_over_generated_values(self):
+        """The same rule over hypothesis-generated integers and text (skipped without hypothesis): an integer and
+        its float (|i| <= 2^53) and text forms are one key; case-folding is idempotent; case_sensitive keeps the
+        stripped text of anything that is not numeric."""
+        try:
+            from hypothesis import given, settings, strategies as st
+        except ImportError:
+            self.skipTest("hypothesis not installed (the fixed-domain test above still runs)")
+
+        @settings(max_examples=300, deadline=None)
+        @given(st.integers(-(2 ** 53), 2 ** 53), st.text(max_size=12))
+        def check(i, text):
+            self.assertEqual(len({canonical_key(v) for v in (i, float(i), str(i), f"{i}.0", f" {i}. ")}), 1)
+            key = canonical_key(text)
+            self.assertEqual(canonical_key(key), key)
+            if "." not in text:
+                self.assertEqual(canonical_key(text, case_sensitive=True), text.strip())
+
+        check()
+
     def test_a4_numeric_group_values_are_one_group(self):
         rows = [{"id": "a", "run": 1}, {"id": "b", "run": 1.0}, {"id": "c", "run": "1"},
                 {"id": "d", "run": 2}, {"id": "e", "run": 3}, {"id": "f", "run": 4}]
