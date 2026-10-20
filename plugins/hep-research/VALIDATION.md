@@ -1961,6 +1961,30 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-GAPS-CLOSED (2026-10-20, branch `ci/close-evidence-gaps`)
+
+Three ledger gaps that needed a backend, not a code change.
+
+**BAYES-T24, ArviZ parent record.** A scratch venv with the CI lock and ArviZ 0.23.4 (Python 3.13.2, NumPy 2.4.6,
+SciPy 1.17.1: the versions of the stats-backends CI job); the fix's test file taken into a worktree of its parent,
+as in SCIFIX-PARENT-RECORDS.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_statistics/test_bayes_arviz_oracle.py::ArviZOracle::test_rhat_ess_and_mcse_match` (at `d161b3b7`) | independent implementation (ArviZ 0.23.4) | fail (assertion) on five cases: MCSE ratio 0.954 (iid), 1.036 (ar1), 0.956 (heavy tails); bulk ESS ratio 0.993 (two modes stuck), 0.994 (shifted chain); ValueError: Quantiles must be in the range [0, 1] (ties) | pass | no | CI lock + ArviZ 0.23.4 |
+
+Parent `bb0774f0`, fix `d161b3b7`. The ratios equal those of the SciPy oracle on the same parent (SCIFIX-ORACLES-BATCH2):
+the two independent oracles agree.
+
+**TH9-MASSES, PDG cross-check in CI.** New required job `pdg-cross-check` in `.github/workflows/tests.yml`: the CI lock
+plus pdg 2026.0 (SQLAlchemy 2.1.5, typing_extensions 4.16.0) and `tools/run_required_backends.py --require
+pdg==2026.0 --modules tests.core.test_constants`, so the bundled-masses test fails the job if it skips for pdg (missing
+package or another edition). Locally with that set: 16 run, 0 skipped, exit 0; without pdg: exit 1.
+
+**ML-DOMAIN, PyTorch tests in CI.** The optional `torch-cpu` job's check-run record on `54ee003a` (main) lists
+`tests.skills.hep_ml.test_audit_domain_method` with 13 run, 0 skipped, pass: the three PyTorch tests run there. That job
+is continue-on-error, so a failure does not block a merge; whether it should is left to the maintainer (ledger gap).
+
 ## SCIFIX-SAMPLE-NAME (2026-10-20, E2v and the CI lock; branch `fix/s2-key-and-sample-name`)
 
 sci-fix SAMPLE-NAME-DOT-SEGMENTS (S2: a validator verdict). Found by the SCIFIX-ORACLES-S2 tests: `_sample_name` in
