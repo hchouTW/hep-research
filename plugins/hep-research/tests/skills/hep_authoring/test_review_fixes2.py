@@ -160,6 +160,25 @@ def cpu_seconds(fn, repeats=3):
     return best
 
 
+def cpu_seconds_pair(small_fn, large_fn, repeats=3):
+    """cpu_seconds for two sizes with their calls interleaved (small, large, small, ...): a drift over the run (clock
+    ramp-up, cache warm-up) then reaches both minima alike instead of only the size timed first."""
+    import gc
+    import time
+    best = [float("inf"), float("inf")]
+    for _ in range(repeats):
+        for k, fn in enumerate((small_fn, large_fn)):
+            gc.collect()
+            gc.disable()
+            try:
+                t0 = time.process_time()
+                fn()
+                best[k] = min(best[k], time.process_time() - t0)
+            finally:
+                gc.enable()
+    return best[0], best[1]
+
+
 def scaling_ratio(small, large):
     return large / max(small, RATIO_FLOOR_SECONDS)
 
@@ -387,16 +406,17 @@ class ReviewFixes2ManuscriptBounds(Manuscript):
         """Regression for a quadratic manuscript scan: 4x the lines must cost well under 16x the CPU time.
 
         Robust to machine load: the clock is this process's CPU time (time off the CPU on a busy machine does not
-        count), each size is timed three times with the garbage collector off and the minimum kept, and the bound is
-        on the scaling ratio (linear about 4, quadratic about 16, limit 10), with only a generous absolute ceiling.
+        count), each size is timed three times, interleaved, with the garbage collector off and the minimum kept, and
+        the bound is on the scaling ratio (linear about 4, quadratic about 16, limit 10), with only a generous absolute
+        ceiling.
         test_scaling_check_rejects_a_quadratic_scan shows that the same measurement fails a quadratic scan."""
         import check_manuscript as cm
         files = {}
         for n in (10000, 40000):
             files[n] = self.write(f"m{n}.tex", "".join(f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}\n"
                                                        for i in range(n)))
-        small = cpu_seconds(lambda: cm.scan_files([files[10000]], []))
-        large = cpu_seconds(lambda: cm.scan_files([files[40000]], []))
+        small, large = cpu_seconds_pair(lambda: cm.scan_files([files[10000]], []),
+                                        lambda: cm.scan_files([files[40000]], []))
         self.assertLess(large, 60.0, "absolute ceiling (CPU seconds) for 40k lines; about 0.4 s on a laptop")
         self.assertLess(scaling_ratio(small, large), LINEAR_RATIO_LIMIT,
                         f"10k lines {small:.3f} s, 40k lines {large:.3f} s CPU: not linear")
@@ -407,11 +427,13 @@ class ReviewFixes2ManuscriptBounds(Manuscript):
 
         The rescan is a Python loop over the earlier lines, so its cost per step is interpreter work and the ratio
         stays near 16. A str.count over the earlier text ran at a byte rate that grew with the text on a CI runner
-        (ratio 7.4: 0.047 s vs 0.351 s), which made this check flaky."""
+        (ratio 7.4: 0.047 s vs 0.351 s), which made this check flaky. With the sizes timed one after the other the
+        Python loop still gave 8.5 on a CI runner (0.050 s vs 0.424 s: the small size, timed first, ran slow), so the
+        sizes are timed interleaved (cpu_seconds_pair); locally 13.6-15.9 one after the other, 15.4-15.8 interleaved."""
         def quadratic(n):
             lines = [f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}" for i in range(n)]
             return lambda: [sum(1 for earlier in lines[:i] if "\\ref" in earlier) for i in range(n)]
-        small, large = cpu_seconds(quadratic(1500)), cpu_seconds(quadratic(6000))
+        small, large = cpu_seconds_pair(quadratic(1500), quadratic(6000))
         self.assertGreater(scaling_ratio(small, large), LINEAR_RATIO_LIMIT, f"{small:.3f} s, {large:.3f} s")
 
     def test_cpu_clock_ignores_time_off_the_cpu(self):
