@@ -143,6 +143,45 @@ class MeanLimitTests(unittest.TestCase):
         with self.assertRaisesRegex(pd.DiagnosticsError, "limited to total means up to 500"):
             pd.fc_interval(0, 480.0)
 
+    def test_two_oracles_and_the_clipped_search_as_negative_control(self):
+        """sci-fix POISSON-500 (axis C). Oracle 1, analytic: the Garwood ends and the classical limit are chi-square
+        quantiles, upper = chi2.ppf(1 - a, 2n + 2) / 2 and lower = chi2.ppf(a, 2n) / 2 (SciPy, computed here).
+        Oracle 2, independent implementation: the root of the regularized upper incomplete gamma Q(n + 1, mu) =
+        P(N <= n | mu) found with mpmath at 50 digits, without core/stats. Invariant: the upper end increases
+        strictly with n across the old limit. Negative control: the pre-fix search, bisection on [0, 500], returns
+        500 for n = 490 and fails the oracles. Tolerance 1e-9 relative: both oracles are good to far better."""
+        import mpmath
+        from scipy import stats as sps
+
+        def gamma_root(n, target):  # mu with P(N <= n | mu) = target
+            with mpmath.workdps(50):
+                return float(mpmath.findroot(lambda mu: mpmath.gammainc(n + 1, mu, mpmath.inf, regularized=True)
+                                             - target, (n + 1, n + 10 * math.sqrt(n + 1)), solver="illinois",
+                                             tol=1e-30, maxsteps=200))
+
+        for n, cl in ((490, 0.6827), (495, 0.95), (600, 0.6827), (5000, 0.6827)):
+            with self.subTest(n=n, cl=cl):
+                a = (1.0 - cl) / 2.0
+                iv = pd.central_interval(n, cl)
+                analytic = sps.chi2.ppf(1.0 - a, 2 * n + 2) / 2.0
+                self.assertAlmostEqual(iv["upper"] / analytic, 1.0, delta=1e-9)
+                self.assertAlmostEqual(iv["lower"] / (sps.chi2.ppf(a, 2 * n) / 2.0), 1.0, delta=1e-9)
+                self.assertAlmostEqual(iv["upper"] / gamma_root(n, a), 1.0, delta=1e-9)
+                ul = pd.upper_limit(n, 0.0, cl)["upper_limit_on_total_mean"]
+                self.assertAlmostEqual(ul / gamma_root(n, 1.0 - cl), 1.0, delta=1e-9)
+                self.assertAlmostEqual(ul / (sps.chi2.ppf(cl, 2 * n + 2) / 2.0), 1.0, delta=1e-9)
+        uppers = [pd.central_interval(n)["upper"] for n in range(470, 531, 5)]
+        self.assertTrue(all(b > a + 1.0 for a, b in zip(uppers, uppers[1:])), uppers)
+
+        def clipped(n, target, lo=0.0, hi=500.0):  # the pre-fix search range, written here
+            for _ in range(200):
+                mid = 0.5 * (lo + hi)
+                lo, hi = (mid, hi) if pd.poisson_cdf(n, mid) > target else (lo, mid)
+            return 0.5 * (lo + hi)
+        old = clipped(490, (1.0 - 0.6827) / 2.0)
+        self.assertAlmostEqual(old, 500.0, delta=1e-9)
+        self.assertGreater(abs(old / gamma_root(490, (1.0 - 0.6827) / 2.0) - 1.0), 1e-3)
+
 
 class UpperTailTests(unittest.TestCase):
     """P(N >= n) far into the tail: 1 - P(N <= n - 1) in double precision cancels to 0 below about 1e-16."""

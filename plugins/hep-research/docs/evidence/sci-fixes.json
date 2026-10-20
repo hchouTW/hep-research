@@ -29,21 +29,22 @@
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_p0_regressions.py",
-    "tests/core/test_stats_counting_asymptotic_oracles.py"
+    "tests/core/test_stats_counting_asymptotic_oracles.py",
+    "tests/core/test_properties.py"
    ],
    "oracle_kinds": [
     "behavioral",
-    "independent-implementation"
+    "independent-implementation",
+    "analytic",
+    "invariant"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D1",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "per-test parent record",
-    "second oracle kind",
-    "negative control",
-    "property test"
-   ]
+    "per-test parent record"
+   ],
+   "note": "property test of ln L against n ln(mu) - mu with the pre-fix domain rule as negative control, 2026-10-20"
   },
   {
    "id": "F02",
@@ -52,21 +53,21 @@
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_p0_regressions.py",
-    "tests/core/test_stats_statistical_toys.py"
+    "tests/core/test_stats_statistical_toys.py",
+    "tests/core/test_properties.py"
    ],
    "oracle_kinds": [
     "analytic",
-    "independent-implementation"
+    "independent-implementation",
+    "invariant"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "per-test parent record",
-    "negative control for the Clopper-Pearson part",
-    "property test"
+    "per-test parent record"
    ],
-   "note": "toys_not_evaluated path tested 2026-10-18"
+   "note": "toys_not_evaluated path tested 2026-10-18; property test of the Clopper-Pearson ends against exact binomial sums (mpmath), Wald at k = 0 as negative control, 2026-10-20"
   },
   {
    "id": "F03",
@@ -170,16 +171,16 @@
    "oracle_kinds": [
     "independent-implementation",
     "closure",
-    "invariant"
+    "invariant",
+    "analytic"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D0",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "second independent oracle kind",
     "parent record"
    ],
-   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18"
+   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20"
   },
   {
    "id": "POISSON-500",
@@ -193,16 +194,16 @@
    ],
    "oracle_kinds": [
     "independent-implementation",
-    "invariant"
+    "invariant",
+    "analytic"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D0",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "parent record",
-    "negative control",
-    "second oracle kind (chi2 relation)"
-   ]
+    "parent record"
+   ],
+   "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20"
   },
   {
    "id": "TH9-MASSES",
@@ -237,16 +238,16 @@
     "tests/skills/hep_detector/test_hep_detector_audit.py"
    ],
    "oracle_kinds": [
-    "analytic"
+    "analytic",
+    "invariant"
    ],
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "property test yield(z)/yield(1) = z^2",
     "second oracle kind"
    ],
-   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18"
+   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20"
   },
   {
    "id": "DR-WP1-02",
@@ -259,16 +260,14 @@
    ],
    "oracle_kinds": [
     "analytic",
-    "independent-implementation"
+    "independent-implementation",
+    "invariant"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D2",
-   "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "property test over x_max and lambda",
-    "negative control"
-   ],
-   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes)"
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes); grid of x_max, lambda and depths against the textbook form in 60-digit decimal arithmetic, the pre-fix form as negative control, half-maximum bracketing, 2026-10-20"
   },
   {
    "id": "DR-WP2-06",

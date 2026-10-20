@@ -27,7 +27,9 @@ from contracts.comparison import gate as gate_mod  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from core.evidence.ledger import check_ledger  # noqa: E402
 from core.partition import engine  # noqa: E402
+from core.stats import likelihood_limits as ll  # noqa: E402
 from core.stats import poisson_diagnostics as pd  # noqa: E402
+from core.stats import tail_estimation as te  # noqa: E402
 from core.stats import statistical_toys as toys  # noqa: E402
 from core.stats._linalg import cholesky  # noqa: E402
 from core.stats.validate_covariance import validate_covariance  # noqa: E402
@@ -199,6 +201,57 @@ class ValidatorsNeverRaise(unittest.TestCase):
     def test_covariance_and_response_validators(self, doc):
         validate_covariance(doc)
         validate_response(doc)
+
+
+
+@unittest.skipUnless(HAVE, SKIP)
+class SciFixProperties(unittest.TestCase):
+    """Property tests that are sci-fix evidence (docs/evidence/sci-fixes.json, axis C); each oracle is written here."""
+
+    @fast(200)
+    @given(st.integers(0, 60), st.floats(-50.0, 200.0, allow_nan=False))
+    def test_f01_poisson_log_likelihood_against_its_closed_form(self, n, mu):
+        """F01: ln L = n ln(mu) - mu (no n! term) for mu > 0; mu = 0 only with n = 0; a negative mean is outside the
+        model. Negative control: the pre-fix rule (any mu <= 0 with n = 0 read as an empty bin) accepts mu < 0."""
+        got = ll._lnl(n, mu)
+        if mu > 0.0:
+            self.assertAlmostEqual(got, n * math.log(mu) - mu, delta=1e-12 * max(1.0, abs(got)))
+        elif mu == 0.0:
+            self.assertEqual(got, 0.0 if n == 0 else ll.NEG)
+        else:
+            self.assertLessEqual(got, ll.NEG)
+            old = 0.0 if n == 0 else ll.NEG  # the pre-fix value for mu <= 0
+            if n == 0:
+                self.assertNotEqual(old, got)
+
+    @fast(100)
+    @given(st.integers(1, 200), st.data(), st.sampled_from([0.6827, 0.90, 0.95]))
+    def test_f02_clopper_pearson_ends_solve_the_binomial_tail_equations(self, n, data, cl):
+        """F02: the Clopper-Pearson ends are the p where P(X >= k | p) = a (lower) and P(X <= k | p) = a (upper), with
+        a = (1 - cl) / 2; checked with exact binomial sums at 40 digits (mpmath), so the interval always holds k / n,
+        is [0, ...] at k = 0 and [..., 1] at k = n. Negative control: the Wald interval is [0, 0] at k = 0 and fails
+        the upper-end equation."""
+        import mpmath
+        k = data.draw(st.integers(0, n))
+        lo, hi = te.clopper_pearson(k, n, cl)
+        a = (1.0 - cl) / 2.0
+
+        def binom_sum(p, js):  # sum of binomial probabilities P(X = j | n, p) over js, exact to 40 digits
+            with mpmath.workdps(40):
+                p = mpmath.mpf(p)
+                return float(mpmath.fsum(mpmath.binomial(n, j) * p ** j * (1 - p) ** (n - j) for j in js))
+        self.assertLessEqual(lo, k / n)
+        self.assertGreaterEqual(hi, k / n)
+        if k == 0:
+            self.assertEqual(lo, 0.0)
+        else:
+            self.assertAlmostEqual(binom_sum(lo, range(k, n + 1)), a, delta=1e-9)   # P(X >= k | lo) = a
+        if k == n:
+            self.assertEqual(hi, 1.0)
+        else:
+            self.assertAlmostEqual(binom_sum(hi, range(0, k + 1)), a, delta=1e-9)   # P(X <= k | hi) = a
+            if k == 0:  # negative control: the Wald upper end at k = 0 is 0, where P(X <= 0 | 0) = 1, not a
+                self.assertGreater(abs(binom_sum(0.0, range(0, 1)) - a), 0.5)
 
 
 if __name__ == "__main__":

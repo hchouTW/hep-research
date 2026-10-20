@@ -12,6 +12,7 @@ Standard library only; synthetic inputs only.
 Place in tests/skills/hep_detector/ to run with the suite; from the work dir set
 HEP_PLUGIN to the plugin root.
 """
+import decimal
 import json
 import math
 import os
@@ -119,6 +120,65 @@ class GaisserHillasBracketingTests(unittest.TestCase):
         self.assertAlmostEqual(value, 0.47236662355903103, delta=1e-9)
 
 
+class GaisserHillasPropertyTests(unittest.TestCase):
+    """sci-fix DR-WP1-02 (axis C): the profile on a grid of x_max (750 to 1e15 g/cm^2), lambda (20 to 3e4) and depths
+    x_max + t sigma (sigma = sqrt(lambda (x_max - x0)), t = -3..3) against the textbook form
+    N_max ((X - x0)/(x_max - x0))^((x_max - x0)/lambda) exp((x_max - X)/lambda) in 60-digit decimal arithmetic,
+    written here (no cancellation at that precision). Invariants: N(x_max) = N_max, N <= N_max, and the half-maximum
+    depths bracket N = N_max / 2 within the search tolerance. Negative control: the pre-fix double-precision form
+    exp(e ln(base) + (x_max - X)/lambda) misses the oracle by more than 1e-6 on part of the grid. Tolerance: the
+    exponent E = e (log1p(u) - u) ~ -t^2/2 is computed with relative error about 2 eps / |u| (log1p(u) - u cancels
+    for small u), so N carries a relative error up to 4 eps |E| / |u| = 2 eps |t| sqrt((x_max - x0) / lambda) plus
+    1e-12 (1.8e-9 at x_max = 1e15, lambda = 20, t = 3, where the old form is off by 8e-4). A first draft with a
+    flat 1e-9 failed there; the bound above is derived, not fitted."""
+
+    X0 = -60.0
+
+    @staticmethod
+    def textbook(depth, x_max, x0, lam):
+        with decimal.localcontext() as ctx:
+            ctx.prec = 60
+            d, xm, z, la = (decimal.Decimal(repr(v)) for v in (depth, x_max, x0, lam))
+            span = xm - z
+            if d <= z:
+                return 0.0  # the model is undefined at or below x0; N -> 0 there
+            return float(((span / la) * ((d - z) / span).ln() + (xm - d) / la).exp())
+
+    def test_profile_against_high_precision_and_the_old_form(self):
+        old_misses = 0
+        for x_max in (750.0, 1e4, 1e8, 1e12, 1e15):
+            for lam in (20.0, 60.0, 300.0, 3e4):
+                sigma = math.sqrt(lam * (x_max - self.X0))
+                self.assertEqual(xmax_gaisser_hillas.gaisser_hillas(x_max, 1.0, x_max, self.X0, lam), 1.0)
+                for t in (-3.0, -1.0, -0.5, 0.25, 0.5, 1.0, 3.0):
+                    depth = x_max + t * sigma
+                    if depth <= self.X0 + 1.0:
+                        continue
+                    with self.subTest(x_max=x_max, lam=lam, t=t):
+                        got = xmax_gaisser_hillas.gaisser_hillas(depth, 1.0, x_max, self.X0, lam)
+                        want = self.textbook(depth, x_max, self.X0, lam)
+                        self.assertLessEqual(got, 1.0)
+                        if want > 1e-250:
+                            tol = 1e-12 + 2.0 * 2.3e-16 * abs(t) * math.sqrt((x_max - self.X0) / lam)
+                            self.assertAlmostEqual(got / want, 1.0, delta=tol)
+                            e, base = (x_max - self.X0) / lam, (depth - self.X0) / (x_max - self.X0)
+                            old = math.exp(e * math.log(base) + (x_max - depth) / lam)  # pre-fix form
+                            old_misses += abs(old / want - 1.0) > 1e-6
+        self.assertGreater(old_misses, 0)  # negative control: the pre-fix form fails part of this grid
+
+    def test_half_maximum_depths_bracket_half_the_maximum(self):
+        tol = 1e-6
+        for x_max, lam in ((750.0, 60.0), (750.0, 3e5), (5e6, 2e5), (1e12, 60.0), (1e15, 30.0)):
+            with self.subTest(x_max=x_max, lam=lam):
+                rising, falling = xmax_gaisser_hillas.half_max_depths(1.0, x_max, self.X0, lam, tolerance=tol)
+                self.assertLess(rising, x_max)
+                self.assertGreater(falling, x_max)
+                for edge, sign in ((rising, -1.0), (falling, 1.0)):  # N falls away from x_max on both sides
+                    step = max(2.0 * tol, 1e-14 * abs(edge))
+                    self.assertGreaterEqual(self.textbook(edge - sign * step, x_max, self.X0, lam), 0.5)
+                    self.assertLessEqual(self.textbook(edge + sign * step, x_max, self.X0, lam), 0.5)
+
+
 # --------------------------------------------------------------------- E-C1
 class CherenkovChargeTests(unittest.TestCase):
     # n=1.05, p=40 GeV/c, L=2 cm, N0=100/cm, 5 mrad: He4 beta=0.995687, theta=0.296014 rad,
@@ -151,6 +211,20 @@ class CherenkovChargeTests(unittest.TestCase):
         beta_p = self.P / math.hypot(self.P, 0.93827208943)  # CODATA 2022 proton mass, GeV
         p_yield = self.N0 * self.L_CM * (1.0 - 1.0 / (self.N_INDEX * beta_p) ** 2)
         self.assertAlmostEqual(payload['species_a']['expected_photons'], p_yield, delta=1e-9)
+
+    def test_yield_scales_as_z_squared_at_fixed_velocity(self):
+        """sci-fix DR-WP1-01 invariant: two species of the same mass and momentum have the same velocity and angle, so
+        their yields differ by z^2 exactly (relative 1e-12, rounding only); the threshold and angle do not change.
+        Negative control: the pre-fix yield ratio is 1 for every z."""
+        for z in (2, 3, 6, 26):
+            with self.subTest(z=z):
+                payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', '3.7273794118:1',
+                                   f'3.7273794118:{z}', '--momentum', '40')
+                a, b = payload['species_a'], payload['species_b']
+                self.assertAlmostEqual(b['expected_photons'] / a['expected_photons'], z * z, delta=1e-12 * z * z)
+                self.assertEqual(b['cherenkov_angle_rad'], a['cherenkov_angle_rad'])
+                self.assertEqual(b['threshold_momentum_gev'], a['threshold_momentum_gev'])
+                self.assertGreater(abs(b['expected_photons'] / a['expected_photons'] - 1.0), 1.0)
 
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',

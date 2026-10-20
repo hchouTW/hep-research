@@ -461,9 +461,6 @@ class CliTests(unittest.TestCase):
             ll.main(["profile-limit", "--n", "1", "--b", "1"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class LogClsCrossingTests(unittest.TestCase):
     """sci-fix CLS-LOGINTERP in the core toy CLs (likelihood_limits._toy_cls): the limit is the first crossing of
@@ -489,3 +486,7 @@ class LogClsCrossingTests(unittest.TestCase):
         self.assertIsNone(ll._log_cls_crossing([1.0, 2.0], [0.5, 0.2], 0.05))
         # first interval: CLs = 1 at mu = 0 is the left point
         self.assertAlmostEqual(ll._log_cls_crossing([2.0], [0.01], 0.05), 2.0 * math.log(0.05) / math.log(0.01), places=12)
+
+
+if __name__ == "__main__":
+    unittest.main()
