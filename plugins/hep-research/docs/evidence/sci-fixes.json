@@ -482,10 +482,25 @@
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "the validator's sample name does not collapse a middle './' (work/./x.csv)"
+   "gaps": [],
+   "note": "the event-id check exhaustively right over all 4096 subset pairs of six ids; the validator's sample-name rule fires exactly for same-file spellings (PurePosixPath); the pre-fix exact-string comparison as negative control; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the middle './' gap found by these tests is fixed as SAMPLE-NAME-DOT-SEGMENTS"
+  },
+  {
+   "id": "SAMPLE-NAME-DOT-SEGMENTS",
+   "title": "Validator sample names drop '.' segments anywhere in the path",
+   "changelog": "CHANGELOG Unreleased",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_calibration_identity.py"
    ],
-   "note": "the event-id check exhaustively right over all 4096 subset pairs of six ids; the validator's sample-name rule fires exactly for same-file spellings (PurePosixPath); the pre-fix exact-string comparison as negative control; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "oracle_kinds": [
+    "independent-implementation"
+   ],
+   "correctness": "C2",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "ml.calibration_on_fit_sample against pathlib.PurePosixPath for 120 spellings with '.' segments in the middle or at the end, each paired with the same and the other file in both orders (480 validations); the pre-fix leading-'./' rule misses all 240 same-file pairs; fails by assertion on parent 6344738e (240 subtests) and passes on the fix; 3 local mutants killed, including the revert (VALIDATION SCIFIX-SAMPLE-NAME 2026-10-20)"
   },
   {
    "id": "ML-K05",

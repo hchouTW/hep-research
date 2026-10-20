@@ -1961,6 +1961,29 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-SAMPLE-NAME (2026-10-20, E2v and the CI lock; branch `fix/s2-key-and-sample-name`)
+
+sci-fix SAMPLE-NAME-DOT-SEGMENTS (S2: a validator verdict). Found by the SCIFIX-ORACLES-S2 tests: `_sample_name` in
+`contracts/validate.py` removed only a leading './', so `ml.calibration_on_fit_sample` passed a calibration validated
+on its fit sample written as 'work/./val_scores.csv'. The fix drops '.' segments anywhere and repeated or trailing
+separators; '..' is kept. Contracts patch change (3.0.1, to be set at the release).
+
+**Correctness (C2):** `tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::
+test_dot_segments_anywhere_in_the_path_name_one_sample`: 120 spellings of 'work/val_scores.csv' with '.' segments in
+the middle ('/./', '/././', '//./', '/.//', '/././/') and optionally at the end ('/.', '/'), with or without a leading
+'./', with '/' or '\\', in both cases, each paired with the plain name of the same file and of the other file in both
+orders (480 validations); the rule fires exactly when pathlib.PurePosixPath names one file. Negative control: the
+pre-fix rule misses all 240 same-file pairs.
+
+**Discrimination (D3):**
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample` | independent implementation | fail (assertion): 240 subtests (every same-file pair not flagged) | pass | no | E2v |
+
+Parent: `6344738e` (this branch's first commit) with the test file copied in. Local mutants of `_sample_name`, all
+killed: the revert, '.' segments kept, empty segments kept.
+
 ## SCIFIX-CANONICAL-KEY (2026-10-20, E2v and the CI lock; branch `fix/s2-key-and-sample-name`)
 
 sci-fix CANONICAL-KEY-ZERO-FRACTION (S2: an overlap check can pass with the same ID in two splits). Found by the

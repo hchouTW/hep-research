@@ -9,6 +9,7 @@ disjointness check. All inputs SYNTHETIC.
 import copy
 import csv
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -172,6 +173,48 @@ class SampleIdentityPropertyTests(unittest.TestCase):
             should += same_file(fit, ev)
         self.assertEqual(fired, should)
         self.assertGreater(should, 1000)
+
+
+class SampleNameDotSegmentTests(unittest.TestCase):
+    def test_dot_segments_anywhere_in_the_path_name_one_sample(self):
+        """sci-fix SAMPLE-NAME-DOT-SEGMENTS, independent implementation: pathlib.PurePosixPath drops '.' segments
+        anywhere ('work/./x.csv' is 'work/x.csv'); the validator's sample name dropped only leading ones, so a
+        calibration validated on its fit sample spelled 'work/./val_scores.csv' passed. Every spelling with '.'
+        segments in the middle or at the end (with or without a leading './', doubled separators, backslashes, case)
+        is paired with the plain name of the same file and of the other file, both orders; the rule must fire
+        exactly when PurePosixPath names one file. Negative control: the pre-fix rule (leading './' removed only)
+        misses every spelling with a middle '.' segment."""
+        from pathlib import PurePosixPath
+
+        def same_file(a, b):
+            def norm(x):
+                return str(PurePosixPath(x.strip().replace("\\", "/"))).casefold()
+            return norm(a) == norm(b)
+
+        def pre_fix(value):
+            text = str(value).strip().replace("\\", "/")
+            while text.startswith("./"):
+                text = text[2:]
+            return re.sub(r"/+", "/", text).casefold()
+
+        middles = ("/./", "/././", "//./", "/.//", "/././/")
+        spellings = sorted({prefix + case("work") + middle.replace("/", sep) + case("val_scores.csv") + tail
+                            for prefix in ("", "./") for middle in middles for sep in ("/", "\\")
+                            for case in (str, str.upper) for tail in ("", "/.", "/")})
+        checked = missed_before = 0
+        for spelled in spellings:
+            for plain in ("work/val_scores.csv", "work/test_scores.csv"):
+                for fit, ev in ((spelled, plain), (plain, spelled)):
+                    doc = copy.deepcopy(CURRENT)
+                    doc["extension"]["calibration"]["fit_sample"] = fit
+                    doc["extension"]["calibration"]["validation"]["sample"] = ev
+                    got = "ml.calibration_on_fit_sample" in codes(v.validate_artifact(doc))
+                    with self.subTest(fit=fit, eval=ev):
+                        self.assertEqual(got, same_file(fit, ev))
+                    checked += 1
+                    missed_before += same_file(fit, ev) and pre_fix(fit) != pre_fix(ev)
+        self.assertEqual(checked, 4 * len(spellings))
+        self.assertEqual(missed_before, 2 * len(spellings))  # every same-file pair: each spelling has a middle '.'
 
 
 def itertools_pairs(names):

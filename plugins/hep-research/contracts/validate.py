@@ -649,11 +649,11 @@ ML_SEMANTICS_V2_FROM = "2.8.0"  # ml-artifact rules of the hep-ml audit (PML) ap
 
 
 def _sample_name(value) -> str:
-    """Comparison form of a sample name or path: stripped, './' and repeated separators removed, case folded."""
+    """Comparison form of a sample name or path: stripped, backslashes as '/', '.' segments ('./x', 'a/./x') and
+    repeated or trailing separators removed, case folded; '..' is kept (resolving it needs the file system)."""
     text = str(value).strip().replace("\\", "/")
-    while text.startswith("./"):
-        text = text[2:]
-    return re.sub(r"/+", "/", text).casefold()
+    parts = [part for part in text.split("/") if part not in ("", ".")]
+    return (("/" if text.startswith("/") else "") + "/".join(parts)).casefold()
 
 
 def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, native: bool = True) -> None:
