@@ -27,7 +27,9 @@ Software checks establish contract consistency only, not physical validity.
 
 - **Sci-fix advisories and impact scan (shadow mode).** `docs/evidence/advisories/` records a corrected defect for
   people holding older results (OSV `introduced`/`fixed` ranges, the scientific impact apart, the ledger entries as
-  evidence): SFA-2026-001 to -003 for the three fixes above. `tools/scifix_advisories.py check | affected | scan
+  evidence): SFA-2026-001 to -003 for the three fixes above, and SFA-2026-004 to -035 for the older ledger entries
+  whose defect shipped in a release (ROBUST-MALFORMED, S4, and CLS-LOGINTERP, in an example script only, have none).
+  `tools/scifix_advisories.py check | affected | scan
   PROJECT_DIR` validates them, lists the affected releases from the release manifests, and reports read-only which of
   a project's artifacts they touch (exit 0 whatever it finds). Format provisional.
 

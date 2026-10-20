@@ -1,0 +1,53 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-032",
+ "severity": "S2",
+ "ledger": [
+  "RC-A2"
+ ],
+ "summary": "A declared display value was compared with its located passage as a substring, so a wrong number that contained the declared one (1.0 inside 1.02) passed, and a mismatch was only a warning.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-authoring/scripts/communication_lib/audit.py",
+    "skills/hep-authoring/scripts/communication_lib/claims.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.6.13"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "ffd7804e1315cdfddfb86e775fcb34cc130f09f4",
+    "introduced_commit": "0f2bb8537ef94457dddf7db6ab18f61932d4aba6"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "occurrence.value_not_in_passage finding of check_communication and audit_claims (communication records)"
+  ],
+  "bias": "a displayed number that disagrees with the manuscript passage passed: the check was a substring test, so 1.0 passed inside 1.02, and a record of 1.09 against a manuscript of 1.02 exited 0 with a warning",
+  "trigger": "a communication record whose declared display value is a substring of, or differs from, the number in the located passage"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "communication"
+  ],
+  "extension_keys": [
+   "occurrences"
+  ]
+ },
+ "remedy": "run check_communication / audit_claims again with a release that has the fix; a new occurrence.value_not_in_passage error names the display to correct",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/ffd7804e1315cdfddfb86e775fcb34cc130f09f4"
+ ]
+}

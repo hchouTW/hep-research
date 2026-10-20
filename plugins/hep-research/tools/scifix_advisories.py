@@ -82,6 +82,21 @@ def load_manifests(folder: Path = MANIFESTS) -> dict[str, dict]:
     return dict(sorted(out.items(), key=lambda kv: version_key(kv[0])))
 
 
+def extension_properties(artifact_types: list[str], root: Path = ROOT) -> set[str] | None:
+    """Top-level extension properties of the listed artifact types: the union over contracts/schemas/ext_<type>.json
+    and its variants ext_<type>_*.json (contract versions, capabilities); None when no listed type has an extension
+    schema, so the keys cannot be checked."""
+    found, any_schema = set(), False
+    for artifact_type in artifact_types:
+        stem = f"ext_{artifact_type.replace('-', '_')}"
+        folder = root / "contracts" / "schemas"
+        for schema in [folder / f"{stem}.json", *sorted(folder.glob(f"{stem}_*.json"))]:
+            if schema.is_file():
+                any_schema = True
+                found |= set((load_json(schema).get("properties") or {}).keys())
+    return found if any_schema else None
+
+
 def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root: Path = ROOT) -> list[str]:
     """Problems in the advisories: format, ids, ledger references and severities, version ranges, paths."""
     problems, seen = [], set()
@@ -109,8 +124,14 @@ def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root
         impact = adv.get("impact") or {}
         if not (impact.get("observables") and impact.get("bias") and impact.get("trigger")):
             problems.append(f"{name}: impact needs observables, bias and trigger")
-        if not (adv.get("applies_to") or {}).get("artifact_types"):
+        applies = adv.get("applies_to") or {}
+        if not applies.get("artifact_types"):
             problems.append(f"{name}: applies_to needs artifact_types")
+        known = extension_properties(applies.get("artifact_types") or [], root)
+        for key in applies.get("extension_keys") or []:
+            if known is not None and key not in known:
+                problems.append(f"{name}: extension key {key} is not a top-level property of the extension of "
+                                f"{', '.join(applies.get('artifact_types') or [])} (the scan reads top-level keys)")
         for block in adv.get("affected") or [{}]:
             paths, ranges = block.get("paths") or [], block.get("ranges") or []
             if not paths or not ranges:

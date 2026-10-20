@@ -1,0 +1,55 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-015",
+ "severity": "S1",
+ "ledger": [
+  "DR-WP1-01"
+ ],
+ "summary": "cherenkov_angle.py computed the Cherenkov photon yield without the z^2 of the Frank-Tamm formula, so multiply charged species got the yield of z = 1.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-detector/scripts/cherenkov_angle.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "fixed_commit": "70f7fbcbc617c012a9b16c2aa391095aca79b80e",
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "expected photon yield and per-track angular resolution of cherenkov_angle.py"
+  ],
+  "bias": "the yield was low by a factor z^2 and sigma_theta high by z: He4 at 40 GeV/c, n = 1.05 gave 17.02 photons instead of 68.08 and sigma_theta 1.212 instead of 0.606 mrad; z = 1 unchanged",
+  "trigger": "a species with charge number z > 1 (He3, He4 or a mass:charge with charge above 1)"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "response",
+   "computational-run"
+  ],
+  "extension_keys": [
+   "parametrization",
+   "tools"
+  ]
+ },
+ "remedy": "rerun cherenkov_angle.py with a release that has the fix for any z > 1 species; a separation or ring-photon estimate built on the old yield is z^2 pessimistic",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/70f7fbcbc617c012a9b16c2aa391095aca79b80e"
+ ]
+}

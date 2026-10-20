@@ -1,0 +1,56 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-009",
+ "severity": "S1",
+ "ledger": [
+  "POISSON-SF"
+ ],
+ "summary": "Exact Poisson p-values were computed as 1 - P(N <= n - 1 | b), which cancels to zero below about 1e-16.",
+ "affected": [
+  {
+   "paths": [
+    "core/stats/likelihood_limits.py",
+    "core/stats/statistical_toys.py",
+    "core/stats/poisson_diagnostics.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.4.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the defective lines are in the repository's first commit, the 0.3.0 import; earlier releases are not in this repository",
+    "fixed_commit": "a2adc12601736296d32ea44800103404850e2cbe",
+    "fixed_basis": "0.4.0 was released (merge 9870a35, version 0.4.0) without a release tag or manifest"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "exact Poisson p-values and significances (likelihood_limits.py profile-significance, statistical_toys.py boundary); the Garwood lower end"
+  ],
+  "bias": "p-values below about 1e-16 came out as 0: n = 60, b = 5 returned 0 instead of 7.65e-43, so the significance was infinite or undefined",
+  "trigger": "a large excess over a small background (p below about 1e-16)"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "statistical-result"
+  ],
+  "extension_keys": [
+   "significance"
+  ]
+ },
+ "remedy": "recompute the p-value and significance with a release that has the fix (0.4.0 or later); outputs now carry log_p_value_exact_poisson",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/a2adc12601736296d32ea44800103404850e2cbe"
+ ]
+}

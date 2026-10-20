@@ -1,0 +1,52 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-034",
+ "severity": "S2",
+ "ledger": [
+  "RC-A5"
+ ],
+ "summary": "A display without a declared rounding rule was only a warning even when it was no rounding of its source value (1.02 shown for 1.09).",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-authoring/scripts/communication_lib/claims.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.6.13"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "7e0ee2392ee64effff04bcef2168581b1ede6ca5",
+    "introduced_commit": "0f2bb8537ef94457dddf7db6ab18f61932d4aba6"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "audit_claims findings for a display without a rounding rule (communication records)"
+  ],
+  "bias": "a displayed number that is not a rounding of its source value (1.02 for 1.09) was a warning (occurrence.value_unrounded_comparison), not the value_mismatch error, so the audit could pass a wrong display",
+  "trigger": "an occurrence whose display value has no declared rounding rule and differs from the source value by more than a rounding"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "communication"
+  ],
+  "extension_keys": [
+   "occurrences"
+  ]
+ },
+ "remedy": "run audit_claims again with a release that has the fix; a new value_mismatch error names the display to correct",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/7e0ee2392ee64effff04bcef2168581b1ede6ca5"
+ ]
+}

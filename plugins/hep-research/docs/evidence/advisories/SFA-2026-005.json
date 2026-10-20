@@ -1,0 +1,54 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-005",
+ "severity": "S1",
+ "ledger": [
+  "F02"
+ ],
+ "summary": "Toy p-values with zero exceedances were reported as p = 0 with error 0 instead of an upper bound.",
+ "affected": [
+  {
+   "paths": [
+    "core/stats/likelihood_limits.py",
+    "core/stats/statistical_toys.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.6.11"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the defective lines are in the repository's first commit, the 0.3.0 import; earlier releases are not in this repository",
+    "fixed_commit": "9f1ee4a9f5810a846000181423ee50e22d487029"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "toy p-values and their binomial errors (likelihood_limits.py toy significances, statistical_toys.py)"
+  ],
+  "bias": "with no toy beyond the observed statistic the p-value was 0 with error 0, which overstates the significance without limit; it is now the bound 1 - 0.05^(1/N) for N toys",
+  "trigger": "a toy-based p-value where no toy reached the observed test statistic (a strong excess or too few toys)"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "statistical-result"
+  ],
+  "extension_keys": [
+   "significance"
+  ]
+ },
+ "remedy": "recompute the toy p-value with a release that has the fix (0.6.11 or later); a zero becomes an upper bound, so run more toys if a value is needed",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/9f1ee4a9f5810a846000181423ee50e22d487029"
+ ]
+}

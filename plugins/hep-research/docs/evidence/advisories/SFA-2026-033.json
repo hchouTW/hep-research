@@ -1,0 +1,53 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-033",
+ "severity": "S2",
+ "ledger": [
+  "RC-A3"
+ ],
+ "summary": "Adaptation drafts were checked with a number pattern that missed numbers at a sentence end or next to Chinese text and misread signs, exponents and grouping, so a wrong number in a draft could pass.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-authoring/scripts/communication_lib/adaptation.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.6.13"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "dc97a00c19ad2b76bcb63f4f4a41bc0da3477fd0",
+    "introduced_commit": "a2a25ec5306153cff342181def51484c7511df8c"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "check_adaptation verdict of an audience adaptation draft against its communication record"
+  ],
+  "bias": "a 9.99 draft against a 1.02 record passed: numbers at a sentence end or touching CJK text were not read, -0.50 was read as 0.50, 1.2e-3 as 3 and 12,000 as 12 and 000",
+  "trigger": "an adaptation draft (English or Chinese) whose numbers end a sentence, touch CJK characters, carry a sign or exponent, or use digit grouping"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "communication"
+  ],
+  "extension_keys": [
+   "occurrences",
+   "claims"
+  ]
+ },
+ "remedy": "check the adaptation drafts again (check_adaptation) with a release that has the fix; an unmapped or mismatched number is now reported",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/dc97a00c19ad2b76bcb63f4f4a41bc0da3477fd0"
+ ]
+}

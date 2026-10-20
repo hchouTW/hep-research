@@ -41,7 +41,7 @@
    "ml-artifact"
   ],
   "extension_keys": [
-   "overlap_check"
+   "splits"
   ]
  },
  "remedy": "rerun check_split_integrity.py with a release that has the fix on the original split files; a new overlap means the reported test metrics may be optimistic",

@@ -1,0 +1,80 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-020",
+ "severity": "S2",
+ "ledger": [
+  "ML-SPLITS"
+ ],
+ "summary": "The split tools did not check the chronology and grouping they claimed: invalid timestamps were sorted or passed, 1 and 1.0 (or '1' and '1.0') were different groups, and the trainer matched manifest IDs without the split tools' key rule.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-ml/scripts/check_split_integrity.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "811f02b626af71d6273798f7a44cdf4e26a6925d",
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the script's first release; its temporal check took timestamps unvalidated from the start"
+   }
+  },
+  {
+   "paths": [
+    "skills/hep-ml/scripts/make_grouped_splits.py",
+    "skills/hep-ml/assets/train_classifier.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.6.17"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "811f02b626af71d6273798f7a44cdf4e26a6925d",
+    "introduced_commit": "2f919b667890a9cd32d06372eb8b308eec27b2cd",
+    "introduced_basis": "the first release of make_grouped_splits.py and of the trainer's manifest-ID matching"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "split-integrity verdict: temporal order and group leakage (check_split_integrity.py)",
+   "temporal splits written by make_grouped_splits.py --mode temporal",
+   "which events train_classifier.py takes from a split manifest"
+  ],
+  "bias": "a leakage or temporal check could pass when it did not run or compared the wrong thing (A1-A4 passed with exit 0 before the fix: a NaN, boolean or non-ISO timestamp, numbers mixed with dates, or a temporal_order naming a split not in the file); a group written as 1 in one split and 1.0 in another was not seen as one group; a non-ISO date was sorted as text in a temporal split; test metrics from such splits may be optimistic",
+  "trigger": "timestamps that are NaN, booleans or non-ISO dates such as 2024-1-10, a temporal_order with unknown or fewer than two splits, group IDs written with and without a zero fraction, or a case-folded manifest against mixed-case data"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "ml-artifact"
+  ],
+  "extension_keys": [
+   "splits"
+  ]
+ },
+ "remedy": "rerun check_split_integrity.py (and make_grouped_splits.py for temporal splits) with a release that has the fix on the original split files; a new failure means the reported test metrics may be optimistic",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/811f02b626af71d6273798f7a44cdf4e26a6925d",
+  "https://github.com/hchouTW/hep-research/pull/81"
+ ]
+}

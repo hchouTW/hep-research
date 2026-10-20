@@ -1,0 +1,53 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-004",
+ "severity": "S1",
+ "ledger": [
+  "F01"
+ ],
+ "summary": "The shape, two-POI and single-bin likelihoods accepted a negative or non-finite Poisson mean (or a zero mean with events) and returned a finite NLL.",
+ "affected": [
+  {
+   "paths": [
+    "core/stats/likelihood_limits.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.6.11"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the defective lines are in the repository's first commit, the 0.3.0 import; earlier releases are not in this repository",
+    "fixed_commit": "9f1ee4a9f5810a846000181423ee50e22d487029"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "profile-likelihood limits, significances and contours from likelihood_limits.py (shape-limit, shape-gof, contour, multibin and single-bin fits)"
+  ],
+  "bias": "a fit could settle where a bin's expected count is negative: the audit counterexample (n = 0, b = 1, background-shape up = 2 / down = 0, theta = -2) gave expected = -1 with NLL = 2 instead of +inf, so the minimum, limit or significance could be wrong; no committed example number changed",
+  "trigger": "shape or normalization nuisances that drive a bin's expected count to zero or below (large shape variations, low-count bins)"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "statistical-result"
+  ],
+  "extension_keys": [
+   "likelihood"
+  ]
+ },
+ "remedy": "refit with a release that has the fix (0.6.11 or later); a result whose fit now reports a boundary or a failure needs its model reviewed",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/9f1ee4a9f5810a846000181423ee50e22d487029"
+ ]
+}

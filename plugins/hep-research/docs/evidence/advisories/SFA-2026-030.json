@@ -1,0 +1,56 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-030",
+ "severity": "S2",
+ "ledger": [
+  "BLINDING-SCANNER"
+ ],
+ "summary": "The blinding output scanner raised false alarms on short sealed values inside names, versions and dates, and passed a UTF-16 (or other non-UTF-8) log that held a sealed value.",
+ "affected": [
+  {
+   "paths": [
+    "core/blinding/blinding.py",
+    "skills/hep-computing/scripts/audit_blinded_outputs.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.4.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "b6334c0432a8fc66e7a787e1be7e64c4ad302d72",
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the root commit of the repository history (the 0.3.0 import) already has the defect; releases before 0.3.0 are not in this history",
+    "fixed_basis": "fixed in 0.4.0 (CHANGELOG 0.4.0; release commit 9870a35 holds the fix); 0.4.0 has no tag and no release manifest"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "blinding scan verdict of outputs, logs and caches (core.blinding, skills/hep-computing/scripts/audit_blinded_outputs.py)",
+   "check_figure verdict of figures (filled areas, 2D histograms, images, figure text)"
+  ],
+  "bias": "a false pass: a log in UTF-16 or another non-UTF-8 encoding that contained a sealed value passed (it was read as UTF-8 with replacement), and filled areas, hist2d/pcolormesh cells, images and figure text in the blinded range were not checked; and false alarms: a sealed value with fewer than 3 significant digits matched any equal token (one unrelated log line gave 8 hits for sealed {0, 3})",
+  "trigger": "a sealed value in a UTF-16 or Latin-1 log, in a figure drawn with fill_between, stackplot, hist2d, pcolormesh, imshow or text; or a short sealed value (0, 3, 0.5, 100) next to run names, versions or dates"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "measurement-spec"
+  ],
+  "extension_keys": [
+   "blinding"
+  ]
+ },
+ "remedy": "rescan the outputs and figures of the blinded analysis with a release that has the fix (audit_blinded_outputs.py); a new hit means a blinded value was exposed and goes to the custodian",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/b6334c0432a8fc66e7a787e1be7e64c4ad302d72"
+ ]
+}

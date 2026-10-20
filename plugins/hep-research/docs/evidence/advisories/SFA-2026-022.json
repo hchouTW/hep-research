@@ -1,0 +1,56 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-022",
+ "severity": "S2",
+ "ledger": [
+  "ML-K05"
+ ],
+ "summary": "The domain-shift record did not say what was done about a measured shift, and the J9 example fit ignored its measured pt_miss scale shift.",
+ "affected": [
+  {
+   "paths": [
+    "contracts/validate.py",
+    "examples/ml-classifier-to-inference/run.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.6.17"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "7b32b109562476c59bdff84fe11c0709e28eebdc",
+    "introduced_commit": "d53736622880bb253254c4897d3690d35b445720",
+    "introduced_basis": "the first release of the ml-artifact domain_shift block"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "domain_shift record of an ml-artifact (status only, no outcome or nuisance)",
+   "J9 example signal strength mu_hat and its interval"
+  ],
+  "bias": "a shift that was measured but not corrected or bounded was not visible in the record, and validation accepted it; in J9 the uncorrected shift moved the result: with the shift as a constrained nuisance mu_hat goes from 1.30738 +0.280857/-0.260727 to 1.33104 +0.293293/-0.277051 (seed 20261013, 1000 toys), and the Asimov shift without the nuisance is -0.107539",
+  "trigger": "an ml-artifact whose domain_shift check found a shift between simulation and control data and whose downstream fit did not carry it as a correction or nuisance"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "ml-artifact"
+  ],
+  "extension_keys": [
+   "domain_shift"
+  ]
+ },
+ "remedy": "record domain_shift.outcome and, if the shift is not corrected, carry it as a nuisance in the downstream fit; validate the artifact again with a release that has the fix",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/7b32b109562476c59bdff84fe11c0709e28eebdc",
+  "https://github.com/hchouTW/hep-research/pull/81"
+ ]
+}

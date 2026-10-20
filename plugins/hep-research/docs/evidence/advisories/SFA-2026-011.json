@@ -1,0 +1,56 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-011",
+ "severity": "S1",
+ "ledger": [
+  "POISSON-500"
+ ],
+ "summary": "Poisson upper limits and intervals were bisected on [0, 500] without checking the bracket, so a root beyond 500 came back as 500.",
+ "affected": [
+  {
+   "paths": [
+    "core/stats/likelihood_limits.py",
+    "core/stats/poisson_diagnostics.py",
+    "core/stats/statistical_toys.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.4.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "introduced_basis": "the defective lines are in the repository's first commit, the 0.3.0 import; earlier releases are not in this repository",
+    "fixed_commit": "b7b7825af140bee72e27aa6950045b44b664eb1c",
+    "fixed_basis": "0.4.0 was released (merge 9870a35, version 0.4.0) without a release tag or manifest"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "Poisson upper limits and central (Garwood) intervals (poisson_diagnostics.py upper-limit and interval; the limits in likelihood_limits.py and statistical_toys.py)"
+  ],
+  "bias": "limits and interval ends clipped at a mean of 500: central_interval(490) gave an upper end of 500.0 (Garwood, 68.27% central: 513.15), upper_limit(495, 0) gave 500 (533.19)",
+  "trigger": "counts of a few hundred or more, where the limit or the interval end exceeds 500"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "statistical-result"
+  ],
+  "extension_keys": [
+   "results"
+  ]
+ },
+ "remedy": "recompute limits and intervals with a release that has the fix (0.4.0 or later); a value of exactly 500 is the clipped one",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/b7b7825af140bee72e27aa6950045b44b664eb1c"
+ ]
+}

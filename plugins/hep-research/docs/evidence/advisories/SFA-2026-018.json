@@ -1,0 +1,56 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-018",
+ "severity": "S1",
+ "ledger": [
+  "DR-WP2-06"
+ ],
+ "summary": "pid_separation_power.py applied the heavy-particle Bethe formula to electrons and positrons, reporting a dE/dx separation as valid, and used I = 75 eV for water instead of 79.7 eV.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-detector/scripts/pid_separation_power.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.10.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "fixed_commit": "6c7933634eb1ab1f43acb9368379fd362e5f642f",
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "dE/dx separation and its validity (pid_separation_power.py --mode dedx)",
+   "Bethe-Bloch stopping power in water"
+  ],
+  "bias": "e vs pi at 0.2 GeV/c gave n_sigma 3.39 with validity 'inside' (now outside the formula, no n_sigma); a muon at 0.3 GeV/c in water lost 2.05062 MeV cm^2/g instead of 2.03897",
+  "trigger": "an electron or positron (mass below 10 MeV) in --mode dedx, or the material water"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "response",
+   "computational-run"
+  ],
+  "extension_keys": [
+   "parametrization",
+   "tools"
+  ]
+ },
+ "remedy": "rerun pid_separation_power.py with a release that has the fix; an electron dE/dx separation from the old output is not valid",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/6c7933634eb1ab1f43acb9368379fd362e5f642f"
+ ]
+}
