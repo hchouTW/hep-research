@@ -312,10 +312,27 @@
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "an integer printed with rounding zeros (22000 for 22014) is not flagged and not listed in OUT_OF_SCOPE_RENDERINGS"
+   "gaps": [],
+   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; every claimed rendering, generated independently, found in all seven claimed encodings; the printed-precision rule against exact Decimal arithmetic, with tokens that must not alarm; the pre-fix UTF-8 decoding and short-value rule as negative controls; 9 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the rounding-zeros gap found by these tests is fixed as BLINDING-ROUNDING-ZEROS"
+  },
+  {
+   "id": "BLINDING-ROUNDING-ZEROS",
+   "title": "Blinding scanner reads an integer's trailing zeros as rounding",
+   "changelog": "CHANGELOG Unreleased",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_blinding.py",
+    "tests/core/test_blinding_u11.py"
    ],
-   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; every claimed rendering, generated independently, found in all seven claimed encodings; the printed-precision rule against exact Decimal arithmetic, with tokens that must not alarm; the pre-fix UTF-8 decoding and short-value rule as negative controls; 9 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C4",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "the printed-precision match exhaustively against Decimal rounding over every sealed n and n + 0.5 (n = 100 to 4999) and every integer token ending in zero within 600 (1,149,200 pairs; 8679 renderings, the pre-fix rule misses 7209); end to end through scan_text; the four evidence tests fail by assertion on parent b34d363a and pass on the fix; 5 local mutants killed, including the revert (VALIDATION SCIFIX-ROUNDING-ZEROS 2026-10-20)"
   },
   {
    "id": "ROBUST-CAMPAIGN",

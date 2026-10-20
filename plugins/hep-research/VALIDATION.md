@@ -1961,6 +1961,39 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## SCIFIX-ROUNDING-ZEROS (2026-10-20, E2v and the CI lock; branch `fix/blinding-trailing-zeros`)
+
+sci-fix BLINDING-ROUNDING-ZEROS (S2: a wrong verdict, the scan passed with a sealed value printed). Found by the
+SCIFIX-ORACLES-S2 tests: `_printed_match` read every trailing zero of an integer as a printed digit (step 1), so
+22000, 22,000 and 22010 passed for a sealed 22014 while 2.20e4 was a hit. The fix reads an integer token's trailing
+zeros (no point, no exponent) as rounding, down to 3 significant digits. Environments as in SCIFIX-ORACLES-BATCH2.
+
+**Correctness (C4, exhaustive):** `tests/core/test_blinding.py::RoundingZerosTests` compares the match with an oracle
+in Decimal (the token equals the sealed value rounded half up or half down at a place its trailing zeros allow,
+never below 3 significant digits) over every sealed n and n + 0.5, n = 100 to 4999, and every integer token ending
+in zero within 600 of it: 1,149,200 pairs, equal on all; 8679 are renderings. Negative control: the pre-fix rule finds
+1470 of them (exact or last-digit matches) and misses 7209. End to end through `scan_text`: 22000, 22,000, 22010,
+22,010, -22000 are hits; 22050, 21900, 20000, 2.2e4, 22000.0 and 2.2010e4 are not.
+
+**Discrimination (D3):**
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_blinding.py::RoundingZerosTests::test_rounding_zeros_exhaustively_against_decimal_rounding` | exhaustive | fail (assertion): token 1000 for sealed 995.0, scanner False, oracle True | pass | no | E2v |
+| `tests/core/test_blinding.py::RoundingZerosTests::test_scan_text_flags_rounded_integers_and_not_coarser_ones` | behavioral | fail (assertion): 5 subtests (22000, 22,000, 22010, 22,010, -22000 not flagged) | pass | no | E2v |
+| `tests/core/test_blinding.py::RenderingOracleTests::test_printed_precision_rule_against_exact_decimal_arithmetic` (oracle updated to the new rule) | independent implementation | fail (assertion): 30 subtests (integer tokens with rounding zeros) | pass | no | E2v |
+| `tests/core/test_blinding_u11.py::RenderingsN12::test_unrelated_numbers_still_pass` (4730 now asserted a hit) | behavioral | fail (assertion): 4730 not flagged for 4731.3712 | pass | no | E2v |
+
+Parent: `b34d363a` (main) with this branch's two test files copied in. Local mutants of `_printed_match`, all killed by
+`RoundingZerosTests`: the revert (no rounding zeros), a 2-digit floor, a 4-digit floor, at most one rounding zero,
+rounding zeros also before a point.
+
+**False-alarm cost (measured before choosing normal over weak hits):** the 113 text outputs under `examples/` (215,002
+number tokens, 4771 integers of four or more digits ending in zero) scanned for 40 random sets of 30 sealed values
+(log-uniform 100 to 1e6): files with a hit 278 of 4520 (6.2%) before, 305 (6.7%) after; hits 3363 before, 4849 after.
+Every hit there is a false alarm (the outputs hold no sealed value). The new matches are normal hits: the rise in
+flagged files is small next to a silent pass.
+
 ## SCIFIX-ORACLES-S2 (2026-10-20, E2v and the CI lock; branch `test/scifix-oracles-s2`, plan PR-6 batch S2)
 
 One independent oracle (axis C) for each of the ten S2 entries at C1, with a negative control that emulates the

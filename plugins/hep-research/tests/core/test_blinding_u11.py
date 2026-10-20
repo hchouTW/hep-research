@@ -155,7 +155,10 @@ class RenderingsN12(unittest.TestCase):
                 self.assertFalse(bl.scan_text(text, self.SEALED))
 
     def test_unrelated_numbers_still_pass(self):
-        self.assertFalse(self.found("bins 12 epoch 37 seed 4730 lr 0.25"))
+        self.assertFalse(self.found("bins 12 epoch 37 seed 4733 lr 0.25"))
+        # 4730 is 4731.3712 rounded to tens (trailing zeros read as rounding, down to 3 digits): a hit since the
+        # rounding-zeros sci-fix, the price of catching 22000 for a sealed 22014
+        self.assertTrue(self.found("bins 12 epoch 37 seed 4730 lr 0.25"))
 
 
 @unittest.skipUnless(HAVE, "numpy and matplotlib are needed")
