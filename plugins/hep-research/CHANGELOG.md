@@ -3,7 +3,12 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.18.0 (2026-10-20)
+
+Contracts 3.0.1 (patch: the validator's sample-name comparison, below). Three scientific corrections found by the new
+oracle tests, sci-fix advisories with a read-only impact scan, and required CI gates for the pdg and PyTorch evidence.
+The sci-fix evidence ledger (`docs/evidence/sci-fixes.json`) now meets its minimums for every entry; its grades await
+maintainer review.
 
 - **Blinding scanner: integers printed with rounding zeros (sci-fix, BLINDING-ROUNDING-ZEROS).** An integer printed
   without a point or exponent may end in rounding zeros: its trailing zeros are now read as rounding, down to 3
@@ -20,8 +25,8 @@ Software checks establish contract consistency only, not physical validity.
   is "+5"); the documented rule that a string keeps its digits ("007" is not 7) is unchanged. The text "-0.0" is now
   "-0", no longer the key of the float -0.0 ("0").
 
-- **Validator: sample names with '.' segments (sci-fix, SAMPLE-NAME-DOT-SEGMENTS; contracts patch, 3.0.1 at the
-  release).** `ml.calibration_on_fit_sample` compared sample names after removing only a leading './', so a
+- **Validator: sample names with '.' segments (sci-fix, SAMPLE-NAME-DOT-SEGMENTS; contracts
+  3.0.1).** `ml.calibration_on_fit_sample` compared sample names after removing only a leading './', so a
   calibration validated on its fit sample written as 'work/./val_scores.csv' passed. The sample name now drops '.'
   segments anywhere and repeated or trailing separators; '..' is kept (resolving it needs the file system).
 
