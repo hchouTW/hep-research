@@ -3,10 +3,11 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.17.0 (2026-10-20)
 
 Contracts 3.0.0 (major): the deprecated skill names are retired, as planned for migration option A (restructuring plan
-section 9). Unreleased; the plugin version is unchanged until the release is decided.
+section 9). Artifacts or profiles that still record an old skill name fail validation here; migrate them with 0.16.x
+first.
 
 - **Retired skill names.** The schema enum lists only the eight current skills. A name retired here (the four aliases
   of the 0.11.0 rename and the communication skill's name from the 0.16.0 split) in `provenance.producer_skill`,
