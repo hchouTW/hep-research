@@ -261,15 +261,18 @@ def _standalone(text: str, start: int, end: int) -> bool:
 
 def _printed_match(token: str, target: float) -> bool:
     """True when the token equals the target rounded at the token's own last printed digit (for example
-    '1234.6' or '1.235e+03' for 1234.567). Tokens with fewer than 3 significant digits are not matched."""
+    '1234.6' or '1.235e+03' for 1234.567). Tokens with fewer than 3 significant digits are not matched. An integer
+    printed without a point or exponent may end in rounding zeros ('22010' or '22000' for 22014), so its trailing
+    zeros are read as rounding down to 3 significant digits: '22000' is matched like '2.20e4'."""
     mant, _, exp_text = token.lower().partition("e")
     exp = int(exp_text) if exp_text else 0
     decimals = len(mant.split(".")[1]) if "." in mant else 0
     digits = mant.lstrip("+-").replace(".", "").lstrip("0")
     if len(digits) < 3:
         return False
+    rounding = min(len(digits) - len(digits.rstrip("0")), len(digits) - 3) if "." not in mant and not exp_text else 0
     try:  # a hex-like token ('91e333' in a job ID or tag) is not a printed number: its exponent overflows
-        step = 10.0 ** (exp - decimals)
+        step = 10.0 ** (exp - decimals + rounding)
         return abs(float(token) - target) <= 0.5 * step * (1 + 1e-9)
     except OverflowError:
         return False

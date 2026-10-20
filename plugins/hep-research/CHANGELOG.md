@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Blinding scanner: integers printed with rounding zeros (sci-fix, BLINDING-ROUNDING-ZEROS).** An integer printed
+  without a point or exponent may end in rounding zeros: its trailing zeros are now read as rounding, down to 3
+  significant digits, so 22000 or 22,000 (like 2.20e4) and 22010 are hits for a sealed 22014; before, every trailing
+  zero was read as a printed digit and the scan passed. 2.2e4 (two digits) stays out of scope; a zero before a point
+  (22000.0) is still a printed digit. Cost: round numbers in logs within half a step of a sealed value now alarm
+  (4730 for 4731.37); on the example outputs with random sealed values, files with a false alarm rose from 6.2% to
+  6.7%.
+
 ## 0.17.0 (2026-10-20)
 
 Contracts 3.0.0 (major): the deprecated skill names are retired, as planned for migration option A (restructuring plan

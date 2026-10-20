@@ -341,8 +341,9 @@ class RenderingOracleTests(unittest.TestCase):
         """Tokens at k = 3..9 significant digits, j = -2..2 steps from the correctly rounded value, with either sign:
         the scanner flags a token exactly when |token - |t|| <= step/2 (Decimal, exact) or |token - |t|| <= 1e-9 |t|.
         j = +-1, +-2 are the numbers that must not alarm. Cases within 1e-6 step of the boundary are not asserted
-        (the scanner compares in floating point with a 1e-9 slack). A step above 1 is printed in exponent form: the
-        rule reads the last printed digit, so 22000 for 22014 (an integer ending in rounding zeros) is not flagged."""
+        (the scanner compares in floating point with a 1e-9 slack). A step above 1 is printed in exponent form. An
+        integer token's trailing zeros count as rounding down to 3 significant digits (5680 is read like 5.68e3), so
+        its step is 10^r larger, r = min(trailing zeros, digits - 3), counted here from the token's text."""
         from decimal import Decimal, localcontext
 
         flagged = silent = 0
@@ -358,13 +359,18 @@ class RenderingOracleTests(unittest.TestCase):
                     if value <= 0:
                         continue
                     diff = abs(value - exact)
-                    if abs(diff - step / 2) < step * Decimal("1e-6"):
-                        continue
-                    expected = diff <= step / 2 or diff <= Decimal("1e-9") * exact
                     decimals = max(0, -(rounded.adjusted() - k + 1))
+                    fixed = step <= 1 and rounded.adjusted() >= -5
+                    text = f"{value:.{decimals}f}" if fixed else f"{value:.{k - 1}e}"
+                    eff = step
+                    if fixed and "." not in text:  # an integer: trailing zeros may be rounding, down to 3 digits
+                        digits = text.lstrip("0")
+                        eff = step * 10 ** min(len(digits) - len(digits.rstrip("0")), len(digits) - 3)
+                    if abs(diff - eff / 2) < eff * Decimal("1e-6"):
+                        continue
+                    expected = diff <= eff / 2 or diff <= Decimal("1e-9") * exact
                     for sign in ("", "-"):
-                        fixed = step <= 1 and rounded.adjusted() >= -5  # an integer ending in rounding zeros is not
-                        tok = sign + (f"{value:.{decimals}f}" if fixed else f"{value:.{k - 1}e}")  # read as rounded
+                        tok = sign + text
                         with self.subTest(t=t, k=k, j=j, token=tok):
                             self.assertEqual(bool(bl.scan_text(f"x = {tok} ;\n", [t])), expected)
                     flagged += expected
@@ -472,6 +478,62 @@ class MaskScriptTests(unittest.TestCase):
             self.assertEqual(d["values"][4:6], [None, None])
             self.assertEqual(d["ratio_to_reference"][4:6], [None, None])
             self.assertTrue(bl.scan_paths([out], bl.seal(EDGES, DATA, SR, [MC]))["ok"])
+
+
+class RoundingZerosTests(unittest.TestCase):
+    """sci-fix BLINDING-ROUNDING-ZEROS: an integer printed with rounding zeros (22010 or 22000 for a sealed 22014) is
+    a rendering of the sealed value; before the fix the printed-precision rule read every trailing zero as a printed
+    digit (step 1) and passed it. The rule now reads an integer token's trailing zeros as rounding, down to 3
+    significant digits: 22000 is matched like 2.20e4, while 2.2e4 (two digits) stays out of scope."""
+
+    @staticmethod
+    def renders(token, sealed):
+        """Oracle (Decimal, not the scanner's floating-point step): the integer token is a rendering of the sealed
+        value when it equals the value rounded half up or half down at a place 10^p its trailing zeros allow, p from
+        0 to min(trailing zeros, digits - 3)."""
+        from decimal import ROUND_HALF_DOWN, ROUND_HALF_UP, Decimal
+
+        digits = token.lstrip("0")
+        places = min(len(digits) - len(digits.rstrip("0")), len(digits) - 3)
+        exact = Decimal(repr(sealed))
+        return any(Decimal(token) == exact.quantize(Decimal(1).scaleb(p), rounding=mode).quantize(Decimal(1))
+                   for p in range(places + 1) for mode in (ROUND_HALF_UP, ROUND_HALF_DOWN))
+
+    @staticmethod
+    def pre_fix(token, sealed):
+        """The rule before the fix: the step is the last printed digit, 1 for an integer."""
+        return abs(int(token) - sealed) <= 0.5 * (1 + 1e-9)
+
+    def test_rounding_zeros_exhaustively_against_decimal_rounding(self):
+        """Exhaustive over the stated domain: every sealed value n and n + 0.5 for n = 100 to 4999 (ties included)
+        against every integer token ending in zero within 600 of it (1,149,200 pairs); the printed-precision match
+        equals the Decimal oracle on every pair. The oracle finds 8679 renderings; the pre-fix rule (negative control)
+        finds only the 1470 that are exact or last-digit matches and misses the other 7209."""
+        checked = hits = missed_before = 0
+        for n in range(100, 5000):
+            for sealed in (float(n), n + 0.5):
+                low = max(100, (int(sealed) - 600) // 10 * 10)
+                for value in range(low, int(sealed) + 601, 10):
+                    token = str(value)
+                    want = self.renders(token, sealed)
+                    if bl._printed_match(token, sealed) != want:
+                        self.fail(f"token {token} for sealed {sealed}: scanner {not want}, oracle {want}")
+                    checked += 1
+                    hits += want
+                    missed_before += want and not self.pre_fix(token, sealed)
+        self.assertEqual((checked, hits, missed_before), (1_149_200, 8679, 7209))
+
+    def test_scan_text_flags_rounded_integers_and_not_coarser_ones(self):
+        """End to end through scan_text, with the sealed 22014: plain and comma-grouped renderings with rounding
+        zeros are hits; values outside the half step, two-digit readings and zeros printed before a point or in an
+        exponent's mantissa are not."""
+        for text, want in (("about 22000 events", True), ("about 22,000 events", True), ("22010 events", True),
+                           ("N = 22014", True), ("about 2.20e4", True), ("22050 events", False),
+                           ("21900 events", False), ("20000 events", False), ("about 2.2e4", False),
+                           ("x 22,010 y", True), ("deficit -22000", True),
+                           ("22000.0 events", False), ("2.2010e4", False)):  # a point or exponent: zeros are digits
+            with self.subTest(text=text):
+                self.assertEqual(bool(bl.scan_text(text, [22014.0])), want)
 
 
 if __name__ == "__main__":
