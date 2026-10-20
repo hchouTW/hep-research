@@ -23,6 +23,7 @@ each by its mass number A; C1 and C3 were recomputed on the same runs.
 import json
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -64,6 +65,12 @@ RUNS = ("X1", "X2", "X3", "G_low2", "G_low", "G_high", "G_high2", "T_truth", "D_
         "D_X1_R60", "D_X3_R60", "D_X1_R60_UG", "D_X2_R60_UG", "D_X3_R60_UG")
 GRID = ("G_low2", "G_low", "X1", "G_high", "G_high2")
 KPC_DZ = 0.02
+
+
+def mentions_path(text, path):
+    """Whether text names path as a whole path (not inside a longer one): with a home of /root, /opt/.../Cellar/root/
+    is no match."""
+    return re.search(r"(?<![\w./-])" + re.escape(str(path)) + r"(?![\w.-])", text) is not None
 
 
 def spec(name):
@@ -247,7 +254,7 @@ class RecordedEvidence(unittest.TestCase):
                 self.assertEqual(ext["exit_status"], 0)
                 self.assertTrue(any("cd588707fe03c76f19bda1b8092e136dcbe3fe90" in t["version"] for t in ext["tools"]
                                     if t["name"] == "DRAGON2"))
-                self.assertNotIn(str(Path.home()), json.dumps(doc))
+                self.assertFalse(mentions_path(json.dumps(doc), Path.home()), name)
         for n in RUNS:
             ext = json.loads(record(n).read_text())["extension"]
             self.assertEqual(ext["output_hashes"], {f"output/{n}.txt": hashlib.sha256(output(n).read_bytes()).hexdigest()})
