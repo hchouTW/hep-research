@@ -126,7 +126,8 @@ class GaisserHillasPropertyTests(unittest.TestCase):
     """sci-fix DR-WP1-02 (axis C): the profile on a grid of x_max (750 to 1e15 g/cm^2), lambda (20 to 3e4) and depths
     x_max + t sigma (sigma = sqrt(lambda (x_max - x0)), t = -3..3) against the textbook form
     N_max ((X - x0)/(x_max - x0))^((x_max - x0)/lambda) exp((x_max - X)/lambda) in 60-digit decimal arithmetic,
-    written here (no cancellation at that precision). Invariants: N(x_max) = N_max, N <= N_max, and the half-maximum
+    written here (no cancellation at that precision). Located source of the form: Pierre Auger Collaboration, JCAP 03
+    (2019) 018, arXiv:1811.04660, eq. (2.1), p. 3 (extensive-air-showers.md). Invariants: N(x_max) = N_max, N <= N_max, and the half-maximum
     depths bracket N = N_max / 2 within the search tolerance. Negative control: the pre-fix double-precision form
     exp(e ln(base) + (x_max - X)/lambda) misses the oracle by more than 1e-6 on part of the grid. Tolerance: the
     exponent E = e (log1p(u) - u) ~ -t^2/2 is computed with relative error about 2 eps / |u| (log1p(u) - u cancels
@@ -231,14 +232,17 @@ class CherenkovChargeTests(unittest.TestCase):
     def test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength(self):
         """sci-fix DR-WP1-01, second oracle kind (independent implementation): the Frank-Tamm spectrum
         d2N/dx dlambda = 2 pi alpha z^2 / lambda^2 (1 - 1/(beta^2 n^2)) integrated numerically (scipy quad) over
-        300-600 nm and 2 cm, with alpha from CODATA 2022, against the script given the ideal-detector figure of merit
-        N0 = 2 pi alpha (1/lambda1 - 1/lambda2). That N0 is alpha/(hbar c) = 369.8 per eV cm times the window width
-        in energy, the coefficient of the PDG RPP review "Passage of particles through matter" (Cherenkov section,
-        about 370 z^2 sin^2 theta per eV cm). Negative control: the pre-fix yield (no z^2)."""
+        300-600 nm and 2 cm against the script given the ideal-detector figure of merit N0 = 2 pi alpha
+        (1/lambda1 - 1/lambda2). The formula is E7 of skills/hep-detector/references/core-detector-equations.md,
+        d2N/(dx dE) ~= 370 z^2 sin^2 theta_C per eV cm (PDG RPP 2024, Passage of particles through matter, Cherenkov
+        yield), written per unit wavelength; alpha and hbar c come from the bundled CODATA 2022 table
+        (core/constants), and alpha/(hbar c) must be the 370 of E7. Negative control: the pre-fix yield (no z^2)."""
         from scipy.integrate import quad
 
-        alpha, hbar_c_ev_cm = 1 / 137.035999177, 197.3269804e-7  # CODATA 2022
-        self.assertAlmostEqual(alpha / hbar_c_ev_cm, 369.8, delta=0.05)
+        from core import constants
+        alpha = constants.constant('fine_structure_constant').value
+        hbar_c_ev_cm = constants.hbar_c().value * 1e6 * 1e-13  # MeV fm -> eV cm
+        self.assertEqual(round(alpha / hbar_c_ev_cm), 370)
         lo, hi = 300e-7, 600e-7  # cm
         n0 = 2 * math.pi * alpha * (1 / lo - 1 / hi)
         for z, momentum in ((1, 40.0), (2, 40.0), (2, 12.0), (3, 25.0), (26, 400.0)):
@@ -334,18 +338,42 @@ class PidElectronAndUnitTests(unittest.TestCase):
                            '--momentum', '2', '--path', '1.2', '--time-resolution', '0.06')
         self.assertTrue(any('ps' in w for w in payload.get('warnings', [])))
 
+    def test_bethe_loss_scales_as_z_squared_at_fixed_momentum_and_mass(self):
+        """Invariant of E5 (core-detector-equations.md: -<dE/dx> = K z^2 (Z/A)(1/beta^2)[...], PDG RPP 2024 "Passage of
+        Particles Through Matter" eq. (34.5), p. 4): at fixed momentum and mass, beta, W_max and the density term do not
+        depend on the charge, so the loss scales exactly as z^2."""
+        for material in ('water', 'silicon', 'argon', 'xenon'):
+            for p in (0.5, 5.0, 50.0):
+                base = pid_separation_power.bethe_bloch_mev_per_g_cm2(p, pid_separation_power.MASSES_GEV['He4'],
+                                                                      material, charge=1)['mev_per_g_cm2']
+                for z in (2, 3, 6):
+                    with self.subTest(material=material, p=p, z=z):
+                        loss = pid_separation_power.bethe_bloch_mev_per_g_cm2(
+                            p, pid_separation_power.MASSES_GEV['He4'], material, charge=z)['mev_per_g_cm2']
+                        self.assertAlmostEqual(loss / base, z * z, delta=1e-12 * z * z)
+
     def test_water_uses_the_pdg_mean_excitation_energy(self):
         """E-P3: PDG AtomicNuclearProperties lists I = 79.7 eV for liquid water. A muon at
         0.3 GeV/c then loses 2.03897040 MeV cm^2/g (closed form); with 75 eV, 2.05062."""
         loss = pid_separation_power.bethe_bloch_mev_per_g_cm2(
             0.3, pid_separation_power.MASSES_GEV['mu'], 'water')['mev_per_g_cm2']
         self.assertAlmostEqual(loss, 2.03897039968383, delta=1e-9)
+        # Negative control: the pre-fix I = 75 eV for water, emulated in the script's material table.
+        from unittest import mock
+        density = pid_separation_power.MATERIALS['water'][0]
+        with mock.patch.dict(pid_separation_power.MATERIALS, {'water': (density, 75.0)}):
+            old = pid_separation_power.bethe_bloch_mev_per_g_cm2(
+                0.3, pid_separation_power.MASSES_GEV['mu'], 'water')['mev_per_g_cm2']
+        self.assertAlmostEqual(old, 2.05062, delta=1e-5)
+        self.assertGreater(abs(old - loss), 1e-2)
 
 
 class SpeciesMassPropertyTests(unittest.TestCase):
     """TH9: the PID species masses come from core/constants. Second oracle kind: the binding energies of d, 3He and
     4He from these (CODATA 2022) nuclear masses equal those from AME2020 atomic mass excesses, a separate evaluation
-    bundled in core/constants (electron binding: H 13.598 eV, He 24.587 + 54.418 eV, NIST). Tolerance 3 N sigma(m_n)
+    bundled in core/constants; CODATA and AME2020 share much of their input data. The electron binding energies (H
+    13.598 eV, He 24.587 + 54.418 eV) are typed here without a source in the repository: for the deuteron (Z = 1)
+    they cancel exactly, so only the d comparison rests on bundled published data alone. Tolerance 3 N sigma(m_n)
     + 0.1 eV, sigma(m_n) = 0.44 eV (AME2020); observed 0.14 to 0.37 eV. The pre-fix table (8 decimals in GeV,
     10 eV steps, 23910085^) is the negative control. Invariants over every species and momentum: mass from beta
     inverts the kinematics, the masses are ordered e < mu < pi < K < p < d < 3He < 4He, and flight time grows with
@@ -434,7 +462,9 @@ class ScriptPhysicsOracleTests(unittest.TestCase):
 
     def test_calorimeter_fit_closure_and_energy_scale_covariance(self):
         """Property tests: points on the model are fitted exactly (a, b, c to 1e-9 relative) for a grid of terms;
-        with energies scaled by s, a^2 scales by s, b^2 by s^2 and c^2 not at all (the same curve in other units)."""
+        with energies scaled by s, a^2 scales by s, b^2 by s^2 and c^2 not at all (the same curve in other units). The
+        model is E9, sigma/E = a/sqrt(E) + b/E + c in quadrature, PDG RPP 2024 "Particle Detectors at Accelerators"
+        eq. (35.43), p. 82 (core-detector-equations.md)."""
         for a, b, c in ((0.03, 0.15, 0.002), (0.10, 0.20, 0.007), (0.5, 0.5, 0.05), (0.15, 0.01, 0.01)):
             points = [[float(x), math.sqrt(a * a / x + b * b / x ** 2 + c * c)] for x in self.ENERGIES]
             fit = calorimeter_resolution.fit_resolution(points)
@@ -450,7 +480,15 @@ class ScriptPhysicsOracleTests(unittest.TestCase):
         """Analytic oracle: with beta(R) = zR / sqrt((zR)^2 + m^2), ms1/beta(R) = k R squares to
         k^2 R^4 - ms1^2 R^2 - ms1^2 m^2/z^2 = 0 and hypot(ms1/beta(R), k R) = 1 to
         k^2 R^4 - (1 - ms1^2) R^2 + ms1^2 m^2/z^2 = 0 (upper root), solved here as quadratics in R^2, against the
-        script's bisection, over stacks, masses and charges. Negative control: the pre-fix beta = 1 crossover ms1/k."""
+        script's bisection, over stacks, masses and charges. Second kind (independent implementation): the same two
+        defining equations solved by scipy.optimize.brentq, a third algorithm. The terms are those of
+        skills/hep-detector/references/tracking-and-vertexing.md (Gluckstern, PDG "Particle detectors at
+        accelerators", momentum measurement; the scattering term's 1/beta, PDG RPP 2025 eq. 35.70, sec. 35.12) with
+        the stack's accumulated budget in Highland's 13.6 MeV (E4 of core-detector-equations.md). Invariant: beta(R)
+        enters through m/z only, so (2m, 2z) gives the same crossover and MDR. Negative control: the pre-fix beta = 1
+        crossover ms1/k."""
+        from scipy.optimize import brentq
+
         stack = json.loads((ASSETS / 'detector-stack.example.json').read_text())
         missed = 0
         for budget_scale in (0.1, 1.0, 10.0):
@@ -477,6 +515,21 @@ class ScriptPhysicsOracleTests(unittest.TestCase):
                         else:
                             self.assertIsNone(out['maximum_detectable_rigidity_gv'])
                         missed += abs(ms1 / k / cross - 1) > 1e-3
+
+                        def ms(r):
+                            return ms1 * math.sqrt(1 + (mass / (z * r)) ** 2)  # ms1 / beta(R)
+                        root = brentq(lambda r: ms(r) - k * r, 1e-6, 1e9, xtol=1e-300, rtol=1e-15)
+                        self.assertAlmostEqual(out['crossover_rigidity_gv'] / root, 1.0, delta=1e-12)
+                        if out['maximum_detectable_rigidity_gv'] is not None:
+                            peak = math.sqrt(1 - ms1 * ms1) / k  # the beta = 1 value; the root is at or below it
+                            mdr_root = brentq(lambda r: math.hypot(ms(r), k * r) - 1, root, peak * (1 + 1e-12),
+                                              xtol=1e-300, rtol=1e-15)
+                            self.assertAlmostEqual(out['maximum_detectable_rigidity_gv'] / mdr_root, 1.0, delta=1e-12)
+                        twice = multiple_scattering.summarize(s, 10.0, charge=2 * z, mass_gev=2 * mass)
+                        self.assertAlmostEqual(twice['crossover_rigidity_gv'] / out['crossover_rigidity_gv'], 1.0,
+                                               delta=1e-12)
+                        self.assertEqual(twice['maximum_detectable_rigidity_gv'] is None,
+                                         out['maximum_detectable_rigidity_gv'] is None)
         self.assertGreater(missed, 10, missed)  # 14 of 45: low crossovers of heavy, slow species
 
 

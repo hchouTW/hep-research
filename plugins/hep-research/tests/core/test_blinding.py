@@ -523,6 +523,29 @@ class RoundingZerosTests(unittest.TestCase):
                     missed_before += want and not self.pre_fix(token, sealed)
         self.assertEqual((checked, hits, missed_before), (1_149_200, 8679, 7209))
 
+    def test_rounding_zeros_sampled_beyond_the_exhaustive_domain(self):
+        """Beyond the exhaustive domain: 4000 seeded sealed values from 5000 to 10^7 (integers, half-integers and two
+        decimals), each against integer tokens near it rounded at 10^1 to 10^5 (the rounded value and two steps either
+        side, every token ending in zero), the same Decimal oracle. A sample, not an exhaustive claim."""
+        import random
+
+        rng, hits, checked = random.Random(20261022), 0, 0
+        for _ in range(4000):
+            sealed = rng.randrange(5000, 10 ** 7) + rng.choice((0.0, 0.5, rng.randrange(100) / 100))
+            for q in range(1, 6):
+                step = 10 ** q
+                for j in (-2, -1, 0, 1, 2):
+                    value = (round(sealed / step) + j) * step
+                    if value < 100:
+                        continue
+                    token = str(value)
+                    want = self.renders(token, sealed)
+                    self.assertEqual(bl._printed_match(token, sealed), want, (token, sealed))
+                    hits += want
+                    checked += 1
+        self.assertGreater(hits, 2000, hits)
+        self.assertGreater(checked - hits, 10_000, checked)
+
     def test_scan_text_flags_rounded_integers_and_not_coarser_ones(self):
         """End to end through scan_text, with the sealed 22014: plain and comma-grouped renderings with rounding
         zeros are hits; values outside the half step, two-digit readings and zeros printed before a point or in an

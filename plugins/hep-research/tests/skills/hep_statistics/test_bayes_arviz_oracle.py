@@ -138,11 +138,16 @@ def mcse_pre_fix(x, p):
 
 
 class IndependentOracle(unittest.TestCase):
-    """Runs without ArviZ: R-hat, bulk and tail ESS and quantile MCSE against an implementation written from
-    Vehtari et al. 2021 with SciPy primitives (rankdata, norm.ppf, beta.ppf), direct-sum autocovariances and
-    Geyer's pair sums, not the script's FFT, Acklam quantile and index loop. Agreement to 1e-12 relative (observed
-    1e-14). Negative control: the pre-fix ESS and MCSE (d161b3b7^, emulated here) miss the reference by 0.5% to 11%
-    on the poorly mixed cases, and pre-fix constant chains reported R-hat = 1.0."""
+    """Runs without ArviZ: R-hat, bulk and tail ESS and quantile MCSE against an implementation written from Vehtari et
+    al. 2021 with SciPy primitives (rankdata, norm.ppf, beta.ppf), direct-sum autocovariances and Geyer's pair sums,
+    not the script's FFT, Acklam quantile and index loop. Agreement to 1e-12 relative (observed 1e-14). Located
+    source (Bayesian Analysis 16 (2021) 667, arXiv:1903.08008v5, read in full, page numbers of v5): split R-hat eqs.
+    (1)-(4), pp. 5-6; rank normalization eq. (14) and folding eq. (15), p. 9; autocorrelation eq. (10), p. 7; ESS
+    eqs. (12)-(13) with the improved last term, p. 8; tail ESS eq. (16), p. 10; quantile MCSE eq. (20), p. 11. Like
+    ArviZ and Stan, the lag term uses the biased autocovariance (eq. (10) as printed is larger by N/(N-1)), the 95%
+    tail indicator is x >= q95 and the last term is added only when positive (hepstats:S07 notes). Negative control:
+    the pre-fix ESS and MCSE (d161b3b7^, emulated here) miss the reference by 0.5% to 11% on the poorly mixed cases,
+    and pre-fix constant chains reported R-hat = 1.0."""
 
     def test_diagnostics_match_the_reference_and_the_pre_fix_rules_do_not(self):
         missed = []

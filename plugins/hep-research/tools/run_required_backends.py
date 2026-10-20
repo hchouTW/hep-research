@@ -35,6 +35,7 @@ MODULES = [
     "tests.adapters.test_pyhf_published_reproduction", "tests.adapters.test_pyhf_nuisance_diagnostics",
     "tests.adapters.test_nuisance_interpolation", "tests.skills.hep_statistics.test_bayes_arviz_oracle",
     "tests.skills.hep_statistics.test_result_artifact", "tests.examples.test_stats_benchmarks",
+    "tests.skills.hep_ml.test_audit_metric_layer", "tests.skills.hep_ml.test_domain_shift_report",  # pyhf oracles
 ]
 
 

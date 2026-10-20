@@ -3,7 +3,7 @@
  "id": "SFA-2026-017",
  "severity": "S1",
  "ledger": [
-  "DR-WP2-06"
+  "DR-WP2-06-CALO"
  ],
  "summary": "calorimeter_resolution.py fitted sigma_E/E without per-point errors with unit weights on (sigma/E)^2, which biased the constant term and often gave a negative squared term.",
  "affected": [

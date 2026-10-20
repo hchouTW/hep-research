@@ -95,7 +95,10 @@ class T09ExactCounting(unittest.TestCase):
         b' in [b, b + 2] of the independently written plain upper end, on a uniform 0.01 grid in b' (a brute-force
         scan, not the module's coarse-then-refine search). The peaks are narrow (n0 = 0, b = 2: 1.22 on a 0.1 grid,
         1.26 on a 0.01 grid, attained at b' = 2.33), hence the fine grid. Published values are read from the FC 1998
-        Table IV fixture, never typed here. Negative control: the plain upper end must fail the same tolerance.
+        Table IV fixture, never typed here. Located construction: Feldman & Cousins, Phys. Rev. D 57 (1998) 3873,
+        arXiv:physics/9711021v2, the ordering ratio eq. (4.1) and "we force the function to be non-increasing, by
+        lengthening selected confidence intervals", Sec. IV.A, p. 8. Negative control: the plain upper end must fail the
+        same tolerance.
         tol = 0.015: half a unit of the table's last digit plus one s-grid step."""
         table = next(t for t in json.loads(FC_TABLES.read_text())["tables"] if t["table"] == "IV")
         s_step, b_step, window, tol, cl = 0.01, 0.01, 2.0, 0.015, 0.90

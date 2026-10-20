@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 37,
-   "bytes": 471830,
+   "bytes": 473215,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1742,13 +1742,14 @@
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
    "owner": "hep-detector",
-   "bytes": 6902,
+   "bytes": 7816,
    "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "tests/skills/hep_detector/test_hep_detector_audit.py",
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
@@ -1987,8 +1988,8 @@
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
    "owner": "hep-detector",
-   "bytes": 8664,
-   "lines": 132,
+   "bytes": 8972,
+   "lines": 135,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2000,7 +2001,8 @@
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
-    "skills/hep-detector/scripts/xmax_gaisser_hillas.py"
+    "skills/hep-detector/scripts/xmax_gaisser_hillas.py",
+    "tests/skills/hep_detector/test_hep_detector_audit.py"
    ],
    "cited_by_other_skills": [
     "hep-citations"
@@ -2385,7 +2387,7 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 16065,
+   "bytes": 16228,
    "lines": 244,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2406,7 +2408,8 @@
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/scripts/multiple_scattering.py",
-    "skills/hep-detector/scripts/tracker_resolution.py"
+    "skills/hep-detector/scripts/tracker_resolution.py",
+    "tests/skills/hep_detector/test_hep_detector_audit.py"
    ],
    "cited_by_other_skills": [
     "hep-citations"

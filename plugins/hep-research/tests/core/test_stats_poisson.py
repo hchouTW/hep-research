@@ -143,6 +143,37 @@ class MeanLimitTests(unittest.TestCase):
         with self.assertRaisesRegex(pd.DiagnosticsError, "limited to total means up to 500"):
             pd.fc_interval(0, 480.0)
 
+    def test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs(self):
+        """Ledger review, 2026-10-20: the Garwood ends and the classical limit are the means where the Poisson CDF
+        takes the target value. Independent implementation: brentq on scipy.stats.poisson.cdf (SciPy's own CDF).
+        Symbolic: the root of sympy.stats' Poisson CDF for n = 490 (lambdified, solved by bracketing at 50 digits).
+        Both 1e-9 relative; the pre-fix search returned 500 for n = 490."""
+        import mpmath
+        import sympy
+        from scipy import optimize
+        from scipy import stats as sps
+        from sympy import stats as sst
+
+        def scipy_root(n, target):
+            return optimize.brentq(lambda mu: sps.poisson.cdf(n, mu) - target, 1e-9, 10.0 * (n + 10), xtol=1e-12,
+                                   rtol=1e-14)
+
+        for n, cl in ((490, 0.6827), (495, 0.95), (600, 0.6827), (5000, 0.6827)):
+            with self.subTest(n=n, cl=cl):
+                a = (1.0 - cl) / 2.0
+                iv = pd.central_interval(n, cl)
+                self.assertAlmostEqual(iv["upper"] / scipy_root(n, a), 1.0, delta=1e-9)
+                self.assertAlmostEqual(iv["lower"] / scipy_root(n - 1, 1.0 - a), 1.0, delta=1e-9)
+                ul = pd.upper_limit(n, 0.0, cl)["upper_limit_on_total_mean"]
+                self.assertAlmostEqual(ul / scipy_root(n, 1.0 - cl), 1.0, delta=1e-9)
+        mu = sympy.Symbol("mu", positive=True)
+        a = (1.0 - 0.6827) / 2.0
+        cdf = sympy.lambdify(mu, sst.cdf(sst.Poisson("N", mu))(490) - sympy.Float(a, 50), "mpmath")
+        with mpmath.workdps(50):
+            root = float(mpmath.findroot(cdf, (mpmath.mpf(495), mpmath.mpf(540)), solver="illinois", tol=1e-40,
+                                         maxsteps=500))
+        self.assertAlmostEqual(pd.central_interval(490)["upper"] / root, 1.0, delta=1e-9)
+
     def test_two_oracles_and_the_clipped_search_as_negative_control(self):
         """sci-fix POISSON-500 (axis C). Oracle 1, analytic: the Garwood ends and the classical limit are chi-square
         quantiles, upper = chi2.ppf(1 - a, 2n + 2) / 2 and lower = chi2.ppf(a, 2n) / 2 (SciPy, computed here).
@@ -192,6 +223,21 @@ class UpperTailTests(unittest.TestCase):
             self.assertAlmostEqual(pd.poisson_sf(n, mu) / float(ref), 1.0, delta=1e-10, msg=(n, mu))
             self.assertAlmostEqual(pd.log_poisson_sf(n, mu), float(ref.ln()), delta=1e-10, msg=(n, mu))
 
+    def test_matches_third_party_and_symbolic_tails(self):
+        """Ledger review, 2026-10-20: the tail against scipy.stats.poisson.sf and logsf (independent implementation:
+        SciPy's own incomplete-gamma tail, not the series above) to 1e-10, and P(N >= 60 | 5) against sympy.stats'
+        Poisson probability evaluated at 30 digits (symbolic): 7.6496...e-43, which the pre-fix complement lost."""
+        import sympy
+        from scipy import stats as sps
+        from sympy import stats as sst
+
+        for n, mu in ((60, 5.0), (1, 5.0), (5, 5.0), (6, 5.0), (20, 5.0), (40, 0.5), (600, 500.0), (499, 500.0)):
+            with self.subTest(n=n, mu=mu):
+                self.assertAlmostEqual(pd.poisson_sf(n, mu) / sps.poisson.sf(n - 1, mu), 1.0, delta=1e-10)
+                self.assertAlmostEqual(pd.log_poisson_sf(n, mu), sps.poisson.logsf(n - 1, mu), delta=1e-10)
+        exact = float(sympy.N(sst.P(sst.Poisson("N", 5) >= 60), 30))
+        self.assertAlmostEqual(pd.poisson_sf(60, 5.0) / exact, 1.0, delta=1e-10)
+
     def test_negative_control_complement_form_fails_the_reference(self):
         """Negative control (sci-fix evidence, axis C): the pre-fix complement 1 - P(N <= n - 1) must fail the same
         high-precision reference that poisson_sf passes, so the reference can tell the two forms apart."""
@@ -228,7 +274,7 @@ class UpperTailTests(unittest.TestCase):
 class FeldmanCousinsTests(unittest.TestCase):
     """Reference values: Feldman and Cousins (1998), Table IV (90% CL, b = 0 to 5) and Table VI (95% CL, b = 0 to 5),
     transcribed into fixtures/fc1998_tables.json (the full grid is in test_published_tables.py). The published upper
-    ends are forced non-increasing in b (Sec. IV.B); the plain construction at a single b dips below them, for
+    ends are forced non-increasing in b (Sec. IV.A, p. 8); the plain construction at a single b dips below them, for
     example 1.08 instead of 1.26 at n0 = 0, b = 2, 90% CL."""
 
     def test_published_values(self):

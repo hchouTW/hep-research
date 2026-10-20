@@ -101,7 +101,8 @@ class ReviewFixes2Numbers(unittest.TestCase):
 
 
 def _generated_passages(seed, count):
-    """Seeded passages with the numbers they contain known by construction (the oracle: no tokenizer involved).
+    """Seeded passages with the numbers they contain known by construction (the oracle: no tokenizer involved; the
+    grouped integers rendered by Python's format(), the values compared as fractions.Fraction).
     Each number has an optional sign (-, +, Unicode minus), an integer part (grouped with ',', '{,}', a thin space
     or '\\,' from 1000 up), an optional fraction (trailing zeros kept) and exponent; it sits between a left and a
     right context (sentence end, CJK text and full-width punctuation with no space, brackets, relation signs, LaTeX
@@ -120,8 +121,7 @@ def _generated_passages(seed, count):
         grouped = n >= 1000 and rng.random() < 0.5
         if grouped:
             sep = rng.choice([",", "{,}", " ", "\\,"])
-            head, rest = digits[:len(digits) % 3 or 3], digits[len(digits) % 3 or 3:]
-            text = head + "".join(sep + rest[i:i + 3] for i in range(0, len(rest), 3))
+            text = format(n, ",").replace(",", sep)  # thousands grouping by Python's format() (third-party)
         else:
             text = digits
         frac = "".join(rng.choice("0123456789") for _ in range(rng.choice([0, 0, 1, 2, 3, 4])))
@@ -434,13 +434,13 @@ class ReviewFixes2Rounding(Project):
         self.assertNotIn("occurrence.value_mismatch", codes(rep))
 
     @staticmethod
-    def no_rule_class(m, k, d):
-        """Integer-arithmetic oracle for a display with no rounding rule (RC-A5): source m/1000, display k/10^d.
-        'ok' when the values are equal; 'warning' when the display is the source rounded to the display's last digit
-        (strictly nearest, or a tie resolved away from zero or to the even digit: half up and half even both count);
-        'error' otherwise."""
-        if d <= 3:
-            scale = 10 ** (3 - d)
+    def no_rule_class(m, k, d, p=3):
+        """Integer-arithmetic oracle for a display with no rounding rule (RC-A5): source m/10^p (p = 3 on the
+        exhaustive grid), display k/10^d. 'ok' when the values are equal; 'warning' when the display is the source
+        rounded to the display's last digit (strictly nearest, or a tie resolved away from zero or to the even digit:
+        half up and half even both count); 'error' otherwise."""
+        if d <= p:
+            scale = 10 ** (p - d)
             if k * scale == m:
                 return "ok"
             diff, half = abs(m - k * scale), scale / 2
@@ -449,7 +449,16 @@ class ReviewFixes2Rounding(Project):
             if diff == half and (abs(k) * scale > abs(m) or k % 2 == 0):
                 return "warning"
             return "error"
-        return "ok" if k == m * 10 ** (d - 3) else "error"   # more digits than the source: only equal values
+        return "ok" if k == m * 10 ** (d - p) else "error"   # more digits than the source: only equal values
+
+    @staticmethod
+    def int_round(m, div, mode):
+        """Round the integer m to a multiple of div in integer arithmetic (RC-A6 oracle): ties away from zero in
+        half-up, to the even quotient in half-even."""
+        q, r = divmod(abs(m), div)
+        if 2 * r > div or (2 * r == div and (mode == "half-up" or q % 2 == 1)):
+            q += 1
+        return (-1 if m < 0 else 1) * q * div
 
     def test_no_rule_classification_exhaustively_against_integer_arithmetic(self):
         """Exhaustive on a stated finite domain (sci-fix RC-A5): every source with three decimals in [-2, 2] and every
@@ -474,6 +483,28 @@ class ReviewFixes2Rounding(Project):
                     pre_fix_wrong += want == "error"          # the pre-fix rule called these a warning
         self.assertGreater(min(counts.values()), 1000, counts)
         self.assertEqual(pre_fix_wrong, counts["error"])
+
+    def test_no_rule_classification_sampled_beyond_the_grid(self):
+        """Beyond the exhaustive grid (RC-A5): 4000 seeded sources with 4 to 7 decimals and magnitudes up to 10^4,
+        each with a display of 0 to p + 1 decimals within two last-digit steps, against the same integer oracle. A
+        sample, not an exhaustive claim."""
+        import random
+        from decimal import Decimal
+        from communication_lib.claims import _rounds_somehow
+
+        rng, counts = random.Random(20261020), {"ok": 0, "warning": 0, "error": 0}
+        for _ in range(4000):
+            p = rng.randint(4, 7)
+            m = rng.choice((-1, 1)) * rng.randrange(10 ** (4 + p))
+            src = Decimal(m).scaleb(-p)
+            d = rng.randint(0, p + 1)
+            k = (m * 10 ** d) // 10 ** p + rng.randint(-2, 3)
+            shown = Decimal(k).scaleb(-d)
+            got = "ok" if src == shown else ("warning" if _rounds_somehow(src, shown) else "error")
+            want = self.no_rule_class(m, k, d, p)
+            self.assertEqual(got, want, (str(src), str(shown)))
+            counts[want] += 1
+        self.assertGreater(min(counts.values()), 50, counts)
 
     def test_no_rule_classification_end_to_end_on_grid_cells(self):
         """The same oracle through audit_claims on cells of each class, ties of both signs included."""
@@ -508,12 +539,7 @@ class ReviewFixes2Rounding(Project):
         from decimal import Decimal
         from communication_lib.claims import _round
 
-        def int_round(m, div, mode):  # round the integer m to a multiple of div
-            q, r = divmod(abs(m), div)
-            if 2 * r > div or (2 * r == div and (mode == "half-up" or q % 2 == 1)):
-                q += 1
-            return (-1 if m < 0 else 1) * q * div
-
+        int_round = self.int_round
         mismatches = {"half-up": 0, "half-even": 0}
         for mode in ("half-up", "half-even"):
             for m in range(-10000, 10000):  # value = m / 1000
@@ -532,6 +558,38 @@ class ReviewFixes2Rounding(Project):
                     mismatches[mode] += 1
         self.assertGreater(mismatches["half-up"], 0)
         self.assertGreater(mismatches["half-even"], 0)
+
+    def test_rounding_rules_sampled_beyond_the_exhaustive_domain(self):
+        """Beyond the exhaustive domain (RC-A6): 4000 seeded values with 4 to 9 decimals or up to 9 significant digits
+        and magnitudes up to 10^8, rounded to 0 to p - 1 decimals or 1 to 8 significant digits in both modes, against
+        the same integer oracle. A sample, not an exhaustive claim."""
+        import random
+        from decimal import Decimal
+        from communication_lib.claims import _round
+
+        rng, ties = random.Random(20261021), 0
+        for _ in range(4000):
+            mode = rng.choice(("half-up", "half-even"))
+            if rng.random() < 0.5:  # decimals: value m / 10^p rounded to n decimals
+                p = rng.randint(4, 9)
+                m = rng.choice((-1, 1)) * rng.randrange(1, 10 ** (8 + p))
+                n = rng.randint(0, p - 1)
+                if rng.random() < 0.3:  # force a tie at the rounding digit
+                    m = m // 10 ** (p - n) * 10 ** (p - n) + (-1 if m < 0 else 1) * 5 * 10 ** (p - n - 1)
+                want = Decimal(self.int_round(m, 10 ** (p - n), mode)).scaleb(-p)
+                got = _round(str(Decimal(m).scaleb(-p)), f"decimals:{n}:{mode}")
+            else:  # significant: value m * 10^e with D digits rounded to n significant digits
+                m = rng.choice((-1, 1)) * rng.randrange(10 ** 3, 10 ** 9)
+                e, digits = rng.randint(-9, 3), len(str(abs(m)))
+                n = rng.randint(1, digits - 1)
+                if rng.random() < 0.3:
+                    unit = 10 ** (digits - n)
+                    m = (-1 if m < 0 else 1) * (abs(m) // unit * unit + unit // 2)
+                want = Decimal(self.int_round(m, 10 ** (digits - n), mode)).scaleb(e)
+                got = _round(str(Decimal(m).scaleb(e)), f"significant:{n}:{mode}")
+            ties += str(m).rstrip("0").endswith("5")
+            self.assertEqual(Decimal(got), want, msg=(m, mode))
+        self.assertGreater(ties, 500, ties)
 
     def test_default_rounding_is_half_up_and_half_even_is_opt_in(self):
         from communication_lib.claims import _round

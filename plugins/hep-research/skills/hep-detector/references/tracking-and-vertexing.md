@@ -139,7 +139,7 @@ The intrinsic term scales as `sigma_x * R / (B * L^2)`, i.e. with the sensor res
 and inversely with the product of the field integral (`~ B*L`) and the lever arm `L`.
 For `N` equally spaced points in a uniform field the Gluckstern estimates (approximate;
 PDG Review of Particle Physics, "Particle detectors at accelerators", momentum
-measurement) are, with `p_T` in GeV/c, `B` in T and lengths in m, for unit charge:
+measurement: eq. (35.68), p. 112, RPP 2025, eq. (35.61), p. 109, RPP 2024, read 2026-10-21) are, with `p_T` in GeV/c, `B` in T and lengths in m, for unit charge:
 
     measurement: sigma(p_T)/p_T ~= sigma_x * p_T / (0.3 * B * L^2) * sqrt(720/(N+4))
     scattering:  sigma(p_T)/p_T ~= 0.016 / (0.3 * beta * B * L) * sqrt(L/X0)
@@ -153,8 +153,8 @@ scattering term carries `beta` to the first power: PDG eq. 35.70 gives
 `k = 0.3 z B / p_T` gives the line above at `lambda = 0` (PDG RPP 2025, sec. 35.12).
 
 The scattering coefficient 0.016 GeV/c is the PDG value for this fit term; it differs
-from the Highland 13.6 MeV coefficient (without its log factor) that
-`multiple_scattering.py` uses for its scattering term. The `1/L^2` dependence is why
+from the Highland 13.6 MeV coefficient (without its log factor; Highland is eq. (34.16), p. 16, of "Passage of
+Particles Through Matter", RPP 2024) that `multiple_scattering.py` uses for its scattering term. The `1/L^2` dependence is why
 lever arm is the most valuable quantity in a spectrometer design and why tracks that
 fail to reach the outermost layer have sharply worse resolution. Selections requiring a full-span
 track are therefore selecting on resolution, which correlates with the physics being

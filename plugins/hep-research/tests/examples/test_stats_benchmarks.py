@@ -251,6 +251,11 @@ class PublishedLikelihood(unittest.TestCase):
                 return [fn(j) for j in jobs]
 
         grid = self.mod.TOY_GRID
+        from scipy import stats as sps  # the counting CLs above is the Poisson CDF ratio (third-party check)
+        for n in (n_obs, *quantile_counts):
+            for s in grid:
+                ref = sps.poisson.cdf(n, s + b) / sps.poisson.cdf(n, b)
+                self.assertAlmostEqual(float(cls(n, s)) / ref, 1.0, delta=1e-12, msg=(n, s))
         with mock.patch.object(self.mod, "_toy_point", fake_toy_point), \
                 mock.patch("multiprocessing.get_context", lambda *a: mock.Mock(Pool=Pool)):
             out = self.mod.toy_based({}, 1, 0, 1)
@@ -267,7 +272,16 @@ class PublishedLikelihood(unittest.TestCase):
 
     def test_crossing_at_zero_events_is_ln_20_for_any_background(self):
         """Invariant: at n = 0 the counting CLs is exp(-S) whatever b is, so the log-CLs crossing on the toy grid is
-        ln 20 exactly for every b; the pre-fix linear rule gives 3.118 on this grid (b-independent too, but wrong)."""
+        ln 20 exactly for every b; the pre-fix linear rule gives 3.118 on this grid (b-independent too, but wrong).
+        Symbolic oracle (ledger review, 2026-10-20): sympy.stats' Poisson CDF ratio at n = 0 simplifies to exp(-S)
+        for any b and its root at 0.05 is log 20."""
+        import sympy
+        from sympy import stats as sst
+
+        s_sym, b_sym = sympy.symbols("S b", positive=True)
+        ratio = sympy.simplify(sst.cdf(sst.Poisson("A", s_sym + b_sym))(0) / sst.cdf(sst.Poisson("B", b_sym))(0))
+        self.assertEqual(ratio, sympy.exp(-s_sym))
+        self.assertEqual(sympy.solve(sympy.Eq(ratio, sympy.Rational(1, 20)), s_sym), [sympy.log(20)])
         grid = self.mod.TOY_GRID
         for b in (0.1, 1.0, 3.232, 10.0, 50.0):
             vals = [math.exp(-(s + b)) / math.exp(-b) for s in grid]

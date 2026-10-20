@@ -1,6 +1,6 @@
 {
  "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric); rechecked on 0.17.0 on 2026-10-20: the evidence tests and the code they cover are unchanged apart from the hep-authoring test folder; needs maintainer review; discrimination axis updated from per-test parent records on 2026-10-20 (VALIDATION SCIFIX-PARENT-RECORDS), also to be reviewed; four S1 entries to C3 (three to D3 by local mutants) by plan PR-6 batch 2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH2), also to be reviewed; the remaining three S1 entries to C3 by plan PR-6 batch 3 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-BATCH3), also to be reviewed; the ten S2 entries below C2 raised (RC-A5 to C4) by plan PR-6 batch S2 on 2026-10-20 (VALIDATION SCIFIX-ORACLES-S2), also to be reviewed; gaps closed on 2026-10-20 (VALIDATION SCIFIX-GAPS-CLOSED): ArviZ parent record, pdg in CI, torch-cpu record; ML-DOMAIN's PyTorch tests in a required CI gate on 2026-10-20 (VALIDATION SCIFIX-TORCH-GATE)",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric), rechecked and extended on 2026-10-20 (VALIDATION SCIFIX-* sections); reviewed 2026-10-21 under the maintainer's decisions on oracle independence (docs/maintenance.md): every counted independent kind has a basis (locator, third-party, exhaustive or person) in its entry's independence records, locators read at page level or better (VALIDATION SCIFIX-LEDGER-REVIEW)",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -12,7 +12,7 @@
     "tests/core/test_stats_likelihood_limits.py"
    ],
    "oracle_kinds": [
-    "analytic",
+    "symbolic",
     "independent-implementation",
     "invariant"
    ],
@@ -20,7 +20,21 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18. The benchmark's toy_based() run in process on exact counting CLs (n = 3, b = 3.232 and the expected quantiles) against mpmath roots within the log-interpolation error bound; fails by assertion on parent 90388aa0 (observed 5.335 against 5.284) and passes on fix 99a18fd8; n = 0 crossing is ln 20 for any b (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20). The core toy CLs (likelihood_limits._toy_cls) interpolated log CLs since it was written (cc44988d): the fix changed the benchmark only"
+   "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18. The benchmark's toy_based() run in process on exact counting CLs (n = 3, b = 3.232 and the expected quantiles) against mpmath roots within the log-interpolation error bound; fails by assertion on parent 90388aa0 (observed 5.335 against 5.284) and passes on fix 99a18fd8; n = 0 crossing is ln 20 for any b (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20). The core toy CLs (likelihood_limits._toy_cls) interpolated log CLs since it was written (cc44988d): the fix changed the benchmark only",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_toy_crossings_on_exact_counting_cls_meet_the_interpolation_bound",
+     "basis": "third-party",
+     "detail": "counting CLs against scipy.stats.poisson.cdf ratios at every grid point (1e-12)"
+    },
+    {
+     "kind": "symbolic",
+     "test": "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_crossing_at_zero_events_is_ln_20_for_any_background",
+     "basis": "third-party",
+     "detail": "sympy.stats Poisson CDF ratio at n = 0 simplifies to exp(-S), root ln 20"
+    }
+   ]
   },
   {
    "id": "F01",
@@ -34,15 +48,29 @@
    ],
    "oracle_kinds": [
     "behavioral",
+    "symbolic",
     "independent-implementation",
-    "analytic",
     "invariant"
    ],
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "property test of ln L against n ln(mu) - mu with the pre-fix domain rule as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+   "note": "property test of ln L against n ln(mu) - mu with the pre-fix domain rule as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson",
+     "basis": "third-party",
+     "detail": "scipy.stats.poisson.logpmf + lgamma(n+1), n 0..30, mu 1e-6..200; nan for mu < 0"
+    },
+    {
+     "kind": "symbolic",
+     "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson",
+     "basis": "third-party",
+     "detail": "log of the sympy.stats Poisson density; sympy refuses a negative rate"
+    }
+   ]
   },
   {
    "id": "F02",
@@ -55,7 +83,7 @@
     "tests/core/test_properties.py"
    ],
    "oracle_kinds": [
-    "analytic",
+    "symbolic",
     "independent-implementation",
     "invariant"
    ],
@@ -63,7 +91,27 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "toys_not_evaluated path tested 2026-10-18; property test of the Clopper-Pearson ends against exact binomial sums (mpmath), Wald at k = 0 as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)"
+   "note": "toys_not_evaluated path tested 2026-10-18; property test of the Clopper-Pearson ends against exact binomial sums (mpmath), Wald at k = 0 as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_clopper_pearson_against_scipy",
+     "basis": "third-party",
+     "detail": "the defining tail equations via scipy.stats.binom.sf/cdf (1e-8)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_extreme_exact_tail_in_log_space",
+     "basis": "third-party",
+     "detail": "scipy.stats.poisson.logpmf with logsumexp"
+    },
+    {
+     "kind": "symbolic",
+     "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedance_bound_solves_the_binomial_equation_symbolically",
+     "basis": "third-party",
+     "detail": "sympy.stats Binomial P(K = 0) = 0.05 solved at 30 digits, N = 1, 7, 100, 1000"
+    }
+   ]
   },
   {
    "id": "F03",
@@ -75,13 +123,21 @@
    ],
    "oracle_kinds": [
     "behavioral",
-    "analytic"
+    "independent-implementation"
    ],
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the parent failure is a missing status key, the defect itself; the T05 tests need a method new in the fix; newton_fit's minimum, value, EDM and verdict against a closed-form two-parameter Poisson and Gaussian model at every stop of truncated fits; the pre-fix no-verdict rule as negative control (14 of 24 stops are not minima); 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "note": "per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the parent failure is a missing status key, the defect itself; the T05 tests need a method new in the fix; newton_fit's minimum, value, EDM and verdict against a closed-form two-parameter Poisson and Gaussian model at every stop of truncated fits; the pre-fix no-verdict rule as negative control (14 of 24 stops are not minima); 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_p0_regressions.py::T04AnalyticOracle::test_converged_fits_match_a_third_party_minimum",
+     "basis": "third-party",
+     "detail": "NLL from scipy.stats.poisson.logpmf and norm.logpdf, minimized by scipy.optimize (Nelder-Mead)"
+    }
+   ]
   },
   {
    "id": "BAYES-T24",
@@ -101,7 +157,27 @@
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate. A SciPy oracle written from Vehtari et al. 2021 runs without ArviZ (R-hat, bulk and tail ESS, quantile MCSE to 1e-12) with invariants and the pre-fix ESS and MCSE as negative control; it fails by assertion on parent bb0774f0 and passes on fix d161b3b7; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20; earlier tie and signed-weight parts: SCIFIX-PARENT-RECORDS); with ArviZ 0.23.4 the fix's ArviZ oracle fails by assertion on parent bb0774f0 (five cases: MCSE ratios 0.954, 1.036, 0.956, bulk ESS 0.993, 0.994, the same as the SciPy oracle) and crashes on the tie case, and passes on fix d161b3b7 (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)"
+   "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate. A SciPy oracle written from Vehtari et al. 2021 runs without ArviZ (R-hat, bulk and tail ESS, quantile MCSE to 1e-12) with invariants and the pre-fix ESS and MCSE as negative control; it fails by assertion on parent bb0774f0 and passes on fix d161b3b7; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20; earlier tie and signed-weight parts: SCIFIX-PARENT-RECORDS); with ArviZ 0.23.4 the fix's ArviZ oracle fails by assertion on parent bb0774f0 (five cases: MCSE ratios 0.954, 1.036, 0.956, bulk ESS 0.993, 0.994, the same as the SciPy oracle) and crashes on the tie case, and passes on fix d161b3b7 (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::ArviZOracle::test_rhat_ess_and_mcse_match",
+     "basis": "third-party",
+     "detail": "ArviZ 0.23.4 R-hat, ESS and MCSE (required stats-backends gate)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_diagnostics_match_the_reference_and_the_pre_fix_rules_do_not",
+     "basis": "locator",
+     "detail": "Vehtari et al., Bayesian Analysis 16 (2021) 667, arXiv:1903.08008v5 (read in full 2026-10-21): eqs. (1)-(4), (10), (12)-(16), (20); follows Stan/ArviZ in three small points (hepstats:S07 notes)"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_statistics/test_bayes_diagnostics.py::Diagnostics::test_ar1_bulk_ess",
+     "basis": "locator",
+     "detail": "AR(1) tau = (1 + rho)/(1 - rho): Thompson, arXiv:1011.0175v1, eq. (7), p. 2 (p. 3: rho = 0.98 gives 99), with ESS = NM/tau, Vehtari et al. eq. (12) (read 2026-10-21)"
+    }
+   ]
   },
   {
    "id": "FC-MONOTONE",
@@ -123,7 +199,21 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only; per-test parent record of fix 04338bbf (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only; per-test parent record of fix 04338bbf (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
+   "independence": [
+    {
+     "kind": "published",
+     "test": "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips",
+     "basis": "locator",
+     "detail": "Feldman & Cousins 1998 Tables IV/VI, transcribed in tests/core/fixtures/fc1998_tables.json (full grid: test_published_tables.py, slow tier)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope",
+     "basis": "locator",
+     "detail": "the construction of Feldman & Cousins, Phys. Rev. D 57 (1998) 3873, arXiv:physics/9711021v2: ordering ratio eq. (4.1) and the non-increasing adjustment, Sec. IV.A, p. 8 (read in full 2026-10-21)"
+    }
+   ]
   },
   {
    "id": "POISSON-SF",
@@ -137,14 +227,28 @@
    ],
    "oracle_kinds": [
     "independent-implementation",
-    "analytic",
+    "symbolic",
     "invariant"
    ],
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "negative control added 2026-10-18; per-test parent record of fix a2adc126 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "note": "negative control added 2026-10-18; per-test parent record of fix a2adc126 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails",
+     "basis": "third-party",
+     "detail": "scipy.stats.poisson.sf and logsf, 8 cases including n = 60, b = 5 (1e-10)"
+    },
+    {
+     "kind": "symbolic",
+     "test": "tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails",
+     "basis": "third-party",
+     "detail": "sympy.stats P(N >= 60 | 5) at 30 digits = 7.6496e-43"
+    }
+   ]
   },
   {
    "id": "COV-NOREPAIR",
@@ -158,15 +262,29 @@
    ],
    "oracle_kinds": [
     "independent-implementation",
+    "exhaustive",
     "closure",
-    "invariant",
-    "analytic"
+    "invariant"
    ],
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20; per-test parent record of fix 6a81109c (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20; per-test parent record of fix 6a81109c (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale",
+     "basis": "third-party",
+     "detail": "numpy.linalg.eigvalsh decides definiteness, 400 random matrices"
+    },
+    {
+     "kind": "exhaustive",
+     "test": "tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3",
+     "basis": "exhaustive",
+     "detail": "all 343 3x3 unit-diagonal matrices with off-diagonals in {-3/2, ..., 3/2} step 1/2, sympy exact definiteness"
+    }
+   ]
   },
   {
    "id": "POISSON-500",
@@ -180,14 +298,28 @@
    ],
    "oracle_kinds": [
     "independent-implementation",
-    "invariant",
-    "analytic"
+    "symbolic",
+    "invariant"
    ],
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20; per-test parent record of fix b7b7825a (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20; per-test parent record of fix b7b7825a (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs",
+     "basis": "third-party",
+     "detail": "brentq on scipy.stats.poisson.cdf for the Garwood ends and the classical limit, n 490..5000 (1e-9)"
+    },
+    {
+     "kind": "symbolic",
+     "test": "tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs",
+     "basis": "third-party",
+     "detail": "root of the sympy.stats Poisson CDF at n = 490, 50 digits"
+    }
+   ]
   },
   {
    "id": "TH9-MASSES",
@@ -208,7 +340,27 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "expected values computed from closed forms in the test since 2026-10-18; binding energies of d, 3He, 4He from the CODATA 2022 masses against AME2020 mass excesses (a second evaluation), property tests over species and momenta, the pre-fix 10 eV table as negative control (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the PDG cross-check (pdg 2026.0, 2026 edition) runs in the required CI job pdg-cross-check, where a skip naming pdg fails (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)"
+   "note": "expected values computed from closed forms in the test since 2026-10-18; binding energies of d, 3He, 4He from the CODATA 2022 masses against AME2020 mass excesses (a second evaluation), property tests over species and momenta, the pre-fix 10 eV table as negative control (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the PDG cross-check (pdg 2026.0, 2026 edition) runs in the required CI job pdg-cross-check, where a skip naming pdg fails (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)",
+   "independence": [
+    {
+     "kind": "published",
+     "test": "tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package",
+     "basis": "third-party",
+     "detail": "bundled PDG 2026 masses equal the pdg package 2026.0 (required CI job pdg-cross-check)"
+    },
+    {
+     "kind": "published",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::SpeciesMassPropertyTests::test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not",
+     "basis": "third-party",
+     "detail": "bundled CODATA 2022 against AME2020 (deuteron; the He electron-binding energies are typed values); CODATA and AME2020 share input data, so this and the pdg check are one published kind"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
+     "basis": "locator",
+     "detail": "PDG RPP 2024 Passage of Particles Through Matter eqs. (34.41), (34.43), pp. 33-34 (read 2026-10-21)"
+    }
+   ]
   },
   {
    "id": "DR-WP1-01",
@@ -227,7 +379,21 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)"
+   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
+     "basis": "locator",
+     "detail": "N = N0 L z^2 sin^2 theta_C: PDG RPP 2024 eq. (34.43), p. 34, angle eq. (34.41), p. 33"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength",
+     "basis": "locator",
+     "detail": "PDG RPP 2024 eq. (34.44), p. 34, integrated with scipy.integrate.quad; alpha and hbar c from the bundled CODATA 2022 table"
+    }
+   ]
   },
   {
    "id": "DR-WP1-02",
@@ -247,11 +413,59 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes); grid of x_max, lambda and depths against the textbook form in 60-digit decimal arithmetic, the pre-fix form as negative control, half-maximum bracketing, 2026-10-20"
+   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes); grid of x_max, lambda and depths against the textbook form in 60-digit decimal arithmetic, the pre-fix form as negative control, half-maximum bracketing, 2026-10-20",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form",
+     "basis": "locator",
+     "detail": "the Gaisser-Hillas form of Pierre Auger Collaboration, JCAP 03 (2019) 018, arXiv:1811.04660, eq. (2.1), p. 3 (read in full 2026-10-21)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form",
+     "basis": "locator",
+     "detail": "the located form in 60-digit decimal arithmetic, a different algorithm from the script's log1p form"
+    }
+   ]
   },
   {
-   "id": "DR-WP2-06",
-   "title": "Script physics (calorimeter, PID, multiple scattering, tag-and-probe, pileup)",
+   "id": "DR-WP2-06-CALO",
+   "title": "Calorimeter resolution fit weights by a constant relative error without per-point errors",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py"
+   ],
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic",
+    "closure",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq",
+     "basis": "third-party",
+     "detail": "numpy.linalg.lstsq with weights 1/r^4 on every one of 2000 toys (1e-10)"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance",
+     "basis": "locator",
+     "detail": "E9, PDG RPP 2024 Particle Detectors at Accelerators eq. (35.43), p. 82 (read 2026-10-21): points on the model are fitted exactly"
+    }
+   ],
+   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); the 2000-toy bias study (bias of c 0.06 sd; pre-fix unit weights: c^2 < 0 in 24.8%, c about 10 sd high), closure and energy-scale covariance; 2 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-017"
+  },
+  {
+   "id": "DR-WP2-06-PID",
+   "title": "PID refuses electrons in the heavy-particle Bethe formula and uses water I = 79.7 eV",
    "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
    "severity": "S1",
    "evidence_tests": [
@@ -259,19 +473,62 @@
     "tests/skills/hep_detector/test_reference_values.py"
    ],
    "oracle_kinds": [
-    "independent-implementation",
-    "analytic",
     "published",
-    "closure",
+    "analytic",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "independence": [
+    {
+     "kind": "published",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy",
+     "basis": "locator",
+     "detail": "I = 79.7 eV, PDG Atomic and Nuclear Properties, water (liquid), https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/water_liquid.html (read 2026-10-21)"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy",
+     "basis": "locator",
+     "detail": "Bethe, PDG RPP 2024 Passage of Particles Through Matter eq. (34.5), p. 4, W_max eq. (34.4), K Table 34.1 (read 2026-10-21): the 0.3 GeV/c muon loss in water"
+    }
+   ],
+   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); invariant: the loss scales exactly as z^2 at fixed momentum and mass; negative control: I = 75 eV gives 2.05062; electrons (m < 10 MeV) refused; parent record of 6c793363 (VALIDATION SCIFIX-PARENT-RECORDS); advisory SFA-2026-018"
+  },
+  {
+   "id": "DR-WP2-06-MS",
+   "title": "Multiple scattering derives beta(R) from mass and charge and solves the crossover and MDR with it",
+   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_hep_detector_audit.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
     "invariant"
    ],
    "correctness": "C3",
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "tag-and-probe and pileup parts: behavioral tests only"
+   "gaps": [],
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms",
+     "basis": "locator",
+     "detail": "closed forms (quadratics in R^2) of the Gluckstern term, PDG RPP 2025 eq. (35.68), p. 112, and the Highland leading term, RPP 2024 eq. (34.16), p. 16 (read 2026-10-21)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms",
+     "basis": "locator",
+     "detail": "scipy.optimize.brentq roots of the same located defining equations, to 1e-12"
+    }
    ],
-   "note": "calorimeter fit: the fix's 2000-toy bias study in the suite (bias of c below 0.1 sd, against numpy weighted lstsq on every toy; pre-fix unit weights: c^2 < 0 in a quarter, c biased by about 10 sd), closure and energy-scale covariance; multiple scattering: crossover and MDR with beta(R) against their closed forms (quadratics in R^2) over stacks, masses, charges, pre-fix beta = 1 as negative control; 6 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)"
+   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); 45 stacks, masses and charges; invariant: (2m, 2z) gives the same crossover and MDR; negative control: the pre-fix beta = 1 crossover off in 14 of 45; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-019"
   },
   {
    "id": "ROBUST-MALFORMED",
@@ -290,7 +547,8 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
    "gaps": [],
-   "note": "per-test parent record of fix d7148901 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent"
+   "note": "per-test parent record of fix d7148901 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
+   "independence": []
   },
   {
    "id": "BLINDING-SCANNER",
@@ -309,7 +567,15 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; every claimed rendering, generated independently, found in all seven claimed encodings; the printed-precision rule against exact Decimal arithmetic, with tokens that must not alarm; the pre-fix UTF-8 decoding and short-value rule as negative controls; 9 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the rounding-zeros gap found by these tests is fixed as BLINDING-ROUNDING-ZEROS"
+   "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; every claimed rendering, generated independently, found in all seven claimed encodings; the printed-precision rule against exact Decimal arithmetic, with tokens that must not alarm; the pre-fix UTF-8 decoding and short-value rule as negative controls; 9 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the rounding-zeros gap found by these tests is fixed as BLINDING-ROUNDING-ZEROS",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding",
+     "basis": "third-party",
+     "detail": "renderings from Python repr()/format(); encodings by str.encode for the seven codecs"
+    }
+   ]
   },
   {
    "id": "BLINDING-ROUNDING-ZEROS",
@@ -328,7 +594,15 @@
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "the printed-precision match exhaustively against Decimal rounding over every sealed n and n + 0.5 (n = 100 to 4999) and every integer token ending in zero within 600 (1,149,200 pairs; 8679 renderings, the pre-fix rule misses 7209); end to end through scan_text; the four evidence tests fail by assertion on parent b34d363a and pass on the fix; 5 local mutants killed, including the revert (VALIDATION SCIFIX-ROUNDING-ZEROS 2026-10-20)"
+   "note": "the printed-precision match exhaustively against Decimal rounding over every sealed n and n + 0.5 (n = 100 to 4999) and every integer token ending in zero within 600 (1,149,200 pairs; 8679 renderings, the pre-fix rule misses 7209); end to end through scan_text; the four evidence tests fail by assertion on parent b34d363a and pass on the fix; 5 local mutants killed, including the revert (VALIDATION SCIFIX-ROUNDING-ZEROS 2026-10-20)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/core/test_blinding.py::RoundingZerosTests::test_rounding_zeros_exhaustively_against_decimal_rounding",
+     "basis": "exhaustive",
+     "detail": "1,149,200 pairs, sealed n and n + 0.5 for n = 100..4999, Decimal.quantize; a sampled check of 4000 values from 5000 to 1e7 beyond the domain"
+    }
+   ]
   },
   {
    "id": "ROBUST-CAMPAIGN",
@@ -342,13 +616,21 @@
    "oracle_kinds": [
     "behavioral",
     "closure",
-    "analytic"
+    "independent-implementation"
    ],
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
    "gaps": [],
-   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; the merged campaign equals closed forms that do not use engine merging, also after an interrupted then confirmed submit; a file-forced two-process test refuses the second submit with campaign.locked; 3 local mutants killed, including a _sum error that the single_run reference misses (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; the merged campaign equals closed forms that do not use engine merging, also after an interrupted then confirmed submit; a file-forced two-process test refuses the second submit with campaign.locked; 3 local mutants killed, including a _sum error that the single_run reference misses (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form",
+     "basis": "third-party",
+     "detail": "the expected sum from Python's built-in sum(range(n)), no chunks, no engine code"
+    }
+   ]
   },
   {
    "id": "RC-A2",
@@ -367,7 +649,15 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "tokens and contains_value against 3000 generated passages with numbers known by construction (values as fractions, digits counted); the pre-fix substring rule as negative control (3368 of 14,344 checks wrong); 7 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "note": "tokens and contains_value against 3000 generated passages with numbers known by construction (values as fractions, digits counted); the pre-fix substring rule as negative control (3368 of 14,344 checks wrong); 7 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages",
+     "basis": "third-party",
+     "detail": "numbers chosen by construction, grouped with format(n, ','), compared as fractions.Fraction"
+    }
+   ]
   },
   {
    "id": "RC-A3",
@@ -385,7 +675,15 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "adaptation numbers equal the constructed numbers of 3000 generated passages, and a wrong 9.99 fails end to end in 28 generated forms and contexts; the pre-fix regex misreads 2706 of 3000 passages (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "note": "adaptation numbers equal the constructed numbers of 3000 generated passages, and a wrong 9.99 fails end to end in 28 generated forms and contexts; the pre-fix regex misreads 2706 of 3000 passages (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages",
+     "basis": "third-party",
+     "detail": "adaptation numbers against the same format()/Fraction generator"
+    }
+   ]
   },
   {
    "id": "RC-A5",
@@ -404,7 +702,15 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "rule-less display classification exhaustive over 111,581 source and display cells (three-decimal sources in [-2, 2], displays with 0 to 4 decimals within two last-digit steps) against integer arithmetic, 12 cells end to end through audit_claims; the pre-fix 'never an error' rule as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "note": "rule-less display classification exhaustive over 111,581 source and display cells (three-decimal sources in [-2, 2], displays with 0 to 4 decimals within two last-digit steps) against integer arithmetic, 12 cells end to end through audit_claims; the pre-fix 'never an error' rule as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_classification_exhaustively_against_integer_arithmetic",
+     "basis": "exhaustive",
+     "detail": "111,581 cells; a sampled check of 4000 sources with 4-7 decimals beyond the grid"
+    }
+   ]
   },
   {
    "id": "RC-A6",
@@ -421,7 +727,15 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "exhaustive integer-arithmetic check on a stated domain added 2026-10-18"
+   "note": "exhaustive integer-arithmetic check on a stated domain added 2026-10-18",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_rounding_rules_exhaustively_against_integer_arithmetic",
+     "basis": "exhaustive",
+     "detail": "both modes over the stated domain; a sampled check of 4000 values beyond it"
+    }
+   ]
   },
   {
    "id": "ML-SPLITS",
@@ -435,13 +749,21 @@
    "oracle_kinds": [
     "behavioral",
     "invariant",
-    "independent-implementation"
+    "exhaustive"
    ],
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "per-test parent record of fix 811f02b6, adapted: the new canonical_key import guarded (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); canonical_key against an independent decimal and string-splitting reading of its rule over a generated domain, an integer/float/text one-key invariant, the pre-fix str().strip().casefold() as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the zero-fraction gap found by these tests is fixed as CANONICAL-KEY-ZERO-FRACTION"
+   "note": "per-test parent record of fix 811f02b6, adapted: the new canonical_key import guarded (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); canonical_key against an independent decimal and string-splitting reading of its rule over a generated domain, an integer/float/text one-key invariant, the pre-fix str().strip().casefold() as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the zero-fraction gap found by these tests is fixed as CANONICAL-KEY-ZERO-FRACTION",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_numeric_forms_of_an_integer_are_one_group_exhaustively",
+     "basis": "exhaustive",
+     "detail": "every integer in [-9999, 9999] in 7 forms gives one key, distinct across integers"
+    }
+   ]
   },
   {
    "id": "CANONICAL-KEY-ZERO-FRACTION",
@@ -453,14 +775,21 @@
     "tests/skills/hep_ml/test_audit_train_keys.py"
    ],
    "oracle_kinds": [
-    "exhaustive",
-    "independent-implementation"
+    "exhaustive"
    ],
    "correctness": "C4",
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "every ASCII digit string of 1 to 4 digits, unsigned or signed (33,330 texts), with the zero fractions '.', '.0', '.000' has the key of the text itself, in both case modes; the pre-fix int() reading splits 13,331 of them; the ML-SPLITS oracle updated to the documented rule; the two evidence tests fail by assertion on parent 54ee003a and pass on the fix; 4 local mutants killed, including the revert and a revert of the trainer copy only (VALIDATION SCIFIX-CANONICAL-KEY 2026-10-20)"
+   "note": "every ASCII digit string of 1 to 4 digits, unsigned or signed (33,330 texts), with the zero fractions '.', '.0', '.000' has the key of the text itself, in both case modes; the pre-fix int() reading splits 13,331 of them; the ML-SPLITS oracle updated to the documented rule; the two evidence tests fail by assertion on parent 54ee003a and pass on the fix; 4 local mutants killed, including the revert and a revert of the trainer copy only (VALIDATION SCIFIX-CANONICAL-KEY 2026-10-20)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_text_with_a_zero_fraction_keeps_its_digits_exhaustively",
+     "basis": "exhaustive",
+     "detail": "33,330 digit strings of 1 to 4 digits x 3 zero fractions; a sampled 5-8 digit check beyond the domain"
+    }
+   ]
   },
   {
    "id": "ML-CALIBRATION",
@@ -479,7 +808,21 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "the event-id check exhaustively right over all 4096 subset pairs of six ids; the validator's sample-name rule fires exactly for same-file spellings (PurePosixPath); the pre-fix exact-string comparison as negative control; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the middle './' gap found by these tests is fixed as SAMPLE-NAME-DOT-SEGMENTS"
+   "note": "the event-id check exhaustively right over all 4096 subset pairs of six ids; the validator's sample-name rule fires exactly for same-file spellings (PurePosixPath); the pre-fix exact-string comparison as negative control; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the middle './' gap found by these tests is fixed as SAMPLE-NAME-DOT-SEGMENTS",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_event_id_check_is_exhaustively_right_over_all_subset_pairs",
+     "basis": "exhaustive",
+     "detail": "all 4096 subset pairs of 6 ids; a sampled check on 200-id sets beyond the domain"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_validator_names_one_sample_under_every_spelling_of_its_path",
+     "basis": "third-party",
+     "detail": "pathlib.PurePosixPath decides which spellings name one file"
+    }
+   ]
   },
   {
    "id": "SAMPLE-NAME-DOT-SEGMENTS",
@@ -496,7 +839,15 @@
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "ml.calibration_on_fit_sample against pathlib.PurePosixPath for 120 spellings with '.' segments in the middle or at the end, each paired with the same and the other file in both orders (480 validations); the pre-fix leading-'./' rule misses all 240 same-file pairs; fails by assertion on parent 6344738e (240 subtests) and passes on the fix; 3 local mutants killed, including the revert (VALIDATION SCIFIX-SAMPLE-NAME 2026-10-20)"
+   "note": "ml.calibration_on_fit_sample against pathlib.PurePosixPath for 120 spellings with '.' segments in the middle or at the end, each paired with the same and the other file in both orders (480 validations); the pre-fix leading-'./' rule misses all 240 same-file pairs; fails by assertion on parent 6344738e (240 subtests) and passes on the fix; 3 local mutants killed, including the revert (VALIDATION SCIFIX-SAMPLE-NAME 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample",
+     "basis": "third-party",
+     "detail": "pathlib.PurePosixPath"
+    }
+   ]
   },
   {
    "id": "ML-K05",
@@ -516,7 +867,15 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "J9's shape_model and fit_mu with the shift nuisance against an independent profile likelihood (SciPy) on a synthetic three-bin template; without the nuisance (pre-fix) the shifted Asimov interval misses mu = 1, with it the interval covers it; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "note": "J9's shape_model and fit_mu with the shift nuisance against an independent profile likelihood (SciPy) on a synthetic three-bin template; without the nuisance (pre-fix) the shifted Asimov interval misses mu = 1, with it the interval covers it; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_ml/test_domain_shift_report.py::ShiftCarriedByNuisance::test_fit_against_pyhf",
+     "basis": "third-party",
+     "detail": "pyhf HistFactory (normfactor, staterror, histosys) with its own likelihood and fitter, 2e-9 (required stats-backends gate)"
+    }
+   ]
   },
   {
    "id": "ML-DOMAIN",
@@ -535,7 +894,21 @@
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "per-statistic flag rates at the split-conformal value and the union in [a, 2a] (two-sided), the reported interval against scipy.stats.beta Clopper-Pearson, the pre-fix min/max box as negative control; 3 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the torch-cpu CI job ran tests.skills.hep_ml.test_audit_domain_method in full on 54ee003a (13 run, 0 skipped, pass) (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20); the PyTorch tests also run in the required CI job torch-backend (torch 2.14.1 pinned), where a skip for PyTorch fails (VALIDATION SCIFIX-TORCH-GATE 2026-10-20)"
+   "note": "per-statistic flag rates at the split-conformal value and the union in [a, 2a] (two-sided), the reported interval against scipy.stats.beta Clopper-Pearson, the pre-fix min/max box as negative control; 3 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the torch-cpu CI job ran tests.skills.hep_ml.test_audit_domain_method in full on 54ee003a (13 run, 0 skipped, pass) (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20); the PyTorch tests also run in the required CI job torch-backend (torch 2.14.1 pinned), where a skip for PyTorch fails (VALIDATION SCIFIX-TORCH-GATE 2026-10-20)",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank",
+     "basis": "exhaustive",
+     "detail": "the rank formula a = 1 - min(r, n)/(n+1), verified by exact enumeration of every ordering for n <= 7 (test_the_split_conformal_rank_formula_by_enumeration)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_false_positive_interval_is_the_beta_quantile_clopper_pearson",
+     "basis": "third-party",
+     "detail": "scipy.stats.beta.ppf"
+    }
+   ]
   },
   {
    "id": "ML-NEGWEIGHTS",
@@ -555,7 +928,21 @@
    "discrimination": "D3",
    "negative_control_emulates_pre_fix": true,
    "gaps": [],
-   "note": "per-test parent record of fix ef5d068f (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); Asimov Z against q0 on the Asimov dataset and Eq. 20 against the profiled on/off likelihood (mpmath), cell resampling against a brute-force reading of eq. 2.2, the pre-fix float expression and dropped negative events as negative controls; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)"
+   "note": "per-test parent record of fix ef5d068f (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); Asimov Z against q0 on the Asimov dataset and Eq. 20 against the profiled on/off likelihood (mpmath), cell resampling against a brute-force reading of eq. 2.2, the pre-fix float expression and dropped negative events as negative controls; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_against_pyhf",
+     "basis": "third-party",
+     "detail": "pyhf q0 on the Asimov dataset, shapesys for sigma_b, 6e-13 (required stats-backends gate)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2",
+     "basis": "locator",
+     "detail": "arXiv:2109.07851 sect. 2.2, eq. 2.2 (cited in hep_metrics.py and references/ml-analysis-weights.md)"
+    }
+   ]
   },
   {
    "id": "ML-SMALL",
@@ -566,8 +953,6 @@
     "tests/skills/hep_ml/test_audit_small_corrections.py"
    ],
    "oracle_kinds": [
-    "analytic",
-    "published",
     "independent-implementation",
     "behavioral"
    ],
@@ -575,9 +960,18 @@
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "K13 corrects a test, not code: no parent failure is possible; its discrimination is the in-test negative control"
+    "K13 corrects a test, not code: no parent failure is possible; its discrimination is the in-test negative control",
+    "the NIST/SEMATECH t-table is cited without a table locator"
    ],
-   "note": "C10 alone is C2 / D2; parent record of fix fd637dcc: C10, C24, C25 and C26 fail on the parent; the K13 evidence (tests/examples/test_ml_classifier_to_inference.py) passes on it (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the t quantile against scipy.stats.t and the NIST/SEMATECH e-Handbook t-table; the false-improvement rate equals the exact t-test size (two-sided, 2000 trials per n) against the pre-fix bootstrap; the two-sided test fails by assertion on parent f5cc59a7 (rate 0.22 at n = 3) and on fix fd637dcc (rate 0 at n <= 5: that fix over-corrected) and passes on follow-up db40e842; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)"
+   "note": "C10 alone is C2 / D2; parent record of fix fd637dcc: C10, C24, C25 and C26 fail on the parent; the K13 evidence (tests/examples/test_ml_classifier_to_inference.py) passes on it (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the t quantile against scipy.stats.t and the NIST/SEMATECH e-Handbook t-table; the false-improvement rate equals the exact t-test size (two-sided, 2000 trials per n) against the pre-fix bootstrap; the two-sided test fails by assertion on parent f5cc59a7 (rate 0.22 at n = 3) and on fix fd637dcc (rate 0 at n <= 5: that fix over-corrected) and passes on follow-up db40e842; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_student_t_quantile_against_scipy_and_the_published_table",
+     "basis": "third-party",
+     "detail": "scipy.stats.t.ppf"
+    }
+   ]
   }
  ],
  "documentation_fixes": [

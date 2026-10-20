@@ -223,6 +223,38 @@ class GroupKeyTests(unittest.TestCase):
         # every '+' text; unsigned or '-' texts with a leading zero; '-0'
         self.assertEqual(split_before, 11_110 + 2 * leading + 1)
 
+    def test_numeric_forms_of_an_integer_are_one_group_exhaustively(self):
+        """sci-fix ML-SPLITS, exhaustive over a stated domain: for every integer i in [-9999, 9999], the forms i,
+        float(i), str(i), ' i ', 'i.', 'i.0' and 'i.000' give one key, the integer's digits (the documented rule:
+        1, 1.0, "1" and "1.0" are one group), and different integers give different keys. Negative control: the
+        pre-fix str().strip().casefold() splits every integer's forms."""
+        keys, split_before = set(), 0
+        for i in range(-9999, 10000):
+            forms = (i, float(i), str(i), f" {i} ", f"{i}.", f"{i}.0", f"{i}.000")
+            got = {canonical_key(v) for v in forms}
+            if got != {str(i)}:
+                self.fail(f"{i}: keys {got}")
+            keys.add(str(i))
+            split_before += len({str(v).strip().casefold() for v in forms}) > 1
+        self.assertEqual((len(keys), split_before), (19999, 19999))
+
+    def test_zero_fraction_text_beyond_the_exhaustive_domain_sampled(self):
+        """sci-fix CANONICAL-KEY-ZERO-FRACTION, beyond the exhaustive 1-4 digit domain: a seeded sample of 3000
+        digit strings of 5 to 8 digits (a third with leading zeros), unsigned or signed, each with '.', '.0' and
+        '.000', has the key of the text itself in both case modes. A sample, not an exhaustive claim."""
+        import random
+
+        rng = random.Random(20261020)
+        for _ in range(3000):
+            n = rng.randint(5, 8)
+            digits = ("0" if rng.random() < 1 / 3 else str(rng.randint(1, 9))) + "".join(
+                rng.choice("0123456789") for _ in range(n - 1))
+            text = rng.choice(("", "+", "-")) + digits
+            for fraction in (".", ".0", ".000"):
+                for case_sensitive in (False, True):
+                    if canonical_key(text + fraction, case_sensitive) != canonical_key(text, case_sensitive):
+                        self.fail(f"{text + fraction!r} and {text!r} are different keys")
+
     def test_canonical_key_property_over_generated_values(self):
         """The same rule over hypothesis-generated integers and text (skipped without hypothesis): an integer and
         its float (|i| <= 2^53) and text forms are one key; case-folding is idempotent; case_sensitive keeps the

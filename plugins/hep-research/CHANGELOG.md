@@ -3,6 +3,18 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Sci-fix ledger reviewed (maintainer decisions).** An AI-written oracle counts as an independent kind only with a
+  basis: a located source (equation, table or page, read and recorded), a third-party implementation's own algorithm,
+  an exhaustive domain, or a person's check; every counted kind is an `independence` record in
+  `docs/evidence/sci-fixes.json`, checked by its test. Locators read for the detector, Bayesian and Feldman-Cousins
+  oracles (VALIDATION SCIFIX-LEDGER-REVIEW); new third-party, symbolic and exhaustive cross-checks in the tests; pyhf
+  oracles in the required stats-backends gate. Every entry meets its minimum (BAYES-T24's AR(1) check located in
+  Thompson, arXiv:1011.0175, eq. (7)). DR-WP2-06 is split into calorimeter, PID and multiple-scattering entries.
+- **Feldman-Cousins citation.** The monotone adjustment is Sec. IV.A of the paper (was cited as IV.B), also in the
+  `construction` string of the Poisson diagnostics output.
+
 ## 0.18.0 (2026-10-20)
 
 Contracts 3.0.1 (patch: the validator's sample-name comparison, below). Three scientific corrections found by the new

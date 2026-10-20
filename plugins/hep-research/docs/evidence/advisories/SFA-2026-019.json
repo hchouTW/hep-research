@@ -3,7 +3,7 @@
  "id": "SFA-2026-019",
  "severity": "S1",
  "ledger": [
-  "DR-WP2-06"
+  "DR-WP2-06-MS"
  ],
  "summary": "multiple_scattering.py solved the crossover and MDR with one velocity for every rigidity (beta fixed, 1 by default), so for slow particles both were off.",
  "affected": [

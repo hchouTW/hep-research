@@ -116,7 +116,20 @@ Oracle rules:
 - The oracle does not import the module under test or its private helpers. Two modules under test compared with each
   other, or a closure through the module's own helpers, is a consistency check, not an oracle.
 - Independence means a different algorithm, specification source or author, and preferably two of them. When the fix
-  was written with an AI assistant, the oracle comes from a published value, an exhaustive check or a person.
+  was written with an AI assistant, an oracle the same assistant wrote counts as an independent kind only with one of
+  four bases (maintainer decision, 2026-10-20): **locator**, its formula or rule cites a located source (paper,
+  equation, table or page; a review section alone is not enough) that was read and is recorded in the repository;
+  **third-party**, its expected values come from another implementation's own algorithm (scipy.stats, SymPy, ArviZ,
+  pyhf, pathlib, Python's decimal rounding), not from a library evaluating a formula the assistant wrote;
+  **exhaustive**, an enumeration over a stated finite domain; **person**, a person checked it and the record says so.
+  Each counted kind is recorded in its entry's `independence` list (kind, test, basis, detail);
+  `tests/tools/test_scifix_ledger.py` checks it.
+- Kinds: **analytic**, an expected value derived in closed form; **independent implementation**, a different algorithm
+  computing the same quantity; **symbolic**, a computer-algebra derivation; **published**, a value printed in a source;
+  **exhaustive**, every case of a stated finite domain. Invariants, closures and behavioral checks are evidence, not
+  independent kinds.
+- A parent record from an adapted parent tree is D2 when the adaptation only adds modules the test imports (new in the
+  fix) or guards an import, never the code under test, and the record says so.
 - Tolerances are fixed before the first run and justified (precision, grid step, Monte Carlo error); a failing
   check is never repaired by widening its tolerance.
 - A negative control that emulates the pre-fix behavior inside the test is correctness evidence; it is not a parent

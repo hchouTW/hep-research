@@ -55,6 +55,10 @@ class Diagnostics(unittest.TestCase):
         self.assertEqual(r["status"], "not-converged")
 
     def test_ar1_bulk_ess(self):
+        """Analytic oracle, located: an AR(1) process has autocorrelation time tau = (1 + rho)/(1 - rho), eq. (7) of
+        M.B. Thompson, A Comparison of Methods for Computing Autocorrelation Time, arXiv:1011.0175v1, p. 2, with p = 1
+        (rho_1 = pi_1 = rho; its p. 3 example: rho = 0.98 gives tau = 99), and ESS = N M / tau, Vehtari et al., Bayesian
+        Analysis 16 (2021) 667, eq. (12); both read 2026-10-21. Tolerance 15%: Monte Carlo error of the estimate."""
         rho, chains, n = 0.9, 4, 5000
         z = ar1(np.random.default_rng(3), rho, chains, n)
         ess = bd.diagnose_param(z)["ess_bulk"]
