@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.3.0"
+CONTRACTS_VERSION = "3.4.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -112,6 +112,14 @@ CONTRACTS_VERSION = "3.3.0"
 # review record and review files never live in an artifacts_dir, so no reader can misread one as an artifact; a 3.2
 # reader keeps every artifact outcome and has no review reader at all. (The spec's "3.2.0" predates 0.21.0, which used
 # 3.2.0 for simulated dataset-records.)
+# 3.4.0 (independent review tuning; docs/dev/independent-review-spec.md sections 5.1, 5.5, 6.9, 7.5 and A2) adds the
+# sidecar format review_filter_record 1.0.0 (contracts/schemas/review_filter_record.json, the filter_record.json of
+# the optional filtering pass, with contracts.review.filter_record_rules and filter_receipt_codes), the event
+# filter_needed, and two optional review_config fields: lens_models (the model of a lens's lens slot) and filter (the
+# filtering pass's model). A configuration, log or record without them reads exactly as in 3.3.0. No capability: like
+# every review file they live under <project>/reviews/, never in an artifacts_dir, and no artifact type, vocabulary
+# term or envelope field changes; a 3.3 driver refuses a configuration with either field as config_out_of_range
+# instead of ignoring it.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

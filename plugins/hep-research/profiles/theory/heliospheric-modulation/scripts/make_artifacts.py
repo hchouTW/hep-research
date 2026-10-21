@@ -16,7 +16,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PROFILE = HERE.parent
 PROFILE_ID, PROFILE_VERSION = "theory:heliospheric-modulation", "0.1.0"
-PLUGIN_VERSION, CONTRACTS = "0.22.0", "3.3.0"
+PLUGIN_VERSION, CONTRACTS = "0.22.0", "3.4.0"
 CREATED = "2026-10-15"
 SPEC_PATH = PROFILE / "derivations" / "theory-spec.json"
 CORE_KEYS = ("unit_system", "hbar_c_one", "metric_signature", "coupling_normalization", "renormalization_scheme",
