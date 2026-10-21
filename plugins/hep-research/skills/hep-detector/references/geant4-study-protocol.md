@@ -180,6 +180,10 @@ below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
   re-issued. This is the one exception to keeping labels on everything derived from them (shared stanza, point 5).
   Validated means only: within this particle, energy, material, thickness and observable, the run agreed with an
   independent reference to the stated tolerance, with the detection limit stated. Never relabel by hand.
+- A table from the runs (resolution, containment, leakage by face): a `dataset-record` with status `simulated`
+  (contracts 3.2.0), the run records (or the study record) as `inputs` with their labels, level `detector` or
+  `particle-fiducial`; it keeps `unvalidated` unless its input study record carries `validated-in-scope`, and the
+  table must stay inside that study's benchmarked scope (not checked by the contract: state it).
 - A response from the runs: `build_response.py build ... --status unvalidated --input-record <run record>` links the
   run records as inputs with their labels. Inference goes to hep-statistics; plots of simulation alone are labelled
   "Simulation" (hep-authoring).

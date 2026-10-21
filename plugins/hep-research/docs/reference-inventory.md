@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-authoring | 48 | 339 | 0 |
 | hep-citations | 11 | 83 | 0 |
 | hep-computing | 35 | 298 | 0 |
-| hep-detector | 38 | 493 | 0 |
+| hep-detector | 38 | 494 | 0 |
 | hep-measurement | 13 | 116 | 0 |
 | hep-ml | 42 | 192 | 0 |
 | hep-statistics | 13 | 185 | 0 |
@@ -199,7 +199,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
 | `front-end-electronics-and-signal-processing.md` | hep-detector | 24.9 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
-| `geant4-study-protocol.md` | hep-detector | 19.4 | no | 9 | hep-citations | 73b525a2 2026-10-21 |
+| `geant4-study-protocol.md` | hep-detector | 19.8 | no | 9 | hep-citations | c705c4ac 2026-10-21 |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `imaging-atmospheric-cherenkov.md` | hep-detector | 11.4 | no | 10 | hep-citations, hep-ml, hep-statistics | ebb58136 2026-10-19 |
 | `multimessenger-analysis.md` | hep-detector | 6.9 | no | 2 | - | 9257d7b5 2026-10-15 |

@@ -243,6 +243,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
                 rep.add("error", "$.status", "dataset.synthetic_unlabeled", "synthetic dataset must carry the 'synthetic' status")
             if "synthetic" not in ext.get("dataset_id", ""):
                 rep.add("error", "$.extension.dataset_id", "dataset.synthetic_unlabeled", "synthetic dataset id must contain 'synthetic'")
+        if ext.get("status") == "simulated":
+            _simulated_dataset(doc, ext, status, rep)
         if ext.get("covariance", {}).get("status") == "present" and not ext["covariance"].get("ref"):
             rep.add("error", "$.extension.covariance", "dataset.covariance_ref", "covariance marked present needs a ref")
     elif t == "statistical-result":
@@ -339,6 +341,33 @@ def _scope_inside(declared: dict, bench: dict) -> list[str]:
         if lo < blo * (1 - 1e-9) or hi > bhi * (1 + 1e-9):
             out.append(f"{k} {d} is outside the benchmarked {b}")
     return out
+
+
+SIMULATED_LEVELS = ("detector", "particle-fiducial")
+
+
+def _simulated_dataset(doc: dict, ext: dict, status: set, rep: Report) -> None:
+    """3.2.0: a dataset-record with status 'simulated' is a table derived from recorded simulation runs. Its envelope
+    inputs are the run records (or a study record) it was derived from, so contracts/dependencies.py checks their
+    hashes and carries their labels; it is never 'observed', it keeps 'unvalidated' unless an input study record
+    carries 'validated-in-scope', and its level is detector or particle-fiducial."""
+    inputs = doc.get("inputs")
+    linked = [i for i in inputs if isinstance(i, dict)] if isinstance(inputs, list) else []
+    if not linked:
+        rep.add("error", "$.inputs", "dataset.simulated_without_runs",
+                "a simulated dataset needs its run records or study record as inputs")
+    if "observed" in status:
+        rep.add("error", "$.status", "dataset.simulated_observed", "a simulated dataset is never 'observed'")
+    level = (ext.get("observable") or {}).get("level")
+    if level not in SIMULATED_LEVELS:
+        rep.add("error", "$.extension.observable.level", "dataset.simulated_level",
+                f"a simulated dataset is at level {' or '.join(SIMULATED_LEVELS)}, not {level!r}")
+    if not {"unvalidated", "validated-in-scope"} & status:
+        rep.add("error", "$.status", "dataset.simulated_unlabeled",
+                "a simulated dataset carries 'unvalidated', or 'validated-in-scope' from a study record it uses")
+    if "validated-in-scope" in status and not any("validated-in-scope" in (i.get("status") or []) for i in linked):
+        rep.add("error", "$.status", "dataset.simulated_upgrade_unlinked",
+                "'validated-in-scope' needs an input study record that carries it (a status is never upgraded by hand)")
 
 
 def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report) -> None:
