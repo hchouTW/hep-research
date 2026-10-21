@@ -15,9 +15,32 @@ import unittest
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2]
-J14 = PLUGIN / "examples" / "geant4-thin-silicon" / "output"
-REC = J14 / "artifacts" / "mpv.study-validated.computational-run.json"
 sys.path.insert(0, str(PLUGIN))
+NAME = "mpv.study-validated.computational-run.json"
+_REPLAY = {}
+
+
+def j14_output() -> Path:
+    """The J14 offline replay, written once into a temporary folder (committed example outputs are not assumed:
+    tools/check_ams_optional.py runs the suites in a copy without output/ folders)."""
+    if "out" not in _REPLAY:
+        import contextlib
+        import importlib.util
+        import io
+        spec = importlib.util.spec_from_file_location("j14_run", PLUGIN / "examples" / "geant4-thin-silicon" / "run.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _REPLAY["tmp"] = tempfile.TemporaryDirectory()
+        out = Path(_REPLAY["tmp"].name) / "output"
+        with contextlib.redirect_stdout(io.StringIO()):
+            mod.main(["--out", str(out)])
+        _REPLAY["out"] = out
+    return _REPLAY["out"]
+
+
+def tearDownModule():
+    if "tmp" in _REPLAY:
+        _REPLAY["tmp"].cleanup()
 from contracts import CONTRACTS_VERSION, KNOWN_CAPABILITIES  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 
@@ -28,7 +51,7 @@ def errors(doc):
 
 class UpgradeRule(unittest.TestCase):
     def setUp(self):
-        self.doc = json.loads(REC.read_text(encoding="utf-8"))
+        self.doc = json.loads((j14_output() / "artifacts" / NAME).read_text(encoding="utf-8"))
 
     def test_the_reissued_record_passes(self):
         self.assertEqual(self.doc["status"], ["validated-in-scope"])
@@ -80,8 +103,8 @@ class EvidenceRecords(unittest.TestCase):
     def setUp(self):
         self._t = tempfile.TemporaryDirectory()
         self.root = Path(self._t.name)
-        shutil.copytree(J14, self.root / "output")
-        self.rec = self.root / "output" / "artifacts" / REC.name
+        shutil.copytree(j14_output(), self.root / "output")
+        self.rec = self.root / "output" / "artifacts" / NAME
 
     def tearDown(self):
         self._t.cleanup()
@@ -116,7 +139,7 @@ class EvidenceRecords(unittest.TestCase):
 
 class LinkedResponse(unittest.TestCase):
     def test_the_j14_response_links_its_run_record(self):
-        doc = json.loads((J14 / "artifacts" / "response.json").read_text(encoding="utf-8"))
+        doc = json.loads((j14_output() / "artifacts" / "response.json").read_text(encoding="utf-8"))
         self.assertEqual(len(doc["inputs"]), 1)
         self.assertEqual(doc["inputs"][0]["status"], ["unvalidated"])
         self.assertIn("unvalidated", doc["status"])
