@@ -5,10 +5,11 @@ modulation) a structured answer instead of memory. Three narrow theory-domain pr
 ratios in a weighted-slab and a 1D thin-disc diffusion model; the secondary antiproton source term; force-field solar
 modulation, derived and benchmarked against the hep-measurement script), and hep-statistics
 fits grid parameters to a measurement from tabulated predictions (`covariance_fit.py`, model `tabulated-grid`, with the
-degenerate directions reported); both are demonstrated on synthetic data only (`docs/capability-matrix.md`). There is
-no propagation code in the plugin: a global fit that runs one (many species, reacceleration, convection, a code's own
-nuclear network) gets the "no validated domain profile" notice, and this reference is used to state assumptions,
-degeneracies and what the data can and cannot decide. Statistical
+degenerate directions reported); both are demonstrated on synthetic data, the antiproton pp source term also against a
+published table (12 of 15 entries; `docs/capability-matrix.md`). There is no propagation code in the plugin core (the
+optional DRAGON2 adapter drives an external build; see Tool coverage below): a global fit that runs one (many
+species, reacceleration, convection, a code's own nuclear network) gets the "no validated domain profile" notice, and
+this reference is used to state assumptions, degeneracies and what the data can and cannot decide. Statistical
 work on a fit (likelihood, nuisance parameters, correlated data) belongs to hep-statistics; measured fluxes come from
 dataset records, never from memory.
 
@@ -105,7 +106,8 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
 
 - **Production (spallation) cross sections** of secondaries (for example B from C and O, including ghost-nucleus
   chains) are measured sparsely in energy and channel; their uncertainty is often comparable to or larger than the
-  statistical precision of modern secondary-to-primary ratios and must be carried as nuisance parameters, not fixed.
+  statistical precision of modern secondary-to-primary ratios and must be carried, not fixed: as a normalization
+  nuisance, or a choice among sets as model alternatives with an envelope.
 - **Interstellar gas** (H, He, molecular hydrogen tracers) normalizes the grammage; its uncertainty is degenerate
   with the transport normalization.
 - **Source spectra and abundances** for each species, including whether species share one injection index.
@@ -159,7 +161,8 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
 ## Electron and positron energy losses
 
 Electrons and positrons lose energy fast enough that their losses, not escape, set how far they travel. For an
-isotropic electron of Lorentz factor gamma (Moderski et al. 2005, Eqs. 1, 3, 7, A10, A12):
+isotropic electron of Lorentz factor gamma (Moderski et al. 2005, Eqs. 1, 3, 7, A10, A12; they write gamma^2, the
+ultra-relativistic limit of the exact beta^2 gamma^2 = gamma^2 - 1 used here and in the script):
 
 - synchrotron: b_sync = (4/3) sigma_T c (gamma^2 - 1) U_B, with U_B = B^2 / 8 pi (Gaussian units);
 - inverse Compton on a photon field of energy density U: b_IC = (4/3) sigma_T c (gamma^2 - 1) U F_KN, where
@@ -202,12 +205,14 @@ agrees within the declared 30% (DRAGON2 9-12% higher at 10-1000 GeV/n, mostly it
 the D0/L degeneracy holds within 2% between L = 2 and 4 kpc but fails at L = 8 kpc (15-18% low, tolerance 10%) because
 of the radial boundary at 20 kpc and the radial gas structure, which the closed form does not have. With the boundary at
 60 kpc and the gas made uniform in R (a local diagnostic patch of DRAGON2), DRAGON2 reaches the closed form: within 2%
-between L = 2, 4 and 8 kpc and within 5% in absolute B/C once its helium production term is divided out. A five-node D0
+between L = 2, 4 and 8 kpc and within 5% in absolute B/C once its helium production term is divided out (post-hoc
+diagnostics with no tolerance declared in advance, not DRAGON2 as released; the declared C2 still fails). A five-node D0
 grid of DRAGON2 runs recovers the D0 of a sixth run within 2% through `tabulated-grid`. DRAGON2's ASCII columns are per
 total kinetic energy, not per nucleon: a ratio of species with different mass numbers needs each column multiplied by
-A, which `dragon2_to_prediction.py` does (a first version did not, and reported a 32-34% B/C excess that was this unit). So results from DRAGON2 and from the closed form are different models: compare them only with the
-geometry, gas, target and cross sections stated. No propagation code is used in a fit to real data, and a global fit
-that runs a propagation code stays outside v1.
+A, which `dragon2_to_prediction.py` does (a first version did not, and reported a 32-34% B/C excess made mostly of
+DRAGON2's helium target (a factor 1.143) and this unit (about 1.19)). So results from DRAGON2 and from the closed form
+are different models: compare them only with the geometry, gas, target and cross sections stated. No propagation code is
+used in a fit to real data, and a global fit that runs a propagation code stays outside v1.
 
 The closed-form secondary-ratio and source-term benchmarks of the two theory-domain profiles, and the grid fit with its
 end-to-end example (`examples/bc-propagation-fit`, synthetic B/C data, D0/L recovered and the flat direction reported),

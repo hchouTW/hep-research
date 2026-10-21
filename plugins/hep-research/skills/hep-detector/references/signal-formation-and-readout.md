@@ -5,9 +5,11 @@ and interaction, detector response, signal formation and transport, electronics 
 raw data. Electronics in quantitative detail (noise, shaping, thresholds, optimal
 filtering, digitization, timing pickoff, rate effects) is in
 [front-end electronics and signal processing](front-end-electronics-and-signal-processing.md). Material-budget/multiple-scattering bookkeeping is in
-[detector systems overview](detector-systems-overview.md); calibration of the constants introduced here is in
-[calibration and alignment](calibration-and-alignment.md). Every equation below states its validity; none
-is a substitute for a full simulation ([detector simulation](detector-simulation.md)).
+[detector systems overview](detector-systems-overview.md); the calibration chain (pedestal, gain, scale, time
+dependence) is in [calibration and alignment](calibration-and-alignment.md), and worked corrections for `t0` and
+drift velocity, refractive index and electron lifetime are in
+[case studies and checklists](detector-case-studies-and-checklists.md) (Cases 3, 6, 8). Most equations below
+state their validity; none is a substitute for a full simulation ([detector simulation](detector-simulation.md)).
 
 ## Energy loss and its fluctuations
 
@@ -22,12 +24,14 @@ K = 4 pi N_A r_e^2 m_e c^2 = 0.307075 MeV mol^-1 cm^2
 
 `z` projectile charge, `Z/A` medium (mol/g), `I` mean excitation energy, `W_max`
 maximum energy transfer, `delta` the density-effect correction. Parameters come from
-tabulated fits (PDG), not from data. It fails below `beta gamma ~ 0.05-0.1`
+tabulated fits (PDG), not from data. Uncorrected, it fails below `beta gamma ~ 0.1`
 (shell, Barkas, and charge-exchange corrections; PDG adds the shell term `-C/Z`, the
-Barkas term `z L1` and the Bloch term `z^2 L2` inside the bracket, so they scale as `z^3`
-and `z^4` overall and matter most for nuclei, and the corrected formula holds to about 1%
+Barkas term `z L1` and the Bloch term `z^2 L2` inside the bracket, so the shell term scales
+as `z^2` overall like the leading term, while the Barkas and Bloch terms scale as `z^3` and
+`z^4` and matter most for nuclei, and the corrected formula holds to about 1%
 down to `beta ≈ 0.05`; for slower protons and alphas use the NIST PSTAR and ASTAR
-stopping-power and range tables (PSTAR covers 1 keV to 10 GeV protons)) and, for muons, above `~ 1000`
+stopping-power and range tables (PSTAR covers 1 keV to 10 GeV protons)) and, for muons, above
+`beta gamma ~ 1000` (`p ≈ 100 GeV/c`)
 (PDG passage-of-particles review: radiative losses take over near the muon critical
 energy, a few hundred GeV in iron/copper). Electrons are not described by this formula
 at all (different kinematics; bremsstrahlung dominates above the electron critical energy, from
@@ -40,16 +44,20 @@ energetic delta rays escape, so the measured rise is *smaller than the mean sugg
 loss (PDG): `Delta_p = xi [ln(2 m_e c^2 beta^2 gamma^2/I) + ln(xi/I) + 0.200 - beta^2 - delta]`.
 
 **Fluctuations (regime by `kappa = xi/W_max`, `xi = (K/2)(Z/A) z^2 (x rho)/beta^2`)**:
-`kappa << 1` (thin absorber, gases, silicon of ~100 um): the Landau/Vavilov
-distribution - asymmetric with a long high tail from delta rays, most-probable value
+`kappa <~ 0.05-0.1` (PDG "moderate thickness", most detectors; thin absorber, gases, silicon of
+~100 um): the Landau (Landau-Vavilov) distribution - asymmetric with a long high tail from
+delta rays, most-probable value
 (MPV) below the mean, no finite mean or variance in the pure Landau limit; for thin silicon
 Bichsel's straggling functions (atomic binding included) describe the width better than
-Landau-Vavilov (PDG); `kappa >> 1` (thick absorbers): Gaussian. Consequences: use the truncated mean, MPV fit, or
+Landau-Vavilov (PDG); larger `kappa`: Vavilov's distribution, less skewed as `kappa` grows;
+`kappa >> 1` (very thick absorbers): less skewed still but, per PDG, never Gaussian - a
+Gaussian approximates only the core. Consequences: use the truncated mean, MPV fit, or
 likelihood, not the raw mean, for thin-layer `dE/dx` ([particle identification](particle-identification.md));
 the fluctuation is a *physical, irreducible* per-layer term, reduced only by more layers
 or cluster counting.
 
-**Multiple Coulomb scattering (Highland, approximate, ~11% for `1e-3 < x/X0 < 100`)**:
+**Multiple Coulomb scattering (Highland, approximate: Gaussian for the central 98% of the
+projected angle; `beta` dependence poorly represented for large `Z` and small `x`; PDG Eq. 34.16)**:
 `theta_0 = (13.6 MeV / (beta c p)) z sqrt(x/X_0) [1 + 0.038 ln(x z^2/(X_0 beta^2))]`.
 It sets the low-momentum resolution floor of every tracker
 ([tracking and vertexing](tracking-and-vertexing.md)); the non-Gaussian large-angle tail
@@ -137,7 +145,8 @@ position reconstruction and calibrated with tracks ([tracking and vertexing](tra
 gain fluctuates: the single-electron gain follows a Polya distribution with relative
 variance `1/(1+theta)`; the exponential (Furry, `theta = 0`) is its limit when ionization is
 memoryless, and measurements in Micromegas and GEMs at high `E/P` and gain need
-`theta > 0` (Micromegas: relative variance 0.31, Zerguerras et al., NIM A608 (2009) 397;
+`theta > 0` (Micromegas: relative variance 0.31 ± 0.02, `theta ≈ 2.2`, Zerguerras et al.,
+NIM A608 (2009) 397, arXiv:0901.2882, eq. 2;
 form from NEWS-G, arXiv:1902.08960, eq. 1); `theta` depends on gas, geometry and field. Gain depends
 exponentially on voltage and, through the gas density (proportional to `P/T`; the
 gain follows the reduced field `E/N`, proportional to `E*T/P`), on temperature and pressure
@@ -164,7 +173,8 @@ light to heat ([noble liquid neutrino and rare event detectors](noble-liquid-neu
 fluctuation, and diffusion are stochastic floors (reducible only by design); gain,
 drift velocity, attenuation length, lifetime, refractive index, and `t0` are correctable
 response variations whose *residual error* is a systematic
-([calibration and alignment](calibration-and-alignment.md)).
+([calibration and alignment](calibration-and-alignment.md) for the chain; worked `t0`, drift-velocity,
+refractive-index and lifetime cases in [case studies and checklists](detector-case-studies-and-checklists.md)).
 
 ## Readout and digitization
 
@@ -223,7 +233,8 @@ in the raw data but not used by the algorithm).
 
 - **"Threshold has no effect on resolution."** Thresholds truncate the low tail of the
   response and bias centroids and energy sums, especially for low-`S/N` clusters.
-- **Using Bethe-Bloch outside its range.** Below `beta gamma ~ 0.1` or in the radiative
+- **Using Bethe-Bloch outside its range.** Below `beta gamma ~ 0.1` (uncorrected formula;
+  `beta ≈ 0.05` with the shell, Barkas and Bloch terms) or in the radiative
   regime, the mean is not the right predictor; thin-layer `dE/dx` is Landau-shaped and
   the mean is not a stable estimator.
 - **Treating attenuation as a constant.** It varies with position, time, temperature,

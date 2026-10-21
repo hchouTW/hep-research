@@ -223,6 +223,40 @@ class ExternalScores(unittest.TestCase):
         self.assertEqual(out["status"], "refused")
         self.assertEqual(out["leakage_check"]["scored_training_ids"], 1)
 
+    def test_scored_ids_outside_the_manifest_are_reported_not_refused(self):
+        # REVIEW-CODE-WARN: scored ids absent from the split manifest were counted (ids_not_in_manifest) but the
+        # warning did not say what that means. Scoring events outside the manifest (real data, other samples) is
+        # legitimate, so the run is not refused; the warning says the check cannot exclude that the model was trained
+        # on them and that, for simulated events of the training sample, the manifest is incomplete.
+        rng = random.Random(9)
+        extra = [{"id": f"data{i}", "x0": rng.gauss(0, 1), "x1": rng.gauss(0, 1)} for i in range(3)]
+        with open(self.d / "test.csv", encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh))
+        write_rows(self.d / "test.csv", rows + extra, ["id", "x0", "x1"])
+        outside = [{"id": r["id"], "score": 0.4} for r in extra]
+
+        def hits(out):
+            return [w for w in out.get("warnings", []) if "not in the split manifest" in w]
+
+        code, out, err = self.infer(self.scores + outside)
+        self.assertEqual(code, 0, (out, err))
+        self.assertEqual(out["status"], "ok")
+        self.assertEqual(out["leakage_check"]["ids_not_in_manifest"], 3)
+        self.assertEqual(len(hits(out)), 1, out["warnings"])
+        self.assertIn("3 scored event(s)", hits(out)[0])
+        self.assertIn("cannot exclude that the model was trained on them", hits(out)[0])
+        self.assertIn("manifest is incomplete", hits(out)[0])
+        # The refusal for a scored training event carries the same warning.
+        code, out, _ = self.infer(self.scores + outside + [{"id": "t3", "score": 0.9}])
+        self.assertEqual(code, 1)
+        self.assertEqual(out["status"], "refused")
+        self.assertEqual(len(hits(out)), 1, out)
+        # Negative control: every scored id in the manifest, no such warning.
+        code, out, err = self.infer(self.scores)
+        self.assertEqual(code, 0, (out, err))
+        self.assertEqual(out["leakage_check"]["ids_not_in_manifest"], 0)
+        self.assertEqual(hits(out), [])
+
     def test_calibration_for_another_model_is_refused_and_the_right_one_applied(self):
         cal = {"calibration": {"method": "platt", "params": {"a": 1.0, "b": 0.5}}, "model_hash": "sha256:" + "0" * 64}
         (self.d / "cal.json").write_text(json.dumps(cal), encoding="utf-8")

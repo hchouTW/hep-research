@@ -15,7 +15,8 @@ compared with the observed VR count by a two-sided Poisson p-value with the pred
 The envelope runs over the models that pass: low and high are the smallest and largest central SR predictions; the
 interval [min(mu - z sigma), max(mu + z sigma)] at the declared cl includes the statistical uncertainty. The envelope
 is not converted into a Gaussian unless "envelope_prescription" says how ("half-range": sigma = (high - low) / 2;
-"uniform": sigma = (high - low) / sqrt(12)); that choice belongs to the analysis, not to this tool.
+"uniform": sigma = (high - low) / sqrt(12)); that choice belongs to the analysis, not to this tool. With one model
+passing, the envelope has zero width by construction: a warning says the model uncertainty was not assessed.
 Then hand over to core/stats: the output lists the background inputs for <plugin root>/core/stats/poisson_diagnostics.py
 cls-limit and <plugin root>/core/stats/likelihood_limits.py profile-cls (the SR count stays blinded: N_OBS).
 
@@ -308,6 +309,10 @@ def analyse(doc: dict, base_dir: Path | None = None, allow_plugin: bool = False)
                "models": usable, "gaussian_sigma": None}
         if m["prescription"]:
             env["gaussian_sigma"] = (env["high"] - env["low"]) / PRESCRIPTIONS[m["prescription"]]
+        if len(usable) == 1:
+            warnings.append(f"only the model '{usable[0]}' passed its validation: the envelope has zero width by "
+                            "construction (low = high" + (", gaussian_sigma = 0" if m["prescription"] else "")
+                            + "); this is not a measured model uncertainty, the model uncertainty was not assessed")
     env["cl"] = m["cl"]
     env["note"] = ("the envelope between models is not converted into a Gaussian" if not m["prescription"] else
                    f"the envelope was converted with the declared prescription '{m['prescription']}'")

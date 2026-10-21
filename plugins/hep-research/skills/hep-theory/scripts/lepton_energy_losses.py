@@ -4,7 +4,9 @@ diffusion distance (Th2).
 
 Purpose: the loss rate b(E) = b_sync + b_IC that sets how far a cosmic-ray electron travels before it loses its energy.
 See <plugin root>/skills/hep-theory/references/cosmic-ray-propagation.md, "Electron and positron energy losses".
-Method (Moderski, Sikora, Coppi and Aharonian 2005, MNRAS 363, 954, arXiv:astro-ph/0504388, read 2026-10-17):
+Method (Moderski, Sikora, Coppi and Aharonian 2005, MNRAS 363, 954, arXiv:astro-ph/0504388, read 2026-10-17 and
+2026-10-22; their Eqs. 1 and 7 write gamma^2, the ultra-relativistic limit of the exact gamma^2 - 1 = beta^2 gamma^2
+used here):
 - isotropic electrons: b_sync = (4/3) sigma_T c (gamma^2 - 1) U_B with U_B = B^2 / 8 pi (Gaussian; Eq. 7);
 - inverse Compton on each declared photon field: b_IC = (4/3) sigma_T c (gamma^2 - 1) U_rad F_KN (Eq. 1). A field
   given as U:thomson is in the Thomson limit (F_KN = 1). A field given as U:T (temperature in K) is a Planck field
