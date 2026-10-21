@@ -2234,17 +2234,17 @@ def _referenced_paths(doc: Any, root: Path) -> set[Path]:
 
 
 def validate_directory(root: Path, vocab: Vocabulary, **flags) -> dict:
-    """Validate every JSON file under an artifacts_dir: each must be a valid artifact, or a sidecar that an artifact in
-    the directory refers to by path (a split report, a model file; listed under 'sidecars'). An unreferenced JSON
-    file without an artifact_type is an error (artifacts_dir.not_artifact: working files and raw tool outputs belong
-    outside artifacts_dir); an unreferenced file of another kind is a warning (artifacts_dir.non_json). Hidden files
-    are skipped."""
+    """Validate every JSON file under an artifacts_dir (suffix .json in any case): each must be a valid artifact, or a
+    sidecar that an artifact in the directory refers to by path (a split report, a model file; listed under
+    'sidecars'). An unreferenced JSON file without an artifact_type is an error (artifacts_dir.not_artifact: working
+    files and raw tool outputs belong outside artifacts_dir); an unreferenced file of another kind is a warning
+    (artifacts_dir.non_json). Hidden files are skipped."""
     top, files, docs, other = Report(), [], {}, []
     paths = sorted(f for f in root.rglob("*") if f.is_file()
                    and not any(part.startswith(".") for part in f.relative_to(root).parts))
     for f in paths:
         rel = f.relative_to(root).as_posix()
-        if f.suffix != ".json":
+        if f.suffix.lower() != ".json":  # bad.JSON is a JSON file too, validated like bad.json
             other.append(f)
             continue
         try:
@@ -2264,7 +2264,7 @@ def validate_directory(root: Path, vocab: Vocabulary, **flags) -> dict:
         rel = f.relative_to(root).as_posix()
         if f.resolve() in referenced:
             sidecars.append(rel)
-        elif f.suffix == ".json":
+        elif f.suffix.lower() == ".json":
             top.add("error", rel, "artifacts_dir.not_artifact",
                     "no artifact_type and no artifact refers to it: write it as an artifact or move this working file "
                     "out of artifacts_dir")

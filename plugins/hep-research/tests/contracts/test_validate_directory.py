@@ -58,6 +58,20 @@ class ValidateDirectory(unittest.TestCase):
         self.assertEqual(rc, 1)
         self.assertFalse(next(e for e in out["files"] if e["path"] == "comm.json")["ok"])
 
+    def test_upper_case_json_suffix_is_validated(self):
+        """Triage T09: bad.JSON was only a non_json warning, so an invalid artifact passed the directory check."""
+        shutil.copy(FIXTURES / "invalid" / "communication_bad_types.json", self.d / "comm.JSON")
+        (self.d / "notes.Json").write_text(json.dumps({"status": "ok"}))
+        rc, out = run(self.d)
+        self.assertEqual(rc, 1, out)
+        self.assertFalse(next(e for e in out["files"] if e["path"] == "comm.JSON")["ok"])
+        self.assertEqual(codes(out), ["artifacts_dir.not_artifact"])
+        shutil.copy(FIXTURES / "valid" / "computational_run.json", self.d / "comm.JSON")
+        (self.d / "notes.Json").unlink()
+        rc, out = run(self.d)
+        self.assertEqual(rc, 0, out)
+        self.assertEqual([e["path"] for e in out["files"]], ["comm.JSON", "run.json", "sub/record.json"])
+
     def test_unreadable_json_is_an_error(self):
         (self.d / "broken.json").write_text("{")
         rc, out = run(self.d)
