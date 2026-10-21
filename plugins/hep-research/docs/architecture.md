@@ -9,7 +9,7 @@ Status: M1, 2026-10-02. Responsibilities here are fixed; file names may still mo
 | Skills | Eight core skills under `skills/` (the former communication skill was split into hep-citations and hep-authoring in 0.16.0) | Description-routed entry points; plugin namespace `hep-research:<skill>` `[Confirmed]` (host fact 3) |
 | Shared resources | `core/`, `contracts/`, `profiles/`, `adapters/` read on demand via `${CLAUDE_PLUGIN_ROOT}/...` | The whole plugin root is installed as one cached directory `[Confirmed]` (host fact 4), so no per-skill copies are needed |
 | Commands | None | Skills supersede commands `[Confirmed]` (host fact 8); D10 |
-| Hooks, MCP servers, background processes, required subagents | None | No implicit activity; handoffs are files |
+| Hooks, MCP servers, background processes, required subagents | None | No implicit activity; handoffs are files. The independent review (hep-authoring, docs/dev/decision-independent-review.md) keeps this: the plugin dispatches and requires no subagent; the author agent passes a fixed message to agents through the host's own mechanism |
 
 ## 2. Ownership
 

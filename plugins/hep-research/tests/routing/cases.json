@@ -2089,6 +2089,53 @@
    "note": "reuse keeps the old verification date; a time-sensitive claim is rechecked"
   },
   {
+   "id": "ir-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run an independent review of this design note by agents that did not write it, with a record a script can check.",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "independent review of a draft by agents that did not write it"
+   ],
+   "set": "IR-P1"
+  },
+  {
+   "id": "ir-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請讓沒有參與撰寫的 agents 對這份交接文件做 independent review，並留下可以用腳本檢查的審查紀錄。",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "independent review"
+   ],
+   "set": "IR-P1"
+  },
+  {
+   "id": "ir-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Have agents who did not write my draft section review it, and give me a review record a script can check.",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "independent review of a draft by agents that did not write it"
+   ],
+   "not": "hep-citations",
+   "set": "IR-P1",
+   "note": "a review of the whole draft is hep-authoring's; whether its citations are verified stays with hep-citations"
+  },
+  {
+   "id": "ir-neighbor-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請找沒寫過這篇草稿的 agents 審查它（independent review），審查結果要能用腳本驗證。",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "independent review"
+   ],
+   "not": "hep-citations",
+   "set": "IR-P1"
+  },
+  {
    "id": "t19-zhs-1",
    "lang": "zh-Hans",
    "kind": "direct",

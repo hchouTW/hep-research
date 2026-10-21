@@ -1,5 +1,5 @@
 {
- "contract_version": "3.2.0",
+ "contract_version": "3.3.0",
  "artifact_id": "synthetic-j9-classifier",
  "artifact_type": "ml-artifact",
  "objective": "SYNTHETIC J9: event classifier whose (prior-corrected, temperature-scaled) score feeds a template fit",
@@ -14,7 +14,7 @@
  },
  "versions": {
   "plugin": "0.21.0",
-  "contracts": "3.2.0",
+  "contracts": "3.3.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

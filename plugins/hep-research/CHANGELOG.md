@@ -3,6 +3,36 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 3.3.0 (minor): independent review of drafts, P1 (`docs/dev/independent-review-spec.md`).
+
+- **A draft can be reviewed by agents that did not write it, with a record a script checks.**
+  `skills/hep-authoring/scripts/review.py` drives one review of a Markdown document: `start`, then `next` until
+  `stop`. Four lenses (facts, design, sources, bypass) and one shadow per lens review packets built per attempt; the
+  author agent passes a fixed two-line message to each agent through the host's own mechanism (the plugin dispatches
+  and requires no subagent). Receipt checks each `review_record.json` (24 reason codes: dispatch and packet hashes,
+  isolation self-report, forbidden reads, recomputed file hashes, claim and finding shape, deep and skim coverage,
+  evidence bases, refutation attempts, unresolved share, canaries, carry-forward; arbiter identity and conclusions).
+  Findings are disposed with declared verification (`--verified` or `--adopted-unverified`); a declined high finding
+  and conflicting verdicts go to arbitration; changes are confirmed by a fresh review in the next round; a reverted
+  edit is caught before close; unresolved items go to a human (`escalate`, `report`, `resolve`) and the review then
+  continues. `report.md` lists the configuration, per-slot quality metrics, canary hits and witnesses, dispositions
+  and the limitations that applied.
+- **Contract and check.** `contracts/review.py` holds the seven new schemas' Python rules, the state table shared by
+  the driver and `check`, and `check` (`log_broken`, `not_closed`, `changed_after_close`, `artifacts_changed`,
+  `finding_open`, `uphold_not_honored` and the warnings). The event log is hash-chained with a head and appended under
+  a file lock.
+- **P1 limits.** Facts and design canaries only: sources and bypass slots run without controls and are reported as
+  `no_control`; Markdown only; Claude Code host notes only, with inferred shared-directory patterns and no way to read
+  the session start time (a warning). Thresholds are provisional until the P3 evaluation. A closed agent review is not
+  a non-author review record for the v6.3 conditions O04/O14; the architecture decision and the invariant at
+  `docs/protected-data-architecture.md:526` await the maintainer (`docs/dev/decision-independent-review.md`).
+- Ownership row "Independent review packets, review records and the review log" (hep-authoring; `independent
+  review`, `review packet`); four routing cases (en, zh-Hant).
+- Contracts 3.3.0 adds sidecar formats only: no artifact, vocabulary or capability change; fixtures, examples and
+  profile artifacts regenerated for the version string.
+
 ## 0.21.0 (2026-10-21)
 
 Contracts 3.2.0 (minor): simulated dataset-records; a reference benchmark for shower development; CI speedup.

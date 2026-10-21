@@ -194,6 +194,11 @@ C = [
  ('rc-t4-det-1', 'en', 'negative', 'For the detector section of the paper, measure the tracking resolution of our silicon tracker from the data.', 'hep-detector', ['resolution'], 'hep-authoring', None, {"set": "T4"}),
  ('rc-t4-review-1', 'en', 'direct', "Write the code-review part of my referee report: does the released repository do what the paper says it does?", 'hep-authoring', ['referee reports'], None, None, {"set": "T4"}),
  ('rc-t4-reuse-1', 'zh-Hant', 'direct', '上次已經查證過這篇 citations 的 INSPIRE-HEP 紀錄，這次改稿能直接沿用嗎？', 'hep-citations', ['citations', 'INSPIRE-HEP'], None, None, {"set": "T4", "note": "reuse keeps the old verification date; a time-sensitive claim is rechecked"}),
+ # Independent review (P1, docs/dev/independent-review-spec.md): hep-authoring owns review packets, records and the log
+ ('ir-direct-1', 'en', 'direct', 'Run an independent review of this design note by agents that did not write it, with a record a script can check.', 'hep-authoring', ['independent review of a draft by agents that did not write it'], None, None, {"set": "IR-P1"}),
+ ('ir-direct-2', 'zh-Hant', 'direct', '請讓沒有參與撰寫的 agents 對這份交接文件做 independent review，並留下可以用腳本檢查的審查紀錄。', 'hep-authoring', ['independent review'], None, None, {"set": "IR-P1"}),
+ ('ir-neighbor-1', 'en', 'neighboring', 'Have agents who did not write my draft section review it, and give me a review record a script can check.', 'hep-authoring', ['independent review of a draft by agents that did not write it'], 'hep-citations', None, {"set": "IR-P1", "note": "a review of the whole draft is hep-authoring's; whether its citations are verified stays with hep-citations"}),
+ ('ir-neighbor-2', 'zh-Hant', 'neighboring', '請找沒寫過這篇草稿的 agents 審查它（independent review），審查結果要能用腳本驗證。', 'hep-authoring', ['independent review'], 'hep-citations', None, {"set": "IR-P1"}),
  # T19: Simplified Chinese, Japanese and German
  ('t19-zhs-1', 'zh-Hans', 'direct', '请用 tag-and-probe 测量 muon 触发效率，并给出每个 bin 的不确定度。', 'hep-detector', ['tag-and-probe'], None, None, {"set": "T19"}),
  ('t19-zhs-2', 'zh-Hans', 'direct', '我想对这个能谱做 unfolding，并检查 coverage。', 'hep-statistics', ['unfolding', 'coverage'], None, None, {"set": "T19"}),
