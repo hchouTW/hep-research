@@ -726,7 +726,64 @@ WARNING["ml_v28_environment_free_text.json"] = (ml_v28(_sub("environment", preci
                                                 ["ml.precision_free_text", "ml.device_free_text"])
 
 
+# Independent review filter records (contracts 3.4.0; docs/dev/independent-review-spec.md section 5.5): sidecar
+# records, not artifacts, so they live in contracts/fixtures/review/ and are checked by contracts.review
+# (filter_record_rules); cases.json lists each invalid record's codes.
+REVIEW_OUT = ROOT / "contracts" / "fixtures" / "review"
+
+
+def filter_record(mutate=None) -> dict:
+    h = "0123456789abcdef" * 4
+    doc = {"packet_sha256": h, "dispatch_nonce": "synthetic-nonce", "instructions_sha256": h, "role": "filter",
+           "reviewer": {"identity": "synthetic-filter-agent", "context": "fresh", "model": "synthetic-model",
+                        "host": "synthetic-host", "slot_id": "S9"},
+           "isolation": {"saw_prior_conversation": False, "host_injected": [], "instruction_files_seen": "unknown"},
+           "paths_read": [{"path": "packet/findings.json", "sha256": h}],
+           "decisions": [{"finding_id": "P00000001", "decision": "keep", "reason": "synthetic: the page should change"},
+                         {"finding_id": "P00000002", "decision": "drop", "duplicate_of": "P00000001",
+                          "reason": "synthetic: repeats P00000001"},
+                         {"finding_id": "P00000003", "decision": "drop", "reason": "synthetic: a preference"}],
+           "limitations": SYN}
+    if mutate:
+        mutate(doc)
+    return doc
+
+
+REVIEW_VALID = {"filter_record.json": filter_record(),
+                "filter_record_all_kept.json": filter_record(lambda d: d.update(decisions=[
+                    {"finding_id": "P00000001", "decision": "keep", "reason": "synthetic"}]))}
+REVIEW_INVALID = {
+    "filter_record_repeated_decision.json": (filter_record(lambda d: d["decisions"].append(
+        {"finding_id": "P00000003", "decision": "keep", "reason": "synthetic: second decision"})), ["decisions_incomplete"]),
+    "filter_record_unknown_decision.json": (filter_record(lambda d: d["decisions"][2].update(decision="maybe")),
+                                            ["schema_invalid"]),
+    "filter_record_blank_reason.json": (filter_record(lambda d: d["decisions"][2].update(reason=" ")), ["schema_invalid"]),
+    "filter_record_duplicate_of_dropped.json": (filter_record(lambda d: d["decisions"][1].update(duplicate_of="P00000003")),
+                                                ["duplicate_target"]),
+    "filter_record_duplicate_of_on_keep.json": (filter_record(lambda d: d["decisions"][0].update(duplicate_of="P00000003")),
+                                                ["duplicate_target"]),
+    "filter_record_reviewer_identity_in_decision.json": (filter_record(lambda d: d["decisions"][0].update(slot_id="S1")),
+                                                         ["schema_invalid"]),
+    "filter_record_wrong_role.json": (filter_record(lambda d: d.update(role="reviewer")), ["schema_invalid"]),
+}
+
+
+def write_review_fixtures() -> None:
+    for sub in ("valid", "invalid"):
+        (REVIEW_OUT / sub).mkdir(parents=True, exist_ok=True)
+        for f in (REVIEW_OUT / sub).glob("*.json"):
+            f.unlink()
+    cases: dict = {"note": SYN, "valid": sorted(REVIEW_VALID), "invalid": {}}
+    for name, doc in REVIEW_VALID.items():
+        (REVIEW_OUT / "valid" / name).write_text(json.dumps(doc, indent=1) + "\n")
+    for name, (doc, codes) in sorted(REVIEW_INVALID.items()):
+        (REVIEW_OUT / "invalid" / name).write_text(json.dumps(doc, indent=1) + "\n")
+        cases["invalid"][name] = codes
+    (REVIEW_OUT / "cases.json").write_text(json.dumps(cases, indent=1) + "\n")
+
+
 def main() -> None:
+    write_review_fixtures()
     for sub in ("valid", "invalid", "unresolved", "warning"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
         for f in (OUT / sub).glob("*.json"):

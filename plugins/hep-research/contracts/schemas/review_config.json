@@ -1,4 +1,4 @@
-{"$comment": "Independent review configuration review_config 1.0.0 (docs/dev/independent-review-spec.md section 5.1), kept at <project>/reviews/review-config.json. Allowed ranges, the loose direction of each quality threshold (weak_config) and the private_dir placement are Python rules in contracts/review.py (CONFIG_RULES, config_problems, weak_config); an out-of-range value is config_out_of_range. lens_models is an optional field added in contracts 3.4.0; a configuration without it is read exactly as before.",
+{"$comment": "Independent review configuration review_config 1.0.0 (docs/dev/independent-review-spec.md section 5.1), kept at <project>/reviews/review-config.json. Allowed ranges, the loose direction of each quality threshold (weak_config) and the private_dir placement are Python rules in contracts/review.py (CONFIG_RULES, config_problems, weak_config); an out-of-range value is config_out_of_range. lens_models and filter are optional fields added in contracts 3.4.0; a configuration without them is read exactly as before.",
  "type": "object",
  "required": ["config_version", "models"],
  "additionalProperties": false,
@@ -17,4 +17,6 @@
   "canaries_per_slot": {"type": "integer", "default": 2, "description": "1-3; provisional; lower is looser"},
   "extra_lenses": {"type": "array", "items": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"}, "default": [], "description": "lenses added to the fixed four; never removes one"},
   "private_dir": {"type": "string", "minLength": 1, "description": "outside the project tree and the host's shared directories; default $XDG_STATE_HOME/hep-research/reviews/ or ~/.local/state/hep-research/reviews/"},
-  "lens_models": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}, "default": {}, "description": "contracts 3.4.0, optional: lens name -> the model of that lens's lens slot in every round (its shadow keeps the rotation and differs from it when models has another); each model must be in models (config_out_of_range otherwise)"}}}
+  "lens_models": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}, "default": {}, "description": "contracts 3.4.0, optional: lens name -> the model of that lens's lens slot in every round (its shadow keeps the rotation and differs from it when models has another); each model must be in models (config_out_of_range otherwise)"},
+  "filter": {"type": "object", "required": ["model"], "additionalProperties": false, "description": "contracts 3.4.0, optional: a filtering pass over the accepted round-1 findings (spec 6.9), run by one agent of this model; absent, there is no filtering pass",
+   "properties": {"model": {"type": "string", "minLength": 1, "description": "the model of the filter slot"}}}}}

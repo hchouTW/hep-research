@@ -6,15 +6,16 @@ prints a fixed two-line message, which the author agent passes to a new agent th
 
 Usage: python3 review.py COMMAND [options]   (run from the project root, or pass --project)
   start DOC [--supersede ID --reason TEXT] [--seed S] [--author NAME] [--author-model M] [--models A,B]
-        [--lens-model LENS=MODEL ...]
-                               --lens-model fixes the model of a lens's lens slot (repeatable; MODEL in models)
+        [--lens-model LENS=MODEL ...] [--filter-model M]
+                               --lens-model fixes the model of a lens's lens slot (repeatable; MODEL in models);
+                               --filter-model adds the filtering pass over the round-1 findings (spec 6.9)
   next                         observe, decide, print the next action (JSON)
   dispatch SLOT                build this attempt's packet, validate its example, print the dispatch message
   returned SLOT                the host reported the agent finished
   receive SLOT                 validate review_record.json; write accepted or rejected
   withdraw SLOT --reason timeout|host-failure|isolation-failure|other [--explanation TEXT]
   dispose FINDING --as changed|partially-changed|declined|unresolved --reason TEXT [--verified EVID | --adopted-unverified]
-  arbitrate | rereview | escalate --reason TEXT | report | close
+  arbitrate | filter | rereview | escalate --reason TEXT | report | close
   resolve ITEM --by NAME --decision D --reason TEXT    a human resolves an escalated item
   repair CODE                  how to fix a repair code; the next `next` confirms the fix
 Common options: --project DIR (default: current folder), --review ID (default: the only open review), --now
@@ -247,7 +248,7 @@ def cmd_start(ctx: Ctx) -> dict:
     if new_cfg != cfg:
         keep = [o.id for o in open_same if o.id != a.supersede] + [o.id for o in open_other]
         if existed and keep:
-            raise ReviewError("--lens-model changes reviews/review-config.json, which the unfinished "
+            raise ReviewError("--lens-model and --filter-model change reviews/review-config.json, which the unfinished "
                               f"review(s) {', '.join(keep)} also use (config_changed there): finish them first")
         write_json(ctx.cfg_path, new_cfg)
         cfg = read_json(ctx.cfg_path)
@@ -297,13 +298,17 @@ def cmd_start(ctx: Ctx) -> dict:
 
 
 def _config_options(cfg: dict, a) -> dict:
-    """The configuration with start's --lens-model applied (a copy; unchanged without it)."""
+    """The configuration with start's --lens-model and --filter-model applied (a copy; unchanged without them)."""
     out = json.loads(json.dumps(cfg))
     for item in a.lens_model or []:
         lens, sep, model = item.partition("=")
         if not sep or not lens.strip() or not model.strip():
             raise ReviewError(f"--lens-model needs LENS=MODEL, not {item!r}")
         out.setdefault("lens_models", {})[lens.strip()] = model.strip()
+    if a.filter_model is not None:
+        if not a.filter_model.strip():
+            raise ReviewError("--filter-model needs a model name")
+        out["filter"] = {"model": a.filter_model.strip()}
     return out
 
 
@@ -319,10 +324,18 @@ def _shown_path(p: str, project: Path) -> str:
 
 
 def cmd_next(ctx: Ctx) -> dict:
-    _, _, act = ctx.decide()
+    _, st, act = ctx.decide()
     act = dict(act)
     if act["action"] == "repair":
         act["fix"] = {c: FIX[c] for c in act["codes"]}
+    elif act["action"] == "filter":
+        act["note"] = ("Run filter: it creates the filter slot over the accepted round-1 findings; next then dispatches "
+                       "it like any other slot.")
+    elif act["action"] == "dispose" and st and (st.get("filter") or {}).get("decisions"):
+        dec = {d["finding"]: d for d in st["filter"]["decisions"]}
+        act["filter"] = {g: {k: dec[g][k] for k in ("decision", "reason", "duplicate_of")} for g in act["findings"] if g in dec}
+        act["filter_note"] = ("The filtering pass is advice, not a disposition: verify and dispose every finding. Its "
+                              "drops are listed apart in the report; nothing is deleted.")
     status = "error" if act["row"] == 1 else "ok"
     return dict({"status": status, "review_id": ctx.rv.id}, **act)
 
@@ -384,6 +397,8 @@ def cmd_dispatch(ctx: Ctx) -> dict:
     cfg = R.effective_config(st["rounds"][r]["config"])
     k = st["attempts"].get((r, sid), {}) and max(st["attempts"][(r, sid)]) or 0
     k += 1
+    if info["role"] == "filter":
+        return _dispatch_filter(ctx, st, r, sid, k, cfg)
     aseed = attempt_seed(rv, r, sid, k)
     units = read_json(rv.units_path(r))["units"]
     text = OBS.read_doc(rv.private / f"round-{r}" / "source.md")
@@ -475,6 +490,102 @@ def cmd_dispatch(ctx: Ctx) -> dict:
                     "subagent type. Run returned SLOT when the host reports the agent has finished."}
 
 
+def _accepted_record(rv: Review, st: dict, r: int, sid: str) -> dict:
+    k = max(x for x, a in st["attempts"][(r, sid)].items() if a["outcome"] == "accepted")
+    return read_json(rv.attempt_dir(r, sid, k) / R.SIDECAR)
+
+
+def _dispatch_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int, cfg: dict) -> dict:
+    """The filter slot's packet (spec 5.2, 6.9): the round's document without canaries, its units, and the pooled
+    findings under random ids, in a random order, with no reviewer identity (slot, lens, role, model or the
+    reviewer's own finding id). The id mapping stays in the private directory."""
+    rv = ctx.rv
+    aseed = attempt_seed(rv, r, sid, k)
+    units = read_json(rv.units_path(r))["units"]
+    text = OBS.read_doc(rv.private / f"round-{r}" / "source.md")
+    by_unit = {u["id"]: u["text"] for u in units}
+    pool = list(st["filter"]["findings"])
+    U.rng(U.derive(aseed, "filter-order")).shuffle(pool)
+    ids: dict[str, str] = {}
+    findings = []
+    for g in pool:
+        n = 8
+        pid = "P" + U.derive(aseed, "filter-id", g)[:n]
+        while pid in ids:
+            n += 2
+            pid = "P" + U.derive(aseed, "filter-id", g)[:n]
+        ids[pid] = g
+        fr, fsid, fid = g.split("/", 2)
+        f = next(x for x in _accepted_record(rv, st, int(fr), fsid)["findings"] if x["id"] == fid)
+        findings.append({"id": pid, "kind": f["kind"], "severity": f["severity"], "units": f["units"],
+                         "unit_texts": {u: by_unit.get(u, "") for u in f["units"]}, "value": f["value"],
+                         "correction": f["correction"], "description": f["description"], "fix": f["fix"]})
+    scope = {"slot_id": sid, "lens": None, "role": "filter", "finding_ids": [x["id"] for x in findings]}
+    pdir = rv.attempt_dir(r, sid, k) / "packet"
+    instructions = PKT.render_filter_instructions(scope=scope, review_id=rv.id, round_=r, attempt=k, plugin=PLUGIN,
+                                                  example=PKT.filter_example_record(sid))
+    sums = PKT.write_packet(pdir, slot_id=sid, document=PKT.packet_document(text, sid),
+                            units=PKT.packet_units(units, None, {}, {}), scope=scope, items=None,
+                            instructions=instructions, extra={"findings.json": {"findings": findings}})
+    try:
+        PKT.validate_written_example(pdir / "instructions.md", "filter", int(cfg["max_units_per_claim"]))
+    except ReviewError:
+        import shutil
+        shutil.rmtree(rv.attempt_dir(r, sid, k), ignore_errors=True)
+        raise
+    (rv.attempt_dir(r, sid, k) / "work").mkdir(exist_ok=True)
+    priv = rv.private_attempt(r, sid, k)
+    salt = U.derive(aseed, "salt")
+    write_json(priv / "canary.json", {"canaries": [], "rejected": [], "salt": salt})
+    write_json(priv / "filter_ids.json", {"ids": ids})
+    write_json(priv / "sample_seed", {"round_seed": round_seed(rv, r), "attempt_seed": aseed})
+    nonce = U.derive(aseed, "nonce")[:20]
+    rv.append("dispatched", ctx.now, {
+        "round": r, "slot_id": sid, "attempt": k, "packet_sha256": sums["packet_sha256"], "nonce": nonce,
+        "instructions_sha256": sums["instructions_sha256"], "deadline": OBS.deadline(ctx.now, cfg),
+        "canary_commitment": R.sha256_bytes((salt + R.canonical_sha256([])).encode()),
+        "seed_commitment": R.sha256_bytes((salt + aseed).encode()), "started": ctx.now,
+        "canaries": 0, "canaries_expected": 0, "instruction_files_sha256": OBS.instruction_hash(st["observed"])})
+    msg = PKT.dispatch_message(nonce, pdir / "instructions.md", sums["instructions_sha256"])
+    return {"status": "ok", "slot": sid, "attempt": k, "message": msg,
+            "note": "Pass exactly these two lines, and nothing else, to a new agent; on Claude Code name a non-fork "
+                    "subagent type. Run returned SLOT when the host reports the agent has finished."}
+
+
+def _receive_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int) -> dict:
+    """Receipt of a filter record (spec 7.5): accepted with one decision per pooled finding, or rejected with codes."""
+    rv = ctx.rv
+    a = st["attempts"][(r, sid)][k]
+    raw = (rv.attempt_dir(r, sid, k) / R.FILTER_SIDECAR).read_bytes()
+    review_sha = R.sha256_bytes(raw)
+    try:
+        record = json.loads(raw.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        record = None
+    ids = read_json(rv.private_attempt(r, sid, k) / "filter_ids.json")["ids"]
+    obs = st["observed"]
+    fctx = REC.build_filter_context(rv, r=r, sid=sid, k=k, dispatched=a["dispatched"], author=st["author"]["identity"],
+                                    shared=OBS.shared_dirs(rv.project, ctx.given),
+                                    instructions_changed=OBS.instruction_hash(obs) != a["dispatched"]["instruction_files_sha256"],
+                                    finding_ids=sorted(ids), record=record)
+    problems = R.filter_receipt_codes(record, fctx) if record is not None else [("schema_invalid", "not JSON")]
+    recomputed = {p: f["sha256"] for p, f in sorted(fctx["files"].items()) if f["local"]}
+    base = {"round": r, "slot_id": sid, "attempt": k, "review_sha256": review_sha, "recomputed": recomputed}
+    if problems:
+        codes = sorted({c for c, _ in problems})
+        rv.append("rejected", ctx.now, dict(base, codes=codes, problems=[m for _, m in problems][:40]))
+        return {"status": "rejected", "slot": sid, "attempt": k, "codes": codes, "problems": [m for _, m in problems],
+                "next": "run next (re-dispatch while attempts remain; after the last one the filter is not applied)"}
+    decisions = sorted(({"finding": ids[d["finding_id"]], "decision": d["decision"], "reason": d["reason"],
+                         "duplicate_of": ids[d["duplicate_of"]] if d.get("duplicate_of") else None}
+                        for d in record["decisions"]), key=lambda d: d["finding"])
+    rv.append("accepted", ctx.now, dict(base, metrics=R.filter_metrics(record), identity=record["reviewer"]["identity"],
+                                        host_injected=record["isolation"]["host_injected"], decisions=decisions))
+    return {"status": "ok", "slot": sid, "attempt": k, "accepted": True, "events": [],
+            "kept": sum(1 for d in decisions if d["decision"] == "keep"),
+            "dropped": sum(1 for d in decisions if d["decision"] == "drop")}
+
+
 def _previous(rv: Review, c: dict) -> dict:
     r, sid, local = c["target"].split("/", 2)
     st = R.fold(rv.events())
@@ -550,6 +661,8 @@ def cmd_receive(ctx: Ctx) -> dict:
     k = max(st["attempts"][(r, sid)])
     a = st["attempts"][(r, sid)][k]
     info = rv.slots()[str(r)][sid]
+    if info["role"] == "filter":
+        return _receive_filter(ctx, st, r, sid, k)
     path = rv.attempt_dir(r, sid, k) / "review_record.json"
     raw = path.read_bytes()
     review_sha = R.sha256_bytes(raw)
@@ -687,6 +800,24 @@ def cmd_arbitrate(ctx: Ctx) -> dict:
     return {"status": "ok", "items": made, "next": "run next (the arbitration slots are dispatched like any other)"}
 
 
+def cmd_filter(ctx: Ctx) -> dict:
+    """Spec 6.9: create the filter slot over the accepted round-1 findings (decide row 8a)."""
+    _, st, act = ctx.decide()
+    _require(act, "filter")
+    rv = ctx.rv
+    r = st["round"]
+    allslots = rv.slots()
+    slots = allslots[str(r)]
+    model = R.effective_config(st["rounds"][r]["config"])["filter"]["model"]
+    sid = f"S{max(int(s[1:]) for s in slots if s[1:].isdigit()) + 1}"
+    pool = R.filter_pool(st)
+    slots[sid] = {"role": "filter", "lens": None, "model": model}
+    rv.save_slots(allslots)
+    rv.append("filter_needed", ctx.now, {"round": r, "slot_id": sid, "model": model, "findings": pool})
+    return {"status": "ok", "slot": sid, "model": model, "findings": len(pool),
+            "next": "run next (the filter slot is dispatched like any other)"}
+
+
 def cmd_rereview(ctx: Ctx) -> dict:
     _, st, act = ctx.decide()
     _require(act, "rereview")
@@ -814,6 +945,7 @@ def cmd_repair(ctx: Ctx) -> dict:
 
 COMMANDS = {"start": cmd_start, "next": cmd_next, "dispatch": cmd_dispatch, "returned": cmd_returned,
             "receive": cmd_receive, "withdraw": cmd_withdraw, "dispose": cmd_dispose, "arbitrate": cmd_arbitrate,
+            "filter": cmd_filter,
             "rereview": cmd_rereview, "escalate": cmd_escalate, "report": cmd_report, "close": cmd_close,
             "resolve": cmd_resolve, "repair": cmd_repair}
 
@@ -837,7 +969,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--models", help="models for a new review-config.json, comma-separated")
     p.add_argument("--lens-model", action="append", metavar="LENS=MODEL",
                    help="fix the model of LENS's lens slot (config lens_models; repeatable; MODEL must be in models)")
-    for name in ("next", "arbitrate", "rereview", "report", "close"):
+    p.add_argument("--filter-model", metavar="MODEL", help="add the filtering pass after round 1 (config filter.model)")
+    for name in ("next", "arbitrate", "filter", "rereview", "report", "close"):
         sub.add_parser(name, parents=[common])
     for name in ("dispatch", "returned", "receive"):
         sub.add_parser(name, parents=[common]).add_argument("slot")

@@ -2,7 +2,7 @@
 agent attaches it unchanged. Deterministic: the same files give the same bytes."""
 from __future__ import annotations
 
-from contracts.review import CONFIG_RULES, effective_config, fold, weak_config
+from contracts.review import CONFIG_RULES, effective_config, filter_pool, fold, slot_state, weak_config
 from review_lib.store import read_json
 
 LIMITATIONS = [
@@ -39,6 +39,8 @@ def build(rv, events: list) -> str:
     out.append(f"| extra_lenses | {', '.join(eff.get('extra_lenses') or []) or '-'} | - |")
     if eff.get("lens_models"):
         out.append("| lens_models | " + ", ".join(f"{k}={v}" for k, v in sorted(eff["lens_models"].items())) + " | - |")
+    if eff.get("filter"):
+        out.append(f"| filter | model {eff['filter']['model']} | - |")
     weak = weak_config(cfg)
     out += ["", f"weak_config: {', '.join(weak) if weak else 'none'}", ""]
     out += ["## Slots", "", "| Round | Slot | Role | Lens | Model | Attempts | Outcome | Reasons | Skim marks | "
@@ -103,12 +105,31 @@ def build(rv, events: list) -> str:
             m = (last["data"] or {}).get("metrics", {}) if last["outcome"] == "accepted" else {}
             out.append(f"- round {r} {sid} (shadow of {info.get('lens')}): {last['outcome'] or 'open'}, "
                        f"deep verdicts {_dist(m.get('deep_verdicts'))}")
-    out += ["", "## Findings", "", "| Finding | Severity | State | Disposition | Verification |", "|---|---|---|---|---|"]
-    for g, f in sorted(st["findings"].items()):
-        d = f["disposals"][-1] if f["disposals"] else {}
-        ver = d.get("verification") or {}
-        vtext = "verified: " + ver["verified"] if ver.get("verified") else "adopted-unverified" if ver.get("adopted_unverified") else "-"
-        out.append(f"| {g} | {f['severity']} | {f['state']} | {d.get('disposition', '-')} | {vtext} |")
+    decisions = {d["finding"]: d for d in ((st.get("filter") or {}).get("decisions") or [])}
+    if eff.get("filter"):
+        out += ["", "## Filtering pass", ""] + _filter_lines(st, decisions)
+    if not decisions:
+        out += ["", "## Findings", "", "| Finding | Severity | State | Disposition | Verification |", "|---|---|---|---|---|"]
+        for g, f in sorted(st["findings"].items()):
+            out.append(f"| {g} | {f['severity']} | {f['state']} | {_disp(f)} |")
+    else:  # kept (and unfiltered) findings first; the dropped ones apart, with the filter's reasons; nothing is deleted
+        out += ["", "## Findings", "", "Findings the filtering pass kept, then findings it did not judge (controls, later "
+                "rounds).", "", "| Finding | Severity | State | Disposition | Verification | Filter |", "|---|---|---|---|---|---|"]
+        kept = [g for g in sorted(st["findings"]) if decisions.get(g, {}).get("decision") == "keep"]
+        rest = [g for g in sorted(st["findings"]) if g not in decisions]
+        for g in kept + rest:
+            f = st["findings"][g]
+            why = f"keep: {_cell(decisions[g]['reason'])}" if g in decisions else "-"
+            out.append(f"| {g} | {f['severity']} | {f['state']} | {_disp(f)} | {why} |")
+        out += ["", "## Findings the filter dropped", "",
+                "Advice, not a disposition: each is still disposed by the author like any other finding.", "",
+                "| Finding | Severity | State | Disposition | Verification | Reason | Duplicate of |",
+                "|---|---|---|---|---|---|---|"]
+        for g in sorted(x for x, d in decisions.items() if d["decision"] == "drop"):
+            f = st["findings"].get(g, {"severity": "?", "state": "?", "disposals": []})
+            d = decisions[g]
+            out.append(f"| {g} | {f['severity']} | {f['state']} | {_disp(f)} | {_cell(d['reason'])} | "
+                       f"{d.get('duplicate_of') or '-'} |")
     out += ["", "## Events", ""]
     for e in events:
         if e["event"] in ("arbitration_resolved", "change_reverted", "change_confirmed", "change_rejected", "late",
@@ -132,6 +153,46 @@ def build(rv, events: list) -> str:
     out += ["## Reviews of this document", "", f"- {st['review_id']} (this review)"] + [f"- {x}" for x in others] + [""]
     out += ["## Limitations that applied", ""] + [f"- {x}" for x in LIMITATIONS] + [""]
     return "\n".join(out)
+
+
+def _disp(f) -> str:
+    d = f["disposals"][-1] if f["disposals"] else {}
+    ver = d.get("verification") or {}
+    vtext = "verified: " + ver["verified"] if ver.get("verified") else "adopted-unverified" if ver.get("adopted_unverified") else "-"
+    return f"{d.get('disposition', '-')} | {vtext}"
+
+
+def _cell(text: str) -> str:
+    return " ".join(str(text).split()).replace("|", "\\|")
+
+
+def _filter_lines(st: dict, decisions: dict) -> list[str]:
+    """What happened to the filtering pass (spec 6.9, A8)."""
+    f = st.get("filter")
+    if f is None:
+        return ["- Not run: no accepted round-1 finding to judge." if not filter_pool(st) else "- Pending.", ""]
+    r, sid = f["round"], f["slot_id"]
+    atts = st["attempts"].get((r, sid), {})
+    head = f"- Slot {sid}, model {f['model']}: {len(f['findings'])} findings, {len(atts)} attempt(s)."
+    reasons = []
+    for k in sorted(atts):
+        a = atts[k]
+        if a["outcome"] == "rejected":
+            reasons.append(f"a{k}: rejected {', '.join(a['data']['codes'])}")
+        elif a["outcome"] == "withdrawn":
+            reasons.append(f"a{k}: withdrawn ({a['data']['reason']})")
+    out = [head]
+    if reasons:
+        out.append("- " + "; ".join(reasons) + ".")
+    if decisions:
+        kept = sum(1 for d in decisions.values() if d["decision"] == "keep")
+        out.append(f"- Applied: kept {kept}, dropped {len(decisions) - kept}. Dropped findings are listed apart below "
+                   "with their reasons; nothing is deleted.")
+    elif slot_state(st, r, sid)["state"] == "exhausted":
+        out.append("- Not applied: the filter slot used up its attempts; the findings below are unfiltered.")
+    else:
+        out.append("- Not applied yet.")
+    return out + [""]
 
 
 def _doc_of(p):

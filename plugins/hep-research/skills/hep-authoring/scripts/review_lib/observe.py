@@ -14,7 +14,7 @@ import subprocess
 from pathlib import Path
 
 from contracts.review import (canonical_sha256, config_problems, effective_config, fold, format_time, parse_time,
-                              sha256_file)
+                              sha256_file, sidecar_name)
 from review_lib import units as U
 from review_lib.store import load_asset, read_json
 
@@ -211,7 +211,8 @@ def sidecars(rv, st: dict) -> dict:
     for (r, sid), atts in sorted(st["attempts"].items()):
         for k in sorted(atts):
             adir = rv.attempt_dir(r, sid, k)
-            final, tmp = adir / "review_record.json", adir / "review_record.json.tmp"
+            name = sidecar_name(st, r, sid)
+            final, tmp = adir / name, adir / f"{name}.tmp"
             ent = {"exists": final.is_file(), "tmp": tmp.is_file() and not final.is_file()}
             if final.is_file():
                 ent["sha256"] = sha256_file(final)

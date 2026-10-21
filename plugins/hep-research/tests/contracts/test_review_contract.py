@@ -19,7 +19,7 @@ from review_lib.packet import example_record  # noqa: E402
 
 SPEC = ROOT / "docs" / "dev" / "independent-review-spec.md"
 SCHEMAS = ("review_config", "review_units", "review_manifest", "review_record", "review_event", "review_head",
-           "review_observation")
+           "review_observation", "review_filter_record")
 
 
 def spec_section(title: str) -> str:
