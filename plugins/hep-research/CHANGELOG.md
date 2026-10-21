@@ -3,6 +3,28 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 3.1.0 (minor): Geant4 phase 2.
+
+- **Study records can be re-issued as `validated-in-scope` (Geant4 phase 2).** `check_geant4_study.py label --upgrade`
+  re-issues a study record only when a scope is eligible (a passed reference benchmark whose negative control was
+  caught, a passed convergence gate, the declared scope inside the benchmark scope) and no gap remains; otherwise it
+  stays `unvalidated` and the refusal is reported. Run records are never upgraded.
+- **Contracts 3.1.0.** New optional `computational-run` field `extension.evidence_records` (run records referenced by
+  path and sha256 without inheriting their labels) with the capability `core:evidence-records`, resolved by
+  `dependencies.py` (hash, exit status 0, no `failed`, output hashes: `evidence.*`). New rule family
+  `geant4.upgrade_*` in `validate.py` for computational-runs with Geant4 study material that carry
+  `validated-in-scope`; other computational-runs (none carries that label in the plugin) are unaffected, as agreed for
+  hep-computing, owner of the computational-run schema. Older contract versions keep their outcome.
+- **Shared context-resolution stanza, point 5:** the one exception to keeping labels ("except a Geant4 study record
+  that passes the 3.1.0 upgrade rule"); every SKILL.md regenerated. Two entry references trimmed by about 60 bytes to
+  stay within the quick-load budget.
+- **`build_response.py`:** `--input-record` links the artifacts the events came from as inputs (sha256, status;
+  their propagating labels are carried) and `--also-status` adds labels. J14's response links its run record.
+- **J14:** both studies re-issued as `validated-in-scope` for their benchmarked scope; the coarse-cut scenario's upgrade
+  is refused.
+
 ## 0.19.0 (2026-10-21)
 
 Geant4 capability (epic TASK-geant4-00 to 03, phase 1). Contracts unchanged (3.0.1); no skill description, SKILL.md or

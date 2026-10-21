@@ -2,8 +2,8 @@
 
 The owner's decision guide to the seven scripts in `<plugin root>/core/stats/`: conventions, caps, which tool to
 choose, the skill scripts, and what is not implemented. What each subcommand assumes, needs and returns is in the
-[command reference](core-stats-commands.md). Experiment profiles may record how an experiment applies these tools; the general rules live here, and
-where a profile's copy differs, this guide applies.
+[command reference](core-stats-commands.md). Where an experiment profile's copy of these rules differs, this guide
+applies.
 
 The scripts are **diagnostics, not frameworks**: small counting, template and unfolding problems with stated
 simplifications. A many-nuisance shape model, a workspace combination or a production sampler goes through the

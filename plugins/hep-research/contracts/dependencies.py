@@ -187,6 +187,53 @@ class _Checker:
                 self.add("error", where, "dependency.too_deep", f"dependency chain deeper than {MAX_DEPTH}")
             else:
                 self.artifact(src, sdoc, trail + (src,))
+        self.evidence(path, doc, trail)
+
+    def evidence(self, path: Path, doc: dict, trail: tuple):
+        """3.1.0: extension.evidence_records, run records the artifact relies on by hash without inheriting their
+        labels. Each must resolve inside the root, match its sha256, validate, and be a successful computational-run
+        (exit_status 0, no 'failed', output hashes recorded)."""
+        records = (doc.get("extension") or {}).get("evidence_records") or []
+        for i, rec in enumerate(records if isinstance(records, list) else []):
+            where = f"{path.relative_to(self.root)}:$.extension.evidence_records[{i}]"
+            if not isinstance(rec, dict) or not isinstance(rec.get("ref"), str):
+                self.add("error", where, "evidence.bad_record", "an evidence record needs a string ref")
+                continue
+            src = self.resolve(rec["ref"], where)
+            if src is None:
+                continue
+            if not src.is_file():
+                self.add("error", where, "evidence.missing", f"{rec['ref']!r} does not exist in the project")
+                continue
+            data = src.read_bytes()
+            digest = hashlib.sha256(data).hexdigest()
+            if rec.get("sha256") != digest:
+                self.add("error", where, "evidence.hash_mismatch",
+                         f"{rec['ref']!r} has sha256 {digest}, the record declares {rec.get('sha256')}")
+            try:
+                sdoc = json.loads(data.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError) as exc:
+                self.add("error", where, "evidence.unreadable", f"{rec['ref']!r} is not a JSON artifact: {exc}")
+                continue
+            srep = validate_artifact(sdoc, self.vocab, protected=self.protected, context=self.context,
+                                     strict_versions=self.strict_versions)
+            bad = sorted({f.code for f in srep.errors})
+            if bad:
+                self.add("error", where, "evidence.source_invalid", f"{rec['ref']!r} fails contract validation: {', '.join(bad)}")
+            if sdoc.get("artifact_type") != "computational-run" or sdoc.get("artifact_id") != rec.get("artifact_id"):
+                self.add("error", where, "evidence.type_or_id_mismatch",
+                         f"{rec['ref']!r} is {sdoc.get('artifact_type')} {sdoc.get('artifact_id')!r}, the record "
+                         f"declares computational-run {rec.get('artifact_id')!r}")
+            sext = sdoc.get("extension") or {}
+            if sext.get("exit_status") != 0 or "failed" in (sdoc.get("status") or []):
+                self.add("error", where, "evidence.run_failed", f"{rec['ref']!r} did not succeed (exit status or 'failed')")
+            hashes = sext.get("output_hashes")
+            if not isinstance(hashes, dict) or not hashes or not all(isinstance(v, str) and HEX64.match(v)
+                                                                      for v in hashes.values()):
+                self.add("error", where, "evidence.no_output_hashes", f"{rec['ref']!r} records no output hashes")
+            self.checked.append(str(src.relative_to(self.root)))
+            if src not in trail and len(trail) < MAX_DEPTH:
+                self.artifact(src, sdoc, trail + (src,))
 
 
 def _event_keys(events) -> dict:

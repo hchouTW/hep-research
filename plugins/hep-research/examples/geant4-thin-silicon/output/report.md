@@ -16,6 +16,7 @@ properties tables, never from the Geant4 material dump.
   -0.0018, detection limit 0.0378; negative control caught;
   convergence gate pass.
 
-Label of both study records: unvalidated (phase 1: no Geant4-derived artifact is upgraded). Scopes phase 2
-could re-issue: thin-layer-mpv, stopping-power.
-Gaps of the MPV study: 1; of the stopping-power study: 1 (listed in the study records).
+Label of both study records: unvalidated; each is re-issued as validated-in-scope for its benchmarked scope
+only (thin-layer-mpv, stopping-power: one particle, energy, material and thickness),
+with the run records referenced as evidence by hash (contracts 3.1.0). Nothing outside that scope is validated.
+Gaps of the MPV study: 0; of the stopping-power study: 0 (listed in the study records).

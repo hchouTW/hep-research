@@ -70,7 +70,9 @@ $ python3 ../../skills/hep-detector/scripts/geant4_benchmarks.py run --config ou
 ```
 
 The highest usable label of the note is `unvalidated`, and the request for `validated-in-scope` is
-refused: phase 1 upgrades no Geant4-derived artifact.
+refused: `check_geant4_study.py label --upgrade` re-issues a study only with a passed reference benchmark whose
+negative control was caught, a passed convergence gate, its scope inside the benchmark scope and no gap left, and the
+contract rule (`geant4.upgrade_*`, contracts 3.1.0) refuses a hand-made relabel.
 
 ## 4. Hardened Architectural Patch
 

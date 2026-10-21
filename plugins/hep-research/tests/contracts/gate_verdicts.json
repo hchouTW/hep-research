@@ -1005,6 +1005,10 @@
   "ok": true,
   "strict_ok": true
  },
+ "examples/geant4-thin-silicon/output/artifacts/mpv.study-validated.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "examples/geant4-thin-silicon/output/artifacts/mpv.study.computational-run.json": {
   "ok": true,
   "strict_ok": true
@@ -1094,6 +1098,10 @@
   "strict_ok": true
  },
  "examples/geant4-thin-silicon/output/artifacts/scenario-dump-reference.study.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/sp.study-validated.computational-run.json": {
   "ok": true,
   "strict_ok": true
  },

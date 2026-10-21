@@ -272,6 +272,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
     elif t == "computational-run":
         if ext.get("exit_status", 0) != 0 and "failed" not in status:
             rep.add("error", "$.status", "status.failed_unlabeled", "non-zero exit status must carry 'failed'")
+        if strict or _at_least(doc.get("contract_version"), GEANT4_UPGRADE_FROM):
+            _study_upgrade(doc, ext, status, rep)
     elif t == "ml-artifact":
         if not ext.get("splits", {}).get("grouping_key"):
             rep.add("error", "$.extension.splits.grouping_key", "ml.no_grouping", "splits need a grouping key (leakage control)")
@@ -317,6 +319,67 @@ def _literature_semantics(ext: dict, rep: Report) -> None:
 
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
+GEANT4_UPGRADE_FROM = "3.1.0"  # Geant4 phase-2 rules (study record upgrade, evidence records) apply from this version
+
+
+def _scope_inside(declared: dict, bench: dict) -> list[str]:
+    """Where a declared scope leaves a benchmark's scope (particle, material, energy and thickness ranges)."""
+    out = []
+    for k in ("particle", "material"):
+        if declared.get(k) is not None and bench.get(k) is not None and declared[k] != bench[k]:
+            out.append(f"{k} {declared[k]!r} is not the benchmark's {bench[k]!r}")
+    for k in ("energy_MeV", "thickness_mm"):
+        d, b = declared.get(k), bench.get(k)
+        if b is None or d is None:
+            if d is not None:
+                out.append(f"{k}: the benchmark states none")
+            continue
+        lo, hi = (d, d) if isinstance(d, (int, float)) else (d[0], d[-1])
+        blo, bhi = (b, b) if isinstance(b, (int, float)) else (b[0], b[-1])
+        if lo < blo * (1 - 1e-9) or hi > bhi * (1 + 1e-9):
+            out.append(f"{k} {d} is outside the benchmarked {b}")
+    return out
+
+
+def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report) -> None:
+    """3.1.0 Geant4 phase 2: evidence records need their capability, and a record with Geant4 study material that
+    carries validated-in-scope must show the evidence for it."""
+    ev = ext.get("evidence_records")
+    if ev and "core:evidence-records" not in (doc.get("required_capabilities") or []):
+        rep.add("error", "$.required_capabilities", "evidence.capability_not_declared",
+                "an artifact with extension.evidence_records must require core:evidence-records")
+    geant4 = any(k in ext for k in ("study", "simulation", "evidence_records"))
+    if "validated-in-scope" not in status or not geant4:
+        return
+    study = ext.get("study")
+    if not isinstance(study, dict):
+        rep.add("error", "$.extension.study", "geant4.upgrade_without_study",
+                "validated-in-scope on a Geant4 record needs the study block of check_geant4_study.py label")
+        return
+    if "simulation" in ext:
+        rep.add("error", "$.extension.simulation", "geant4.run_record_upgraded",
+                "a Geant4 run record stays unvalidated; only a study record can be re-issued as validated-in-scope")
+    if not ev:
+        rep.add("error", "$.extension.evidence_records", "geant4.upgrade_without_evidence_records",
+                "the run records behind the study must be referenced in extension.evidence_records")
+    if (study.get("convergence") or {}).get("gate") != "pass":
+        rep.add("error", "$.extension.study.convergence", "geant4.upgrade_unconverged",
+                "validated-in-scope needs a passed convergence gate")
+    good = [b for b in study.get("benchmarks", []) if isinstance(b, dict) and b.get("grade") == "reference"
+            and b.get("verdict") == "pass" and b.get("validation_evidence") is True
+            and (b.get("negative_control") or {}).get("status") == "caught"]
+    if not good:
+        rep.add("error", "$.extension.study.benchmarks", "geant4.upgrade_without_reference_benchmark",
+                "validated-in-scope needs a passed reference benchmark whose negative control was caught")
+        return
+    declared = study.get("declared_scope") or {}
+    misses = [_scope_inside(declared, b.get("scope") or {}) for b in good]
+    if not declared or all(misses):
+        detail = "; ".join(m for ms in misses for m in ms) or "no declared scope"
+        rep.add("error", "$.extension.study.declared_scope", "geant4.upgrade_scope_outside",
+                f"the declared scope is not inside a passed benchmark's scope: {detail}")
+
+
 RESPONSE_SEMANTICS_FROM = "2.4.0"  # response semantic rules apply natively from this contract version
 RESPONSE_HARDENING_FROM = "2.8.0"  # response hardening rules (hep-detector audit) apply natively from this version
 IMPLIED_CORRECTIONS = {"exposure": {"acceptance", "livetime"}}  # vocab response_corrections: exposure = acceptance x live time

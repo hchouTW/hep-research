@@ -529,8 +529,6 @@ def cmd_label(args) -> tuple[str, dict]:
         if not lit_doc or lit_doc.get("artifact_type") != "literature-record":
             gaps.append("written downstream use without a literature record (citations.literature_record): cite the "
                         "Geant4 papers, version and documents from one, never from memory (R8)")
-    gaps.append("build_response.py writes empty inputs and one --status: a response built from these runs cannot link "
-                "the run records (phase 2 requirement 5)")
     if not any(b.get("validation_evidence") for b in bench.get("benchmarks", [])):
         gaps.append("no reference benchmark is validation evidence for this study (R5 not met)")
     declared = get(study, "validation_plan.scope") or {}
@@ -557,10 +555,30 @@ def cmd_label(args) -> tuple[str, dict]:
                          "sha256": sha256_file(Path(path)), "status": rec.get("status", [])})
     labels = ["unvalidated"] + [s for r in run_refs for s in r["status"] if s in PROPAGATING]
     labels = list(dict.fromkeys(labels))
-    doc = {"highest_usable_label": "unvalidated", "labels": labels, "gaps": gaps,
+    upgrade, refused = False, []
+    if args.upgrade:
+        if not eligible:
+            refused.append("no scope is eligible (a passed reference benchmark with its control caught, a passed "
+                           "convergence gate, the declared scope inside the benchmark scope)")
+        if gaps:
+            refused.append(f"{len(gaps)} gap(s) remain")
+        n_ref = len(args.reference_record or [])
+        evidence = run_refs[:len(run_refs) - n_ref] if n_ref else run_refs
+        if not evidence:
+            refused.append("no run record to reference as evidence")
+        upgrade = not refused
+    if upgrade:  # phase 2 (contracts 3.1.0): the run records become evidence records, their labels not inherited
+        refs = run_refs[len(evidence):]
+        labels = ["validated-in-scope"] + [s for r in refs for s in r["status"] if s in PROPAGATING and
+                                           s != "unvalidated"]
+        labels = list(dict.fromkeys(labels))
+    doc = {"highest_usable_label": "validated-in-scope" if upgrade else "unvalidated", "labels": labels, "gaps": gaps,
+           "upgrade": ("re-issued as validated-in-scope" if upgrade else
+                       {"refused": refused} if args.upgrade else "not requested"),
            "phase2_upgrade_eligible_scopes": eligible,
-           "note": "phase 1: every Geant4-derived artifact stays unvalidated with its evidence and scope embedded; "
-                   "the eligible scopes say only what phase 2 could re-issue as validated-in-scope"}
+           "note": "without --upgrade the record stays unvalidated with its evidence and scope embedded; --upgrade "
+                   "re-issues it as validated-in-scope only when a scope is eligible and no gap remains (contracts "
+                   "3.1.0 rule geant4.upgrade_*)"}
     if args.write:
         out = Path(args.write)
         created = args.created or datetime.date.today().isoformat()
@@ -581,7 +599,8 @@ def cmd_label(args) -> tuple[str, dict]:
             "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "profiles": {}},
             "provenance": {"producer_skill": "hep-detector", "created": created, "evidence_ids": []},
-            "inputs": run_refs, "outputs": [], "unresolved_inputs": [], "status": labels,
+            "inputs": run_refs[len(evidence):] if upgrade else run_refs, "outputs": [], "unresolved_inputs": [],
+            "status": labels,
             "extension": {"input_manifest": manifest,
                           "tools": [{"name": "check_geant4_study.py", "version": sha256_file(Path(__file__))[:16]},
                                     {"name": "geant4_benchmarks.py", "version": sha256_file(
@@ -594,7 +613,15 @@ def cmd_label(args) -> tuple[str, dict]:
                                     "statistical_target": conv.get("statistical_target"),
                                     "variations": var, "declared_scope": declared, "gaps": gaps,
                                     "phase2_upgrade_eligible_scopes": eligible,
-                                    "highest_usable_label": "unvalidated"}}}
+                                    "highest_usable_label": doc["highest_usable_label"]}}}
+        if upgrade:
+            record["artifact_id"] = record["artifact_id"].removesuffix("-study") + "-study-validated"
+            record["required_capabilities"] = ["core:evidence-records"]
+            record["extension"]["evidence_records"] = [
+                {"ref": r["ref"], "sha256": r["sha256"], "artifact_id": r["artifact_id"],
+                 "artifact_type": "computational-run", "role": "Geant4 run"} for r in evidence]
+            record["objective"] = record["objective"].replace("(unvalidated in phase 1)",
+                                                              "(validated-in-scope: phase 2, contracts 3.1.0)")
         write_json(out, record)
         doc["record"] = str(out)
     return "ok", doc
@@ -637,6 +664,9 @@ def main(argv=None) -> int:
     p.add_argument("--project-root", required=True)
     p.add_argument("--write")
     p.add_argument("--created")
+    p.add_argument("--upgrade", action="store_true",
+                   help="phase 2: re-issue an eligible study with no gaps as validated-in-scope (run records become "
+                        "evidence records); otherwise the record stays unvalidated and the refusal is reported")
     for sp in sub.choices.values():
         add_status_argument(sp)
     args = ap.parse_args(argv)

@@ -3,39 +3,42 @@
  "pass": {
   "artifacts_validate": true,
   "coarse_cut_stopped_by_gate": true,
+  "coarse_cut_upgrade_refused": true,
   "density_10_caught": true,
   "dump_reference_flagged": true,
   "mpv_convergence_gate_passes": true,
-  "mpv_dependencies_ok": true,
   "mpv_record_unvalidated": true,
+  "mpv_reissued_validated_in_scope": true,
   "mpv_spec_ok": true,
   "mpv_statistical_target_met": true,
+  "mpv_study-validated_dependencies_ok": true,
+  "mpv_study_dependencies_ok": true,
   "mpv_thin-layer-mpv_negative_control_caught": true,
   "mpv_thin-layer-mpv_passes": true,
   "report_citations_verified": true,
+  "response_linked_to_its_run": true,
   "response_validates_and_is_unvalidated": true,
   "same_model_variation_excluded": true,
   "sp_convergence_gate_passes": true,
-  "sp_dependencies_ok": true,
   "sp_record_unvalidated": true,
+  "sp_reissued_validated_in_scope": true,
   "sp_spec_ok": true,
   "sp_statistical_target_met": true,
   "sp_stopping-power_negative_control_caught": true,
-  "sp_stopping-power_passes": true
+  "sp_stopping-power_passes": true,
+  "sp_study-validated_dependencies_ok": true,
+  "sp_study_dependencies_ok": true
  },
  "scenarios": {
   "coarse-cut": [
-   "convergence gate not passed: physics.default_cut_mm fail",
-   "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
+   "convergence gate not passed: physics.default_cut_mm fail"
   ],
   "density-10": [
    "stopping-power failed: relative difference +0.09709 beyond the tolerance 0.03329 (Bethe mean rate, PDG RPP 2024, Passage of particles through ...)",
-   "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)",
    "no reference benchmark is validation evidence for this study (R5 not met)"
   ],
   "dump-reference": [
-   "material Si_study: reference inputs taken from the Geant4 material dump or of undeclared origin (reference_origin 'geant4-material-dump'; Geant4 material dump (materials.json of the nominal run)): an error in the spec would enter the reference too and cancel",
-   "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
+   "material Si_study: reference inputs taken from the Geant4 material dump or of undeclared origin (reference_origin 'geant4-material-dump'; Geant4 material dump (materials.json of the nominal run)): an error in the spec would enter the reference too and cancel"
   ]
  },
  "studies": {
@@ -57,9 +60,7 @@
     }
    },
    "convergence_gate": "pass",
-   "gaps": [
-    "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
-   ],
+   "gaps": [],
    "labels": [
     "unvalidated"
    ],
@@ -67,7 +68,8 @@
     "thin-layer-mpv"
    ],
    "spec": "ok",
-   "statistical_target": "pass"
+   "statistical_target": "pass",
+   "upgrade": "re-issued as validated-in-scope"
   },
   "sp": {
    "benchmarks": {
@@ -80,9 +82,7 @@
     }
    },
    "convergence_gate": "pass",
-   "gaps": [
-    "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
-   ],
+   "gaps": [],
    "labels": [
     "unvalidated"
    ],
@@ -90,7 +90,8 @@
     "stopping-power"
    ],
    "spec": "ok",
-   "statistical_target": "pass"
+   "statistical_target": "pass",
+   "upgrade": "re-issued as validated-in-scope"
   }
  }
 }
