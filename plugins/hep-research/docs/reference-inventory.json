@@ -1312,6 +1312,7 @@
    "lines": 148,
    "linked_from_skill_md": true,
    "cited_by": [
+    "core/status.py",
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/agile-development-guide.md"
@@ -3719,7 +3720,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "100eb1c3 2026-10-16"
+   "last_commit": "da0e37d2 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",

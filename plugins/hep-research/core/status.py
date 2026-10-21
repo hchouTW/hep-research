@@ -11,6 +11,16 @@ Two vocabularies meet in a script's output and are kept apart:
 The obligation states of the analysis check (satisfied, violated, not_applicable, unverified, unsupported) are a third
 vocabulary and are not mapped here.
 
+"refused" means a negative verdict (exit 1): the tool ran its checks and refuses the input or the result (a plan, a
+covariance, a response that fails its validation). Input a tool cannot read or use is "rejected" (exit 2). One
+documented exception keeps its own exit code: the protected-use guard (core/protected/guard.py protected_main) and the
+permit check (contracts/permit.py) refuse a run before it starts with "status": "refused" and exit 3, because the run
+does not happen (no result, nothing written; docs/protected-data-architecture.md,
+skills/hep-computing/references/engineering-playbook.md). Some older tools also print "refused" with exit 2 for some
+input they cannot use and say so in their usage text (contracts/comparison/gate.py, core/evidence/query.py,
+contracts/migrate_statistical_result.py, the partition campaign CLI, skills/hep-ml/assets/inference.py); new code uses
+"rejected" for that.
+
 Usage in a script:
     from core.status import add_status_argument, exit_code
     add_status_argument(parser)                 # --status LABEL, default unvalidated
