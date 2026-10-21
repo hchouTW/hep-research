@@ -47,7 +47,17 @@ class J14Replay(unittest.TestCase):
         self.assertEqual(files, sorted(p.relative_to(self.out) for p in self.out.rglob("*") if p.is_file()))
         for rel in files:
             with self.subTest(file=str(rel)):
-                self.assertEqual((self.out / rel).read_bytes(), (committed / rel).read_bytes())
+                new, old = (self.out / rel).read_bytes(), (committed / rel).read_bytes()
+                if rel.suffix == ".json" and new != old:
+                    # versions.plugin_release is the code identity of the checkout (contracts/identity.py): it reads
+                    # "unreleased" until a release manifest matches the tree, so it cannot be committed byte for byte
+                    a, b = json.loads(new), json.loads(old)
+                    for doc in (a, b):
+                        if isinstance(doc, dict) and isinstance(doc.get("versions"), dict):
+                            doc["versions"].pop("plugin_release", None)
+                    self.assertEqual(a, b)
+                else:
+                    self.assertEqual(new, old)
 
     def test_every_artifact_is_unvalidated_and_none_upgraded(self):
         for f in (self.out / "artifacts").rglob("*.json"):

@@ -5,7 +5,7 @@
  "hash_algorithm": "sha256",
  "path_order": "UTF-8 bytes, ascending",
  "file_count": 2264,
- "digest": "b75c6285a63825d741c26ba84d1ac51a3b97111d0baeb44e83b18e67993a7749",
+ "digest": "69d73b4aa71f9db8148123cd0789664dada472a74560d8c16d133b40e042821d",
  "files": [
   {
    "path": ".claude-plugin/plugin.json",
@@ -11973,8 +11973,8 @@
   },
   {
    "path": "tests/examples/test_geant4_thin_silicon.py",
-   "sha256": "6bf2285c6af80f98472bd4a7375c7b7d8b23fde45ea7f6de926c03b61082596c",
-   "size": 5205,
+   "sha256": "7cae73248f859bf1e44dd34af871a7e46b1d4e2d595f2022d932fed4b210f493",
+   "size": 5865,
    "mode": "100644"
   },
   {
