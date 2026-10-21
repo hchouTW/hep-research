@@ -238,6 +238,9 @@ def _replay(here: Path) -> dict:
         shutil.copyfile(f, art / "runs" / f.name)
     o = "output"
     results, crit = {"label": LABEL, "studies": {}}, {}
+    # the literature record first: the study specs name it (rule G4R-CITATION)
+    call(LIT, "import", "literature-input.json", "--project-root", ".", "--out",
+         f"{o}/artifacts/geant4.literature-record.json", "--today", CREATED, "--artifact-id", "j14-geant4-literature")
     variations = {"mpv": ["em-option0", "em-option3", "pai", "ftfp-bert-emz"], "sp": ["em-option0", "em-option3"]}
     for study in ("mpv", "sp"):
         _, spec = call(CHECK, "spec", "--spec", f"study-{study}.json")
@@ -283,6 +286,7 @@ def _replay(here: Path) -> dict:
     coarse["study_id"] = "j14-scenario-coarse-cut"
     coarse["convergence_plan"]["parameters"][0]["values"] = list(COARSE)
     coarse["physics"]["layered_sim_spec"] = os.path.relpath(here / "specs" / "mpv-mu10GeV.json", scen)
+    coarse["citations"]["literature_record"] = "../artifacts/geant4.literature-record.json"
     write(scen / "coarse-cut.study.json", coarse)
     _, cc = call(CHECK, "run", "--spec", f"{o}/scenarios/coarse-cut.study.json", "--summary",
                  "scan=recorded/summaries/mpv-cut-1.0.json", "--summary", "scan=recorded/summaries/mpv-cut-0.3.json",
@@ -308,6 +312,7 @@ def _replay(here: Path) -> dict:
     dump["materials"][0]["reference_source"] = "Geant4 material dump (materials.json of the nominal run)"
     dump["materials"][0]["reference_origin"] = "geant4-material-dump"
     dump["physics"]["layered_sim_spec"] = os.path.relpath(here / "specs" / "sp-p100MeV.json", scen)
+    dump["citations"]["literature_record"] = "../artifacts/geant4.literature-record.json"
     write(scen / "dump-reference.study.json", dump)
     _, ld = call(CHECK, "label", "--spec", f"{o}/scenarios/dump-reference.study.json", "--benchmarks",
                  f"{o}/benchmarks-sp.json", "--convergence", f"{o}/convergence-sp.json", "--variations",
@@ -337,8 +342,6 @@ def _replay(here: Path) -> dict:
     crit["response_validates_and_is_unvalidated"] = rcode == 0 and acode == 0 and "unvalidated" in json.loads(
         (art / "response.json").read_text(encoding="utf-8"))["status"]
     # literature record and report
-    call(LIT, "import", "literature-input.json", "--project-root", ".", "--out",
-         f"{o}/artifacts/geant4.literature-record.json", "--today", CREATED, "--artifact-id", "j14-geant4-literature")
     report = render_report(results)
     (out / "report.md").write_text(report, encoding="utf-8")
     ccode, cite = call(CITES, f"{o}/report.md", "--record", f"{o}/artifacts/geant4.literature-record.json",

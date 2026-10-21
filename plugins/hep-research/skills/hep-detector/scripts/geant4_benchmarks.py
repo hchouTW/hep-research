@@ -29,6 +29,10 @@ evidence; `sanity` benchmarks are plausibility checks; `interface` hands a compa
                     run as a subprocess (RPP 2024 gives no numerical accuracy for it).
   em-shower-shape   (sanity) depth of the longitudinal maximum from per-copy deposits against t_max = ln(E/E_c) + C_j
                     (config keys layer_x0 and critical_energy_MeV); not applicable when the stack does not contain t_max.
+  shower-containment (sanity) rear leakage fraction of an e+-/gamma shower against the PDG gamma-function profile
+                    (RPP 2024 Eqs. 34.34-34.36, b = 0.5 by default; config keys depth_x0, critical_energy_MeV, b):
+                    the profile is a fit to EGS4 showers (1-100 GeV), so this is never validation; a reference for
+                    leakage needs published data (published-data).
   published-data    (interface) the Geant4 mean of a named column and a published value, handed to hep-statistics.
 Verdict: |G4 - ref| / ref <= tolerance, tolerance = reference accuracy + k x SE (SE by a seeded bootstrap of the
 events), plus a stated binning term for the MPV. Detection limit: tolerance + |observed relative difference| + 2 SE
@@ -79,7 +83,7 @@ J_LANDAU = 0.200  # PDG RPP 2024 eq. 34.12
 TRUNC_98 = 0.8673  # RMS of a unit Gaussian truncated to its central 98 %
 GRADES = {"stopping-power": "reference", "range": "reference", "thin-layer-mpv": "reference",
           "thin-layer-width": "sanity", "multiple-scattering": "sanity", "em-shower-shape": "sanity",
-          "published-data": "interface"}
+          "shower-containment": "sanity", "published-data": "interface"}
 RPP = "PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)"
 HADRONIC_END = ("Inelastic", "hadElastic", "nCapture", "CoulombScat")
 
@@ -224,18 +228,24 @@ def transmitted(rows: list[dict]) -> tuple[list[dict], dict]:
                   "excluded_fraction": (len(rows) - len(kept)) / len(rows), "ended_in_hadronic_process": hadronic}
 
 
-def material(study: dict, name: str) -> dict:
+FULL_INPUTS = ("density_g_cm3", "z_over_a", "mean_excitation_eV", "sternheimer", "reference_source")
+
+
+def material(study: dict, name: str, need: tuple = FULL_INPUTS) -> dict:
+    """The study spec's reference inputs for a material; only the keys a benchmark uses are required."""
     for m in study.get("materials", []):
         if m.get("name") == name:
             if m.get("reference_origin") == "geant4-material-dump":
                 raise BenchmarkError(f"study spec material {name}: reference inputs from the Geant4 material dump are "
                                      "refused (an error in the spec would cancel)")
-            for k in ("density_g_cm3", "z_over_a", "mean_excitation_eV", "sternheimer", "reference_source"):
+            for k in need:
                 if k not in m:
-                    raise BenchmarkError(f"study spec material {name}: {k} is required for reference inputs")
-            for k in ("a", "k", "x0", "x1", "Cbar", "delta0"):
-                if k not in m["sternheimer"]:
-                    raise BenchmarkError(f"study spec material {name}: sternheimer.{k} is required")
+                    raise BenchmarkError(f"study spec material {name}: {k} is required for this benchmark's "
+                                         "reference inputs")
+            if "sternheimer" in need:
+                for k in ("a", "k", "x0", "x1", "Cbar", "delta0"):
+                    if k not in m["sternheimer"]:
+                        raise BenchmarkError(f"study spec material {name}: sternheimer.{k} is required")
             return m
     raise BenchmarkError(f"material {name} not in the study spec (reference inputs come from the spec, never the dump)")
 
@@ -303,7 +313,7 @@ def bench_range(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
             ref = math.exp(math.log(r0) + (math.log(r1) - math.log(r0)) * (math.log(e) - math.log(e0))
                            / (math.log(e1) - math.log(e0)))
             break
-    mat = material(study, b["material"])
+    mat = material(study, b["material"], ("density_g_cm3", "reference_source"))
     stopped = [r for r in rows if r.get("primary_fate") == 0 and not any(
         h in str(r.get("primary_end_process")) for h in HADRONIC_END)]
     sel = {"events": len(rows), "used": len(stopped), "excluded": len(rows) - len(stopped),
@@ -427,6 +437,71 @@ def bench_shower(b: dict, rows: list[dict], study: dict) -> dict:
                                                                  "version": "RPP 2024", "validity": "never validation"}}
 
 
+def gamma_p(a: float, x: float) -> float:
+    """Regularized lower incomplete gamma function P(a, x): series for x < a + 1, else the continued fraction."""
+    if x <= 0:
+        return 0.0
+    lg = math.lgamma(a)
+    if x < a + 1:
+        term = total = 1.0 / a
+        n = a
+        for _ in range(1000):
+            n += 1
+            term *= x / n
+            total += term
+            if abs(term) < abs(total) * 1e-15:
+                break
+        return total * math.exp(-x + a * math.log(x) - lg)
+    tiny = 1e-300
+    b_ = x + 1 - a
+    c, d = 1 / tiny, 1 / b_
+    h = d
+    for i in range(1, 1000):
+        an = -i * (i - a)
+        b_ += 2
+        d = an * d + b_
+        d = tiny if abs(d) < tiny else d
+        c = b_ + an / c
+        c = tiny if abs(c) < tiny else c
+        d = 1 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1) < 1e-15:
+            break
+    return 1 - math.exp(-x + a * math.log(x) - lg) * h
+
+
+def bench_containment(b: dict, rows: list[dict]) -> dict:
+    """Rear leakage fraction of an EM shower against the PDG gamma-function profile (sanity only)."""
+    for k in ("depth_x0", "critical_energy_MeV"):
+        if not isinstance(b.get(k), (int, float)) or b[k] <= 0:
+            raise BenchmarkError(f"shower-containment: {k} (from the study spec or PDG, never the dump) is required")
+    if "leak_rear_MeV" not in rows[0]:
+        raise BenchmarkError("shower-containment needs leak_rear_MeV (layered_sim with leakage by face)")
+    ref_block = {"source": f"longitudinal profile dE/dt = E0 b (bt)^(a-1) e^(-bt) / Gamma(a), {RPP}, Eqs. 34.34-34.36 "
+                           "(fits to EGS4 showers, carbon to uranium, 1 to 100 GeV)", "version": "RPP 2024",
+                 "validity": "sanity only: the profile is itself a fit to simulated showers and RPP states no accuracy; "
+                             "b depends on Z and energy (RPP Fig. 34.21), b = 0.5 by default"}
+    e = b["energy_MeV"]
+    if not 1000.0 <= e <= 100000.0 or b["particle"] not in ("e-", "e+", "gamma"):
+        return {"statistic": "rear leakage fraction", "verdict": "not-applicable", "reference": ref_block,
+                "reason": "the fitted profile covers e+-, gamma showers from 1 to 100 GeV only"}
+    bpar = b.get("b", 0.5)
+    tmax = math.log(e / b["critical_energy_MeV"]) + (-0.5 if b["particle"] in ("e-", "e+") else 0.5)
+    a = 1 + bpar * tmax
+    ref = 1 - gamma_p(a, bpar * b["depth_x0"])
+    vals = [r["leak_rear_MeV"] / r["primary_ekin_MeV"] for r in rows]
+    g4 = statistics.fmean(vals)
+    window = max(0.3 * min(ref, 1 - ref), 0.02)
+    return {"statistic": "rear leakage fraction (energy leaving the +x face over the primary kinetic energy)",
+            "geant4": g4, "geant4_se": statistics.stdev(vals) / math.sqrt(len(vals)), "reference_value": ref,
+            "relative_difference": (g4 - ref) / ref if ref else None, "profile": {"a": a, "b": bpar, "t_max": tmax},
+            "verdict": "plausible" if abs(g4 - ref) <= window else "implausible",
+            "plausibility_window": f"within {window:.3g} (absolute) of the profile",
+            "albedo_fraction": statistics.fmean(r["leak_front_MeV"] / r["primary_ekin_MeV"] for r in rows),
+            "reference": ref_block}
+
+
 def bench_published(b: dict, rows: list[dict]) -> dict:
     col = b.get("column")
     if not col or col not in rows[0]:
@@ -454,6 +529,8 @@ def evaluate(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
         return bench_ms(b, rows, study, cfg_dir)
     if name == "em-shower-shape":
         return bench_shower(b, rows, study)
+    if name == "shower-containment":
+        return bench_containment(b, rows)
     return bench_published(b, rows)
 
 

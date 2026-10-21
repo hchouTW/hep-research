@@ -27,26 +27,31 @@
  },
  "missing": [],
  "rule_coverage": {
-  "applicable": 2,
+  "applicable": 3,
   "applicable_ids": [
    "G4R-PRECISION-EM",
-   "G4R-BETHE-RANGE"
+   "G4R-BETHE-RANGE",
+   "G4R-CITATION"
   ],
   "fired": 0,
   "kinds_with_a_rule": [
    "activation",
+   "containment",
    "energy-deposit",
    "energy-loss",
+   "energy-resolution",
+   "leakage",
    "most-probable-value",
    "neutron-capture",
    "neutron-dose",
    "neutron-flux",
    "range",
+   "shower-shape",
    "stopping-power",
    "thin-layer-width"
   ],
   "observable_kind": "stopping-power",
-  "rules": 11
+  "rules": 13
  },
  "status": "ok",
  "status_label": "unvalidated"

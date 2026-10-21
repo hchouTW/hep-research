@@ -25,8 +25,9 @@ flag must be a boolean. With no layer flagged, every layer is used and a warning
 MDR: the rigidity where the total sigma(R)/R reaches 1 (mdr_definition); the intrinsic-only
 value 1/k is reported as mdr_intrinsic_only_gv.
 
-Validity: the Highland formula is a fit valid for 1e-3 < x/X0 < 100 of total material;
-outside that range the output carries highland_validity.inside = false and a warning.
+Validity: the Highland formula is a fit; RPP 2024 Eq. 34.16 gives no numerical accuracy (the beta dependence is poor
+for large Z and small x). The range 1e-3 < x/X0 < 100 of total material, quoted in earlier sources but not in RPP 2024,
+is kept as an operating guard: outside it the output carries highland_validity.inside = false and a warning.
 Resolution-term convention: the scattering term of sigma(R)/R uses
 0.0136 GeV * sqrt(x/X0) / (0.3 beta B L), the Highland constant without its log factor,
 so the term stays independent of rigidity. The PDG tracking section writes the same term
@@ -107,7 +108,7 @@ def highland_angle(rigidity_gv, x_over_x0, beta=1.0, charge=1):
         return 0.0
     log_argument = x_over_x0 * charge * charge / (beta * beta)
     correction = 1.0 + 0.038 * math.log(log_argument)
-    # The logarithmic correction is a fit valid for 1e-3 < x/X0 < 100 and turns
+    # The logarithmic correction is a fit (range 1e-3 < x/X0 < 100 kept as a guard; not in RPP 2024) and turns
     # negative for very thin layers; clamp at zero rather than return a negative RMS.
     correction = max(correction, 0.0)
     return (HIGHLAND_GEV / (beta * rigidity_gv)) * math.sqrt(x_over_x0) * correction

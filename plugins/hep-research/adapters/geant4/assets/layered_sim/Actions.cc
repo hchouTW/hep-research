@@ -50,6 +50,7 @@ std::vector<std::string> CsvColumns(const Spec& spec, const Detector& det) {
   if (spec.per_instance)
     for (int i = 0; i < det.NumberOfPlacements(); ++i) c.push_back("edep_copy" + std::to_string(i) + "_MeV");
   for (const char* n : {"edep_world_MeV", "leak_gamma_MeV", "leak_e_MeV", "leak_nu_MeV", "leak_other_MeV",
+                        "leak_rear_MeV", "leak_front_MeV", "leak_lateral_MeV",
                         "killed_booked_MeV", "killed_unbooked_MeV", "killed_eplus", "exit_ekin_MeV", "primary_eloss_MeV", "exit_dx",
                         "exit_dy", "exit_dz", "primary_fate", "primary_end_x_mm", "primary_end_process",
                         "n_sec_gamma", "n_sec_electron", "n_sec_positron", "n_sec_other"})
@@ -94,7 +95,8 @@ void EventAction::EndOfEventAction(const G4Event* event) {
     o << "," << Fmt(r.edep[i] / MeV) << "," << Fmt(r.chlen[i] / mm) << "," << Fmt(r.plen[i] / mm);
   for (double e : r.edepInst) o << "," << Fmt(e / MeV);
   o << "," << Fmt(r.edepWorld / MeV) << "," << Fmt(r.leakGamma / MeV) << "," << Fmt(r.leakE / MeV) << ","
-    << Fmt(r.leakNu / MeV) << "," << Fmt(r.leakOther / MeV) << "," << Fmt(r.killedBooked / MeV) << ","
+    << Fmt(r.leakNu / MeV) << "," << Fmt(r.leakOther / MeV) << "," << Fmt(r.leakRear / MeV) << ","
+    << Fmt(r.leakFront / MeV) << "," << Fmt(r.leakLateral / MeV) << "," << Fmt(r.killedBooked / MeV) << ","
     << Fmt(r.killedUnbooked / MeV) << "," << r.killedEplus << "," << Fmt(r.exitEkin / MeV) << ","
     << Fmt((p->GetKineticEnergy() - r.exitEkin) / MeV) << ","
     << Fmt(r.exitDir.x()) << "," << Fmt(r.exitDir.y()) << "," << Fmt(r.exitDir.z()) << "," << r.fate << ","
@@ -130,10 +132,17 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
   }
   if (post->GetStepStatus() == fWorldBoundary) {
     double ek = post->GetKineticEnergy() * w;
+    if (pdg == -11) ek += 2 * CLHEP::electron_mass_c2 * w;  // an escaping e+ carries its annihilation energy
     if (pdg == 22) r.leakGamma += ek;
-    else if (std::abs(pdg) == 11) r.leakE += ek + (pdg == -11 ? 2 * CLHEP::electron_mass_c2 * w : 0.);
+    else if (std::abs(pdg) == 11) r.leakE += ek;
     else if (IsNeutrino(pdg)) r.leakNu += ek;
     else r.leakOther += ek;
+    // face crossed: rear (+x end), front (-x end, albedo) or lateral (y or z faces)
+    double xEdge = 0.5 * fDet.WorldXLength() * (1 - 1e-9);
+    double x = post->GetPosition().x();
+    if (x >= xEdge) r.leakRear += ek;
+    else if (x <= -xEdge) r.leakFront += ek;
+    else r.leakLateral += ek;
     if (primary) {
       r.exitEkin = post->GetKineticEnergy();
       r.exitDir = post->GetMomentumDirection();

@@ -22,6 +22,7 @@ class G4ParticleGun;
 struct EventRecord {
   std::vector<double> edep, chlen, plen, edepInst;
   double edepWorld = 0, leakGamma = 0, leakE = 0, leakNu = 0, leakOther = 0;
+  double leakRear = 0, leakFront = 0, leakLateral = 0;  // the same leakage by the world face crossed
   double killedBooked = 0, killedUnbooked = 0;
   long killedEplus = 0;
   double exitEkin = 0;

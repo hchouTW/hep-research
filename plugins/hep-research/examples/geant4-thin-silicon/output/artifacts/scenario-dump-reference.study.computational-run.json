@@ -15,7 +15,7 @@
   "input_manifest": [
    {
     "path": "output/scenarios/dump-reference.study.json",
-    "sha256": "d4c7755531b760a0f8505ba318c9287b24aa85e1e654de208fb61f27c20860c0"
+    "sha256": "fcdf6f859089e43d119fd39033911b98aa5cbec0bf7dc313896754ac52c78a02"
    },
    {
     "path": "output/benchmarks-sp.json",
@@ -243,11 +243,11 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "0b0ca9c41ca4b85c"
+    "version": "8fe995f95702bb64"
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "e471b3d30a69c4eb"
+    "version": "3db755f3f8d11618"
    }
   ]
  },

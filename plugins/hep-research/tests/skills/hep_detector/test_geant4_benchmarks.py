@@ -6,6 +6,7 @@ the detection limit fails, deposit below loss, inelastic primaries excluded, kap
 negative-control and reference-input rules; and the output fields. Standard library only."""
 import gzip
 import json
+import math
 import random
 import subprocess
 import sys
@@ -219,6 +220,43 @@ class Shower(_Cfg):
         self.assertEqual(out["benchmarks"][0]["verdict"], "not-applicable", out)
         self.assertTrue(any("not contained" in g for g in out["gaps"]))
         self.assertTrue(any("no reference benchmark" in g for g in out["gaps"]))
+
+
+class Containment(_Cfg):
+    def rows(self, leak):
+        cols = ["event", "primary_ekin_MeV", "leak_rear_MeV", "leak_front_MeV", "leak_lateral_MeV"]
+        return "# SIMULATION\n" + ",".join(cols) + "\n" + "".join(f"{i},1000,{1000 * leak},0.6,0.1\n" for i in range(50))
+
+    def bench(self, csv, **over):
+        b = {"benchmark": "shower-containment", "csv": csv, "particle": "e-", "energy_MeV": 1000.0,
+             "depth_x0": 20 / 12.65, "critical_energy_MeV": 10.41}
+        b.update(over)
+        return b
+
+    def test_gamma_p_closed_forms(self):
+        self.assertAlmostEqual(G.gamma_p(2.0, 1.0), 1 - 2 * math.exp(-1), places=14)
+        self.assertAlmostEqual(G.gamma_p(3.0, 5.0), 1 - math.exp(-5) * (1 + 5 + 12.5), places=14)
+        self.assertAlmostEqual(G.gamma_p(0.5, 0.2), math.erf(math.sqrt(0.2)), places=13)
+
+    def test_plausible_implausible_and_outside_the_fit_range(self):
+        (self.d / "near.csv").write_text(self.rows(0.95))
+        (self.d / "far.csv").write_text(self.rows(0.5))
+        out = run("run", "--config", self.config([self.bench("near.csv"), self.bench("far.csv"),
+                                                  self.bench("near.csv", energy_MeV=500.0)]))[1]
+        v = [b["verdict"] for b in out["benchmarks"]]
+        self.assertEqual(v, ["plausible", "implausible", "not-applicable"], out)
+        self.assertEqual({b["grade"] for b in out["benchmarks"]}, {"sanity"})
+        self.assertIn("EGS4", out["benchmarks"][0]["reference"]["source"])
+
+    def test_sternheimer_is_required_only_where_used(self):
+        (self.d / "study.json").write_text(json.dumps({"materials": [{"name": "Si_study", "density_g_cm3": 2.329,
+                                                                      "reference_origin": "independent",
+                                                                      "reference_source": "PDG"}]}))
+        (self.d / "near.csv").write_text(self.rows(0.95))
+        self.assertEqual(run("run", "--config", self.config([self.bench("near.csv")]))[0], 0)
+        code, out = run("run", "--config", self.config([self.sp(self.csv("good", self.protons()))]))
+        self.assertEqual(code, 2, out)
+        self.assertIn("z_over_a", out["error"])
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 490155,
+   "bytes": 492866,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1035,7 +1035,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "3f4f9985 2026-10-21"
   },
   {
    "path": "skills/hep-citations/references/reading-papers.md",
@@ -1743,7 +1743,7 @@
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
    "owner": "hep-detector",
-   "bytes": 7816,
+   "bytes": 8181,
    "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1941,7 +1941,7 @@
     "hep-ml",
     "hep-theory"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "3f4f9985 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/detector-systems-overview.md",
@@ -2058,8 +2058,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 16510,
-   "lines": 206,
+   "bytes": 18856,
+   "lines": 225,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2075,7 +2075,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "untracked"
+   "last_commit": "3f4f9985 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",

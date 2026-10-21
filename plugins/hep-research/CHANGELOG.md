@@ -37,6 +37,19 @@ entry reference changed.
   `HEP_GEANT4_LIVE_TEST=1`; 11 routing cases (`g4-*`, `j14`), capability `full-detector-simulation`, the Geant4 row of
   the hep-citations version checks extended. Not run: live routing of the new cases (needs approval and budget).
 
+- **Geant4 follow-ups (independent check and maintainer decisions, 2026-10-21).** `layered_sim` splits leakage by
+  the world face crossed (`leak_rear_MeV`, `leak_front_MeV` for the albedo, `leak_lateral_MeV`);
+  `check_geant4_study.py summarize --observables` adds leakage fractions and `--slab all`; new sanity benchmark
+  `shower-containment` (PDG gamma-function profile, a fit to EGS4 showers, never validation); rules `G4R-SHOWER` and
+  `G4R-CITATION` (13 rules); Sternheimer inputs required only by the benchmarks that use them; `label` lists a written
+  result without a literature record as a gap. Maintainer decisions: gate G5 licence boundary approved for distribution;
+  phase 2 (`validated-in-scope` for Geant4-derived artifacts) deferred, its requirements recorded in the study protocol.
+- **Highland accuracy statement (E4).** `core-detector-equations.md` and `multiple_scattering.py` no longer state
+  "about 11% for 1e-3 < x/X0 < 100" as current: RPP 2024 Eq. (34.16) gives no numerical accuracy; the range stays
+  only as an operating guard (its source edition unverified).
+- **`check_citations.py`: DOIs with parentheses.** A bare DOI such as 10.1016/S0168-9002(03)01368-8 was cut at the
+  first parenthesis and reported not-verified; balanced parentheses are now part of the DOI.
+
 ## 0.18.1 (2026-10-21)
 
 Patch release: the sci-fix ledger review and a corrected citation. Contracts unchanged (3.0.1).

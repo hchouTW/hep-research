@@ -105,6 +105,21 @@
    "description": "every other particle leaving the world"
   },
   {
+   "name": "leak_rear_MeV",
+   "unit": "MeV",
+   "description": "all leakage (as the four category columns) through the +x end face of the world"
+  },
+  {
+   "name": "leak_front_MeV",
+   "unit": "MeV",
+   "description": "all leakage through the -x end face (albedo, backscatter)"
+  },
+  {
+   "name": "leak_lateral_MeV",
+   "unit": "MeV",
+   "description": "all leakage through the y and z faces"
+  },
+  {
    "name": "killed_booked_MeV",
    "unit": "MeV",
    "description": "kinetic energy at the start of the step in which G4UserSpecialCuts killed a track (already in the deposits; an upper bound when that step had continuous loss)"

@@ -163,5 +163,8 @@
     "change": "reference list FTFP_BERT_EMZ (same EM option 4 and Urban: expected to be excluded)"
    }
   ]
+ },
+ "citations": {
+  "literature_record": "output/artifacts/geant4.literature-record.json"
  }
 }

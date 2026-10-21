@@ -1,0 +1,554 @@
+{
+ "meta": {
+  "run_id": "geant4-cases-r1",
+  "date": "2026-10-21",
+  "cli": "claude",
+  "cli_version": "2.1.305",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "b1048f66b98521c7938b4d26066ae76c4e2961e6",
+  "plugin_dirty": true,
+  "cases_file_sha256": "6b78a8700dbb9bc7d4844756f192f8ffcea729fa683a7352460269faaa42dcf6",
+  "selected": 11,
+  "completed": 11,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 3.0,
+  "reused_cases": 0,
+  "spent_usd": 0.8774,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 11,
+   "strict_pass": 10,
+   "lenient_pass": 10
+  },
+  "by_lang": {
+   "en": {
+    "cases": 6,
+    "strict_pass": 6,
+    "lenient_pass": 6
+   },
+   "zh-Hant": {
+    "cases": 5,
+    "strict_pass": 4,
+    "lenient_pass": 4
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "journey": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "neighboring": {
+    "cases": 6,
+    "strict_pass": 6,
+    "lenient_pass": 6
+   },
+   "underspecified": {
+    "cases": 2,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 11,
+    "strict_pass": 10,
+    "lenient_pass": 10
+   }
+  },
+  "by_expected_primary": {
+   "ask": {
+    "cases": 2,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "hep-computing": {
+    "cases": 4,
+    "strict_pass": 4,
+    "lenient_pass": 4
+   },
+   "hep-detector": {
+    "cases": 3,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   },
+   "hep-statistics": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "by_set": {
+   "GEANT4": {
+    "cases": 11,
+    "strict_pass": 10,
+    "lenient_pass": 10
+   }
+  },
+  "outcomes": {
+   "pass": 10,
+   "skill-instead-of-question": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.8774,
+   "per_case": 0.0798,
+   "per_turn": 0.0162
+  }
+ },
+ "cases": [
+  {
+   "id": "g4-build-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.073731,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-build-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.077197,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-crash-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.081574,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-crash-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.090224,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-nuisance-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.061055,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-nuisance-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.101355,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-study-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.115469,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-study-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.124227,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-underspec-1",
+   "lang": "en",
+   "kind": "underspecified",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "ask",
+   "turns": [
+    {
+     "expected": "ask",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": true,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.03803,
+   "n_turns": 2,
+   "loading_violation": false
+  },
+  {
+   "id": "g4-underspec-2",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "ask",
+   "turns": [
+    {
+     "expected": "ask",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "skill-instead-of-question",
+     "strict": false,
+     "lenient": false,
+     "heuristic": true,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "skill-instead-of-question",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053542,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "j14",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": "GEANT4",
+   "expected_primary": "hep-detector",
+   "turns": [
+    {
+     "expected": "hep-detector",
+     "first_skill": "hep-detector",
+     "skills": [
+      "hep-detector"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.305",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.060982,
+   "n_turns": 4,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/geant4-cases-r1/raw/, not committed)"
+}

@@ -136,3 +136,14 @@ class CheckCitations(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DoiWithParentheses(unittest.TestCase):
+    """A bare DOI may hold balanced parentheses (Elsevier's 10.1016/S0168-9002(03)01368-8 was cut at '(03')."""
+
+    def test_balanced_parentheses_are_kept_and_an_enclosing_one_is_not(self):
+        found = lambda text: [m.group(1) for m in cc.DOI_TEXT_RE.finditer(text)]  # noqa: E731
+        self.assertEqual(found("Geant4 doi:10.1016/S0168-9002(03)01368-8."),
+                         ["10.1016/S0168-9002(03)01368-8."])
+        self.assertEqual(found("(doi:10.1109/TNS.2006.869826)"), ["10.1109/TNS.2006.869826"])
+        self.assertEqual(found("https://doi.org/10.1016/j.nima.2016.06.125, and"), ["10.1016/j.nima.2016.06.125"])
