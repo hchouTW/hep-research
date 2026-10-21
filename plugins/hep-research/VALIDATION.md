@@ -1996,6 +1996,161 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## ANISO-WEIGHTED-COV (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv: NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0; CI lock venv: NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0)
+
+Sci-fix S1, fix `3c10ac23`, parent `32450b32`. `skills/hep-measurement/scripts/anisotropy.py harmonic` with
+`--exposure-map` took the null covariance of the weighted harmonic components `(a, b)` as `(2/N_eff) I`. A non-uniform
+exposure makes their variances unequal and correlated: for `1 + 0.9 cos alpha`, `N Var(a) = (4/e^2)(1/sqrt(1-e^2) - 1)
+= 6.39` and `N Var(b) = 2.79` against 4.59 for both from `N_eff`. The Rayleigh probability overstated the significance
+of a dipole along the less exposed axis and the Neyman upper limit was too tight.
+
+The fix (maintainer's design): `harmonic_covariance(edges, rel, n)` computes V from the binned map (closed-form
+integrals per bin; exactly `(2/n) I` for a uniform map; a map with an empty bin is rejected); `first_harmonic` reports
+`covariance_ab`, `chi2_ab` and `rayleigh_probability = exp(-chi^2 / 2)`, `sigma_per_component = sqrt(trace V / 2)`,
+`n_effective` informational; `amplitude_upper_limit` keeps the Rice construction bit for bit when V is isotropic
+(relative tolerance 1e-12) and otherwise uses `AnisotropicNull`: `P(r <= x | s, phi, V)` as a closed-form radial
+integral (exponential and erf terms) and a periodic trapezoid in the polar angle (64 to 8192 points, set by the axis
+ratio and s / sigma; a second-order Gaussian above 40 sigma), s excluded only if excluded at every phase of a 72-point
+grid aligned with V's eigen-axes (19 distinct phases by the symmetries of the Gaussian), the expected limit at the
+null median for V. Reference `cosmic-ray-measurements.md` (Harmonic analysis, script bullet) updated; the slow
+coverage test joins the `slow-evidence` job (`--require numpy,scipy,sympy --no-skips`).
+
+Evidence module `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py`, tolerances fixed before the
+first run and stated in its docstring (binning bound 2.1e-5 for 3600 bins, so 1e-4 relative; dblquad at 1e-10 and the
+exponentially convergent trapezoid, so 1e-8 for the CDF; the phase grid 2e-3; Monte Carlo 4 SE for variances, CL minus
+3 binomial SE for coverage; fixed seeds). Oracles never import the module to compute an expected value.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_covariance_matches_the_sympy_delta_method` | symbolic (SymPy delta method, third-party) | fail (AttributeError): module 'anisotropy' has no attribute 'harmonic_covariance' | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_toy_skies_have_the_reported_covariance` | invariant (Monte Carlo, 2000 toy skies) | fail (AttributeError): module 'anisotropy' has no attribute 'harmonic_covariance' | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_uniform_map_reproduces_the_unweighted_outputs_bit_for_bit` | invariant (bit for bit) | fail (KeyError): 'covariance_ab' | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_a_map_with_an_empty_bin_is_rejected` | behavioral | fail (AttributeError): module 'anisotropy' has no attribute 'harmonic_covariance' | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_rayleigh_probability_matches_scipy_chi2` | independent implementation (scipy mahalanobis, chi2.sf; V from SymPy) | fail (assertion): CLI p 1.74e-06 against scipy 7.47e-05 | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_negative_control_pre_fix_n_eff_fails_the_oracle` | negative control (emulated exp(-N_eff r^2 / 4)) | fail (assertion): the CLI value equals the pre-fix emulation (log ratio 1.8e-15) | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_limit_meets_the_neyman_condition_by_scipy` | independent implementation (scipy dblquad over the 72-phase grid, minimize_scalar, brentq) | fail (assertion): max scipy CDF at the CLI limit 0.0885, not 0.05 | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_negative_control_pre_fix_rice_limit_fails_the_neyman_condition` | negative control (emulated Rice limit with 2/N_eff, scipy ncx2) | fail (assertion): CLI limit 0.10012 is the pre-fix limit, not above 1.01 x 0.10012 | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_cdf_matches_scipy` | independent implementation (scipy multivariate_normal + dblquad; ncx2) | fail (AttributeError): module 'anisotropy' has no attribute 'AnisotropicNull' | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_limit_takes_the_largest_cdf_over_the_phase_grid` | independent implementation (scipy dblquad over the 72-phase grid, CL 0.3 and 0.2) | fail (AttributeError): module 'anisotropy' has no attribute 'AnisotropicNull' | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_acceptance_region_covers_at_four_phases` | invariant (coverage, 1500 Gaussian toys per phase) + negative control | fail (AttributeError): module 'anisotropy' has no attribute 'AnisotropicNull' | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_upper_limit_covers_with_a_modulated_exposure` | invariant (coverage, 400 event-level toys per phase; slow tier) | fail (AttributeError): module 'anisotropy' has no attribute 'harmonic_covariance' | pass | no (HEP_SLOW_TESTS=1) | E2v, CIlock |
+
+- Parent record: an adapted parent tree (`git archive 32450b32`) to which only the new test module was added; the
+  code under test is the parent's, unchanged. 12 of 12 tests fail on the parent: 4 by assertion on the released CLI
+  numbers (`test_rayleigh_probability_matches_scipy_chi2`, `test_limit_meets_the_neyman_condition_by_scipy` and the
+  two negative controls, whose module check fails because the CLI still reports the pre-fix value), 8 because the
+  function, class or output key they test is new in the fix. `tests/skills/hep_measurement/test_anisotropy.py`: 12
+  tests pass on both (not discriminating).
+- Mutants (D3), each run against the fast evidence tests on the fix with one change: M01 revert to the parent script
+  (11 tests fail), M02 `cos^2 * rho` for `cos^2 / rho` (4), M03 covariance off-diagonal dropped (3), M04 covariance
+  replaced by its isotropic mean, the N_eff idea (6), M05 chi^2 without the covariance term (1), M06 `exp(-chi^2 / 4)`
+  (1), M07 radial integral without the erf term (5), M08 phase grid reduced to the major axis (1), M09 to the minor axis
+  (4), M10 phase not rotated into the eigenframe (1), M11 CLI keeps the Rice limit with N_eff (2), M12 null median at
+  the 45 % point (1), M13 every covariance treated as isotropic (5), M14 trapezoid with 4 points (3), M15 phase step
+  45 deg (1), M16 uniform-map shortcut removed (1): 16 of 16 killed. M08 survived a first version of the module (at
+  CL >= 1/2 the deciding phase was always the major axis); `test_limit_takes_the_largest_cdf_over_the_phase_grid`
+  (CL 0.3 and 0.2) was added to kill it, with its tolerance set before its first run.
+- Numbers (fix, E2v): SymPy `N V` for the axis at 30 deg `[[5.48961, 1.56109], [1.56109, 3.68702]]`, the 3600-bin map
+  within 1.6e-6 relative. Significance case (20000 events, amplitude 0.06 along the exposure axis): scipy
+  `p = 7.4718e-05` (chi^2 19.004), CLI 7.4717e-05, pre-fix 1.74e-06. Neyman limit at CL 0.95: 0.10540 (pre-fix
+  0.10012, where the scipy CDF along the exposure axis is 0.0885); scipy maximum over the grid at the new limit
+  0.05000007. Fast coverage (CL 0.95, floor 0.9331, 1500 toys, s = 5 sigma): 0.9493, 0.9793, 0.9947, 0.9760 at
+  30, 75, 120, 165 deg; pre-fix emulation 0.9160 at 30 deg. Slow coverage (CL 0.95, floor 0.9173, 400 event-level
+  toys, n = 2000, s = 0.15, 24-bin map, phases 0, 45, 90, 135 deg): passes.
+- Unchanged outputs: the parent and fix CLIs give identical numbers (every key of the parent output, compared exactly)
+  without a map, with a uniform 24-bin map, and with event times (solar, sidereal, anti-sidereal; exit 1 kept), on
+  five input sets; the fix only adds `covariance_ab` and `covariance_source`.
+- Runtime (fix, E2v): a CLI run with 20000 events and a 3600-bin map takes 0.13-0.17 s; `amplitude_upper_limit` with
+  an anisotropic V takes 0.01-0.37 s over axis ratios 2.3 to 22 and r_obs up to 100 sigma.
+- Gates: `tools/run_required_backends.py --require numpy,scipy,sympy --no-skips` with `HEP_SLOW_TESTS=1` on the new
+  module and `test_anisotropy.py` in the CI lock venv: 24 run, 0 failures, 0 skips. `tools/run_all_checks.py --no-cli
+  --jobs 6` (E2v): unittest 4522 run, 0 failures, 0 errors, 130 skipped; profile suites, static checks and the
+  AMS-optional check pass.
+- Known limitations: the covariance is leading order in 1/N and only as good as the exposure model; the grid of 72
+  phases is the documented construction (a continuous maximum may exceed it by up to 2e-3 in the CDF); above
+  40 sigma the CDF is a second-order Gaussian (up to 6e-4 from the trapezoid at 40 sigma). Pre-existing, not changed:
+  `--cl` below 1/2 is rejected with a TypeError message because the expected limit is empty (also on the parent).
+
+## REVIEW-CODE-WARN (2026-10-22; branch `fix/review-code-warnings` from `32450b32`)
+
+Three code-and-guidance gaps that REVIEW-REFS found but did not fix ("Found, not fixed here"). Severity S3 (warnings
+and guidance only); ledger `documentation_fixes` REVIEW-CODE-WARN-TAIL, -MANIFEST, -NEGW. No computed number, verdict,
+exit code or policy name changes; the only output change is added warning text (and a new `warnings` key in the
+`train_bdt.py` stdout result and in the `inference.py --external-scores` refusal).
+
+- **`tail_extrapolation.py`, one-model envelope** (commit `2b221f92`). With exactly one model passing validation the
+  envelope is `low = high` (and `gaussian_sigma = 0` under a prescription) by construction; a warning now names the
+  model and says this is not a measured model uncertainty and the model uncertainty was not assessed.
+  `inference-recipes.md` step 3, which said the tool gives no warning, updated.
+- **`assets/inference.py --external-scores`, scored ids missing from the split manifest** (commit `cdb31f9e`). Still
+  not refused (real data or other samples are legitimately outside the manifest). The warning (formerly "their
+  train/test role is unknown") now says N scored events are not in the split manifest, so the check cannot exclude
+  that the model was trained on them, and that the manifest is incomplete if they are simulated events from the
+  training sample; the refusal for scored training ids carries it too. `leakage_check` docstring, module docstring
+  and `multivariate-analysis-bdt-nn.md` ("Scores from another tool") updated.
+- **Negative weights, `drop`** (commit `33bd6464`). Maintainer decision 2026-10-22: `ml-analysis-weights.md` option 4
+  overstated. Dropping from training only makes the classifier learn the positive-weight density instead of the
+  signed one, option 3's kind of distortion (|w| learns positive plus negative); acceptable only with the effect
+  shown against option 1 or 2; never for evaluation (biases yields, efficiencies, working points).
+  `multivariate-analysis-bdt-nn.md` matches. `train_bdt.py` warns under `drop` and `abs-train-signed-eval` when
+  negative weights are present (it already evaluated with signed weights; `train_ok` and the evaluation block
+  checked). A stale comment in `test_training_pipeline.py` (train_classifier.py's removed `dropped` option) updated.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_statistics/test_tail_extrapolation.py::Basics::test_one_usable_model_warns_that_the_envelope_has_zero_width` | behavioral (C1), negative control: two passing models, no warning | fail (3 subtests: no warning) | pass | no (NumPy, SciPy) | E2, CI venv |
+| `tests/skills/hep_ml/test_train_bdt_extensions.py::ExternalScores::test_scored_ids_outside_the_manifest_are_reported_not_refused` | behavioral (C1), negative control: all ids in the manifest, no warning | fail (old warning text) | pass | no (NumPy only) | E2, CI venv |
+| `tests/skills/hep_ml/test_train_bdt.py::Contract::test_negative_weight_warning_names_the_distorted_density` | behavioral (C1) | error (3 subtests: no `negative_weight_warning`) | pass | no (no backend needed) | E2, CI venv |
+| `tests/skills/hep_ml/test_train_bdt.py::XgboostBackend::test_drop_and_abs_warn_that_the_training_density_is_distorted` | behavioral (C1), negative control: no negative weights, no warning | error (4 subtests: no `warnings` key) | pass | yes in E2 and in CI (no xgboost); ran in the CI venv | CI venv |
+| `tests/skills/hep_ml/test_train_bdt.py::SklearnBackend::test_drop_and_abs_warn_that_the_training_density_is_distorted` | as above | error (4 subtests) | pass | yes in E2 and in CI (no scikit-learn); ran in the CI venv | CI venv |
+
+Parent records: the `32450b32` tree (`git archive`) with the three fix-commit test files copied in, nothing else
+changed. No required CI gate installs xgboost or scikit-learn (`bdt` extra; not in `requirements-ci.lock`,
+`tools/run_required_backends.py` or an `optional-python` matrix entry), so the two backend tests are unverified in CI;
+the backend-free Contract test covers the warning text there.
+
+Environment: macOS 26.5 arm64. E2 `~/.venvs/hep-research-e2`: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, no xgboost or
+scikit-learn. CI venv `~/.venvs/hep-research-ci`: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, xgboost 3.4.1,
+scikit-learn 1.9.1.
+
+| Check | Result |
+|---|---|
+| `tools/reference_inventory.py --check` | pass (218 references) |
+| touched modules (tail_extrapolation, train_bdt, train_bdt_extensions, write_ml_artifact) | E2: 56 run, OK, 25 skipped; CI venv: 56 run, OK, 1 skipped |
+| `run_all_checks.py --no-cli --jobs 6`, E2, at `33bd6464` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4515 tests in 383 modules, 4384 pass, 0 failures, 131 skipped; profile tests all pass |
+
+## REVIEW-REFS (2026-10-22; branch `fix/reference-review-issues` from main `c4f7954b`)
+
+Five 0.21.0 references were the documents of the independent-review evaluation (a matched self-check against the
+8-slot review of PR #194, outside the repository). A blind Opus adjudicator per document judged every finding of both
+arms; 45 distinct issues had at least one finding judged correct or partly correct (2 substantive, the rest minor or
+trivial). Each was rechecked against its source before the edit, and for a partly correct finding only the upheld
+part was changed. Severity S3 (guidance), ledger `documentation_fixes` REVIEW-REFS. Sources were opened on 2026-10-22.
+
+| Reference | Issues | Main changes | Sources (locators) |
+|---|---|---|---|
+| hep-measurement `cosmic-ray-measurements.md` | 7 | the `2/N` variance and `sqrt(pi/N)` bias of the first harmonic hold for uniform exposure; with weights `N_eff` is an approximation (substantive); upper-limit trigger fixed before unblinding; the script computes the Neyman limit, hep-statistics owns the choice; coverage test scope (one slow test, uniform exposure); stale "analysis guide" link labels; X_max width measures the lnA variance only after the shower-fluctuation term | numerical integration and toys (N Var(a) = 6.39 against 4.59 with `N_eff`, e = 0.9; marked Inferred); `scripts/anisotropy.py` `first_harmonic`, `_neyman`; `tests/skills/hep_measurement/test_anisotropy.py::test_upper_limit_covers`; Kampert and Unger, arXiv:1201.0018 Sec. 2.1, Eqs. 13-14 |
+| hep-theory `cosmic-ray-propagation.md` | 6 | cross sections carried as a normalization nuisance or as model alternatives with an envelope; DRAGON2 agreement marked post-hoc (C2 still fails); the first 32-34% B/C excess was mostly the helium target (1.143) and the unit (about 1.19); intro points to the optional DRAGON2 adapter; Moderski write gamma^2, the page and script use the exact gamma^2 - 1; antiproton source term also checked against a published table | `docs/capability-matrix.md` (tabulated-grid, adapter and pp rows); VALIDATION CR-PROPAGATION-DRAGON2 and -UNITS rows; `tests/adapters/test_cr_propagation.py` Diagnostics; Moderski et al., arXiv:astro-ph/0504388v1 Eqs. 1 and 7; `scripts/lepton_energy_losses.py` |
+| hep-statistics `inference-recipes.md` | 12 | Baker-Cousins gives the ML estimates (not "unbiased"); Gross-Vitells bound holds at every `c`; Cowan et al. eq. 98 (not 97) for `s/sqrt(b)`; Z_Bi over-covers at very low counts; reference and Jeffreys priors are reparametrization-invariant (not dependent); `cls-limit --sigma-b` (hybrid) and `profile-cls` are not interchangeable; a one-model envelope has zero spread by construction; demo-sampler MCSE 0.059 (rerun, seed 11); `counting_reference.py` path; pyhf pointer; the coverage example is labelled as an outside study; "below" to "above" | Baker and Cousins, NIM 221 (1984) 437, abstract; Gross and Vitells, arXiv:1005.1891 p. 1, Eqs. 1 and 3; Cowan et al., arXiv:1007.1727 Eqs. 97-98 (and a numerical check of the `sigma_b` limit); Cousins, Linnemann and Tucker, physics/0702156 abstract and Sec. 6; Demortier, Jain and Prosper, arXiv:1002.1111 Sec. II p. 6; `core/stats/poisson_diagnostics.py`, `core/stats/likelihood_limits.py`, `scripts/tail_extrapolation.py`, `scripts/bayes_diagnostics.py demo-sampler` output |
+| hep-ml `multivariate-analysis-bdt-nn.md` | 11 | flattening or oversampling inside a class is a documented training-only choice, as the weights reference allows (substantive); hyperparameter selection averages the validation objective over all folds, so test-fold events inform it; the analysis metric (Asimov) before AUC; `drop` biases training; the `inference.py` leakage check only refuses training-part scores; Huber lies between mean and median; Cheong et al. cited by section, the mean-and-variance head marked unverified; regression closure on a different truth spectrum; cap changes within-class weights; leakage symptoms; statistics link to `ml-assisted-inference.md` | `ml-analysis-weights.md` ("Class balancing and the prior", "Negative weights"); `scripts/train_bdt.py` selection code; `assets/inference.py` `leakage_check`; Cheong et al., arXiv:1910.03773v3 Secs. 3, 3.1, 3.2, 3.5 |
+| hep-detector `signal-formation-and-readout.md` | 9 | the shell term scales as `z^2` (Barkas `z^3`, Bloch `z^4`); Bethe limits: `beta gamma ~ 0.1` uncorrected, `beta ~ 0.05` corrected, muons radiative above `beta gamma ~ 1000` (about 100 GeV/c); fluctuation regimes by Vavilov `kappa`, very thick absorbers never Gaussian; Highland accuracy as PDG states it (no 11%); Pólya 0.31 ± 0.02 located; calibration pointers; "most equations" state their validity | PDG RPP 2025 Sec. 34 (Eqs. 34.5, 34.8, 34.16; Sec. 34.2.9 pp. 11-14); Zerguerras et al., arXiv:0901.2882 abstract and Eq. 2; NEWS-G arXiv:1902.08960 Eq. 1; `core-detector-equations.md` E4 |
+
+Two docstrings with the same claims were corrected (no behavior change): `train_bdt.py` (hyperparameter selection
+across folds) and `lepton_energy_losses.py` (Moderski's gamma^2). `tools/reference_inventory.py` regenerated.
+
+Found here and fixed in the same branch (ANISO-WEIGHTED-COV and REVIEW-CODE-WARN above):
+
+- `anisotropy.py` uses the Rayleigh probability and Rice width with `2/N_eff`; for a strongly modulated exposure this
+  understates the variance of a, so the significance is overstated and the Neyman limit too tight.
+- `tail_extrapolation.py` reports a one-model envelope (`low = high`, `gaussian_sigma = 0`) without a warning.
+- `train_bdt.py --negative-weights drop` is offered while `ml-analysis-weights.md` says not to drop.
+- `assets/inference.py` lets scored events that are missing from the split manifest through (counted only).
+
+| Check | Result |
+|---|---|
+| `tools/reference_inventory.py --check` | pass (218 references) |
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4510 tests in 383 modules, 4381 pass, 0 failures, 129 skipped; profile tests all pass |
+
 ## GEANT4-FOCAL (2026-10-21, E2: macOS 26.5 arm64, Geant4 11.4.3 build A; branch `feat/geant4-focal-benchmark` from main)
 
 Longitudinal-profile reference benchmark against ALICE FoCal-E test-beam data (M. Aehle et al., JINST 19 (2024)

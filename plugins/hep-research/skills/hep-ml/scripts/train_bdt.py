@@ -3,8 +3,8 @@
 a classifier or a regression.
 
 Purpose: the executable path for a boosted-decision-tree classifier in a physics analysis, with the choices that bias
-results made explicit: every event is scored only by a model that never saw it, hyperparameters are chosen on
-validation events inside the training folds and reported on the test folds, negative event weights are handled by a
+results made explicit: every event is scored only by a model whose fit never used it, hyperparameters are chosen on
+validation events of the training folds and reported on the test folds, negative event weights are handled by a
 declared policy, and the run summary is the input of write_ml_artifact.py. See
 <plugin root>/skills/hep-ml/references/multivariate-analysis-bdt-nn.md, "XGBoost in an analysis".
 
@@ -13,16 +13,20 @@ Method:
            sha256(key) mod K for a composite key such as (run, event); rows that share a key share a fold. The fold
            manifest (fold0..foldK-1, groups) is checked with check_split_integrity.py before training.
   training for test fold k the model trains on the other folds; a validation part of those folds (sha256 of the key,
-           fraction validation_fraction) drives early stopping and the hyperparameter choice, never the test fold.
+           fraction validation_fraction) drives early stopping, never the test fold.
            With no fold's validation part holding both classes the run is refused before training (exit 2).
   selection every grid point of "hyperparameters" is trained for every fold; the point with the best mean objective
-           on the validation parts is kept: weighted AUC ("auc") or the Asimov significance
-           Z_A = sqrt(2((s+b) ln(1+s/b) - s)) maximized over the score cut ("asimov", s and b = physical-weight sums
-           above the cut times asimov_scale). Test-fold metrics are reported once, for that point.
+           on the validation parts of all folds is kept (so the other folds' validation parts, which include test-fold
+           k's events, inform the choice for fold k; not nested cross-validation): weighted AUC ("auc") or the Asimov
+           significance Z_A = sqrt(2((s+b) ln(1+s/b) - s)) maximized over the score cut ("asimov", s and b =
+           physical-weight sums above the cut times asimov_scale). Test-fold metrics are reported once, for that point.
   weights  --negative-weights has no default: reject (exit 3 when a negative weight is present; XGBoost refuses
            negative weights since 1.3.0), abs-train-signed-eval (train on |w|, evaluate with signed w) or drop (drop
            negative-weight events from training; evaluation keeps every event with its signed weight). Training and
-           physical weights are recorded separately, with the fraction and sum of negative weights.
+           physical weights are recorded separately, with the fraction and sum of negative weights. Both non-reject
+           policies distort the training density (|w|, or the positive-weight events only, instead of the signed
+           weights): with negative weights present the output warns, and the effect must be shown against a
+           signed-weight or resampled training (references/ml-analysis-weights.md, "Negative weights", options 3-4).
   checks   overtraining: the weighted Kolmogorov distance between the training and test score distributions per
            class and the effective entries n_eff = (sum w)^2 / sum w^2; a distance, never a p-value. Importance
            (xgboost): gain, cover and TreeSHAP (mean |pred_contribs| on the test folds). Working points: score cuts
@@ -51,7 +55,8 @@ Input:
                   "model_format" ("json"|"ubj"), "asimov_scale" (1.0), "units" ({feature: unit}), "tree" (ROOT)}
 Output (--out-dir): fold_manifest.json, split_report.json, scores.csv (id, fold, label, weight, score), the models,
 run_summary.json (accepted by write_ml_artifact.py); JSON on stdout with "status", "status_label", "inputs",
-"defaults_used", metrics, working points, overtraining, importance and weights.
+"defaults_used", metrics, working points, overtraining, importance, weights and "warnings" (the negative-weight
+policy's training density, when negative weights are present).
 Validity: binary classification; deterministic for a fixed seed and thread count on one machine and library version.
 Exit codes: 0 ok; 2 bad input (missing column, bad config, missing --negative-weights, a fold or all validation
 parts too small); 3 incomplete or a missing dependency (numpy, xgboost or scikit-learn, pyarrow, uproot: the output
@@ -77,6 +82,8 @@ sys.path.insert(0, str(HERE.parents[2]))  # the plugin root
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 POLICIES = ("reject", "abs-train-signed-eval", "drop")
+TRAINING_DENSITY = {"drop": "the positive-weight density (negative-weight events left out of training)",
+                    "abs-train-signed-eval": "the |w| density (positive plus negative weights)"}
 BACKENDS = ("xgboost", "sklearn")
 INSTALL = {"numpy": "pip install 'numpy>=2.4,<3'",
            "xgboost": "pip install 'xgboost>=3.4,<4'  (optional extra `bdt`: pip install '.[bdt]')",
@@ -474,6 +481,17 @@ class Skl:
 
 # ---------------------------------------------------------------- run
 
+def negative_weight_warning(policy: str, n_negative: int) -> str | None:
+    """The run-output warning for a policy that trains on another density than the signed one, or None."""
+    if policy not in TRAINING_DENSITY or not n_negative:
+        return None
+    return (f"{n_negative} negative-weight event(s) under --negative-weights {policy}: the training density is "
+            f"distorted, the classifier learns {TRAINING_DENSITY[policy]}, not the signed (positive minus negative) "
+            "one; show the effect against a signed-weight or resampled training (compare weighted output "
+            "distributions or the downstream sensitivity) before using the result (references/ml-analysis-weights.md, "
+            '"Negative weights", options 3 and 4); evaluation uses the signed weights')
+
+
 def run(args) -> tuple[str, dict]:
     cfg, defaults_used = load_config(args.config)
     np = need("numpy")
@@ -723,6 +741,7 @@ def run(args) -> tuple[str, dict]:
               "rounds_per_fold": [m["rounds"] for m in models],
               "metrics": {"test": test_metrics}, "working_points": wps, "overtraining": overtraining,
               "importance": importance, "weights": weights_out, "model_hash": model_hash,
+              "warnings": [t for t in (negative_weight_warning(args.negative_weights, int(neg.sum())),) if t],
               **({"mass_sculpting": sculpting} if sculpting else {}),
               "run_summary": str((out_dir / "run_summary.json").resolve()), "defaults_used_config": defaults_used}
     return "ok", result

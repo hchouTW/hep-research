@@ -59,7 +59,10 @@ The options, in rough order of preference:
 3. **Train with |w|.** This is simple and stable, but it learns the wrong density ratio wherever negative weights
    cluster (often exactly in the hard-radiation tails). It is acceptable only when you show the effect: compare
    weighted output distributions or the downstream sensitivity against option 1 or 2. Never use |w| for evaluation.
-4. **Dropping negative-weight events** biases both training and evaluation; do not.
+4. **Drop negative-weight events from training only.** The classifier then learns the positive-weight density
+   instead of the signed (positive minus negative) one, the same kind of distortion as option 3, which learns positive
+   plus negative. It is acceptable only under option 3's condition: show the effect against option 1 or 2. Never drop
+   them from evaluation: that biases every yield, efficiency and working point.
 
 For likelihood-ratio estimation with signed weights, see Drnevich, Jiggins, Katzy, Cranmer, arXiv:2410.10216 (the
 arXiv page, read 2026-10-14, gives no journal reference; the Mach. Learn. Sci. Tech. 6 (2025) 045023 details are

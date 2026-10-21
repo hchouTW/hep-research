@@ -105,6 +105,28 @@ class Contract(unittest.TestCase):
         self.assertEqual(out["status"], "missing-dependency")
         self.assertIn("pip install", out["install"])
 
+    def test_negative_weight_warning_names_the_distorted_density(self):
+        """REVIEW-CODE-WARN, without a BDT backend (CI installs neither xgboost nor scikit-learn): the warning text for
+        each policy. drop learns the positive-weight density, abs-train-signed-eval the |w| density; reject and runs
+        without negative weights get none."""
+        sys.path.insert(0, str(SCRIPT.parent))
+        try:
+            spec = importlib.util.spec_from_file_location("train_bdt_under_test", SCRIPT)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+        finally:
+            sys.path.remove(str(SCRIPT.parent))
+        for policy, density in (("drop", "positive-weight density"), ("abs-train-signed-eval", "|w| density")):
+            with self.subTest(policy=policy):
+                text = mod.negative_weight_warning(policy, 7)
+                self.assertIn("training density is distorted", text)
+                self.assertIn(density, text)
+                self.assertIn("7 negative-weight", text)
+                self.assertIn("signed-weight or resampled training", text)
+                self.assertIn('ml-analysis-weights.md, "Negative weights", options 3 and 4', text)
+                self.assertIsNone(mod.negative_weight_warning(policy, 0))
+        self.assertIsNone(mod.negative_weight_warning("reject", 0))
+
     def test_no_pickle_in_the_script(self):
         text = SCRIPT.read_text(encoding="utf-8")
         for word in ("import pickle", "joblib", "pickle.load", "pickle.dump"):
@@ -192,6 +214,23 @@ class Backend:
             self.assertGreater(out["weights"]["negative_fraction"], 0.1)
             self.assertLess(out["weights"]["negative_sum"], 0)
             self.assertEqual(out["weights"]["training_weights"], "absolute values of the physical weights")
+
+    def test_drop_and_abs_warn_that_the_training_density_is_distorted(self):
+        """REVIEW-CODE-WARN: drop trains on the positive-weight density and abs-train-signed-eval on the |w| density,
+        not the signed one; with negative weights present the run output warns and points to ml-analysis-weights.md,
+        "Negative weights", options 3 and 4. Without negative weights there is nothing to warn about."""
+        for policy, density in (("drop", "positive-weight density"), ("abs-train-signed-eval", "|w| density")):
+            with self.subTest(policy=policy), tempfile.TemporaryDirectory() as d:
+                code, out, err = self.fit(d, n=600, neg=policy, data={"negative_fraction": 0.2})
+                self.assertEqual(code, 0, (out, err))
+                hits = [w for w in out["warnings"] if "training density is distorted" in w]
+                self.assertEqual(len(hits), 1, out["warnings"])
+                self.assertIn(density, hits[0])
+                self.assertIn("options 3 and 4", hits[0])
+            with self.subTest(policy=policy, negatives=False), tempfile.TemporaryDirectory() as d:
+                code, out, err = self.fit(d, n=600, neg=policy)
+                self.assertEqual(code, 0, (out, err))
+                self.assertFalse([w for w in out["warnings"] if "training density" in w], out["warnings"])
 
     def test_reject_with_negative_weights_exits_3(self):
         with tempfile.TemporaryDirectory() as d:

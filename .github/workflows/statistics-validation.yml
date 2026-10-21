@@ -10,7 +10,8 @@
 #   combine           CMS Combine 11.1.0 (conda-forge package cms-combine) with ROOT 6.36.14 (the build recorded in VALIDATION.md):
 #                     the datacard template against pyhf; Combine missing fails the job (no silent skip)
 #   slow-evidence     the sci-fix evidence that runs only in the slow tier (Feldman-Cousins Tables IV and VI in full,
-#                     PDG Table 40.4, the slow toy-CLs checks), with HEP_SLOW_TESTS=1; any skip fails the job
+#                     PDG Table 40.4, the slow toy-CLs checks, the anisotropy coverage with a modulated exposure),
+#                     with HEP_SLOW_TESTS=1; any skip fails the job
 #                     (tools/run_required_backends.py --no-skips; docs/maintenance.md, evidence that skips is unverified)
 name: statistics-validation
 on:
@@ -57,7 +58,7 @@ jobs:
       - name: Slow-tier sci-fix evidence, no skip allowed
         env:
           HEP_SLOW_TESTS: "1"
-        run: python tools/run_required_backends.py --require numpy,scipy --no-skips --modules tests.core.test_published_tables,tests.core.test_stats_poisson,tests.core.test_stats_likelihood_limits
+        run: python tools/run_required_backends.py --require numpy,scipy,sympy --no-skips --modules tests.core.test_published_tables,tests.core.test_stats_poisson,tests.core.test_stats_likelihood_limits,tests.skills.hep_measurement.test_anisotropy_weighted_covariance
 
   published:
     runs-on: ubuntu-latest

@@ -3,6 +3,40 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **`anisotropy.py harmonic` uses the exact null covariance of the weighted harmonic (sci-fix ANISO-WEIGHTED-COV, S1;
+  advisory SFA-2026-036; VALIDATION ANISO-WEIGHTED-COV).** With `--exposure-map` the Rayleigh probability and the Rice
+  width took `2/N_eff` per component, but a non-uniform exposure makes the variances of `a` and `b` unequal and
+  correlated (`1 + 0.9 cos alpha`: `N Var(a) = 6.39`, `N Var(b) = 2.79`, against 4.59 for both): a dipole along the
+  less exposed axis looked more significant than it is and its upper limit was too tight. The covariance now comes
+  from the binned map (`harmonic_covariance`, reported as `covariance_ab`), the probability is `exp(-chi^2 / 2)` with
+  `chi^2 = v^T V^-1 v` (`chi2_ab`), `sigma_per_component` is `sqrt(trace V / 2)`, and the upper limit, when V is not
+  isotropic, excludes an amplitude only if it is excluded for every dipole phase on a 72-point grid aligned with V's
+  axes. Without a map, with a uniform map and for the solar, sidereal and anti-sidereal checks the numbers are unchanged
+  bit for bit; a map with an empty right-ascension bin is now rejected.
+- **`tail_extrapolation.py` warns when only one model passes validation (VALIDATION REVIEW-CODE-WARN).** The envelope
+  then has zero width by construction (`low = high`, `gaussian_sigma = 0` under a prescription); the warning names
+  the model and says the model uncertainty was not assessed. Numbers unchanged.
+- **`assets/inference.py --external-scores` explains scored events missing from the split manifest.** They are still
+  scored (real data and other samples are legitimate), but the warning says the check cannot exclude that the model
+  was trained on them and that, for simulated events of the training sample, the manifest is incomplete; a refusal
+  for scored training events carries the warning too.
+- **Negative weights: dropping them from training only is allowed under option 3's condition.**
+  `ml-analysis-weights.md` option 4 no longer forbids it outright: the classifier learns the positive-weight density
+  instead of the signed one, like |w| training, so the effect must be shown against signed-weight or resampled
+  training, and negative weights are never dropped from evaluation. `train_bdt.py` now prints a `warnings` entry
+  under `--negative-weights drop` or `abs-train-signed-eval` when negative weights are present. Scores, metrics and
+  policy names unchanged.
+- **Five references corrected after an adjudicated review (45 issues; VALIDATION REVIEW-REFS).** The first-harmonic
+  variance `2/N` and its bias hold for uniform exposure only, and `N_eff` is an approximation with weights
+  (`cosmic-ray-measurements.md`); flattening inside a class is a documented training-only choice, as
+  `ml-analysis-weights.md` allows, and hyperparameter selection in `train_bdt.py` is not nested
+  (`multivariate-analysis-bdt-nn.md`); the Bethe shell term scales as `z^2`, and the fluctuation regimes and Highland
+  accuracy follow PDG 2025 (`signal-formation-and-readout.md`); Cowan et al. eq. 98, the Baker-Cousins, Jeffreys and
+  Z_Bi statements, and the `cls-limit`/`profile-cls` handover (`inference-recipes.md`); DRAGON2 diagnostics and the
+  Moderski attribution (`cosmic-ray-propagation.md`). Guidance only; no tool output changes.
+
 ## 0.21.0 (2026-10-21)
 
 Contracts 3.2.0 (minor): simulated dataset-records; a reference benchmark for shower development; CI speedup.

@@ -22,9 +22,10 @@ External scores (ML3 extensions): --external-scores SCORES.csv (columns id, scor
 go through the same checks without a checkpoint and without PyTorch: --model-file (the external model; its sha256 is
 the model_hash a calibration must name), --input (feature rows of the scored events) with --training-features (the
 training rows: the same DomainModel is fitted on them and flags each scored row), --split-manifest (every scored id
-must be in the manifest's test part, or, for a k-fold manifest {fold0.., } with a "fold" column in SCORES, in the fold
-whose model scored it: a score on an event the model was trained on is refused, exit 1), --calibration as above, and
---run-summary-out (with --labels and --grouping-key) for write_ml_artifact.py.
+the manifest lists must be in its test part, or, for a k-fold manifest {fold0.., } with a "fold" column in SCORES, in
+the fold whose model scored it: a score on an event the model was trained on is refused, exit 1; scored ids the
+manifest does not list are kept with a warning, since the check cannot exclude that the model was trained on them),
+--calibration as above, and --run-summary-out (with --labels and --grouping-key) for write_ml_artifact.py.
 
 The checkpoint is loaded with weights_only=True (tensors and plain containers only); --unsafe-full-unpickle runs a
 full unpickle, which can execute arbitrary code: only for files you trust.
@@ -304,7 +305,13 @@ def _read_scores(path: str) -> tuple[list[str], np.ndarray, list[str] | None]:
 
 
 def leakage_check(ids: list[str], folds: list[str] | None, manifest_path: str) -> dict:
-    """Scored ids must be test events of the manifest (or of the fold whose model scored them)."""
+    """Compare scored ids with the split manifest.
+
+    Counts the scored ids the manifest puts in training (train/val, or another fold than the one whose model scored
+    them: scored_training_ids, which run_external refuses) and the scored ids the manifest does not list at all
+    (ids_not_in_manifest). The second are not refused, since scoring real data or other samples is legitimate, but the
+    check cannot exclude that the model was trained on them: missing_manifest_warning() states it.
+    """
     manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
     kfold = sorted(k for k in manifest if k.startswith("fold"))
     bad, missing = [], []
@@ -329,6 +336,15 @@ def leakage_check(ids: list[str], folds: list[str] | None, manifest_path: str) -
             "sha256": "sha256:" + hashlib.sha256(Path(manifest_path).read_bytes()).hexdigest()}
 
 
+def missing_manifest_warning(leak: dict) -> str | None:
+    """The warning for scored ids absent from the split manifest, or None when every scored id is listed."""
+    n = leak["ids_not_in_manifest"]
+    if not n:
+        return None
+    return (f"{n} scored event(s) are not in the split manifest, so the check cannot exclude that the model was "
+            "trained on them; if they are simulated events from the training sample, the manifest is incomplete")
+
+
 def run_external(args) -> int:
     for need in ("external_tool", "model_file", "training_features"):
         if not getattr(args, need):
@@ -339,6 +355,7 @@ def run_external(args) -> int:
     if leak and leak["scored_training_ids"]:
         print(json.dumps({"status": "refused", "external": {"tool": args.external_tool}, "model_hash": model_hash,
                           "leakage_check": leak, "status_label": args.status,
+                          "warnings": [w for w in (missing_manifest_warning(leak),) if w],
                           "reason": "scores on events the model was trained on: not usable for evaluation; no scores "
                                     "written"}, indent=2))
         return 1
@@ -362,9 +379,8 @@ def run_external(args) -> int:
                "on_out_of_domain": args.on_out_of_domain, "status_label": args.status, "warnings": []}
     if leak:
         summary["leakage_check"] = leak
-        if leak["ids_not_in_manifest"]:
-            summary["warnings"].append(f"{leak['ids_not_in_manifest']} scored id(s) are not in the split manifest: "
-                                       "their train/test role is unknown")
+        if missing_manifest_warning(leak):
+            summary["warnings"].append(missing_manifest_warning(leak))
     else:
         summary["warnings"].append("no --split-manifest: the scores were not checked for training events")
     if n_ood and args.on_out_of_domain == "reject":

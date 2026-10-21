@@ -2,8 +2,9 @@
 
 An index for designing a cosmic-ray measurement: for each measurement type it points to the sections that already
 cover it, in this skill and in hep-detector, hep-statistics and hep-authoring. Only the anisotropy
-section has its own content. Links are relative to this file. Experiment conventions (cutoff safety factor, binning,
-periods, resolutions) come from the bound profile, never from this file.
+section is new content; the invariants section, moved from the analysis guide, also has rules of its own. Links are
+relative to this file. Experiment conventions (cutoff safety factor, binning, periods, resolutions) come from the bound
+profile, never from this file.
 
 ## Contents
 
@@ -35,7 +36,7 @@ periods, resolutions) come from the bound profile, never from this file.
 
 | Step | Read |
 |---|---|
-| Shared systematics and the covariance of the two yields | [analysis guide, astroparticle invariants](#astroparticle-and-cosmic-ray-invariants); script `particle_ratio_with_uncertainty.py` |
+| Shared systematics and the covariance of the two yields | [astroparticle and cosmic-ray invariants (this file)](#astroparticle-and-cosmic-ray-invariants); script `particle_ratio_with_uncertainty.py` |
 | Charge confusion and species-specific backgrounds in antiparticle ratios | [Backgrounds, antiparticles](backgrounds.md#antiparticles-and-charge-sign-confusion) |
 | Secondary-to-primary ratios: fragmentation feed-down, survival probability | [Correction chain, nuclei](correction-chain.md#nuclei-and-isotopes) |
 | Which systematics cancel and which do not | [Systematics, source inventory](systematics.md#source-inventory) |
@@ -56,7 +57,7 @@ periods, resolutions) come from the bound profile, never from this file.
 | Step | Read |
 |---|---|
 | Per-period exposure, exposure-weighted averages, efficiency drift, period-correlated systematics | [Correction chain, time dependence](correction-chain.md#time-dependent-measurements) |
-| Solar modulation and the epoch to state | hep-detector: [solar modulation](../../hep-detector/references/space-based-direct-detection.md#solar-modulation); script `solar_modulation_force_field.py`; the solar-phase rule in the [analysis guide](#astroparticle-and-cosmic-ray-invariants) |
+| Solar modulation and the epoch to state | hep-detector: [solar modulation](../../hep-detector/references/space-based-direct-detection.md#solar-modulation); script `solar_modulation_force_field.py`; the solar-phase rule in the [invariants section below](#astroparticle-and-cosmic-ray-invariants) |
 | Periodicity in a flux time series (known vs unknown period, binning, charge-sign comparison) | hep-detector: [periodicity](../../hep-detector/references/space-based-direct-detection.md#searching-for-periodicity-and-time-structure-in-a-flux-time-series) |
 | Event-level periodicity tests and variability | hep-statistics: [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md#point-sources-test-statistics-periodicity-and-variability) |
 | Time-bin covariance and binned-series inference | [hep-statistics time-series inference](../../hep-statistics/references/time-series-inference.md) (hands off the period-correlated evidence from the correction chain) |
@@ -128,8 +129,16 @@ back through a field model, and state the model and epoch.
 - **Harmonic analysis** (Linsley, Phys. Rev. Lett. 34 (1975) 1530): with right ascensions `alpha_i` and weights
   `w_i = 1 / omega(alpha_i)` that correct the relative exposure in right ascension, `a = (2/W) sum w_i cos alpha_i`,
   `b = (2/W) sum w_i sin alpha_i`, `W = sum w_i`, amplitude `r = sqrt(a^2 + b^2)`, phase `phi = atan2(b, a)`. Under
-  isotropy and for large N, a and b are Gaussian with variance `2/N` each, so r follows the Rayleigh distribution and
-  `P(>= r) = exp(-N r^2 / 4)`.
+  isotropy, for large N and uniform exposure, a and b are Gaussian with variance `2/N` each, so r follows the Rayleigh
+  distribution and `P(>= r) = exp(-N r^2 / 4)`. With a non-uniform exposure the weights enlarge the variances, unequally
+  for a and b, and correlate them: under isotropy, to leading order in 1/N, `Var(a) = (4/N) (int cos^2 alpha / omega)
+  (int omega) / (2 pi)^2`, `Var(b)` likewise with `sin^2`, `Cov(a, b)` with `sin cos` (Inferred, from
+  `4 E[w^2 cos^2 alpha] / (N E[w]^2)` over the observed right-ascension distribution). Replacing N by
+  `N_eff = W^2 / sum w_i^2` gets only their mean right, not each one (for `omega` proportional to `1 + 0.9 cos alpha`,
+  `N Var(a) = (4/e^2)(1/sqrt(1 - e^2) - 1) = 6.39` with `e = 0.9`, `N Var(b) = 2.79`, against 4.59 for both with
+  `N_eff` and 2 with N), so it overstates the significance of a dipole along the less exposed axis. Use the full
+  covariance V of `(a, b)`: `chi^2 = (a, b) V^-1 (a, b)^T` and `P(>= chi^2) = exp(-chi^2 / 2)` for a bivariate normal.
+  The covariance is only as good as the exposure model, so check that model on simulated skies.
 - **Full-sky dipole** (Sommers, Astropart. Phys. 14 (2001) 271, arXiv:astro-ph/0004016): with exposure on the whole sky,
   `d = 3 sum_i (u_i / omega(u_i)) / sum_i (1 / omega(u_i))`, the unit vectors `u_i` weighted by the inverse exposure;
   for uniform exposure each Cartesian component has variance about `3/N` (Inferred from `Var(3 u_x) = 3` per event).
@@ -138,8 +147,8 @@ back through a field model, and state the model and epoch.
   Fix the maximum multipole order before looking and estimate the coefficients jointly (Sommers 2001; Billoir &
   Deligny, JCAP 02 (2008) 009).
 - **Amplitude bias.** r is positive by construction, so for a small true amplitude it is biased upward: under isotropy
-  its mean is `sqrt(pi/N)`. For a true amplitude s, r follows the Rice distribution with the same width; the phase is
-  meaningful only when s is well above that width.
+  and uniform exposure its mean is `sqrt(pi/N)`. For a true amplitude s, r follows the Rice distribution with the same
+  width; the phase is meaningful only when s is well above that width.
 
 ### Spurious modulations: checks to plan
 
@@ -160,12 +169,12 @@ back through a field model, and state the model and epoch.
 
 ### Upper limits on the amplitude
 
-When the amplitude is not significant, report an upper limit on the amplitude (r, `d_perp` or `|d|`, said which),
-not the observed r, together with the expected limit under isotropy for the same exposure. The design supplies the
-estimator, the exposure, N and the systematic ledger; the construction is hep-statistics': the limit follows from the
-Rice distribution of r for each true amplitude, with the choice
-between a Neyman upper limit, a Feldman-Cousins interval on `s >= 0` or a Bayesian bound, its coverage checked on
-simulated skies drawn with the real exposure, and the trials over energy bins
+When the amplitude is not significant, by a criterion fixed before unblinding (for example a Rayleigh probability
+threshold), report an upper limit on the amplitude (r, `d_perp` or `|d|`, said which), not the observed r, together
+with the expected limit under isotropy for the same exposure. The design supplies the estimator, the exposure, N and
+the systematic ledger; the limit follows from the Rice distribution of r for each true amplitude. The script below
+computes a Neyman upper limit; hep-statistics owns the choice between it, a Feldman-Cousins interval on `s >= 0` or
+a Bayesian bound, its coverage checked on simulated skies drawn with the real exposure, and the trials over energy bins
 ([inference recipes](../../hep-statistics/references/inference-recipes.md#cls-and-upper-limits),
 [astroparticle look-elsewhere](../../hep-statistics/references/astroparticle-statistics.md#the-look-elsewhere-effect-in-its-astroparticle-forms)).
 
@@ -177,11 +186,16 @@ simulated skies drawn with the real exposure, and the trials over energy bins
   `collection_time.py`), for a top-hat field of view of declared half-width around the zenith right ascension, which
   advances one turn per sidereal day from the user's local sidereal time at the clock's zero (no default). A planning
   model; a real exposure comes from the acceptance per direction and can be passed as the map.
-- `harmonic`: the weighted first harmonic (amplitude, phase, Rayleigh probability with the effective count), `d_perp`
-  when declinations are given, the amplitude upper limit (Neyman, from the Rice distribution, power-constrained at the
-  expected limit so it is never empty; its coverage is checked on toys) and, with event times, the solar, sidereal and
+- `harmonic`: the weighted first harmonic (amplitude, phase, and the Rayleigh probability `exp(-chi^2 / 2)` from the
+  null covariance of `(a, b)`, reported as `covariance_ab`: exact for the binned exposure map, `(2/N) I` without one),
+  `d_perp` when declinations are given, the amplitude upper limit (Neyman, power-constrained at the expected limit so it
+  is never empty: from the Rice distribution when the covariance is isotropic; otherwise from the distribution of r for
+  the full covariance, a true amplitude being excluded only if excluded for every dipole phase on a 72-point grid
+  aligned with the covariance's axes; its coverage is checked on toys at uniform exposure, n = 1500, s = 0.03, CL 0.9,
+  and with a `1 + 0.9 cos alpha` exposure at four dipole phases) and, with event times, the solar, sidereal and
   anti-sidereal harmonics: a significant anti-sidereal amplitude makes the run `failed` (exit 1). Without an exposure
-  map it warns that uniform exposure is assumed; without times the checks are reported as not run.
+  map it warns that uniform exposure is assumed; a map with an empty right-ascension bin is rejected; without times the
+  checks are reported as not run.
 
 The full three-dimensional dipole (whole-sky exposure) and the joint multipole fit for partial coverage are not
 implemented; they belong to hep-statistics.
@@ -201,6 +215,6 @@ Moved here from the [analysis guide](hep-measurement-guide.md) (B-03); they appl
 
 - In an ON/OFF or blind sky-scan search, the OFF/background region must not overlap the ON region, and a reported significance must account for the number of independent trials (positions, energy bins, time windows, source catalogs) actually tested, not just the one presented.
 - Distinguish a flux measured at the top of the atmosphere or at an instrument from one corrected to the local interstellar spectrum; state the solar-modulation epoch/potential and the geomagnetic cutoff applied whenever a low-rigidity cosmic-ray flux is reported. Keep an event in a rigidity bin only if the bin's lower edge is above f times the maximum cutoff over the acceptance cone, backtraced through a realistic field model at that time; f is an experiment's convention taken from its profile, and the same rule defines the exposure, E_i = sum over t of T_live(t) A_i step(R_low,i > f Rc_max(t)) ([selection rule](../../hep-detector/references/space-based-direct-detection.md)); a Stormer formula is only a planning estimate. Take the epoch's solar phase from the SILSO sunspot record, never from memory: look up in the [SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm) the minimum and the 13-month smoothed maximum of the cycle that contains the data-taking period, and state them with the date the table was read (smoothed values are revised); a multi-peaked maximum is solar maximum, not a declining phase. The detector reference gives a worked reading for cycles 24 and 25 ([space-based direct detection](../../hep-detector/references/space-based-direct-detection.md)).
-- Do not draw a composition conclusion from a single shower observable (X_max or muon content alone) without stating the hadronic interaction model assumed (quote more than one) and checking consistency against the other observable, given the current muon-content/X_max modeling discrepancy. Use the X_max distribution width (sigma(X_max)), not only the mean: simulations give about 60 g/cm2 for protons and about 20 g/cm2 for iron near 1e18 eV, far wider than the naive superposition value sigma_p/sqrt(A) (about 8 g/cm2); a mixed composition adds the spread of the component means, sigma(X_max)^2 = <sigma_i^2> + (spread of <X_max>_i), so the width measures the variance of lnA; convert mean and width to lnA moments for each hadronic model ([Kampert & Unger 2012, arXiv:1201.0018](https://arxiv.org/abs/1201.0018), Sec. 2).
+- Do not draw a composition conclusion from a single shower observable (X_max or muon content alone) without stating the hadronic interaction model assumed (quote more than one) and checking consistency against the other observable, given the current muon-content/X_max modeling discrepancy. Use the X_max distribution width (sigma(X_max)), not only the mean: simulations give about 60 g/cm2 for protons and about 20 g/cm2 for iron near 1e18 eV, far wider than the naive superposition value sigma_p/sqrt(A) (about 8 g/cm2); a mixed composition adds the variance of the component means, sigma(X_max)^2 = <sigma_i^2> + (variance of <X_max>_i), so the width measures the variance of lnA only after the shower-fluctuation term <sigma_i^2> (itself composition dependent) is subtracted; convert mean and width to lnA moments for each hadronic model ([Kampert & Unger 2012, arXiv:1201.0018](https://arxiv.org/abs/1201.0018), Sec. 2).
 - A flux or rate reported from raw counts must use an exact Poisson interval, not a Gaussian sqrt(N) approximation, whenever counts are low enough for the two to disagree (routine in a steeply falling spectrum's high-energy tail); state the exposure (effective area/geometric factor times live time times solid angle) and bin width used, separately from the raw count. If asked whether `sqrt(N)` is right for a few-count bin, answer no (not "approximately right"), run `<plugin root>/skills/hep-measurement/scripts/cosmic_ray_flux.py` for the interval, and for a high-rigidity/energy bin also address resolution spillover and background ([space-based direct detection, low-count bins](../../hep-detector/references/space-based-direct-detection.md#low-count-high-rigidity-bins)).
 - A ratio or fraction of two yields (e.g. a positron fraction or an antiproton/proton ratio) must use the yields' actual covariance, not an independence assumption, whenever they share a systematic (the same acceptance, exposure, or background-template shape) - state which systematics are shared and whether they were treated as correlated. Species-specific effects (e.g. charge confusion, which feeds protons into the antiproton sample) belong to one yield only and do not cancel.
