@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.20.0 (2026-10-21)
 
 Contracts 3.1.0 (minor): Geant4 phase 2.
 
