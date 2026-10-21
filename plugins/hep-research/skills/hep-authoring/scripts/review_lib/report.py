@@ -14,8 +14,8 @@ LIMITATIONS = [
     "Refutation attempts are checked only for empty targets and repeated (method, target) pairs.",
     "tool-output evidence is not checked for relevance; locators only for being read with location and hash.",
     "Shared-directory files written during an attempt window are attributed to the reviewer; parallel slots cannot be told apart.",
-    "A closed agent review is not a review record by a non-author reviewer (v6.3 O04/O14 are undecided; "
-    "docs/dev/v6.3/decision-enforce.md); whether it can count is a maintainer decision.",
+    "A closed agent review is not a review record by a non-author reviewer (v6.3 O04/O14; maintainer decision "
+    "2026-10-21): the author agent could forge it (spec 10). It is advisory input a human reviewer may cite.",
 ]
 
 

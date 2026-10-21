@@ -315,3 +315,39 @@ class HostPathTests(unittest.TestCase):
         text = (H.PLUGIN / "skills" / "hep-authoring" / "assets" / "review-hosts.json").read_text(encoding="utf-8")
         self.assertNotIn("/" + "tmp/claude", text)
         self.assertNotIn("." + "claude/projects", text)
+
+
+class SessionStartTests(unittest.TestCase):
+    """The Claude Code host start time from CLAUDE_PID (review-hosts.json session_start; undocumented host behaviour)."""
+
+    def test_parses_ps_lstart_as_local_time(self):
+        import datetime
+        import subprocess
+        from review_lib import observe as OBS
+
+        def fake(cmd, **kw):
+            self.assertEqual(cmd, ["ps", "-o", "lstart=", "-p", "4242"])
+            return subprocess.CompletedProcess(cmd, 0, stdout="Wed Oct 21 19:09:16 2026\n", stderr="")
+
+        want = datetime.datetime(2026, 10, 21, 19, 9, 16).astimezone(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.assertEqual(OBS.session_start({"CLAUDE_PID": "4242"}, fake), want)
+
+    def test_unknown_without_the_variable_or_on_failure(self):
+        import subprocess
+        from review_lib import observe as OBS
+        self.assertIsNone(OBS.session_start({}))
+        self.assertIsNone(OBS.session_start({"CLAUDE_PID": "x; rm"}))
+        bad = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, stdout="", stderr="no such process")  # noqa: E731
+        self.assertIsNone(OBS.session_start({"CLAUDE_PID": "4242"}, bad))
+        odd = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, stdout="garbage", stderr="")  # noqa: E731
+        self.assertIsNone(OBS.session_start({"CLAUDE_PID": "4242"}, odd))
+
+    def test_real_process(self):
+        import datetime
+        from contracts.review import parse_time
+        from review_lib import observe as OBS
+        got = OBS.session_start({"CLAUDE_PID": str(os.getpid())})
+        if got is None:
+            self.skipTest("ps is not available")
+        age = datetime.datetime.now(datetime.UTC) - parse_time(got)
+        self.assertLess(abs(age.total_seconds()), 86400)

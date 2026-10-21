@@ -44,6 +44,28 @@ def _settings(host: dict, project: Path) -> list[tuple[Path, dict]]:
     return out
 
 
+def session_start(env=None, run=subprocess.run) -> str | None:
+    """Start time (UTC) of the Claude Code host process named by CLAUDE_PID, from `ps -o lstart=`; None when the variable
+    is unset or ps fails. Observed on the macOS CLI on 2026-10-21; not documented by the host (review-hosts.json)."""
+    env = os.environ if env is None else env
+    pid = str(env.get("CLAUDE_PID") or "")
+    if not pid.isdigit():
+        return None
+    try:
+        res = run(["ps", "-o", "lstart=", "-p", pid], capture_output=True, text=True, timeout=10,
+                  env=dict(os.environ, LC_ALL="C", LANG="C"))
+    except (OSError, subprocess.SubprocessError):
+        return None
+    text = " ".join(res.stdout.split())
+    if res.returncode != 0 or not text:
+        return None
+    try:
+        local = datetime.datetime.strptime(text, "%a %b %d %H:%M:%S %Y")
+    except ValueError:
+        return None
+    return format_time(local.astimezone(datetime.UTC))
+
+
 def host_facts(project: Path, given: dict | None) -> dict:
     """Isolation precondition (A7), settings that affect loading or isolation, and their modification time."""
     given = given or {}
@@ -74,7 +96,7 @@ def host_facts(project: Path, given: dict | None) -> dict:
         if "permissions" in sub:
             sub["permissions"] = {"deny": [x for x in (sub["permissions"].get("deny") or []) if x.startswith("Agent(")]}
         settings[str(p)] = sub
-    return {"name": HOST, "precondition": pre, "session_start": None, "settings_mtime": mtime, "settings": settings}
+    return {"name": HOST, "precondition": pre, "session_start": session_start(), "settings_mtime": mtime, "settings": settings}
 
 
 def instruction_files(project: Path, given: dict | None) -> dict:

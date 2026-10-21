@@ -1,6 +1,6 @@
 # Decision record: independent review mechanism, P1
 
-Status: **draft, 2026-10-21; not decided** (the Decision section is the maintainer's). Written at the end of P1 of
+Status: **partly decided 2026-10-21** (see Decision: items 1, 2, 5 and 6 decided; the release and the P3 budget open). Written at the end of P1 of
 `docs/dev/independent-review-spec.md` (13th edition, "the spec"). Labels: **Confirmed** (checked against the
 repository or by a committed test), **Inferred** (a reading to sanity-check), **Unresolved** (needs a decision).
 
@@ -54,7 +54,7 @@ Proposed clarifying sentences:
 |---|---|---|
 | `docs/architecture.md:12` (no required subagents) | "The independent review (hep-authoring, docs/dev/decision-independent-review.md) keeps this: the plugin dispatches and requires no subagent; the author agent passes a fixed message to agents through the host's own mechanism." | added to the table row |
 | `docs/routing-contract.md:7` (no coordinator skill, no dispatch API) | "The independent review driver (`skills/hep-authoring/scripts/review.py`) is not one: it sequences one review inside hep-authoring, dispatches no agent and routes no work between skills (docs/dev/decision-independent-review.md)." | added after the rule |
-| `docs/protected-data-architecture.md:526` (architectural invariant: no hooks, MCP servers, commands, background processes, or required subagents) | append: "The independent review is agent-driven but optional to the plugin: its driver prints the next action and a fixed dispatch message; the author agent dispatches through the host's own mechanism, and no plugin component dispatches or requires a subagent (docs/dev/decision-independent-review.md)." | **not edited**: an invariant needs special approval |
+| `docs/protected-data-architecture.md:526` (architectural invariant: no hooks, MCP servers, commands, background processes, or required subagents) | append: "The independent review is agent-driven but optional to the plugin: its driver prints the next action and a fixed dispatch message; the author agent dispatches through the host's own mechanism, and no plugin component dispatches or requires a subagent (docs/dev/decision-independent-review.md)." | added as a separate line under the invariant, its wording unchanged (decided 2026-10-21) |
 
 The two edited sentences are reversible text edits; if the maintainer rejects the position, revert them with the
 mechanism.
@@ -67,8 +67,7 @@ third-party at 122-123, with exhaustive and person). The mechanism adds two non-
 the reviewed document; neither external nor independent). A locator counts as independent only for a paper, equation,
 table or page (a specification page inside the plugin counts) that was read and hashed as a whole file, never the
 reviewed document or another file the author wrote for it; the record states this with `source_kind`. The report
-counts independent and tool-output evidence separately. (**Unresolved**: adopting these categories for review
-verdicts is a maintainer decision.)
+counts independent and tool-output evidence separately. (Adopted 2026-10-21, see Decision.)
 
 ## Contracts version
 
@@ -84,8 +83,7 @@ free number (0.22.0 at the time of writing; **Unresolved** until merge).
 The mechanism does not settle O04 ("reviewers other than the author") or O14 ("which reviewer roles may accept reports
 as evidence"), `docs/dev/v6.3/custodian-gate-requirement.md:42-43`. A closed agent review is **not** presented as
 meeting the "a review record exists" criterion of `docs/dev/v6.3/decision-enforce.md:20`: the report's limitations,
-the procedure reference and `review.py --help` say so. Whether it may ever count is a maintainer decision
-(**Unresolved**). The mechanism writes no attestation; the attestation reviewer role is still under Q-06
+the procedure reference and `review.py --help` say so. Decided 2026-10-21: it does not count (see Decision). The mechanism writes no attestation; the attestation reviewer role is still under Q-06
 (`contracts/schemas/attestation.json`).
 
 ## Cost
@@ -149,9 +147,10 @@ hep-authoring (ownership row "Independent review packets, review records and the
 14. File:line references and facts canaries accept extension-less paths (`LICENSE:2-3`).
 15. `start` writes a default configuration when none exists (`--models`, else `host-default`); `escalate` runs only
     when decide asks for it; `report` runs at any time; `receive` exits 1 when it writes `rejected`.
-16. Host shared directories for Claude Code (`review-hosts.json`) are inferred patterns (the session scratchpad and
-    tool-result folders); the session start time is treated as not obtainable, so `isolation_not_yet_effective` is
-    replaced by a warning (spec 7.3, last paragraph) unless an observation input supplies the time.
+16. Host shared directories for Claude Code (`review-hosts.json`): the session scratchpad and tool-result folders,
+    observed on the macOS CLI and confirmed (Decision 6). The session start time is the start of the process named by
+    `CLAUDE_PID` (`ps -o lstart=`); without it, `isolation_not_yet_effective` is replaced by a warning (spec 7.3, last
+    paragraph) unless an observation input supplies the time.
 17. The instruction file names `contracts/review.py` by its absolute path so that a reviewer can run the self-check;
     the packet and instruction hashes therefore differ between plugin installs at different paths. Runs on one
     install are byte-for-byte reproducible (tested); across installs they are not.
@@ -171,12 +170,38 @@ hep-authoring (ownership row "Independent review packets, review records and the
    (`$CLAUDE_CONFIG_DIR`, else `~/.claude`), filled in by observe, so the private-path rule is unchanged. Not chosen:
    exempting the two files (too broad), moving the host notes out of the plugin or editing the spec (both contradict
    the spec).
-2. The four maintainer decisions of spec section 13 (subagent statements and the invariant, evidence categories,
-   contracts 3.3.0 and its release number, P3 budget) and whether a closed agent review may count toward O04/O14.
-3. Confirm the Claude Code shared-directory patterns and any concrete way to read the session start time
-   (`review-hosts.json`); until then the fallback warning applies.
+2. Decided 2026-10-21: the architecture statements, the evidence categories, O04/O14 and the host facts (see
+   Decision). Open: the release that carries contracts 3.3.0, after a live pilot review; the P3 budget.
+3. Resolved 2026-10-21: the shared-directory patterns are confirmed and the session start is read from `CLAUDE_PID`
+   (Decision 6).
 4. Location of the spec and of this record (`docs/dev/` rather than a versioned subfolder such as `docs/dev/v6.3/`).
 
 ## Decision
 
-(Left for the maintainer.)
+Maintainer, 2026-10-21 (recommendations accepted; the numbers follow spec section 13):
+
+1. **Architecture statements: accepted.** The plugin dispatches and requires no subagent. The two clarifying
+   sentences stay in `docs/architecture.md` and `docs/routing-contract.md`, and the drafted sentence is added as a
+   separate line under the invariant at `docs/protected-data-architecture.md:526`; the invariant's wording is
+   unchanged.
+2. **Evidence categories: adopted.** The bases of `docs/maintenance.md:118-126` (locator, third-party, exhaustive,
+   person) apply to review verdicts as defined there; `tool-output` and `internal` are added as non-independent
+   categories. This is the independence rule accepted on 2026-10-20 for sci-fix oracles, applied unchanged.
+3. **Release: open.** Recommended: 0.22.0 (contracts 3.3.0; the ams02-research companion needs no change), after one
+   live pilot review on a real document (about 8 to 10 agent runs, spec section 13 "Recommended next step"), each
+   paid run approved first.
+4. **P3 budget: open.** Recommended: stage it. A pilot of 5 documents with two arms (author self-check, four lenses;
+   about 50 agent runs) checks the injection script and the provisional thresholds; the full design (at least 20
+   documents, four arms, about 19 agent runs per document, about 500 with re-dispatches) only after it.
+5. **O04/O14: a closed agent review does not count** as a review record by a non-author reviewer and does not meet
+   the "a review record exists" criterion of `docs/dev/v6.3/decision-enforce.md:20`. Reason: the threat model
+   excludes deliberate fraud by the author agent (spec sections 0 and 10), who can write a reviewer's record; an
+   enforcement gate needs records the author cannot produce. It is advisory input that a human reviewer may cite in
+   their own record. Revisit only if P4 adds external custody or a process other than the author's.
+6. **Host facts: confirmed.** On the Claude Code CLI on macOS (2026-10-21) session scratchpads are
+   `<tmp>/claude-<uid>/<project-slug>/<session>/scratchpad` and tool results
+   `<claude-config>/projects/<project-slug>/<session>/tool-results`; the host exports `CLAUDE_PID`, and the start of
+   that process (`ps -o lstart= -p $CLAUDE_PID`) is the session start (it matched the session's start, 19:09:16 local).
+   Both are undocumented host behaviour (`documented: false` in `review-hosts.json`); without `CLAUDE_PID` the
+   fallback warning applies. `skills/hep-authoring/scripts/review_lib/observe.py` `session_start()` implements the
+   method; tests use a faked `ps`.

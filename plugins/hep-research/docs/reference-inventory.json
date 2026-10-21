@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 348238,
+   "bytes": 348509,
    "uncited": 0
   },
   "hep-citations": {
@@ -405,15 +405,15 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 9392,
-   "lines": 133,
+   "bytes": 9663,
+   "lines": 135,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
     "skills/hep-authoring/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "33b26f96 2026-10-21"
+   "last_commit": "95d79322 2026-10-21"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",

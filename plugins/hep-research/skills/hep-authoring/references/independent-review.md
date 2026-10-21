@@ -13,8 +13,9 @@ section 10), and it is not an attestation.
 
 **What a closed review is not.** A closed agent review is not a review record by a reviewer other than the author in
 the sense of the v6.3 open conditions O04 and O14 (`<plugin root>/docs/dev/v6.3/custodian-gate-requirement.md`), and
-it does not meet the "a review record exists" criterion of `<plugin root>/docs/dev/v6.3/decision-enforce.md`. Whether
-it can is a maintainer decision (`<plugin root>/docs/dev/decision-independent-review.md`). Say so when you report it.
+it does not meet the "a review record exists" criterion of `<plugin root>/docs/dev/v6.3/decision-enforce.md`
+(maintainer decision 2026-10-21, `<plugin root>/docs/dev/decision-independent-review.md`): the author agent could
+forge it. It is advisory input that a human reviewer may cite in their own record. Say so when you report it.
 
 **Terminology.** "Review packet" and "shadow slot" here are this mechanism's terms. They are unrelated to
 `<plugin root>/docs/dev/v6.3/review-packet.md` (a human review of the G-ENFORCE inputs) and
@@ -68,8 +69,9 @@ Never translate or reword the first line, add context, or tell a reviewer how to
 
 **Isolation (Claude Code).** Set `CLAUDE_CODE_FORK_SUBAGENT=0` in `env` of `settings.json` and restart the host, or
 add `Agent(fork)` to `permissions.deny` (a warning: the docs do not say when the rule takes effect). With neither,
-`next` prints the repair `isolation_precondition`. The session start time cannot be read, so the report says the
-setting's effect could not be confirmed.
+`next` prints the repair `isolation_precondition`. The host's start time is read from the process `CLAUDE_PID` names
+(undocumented host behaviour); if the settings changed after it, `next` prints `isolation_not_yet_effective` (restart
+the host). Without `CLAUDE_PID` the report says the setting's effect could not be confirmed.
 
 **During the review.** Do not put packets, drafts, canaries or your own tool outputs in the host's shared directories
 (the Claude Code scratchpad and tool-result folders): `shared_dir_contamination`. Do not edit the configuration
