@@ -3,6 +3,20 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 3.2.0 (minor): simulated dataset-records.
+
+- **Tables derived from simulation runs have their own dataset status.** `dataset-record` `extension.status` accepts
+  `simulated`: the envelope inputs are the Geant4 run records or study record the table came from (checked by
+  `contracts/dependencies.py`: hash, labels, and `dataset.simulated_source` when an input is neither a run record with
+  `extension.simulation` nor a study record). The record is never `observed`, is at level `detector` or
+  `particle-fiducial`, and keeps `unvalidated` unless an input study record carries `validated-in-scope`
+  (`dataset.simulated_*`). A `communication` using a simulated table gets the warning `communication.simulated_source`
+  (label figures and tables "Simulation"). Additive: existing records keep their outcome; a 3.1 reader refuses the new
+  status as an unknown term. Closes the J2/J14 known limitation for simulation tables; scope containment of a table
+  inside its study's benchmarked scope is not checked.
+
 ## 0.20.0 (2026-10-21)
 
 Contracts 3.1.0 (minor): Geant4 phase 2.
