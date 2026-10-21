@@ -6,7 +6,8 @@ This folder is the starting point for implementing the Geant4 architecture propo
 
 | File | Content |
 |---|---|
-| `proposal.md` | The final proposal (Traditional Chinese): three phases, every review finding and its resolution, re-checked against 0.21.0 in section 12 |
+| `proposal.md` | The final proposal, Traditional Chinese original: three phases, every review finding and its resolution, re-checked against 0.21.0 in section 12 |
+| `proposal.en.md` | English translation of `proposal.md`, same sections, tables and numbers. Edit both together; if they disagree, the Chinese original wins until the English is corrected |
 | `j15_design_estimates.py` | Design estimates for the J15 minimal spectrometer (geometry, acceptance, resolution, statistics). Standard library; scipy optional. Not a benchmark reference |
 
 ## Before starting any work

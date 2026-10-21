@@ -1,9 +1,10 @@
 # hep-research Geant4 研究架構：最終版
 
 > 狀態：最終提案，待維護者核准
-> 依據：v2 至 v5 的四輪獨立審查（共 9 份審查報告）；最後一輪的事實與數值已逐項核對
+> 依據：三輪獨立審查（v2、v4、v5，共 7 份審查報告），以及依 0.21.0 的重新核對（第 12 節）；審查指出的事實與數值都已逐項核對
 > 基準：hep-research **0.21.0**（`main` 的 `c4f7954`，tag `hep-research--v0.21.0`），contracts **3.2.0**，adapter geant4 0.1.0，Geant4 11.4.3（commit `2ee379e6`）
 > 日期：2026-10-21（依 0.21.0 重新核對；見第 12 節）
+> 語言：本文件為繁體中文原文；英文版見 [`proposal.en.md`](proposal.en.md)，兩者內容一致
 > 範例性質：J15 最小磁譜儀是**合成幾何**，是 verification 的載體，不是任何實驗的偵測器
 
 ---
@@ -201,7 +202,7 @@ hep-computing（run_workflow.py、local_partition.py）
 
 - **版本：contracts 3.3.0（minor）。** 0.21.0 已使用 3.2.0（simulated dataset-record）。現有所有閘控都設在 x.y.0；新增閘控規則族的先例（2.4.0、2.6.0、2.8.0、3.1.0、3.2.0）都是 minor。
 - **sci-fix**（依 `docs/maintenance.md`）：
-  - 等級 S2（改變判定）；提交前綴 `sci-fix:`；附 parent record（D2）。
+  - 等級 S2（改變判定）；提交前綴 `sci-fix:`；附 parent record（`docs/maintenance.md` 的 D2 層級；不是本文缺陷編號 D2）。
   - oracle 證據至少 C2；assistant 撰寫的 oracle 必須符合四種獨立依據之一。
   - `docs/evidence/sci-fixes.json` 新增條目。
   - 0.20.0 與 0.21.0 已發布受影響的判定路徑，需發 advisory（截至 0.21.0，下一個編號為 SFA-2026-036）。
@@ -224,7 +225,7 @@ hep-computing（run_workflow.py、local_partition.py）
 
 ### 5.1 範圍
 
-所有會影響 J14 的 C++ 工作都在這一階段完成：spec/2 讀取、scorer 元件化、探針、column map。場區、化合物、平面穿越在階段 3 加入；它們會改變之後 live 重跑的 J14 `sources_sha256`，這是預期的變化，已提交的 J14 紀錄不重錄。
+所有會影響 J14 的 C++ 工作都在這一階段完成：spec/2 讀取、scorer 元件化、探針、column map。場區與平面穿越在階段 3 加入（混合材料 0.21.0 已有）；它們會改變之後 live 重跑的 J14 `sources_sha256`，這是預期的變化，已提交的 J14 紀錄不重錄。
 
 ### 5.2 spec/2 的座標與格式
 
@@ -557,7 +558,8 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | ReferenceMaterial 契約 | 延後 | 觸發：第一個非平板幾何的 reference benchmark |
 | 欄式輸出 | 延後 | 觸發：需要 per-hit 資料且 root-uproot adapter 可用 |
 | 模擬內 bootstrap、內容定址快取、新執行器、replay 後端 | 刪除或延後 | 目前規模不需要；快取鍵難以完整 |
-| 一般化 `scoped_upgrade`、Geant4 10.x 探針 | 延後 | 各自的觸發條件見 v3 |
+| 一般化 `scoped_upgrade` | 延後 | 觸發：第二種研究類型需要升級（目前只有 Geant4 study record） |
+| Geant4 10.x 探針 | 延後 | 觸發：第一個使用 10.x 的應用；`StreamInfo`（10.2 起）、`FluctuationType()`（11.x 起）等 API 需依版本條件編譯 |
 
 ---
 
@@ -621,6 +623,7 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 4. 取樣比例的參考需要 PDG 的 μ 能損表；選用的 PVT benchmark 需要 Sternheimer 參數。兩者都要經 hep-citations 取得文獻紀錄後才能使用。
 5. 量能器簇射主導 CPU 時間；後漏的收斂每點約需 5000 個簇射，事件數由 trial run 決定並記錄。
 6. 探針假設 worker 和 master 的設定相同；若發現 thread-local 差異，改為逐執行緒傾印。
+7. `longitudinal-profile` 的 `isolated` 只保證幾何中沒有目標以外的東西；目標堆疊是否就是已發表量測的配置，契約無法判定，只能由審查者以 `target_geometry_sha256` 核對。
 
 ---
 
@@ -669,6 +672,8 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 | `check_packaging.py` MAX_BYTES | 2 MiB |
 | advisory | 最新 SFA-2026-035 |
 | journey 表 | J1–J14 |
+
+---
 
 ## 附錄 A：數值
 
