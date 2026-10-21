@@ -149,7 +149,7 @@ Guide, November 2024; the skeleton above compiles with Tectonic):
 \author[b]{and Second Author}
 \affiliation[a]{Institution A}
 \affiliation[b]{Institution B}
-\emailAdd{author@inst.edu}
+\emailAdd{author@example.org}
 
 \abstract{...}
 

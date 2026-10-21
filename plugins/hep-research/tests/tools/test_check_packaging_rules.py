@@ -91,5 +91,22 @@ class BatchSiteFactTests(unittest.TestCase):
         self.assertEqual(scan({"examples/x/batch.json": json.dumps(obj)}), [])
 
 
+class PlaceholderEmailTests(unittest.TestCase):
+    """T30: a placeholder local part (author, user, ...) was exempt at any domain, so author@<real domain> passed."""
+
+    def test_placeholder_local_part_at_a_real_domain_is_reported(self):
+        for addr in ("author" + "@" + "cern.ch", "user" + "@" + "gmail.com", "your.name" + "@" + "uni.edu"):
+            with self.subTest(addr=addr):
+                found = scan({"docs/probe.md": f"contact {addr}\n"})
+                self.assertEqual([(f["rule"], f["detail"]) for f in found], [("email", addr)])
+
+    def test_reserved_domains_are_exempt(self):
+        for addr in ("author@example.org", "user@example.com", "bob@example.net", "first.last@mail.example.com",
+                     "you@lab.example", "a@host.invalid", "x@ci.test", "noreply@anthropic.com"):
+            with self.subTest(addr=addr):
+                self.assertEqual(scan({"docs/probe.md": f"contact {addr}\n"}), [])
+        self.assertTrue(scan({"docs/probe.md": "bob" + "@" + "notexample.com\n"}))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 349047,
+   "bytes": 349050,
    "uncited": 0
   },
   "hep-citations": {
@@ -437,7 +437,7 @@
   {
    "path": "skills/hep-authoring/references/latex-venue-setup.md",
    "owner": "hep-authoring",
-   "bytes": 30415,
+   "bytes": 30418,
    "lines": 413,
    "linked_from_skill_md": true,
    "cited_by": [
