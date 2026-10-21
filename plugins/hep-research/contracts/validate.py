@@ -159,8 +159,29 @@ def check_binned(b: dict, rep: Report, path: str, obs: dict | None = None) -> No
                     f"uncertainty '{u.get('name')}' has {len(u['values'])} entries for {len(values)} bins")
 
 
+def _level_text(text) -> str:
+    return " ".join(re.sub(r"[-_]", " ", str(text).lower()).split())
+
+
+def unfolded_target(obs: dict, vocab: Vocabulary) -> str | None:
+    """The target level an 'unfolded' observable declares: a level term other than 'unfolded' and 'detector' (core or
+    profile) named in phase_space.definition (case, '-', '_' and spaces ignored), or None. The vocabulary says the
+    target of 'unfolded' is declared separately; contracts 3.3.0 has no field for it, so the definition carries it."""
+    ps = obs.get("phase_space")
+    text = _level_text(ps.get("definition", "")) if isinstance(ps, dict) else ""
+    for term in sorted(vocab.terms("levels") - {"unfolded", "detector"}):
+        if re.search(rf"(?<![a-z0-9]){re.escape(_level_text(term))}(?![a-z0-9])", text):
+            return term
+    return None
+
+
 def check_observable(obs: dict, vocab: Vocabulary, rep: Report, path: str) -> None:
     check_conventions(obs.get("conventions", {}), vocab, rep, f"{path}.conventions")
+    if obs.get("level") == "unfolded" and unfolded_target(obs, vocab) is None:  # triage T36: a warning, no new field
+        targets = ", ".join(sorted(vocab.terms("levels") - {"unfolded", "detector"}))
+        rep.add("warning", f"{path}.level", "observable.unfolded_target_undeclared",
+                f"level 'unfolded' does not say which level it was unfolded to: name the target level ({targets}) in "
+                "phase_space.definition, e.g. 'unfolded to particle-fiducial: ...'")
     for i, v in enumerate(obs.get("variables", [])):
         if "edges" in v and "points" in v:
             rep.add("error", f"{path}.variables[{i}]", "observable.edges_and_points", "give edges or points, not both")
