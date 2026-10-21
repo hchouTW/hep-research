@@ -304,3 +304,21 @@ class ArbiterReceiptTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PluginRelativePathTests(_Base):
+    """A path relative to the plugin root resolves (found in the P3 pilot: reviewers cite plugin paths)."""
+
+    def test_plugin_relative_path_is_accepted(self):
+        sid = self.h.slot_of("lens", "facts")
+        rec = self.h.good_record(sid)
+        rec["paths_read"].append({"path": "LICENSE", "sha256": H.sha(H.LICENSE)})
+        out, ev = self.receive(sid, rec)
+        self.assertEqual(ev["event"], "accepted", out)
+
+    def test_plugin_relative_path_with_wrong_hash_is_rejected(self):
+        sid = self.h.slot_of("lens", "facts")
+        rec = self.h.good_record(sid)
+        rec["paths_read"].append({"path": "LICENSE", "sha256": "0" * 64})
+        out, ev = self.receive(sid, rec)
+        self.assertEqual(ev["data"]["codes"], ["file_hash_mismatch"])

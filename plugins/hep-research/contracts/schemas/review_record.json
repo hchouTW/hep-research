@@ -25,7 +25,7 @@
   "reads": {"type": "array", "items": {"$ref": "ext_communication_traceability.json#/$defs/read_event"},
    "description": "optional: read records of literature sources (hep-citations read_event; hep-citations owns their meaning)"},
   "paths_read": {"type": "array", "items": {"$ref": "#/$defs/path_read"},
-   "description": "every local file you read, each with the sha256 of the whole file (`sha256sum FILE`); relative paths are relative to your attempt folder (the parent of packet/)"},
+   "description": "every local file you read, each with the sha256 of the whole file (`sha256sum FILE`); relative paths are relative to your attempt folder (the parent of packet/), or else to the plugin root; a file from another version or from git history is saved in work/ and cited as that copy"},
   "skim": {"type": "array", "items": {"$ref": "#/$defs/skim_mark"}, "description": "one mark per skim unit in scope.json"},
   "claims": {"type": "array", "items": {"$ref": "#/$defs/claim"}, "description": "the claims you judged; every deep or focus unit is covered by at least one claim"},
   "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}, "description": "evidence items, each with one basis and that basis's required fields"},

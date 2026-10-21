@@ -32,12 +32,13 @@ def _within(p: Path, d: Path) -> bool:
 
 
 def classify(rv, adir: Path, path_str: str, started, shared: list[Path], doc: Path) -> dict:
-    """{exists, local, sha256, forbidden (reason or None), in_work} of one path a record names; relative paths are
-    relative to the attempt folder."""
+    """{exists, local, sha256, forbidden (reason or None), in_work} of one path a record names; a relative path is
+    relative to the attempt folder, or to the plugin root when it names no file there."""
     if URLISH.match(path_str):
         return {"exists": False, "local": False, "sha256": None, "forbidden": None, "in_work": False}
     p = Path(path_str)
-    p = (p if p.is_absolute() else adir / p)
+    if not p.is_absolute():  # relative to the attempt folder, else to the plugin root (reviewers cite plugin paths)
+        p = adir / p if (adir / p).exists() or not (PLUGIN / p).exists() else PLUGIN / p
     try:
         p = p.resolve()
     except (OSError, RuntimeError):
