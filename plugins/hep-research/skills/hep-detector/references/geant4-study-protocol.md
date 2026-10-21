@@ -163,25 +163,25 @@ suffix that maps to the same constructor (for example `FTFP_BERT_EMZ` against op
 excluded. Report the spread as a model envelope, not a sigma, with each variation's standard error (a difference
 below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
 
-## 7. Labels and handoffs (phase 1)
+## 7. Labels and handoffs
 
-- Every Geant4-derived artifact is `unvalidated` (or also `failed`), with its evidence embedded. Nothing is upgraded
-  to `validated-in-scope` in phase 1; `check_geant4_study.py label` lists only the scopes a later phase could upgrade.
+- Every Geant4 run record is `unvalidated` (or also `failed`) and stays so: a run is never validated.
 - The study record is a `computational-run`: its `inputs` are the run records (status declared, sha256) and any
   reference `dataset-record`; it carries every propagating label they bring; `extension.study` holds the benchmarks,
   convergence, variations, declared scope and gaps. Check it with `python3 <plugin root>/contracts/validate.py
   <record> --strict` and `python3 <plugin root>/contracts/dependencies.py <record> --root <project>`.
-- A response from the runs: `build_response.py build ... --status unvalidated` (it writes empty `inputs`, a
-  provenance gap listed in the study record). Inference goes to hep-statistics; plots of simulation alone are labelled
+- Phase 2 (contracts 3.1.0): `check_geant4_study.py label --upgrade` re-issues the study record as
+  `validated-in-scope` only when a scope is eligible and no gap remains. The run records then move from `inputs` to
+  `extension.evidence_records` (path and sha256; `dependencies.py` checks the hash, exit status 0, no `failed`, and
+  the output hashes, without inheriting their labels) and the record requires `core:evidence-records`. The contract
+  rule (`geant4.upgrade_*`) refuses a record without a passed reference benchmark whose negative control was caught,
+  without a passed convergence gate, or with a declared scope outside the benchmark scope; a run record is never
+  re-issued. This is the one exception to keeping labels on everything derived from them (shared stanza, point 5).
+  Validated means only: within this particle, energy, material, thickness and observable, the run agreed with an
+  independent reference to the stated tolerance, with the detection limit stated. Never relabel by hand.
+- A response from the runs: `build_response.py build ... --status unvalidated --input-record <run record>` links the
+  run records as inputs with their labels. Inference goes to hep-statistics; plots of simulation alone are labelled
   "Simulation" (hep-authoring).
-- Phase 2 (re-issuing an eligible scope as `validated-in-scope`) is deferred by maintainer decision (2026-10-21). It
-  would need all of: an explicit exception in point 5 of the shared context-resolution stanza (regenerating every
-  SKILL.md and a live routing rerun); a contract rule after 3.0.1 requiring a `study` block with a passed reference
-  benchmark whose negative control held, a passed convergence gate and a declared scope inside the benchmark scope;
-  a field that references the provisional run records by path and hash without inheriting their labels, resolved by
-  `dependencies.py`; the study spec kept in `extension.input_manifest`; `build_response.py` able to link run records
-  and carry several labels; and recorded fixtures not tied to the current contract version. Until then never relabel a
-  study record: `dependencies.py` reports `dependency.status_undeclared` for exactly that.
 
 ## 8. The Geant4 adapter
 

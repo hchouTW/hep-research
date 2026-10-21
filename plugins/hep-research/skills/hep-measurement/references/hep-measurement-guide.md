@@ -1,7 +1,7 @@
 # Measurement design and review: routing and invariants (guide)
 
-Routing and rules of the hep-measurement skill: the routing table first, then check-first corrections, working
-procedure, analysis invariants and this skill's scripts. Links are relative to this file.
+The hep-measurement routing table, then check-first corrections, working procedure, invariants and scripts.
+Links are relative to this file.
 
 ## Reference routing
 

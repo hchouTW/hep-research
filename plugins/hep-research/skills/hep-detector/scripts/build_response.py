@@ -34,7 +34,9 @@ Usage:
       --normalization {conditional_on_generated,conditional_on_selected} --acceptance {inside_matrix,outside_matrix}
       --residual {difference,ratio,inverse} --intended-use {forward_folding,unfolding,parametric_fit}
       --artifact-id ID --objective TEXT --out ARTIFACT.json [--created YYYY-MM-DD] [--provenance TEXT]
-      [--applied-separately TERM ...] [--fold TRUTH.json] [--status LABEL]
+      [--applied-separately TERM ...] [--fold TRUTH.json] [--status LABEL] [--also-status LABEL ...]
+      [--input-record ARTIFACT.json ... [--project-root DIR]]   (inputs with sha256 and status; their propagating
+      labels are carried)
   BINS.json: {"truth_edges": [...], "reco_edges": [...]}; TRUTH.json: {"truth": [...]} or a list.
 Output JSON: status (ok, refused, rejected), status_label, inputs, defaults_used, out, selection_efficiency per truth
 bin, counts, validation (contracts_validate, response_validation) and, with --fold, the folded reco spectrum.
@@ -46,6 +48,7 @@ from __future__ import annotations
 import argparse
 import bisect
 import csv
+import hashlib
 import io
 import json
 import math
@@ -62,7 +65,7 @@ from contracts.response_adapter import fold as adapter_fold  # noqa: E402
 from contracts.response_adapter import to_validator_input  # noqa: E402
 from contracts.validate import Vocabulary, validate_artifact  # noqa: E402
 from core.stats.validate_response import validate_response  # noqa: E402
-from core.status import add_status_argument, exit_code  # noqa: E402
+from core.status import ARTIFACT_LABELS as STATUSES_ALL, add_status_argument, exit_code  # noqa: E402
 
 RESIDUALS = {"difference": lambda r, t: r - t, "ratio": lambda r, t: r / t - 1.0, "inverse": lambda r, t: 1.0 / r - 1.0 / t}
 TAIL_SIGMAS = 3.0
@@ -257,7 +260,41 @@ def envelope(args, ext: dict) -> dict:
             "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(),
                          "profiles": {}},
             "provenance": {"producer_skill": "hep-detector", "created": args.created, "evidence_ids": []},
-            "inputs": [], "outputs": [], "status": [args.status], "unresolved_inputs": [], "extension": ext}
+            "inputs": linked_inputs(args), "outputs": [], "status": labels(args), "unresolved_inputs": [],
+            "extension": ext}
+
+
+STICKY = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied")
+
+
+def linked_inputs(args) -> list[dict]:
+    """--input-record: artifacts the events came from (for example Geant4 run records), as inputs with sha256 and
+    their status, refs relative to --project-root (default the folder of --out)."""
+    root = Path(args.project_root or Path(args.out).parent).resolve()
+    out = []
+    for path in args.input_record or []:
+        p = Path(path).resolve()
+        try:
+            doc = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise InputError(f"cannot read --input-record {path}: {exc}") from None
+        if not isinstance(doc, dict) or "artifact_type" not in doc:
+            raise InputError(f"--input-record {path} is not a contract artifact")
+        try:
+            ref = p.relative_to(root).as_posix()
+        except ValueError:
+            raise InputError(f"--input-record {path} is outside the project root {root}") from None
+        out.append({"ref": ref, "artifact_type": doc.get("artifact_type"), "artifact_id": doc.get("artifact_id"),
+                    "version": doc.get("contract_version"), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+                    "status": list(doc.get("status", []))})
+    return out
+
+
+def labels(args) -> list[str]:
+    """--status, every --also-status, and every propagating label the linked inputs carry."""
+    out = [args.status] + list(args.also_status or [])
+    out += [s for i in linked_inputs(args) for s in i["status"] if s in STICKY]
+    return list(dict.fromkeys(out))
 
 
 def main(argv=None) -> int:
@@ -292,6 +329,11 @@ def main(argv=None) -> int:
     p.add_argument("--applied-separately", action="append")
     p.add_argument("--fold")
     p.add_argument("--out", required=True)
+    p.add_argument("--input-record", action="append",
+                   help="an artifact the events came from (repeatable): linked as an input with sha256 and status")
+    p.add_argument("--project-root", help="refs of --input-record are relative to this folder (default: --out's)")
+    p.add_argument("--also-status", action="append", choices=STATUSES_ALL,
+                   help="a further status label of the response (repeatable)")
     add_status_argument(p)
     args = ap.parse_args(argv)
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}

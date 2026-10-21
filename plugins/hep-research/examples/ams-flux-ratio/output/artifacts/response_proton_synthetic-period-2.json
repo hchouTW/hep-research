@@ -1,5 +1,5 @@
 {
- "contract_version": "3.0.1",
+ "contract_version": "3.1.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.19.0",
-  "contracts": "3.0.1",
+  "contracts": "3.1.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

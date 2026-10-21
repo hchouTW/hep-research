@@ -2,7 +2,9 @@
 """Journey J14 (detector simulation study with independent-reference benchmarks): energy loss in 300 um of silicon.
 
 ILLUSTRATIVE. Two studies with Geant4 11.4.3 through adapters/geant4 and hep-detector's Geant4 study tools; names no
-experiment. Every Geant4 output is `unvalidated`; the final products are the two study records.
+experiment. Every Geant4 run record is `unvalidated`; the final products are the two study records, each written
+`unvalidated` and re-issued as `validated-in-scope` for its benchmarked scope (phase 2, contracts 3.1.0: the run
+records become evidence records referenced by hash; the coarse-cut scenario's upgrade is refused).
 - study-mpv.json: most probable energy loss of 10 GeV mu- (thin-layer-mpv reference benchmark against the PDG
   Landau-Vavilov Delta_p, thin-layer-width sanity), cut scan 0.1/0.03/0.01 mm, variations EM option 0 and 3, PAI, and
   FTFP_BERT_EMZ (same EM model: must be excluded from the systematic list).
@@ -260,7 +262,12 @@ def _replay(here: Path) -> dict:
                       "--convergence", f"{o}/convergence-{study}.json", "--variations", f"{o}/variations-{study}.json",
                       *[a for r in runs for a in ("--run-record", r)], "--project-root", ".",
                       "--write", f"{o}/artifacts/{study}.study.computational-run.json", "--created", CREATED)
-        results["studies"][study] = {"spec": spec["status"], "convergence_gate": conv["convergence"]["gate"],
+        _, up = call(CHECK, "label", "--spec", f"study-{study}.json", "--benchmarks", f"{o}/benchmarks-{study}.json",
+                     "--convergence", f"{o}/convergence-{study}.json", "--variations", f"{o}/variations-{study}.json",
+                     *[a for r in runs for a in ("--run-record", r)], "--project-root", ".", "--upgrade",
+                     "--write", f"{o}/artifacts/{study}.study-validated.computational-run.json", "--created", CREATED)
+        crit[f"{study}_reissued_validated_in_scope"] = up["labels"] == ["validated-in-scope"]
+        results["studies"][study] = {"spec": spec["status"], "upgrade": up["upgrade"], "convergence_gate": conv["convergence"]["gate"],
                                      "statistical_target": conv["statistical_target"]["verdict"],
                                      "benchmarks": {b["benchmark"]: {"verdict": b["verdict"],
                                                                      "relative_difference": b.get("relative_difference"),
@@ -297,6 +304,10 @@ def _replay(here: Path) -> dict:
                  f"{o}/artifacts/scenario-coarse-cut.study.computational-run.json", "--created", CREATED)
     crit["coarse_cut_stopped_by_gate"] = cc["convergence"]["gate"] == "fail" and any(
         "convergence gate not passed" in g for g in lc["gaps"])
+    _, uc = call(CHECK, "label", "--spec", f"{o}/scenarios/coarse-cut.study.json", "--benchmarks",
+                 f"{o}/benchmarks-mpv.json", "--convergence", f"{o}/scenarios/coarse-cut.convergence.json",
+                 "--variations", f"{o}/variations-mpv.json", "--project-root", ".", "--upgrade")
+    crit["coarse_cut_upgrade_refused"] = isinstance(uc["upgrade"], dict) and uc["labels"] == ["unvalidated"]
     d10 = bench_config("sp", rec, root=scen, main="density-10")
     write(scen / "density-10.config.json", d10)
     _, b10 = call(BENCH, "run", "--config", f"{o}/scenarios/density-10.config.json", "--out",
@@ -336,7 +347,8 @@ def _replay(here: Path) -> dict:
          "--normalization", "conditional_on_generated", "--acceptance", "outside_matrix", "--residual", "difference",
          "--intended-use", "forward_folding", "--artifact-id", "j14-response-mpv",
          "--objective", "deposit response to the primary energy loss, 10 GeV mu- in 300 um Si (Geant4, unvalidated)",
-         "--created", CREATED, "--status", "unvalidated", "--out", f"{o}/artifacts/response.json")
+         "--created", CREATED, "--status", "unvalidated", "--out", f"{o}/artifacts/response.json",
+         "--input-record", f"{o}/artifacts/runs/mpv-nominal.computational-run.json", "--project-root", ".")
     rcode, _ = call(VALIDATE, f"{o}/artifacts/response.json", "--strict", ok=(0, 1))
     acode, _ = call(RESP, f"{o}/artifacts/response.json", "--validate", ok=(0, 1, 2, 3))
     crit["response_validates_and_is_unvalidated"] = rcode == 0 and acode == 0 and "unvalidated" in json.loads(
@@ -351,8 +363,12 @@ def _replay(here: Path) -> dict:
     crit["artifacts_validate"] = vcode == 0 and not any(
         f.get("code") == "artifacts_dir.non_json" for f in val.get("findings", []))
     for study in ("mpv", "sp"):
-        dcode, dep = call(DEPS, f"{o}/artifacts/{study}.study.computational-run.json", "--root", ".", ok=(0, 1, 3))
-        crit[f"{study}_dependencies_ok"] = dcode == 0 and dep.get("dependency_consistency_ok") is True
+        for kind in ("study", "study-validated"):
+            dcode, dep = call(DEPS, f"{o}/artifacts/{study}.{kind}.computational-run.json", "--root", ".",
+                              ok=(0, 1, 3))
+            crit[f"{study}_{kind}_dependencies_ok"] = dcode == 0 and dep.get("dependency_consistency_ok") is True
+    dcode, _ = call(DEPS, f"{o}/artifacts/response.json", "--root", ".", ok=(0, 1, 3))
+    crit["response_linked_to_its_run"] = dcode == 0
     results["pass"] = crit
     write(out / "results.json", results)
     return results
@@ -379,8 +395,9 @@ properties tables, never from the Geant4 material dump.
   {sb['relative_difference']:+.4f}, detection limit {sb['detection_limit']:.4f}; negative control {sb['negative_control']};
   convergence gate {s['convergence_gate']}.
 
-Label of both study records: {', '.join(m['labels'])} (phase 1: no Geant4-derived artifact is upgraded). Scopes phase 2
-could re-issue: {', '.join(m['phase2_eligible'] + s['phase2_eligible']) or 'none'}.
+Label of both study records: {', '.join(m['labels'])}; each is re-issued as validated-in-scope for its benchmarked scope
+only ({', '.join(m['phase2_eligible'] + s['phase2_eligible']) or 'none'}: one particle, energy, material and thickness),
+with the run records referenced as evidence by hash (contracts 3.1.0). Nothing outside that scope is validated.
 Gaps of the MPV study: {len(m['gaps'])}; of the stopping-power study: {len(s['gaps'])} (listed in the study records).
 """
 

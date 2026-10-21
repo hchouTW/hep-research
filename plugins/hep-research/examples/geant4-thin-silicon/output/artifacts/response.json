@@ -1,5 +1,5 @@
 {
- "contract_version": "3.0.1",
+ "contract_version": "3.1.0",
  "artifact_id": "j14-response-mpv",
  "artifact_type": "response",
  "objective": "deposit response to the primary energy loss, 10 GeV mu- in 300 um Si (Geant4, unvalidated)",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.19.0",
-  "contracts": "3.0.1",
+  "contracts": "3.1.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -21,7 +21,18 @@
   "created": "2026-10-21",
   "evidence_ids": []
  },
- "inputs": [],
+ "inputs": [
+  {
+   "ref": "output/artifacts/runs/mpv-nominal.computational-run.json",
+   "artifact_type": "computational-run",
+   "artifact_id": "geant4-run-mpv-nominal",
+   "version": "3.0.1",
+   "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
  "outputs": [],
  "status": [
   "unvalidated"

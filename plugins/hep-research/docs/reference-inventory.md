@@ -199,7 +199,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
 | `front-end-electronics-and-signal-processing.md` | hep-detector | 24.9 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
-| `geant4-study-protocol.md` | hep-detector | 18.9 | no | 9 | hep-citations | 28f7d9c7 2026-10-21 |
+| `geant4-study-protocol.md` | hep-detector | 18.8 | no | 9 | hep-citations | 73b525a2 2026-10-21 |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `imaging-atmospheric-cherenkov.md` | hep-detector | 11.4 | no | 10 | hep-citations, hep-ml, hep-statistics | ebb58136 2026-10-19 |
 | `multimessenger-analysis.md` | hep-detector | 6.9 | no | 2 | - | 9257d7b5 2026-10-15 |
@@ -223,7 +223,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `correction-chain.md` | hep-measurement | 14.3 | yes | 15 | hep-detector, hep-theory | ecd989f1 2026-10-17 |
 | `cosmic-ray-measurements.md` | hep-measurement | 21.6 | yes | 5 | - | ebb58136 2026-10-19 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 12 | hep-computing | 9257d7b5 2026-10-15 |
-| `hep-measurement-guide.md` | hep-measurement | 16.4 | yes | 10 | hep-detector | ebb58136 2026-10-19 |
+| `hep-measurement-guide.md` | hep-measurement | 16.4 | yes | 10 | hep-detector | 73b525a2 2026-10-21 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 9 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a584954 2026-10-17 |
 | `rare-event-and-neutrino-measurements.md` | hep-measurement | 7.0 | no | 3 | - | c4d801c4 2026-10-17 |
@@ -275,7 +275,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 11.6 | yes | 15 | hep-detector, hep-measurement | 14eeda45 2026-10-15 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 42.8 | yes | 6 | hep-detector, hep-measurement | a73d421e 2026-10-17 |
-| `core-stats-guide.md` | hep-statistics | 15.2 | yes | 13 | hep-measurement | 497042d0 2026-10-18 |
+| `core-stats-guide.md` | hep-statistics | 15.1 | yes | 13 | hep-measurement | 73b525a2 2026-10-21 |
 | `inference-recipes.md` | hep-statistics | 20.4 | yes | 13 | hep-detector, hep-measurement | a73d421e 2026-10-17 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | hep-ml | 9257d7b5 2026-10-15 |

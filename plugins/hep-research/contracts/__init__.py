@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.0.1"
+CONTRACTS_VERSION = "3.1.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -88,6 +88,15 @@ CONTRACTS_VERSION = "3.0.1"
 # anywhere and repeated or trailing separators are dropped (was a leading './' only), so a calibration evaluated on its
 # fit sample written as 'work/./x.csv' is the error it always should have been (sci-fix SAMPLE-NAME-DOT-SEGMENTS). No
 # field, enum or capability changes.
-KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
+# 3.1.0 (hep-research 0.20.0, Geant4 phase 2) adds the optional computational-run field extension.evidence_records
+# (run records referenced by path and hash without inheriting their labels; resolved and checked by
+# contracts/dependencies.py: hash, exit_status 0, no 'failed', output hashes) and the capability core:evidence-records
+# that an artifact using it must require; and the rule family _study_upgrade (GEANT4_UPGRADE_FROM): a computational-run
+# with Geant4 study material (extension.study, extension.simulation or evidence_records) that carries
+# validated-in-scope needs a study block with a passed reference benchmark whose negative control was caught, a passed
+# convergence gate, a declared scope inside that benchmark's scope, and evidence records. Other computational-runs are
+# unaffected (none in the plugin carries validated-in-scope). A 3.0 reader refuses an upgraded record through the
+# capability instead of reading it as validated without checking its evidence.
+KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

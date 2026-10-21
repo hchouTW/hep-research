@@ -20,12 +20,12 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 492866,
+   "bytes": 492832,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 116084,
+   "bytes": 116024,
    "uncited": 0
   },
   "hep-ml": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 184913,
+   "bytes": 184837,
    "uncited": 0
   },
   "hep-theory": {
@@ -2058,7 +2058,7 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 18856,
+   "bytes": 18822,
    "lines": 225,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2075,7 +2075,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "28f7d9c7 2026-10-21"
+   "last_commit": "73b525a2 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2628,7 +2628,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16442,
+   "bytes": 16382,
    "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2646,7 +2646,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "73b525a2 2026-10-21"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -3587,7 +3587,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15178,
+   "bytes": 15102,
    "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3608,7 +3608,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "497042d0 2026-10-18"
+   "last_commit": "73b525a2 2026-10-21"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",

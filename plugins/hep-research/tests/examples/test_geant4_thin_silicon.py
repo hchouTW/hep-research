@@ -59,13 +59,19 @@ class J14Replay(unittest.TestCase):
                 else:
                     self.assertEqual(new, old)
 
-    def test_every_artifact_is_unvalidated_and_none_upgraded(self):
+    def test_only_the_reissued_study_records_are_validated_in_scope(self):
+        upgraded = set()
         for f in (self.out / "artifacts").rglob("*.json"):
             doc = json.loads(f.read_text(encoding="utf-8"))
             with self.subTest(artifact=f.name):
-                self.assertNotIn("validated-in-scope", doc["status"])
-                if doc["artifact_type"] in ("computational-run", "response"):
-                    self.assertIn("unvalidated", doc["status"])
+                if "validated-in-scope" in doc["status"]:
+                    upgraded.add(f.name)
+                    self.assertEqual(doc["status"], ["validated-in-scope"])
+                    self.assertIn("core:evidence-records", doc["required_capabilities"])
+                elif doc["artifact_type"] in ("computational-run", "response"):
+                    self.assertIn("unvalidated", doc["status"])  # run records, scenarios, response
+        self.assertEqual(upgraded, {"mpv.study-validated.computational-run.json",
+                                    "sp.study-validated.computational-run.json"})
         self.assertIn("ILLUSTRATIVE", self.r["label"])
         self.assertIn("Simulation", (self.out / "report.md").read_text(encoding="utf-8"))
 

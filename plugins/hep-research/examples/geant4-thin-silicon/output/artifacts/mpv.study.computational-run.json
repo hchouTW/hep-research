@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.0.1",
+ "contract_version": "3.1.0",
  "extension": {
   "commands": [
    "check_geant4_study.py label --write"
@@ -199,9 +199,7 @@
      0.3
     ]
    },
-   "gaps": [
-    "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
-   ],
+   "gaps": [],
    "highest_usable_label": "unvalidated",
    "phase2_upgrade_eligible_scopes": [
     {
@@ -343,7 +341,7 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "8fe995f95702bb64"
+    "version": "ae245d9b0a744299"
    },
    {
     "name": "geant4_benchmarks.py",
@@ -445,7 +443,7 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.0.1",
+  "contracts": "3.1.0",
   "plugin": "0.19.0",
   "profiles": {}
  }
