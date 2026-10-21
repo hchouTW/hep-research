@@ -190,7 +190,14 @@ Maintainer, 2026-10-21 (recommendations accepted; the numbers follow spec sectio
 3. **Release: open.** Recommended: 0.22.0 (contracts 3.3.0; the ams02-research companion needs no change), after one
    live pilot review on a real document (about 8 to 10 agent runs, spec section 13 "Recommended next step"), each
    paid run approved first.
-4. **P3 budget: open.** Recommended: stage it. A pilot of 5 documents with two arms (author self-check, four lenses;
+4. **P3 budget: staged; stage 1 run 2026-10-21** (5 documents, author self-check vs four lenses and shadows, Sonnet
+   and Haiku, 54 agent runs, about 5 million subagent tokens; report outside the repository,
+   `~/Workspace/hep-research-tasks/p3-pilot/results/REPORT.md`). Planted errors: self-check 9/12, independent review
+   10/12 (intervals overlap); facts canaries 7/7 hit and exactly corrected. It found two driver bugs, fixed in this
+   PR (one seed reused across reviews repeated nonces; plugin-relative paths were rejected), and P2 items: copies of
+   the delivered document elsewhere on the host leak it (two reviewers diffed against the plugin original), design
+   canaries never fired on documents without numbered references, empty-scope slots still cost an agent. Full P3
+   only after those. Recommended: stage it. A pilot of 5 documents with two arms (author self-check, four lenses;
    about 50 agent runs) checks the injection script and the provisional thresholds; the full design (at least 20
    documents, four arms, about 19 agent runs per document, about 500 with re-dispatches) only after it.
 5. **O04/O14: a closed agent review does not count** as a review record by a non-author reviewer and does not meet
