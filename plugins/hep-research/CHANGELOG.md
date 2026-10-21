@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.19.0 (2026-10-21)
 
 Geant4 capability (epic TASK-geant4-00 to 03, phase 1). Contracts unchanged (3.0.1); no skill description, SKILL.md or
 entry reference changed.
