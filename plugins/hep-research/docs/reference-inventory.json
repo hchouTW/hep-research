@@ -20,12 +20,12 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 494923,
+   "bytes": 495733,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 117832,
+   "bytes": 119074,
    "uncited": 0
   },
   "hep-ml": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 186011,
+   "bytes": 187654,
    "uncited": 0
   },
   "hep-theory": {
@@ -2030,8 +2030,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 24867,
-   "lines": 379,
+   "bytes": 25139,
+   "lines": 381,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2228,8 +2228,8 @@
   {
    "path": "skills/hep-detector/references/particle-identification.md",
    "owner": "hep-detector",
-   "bytes": 18189,
-   "lines": 281,
+   "bytes": 18727,
+   "lines": 287,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -2574,8 +2574,8 @@
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
    "owner": "hep-measurement",
-   "bytes": 14312,
-   "lines": 172,
+   "bytes": 15554,
+   "lines": 183,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -3703,8 +3703,8 @@
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 20336,
-   "lines": 250,
+   "bytes": 20604,
+   "lines": 252,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
@@ -3783,8 +3783,8 @@
   {
    "path": "skills/hep-statistics/references/time-series-inference.md",
    "owner": "hep-statistics",
-   "bytes": 18835,
-   "lines": 233,
+   "bytes": 20210,
+   "lines": 246,
    "linked_from_skill_md": true,
    "cited_by": [
     "examples/multi-era-fit/run.py",

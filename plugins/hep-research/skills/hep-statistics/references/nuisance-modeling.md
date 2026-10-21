@@ -140,9 +140,10 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
   not a derived number.
 - **Discrete profiling** (Dauncey, Kenzie, Wardle and Davies, arXiv:1408.6865): the choice among background
   functions is a discrete nuisance; the profile at each value of the parameter of interest is the envelope (minimum)
-  over the functions of `-2 ln L` plus a penalty per free parameter fixed in advance (one unit of `-2 ln L` per
-  parameter is the usual choice). Its coverage must be checked with toys from several functions in the family and
-  from one outside it; `skills/hep-statistics/scripts/discrete_profile.py` (EXPERIMENTAL) runs that study.
+  over the functions of `-2 ln L` plus a penalty per free parameter fixed in advance (the paper uses one unit of
+  `-2 ln L` per parameter, as in CMS H->gamma gamma, and says the size must be chosen per application). Its
+  coverage must be checked with toys from several functions in the family and from one outside it;
+  `skills/hep-statistics/scripts/discrete_profile.py` (EXPERIMENTAL) runs that study.
 
 ## MC statistics
 
@@ -161,7 +162,7 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
 - Default constraint of the MC-statistics term: pyhf `staterror` is Gaussian (`constrained_by_normal`, pyhf 0.7.6
   `modifiers/staterror.py`), while ROOT HistFactory's StatError defaults to a Poisson constraint, applied to bins whose relative MC
   uncertainty exceeds 5% (`StatErrorConfig` in `RooStats/HistFactory/Measurement.h`); Combine's
-  `autoMCStats` is Barlow-Beeston-lite with its own threshold ([Combine docs](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/)).
+  `autoMCStats` is Barlow-Beeston-lite with its own threshold ([Combine docs, Automatic statistical uncertainties](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part2/bin-wise-stats/)).
 - **Combine `autoMCStats`** (datacard line `[channel] autoMCStats threshold [include-signal] [hist-mode]`, Combine
   v11 documentation, "Automatic statistical uncertainties"): per bin it forms the effective number of unweighted
   events `n_eff = n_tot^2 / e_tot^2` from the summed background yields and their errors in quadrature; above the
@@ -219,9 +220,10 @@ Run after every fit that is used for a result, and after each pruning, smoothing
 - A refit that fails is a `failed` entry, never a silently missing row.
 
 `<plugin root>/adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py` does all of this for a pyhf
-workspace (needs pyhf; exit 1 when the nominal fit or a refit fails, 2 for rejected input, 3 without pyhf). Its impacts
-agree with independent refits of a HistFactory likelihood written without pyhf to 1e-3 relative or 1e-4 absolute
-(`tests/adapters/test_pyhf_nuisance_diagnostics.py`).
+workspace (needs pyhf; exit 1 when the nominal fit or a refit fails, 2 for rejected input, 3 without pyhf). On the
+synthetic shape workspace, its impacts, evaluated at the tool's own `theta_hat` and `sigma`, agree with refits of an
+in-repo HistFactory likelihood written without pyhf to 1e-3 relative or 1e-4 absolute
+(`tests/adapters/test_pyhf_nuisance_diagnostics.py`, skipped where pyhf is absent).
 
 ### Verified walkthrough: the synthetic shape workspace (2026-10-03, pyhf 0.7.6)
 
@@ -243,7 +245,7 @@ Combine equivalents (documentation for v11.1.0, read 2026-10-03; these modes wer
 execution scope above):
 `combine -M FitDiagnostics` writes `fit_b`, `fit_s` and `nuisances_prefit` (with `--plots` the covariance matrices,
 with `--saveShapes` the pre- and post-fit shapes), and `diffNuisances.py` prints pulls. Impacts come from
-`combineTool.py -M Impacts` (`--doInitialFit --robustFit 1`, then `--doFits`, then `-o impacts.json`) and
+`combineTool.py -M Impacts` (`--doInitialFit --robustFit 1`, then `--robustFit 1 --doFits`, then `-o impacts.json`) and
 `plotImpacts.py`; Combine defines the impact with the nuisance at its **post-fit** `+-1 sigma` and plots
-the post-fit minus pre-fit value over the uncertainty, `(theta - theta_0)/Delta theta`, with the post-fit/pre-fit width ratio
-([non-standard usage](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part3/nonstandard/)).
+the post-fit minus pre-fit value over the pre-fit uncertainty, `(theta - theta_0)/Delta theta`, with the post-fit/pre-fit
+width ratio ([non-standard usage](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part3/nonstandard/)).

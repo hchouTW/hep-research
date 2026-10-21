@@ -2393,6 +2393,25 @@ scikit-learn 1.9.1.
 | touched modules (tail_extrapolation, train_bdt, train_bdt_extensions, write_ml_artifact) | E2: 56 run, OK, 25 skipped; CI venv: 56 run, OK, 1 skipped |
 | `run_all_checks.py --no-cli --jobs 6`, E2, at `33bd6464` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4515 tests in 383 modules, 4384 pass, 0 failures, 131 skipped; profile tests all pass |
 
+## REVIEW-REFS-2 (2026-10-22; branch `fix/tune-reference-issues` from main `5350266b`)
+
+Five 0.22.0 references were the documents of the review tuning run (8-slot reviews of PR #194's mechanism, outside the
+repository). A blind Opus adjudicator per document upheld 25 issues from the findings (3 substantive) and named 2 more
+that no accepted finding raised. Each was rechecked against its source before the edit; for a partly correct finding
+only the upheld part changed. Severity S3 (guidance), ledger `documentation_fixes` REVIEW-REFS-2. Sources opened
+2026-10-22.
+
+| Reference | Issues | Main changes | Sources (locators) |
+|---|---|---|---|
+| hep-measurement `correction-chain.md` | 5 + 1 | chained factors multiply to the total with no independence; bias only from factors measured on another population (substantive); the acceptance already holds the simulated selection, so eps holds only what it does not (raised by the adjudicator); validator scope for a bare `efficiency`; Garwood/Kish interval with a target spectrum; covariance scales with products of the factors; feed-down `N_heavy` and scope defined | chain rule against the page's chained definition; `contracts/validate.py` (bare-efficiency rule); `scripts/acceptance_from_generation.py` docstring and weighted branch; `scripts/spectrum_transform.py` (`J C J^T`) |
+| hep-detector `front-end-electronics-and-signal-processing.md` | 4 | fake hits use `nu`, not `nu_0` (substantive, about 2.7e5 at 5 sigma); AC-coupling recovery on the coupling constant (also in Pileup); dark-count sigma `sqrt(20)`; timing link wording | the page's own Rice-rate bullet; numerical check of CR-RC plus CR coupling; `timing-detectors.md` sections |
+| hep-statistics `time-series-inference.md` | 5 + 1 | `periodicity_scan.py` exists, with its null's limits (substantive); a model-built covariance is not equivalent to a normalization nuisance (raised by the adjudicator); `--allow-plugin`; EXPERIMENTAL label; Horne-Baliunas white-noise scope; a pre-specified period | `scripts/periodicity_scan.py` docstring, `_null`, `_surrogate`, `scan`; `core/stats/covariance_fit.py` header (Peelle bias data -0.043, model -0.039, nuisance -0.002) and flag; `global_significance.py` header; Horne and Baliunas 1986 abstract |
+| hep-detector `particle-identification.md` | 6 | TOF ceilings are the "single" convention (quadrature 0.9-1.3 and 1.6-2.3 GeV/c); TR onsets 140 and 940 GeV/c at gamma 1e3; RICH threshold cancellation exact for photon statistics, not for chromatic and few-photon terms; velocity-based scope (also in the intro); cross-reference direction; deliverable intervals | `pid_separation_power.py --mode tof` runs (both conventions); PDG RPP 2024 sec. 34.7.3 and 35.5 eqs. 35.11-35.12 |
+| hep-statistics `nuisance-modeling.md` | 5 | Combine impacts `--robustFit 1 --doFits`; pull denominator is the pre-fit uncertainty; `autoMCStats` doc link; diagnostics test scope; discrete-profiling penalty is the paper's choice, not "the usual" | Combine docs part3/nonstandard and part2/bin-wise-stats; arXiv:1408.6865 sec. 4.3 p. 18; `tests/adapters/test_pyhf_nuisance_diagnostics.py` |
+
+Found, not fixed here: `contracts/validate.py` does not flag a bare `efficiency` next to `<ns>:efficiency` (the page
+now says so); `periodicity_scan.py` does not refit its red-noise null per surrogate and calls the result conservative.
+
 ## REVIEW-REFS (2026-10-22; branch `fix/reference-review-issues` from main `c4f7954b`)
 
 Five 0.21.0 references were the documents of the independent-review evaluation (a matched self-check against the
