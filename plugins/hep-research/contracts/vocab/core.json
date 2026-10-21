@@ -1,5 +1,5 @@
 {
- "contracts_version": "3.1.0",
+ "contracts_version": "3.2.0",
  "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
  "vocabularies": {
   "levels": {
@@ -56,6 +56,7 @@
    "published": "Formally published",
    "preliminary": "Public but preliminary",
    "synthetic": "Synthetic",
+   "simulated": "Derived from recorded simulation runs (inputs: run or study records)",
    "user-supplied": "User supplied"
   },
   "derivation_statuses": {

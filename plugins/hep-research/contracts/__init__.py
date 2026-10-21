@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.1.0"
+CONTRACTS_VERSION = "3.2.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -97,6 +97,13 @@ CONTRACTS_VERSION = "3.1.0"
 # convergence gate, a declared scope inside that benchmark's scope, and evidence records. Other computational-runs are
 # unaffected (none in the plugin carries validated-in-scope). A 3.0 reader refuses an upgraded record through the
 # capability instead of reading it as validated without checking its evidence.
+# 3.2.0 (Geant4 follow-up) adds the dataset status 'simulated' (vocab dataset_statuses) and the rule family
+# dataset.simulated_* (contracts.validate._simulated_dataset): a simulated dataset-record needs its run or study records
+# as inputs, is never 'observed', keeps 'unvalidated' unless an input carries 'validated-in-scope', and is at level
+# detector or particle-fiducial; contracts/dependencies.py requires those inputs to be computational-runs with
+# extension.simulation or extension.study (dataset.simulated_source) and warns when a communication uses a simulated
+# table (communication.simulated_source). Additive: no capability, and a 3.1 reader refuses the new status as an
+# unknown vocabulary term instead of misreading it.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

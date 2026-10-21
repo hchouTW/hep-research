@@ -6,6 +6,7 @@
   "comparison_spec.json",
   "computational_run.json",
   "dataset_record.json",
+  "dataset_simulated.json",
   "literature_record.json",
   "measurement_collider.json",
   "measurement_exposure.json",
@@ -80,6 +81,19 @@
   ],
   "dataset_binned_length.json": [
    "binned.length"
+  ],
+  "dataset_simulated_without_runs.json": [
+   "dataset.simulated_without_runs"
+  ],
+  "dataset_simulated_observed.json": [
+   "dataset.simulated_observed",
+   "dataset.simulated_unlabeled"
+  ],
+  "dataset_simulated_unfolded.json": [
+   "dataset.simulated_level"
+  ],
+  "dataset_simulated_upgrade_unlinked.json": [
+   "dataset.simulated_upgrade_unlinked"
   ],
   "statres_bayesian_no_priors.json": [
    "stats.paradigm_incomplete"

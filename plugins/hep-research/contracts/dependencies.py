@@ -180,6 +180,7 @@ class _Checker:
                          f"{ref!r} carries '{s}'; the consuming artifact must carry it too")
             if "failed" in actual:
                 self.failed_upstream = True
+            self.simulated(doc, sdoc, ref, where)
             self.checked.append(str(src.relative_to(self.root)))
             if src in trail:
                 self.add("error", where, "dependency.cycle", f"{ref!r} is already in the chain {[str(t.relative_to(self.root)) for t in trail]}")
@@ -188,6 +189,19 @@ class _Checker:
             else:
                 self.artifact(src, sdoc, trail + (src,))
         self.evidence(path, doc, trail)
+
+    def simulated(self, doc: dict, sdoc: dict, ref: str, where: str):
+        """3.2.0: the inputs of a simulated dataset-record are Geant4 run records (extension.simulation) or a study
+        record (extension.study); a communication that uses a simulated table is reminded of the 'Simulation' label."""
+        if _dataset_status(doc) == "simulated":
+            sext = sdoc.get("extension") or {}
+            if sdoc.get("artifact_type") != "computational-run" or not ({"simulation", "study"} & set(sext)):
+                self.add("error", where, "dataset.simulated_source",
+                         f"{ref!r} is not a simulation run record or study record (computational-run with "
+                         "extension.simulation or extension.study)")
+        if doc.get("artifact_type") == "communication" and _dataset_status(sdoc) == "simulated":
+            self.add("warning", where, "communication.simulated_source",
+                     f"{ref!r} is a simulated table: figures and tables from it are labelled 'Simulation' (hep-authoring)")
 
     def evidence(self, path: Path, doc: dict, trail: tuple):
         """3.1.0: extension.evidence_records, run records the artifact relies on by hash without inheriting their
@@ -234,6 +248,11 @@ class _Checker:
             self.checked.append(str(src.relative_to(self.root)))
             if src not in trail and len(trail) < MAX_DEPTH:
                 self.artifact(src, sdoc, trail + (src,))
+
+
+def _dataset_status(doc: dict):
+    """extension.status of a dataset-record (published, synthetic, simulated, ...), else None."""
+    return (doc.get("extension") or {}).get("status") if doc.get("artifact_type") == "dataset-record" else None
 
 
 def _event_keys(events) -> dict:

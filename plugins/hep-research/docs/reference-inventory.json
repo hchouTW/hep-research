@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 492992,
+   "bytes": 493424,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2058,8 +2058,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 18822,
-   "lines": 225,
+   "bytes": 19254,
+   "lines": 229,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2438,7 +2438,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "af7ad3bb 2026-10-21"
+   "last_commit": "54b9cd4b 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
