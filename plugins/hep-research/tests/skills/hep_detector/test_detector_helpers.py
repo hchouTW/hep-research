@@ -182,9 +182,10 @@ class PileupReweightTests(unittest.TestCase):
             [sys.executable, str(ROOT / 'skills/hep-detector/scripts/pileup_reweight.py'), '/tmp/does-not-exist-pileup-bundle.json'],
             capture_output=True, text=True, timeout=600
         )
-        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.returncode, 2)  # a missing input file is bad input, not a failed run (T17)
         payload = json.loads(result.stdout)
         self.assertFalse(payload['ok'])
+        self.assertEqual(payload['error_kind'], 'invalid-input')
         self.assertNotIn('Traceback', result.stderr)
 
 

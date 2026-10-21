@@ -22,7 +22,8 @@ What it does:
 Usage: hepdata_record.py --table T.json --observable OBS.json --record ins1234567 --table-name "Table 5"
        [--covariance C.json --covariance-of "stat[;sys]"] [--dependent 0] [--status published|synthetic]
        [--evidence-id ns:C01] [--dataset-id ns:name] --out DIR
-Exit 0 written and valid, 1 refused input or contract errors, 2 bad arguments. Needs PyYAML only for .yaml input.
+Exit 0 written and valid, 1 refused input or contract errors, 2 bad arguments or a missing or unreadable input file
+(status rejected). Needs PyYAML only for .yaml input.
 """
 from __future__ import annotations
 
@@ -218,7 +219,10 @@ def main(argv=None) -> int:
     opts = ap.parse_args(argv)
     try:
         doc, cov = build(opts)
-    except (OSError, ValueError, KeyError, IndexError) as exc:  # a missing input file too
+    except OSError as exc:  # a missing or unreadable input file is bad input (exit 2)
+        print(json.dumps({"status": "rejected", "reason": f"{type(exc).__name__}: {exc}"}))
+        return 2
+    except (ValueError, KeyError, IndexError) as exc:
         print(json.dumps({"status": "failed", "reason": f"{type(exc).__name__}: {exc}"}))
         return 1
     rep = validate_artifact(doc)

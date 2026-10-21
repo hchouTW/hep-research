@@ -123,12 +123,12 @@
     {
      "exit_code": 1,
      "status": "failed",
-     "meaning": "the fit input is unreadable or invalid, or a squared coefficient fitted negative (all roots null, ok false, the reason in warnings), or the result is not representable"
+     "meaning": "the fit input's content is invalid, or a squared coefficient fitted negative (all roots null, ok false, the reason in warnings), or the result is not representable"
     },
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+     "meaning": "an argument is missing, malformed or out of range, or the fit input file is missing or unreadable; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
     }
    ],
    "required_capabilities": [],

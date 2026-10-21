@@ -26,8 +26,9 @@ Validate the reweighting on a variable that was not reweighted (for example the 
 of reconstructed vertices in a control region).
 Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
 echoed as status.
-Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
-2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
+Exit codes: 0 ok; 1 the computation failed or the input file's content is invalid (JSON with ok false);
+2 invalid input: an argument, or an input file that is missing or unreadable (JSON with error_kind
+invalid-input on stdout, the usage or the reason on stderr).
 Run: python3 <plugin root>/skills/hep-detector/scripts/pileup_reweight.py <plugin root>/skills/hep-detector/assets/pileup-profiles.example.json
 """
 import argparse
@@ -208,6 +209,14 @@ def _fail(message, kind='failed'):
     return 1
 
 
+def _unreadable(path, exc):
+    """A missing or unreadable input file is bad input (exit 2, the shape of an argument error), not a failed run."""
+    message = f'cannot read {path}: {exc}'
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+    print(f'pileup_reweight.py: error: {message}', file=sys.stderr)
+    return 2
+
+
 def main():
     parser = JsonArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -271,7 +280,9 @@ def main():
                 result['mc_mean_after_reweight_note'] = (
                     'equals data_mean by construction (a bookkeeping identity, not an '
                     'independent closure); validate on a variable that was not reweighted')
-    except (OSError, ValueError, TypeError) as exc:
+    except OSError as exc:
+        return _unreadable(args.bundle, exc)
+    except (ValueError, TypeError) as exc:
         return _fail(str(exc))
     errors = []
     if empty_mc_bins:

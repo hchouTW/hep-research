@@ -32,8 +32,9 @@ fitted range (or outside --valid-range in --evaluate mode) is marked extrapolate
 <plugin root>/skills/hep-detector/references/calorimetry-ecal-hcal.md.
 Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
 echoed as status.
-Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
-2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
+Exit codes: 0 ok; 1 the computation failed or the input file's content is invalid (JSON with ok false);
+2 invalid input: an argument, or an input file that is missing or unreadable (JSON with error_kind
+invalid-input on stdout, the usage or the reason on stderr).
 Run: python3 <plugin root>/skills/hep-detector/scripts/calorimeter_resolution.py --fit <plugin root>/skills/hep-detector/assets/calorimeter-response.example.json
      python3 <plugin root>/skills/hep-detector/scripts/calorimeter_resolution.py --evaluate --stochastic 0.10 --noise 0.20 --constant 0.007 --energy 100
 """
@@ -270,6 +271,14 @@ def _fail(message, kind='failed'):
     return 1
 
 
+def _unreadable(path, exc):
+    """A missing or unreadable input file is bad input (exit 2, the shape of an argument error), not a failed run."""
+    message = f'cannot read {path}: {exc}'
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+    print(f'calorimeter_resolution.py: error: {message}', file=sys.stderr)
+    return 2
+
+
 def main():
     parser = JsonArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -323,7 +332,9 @@ def main():
                     result['warnings'].append(
                         'the requested energy is outside the fitted energy range; the value '
                         'is an extrapolation of the fitted model')
-        except (OSError, ValueError, TypeError, OverflowError, ZeroDivisionError) as exc:
+        except OSError as exc:
+            return _unreadable(args.fit, exc)
+        except (ValueError, TypeError, OverflowError, ZeroDivisionError) as exc:
             return _fail(str(exc))
         if result['weighted']:
             method = 'linear least squares in (a^2, b^2, c^2), weighted by the input uncertainties'

@@ -5,7 +5,8 @@ The contract is the hep-computing one (skills/hep-computing/SKILL.md), with the 
    main/run and every function annotated "-> int" in a tool; plugin scripts, skill assets, adapter assets, profile
    scripts).
 2. Pointed at a missing input (tests/skills/test_cli_robustness.py MISSING_FILE_ARGS), a tool prints one JSON object
-   with a "status" key and exits 1, 2 or 3. Tools with a --json switch are run with it. Scripts outside this batch's
+   with a "status" key and exits 2 (bad input), or 3 only with the status "missing-dependency" (an optional package it
+   needs before reading the input is absent). Exit 1 is a negative verdict, never a missing file. Tools with a --json switch are run with it. Scripts outside this batch's
    scope (hep-theory, hep-computing, hep-ml) that do not do this yet are listed in JSON_STATUS_FOLLOW_UP; no script
    outside the list may fail. The list is not required to match exactly: some adapters stop earlier, with a JSON
    missing-dependency status, when an optional package is absent, so what fails depends on the environment.
@@ -140,10 +141,11 @@ def run(script, args, timeout=180):
 
 
 def refused_input_violation(script):
-    """None when a missing input gives one JSON object with a status and exit 1-3, else the reason."""
+    """None when a missing input gives one JSON object with a status and exit 2 (or exit 3 with the status
+    missing-dependency), else the reason."""
     args = list(MISSING_FILE_ARGS[script]) + (["--json"] if script in HAS_JSON_SWITCH else [])
     res = run(script, args)
-    if res.returncode not in (1, 2, 3):
+    if res.returncode not in (2, 3):
         return f"exit {res.returncode}"
     try:
         doc = json.loads(res.stdout)
@@ -151,6 +153,8 @@ def refused_input_violation(script):
         return f"stdout is not JSON: {(res.stdout + res.stderr).strip()[-160:]!r}"
     if not isinstance(doc, dict) or "status" not in doc:
         return "JSON without a status key"
+    if res.returncode == 3 and doc["status"] != "missing-dependency":
+        return f"exit 3 with status {doc['status']!r}: a missing input is bad input (exit 2)"
     return None
 
 

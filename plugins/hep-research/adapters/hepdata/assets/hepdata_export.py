@@ -23,7 +23,8 @@ to upload, archive the folder's files (tar czf submission.tar.gz -C DIR .).
 
 Usage: hepdata_export.py --artifact RECORD.json --out DIR [--table-name "Table 1"] [--description TEXT]
        [--engine plain|hepdata_lib]
-Exit 0 written, 1 refused (invalid artifact, unsupported shape, missing covariance file), 2 bad arguments.
+Exit 0 written, 1 refused (invalid artifact, unsupported shape, missing covariance file), 2 bad arguments or an
+unreadable --artifact file (status rejected).
 Standard library only for the plain engine.
 """
 from __future__ import annotations
@@ -226,7 +227,12 @@ def main(argv=None) -> int:
     ap.add_argument("--permit", type=Path, help="formal-use permit (protected mode only; contracts/permit.py)")
     args = ap.parse_args(argv)
     try:
-        doc = json.loads(args.artifact.read_text(encoding="utf-8"))
+        text = args.artifact.read_text(encoding="utf-8")
+    except OSError as exc:  # a missing or unreadable input is bad input (exit 2), not a refusal
+        print(json.dumps({"status": "rejected", "reason": f"cannot read {args.artifact}: {exc}"}))
+        return 2
+    try:
+        doc = json.loads(text)
         comment, entries = build_tables(doc, args.artifact.parent, args.table_name, args.description, args.permit,
                                         [args.artifact])
         if args.engine == "hepdata_lib":
