@@ -74,6 +74,18 @@ class OwnershipCheckTests(unittest.TestCase):
         self.assertTrue(co.claims("forward-folding algorithms", "forward folding"))
         self.assertFalse(co.claims("unfolding", "folding"))
 
+    def test_plural_of_a_term_is_a_claim(self):
+        # T07: a non-letter was required right after the term, so 'BDTs' did not claim 'BDT'
+        self.assertTrue(co.claims("trains BDTs.", "BDT"))
+        self.assertTrue(co.claims("Owns: fit diagnostics and template fits", "template fit"))
+        self.assertTrue(co.claims("several boxes", "box"))
+        self.assertFalse(co.claims("BDTstyle", "BDT"))
+        self.mutate("skills/hep-statistics/SKILL.md", "unfolding algorithms and regularization,",
+                    "unfolding algorithms and regularization, BDTs,")
+        problems = co.check(self.root)
+        self.assertTrue(any("owned by hep-ml but hep-statistics claims ['BDT'] in its owns" in p for p in problems),
+                        problems)
+
 
 if __name__ == "__main__":
     unittest.main()

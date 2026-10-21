@@ -7,7 +7,8 @@ Capability-matrix row. For every topic:
 2. no other skill claims a term in its "**Owns:**" line, in the "Use when" part of its description (before "Not for")
    or in its row of the README skill table;
 3. the named capability-matrix row (if not "—") lists the owner first in its Owner column.
-Terms are matched case-insensitively, with hyphens read as spaces and on word boundaries.
+Terms are matched case-insensitively, with hyphens read as spaces and on word boundaries; a plural ('BDTs' for 'BDT')
+is a claim too.
 
 Usage: python3 tools/check_ownership.py [--root DIR]   Exit 0 ok, 1 problems. Output: JSON. Standard library only.
 """
@@ -27,7 +28,7 @@ def norm(text: str) -> str:
 
 
 def claims(text: str, term: str) -> bool:
-    return re.search(r"(?<![a-z])" + re.escape(norm(term)) + r"(?![a-z])", norm(text)) is not None
+    return re.search(r"(?<![a-z])" + re.escape(norm(term)) + r"(?:s|es)?(?![a-z])", norm(text)) is not None
 
 
 def table_rows(md: str, start: str, end: str | None = None) -> list[list[str]]:
