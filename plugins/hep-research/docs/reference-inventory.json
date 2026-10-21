@@ -1754,7 +1754,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "af7ad3bb 2026-10-21"
+   "last_commit": "28f7d9c7 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2075,7 +2075,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "3f4f9985 2026-10-21"
+   "last_commit": "28f7d9c7 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
