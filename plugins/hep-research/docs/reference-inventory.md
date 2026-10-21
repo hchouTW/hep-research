@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 35 | 298 | 0 |
 | hep-detector | 38 | 495 | 0 |
 | hep-measurement | 13 | 117 | 0 |
-| hep-ml | 42 | 193 | 0 |
+| hep-ml | 42 | 194 | 0 |
 | hep-statistics | 13 | 186 | 0 |
 | hep-theory | 18 | 121 | 0 |
 
@@ -251,10 +251,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `ml-analysis-decorrelation-and-systematics.md` | hep-ml | 7.0 | no | 4 | - | 485e96cb 2026-10-17 |
 | `ml-analysis-training-and-data.md` | hep-ml | 9.0 | no | 5 | - | 485e96cb 2026-10-17 |
 | `ml-analysis-validation-and-deployment.md` | hep-ml | 3.1 | no | 3 | - | 485e96cb 2026-10-17 |
-| `ml-analysis-weights.md` | hep-ml | 6.0 | no | 7 | - | 485e96cb 2026-10-17 |
+| `ml-analysis-weights.md` | hep-ml | 6.4 | no | 9 | - | 485e96cb 2026-10-17 |
 | `ml-analysis.md` | hep-ml | 7.5 | yes | 25 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `monitoring-and-lifecycle.md` | hep-ml | 2.1 | no | 3 | - | 9257d7b5 2026-10-15 |
-| `multivariate-analysis-bdt-nn.md` | hep-ml | 16.0 | yes | 12 | hep-detector | 32450b32 2026-10-22 |
+| `multivariate-analysis-bdt-nn.md` | hep-ml | 16.2 | yes | 12 | hep-detector | 4dddc8b7 2026-10-22 |
 | `optimization-and-training-dynamics.md` | hep-ml | 3.8 | no | 1 | - | 9257d7b5 2026-10-15 |
 | `parallelism-strategy.md` | hep-ml | 3.5 | no | 5 | - | 9257d7b5 2026-10-15 |
 | `particle-and-jet-architectures.md` | hep-ml | 8.5 | yes | 8 | - | 9257d7b5 2026-10-15 |

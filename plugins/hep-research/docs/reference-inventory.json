@@ -30,7 +30,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 193345,
+   "bytes": 193880,
    "uncited": 0
   },
   "hep-statistics": {
@@ -3147,8 +3147,8 @@
   {
    "path": "skills/hep-ml/references/ml-analysis-weights.md",
    "owner": "hep-ml",
-   "bytes": 6025,
-   "lines": 80,
+   "bytes": 6368,
+   "lines": 83,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-ml/assets/calibration.py",
@@ -3157,6 +3157,8 @@
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/hep-ml/references/uncertainty-and-calibration.md",
+    "skills/hep-ml/scripts/train_bdt.py",
+    "tests/skills/hep_ml/test_train_bdt.py",
     "tests/skills/hep_ml/test_training_pipeline.py"
    ],
    "cited_by_other_skills": [],
@@ -3218,8 +3220,8 @@
   {
    "path": "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
    "owner": "hep-ml",
-   "bytes": 15978,
-   "lines": 211,
+   "bytes": 16170,
+   "lines": 213,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -3238,7 +3240,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "4dddc8b7 2026-10-22"
   },
   {
    "path": "skills/hep-ml/references/optimization-and-training-dynamics.md",

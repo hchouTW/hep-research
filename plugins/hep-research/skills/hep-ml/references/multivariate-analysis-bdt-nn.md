@@ -151,12 +151,14 @@ HistGradientBoosting as a fallback; optional extra `bdt`; exit 3 with the pip co
   chosen on the validation objective averaged over all fold models, so the other folds' validation parts, which
   include test-fold events, inform it (not nested cross-validation).
 - **Negative weights.** XGBoost refuses negative weights ("Weights must be positive values"; checked with xgboost
-  3.4.1). `--negative-weights` has no default: `reject`, `abs-train-signed-eval` (train on |w|, which biases the
-  learned density where negative weights matter: show the effect is small) or `drop` (from training only; it biases
-  the training, and [ml-analysis-weights.md](ml-analysis-weights.md), "Negative weights", says not to use it). Yields,
-  metrics and working points always use the signed physical weights; the run records the negative fraction and sum
-  and keeps training and physical weights apart. Resampling (`assets/hep_metrics.py` `cell_resample`) is the
-  alternative that keeps positive weights without |w|.
+  3.4.1). `--negative-weights` has no default: `reject`, `abs-train-signed-eval` (train on |w|, which learns the
+  positive plus negative density) or `drop` (from training only, which learns the positive-weight density). Both
+  distort the learned density where negative weights matter, so either is acceptable only when you show the effect
+  against a signed-weight or resampled training ([ml-analysis-weights.md](ml-analysis-weights.md), "Negative weights",
+  options 3 and 4); with negative weights present the run output warns. Yields, metrics and working points always use
+  the signed physical weights; the run records the negative fraction and sum and keeps training and physical weights
+  apart. Resampling (`assets/hep_metrics.py` `cell_resample`) is the alternative that keeps positive weights without
+  |w|.
 - **Selection.** The Asimov significance Z_A = sqrt(2((s+b) ln(1+s/b) - s)) at the best cut (`asimov`), or weighted
   AUC (`auc`) only as a proxy when the yields are not set, on the validation parts; test-fold metrics are reported
   once.

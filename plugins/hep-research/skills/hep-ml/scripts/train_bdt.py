@@ -23,7 +23,10 @@ Method:
   weights  --negative-weights has no default: reject (exit 3 when a negative weight is present; XGBoost refuses
            negative weights since 1.3.0), abs-train-signed-eval (train on |w|, evaluate with signed w) or drop (drop
            negative-weight events from training; evaluation keeps every event with its signed weight). Training and
-           physical weights are recorded separately, with the fraction and sum of negative weights.
+           physical weights are recorded separately, with the fraction and sum of negative weights. Both non-reject
+           policies distort the training density (|w|, or the positive-weight events only, instead of the signed
+           weights): with negative weights present the output warns, and the effect must be shown against a
+           signed-weight or resampled training (references/ml-analysis-weights.md, "Negative weights", options 3-4).
   checks   overtraining: the weighted Kolmogorov distance between the training and test score distributions per
            class and the effective entries n_eff = (sum w)^2 / sum w^2; a distance, never a p-value. Importance
            (xgboost): gain, cover and TreeSHAP (mean |pred_contribs| on the test folds). Working points: score cuts
@@ -52,7 +55,8 @@ Input:
                   "model_format" ("json"|"ubj"), "asimov_scale" (1.0), "units" ({feature: unit}), "tree" (ROOT)}
 Output (--out-dir): fold_manifest.json, split_report.json, scores.csv (id, fold, label, weight, score), the models,
 run_summary.json (accepted by write_ml_artifact.py); JSON on stdout with "status", "status_label", "inputs",
-"defaults_used", metrics, working points, overtraining, importance and weights.
+"defaults_used", metrics, working points, overtraining, importance, weights and "warnings" (the negative-weight
+policy's training density, when negative weights are present).
 Validity: binary classification; deterministic for a fixed seed and thread count on one machine and library version.
 Exit codes: 0 ok; 2 bad input (missing column, bad config, missing --negative-weights, a fold or all validation
 parts too small); 3 incomplete or a missing dependency (numpy, xgboost or scikit-learn, pyarrow, uproot: the output
@@ -78,6 +82,8 @@ sys.path.insert(0, str(HERE.parents[2]))  # the plugin root
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 POLICIES = ("reject", "abs-train-signed-eval", "drop")
+TRAINING_DENSITY = {"drop": "the positive-weight density (negative-weight events left out of training)",
+                    "abs-train-signed-eval": "the |w| density (positive plus negative weights)"}
 BACKENDS = ("xgboost", "sklearn")
 INSTALL = {"numpy": "pip install 'numpy>=2.4,<3'",
            "xgboost": "pip install 'xgboost>=3.4,<4'  (optional extra `bdt`: pip install '.[bdt]')",
@@ -475,6 +481,17 @@ class Skl:
 
 # ---------------------------------------------------------------- run
 
+def negative_weight_warning(policy: str, n_negative: int) -> str | None:
+    """The run-output warning for a policy that trains on another density than the signed one, or None."""
+    if policy not in TRAINING_DENSITY or not n_negative:
+        return None
+    return (f"{n_negative} negative-weight event(s) under --negative-weights {policy}: the training density is "
+            f"distorted, the classifier learns {TRAINING_DENSITY[policy]}, not the signed (positive minus negative) "
+            "one; show the effect against a signed-weight or resampled training (compare weighted output "
+            "distributions or the downstream sensitivity) before using the result (references/ml-analysis-weights.md, "
+            '"Negative weights", options 3 and 4); evaluation uses the signed weights')
+
+
 def run(args) -> tuple[str, dict]:
     cfg, defaults_used = load_config(args.config)
     np = need("numpy")
@@ -724,6 +741,7 @@ def run(args) -> tuple[str, dict]:
               "rounds_per_fold": [m["rounds"] for m in models],
               "metrics": {"test": test_metrics}, "working_points": wps, "overtraining": overtraining,
               "importance": importance, "weights": weights_out, "model_hash": model_hash,
+              "warnings": [t for t in (negative_weight_warning(args.negative_weights, int(neg.sum())),) if t],
               **({"mass_sculpting": sculpting} if sculpting else {}),
               "run_summary": str((out_dir / "run_summary.json").resolve()), "defaults_used_config": defaults_used}
     return "ok", result
