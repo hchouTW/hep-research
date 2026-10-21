@@ -14,7 +14,10 @@ contributions to sigma(R)/R. See <plugin root>/skills/hep-detector/references/de
 Usage notes / assumptions: standard library only. Rigidity/momentum in GV or GeV/c,
 field in tesla, lengths in metres, point resolution in micrometres. The Gluckstern
 term assumes equally spaced measuring layers and a uniform field over the lever arm;
-it is a design-level estimate, not a substitute for a full track fit. beta: with --mass
+it is a design-level estimate, not a substitute for a full track fit. PDG states it for many
+(N >= 10) points: with fewer measuring layers it overstates the intrinsic term (by 5.4% at
+N = 4, 2.4% at N = 8), so the output also gives the exact least-squares coefficient for N
+equally spaced points and a warning; tracker_resolution.py fits the actual layer positions. beta: with --mass
 or --species (name or mass:charge) it is derived from the rigidity at every R,
 beta(R) = zR / sqrt((zR)^2 + m^2), and the crossover and the MDR are solved with beta(R)
 (beta_source "derived"); --beta fixes one value for every rigidity (and is refused when it
@@ -141,6 +144,19 @@ def intrinsic_resolution_slope(point_resolution_um, n_points, field_tesla, lever
         raise ValueError('n_points must be an integer of at least 3 (a curvature fit needs three points)')
     return (sigma_m * math.sqrt(720.0 / (n_points + 4.0))
             / (FIELD_TO_MOMENTUM * field_tesla * lever_arm_m * lever_arm_m))
+
+
+GLUCKSTERN_MIN_POINTS = 10  # PDG states the Gluckstern measurement term for N >= 10 uniformly spaced points
+
+
+def exact_equal_spacing_coefficient(n_points):
+    """Exact least-squares curvature coefficient for N equally spaced points over the lever arm (sigma_k * L^2 /
+    sigma_x), the value that sqrt(720 / (N + 4)) approximates: sqrt(720 (N-1)^3 / ((N-2) N (N+1) (N+2)));
+    8 sqrt(3/2) at N = 3."""
+    if isinstance(n_points, bool) or not isinstance(n_points, int) or n_points < 3:
+        raise ValueError('n_points must be an integer of at least 3 (a curvature fit needs three points)')
+    n = n_points
+    return math.sqrt(720.0 * (n - 1) ** 3 / ((n - 2) * n * (n + 1) * (n + 2)))
 
 
 def crossover_rigidity(ms_term, slope):
@@ -278,6 +294,13 @@ def summarize(stack, rigidity_gv, beta=1.0, charge=1, mass_gev=None, beta_source
     if not measuring:
         warnings.append(f'no layer is marked measuring: all {len(layers)} layers, passive ones included, are used '
                         'as measuring points')
+    exact = exact_equal_spacing_coefficient(n_points)
+    gluckstern = math.sqrt(720.0 / (n_points + 4.0))
+    if n_points < GLUCKSTERN_MIN_POINTS:
+        warnings.append(
+            f'{n_points} measuring layers: the Gluckstern term (stated for N >= {GLUCKSTERN_MIN_POINTS}) overstates the '
+            f'intrinsic term by {100 * (gluckstern / exact - 1):.1f}% against the exact fit of {n_points} equally spaced '
+            'points (intrinsic_coefficient); for the actual layer positions use tracker_resolution.py momentum')
     if not validity['inside']:
         warnings.append(
             f'total x/X0 = {total_budget:.4g} is outside the Highland range '
@@ -298,6 +321,9 @@ def summarize(stack, rigidity_gv, beta=1.0, charge=1, mass_gev=None, beta_source
         'rigidity_gv': rigidity_gv,
         'scattering_term': ms_term,
         'intrinsic_term': slope * rigidity_gv,
+        'intrinsic_coefficient': {'gluckstern': gluckstern, 'exact_equal_spacing': exact,
+                                  'exact_over_gluckstern_variance': (exact / gluckstern) ** 2,
+                                  'used': 'gluckstern'},
         'total_relative_resolution': resolution_at(rigidity_gv, ms_term, slope),
         'dominant_term': 'scattering' if ms_term > slope * rigidity_gv else 'intrinsic',
         'crossover_rigidity_gv': crossover,
