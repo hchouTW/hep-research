@@ -1,0 +1,11 @@
+# excerpt of a local exampleB4a run (Geant4 11.4.3, serial, seeds 1001 2002)
+<<< Geant4 Physics List simulation engine: FTFP_BERT
+ Material:    G4_Pb    density: 11.350 g/cm3   RadL:   5.613 mm   Nucl.Int.Length:  18.248 cm 
+ Material: liquidArgon    density:  1.390 g/cm3   RadL:  14.064 cm   Nucl.Int.Length:  86.076 cm 
+ Material: Galactic    density:  0.000 mg/cm3  RadL: 204310098.490 pc   Nucl.Int.Length: 3240.779 pc 
+### Run 0 starts.
+ EAbs : mean = 278.99 MeV rms = 2.18755 eV 
+### Run 1 starts.
+ EAbs : mean = 281.85 MeV rms = 2.64426 eV 
+### Run 2 starts.
+ EAbs : mean = 0 eV  rms = 0 eV 

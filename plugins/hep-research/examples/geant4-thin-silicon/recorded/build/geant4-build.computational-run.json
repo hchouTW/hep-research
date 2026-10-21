@@ -1,0 +1,248 @@
+{
+ "artifact_id": "geant4-build-2ee379e6",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.0.1",
+ "extension": {
+  "build": {
+   "cmake_cxx_standard": "17",
+   "cmake_options": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "CMAKE_CXX_STANDARD": "17",
+    "GEANT4_BUILD_MULTITHREADED": "ON",
+    "GEANT4_INSTALL_DATA": "OFF",
+    "GEANT4_USE_GDML": "OFF",
+    "GEANT4_USE_OPENGL_X11": "OFF",
+    "GEANT4_USE_QT": "OFF",
+    "GEANT4_USE_SYSTEM_CLHEP": "OFF"
+   },
+   "commit": "2ee379e6843e55b9c6bbb835d2a2b03cc998fef0",
+   "datasets": [
+    {
+     "content_sha256": "55e8055d32cb664e2f733d563eb499ab0fba9e9a6c6ed2697975fb0bf0e45fd9",
+     "envvar": "G4LEDATA",
+     "md5": "328330009df633f7e9b3a9f445745298",
+     "md5_expected": "328330009df633f7e9b3a9f445745298",
+     "md5_verified": true,
+     "n_files": 11424,
+     "name": "G4EMLOW",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4EMLOW8.8",
+     "source": "https://cern.ch/geant4-data/datasets/G4EMLOW.8.8.tar.gz",
+     "version": "8.8"
+    },
+    {
+     "content_sha256": "bfc6516a08a06ac1c7cecef004c30b222f8473af4d193d58ff06e71a5b5f76fd",
+     "envvar": "G4LEVELGAMMADATA",
+     "md5": "d80ba9bdefcf9e23487a26adfa273304",
+     "md5_expected": "d80ba9bdefcf9e23487a26adfa273304",
+     "md5_verified": true,
+     "n_files": 3366,
+     "name": "PhotonEvaporation",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/PhotonEvaporation6.1.2",
+     "source": "https://cern.ch/geant4-data/datasets/G4PhotonEvaporation.6.1.2.tar.gz",
+     "version": "6.1.2"
+    },
+    {
+     "content_sha256": "92bff015b052c5758f58c2750d81d582bfbc5c4c60c7ce37b6513fdcaedaa9f2",
+     "envvar": "G4RADIOACTIVEDATA",
+     "md5": "20d494f73d4bddabd7fab5c06a58895c",
+     "md5_expected": "20d494f73d4bddabd7fab5c06a58895c",
+     "md5_verified": true,
+     "n_files": 2965,
+     "name": "RadioactiveDecay",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/RadioactiveDecay6.1.2",
+     "source": "https://cern.ch/geant4-data/datasets/G4RadioactiveDecay.6.1.2.tar.gz",
+     "version": "6.1.2"
+    },
+    {
+     "content_sha256": "bd81a6bca55021fcbc3232c77fe99eb332ad29a7c62ac278521c74985430e02d",
+     "envvar": "G4PARTICLEXSDATA",
+     "md5": "b63341cc97a472b04ff607b094493174",
+     "md5_expected": "b63341cc97a472b04ff607b094493174",
+     "md5_verified": true,
+     "n_files": 3362,
+     "name": "G4PARTICLEXS",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4PARTICLEXS4.2",
+     "source": "https://cern.ch/geant4-data/datasets/G4PARTICLEXS.4.2.tar.gz",
+     "version": "4.2"
+    },
+    {
+     "content_sha256": "e18d419405fa873f66ab5430ab9036313b1a9960ad0eba944fdd67b27a0f478b",
+     "envvar": "G4PIIDATA",
+     "md5": "05f2471dbcdf1a2b17cbff84e8e83b37",
+     "md5_expected": "05f2471dbcdf1a2b17cbff84e8e83b37",
+     "md5_verified": true,
+     "n_files": 6189,
+     "name": "G4PII",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4PII1.3",
+     "source": "https://cern.ch/geant4-data/datasets/G4PII.1.3.tar.gz",
+     "version": "1.3"
+    },
+    {
+     "content_sha256": "ecd82faa275df12dae0cdb5965d48ae6f70c616906a4020d83bd83907cb181e3",
+     "envvar": "G4REALSURFACEDATA",
+     "md5": "ea8f1cfa8d8aafd64b71fb30b3e8a6d9",
+     "md5_expected": "ea8f1cfa8d8aafd64b71fb30b3e8a6d9",
+     "md5_verified": true,
+     "n_files": 41,
+     "name": "RealSurface",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/RealSurface2.2",
+     "source": "https://cern.ch/geant4-data/datasets/G4RealSurface.2.2.tar.gz",
+     "version": "2.2"
+    },
+    {
+     "content_sha256": "9290b9e349008463694d9eedc856c5c9344658ad71e354ca6caa80dbc6a8be52",
+     "envvar": "G4SAIDXSDATA",
+     "md5": "d5d4e9541120c274aeed038c621d39da",
+     "md5_expected": "d5d4e9541120c274aeed038c621d39da",
+     "md5_verified": true,
+     "n_files": 37,
+     "name": "G4SAIDDATA",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4SAIDDATA2.0",
+     "source": "https://cern.ch/geant4-data/datasets/G4SAIDDATA.2.0.tar.gz",
+     "version": "2.0"
+    },
+    {
+     "content_sha256": "611b73a995c1f54e863c3683cf555053968fa9f2f7ff00d3816789fd3ded2e9b",
+     "envvar": "G4ABLADATA",
+     "md5": "b25d093339e1e4532e31038653580ca6",
+     "md5_expected": "b25d093339e1e4532e31038653580ca6",
+     "md5_verified": true,
+     "n_files": 10,
+     "name": "G4ABLA",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4ABLA3.3",
+     "source": "https://cern.ch/geant4-data/datasets/G4ABLA.3.3.tar.gz",
+     "version": "3.3"
+    },
+    {
+     "content_sha256": "2da60a059be71feb0409abe06200957f25ef30eb5bc58aad73547e8969a9b337",
+     "envvar": "G4INCLDATA",
+     "md5": "72c3ff5f7f1e6f727f2ebf3b11ce784f",
+     "md5_expected": "72c3ff5f7f1e6f727f2ebf3b11ce784f",
+     "md5_verified": true,
+     "n_files": 16,
+     "name": "G4INCL",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4INCL1.3",
+     "source": "https://cern.ch/geant4-data/datasets/G4INCL.1.3.tar.gz",
+     "version": "1.3"
+    },
+    {
+     "content_sha256": "12826f019ef9c87fe3ead34957e35e4e9484ccdd960cfb76df5160f87a455db6",
+     "envvar": "G4ENSDFSTATEDATA",
+     "md5": "c500728534ce3e9fb2fefa0112eb3a74",
+     "md5_expected": "c500728534ce3e9fb2fefa0112eb3a74",
+     "md5_verified": true,
+     "n_files": 3,
+     "name": "G4ENSDFSTATE",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4ENSDFSTATE3.0",
+     "source": "https://cern.ch/geant4-data/datasets/G4ENSDFSTATE.3.0.tar.gz",
+     "version": "3.0"
+    },
+    {
+     "content_sha256": "fe83064bcd51e8191398e7934b961c66b048fc183ab463aa7a8ac18c9608c181",
+     "envvar": "G4CHANNELINGDATA",
+     "md5": "e853fbcba1e8640f7c3a437253955482",
+     "md5_expected": "e853fbcba1e8640f7c3a437253955482",
+     "md5_verified": true,
+     "n_files": 21,
+     "name": "G4CHANNELING",
+     "path": "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4CHANNELING2.0",
+     "source": "https://cern.ch/geant4-data/datasets/G4CHANNELING.2.0.tar.gz",
+     "version": "2.0"
+    }
+   ],
+   "geant4_config": {
+    "check_datasets": "G4NDL NOTFOUND ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4NDL4.7.1\nG4EMLOW INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4EMLOW8.8\nPhotonEvaporation INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/PhotonEvaporation6.1.2\nRadioactiveDecay INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/RadioactiveDecay6.1.2\nG4PARTICLEXS INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4PARTICLEXS4.2\nG4PII INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4PII1.3\nRealSurface INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/RealSurface2.2\nG4SAIDDATA INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4SAIDDATA2.0\nG4ABLA INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4ABLA3.3\nG4INCL INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4INCL1.3\nG4ENSDFSTATE INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4ENSDFSTATE3.0\nG4CHANNELING INSTALLED ~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4CHANNELING2.0",
+    "check_datasets_note": "information only: checks that the compiled-in directories exist",
+    "has_multithreading": "yes",
+    "version": "11.4.3"
+   },
+   "install_prefix": "~/Workspace/geant4-work/build-a/install",
+   "log": "~/Workspace/geant4-work/build-a/logs/build.log",
+   "multithreaded": "ON",
+   "step_exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "tag": "v11.4.3"
+  },
+  "commands": [
+   "cmake -S ~/Workspace/geant4-work/build-a/src -B ~/Workspace/geant4-work/build-a/build -DCMAKE_INSTALL_PREFIX=~/Workspace/geant4-work/build-a/install -DCMAKE_CXX_COMPILER=/usr/bin/c++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DGEANT4_BUILD_MULTITHREADED=ON -DGEANT4_INSTALL_DATA=OFF -DGEANT4_USE_GDML=OFF -DGEANT4_USE_OPENGL_X11=OFF -DGEANT4_USE_QT=OFF -DGEANT4_USE_SYSTEM_CLHEP=OFF",
+   "cmake --build ~/Workspace/geant4-work/build-a/build --parallel 8",
+   "cmake --install ~/Workspace/geant4-work/build-a/build"
+  ],
+  "environment": {
+   "hosts_contacted": [],
+   "machine": "arm64",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "python": "3.13.2",
+   "work": "~/Workspace/geant4-work/build-a"
+  },
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "geant4@2ee379e6843e55b9c6bbb835d2a2b03cc998fef0/cmake/Modules/G4DatasetDefinitions.cmake",
+    "sha256": "8481992c3fa92794e42855ca612d5956649ff70aa4537c04d8340bc147786ef9"
+   },
+   {
+    "path": "adapters/geant4/assets/build_spec.example.json",
+    "sha256": "638cedc7cc1647ac60b28bcaf71dfa976ce0e57f2f845f24517ac3d4e003015b"
+   }
+  ],
+  "output_hashes": {
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4ABLA3.3": "611b73a995c1f54e863c3683cf555053968fa9f2f7ff00d3816789fd3ded2e9b",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4CHANNELING2.0": "fe83064bcd51e8191398e7934b961c66b048fc183ab463aa7a8ac18c9608c181",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4EMLOW8.8": "55e8055d32cb664e2f733d563eb499ab0fba9e9a6c6ed2697975fb0bf0e45fd9",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4ENSDFSTATE3.0": "12826f019ef9c87fe3ead34957e35e4e9484ccdd960cfb76df5160f87a455db6",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4INCL1.3": "2da60a059be71feb0409abe06200957f25ef30eb5bc58aad73547e8969a9b337",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4PARTICLEXS4.2": "bd81a6bca55021fcbc3232c77fe99eb332ad29a7c62ac278521c74985430e02d",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4PII1.3": "e18d419405fa873f66ab5430ab9036313b1a9960ad0eba944fdd67b27a0f478b",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/G4SAIDDATA2.0": "9290b9e349008463694d9eedc856c5c9344658ad71e354ca6caa80dbc6a8be52",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/PhotonEvaporation6.1.2": "bfc6516a08a06ac1c7cecef004c30b222f8473af4d193d58ff06e71a5b5f76fd",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/RadioactiveDecay6.1.2": "92bff015b052c5758f58c2750d81d582bfbc5c4c60c7ce37b6513fdcaedaa9f2",
+   "~/Workspace/geant4-work/build-a/install/share/Geant4/data/RealSurface2.2": "ecd82faa275df12dae0cdb5965d48ae6f70c616906a4020d83bd83907cb181e3"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "tools": [
+   {
+    "name": "Geant4",
+    "source": "https://github.com/Geant4/geant4.git",
+    "version": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)"
+   },
+   {
+    "name": "cmake",
+    "version": "cmake version 4.3.2"
+   },
+   {
+    "name": "c++",
+    "version": "Apple clang version 21.0.0 (clang-2100.0.123.102)"
+   },
+   {
+    "name": "CLHEP",
+    "version": "internal (GEANT4_USE_SYSTEM_CLHEP OFF)"
+   }
+  ]
+ },
+ "inputs": [],
+ "objective": "Build Geant4 v11.4.3 (commit 2ee379e6) from source in ~/Workspace/geant4-work/build-a without system-wide installation, for adapters/geant4",
+ "outputs": [],
+ "provenance": {
+  "created": "2026-10-21",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.0.1",
+  "plugin": "0.18.1",
+  "profiles": {}
+ }
+}

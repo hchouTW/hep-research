@@ -1,0 +1,22 @@
+# Apptainer definition for adapters/geant4 (declared, not yet built or tested: the declared environment of this
+# adapter is E2, a native macOS build by geant4_build.py). Base image pinned by digest; Geant4 is cloned and built
+# inside the container by geant4_build.py with the same build spec, so nothing of Geant4 is bundled with the plugin.
+# Build (user-approved, contacts the registry, github.com and cern.ch):
+#   apptainer build geant4.sif adapters/geant4/assets/geant4.def
+Bootstrap: docker
+From: ubuntu@sha256:<pin the digest of the ubuntu:24.04 image you pull, e.g. from `docker pull ubuntu:24.04`>
+
+%files
+    build_spec.example.json /opt/hep-research-geant4/build_spec.json
+    geant4_build.py /opt/hep-research-geant4/geant4_build.py
+    g4common.py /opt/hep-research-geant4/g4common.py
+
+%post
+    apt-get update && apt-get install -y --no-install-recommends build-essential cmake git python3 libexpat1-dev ca-certificates
+    rm -rf /var/lib/apt/lists/*
+
+%environment
+    export LC_ALL=C.UTF-8
+
+%runscript
+    echo "geant4_build.py needs the plugin's core/ and contracts/ packages: bind the plugin root and run it from there"

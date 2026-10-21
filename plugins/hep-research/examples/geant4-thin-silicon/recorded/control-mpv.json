@@ -1,0 +1,5 @@
+{
+ "detection_limit_relative": 0.0826757688364182,
+ "injected": "silicon density x 1.083 on the Geant4 side (reference keeps 2.329 g/cm3)",
+ "injected_relative": 0.083
+}

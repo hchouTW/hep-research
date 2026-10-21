@@ -1,0 +1,50 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "thin-layer-mpv",
+   "binning": {
+    "bin_width_MeV": 0.002
+   },
+   "bootstrap": {
+    "resamples": 200,
+    "seed": 1
+   },
+   "csv": "../recorded/events/mpv-nominal.csv.gz",
+   "energy_MeV": 10000.0,
+   "material": "Si_study",
+   "negative_control": {
+    "csv": "../recorded/events/mpv-control.csv.gz",
+    "injected": "silicon density x 1.083 on the Geant4 side (reference keeps 2.329 g/cm3)",
+    "injected_relative": 0.083,
+    "run_record": "../recorded/runs/mpv-control.computational-run.json"
+   },
+   "particle": "mu-",
+   "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+   "slab": "Si",
+   "thickness_mm": 0.3,
+   "tolerance": {
+    "k_sigma": 3,
+    "reference_accuracy_relative": 0.03
+   }
+  },
+  {
+   "benchmark": "thin-layer-width",
+   "binning": {
+    "bin_width_MeV": 0.002
+   },
+   "bootstrap": {
+    "resamples": 200,
+    "seed": 1
+   },
+   "csv": "../recorded/events/mpv-nominal.csv.gz",
+   "energy_MeV": 10000.0,
+   "material": "Si_study",
+   "particle": "mu-",
+   "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+   "slab": "Si",
+   "thickness_mm": 0.3
+  }
+ ],
+ "schema": "geant4-benchmarks/1",
+ "study_spec": "../study-mpv.json"
+}

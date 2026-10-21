@@ -1,0 +1,107 @@
+{
+ "domain": "em",
+ "envelope_relative": 0.008882181482382366,
+ "nominal": {
+  "model_assignment": {
+   "domain": "em",
+   "em_constructor": "G4EmStandardPhysics_option4",
+   "fluctuation_model": "Urban",
+   "known": true
+  },
+  "summary": "recorded/summaries/mpv-nominal.json",
+  "value": 0.08487795698924731
+ },
+ "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
+ "observable": "mpv_loss_MeV",
+ "variations": [
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": 0.008882181482382366,
+   "resolved": false,
+   "se": 0.0009726356768136352,
+   "se_of_relative_difference": 0.013040707564557214,
+   "summary": "recorded/summaries/mpv-em-option0.json",
+   "value": 0.08563185840707965,
+   "variation": "em-option0"
+  },
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option3",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": 0.00190734100865149,
+   "resolved": false,
+   "se": 0.0006949890357379464,
+   "se_of_relative_difference": 0.010285482353135115,
+   "summary": "recorded/summaries/mpv-em-option3.json",
+   "value": 0.08503984819734346,
+   "variation": "em-option3"
+  },
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "PAI",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": 0.0043239769668421005,
+   "resolved": false,
+   "se": 0.0005306540583341415,
+   "se_of_relative_difference": 0.008822316577291692,
+   "summary": "recorded/summaries/mpv-pai.json",
+   "value": 0.08524496732026143,
+   "variation": "pai"
+  },
+  {
+   "listed": false,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "reason": "same model for this particle and energy: a false zero difference, not a systematic",
+   "relative_to_nominal": 0.0039510396400223545,
+   "resolved": false,
+   "se": 0.0006709992237991147,
+   "se_of_relative_difference": 0.010061932319748664,
+   "summary": "recorded/summaries/mpv-ftfp-bert-emz.json",
+   "value": 0.08521331316187594,
+   "variation": "ftfp-bert-emz"
+  }
+ ]
+}

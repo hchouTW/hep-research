@@ -124,6 +124,13 @@ MISSING_FILE_ARGS = {
     "adapters/crdb/assets/crdb_query.py": ["summarize", M],
     "adapters/unfolding/assets/unfold.py": ["unfold", "--input", M, "--backend", "pyunfold", "--iterations", "3"],
     "adapters/geomagnetic-backtracing/assets/otso_cutoff.py": ["dipole-check", "--replay", M],
+    "adapters/geant4/assets/geant4_build.py": ["check", "--record", M],
+    "adapters/geant4/assets/geant4_examples.py": ["extract", "--example", "B1", "--out-file", M],
+    "adapters/geant4/assets/geant4_run.py": ["run", "--spec", M, "--exe", M, "--build-record", M, "--work", OUT,
+                                             "--run-id", "r", "--record", OUT],
+    "adapters/geant4/assets/geant4_verify.py": ["balance", "--run-record", M, "--tolerance-mev", "0.001"],
+    "skills/hep-detector/scripts/check_geant4_study.py": ["spec", "--spec", M],
+    "skills/hep-detector/scripts/geant4_benchmarks.py": ["run", "--config", M],
     "adapters/hepdata/assets/hepdata_export.py": ["--artifact", M, "--out", OUT],
     "adapters/hepdata/assets/hepdata_record.py": ["--table", M, "--observable", M, "--record", "r", "--table-name", "t",
                                                   "--out", OUT],
@@ -176,6 +183,7 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-ml/scripts/find_nan_batches.py": "a synthetic dataset, no input",
     "skills/hep-ml/scripts/profile_dataloader.py": "a synthetic dataset, no input",
     "skills/hep-ml/scripts/serving_capacity.py": "numbers on the command line",
+    "adapters/geant4/assets/g4common.py": "shared helpers of the geant4 adapter scripts; only --help",
 }
 SCRIPTS = sorted(os.path.relpath(p, ROOT) for p in glob.glob(str(ROOT / "skills/*/scripts/*.py"))
                  + glob.glob(str(ROOT / "adapters/*/assets/*.py")))

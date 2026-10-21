@@ -1,5 +1,10 @@
 # Detector Simulation
 
+**Before a Geant4 study**, confirm the observable and its exact definition, the particle and energy, the source of
+the geometry and materials, the precision target or downstream use, and the Geant4 version with the documentation
+version that matches it; then follow the [Geant4 study protocol](geant4-study-protocol.md) (study spec, physics
+rules, convergence gate, independent-reference benchmarks, `unvalidated` study record).
+
 Covers propagating generated particles through a model of the apparatus and producing
 simulated readout: geometry and materials, physics processes, digitization, fast
 simulation, and - most importantly for an analysis - how to establish that the

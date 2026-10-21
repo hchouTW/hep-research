@@ -635,6 +635,9 @@ F04_CASES = {
                             '--rigidity', '10'],
     'propagate_scale_distortion.py': ['events', ASSETS / 'scale-distortion-events.example.csv', '--column', 'x',
                                       '--signed', '--edges', '1', '2', '4', '--mode', 'scale', '--scale', '0.01'],
+    'check_geant4_study.py': ['spec', '--spec', ASSETS / 'geant4-study-spec.example.json'],
+    'geant4_benchmarks.py': ['reference', '--study-spec', ASSETS / 'geant4-study-spec.example.json', '--material',
+                             'Si_study', '--particle', 'mu-', '--energy-mev', '10000', '--thickness-mm', '0.3'],
 }
 
 

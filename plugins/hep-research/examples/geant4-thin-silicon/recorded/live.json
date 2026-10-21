@@ -1,0 +1,26 @@
+{
+ "created": "2026-10-21",
+ "hosts_contacted": [],
+ "note": "Geant4 runs need no network; the build record lists the hosts its build contacted",
+ "runs": [
+  "mpv-control",
+  "mpv-cut-0.03",
+  "mpv-cut-0.1",
+  "mpv-cut-0.3",
+  "mpv-cut-1.0",
+  "mpv-density-10",
+  "mpv-em-option0",
+  "mpv-em-option3",
+  "mpv-ftfp-bert-emz",
+  "mpv-nominal",
+  "mpv-pai",
+  "sp-control",
+  "sp-cut-0.03",
+  "sp-cut-0.1",
+  "sp-density-10",
+  "sp-em-option0",
+  "sp-em-option3",
+  "sp-nominal"
+ ],
+ "work": "~/Workspace/geant4-work/j14"
+}

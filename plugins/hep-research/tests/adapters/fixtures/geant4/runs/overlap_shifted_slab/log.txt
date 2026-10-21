@@ -1,0 +1,12 @@
+# excerpt of the layered_sim log: overlap-check and status lines only
+Checking overlaps for volume Pb:0 (G4Box) ... OK! 
+Checking overlaps for volume lAr:1 (G4Box) ... 
+*** G4Exception : GeomVol1002
+          Overlap is detected for volume lAr:1 (G4Box) with Pb:0 (G4Box)
+Checking overlaps for volume Pb:0 (G4Box) ... 
+*** G4Exception : GeomVol1002
+          Overlap is detected for volume Pb:0 (G4Box) with lAr:1 (G4Box)
+Checking overlaps for volume lAr:1 (G4Box) ... 
+*** G4Exception : GeomVol1002
+          Overlap is detected for volume lAr:1 (G4Box) with Pb:0 (G4Box)
+LAYERED_SIM_STATUS {"status": "ok"}

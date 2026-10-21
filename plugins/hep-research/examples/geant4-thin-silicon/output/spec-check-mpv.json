@@ -1,0 +1,54 @@
+{
+ "blocking_missing": [],
+ "defaults_used": [
+  "rules",
+  "status"
+ ],
+ "derived": {
+  "cut_scan_values": [
+   [
+    0.1,
+    0.03,
+    0.01
+   ]
+  ],
+  "em_only": true,
+  "hadronic_list": null,
+  "min_thickness_mm": 0.3,
+  "pai_requested": false,
+  "secondary_biasing": false,
+  "step_limits": false
+ },
+ "findings": [],
+ "inputs": {
+  "command": "spec",
+  "rules": null,
+  "spec": "study-mpv.json"
+ },
+ "missing": [],
+ "rule_coverage": {
+  "applicable": 3,
+  "applicable_ids": [
+   "G4R-THIN-FLUCT",
+   "G4R-THIN-CUT-SCAN",
+   "G4R-PRECISION-EM"
+  ],
+  "fired": 0,
+  "kinds_with_a_rule": [
+   "activation",
+   "energy-deposit",
+   "energy-loss",
+   "most-probable-value",
+   "neutron-capture",
+   "neutron-dose",
+   "neutron-flux",
+   "range",
+   "stopping-power",
+   "thin-layer-width"
+  ],
+  "observable_kind": "most-probable-value",
+  "rules": 11
+ },
+ "status": "ok",
+ "status_label": "unvalidated"
+}

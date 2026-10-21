@@ -3,6 +3,40 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Geant4 capability (epic TASK-geant4-00 to 03, phase 1). Contracts unchanged (3.0.1); no skill description, SKILL.md or
+entry reference changed.
+
+- **`adapters/geant4` (new, optional, owned by hep-detector; demonstrated-on-synthetic-data).** `geant4_build.py`
+  builds Geant4 from a pinned build spec in the user's work folder (commit checked, datasets fetched with their MD5
+  checked and content-hashed, `geant4-config --check-datasets` recorded as information only) and `check`s an
+  installation against its record; `geant4_examples.py` runs B1, B4a, TestEm3 and TestEm5 unchanged through a wrapper
+  macro in serial mode and compares them with the reference outputs by the meaning of each printed number (B1 rms is
+  the SD of the run total, TestEm3 RMS is per event, TestEm5 errors are on the mean; rounding of the printed digits
+  included), with a Bonferroni threshold and reruns pooled, never substituted; `layered_sim` (this plugin's C++ program,
+  built against the user's installation) runs a layered-slab geometry from a JSON spec, one `G4PVPlacement` per slab
+  with overlap checks, UI commands applied after the physics list and before `/run/initialize`, per-event CSV with
+  deposits, leakage by category, killed-track energy booked and not booked, and the primary's fate; `geant4_run.py`
+  records every run as a `computational-run` with a `simulation` block (resolved data paths compared with the build
+  record: another copy fails the run), writes scans for `run_workflow.py`, partition chunks for `local_partition.py`,
+  reduced replay copies, and an `oracle` that calls hep-detector's `geant4_benchmarks.py`; `geant4_verify.py` checks
+  overlaps, material budget (geantino scan), energy balance (EM-only closure) and mirrors of TestEm3 and TestEm5 run 0.
+  Licence boundary: nothing of Geant4 is bundled (gate G5 wording approved for the branch; maintainers decide).
+- **hep-detector Geant4 study tools.** `references/geant4-study-protocol.md` (verification versus validation, the
+  study spec, a sourced settings checklist, the convergence gate, the validation ladder and verified pitfalls,
+  variations, labels, adapter usage); `assets/geant4-physics-rules.json` (11 rules, each with a Geant4 11.4.3 source
+  path or RPP 2024 section; a rule without a source is refused); `scripts/check_geant4_study.py` (`spec`, `summarize`,
+  `run` with the hard convergence gate, `variations` with the model assignment of each variation, `label --write` for
+  the study record, always `unvalidated` in phase 1); `scripts/geant4_benchmarks.py` (stopping power, range,
+  thin-layer MPV as reference benchmarks with negative controls at the claimed detection limit; thin-layer width,
+  multiple scattering and shower shape as sanity checks; reference inputs from the study spec, never the Geant4
+  material dump). Two behavioural examples in `skills/hep-detector/examples/`.
+- **Journey J14** (`examples/geant4-thin-silicon/`, `tests/examples/test_geant4_thin_silicon.py`): 10 GeV mu- and
+  100 MeV protons in 300 um of silicon; offline replay byte-identical to the committed output, live mode with
+  `HEP_GEANT4_LIVE_TEST=1`; 11 routing cases (`g4-*`, `j14`), capability `full-detector-simulation`, the Geant4 row of
+  the hep-citations version checks extended. Not run: live routing of the new cases (needs approval and budget).
+
 ## 0.18.1 (2026-10-21)
 
 Patch release: the sci-fix ledger review and a corrected citation. Contracts unchanged (3.0.1).

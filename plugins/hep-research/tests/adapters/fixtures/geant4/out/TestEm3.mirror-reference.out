@@ -1,0 +1,10 @@
+# excerpt of the local TestEm3 run 0 at 10000 events (Geant4 11.4.3, serial, seeds 3001 3002): the mirror reference
+### Run 0 starts.
+  Number of events processed : 10000
+         G4_Pb: 775.43 MeV :  16.26 MeV     2.097 +- 0.02097 %      54.8 cm  +- 1.28 cm 
+        G4_lAr: 214.43 MeV :  15.39 MeV     7.177 +- 0.07177 %      1.05 m   +- 7.84 cm 
+ Total energy deposited = 989.9 MeV +- 7.087 MeV
+ Energy leakage = 10.15 MeV +- 7.087 MeV
+ Mean number of gamma       509.6
+ Mean number of e-          872.3
+ Mean number of e+          53.61

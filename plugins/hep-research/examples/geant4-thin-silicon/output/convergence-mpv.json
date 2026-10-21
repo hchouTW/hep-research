@@ -1,0 +1,89 @@
+{
+ "convergence": {
+  "gate": "pass",
+  "parameters": [
+   {
+    "observables": [
+     {
+      "finest": 0.01,
+      "next": 0.03,
+      "observable": "mean_deposit_MeV",
+      "relative_change": 0.0010122140872702824,
+      "se_of_change": 0.0026243396119204334,
+      "tolerance": 0.01,
+      "verdict": "pass"
+     },
+     {
+      "finest": 0.01,
+      "next": 0.03,
+      "observable": "mpv_deposit_MeV",
+      "relative_change": 0.005101985384749215,
+      "se_of_change": 0.008071008757945997,
+      "tolerance": 0.02,
+      "verdict": "pass"
+     },
+     {
+      "finest": 0.01,
+      "next": 0.03,
+      "observable": "tail_fraction",
+      "relative_change": 0.0575730735163863,
+      "se_of_change": 0.042274889186150195,
+      "tolerance": 0.1,
+      "verdict": "pass"
+     }
+    ],
+    "parameter": "physics.default_cut_mm",
+    "two_finest": [
+     0.01,
+     0.03
+    ],
+    "values": [
+     0.01,
+     0.03,
+     0.1
+    ],
+    "verdict": "pass"
+   }
+  ],
+  "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+ },
+ "record_problems": [],
+ "statistical_target": {
+  "estimate": "seeded bootstrap of this run (200 resamples); N_needed = N (SE/target)^2, assuming SE ~ 1/sqrt(N); the delta-ray tail makes means converge slowly",
+  "events": 60000,
+  "events_needed": null,
+  "observable": "mpv_loss_MeV",
+  "relative_se": 0.006224644346985895,
+  "target": 0.01,
+  "verdict": "pass"
+ },
+ "summaries": [
+  {
+   "path": "recorded/summaries/mpv-nominal.json",
+   "role": "nominal",
+   "run_record": {
+    "artifact_id": "geant4-run-mpv-nominal",
+    "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099"
+   },
+   "sha256": "def08265bff48209fce748576047b44ec6718365bf32249f17ae7256777e38a7"
+  },
+  {
+   "path": "recorded/summaries/mpv-cut-0.1.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-run-mpv-cut-0.1",
+    "sha256": "ed00d3638b857f1a4d4624e5d2e787a5cf0d581b6abb27d4ce974764ea1fd2a6"
+   },
+   "sha256": "48f098ec85eb1372783d4f8cb726b2768151bba7c0af6631543fe946d5b25b6c"
+  },
+  {
+   "path": "recorded/summaries/mpv-cut-0.03.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-run-mpv-cut-0.03",
+    "sha256": "5c9759084290a3cb5842f6484d874328a2ca33d3764a6f6bb17bb173df74414d"
+   },
+   "sha256": "77b8545b6f1ba22f327c21c30107a2b7881e5b138131b017735895a9934188d2"
+  }
+ ]
+}

@@ -1,0 +1,48 @@
+{
+ "bootstrap": {
+  "resamples": 200,
+  "seed": 1
+ },
+ "csv": {
+  "name": "events.csv",
+  "sha256": "f01a0793bc876ef551ce97bde47fdec9557769124de772e07eae72f8fc8f20f7"
+ },
+ "data_path_problems": [],
+ "datasets_content_match": true,
+ "events": 60000,
+ "mpv_bin_MeV": 0.002,
+ "observables": {
+  "mean_deposit_MeV": {
+   "se": 0.0001843463926587264,
+   "value": 0.10545129791791649
+  },
+  "mpv_deposit_MeV": {
+   "se": 0.0007013882826336029,
+   "value": 0.08529051987767584
+  },
+  "mpv_loss_MeV": {
+   "se": 0.0006709992237991147,
+   "value": 0.08521331316187594
+  },
+  "tail_fraction": {
+   "se": 0.000569678011719811,
+   "threshold_MeV": 0.25,
+   "value": 0.019866666666666668
+  }
+ },
+ "run_record": {
+  "artifact_id": "geant4-run-mpv-ftfp-bert-emz",
+  "sha256": "ad511f00dfd64bda7f93b476479cfe55119979ad2b76135e0382b24a289e3cab"
+ },
+ "schema": "geant4-run-summary/1",
+ "settings": {
+  "default_cut_mm": 0.01,
+  "em_constructor": null,
+  "energy_MeV": 10000.0,
+  "particle": "mu-",
+  "reference_list": "FTFP_BERT_EMZ",
+  "step_limit_mm": 0.0,
+  "ui_commands": []
+ },
+ "spec_sha256": "ee890244dfed596f97506e37ab319d07155da673acb5700ba246e4c62e847770"
+}

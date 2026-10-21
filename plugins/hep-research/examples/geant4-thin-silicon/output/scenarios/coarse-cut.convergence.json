@@ -1,0 +1,74 @@
+{
+ "convergence": {
+  "gate": "fail",
+  "parameters": [
+   {
+    "observables": [
+     {
+      "finest": 0.3,
+      "next": 1.0,
+      "observable": "mean_deposit_MeV",
+      "relative_change": -0.015519646772418646,
+      "se_of_change": 0.002657277327272158,
+      "tolerance": 0.01,
+      "verdict": "fail"
+     },
+     {
+      "finest": 0.3,
+      "next": 1.0,
+      "observable": "mpv_deposit_MeV",
+      "relative_change": -0.01413921265578822,
+      "se_of_change": 0.006296806236142746,
+      "tolerance": 0.02,
+      "verdict": "pass"
+     },
+     {
+      "finest": 0.3,
+      "next": 1.0,
+      "observable": "tail_fraction",
+      "relative_change": -0.15855106888361042,
+      "se_of_change": 0.03263479306271383,
+      "tolerance": 0.1,
+      "verdict": "fail"
+     }
+    ],
+    "parameter": "physics.default_cut_mm",
+    "two_finest": [
+     0.3,
+     1.0
+    ],
+    "values": [
+     0.3,
+     1.0
+    ],
+    "verdict": "fail"
+   }
+  ],
+  "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+ },
+ "record_problems": [],
+ "statistical_target": {
+  "reason": "no nominal summary or no statistical_target.observable/relative_se",
+  "verdict": "not-checked"
+ },
+ "summaries": [
+  {
+   "path": "recorded/summaries/mpv-cut-1.0.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-run-mpv-cut-1.0",
+    "sha256": "41e617b98d62842236c5a18dd0c2bbcccf4e738160c3b27c537c7ce72cd629f8"
+   },
+   "sha256": "0cb0838ae92ebf0348dffc613c219327131cb530f7035050de1cc8085843ea91"
+  },
+  {
+   "path": "recorded/summaries/mpv-cut-0.3.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-run-mpv-cut-0.3",
+    "sha256": "4c835d3b0458b34fb1444b2a56c6f613d40c2f6e479d3cfc5170560df88e9940"
+   },
+   "sha256": "e4657e00321c1ce3ed0b1b20b930ff3f5e691ecd54c32a881517cefd93ce9801"
+  }
+ ]
+}

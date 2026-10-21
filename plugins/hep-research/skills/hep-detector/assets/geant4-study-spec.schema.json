@@ -1,0 +1,531 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "geant4-study-spec/1",
+ "title": "Geant4 study spec (hep-detector, references/geant4-study-protocol.md)",
+ "$comment": "Read by scripts/check_geant4_study.py (spec, run, variations, label) and scripts/geant4_benchmarks.py (materials). physics.layered_sim_spec is a path relative to this file to an adapters/geant4 layered_sim spec (schema layered_sim.spec/1).",
+ "type": "object",
+ "required": [
+  "schema",
+  "study_id",
+  "observable",
+  "particle",
+  "geometry_source",
+  "materials",
+  "physics",
+  "convergence_plan",
+  "statistical_target",
+  "validation_plan",
+  "variation_plan",
+  "downstream_use"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "geant4-study-spec/1"
+  },
+  "study_id": {
+   "type": "string",
+   "minLength": 1
+  },
+  "label": {
+   "type": "string",
+   "minLength": 1
+  },
+  "geant4": {
+   "type": "object",
+   "required": [
+    "version"
+   ],
+   "properties": {
+    "version": {
+     "type": "string",
+     "minLength": 1
+    },
+    "commit": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{40}$"
+    },
+    "documentation": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "version"
+      ],
+      "properties": {
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "version": {
+        "type": "string",
+        "minLength": 1
+       },
+       "relied_on": {
+        "type": "boolean"
+       }
+      },
+      "additionalProperties": false
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "observable": {
+   "type": "object",
+   "required": [
+    "name",
+    "kind",
+    "definition",
+    "unit"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "minLength": 1
+    },
+    "kind": {
+     "type": "string",
+     "enum": [
+      "energy-deposit",
+      "energy-loss",
+      "most-probable-value",
+      "stopping-power",
+      "range",
+      "thin-layer-width",
+      "angle",
+      "shower-shape",
+      "neutron-flux",
+      "neutron-dose",
+      "neutron-capture",
+      "activation",
+      "other"
+     ]
+    },
+    "domain": {
+     "enum": [
+      "em",
+      "hadronic"
+     ]
+    },
+    "definition": {
+     "type": "string",
+     "minLength": 1
+    },
+    "unit": {
+     "type": "string",
+     "minLength": 1
+    },
+    "weighted": {
+     "type": "boolean"
+    }
+   },
+   "additionalProperties": false
+  },
+  "particle": {
+   "type": "object",
+   "required": [
+    "name",
+    "energy_MeV"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "minLength": 1
+    },
+    "energy_MeV": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    }
+   },
+   "additionalProperties": false
+  },
+  "geometry_source": {
+   "type": "object",
+   "required": [
+    "kind",
+    "description"
+   ],
+   "properties": {
+    "kind": {
+     "enum": [
+      "design",
+      "published",
+      "user-supplied",
+      "synthetic"
+     ]
+    },
+    "description": {
+     "type": "string",
+     "minLength": 1
+    },
+    "uses_replicas": {
+     "type": "boolean"
+    }
+   },
+   "additionalProperties": false
+  },
+  "materials": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "density_g_cm3",
+     "z_over_a",
+     "mean_excitation_eV",
+     "sternheimer",
+     "reference_source",
+     "reference_origin"
+    ],
+    "properties": {
+     "name": {
+      "type": "string",
+      "minLength": 1
+     },
+     "density_g_cm3": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "z_over_a": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "mean_excitation_eV": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "sternheimer": {
+      "type": "object",
+      "required": [
+       "a",
+       "k",
+       "x0",
+       "x1",
+       "Cbar",
+       "delta0"
+      ],
+      "properties": {
+       "a": {
+        "type": "number"
+       },
+       "k": {
+        "type": "number"
+       },
+       "x0": {
+        "type": "number"
+       },
+       "x1": {
+        "type": "number"
+       },
+       "Cbar": {
+        "type": "number"
+       },
+       "delta0": {
+        "type": "number"
+       }
+      },
+      "additionalProperties": false
+     },
+     "reference_source": {
+      "type": "string",
+      "minLength": 1
+     },
+     "reference_origin": {
+      "enum": [
+       "independent",
+       "geant4-material-dump"
+      ]
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  "physics": {
+   "type": "object",
+   "required": [
+    "layered_sim_spec",
+    "justification"
+   ],
+   "properties": {
+    "layered_sim_spec": {
+     "type": "string",
+     "minLength": 1
+    },
+    "ui_order": {
+     "const": "after-physics-list-before-initialize"
+    },
+    "justification": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "choice",
+       "reason",
+       "source"
+      ],
+      "properties": {
+       "choice": {
+        "type": "string",
+        "minLength": 1
+       },
+       "reason": {
+        "type": "string",
+        "minLength": 1
+       },
+       "source": {
+        "type": "string",
+        "minLength": 1
+       }
+      },
+      "additionalProperties": false
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "convergence_plan": {
+   "type": "object",
+   "required": [
+    "parameters",
+    "observables",
+    "tolerance_relative"
+   ],
+   "properties": {
+    "parameters": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "values"
+      ],
+      "properties": {
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "values": {
+        "type": "array",
+        "items": {
+         "type": "number"
+        },
+        "minItems": 2
+       }
+      },
+      "additionalProperties": false
+     }
+    },
+    "observables": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "enum": [
+       "mean_deposit_MeV",
+       "mpv_deposit_MeV",
+       "tail_fraction",
+       "mpv_loss_MeV"
+      ]
+     }
+    },
+    "tolerance_relative": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "statistical_target": {
+   "type": "object",
+   "required": [
+    "observable",
+    "relative_se"
+   ],
+   "properties": {
+    "observable": {
+     "type": "string",
+     "minLength": 1
+    },
+    "relative_se": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    }
+   },
+   "additionalProperties": false
+  },
+  "validation_plan": {
+   "type": "object",
+   "required": [
+    "benchmarks",
+    "scope"
+   ],
+   "properties": {
+    "benchmarks": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "grade"
+      ],
+      "properties": {
+       "name": {
+        "enum": [
+         "stopping-power",
+         "range",
+         "thin-layer-mpv",
+         "thin-layer-width",
+         "multiple-scattering",
+         "em-shower-shape",
+         "published-data"
+        ]
+       },
+       "grade": {
+        "enum": [
+         "reference",
+         "sanity",
+         "interface"
+        ]
+       }
+      },
+      "additionalProperties": false
+     }
+    },
+    "scope": {
+     "type": "object",
+     "required": [
+      "particle",
+      "energy_MeV",
+      "material",
+      "observable"
+     ],
+     "properties": {
+      "particle": {
+       "type": "string",
+       "minLength": 1
+      },
+      "energy_MeV": {
+       "type": "array",
+       "items": {
+        "type": "number"
+       },
+       "minItems": 2,
+       "maxItems": 2
+      },
+      "material": {
+       "type": "string",
+       "minLength": 1
+      },
+      "thickness_mm": {
+       "type": "array",
+       "items": {
+        "type": "number"
+       },
+       "minItems": 2,
+       "maxItems": 2
+      },
+      "observable": {
+       "type": "string",
+       "minLength": 1
+      },
+      "beta_gamma": {
+       "type": "number"
+      }
+     },
+     "additionalProperties": false
+    }
+   },
+   "additionalProperties": false
+  },
+  "variation_plan": {
+   "type": "object",
+   "required": [
+    "observable",
+    "model_assignment_checked",
+    "variations"
+   ],
+   "properties": {
+    "observable": {
+     "type": "string",
+     "minLength": 1
+    },
+    "model_assignment_checked": {
+     "type": "boolean"
+    },
+    "variations": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "change"
+      ],
+      "properties": {
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "change": {
+        "type": "string",
+        "minLength": 1
+       }
+      },
+      "additionalProperties": false
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "downstream_use": {
+   "type": "object",
+   "required": [
+    "kind"
+   ],
+   "properties": {
+    "kind": {
+     "enum": [
+      "report",
+      "response",
+      "comparison-with-published",
+      "other"
+     ]
+    },
+    "handoff": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "note": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "reproducibility": {
+   "type": "object",
+   "required": [
+    "data_paths_recorded"
+   ],
+   "properties": {
+    "data_paths_recorded": {
+     "type": "boolean"
+    },
+    "build_record": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  }
+ }
+}

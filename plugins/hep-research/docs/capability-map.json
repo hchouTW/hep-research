@@ -172,6 +172,18 @@
    ]
   },
   {
+   "id": "full-detector-simulation",
+   "capability": "Full detector simulation with Geant4: reproducible runs, implementation checks, convergence gate, independent-reference benchmarks",
+   "owner": "hep-detector",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "G4-WP1",
+    "G4-WP2",
+    "G4-WP3"
+   ]
+  },
+  {
    "id": "fits-and-limits",
    "capability": "Likelihoods, binned and unbinned fits, template fits, intervals and limits, significance and look-elsewhere effects",
    "owner": "hep-statistics",

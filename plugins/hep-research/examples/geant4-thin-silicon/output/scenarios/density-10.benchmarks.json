@@ -1,0 +1,78 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "stopping-power",
+   "beta_gamma": 0.47383208519543973,
+   "detection_limit_relative": 0.13258186067424738,
+   "geant4": 14.956526848479669,
+   "geant4_se": 0.016420615340717,
+   "grade": "reference",
+   "inputs": {
+    "csv": "../../recorded/events/sp-density-10.csv.gz",
+    "run_record": "../../recorded/runs/sp-density-10.computational-run.json"
+   },
+   "mean_deposit_over_mean_loss": 0.9901651762825422,
+   "negative_control": {
+    "at_claimed_detection_limit": true,
+    "csv": "../../recorded/events/sp-control.csv.gz",
+    "injected": "silicon density x 1.038 on the Geant4 side (reference keeps 2.329 g/cm3)",
+    "injected_relative": 0.038,
+    "relative_difference": 0.036212073161258074,
+    "run_record": "../../recorded/runs/sp-control.computational-run.json",
+    "status": "caught",
+    "verdict_on_control": "fail"
+   },
+   "reference": {
+    "source": "Bethe mean rate, PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf), eq. 34.5, with I, Z/A, density and Sternheimer parameters from the study spec (PDG Atomic and Nuclear Properties, silicon, 2024 edition: density 2.329 g/cm3, A 28.0855(3) g/mol (Z/A = 14/28.0855), I 173.0 eV, Sternheimer coefficients a, k, x0, x1, Cbar, delta0 from the header of MUE/muE_silicon_Si.txt (refdata/pdg-silicon-2024.json); never from the Geant4 material dump)",
+    "validity": "0.1 <~ beta gamma <~ 1000, accuracy a few percent",
+    "version": "RPP 2024"
+   },
+   "reference_value": 13.632877846910775,
+   "relative_difference": 0.0970924126536375,
+   "scope": {
+    "detection_limit_relative": 0.13258186067424738,
+    "energy_MeV": 100.0,
+    "material": "Si_study",
+    "observable": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
+    "particle": "proton",
+    "thickness_mm": 0.3
+   },
+   "selection": {
+    "ended_in_hadronic_process": 0,
+    "events": 30000,
+    "excluded": 0,
+    "excluded_fraction": 0.0,
+    "used": 30000
+   },
+   "statistic": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
+   "thin_slab_approximation": {
+    "bethe_at_entry": 13.610500974233627,
+    "bethe_at_mean_energy": 13.632877846910775,
+    "relative_change": 0.0016440888340194116
+   },
+   "tolerance": {
+    "parts": {
+     "binning": 0.0,
+     "k_sigma": 3,
+     "mc_statistics": 0.0032936688123659185,
+     "reference_accuracy": 0.03
+    },
+    "total": 0.033293668812365916
+   },
+   "validation_evidence": false,
+   "verdict": "fail"
+  }
+ ],
+ "constants": {
+  "K_MeV_mol_cm2": 0.3070749269094836,
+  "m_e_MeV": 0.51099895069,
+  "source": "core/constants (CODATA 2022)"
+ },
+ "failed": [
+  "stopping-power"
+ ],
+ "gaps": [],
+ "note": "reference inputs come from the study spec; the Geant4 material dump is never read",
+ "status": "failed",
+ "status_label": "unvalidated"
+}

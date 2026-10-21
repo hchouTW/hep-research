@@ -1,0 +1,13 @@
+{
+ "note": "Build spec for adapters/geant4/assets/geant4_build.py: Geant4 11.4.3, serial-capable MT build, no visualization, internal CLHEP; the datasets an EM study and the official B1, B4a, TestEm3 and TestEm5 examples need (no G4NDL: no _HP physics list is used). Downloading contacts github.com and cern.ch and needs the user's approval.",
+ "geant4": {"repository": "https://github.com/Geant4/geant4.git", "tag": "v11.4.3",
+            "commit": "2ee379e6843e55b9c6bbb835d2a2b03cc998fef0"},
+ "cmake_options": {"CMAKE_BUILD_TYPE": "Release", "CMAKE_CXX_STANDARD": "17", "GEANT4_BUILD_MULTITHREADED": "ON",
+                   "GEANT4_USE_QT": "OFF", "GEANT4_USE_OPENGL_X11": "OFF", "GEANT4_USE_GDML": "OFF",
+                   "GEANT4_USE_SYSTEM_CLHEP": "OFF"},
+ "compiler": {"cxx": "c++"},
+ "platform": "macOS arm64 (E2)",
+ "datasets": {"source": "download", "base_url": "https://cern.ch/geant4-data/datasets",
+              "names": ["G4EMLOW", "PhotonEvaporation", "RadioactiveDecay", "G4PARTICLEXS", "G4PII", "RealSurface",
+                        "G4SAIDDATA", "G4ABLA", "G4INCL", "G4ENSDFSTATE", "G4CHANNELING"]}
+}

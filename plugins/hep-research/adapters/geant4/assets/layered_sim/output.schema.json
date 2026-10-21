@@ -1,0 +1,188 @@
+{
+ "$id": "layered_sim.output/1",
+ "title": "layered_sim per-event CSV",
+ "description": "First line '# SIMULATION', second line the column names, then one row per event (numbers printed with 10 significant digits). In MT mode each worker writes CSV.thread<N> and the master merges them sorted by event number.",
+ "first_line": "# SIMULATION",
+ "columns": [
+  {
+   "name": "event",
+   "unit": "",
+   "description": "event number (first_event + Geant4 event ID)"
+  },
+  {
+   "name": "chunk",
+   "unit": "",
+   "description": "chunk number"
+  },
+  {
+   "name": "weight",
+   "unit": "",
+   "description": "primary vertex weight"
+  },
+  {
+   "name": "primary_pdg",
+   "unit": "",
+   "description": "PDG code of the primary"
+  },
+  {
+   "name": "primary_ekin_MeV",
+   "unit": "MeV",
+   "description": "primary kinetic energy"
+  },
+  {
+   "name": "primary_x_mm",
+   "unit": "mm",
+   "description": "gun position"
+  },
+  {
+   "name": "primary_y_mm",
+   "unit": "mm",
+   "description": ""
+  },
+  {
+   "name": "primary_z_mm",
+   "unit": "mm",
+   "description": ""
+  },
+  {
+   "name": "primary_dx",
+   "unit": "",
+   "description": "primary direction cosine"
+  },
+  {
+   "name": "primary_dy",
+   "unit": "",
+   "description": ""
+  },
+  {
+   "name": "primary_dz",
+   "unit": "",
+   "description": ""
+  },
+  {
+   "name": "edep_<slab>_MeV",
+   "unit": "MeV",
+   "description": "weighted energy deposit (G4Step total energy deposit) summed over the copies of the slab, including energy G4UserSpecialCuts booked for killed tracks"
+  },
+  {
+   "name": "chlen_<slab>_mm",
+   "unit": "mm",
+   "description": "track length of charged particles in the slab"
+  },
+  {
+   "name": "plen_<slab>_mm",
+   "unit": "mm",
+   "description": "path length of the primary in the slab (geantino material-budget scans)"
+  },
+  {
+   "name": "edep_copy<i>_MeV",
+   "unit": "MeV",
+   "description": "deposit per placed copy (output.per_instance only)"
+  },
+  {
+   "name": "edep_world_MeV",
+   "unit": "MeV",
+   "description": "deposit in the world volume"
+  },
+  {
+   "name": "leak_gamma_MeV",
+   "unit": "MeV",
+   "description": "kinetic energy of photons leaving the world"
+  },
+  {
+   "name": "leak_e_MeV",
+   "unit": "MeV",
+   "description": "kinetic energy of e-+ leaving the world, plus 2 m_e c^2 for an e+ (TestEm3 convention)"
+  },
+  {
+   "name": "leak_nu_MeV",
+   "unit": "MeV",
+   "description": "neutrinos leaving the world"
+  },
+  {
+   "name": "leak_other_MeV",
+   "unit": "MeV",
+   "description": "every other particle leaving the world"
+  },
+  {
+   "name": "killed_booked_MeV",
+   "unit": "MeV",
+   "description": "kinetic energy at the start of the step in which G4UserSpecialCuts killed a track (already in the deposits; an upper bound when that step had continuous loss)"
+  },
+  {
+   "name": "killed_unbooked_MeV",
+   "unit": "MeV",
+   "description": "kinetic energy of secondaries killed at stacking (not deposited)"
+  },
+  {
+   "name": "killed_eplus",
+   "unit": "",
+   "description": "number of killed e+ (they do not annihilate)"
+  },
+  {
+   "name": "exit_ekin_MeV",
+   "unit": "MeV",
+   "description": "primary kinetic energy when it leaves the world (0 if it did not)"
+  },
+  {
+   "name": "primary_eloss_MeV",
+   "unit": "MeV",
+   "description": "primary kinetic energy minus exit_ekin_MeV"
+  },
+  {
+   "name": "exit_dx",
+   "unit": "",
+   "description": "primary direction cosines when it leaves the world"
+  },
+  {
+   "name": "exit_dy",
+   "unit": "",
+   "description": ""
+  },
+  {
+   "name": "exit_dz",
+   "unit": "",
+   "description": ""
+  },
+  {
+   "name": "primary_fate",
+   "unit": "",
+   "description": "+1 transmitted (left going +x), -1 reflected, 0 stopped or absorbed"
+  },
+  {
+   "name": "primary_end_x_mm",
+   "unit": "mm",
+   "description": "x where the primary ended or left"
+  },
+  {
+   "name": "primary_end_process",
+   "unit": "",
+   "description": "process that ended the primary (Transportation when it left the world; none if it never ended)"
+  },
+  {
+   "name": "n_sec_gamma",
+   "unit": "",
+   "description": "number of secondary photons"
+  },
+  {
+   "name": "n_sec_electron",
+   "unit": "",
+   "description": ""
+  },
+  {
+   "name": "n_sec_positron",
+   "unit": "",
+   "description": ""
+  },
+  {
+   "name": "n_sec_other",
+   "unit": "",
+   "description": ""
+  }
+ ],
+ "side_outputs": {
+  "materials.json": "density, radiation length, nuclear interaction length, mean excitation energy, electron density and elements of every material in use, from the Geant4 material table after /run/initialize: for the material-budget closure only, never a reference input",
+  "datapaths.json": "Geant4 version and the dataset variables before initialisation and after the run (the paths Geant4 resolved)",
+  "stdout": "the Geant4 log; 'LAYERED_SIM_UI \"<command>\" <code>' per UI command and a last line 'LAYERED_SIM_STATUS {json}'"
+ }
+}

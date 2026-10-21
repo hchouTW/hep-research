@@ -1,0 +1,113 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "thin-layer-mpv",
+   "deposit_minus_loss_relative": 0.0015604862756076893,
+   "detection_limit_relative": 0.0826757688364182,
+   "estimator": "least-squares parabola vertex through the fullest bin and two bins on each side, bin width 0.002 MeV, bins from 0",
+   "geant4": 0.08487795698924731,
+   "geant4_se": 0.0005283350951568302,
+   "grade": "reference",
+   "inputs": {
+    "csv": "../recorded/events/mpv-nominal.csv.gz",
+    "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
+   },
+   "landau": {
+    "beta_gamma": 95.63942246882289,
+    "delta": 4.788136775711048,
+    "delta_p_MeV": 0.08368862031620586,
+    "kappa": 1.1013920613450275e-06,
+    "xi_MeV": 0.005348088408125617
+   },
+   "most_probable_deposit_MeV": 0.08501040787623065,
+   "negative_control": {
+    "at_claimed_detection_limit": true,
+    "csv": "../recorded/events/mpv-control.csv.gz",
+    "injected": "silicon density x 1.083 on the Geant4 side (reference keeps 2.329 g/cm3)",
+    "injected_relative": 0.083,
+    "relative_difference": 0.09977568431244103,
+    "run_record": "../recorded/runs/mpv-control.computational-run.json",
+    "status": "caught",
+    "verdict_on_control": "fail"
+   },
+   "reference": {
+    "source": "most probable energy loss Delta_p, PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf), eq. 34.12 (j = 0.200), delta(beta gamma) from Sternheimer parameters in the study spec (PDG Atomic and Nuclear Properties, silicon, 2024 edition: density 2.329 g/cm3, A 28.0855(3) g/mol (Z/A = 14/28.0855), I 173.0 eV, Sternheimer coefficients a, k, x0, x1, Cbar, delta0 from the header of MUE/muE_silicon_Si.txt (refdata/pdg-silicon-2024.json); never from the Geant4 material dump)",
+    "validity": "kappa = xi / W_max < 0.05; RPP gives no numerical thickness range or accuracy: the thickness of validity and the accuracy are declared in the study spec",
+    "version": "RPP 2024"
+   },
+   "reference_value": 0.08368862031620586,
+   "relative_difference": 0.01421145035666392,
+   "scope": {
+    "detection_limit_relative": 0.0826757688364182,
+    "energy_MeV": 10000.0,
+    "material": "Si_study",
+    "observable": "most probable energy loss of transmitted primaries (MeV)",
+    "particle": "mu-",
+    "thickness_mm": 0.3
+   },
+   "selection": {
+    "ended_in_hadronic_process": 0,
+    "events": 60000,
+    "excluded": 0,
+    "excluded_fraction": 0.0,
+    "used": 60000
+   },
+   "statistic": "most probable energy loss of transmitted primaries (MeV)",
+   "tolerance": {
+    "parts": {
+     "binning": 0.006898790624199416,
+     "k_sigma": 3,
+     "mc_statistics": 0.01893931671333292,
+     "reference_accuracy": 0.03
+    },
+    "total": 0.05583810733753233
+   },
+   "validation_evidence": true,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "thin-layer-width",
+   "geant4": 0.028,
+   "grade": "sanity",
+   "inputs": {
+    "csv": "../recorded/events/mpv-nominal.csv.gz",
+    "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
+   },
+   "plausibility_window": "0.5 to 3 x the Landau width (thin layers are wider than 4 xi, RPP 2024)",
+   "reference": {
+    "source": "Landau FWHM 4 xi, PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)",
+    "validity": "sanity only",
+    "version": "RPP 2024"
+   },
+   "reference_value": 0.021392353632502466,
+   "relative_difference": 0.3088788864007095,
+   "scope": {
+    "energy_MeV": 10000.0,
+    "material": "Si_study",
+    "observable": "FWHM of the deposit distribution (MeV)",
+    "particle": "mu-",
+    "thickness_mm": 0.3
+   },
+   "selection": {
+    "ended_in_hadronic_process": 0,
+    "events": 60000,
+    "excluded": 0,
+    "excluded_fraction": 0.0,
+    "used": 60000
+   },
+   "statistic": "FWHM of the deposit distribution (MeV)",
+   "validation_evidence": false,
+   "verdict": "plausible"
+  }
+ ],
+ "constants": {
+  "K_MeV_mol_cm2": 0.3070749269094836,
+  "m_e_MeV": 0.51099895069,
+  "source": "core/constants (CODATA 2022)"
+ },
+ "failed": [],
+ "gaps": [],
+ "note": "reference inputs come from the study spec; the Geant4 material dump is never read",
+ "status": "ok",
+ "status_label": "unvalidated"
+}
