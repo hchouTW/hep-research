@@ -81,6 +81,30 @@ class Budget(unittest.TestCase):
         code, out = measure(skill(5000, desc_chars=1025))
         self.assertEqual(code, 1)
 
+    def test_block_scalar_description_is_measured_in_full(self):
+        # T01: a folded or literal block (or a continued plain value) was read as its first line only, so a
+        # 2,000-character description measured as 2 characters and passed the 1,024 limit
+        long = " ".join(["word"] * 400)  # 1,999 characters
+        for head in ("description: >-", "description: |", "description: >", f"description: {long[:40]}"):
+            rest = long if not head.endswith(long[:40]) else long[41:]
+            text = f"---\nname: synthetic\n{head}\n  {rest[:1000]}\n  {rest[1000:]}\n---\n# body\n"
+            with self.subTest(head=head[:20]):
+                code, out = measure(text)
+                self.assertEqual(code, 1, out)
+                self.assertTrue(any("description_chars=" in o for o in out["over_budget"]), out["over_budget"])
+                self.assertGreater(out["skills"][0]["description_chars"], 1024)
+        short = "---\nname: synthetic\ndescription: >-\n  Use when a short\n  folded description.\n---\n# body\n"
+        code, out = measure(short)
+        self.assertEqual((code, out["skills"][0]["description_chars"]), (0, len("Use when a short folded description.")))
+
+    def test_line_count_without_final_newline(self):
+        # T02: lines were counted as newline characters, so 501 lines without a final newline counted as 500
+        text = skill(9000, n_lines=501)[:-1]
+        self.assertEqual(len(text.splitlines()), 501)
+        code, out = measure(text)
+        self.assertEqual(code, 1)
+        self.assertIn("synthetic lines=501 > 500", out["over_budget"])
+
 
 if __name__ == "__main__":
     unittest.main()

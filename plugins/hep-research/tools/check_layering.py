@@ -15,7 +15,10 @@ Text rules:
     example blocks (<!-- example ... --> ... <!-- /example --> in Markdown;
     '# example-begin' ... '# example-end' in Python) or a whitelist entry.
   - No core schema requires a collider-only or AMS-only field.
-  - Every module or package in core/ has a steward in core/OWNERS.json.
+  - Every module or package in core/ has a steward in core/OWNERS.json, and the steward is a skill name
+    (contracts.skill_names.SKILLS).
+Imports are read from the AST: static imports, relative imports resolved against the file's package, and
+constant-string importlib.import_module() / __import__() calls; fixtures/ folders outside tests/ are not exempt.
 
 Usage: python3 tools/check_layering.py [--root PLUGIN_ROOT]
 Exit 0 clean, 1 violations. Output: JSON with file, line, rule, message per violation.
@@ -27,6 +30,9 @@ import json
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from contracts.skill_names import SKILLS  # noqa: E402  (tools/ may import contracts)
 
 MANDATORY = {"numpy", "scipy", "matplotlib", "sympy", "mpmath"}
 INTERNAL = {"core", "contracts", "skills", "profiles", "adapters", "tools", "tests", "examples"}
@@ -50,13 +56,30 @@ def component(rel: Path) -> tuple[str, str | None]:
     return top, None
 
 
-def imported_modules(tree: ast.AST):
+def imported_modules(tree: ast.AST, rel: Path | None = None):
+    """(line, dotted module) for static imports, relative imports resolved against the file's package (rel, a path
+    under the plugin root; a level that climbs above the top folder lands at the plugin root, where 'contracts' etc.
+    live), and constant-string importlib.import_module(...) / __import__(...) calls."""
+    package = list(rel.parent.parts if rel is not None else ())
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for a in node.names:
                 yield node.lineno, a.name
         elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
             yield node.lineno, node.module
+        elif isinstance(node, ast.ImportFrom) and node.level > 0 and rel is not None:
+            base = package[:max(len(package) - (node.level - 1), 0)]
+            if node.module:
+                yield node.lineno, ".".join(base + [node.module])
+            else:
+                for a in node.names:
+                    yield node.lineno, ".".join(base + [a.name])
+        elif isinstance(node, ast.Call) and node.args and isinstance(node.args[0], ast.Constant) \
+                and isinstance(node.args[0].value, str) and not node.args[0].value.startswith("."):
+            f = node.func
+            name = f.attr if isinstance(f, ast.Attribute) else f.id if isinstance(f, ast.Name) else ""
+            if name in ("import_module", "__import__"):
+                yield node.lineno, node.args[0].value
 
 
 def blank_examples(text: str, pattern: re.Pattern) -> str:
@@ -106,14 +129,17 @@ def check(root: Path) -> list[dict]:
     for py in sorted(root.rglob("*.py")):
         rel = py.relative_to(root)
         comp, sub = component(rel)
-        if comp in ("tools", "tests", "examples") or "fixtures" in rel.parts:
-            continue
+        if comp in ("tools", "tests", "examples"):
+            continue  # a fixtures/ folder elsewhere is scanned like any other code (T03)
         try:
             tree = ast.parse(py.read_text(encoding="utf-8"))
         except SyntaxError as exc:
             add(py, exc.lineno or 0, "parse", f"cannot parse: {exc.msg}")
             continue
-        for line, mod in imported_modules(tree):
+        own = (comp, *(sub.split("/") if sub else ()))  # a relative import inside the own component is internal
+        for line, mod in imported_modules(tree, rel):
+            if comp in ("skills", "profiles", "adapters") and tuple(mod.split(".")[:len(own)]) == own:
+                continue
             top = mod.split(".")[0]
             if comp in ("core", "contracts"):
                 allowed = {"core"} | ({"contracts"} if comp == "contracts" else set())
@@ -178,6 +204,9 @@ def check(root: Path) -> list[dict]:
                 continue
             if name not in owners:
                 add(item, 0, "steward", f"core module '{name}' has no steward in core/OWNERS.json")
+            elif (owners[name] or {}).get("steward") not in SKILLS:
+                add(item, 0, "steward", f"core module '{name}' has steward {(owners[name] or {}).get('steward')!r} in "
+                    f"core/OWNERS.json, which is not a skill name ({', '.join(SKILLS)})")
     return v
 
 

@@ -27,6 +27,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 QUICK_LOAD_BYTES = 25600  # SKILL.md plus its entry reference (B-03)
 ENTRY_REF = re.compile(r"\((references/[^)#\s]+\.md)")
+BLOCK_SCALAR = re.compile(r"[>|][-+]?[1-9]?")
+
+
+def skill_description(text: str) -> str:
+    """The frontmatter description in full: a quoted or plain one-line value, or a folded/literal block ('>-', '|')
+    or a plain value continued on indented lines, joined with single spaces (as YAML folds them, near enough)."""
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        m = re.match(r"description:\s*(.*?)\s*$", line)
+        if not m:
+            continue
+        head, cont = m.group(1), []
+        for nxt in lines[i + 1:]:
+            if nxt.strip() and not nxt[:1].isspace():
+                break
+            cont.append(nxt.strip())
+        parts = cont if BLOCK_SCALAR.fullmatch(head) else [head, *cont]
+        value = " ".join(p for p in parts if p)
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        return value
+    return ""
+
+
 BUDGET = {"skill_bytes_target": 12288, "skill_bytes_max": 16384, "skill_lines_max": 500, "description_chars": 1024, "registry_bytes": 3072, "index_bytes": 4096}
 
 
@@ -55,9 +79,8 @@ def main(argv=None) -> int:
     rows, over, warnings = [], [], []
     for skill in sorted((root / "skills").glob("*/SKILL.md")):
         text = skill.read_text(encoding="utf-8")
-        m = re.search(r'^description:\s*"?(.*?)"?\s*$', text, re.M)
-        desc = m.group(1) if m else ""
-        row = {"skill": skill.parent.name, "lines": text.count("\n"), "bytes": len(text.encode()), "description_chars": len(desc)}
+        desc = skill_description(text)
+        row = {"skill": skill.parent.name, "lines": len(text.splitlines()), "bytes": len(text.encode()), "description_chars": len(desc)}
         entry = ENTRY_REF.search(text.split("## Resources", 1)[1]) if "## Resources" in text else None
         if entry and (skill.parent / entry.group(1)).is_file():
             row["entry_reference"] = entry.group(1)

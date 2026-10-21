@@ -3,10 +3,13 @@
 hep-research 0.11.0 renamed four skills (contracts 2.9.0) and 0.16.0 split the communication skill into hep-citations
 and hep-authoring (contracts 2.13.0); through 0.16.x the old names were deprecated aliases. Contracts 3.0.0
 (hep-research 0.17.0) retires them: a skill name that is not in SKILLS is an error, `skill.unknown_name`, in an
-artifact (provenance.producer_skill, handoff.to_skill, an extension handoff) and in a profile's related_skills. For a
-retired name the message says to migrate with hep-research 0.16.x, whose contracts/migrate_skill_names.py rewrites
-them. The retired names are kept only as SHA-256 hashes (RETIRED_SHA256), so the maintained tree never spells them;
-tools/check_retired_names.py fails on any maintained file that does.
+artifact (provenance.producer_skill, handoff.to_skill, an extension handoff) and in a profile's related_skills, with
+one exception: an unknown name that is not a retired one under an extension 'handoff' key is a warning,
+`skill.unknown_handoff` (in an ml-artifact under the ml rules of contracts 2.8.0 it is the error `ml.handoff_unknown`
+instead), so artifacts that passed before keep their outcome. For a retired name the message says to migrate with
+hep-research 0.16.x, whose contracts/migrate_skill_names.py rewrites them. The retired names are kept only as SHA-256
+hashes (RETIRED_SHA256), so the maintained tree never spells them; tools/check_retired_names.py fails on any maintained
+file that does.
 
 This module and `contracts/schemas/skill_names.json` (its enum is SKILLS) are the only places that define the names;
 tests/contracts/test_skill_names.py checks that they agree.
@@ -28,6 +31,7 @@ RETIRED_SHA256 = frozenset({
 })
 RETIRED_IN = "0.17.0"  # the hep-research release that retired them (contracts 3.0.0)
 CODE = "skill.unknown_name"
+HANDOFF_CODE = "skill.unknown_handoff"  # warning: an unknown, not retired, extension handoff
 
 
 def is_retired(name: Any) -> bool:
@@ -71,14 +75,17 @@ def artifact_name_fields(doc: Any):
 
 
 def check_artifact(doc: Any, rep: Any) -> None:
-    """Report each skill name an artifact records that is not a current skill. producer_skill and extension handoffs
-    are also checked by the schema enum and the ml-artifact rules; this adds the finding only for a retired name there,
-    and for any unknown handoff.to_skill, which no other rule checks."""
+    """Report each skill name an artifact records that is not a current skill. producer_skill is also checked by the
+    schema enum and ml-artifact extension handoffs by the ml rules (ml.handoff_unknown); this adds the error for a
+    retired name anywhere and for any unknown handoff.to_skill, and a warning (HANDOFF_CODE) for another unknown
+    extension handoff (triage T15); contracts.validate drops that warning when the ml rules report the same name."""
     for path, value in artifact_name_fields(doc):
         if value in SKILLS:
             continue
         if is_retired(value) or path == "$.handoff.to_skill":
             rep.add("error", path, CODE, message(path.rsplit(".", 1)[-1], value))
+        elif path.startswith("$.extension"):
+            rep.add("warning", path, HANDOFF_CODE, message(path.rsplit(".", 1)[-1], value))
 
 
 def check_profile(prof: Any, rep: Any, where: str) -> None:

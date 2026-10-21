@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -29,6 +28,9 @@ ROOT = Path(__file__).resolve().parents[1] / "skills" / "hep-computing"
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT / "scripts"))
 from lint_task import REQUIRED_TEMPLATE_SECTIONS, check_template_sections  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from measure_entrypoints import skill_description  # noqa: E402
 
 REQUIRED_PATHS = [
     "SKILL.md",
@@ -64,9 +66,9 @@ def problems_of(root: Path) -> list[str]:
     for field in ("name:", "description:"):
         if field not in frontmatter:
             return [f"SKILL.md frontmatter is missing {field}"]
-    match = re.search(r'^description:\s*"?(.*?)"?\s*$', frontmatter, re.MULTILINE)
-    if match and len(match.group(1)) > DESCRIPTION_LIMIT:
-        return [f"SKILL.md description is {len(match.group(1))} characters; limit is {DESCRIPTION_LIMIT}"]
+    description = skill_description(frontmatter)  # a folded or literal block is measured in full
+    if len(description) > DESCRIPTION_LIMIT:
+        return [f"SKILL.md description is {len(description)} characters; limit is {DESCRIPTION_LIMIT}"]
     template = (root / "assets/task-template.md").read_text(encoding="utf-8")
     return [f"assets/task-template.md section contract violated: {p}" for p in check_template_sections(template)]
 

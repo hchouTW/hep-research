@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -245,6 +246,15 @@ class RegistryTests(unittest.TestCase):
         text = (ROOT / "tools" / "measure_entrypoints.py").read_text(encoding="utf-8")
         self.assertIn(f'"registry_bytes": {REGISTRY_BUDGET}', text)
         self.assertEqual(REGISTRY_BUDGET, 3072)
+
+    def test_registry_budget_in_the_docs_matches_the_code(self):
+        # T35: docs/profile-authoring.md said the registry stays under 2 KiB while the budget is 3,072 bytes
+        for doc in ("docs/profile-authoring.md", "docs/maintenance.md"):
+            text = (ROOT / doc).read_text(encoding="utf-8")
+            stated = re.findall(r"registry\s+(?:stays\s+)?at\s+or\s+under\s+([\d,]+)\s+bytes", text)
+            self.assertTrue(stated, f"{doc} does not state the registry budget in bytes")
+            self.assertEqual({int(n.replace(",", "")) for n in stated}, {REGISTRY_BUDGET}, doc)
+            self.assertNotRegex(text, r"registry[^.\n]*\b\d+ KiB", doc)
 
     def test_symlink_escape_detected(self):
         with tempfile.TemporaryDirectory() as td:

@@ -25,7 +25,8 @@ Subcommands:
             distribution of r (sigma^2 = 2/N per component; the CDF as a Poisson mixture of chi-square CDFs) when V
             is isotropic, otherwise from P(r <= x | s, phi, V) (the bivariate normal over the disk: a closed-form
             radial integral, a periodic trapezoid in the polar angle), a true amplitude s being excluded only if it
-            is excluded for every dipole phase phi on a 72-point grid aligned with V's eigen-axes. With
+            is excluded for every dipole phase phi on a 72-point grid aligned with V's eigen-axes. --cl must lie in
+            [0.5, 1): below 0.5 the expected limit is empty and the power constraint undefined (rejected). With
             --time-column, the first harmonic of event times at the solar (86400 s), sidereal and anti-sidereal
             (2/86400 - 1/86164.0905 per s) frequencies (unweighted, V = (2/N) I): an anti-sidereal amplitude with
             Rayleigh probability below --spurious-alpha means a seasonal modulation leaks into the sidereal frequency,
@@ -340,7 +341,14 @@ def amplitude_upper_limit(r_obs, n: float | None, cl: float = DEFAULT_CL, covari
     amplitude). Without a covariance (or n given for an isotropic null covariance (2/n) I) the limit comes from the
     Rice distribution of r. With an anisotropic null covariance of (a, b) a true amplitude s is excluded only when
     P(r <= r_obs | s, phi) < 1 - cl for every dipole phase phi on the grid (AnisotropicNull.allowed), so the limit
-    holds whatever the phase."""
+    holds whatever the phase.
+
+    cl must lie in [0.5, 1) (ValueError otherwise): below 1/2 the expected limit is empty (even s = 0 is excluded at
+    the median isotropic amplitude), so the power constraint is undefined. At cl = 1/2 the expected limit is 0
+    analytically (P(r <= median | s = 0) = 1/2); a rounding-level empty result there is reported as 0."""
+    if not 0.5 <= cl < 1.0:
+        raise ValueError(f"the confidence level must lie in [0.5, 1), got {cl} (below 0.5 the expected limit, the "
+                         "Neyman limit at the median isotropic amplitude, is empty and the power constraint undefined)")
     if covariance is None:
         median_iso = math.sqrt(4.0 * math.log(2.0) / n)
         expected = _neyman(median_iso, n, cl)
@@ -360,6 +368,8 @@ def amplitude_upper_limit(r_obs, n: float | None, cl: float = DEFAULT_CL, covari
                "phase_grid_deg": PHASE_STEP_DEG}
         if r_obs is not None:
             ney = model.neyman(r_obs, cl)
+    if expected is None:  # only at (or within rounding of) cl = 1/2: s = 0 is allowed at the median (docstring)
+        out["expected_limit"] = expected = 0.0
     if r_obs is not None:
         out["neyman_limit"] = ney
         out["upper_limit"] = max(ney if ney is not None else 0.0, expected)
@@ -532,8 +542,11 @@ def main(argv=None) -> int:
             rows = [r for p in args.periods for r in read_csv(p)]
             status, out = "ok", exposure_map(cfg, rows)
         else:
-            if not 0 < args.cl < 1 or not 0 < args.spurious_alpha < 1:
-                raise ValueError("--cl and --spurious-alpha must lie in (0, 1)")
+            if not 0.5 <= args.cl < 1:
+                raise ValueError(f"--cl must lie in [0.5, 1), got {args.cl} (an upper limit below CL 0.5 is not "
+                                 "supported: the expected limit is empty and the power constraint undefined)")
+            if not 0 < args.spurious_alpha < 1:
+                raise ValueError("--spurious-alpha must lie in (0, 1)")
             status, out = harmonic_run(args)
     except (OSError, ValueError, KeyError, TypeError) as exc:
         status, out = "rejected", {"error": str(exc)}

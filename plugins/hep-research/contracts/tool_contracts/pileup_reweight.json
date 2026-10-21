@@ -77,12 +77,12 @@
     {
      "exit_code": 1,
      "status": "failed",
-     "meaning": "the bundle (positional JSON with data_profile, mc_profile, optional bin_centers and bin_edges) is unreadable or invalid, or a weight is undefined (MC empty where data is not) or not representable; stdout carries ok false and the reason"
+     "meaning": "the bundle (positional JSON with data_profile, mc_profile, optional bin_centers and bin_edges) is invalid, or a weight is undefined (MC empty where data is not) or not representable; stdout carries ok false and the reason"
     },
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+     "meaning": "an argument is missing, malformed or out of range, or the bundle file is missing or unreadable; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
     }
    ],
    "required_capabilities": [],

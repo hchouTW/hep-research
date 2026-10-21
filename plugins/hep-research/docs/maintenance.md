@@ -136,10 +136,14 @@ Oracle rules:
   record.
 - Evidence that skips (an optional backend, the slow tier) is unverified, not passed: list such modules in the gate
   that requires the backend (`tools/run_required_backends.py`), or run them in the release gate.
-  The required CI gates: `stats-backends` (pyhf, ArviZ, NumPy, hypothesis), `pdg-cross-check` (pdg) and
+  The required CI gates: `stats-backends` (pyhf, ArviZ, NumPy, hypothesis), `pdg-cross-check` (pdg),
   `torch-backend` (the hep-ml modules with PyTorch tests, torch pinned; `tests/tools/test_pyproject.py` checks that
-  every such module is listed). The unpinned `optional (torch-cpu)` job is an early warning for new PyTorch releases:
-  when it passes on a newer one, bump the `torch-backend` pins.
+  every such module is listed) and `bdt-backend` (the modules with xgboost or scikit-learn tests: `train_bdt.py`,
+  `export_bdt.py` and the analysis-to-paper BDT path, with the `bdt` extra pinned, xgboost 3.4.1 and scikit-learn
+  1.9.1 plus scikit-learn's joblib, narwhals and threadpoolctl; `tests/tools/test_pyproject.py` checks that every such
+  module is listed and that the pins lie in the extra's ranges; a scikit-learn skip reason names `sklearn`, the import
+  name the gate matches). The unpinned `optional (torch-cpu)` job is an early warning for new PyTorch releases: when
+  it passes on a newer one, bump the `torch-backend` pins.
 
 Record each correction in `docs/evidence/sci-fixes.json` and in `VALIDATION.md` with one row per evidence test:
 

@@ -16,7 +16,8 @@ the card omits it, the background normalization absorbs it and the poi is biased
 
 Usage: model_card.py --card CARD.json [--truth TRUTH.json] [--out REPORT.json]
 Exit codes: 0 the card is valid, its fit converged and (with --truth) the closure passes; 1 the closure fails or a fit
-fails; 2 the card is refused or pyhf is not installed. Needs pyhf (tested with 0.7.6) and NumPy.
+fails; 2 the card cannot be read or is refused (status rejected); 3 pyhf is not installed (status
+missing-dependency). Needs pyhf (tested with 0.7.6) and NumPy.
 """
 from __future__ import annotations
 
@@ -166,8 +167,8 @@ def main(argv=None) -> int:
     try:
         import pyhf  # noqa: F401
     except ImportError:
-        print(json.dumps({"status": "refused", "reason": "pyhf is not installed"}))
-        return 2
+        print(json.dumps({"status": "missing-dependency", "reason": "pyhf is not installed: pip install 'pyhf>=0.7'"}))
+        return 3
     try:
         card = json.loads(Path(a.card).read_text())
         truth = json.loads(Path(a.truth).read_text()) if a.truth else card
@@ -175,7 +176,7 @@ def main(argv=None) -> int:
         check(truth)
         tv = json.loads(a.truth_values)
     except (OSError, ValueError) as exc:
-        print(json.dumps({"status": "refused", "reason": str(exc)}))
+        print(json.dumps({"status": "rejected", "reason": str(exc)}))  # bad input: exit 2 (core/status.py)
         return 2
     rep = {"fit": fit(card), "closure": asimov_closure(card, truth, tv)}
     text = json.dumps(rep, indent=1)

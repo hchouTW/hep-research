@@ -30,7 +30,8 @@ Usage: python3 pyhf_nuisance_diagnostics.py WORKSPACE.json [--measurement NAME] 
   modifier name stands for all its components).
 Output: JSON (stdout, or --json) and a text table (stdout with --json). No random numbers are used; the output
 records "seed": null and the pyhf version.
-Exit codes: 0 ok; 1 the nominal fit failed or a requested refit failed; 2 rejected input or pyhf not installed.
+Exit codes: 0 ok; 1 the nominal fit failed or a requested refit failed; 2 rejected input; 3 pyhf not installed
+(status missing-dependency).
 """
 from __future__ import annotations
 
@@ -279,8 +280,9 @@ def main(argv=None) -> int:
     parser.add_argument("--json", dest="json_out")
     args = parser.parse_args(argv)
     if pyhf is None:
-        print(json.dumps({"status": "failed", "error": "pyhf not installed: these diagnostics need pyhf (tested 0.7.6)"}))
-        return 2
+        print(json.dumps({"status": "missing-dependency",
+                          "error": "pyhf not installed: these diagnostics need pyhf (tested 0.7.6)"}))
+        return 3
     try:
         with open(args.workspace, encoding="utf-8") as fh:
             spec = json.load(fh)

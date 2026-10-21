@@ -16,6 +16,9 @@ formulas follow Korthikanti et al. (arXiv:2205.05198) and assume 2-byte activati
 a standard pre-norm transformer block; they are estimates, not allocator accounting, and
 exclude fragmentation, communication buffers, and the CUDA context (add roughly 1-2 GB).
 Pipeline activation memory is the 1F1B worst case, held by the first stage.
+Output: a text report, or JSON with --json ("status" ok or failed, the terms, "fits", the micro-batch size and
+sequence length the activation estimate assumed). Exit codes: 0 it fits; 1 it does not fit (status failed); 2 bad
+input (status rejected with --json).
 Run: python3 <plugin root>/skills/hep-ml/scripts/estimate_training_memory.py plan.json   (keys: the flag names with underscores, e.g. "zero_stage")
      python3 <plugin root>/skills/hep-ml/scripts/estimate_training_memory.py --params 7e9 --gpus 8 --zero-stage 3
 """
@@ -176,6 +179,9 @@ def estimate(params, gpus, gpu_memory_gb, precision="mixed", optimizer="adam",
         "zero_stage": zero_stage,
         "precision": precision,
         "optimizer": optimizer,
+        "recompute": recompute,
+        "micro_batch": micro_batch,
+        "seq_len": seq_len,
         "bytes_per_param": {"parameters": param_b, "gradients": grad_b,
                             "optimizer": optim_b, "total": param_b + grad_b + optim_b},
         "per_gpu_bytes": terms,
@@ -238,6 +244,8 @@ def _format(result, advice):
         f"Precision/optim:   {result['precision']} + {result['optimizer']}  "
         f"({result['bytes_per_param']['total']} bytes/param before sharding)",
         f"ZeRO stage:        {result['zero_stage']}",
+        f"Activation inputs: micro-batch {result['micro_batch']}, sequence length "
+        + (f"{result['seq_len']}" if result['seq_len'] is not None else "not given"),
         "",
         "Per-GPU memory:",
     ]
@@ -333,14 +341,19 @@ def main():
         unsharded = estimate(**{**common, "zero_stage": 0})
         advice = advise(result, sum(unsharded["per_gpu_bytes"].values()))
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        if args.json:
+            print(json.dumps({"status": "rejected", "error": str(exc)}))
         print(f"error: {exc}", file=sys.stderr)
-        sys.exit(2)
+        return 2
 
+    # the estimate is a verdict: exit 1 when it does not fit (hep-computing script contract, core/status.py)
+    status = "ok" if result["fits"] else "failed"
     if args.json:
-        print(json.dumps({**result, "advice": advice}, indent=2))
+        print(json.dumps({"status": status, **result, "advice": advice}, indent=2))
     else:
         print(_format(result, advice))
+    return 0 if result["fits"] else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

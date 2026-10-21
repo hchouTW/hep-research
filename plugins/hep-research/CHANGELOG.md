@@ -3,6 +3,89 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **anisotropy.py: `--cl` below 0.5 is rejected with its reason, not a TypeError (robust-fix ANISO-CL-RANGE).** An
+  upper limit below CL 0.5 is not supported: the expected limit (the Neyman limit at the median isotropic amplitude)
+  is empty there and the power constraint undefined. `harmonic --cl` outside [0.5, 1) is rejected (exit 2) with that
+  reason, and `amplitude_upper_limit` raises ValueError for it; at CL 0.5 an expected limit found empty by rounding is
+  reported as its analytic value 0 (it was a TypeError with a non-uniform exposure map). Results for CL >= 0.5 that
+  ran before are unchanged bit for bit. Evidence: VALIDATION ANISO-CL-RANGE.
+- **CI: a required `bdt-backend` job runs the xgboost and scikit-learn tests with the `bdt` extra pinned.** The
+  `train_bdt.py`, `export_bdt.py` and analysis-to-paper BDT tests skipped in every required job; the new job installs
+  xgboost 3.4.1 and scikit-learn 1.9.1 and fails on a test skipped for either (`tools/run_required_backends.py`);
+  `tests/tools/test_pyproject.py` checks that every such module is listed. Evidence: VALIDATION BDT-BACKEND-GATE.
+- **A missing input file is bad input, exit 2 (sci-fix CLI-MISSING-INPUT-EXIT2, T17).** `calorimeter_resolution.py`,
+  `multiple_scattering.py`, `pileup_reweight.py` (hep-detector), `hepdata_export.py`, `hepdata_record.py` and
+  `geant4_build.py` reported a missing or unreadable input file as status `failed`, exit 1 (a negative verdict). They now
+  exit 2: the detector scripts with the shape of their argument error (`error_kind` `invalid-input`, as their tool
+  contracts declare for exit 2), the adapters with status `rejected`. Invalid file content keeps its documented exit 1.
+  The plugin-wide CLI contract test now requires exit 2 for a missing input (or 3 only with `missing-dependency`) for
+  every tool it runs; it accepted 1.
+- **Adapters report a missing optional package as `missing-dependency`, exit 3 (sci-fix ADAPTER-MISSING-DEPENDENCY,
+  T19).** The pyhf-combine scripts exited 2 with `refused` or `failed`; `coffea_dijet_processor.py` and
+  `root_to_parquet.py` exited 2 with text only; `uproot_awkward_analysis.py` and the two PyROOT templates exited 1 with
+  text only; `hepdata_export.py --engine hepdata_lib` exited 1 with `failed` after reading its input (now checked first);
+  `hepdata_record.py` on a YAML table without PyYAML, and `unbinned_fit.py` and `reproduce_published_likelihood.py`
+  without NumPy or SciPy, ended in a traceback. All print `{"status": "missing-dependency", ...}` and exit 3; a test
+  hides each third-party module of each adapter in turn (28 pairs, 14 tools).
+- **`backend_comparison.py` and `model_card.py` report input they cannot read or map as `rejected` (sci-fix
+  PYHF-REJECTED-STATUS, T18).** They printed `refused` (a negative verdict in `core/status.py`) with exit 2; exit 2 is
+  unchanged.
+- **`estimate_training_memory.py` states its verdict (sci-fix TRAINING-MEMORY-VERDICT, T33) and its activation inputs
+  (T34).** A configuration that does not fit exits 1 (was 0) and `--json` carries `status` `ok` or `failed`; bad input
+  with `--json` prints `rejected` (exit 2 as before). The report and the JSON give the micro-batch size and sequence
+  length the activation estimate used (`micro_batch`, `seq_len`, and `recompute`).
+- **`core/status.exit_code` on an unknown status (robust-fix STATUS-UNKNOWN-EXIT, T16)** names the status on stderr and
+  returns 3 (incomplete) instead of raising KeyError, which exited 1 (a verdict) with a traceback. `artifact_labels`
+  refuses an unknown status with ValueError. No shipped script was found printing an unknown status (latent).
+- **`run_all_checks.py` writes its summary when git is missing or hangs (robust-fix RUN-ALL-CHECKS-GIT, T21)**, with
+  `git_commit` `unknown`, instead of ending in a traceback after every check had run.
+- **Documentation (T18):** `core/status.py` states that `refused` is a negative verdict (exit 1), names the documented
+  exception (the protected-use guard and the permit check refuse a run before it starts with exit 3) and the older tools
+  that print `refused` with exit 2, and says new code uses `rejected` for unusable input.
+- **Checkers enforce the rules they state (plugin triage batch B).** Development and packaging checks only; no
+  scientific number changes.
+  - `tools/measure_entrypoints.py` and `tools/validate_skill_bundle.py` measure a folded or literal block SKILL.md
+    description (`description: >-`) in full, so a long block description no longer passes the 1,024-character limit
+    (T01); the 500-line limit counts lines, not newline characters, so a file without a final newline is counted
+    right (T02).
+  - `tools/check_layering.py` reads relative imports (resolved against the file's package), constant-string
+    `importlib.import_module()` and `__import__()` calls, and code under `fixtures/` outside `tests/`, so "core/ never
+    imports contracts/" holds for every import form (T03); a core module's steward in `core/OWNERS.json` must be a
+    skill name, not empty or a placeholder (T04).
+  - `tools/check_ownership.py` reads a plural (`BDTs`) as a claim of its term (T07).
+  - `tools/check_packaging.py` scans every text file, detected by content (no NUL byte in the first 8 KiB), not only
+    known suffixes (T27); finds batch-scheduler site keys at any depth below a slurm or htcondor backend or section,
+    in any case (T29); and exempts placeholder e-mail addresses only at reserved domains (example.com/.org/.net,
+    `*.example`, `*.invalid`, `*.test`, `*.localhost`; RFC 2606, RFC 6761), so `author@<real domain>` is reported
+    (T30). The LaTeX venue template in hep-authoring now uses `author@example.org`.
+  - `docs/profile-authoring.md` states the registry budget as 3,072 bytes (`REGISTRY_BUDGET`), not 2 KiB (T35).
+- **Artifact validation gaps from the plugin triage closed without a contracts major (T09, T11, T12, T14, T15,
+  T36).** Contracts-visible: new finding codes, all warnings except T09; no field added, `CONTRACTS_VERSION`
+  unchanged. Specs and artifacts that validated before keep their outcome (360 shipped artifacts, fixtures and
+  examples revalidated: no outcome change).
+  - `contracts/validate.py` on a directory validates `*.JSON` (any suffix case) like `*.json`: an invalid artifact
+    named `bad.JSON` now fails the directory check (artifact errors, or `artifacts_dir.not_artifact`); before it was
+    only an `artifacts_dir.non_json` warning (T09; an error, as the docstring already stated for every JSON file).
+  - measurement-spec: a `conditional_denominator` that is null, a number, a bool or a placeholder token (`n/a`,
+    `none`, `tbd`, `-`, `?`, ...) is the warning `measurement.denominator_placeholder` (T11); an empty backgrounds
+    list with a placeholder `no_backgrounds_reason` is `measurement.no_backgrounds_reason_placeholder` (T12); a
+    blinded spec whose mask names no region and no interval variable is `measurement.blinding_mask_empty` (T14).
+    A blank string, a missing mask and a missing reason stay errors.
+  - An unknown (not retired) skill name under an extension `handoff` key is the warning `skill.unknown_handoff` in
+    every artifact type; where the 2.8.0 ml rules report it as `ml.handoff_unknown` it is reported once (T15).
+  - An observable at level `unfolded` whose `phase_space.definition` names no target level (a level term other than
+    `unfolded` and `detector`) is the warning `observable.unfolded_target_undeclared` (T36). A structured
+    `observable.target_level` field is left for a contracts minor.
+- **Partition manifests with shared chunk seeds are refused (T23).** `core.partition.engine.validate_manifest` raises
+  `PartitionError("partition.duplicate_seed")` (a `ValueError`) when two chunks share a seed; `local_partition.py`
+  and `campaign.init` (`campaign.bad_manifest`) refuse such a manifest before writing anything. Manifests from
+  `make_manifest` are unaffected.
+- **A failed revocation status has no readable events (T26).** `RevocationStatus.events` is a property that raises
+  `RevocationUnverified` when the log did not verify (it was a public `[]`, readable as "nothing revoked"); the
+  constructor field is now `_events`.
+
 ## 0.22.0 (2026-10-22)
 
 Contracts 3.3.0 (minor): independent review of drafts, P1 (`docs/dev/independent-review-spec.md`); five references

@@ -40,6 +40,10 @@ class Vocabulary:
                 self._ext[name].add(term)
         return problems
 
+    def terms(self, name: str) -> set[str]:
+        """Core and profile terms of one vocabulary."""
+        return set(self._core.get(name, ())) | set(self._ext.get(name, ()))
+
     def has(self, name: str, term: str) -> bool:
         return term in self._core.get(name, ()) or term in self._ext.get(name, ())
 

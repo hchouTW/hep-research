@@ -10,7 +10,8 @@ advisory: it never authorizes a use. --protected switches protected mode on (cor
 inputs of the project's authoritative agent_policy must be established, else the run is refused) and with it the
 stricter version policy; --strict-versions applies only that version policy (a newer minor contract version is an
 error, not a warning), without protected mode. A skill name that is not a current skill (contracts.skill_names) is
-always an error. --strict applies the statistical-result
+an error, except an unknown, not retired, name under an extension 'handoff' key, which is a warning
+(skill.unknown_handoff; an ml-artifact under the 2.8.0 ml rules reports it as the error ml.handoff_unknown instead). --strict applies the statistical-result
 semantic rules of contracts 2.2.0 (p-values and confidence levels in range, ordered expected bands, typed coverage and global
 calibration) and the response semantic rules of contracts 2.4.0 (controlled correction vocabulary, a matrix or
 matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
@@ -158,8 +159,29 @@ def check_binned(b: dict, rep: Report, path: str, obs: dict | None = None) -> No
                     f"uncertainty '{u.get('name')}' has {len(u['values'])} entries for {len(values)} bins")
 
 
+def _level_text(text) -> str:
+    return " ".join(re.sub(r"[-_]", " ", str(text).lower()).split())
+
+
+def unfolded_target(obs: dict, vocab: Vocabulary) -> str | None:
+    """The target level an 'unfolded' observable declares: a level term other than 'unfolded' and 'detector' (core or
+    profile) named in phase_space.definition (case, '-', '_' and spaces ignored), or None. The vocabulary says the
+    target of 'unfolded' is declared separately; contracts 3.3.0 has no field for it, so the definition carries it."""
+    ps = obs.get("phase_space")
+    text = _level_text(ps.get("definition", "")) if isinstance(ps, dict) else ""
+    for term in sorted(vocab.terms("levels") - {"unfolded", "detector"}):
+        if re.search(rf"(?<![a-z0-9]){re.escape(_level_text(term))}(?![a-z0-9])", text):
+            return term
+    return None
+
+
 def check_observable(obs: dict, vocab: Vocabulary, rep: Report, path: str) -> None:
     check_conventions(obs.get("conventions", {}), vocab, rep, f"{path}.conventions")
+    if obs.get("level") == "unfolded" and unfolded_target(obs, vocab) is None:  # triage T36: a warning, no new field
+        targets = ", ".join(sorted(vocab.terms("levels") - {"unfolded", "detector"}))
+        rep.add("warning", f"{path}.level", "observable.unfolded_target_undeclared",
+                f"level 'unfolded' does not say which level it was unfolded to: name the target level ({targets}) in "
+                "phase_space.definition, e.g. 'unfolded to particle-fiducial: ...'")
     for i, v in enumerate(obs.get("variables", [])):
         if "edges" in v and "points" in v:
             rep.add("error", f"{path}.variables[{i}]", "observable.edges_and_points", "give edges or points, not both")
@@ -1307,6 +1329,23 @@ def _is_zero(v) -> bool:
     return isinstance(v, (int, float)) and not isinstance(v, bool) and v == 0
 
 
+# Strings that fill a required text field without stating anything (triage T11, T12). A missing marker ('unknown',
+# 'not-provided') is not one of them: it goes through the unresolved_inputs rule.
+PLACEHOLDER_TOKENS = frozenset({"n/a", "na", "none", "null", "tbd", "todo", "-", "--", "?", "..."})
+
+
+def _placeholder(v) -> bool:
+    """A non-blank string that is only a placeholder token (case and surrounding space ignored)."""
+    return isinstance(v, str) and v.strip().lower() in PLACEHOLDER_TOKENS
+
+
+def _mask_names_something(mask: dict) -> bool:
+    """A blinding mask with a non-blank region name or an interval dict with a non-blank variable (triage T14)."""
+    regions, intervals = mask.get("regions"), mask.get("intervals")
+    return any(not _blank(r) for r in (regions if isinstance(regions, list) else [])) or \
+        any(isinstance(iv, dict) and not _blank(iv.get("variable")) for iv in (intervals if isinstance(intervals, list) else []))
+
+
 def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
     """measurement-spec rules of contracts 2.6.0 (hep-measurement audit 2026-10-13): the SKILL.md invariants. Native for
     artifacts of contract 2.6.0 or later; an older artifact gets them only in strict mode, so its promised outcome is
@@ -1320,7 +1359,10 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     systematic name; a missing marker not named in unresolved_inputs; a blinded spec without mask, or blinded with
     'observed' status; a ratio quantity without ratio block, a ratio of a quantity to itself, no cancellation entry; a
     period ending before it starts; a misspelled key. Unresolved: a listed missing marker, a background without
-    closure. Warnings: partial selection validation, a 'cancels' entry without verification, unknown keys."""
+    closure. Warnings: partial selection validation, a 'cancels' entry without verification, unknown keys; a conditional
+    denominator that is not a string or is a placeholder ('n/a', 'none', 'tbd', ...), a placeholder
+    no_backgrounds_reason, a blinding mask that names nothing (triage 2026-10-22: warnings, so older specs keep their
+    outcome)."""
     obs: Any = ext.get("observable") if isinstance(ext.get("observable"), dict) else {}
     x = "$.extension"
     est = ext.get("estimand")
@@ -1349,6 +1391,10 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
         if isinstance(den, str) and not den.strip():
             rep.add("error", f"{x}.selections[{i}].conditional_denominator", "measurement.denominator_blank",
                     f"selection '{s.get('name')}' needs its conditional denominator")
+        elif not isinstance(den, str) or _placeholder(den):  # a warning: older specs with these values stay valid
+            rep.add("warning", f"{x}.selections[{i}].conditional_denominator", "measurement.denominator_placeholder",
+                    f"selection '{s.get('name')}': conditional denominator {den!r} names no sample; state what the "
+                    "selection is conditional on, or write a missing marker listed in unresolved_inputs")
         val = s.get("validation")
         if isinstance(val, dict) and not all(not _blank(val.get(k)) for k in ("metric", "threshold", "action")):
             rep.add("warning", f"{x}.selections[{i}].validation", "measurement.selection_validation_partial",
@@ -1358,6 +1404,10 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     if isinstance(bkgs, list) and not bkgs and _blank(ext.get("no_backgrounds_reason")):
         rep.add("error", f"{x}.backgrounds", "measurement.backgrounds_empty",
                 "no background listed: give each background, or state why there is none in no_backgrounds_reason")
+    elif isinstance(bkgs, list) and not bkgs and _placeholder(ext.get("no_backgrounds_reason")):
+        rep.add("warning", f"{x}.no_backgrounds_reason", "measurement.no_backgrounds_reason_placeholder",
+                f"no_backgrounds_reason {ext.get('no_backgrounds_reason')!r} states no reason: say why the "
+                "measurement has no background")
     for i, b in enumerate(bkgs if isinstance(bkgs, list) else []):
         if not isinstance(b, dict):
             continue
@@ -1452,6 +1502,9 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
         if not (isinstance(mask, dict) and (mask.get("regions") or mask.get("intervals"))):
             rep.add("error", f"{x}.blinding.mask", "measurement.blinding_mask_missing",
                     "a blinded measurement needs its mask (regions or observable intervals)")
+        elif not _mask_names_something(mask):
+            rep.add("warning", f"{x}.blinding.mask", "measurement.blinding_mask_empty",
+                    "the mask names nothing: give a non-blank region name or an interval with its variable")
         if "observed" in set(doc.get("status", [])):
             rep.add("error", "$.status", "measurement.blinded_observed",
                     "a blinded spec cannot carry 'observed' results: only an authorized person unblinds, outside the "
@@ -2208,6 +2261,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
                     _stat_semantics(doc, ext, rep, strict)
                     if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM):
                         _observable_source(doc, ext, rep)
+    if any(f.code == "ml.handoff_unknown" for f in rep.findings):  # the ml rule already reports the unknown handoff
+        rep.findings = [f for f in rep.findings if f.code != skill_names.HANDOFF_CODE]
     return rep
 
 
@@ -2234,17 +2289,17 @@ def _referenced_paths(doc: Any, root: Path) -> set[Path]:
 
 
 def validate_directory(root: Path, vocab: Vocabulary, **flags) -> dict:
-    """Validate every JSON file under an artifacts_dir: each must be a valid artifact, or a sidecar that an artifact in
-    the directory refers to by path (a split report, a model file; listed under 'sidecars'). An unreferenced JSON
-    file without an artifact_type is an error (artifacts_dir.not_artifact: working files and raw tool outputs belong
-    outside artifacts_dir); an unreferenced file of another kind is a warning (artifacts_dir.non_json). Hidden files
-    are skipped."""
+    """Validate every JSON file under an artifacts_dir (suffix .json in any case): each must be a valid artifact, or a
+    sidecar that an artifact in the directory refers to by path (a split report, a model file; listed under
+    'sidecars'). An unreferenced JSON file without an artifact_type is an error (artifacts_dir.not_artifact: working
+    files and raw tool outputs belong outside artifacts_dir); an unreferenced file of another kind is a warning
+    (artifacts_dir.non_json). Hidden files are skipped."""
     top, files, docs, other = Report(), [], {}, []
     paths = sorted(f for f in root.rglob("*") if f.is_file()
                    and not any(part.startswith(".") for part in f.relative_to(root).parts))
     for f in paths:
         rel = f.relative_to(root).as_posix()
-        if f.suffix != ".json":
+        if f.suffix.lower() != ".json":  # bad.JSON is a JSON file too, validated like bad.json
             other.append(f)
             continue
         try:
@@ -2264,7 +2319,7 @@ def validate_directory(root: Path, vocab: Vocabulary, **flags) -> dict:
         rel = f.relative_to(root).as_posix()
         if f.resolve() in referenced:
             sidecars.append(rel)
-        elif f.suffix == ".json":
+        elif f.suffix.lower() == ".json":
             top.add("error", rel, "artifacts_dir.not_artifact",
                     "no artifact_type and no artifact refers to it: write it as an artifact or move this working file "
                     "out of artifacts_dir")

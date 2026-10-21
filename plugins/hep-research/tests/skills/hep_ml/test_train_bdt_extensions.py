@@ -100,7 +100,7 @@ class Regression(unittest.TestCase):
     def test_xgboost_regression(self):
         self.check("xgboost")
 
-    @unittest.skipUnless(HAS_SKL, "scikit-learn is not installed (optional extra bdt)")
+    @unittest.skipUnless(HAS_SKL, "scikit-learn (sklearn) is not installed (optional extra bdt)")
     def test_sklearn_regression(self):
         self.check("sklearn")
 

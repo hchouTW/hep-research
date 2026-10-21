@@ -68,6 +68,32 @@ class ArtifactTests(unittest.TestCase):
         rep = validate.validate_artifact(self.doc(to_skill="hep-bogus"))
         self.assertIn("not a skill of this plugin", errors(rep)["$.handoff.to_skill"])
 
+    def test_unknown_extension_handoff_warns(self):
+        """Triage T15: an unknown skill name under an extension 'handoff' key passed with no finding outside an
+        ml-artifact. A warning (skill.unknown_handoff) so older artifacts keep their outcome; a retired name stays an
+        error."""
+        spec = load(ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "measurement_v26.json")
+
+        def run(name):
+            d = json.loads(json.dumps(spec))
+            d["extension"]["notes"] = {"handoff": name}
+            return validate.validate_artifact(d)
+        rep = run("hep-bogus")
+        self.assertTrue(rep.ok, rep.as_dict())
+        self.assertEqual([(f.severity, f.path, f.code) for f in rep.findings],
+                         [("warning", "$.extension.notes.handoff", "skill.unknown_handoff")])
+        self.assertIn("not a skill of this plugin", rep.findings[0].message)
+        self.assertEqual(run("hep-statistics").findings, [])
+        rep = run(RETIRED[0])
+        self.assertEqual(set(errors(rep)), {"$.extension.notes.handoff"})
+        ml = load(ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "ml_artifact.json")  # contract 1.0.0
+        ml["extension"]["notes"] = {"handoff": "hep-bogus"}
+        codes = {f.code for f in validate.validate_artifact(ml).findings}
+        self.assertIn("skill.unknown_handoff", codes)  # the 2.8.0 ml rules do not apply to it without --strict
+        codes = {f.code for f in validate.validate_artifact(ml, strict=True).findings}
+        self.assertIn("ml.handoff_unknown", codes)  # where they apply, the name is reported once, by the ml rule
+        self.assertNotIn("skill.unknown_handoff", codes)
+
     def test_unknown_producer_is_left_to_the_schema(self):
         rep = validate.validate_artifact(self.doc(producer="hep-bogus"))
         self.assertEqual(errors(rep), {})

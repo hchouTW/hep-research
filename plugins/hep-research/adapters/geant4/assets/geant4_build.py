@@ -24,8 +24,8 @@ Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_build.py check --record BUILD.json [--work DIR]
 Every subcommand takes --status LABEL (default unvalidated), echoed as status_label.
 Output JSON: status, status_label, inputs, defaults_used, and the record (build) or the comparison (check).
-Exit codes: 0 ok; 1 the build failed, a commit or MD5 does not match, or check found a difference; 2 bad input;
-3 git, cmake or a compiler missing. Standard library only.
+Exit codes: 0 ok; 1 the build failed, a commit or MD5 does not match, or check found a difference; 2 bad input
+(also a missing or unreadable spec or record); 3 git, cmake or a compiler missing. Standard library only.
 """
 from __future__ import annotations
 
@@ -86,8 +86,16 @@ def dataset_definitions(src: Path) -> dict[str, dict]:
     return out
 
 
+def read_input(path: Path) -> str:
+    """The text of an input file; a missing or unreadable one is bad input (SpecError: rejected, exit 2)."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise SpecError(f"cannot read {path}: {exc}") from exc
+
+
 def load_spec(path: Path) -> dict:
-    spec = json.loads(path.read_text(encoding="utf-8"))
+    spec = json.loads(read_input(path))
     g = spec.get("geant4") or {}
     for key in ("repository", "tag", "commit"):
         if not isinstance(g.get(key), str) or not g[key]:
@@ -263,7 +271,7 @@ def cmd_build(args) -> tuple[str, dict]:
 
 
 def cmd_check(args) -> tuple[str, dict]:
-    rec = json.loads(args.record.read_text(encoding="utf-8"))
+    rec = json.loads(read_input(args.record))
     build = rec["extension"]["build"]
     inst = Path(os.path.expanduser(build["install_prefix"]))
     config = inst / "bin" / "geant4-config"

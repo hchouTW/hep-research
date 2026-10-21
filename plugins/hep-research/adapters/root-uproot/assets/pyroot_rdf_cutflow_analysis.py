@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -10,11 +12,12 @@ ROOT: Any = None
 def import_root() -> Any:
     try:
         import ROOT as root
-    except ImportError as exc:
-        raise SystemExit(
-            "PyROOT is required. Use a Python interpreter compatible with ROOT "
-            "(check `root-config --python-version`)."
-        ) from exc
+    except ImportError:  # exit 3, a missing dependency, with a JSON status (hep-computing script contract)
+        reason = ("PyROOT is required. Use a Python interpreter compatible with ROOT "
+                  "(check `root-config --python-version`).")
+        print(json.dumps({"status": "missing-dependency", "reason": reason}))
+        print(reason, file=sys.stderr)
+        raise SystemExit(3) from None
     return root
 
 

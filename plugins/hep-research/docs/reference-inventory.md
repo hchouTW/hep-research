@@ -109,7 +109,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `graphviz-patterns.md` | hep-authoring | 3.5 | no | 2 | - | ebb58136 2026-10-19 |
 | `independent-review.md` | hep-authoring | 10.2 | yes | 3 | - | 88a40a9a 2026-10-21 |
 | `latex-mechanics-and-tooling.md` | hep-authoring | 13.4 | no | 7 | - | ebb58136 2026-10-19 |
-| `latex-venue-setup.md` | hep-authoring | 30.4 | yes | 13 | - | ebb58136 2026-10-19 |
+| `latex-venue-setup.md` | hep-authoring | 30.4 | yes | 13 | - | 4eae529b 2026-10-22 |
 | `legends-panels-and-export.md` | hep-authoring | 6.6 | no | 2 | - | ebb58136 2026-10-19 |
 | `logical-consistency-and-argument-uniformity.md` | hep-authoring | 5.0 | no | 5 | hep-citations, hep-theory | ebb58136 2026-10-19 |
 | `manuscript-consistency-auditing.md` | hep-authoring | 3.6 | no | 4 | hep-citations | ebb58136 2026-10-19 |
@@ -158,7 +158,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cpp-balanced-design-guidelines.md` | hep-computing | 6.6 | yes | 4 | hep-ml | 8eefac0f 2026-10-13 |
 | `crash-and-memory-debugging.md` | hep-computing | 8.2 | yes | 7 | - | 9257d7b5 2026-10-15 |
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f4372374 2026-10-13 |
-| `engineering-playbook.md` | hep-computing | 10.7 | yes | 3 | - | 338f8d78 2026-10-19 |
+| `engineering-playbook.md` | hep-computing | 10.7 | yes | 4 | - | 338f8d78 2026-10-19 |
 | `environments-and-containers.md` | hep-computing | 4.0 | yes | 6 | - | efa283c7 2026-10-13 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e6 2026-10-09 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | f4372374 2026-10-13 |
@@ -280,7 +280,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
-| `nuisance-modeling.md` | hep-statistics | 20.3 | yes | 9 | hep-measurement | 100eb1c3 2026-10-16 |
+| `nuisance-modeling.md` | hep-statistics | 20.3 | yes | 9 | hep-measurement | 61920170 2026-10-22 |
 | `roofit-and-roostats-methods.md` | hep-statistics | 7.6 | yes | 5 | - | 09237aee 2026-10-17 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.8 | yes | 11 | hep-authoring, hep-citations, hep-computing, hep-theory | ebb58136 2026-10-19 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | - | 578c12ff 2026-10-13 |

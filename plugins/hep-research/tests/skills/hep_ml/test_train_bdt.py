@@ -106,9 +106,9 @@ class Contract(unittest.TestCase):
         self.assertIn("pip install", out["install"])
 
     def test_negative_weight_warning_names_the_distorted_density(self):
-        """REVIEW-CODE-WARN, without a BDT backend (CI installs neither xgboost nor scikit-learn): the warning text for
-        each policy. drop learns the positive-weight density, abs-train-signed-eval the |w| density; reject and runs
-        without negative weights get none."""
+        """REVIEW-CODE-WARN, without a BDT backend (only the bdt-backend CI job installs xgboost and scikit-learn): the
+        warning text for each policy. drop learns the positive-weight density, abs-train-signed-eval the |w| density;
+        reject and runs without negative weights get none."""
         sys.path.insert(0, str(SCRIPT.parent))
         try:
             spec = importlib.util.spec_from_file_location("train_bdt_under_test", SCRIPT)
@@ -315,7 +315,7 @@ class XgboostBackend(Backend, unittest.TestCase):
             self.assertEqual(models, ["model_fold0.json", "model_fold1.json", "model_fold2.json"])
 
 
-@unittest.skipUnless(HAS_SKL, "optional package scikit-learn not installed (extra `bdt`)")
+@unittest.skipUnless(HAS_SKL, "optional package scikit-learn (sklearn) not installed (extra `bdt`)")
 class SklearnBackend(Backend, unittest.TestCase):
     backend = "sklearn"
 

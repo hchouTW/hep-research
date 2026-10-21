@@ -11,6 +11,16 @@ Two vocabularies meet in a script's output and are kept apart:
 The obligation states of the analysis check (satisfied, violated, not_applicable, unverified, unsupported) are a third
 vocabulary and are not mapped here.
 
+"refused" means a negative verdict (exit 1): the tool ran its checks and refuses the input or the result (a plan, a
+covariance, a response that fails its validation). Input a tool cannot read or use is "rejected" (exit 2). One
+documented exception keeps its own exit code: the protected-use guard (core/protected/guard.py protected_main) and the
+permit check (contracts/permit.py) refuse a run before it starts with "status": "refused" and exit 3, because the run
+does not happen (no result, nothing written; docs/protected-data-architecture.md,
+skills/hep-computing/references/engineering-playbook.md). Some older tools also print "refused" with exit 2 for some
+input they cannot use and say so in their usage text (contracts/comparison/gate.py, core/evidence/query.py,
+contracts/migrate_statistical_result.py, the partition campaign CLI, skills/hep-ml/assets/inference.py); new code uses
+"rejected" for that.
+
 Usage in a script:
     from core.status import add_status_argument, exit_code
     add_status_argument(parser)                 # --status LABEL, default unvalidated
@@ -18,6 +28,8 @@ Usage in a script:
     return exit_code("ok")
 """
 from __future__ import annotations
+
+import sys
 
 EXIT_OK, EXIT_NEGATIVE, EXIT_BAD_INPUT, EXIT_INCOMPLETE = 0, 1, 2, 3
 EXIT_CODES = (EXIT_OK, EXIT_NEGATIVE, EXIT_BAD_INPUT, EXIT_INCOMPLETE)
@@ -44,13 +56,23 @@ _NO_ARTIFACT = frozenset({"rejected", "error", "refused", "missing-dependency", 
 
 
 def exit_code(status: str) -> int:
-    """The exit code of a run status; an unknown status is a programming error (KeyError)."""
-    return RUN_STATUSES[status]
+    """The exit code of a run status. An unknown status is a programming error in the calling script; it is named on
+    stderr and gives exit 3 (incomplete: the run's outcome cannot be classified). It never gives 1, which reads as a
+    negative verdict, as the uncaught KeyError did, and never 0 or 2, which would read as ok or as the user's input."""
+    try:
+        return RUN_STATUSES[status]
+    except (KeyError, TypeError):
+        print(f"core.status: unknown run status {status!r} (a programming error in this script); exit "
+              f"{EXIT_INCOMPLETE}, incomplete. Known statuses: {', '.join(RUN_STATUSES)}", file=sys.stderr)
+        return EXIT_INCOMPLETE
 
 
 def artifact_labels(status: str, labels: list[str] | tuple[str, ...] = (DEFAULT_LABEL,)) -> list[str] | None:
     """Labels for an artifact written from a run with this status: the input labels, plus 'failed' after a negative
-    verdict or 'unvalidated' after an incomplete run; None when no artifact may be written."""
+    verdict or 'unvalidated' after an incomplete run; None when no artifact may be written. An unknown status is a
+    ValueError: an artifact is never labelled from a run whose outcome is not known."""
+    if not isinstance(status, str) or status not in RUN_STATUSES:
+        raise ValueError(f"unknown run status {status!r}; known: {list(RUN_STATUSES)}")
     code = exit_code(status)
     if status in _NO_ARTIFACT:
         return None

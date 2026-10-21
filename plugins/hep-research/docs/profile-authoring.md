@@ -62,7 +62,8 @@ Each capability names one state from `contracts/vocab/core.json`:
 ## Tests and registration
 
 1. Put tests in `<profile>/tests/`; `tools/run_all_checks.py` runs every registered profile's suite.
-2. Add one line to `profiles/registry.json` (`id`, `kind`, `version`, `scope`, `path`; the registry stays under 2 KiB).
+2. Add one line to `profiles/registry.json` (`id`, `kind`, `version`, `scope`, `path`; the registry stays at
+   or under 3,072 bytes, `REGISTRY_BUDGET` in `contracts/registry.py`).
 3. Run `python3 contracts/registry.py` (duplicate ids, versions, missing resources, escaping paths, cycles, budgets)
    and `python3 tools/check_layering.py` (no skill, core or contract file may name the profile).
 4. Run `python3 tools/run_all_checks.py --out <dir>` and add the capability to `docs/capability-matrix.md`.

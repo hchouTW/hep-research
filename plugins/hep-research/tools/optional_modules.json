@@ -26,6 +26,7 @@
    "tests.adapters.test_backend_likelihood_equivalence",
    "tests.adapters.test_hepdata_export",
    "tests.adapters.test_nuisance_interpolation",
+   "tests.adapters.test_pyhf_adapter_statuses",
    "tests.adapters.test_pyhf_counting",
    "tests.adapters.test_pyhf_nuisance_diagnostics",
    "tests.adapters.test_pyhf_publication",

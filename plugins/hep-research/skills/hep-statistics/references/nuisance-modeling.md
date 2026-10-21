@@ -219,7 +219,7 @@ Run after every fit that is used for a result, and after each pruning, smoothing
 - A refit that fails is a `failed` entry, never a silently missing row.
 
 `<plugin root>/adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py` does all of this for a pyhf
-workspace (needs pyhf; exit 1 when the nominal fit or a refit fails, 2 for rejected input or no pyhf). Its impacts
+workspace (needs pyhf; exit 1 when the nominal fit or a refit fails, 2 for rejected input, 3 without pyhf). Its impacts
 agree with independent refits of a HistFactory likelihood written without pyhf to 1e-3 relative or 1e-4 absolute
 (`tests/adapters/test_pyhf_nuisance_diagnostics.py`).
 

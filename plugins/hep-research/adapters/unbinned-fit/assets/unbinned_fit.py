@@ -24,7 +24,8 @@ estimated distance to the minimum (EDM = g^T H^-1 g / 2) exceeds 1e-3, the Hessi
 parameter sits on a bound.
 
 Usage: python3 unbinned_fit.py coverage --config cfg.json --toys 300 --seed 1
-Exit 0 ok, 1 refused input or failed fit, 2 bad arguments (including an unknown profile_parameter).
+Exit 0 ok, 1 refused input or failed fit, 2 bad arguments (including an unknown profile_parameter), 3 NumPy or SciPy
+not installed (status missing-dependency).
 A fit with n_sig on its lower bound is a boundary estimate ("boundary": ["n_sig"]): its profile interval starts at
 the bound; coverage counts such toys through the profile interval only (boundary_toys) and not in the Hesse pulls.
 """
@@ -36,8 +37,12 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy import optimize, special
+try:
+    import numpy as np
+    from scipy import optimize, special
+    MISSING = None
+except ImportError as _exc:  # reported by main() (exit 3), so --help works without NumPy and SciPy
+    MISSING = _exc.name or "numpy or scipy"
 
 LABEL = "[General method]"
 NAMES = ["n_sig", "n_bkg", "mu", "sigma", "slope"]
@@ -290,6 +295,9 @@ def main(argv=None) -> int:
     pc.add_argument("--toys", type=int, default=200)
     pc.add_argument("--seed", type=int, default=1)
     opts = ap.parse_args(argv)
+    if MISSING:  # exit 3, a missing dependency (hep-computing script contract)
+        print(json.dumps({"status": "missing-dependency", "reason": f"{MISSING} is not installed: pip install numpy scipy"}))
+        return 3
     try:
         cfg = json.loads(opts.config.read_text(encoding="utf-8"))
         lo, hi = _check_cfg(cfg)
