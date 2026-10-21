@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Packaging scan: nothing private, project-specific, cached or transcript-like ships in the plugin.
 
-Scans the files a package would contain (git-tracked files when run in a checkout, else every file except caches):
+Scans the files a package would contain (git-tracked files when run in a checkout, else every file except caches); the
+content rules below apply to every text file (a known text suffix, or no NUL byte in the first 8 KiB):
 - no symlinks, caches (__pycache__, *.pyc, .pytest_cache, .DS_Store) or editor/OS debris
 - no model transcripts or session logs (*.jsonl, files named *transcript*), no grading rubrics or eval answer keys
 - no archives (.tar.gz, .zip, ...): they are build or tool outputs, such as the submission.tar.gz hepdata_lib writes
@@ -44,7 +45,16 @@ EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 EMAIL_OK = {"noreply@anthropic.com"}
 PLACEHOLDER_LOCAL = {"author", "name", "user", "you", "your.name", "first.last", "someone"}  # template placeholders
 TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".cpp", ".cc", ".h", ".hpp", ".toml", ".cfg", ".ini",
-        ".tex", ".bib", ".dat", ".tcl", ".ma5", ".info", ".template", ".sub", ".sbatch", ".lock"}  # every shipped text format
+        ".tex", ".bib", ".dat", ".tcl", ".ma5", ".info", ".template", ".sub", ".sbatch", ".lock"}  # fast path only
+
+
+def is_text(p: Path) -> bool:
+    """A file is scanned as text when its suffix is a known text format or its first 8 KiB hold no NUL byte, so a
+    .hh header, a .patch, a Snakefile or a suffix-less shim is scanned too."""
+    if p.suffix in TEXT:
+        return True
+    with p.open("rb") as fh:
+        return b"\0" not in fh.read(8192)
 
 
 def files() -> list[Path]:
@@ -128,7 +138,7 @@ def main(argv=None) -> int:
             add(rel, "project-config-outside-fixtures")
         if p.stat().st_size > MAX_BYTES:
             add(rel, "large-file", f"{p.stat().st_size} bytes")
-        if p.suffix in TEXT:
+        if is_text(p):
             text = p.read_text(encoding="utf-8", errors="replace")
             for rule, rx in (("private-path", PRIVATE), ("credential", SECRET), ("restricted-site-fact", RESTRICTED), ("legacy-repo-trace", LEGACY)):
                 m = rx.search(text)

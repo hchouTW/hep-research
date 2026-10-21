@@ -2,6 +2,10 @@
 flags the Claude Code file names CLAUDE.local.md and settings.local.json, which the independent review host notes
 must name (maintainer decision 2026-10-21); the private-path rule still catches Claude session folders."""
 import importlib.util
+import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -32,6 +36,39 @@ class PrivatePathRuleTests(unittest.TestCase):
         for text in ("<tmp>/claude-<uid>/<project-slug>/*/scratchpad", "<claude-config>/projects/<project-slug>/*/tool-results"):
             self.assertIsNone(CP.PRIVATE.search(text), text)
             self.assertIsNone(CP.RESTRICTED.search(text), text)
+
+
+def scan(files: dict[str, str | bytes]) -> list[dict]:
+    """Findings of tools/check_packaging.py --root on a temp tree holding files (not a git checkout)."""
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        for rel, body in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            if isinstance(body, bytes):
+                p.write_bytes(body)
+            else:
+                p.write_text(body, encoding="utf-8")
+        res = subprocess.run([sys.executable, "-I", str(ROOT / "tools" / "check_packaging.py"), "--root", str(root)],
+                             capture_output=True, text=True, timeout=120)
+    return [f for f in json.loads(res.stdout)["findings"] if f["rule"] != "size-statement-drift"]
+
+
+HOME = "/" + "Users/alice/"
+
+
+class TextScanCoverageTests(unittest.TestCase):
+    """T27: only files with a suffix in TEXT were scanned, so a .hh header, a suffix-less shim or a .patch was not."""
+
+    def test_every_text_file_is_scanned(self):
+        for rel in ("adapters/g4/include/Probe.hh", "skills/a/scripts/shim", "docs/fix.patch", "examples/x/Snakefile",
+                    "examples/x/run.out", "LICENSE"):
+            with self.subTest(file=rel):
+                found = scan({rel: f"#include <x>\nconst char* p = \"{HOME}secret\";\n"})
+                self.assertIn(("private-path", rel), {(f["rule"], f["file"]) for f in found}, found)
+
+    def test_binary_files_are_not_scanned(self):
+        self.assertEqual(scan({"docs/img.bin": b"\x89PNG\x00\x00" + HOME.encode() + b"secret"}), [])
 
 
 if __name__ == "__main__":
