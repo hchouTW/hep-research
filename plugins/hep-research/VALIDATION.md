@@ -1961,6 +1961,25 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## INDEPENDENT-REVIEW-P1 (2026-10-21, E2; branch `feat/independent-review-p1` from main `c4f7954b`, unreleased)
+
+P1 of the independent review mechanism (`docs/dev/independent-review-spec.md`; draft decision record
+`docs/dev/decision-independent-review.md`), contracts 3.3.0. Baseline: `run_all_checks.py --part all` on clean main
+passes; the run started on the branch failed only `packaging_scan` on the newly added spec.
+
+| Check | Result |
+|---|---|
+| New review tests: `tests/contracts/test_review_{contract,state,lcs}.py`, `tests/skills/hep_authoring/test_review_{units,canaries,generator,receipt,repair_check,end_to_end}.py` | 161 pass. Covered: every receipt code of spec 7.1 and 7.2 rejected alone; every repair and check code of 7.3 and 7.4; decide rows 1-14 and the five arbitration conclusions; the exhaustive state test (74,800 combinations); the 5.3 field table against `review_record.json`; two-sided canary witnesses and the one-sided shortfall; LCS against brute force on 500 random sequences; the written example per role and a corrupted example stopping the build; packet hygiene; the end-to-end review driven by `next` (closed, `check` exit 0) and its byte-identical rerun |
+| `run_all_checks.py --part all`, E2 (Python 3.13.2), commit `95d79322` | 25 pass, 2 fail (`packaging_scan` and `tests.adapters.test_batch_privacy`, which runs the same scan); 4671 tests in 392 modules, 4541 pass, 1 failure (that scan test), 129 skipped |
+| `packaging_scan` | fail: `restricted-site-fact` on `docs/dev/independent-review-spec.md` and `skills/hep-authoring/assets/review-hosts.json` (Claude Code local memory and settings file names), `private-path` on `review-hosts.json` (inferred shared-directory patterns). A stop condition of the work order; left for the maintainer (decision record, open item 1) |
+| `check_ownership.py`, `check_layering.py`, `check_host_neutral.py`, `check_routing_static.py`, `make_cases.py --stdout` equal to `cases.json` | pass |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| `hep-authoring/SKILL.md` | 8,992 bytes, 73 lines |
+| Smoke test on a copy of the spec, real host observation | `next` prints the repair `isolation_precondition` on this host; with `CLAUDE_CODE_FORK_SUBAGENT=0` it prints `dispatch` with 8 slots; every written example passes `check --record-only`; `check` gives `not_closed` (incomplete) |
+
+Not run: the CI-lock environment (the new tests are standard-library only), live agent reviews (P3), live routing of
+the four new cases. Skipped tests are unverified, not passed.
+
 ## 0.20.0 release check (2026-10-21, E2 and the CI lock)
 
 Release branch `release/0.20.0` from main `c325d678` (#186 Geant4 phase 2; main CI green). Minor release with
