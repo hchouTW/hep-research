@@ -477,6 +477,12 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
             ('frontend_response.py', 'deadtime', '--dead-time', '1e308', '--rate', '1e308',
              '--model', 'paralyzable'),
             ('frontend_response.py', 'cluster-noise', '--channels', '4', '--sigma', '1e308', '--rho', '1'),
+            ('check_geant4_study.py', 'spec', '--spec', self.write('bad_study.json', json.dumps({'schema': 'x'}))),
+            ('check_geant4_study.py', 'summarize', '--record', self.write('rec.json', '{}'), '--csv', 'no.csv',
+             '--slab', 'Si', '--out', self.tmp / 'o.json'),
+            ('geant4_benchmarks.py', 'run', '--config', self.write('bad_cfg.json', json.dumps({'schema': 'x'}))),
+            ('geant4_benchmarks.py', 'reference', '--study-spec', ASSETS / 'geant4-study-spec.example.json',
+             '--material', 'Si_study', '--particle', 'mu-', '--energy-mev', '1e308', '--thickness-mm', '1e308'),
         ]
 
     def test_all_scripts_emit_strict_json_and_no_traceback(self):

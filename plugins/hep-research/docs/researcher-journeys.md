@@ -1,4 +1,4 @@
-# Researcher Journeys (J1–J12)
+# Researcher Journeys (J1–J14)
 
 Status: M1 desk trace, 2026-10-02. Each journey is traced through skills, contract artifacts, and profiles.
 Labels: `[Confirmed]` = backed by a file or test that exists now; `[Proposal]` = design not yet built; `[Unresolved]` = open.
@@ -21,6 +21,7 @@ Evidence for the contract parts: `contracts/fixtures/artifacts/valid/*.json` and
 | J11 Collaboration member, private knowledge | any, via project config | any; private evidence by path | `local_profile_paths` validated by the same validator, resolved from the project, never copied into the plugin `[Confirmed]` (`ProjectConfigTests`, `local_profile` fixture) | None | T27 (M4) |
 | J12 Domain outside v1 | closest owner (hep-theory / hep-statistics) | as needed | none | Limited-support behavior is the stanza's step 4 `[Confirmed]` (`contracts/stanzas/context-resolution.md`) | Routing cases (M5) |
 | J13 Published-data comparison written up | hep-citations → hep-theory → hep-statistics → hep-authoring | `literature-record` (sources with identifiers and read levels) → `dataset-record` + `prediction` → `statistical-result` → `communication` | Evidence ledger of the bound profile | None | Routing case `j13` (static); live run not yet made |
+| J14 Detector simulation study with independent-reference benchmarks | hep-detector → hep-computing → hep-detector → hep-citations → hep-authoring (hep-statistics before hep-citations for a comparison with published data) | study spec (`skills/hep-detector/assets/geant4-study-spec.schema.json`) → Geant4 run records (`computational-run` with a `simulation` block, `unvalidated`) → study record (`computational-run`, `unvalidated`, benchmarks, convergence and scope embedded) → `literature-record` → report | No profile; `adapters/geant4` and a Geant4 11.4.3 installation the user built | Detector-level simulation tables have no suitable `dataset-record` status and no dedicated typed extension (same as J2); `validated-in-scope` does not appear in phase 1; `build_response.py` writes empty `inputs`, so a response cannot link the run records | Executed: `examples/geant4-thin-silicon/run.py` (offline replay; live mode with `HEP_GEANT4_LIVE_TEST=1` and `HEP_GEANT4_CONFIG`, run 2026-10-21 on E2): thin-layer-mpv +1.4% to the PDG Delta_p (detection limit 8.3%, control caught), stopping-power -0.18% to Bethe (detection limit 3.8%, control caught), convergence gates pass, model variations not resolved at 60000 events (SE about 1%); routing case `j14` (static) |
 
 ## Handoff termination
 
@@ -28,5 +29,5 @@ Every chain above ends at a deliverable the user asked for, or at a reported blo
 
 ## Known limitations recorded in M1
 
-- Detector performance studies (J2) have no dedicated typed extension; they use `dataset-record` with detector-level quantities. Revisit if M4 handoff tests show missing fields.
+- Detector performance studies (J2, and detector-level simulation tables in J14) have no dedicated typed extension; they use `dataset-record` with detector-level quantities. Revisit if M4 handoff tests show missing fields.
 - Load traces for "no detector modules loaded" (J6) can only be observed in a live headless run, which needs approval at M5 (host fact 5.1 #7 unresolved).

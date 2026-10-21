@@ -1,0 +1,50 @@
+{
+ "bootstrap": {
+  "resamples": 200,
+  "seed": 1
+ },
+ "csv": {
+  "name": "events.csv",
+  "sha256": "d76c48bc2674acf8c20062dd92648d9c05b0373b98775a2ac72547c27181c6bd"
+ },
+ "data_path_problems": [],
+ "datasets_content_match": true,
+ "events": 60000,
+ "mpv_bin_MeV": 0.002,
+ "observables": {
+  "mean_deposit_MeV": {
+   "se": 0.00019436809071974754,
+   "value": 0.10537177875763283
+  },
+  "mpv_deposit_MeV": {
+   "se": 0.000543807429411692,
+   "value": 0.08533979057591623
+  },
+  "mpv_loss_MeV": {
+   "se": 0.0005306540583341415,
+   "value": 0.08524496732026143
+  },
+  "tail_fraction": {
+   "se": 0.0005727127414849955,
+   "threshold_MeV": 0.25,
+   "value": 0.020083333333333335
+  }
+ },
+ "run_record": {
+  "artifact_id": "geant4-run-mpv-pai",
+  "sha256": "bd26fe837e39394da79827914b244b4a87734a9f36b3e02b0a7663b51736f48d"
+ },
+ "schema": "geant4-run-summary/1",
+ "settings": {
+  "default_cut_mm": 0.01,
+  "em_constructor": "G4EmStandardPhysics_option4",
+  "energy_MeV": 10000.0,
+  "particle": "mu-",
+  "reference_list": null,
+  "step_limit_mm": 0.0,
+  "ui_commands": [
+   "/process/em/AddPAIRegion all SiRegion PAI"
+  ]
+ },
+ "spec_sha256": "234ff6d5c92303418891e5fcb891d991625c13825e22084bd0931402aa0f2008"
+}

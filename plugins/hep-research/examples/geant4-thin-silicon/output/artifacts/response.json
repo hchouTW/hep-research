@@ -1,0 +1,307 @@
+{
+ "contract_version": "3.0.1",
+ "artifact_id": "j14-response-mpv",
+ "artifact_type": "response",
+ "objective": "deposit response to the primary energy loss, 10 GeV mu- in 300 um Si (Geant4, unvalidated)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.18.1",
+  "contracts": "3.0.1",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-21",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "truth_axis": {
+   "name": "primary_energy_loss",
+   "unit": "keV",
+   "edges": [
+    40.0,
+    70.0,
+    80.0,
+    90.0,
+    100.0,
+    150.0,
+    400.0
+   ]
+  },
+  "reco_axis": {
+   "name": "deposit",
+   "unit": "keV",
+   "edges": [
+    40.0,
+    70.0,
+    80.0,
+    90.0,
+    100.0,
+    150.0,
+    400.0
+   ]
+  },
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_generated",
+  "inefficiency": "inside_matrix",
+  "acceptance": "outside_matrix",
+  "includes": [
+   "migration",
+   "efficiency"
+  ],
+  "applied_separately": [
+   "acceptance"
+  ],
+  "underflow_overflow": "explicit_bins",
+  "intended_use": "forward_folding",
+  "conditions": "built by build_response.py from truth-reco.csv: 5000 events, 96 with truth outside the truth axis (not used)",
+  "provenance": "matched truth/reco sample supplied by the user",
+  "form": "matrix",
+  "matrix": [
+   [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.000724112961622013,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.000724112961622013,
+    0.0024937655860349127
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.00997506234413965
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.998551774076756,
+    0.0798004987531172
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.9077306733167082
+   ]
+  ],
+  "underflow": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "overflow": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "generated_per_truth_bin": [
+   130.0,
+   774.0,
+   1248.0,
+   970.0,
+   1381.0,
+   401.0
+  ],
+  "build_diagnostics": {
+   "mc_uncertainty": [
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0007238507443540917,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0007238507443540917,
+     0.002490654211665448
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.004962593359956539
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.001023308574199339,
+     0.013532299879532798
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.014452234339307667
+    ]
+   ],
+   "mc_uncertainty_method": "delta-method weighted multinomial",
+   "underflow_uncertainty": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overflow_uncertainty": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "residual": "difference",
+   "resolution": [
+    {
+     "n": 130,
+     "sum_w": 130.0,
+     "median": 0.0,
+     "sigma68": 0.0,
+     "mad": 0.0,
+     "sigma_mad": 0.0,
+     "tail_fraction": 0.0,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 774,
+     "sum_w": 774.0,
+     "median": 0.0,
+     "sigma68": 0.0,
+     "mad": 0.0,
+     "sigma_mad": 0.0,
+     "tail_fraction": 0.0,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 1248,
+     "sum_w": 1248.0,
+     "median": 0.0,
+     "sigma68": 0.0,
+     "mad": 0.0,
+     "sigma_mad": 0.0,
+     "tail_fraction": 0.0,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 970,
+     "sum_w": 970.0,
+     "median": 0.0,
+     "sigma68": 0.0,
+     "mad": 0.0,
+     "sigma_mad": 0.0,
+     "tail_fraction": 0.0,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 1381,
+     "sum_w": 1381.0,
+     "median": 0.0,
+     "sigma68": 0.0,
+     "mad": 0.0,
+     "sigma_mad": 0.0,
+     "tail_fraction": 0.0,
+     "tail_definition": "|r - median| > 3 sigma68"
+    },
+    {
+     "n": 401,
+     "sum_w": 401.0,
+     "median": 0.0,
+     "sigma68": 0.0,
+     "mad": 0.0,
+     "sigma_mad": 0.0,
+     "tail_fraction": 0.0,
+     "tail_definition": "|r - median| > 3 sigma68"
+    }
+   ],
+   "effective_entries": [
+    130.0,
+    774.0,
+    1248.0,
+    970.0,
+    1381.0,
+    401.0
+   ],
+   "empty_truth_bins": []
+  },
+  "correction_space": {
+   "acceptance": {
+    "space": "truth"
+   }
+  },
+  "mc_stat": {
+   "kind": "generated_counts",
+   "weighted": false,
+   "events_per_truth_bin": [
+    130,
+    774,
+    1248,
+    970,
+    1381,
+    401
+   ]
+  },
+  "variable_conversion": "deposit = energy loss minus the energy carried out of the slab by secondaries"
+ }
+}

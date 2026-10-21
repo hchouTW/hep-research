@@ -1,0 +1,147 @@
+{
+ "convergence_plan": {
+  "observables": [
+   "mean_deposit_MeV"
+  ],
+  "parameters": [
+   {
+    "name": "physics.default_cut_mm",
+    "values": [
+     0.1,
+     0.03,
+     0.01
+    ]
+   }
+  ],
+  "tolerance_relative": {
+   "mean_deposit_MeV": 0.01
+  }
+ },
+ "downstream_use": {
+  "handoff": [
+   "hep-citations",
+   "hep-authoring"
+  ],
+  "kind": "report",
+  "note": "a response matrix from these runs would be built with build_response.py --status unvalidated"
+ },
+ "geant4": {
+  "commit": "2ee379e6843e55b9c6bbb835d2a2b03cc998fef0",
+  "documentation": [
+   {
+    "name": "Geant4 upstream source, tag v11.4.3",
+    "relied_on": true,
+    "version": "11.4.3"
+   },
+   {
+    "name": "Physics List Guide",
+    "relied_on": false,
+    "version": "dev build only (no 11.4 build found)"
+   },
+   {
+    "name": "Book for Application Developers",
+    "relied_on": false,
+    "version": "dev build only (no 11.4 build found)"
+   }
+  ],
+  "version": "11.4.3"
+ },
+ "geometry_source": {
+  "description": "one 300 um silicon slab, 10 mm x 10 mm, vacuum world (G4_Galactic), slab placed with G4PVPlacement and checkOverlaps",
+  "kind": "design",
+  "uses_replicas": false
+ },
+ "label": "ILLUSTRATIVE study (journey J14); every Geant4 output is unvalidated; names no experiment",
+ "materials": [
+  {
+   "density_g_cm3": 2.329,
+   "mean_excitation_eV": 173.0,
+   "name": "Si_study",
+   "reference_origin": "geant4-material-dump",
+   "reference_source": "Geant4 material dump (materials.json of the nominal run)",
+   "sternheimer": {
+    "Cbar": 4.4355,
+    "a": 0.1492,
+    "delta0": 0.14,
+    "k": 3.2546,
+    "x0": 0.2015,
+    "x1": 2.8716
+   },
+   "z_over_a": 0.498478
+  }
+ ],
+ "observable": {
+  "definition": "mean (E_in - E_exit) / thickness of primaries transmitted through the slab",
+  "domain": "em",
+  "kind": "stopping-power",
+  "name": "mean stopping power",
+  "unit": "MeV/cm",
+  "weighted": false
+ },
+ "particle": {
+  "energy_MeV": 100.0,
+  "name": "proton"
+ },
+ "physics": {
+  "justification": [
+   {
+    "choice": "EM-only modular list: G4EmStandardPhysics_option4 + G4DecayPhysics",
+    "reason": "the stopping-power benchmark needs EM-only physics (no hadronic interactions remove primaries)",
+    "source": "geant4:source/physics_lists/constructors/electromagnetic/include/G4EmStandardPhysics_option4.hh"
+   },
+   {
+    "choice": "production cut 0.01 mm in the slab",
+    "reason": "the finest of a converged cut scan",
+    "source": "convergence gate of this study"
+   }
+  ],
+  "layered_sim_spec": "../../specs/sp-p100MeV.json",
+  "ui_order": "after-physics-list-before-initialize"
+ },
+ "reproducibility": {
+  "build_record": "recorded/build/geant4-build.computational-run.json",
+  "data_paths_recorded": true
+ },
+ "schema": "geant4-study-spec/1",
+ "statistical_target": {
+  "observable": "mean_deposit_MeV",
+  "relative_se": 0.005
+ },
+ "study_id": "j14-scenario-dump-reference",
+ "validation_plan": {
+  "benchmarks": [
+   {
+    "grade": "reference",
+    "name": "stopping-power"
+   }
+  ],
+  "scope": {
+   "beta_gamma": 0.4719,
+   "energy_MeV": [
+    100.0,
+    100.0
+   ],
+   "material": "Si_study",
+   "observable": "mean stopping power",
+   "particle": "proton",
+   "thickness_mm": [
+    0.3,
+    0.3
+   ]
+  }
+ },
+ "variation_plan": {
+  "model_assignment_checked": true,
+  "observable": "mean_deposit_MeV",
+  "variations": [
+   {
+    "change": "G4EmStandardPhysics",
+    "name": "em-option0"
+   },
+   {
+    "change": "G4EmStandardPhysics_option3",
+    "name": "em-option3"
+   }
+  ]
+ }
+}

@@ -1,0 +1,18 @@
+# excerpt of a local TestEm3 run (Geant4 11.4.3, serial, seeds 1001 2002): summary lines only
+### Run 0 starts.
+  Number of events processed : 100
+         G4_Pb: 776.79 MeV :  17.48 MeV      2.25 +- 0.225 %      54.8 cm  +- 1.33 cm 
+        G4_lAr: 213.82 MeV :  16.65 MeV     7.788 +- 0.7788 %      1.05 m   +- 8.41 cm 
+ Total energy deposited = 990.6 MeV +- 6.869 MeV
+ Energy leakage = 9.395 MeV +- 6.869 MeV
+ Mean number of gamma       511.4
+ Mean number of e-          878.1
+ Mean number of e+          53.62
+### Run 1 starts.
+  Number of events processed : 100
+         G4_Pb: 773.36 MeV :     19 MeV     2.457 +- 0.2457 %        52 cm  +- 1.29 cm 
+ Total energy deposited = 988 MeV +- 16.42 MeV
+ Energy leakage = 9.885 MeV +- 6.924 MeV
+ Mean number of gamma       291.8
+ Mean number of e-          559.2
+ Mean number of e+          53.1

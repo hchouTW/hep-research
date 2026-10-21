@@ -1,0 +1,73 @@
+{
+ "geometry": {
+  "lateral_mm": 400.0,
+  "layers": [
+   {
+    "repeat": 50,
+    "slabs": [
+     {
+      "material": "G4_Pb",
+      "name": "Pb",
+      "sensitive": true,
+      "thickness_mm": 2.3
+     },
+     {
+      "material": "G4_lAr",
+      "name": "lAr",
+      "sensitive": true,
+      "thickness_mm": 5.7
+     }
+    ]
+   }
+  ],
+  "world": {
+   "material": "Galactic",
+   "scale": 1.2
+  }
+ },
+ "gun": {
+  "direction": [
+   1,
+   0,
+   0
+  ],
+  "energy_MeV": 1000.0,
+  "particle": "geantino",
+  "world_fraction": -0.499
+ },
+ "materials": [
+  {
+   "a_g_mole": 1.008,
+   "density_g_cm3": 1e-25,
+   "name": "Galactic",
+   "pressure_Pa": 3e-18,
+   "state": "gas",
+   "temperature_K": 2.73,
+   "z": 1
+  }
+ ],
+ "note": "Geantino scan of the TestEm3 mirror geometry for the material-budget closure (WP1 check 2).",
+ "output": {
+  "csv": "events.csv",
+  "datapaths": "datapaths.json",
+  "materials": "materials.json",
+  "overlap_test_points": 1000
+ },
+ "physics": {
+  "decay": true,
+  "default_cut_mm": 1.0,
+  "em_constructor": "G4EmStandardPhysics"
+ },
+ "run": {
+  "events": 10,
+  "run_manager": "serial",
+  "seeds": [
+   12345,
+   67890
+  ]
+ },
+ "schema": "layered_sim.spec/1",
+ "ui_commands": [
+  "/process/msc/Skin 1"
+ ]
+}

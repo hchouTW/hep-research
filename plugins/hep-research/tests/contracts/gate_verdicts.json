@@ -1001,6 +1001,182 @@
   "ok": true,
   "strict_ok": true
  },
+ "examples/geant4-thin-silicon/output/artifacts/geant4.literature-record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/mpv.study.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/response.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-control.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-cut-0.03.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-cut-0.1.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-cut-0.3.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-cut-1.0.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-density-10.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-em-option0.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-em-option3.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-ftfp-bert-emz.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-nominal.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/mpv-pai.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/sp-control.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/sp-cut-0.03.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/sp-cut-0.1.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/sp-density-10.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/sp-em-option0.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/sp-em-option3.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/runs/sp-nominal.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/scenario-coarse-cut.study.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/scenario-density-10.study.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/scenario-dump-reference.study.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/output/artifacts/sp.study.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/build/geant4-build.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-control.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.03.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.1.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.3.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-cut-1.0.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-density-10.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-em-option0.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-em-option3.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-ftfp-bert-emz.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-nominal.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/mpv-pai.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/sp-control.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/sp-cut-0.03.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/sp-cut-0.1.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/sp-density-10.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/sp-em-option0.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/sp-em-option3.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/geant4-thin-silicon/recorded/runs/sp-nominal.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "examples/ml-classifier-to-inference/output/artifacts/ml_artifact.json": {
   "ok": true,
   "strict_ok": true

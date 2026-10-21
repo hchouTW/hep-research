@@ -4770,6 +4770,140 @@
    ]
   },
   {
+   "id": "g4-build-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Build Geant4 11.4.3 from source with CMake in a pinned container and run the basic examples.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "CMake builds"
+   ],
+   "not": "hep-detector",
+   "set": "GEANT4"
+  },
+  {
+   "id": "g4-build-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請在固定版本的容器裡用 CMake builds 從原始碼編譯 Geant4 11.4.3，並執行 basic examples。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "CMake builds"
+   ],
+   "not": "hep-detector",
+   "set": "GEANT4"
+  },
+  {
+   "id": "g4-study-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Study the energy loss and most probable value of GeV muons in a 300 um silicon layer with a detector simulation (Geant4).",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "detector simulation (Geant4)"
+   ],
+   "set": "GEANT4"
+  },
+  {
+   "id": "g4-study-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用 detector simulation (Geant4) 研究 GeV 緲子在 300 微米矽層中的能量損失與最可能值。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "detector simulation (Geant4)"
+   ],
+   "set": "GEANT4"
+  },
+  {
+   "id": "g4-underspec-1",
+   "lang": "en",
+   "kind": "underspecified",
+   "prompt": "Simulate this with Geant4 for me.",
+   "expected_primary": "ask",
+   "trigger_terms": [],
+   "set": "GEANT4",
+   "note": "ask the observable, the particle and energy, the source of geometry and materials, and the precision target or downstream use before running anything; never pick an experiment for the user"
+  },
+  {
+   "id": "g4-underspec-2",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "prompt": "幫我用 Geant4 模擬一下這個。",
+   "expected_primary": "ask",
+   "trigger_terms": [],
+   "set": "GEANT4",
+   "note": "ask the observable, the particle and energy, the source of geometry and materials, and the precision target; never pick an experiment for the user"
+  },
+  {
+   "id": "g4-nuisance-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Put the envelope of the Geant4 model variations into the likelihood as nuisance parameters.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ],
+   "not": "hep-detector",
+   "set": "GEANT4"
+  },
+  {
+   "id": "g4-nuisance-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請把 Geant4 模型變化的包絡以 nuisance parameters 放進似然函數。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ],
+   "not": "hep-detector",
+   "set": "GEANT4"
+  },
+  {
+   "id": "g4-crash-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "My Geant4 SteppingAction crashes, help me debug it; I suspect crashes and memory leaks in my user code.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes and memory leaks"
+   ],
+   "not": "hep-detector",
+   "set": "GEANT4"
+  },
+  {
+   "id": "g4-crash-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "我的 Geant4 SteppingAction 一直當掉，請幫我除錯（crashes and memory leaks）。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes and memory leaks"
+   ],
+   "not": "hep-detector",
+   "set": "GEANT4"
+  },
+  {
+   "id": "j14",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Run a detector simulation (Geant4) study of energy loss in thin silicon: build and run it reproducibly, check convergence, benchmark it against independent references, and write it up with citations.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "detector simulation (Geant4)"
+   ],
+   "journey": "J14",
+   "set": "GEANT4",
+   "chain": [
+    "hep-detector",
+    "hep-computing",
+    "hep-detector",
+    "hep-citations",
+    "hep-authoring"
+   ],
+   "note": "for a comparison with published data, hep-statistics comes before hep-citations"
+  },
+  {
    "id": "j13",
    "lang": "en",
    "kind": "journey",

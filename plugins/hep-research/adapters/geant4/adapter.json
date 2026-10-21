@@ -1,0 +1,53 @@
+{
+ "id": "adapter:geant4",
+ "version": "0.1.0",
+ "status": "demonstrated-on-synthetic-data",
+ "purpose": "Run Geant4 correctly for research: a pinned, recorded build from source (geant4_build.py), the official examples B1, B4a, TestEm3 and TestEm5 compared with their reference outputs by the statistical meaning of each printed quantity (geant4_examples.py), a layered-slab simulation program driven by a JSON spec with per-event CSV output (layered_sim, geant4_run.py with scan, partition chunks, reduce and an oracle that calls hep-detector's geant4_benchmarks.py), and four implementation checks (geant4_verify.py: overlaps, material budget, energy balance, mirror). Every record is unvalidated: a run that completes is verification at most; hep-detector decides physics. Optional, required by no skill",
+ "tools": [
+  {
+   "name": "Geant4 build and official examples (geant4_build.py, geant4_examples.py): Geant4 11.4.3 from https://github.com/Geant4/geant4 (tag v11.4.3), Geant4 Software License 1.0",
+   "status": "tested-in-declared-environment",
+   "tested_versions": [
+    "Geant4 11.4.3 (commit 2ee379e6843e55b9c6bbb835d2a2b03cc998fef0) built twice on E2 on 2026-10-21 with Apple clang 21.0.0 and CMake 4.3.2 (C++17, MT, internal CLHEP, no visualization), eleven datasets (no G4NDL) MD5-verified and content-hashed; the clean rebuild gave the same version, dataset hashes and example values; B1, TestEm3 run 0 and TestEm5 runs 0-4 agree with the reference outputs (48 quantities, Bonferroni |z| <= 3.28) and the B4a smoke comparison passes (VALIDATION GEANT4-ADAPTER)"
+   ]
+  },
+  {
+   "name": "layered_sim, geant4_run.py and geant4_verify.py (this plugin's code; links against the user's Geant4 installation)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "layered_sim built against Geant4 11.4.3 on E2 (2026-10-21): mirror runs of TestEm3 run 0 (10000 events) and TestEm5 run 0 (1e5 events) agree with the local examples; overlap, material-budget and energy-balance checks pass and their five negative tests are caught; a cut scan under run_workflow.py and a four-chunk local_partition.py run agree with a single run; the runs are of invented layouts (synthetic geometries), so the status stays demonstrated-on-synthetic-data"
+   ]
+  }
+ ],
+ "licence_boundary": "Geant4 is distributed under the Geant4 Software License, Version 1.0, 28 June 2006; this plugin is Apache-2.0. Nothing of Geant4 is bundled or copied: geant4_build.py clones the source into the work directory the user names and builds it there, with the user's approval (it contacts github.com and cern.ch); layered_sim is this plugin's own code, built by the user against that installation and run as a separate executable that exchanges JSON and CSV files. No pyproject extra and no required CI job. Gate G5: proceeding with this wording was approved by the user for the branch on 2026-10-21; whether it is acceptable for a given distribution is the maintainers' decision",
+ "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Python 3.13 standard library only on the plugin side; Geant4 11.4.3 built from source by geant4_build.py in ~/Workspace/geant4-work (no system-wide installation), eleven datasets downloaded from cern.ch with MD5 checks. The Apptainer definition assets/geant4.def is declared but not built or tested. Live tests need HEP_GEANT4_LIVE_TEST=1 and HEP_GEANT4_CONFIG",
+ "assets": [
+  "assets/build_spec.example.json",
+  "assets/geant4.def",
+  "assets/g4common.py",
+  "assets/geant4_build.py",
+  "assets/geant4_examples.py",
+  "assets/geant4_run.py",
+  "assets/geant4_verify.py",
+  "assets/layered_sim/CMakeLists.txt",
+  "assets/layered_sim/MiniJson.hh",
+  "assets/layered_sim/Spec.hh",
+  "assets/layered_sim/Spec.cc",
+  "assets/layered_sim/Detector.hh",
+  "assets/layered_sim/Detector.cc",
+  "assets/layered_sim/Physics.hh",
+  "assets/layered_sim/Physics.cc",
+  "assets/layered_sim/Actions.hh",
+  "assets/layered_sim/Actions.cc",
+  "assets/layered_sim/layered_sim.cc",
+  "assets/layered_sim/spec.schema.json",
+  "assets/layered_sim/output.schema.json",
+  "assets/layered_sim/mirror_testem3.json",
+  "assets/layered_sim/mirror_testem5_run0.json"
+ ],
+ "tests": [
+  "../../tests/adapters/test_geant4.py"
+ ],
+ "owner_skill": "hep-detector",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; the build and examples stay tested-in-declared-environment only while the recorded build and comparison replay and the live rerun (HEP_GEANT4_LIVE_TEST=1) pass on the declared version; another Geant4 version, compiler or platform is a new test. A completed run, a passed implementation check or agreement with an official example is verification, never physical validity, which hep-detector's study protocol decides (every record stays unvalidated in phase 1)"
+}

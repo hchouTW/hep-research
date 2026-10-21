@@ -1,0 +1,299 @@
+{
+ "contract_version": "3.0.1",
+ "artifact_id": "j14-geant4-literature",
+ "artifact_type": "literature-record",
+ "objective": "literature record imported offline from literature-input.json",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.18.1",
+  "contracts": "3.0.1",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-citations",
+  "created": "2026-10-21",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "user-supplied"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "record_version": "1.0.0",
+  "created": "2026-10-21",
+  "imported": [
+   {
+    "path": "literature-input.json",
+    "sha256": "47fcacb0329d1d321467d9897e5a6246d2be31aca5bed9c79f65d7b2beb01030",
+    "date": "2026-10-21",
+    "counts": {
+     "sources": 6,
+     "claims": 1,
+     "searches": 0,
+     "notices": 0
+    }
+   }
+  ],
+  "sources": {
+   "lit:S01": {
+    "id": "lit:S01",
+    "title": "GEANT4 - A Simulation Toolkit",
+    "authors": "Agostinelli, S. et al. (GEANT4)",
+    "year": 2003,
+    "tier": 1,
+    "verification_level": "metadata-only",
+    "verification_date": "2026-10-21",
+    "formal_status": "published",
+    "supersedes": [],
+    "superseded_by": [],
+    "identifiers": {
+     "doi": "10.1016/s0168-9002(03)01368-8",
+     "arxiv": null,
+     "arxiv_version": null,
+     "inspire": null
+    },
+    "citation_key": "Agostinelli:2002hh",
+    "journal_ref": "Nucl.Instrum.Meth.A 506 (2003) 250",
+    "verification_limitations": "metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read",
+    "read_events": [
+     {
+      "level": "metadata-only",
+      "date": "2026-10-21",
+      "locators": [],
+      "imported_from": "literature-input.json"
+     }
+    ],
+    "versions": [],
+    "notices": [],
+    "status": "as-imported",
+    "imported_from": "literature-input.json"
+   },
+   "lit:S02": {
+    "id": "lit:S02",
+    "title": "Geant4 developments and applications",
+    "authors": "Allison, J. et al.",
+    "year": 2006,
+    "tier": 1,
+    "verification_level": "metadata-only",
+    "verification_date": "2026-10-21",
+    "formal_status": "published",
+    "supersedes": [],
+    "superseded_by": [],
+    "identifiers": {
+     "doi": "10.1109/tns.2006.869826",
+     "arxiv": null,
+     "arxiv_version": null,
+     "inspire": null
+    },
+    "citation_key": "Allison:2006ve",
+    "journal_ref": "IEEE Trans.Nucl.Sci. 53 (2006) 270",
+    "verification_limitations": "metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read",
+    "read_events": [
+     {
+      "level": "metadata-only",
+      "date": "2026-10-21",
+      "locators": [],
+      "imported_from": "literature-input.json"
+     }
+    ],
+    "versions": [],
+    "notices": [],
+    "status": "as-imported",
+    "imported_from": "literature-input.json"
+   },
+   "lit:S03": {
+    "id": "lit:S03",
+    "title": "Recent developments in Geant4",
+    "authors": "Allison, J. et al.",
+    "year": 2016,
+    "tier": 1,
+    "verification_level": "metadata-only",
+    "verification_date": "2026-10-21",
+    "formal_status": "published",
+    "supersedes": [],
+    "superseded_by": [],
+    "identifiers": {
+     "doi": "10.1016/j.nima.2016.06.125",
+     "arxiv": null,
+     "arxiv_version": null,
+     "inspire": null
+    },
+    "citation_key": "Allison:2016lfl",
+    "journal_ref": "Nucl.Instrum.Meth.A 835 (2016) 186",
+    "verification_limitations": "metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read",
+    "read_events": [
+     {
+      "level": "metadata-only",
+      "date": "2026-10-21",
+      "locators": [],
+      "imported_from": "literature-input.json"
+     }
+    ],
+    "versions": [],
+    "notices": [],
+    "status": "as-imported",
+    "imported_from": "literature-input.json"
+   },
+   "lit:S04": {
+    "id": "lit:S04",
+    "title": "Review of particle physics",
+    "authors": "Navas, S. et al. (Particle Data Group)",
+    "year": 2024,
+    "tier": 1,
+    "verification_level": "page",
+    "verification_date": "2026-10-21",
+    "formal_status": "published",
+    "supersedes": [],
+    "superseded_by": [],
+    "identifiers": {
+     "doi": "10.1103/physrevd.110.030001",
+     "arxiv": null,
+     "arxiv_version": null,
+     "inspire": null
+    },
+    "citation_key": "ParticleDataGroup:2024cfk",
+    "journal_ref": "Phys.Rev.D 110 (2024) 030001",
+    "verification_limitations": "the Passage of particles through matter chapter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf, sha256 1b328278e8358dd53127b52d07c1048b63a0b98219e5c6541fe9f2a3d0e2f7cc, retrieved 2026-10-21) was read for Eqs. 34.5 (Bethe, valid 0.1 <~ beta gamma <~ 1000 to a few percent), 34.7 (density effect), 34.12 (Delta_p, j = 0.200), 34.16 (Highland) and 34.36 (shower maximum); the DOI record was found on INSPIRE-HEP",
+    "read_events": [
+     {
+      "level": "page",
+      "date": "2026-10-21",
+      "locators": [],
+      "imported_from": "literature-input.json"
+     }
+    ],
+    "versions": [],
+    "notices": [],
+    "status": "as-imported",
+    "imported_from": "literature-input.json"
+   },
+   "lit:S05": {
+    "id": "lit:S05",
+    "title": "Geant4 source code, tag v11.4.3",
+    "authors": "Geant4 Collaboration",
+    "year": 2026,
+    "tier": 1,
+    "verification_level": "page",
+    "verification_date": "2026-10-21",
+    "formal_status": "published",
+    "supersedes": [],
+    "superseded_by": [],
+    "identifiers": {
+     "doi": null,
+     "arxiv": null,
+     "arxiv_version": null,
+     "inspire": null
+    },
+    "citation_key": "Geant4:v11.4.3",
+    "url": "https://github.com/Geant4/geant4/tree/v11.4.3",
+    "verification_limitations": "commit 2ee379e6843e55b9c6bbb835d2a2b03cc998fef0 cloned 2026-10-21; the files cited by the study protocol and the rule table were read",
+    "read_events": [
+     {
+      "level": "page",
+      "date": "2026-10-21",
+      "locators": [],
+      "imported_from": "literature-input.json"
+     }
+    ],
+    "versions": [],
+    "notices": [],
+    "status": "as-imported",
+    "imported_from": "literature-input.json"
+   },
+   "lit:S06": {
+    "id": "lit:S06",
+    "title": "Atomic and nuclear properties of silicon (Si)",
+    "authors": "Particle Data Group (Groom, Mokhov and Striganov tables)",
+    "year": 2024,
+    "tier": 1,
+    "verification_level": "page",
+    "verification_date": "2026-10-21",
+    "formal_status": "published",
+    "supersedes": [],
+    "superseded_by": [],
+    "identifiers": {
+     "doi": null,
+     "arxiv": null,
+     "arxiv_version": null,
+     "inspire": null
+    },
+    "citation_key": "PDG:AtomicNuclear:Si2024",
+    "url": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/silicon_Si.html",
+    "verification_limitations": "the property page and MUE/muE_silicon_Si.txt were read (sha256 in refdata/pdg-silicon-2024.json)",
+    "read_events": [
+     {
+      "level": "page",
+      "date": "2026-10-21",
+      "locators": [],
+      "imported_from": "literature-input.json"
+     }
+    ],
+    "versions": [],
+    "notices": [],
+    "status": "as-imported",
+    "imported_from": "literature-input.json"
+   }
+  },
+  "claims": {
+   "lit:C01": {
+    "id": "lit:C01",
+    "claim": "Geant4 asks users to cite these three papers (they are printed in the run banner of Geant4 11.4.3)",
+    "claim_types": [
+     "general_method"
+    ],
+    "support_kind": "general_method",
+    "source_ids": [
+     "lit:S01",
+     "lit:S02",
+     "lit:S03"
+    ],
+    "location": "Geant4 11.4.3 run banner (local log)",
+    "scope": {
+     "text": "software citation"
+    },
+    "verification_strength": "metadata-only",
+    "numeric_quotation_allowed": false,
+    "last_reviewed": "2026-10-21"
+   }
+  },
+  "searches": [],
+  "notices": [],
+  "relations": [],
+  "proposed_merges": [],
+  "flags": [
+   {
+    "source_id": "lit:S01",
+    "reason": "read level metadata-only: metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read",
+    "level": "access-limited",
+    "claims": [
+     "lit:C01"
+    ]
+   },
+   {
+    "source_id": "lit:S02",
+    "reason": "read level metadata-only: metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read",
+    "level": "access-limited",
+    "claims": [
+     "lit:C01"
+    ]
+   },
+   {
+    "source_id": "lit:S03",
+    "reason": "read level metadata-only: metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read",
+    "level": "access-limited",
+    "claims": [
+     "lit:C01"
+    ]
+   }
+  ],
+  "verification": {
+   "online": "not-performed",
+   "note": "check sources at a primary source through the host's authorized tools; record each check as a read event"
+  }
+ }
+}

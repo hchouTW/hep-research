@@ -71,11 +71,11 @@ CLAIMS = [
     (MATRIX, "`--help` without NumPy/SciPy for every script",
      "tests.skills.hep_statistics.test_cli_input_fuzz.CliInputFuzz.test_help_without_numpy"),
     # hep-detector capability-matrix rows (its entry reference, the principles summary, states no script output)
-    (MATRIX, "nineteen scripts with status labels and JSON errors",
+    (MATRIX, "twenty-one scripts with status labels and JSON errors",
      "tests.skills.hep_detector.test_hep_detector_audit.StatusLabelTests.test_every_script_echoes_status"),
-    (MATRIX, "nineteen scripts with status labels and JSON errors",
+    (MATRIX, "twenty-one scripts with status labels and JSON errors",
      "tests.skills.hep_detector.test_hep_detector_audit.UniformErrorTests.test_invalid_input_is_exit_2_with_a_json_error"),
-    (MATRIX, "nineteen scripts with status labels and JSON errors", f"{T}.DetectorScriptCount.test_script_count"),
+    (MATRIX, "twenty-one scripts with status labels and JSON errors", f"{T}.DetectorScriptCount.test_script_count"),
 ]
 
 
@@ -144,7 +144,7 @@ class GeneralMethodLabel(unittest.TestCase):
 
 class DetectorScriptCount(unittest.TestCase):
     def test_script_count(self):
-        self.assertEqual(len(list((ROOT / "skills" / "hep-detector" / "scripts").glob("*.py"))), 19)
+        self.assertEqual(len(list((ROOT / "skills" / "hep-detector" / "scripts").glob("*.py"))), 21)
 
 
 if __name__ == "__main__":

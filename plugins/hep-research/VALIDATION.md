@@ -1961,6 +1961,78 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## GEANT4-ADAPTER (2026-10-21, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Python 3.13; branch `feat/geant4-capability` from `cb64cba5`)
+
+Epic TASK-geant4-00 to 03, WP1. Geant4 11.4.3 (commit 2ee379e6843e55b9c6bbb835d2a2b03cc998fef0) built by
+`adapters/geant4/assets/geant4_build.py` in `~/Workspace/geant4-work/` (no system-wide installation; hosts contacted
+github.com, cern.ch, both user-approved), C++17, MT, internal CLHEP, no visualization, 11 datasets (no G4NDL), each MD5
+checked at download and content-hashed after unpacking. Recorded runs and excerpts: `tests/adapters/fixtures/geant4/`.
+
+| Check | Result |
+|---|---|
+| Build A, then clean rebuild B (fresh clone and download) | `geant4-config --version` 11.4.3 both; all 11 dataset content hashes identical; `geant4_build.py check` ok |
+| Example values, build A against B, same seeds | B1, TestEm3, TestEm5 extracted values identical (72 quantities) |
+| Official examples against the reference outputs (`geant4_examples.py compare`) | 48 compared quantities (B1 runs 0-1, TestEm3 run 0, TestEm5 runs 0-4), Bonferroni z_crit 3.28 (alpha 0.05): all pass, largest abs(z) 2.99; B4a smoke passes |
+| TestEm3 run 0 mirror (10000 events) | first comparison failed on the lAr track length (z = 3.81) because the 3-digit print was treated as 4; per-field print precision from Run.cc added; fresh-seed rerun with the rule declared first: 7/7 pass, largest abs(z) 1.58 (z_crit 2.69) |
+| TestEm5 run 0 mirror (1e5 events) | 6/6 pass |
+| Overlaps; shifted-slab negative test | 0 reports; shifted slab caught (3 GeomVol1002 reports) |
+| Material budget (geantino, TestEm3 geometry); tampered dump | sum t/X0 = 22.525 closes to 1e-9; tampered density caught |
+| Energy balance (EM-only, 200 events with killed e+) | residual RMS 1.5e-6 MeV; omitting 2 m_e c^2 (+17.4 MeV mean) and double-counting booked energy (-163 MeV) both caught in every event; an injection with nothing to act on is now incomplete (exit 3) |
+| Data path pointed at build B's copy of G4EMLOW | run `failed` |
+| Bit-identical rerun (same build, serial) | CSV identical |
+| Scan of 3 cuts under `run_workflow.py`; 4-chunk `local_partition.py` run | all steps ok with orchestration and Geant4 records; merge has no duplicate events, abs(z) <= 2.0 against a single run |
+| `python3 -m unittest tests.adapters.test_geant4` | 31 offline pass, 4 live skipped; with `HEP_GEANT4_LIVE_TEST=1`: all pass (UI commands accepted between physics construction and `/run/initialize`, a bad one refused; MT merge in event order) |
+
+The Apptainer definition `assets/geant4.def` was not built (no container runtime on E2). Every record is
+`unvalidated`; the comparisons are verification, not validation.
+
+## GEANT4-STUDY (2026-10-21, E2, same branch)
+
+WP2: `skills/hep-detector/scripts/check_geant4_study.py`, `geant4_benchmarks.py`, the rule table and the protocol. The
+Bethe implementation reproduces the PDG silicon muon table (Groom, Mokhov and Striganov, 2024 edition, retrieved
+2026-10-21 from pdg.lbl.gov) within 0.3 % at 100, 300 and 1000 MeV and its density effect to 2e-3; at 10 GeV it is 1 %
+low (the table's ionization column includes high-energy corrections). RPP 2024 equation numbers checked in the chapter
+PDF (sha256 1b328278...): Bethe 34.5, delta 34.7, Delta_p 34.12 (j = 0.200), Highland 34.16, t_max 34.36; the Highland
+text gives no "11 %" accuracy (the plugin's E4 statement is not from this edition). Hadronic transitions read in the
+11.4.3 source (QGSP_BIC BIC to 1.5 GeV, FTF-cascade 3-6 GeV, QGS-FTF 12-25 GeV).
+
+| Check | Result |
+|---|---|
+| `tests.skills.hep_detector.test_check_geant4_study`, `test_geant4_benchmarks` | 29 pass |
+| Registration set (documented claims, audit, script guards, reference links, CLI robustness and contract, constant literals) | pass (the script-guard test found an overflow on 1e308 MeV, fixed by input guards) |
+| `check_layering.py`, `reference_inventory.py --check`, `measure_entrypoints.py` | pass; no new warning; SKILL.md and entry references unchanged |
+
+## GEANT4-J14 (2026-10-21, E2, same branch)
+
+`examples/geant4-thin-silicon/` live (2 min 43 s, 26 Geant4 runs) and offline replay: 21/21 criteria pass; replay
+byte-identical to the committed output wherever --out is; live rerun into a temporary folder gives the recorded
+verdicts. thin-layer-mpv (10 GeV mu-, 300 um Si, 60000 events): +1.4 % from the PDG Delta_p, detection limit 8.3 %,
+control (density x 1.083) caught; stopping-power (100 MeV p, 30000 events): -0.18 % from Bethe, limit 3.8 %, control
+(x 1.038) caught; convergence gates pass; variations not resolved (SE about 1 %); FTFP_BERT_EMZ excluded as the same
+model. Scenarios: coarse cut stopped by the gate, density +10 % caught, dump-origin inputs flagged. Study records pass
+`validate.py --strict` and `dependencies.py`; the response passes `--strict` and `response_adapter.py --validate`; the
+report passes `check_citations.py` (citations by key: the tool truncates DOIs with parentheses). The four DOIs were
+verified on INSPIRE-HEP with `adapters/literature-lookup` (responses in `lookups/`).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4476 tests, 4299 pass, 0 failures, 177 skipped |
+| `check_routing_static.py` | 415 cases, empty failed, coverage and topic errors; rerunning `make_cases.py` gives no difference |
+| `check_ownership.py`, `check_retired_names.py`, `check_packaging.py`, `capability_map.py --check` | pass |
+
+## GEANT4-INDEPENDENT (2026-10-21, E2, same branch)
+
+Epic Validation 2: an agent that did not write the code ran "estimate the longitudinal leakage of 1 GeV electrons in
+2 cm of lead glass with Geant4" through the docs and tools (outputs in `~/Workspace/geant4-work/independent-validation/`;
+pdg.lbl.gov contacted for the lead-glass table). Leakage fraction 0.9427 +- 0.0002 (MC), `unvalidated`. R1, R2, R4,
+R6, R7 triggered; R3 partly (no rule covers EM showers or containment); R5 not (no reference benchmark for leakage;
+the shower-shape sanity check does not apply: the 1.58 X0 slab does not contain t_max); R8 not (no tool asks for a
+literature record outside J14). Bugs found and fixed: an uncontained shower maximum was "implausible" with no gap (now
+not-applicable and a gap); an energy-balance injection that changes no event passed (now exit 3); the study record did
+not list the absence of a reference benchmark (now a gap); scan points reused the base seeds (now s1 + k). Left open: no
+leakage observable in `summarize`, rear leakage not separated from albedo, the schema requires Sternheimer inputs even
+when no benchmark uses them.
+
 ## 0.18.1 release check (2026-10-21, E2 and the CI lock)
 
 Release branch `release/0.18.1` from main `9298ab21` (#181: the sci-fix ledger review, SCIFIX-LEDGER-REVIEW below; main

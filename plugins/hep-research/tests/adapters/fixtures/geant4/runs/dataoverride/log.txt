@@ -1,0 +1,4 @@
+# excerpt of the layered_sim log: overlap-check and status lines only
+Checking overlaps for volume Si:0 (G4Box) ... OK! 
+Checking overlaps for volume Si:0 (G4Box) ... OK! 
+LAYERED_SIM_STATUS {"status": "ok"}

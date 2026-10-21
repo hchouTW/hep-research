@@ -1,0 +1,582 @@
+#!/usr/bin/env python3
+"""Independent-reference benchmarks for Geant4 layered-slab runs (stopping power, range, thin-layer MPV and width,
+multiple scattering, shower shape, published data).
+
+Purpose: compare quantities from layered_sim CSV outputs (adapters/geant4) with references whose inputs do NOT come
+from Geant4: density, Z/A, mean excitation energy and the Sternheimer density-effect parameters are read from the
+study spec (which cites PDG or NIST for them), physical constants from core/constants (CODATA 2022, PDG 2026). The
+Geant4 material dump is never read: an error in the spec must not enter the reference and cancel out. This script
+does not import the adapter and does not need Geant4. See <plugin root>/skills/hep-detector/references/
+geant4-study-protocol.md.
+
+Grades: `reference` benchmarks use an independent source that states its accuracy and are the only validation
+evidence; `sanity` benchmarks are plausibility checks; `interface` hands a comparison to hep-statistics.
+  stopping-power    (reference) mean energy loss of transmitted primaries (E_in - E_exit), as linear dE/dx, against
+                    the Bethe mean rate (PDG RPP 2024 eq. 34.5, valid 0.1 <~ beta gamma <~ 1000 to a few percent)
+                    at the mean energy in the slab; non-transmitted primaries and primaries that ended in a process
+                    other than Transportation are excluded and counted. Deposit is not energy loss.
+  range             (reference) mean projected stopping depth of primaries in a thick block against a user-supplied
+                    PSTAR/ASTAR projected range (dataset-record, interpolated in log-log); primaries that ended in a
+                    hadronic process are excluded and counted (PSTAR excludes nuclear interactions).
+  thin-layer-mpv    (reference) most probable energy loss of the primary against the PDG Landau-Vavilov value
+                    Delta_p = xi [ln(2 m c^2 b^2 g^2 / I) + ln(xi / I) + j - b^2 - delta(bg)], j = 0.200, xi =
+                    (K/2)(Z/A) z^2 (rho x / b^2) (RPP 2024 eq. 34.12); applicable only for kappa = xi / W_max < 0.05.
+                    MPV estimator: the vertex of the least-squares parabola through the fullest bin and two bins on
+                    each side of a histogram with the declared bin width; the most probable deposit is reported too.
+  thin-layer-width  (sanity) FWHM of the deposit distribution against 4 xi (thin-layer widths are wider: RPP 2024).
+  multiple-scattering (sanity) core width of the projected exit angle (both projections, RMS of the central 98 %
+                    divided by the Gaussian truncation factor 0.8673) against Highland from multiple_scattering.py,
+                    run as a subprocess (RPP 2024 gives no numerical accuracy for it).
+  em-shower-shape   (sanity) depth of the longitudinal maximum from per-copy deposits against t_max = ln(E/E_c) + C_j
+                    (config keys layer_x0 and critical_energy_MeV); not applicable when the stack does not contain t_max.
+  published-data    (interface) the Geant4 mean of a named column and a published value, handed to hep-statistics.
+Verdict: |G4 - ref| / ref <= tolerance, tolerance = reference accuracy + k x SE (SE by a seeded bootstrap of the
+events), plus a stated binning term for the MPV. Detection limit: tolerance + |observed relative difference| + 2 SE
+(an injected error of that size, of either sign, fails with probability >= 0.977). Every reference benchmark reruns on its negative control (a Geant4 run with an error of known
+size injected on the Geant4 side, set at the claimed detection limit, the reference unchanged): the control must
+fail, or the benchmark is not validation evidence for that scope. Gross controls (msc off) do not count.
+
+Input: a benchmark config JSON (schema geant4-benchmarks/1; paths relative to the config file):
+  {"schema", "study_spec", "benchmarks": [{"benchmark", "csv", "run_record", "slab", "material", "particle",
+   "energy_MeV", "thickness_mm", "tolerance": {"reference_accuracy_relative", "k_sigma"}, "bootstrap": {"resamples",
+   "seed"}, "binning": {"bin_width_MeV"}, "negative_control": {"csv", "run_record", "injected", "injected_relative"},
+   "reference_table" (range), "column"/"published" (published-data)}]}
+Usage: geant4_benchmarks.py run --config CONFIG.json [--out OUT.json] [--status LABEL]
+       geant4_benchmarks.py reference --study-spec SPEC.json --material NAME --particle P --energy-mev E [--thickness-mm T]
+Output JSON: status, status_label, inputs, defaults_used, benchmarks [{benchmark, grade, reference {source, version,
+validity}, scope {particle, energy_MeV, material, thickness_mm, observable}, statistic, geant4, reference_value,
+relative_difference, tolerance {total, parts}, detection_limit_relative, verdict, negative_control {...},
+validation_evidence}], gaps.
+Exit codes: 0 every benchmark ran and no reference benchmark failed; 1 a reference benchmark failed or its negative
+control was not caught; 2 bad input; 3 incomplete (a benchmark not applicable or missing data). Standard library only.
+"""
+from __future__ import annotations
+
+import argparse
+import gzip
+import json
+import math
+import random
+import statistics
+import subprocess
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
+PLUGIN = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(PLUGIN))
+from core import constants as K  # noqa: E402
+from core.status import add_status_argument, exit_code  # noqa: E402
+
+STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
+            "validated-in-scope", "projection", "outside-validated-range")
+MS_SCRIPT = Path(__file__).resolve().parent / "multiple_scattering.py"
+ME = K.constant("electron_mass_energy", unit="MeV").value  # CODATA 2022
+R_E_CM = K.constant("classical_electron_radius", unit="m").value * 100
+N_A = K.constant("avogadro_constant").value
+K_BETHE = 4 * math.pi * N_A * R_E_CM ** 2 * ME  # MeV mol^-1 cm^2 (PDG Table 34.1: 0.307075)
+J_LANDAU = 0.200  # PDG RPP 2024 eq. 34.12
+TRUNC_98 = 0.8673  # RMS of a unit Gaussian truncated to its central 98 %
+GRADES = {"stopping-power": "reference", "range": "reference", "thin-layer-mpv": "reference",
+          "thin-layer-width": "sanity", "multiple-scattering": "sanity", "em-shower-shape": "sanity",
+          "published-data": "interface"}
+RPP = "PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)"
+HADRONIC_END = ("Inelastic", "hadElastic", "nCapture", "CoulombScat")
+
+
+class BenchmarkError(ValueError):
+    """Input the script refuses (exit 2)."""
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        print(json.dumps({"status": "rejected", "error": message}, indent=1))
+        self.print_usage(sys.stderr)
+        self.exit(2, f"{self.prog}: error: {message}\n")
+
+
+def particle_props(name: str) -> tuple[float, int]:
+    """(mass in MeV, charge number) for a Geant4 particle name, from core/constants."""
+    table = {"e-": ("electron_mass_energy", -1), "e+": ("electron_mass_energy", 1), "mu-": ("muon_mass_energy", -1),
+             "mu+": ("muon_mass_energy", 1), "proton": ("proton_mass_energy", 1), "alpha": ("alpha_particle_mass_energy", 2),
+             "deuteron": ("deuteron_mass_energy", 1)}
+    if name in table:
+        key, z = table[name]
+        return K.constant(key, unit="MeV").value, z
+    if name in ("pi+", "pi-"):
+        return K.particle("pi+", "mass", unit="MeV").value, 1 if name == "pi+" else -1
+    raise BenchmarkError(f"no mass for particle {name!r} (known: {sorted(table) + ['pi+', 'pi-']})")
+
+
+def check_inputs(energy_mev, thickness_mm=None) -> None:
+    """Refuse a kinetic energy or thickness outside what the references can be evaluated for."""
+    if not isinstance(energy_mev, (int, float)) or not math.isfinite(energy_mev) or not 0 < energy_mev <= 1e9:
+        raise BenchmarkError("energy_MeV must be a finite kinetic energy in (0, 1e9] MeV")
+    if thickness_mm is not None and (not isinstance(thickness_mm, (int, float)) or not math.isfinite(thickness_mm)
+                                     or not 0 < thickness_mm <= 1e4):
+        raise BenchmarkError("thickness_mm must be in (0, 1e4] mm")
+
+
+def kinematics(ekin: float, mass: float) -> tuple[float, float, float]:
+    gamma = 1 + ekin / mass
+    beta2 = 1 - 1 / gamma ** 2
+    return gamma, beta2, math.sqrt(beta2) * gamma
+
+
+def w_max(ekin: float, mass: float) -> float:
+    gamma, beta2, bg = kinematics(ekin, mass)
+    return 2 * ME * bg ** 2 / (1 + 2 * gamma * ME / mass + (ME / mass) ** 2)
+
+
+def density_effect(bg: float, st: dict) -> float:
+    """Sternheimer delta(beta gamma) (PDG RPP 2024 eq. 34.7) with parameters a, k, x0, x1, Cbar, delta0."""
+    x = math.log10(bg)
+    if x >= st["x1"]:
+        return 2 * math.log(10) * x - st["Cbar"]
+    if x >= st["x0"]:
+        return 2 * math.log(10) * x - st["Cbar"] + st["a"] * (st["x1"] - x) ** st["k"]
+    return st["delta0"] * 10 ** (2 * (x - st["x0"]))
+
+
+def bethe(ekin: float, mass: float, z: int, mat: dict) -> float:
+    """Mean dE/dx in MeV cm^2/g (PDG RPP 2024 eq. 34.5); I and Z/A and Sternheimer from the study spec."""
+    gamma, beta2, bg = kinematics(ekin, mass)
+    i_mev = mat["mean_excitation_eV"] * 1e-6
+    arg = 2 * ME * bg ** 2 * w_max(ekin, mass) / i_mev ** 2
+    return K_BETHE * z ** 2 * mat["z_over_a"] / beta2 * (0.5 * math.log(arg) - beta2
+                                                         - density_effect(bg, mat["sternheimer"]) / 2)
+
+
+def landau_mpv(ekin: float, mass: float, z: int, mat: dict, thickness_mm: float) -> dict:
+    gamma, beta2, bg = kinematics(ekin, mass)
+    x = mat["density_g_cm3"] * thickness_mm / 10  # g/cm^2
+    xi = K_BETHE / 2 * mat["z_over_a"] * z ** 2 * x / beta2
+    i_mev = mat["mean_excitation_eV"] * 1e-6
+    delta = density_effect(bg, mat["sternheimer"])
+    dp = xi * (math.log(2 * ME * bg ** 2 / i_mev) + math.log(xi / i_mev) + J_LANDAU - beta2 - delta)
+    return {"delta_p_MeV": dp, "xi_MeV": xi, "kappa": xi / w_max(ekin, mass), "delta": delta, "beta_gamma": bg}
+
+
+def read_csv(path: Path) -> list[dict]:
+    """Rows of a layered_sim CSV (or a gzip-compressed copy, .csv.gz), numbers as floats."""
+    raw = gzip.decompress(path.read_bytes()).decode() if path.suffix == ".gz" else path.read_text(encoding="utf-8")
+    lines = raw.splitlines()
+    if not lines or lines[0] != "# SIMULATION":
+        raise BenchmarkError(f"{path.name}: not a layered_sim CSV (first line must be '# SIMULATION')")
+    cols = lines[1].split(",")
+    rows = []
+    for ln in lines[2:]:
+        if ln:
+            vals = ln.split(",")
+            rows.append({c: (float(v) if _is_num(v) else v) for c, v in zip(cols, vals)})
+    if not rows:
+        raise BenchmarkError(f"{path.name}: no events")
+    return rows
+
+
+def _is_num(v: str) -> bool:
+    try:
+        float(v)
+        return True
+    except ValueError:
+        return False
+
+
+def bootstrap(values: list[float], stat, resamples: int, seed: int) -> float:
+    rng = random.Random(seed)
+    n = len(values)
+    est = [stat([values[rng.randrange(n)] for _ in range(n)]) for _ in range(resamples)]
+    return statistics.stdev(est)
+
+
+def mpv(values: list[float], width: float, half: int = 2) -> float:
+    """Vertex of the least-squares parabola through the fullest histogram bin and `half` bins on each side (bins of
+    `width` from 0); the vertex is kept inside the fitted window."""
+    counts: dict[int, int] = {}
+    for v in values:
+        b = int(math.floor(v / width))
+        counts[b] = counts.get(b, 0) + 1
+    k = max(sorted(counts), key=lambda b: counts[b])
+    xs = list(range(-half, half + 1))
+    ys = [counts.get(k + x, 0) for x in xs]
+    n, sx2, sx4 = len(xs), sum(x * x for x in xs), sum(x ** 4 for x in xs)
+    sy, sxy, sx2y = sum(ys), sum(x * y for x, y in zip(xs, ys)), sum(x * x * y for x, y in zip(xs, ys))
+    b1 = sxy / sx2  # symmetric window: the linear term decouples
+    a2 = (n * sx2y - sx2 * sy) / (n * sx4 - sx2 * sx2)
+    shift = -b1 / (2 * a2) if a2 < 0 else 0.0
+    return (k + 0.5 + max(-half, min(half, shift))) * width
+
+
+def fwhm(values: list[float], width: float) -> float:
+    counts: dict[int, int] = {}
+    for v in values:
+        b = int(math.floor(v / width))
+        counts[b] = counts.get(b, 0) + 1
+    peak = max(counts.values())
+    above = sorted(b for b, c in counts.items() if c >= peak / 2)
+    return (above[-1] - above[0] + 1) * width
+
+
+def transmitted(rows: list[dict]) -> tuple[list[dict], dict]:
+    kept = [r for r in rows if r.get("primary_fate") == 1 and r.get("primary_end_process") == "Transportation"]
+    hadronic = sum(1 for r in rows if any(h in str(r.get("primary_end_process")) for h in HADRONIC_END))
+    return kept, {"events": len(rows), "used": len(kept), "excluded": len(rows) - len(kept),
+                  "excluded_fraction": (len(rows) - len(kept)) / len(rows), "ended_in_hadronic_process": hadronic}
+
+
+def material(study: dict, name: str) -> dict:
+    for m in study.get("materials", []):
+        if m.get("name") == name:
+            if m.get("reference_origin") == "geant4-material-dump":
+                raise BenchmarkError(f"study spec material {name}: reference inputs from the Geant4 material dump are "
+                                     "refused (an error in the spec would cancel)")
+            for k in ("density_g_cm3", "z_over_a", "mean_excitation_eV", "sternheimer", "reference_source"):
+                if k not in m:
+                    raise BenchmarkError(f"study spec material {name}: {k} is required for reference inputs")
+            for k in ("a", "k", "x0", "x1", "Cbar", "delta0"):
+                if k not in m["sternheimer"]:
+                    raise BenchmarkError(f"study spec material {name}: sternheimer.{k} is required")
+            return m
+    raise BenchmarkError(f"material {name} not in the study spec (reference inputs come from the spec, never the dump)")
+
+
+def _tol(b: dict, se_rel: float, extra: float = 0.0) -> tuple[float, dict, float]:
+    t = b.get("tolerance", {})
+    acc = t.get("reference_accuracy_relative")
+    k = t.get("k_sigma", 3.0)
+    if not isinstance(acc, (int, float)) or acc < 0:
+        raise BenchmarkError(f"{b['benchmark']}: tolerance.reference_accuracy_relative is required")
+    total = acc + k * se_rel + extra
+    return total, {"reference_accuracy": acc, "mc_statistics": k * se_rel, "k_sigma": k, "binning": extra}, \
+        total + 2 * se_rel
+
+
+def detection_limit(tol: float, rel: float, se_rel: float) -> float:
+    """Smallest injected relative error, of either sign, that fails with probability >= 0.977 given the offset
+    already observed: |rel + delta| >= |delta| - |rel| must exceed tol by 2 SE."""
+    return tol + abs(rel) + 2 * se_rel
+
+
+def bench_stopping_power(b: dict, rows: list[dict], study: dict) -> dict:
+    mat = material(study, b["material"])
+    mass, z = particle_props(b["particle"])
+    kept, sel = transmitted(rows)
+    if len(kept) < 2:
+        raise BenchmarkError("stopping-power: fewer than two transmitted primaries")
+    loss = [r["primary_eloss_MeV"] for r in kept]
+    t_cm = b["thickness_mm"] / 10
+    mean_loss = statistics.fmean(loss)
+    bs = b.get("bootstrap", {})
+    se = bootstrap(loss, statistics.fmean, bs.get("resamples", 200), bs.get("seed", 1))
+    g4 = mean_loss / t_cm
+    e_mid = b["energy_MeV"] - mean_loss / 2
+    ref = bethe(e_mid, mass, z, mat) * mat["density_g_cm3"]
+    ref_in = bethe(b["energy_MeV"], mass, z, mat) * mat["density_g_cm3"]
+    _, _, bg = kinematics(b["energy_MeV"], mass)
+    applicable = 0.1 <= bg <= 1000
+    rel = (g4 - ref) / ref
+    tol, parts, _ = _tol(b, se / mean_loss)
+    dl = detection_limit(tol, rel, se / mean_loss)
+    return {"statistic": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
+            "geant4": g4, "geant4_se": se / t_cm, "reference_value": ref, "relative_difference": rel,
+            "tolerance": {"total": tol, "parts": parts}, "detection_limit_relative": dl,
+            "verdict": ("pass" if abs(rel) <= tol else "fail") if applicable else "not-applicable",
+            "selection": sel, "beta_gamma": bg,
+            "thin_slab_approximation": {"bethe_at_entry": ref_in, "bethe_at_mean_energy": ref,
+                                        "relative_change": (ref - ref_in) / ref_in},
+            "mean_deposit_over_mean_loss": statistics.fmean(r[f"edep_{b['slab']}_MeV"] for r in kept) / mean_loss,
+            "reference": {"source": f"Bethe mean rate, {RPP}, eq. 34.5, with I, Z/A, density and Sternheimer "
+                                    f"parameters from the study spec ({mat['reference_source']})",
+                          "version": "RPP 2024", "validity": "0.1 <~ beta gamma <~ 1000, accuracy a few percent"}}
+
+
+def bench_range(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
+    table = json.loads((cfg_dir / b["reference_table"]).read_text(encoding="utf-8"))
+    pts = sorted((float(p["energy_MeV"]), float(p["projected_range_g_cm2"])) for p in table["extension"]["points"]) \
+        if "extension" in table else sorted((float(p["energy_MeV"]), float(p["projected_range_g_cm2"]))
+                                            for p in table["points"])
+    e = b["energy_MeV"]
+    if not pts[0][0] <= e <= pts[-1][0]:
+        raise BenchmarkError("range: the energy is outside the reference table")
+    for (e0, r0), (e1, r1) in zip(pts, pts[1:]):
+        if e0 <= e <= e1:
+            ref = math.exp(math.log(r0) + (math.log(r1) - math.log(r0)) * (math.log(e) - math.log(e0))
+                           / (math.log(e1) - math.log(e0)))
+            break
+    mat = material(study, b["material"])
+    stopped = [r for r in rows if r.get("primary_fate") == 0 and not any(
+        h in str(r.get("primary_end_process")) for h in HADRONIC_END)]
+    sel = {"events": len(rows), "used": len(stopped), "excluded": len(rows) - len(stopped),
+           "excluded_fraction": (len(rows) - len(stopped)) / len(rows)}
+    if len(stopped) < 2:
+        raise BenchmarkError("range: fewer than two stopped primaries")
+    x0 = b.get("entry_x_mm", 0.0)
+    depth = [(r["primary_end_x_mm"] - x0) / 10 * mat["density_g_cm3"] for r in stopped]
+    g4 = statistics.fmean(depth)
+    bs = b.get("bootstrap", {})
+    se = bootstrap(depth, statistics.fmean, bs.get("resamples", 200), bs.get("seed", 1))
+    rel = (g4 - ref) / ref
+    tol, parts, _ = _tol(b, se / g4)
+    dl = detection_limit(tol, rel, se / g4)
+    return {"statistic": "mean projected stopping depth (g/cm^2) of primaries that stopped without a hadronic process",
+            "geant4": g4, "geant4_se": se, "reference_value": ref, "relative_difference": rel,
+            "tolerance": {"total": tol, "parts": parts}, "detection_limit_relative": dl,
+            "verdict": "pass" if abs(rel) <= tol else "fail", "selection": sel,
+            "reference": {"source": table.get("source", b["reference_table"]), "version": table.get("version"),
+                          "validity": "projected range without nuclear interactions (PSTAR/ASTAR)"}}
+
+
+def bench_mpv(b: dict, rows: list[dict], study: dict) -> dict:
+    mat = material(study, b["material"])
+    mass, z = particle_props(b["particle"])
+    kept, sel = transmitted(rows)
+    lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
+    width = b.get("binning", {}).get("bin_width_MeV")
+    if not isinstance(width, (int, float)) or width <= 0:
+        raise BenchmarkError("thin-layer-mpv: binning.bin_width_MeV is required")
+    base = {"reference": {"source": f"most probable energy loss Delta_p, {RPP}, eq. 34.12 (j = 0.200), delta(beta "
+                                    f"gamma) from Sternheimer parameters in the study spec ({mat['reference_source']})",
+                          "version": "RPP 2024",
+                          "validity": "kappa = xi / W_max < 0.05; RPP gives no numerical thickness range or accuracy: "
+                                      "the thickness of validity and the accuracy are declared in the study spec"},
+            "landau": lv, "selection": sel, "estimator": f"least-squares parabola vertex through the fullest bin "
+                                                         f"and two bins on each side, bin width {width} MeV, bins from 0"}
+    if lv["kappa"] >= 0.05:
+        return {**base, "verdict": "not-applicable", "statistic": "most probable energy loss",
+                "reason": f"kappa = {lv['kappa']:.4g} >= 0.05: not the Landau-Vavilov regime"}
+    loss = [r["primary_eloss_MeV"] for r in kept]
+    dep = [r[f"edep_{b['slab']}_MeV"] for r in kept]
+    g4 = mpv(loss, width)
+    bs = b.get("bootstrap", {})
+    se = bootstrap(loss, lambda v: mpv(v, width), bs.get("resamples", 200), bs.get("seed", 1))
+    ref = lv["delta_p_MeV"]
+    rel = (g4 - ref) / ref
+    binning = width / math.sqrt(12) / ref
+    tol, parts, _ = _tol(b, se / ref, binning)
+    dl = detection_limit(tol, rel, se / ref)
+    dep_mpv = mpv(dep, width)
+    return {**base, "statistic": "most probable energy loss of transmitted primaries (MeV)", "geant4": g4,
+            "geant4_se": se, "reference_value": ref, "relative_difference": rel,
+            "tolerance": {"total": tol, "parts": parts}, "detection_limit_relative": dl,
+            "verdict": "pass" if abs(rel) <= tol else "fail",
+            "most_probable_deposit_MeV": dep_mpv, "deposit_minus_loss_relative": (dep_mpv - g4) / g4}
+
+
+def bench_width(b: dict, rows: list[dict], study: dict) -> dict:
+    mat = material(study, b["material"])
+    mass, z = particle_props(b["particle"])
+    kept, sel = transmitted(rows)
+    lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
+    width = b.get("binning", {}).get("bin_width_MeV", lv["xi_MeV"] / 10)
+    g4 = fwhm([r[f"edep_{b['slab']}_MeV"] for r in kept], width)
+    ref = 4 * lv["xi_MeV"]
+    return {"statistic": "FWHM of the deposit distribution (MeV)", "geant4": g4, "reference_value": ref,
+            "relative_difference": (g4 - ref) / ref, "verdict": "plausible" if 0.5 <= g4 / ref <= 3 else "implausible",
+            "plausibility_window": "0.5 to 3 x the Landau width (thin layers are wider than 4 xi, RPP 2024)",
+            "selection": sel, "reference": {"source": f"Landau FWHM 4 xi, {RPP}", "version": "RPP 2024",
+                                            "validity": "sanity only"}}
+
+
+def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
+    kept, sel = transmitted(rows)
+    angles = []
+    for r in kept:
+        angles += [math.atan2(r["exit_dy"], r["exit_dx"]), math.atan2(r["exit_dz"], r["exit_dx"])]
+    angles.sort()
+    cut = int(0.01 * len(angles))
+    core = angles[cut:len(angles) - cut] if cut else angles
+    g4 = math.sqrt(statistics.fmean(a * a for a in core)) / TRUNC_98
+    stack = b.get("highland_stack")
+    if not stack:
+        raise BenchmarkError("multiple-scattering: highland_stack (a multiple_scattering.py input) is required")
+    p = subprocess.run([sys.executable, "-B", str(MS_SCRIPT), str(cfg_dir / stack)], capture_output=True, text=True,
+                       timeout=600)
+    try:
+        ms = json.loads(p.stdout)
+    except ValueError as exc:
+        raise BenchmarkError(f"multiple_scattering.py printed no JSON: {p.stderr[-300:]}") from exc
+    ref = ms.get("scattering_angle_rad")  # Highland theta0 of the stack (multiple_scattering.py)
+    if not isinstance(ref, (int, float)):
+        raise BenchmarkError(f"multiple_scattering.py output has no theta0: {sorted(ms)}")
+    return {"statistic": "core width of the projected exit angle (rad)", "geant4": g4, "reference_value": ref,
+            "relative_difference": (g4 - ref) / ref, "verdict": "plausible" if abs(g4 / ref - 1) <= 0.2 else
+            "implausible", "plausibility_window": "within 20 % of Highland", "selection": sel,
+            "reference": {"source": f"Highland (Lynch and Dahl) via multiple_scattering.py; {RPP}, eq. 34.16",
+                          "version": "RPP 2024", "validity": "sanity only: RPP 2024 gives no numerical accuracy; "
+                                                              "the beta dependence is poor for large Z, small x"}}
+
+
+def bench_shower(b: dict, rows: list[dict], study: dict) -> dict:
+    cols = sorted((c for c in rows[0] if c.startswith("edep_copy")), key=lambda c: int(c[9:-4]))
+    if not cols:
+        raise BenchmarkError("em-shower-shape: needs per-copy deposits (output.per_instance)")
+    profile = [statistics.fmean(r[c] for r in rows) for c in cols]
+    t_layer = b["layer_x0"]
+    k = max(range(len(profile)), key=profile.__getitem__)
+    g4 = (k + 0.5) * t_layer
+    ref = math.log(b["energy_MeV"] / b["critical_energy_MeV"]) + (-0.5 if b["particle"] in ("e-", "e+") else 0.5)
+    depth = len(profile) * t_layer
+    if ref >= depth:
+        return {"statistic": "depth of the longitudinal maximum (X0)", "verdict": "not-applicable",
+                "reason": f"the expected shower maximum {ref:.3g} X0 is not contained in the {depth:.3g} X0 stack",
+                "reference": {"source": f"t_max = ln(E/E_c) + C_j, {RPP}, eq. 34.36", "version": "RPP 2024",
+                              "validity": "never validation"}}
+    return {"statistic": "depth of the longitudinal maximum (X0)", "geant4": g4, "reference_value": ref,
+            "relative_difference": (g4 - ref) / ref, "verdict": "plausible" if abs(g4 - ref) <= 1.5 else "implausible",
+            "plausibility_window": "within 1.5 X0", "reference": {"source": f"t_max = ln(E/E_c) + C_j, {RPP}, eq. 34.36",
+                                                                 "version": "RPP 2024", "validity": "never validation"}}
+
+
+def bench_published(b: dict, rows: list[dict]) -> dict:
+    col = b.get("column")
+    if not col or col not in rows[0]:
+        raise BenchmarkError("published-data: 'column' must name a CSV column")
+    vals = [r[col] for r in rows]
+    return {"statistic": f"mean of {col}", "geant4": statistics.fmean(vals),
+            "geant4_se": statistics.stdev(vals) / math.sqrt(len(vals)), "published": b.get("published"),
+            "verdict": "handoff", "handoff": {"to_skill": "hep-statistics",
+                                              "reason": "compatibility with a published measurement is a statistical "
+                                                        "question; this benchmark gives no verdict"},
+            "reference": {"source": "published measurement (dataset-record)", "version": None, "validity": "interface"}}
+
+
+def evaluate(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
+    name = b["benchmark"]
+    if name == "stopping-power":
+        return bench_stopping_power(b, rows, study)
+    if name == "range":
+        return bench_range(b, rows, study, cfg_dir)
+    if name == "thin-layer-mpv":
+        return bench_mpv(b, rows, study)
+    if name == "thin-layer-width":
+        return bench_width(b, rows, study)
+    if name == "multiple-scattering":
+        return bench_ms(b, rows, study, cfg_dir)
+    if name == "em-shower-shape":
+        return bench_shower(b, rows, study)
+    return bench_published(b, rows)
+
+
+def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
+    name = b.get("benchmark")
+    if name not in GRADES:
+        raise BenchmarkError(f"unknown benchmark {name!r} (known: {sorted(GRADES)})")
+    for k in ("csv", "particle", "energy_MeV") + (("material", "slab", "thickness_mm") if name in (
+            "stopping-power", "thin-layer-mpv", "thin-layer-width", "range") else ()):
+        if k not in b:
+            raise BenchmarkError(f"{name}: '{k}' is required")
+    check_inputs(b["energy_MeV"], b.get("thickness_mm"))
+    rows = read_csv(cfg_dir / b["csv"])
+    res = evaluate(b, rows, study, cfg_dir)
+    grade = GRADES[name]
+    out = {"benchmark": name, "grade": grade, **res,
+           "scope": {"particle": b["particle"], "energy_MeV": b["energy_MeV"], "material": b.get("material"),
+                     "thickness_mm": b.get("thickness_mm"), "observable": res.get("statistic")},
+           "inputs": {"csv": b["csv"], "run_record": b.get("run_record")}}
+    if grade == "reference" and res["verdict"] in ("pass", "fail"):
+        nc = b.get("negative_control")
+        if not nc:
+            out["negative_control"] = {"status": "missing"}
+        else:
+            nres = evaluate(b, read_csv(cfg_dir / nc["csv"]), study, cfg_dir)
+            caught = nres["verdict"] == "fail"
+            inj = nc.get("injected_relative")
+            # the control must sit at (not far above) the detection limit it is meant to demonstrate
+            at_limit = isinstance(inj, (int, float)) and 0 < inj <= 1.1 * res["detection_limit_relative"]
+            out["negative_control"] = {"status": "caught" if caught else "not-caught", "injected": nc.get("injected"),
+                                       "injected_relative": nc.get("injected_relative"),
+                                       "at_claimed_detection_limit": bool(at_limit),
+                                       "relative_difference": nres.get("relative_difference"),
+                                       "verdict_on_control": nres["verdict"], "csv": nc["csv"],
+                                       "run_record": nc.get("run_record")}
+        out["scope"]["detection_limit_relative"] = res["detection_limit_relative"]
+    nc_ok = out.get("negative_control", {}).get("status") == "caught"
+    out["validation_evidence"] = grade == "reference" and res["verdict"] == "pass" and nc_ok
+    return out
+
+
+def cmd_run(args) -> tuple[str, dict]:
+    cfg_path = Path(args.config)
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    if cfg.get("schema") != "geant4-benchmarks/1":
+        raise BenchmarkError("config schema must be geant4-benchmarks/1")
+    cfg_dir = cfg_path.resolve().parent
+    study = json.loads((cfg_dir / cfg["study_spec"]).read_text(encoding="utf-8"))
+    results, gaps = [], []
+    for b in cfg.get("benchmarks", []):
+        r = run_benchmark(b, study, cfg_dir)
+        results.append(r)
+        nc = r.get("negative_control", {})
+        if r["grade"] == "reference":
+            if r["verdict"] == "not-applicable":
+                gaps.append(f"{r['benchmark']}: not applicable ({r.get('reason', 'outside validity')})")
+            elif nc.get("status") == "missing":
+                gaps.append(f"{r['benchmark']}: no negative control, so not validation evidence")
+            elif nc.get("status") == "not-caught":
+                gaps.append(f"{r['benchmark']}: negative control ({nc.get('injected')}) not caught: no discriminating "
+                            "power at the claimed detection limit")
+            elif not nc.get("at_claimed_detection_limit"):
+                gaps.append(f"{r['benchmark']}: negative control injected {nc.get('injected_relative')} is not at the "
+                            f"claimed detection limit {r['detection_limit_relative']:.4g}")
+        elif r["verdict"] in ("implausible", "not-applicable"):
+            gaps.append(f"{r['benchmark']} ({r['grade']}): {r['verdict']}" + (f" ({r['reason']})" if r.get("reason")
+                                                                             else ""))
+    if not results:
+        raise BenchmarkError("the config lists no benchmarks")
+    if not any(r["grade"] == "reference" for r in results):
+        gaps.append("no reference benchmark in the config: nothing here is validation evidence")
+    ref = [r for r in results if r["grade"] == "reference"]
+    failed = [r["benchmark"] for r in ref if r["verdict"] == "fail" or r.get("negative_control", {}).get("status")
+              == "not-caught"]
+    status = "failed" if failed else ("incomplete" if any(r["verdict"] == "not-applicable" for r in ref) else "ok")
+    doc = {"benchmarks": results, "gaps": gaps, "failed": failed,
+           "constants": {"K_MeV_mol_cm2": K_BETHE, "m_e_MeV": ME, "source": "core/constants (CODATA 2022)"},
+           "note": "reference inputs come from the study spec; the Geant4 material dump is never read"}
+    if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.out).write_text(json.dumps({"status": status, "status_label": args.status, **doc}, indent=1,
+                                             sort_keys=True) + "\n", encoding="utf-8")
+    return status, doc
+
+
+def cmd_reference(args) -> tuple[str, dict]:
+    study = json.loads(Path(args.study_spec).read_text(encoding="utf-8"))
+    mat = material(study, args.material)
+    mass, z = particle_props(args.particle)
+    check_inputs(args.energy_mev, args.thickness_mm)
+    out = {"bethe_MeV_cm2_g": bethe(args.energy_mev, mass, z, mat), "w_max_MeV": w_max(args.energy_mev, mass),
+           "beta_gamma": kinematics(args.energy_mev, mass)[2],
+           "density_effect": density_effect(kinematics(args.energy_mev, mass)[2], mat["sternheimer"])}
+    if args.thickness_mm:
+        out["landau"] = landau_mpv(args.energy_mev, mass, z, mat, args.thickness_mm)
+    return "ok", out
+
+
+def main(argv=None) -> int:
+    ap = JsonArgumentParser(description=__doc__.splitlines()[0])
+    sub = ap.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("run", help="run the benchmarks of a config")
+    p.add_argument("--config", required=True)
+    p.add_argument("--out")
+    p = sub.add_parser("reference", help="print the reference values for one material, particle and energy")
+    p.add_argument("--study-spec", required=True)
+    p.add_argument("--material", required=True)
+    p.add_argument("--particle", required=True)
+    p.add_argument("--energy-mev", type=float, required=True)
+    p.add_argument("--thickness-mm", type=float)
+    for sp in sub.choices.values():
+        add_status_argument(sp)
+    args = ap.parse_args(argv)
+    inputs = {k: v for k, v in vars(args).items() if k != "status"}
+    try:
+        status, doc = (cmd_run if args.command == "run" else cmd_reference)(args)
+    except (BenchmarkError, OSError, KeyError, ValueError, TypeError, ArithmeticError) as exc:
+        status, doc = "rejected", {"error": f"{type(exc).__name__}: {exc}" if isinstance(exc, KeyError) else str(exc)}
+    print(json.dumps({"status": status, "status_label": args.status, "inputs": inputs,
+                      "defaults_used": ["status"] if "--status" not in (argv or sys.argv[1:]) else [], **doc},
+                     indent=1, default=str))
+    return exit_code(status)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

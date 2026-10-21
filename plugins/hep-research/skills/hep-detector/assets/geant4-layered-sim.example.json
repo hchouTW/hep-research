@@ -1,0 +1,69 @@
+{
+ "schema": "layered_sim.spec/1",
+ "note": "SYNTHETIC example layered_sim spec (adapters/geant4): 10 GeV mu- through 300 um of silicon, EM-only option 4; illustrative only",
+ "geometry": {
+  "lateral_mm": 10.0,
+  "layers": [
+   {
+    "repeat": 1,
+    "slabs": [
+     {
+      "name": "Si",
+      "material": "Si_study",
+      "thickness_mm": 0.3,
+      "sensitive": true
+     }
+    ]
+   }
+  ],
+  "world": {
+   "material": "G4_Galactic",
+   "scale": 1.2
+  }
+ },
+ "materials": [
+  {
+   "name": "Si_study",
+   "z": 14,
+   "a_g_mole": 28.0855,
+   "density_g_cm3": 2.329,
+   "source": "PDG Atomic and Nuclear Properties, silicon (2024): A = 28.0855(3) g/mol, density 2.329 g/cm3"
+  }
+ ],
+ "physics": {
+  "em_constructor": "G4EmStandardPhysics_option4",
+  "decay": true,
+  "default_cut_mm": 0.01,
+  "regions": [
+   {
+    "name": "SiRegion",
+    "slabs": [
+     "Si"
+    ],
+    "cut_mm": 0.01
+   }
+  ]
+ },
+ "ui_commands": [],
+ "gun": {
+  "particle": "mu-",
+  "energy_MeV": 10000.0,
+  "world_fraction": -0.499,
+  "direction": [
+   1,
+   0,
+   0
+  ]
+ },
+ "run": {
+  "events": 60000,
+  "seeds": [
+   1401,
+   1
+  ],
+  "run_manager": "serial"
+ },
+ "output": {
+  "overlap_test_points": 1000
+ }
+}

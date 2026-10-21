@@ -1,0 +1,96 @@
+{
+ "label": "ILLUSTRATIVE (journey J14): Geant4 outputs are unvalidated; names no experiment",
+ "pass": {
+  "artifacts_validate": true,
+  "coarse_cut_stopped_by_gate": true,
+  "density_10_caught": true,
+  "dump_reference_flagged": true,
+  "mpv_convergence_gate_passes": true,
+  "mpv_dependencies_ok": true,
+  "mpv_record_unvalidated": true,
+  "mpv_spec_ok": true,
+  "mpv_statistical_target_met": true,
+  "mpv_thin-layer-mpv_negative_control_caught": true,
+  "mpv_thin-layer-mpv_passes": true,
+  "report_citations_verified": true,
+  "response_validates_and_is_unvalidated": true,
+  "same_model_variation_excluded": true,
+  "sp_convergence_gate_passes": true,
+  "sp_dependencies_ok": true,
+  "sp_record_unvalidated": true,
+  "sp_spec_ok": true,
+  "sp_statistical_target_met": true,
+  "sp_stopping-power_negative_control_caught": true,
+  "sp_stopping-power_passes": true
+ },
+ "scenarios": {
+  "coarse-cut": [
+   "convergence gate not passed: physics.default_cut_mm fail",
+   "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
+  ],
+  "density-10": [
+   "stopping-power failed: relative difference +0.09709 beyond the tolerance 0.03329 (Bethe mean rate, PDG RPP 2024, Passage of particles through ...)",
+   "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)",
+   "no reference benchmark is validation evidence for this study (R5 not met)"
+  ],
+  "dump-reference": [
+   "material Si_study: reference inputs taken from the Geant4 material dump or of undeclared origin (reference_origin 'geant4-material-dump'; Geant4 material dump (materials.json of the nominal run)): an error in the spec would enter the reference too and cancel",
+   "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
+  ]
+ },
+ "studies": {
+  "mpv": {
+   "benchmarks": {
+    "thin-layer-mpv": {
+     "detection_limit": 0.0826757688364182,
+     "negative_control": "caught",
+     "relative_difference": 0.01421145035666392,
+     "validation_evidence": true,
+     "verdict": "pass"
+    },
+    "thin-layer-width": {
+     "detection_limit": null,
+     "negative_control": null,
+     "relative_difference": 0.3088788864007095,
+     "validation_evidence": false,
+     "verdict": "plausible"
+    }
+   },
+   "convergence_gate": "pass",
+   "gaps": [
+    "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
+   ],
+   "labels": [
+    "unvalidated"
+   ],
+   "phase2_eligible": [
+    "thin-layer-mpv"
+   ],
+   "spec": "ok",
+   "statistical_target": "pass"
+  },
+  "sp": {
+   "benchmarks": {
+    "stopping-power": {
+     "detection_limit": 0.03776020023771021,
+     "negative_control": "caught",
+     "relative_difference": -0.0018499429437011151,
+     "validation_evidence": true,
+     "verdict": "pass"
+    }
+   },
+   "convergence_gate": "pass",
+   "gaps": [
+    "build_response.py writes empty inputs and one --status: a response built from these runs cannot link the run records (phase 2 requirement 5)"
+   ],
+   "labels": [
+    "unvalidated"
+   ],
+   "phase2_eligible": [
+    "stopping-power"
+   ],
+   "spec": "ok",
+   "statistical_target": "pass"
+  }
+ }
+}

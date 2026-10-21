@@ -1,0 +1,161 @@
+{
+ "sources": [
+  {
+   "id": "lit:S01",
+   "title": "GEANT4 - A Simulation Toolkit",
+   "authors": "Agostinelli, S. et al. (GEANT4)",
+   "year": 2003,
+   "tier": 1,
+   "verification_level": "metadata-only",
+   "verification_date": "2026-10-21",
+   "formal_status": "published",
+   "supersedes": [],
+   "superseded_by": [],
+   "identifiers": {
+    "dois": [
+     "10.1016/S0168-9002(03)01368-8"
+    ],
+    "arxiv_ids": [],
+    "inspire_recids": [
+     593382
+    ]
+   },
+   "citation_key": "Agostinelli:2002hh",
+   "journal_ref": "Nucl.Instrum.Meth.A 506 (2003) 250",
+   "verification_limitations": "metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read"
+  },
+  {
+   "id": "lit:S02",
+   "title": "Geant4 developments and applications",
+   "authors": "Allison, J. et al.",
+   "year": 2006,
+   "tier": 1,
+   "verification_level": "metadata-only",
+   "verification_date": "2026-10-21",
+   "formal_status": "published",
+   "supersedes": [],
+   "superseded_by": [],
+   "identifiers": {
+    "dois": [
+     "10.1109/TNS.2006.869826"
+    ],
+    "arxiv_ids": [],
+    "inspire_recids": [
+     715388
+    ]
+   },
+   "citation_key": "Allison:2006ve",
+   "journal_ref": "IEEE Trans.Nucl.Sci. 53 (2006) 270",
+   "verification_limitations": "metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read"
+  },
+  {
+   "id": "lit:S03",
+   "title": "Recent developments in Geant4",
+   "authors": "Allison, J. et al.",
+   "year": 2016,
+   "tier": 1,
+   "verification_level": "metadata-only",
+   "verification_date": "2026-10-21",
+   "formal_status": "published",
+   "supersedes": [],
+   "superseded_by": [],
+   "identifiers": {
+    "dois": [
+     "10.1016/j.nima.2016.06.125"
+    ],
+    "arxiv_ids": [],
+    "inspire_recids": [
+     1488031
+    ]
+   },
+   "citation_key": "Allison:2016lfl",
+   "journal_ref": "Nucl.Instrum.Meth.A 835 (2016) 186",
+   "verification_limitations": "metadata-only: INSPIRE-HEP record found by DOI with adapters/literature-lookup (recorded in lookups/); the paper's text was not read"
+  },
+  {
+   "id": "lit:S04",
+   "title": "Review of particle physics",
+   "authors": "Navas, S. et al. (Particle Data Group)",
+   "year": 2024,
+   "tier": 1,
+   "verification_level": "page",
+   "verification_date": "2026-10-21",
+   "formal_status": "published",
+   "supersedes": [],
+   "superseded_by": [],
+   "identifiers": {
+    "dois": [
+     "10.1103/PhysRevD.110.030001"
+    ],
+    "arxiv_ids": [],
+    "inspire_recids": [
+     2817040
+    ]
+   },
+   "citation_key": "ParticleDataGroup:2024cfk",
+   "journal_ref": "Phys.Rev.D 110 (2024) 030001",
+   "verification_limitations": "the Passage of particles through matter chapter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf, sha256 1b328278e8358dd53127b52d07c1048b63a0b98219e5c6541fe9f2a3d0e2f7cc, retrieved 2026-10-21) was read for Eqs. 34.5 (Bethe, valid 0.1 <~ beta gamma <~ 1000 to a few percent), 34.7 (density effect), 34.12 (Delta_p, j = 0.200), 34.16 (Highland) and 34.36 (shower maximum); the DOI record was found on INSPIRE-HEP"
+  },
+  {
+   "id": "lit:S05",
+   "title": "Geant4 source code, tag v11.4.3",
+   "authors": "Geant4 Collaboration",
+   "year": 2026,
+   "tier": 1,
+   "verification_level": "page",
+   "verification_date": "2026-10-21",
+   "formal_status": "published",
+   "supersedes": [],
+   "superseded_by": [],
+   "identifiers": {
+    "dois": [],
+    "arxiv_ids": []
+   },
+   "citation_key": "Geant4:v11.4.3",
+   "url": "https://github.com/Geant4/geant4/tree/v11.4.3",
+   "verification_limitations": "commit 2ee379e6843e55b9c6bbb835d2a2b03cc998fef0 cloned 2026-10-21; the files cited by the study protocol and the rule table were read"
+  },
+  {
+   "id": "lit:S06",
+   "title": "Atomic and nuclear properties of silicon (Si)",
+   "authors": "Particle Data Group (Groom, Mokhov and Striganov tables)",
+   "year": 2024,
+   "tier": 1,
+   "verification_level": "page",
+   "verification_date": "2026-10-21",
+   "formal_status": "published",
+   "supersedes": [],
+   "superseded_by": [],
+   "identifiers": {
+    "dois": [],
+    "arxiv_ids": []
+   },
+   "citation_key": "PDG:AtomicNuclear:Si2024",
+   "url": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/silicon_Si.html",
+   "verification_limitations": "the property page and MUE/muE_silicon_Si.txt were read (sha256 in refdata/pdg-silicon-2024.json)"
+  }
+ ],
+ "claims": [
+  {
+   "id": "lit:C01",
+   "claim": "Geant4 asks users to cite these three papers (they are printed in the run banner of Geant4 11.4.3)",
+   "claim_types": [
+    "general_method"
+   ],
+   "support_kind": "general_method",
+   "source_ids": [
+    "lit:S01",
+    "lit:S02",
+    "lit:S03"
+   ],
+   "location": "Geant4 11.4.3 run banner (local log)",
+   "scope": {
+    "text": "software citation"
+   },
+   "verification_strength": "metadata-only",
+   "numeric_quotation_allowed": false,
+   "last_reviewed": "2026-10-21"
+  }
+ ],
+ "lookup_note": "the four DOIs were looked up one by one on INSPIRE-HEP (2026-10-21, adapters/literature-lookup, responses in lookups/); no topical search was made, so no search_log is recorded"
+}

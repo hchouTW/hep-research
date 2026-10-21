@@ -1,0 +1,48 @@
+{
+ "bootstrap": {
+  "resamples": 200,
+  "seed": 1
+ },
+ "csv": {
+  "name": "events.csv",
+  "sha256": "fbd1e6ae0236dee5ee7fad87facb0105061443ce7bb1fd5391930294e922f640"
+ },
+ "data_path_problems": [],
+ "datasets_content_match": true,
+ "events": 30000,
+ "mpv_bin_MeV": 0.002,
+ "observables": {
+  "mean_deposit_MeV": {
+   "se": 0.0003634539363429993,
+   "value": 0.40538393602504336
+  },
+  "mpv_deposit_MeV": {
+   "se": 0.005609560067280215,
+   "value": 0.37076036036036036
+  },
+  "mpv_loss_MeV": {
+   "se": 0.006014864725020301,
+   "value": 0.37080350877192986
+  },
+  "tail_fraction": {
+   "se": 1.9245008972987525e-07,
+   "threshold_MeV": 0.25,
+   "value": 1.0
+  }
+ },
+ "run_record": {
+  "artifact_id": "geant4-run-sp-cut-0.1",
+  "sha256": "acb4821425ea9e513f2c7bdcacb6af1d2d1027d751e5e70a8c55ada6d0947e51"
+ },
+ "schema": "geant4-run-summary/1",
+ "settings": {
+  "default_cut_mm": 0.1,
+  "em_constructor": "G4EmStandardPhysics_option4",
+  "energy_MeV": 100.0,
+  "particle": "proton",
+  "reference_list": null,
+  "step_limit_mm": 0.0,
+  "ui_commands": []
+ },
+ "spec_sha256": "1b6c2e460f9905761b3ac9cb8eabb9a9d2595f960e5d5dc48262a204a01076a4"
+}

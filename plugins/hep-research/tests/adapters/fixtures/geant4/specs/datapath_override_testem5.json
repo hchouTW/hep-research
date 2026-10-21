@@ -1,0 +1,63 @@
+{
+ "schema": "layered_sim.spec/1",
+ "note": "Negative control of the data-path check: TestEm5 run 0 mirror with 2000 events, run with G4LEDATA pointed at another copy of G4EMLOW",
+ "geometry": {
+  "lateral_mm": 0.05,
+  "layers": [
+   {
+    "repeat": 1,
+    "slabs": [
+     {
+      "name": "Si",
+      "material": "Silicon",
+      "thickness_mm": 0.02,
+      "sensitive": true
+     }
+    ]
+   }
+  ],
+  "world": {
+   "material": "G4_Galactic",
+   "size_mm": [
+    0.024,
+    0.06,
+    0.06
+   ]
+  }
+ },
+ "materials": [
+  {
+   "name": "Silicon",
+   "z": 14,
+   "a_g_mole": 28.09,
+   "density_g_cm3": 2.33
+  }
+ ],
+ "physics": {
+  "em_constructor": "G4EmStandardPhysics_option3",
+  "decay": true,
+  "default_cut_mm": 0.007
+ },
+ "ui_commands": [],
+ "gun": {
+  "particle": "pi+",
+  "energy_MeV": 5000.0,
+  "world_fraction": -0.4999,
+  "direction": [
+   1,
+   0,
+   0
+  ]
+ },
+ "run": {
+  "events": 2000,
+  "seeds": [
+   24680,
+   13579
+  ],
+  "run_manager": "serial"
+ },
+ "output": {
+  "overlap_test_points": 10000
+ }
+}

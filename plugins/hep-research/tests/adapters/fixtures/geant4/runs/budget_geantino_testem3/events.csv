@@ -1,0 +1,12 @@
+# SIMULATION
+event,chunk,weight,primary_pdg,primary_ekin_MeV,primary_x_mm,primary_y_mm,primary_z_mm,primary_dx,primary_dy,primary_dz,edep_Pb_MeV,chlen_Pb_mm,plen_Pb_mm,edep_lAr_MeV,chlen_lAr_mm,plen_lAr_mm,edep_world_MeV,leak_gamma_MeV,leak_e_MeV,leak_nu_MeV,leak_other_MeV,killed_booked_MeV,killed_unbooked_MeV,killed_eplus,exit_ekin_MeV,primary_eloss_MeV,exit_dx,exit_dy,exit_dz,primary_fate,primary_end_x_mm,primary_end_process,n_sec_gamma,n_sec_electron,n_sec_positron,n_sec_other
+0,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+1,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+2,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+3,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+4,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+5,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+6,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+7,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+8,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0
+9,0,1,0,1000,-239.52,0,0,1,0,0,0,0,115,0,0,285,0,0,0,0,1000,0,0,0,1000,0,1,0,0,1,240,Transportation,0,0,0,0

@@ -1,0 +1,56 @@
+# excerpt of a local TestEm5 run (Geant4 11.4.3, serial, seeds 1001 2002): summary lines only
+### Run 0 starts.
+ The run was 100000 pi+ of 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )
+ Total energy deposit in absorber per event = 6.348 keV +- 16.19 eV 
+ Leakage :  primary = 5 GeV +- 1.346 keV   secondaries = 4.506 keV +- 1.346 keV
+ Total track length (charged) in absorber per event = 20.26 um  +- 7.942 nm 
+ Total track length (neutral) in absorber per event = 5.115 Ang +- 3.561 Ang
+ Number of steps (charged) in absorber per event = 1.178 +- 0.005469
+ Number of steps (neutral) in absorber per event = 5e-05 +- 2.236e-05
+ Number of events with the primary particle transmitted = 100 %
+ Number of events with the primary particle reflected = 0 %
+  rms proj angle of transmit primary particle = 0.025 mrad (central part only)
+### Run 1 starts.
+ The run was 50000 e- of 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )
+ Total energy deposit in absorber per event = 18.34 keV +- 62.82 eV 
+ Leakage :  primary = 15.63 MeV +- 2.472 keV   secondaries = 47.17 keV +- 2.463 keV
+ Total track length (charged) in absorber per event = 9.905 um  +- 10.83 nm 
+ Total track length (neutral) in absorber per event = 127.6 nm  +- 4.279 nm 
+ Number of steps (charged) in absorber per event = 2.605 +- 0.008942
+ Number of steps (neutral) in absorber per event = 0.02822 +- 0.0007702
+ Number of events with the primary particle transmitted = 99.99 %
+ Number of events with the primary particle reflected = 0.008 %
+  rms proj angle of transmit primary particle = 34.77 mrad (central part only)
+### Run 2 starts.
+ The run was 50000 mu+ of 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)
+ Total energy deposit in absorber per event = 1.048 MeV +- 996.5 eV 
+ Leakage :  primary = 95.12 MeV +- 1.358 keV   secondaries = 26.84 keV +- 715.6 eV 
+ Total track length (charged) in absorber per event = 5.173 mm  +- 3.781 um 
+ Total track length (neutral) in absorber per event = 21.63 um  +- 2.228 um 
+ Number of steps (charged) in absorber per event = 12.24 +- 0.03733
+ Number of steps (neutral) in absorber per event = 0.01022 +- 0.0004857
+ Number of events with the primary particle transmitted = 100 %
+ Number of events with the primary particle reflected = 0 %
+  rms proj angle of transmit primary particle = 7.364 mrad (central part only)
+### Run 3 starts.
+ The run was 50000 proton of 175 GeV through 8 mm  of Aluminium (density: 2.7 g/cm3 )
+ Total energy deposit in absorber per event = 4.666 MeV +- 152.7 keV
+ Leakage :  primary = 174.7 GeV +- 152.7 keV   secondaries = 0 eV  +- 0 eV 
+ Total track length (charged) in absorber per event = 8.004 mm  +- 0 fm 
+ Total track length (neutral) in absorber per event = 0 fm  +- 0 fm 
+ Number of steps (charged) in absorber per event = 1.264 +- 0.002295
+ Number of steps (neutral) in absorber per event = 0 +- 0
+ Number of events with the primary particle transmitted = 100 %
+ Number of events with the primary particle reflected = 0 %
+  rms proj angle of transmit primary particle = 0.02049 mrad (central part only)
+### Run 4 starts.
+ The run was 50000 mu+ of 100 GeV through 1 m   of Iron (density: 7.87 g/cm3 )
+ Total energy deposit in absorber per event = 2.155 GeV +- 14.01 MeV
+ Leakage :  primary = 97.84 GeV +- 14.08 MeV   secondaries = 0 eV  +- 0 eV 
+ Total track length (charged) in absorber per event = 100 cm  +- 18.64 um 
+ Total track length (neutral) in absorber per event = 0 fm  +- 0 fm 
+ Number of steps (charged) in absorber per event = 47.65 +- 0.03057
+ Number of steps (neutral) in absorber per event = 0 +- 0
+ Number of events with the primary particle transmitted = 100 %
+ Number of events with the primary particle reflected = 0 %
+  rms proj angle of transmit primary particle = 1.177 mrad (central part only)

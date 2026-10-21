@@ -1,0 +1,71 @@
+{
+ "convergence": {
+  "gate": "pass",
+  "parameters": [
+   {
+    "observables": [
+     {
+      "finest": 0.01,
+      "next": 0.03,
+      "observable": "mean_deposit_MeV",
+      "relative_change": -7.08727349259099e-05,
+      "se_of_change": 0.0015021314019439602,
+      "tolerance": 0.01,
+      "verdict": "pass"
+     }
+    ],
+    "parameter": "physics.default_cut_mm",
+    "two_finest": [
+     0.01,
+     0.03
+    ],
+    "values": [
+     0.01,
+     0.03,
+     0.1
+    ],
+    "verdict": "pass"
+   }
+  ],
+  "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+ },
+ "record_problems": [],
+ "statistical_target": {
+  "estimate": "seeded bootstrap of this run (200 resamples); N_needed = N (SE/target)^2, assuming SE ~ 1/sqrt(N); the delta-ray tail makes means converge slowly",
+  "events": 30000,
+  "events_needed": null,
+  "observable": "mean_deposit_MeV",
+  "relative_se": 0.0011110094049006192,
+  "target": 0.005,
+  "verdict": "pass"
+ },
+ "summaries": [
+  {
+   "path": "recorded/summaries/sp-nominal.json",
+   "role": "nominal",
+   "run_record": {
+    "artifact_id": "geant4-run-sp-nominal",
+    "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
+   },
+   "sha256": "732a1cb86d38408b0ee174ca53325a141067a3785132c1fe4a276c734b754668"
+  },
+  {
+   "path": "recorded/summaries/sp-cut-0.1.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-run-sp-cut-0.1",
+    "sha256": "acb4821425ea9e513f2c7bdcacb6af1d2d1027d751e5e70a8c55ada6d0947e51"
+   },
+   "sha256": "b99cacd01ba19118bc0d1bc6ef59c5e8b469ce908d8dd07ea0fadfff5b0f9ecb"
+  },
+  {
+   "path": "recorded/summaries/sp-cut-0.03.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-run-sp-cut-0.03",
+    "sha256": "a7f098b024cb6c7b065cf7d2f669ebdebb6364fc27fbfb9101dbc825272ef2db"
+   },
+   "sha256": "2cb93445da1eeb04860a23d6c4c9eb0a53839ff752c32b6b30fc2f69df577269"
+  }
+ ]
+}

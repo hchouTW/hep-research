@@ -1,0 +1,70 @@
+{
+ "schema": "layered_sim.spec/1",
+ "note": "Geantino scan of the TestEm3 mirror geometry for the material-budget closure (WP1 check 2).",
+ "geometry": {
+  "lateral_mm": 400.0,
+  "layers": [
+   {
+    "repeat": 50,
+    "slabs": [
+     {
+      "name": "Pb",
+      "material": "G4_Pb",
+      "thickness_mm": 2.3,
+      "sensitive": true
+     },
+     {
+      "name": "lAr",
+      "material": "G4_lAr",
+      "thickness_mm": 5.7,
+      "sensitive": true
+     }
+    ]
+   }
+  ],
+  "world": {
+   "material": "Galactic",
+   "scale": 1.2
+  }
+ },
+ "materials": [
+  {
+   "name": "Galactic",
+   "z": 1,
+   "a_g_mole": 1.008,
+   "density_g_cm3": 1e-25,
+   "state": "gas",
+   "temperature_K": 2.73,
+   "pressure_Pa": 3e-18
+  }
+ ],
+ "physics": {
+  "em_constructor": "G4EmStandardPhysics",
+  "decay": true,
+  "default_cut_mm": 1.0
+ },
+ "ui_commands": [
+  "/process/msc/Skin 1"
+ ],
+ "gun": {
+  "particle": "geantino",
+  "energy_MeV": 1000.0,
+  "world_fraction": -0.499,
+  "direction": [
+   1,
+   0,
+   0
+  ]
+ },
+ "run": {
+  "events": 10,
+  "seeds": [
+   12345,
+   67890
+  ],
+  "run_manager": "serial"
+ },
+ "output": {
+  "overlap_test_points": 1000
+ }
+}

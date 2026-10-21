@@ -518,6 +518,18 @@ C = [
  ("lit-ja-1", "ja", "direct", "この論文（arXiv:2405.01234）は本当に存在しますか？", "hep-citations", ["whether a paper exists"], None, None, {"set": "SPLIT"}),
  ("lit-turns-1", "en", "multi-turn", "Draft the introduction of my W mass paper with its citations.", "hep-authoring", ["drafting or revising paper sections"], None, None,
   {"set": "SPLIT", "turns": [{"prompt": "Have all these citations been verified?", "expected": "hep-citations", "trigger_terms": ["finding and verifying literature and citations"]}]}),
+ # Geant4 capability (TASK-geant4-03 section A): build, research, vague and neighbouring requests, en and zh-Hant
+ ("g4-build-1", "en", "neighboring", "Build Geant4 11.4.3 from source with CMake in a pinned container and run the basic examples.", "hep-computing", ["CMake builds"], "hep-detector", None, {"set": "GEANT4"}),
+ ("g4-build-2", "zh-Hant", "neighboring", "請在固定版本的容器裡用 CMake builds 從原始碼編譯 Geant4 11.4.3，並執行 basic examples。", "hep-computing", ["CMake builds"], "hep-detector", None, {"set": "GEANT4"}),
+ ("g4-study-1", "en", "direct", "Study the energy loss and most probable value of GeV muons in a 300 um silicon layer with a detector simulation (Geant4).", "hep-detector", ["detector simulation (Geant4)"], None, None, {"set": "GEANT4"}),
+ ("g4-study-2", "zh-Hant", "direct", "請用 detector simulation (Geant4) 研究 GeV 緲子在 300 微米矽層中的能量損失與最可能值。", "hep-detector", ["detector simulation (Geant4)"], None, None, {"set": "GEANT4"}),
+ ("g4-underspec-1", "en", "underspecified", "Simulate this with Geant4 for me.", "ask", [], None, None, {"set": "GEANT4", "note": "ask the observable, the particle and energy, the source of geometry and materials, and the precision target or downstream use before running anything; never pick an experiment for the user"}),
+ ("g4-underspec-2", "zh-Hant", "underspecified", "幫我用 Geant4 模擬一下這個。", "ask", [], None, None, {"set": "GEANT4", "note": "ask the observable, the particle and energy, the source of geometry and materials, and the precision target; never pick an experiment for the user"}),
+ ("g4-nuisance-1", "en", "neighboring", "Put the envelope of the Geant4 model variations into the likelihood as nuisance parameters.", "hep-statistics", ["nuisance parameters"], "hep-detector", None, {"set": "GEANT4"}),
+ ("g4-nuisance-2", "zh-Hant", "neighboring", "請把 Geant4 模型變化的包絡以 nuisance parameters 放進似然函數。", "hep-statistics", ["nuisance parameters"], "hep-detector", None, {"set": "GEANT4"}),
+ ("g4-crash-1", "en", "neighboring", "My Geant4 SteppingAction crashes, help me debug it; I suspect crashes and memory leaks in my user code.", "hep-computing", ["crashes and memory leaks"], "hep-detector", None, {"set": "GEANT4"}),
+ ("g4-crash-2", "zh-Hant", "neighboring", "我的 Geant4 SteppingAction 一直當掉，請幫我除錯（crashes and memory leaks）。", "hep-computing", ["crashes and memory leaks"], "hep-detector", None, {"set": "GEANT4"}),
+ ("j14", "en", "journey", "Run a detector simulation (Geant4) study of energy loss in thin silicon: build and run it reproducibly, check convergence, benchmark it against independent references, and write it up with citations.", "hep-detector", ["detector simulation (Geant4)"], None, "J14", {"set": "GEANT4", "chain": ["hep-detector", "hep-computing", "hep-detector", "hep-citations", "hep-authoring"], "note": "for a comparison with published data, hep-statistics comes before hep-citations"}),
  ("j13", "en", "journey", "Find what AMS-02 published on B/C, compare it with my propagation model, check the compatibility, and write it up.", "hep-citations", ["what a named experiment published"], None, "J13", {"set": "SPLIT", "profiles": ["experiment:ams-02"], "chain": ["hep-citations", "hep-theory", "hep-statistics", "hep-authoring"]}),
 ]
 

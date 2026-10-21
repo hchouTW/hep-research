@@ -10,7 +10,7 @@
   },
   "hep-citations": {
    "references": 11,
-   "bytes": 82225,
+   "bytes": 82990,
    "uncited": 0
   },
   "hep-computing": {
@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 37,
-   "bytes": 473215,
+   "references": 38,
+   "bytes": 490155,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1016,7 +1016,7 @@
   {
    "path": "skills/hep-citations/references/primary-sources-and-version-checks.md",
    "owner": "hep-citations",
-   "bytes": 12626,
+   "bytes": 13391,
    "lines": 90,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1026,6 +1026,7 @@
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
+    "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-detector/scripts/multiple_scattering.py",
     "skills/hep-measurement/references/hep-measurement-guide.md"
@@ -1919,8 +1920,8 @@
   {
    "path": "skills/hep-detector/references/detector-simulation.md",
    "owner": "hep-detector",
-   "bytes": 13655,
-   "lines": 222,
+   "bytes": 14085,
+   "lines": 227,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -1931,6 +1932,7 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-ml/references/fast-simulation-validation.md",
     "skills/hep-theory/references/event-generation.md"
@@ -2052,6 +2054,28 @@
     "hep-citations"
    ],
    "last_commit": "9257d7b5 2026-10-15"
+  },
+  {
+   "path": "skills/hep-detector/references/geant4-study-protocol.md",
+   "owner": "hep-detector",
+   "bytes": 16510,
+   "lines": 206,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-citations/references/primary-sources-and-version-checks.md",
+    "skills/hep-detector/README.md",
+    "skills/hep-detector/assets/geant4-study-spec.schema.json",
+    "skills/hep-detector/examples/01-geant4-elicitation.md",
+    "skills/hep-detector/examples/02-geant4-adversarial-audit.md",
+    "skills/hep-detector/examples/README.md",
+    "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/scripts/check_geant4_study.py",
+    "skills/hep-detector/scripts/geant4_benchmarks.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-citations"
+   ],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",

@@ -1,0 +1,48 @@
+{
+ "source": "PDG Atomic and Nuclear Properties (Groom, Mokhov and Striganov tables), silicon, 2024 edition",
+ "urls": {
+  "properties": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/silicon_Si.html",
+  "muon_table": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/MUE/muE_silicon_Si.txt"
+ },
+ "retrieved": "2026-10-21",
+ "sha256": {
+  "silicon_Si.html": "74ff6d83495a8aa8815b3b1e6a0478e105562eac4f065c630e3ee849009df5bf",
+  "muE_silicon_Si.txt": "4f1fbf9a287a59765de8b5ea840471fe72c2b675c982e995bac9b57d2c0425fd"
+ },
+ "citation": "cite the Review of Particle Physics (S. Navas et al. (Particle Data Group), Phys. Rev. D 110, 030001 (2024)) and the atomic and nuclear properties pages",
+ "values": {
+  "Z": 14,
+  "A_g_mol": "28.0855(3)",
+  "density_g_cm3": 2.329,
+  "mean_excitation_eV": 173.0,
+  "sternheimer": {
+   "a": 0.1492,
+   "k": 3.2546,
+   "x0": 0.2015,
+   "x1": 2.8716,
+   "I_eV": 173.0,
+   "Cbar": 4.4355,
+   "delta0": 0.14
+  }
+ },
+ "muon_ionization_check": {
+  "note": "rows of muE_silicon_Si.txt (T in MeV, ionization dE/dx in MeV cm2/g, density-effect delta) used to verify the Bethe implementation of geant4_benchmarks.py",
+  "rows": [
+   [
+    100.0,
+    1.849,
+    0.1439
+   ],
+   [
+    300.0,
+    1.665,
+    0.4373
+   ],
+   [
+    1000.0,
+    1.803,
+    1.3637
+   ]
+  ]
+ }
+}

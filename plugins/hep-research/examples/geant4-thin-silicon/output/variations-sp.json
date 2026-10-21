@@ -1,0 +1,62 @@
+{
+ "domain": "em",
+ "envelope_relative": 0.0022373969560187373,
+ "nominal": {
+  "model_assignment": {
+   "domain": "em",
+   "em_constructor": "G4EmStandardPhysics_option4",
+   "fluctuation_model": "Urban",
+   "known": true
+  },
+  "summary": "recorded/summaries/sp-nominal.json",
+  "value": 0.4035049105530633
+ },
+ "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
+ "observable": "mean_deposit_MeV",
+ "variations": [
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": -0.0007148521168874243,
+   "resolved": false,
+   "se": 0.0004543607014468086,
+   "se_of_relative_difference": 0.0015818650369838559,
+   "summary": "recorded/summaries/sp-em-option0.json",
+   "value": 0.40321646421358,
+   "variation": "em-option0"
+  },
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option3",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": 0.001522544839131313,
+   "resolved": false,
+   "se": 0.0004175223445035908,
+   "se_of_relative_difference": 0.0015182315666950458,
+   "summary": "recorded/summaries/sp-em-option3.json",
+   "value": 0.40411926487219,
+   "variation": "em-option3"
+  }
+ ]
+}

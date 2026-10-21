@@ -1,0 +1,344 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "layered_sim.spec/1",
+ "title": "layered_sim run spec",
+ "description": "Input of adapters/geant4/assets/layered_sim (validated by geant4_run.py validate_spec, which also enforces the cross-field rules noted here). Slabs are stacked along x and centred in the world; every slab is its own G4PVPlacement with checkOverlaps (no replicas).",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "geometry",
+  "physics",
+  "gun",
+  "run"
+ ],
+ "properties": {
+  "schema": {
+   "const": "layered_sim.spec/1"
+  },
+  "note": {
+   "type": "string"
+  },
+  "source": {
+   "type": "object",
+   "description": "where each setting comes from (mirror specs cite the example sources)"
+  },
+  "geometry": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "lateral_mm",
+    "layers",
+    "world"
+   ],
+   "properties": {
+    "lateral_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "layers": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "slabs"
+      ],
+      "properties": {
+       "repeat": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "slabs": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "type": "object",
+         "additionalProperties": false,
+         "required": [
+          "name",
+          "material",
+          "thickness_mm"
+         ],
+         "properties": {
+          "name": {
+           "type": "string",
+           "pattern": "^[A-Za-z0-9_]+$",
+           "description": "a name reused elsewhere must keep its material and thickness"
+          },
+          "material": {
+           "type": "string",
+           "description": "a NIST name (G4_...) or a materials[] name"
+          },
+          "thickness_mm": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "sensitive": {
+           "type": "boolean",
+           "description": "step limits apply to sensitive slabs"
+          },
+          "shift_mm": {
+           "type": "number",
+           "description": "shift of the placements along x: negative controls of the overlap check only"
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "world": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "material"
+     ],
+     "properties": {
+      "material": {
+       "type": "string"
+      },
+      "scale": {
+       "type": "number",
+       "exclusiveMinimum": 1,
+       "description": "world = scale x stack (exactly one of scale and size_mm)"
+      },
+      "size_mm": {
+       "type": "array",
+       "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "minItems": 3,
+       "maxItems": 3
+      }
+     }
+    }
+   }
+  },
+  "materials": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "name",
+     "z",
+     "a_g_mole",
+     "density_g_cm3"
+    ],
+    "properties": {
+     "name": {
+      "type": "string",
+      "description": "not starting with G4_"
+     },
+     "z": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "a_g_mole": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "density_g_cm3": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "state": {
+      "enum": [
+       "solid",
+       "liquid",
+       "gas"
+      ]
+     },
+     "temperature_K": {
+      "type": "number"
+     },
+     "pressure_Pa": {
+      "type": "number"
+     },
+     "source": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "physics": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "default_cut_mm"
+   ],
+   "properties": {
+    "reference_list": {
+     "type": "string",
+     "description": "a G4PhysListFactory name, optionally with an EM suffix (exactly one of reference_list and em_constructor)"
+    },
+    "em_constructor": {
+     "enum": [
+      "G4EmStandardPhysics",
+      "G4EmStandardPhysics_option1",
+      "G4EmStandardPhysics_option2",
+      "G4EmStandardPhysics_option3",
+      "G4EmStandardPhysics_option4",
+      "G4EmLivermorePhysics",
+      "G4EmPenelopePhysics",
+      "G4EmLowEPPhysics",
+      "G4EmStandardPhysicsGS",
+      "G4EmStandardPhysicsSS",
+      "G4EmStandardPhysicsWVI"
+     ]
+    },
+    "decay": {
+     "type": "boolean",
+     "description": "add G4DecayPhysics to an EM-only list (default true)"
+    },
+    "default_cut_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "regions": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "name",
+       "slabs",
+       "cut_mm"
+      ],
+      "properties": {
+       "name": {
+        "type": "string"
+       },
+       "slabs": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       "cut_mm": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       }
+      }
+     }
+    },
+    "step_limit_mm": {
+     "type": "number",
+     "minimum": 0,
+     "description": "> 0: G4UserLimits max step in sensitive slabs and G4StepLimiterPhysics (which attaches G4UserSpecialCuts)"
+    },
+    "min_ekin_MeV": {
+     "type": "number",
+     "minimum": 0,
+     "description": "> 0: G4UserLimits minimum kinetic energy in sensitive slabs: G4UserSpecialCuts kills and books the energy as a deposit"
+    },
+    "kill_secondaries": {
+     "type": "boolean",
+     "description": "stacking kill of every secondary (energy recorded as killed, not booked)"
+    },
+    "justification": {
+     "type": "string"
+    }
+   }
+  },
+  "ui_commands": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^/"
+   },
+   "description": "applied verbatim after the physics list is built and before /run/initialize; /run/initialize, /run/beamOn, /control/execute and /control/shell are refused"
+  },
+  "gun": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "particle",
+    "energy_MeV"
+   ],
+   "properties": {
+    "particle": {
+     "type": "string"
+    },
+    "energy_MeV": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "world_fraction": {
+     "type": "number",
+     "minimum": -0.5,
+     "exclusiveMaximum": 0,
+     "description": "gun x = fraction x world x length (TestEm3 -0.499, TestEm5 -0.4999)"
+    },
+    "direction": {
+     "type": "array",
+     "items": {
+      "type": "number"
+     },
+     "minItems": 3,
+     "maxItems": 3
+    }
+   }
+  },
+  "run": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "events",
+    "seeds"
+   ],
+   "properties": {
+    "events": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "first_event": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "chunk": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "seeds": {
+     "type": "array",
+     "items": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "minItems": 2,
+     "maxItems": 2,
+     "description": "MixMaxRng seeds"
+    },
+    "run_manager": {
+     "enum": [
+      "serial",
+      "mt"
+     ]
+    },
+    "threads": {
+     "type": "integer",
+     "minimum": 1
+    }
+   }
+  },
+  "output": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "overlap_test_points": {
+     "type": "integer",
+     "minimum": 0,
+     "description": "> 0: /geometry/test/resolution N and /geometry/test/run after initialisation"
+    },
+    "per_instance": {
+     "type": "boolean",
+     "description": "also one deposit column per placed slab copy (edep_copy<i>_MeV)"
+    }
+   }
+  }
+ }
+}

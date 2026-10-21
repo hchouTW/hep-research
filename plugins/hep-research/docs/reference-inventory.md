@@ -9,9 +9,9 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | hep-authoring | 48 | 339 | 0 |
-| hep-citations | 11 | 82 | 0 |
+| hep-citations | 11 | 83 | 0 |
 | hep-computing | 35 | 298 | 0 |
-| hep-detector | 37 | 473 | 0 |
+| hep-detector | 38 | 490 | 0 |
 | hep-measurement | 13 | 116 | 0 |
 | hep-ml | 42 | 192 | 0 |
 | hep-statistics | 13 | 185 | 0 |
@@ -141,7 +141,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `literature-guide.md` | hep-citations | 9.6 | yes | 5 | hep-authoring | ebb58136 2026-10-19 |
 | `literature-lookup-recipes.md` | hep-citations | 6.0 | yes | 7 | - | ebb58136 2026-10-19 |
 | `literature-review.md` | hep-citations | 7.9 | yes | 7 | hep-authoring | ebb58136 2026-10-19 |
-| `primary-sources-and-version-checks.md` | hep-citations | 12.6 | yes | 9 | hep-detector, hep-measurement | ebb58136 2026-10-19 |
+| `primary-sources-and-version-checks.md` | hep-citations | 13.4 | yes | 10 | hep-detector, hep-measurement | ebb58136 2026-10-19 |
 | `reading-papers.md` | hep-citations | 9.9 | yes | 10 | hep-authoring, hep-statistics | ebb58136 2026-10-19 |
 | `systematic-review-screening.md` | hep-citations | 3.1 | yes | 3 | - | ebb58136 2026-10-19 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
@@ -193,12 +193,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-measurement-framework.md` | hep-detector | 11.0 | no | 11 | hep-citations, hep-measurement | 9257d7b5 2026-10-15 |
 | `detector-principles-bibliography.md` | hep-detector | 14.8 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `detector-principles-summary.md` | hep-detector | 15.1 | yes | 5 | - | 485e96cb 2026-10-17 |
-| `detector-simulation.md` | hep-detector | 13.7 | yes | 11 | hep-ml, hep-theory | 9257d7b5 2026-10-15 |
+| `detector-simulation.md` | hep-detector | 14.1 | yes | 12 | hep-ml, hep-theory | 9257d7b5 2026-10-15 |
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 14 | hep-measurement | 9257d7b5 2026-10-15 |
 | `event-reconstruction.md` | hep-detector | 12.7 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
 | `front-end-electronics-and-signal-processing.md` | hep-detector | 24.9 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
+| `geant4-study-protocol.md` | hep-detector | 16.5 | no | 9 | hep-citations | untracked |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `imaging-atmospheric-cherenkov.md` | hep-detector | 11.4 | no | 10 | hep-citations, hep-ml, hep-statistics | ebb58136 2026-10-19 |
 | `multimessenger-analysis.md` | hep-detector | 6.9 | no | 2 | - | 9257d7b5 2026-10-15 |

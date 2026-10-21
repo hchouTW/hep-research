@@ -1,0 +1,167 @@
+{
+ "schema": "geant4-study-spec/1",
+ "label": "SYNTHETIC example study spec: illustrative only, names no experiment; every Geant4 output it leads to is unvalidated",
+ "geant4": {
+  "version": "11.4.3",
+  "commit": "2ee379e6843e55b9c6bbb835d2a2b03cc998fef0",
+  "documentation": [
+   {
+    "name": "Geant4 upstream source, tag v11.4.3",
+    "version": "11.4.3",
+    "relied_on": true
+   },
+   {
+    "name": "Physics List Guide",
+    "version": "dev build only (no 11.4 build found)",
+    "relied_on": false
+   },
+   {
+    "name": "Book for Application Developers",
+    "version": "dev build only (no 11.4 build found)",
+    "relied_on": false
+   }
+  ]
+ },
+ "geometry_source": {
+  "kind": "design",
+  "description": "one 300 um silicon slab, 10 mm x 10 mm, vacuum world (G4_Galactic), slab placed with G4PVPlacement and checkOverlaps",
+  "uses_replicas": false
+ },
+ "materials": [
+  {
+   "name": "Si_study",
+   "density_g_cm3": 2.329,
+   "z_over_a": 0.498478,
+   "mean_excitation_eV": 173.0,
+   "sternheimer": {
+    "a": 0.1492,
+    "k": 3.2546,
+    "x0": 0.2015,
+    "x1": 2.8716,
+    "Cbar": 4.4355,
+    "delta0": 0.14
+   },
+   "reference_source": "PDG Atomic and Nuclear Properties, silicon, 2024 edition: density 2.329 g/cm3, A 28.0855(3) g/mol (Z/A = 14/28.0855), I 173.0 eV, Sternheimer coefficients a, k, x0, x1, Cbar, delta0 from the header of MUE/muE_silicon_Si.txt (refdata/pdg-silicon-2024.json); never from the Geant4 material dump",
+   "reference_origin": "independent"
+  }
+ ],
+ "reproducibility": {
+  "data_paths_recorded": true,
+  "build_record": "hep-research-artifacts/geant4-build.computational-run.json"
+ },
+ "downstream_use": {
+  "kind": "report",
+  "handoff": [
+   "hep-citations",
+   "hep-authoring"
+  ],
+  "note": "a response matrix from these runs would be built with build_response.py --status unvalidated"
+ },
+ "study_id": "synthetic-mpv-mu-si",
+ "observable": {
+  "name": "most probable energy loss",
+  "kind": "most-probable-value",
+  "domain": "em",
+  "definition": "MPV of E_in - E_exit of primaries transmitted through the slab",
+  "unit": "MeV",
+  "weighted": false
+ },
+ "particle": {
+  "name": "mu-",
+  "energy_MeV": 10000.0
+ },
+ "physics": {
+  "layered_sim_spec": "geant4-layered-sim.example.json",
+  "ui_order": "after-physics-list-before-initialize",
+  "justification": [
+   {
+    "choice": "EM-only modular list: G4EmStandardPhysics_option4 + G4DecayPhysics",
+    "reason": "the observable is electromagnetic energy loss of a muon; option 4 provides the most precise standard and low-energy EM models",
+    "source": "geant4:source/physics_lists/constructors/electromagnetic/include/G4EmStandardPhysics_option4.hh"
+   },
+   {
+    "choice": "Urban energy-loss fluctuations (option 4 default), PAI as a variation",
+    "reason": "the fluctuation model shapes a thin-layer distribution and is varied, not assumed",
+    "source": "geant4:source/physics_lists/constructors/electromagnetic/src/G4EmStandardPhysics_option4.cc (SetFluctuationType(fUrbanFluctuation))"
+   },
+   {
+    "choice": "production cut 0.01 mm in the slab",
+    "reason": "the finest of a converged cut scan (0.1, 0.03, 0.01 mm)",
+    "source": "convergence gate of this study"
+   }
+  ]
+ },
+ "convergence_plan": {
+  "parameters": [
+   {
+    "name": "physics.default_cut_mm",
+    "values": [
+     0.1,
+     0.03,
+     0.01
+    ]
+   }
+  ],
+  "observables": [
+   "mean_deposit_MeV",
+   "mpv_deposit_MeV",
+   "tail_fraction"
+  ],
+  "tolerance_relative": {
+   "mean_deposit_MeV": 0.01,
+   "mpv_deposit_MeV": 0.02,
+   "tail_fraction": 0.1
+  }
+ },
+ "statistical_target": {
+  "observable": "mpv_loss_MeV",
+  "relative_se": 0.01
+ },
+ "validation_plan": {
+  "benchmarks": [
+   {
+    "name": "thin-layer-mpv",
+    "grade": "reference"
+   },
+   {
+    "name": "thin-layer-width",
+    "grade": "sanity"
+   }
+  ],
+  "scope": {
+   "particle": "mu-",
+   "energy_MeV": [
+    10000.0,
+    10000.0
+   ],
+   "material": "Si_study",
+   "thickness_mm": [
+    0.3,
+    0.3
+   ],
+   "observable": "most probable energy loss"
+  }
+ },
+ "variation_plan": {
+  "observable": "mpv_loss_MeV",
+  "model_assignment_checked": true,
+  "variations": [
+   {
+    "name": "em-option0",
+    "change": "G4EmStandardPhysics"
+   },
+   {
+    "name": "em-option3",
+    "change": "G4EmStandardPhysics_option3"
+   },
+   {
+    "name": "pai",
+    "change": "/process/em/AddPAIRegion all SiRegion PAI"
+   },
+   {
+    "name": "ftfp-bert-emz",
+    "change": "reference list FTFP_BERT_EMZ (same EM option 4 and Urban: expected to be excluded)"
+   }
+  ]
+ }
+}
