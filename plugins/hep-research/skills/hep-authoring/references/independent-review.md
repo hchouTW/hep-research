@@ -29,7 +29,7 @@ it can is a maintainer decision (`<plugin root>/docs/dev/decision-independent-re
 | Schemas | `<plugin root>/contracts/schemas/` `review_config`, `review_units`, `review_manifest`, `review_record`, `review_event`, `review_head`, `review_observation` |
 | Lens table, host notes | `<plugin root>/skills/hep-authoring/assets/review-lenses.json`, `<plugin root>/skills/hep-authoring/assets/review-hosts.json` |
 | Configuration | `<project>/reviews/review-config.json` (`start` writes one with defaults when missing; `models` is required) |
-| Review directory | `<project>/reviews/<review-id>/`: the event log and head, unit tables, packets, records, `report.md` |
+| Review directory | `<project>/reviews/<review-id>/`: the event log and head, unit tables, packets, records, the report file (report.md) |
 | Private directory | config `private_dir`, else `$XDG_STATE_HOME/hep-research/reviews/` or `~/.local/state/hep-research/reviews/`: canaries, witnesses, seeds, the slot table. Outside the project and the host's shared directories |
 
 Every command prints one JSON object with a `status`. Pass `--now` and `--observation FILE` only for reproducible test
@@ -51,8 +51,8 @@ runs. All review state is in files, so a review resumes after a host restart.
 | `repair` | `repair CODE` shows the fix; fix it; `next` confirms |
 | `arbitrate` | `arbitrate` (creates arbitration items and slots; `next` then dispatches them) |
 | `dispose` | Verify each finding, then `dispose FINDING --as ...` (below) |
-| `escalate` | `escalate --reason TEXT`; `next` then asks for `report`; hand `report.md` to a human |
-| `report` | `report` (writes `report.md`; it does not close the review) |
+| `escalate` | `escalate --reason TEXT`; `next` then asks for `report`; hand the report file (report.md) to a human |
+| `report` | `report` (writes the report file, report.md; it does not close the review) |
 | `rereview` | `rereview` (starts the next round; every change gets a fresh review) |
 | `close` | `close` (runs the pre-close check; writes `closed` only if it passes) |
 | `stop` | Finished, or waiting for a human, or an error: read `reason` |
@@ -91,11 +91,11 @@ as reason) or declined.
   try at least two URL forms (for example the `.md` version and the normal page) and ask for a verbatim quote.
 - If a reviewer gave a verbatim quote you cannot reproduce, dispose `unresolved`, never `declined`.
 - If two or more independent reviewers quote the same verbatim text, say so when you report.
-- Attach `report.md` unchanged when you report back, with the line on O04/O14 above.
+- Attach the report file (report.md) unchanged when you report back, with the line on O04/O14 above.
 
 ## Reviewer and arbiter agents
 
-They follow their generated `instructions.md`, which lists every field, its computation, the read rules, the quality
+They follow their generated instruction file (instructions.md), which lists every field, its computation, the read rules, the quality
 rules with this slot's thresholds, the full evidence-basis table and an example that passes `check --record-only`.
 In short: run the R0 isolation self-check (stop if any prior conversation is visible); read only the packet, plugin
 files and public sources; write only in `work/`; skim and judge deep units; give each claim one verdict with external
@@ -127,3 +127,6 @@ evidence separately.
 consistent (warnings such as `adopted_unverified`, `no_control`, `canary_shortfall`, `weak_config`,
 `no_model_diversity` are listed), 3 when it is not closed or a finding is open, 1 when the log is broken, the document
 changed after close, a received packet, unit table or record changed, or an upheld finding was declined again.
+
+Done when `next` prints `stop` with the review closed, `contracts/review.py check` exits 0 on the review directory,
+and the report file is attached unchanged with the O04/O14 line.

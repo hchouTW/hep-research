@@ -221,7 +221,7 @@ class ArbitrationConclusionTests(unittest.TestCase):
             ev("escalated", seq=50, items=["item:A1.1"], reason="r"), ev("reported", report_sha256="0" * 64)]
         st = R.fold(evs)
         self.assertEqual(R.decide(R.snapshot(st))["action"], "stop")
-        st = R.fold(evs + [ev("human_resolved", item="item:A1.1", by="h", decision="uphold-first", reason="r")])
+        st = R.fold(evs + [ev("human_resolved", seq=60, item="item:A1.1", by="h", decision="uphold-first", reason="r")])
         self.assertTrue(st["verdicts"]["1/S2/C1"]["superseded"])
         self.assertEqual(R.decide(R.snapshot(st))["action"], "close")
 
@@ -325,7 +325,7 @@ class ExhaustiveTests(unittest.TestCase):
                 st = {"round": 1, "verdicts": {}, "findings": {}}
                 for sid, state in zip(("S1", "S2", "S3"), states):
                     st["findings"][f"1/{sid}/F1"] = {"slot": sid, "round": 1, "units": ["U0002"], "state": state}
-                plan, removed = R.carry_forward_plan(st, mapping, roles, {"facts": "S5", "design": "S6"})
+                plan, removed = R.carry_forward_plan(st, mapping, {"1": roles}, {"facts": "S5", "design": "S6"})
                 carried = {c["target"] for items in plan.values() for c in items if c["kind"] == "finding"}
                 for g, f in st["findings"].items():
                     if f["state"] == "changed":
@@ -349,3 +349,24 @@ class ExhaustiveTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewFollowUpTests(unittest.TestCase):
+    """Regressions found in code review: a second escalation of the same item waits for a new human decision."""
+
+    def test_second_escalation_of_the_same_item_is_pending_again(self):
+        evs = base_events() + arb("conflict", "uphold-first", **CONFLICT) + [
+            ev("escalated", seq=50, items=["round-limit"], reason="r"), ev("reported", seq=51, report_sha256="0" * 64),
+            ev("human_resolved", seq=52, item="round-limit", by="h", decision="extend", reason="r")]
+        self.assertIsNone(R.snapshot(R.fold(evs))["escalation"])
+        evs += [ev("escalated", seq=80, items=["round-limit"], reason="again")]
+        self.assertEqual(R.snapshot(R.fold(evs))["escalation"], {"pending": ["round-limit"], "reported": False})
+
+    def test_carry_forward_uses_each_findings_own_round(self):
+        st = {"round": 2, "verdicts": {}, "findings": {"1/S3/F1": {"slot": "S3", "round": 1, "units": ["U0002"],
+                                                                     "units_now": ["U0002"], "state": "changed"}}}
+        roles = {"1": {"S3": {"role": "lens", "lens": "design"}}, "2": {"S3": {"role": "lens", "lens": "facts"}}}
+        mapping = {"unchanged": [["U0002", "U0002"]], "changed": [], "added": [], "removed": []}
+        plan, removed = R.carry_forward_plan(st, mapping, roles, {"facts": "S5", "design": "S6"})
+        self.assertEqual([c["target"] for c in plan["S6"]], ["1/S3/F1"])
+        self.assertEqual(removed, [])

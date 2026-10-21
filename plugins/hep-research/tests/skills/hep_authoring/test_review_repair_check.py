@@ -258,3 +258,39 @@ class CheckTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FollowUpTests(unittest.TestCase):
+    """Regressions found in code review: CRLF documents, refused appends, check on a relative path."""
+
+    def test_crlf_document_is_not_seen_as_changed(self):
+        with tempfile.TemporaryDirectory() as t:
+            h = H.Harness(Path(t)).setup()
+            (h.project / h.doc_rel).write_bytes(H.DOC.replace("\n", "\r\n").encode("utf-8"))
+            h.start()
+            self.assertEqual(h.next()["action"], "dispatch")
+            obs = [e for e in h.rv.events() if e["event"] == "observed"][-1]["data"]
+            self.assertEqual(obs["document_sha256"], h.st()["rounds"][1]["source_sha256"])
+
+    def test_append_refuses_a_time_earlier_than_the_log(self):
+        with tempfile.TemporaryDirectory() as t:
+            h = H.Harness(Path(t)).setup()
+            h.start()
+            n = len(h.rv.events())
+            out = h.run("next", minutes=-30)
+            self.assertEqual(out["_exit"], 2)
+            self.assertIn("earlier than the last event", out["error"])
+            self.assertEqual(len(h.rv.events()), n)
+            h.now(60)
+            self.assertEqual(h.next()["action"], "dispatch")  # the log still verifies
+
+    def test_check_on_a_relative_path(self):
+        with tempfile.TemporaryDirectory() as t:
+            h = H.Harness(Path(t)).setup()
+            h.start()
+            cwd = os.getcwd()
+            try:
+                os.chdir(h.rv.dir)
+                self.assertEqual(R.check(Path("."))["status"], "incomplete")
+            finally:
+                os.chdir(cwd)

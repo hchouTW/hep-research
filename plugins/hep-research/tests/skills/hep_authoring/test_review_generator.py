@@ -42,7 +42,7 @@ class GeneratorTests(unittest.TestCase):
                 p = Path(self._tmp.name) / f"{role}.json"
                 p.write_text(json.dumps(ex), encoding="utf-8")
                 res = subprocess.run([sys.executable, str(H.PLUGIN / "contracts" / "review.py"), "check", "--record-only",
-                                      str(p), "--role", rrole], capture_output=True, text=True)
+                                      str(p), "--role", rrole], capture_output=True, text=True, timeout=120)
                 self.assertEqual(res.returncode, 0, res.stdout)
                 self.assertIn("### Evidence bases", text)
                 for basis in ("locator", "third-party", "tool-output", "exhaustive", "person", "internal"):

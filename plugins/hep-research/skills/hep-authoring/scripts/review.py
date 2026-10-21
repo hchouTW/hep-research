@@ -167,7 +167,7 @@ def build_round(ctx: Ctx, rv: Review, r: int, text: str, lenses: list[str], prev
     table = {"units_version": "1.0.0", "round": r, "source_sha256": U.sha256_text(text), "units": units, "mapping": mapping}
     write_json(rv.units_path(r), table)
     (rv.private / f"round-{r}").mkdir(parents=True, exist_ok=True)
-    (rv.private / f"round-{r}" / "source.md").write_text(text, encoding="utf-8")
+    (rv.private / f"round-{r}" / "source.md").write_bytes(text.encode("utf-8"))
     return units, table, mapping
 
 
@@ -183,7 +183,7 @@ def cmd_start(ctx: Ctx) -> dict:
         rel = doc.relative_to(ctx.project).as_posix()
     except ValueError as exc:
         raise ReviewError("the document must be inside the project") from exc
-    text = doc.read_text(encoding="utf-8")
+    text = OBS.read_doc(doc)
     if not ctx.cfg_path.is_file():
         models = [m for m in (a.models or "host-default").split(",") if m]
         write_json(ctx.cfg_path, {"config_version": "1.0.0", "models": models})
@@ -257,14 +257,14 @@ def _main_lens_canaries(ctx: Ctx, rv: Review, r: int, main_sid: str, lens: str, 
     once and kept in the private directory, so the lens and its shadow see the same choice."""
     st = R.fold(rv.events())
     atts = st["attempts"].get((r, main_sid), {})
-    if k is None:
-        k = max(atts) if atts else 1
+    if k is None:  # the lens's live or accepted attempt; after a reject or withdraw, the attempt it will dispatch next
+        k = (max(atts) + (1 if atts[max(atts)]["outcome"] in ("rejected", "withdrawn") else 0)) if atts else 1
     path = rv.private_attempt(r, main_sid, k) / "canary.json"
     if path.exists():
         return read_json(path)["canaries"]
     cfg = R.effective_config(st["rounds"][r]["config"])
     units = read_json(rv.units_path(r))["units"]
-    text = (rv.private / f"round-{r}" / "source.md").read_text(encoding="utf-8")
+    text = OBS.read_doc(rv.private / f"round-{r}" / "source.md")
     exclude = set()
     for p in rv.private.glob(f"round-{r}/*/attempt-*/canary.json"):
         if p.parent.parent.name != main_sid:
@@ -306,7 +306,7 @@ def cmd_dispatch(ctx: Ctx) -> dict:
     k += 1
     aseed = attempt_seed(rv, r, sid, k)
     units = read_json(rv.units_path(r))["units"]
-    text = (rv.private / f"round-{r}" / "source.md").read_text(encoding="utf-8")
+    text = OBS.read_doc(rv.private / f"round-{r}" / "source.md")
     sample = read_json(rv.private / f"round-{r}" / "sample.json")
     role, lens = info["role"], info.get("lens")
     texts, roles_map, items, cans = {}, {}, None, []
@@ -560,8 +560,8 @@ def cmd_dispose(ctx: Ctx) -> dict:
     if not changed and (a.verified or a.adopted_unverified):
         raise ReviewError("--verified and --adopted-unverified apply only to changed and partially-changed")
     try:
-        text = (ctx.project / st["document"]).read_text(encoding="utf-8")
-    except OSError:
+        text = OBS.read_doc(ctx.project / st["document"])
+    except (OSError, UnicodeDecodeError):
         text = None
     chg, rem = OBS.changed_removed(ctx.rv, st, text)
     ver = {"verified": a.verified} if a.verified else {"adopted_unverified": True} if a.adopted_unverified else None
@@ -611,7 +611,7 @@ def cmd_rereview(ctx: Ctx) -> dict:
     rv = ctx.rv
     r = st["round"]
     nr = r + 1
-    text = (ctx.project / st["document"]).read_text(encoding="utf-8")
+    text = OBS.read_doc(ctx.project / st["document"])
     prev = read_json(rv.units_path(r))["units"]
     prev_sample = read_json(rv.private / f"round-{r}" / "sample.json")
     cfg = R.effective_config(st["rounds"][r]["config"])
@@ -627,7 +627,7 @@ def cmd_rereview(ctx: Ctx) -> dict:
     allslots[str(nr)] = slots
     rv.save_slots(allslots)
     new_lens_slot = {v["lens"]: s for s, v in slots.items() if v["role"] == "lens"}
-    plan, removed = R.carry_forward_plan(st, mapping, old, new_lens_slot)
+    plan, removed = R.carry_forward_plan(st, mapping, allslots, new_lens_slot)
     old_to_new = {a: b for a, b in mapping["unchanged"] + mapping["changed"]}
     new_ids = {b for _, b in mapping["changed"]} | set(mapping["added"])
     deep = {}
@@ -681,7 +681,7 @@ def cmd_close(ctx: Ctx) -> dict:
     _require(act, "close")
     rv = ctx.rv
     r = st["round"]
-    text = (ctx.project / st["document"]).read_text(encoding="utf-8")
+    text = OBS.read_doc(ctx.project / st["document"])
     chg, rem = OBS.changed_removed(rv, st, text)
     edited = set(chg) | set(rem)
     reverted = sorted(g for g, f in st["findings"].items() if f["state"] == "changed" and f["changed_round"] == r

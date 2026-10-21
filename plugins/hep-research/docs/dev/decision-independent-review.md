@@ -152,17 +152,27 @@ hep-authoring (ownership row "Independent review packets, review records and the
 16. Host shared directories for Claude Code (`review-hosts.json`) are inferred patterns (the session scratchpad and
     tool-result folders); the session start time is treated as not obtainable, so `isolation_not_yet_effective` is
     replaced by a warning (spec 7.3, last paragraph) unless an observation input supplies the time.
-17. The hep-authoring description gained "independent review of a draft by agents that did not write it", so the
+17. The instruction file names `contracts/review.py` by its absolute path so that a reviewer can run the self-check;
+    the packet and instruction hashes therefore differ between plugin installs at different paths. Runs on one
+    install are byte-for-byte reproducible (tested); across installs they are not.
+18. The hep-authoring description gained "independent review of a draft by agents that did not write it", so the
     English routing cases have a trigger in its "Use when" part.
 
 ## Open items (stop conditions and questions for the maintainer)
 
 1. **Packaging scan (stop condition).** `tools/check_packaging.py` rule `restricted-site-fact` matches
-   `[A-Za-z0-9-]+\.local\b` (local hostnames) and so flags the Claude Code file name `CLAUDE.local.md`, which the spec
+   `[A-Za-z0-9-]+\.local\b` (local hostnames) and so flags the Claude Code per-directory local memory file (the name
+   `CLAUDE` followed by `.local` and `.md`, spec A7), which the spec
    requires verbatim (A7, committed unchanged as `docs/dev/independent-review-spec.md`) and which
    `review-hosts.json` must list. Clean `main` passes the scan. Passing it needs either narrowing the rule (for
    example `\.local\b(?!\.md)`), an allow-list entry the spec does not call for, or altering the spec text; this task
-   did none of them. Maintainer decision needed.
+   did none of them. The same scan also flags `skills/hep-authoring/assets/review-hosts.json`, which A7 requires to
+   list the host's settings and shared directories: `restricted-site-fact` on the project-local settings file name
+   (`settings` followed by `.local` and `.json`) and on the memory file name above, and `private-path` on the inferred
+   shared-directory patterns (the Claude Code scratchpad under the system temp folder and the per-project folder
+   under `~/.claude/`). Both rules guard against shipping a user's private paths; here they match host-documented
+   file names and generic patterns. Maintainer decision needed: narrow the rules for these host terms, allow-list
+   the two files, or move the host notes out of the shipped plugin.
 2. The four maintainer decisions of spec section 13 (subagent statements and the invariant, evidence categories,
    contracts 3.3.0 and its release number, P3 budget) and whether a closed agent review may count toward O04/O14.
 3. Confirm the Claude Code shared-directory patterns and any concrete way to read the session start time

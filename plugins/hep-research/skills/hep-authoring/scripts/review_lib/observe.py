@@ -198,7 +198,7 @@ def unedited_changes(st: dict) -> list[str]:
     the finding's units (change_without_edit)."""
     out = []
     for g, f in st["findings"].items():
-        if f["disposals"]:
+        if f["disposals"] and f["state"] in ("open", "reopened"):
             d = f["disposals"][-1]
             if d["disposition"] in ("changed", "partially-changed") and not set(d["edited_units"]) & set(d["finding_units"]) \
                     and f["state"] != "removed-pending":
@@ -223,7 +223,7 @@ def observe(rv, now: str, given: dict | None, private_root: Path) -> tuple[dict,
     rd = st["rounds"][st["round"]]
     doc = rv.project / st["document"]
     try:
-        text = doc.read_text(encoding="utf-8")
+        text = read_doc(doc)
         doc_sha = sha256_file(doc)
     except (OSError, UnicodeDecodeError):
         text, doc_sha = None, None
@@ -277,6 +277,11 @@ def observe(rv, now: str, given: dict | None, private_root: Path) -> tuple[dict,
             "changed_units": changed, "removed_units": removed, "git_head": git_head(rv.project, given),
             "sidecars": side, "repair": sorted(set(repair)), "warnings": warnings}
     return data, late
+
+
+def read_doc(path: Path) -> str:
+    """The document's text exactly as stored (no newline translation), so text and byte hashes agree."""
+    return Path(path).read_bytes().decode("utf-8")
 
 
 def private_dir_problems(cfg: dict, project: Path, private_root: Path, given: dict | None) -> list[str]:

@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 
-from contracts.review import encode, make_event, make_head, parse_log, verify_log
+from contracts.review import encode, event_problems, make_event, make_head, parse_log, parse_time, verify_log
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
 
@@ -104,6 +104,11 @@ class Review:
                 if problems:
                     raise ReviewError(f"the event log does not verify: {problems[0]}")
             rec = make_event(events[-1] if events else None, event, time, data)
+            probs = event_problems(rec)
+            if probs:
+                raise ReviewError(f"refused to write a malformed {event} event: {probs[0]}")
+            if events and parse_time(time) < parse_time(events[-1]["time"]):
+                raise ReviewError(f"--now {time} is earlier than the last event ({events[-1]['time']})")
             with open(self.log, "ab") as fh:
                 fh.write(encode(rec))
             tmp = self.head.with_suffix(".json.tmp")

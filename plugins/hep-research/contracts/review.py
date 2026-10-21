@@ -663,7 +663,7 @@ def fold(events: list) -> dict:
     st: dict[str, Any] = {"review_id": None, "document": None, "rounds": {}, "round": 0, "attempts": {}, "arb_slots": {},
           "observed": None, "findings": {}, "verdicts": {}, "items": {}, "escalations": [], "human": {},
           "terminal": None, "author": None, "extra_rounds": 0, "accept_round_limit": False, "resolved_slots": set(),
-          "late": [], "reported": []}
+          "late": [], "reported": [], "human_seq": {}}
     F, V = st["findings"], st["verdicts"]
     for ev in events:
         e, d = ev["event"], ev["data"]
@@ -742,7 +742,7 @@ def fold(events: list) -> dict:
             if st["escalations"]:
                 st["escalations"][-1]["reported"] = True
         elif e == "human_resolved":
-            _apply_human(st, d)
+            _apply_human(st, d, ev["seq"])
         elif e in TERMINAL:
             st["terminal"] = e
     return st
@@ -775,9 +775,10 @@ def _apply_conclusion(st, it, conclusion):
                 F[g]["closed_by"] = "superseded-by-arbitration"
 
 
-def _apply_human(st, d):
+def _apply_human(st, d, seq: int = 0):
     ref, dec = d["item"], d["decision"]
     st["human"][ref] = dec
+    st["human_seq"][ref] = seq
     kind, _, key = ref.partition(":")
     if kind == "finding" and key in st["findings"]:
         st["findings"][key]["state"] = "closed" if dec == "close" else "reopened"
@@ -873,7 +874,7 @@ def snapshot(st: dict, log_ok: bool = True) -> dict:
     esc = None
     if st["escalations"]:
         last = st["escalations"][-1]
-        pending = [x for x in last["items"] if x not in st["human"]]
+        pending = [x for x in last["items"] if st["human_seq"].get(x, -1) < last["seq"]]  # resolved after this escalation
         if pending:
             esc = {"pending": pending, "reported": last["reported"]}
     obs = st["observed"] or {}
@@ -957,15 +958,16 @@ def _slot_order(sid: str):
 def carry_forward_plan(st: dict, mapping: dict, slot_roles: dict, new_lens_slot: dict) -> tuple[dict, list]:
     """A4: per new lens slot, the carry_forward items: that lens's non-canary verdicts of the previous round and every
     finding of that lens (main or shadow slot) in state changed, renumbered through the mapping; plus the changed
-    findings whose units were all removed, which go to dispose instead (A4.3). slot_roles maps each previous-round slot
-    to {role, lens}; new_lens_slot maps a lens to its main slot in the new round."""
+    findings whose units were all removed, which go to dispose instead (A4.3). slot_roles maps each round (as a string)
+    to its slots {slot_id: {role, lens}} (slot ids are reassigned every round); new_lens_slot maps a lens to its main
+    slot in the new round."""
     r = st["round"]
     old_to_new = {a: b for a, b in mapping.get("unchanged", []) + mapping.get("changed", [])}
     plan: dict[str, list] = {sid: [] for sid in sorted(new_lens_slot.values())}
     removed: list[str] = []
     n = 0
     for g, v in sorted(st["verdicts"].items()):
-        info = slot_roles.get(v["slot"], {})
+        info = slot_roles.get(str(v["round"]), {}).get(v["slot"], {})
         if v["round"] != r or info.get("role") != "lens" or not v["eligible"] or v["superseded"]:
             continue
         units = [old_to_new[u] for u in v["units"] if u in old_to_new]
@@ -976,7 +978,7 @@ def carry_forward_plan(st: dict, mapping: dict, slot_roles: dict, new_lens_slot:
         if f["state"] != "changed":
             continue
         units = [old_to_new[u] for u in f.get("units_now") or f["units"] if u in old_to_new]
-        tgt = new_lens_slot.get(slot_roles.get(f["slot"], {}).get("lens") or f.get("lens"))
+        tgt = new_lens_slot.get(slot_roles.get(str(f["round"]), {}).get(f["slot"], {}).get("lens") or f.get("lens"))
         if not units or tgt is None:
             removed.append(g)
             continue
@@ -1002,8 +1004,8 @@ def load_review(review_dir: Path) -> tuple[list, dict | None, list[str]]:
 
 def check(review_dir, project: Path | None = None) -> dict:
     """Section 7.4 on a review directory; reads files only."""
-    review_dir = Path(review_dir)
-    project = Path(project) if project else review_dir.parents[1]
+    review_dir = Path(review_dir).resolve()
+    project = Path(project).resolve() if project else review_dir.parents[1]
     events, head, problems = load_review(review_dir)
     codes = []
 

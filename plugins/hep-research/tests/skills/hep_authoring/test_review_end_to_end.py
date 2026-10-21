@@ -89,7 +89,7 @@ class EndToEndTests(unittest.TestCase):
         res = R.check(self.h.rv.dir)
         self.assertEqual(res["status"], "ok", res)
         cli = subprocess.run([sys.executable, str(H.PLUGIN / "contracts" / "review.py"), "check", str(self.h.rv.dir)],
-                             capture_output=True, text=True)
+                             capture_output=True, text=True, timeout=120)
         self.assertEqual(cli.returncode, 0, cli.stdout[-800:])
         self.assertIn("adopted_unverified", cli.stdout)
 
