@@ -28,9 +28,14 @@ Write the efficiency as conditional factors, each with its denominator:
 or in the order the selection is applied; what matters is that each factor's denominator is the numerator of the
 previous one. In the spec, give each factor its own category (`trigger_efficiency`, `reconstruction_efficiency`,
 `selection_efficiency`, `identification_efficiency`, or a profile's `<ns>:<term>`); a bare `efficiency` next to any of
-them is the same efficiency counted twice and fails validation.
+them is the same efficiency counted twice. Validation rejects it only when the other category's name (after the
+namespace) ends in `_efficiency`: a bare `efficiency` next to `<ns>:trigger` or `<ns>:efficiency` passes unflagged.
 
-**Factorization bias.** The product equals the total only if the factors are independent given the denominator. Test
+**Factorization bias.** With each denominator the previous numerator, the product equals the total identically (the
+chain rule; no independence is needed). It is biased when a factor is measured on another population (a separate
+sample, an orthogonal trigger, an unchained denominator) whose distribution of a variable that drives several factors
+differs from the analysis sample's: the product is then right only if each factor measured there equals its
+conditional factor in the analysis sample, which fails when the factors are correlated through that variable. Test
 it: measure the total directly on a sample where that is possible (simulation truth, or an orthogonal-trigger
 sample) and compare with the product, binned in the variables that drive both factors (for example the trigger and the
 reconstruction both depending on the track multiplicity). A significant difference is either corrected (measure the
@@ -45,18 +50,21 @@ simulated efficiency once; a selection already reweighted by SF in the event wei
 ## Acceptance from generation records
 
 An acceptance from simulation is `A(x) = G_gen N_sel(x) / N_gen(x)`: the generation factor times the fraction of the
-events generated in the bin that pass the selection. The generation must be declared, not inferred: the surface (a
-plane of area S, or a sphere of radius R), the angular law (the cosine law of an isotropic flux crossing the surface,
-`G_gen = pi S` for one side of a plane, `pi sin^2(theta_max) S` within theta_max, `pi 4 pi R^2` for a sphere), the
-generation spectrum and its range, and the number generated, including every event that missed the instrument. The
-generated count per bin follows from the spectrum (`N_gen(x) = N_generated P(x)`), never from the selected sample.
-`acceptance_from_generation.py` does this with a Clopper-Pearson interval per bin and stops (exit 3) when the generated
+events generated in the bin that pass the selection. It already contains the simulated selection efficiency, so eps next
+to it holds only what the simulated selection does not (data/simulation scale factors, or factors measured on data for
+steps left out of the simulated selection), never the full efficiency again. The generation must be declared, not
+inferred: the surface (a plane of area S, or a sphere of radius R), the angular law (the cosine law of an isotropic flux
+crossing the surface, `G_gen = pi S` for one side of a plane, `pi sin^2(theta_max) S` within theta_max, `pi 4 pi R^2`
+for a sphere), the generation spectrum and its range, and the number generated, including every event that missed the
+instrument. The generated count per bin follows from the spectrum (`N_gen(x) = N_generated P(x)`), never from the
+selected sample. `acceptance_from_generation.py` does this with a Clopper-Pearson interval per bin (with a target
+spectrum, a Garwood interval on Kish's effective count, labelled approximate) and stops (exit 3) when the generated
 count is missing. Two checks: a one-sided flat detector in an isotropic flux has `G = pi S`; two coaxial discs of radii
 R1, R2 a distance L apart have `G = (pi^2/2) [R1^2 + R2^2 + L^2 - sqrt((R1^2 + R2^2 + L^2)^2 - 4 R1^2 R2^2)]`, which
-tends to `pi^2 R^2` at L = 0 (R1 = R2 = R) and to `A1 A2 / L^2` far apart (the formula is usually attributed to
-Sullivan 1971; to-verify, checked here against a Monte Carlo). Reweighting to a target spectrum changes the acceptance
-within wide bins; a target taken from this measurement's own flux makes the result depend on itself (iterate and
-report it; the script warns).
+tends to `pi^2 R^2` at L = 0 (R1 = R2 = R) and to `A1 A2 / L^2` far apart (the formula is usually attributed to Sullivan
+1971; to-verify, checked here against a Monte Carlo). Reweighting to a target spectrum changes the acceptance within
+wide bins; a target taken from this measurement's own flux makes the result depend on itself (iterate and report it; the
+script warns).
 
 ## Worked example (synthetic)
 
@@ -109,9 +117,11 @@ two fluxes would be 1.25e-2, 15% higher.
   probability `P = exp(-x / lambda_int)`, with lambda_int the interaction length of that nucleus in that material; the
   top-of-instrument flux divides by P for the material above the measuring layers. lambda_int comes from measured
   cross sections or a validated simulation, per species and energy; its uncertainty is a systematic.
-- **Fragmentation in the detector and above it.** A heavier nucleus that fragments in the upper material can be
-  reconstructed as a lighter one (for example carbon into boron), so the lighter species gains a feed-down background
-  `N_feed = N_heavy (1 - P_heavy) f(heavy -> light)`, with f the partial fragmentation fraction into that species;
+- **Fragmentation in the detector and above it.** A heavier nucleus that fragments in the material above the layers
+  that fix its charge can be reconstructed as a lighter one (for example carbon into boron), so the lighter species
+  gains a feed-down background `N_feed = N_heavy (1 - P_heavy) f(heavy -> light)`, with N_heavy the heavy nuclei
+  arriving at the top of that material (not the measured, already attenuated count), P_heavy their survival through
+  it, and f the partial fragmentation fraction into that species;
   subtract it, or fit the charge measured in several layers to tag fragmentation before the last layer. The heavy
   species is measured in the same data, so the feed-down is a coupled background (`references/backgrounds.md`,
   "Coupled species"), not a fixed number.
@@ -136,7 +146,8 @@ never a relabeling of the bin edges: the target bin [y1, y2] holds
 isotope i and f_i the isotope fraction at equal source-variable value.
 
 - **One isotope.** With the mapped source edges as target edges the result is exact,
-  `Phi_y = Phi_x (x2 - x1) / (y2 - y1)`, and the statistical covariance scales with the same factors.
+  `Phi_y = Phi_x (x2 - x1) / (y2 - y1)`, and the statistical covariance scales with the products of the same factors
+  (`Cov_y = J C J^T`: a variance with the square of its bin's factor).
 - **Several isotopes.** Each isotope maps the edges differently (A and the mass differ), so the edges of an element in
   rigidity correspond to different kinetic energies per nucleon for 3He and 4He. The transform then integrates inside
   source bins and needs a declared within-bin shape (constant, or a local power law). The isotope composition is an
