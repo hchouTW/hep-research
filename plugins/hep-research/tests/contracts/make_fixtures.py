@@ -147,6 +147,20 @@ def dataset(status="synthetic", did="synthetic-collider:synthetic-angular-1", **
     return envelope("dataset-record", ext, "hep-measurement")
 
 
+SIM_RUN = [{"ref": "artifacts/g4-run.computational-run.json", "artifact_type": "computational-run",
+            "status": ["unvalidated"], "sha256": "0" * 64}]
+
+
+def simulated(**kw):
+    """3.2.0: a detector-level table derived from a recorded (here placeholder) simulation run."""
+    d = dataset(status="simulated", did="synthetic-collider:synthetic-simulated-resolution-1",
+                observable=observable(level="detector"), experiment_profile=None)
+    d["extension"].pop("experiment_profile")
+    d["inputs"] = [dict(i) for i in SIM_RUN]
+    d.update(kw)
+    return d
+
+
 def statres(paradigm, **extra):
     ext = {"paradigm": paradigm, "likelihood": {"form": "poisson"}, "parameters_of_interest": ["mu"],
            "nuisances": [], "fit_status": "converged"}
@@ -341,6 +355,7 @@ VALID = {
     "theory_spec.json": theory(),
     "prediction.json": prediction(),
     "dataset_record.json": dataset(),
+    "dataset_simulated.json": simulated(),
     "comparison_spec.json": envelope("comparison-spec", {"dataset_bindings": ["synthetic-collider:synthetic-angular-1"],
                                                          "prediction_bindings": ["fixture-synthetic-prediction"],
                                                          "gate_result": {"comparable": True, "mismatches": []},
@@ -409,6 +424,10 @@ d = prediction(); d["extension"]["uncertainties"][0]["gaussian"] = True; bad["pr
 d = dataset(status="published", did="synthetic-collider:synthetic-pubshape-1"); d["status"] = ["unvalidated"]; bad["dataset_published_no_evidence.json"] = (d, ["dataset.values_without_provenance"])
 d = dataset(did="synthetic-collider:angular-1"); d["status"] = ["unvalidated"]; bad["dataset_synthetic_unlabeled.json"] = (d, ["dataset.synthetic_unlabeled"])
 d = dataset(); d["extension"]["data"]["values"] = [1.0, 2.0]; bad["dataset_binned_length.json"] = (d, ["binned.length"])
+bad["dataset_simulated_without_runs.json"] = (simulated(inputs=[]), ["dataset.simulated_without_runs"])
+bad["dataset_simulated_observed.json"] = (simulated(status=["observed"]), ["dataset.simulated_observed", "dataset.simulated_unlabeled"])
+d = simulated(); d["extension"]["observable"]["level"] = "unfolded"; bad["dataset_simulated_unfolded.json"] = (d, ["dataset.simulated_level"])
+d = simulated(status=["validated-in-scope"]); d["inputs"][0]["status"] = []; bad["dataset_simulated_upgrade_unlinked.json"] = (d, ["dataset.simulated_upgrade_unlinked"])
 d = statres("bayesian"); del d["extension"]["priors"]; bad["statres_bayesian_no_priors.json"] = (d, ["stats.paradigm_incomplete"])
 d = statres("frequentist"); d["extension"]["priors"] = [{"parameter": "mu", "form": "flat"}]; bad["statres_frequentist_with_priors.json"] = (d, ["stats.paradigm_mislabeled"])
 d = prediction(); d["inputs"] = [{"ref": "x.json", "status": ["asimov"]}]; bad["status_not_propagated.json"] = (d, ["status.not_propagated"])

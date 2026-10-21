@@ -23,6 +23,22 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/dataset_simulated_observed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/dataset_simulated_unfolded.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/dataset_simulated_upgrade_unlinked.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/dataset_simulated_without_runs.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/dataset_synthetic_unlabeled.json": {
   "ok": false,
   "strict_ok": false
@@ -739,6 +755,10 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/dataset_record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/dataset_simulated.json": {
   "ok": true,
   "strict_ok": true
  },
