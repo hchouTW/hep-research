@@ -16,6 +16,14 @@ Contracts 3.2.0 (minor): simulated dataset-records.
   (label figures and tables "Simulation"). Additive: existing records keep their outcome; a 3.1 reader refuses the new
   status as an unknown term. Closes the J2/J14 known limitation for simulation tables; scope containment of a table
   inside its study's benchmarked scope is not checked.
+- **`multiple_scattering.py` says when the Gluckstern term is an approximation.** PDG states
+  `sigma_x sqrt(720/(N+4)) / (0.3 B L^2)` for N >= 10 equally spaced points; with fewer measuring layers it overstates
+  the intrinsic term (3.5% at N = 3, 5.4% at N = 4, 2.4% at N = 8; the crossover and the intrinsic MDR move by the
+  same factor). The output now carries `intrinsic_coefficient` (Gluckstern, the exact least-squares coefficient for N
+  equally spaced points `sqrt(720 (N-1)^3 / ((N-2) N (N+1) (N+2)))`, their variance ratio, and which one is used) and
+  a warning below N = 10 that points to `tracker_resolution.py momentum` for the actual layer positions. The numbers
+  it reports are unchanged (Gluckstern stays the term used); `toy_spectrometer.py` keeps Gluckstern as the definition
+  of its synthetic slope.
 - **A reference benchmark for electromagnetic shower development (`longitudinal-profile`).** `geant4_benchmarks.py`
   fits dQ/dt = Q_E beta (beta t)^(alpha-1) e^(-beta t) / Gamma(alpha) + Q0 to the per-layer mean deposits of a
   layered_sim sampling stack (weighted least squares, standard library) and compares the shower maximum

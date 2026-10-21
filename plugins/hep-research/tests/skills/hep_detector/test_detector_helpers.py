@@ -27,7 +27,7 @@ from pid_separation_power import (MASSES_GEV, bethe_bloch_mev_per_g_cm2, kinemat
                                   mass_from_beta, mass_resolution, resolve_mass,
                                   separation, separation_ceiling, time_of_flight_ns,
                                   tof_beta_resolution)
-from multiple_scattering import (crossover_rigidity, highland_angle,
+from multiple_scattering import (crossover_rigidity, exact_equal_spacing_coefficient, highland_angle,
                                 intrinsic_resolution_slope, load_stack,
                                 maximum_detectable_rigidity, resolution_at,
                                 scattering_resolution_term, summarize)
@@ -247,6 +247,29 @@ class MultipleScatteringTests(unittest.TestCase):
     def test_gluckstern_slope_matches_closed_form(self):
         expected = 10e-6 * math.sqrt(720.0 / 12.0) / (0.299792458 * 0.8 * 1.0 * 1.0)
         self.assertAlmostEqual(intrinsic_resolution_slope(10.0, 8, 0.8, 1.0), expected, places=18)
+
+    def test_exact_equal_spacing_coefficient_against_the_exact_fit(self):
+        # Oracles: 8 sqrt(3/2) at N = 3 (second difference of three points), and tracker_resolution.py's weighted
+        # least-squares fit of the same equally spaced positions (an independent implementation); Gluckstern is
+        # approached from above as N grows.
+        from tracker_resolution import curvature_sigma
+        self.assertAlmostEqual(exact_equal_spacing_coefficient(3), 8 * math.sqrt(1.5), places=12)
+        for n in (3, 4, 8, 10, 50):
+            with self.subTest(n=n):
+                z = [i / (n - 1) for i in range(n)]
+                self.assertAlmostEqual(exact_equal_spacing_coefficient(n), curvature_sigma(z, [1.0] * n), places=9)
+                self.assertLess(exact_equal_spacing_coefficient(n), math.sqrt(720.0 / (n + 4)))
+        self.assertAlmostEqual(exact_equal_spacing_coefficient(400) ** 2 / (720.0 / 404), 1.0, delta=1e-4)
+
+    def test_few_measuring_layers_warn_that_gluckstern_overstates_the_term(self):
+        stack = {'field_tesla': 0.8, 'lever_arm_m': 1.0, 'point_resolution_um': 10.0,
+                 'layers': [{'x_over_x0': 0.003, 'measuring': True}] * 8}
+        out = summarize(stack, 100.0)
+        self.assertEqual(out['intrinsic_coefficient']['used'], 'gluckstern')
+        self.assertAlmostEqual(out['intrinsic_coefficient']['exact_over_gluckstern_variance'], 0.953, delta=1e-3)
+        self.assertTrue(any('overstates the intrinsic term by 2.4%' in w for w in out['warnings']), out['warnings'])
+        stack['layers'] = [{'x_over_x0': 0.003, 'measuring': True}] * 10
+        self.assertFalse(any('overstates' in w for w in summarize(stack, 100.0)['warnings']))
 
     def test_intrinsic_term_is_linear_in_rigidity(self):
         slope = intrinsic_resolution_slope(10.0, 8, 0.8, 1.0)

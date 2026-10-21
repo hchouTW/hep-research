@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 493839,
+   "bytes": 493999,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2075,7 +2075,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "c705c4ac 2026-10-21"
+   "last_commit": "7013f194 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2411,8 +2411,8 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 16228,
-   "lines": 244,
+   "bytes": 16388,
+   "lines": 245,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",

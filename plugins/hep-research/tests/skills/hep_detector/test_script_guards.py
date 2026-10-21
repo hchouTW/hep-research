@@ -339,7 +339,7 @@ class MultipleScatteringValidityTests(unittest.TestCase):
                          'layers': [{'x_over_x0': budget / 4, 'measuring': True}] * 4}
                 result = multiple_scattering.summarize(stack, 10.0)
                 self.assertEqual(result['highland_validity']['inside'], inside)
-                self.assertEqual(bool(result['warnings']), not inside)
+                self.assertEqual(any('Highland range' in w for w in result['warnings']), not inside)
 
     def test_docstring_states_the_resolution_coefficient_convention(self):
         self.assertIn('0.016', multiple_scattering.__doc__)
