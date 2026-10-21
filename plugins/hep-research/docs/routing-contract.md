@@ -4,7 +4,7 @@ Status: M1 `[Proposal]`, enforced statically by skill descriptions (`skills/*/SK
 
 ## Rule
 
-Choose the primary skill by the **deliverable**, never by an experiment, model, or tool name. Profiles add knowledge to the chosen skill; they never become entry points. There is no coordinator skill and no dispatch API: a skill names the next skill and the artifact path in its answer, and Claude or the researcher continues from there.
+Choose the primary skill by the **deliverable**, never by an experiment, model, or tool name. Profiles add knowledge to the chosen skill; they never become entry points. There is no coordinator skill and no dispatch API: a skill names the next skill and the artifact path in its answer, and Claude or the researcher continues from there. The independent review driver (`skills/hep-authoring/scripts/review.py`) is not one: it sequences one review inside hep-authoring, dispatches no agent and routes no work between skills (docs/dev/decision-independent-review.md).
 
 ## Per-skill triggers
 
@@ -16,8 +16,8 @@ Choose the primary skill by the **deliverable**, never by an experiment, model, 
 | hep-statistics | "Feldman–Cousins interval for zero observed events"; "Combine these two measurements with shared systematics"; "Bayesian posterior with these priors" | "Which correlation should I assume?" → evidence owner (hep-measurement / hep-detector / hep-theory) | "Choose my selection cuts" → hep-measurement |
 | hep-computing | "Memory leak in my ROOT macro"; "Batch submission with resubmission and merge"; "Convergence study of this integral" | "Is this result physically right?" → owning physics skill | General non-physics software questions outside research code: no special handling |
 | hep-ml | "Train a classifier with grouped splits"; "Train a BDT for my event selection"; "ECAL energy regression with a neural network"; "Surrogate for my simulation"; "Domain shift between MC and data" | "What physics should the surrogate respect?" → hep-theory; "Is my SBI posterior's coverage valid?" → hep-statistics; "Validate the fast simulation against Geant4" → hep-detector | TensorFlow/JAX-only questions: plugin gives general advice only |
-| hep-citations | "Check that this citation supports the number"; "What did the collaboration publish on this, latest first?"; "Collect the literature on this topic into a table" | "Import the published table and compare it with my model" → hep-theory | "Are these two published fluxes compatible?" → hep-statistics |
-| hep-authoring | "Draft the results section"; "Draw the analysis workflow"; "Write the referee report" | "Is this Feynman diagram physically correct?" → hep-theory; "Has every citation in my draft been verified?" → hep-citations | "Run the fit for the paper" → hep-statistics |
+| hep-citations | "Check that this citation supports the number"; "What did the collaboration publish on this, latest first?"; "Collect the literature on this topic into a table" | "Import the published table and compare it with my model" → hep-theory; "Have agents who did not write my draft review it, with a checkable record" → hep-authoring | "Are these two published fluxes compatible?" → hep-statistics |
+| hep-authoring | "Draft the results section"; "Draw the analysis workflow"; "Write the referee report"; "Run an independent review of this design note" | "Is this Feynman diagram physically correct?" → hep-theory; "Has every citation in my draft been verified?" → hep-citations | "Run the fit for the paper" → hep-statistics |
 
 ## Topic ownership (single source)
 
@@ -52,6 +52,7 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Literature matrices with identifiers and read levels | hep-citations | `literature matrices` | — |
 | Claim-to-result links in a manuscript or a packaged result | hep-authoring | `claim-to-result links` | Claims linked to results, status preserved in text |
 | Writing a literature review or a related-work section from the sources | hep-authoring | `related-work and review sections` | — |
+| Independent review packets, review records and the review log | hep-authoring | `independent review`, `review packet` | — |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in

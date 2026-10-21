@@ -524,6 +524,9 @@ An `InProcessSubmitter` keeps today's direct-submission behavior for S0.
 These properties of hep-research are relied on by the architecture and must be preserved:
 
 - No hooks, MCP servers, commands, background processes, or required subagents in the plugin.
+  The independent review is agent-driven but optional to the plugin: its driver prints the next action and a fixed
+  dispatch message; the author agent dispatches through the host's own mechanism, and no plugin component dispatches
+  or requires a subagent (maintainer decision 2026-10-21, docs/dev/decision-independent-review.md).
 - Skills reference scripts by `<plugin root>` paths and scripts import from the plugin root, which makes the install location the trust boundary.
 - Dry-run by default; write-ahead `submitting` intents; refusal to submit while a submission is unconfirmed; exclusive campaign and partition-state locks; atomic write-once outputs; duplicate-safe merge; quarantine with reasons.
 - Contracts reject a missing or malformed envelope version and a newer major version; the schema engine fails any schema that uses an unsupported keyword; the project config schema is closed at the top level.

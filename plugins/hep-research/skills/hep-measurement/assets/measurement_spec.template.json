@@ -1,5 +1,5 @@
 {
- "contract_version": "3.2.0",
+ "contract_version": "3.3.0",
  "artifact_id": "TEMPLATE-synthetic-measurement-spec",
  "artifact_type": "measurement-spec",
  "objective": "SYNTHETIC TEMPLATE: copy, rename the artifact_id and replace every placeholder; the field guide is measurement_spec.template.md",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.6.17",
-  "contracts": "3.2.0",
+  "contracts": "3.3.0",
   "profiles": {}
  },
  "provenance": {

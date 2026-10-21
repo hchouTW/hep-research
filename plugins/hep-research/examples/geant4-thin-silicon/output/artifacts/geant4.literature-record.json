@@ -1,5 +1,5 @@
 {
- "contract_version": "3.2.0",
+ "contract_version": "3.3.0",
  "artifact_id": "j14-geant4-literature",
  "artifact_type": "literature-record",
  "objective": "literature record imported offline from literature-input.json",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.21.0",
-  "contracts": "3.2.0",
+  "contracts": "3.3.0",
   "profiles": {}
  },
  "provenance": {

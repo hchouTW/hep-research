@@ -114,6 +114,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-authoring/scripts/check_diagram_sources.py": [M],
     "skills/hep-authoring/scripts/check_manuscript.py": [M],
     "skills/hep-authoring/scripts/check_citations.py": [M],
+    "skills/hep-authoring/scripts/review.py": ["start", M],
     "skills/hep-authoring/scripts/check_terminology.py": [M, "--project-root", "/tmp", "--glossary", M],
     "skills/hep-citations/scripts/manage_literature.py": ["import", M, "--project-root", "/tmp", "--out", OUT],
     "skills/hep-authoring/scripts/track_revision_impact.py": [M, M, "--project-root", "/tmp"],

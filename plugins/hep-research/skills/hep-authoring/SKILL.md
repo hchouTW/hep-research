@@ -1,11 +1,11 @@
 ---
 name: hep-authoring
-description: "Use when the deliverable is physics writing or its presentation, even one sentence for an abstract or summary; load it first: drafting or revising paper sections, abstracts and captions, papers from results (short summaries, terminology, numbers and units; English or Chinese), figures and tables, diagrams as editable sources, talks and posters, referee reports, theses, proposals, handover notes, and packaging results with claim-to-result links. Never cites from memory. Not for: what a paper states, the latest result, citations (hep-citations); producing results (hep-measurement, hep-detector, hep-theory, hep-statistics, hep-computing, hep-ml)."
+description: "Use when the deliverable is physics writing or its presentation, even one sentence for an abstract or summary; load it first: drafting or revising paper sections, abstracts and captions, papers from results (short summaries, terminology, numbers and units; English or Chinese), figures and tables, diagrams as editable sources, talks and posters, referee reports, theses, proposals, handover notes, packaging results with claim-to-result links, and independent review of a draft by agents that did not write it. Never cites from memory. Not for: what a paper states, the latest result, citations (hep-citations); producing results (hep-measurement, hep-detector, hep-theory, hep-statistics, hep-computing, hep-ml)."
 ---
 
 # hep-authoring: papers, figures, diagrams, talks
 
-**Owns:** writing and revising papers, theses, proposals and handover notes; related-work and review sections; figures, tables, diagrams and their rendering; talks and posters; referee reports and replies; packaging results with claim-to-result links; the `communication` extension and the shared audit report shape (`contracts/audit_report.py`).
+**Owns:** writing and revising papers, theses, proposals and handover notes; related-work and review sections; figures, tables, diagrams and their rendering; talks and posters; referee reports and replies; packaging results with claim-to-result links; the `communication` extension and the shared audit report shape (`contracts/audit_report.py`); independent review of a draft by agents that did not write it (review packets, review records and the review log; `contracts/review.py`).
 **Typical artifacts:** `communication` (claims linked to results, sources with their read levels, figure inputs, limitations), manuscripts, figures with captions, diagram sources.
 **Never:** invent a result, a number or a citation; cite from memory; answer whether citations are verified yourself (load hep-citations, even mid-draft); upgrade a derivation or result status; describe synthetic or Asimov results as measurements.
 
@@ -55,6 +55,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 | Referee reports and replies | [reviewing](references/reviewer-style-assessment.md), [comment exchange](references/comment-and-reply-exchange.md) |
 | Audience adaptation, terminology (exposure vs collection time, rigidity vs momentum) | [outreach](references/outreach-and-public-facing-summaries.md); `check_adaptation.py`, `check_terminology.py` with `assets/paper/glossary-template.json` |
 | Revisions after a changed result | `track_revision_impact.py`; [revision tracking](references/revision-impact-tracking.md) |
+| Independent review of a draft by agents that did not write it: review packets, records, the review log and its check | [independent review](references/independent-review.md); `review.py` |
 | Statistics and astroparticle papers | [statistics and ML papers](references/statistics-and-ml-papers.md), [astroparticle papers](references/astroparticle-and-cosmic-ray-papers.md) |
 
 Scripts in `<plugin root>/skills/hep-authoring/scripts/` (read `--help` first; what each checks: [README.md](README.md#scripts)). Field-specific patterns, venues and reviews have their own files under `references/`; diagram skeletons in `assets/diagrams/`, paper templates in `assets/paper/`, worked diagrams in `examples/`. Folder guide for people: [README.md](README.md).

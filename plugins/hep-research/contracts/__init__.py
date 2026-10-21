@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.2.0"
+CONTRACTS_VERSION = "3.3.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -104,6 +104,14 @@ CONTRACTS_VERSION = "3.2.0"
 # extension.simulation or extension.study (dataset.simulated_source) and warns when a communication uses a simulated
 # table (communication.simulated_source). Additive: no capability, and a 3.1 reader refuses the new status as an
 # unknown vocabulary term instead of misreading it.
+# 3.3.0 (independent review, P1; docs/dev/independent-review-spec.md) adds the seven review schemas
+# (contracts/schemas/review_config, review_units, review_manifest, review_record, review_event, review_head,
+# review_observation) and contracts/review.py (their Python rules, the shared state table, decide and check). They
+# are sidecar formats under <project>/reviews/, read only by contracts/review.py and the hep-authoring driver; no
+# artifact type, vocabulary term or envelope field changes. No capability: no envelope artifact declares or embeds a
+# review record and review files never live in an artifacts_dir, so no reader can misread one as an artifact; a 3.2
+# reader keeps every artifact outcome and has no review reader at all. (The spec's "3.2.0" predates 0.21.0, which used
+# 3.2.0 for simulated dataset-records.)
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

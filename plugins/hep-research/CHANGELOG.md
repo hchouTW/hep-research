@@ -5,6 +5,46 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Contracts 3.3.0 (minor): independent review of drafts, P1 (`docs/dev/independent-review-spec.md`).
+
+- **A draft can be reviewed by agents that did not write it, with a record a script checks.**
+  `skills/hep-authoring/scripts/review.py` drives one review of a Markdown document: `start`, then `next` until
+  `stop`. Four lenses (facts, design, sources, bypass) and one shadow per lens review packets built per attempt; the
+  author agent passes a fixed two-line message to each agent through the host's own mechanism (the plugin dispatches
+  and requires no subagent). Receipt checks each `review_record.json` (24 reason codes: dispatch and packet hashes,
+  isolation self-report, forbidden reads, recomputed file hashes, claim and finding shape, deep and skim coverage,
+  evidence bases, refutation attempts, unresolved share, canaries, carry-forward; arbiter identity and conclusions).
+  Findings are disposed with declared verification (`--verified` or `--adopted-unverified`); a declined high finding
+  and conflicting verdicts go to arbitration; changes are confirmed by a fresh review in the next round; a reverted
+  edit is caught before close; unresolved items go to a human (`escalate`, `report`, `resolve`) and the review then
+  continues. `report.md` lists the configuration, per-slot quality metrics, canary hits and witnesses, dispositions
+  and the limitations that applied.
+- **Contract and check.** `contracts/review.py` holds the seven new schemas' Python rules, the state table shared by
+  the driver and `check`, and `check` (`log_broken`, `not_closed`, `changed_after_close`, `artifacts_changed`,
+  `finding_open`, `uphold_not_honored` and the warnings). The event log is hash-chained with a head and appended under
+  a file lock.
+- **P1 limits.** Facts and design canaries only: sources and bypass slots run without controls and are reported as
+  `no_control`; Markdown only; Claude Code host notes only (shared directories and the session start, read from the
+  process `CLAUDE_PID` names, observed on the macOS CLI and undocumented; without `CLAUDE_PID` a warning). Thresholds
+  are provisional until the P3 evaluation.
+- **Maintainer decisions (2026-10-21, `docs/dev/decision-independent-review.md`).** The plugin dispatches and requires
+  no subagent: clarifying sentences in `docs/architecture.md`, `docs/routing-contract.md` and under the invariant at
+  `docs/protected-data-architecture.md:526` (its wording unchanged). Review verdicts use the evidence bases of
+  `docs/maintenance.md` plus the non-independent `tool-output` and `internal`. A closed agent review is not a
+  non-author review record for the v6.3 conditions O04/O14 (the author agent could forge one); it is advisory input a
+  human reviewer may cite.
+- **Fixes from the P3 stage-1 pilot.** Receipt rejects a record that cites a copy or version of the delivered
+  document anywhere on the host (`read_outside_packet`), and `start` warns about copies in the plugin and the project;
+  design canaries fire on documents without numbered references (a repeated value made inconsistent, a repeated name
+  misspelt); a lens with nothing in scope gets no slot and a shadow only when it can have focus units; one `--seed`
+  reused for several reviews no longer repeats their nonces; records may cite plugin-relative paths.
+- `tools/check_packaging.py`: the local-hostname rule no longer matches a name followed by `.md` or `.json`, so the
+  Claude Code memory and settings file names the review host notes need are not read as hostnames (planted hostnames
+  still fail; maintainer decision). The host notes write temporary and Claude configuration folders as placeholders.
+- Ownership row "Independent review packets, review records and the review log" (hep-authoring; `independent
+  review`, `review packet`); four routing cases (en, zh-Hant).
+- Contracts 3.3.0 adds sidecar formats only: no artifact, vocabulary or capability change; fixtures, examples and
+  profile artifacts regenerated for the version string.
 - **`anisotropy.py harmonic` uses the exact null covariance of the weighted harmonic (sci-fix ANISO-WEIGHTED-COV, S1;
   advisory SFA-2026-036; VALIDATION ANISO-WEIGHTED-COV).** With `--exposure-map` the Rayleigh probability and the Rice
   width took `2/N_eff` per component, but a non-uniform exposure makes the variances of `a` and `b` unequal and

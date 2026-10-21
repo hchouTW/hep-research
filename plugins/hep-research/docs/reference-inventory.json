@@ -4,8 +4,8 @@
  "threshold": 0.08,
  "by_skill": {
   "hep-authoring": {
-   "references": 48,
-   "bytes": 338846,
+   "references": 49,
+   "bytes": 349047,
    "uncited": 0
   },
   "hep-citations": {
@@ -401,6 +401,20 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "ebb58136 2026-10-19"
+  },
+  {
+   "path": "skills/hep-authoring/references/independent-review.md",
+   "owner": "hep-authoring",
+   "bytes": 10201,
+   "lines": 141,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-authoring/README.md",
+    "skills/hep-authoring/SKILL.md",
+    "tests/skills/hep_authoring/test_review_pilot_fixes.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "88a40a9a 2026-10-21"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -2359,7 +2373,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "9257d7b5 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
@@ -2599,7 +2613,7 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-measurement/references/data-pipelines.md",
@@ -3162,7 +3176,7 @@
     "tests/skills/hep_ml/test_training_pipeline.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "33bd6464 2026-10-22"
+   "last_commit": "485e96cb 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/ml-analysis.md",
@@ -3240,7 +3254,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "33bd6464 2026-10-22"
+   "last_commit": "97471b3f 2026-10-19"
   },
   {
    "path": "skills/hep-ml/references/optimization-and-training-dynamics.md",
@@ -3637,7 +3651,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "2b221f92 2026-10-22"
+   "last_commit": "a73d421e 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
@@ -3893,7 +3907,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "42ad7086 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/dark-matter-phenomenology.md",

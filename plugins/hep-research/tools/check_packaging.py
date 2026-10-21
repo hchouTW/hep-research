@@ -34,7 +34,9 @@ ARCHIVE = re.compile(r"\.(tar|tgz|tar\.gz|tar\.bz2|tar\.xz|zip|7z|rar)$", re.I) 
 RUBRIC = re.compile(r"rubric|answer[-_]?key|grading|prompts_eval|routing_eval", re.I)
 PRIVATE = re.compile(r"/home/[a-z_][a-z0-9_-]*/|/Users/[A-Za-z0-9_.-]+/|C:\\\\Users\\\\|/mnt/project-files|/tmp/claude|\.claude/projects/")
 SECRET = re.compile(r"BEGIN [A-Z ]*PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-ant-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|(api[_-]?key|token|password)\s*[:=]\s*['\"][^'\"\s]{8,}", re.I)
-RESTRICTED = re.compile(r"/eos/|/afs/|/cvmfs/ams|lxplus\d+|/Users/|-Users-|/tmp/[a-z]{3,}[a-z0-9]*/|hitronhub|[A-Za-z0-9-]+\.local\b"
+# A local hostname (mymac.local); a name followed by .md or .json is a file, such as the Claude Code files CLAUDE.local.md
+# and settings.local.json that the independent review host notes must name (maintainer decision, 2026-10-21).
+RESTRICTED = re.compile(r"/eos/|/afs/|/cvmfs/ams|lxplus\d+|/Users/|-Users-|/tmp/[a-z]{3,}[a-z0-9]*/|hitronhub|[A-Za-z0-9-]+\.local\b(?!\.(?:md|json))"
                         r"|AMSChain|AMSEventR|AMSDataDir|\bvdev\b|ISS\.B\d+")
 LEGACY = re.compile(r"agentic[-_]ai[-_]skills|3e995a4|\.legacy/|legacy_id|\bported from|migrated (from|routing)"
                     r"|legacy [`a-z-]+ (skill|ledger|spec|tests?|sample|scripts?|repo|checkout)|migration[- ]map|ams-analysis|fetch_legacy", re.I)
