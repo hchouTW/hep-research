@@ -3,9 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.22.0 (2026-10-22)
 
-Contracts 3.3.0 (minor): independent review of drafts, P1 (`docs/dev/independent-review-spec.md`).
+Contracts 3.3.0 (minor): independent review of drafts, P1 (`docs/dev/independent-review-spec.md`); five references
+corrected after its real-document evaluation; an S1 sci-fix of the weighted anisotropy statistics (advisory SFA-2026-036).
 
 - **A draft can be reviewed by agents that did not write it, with a record a script checks.**
   `skills/hep-authoring/scripts/review.py` drives one review of a Markdown document: `start`, then `next` until

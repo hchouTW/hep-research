@@ -2020,6 +2020,23 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## 0.22.0 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.22.0` from main `9db118e5` (#194 independent review P1, contracts 3.3.0; #195 the five
+reference corrections REVIEW-REFS, the S1 sci-fix ANISO-WEIGHTED-COV and REVIEW-CODE-WARN; main CI green on both PRs).
+Minor release. The ams02-research companion (requires hep-research `>=0.11.0`, profile contracts `>=2.0`) needs no
+change.
+
+What changed: version 0.22.0 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.22.0`; advisory SFA-2026-036 gets its `fixed`
+event 0.22.0. Examples regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings and the hashes
+that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as committed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4707 tests in 395 modules, 4575 pass, 0 failures, 132 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4707 tests, 4484 pass, 0 failures, 223 skipped |
+
 ## ANISO-WEIGHTED-COV (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv: NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0; CI lock venv: NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0)
 
 Sci-fix S1, fix `3c10ac23`, parent `32450b32`. `skills/hep-measurement/scripts/anisotropy.py harmonic` with
