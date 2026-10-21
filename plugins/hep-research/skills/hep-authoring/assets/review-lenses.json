@@ -1,0 +1,26 @@
+{
+ "$comment": "Lens table of the independent review mechanism (docs/dev/independent-review-spec.md sections 4.4, A2 and A5), read by skills/hep-authoring/scripts/review.py. fixed lenses always run; a domain lens (fixed false) is added when one of its keywords occurs in the document, and extra_lenses in review-config.json can add one by name; no lens is ever removed. evidence: external (facts, sources, domain lenses) or any (design, bypass) for a non-unresolved verdict on a deep unit (basis_missing). canary: the canary type of the lens; P1 implements facts and design, so sources and bypass run without controls (no_control).",
+ "lenses_version": "1.0.0",
+ "lenses": {
+  "facts": {"fixed": true, "evidence": "external", "canary": "facts",
+            "scope": "Substantive units that contain a path or file name that exists in the baseline plugin, or a host term listed in review-hosts.json",
+            "witness": "The original value is found in a file of the baseline plugin (path and line); the new value is not (a moved line range does not contain the cited lines, a changed number does not occur in the file)",
+            "task": "Check every stated fact about files, paths, line numbers, values and host settings against the files themselves.",
+            "review_points": "hep-citations: what a source states, read levels; hep-computing: what code and scripts do"},
+  "design": {"fixed": true, "evidence": "any", "canary": "design",
+             "scope": "All substantive units",
+             "witness": "The cited section or table row exists; the new section or row exists and says something else",
+             "task": "Check that the design is consistent: rules, tables, states and cross-references agree with each other and with the stated goals.",
+             "review_points": "hep-computing: engineering playbook (failure modes, definitions of done)"},
+  "sources": {"fixed": true, "evidence": "external", "canary": null,
+              "scope": "Substantive units that contain a file:line, a URL, or an attribution phrase plus a named document",
+              "witness": "P2",
+              "task": "Check that every cited source says what the unit claims it says, at the cited place.",
+              "review_points": "hep-citations: claim checks against sources, read levels"},
+  "bypass": {"fixed": true, "evidence": "any", "canary": null,
+             "scope": "Substantive units that contain a normative word, a threshold number, a rule code or a state-machine row number",
+             "witness": "P2",
+             "task": "Look for ways each rule, threshold or state transition can be bypassed, satisfied vacuously or contradicted by another rule.",
+             "review_points": "hep-measurement: verdict-first review; hep-statistics: thresholds and their calibration"}
+ }
+}

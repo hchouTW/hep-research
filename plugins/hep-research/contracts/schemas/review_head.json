@@ -1,0 +1,9 @@
+{"$comment": "Head of an independent review event log (docs/dev/independent-review-spec.md section 3), review_head.json next to review_log.jsonl, rewritten by the author agent after every append under the log lock: count is the number of events, last_sha256 the canonical SHA-256 (contracts.revocation.canonical_sha256) of the last event. contracts/review.py verify_log trusts a log only with a head that matches it.",
+ "type": "object",
+ "required": ["head_version", "review_id", "count", "last_sha256"],
+ "additionalProperties": false,
+ "properties": {
+  "head_version": {"type": "string", "const": "1.0.0"},
+  "review_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"},
+  "count": {"type": "integer", "minimum": 1},
+  "last_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}

@@ -1,0 +1,39 @@
+{
+ "$comment": "Host notes of the independent review mechanism (docs/dev/independent-review-spec.md A7), read by observe in skills/hep-authoring/scripts/review.py. P1 covers Claude Code only. Paths use ~ for the home folder, <project> for the project root and <project-slug> for the project path with '/' replaced by '-'. Entries marked inferred are not from the host documentation and need maintainer confirmation; session_start.obtainable is false, so isolation_not_yet_effective is never raised and the report says the setting's effect cannot be confirmed (spec 7.3, last paragraph).",
+ "hosts_version": "1.0.0",
+ "hosts": {
+  "claude-code": {
+   "isolation": [
+    {"method": "env", "key": "CLAUDE_CODE_FORK_SUBAGENT", "value": "0", "needs_restart": true,
+     "docs": "Sub-agents docs, section 'Let Claude wait for a subagent': after setting it, run claude again from your shell, or open a new VS Code conversation"},
+    {"method": "deny", "rule": "Agent(fork)", "needs_restart": null,
+     "docs": "The docs say this rule prevents Claude from starting a fork, but not when it takes effect: a warning, with the R0 isolation self-check as the fallback"}
+   ],
+   "dispatch_note": "Name a non-fork subagent type when dispatching, whichever method is used.",
+   "session_start": {"obtainable": false, "note": "No documented way to read the host session start time; observation input may supply it"},
+   "settings_files": ["~/.claude/settings.json", "<project>/.claude/settings.json", "<project>/.claude/settings.local.json"],
+   "managed_settings": ["/Library/Application Support/ClaudeCode/managed-settings.json", "/etc/claude-code/managed-settings.json"],
+   "instruction_files": {
+    "user": ["~/.claude/CLAUDE.md", "~/.claude/rules/"],
+    "per_directory": ["CLAUDE.md", ".claude/CLAUDE.md", "CLAUDE.local.md"],
+    "project": [".claude/rules/"],
+    "subdirectory": {"name": "CLAUDE.md", "mark": "on-demand"},
+    "conditional": {"names": ["AGENTS.md", ".claude/AGENTS.md"], "mark": "conditional",
+                    "note": "v2.1.277 or later; read only when neither the working directory nor a parent has CLAUDE.md, .claude/CLAUDE.md or CLAUDE.local.md (~/.claude/CLAUDE.md does not count), unless the Project instructions setting says otherwise"},
+    "imports": "files pulled in by @path from any of the above",
+    "subagent_definition": "the subagent definition file used for dispatch, with its memory and omitClaudeMd fields",
+    "managed": ["/Library/Application Support/ClaudeCode/CLAUDE.md", "/etc/claude-code/CLAUDE.md"]
+   },
+   "loading_settings": ["claudeMdExcludes", "projectInstructions", "pluginConfigs", "--add-dir", "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD", "--setting-sources"],
+   "plugin_config_ids": ["cc-plugin-agents-md@builtin", "agents-md@builtin"],
+   "shared_dirs": [
+    {"pattern": "/private/tmp/claude-<uid>/<project-slug>/*/scratchpad", "inferred": true},
+    {"pattern": "/tmp/claude-<uid>/<project-slug>/*/scratchpad", "inferred": true},
+    {"pattern": "~/.claude/projects/<project-slug>/*/tool-results", "inferred": true}
+   ],
+   "terms": ["CLAUDE_CODE_FORK_SUBAGENT", "Agent(fork)", "permissions.deny", "claudeMdExcludes", "CLAUDE.md", "CLAUDE.local.md",
+             "AGENTS.md", "settings.json", "pluginConfigs", "cc-plugin-agents-md@builtin", "agents-md@builtin", "--add-dir",
+             "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD", "--setting-sources", "omitClaudeMd", "managed settings"]
+  }
+ }
+}

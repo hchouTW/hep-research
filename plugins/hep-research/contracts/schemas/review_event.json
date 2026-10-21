@@ -1,0 +1,12 @@
+{"$comment": "One line of an independent review event log review_log.jsonl (docs/dev/independent-review-spec.md section 5.4): {seq, prev_sha256, event, time, data}. seq starts at 0; prev_sha256 is all zeros for seq 0 and otherwise the canonical SHA-256 of the previous line's record; time is the command's --now or the clock. The key fields of each event's data are Python rules in contracts/review.py (EVENT_FIELDS, event_problems); the data of an observed event follows review_observation.json.",
+ "type": "object",
+ "required": ["seq", "prev_sha256", "event", "time", "data"],
+ "additionalProperties": false,
+ "properties": {
+  "seq": {"type": "integer", "minimum": 0},
+  "prev_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "event": {"type": "string", "enum": ["round_started", "observed", "dispatched", "returned", "accepted", "rejected", "withdrawn", "late", "disposed",
+                                       "change_confirmed", "change_rejected", "arbitration_needed", "arbitration_resolved", "escalated",
+                                       "human_resolved", "change_reverted", "reported", "closed", "superseded"]},
+  "time": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+  "data": {"type": "object"}}}
