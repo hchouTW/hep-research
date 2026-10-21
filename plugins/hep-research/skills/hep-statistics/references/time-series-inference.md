@@ -9,7 +9,9 @@ and are not repeated here. General fitting, covariance and combination rules are
 [likelihood fitting](likelihood-fitting.md), [nuisance modeling](nuisance-modeling.md) and
 [combinations](combinations.md).
 
-Status: **documented** (guidance; no shipped tool runs a periodogram search or a red-noise fit). The time-bin covariance
+Status: **documented** (guidance; `periodicity_scan.py` runs a periodogram search against simpler nulls, see
+[Test](#periodicity-in-a-binned-series), and `time_structure.py` finds change points and lags; no shipped tool fits
+the red-noise null with `C` below). The time-bin covariance
 construction below is **demonstrated-on-synthetic-data** by `tests/skills/hep_statistics/test_time_series_covariance.py`
 (synthetic series only; it shows the recipe is internally consistent, not that any experiment's systematics are
 modeled correctly). Which systematic sources are time-independent, and their correlation times, are physics inputs
@@ -67,7 +69,8 @@ Checks before the matrix is used:
   Whether a source factorizes is an assumption to state.
 - **Normalization in a fit.** A time-independent fraction built from the measured values biases a fit low (Peelle's
   pertinent puzzle, [combinations](combinations.md#multiplicative-uncertainties-peelles-pertinent-puzzle)); in a fit,
-  carry it as a nuisance parameter or build it from the model (see [joint fits](#joint-fits-of-several-periods)).
+  carry it as a nuisance parameter (a covariance built from the model is not equivalent; see
+  [joint fits](#joint-fits-of-several-periods)).
 
 A missing time correlation stays missing: when only per-bin totals are published, the time correlation is unknown, not
 zero, and a result that depends on it says so.
@@ -95,12 +98,13 @@ is part of the null hypothesis and is stated.
 
 **Known or unknown period.** A period with a physical reason to test (the ~27-day solar rotation and its harmonics, an
 orbital or attitude period of the instrument) is tested alone, for example by folding the series at that period
-(epoch folding) against the same red-noise null: one trial, no search penalty. A periodogram search (Lomb-Scargle for
-uneven sampling and gaps) is for a genuinely unknown or approximate period and pays the trials below. Comparing the
-amplitude and phase of the same candidate period between species of opposite charge sign (a particle and its
-antiparticle, protons and electrons) separates a drift-related heliospheric effect from an instrumental or
-environmental artefact, which affects both signs alike; the comparison is a joint fit with the shared normalization
-and its covariance, not two separate significances.
+(epoch folding) against the same red-noise null: one trial, no search penalty, provided the period is fixed before the
+series is examined (a period read off the same series is a search and pays the trials). A periodogram search
+(Lomb-Scargle for uneven sampling and gaps) is for a genuinely unknown or approximate period and pays the trials
+below. Comparing the amplitude and phase of the same candidate period between species of opposite charge sign (a
+particle and its antiparticle, protons and electrons) separates a drift-related heliospheric effect from an
+instrumental or environmental artefact, which affects both signs alike; the comparison is a joint fit with the shared
+normalization and its covariance, not two separate significances.
 
 **Test.** At the Fourier frequencies `f_j` of a Gaussian stationary series, the periodogram ordinates are approximately
 independent and distributed as `S(f_j) chi2_2 / 2` (Brockwell and Davis 1991, Ch. 10). The local test compares each
@@ -119,6 +123,12 @@ ordinate with the fitted red-noise spectrum: `2 I(f_j) / S_hat(f_j)` against `ch
 - Fewer than a few cycles in the span cannot establish a period against red noise; say so instead of quoting a
   significance (Vaughan et al. 2016). The longest period searched and the minimum number of cycles are fixed in
   advance.
+- **Shipped tool.** `<plugin root>/skills/hep-statistics/scripts/periodicity_scan.py` runs a weighted generalized
+  Lomb-Scargle periodogram of one series with a band-maximum global p from surrogates under a declared white, AR(1)
+  or OU null. Its red-noise surrogates are a constant mean plus a red process with `phi` (or `tau`) from the lag-1
+  autocorrelation and the series' total variance, estimated once and not refitted per surrogate; they have no trend,
+  no measurement term `e ~ N(0, C)` (only the white null adds `N(0, sigma_i^2)`) and no cross-rigidity correlation.
+  Its p-value is therefore not the one against the null above; report it as such, or run the full toys yourself.
 
 ## Trials across periods and energy bins
 
@@ -127,7 +137,8 @@ period and bin tried.
 
 - **Periods.** An evenly sampled series of `N` bins has about `N/2` independent Fourier frequencies; an oversampled
   frequency grid makes neighbouring trials correlated, so its number of grid points is not the number of trials. For
-  uneven sampling the effective number of independent frequencies is estimated by simulation (Horne and Baliunas 1986).
+  uneven sampling the effective number of independent frequencies is estimated by simulation (Horne and Baliunas 1986,
+  for a white-noise null; under the red-noise null the toys below count the trials).
 - **Energy bins.** Series in neighbouring rigidity bins share the physical variability and the systematics, so they
   are strongly correlated. A Bonferroni factor (the number of bins) is conservative; treating each bin as a separate
   search with no correction is not acceptable.
@@ -135,8 +146,8 @@ period and bin tried.
   draw all rigidity bins jointly from the fitted red-noise null with their cross-rigidity correlation plus `C`, rerun
   the null fit, the periodogram over every trial period and every bin, and take the largest local statistic; the
   global p is the fraction of toys that reach the observed maximum, with its binomial uncertainty (a bound when none
-  do). This is the principle that `<plugin root>/skills/hep-statistics/scripts/global_significance.py` implements for
-  Poisson-count scans (the best variant chosen inside every toy) and that
+  do). This is the principle that `<plugin root>/skills/hep-statistics/scripts/global_significance.py` (labelled
+  EXPERIMENTAL) implements for Poisson-count scans (the best variant chosen inside every toy) and that
   `<plugin root>/skills/hep-statistics/scripts/look_elsewhere.py brute` implements for a 1D scan. Neither script takes
   a periodogram of a correlated series: use them as the pattern and for their tail and binomial conventions
   (`core/stats/tail_estimation.py`), not as the tool. The Gross-Vitells bound in `look_elsewhere.py gross-vitells` is
@@ -153,8 +164,9 @@ together rather than one at a time:
   time-independent systematic source, shared by every period.
 - **Likelihood.** With the residual `r = y - m(theta, phi_p) (1 + sum_k delta_k nu_k)` over all (period, rigidity)
   bins, `chi2 = r^T (C_stat + C_tdep)^-1 r + sum_k nu_k^2`. `C_tdep` keeps its cross-period blocks when `tau` is not
-  short compared with the gap between periods. Putting `C_tind` into the covariance instead is equivalent only when it
-  is built from the model, not from the measured values (Peelle's pertinent puzzle).
+  short compared with the gap between periods. Putting `C_tind` into the covariance instead is not equivalent: built
+  from the measured values it biases the fit low (Peelle's pertinent puzzle), and built from the model (`C(theta)`
+  with `ln det`) it was also biased low on the Peelle setup of `covariance_fit.py`, while the explicit nuisance was not.
 - **Why jointly.** Fits of single periods each absorb the same time-independent systematic, so their `phi_p` are
   correlated; fitting a trend to them as if independent mis-states its uncertainty. The joint fit returns the full
   covariance of `(phi_1 .. phi_P, theta)`: differences `phi_p - phi_q` are usually much better constrained than each
@@ -162,10 +174,11 @@ together rather than one at a time:
   or with a nuisance.
 - **Tool.** `<plugin root>/skills/hep-statistics/scripts/covariance_fit.py fit` with a plug-in model
   (`{"plugin": {"path", "function", "n_params"}}`, `n_params` = the shared parameters plus `P`; `x` can be a running
-  bin index that the function maps to period and rigidity; the plug-in file runs with your permissions). Its
-  `multiplicative` mode `nuisance` fits one common normalization and needs a rank-one relative covariance (constant
-  fractions add into one); several sources with different time or rigidity shapes need the `model` mode or explicit
-  nuisances in the plug-in. A force-field modulation model is in
+  bin index that the function maps to period and rigidity; the plug-in file runs with your permissions, so only with
+  `--allow-plugin`). Its `multiplicative` mode `nuisance` fits one common normalization and needs a rank-one relative
+  covariance (constant fractions add into one); several sources with different time or rigidity shapes need explicit
+  nuisances in the plug-in (the `model` mode is biased low for a normalization, see the likelihood above). A
+  force-field modulation model is in
   `<plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py`; the physics of the model and its
   validity range belong to hep-measurement and hep-theory.
 - **Closure first.** Generate synthetic series from known `phi_p` and `theta` with the full covariance, fit them, and
@@ -190,8 +203,8 @@ responses, acceptances and collection times, and one spectrum is fitted to all o
   uncertainties until the joint fit passes.
 - **Size.** The core tools stop at their caps (template fits: 60 bins, 6 templates; see the core/stats guide). Above
   them, use parametrized forward folding: fold `Phi(theta)` through each era's response
-  (hep-detector, response and forward folding) and fit `theta` with `covariance_fit.py fit` and a plug-in model, or with
-  the pyhf adapter (one channel per era).
+  (hep-detector, response and forward folding) and fit `theta` with `covariance_fit.py fit --allow-plugin` and a
+  plug-in model, or with the pyhf adapter (one channel per era).
 - **Model-card diagnostic (opt-in).** When the joint fit is described by model cards, freeze them with
   `python3 <plugin root>/contracts/analysis_check.py freeze ... --mode model` and run `check`: the model-card suite
   reports whether each auxiliary measurement is used once (`r-aux.use`) and whether parameters shared across eras are

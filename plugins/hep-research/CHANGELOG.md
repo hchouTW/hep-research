@@ -20,6 +20,13 @@ Software checks establish contract consistency only, not physical validity.
   tuning run one Opus pass raised precision from 0.53 to 0.88 at about 2% of the review's tokens. Contracts 3.4.0:
   the new schema, the `filter_needed` event and the two config fields (fixtures, templates and example artifacts carry
   the new version string only). Evidence: VALIDATION REVIEW-FILTER-PASS.
+- **Five more references corrected after the review tuning run (27 issues; VALIDATION REVIEW-REFS-2).** The
+  efficiency factor product needs no independence when the factors are chained, and the acceptance already holds the
+  simulated selection efficiency (`correction-chain.md`); the fake-hit recipe multiplies by `nu`, not `nu_0`
+  (`front-end-electronics-and-signal-processing.md`); `periodicity_scan.py` exists and its red-noise null omits the
+  measurement covariance, and a model-built covariance is not equivalent to a normalization nuisance
+  (`time-series-inference.md`); the TOF ceilings name their separation convention and the TR onsets scale with mass
+  (`particle-identification.md`); Combine impacts and `autoMCStats` pointers (`nuisance-modeling.md`). Guidance only.
 - **anisotropy.py: `--cl` below 0.5 is rejected with its reason, not a TypeError (robust-fix ANISO-CL-RANGE).** An
   upper limit below CL 0.5 is not supported: the expected limit (the Neyman limit at the median isotropic amplitude)
   is empty there and the power constraint undefined. `harmonic --cl` outside [0.5, 1) is rejected (exit 2) with that

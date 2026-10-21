@@ -1,8 +1,8 @@
 # Particle Identification: TRD, TOF, RICH, dE/dx, and Muon Systems
 
 Covers how detectors determine *what* a particle is, as opposed to where it went and
-how much energy it carried. Every technique here measures velocity, Lorentz factor, or
-charge, and converts that - combined with the rigidity from
+how much energy it carried. Almost every technique here measures velocity, Lorentz factor,
+or charge (muon systems use penetration instead), and converts that - combined with the rigidity from
 [tracking and vertexing](tracking-and-vertexing.md) - into a mass or species
 hypothesis. Organized by technology and independent of experiment; calorimeter-based
 identification (`E/p`, shower shape) is in
@@ -12,8 +12,9 @@ identification (`E/p`, shower shape) is in
 
 A magnetic spectrometer measures rigidity `R = p/q`. Mass does not appear. To identify
 a particle you need a second, independent measurement that depends on mass through a
-different combination of variables - and every technique below is a way of measuring
-either velocity `beta` or Lorentz factor `gamma`:
+different combination of variables - and every velocity-based technique below measures
+either velocity `beta` or Lorentz factor `gamma` (dE/dx also gives charge; muon systems
+identify by penetration instead):
 
     m = p / (beta * gamma) = (p / beta) * sqrt(1 - beta^2)
 
@@ -52,7 +53,9 @@ their time difference over the same path, which for relativistic particles scale
 The `1/p^2` is decisive: TOF separation power falls as the square of momentum, so a
 system with a given timing resolution has a sharp practical ceiling - at 3 sigma about 1.1-1.6 GeV/c
 for pi/K with 50-100 ps over 1 m, and about 2-2.7 GeV/c over 3 m at 50-100 ps
-(`pid_separation_power.py --mode tof` evaluates it). Separation grows linearly with `L/sigma_t`, so
+(`pid_separation_power.py --mode tof` evaluates it; these are its default "single"
+convention, separation over one species' sigma - the "quadrature" convention gives
+0.9-1.3 and 1.6-2.3 GeV/c). Separation grows linearly with `L/sigma_t`, so
 the momentum reach grows only as `sqrt(L/sigma_t)`.
 
 Practical points that dominate real TOF performance:
@@ -132,8 +135,8 @@ signature in any single layer. That has two direct consequences:
   from a heavier species - pions (`e/pi`, the usual collider figure) or protons (the
   usual cosmic-ray case, helped by the ~1836 mass ratio) - over the momentum band where
   the electron is above the onset and the heavier species is below it, and loses power
-  once the heavier species' `gamma` also crosses the onset (roughly 100 GeV/c for
-  pions, about 1 TeV/c for protons). State the
+  once the heavier species' `gamma` also crosses the onset (at `gamma = 10^3`, about
+  140 GeV/c for pions and 940 GeV/c for protons). State the
   momentum band, the working-point efficiency, and the rejection factor together - one
   without the others is uninterpretable.
 
@@ -169,8 +172,10 @@ Key behaviors:
   granularity, and by the emission-point uncertainty along the track; the per-track
   resolution improves as the square root of the number of detected photons. Photon
   yield is itself proportional to `sin^2(theta_c)`, so rings are dimmest exactly at
-  threshold, where the angle is most sensitive to velocity - the two effects partially
-  cancel and must be evaluated together, not separately.
+  threshold, where the angle is most sensitive to velocity. For a fixed single-photon
+  resolution the two cancel exactly in `dbeta`, but the chromatic term
+  (`dtheta = dn/(n tan theta_c)`) and few-photon effects (ring finding, background) do
+  not, so they must be evaluated together, not separately.
 - **Velocity precision translates to mass precision with the `gamma^2` amplification**
   above. A RICH achieving a `dbeta/beta` of order `1e-3` still loses isotope separation
   at high `gamma`, which is the limiting factor in isotope measurements.
@@ -220,7 +225,7 @@ choice stated:
   and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum.
 - **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
   declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
-  separation (see "Combining measurements" above).
+  separation (see "Combining measurements" below).
 
 ## Combining measurements
 
@@ -263,8 +268,9 @@ easy to violate:
 
 - The PID systems used, the momentum band over which each is valid, and the threshold
   and saturation momenta where applicable.
-- Mass resolution as a function of momentum, showing the `gamma^2` degradation, and the
-  momentum at which the required species separation is lost.
+- For velocity-based systems (TOF, RICH, dE/dx used as velocity): mass resolution as a
+  function of momentum, showing the `gamma^2` degradation, and the momentum interval(s)
+  where the required species separation is lost (it need not be monotonic).
 - For TOF: timing resolution, flight path and its uncertainty, start-time source, and
   any charge-dependent time-walk correction.
 - For dE/dx: number of samples, truncation fraction, and whether it is used for charge,

@@ -1227,6 +1227,12 @@
    "severity": "doc",
    "title": "core/status.py states that refused is a negative verdict (exit 1), names the protected-use guard and permit check exception (exit 3) and the older tools that print refused with exit 2; new code uses rejected for unusable input (T18)",
    "sources_with_locators": "in-repo contracts, read 2026-10-22: core/status.py RUN_STATUSES; core/protected/guard.py protected_main (exit 3); contracts/permit.py usage (3 when the permit is refused); docs/protected-data-architecture.md; skills/hep-computing/references/engineering-playbook.md (refuses with exit 3); usage text of contracts/comparison/gate.py, core/evidence/query.py, contracts/migrate_statistical_result.py, core/partition/campaign.py, skills/hep-ml/assets/inference.py; fix 14c0ff94"
+  },
+  {
+   "id": "REVIEW-REFS-2",
+   "title": "Five more references corrected after the review tuning run (27 adjudicated issues, 3 substantive; VALIDATION REVIEW-REFS-2)",
+   "severity": "S3",
+   "sources_with_locators": "mostly; external claims located and opened 2026-10-22 (Combine docs part3/nonstandard and part2/bin-wise-stats; arXiv:1408.6865 p. 18; PDG RPP 2024 sections 34.7 and 35.5; Horne and Baliunas 1986 abstract via OpenAlex), internal ones by file:line (periodicity_scan.py, covariance_fit.py, acceptance_from_generation.py, spectrum_transform.py, contracts/validate.py, pid_separation_power.py runs); single-source items: the Horne-Baliunas white-noise scope (abstract only) and the AC-coupling recovery (a numerical check)"
   }
  ]
 }

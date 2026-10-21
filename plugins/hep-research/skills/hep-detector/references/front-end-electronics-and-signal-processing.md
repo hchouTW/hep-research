@@ -3,7 +3,7 @@
 How readout electronics shapes a detector's response: scale and linearity, resolution,
 efficiency and fake rate, timing, rate behaviour, and data/MC agreement. The physical
 signal (ionization, light, drift, gain) is in [signal formation and readout](signal-formation-and-readout.md);
-time-measurement budgets per detector type are in [timing detectors](timing-detectors.md); photosensor
+the single-hit time-resolution budget and per-technology timing notes are in [timing detectors](timing-detectors.md); photosensor
 statistics are in [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md); the electronics model in
 simulation is the Digitization section of [detector simulation](detector-simulation.md).
 `<plugin root>/skills/hep-detector/scripts/frontend_response.py` evaluates the relations below
@@ -80,8 +80,9 @@ question, first establish:
   time; a mis-set pole-zero gives a rate-dependent baseline.
 - **AC coupling and bipolar shaping** keep the mean baseline at zero *in steady state*
   only: after a change in rate (start of a bunch train, a spill, a burst) the baseline
-  is displaced for several shaping times (see Pileup below). Baseline restorers reduce,
-  but do not remove, this.
+  is displaced for several shaping times (bipolar shaping) or several coupling time
+  constants (AC coupling alone; see Pileup below). Baseline restorers reduce, but do not
+  remove, this.
 - **Shaping time is a trade-off** between series noise (falls with `t_p`), parallel
   noise (rises with `t_p`), pileup and dead time (rise with `t_p`), and ballistic
   deficit (falls with `t_p`). There is an optimum; it moves to shorter `t_p` as leakage
@@ -249,7 +250,8 @@ distribution, not only its width, and its spectrum when tails appear.
 - **Bipolar or AC-coupled shaping** has `∫ g dt = 0`, so the mean offset vanishes in
   steady state, but not after a change in rate: after a step from zero to rate `nu`
   the offset is `nu <a> ∫_0^t g dt'`, which rises and then returns to zero over several
-  shaping times. For a bipolar pulse `g = tau d/dt[(t/tau) e^(1 - t/tau)]` it equals
+  shaping times for bipolar shaping, or several coupling time constants for AC coupling
+  alone (longer when that constant exceeds the shaping time). For a bipolar pulse `g = tau d/dt[(t/tau) e^(1 - t/tau)]` it equals
   `nu <a> tau (t/tau) e^(1 - t/tau)`: maximal (`nu <a> tau`) one `tau` after the start of
   a bunch train, still 9 % of that after `5 tau`. The result is an energy offset that
   depends on position in the train and on pileup.
@@ -277,8 +279,8 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
   secondaries `lambda = -ln(1 - P_ct)`, where `P_ct` is the measured probability of
   at least one secondary (`P_ct = 0.2` gives `lambda = 0.22`, mean 1.29 cells).
   Dark counts add both a mean `DCR · gate` and a variance (1 GHz × 20 ns gives 20 pe
-  mean and sigma ≥ 4.5 pe, more with crosstalk); pedestal subtraction removes only the
-  mean, which matters for irradiated SiPMs.
+  mean and sigma = √20 ≈ 4.5 pe from Poisson alone, more with crosstalk); pedestal
+  subtraction removes only the mean, which matters for irradiated SiPMs.
 - **SiPM gain and photon detection efficiency** grow with overvoltage
   `V_bias - V_bd(T)`; the breakdown voltage changes with temperature (*device-specific*
   coefficient), so gain drifts with temperature unless the bias is compensated.
@@ -357,7 +359,7 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
   dither; `LSB/√12` is an rms over inputs.
 - **"Pedestal subtraction removes dark counts."** It removes the mean, not the variance.
 - **"Bipolar shaping has no baseline shift."** Only in steady state.
-- **"Five sigma means no fake hits."** Multiply by channels, window, and `nu_0`.
+- **"Five sigma means no fake hits."** Multiply by channels, window, and `nu` (not `nu_0`).
 - **"Noise is per channel and independent."** Coherent noise can dominate sums.
 - **"The dead-channel map is static."** Upsets, dose, and temperature change it.
 - **Electronics nonlinearity calibrated away as a physics effect** (SiPM saturation,
