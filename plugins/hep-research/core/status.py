@@ -29,6 +29,8 @@ Usage in a script:
 """
 from __future__ import annotations
 
+import sys
+
 EXIT_OK, EXIT_NEGATIVE, EXIT_BAD_INPUT, EXIT_INCOMPLETE = 0, 1, 2, 3
 EXIT_CODES = (EXIT_OK, EXIT_NEGATIVE, EXIT_BAD_INPUT, EXIT_INCOMPLETE)
 
@@ -54,13 +56,23 @@ _NO_ARTIFACT = frozenset({"rejected", "error", "refused", "missing-dependency", 
 
 
 def exit_code(status: str) -> int:
-    """The exit code of a run status; an unknown status is a programming error (KeyError)."""
-    return RUN_STATUSES[status]
+    """The exit code of a run status. An unknown status is a programming error in the calling script; it is named on
+    stderr and gives exit 3 (incomplete: the run's outcome cannot be classified). It never gives 1, which reads as a
+    negative verdict, as the uncaught KeyError did, and never 0 or 2, which would read as ok or as the user's input."""
+    try:
+        return RUN_STATUSES[status]
+    except (KeyError, TypeError):
+        print(f"core.status: unknown run status {status!r} (a programming error in this script); exit "
+              f"{EXIT_INCOMPLETE}, incomplete. Known statuses: {', '.join(RUN_STATUSES)}", file=sys.stderr)
+        return EXIT_INCOMPLETE
 
 
 def artifact_labels(status: str, labels: list[str] | tuple[str, ...] = (DEFAULT_LABEL,)) -> list[str] | None:
     """Labels for an artifact written from a run with this status: the input labels, plus 'failed' after a negative
-    verdict or 'unvalidated' after an incomplete run; None when no artifact may be written."""
+    verdict or 'unvalidated' after an incomplete run; None when no artifact may be written. An unknown status is a
+    ValueError: an artifact is never labelled from a run whose outcome is not known."""
+    if not isinstance(status, str) or status not in RUN_STATUSES:
+        raise ValueError(f"unknown run status {status!r}; known: {list(RUN_STATUSES)}")
     code = exit_code(status)
     if status in _NO_ARTIFACT:
         return None
