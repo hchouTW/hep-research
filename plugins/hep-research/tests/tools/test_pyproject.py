@@ -140,6 +140,39 @@ class PyprojectTests(unittest.TestCase):
 
     @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
                          "repository checkout only (an installed plugin tree has no .github)")
+    def test_bdt_backend_job_lists_every_module_with_bdt_tests(self):
+        """The required bdt-backend job names its modules: every test module that marks an xgboost or scikit-learn
+        test (a find_spec guard for xgboost or sklearn, or an 'xgboost ... not installed' / 'scikit-learn ... not
+        installed' skip) must be listed (except this module, which spells the markers). A scikit-learn skip reason
+        names sklearn, the import name run_required_backends.py matches, so such a skip fails the job; the job pins
+        every package of the `bdt` extra, within the extra's range."""
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        job = re.search(r"(?ms)^  bdt-backend:\n(.*?)(?=^  [A-Za-z0-9_-]+:\n|\Z)", workflow).group(1)
+        listed = set(re.search(r"--modules (\S+)", job).group(1).split(","))
+        marker = re.compile(r'find_spec\("(?:xgboost|sklearn)"\)|(?:xgboost|scikit-learn)[^"\n]*not installed')
+        marked = set()
+        for path in (ROOT / "tests").rglob("test_*.py"):
+            text = path.read_text(encoding="utf-8")
+            if marker.search(text):
+                marked.add(".".join(path.relative_to(ROOT).with_suffix("").parts))
+                for reason in re.findall(r'"[^"\n]*scikit-learn[^"\n]*not installed[^"\n]*"', text):
+                    self.assertIn("sklearn", reason, f"{path.name}: a scikit-learn skip reason must name sklearn")
+        self.assertEqual(listed, marked - {"tests.tools.test_pyproject"})
+        required = dict(x.split("==") for x in re.search(r"--require (\S+)", job).group(1).split(","))
+        self.assertEqual(set(required), {"xgboost", "sklearn"})
+        pinned = dict(re.findall(r'"([A-Za-z0-9_.-]+)==([0-9][^"]*)"', job))
+        self.assertEqual(pinned["xgboost"], required["xgboost"])
+        self.assertEqual(pinned["scikit-learn"], required["sklearn"])
+        for req in PYPROJECT["project"]["optional-dependencies"]["bdt"]:
+            name = re.match(r"[A-Za-z0-9_.-]+", req).group(0)
+            self.assertIn(name, pinned, f"the bdt extra's {name} is not pinned in the job")
+            lo, hi = re.search(r">=([0-9.]+),<([0-9.]+)", req).groups()
+            version = tuple(int(x) for x in pinned[name].split("."))
+            self.assertTrue(tuple(map(int, lo.split("."))) <= version < tuple(map(int, hi.split("."))),
+                            f"{name}=={pinned[name]} outside the bdt extra {req}")
+
+    @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
+                         "repository checkout only (an installed plugin tree has no .github)")
     def test_slow_tier_job_has_a_larger_module_timeout(self):
         """The weekly `latest` job runs the slow tier, where tests.examples.test_stats_benchmarks alone takes about
         525-545 s, near the default 600 s module limit: the job sets HEP_MODULE_TIMEOUT to at least 1800 s, and the

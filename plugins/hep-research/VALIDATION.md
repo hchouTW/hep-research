@@ -2037,6 +2037,28 @@ that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as co
 | `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4707 tests in 395 modules, 4575 pass, 0 failures, 132 skipped |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4707 tests, 4484 pass, 0 failures, 223 skipped |
 
+## BDT-BACKEND-GATE (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; CI lock venv with xgboost 3.4.1 and scikit-learn 1.9.1, E2 venv without them; branch `fix/aniso-cl-bdt-gate`)
+
+The tests of `skills/hep-ml/scripts/train_bdt.py` and `export_bdt.py` that need xgboost or scikit-learn, and the BDT
+path of the analysis-to-paper example, skipped in every required CI job: none installs the `bdt` extra. New required
+job `bdt-backend` (modelled on `torch-backend`): the CI lock plus `xgboost==3.4.1`, `scikit-learn==1.9.1` and
+scikit-learn's dependencies outside the lock `joblib==1.6.0`, `narwhals==2.27.1`, `threadpoolctl==3.7.0` (the versions
+of the CI lock venv), and `tools/run_required_backends.py --require xgboost==3.4.1,sklearn==1.9.1` over
+`tests.examples.test_analysis_to_paper`, `tests.skills.hep_ml.test_train_bdt` and
+`tests.skills.hep_ml.test_train_bdt_extensions`, so a test skipped for either backend fails the job. The gate matches
+skip reasons by import name, so the two scikit-learn skip reasons now name `sklearn` (before, a scikit-learn skip
+would not have counted as a skip for the backend). `tests/tools/test_pyproject.py`: every test module that marks an
+xgboost or scikit-learn test is listed, its scikit-learn skip reasons name `sklearn`, and the job pins every package
+of the extra within the extra's range (dropping a module or pinning scikit-learn 2.0.0 fails it).
+
+- The job's command, run as the job runs it (CI lock venv with the backends): 44 run, 0 failures, 0 errors, 2 skips
+  not for a backend (PyROOT for the RooFit cross-check; `test_tmva_without_root_exits_3_with_a_hint`, skipped where
+  ROOT is importable, which it is not on the CI runner), `skipped_for_a_required_backend` empty, exit 0, about 49 s.
+- Without the backends (E2 venv): exit 1, both backends reported not importable and 25 tests skipped for them
+  (xgboost and sklearn reasons both caught).
+- Branch protection is a repository setting: `bdt-backend` must be added to the required status checks there; the
+  workflow cannot make it required by itself (as for `torch-backend`).
+
 ## ANISO-CL-RANGE (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `fix/aniso-cl-bdt-gate` from `b45e4037`)
 
 Robust-fix S4, parent `b45e4037` (release 0.22.0). `skills/hep-measurement/scripts/anisotropy.py harmonic --cl 0.3`

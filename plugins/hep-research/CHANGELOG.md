@@ -11,6 +11,10 @@ Software checks establish contract consistency only, not physical validity.
   reason, and `amplitude_upper_limit` raises ValueError for it; at CL 0.5 an expected limit found empty by rounding is
   reported as its analytic value 0 (it was a TypeError with a non-uniform exposure map). Results for CL >= 0.5 that
   ran before are unchanged bit for bit. Evidence: VALIDATION ANISO-CL-RANGE.
+- **CI: a required `bdt-backend` job runs the xgboost and scikit-learn tests with the `bdt` extra pinned.** The
+  `train_bdt.py`, `export_bdt.py` and analysis-to-paper BDT tests skipped in every required job; the new job installs
+  xgboost 3.4.1 and scikit-learn 1.9.1 and fails on a test skipped for either (`tools/run_required_backends.py`);
+  `tests/tools/test_pyproject.py` checks that every such module is listed. Evidence: VALIDATION BDT-BACKEND-GATE.
 
 ## 0.22.0 (2026-10-22)
 
