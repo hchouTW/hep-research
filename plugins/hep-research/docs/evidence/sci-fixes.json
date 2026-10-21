@@ -972,6 +972,57 @@
      "detail": "scipy.stats.t.ppf"
     }
    ]
+  },
+  {
+   "id": "ANISO-WEIGHTED-COV",
+   "title": "Weighted first harmonic: the exact null covariance of (a, b) from the exposure map replaces 2/N_eff, with a chi^2 significance and a phase-free Neyman limit",
+   "changelog": "CHANGELOG Unreleased, anisotropy.py weighted harmonic (sci-fix ANISO-WEIGHTED-COV)",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+   ],
+   "oracle_kinds": [
+    "symbolic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "per-test parent record of fix 3c10ac23 against parent 32450b32 (12 of 12 evidence tests fail on the parent: 4 by assertion on the released CLI numbers, 8 because harmonic_covariance, AnisotropicNull or covariance_ab are new; adapted parent tree adds only the new test module; VALIDATION ANISO-WEIGHTED-COV 2026-10-22); 16 local mutants killed, the revert among them; negative controls emulate exp(-N_eff r^2 / 4) and the Rice limit with sigma^2 = 2/N_eff (scipy ncx2) and show both fail the oracles; invariants: a uniform map reproduces the unweighted outputs bit for bit, toy skies have the reported covariance, coverage at four dipole phases (fast Gaussian toys, slow event-level toys in the slow-evidence job)",
+   "independence": [
+    {
+     "kind": "symbolic",
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_covariance_matches_the_sympy_delta_method",
+     "basis": "third-party",
+     "detail": "SymPy 1.14.0 integrates the moments of X = w cos, S = w sin, Y = w for the exposure 1 + (9/10) cos(alpha - axis), axis 0 and 30 deg, and applies the delta method to a = 2 mean(X) / mean(Y), b = 2 mean(S) / mean(Y) (sympy jacobian); 1e-4 relative against harmonic_covariance on 3600 bins (binning bound 2.1e-5); the closed forms (4/e^2)(1/sqrt(1-e^2) - 1) and (4/e^2)(1 - sqrt(1-e^2)) checked symbolically"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_cdf_matches_scipy",
+     "basis": "third-party",
+     "detail": "scipy.stats.multivariate_normal density integrated over the disk by scipy.integrate.dblquad (epsabs 1e-12, epsrel 1e-10), and scipy.stats.ncx2 for the isotropic Rice case, against AnisotropicNull.cdf at 11 points, 1e-8 absolute"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_rayleigh_probability_matches_scipy_chi2",
+     "basis": "third-party",
+     "detail": "scipy.spatial.distance.mahalanobis and scipy.stats.chi2.sf(chi^2, 2) with V from the SymPy oracle against the CLI's rayleigh_probability, chi^2 at 1e-4 relative (binning)"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_limit_meets_the_neyman_condition_by_scipy",
+     "basis": "third-party",
+     "detail": "scipy dblquad CDF over the 72-phase grid from numpy.linalg.eigh's axis at the CLI's Neyman limit equals 1 - CL within 1e-4, the continuous maximum (scipy minimize_scalar) within 2e-3, the null median (scipy brentq) within 1e-4 relative"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_limit_takes_the_largest_cdf_over_the_phase_grid",
+     "basis": "third-party",
+     "detail": "scipy dblquad CDF over the 72-phase grid at AnisotropicNull.neyman for CL 0.3 and 0.2, where the deciding phase is not the major axis, equals 1 - CL within 1e-7"
+    }
+   ]
   }
  ],
  "documentation_fixes": [
@@ -992,6 +1043,24 @@
    "title": "Five released references corrected after the independent-review evaluation (45 adjudicated issues; VALIDATION REVIEW-REFS)",
    "severity": "S3",
    "sources_with_locators": "mostly; each external claim has a paper, equation or page and the 2026-10-22 opening date, internal ones a file:line; three statements rest on one source (Baker-Cousins normalization bias, abstract only; Huber limits; the weighted-dipole variance, computed here and marked Inferred)"
+  },
+  {
+   "id": "REVIEW-CODE-WARN-TAIL",
+   "title": "tail_extrapolation.py warns when exactly one model passes validation: the envelope has zero width by construction, the model uncertainty was not assessed (VALIDATION REVIEW-CODE-WARN)",
+   "severity": "S3",
+   "sources_with_locators": "internal only; skills/hep-statistics/scripts/tail_extrapolation.py analyse() (envelope over the models that pass, low = min, high = max, gaussian_sigma = (high - low) / prescription) and skills/hep-statistics/references/inference-recipes.md step 3 (a one-model spread is zero by construction, not a measured model uncertainty; REVIEW-REFS); no external source, the statement is definitional (max - min over one value is 0)"
+  },
+  {
+   "id": "REVIEW-CODE-WARN-MANIFEST",
+   "title": "assets/inference.py --external-scores warns that scored events missing from the split manifest cannot be excluded as training events, without refusing them (VALIDATION REVIEW-CODE-WARN)",
+   "severity": "S3",
+   "sources_with_locators": "internal only; skills/hep-ml/assets/inference.py leakage_check (ids_not_in_manifest counted, only scored_training_ids refused by run_external) and skills/hep-ml/references/multivariate-analysis-bdt-nn.md, 'Scores from another tool'; no external source, the statement follows from the manifest being the only record of the training events"
+  },
+  {
+   "id": "REVIEW-CODE-WARN-NEGW",
+   "title": "Negative weights: dropping them from training only is option 3's kind of distortion (positive-weight density instead of the signed one), acceptable only with its effect shown, never for evaluation; train_bdt.py warns under drop and abs-train-signed-eval (VALIDATION REVIEW-CODE-WARN)",
+   "severity": "S3",
+   "sources_with_locators": "yes; Andersen, Gütschow, Maier and Prestel, arXiv:2005.09375v1 Sec. 1 p. 3 (the sample's cross section is sigma = sigma_p - sigma_n, so dropping the negative-weight events keeps sigma_p only) and Andersen and Maier, arXiv:2109.07851 Sec. 2 p. 4 (negative-weight counterevents correct the overestimation by the positive weights), both opened 2026-10-22; skills/hep-ml/scripts/train_bdt.py train_ok and the evaluation block (signed weights) checked; maintainer decision 2026-10-22"
   }
  ]
 }
