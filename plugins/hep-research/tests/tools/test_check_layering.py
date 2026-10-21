@@ -119,6 +119,42 @@ class LayeringTests(unittest.TestCase):
         v = self.run_case({"core/units.py": "import math\n"})
         self.assertViolation(v, "steward", "core/units.py")
 
+    def test_core_relative_and_dynamic_imports_of_contracts(self):
+        # T03: only absolute static imports were scanned, and any .py under a fixtures/ folder was skipped
+        owners = json.dumps({"modules": {n: {"steward": "hep-computing"} for n in ("bootstrap", "x", "stats")}})
+        cases = {"core/x.py": "from ..contracts import validate\n",
+                 "core/stats/__init__.py": "import importlib\nM = importlib.import_module('contracts.validate')\n",
+                 "core/stats/dyn.py": "C = __import__('contracts')\n",
+                 "core/stats/fixtures/fx.py": "import contracts\n",
+                 "core/stats/rel.py": "from ... import contracts\n"}
+        for rel, code in cases.items():
+            with self.subTest(file=rel):
+                v = self.run_case({rel: code, "core/OWNERS.json": owners})
+                hits = [x for x in v if x["rule"] == "direction" and x["file"] == rel]
+                self.assertTrue(hits, f"expected a direction violation at {rel}, got {v}")
+                self.assertIn("contracts", hits[0]["message"])
+
+    def test_core_relative_imports_inside_core_are_clean(self):
+        owners = json.dumps({"modules": {n: {"steward": "hep-computing"} for n in ("bootstrap", "stats")}})
+        files = {"core/OWNERS.json": owners, "core/stats/__init__.py": "from . import fit\nfrom .fit import f\n",
+                 "core/stats/fit.py": "from ..bootstrap import os\nimport importlib\nimportlib.import_module('core.bootstrap')\n",
+                 "skills/a/scripts/s.py": "from . import t\nfrom .t import u\n", "skills/a/scripts/t.py": "u = 1\n"}
+        self.assertEqual(self.run_case(files), [])
+
+    def test_skill_relative_import_of_another_skill(self):
+        v = self.run_case({"skills/a/scripts/s.py": "from ...b.scripts import t\n"})
+        self.assertViolation(v, "direction", "skills/a/scripts/s.py", 1)
+
+    def test_empty_or_placeholder_steward(self):
+        # T04: only the presence of a key was checked, so steward '' or 'TBD' passed
+        owners = {"modules": {"bootstrap": {"steward": "hep-computing"}, "units": {"steward": ""},
+                              "tables": {"steward": "TBD"}, "misc": {}}}
+        v = self.run_case({"core/OWNERS.json": json.dumps(owners), "core/units.py": "import math\n",
+                           "core/tables.py": "import math\n", "core/misc.py": "import math\n"})
+        for f in ("core/units.py", "core/tables.py", "core/misc.py"):
+            self.assertViolation(v, "steward", f)
+        self.assertEqual(len([x for x in v if x["rule"] == "steward"]), 3, v)
+
     def test_profile_reference_requires_depends_on(self):
         files = with_profiles(("experiment:a", "experiments/a", [], "a"), ("experiment:b", "experiments/b", [], "b"))
         files["profiles/experiments/a/index.md"] = "See profiles/experiments/b/index.md\n"
