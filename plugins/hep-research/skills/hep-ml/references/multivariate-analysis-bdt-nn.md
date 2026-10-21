@@ -21,8 +21,9 @@ families and their training. Sections are written for a signal/background score;
 
 Prefer physically motivated features (masses, angular separations, known discriminants) over every available
 low-level variable. Exclude features that encode the region definitions or the target itself (target leakage: a
-variable built from the selection that defines signal and control regions leaks across them and shows up only when a
-closure test fails). Check each feature's correlation with the fitted observable (typically a mass): a correlated
+variable built from the selection that defines signal and control regions leaks across them and shows up as a failed
+closure test or an implausible feature-importance ranking). Check each feature's correlation with the fitted
+observable (typically a mass): a correlated
 feature sculpts the background after a cut on the score ([ml-analysis-decorrelation-and-systematics.md](ml-analysis-decorrelation-and-systematics.md), "Mass sculpting and
 decorrelation").
 
@@ -38,16 +39,19 @@ decorrelation").
   raises a fatal error on negative instance weights, so signed samples need a deliberate treatment before training
   (options and costs: [ml-analysis-weights.md](ml-analysis-weights.md), "Negative weights"). Evaluate with the signed physics weights
   and never drop the sign silently.
-- A hyperparameter search optimizes the analysis metric (expected sensitivity), not raw AUC or accuracy, with grouped
-  folds ([ml-analysis-training-and-data.md](ml-analysis-training-and-data.md), "Hyperparameter search").
+- A hyperparameter search optimizes the analysis metric (expected sensitivity, such as the Asimov significance), not
+  raw AUC or accuracy, with grouped folds
+  ([ml-analysis-training-and-data.md](ml-analysis-training-and-data.md), "Hyperparameter search").
 
 ## Training practicalities: neural networks
 
-- Balance the class totals in the training weights (rescale each class to equal summed weight) and keep the relative
-  physics weights within a class; never oversample or flatten inside a class ([ml-analysis-weights.md](ml-analysis-weights.md),
-  "Event weights" and "Class balancing and the prior").
+- Balance the class totals in the training weights (rescale each class to equal summed weight) and by default keep the
+  relative physics weights within a class; flattening in a steeply falling variable or oversampling inside a class is
+  a deliberate, documented training-only choice, with evaluation on the physics weights
+  ([ml-analysis-weights.md](ml-analysis-weights.md), "Event weights" and "Class balancing and the prior").
 - A batch with a few very high-weight events can dominate a step: monitor the effective sample size per batch, or cap
-  extreme weights and document the cap. PyTorch practice: [deep-learning-guide.md](deep-learning-guide.md).
+  extreme weights in the training weights only (this changes the relative weights within a class) and document the
+  cap. PyTorch practice: [deep-learning-guide.md](deep-learning-guide.md).
 - Start shallow and confirm the network at least matches a tuned BDT; a complex network that loses to it usually has
   a data or procedure problem.
 
@@ -56,9 +60,12 @@ decorrelation").
 Energy, momentum or mass regressions, MET estimators, direction or resolution estimators. The guidance above applies,
 with these changes:
 
-- **The loss picks the summary learned** (Cheong et al., JINST 15 (2020) P01030, arXiv:1910.03773, abstract, read
-  2026-10-14): MSE learns the conditional mean E[y_true | x]; mean absolute error or Huber the median, robust to
-  tails; quantile regression or a mean-and-variance head a predictive distribution. Match it to the downstream use.
+- **The loss picks the summary learned** (Cheong et al., JINST 15 (2020) P01030, arXiv:1910.03773: abstract for the
+  principle, Secs. 3.1, 3.2, 3.5 and the Sec. 3 introduction for the mapping, read 2026-10-22): MSE learns the
+  conditional mean E[y_true | x]; mean absolute error the median, robust to tails; Huber, which interpolates between
+  MSE and MAE, a location between the mean and the median set by its threshold; quantile regression a chosen
+  quantile, and so the spread. A mean-and-variance head gives a parametric predictive distribution (`unverified`: not
+  in that paper). Match it to the downstream use.
 - **The training truth spectrum is part of the answer.** By Bayes' theorem p(y_true | x) is proportional to
   p(x | y_true) p(y_true), so the conditional mean, and the correction, depend on the truth spectrum of the training
   sample. A correction trained on one spectrum and applied to another (a steeper background, a resonance, data) is
@@ -81,7 +88,7 @@ with these changes:
 A raw score is not a probability: calibrate it (Platt, isotonic, prior correction:
 [uncertainty-and-calibration.md](uncertainty-and-calibration.md)) or use it only through its rank and a threshold, and
 state which, since statistical combinations may assume one
-([statistical-tools.md](../../hep-statistics/references/statistical-tools.md)); the limit or fit itself is
+([ml-assisted-inference.md](../../hep-statistics/references/ml-assisted-inference.md)); the limit or fit itself is
 hep-statistics': load that skill. Apply the model in the production event
 loop with the training preprocessing (feature order, units, scaling constants), for example
 `TMVA::Experimental::RBDT`/`RReader` or an ONNX model inside `RDataFrame::Define()`; version weights, preprocessing and
@@ -139,16 +146,20 @@ unblinding.
 `<plugin root>/skills/hep-ml/scripts/train_bdt.py` is the executable path (backends xgboost, or scikit-learn
 HistGradientBoosting as a fallback; optional extra `bdt`; exit 3 with the pip command when missing). Read `--help`.
 - **Cross-training.** Folds come from the event number (mod K) or a hash of a composite key such as (run, event), so
-  the fold manifest passes `check_split_integrity.py` and every event is scored by a model that never saw it.
-  Early stopping and the hyperparameter choice use a validation part inside the training folds, never the test fold.
+  the fold manifest passes `check_split_integrity.py` and every event is scored by a model whose fit never used it.
+  Early stopping uses a validation part inside the training folds, never the test fold; the hyperparameter point is
+  chosen on the validation objective averaged over all fold models, so the other folds' validation parts, which
+  include test-fold events, inform it (not nested cross-validation).
 - **Negative weights.** XGBoost refuses negative weights ("Weights must be positive values"; checked with xgboost
   3.4.1). `--negative-weights` has no default: `reject`, `abs-train-signed-eval` (train on |w|, which biases the
-  learned density where negative weights matter: show the effect is small) or `drop` (from training only). Yields,
+  learned density where negative weights matter: show the effect is small) or `drop` (from training only; it biases
+  the training, and [ml-analysis-weights.md](ml-analysis-weights.md), "Negative weights", says not to use it). Yields,
   metrics and working points always use the signed physical weights; the run records the negative fraction and sum
   and keeps training and physical weights apart. Resampling (`assets/hep_metrics.py` `cell_resample`) is the
   alternative that keeps positive weights without |w|.
-- **Selection.** Weighted AUC or the Asimov significance Z_A = sqrt(2((s+b) ln(1+s/b) - s)) at the best cut, on
-  the validation parts; test-fold metrics are reported once.
+- **Selection.** The Asimov significance Z_A = sqrt(2((s+b) ln(1+s/b) - s)) at the best cut (`asimov`), or weighted
+  AUC (`auc`) only as a proxy when the yields are not set, on the validation parts; test-fold metrics are reported
+  once.
 - **Overtraining.** Compare training and test score distributions with a distance and the effective entries
   n_eff = (sum w)^2 / sum w^2. A weighted Kolmogorov-Smirnov p-value is not a valid test with weighted or signed
   events and correlated folds; do not quote one.
@@ -169,9 +180,9 @@ HistGradientBoosting as a fallback; optional extra `bdt`; exit 3 with the pip co
   file for TMVA's RBDT (`ROOT.TMVA.Experimental.SaveXGBoost`); both are optional packages the plugin does not
   install, so without them it exits 3 with the install command. The written file's sha256 is the model_hash to carry.
 - **Scores from another tool** (TMVA, LightGBM): `assets/inference.py --external-scores` applies the same checks to a
-  score file: every scored event must be a test event of the split manifest (or of the fold whose model scored it),
-  the training-domain flags, and a calibration that names the model's sha256; `--run-summary-out` feeds
-  `write_ml_artifact.py`.
+  score file: a leakage check, run only with `--split-manifest`, that refuses scores on events of the manifest's
+  training part (or, for k-fold, scored by another fold's model) and only counts scored events absent from the
+  manifest; the training-domain flags; and a calibration that names the model's sha256; `--run-summary-out` feeds `write_ml_artifact.py`.
 
 TMVA options for the same choices (`MethodBDT`, checked against ROOT master `tmva/tmva/src/MethodBDT.cxx`, read
 2026-10-17; classification defaults):
@@ -193,4 +204,5 @@ The family chosen against a simpler baseline; features with their motivation and
 observable; the k-fold scheme with effective weighted statistics per fold; the score convention (calibrated or rank
 only); the systematic-variation stability check; seeds and library versions; the versioned deployment artifact with a
 training-versus-deployment score comparison; for a regression, the loss and its match to the use, the closure in bins
-of true and reconstructed value, and how the correction's uncertainty is propagated.
+of true and reconstructed value and on a sample with a different truth spectrum (or recorded as not run), and how
+the correction's uncertainty is propagated.

@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Five references corrected after an adjudicated review (45 issues; VALIDATION REVIEW-REFS).** The first-harmonic
+  variance `2/N` and its bias hold for uniform exposure only, and `N_eff` is an approximation with weights
+  (`cosmic-ray-measurements.md`); flattening inside a class is a documented training-only choice, as
+  `ml-analysis-weights.md` allows, and hyperparameter selection in `train_bdt.py` is not nested
+  (`multivariate-analysis-bdt-nn.md`); the Bethe shell term scales as `z^2`, and the fluctuation regimes and Highland
+  accuracy follow PDG 2025 (`signal-formation-and-readout.md`); Cowan et al. eq. 98, the Baker-Cousins, Jeffreys and
+  Z_Bi statements, and the `cls-limit`/`profile-cls` handover (`inference-recipes.md`); DRAGON2 diagnostics and the
+  Moderski attribution (`cosmic-ray-propagation.md`). Guidance only; no tool output changes.
+
 ## 0.21.0 (2026-10-21)
 
 Contracts 3.2.0 (minor): simulated dataset-records; a reference benchmark for shower development; CI speedup.

@@ -20,27 +20,27 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 493999,
+   "bytes": 494923,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 116024,
+   "bytes": 116852,
    "uncited": 0
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 192064,
+   "bytes": 193198,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 184837,
+   "bytes": 185991,
    "uncited": 0
   },
   "hep-theory": {
    "references": 18,
-   "bytes": 120543,
+   "bytes": 121074,
    "uncited": 0
   }
  },
@@ -1813,6 +1813,7 @@
    "cited_by": [
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
@@ -2342,8 +2343,8 @@
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
    "owner": "hep-detector",
-   "bytes": 18335,
-   "lines": 247,
+   "bytes": 19259,
+   "lines": 258,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2587,8 +2588,8 @@
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
    "owner": "hep-measurement",
-   "bytes": 21647,
-   "lines": 207,
+   "bytes": 22475,
+   "lines": 212,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-measurement/README.md",
@@ -3217,8 +3218,8 @@
   {
    "path": "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
    "owner": "hep-ml",
-   "bytes": 14697,
-   "lines": 197,
+   "bytes": 15831,
+   "lines": 209,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -3598,7 +3599,6 @@
     "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/core-stats-commands.md",
-    "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "tests/skills/hep_statistics/test_cap_override_s7.py",
     "tests/skills/hep_statistics/test_core_stats_guide.py",
@@ -3613,8 +3613,8 @@
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
    "owner": "hep-statistics",
-   "bytes": 20424,
-   "lines": 226,
+   "bytes": 21578,
+   "lines": 234,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -3670,6 +3670,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-ml/references/ml-analysis.md",
+    "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/hep-ml/references/sbi-training.md",
     "skills/hep-ml/references/scientific-machine-learning.md",
     "skills/hep-ml/references/uncertainty-and-calibration.md",
@@ -3754,14 +3755,12 @@
    "lines": 96,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
-    "skills/hep-statistics/references/core-stats-guide.md"
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/references/inference-recipes.md"
    ],
-   "cited_by_other_skills": [
-    "hep-ml"
-   ],
+   "cited_by_other_skills": [],
    "last_commit": "578c12ff 2026-10-13"
   },
   {
@@ -3865,8 +3864,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 20181,
-   "lines": 231,
+   "bytes": 20712,
+   "lines": 236,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",

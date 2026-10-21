@@ -3,8 +3,8 @@
 a classifier or a regression.
 
 Purpose: the executable path for a boosted-decision-tree classifier in a physics analysis, with the choices that bias
-results made explicit: every event is scored only by a model that never saw it, hyperparameters are chosen on
-validation events inside the training folds and reported on the test folds, negative event weights are handled by a
+results made explicit: every event is scored only by a model whose fit never used it, hyperparameters are chosen on
+validation events of the training folds and reported on the test folds, negative event weights are handled by a
 declared policy, and the run summary is the input of write_ml_artifact.py. See
 <plugin root>/skills/hep-ml/references/multivariate-analysis-bdt-nn.md, "XGBoost in an analysis".
 
@@ -13,12 +13,13 @@ Method:
            sha256(key) mod K for a composite key such as (run, event); rows that share a key share a fold. The fold
            manifest (fold0..foldK-1, groups) is checked with check_split_integrity.py before training.
   training for test fold k the model trains on the other folds; a validation part of those folds (sha256 of the key,
-           fraction validation_fraction) drives early stopping and the hyperparameter choice, never the test fold.
+           fraction validation_fraction) drives early stopping, never the test fold.
            With no fold's validation part holding both classes the run is refused before training (exit 2).
   selection every grid point of "hyperparameters" is trained for every fold; the point with the best mean objective
-           on the validation parts is kept: weighted AUC ("auc") or the Asimov significance
-           Z_A = sqrt(2((s+b) ln(1+s/b) - s)) maximized over the score cut ("asimov", s and b = physical-weight sums
-           above the cut times asimov_scale). Test-fold metrics are reported once, for that point.
+           on the validation parts of all folds is kept (so the other folds' validation parts, which include test-fold
+           k's events, inform the choice for fold k; not nested cross-validation): weighted AUC ("auc") or the Asimov
+           significance Z_A = sqrt(2((s+b) ln(1+s/b) - s)) maximized over the score cut ("asimov", s and b =
+           physical-weight sums above the cut times asimov_scale). Test-fold metrics are reported once, for that point.
   weights  --negative-weights has no default: reject (exit 3 when a negative weight is present; XGBoost refuses
            negative weights since 1.3.0), abs-train-signed-eval (train on |w|, evaluate with signed w) or drop (drop
            negative-weight events from training; evaluation keeps every event with its signed weight). Training and

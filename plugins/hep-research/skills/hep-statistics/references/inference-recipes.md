@@ -10,12 +10,13 @@ Define `lambda(mu)=L(mu,theta_hat_hat_mu)/L(mu_hat,theta_hat)`. The usual two-si
 
 Wilks/Wald/Asimov approximations have regularity requirements. Sparse bins, weak identifiability, boundaries, discrete models, and strongly nonlinear nuisances may require toy calibration or other checks. A fixed rule such as five entries per bin does not guarantee validity. See the [original Cowan et al. paper](https://arxiv.org/abs/1007.1727).
 
-Measured example (synthetic ratio of two Poisson yields with known leakage backgrounds, nuisance profiled): the
-interval `-2 log lambda <= 1` covered 0.57 to 0.79 instead of 0.683 for a few to about 50 events per bin. A Neyman
-construction with the threshold calibrated by toys at each tested value (nuisance at its profiled value, common random
-numbers across the scan) restored 0.67-0.71 (nested toys, about ±0.03). Measure coverage before quoting a Wilks
-interval at such counts, and put every background that scales with a fitted yield (for example a species leaking into
-the other selection of a ratio) inside the likelihood, not as a fixed subtraction.
+Measured example (synthetic ratio of two Poisson yields with known leakage backgrounds, nuisance profiled; from a
+synthetic-twin study outside the plugin, with no script, seed or test shipped here, so a note rather than a
+reproducible result): the interval `-2 log lambda <= 1` covered 0.57 to 0.79 instead of 0.683 for a few to about 50
+events per bin. A Neyman construction with the threshold calibrated by toys at each tested value (nuisance at its
+profiled value, common random numbers across the scan) restored 0.67-0.71 (nested toys, about ±0.03). Measure
+coverage before quoting a Wilks interval at such counts, and put every background that scales with a fitted yield (for
+example a species leaking into the other selection of a ratio) inside the likelihood, not as a fixed subtraction.
 
 **Wald approximation and the Asimov width.** For large samples `-2 ln lambda(mu) = (mu - mu_hat)^2 / sigma^2 + O(1/sqrt N)`
 (Cowan et al., arXiv:1007.1727, eq. 17), and the width `sigma` is read off the Asimov data set generated at `mu'`:
@@ -26,7 +27,7 @@ values for a pre-data expectation); state which, because the expected bands diff
 **Profile likelihood with nuisances at low counts.** Rolke, Lopez and Conrad (NIM A551 (2005) 493,
 physics/0403059) give profile-likelihood intervals for a Poisson signal with a background (and efficiency) measured in
 auxiliary samples and show their coverage is close to nominal over a wide range; it is still a property to check with
-toys at the counts in hand (the measured example below shows how far Wilks can be off).
+toys at the counts in hand (the measured example above shows how far Wilks can be off).
 
 **Cousins-Highland.** Integrating a background or efficiency uncertainty over a prior inside an otherwise frequentist
 limit (Cousins and Highland, NIM A320 (1992) 331) is a hybrid: its coverage is not guaranteed, it depends on the prior
@@ -67,9 +68,9 @@ exactly known background and a 1D family of signal templates (one-sided `q0`, as
 - `gross-vitells --toys N --seed S [--ref-level C0]`: count the mean number of upcrossings `<N(c0)>` of a low level
   `c0` in a few hundred toys and extrapolate,
   `p_global ~= p_local(c) + <N(c0)> exp(-(c - c0)/2)` for one degree of freedom
-  ([Gross & Vitells 2010](https://doi.org/10.1140/epjc/s10052-010-1470-8), eq. 3, written there as an upper bound for
-  large `c`). The output gives `c0`, the toy count, the extrapolation distance `c - c0` and the highest level the same
-  toys checked empirically; beyond that level it warns.
+  ([Gross & Vitells 2010](https://doi.org/10.1140/epjc/s10052-010-1470-8), eq. 3, an upper bound at every `c`
+  that they expect to become an equality for large `c`). The output gives `c0`, the toy count, the extrapolation
+  distance `c - c0` and the highest level the same toys checked empirically; beyond that level it warns.
 - One scan point: no correction, global = local. The global p is never reported below the local p; zero toy
   exceedances give a 95% binomial bound, not zero.
 - Not modeled: a background uncertainty or a background fitted in the scan, several scan dimensions, or signal
@@ -98,11 +99,12 @@ Quote the expected sensitivity with every observed result, computed before unbli
   2012, eq. 20). For `s = 5`, `b = 20`, `sigma_b = 2` it gives 0.9755; a numerical profile of `q0` on the Asimov data
   of that model gives the same to 1e-6. It does not hold for a Gaussian constraint or a background from simulation
   with an unrelated uncertainty.
-- `s/sqrt(b)` (and `s/sqrt(b + sigma_b^2)`) is the `s << b` limit of these formulas (expand ln(1 + s/b) for small s/b; Cowan et al., arXiv:1007.1727 eq. 97). Never quote it without saying
-  so; at small `b` it overstates the sensitivity.
+- `s/sqrt(b)` (and `s/sqrt(b + sigma_b^2)`) is the `s << b` limit of these formulas (expand ln(1 + s/b) for small
+  s/b; Cowan et al., arXiv:1007.1727 eq. 98 for `s/sqrt(b)`; the `sigma_b` form is the same limit of the 2012 note's
+  formula). Never quote it without saying so; at small `b` it overstates the sensitivity.
 - **Limits:** the median expected limit and its 1- and 2-sigma bands under background only come from
   `core/stats/poisson_diagnostics.py cls-limit` (known background), `likelihood_limits.py profile-cls` or
-  `multibin-limit` (asymptotic: median and 1- and 2-sigma bands), or pyhf with `return_expected_set=True` ([core/stats guide](core-stats-guide.md)).
+  `multibin-limit` (asymptotic: median and 1- and 2-sigma bands), or pyhf with `return_expected_set=True` ([pyhf and Combine](statistical-tools.md)).
 
 `<plugin root>/skills/hep-statistics/scripts/sensitivity_and_gof.py asimov-z --s S --b B [--sigma-b SB]`
 computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_and_gof.py`).
@@ -110,7 +112,8 @@ computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_an
 **On/off and ratio-of-Poisson-means significance.** For a signal region count against a background measured in a
 control region (ratio of exposures tau), the frequentist test conditional on the total count (a binomial test of the
 ratio of Poisson means, the Z_Bi of the HEP literature) is recommended over the Bayesian-frequentist hybrid, which can
-undercover severely at high Z (Cousins, Linnemann and Tucker, NIM A595 (2008) 480, physics/0702156).
+undercover severely at high Z (Cousins, Linnemann and Tucker, NIM A595 (2008) 480, physics/0702156); for very low
+counts the conditional test can over-cover severely because of discreteness (same paper).
 `li_ma_significance.py --exact-conditional` gives that conditional p-value; Li-Ma's formula is its large-count limit.
 
 ## Goodness of fit
@@ -120,8 +123,9 @@ undercover severely at high Z (Cousins, Linnemann and Tucker, NIM A595 (2008) 48
   asymptotic; with fitted parameters, boundaries and small counts calibrate it with toys drawn from the fitted model,
   **refitting each toy**.
 - That deviance is the Poisson likelihood-ratio chi-square of Baker and Cousins (NIM 221 (1984) 437): for fits to
-  histograms it is the statistic to minimize and to use for goodness of fit, unbiased where Pearson's and Neyman's
-  chi-square are biased at small counts.
+  histograms it is the statistic to minimize and to use for goodness of fit: it gives the maximum-likelihood
+  estimates, whereas minimizing Pearson's or Neyman's chi-square biases the fitted normalization at small counts. Its
+  estimates can still be biased when counts are small (Baker and Cousins say so too).
 - Pearson `sum (n - nu)^2/nu` and Neyman `sum (n - nu)^2/n` chi-square need large expectations in every bin (state
   the condition, for example every `nu >= 5`); Neyman's is undefined at `n = 0`.
 - A good GoF p-value says the model is not rejected by this statistic; it says nothing about bias in the parameter of
@@ -154,8 +158,9 @@ undercover severely at high Z (Cousins, Linnemann and Tucker, NIM A595 (2008) 48
 Specify priors and parameterization, and check posterior propriety. A flat prior in signal strength is not flat in its logarithm. For MCMC inspect multiple chains, R-hat, effective sample size, divergences, mixing, and tail sampling. State whether intervals are central or highest-posterior-density and assess prior sensitivity.
 
 - **Priors.** Reference and Jeffreys priors are conventions (invariance or information arguments), not "no
-  information"; they depend on the parameterization and the model, can be improper, and a Jeffreys prior for a
-  Poisson mean differs from a flat one. An improper prior needs a proof that the posterior is proper.
+  information"; they depend on the model (a reference prior also on which parameter is of interest), are invariant
+  under reparametrization (of the parameter of interest, for a reference prior), can be improper, and a Jeffreys prior
+  for a Poisson mean differs from a flat one. An improper prior needs a proof that the posterior is proper.
 - **Reference priors in HEP.** Demortier, Jain and Prosper (PRD 82 (2010) 034002, arXiv:1002.1111) construct
   reference priors (parametrization-invariant, by reference analysis) for cross-section measurements with nuisance
   parameters; they are a defensible default when a prior must be stated, still a convention, and the posterior
@@ -183,8 +188,8 @@ Specify priors and parameterization, and check posterior propriety. A flat prior
   weight ESS. Below 10% of the draws, or when the new prior has support the old one lacked, the answer is a rerun
   with the new prior, not a reweighting.
 - `demo-sampler`: a seeded random-walk Metropolis sampler for `n ~ Pois(s + b)` with a flat prior, a demonstration
-  and test oracle only. For `n = 0`, `b = 0` (4 x 20,000 draws, seed 11) its 95% upper bound is 2.957 +- 0.060
-  against the exact `-ln 0.05 = 2.995732` of `counting_reference.py`; with `--artifact` it writes a
+  and test oracle only. For `n = 0`, `b = 0` (4 x 20,000 draws, seed 11) its 95% upper bound is 2.957 +- 0.059
+  against the exact `-ln 0.05 = 2.995732` of `counting_reference.py` (hep-measurement); with `--artifact` it writes a
   `statistical-result` that validates, and the validator refuses the same artifact if it claims `converged` with an
   R-hat above 1.01 (`stats.convergence_mismatch`).
 
@@ -206,14 +211,17 @@ assumption, and the uncertainty has two parts that must stay apart.
    estimate. The VR test only has power against deviations the VR can show: a model that passes may still fail
    further out.
 3. **Report the envelope between models separately.** The spread of the central SR predictions over the models that
-   passed is a model uncertainty. It is not a Gaussian standard deviation; it becomes one only through a prescription
-   the analysis declares and owns (half-range, or a uniform distribution over the range), and the choice is stated with
-   the result.
+   passed is a model uncertainty. With only one passing model the spread is zero by construction, not a measured
+   model uncertainty; `tail_extrapolation.py` then reports `low = high` (and `gaussian_sigma = 0` under a
+   prescription) without a warning, so state that the model uncertainty was not assessed. The spread is not a
+   Gaussian standard deviation; it becomes one only through a prescription the analysis declares and owns
+   (half-range, or a uniform distribution over the range), and the choice is stated with the result.
 4. **State the extrapolation distance.** Declare how far beyond the CR the prediction may reach; beyond it, the result
    carries a warning.
 5. **Hand over.** The nominal SR prediction and its statistical sigma (and, with a declared prescription, the envelope
-   sigma) go to `<plugin root>/core/stats/poisson_diagnostics.py cls-limit` or `likelihood_limits.py profile-cls`; the
-   envelope is stated next to the limit.
+   sigma) go to `<plugin root>/core/stats/poisson_diagnostics.py cls-limit` or `likelihood_limits.py profile-cls`;
+   these are not interchangeable (with `--sigma-b`, `cls-limit` is the Cousins-Highland hybrid above, `profile-cls`
+   profiles the background), so name the one used. The envelope is stated next to the limit.
 
 Run: `<plugin root>/skills/hep-statistics/scripts/tail_extrapolation.py --input tail.json` (input format in its
 `--help`; a user model only with `--allow-plugin`). Its tests check that the envelope interval covers a known
@@ -222,4 +230,4 @@ Asimov fit predicts.
 
 ## Minimal cross-check
 
-`counting_reference.py` assumes nonnegative signal, exactly known background, and a flat prior in signal yield. Its credible bound is not expected to match CLs with background uncertainty. With zero observations and zero background, its 95% upper bound is `-log(0.05)≈2.995732`; this is a reference for that specific model.
+`<plugin root>/skills/hep-measurement/scripts/counting_reference.py` assumes nonnegative signal, exactly known background, and a flat prior in signal yield. Its credible bound is not expected to match CLs with background uncertainty. With zero observations and zero background, its 95% upper bound is `-log(0.05)≈2.995732`; this is a reference for that specific model.

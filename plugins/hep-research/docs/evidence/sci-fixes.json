@@ -986,6 +986,12 @@
    "title": "ML physics references (ML-R01..R25)",
    "severity": "S3",
    "sources_with_locators": "yes; not every citation has an opened date"
+  },
+  {
+   "id": "REVIEW-REFS",
+   "title": "Five released references corrected after the independent-review evaluation (45 adjudicated issues; VALIDATION REVIEW-REFS)",
+   "severity": "S3",
+   "sources_with_locators": "mostly; each external claim has a paper, equation or page and the 2026-10-22 opening date, internal ones a file:line; three statements rest on one source (Baker-Cousins normalization bias, abstract only; Huber limits; the weighted-dipole variance, computed here and marked Inferred)"
   }
  ]
 }

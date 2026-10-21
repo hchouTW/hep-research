@@ -1996,6 +1996,38 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## REVIEW-REFS (2026-10-22; branch `fix/reference-review-issues` from main `c4f7954b`)
+
+Five 0.21.0 references were the documents of the independent-review evaluation (a matched self-check against the
+8-slot review of PR #194, outside the repository). A blind Opus adjudicator per document judged every finding of both
+arms; 45 distinct issues had at least one finding judged correct or partly correct (2 substantive, the rest minor or
+trivial). Each was rechecked against its source before the edit, and for a partly correct finding only the upheld
+part was changed. Severity S3 (guidance), ledger `documentation_fixes` REVIEW-REFS. Sources were opened on 2026-10-22.
+
+| Reference | Issues | Main changes | Sources (locators) |
+|---|---|---|---|
+| hep-measurement `cosmic-ray-measurements.md` | 7 | the `2/N` variance and `sqrt(pi/N)` bias of the first harmonic hold for uniform exposure; with weights `N_eff` is an approximation (substantive); upper-limit trigger fixed before unblinding; the script computes the Neyman limit, hep-statistics owns the choice; coverage test scope (one slow test, uniform exposure); stale "analysis guide" link labels; X_max width measures the lnA variance only after the shower-fluctuation term | numerical integration and toys (N Var(a) = 6.39 against 4.59 with `N_eff`, e = 0.9; marked Inferred); `scripts/anisotropy.py` `first_harmonic`, `_neyman`; `tests/skills/hep_measurement/test_anisotropy.py::test_upper_limit_covers`; Kampert and Unger, arXiv:1201.0018 Sec. 2.1, Eqs. 13-14 |
+| hep-theory `cosmic-ray-propagation.md` | 6 | cross sections carried as a normalization nuisance or as model alternatives with an envelope; DRAGON2 agreement marked post-hoc (C2 still fails); the first 32-34% B/C excess was mostly the helium target (1.143) and the unit (about 1.19); intro points to the optional DRAGON2 adapter; Moderski write gamma^2, the page and script use the exact gamma^2 - 1; antiproton source term also checked against a published table | `docs/capability-matrix.md` (tabulated-grid, adapter and pp rows); VALIDATION CR-PROPAGATION-DRAGON2 and -UNITS rows; `tests/adapters/test_cr_propagation.py` Diagnostics; Moderski et al., arXiv:astro-ph/0504388v1 Eqs. 1 and 7; `scripts/lepton_energy_losses.py` |
+| hep-statistics `inference-recipes.md` | 12 | Baker-Cousins gives the ML estimates (not "unbiased"); Gross-Vitells bound holds at every `c`; Cowan et al. eq. 98 (not 97) for `s/sqrt(b)`; Z_Bi over-covers at very low counts; reference and Jeffreys priors are reparametrization-invariant (not dependent); `cls-limit --sigma-b` (hybrid) and `profile-cls` are not interchangeable; a one-model envelope has zero spread by construction; demo-sampler MCSE 0.059 (rerun, seed 11); `counting_reference.py` path; pyhf pointer; the coverage example is labelled as an outside study; "below" to "above" | Baker and Cousins, NIM 221 (1984) 437, abstract; Gross and Vitells, arXiv:1005.1891 p. 1, Eqs. 1 and 3; Cowan et al., arXiv:1007.1727 Eqs. 97-98 (and a numerical check of the `sigma_b` limit); Cousins, Linnemann and Tucker, physics/0702156 abstract and Sec. 6; Demortier, Jain and Prosper, arXiv:1002.1111 Sec. II p. 6; `core/stats/poisson_diagnostics.py`, `core/stats/likelihood_limits.py`, `scripts/tail_extrapolation.py`, `scripts/bayes_diagnostics.py demo-sampler` output |
+| hep-ml `multivariate-analysis-bdt-nn.md` | 11 | flattening or oversampling inside a class is a documented training-only choice, as the weights reference allows (substantive); hyperparameter selection averages the validation objective over all folds, so test-fold events inform it; the analysis metric (Asimov) before AUC; `drop` biases training; the `inference.py` leakage check only refuses training-part scores; Huber lies between mean and median; Cheong et al. cited by section, the mean-and-variance head marked unverified; regression closure on a different truth spectrum; cap changes within-class weights; leakage symptoms; statistics link to `ml-assisted-inference.md` | `ml-analysis-weights.md` ("Class balancing and the prior", "Negative weights"); `scripts/train_bdt.py` selection code; `assets/inference.py` `leakage_check`; Cheong et al., arXiv:1910.03773v3 Secs. 3, 3.1, 3.2, 3.5 |
+| hep-detector `signal-formation-and-readout.md` | 9 | the shell term scales as `z^2` (Barkas `z^3`, Bloch `z^4`); Bethe limits: `beta gamma ~ 0.1` uncorrected, `beta ~ 0.05` corrected, muons radiative above `beta gamma ~ 1000` (about 100 GeV/c); fluctuation regimes by Vavilov `kappa`, very thick absorbers never Gaussian; Highland accuracy as PDG states it (no 11%); Pólya 0.31 ± 0.02 located; calibration pointers; "most equations" state their validity | PDG RPP 2025 Sec. 34 (Eqs. 34.5, 34.8, 34.16; Sec. 34.2.9 pp. 11-14); Zerguerras et al., arXiv:0901.2882 abstract and Eq. 2; NEWS-G arXiv:1902.08960 Eq. 1; `core-detector-equations.md` E4 |
+
+Two docstrings with the same claims were corrected (no behavior change): `train_bdt.py` (hyperparameter selection
+across folds) and `lepton_energy_losses.py` (Moderski's gamma^2). `tools/reference_inventory.py` regenerated.
+
+Found, not fixed here (code changes that need their own sci-fix evidence):
+
+- `anisotropy.py` uses the Rayleigh probability and Rice width with `2/N_eff`; for a strongly modulated exposure this
+  understates the variance of a, so the significance is overstated and the Neyman limit too tight.
+- `tail_extrapolation.py` reports a one-model envelope (`low = high`, `gaussian_sigma = 0`) without a warning.
+- `train_bdt.py --negative-weights drop` is offered while `ml-analysis-weights.md` says not to drop.
+- `assets/inference.py` lets scored events that are missing from the split manifest through (counted only).
+
+| Check | Result |
+|---|---|
+| `tools/reference_inventory.py --check` | pass (218 references) |
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4510 tests in 383 modules, 4381 pass, 0 failures, 129 skipped; profile tests all pass |
+
 ## GEANT4-FOCAL (2026-10-21, E2: macOS 26.5 arm64, Geant4 11.4.3 build A; branch `feat/geant4-focal-benchmark` from main)
 
 Longitudinal-profile reference benchmark against ALICE FoCal-E test-beam data (M. Aehle et al., JINST 19 (2024)
