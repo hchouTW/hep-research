@@ -1976,6 +1976,7 @@ passes; the run started on the branch failed only `packaging_scan` on the newly 
 | `check_ownership.py`, `check_layering.py`, `check_host_neutral.py`, `check_routing_static.py`, `make_cases.py --stdout` equal to `cases.json` | pass |
 | After the maintainer decisions 1, 2, 5, 6 (clarifying line under the invariant, decision record, host facts and the `CLAUDE_PID` session start), commit `54823740` | 27 pass, 0 fail; 4679 tests in 393 modules, 4550 pass, 0 failures, 129 skipped; `session_start()` on this host gave 11:09:16Z, the session's start (19:09:16 local) |
 | After the P3 stage-1 pilot fixes (master seed bound to the review id; plugin-relative paths in records), commit `9f36acec` | 27 pass, 0 fail; 4682 tests in 393 modules, 4553 pass, 0 failures, 129 skipped |
+| After the three pilot must-fix items (copy guard, design canaries on ordinary documents, no empty slots; `test_review_pilot_fixes.py`), commit `88a40a9a` | 27 pass, 0 fail; 4690 tests in 394 modules, 4561 pass, 0 failures, 129 skipped; design canaries generated on all five pilot documents (2 each) |
 | P3 stage-1 pilot, live agents (outside the repository; decision record, Decision 4) | 5 documents, 54 agent runs: planted errors self-check 9/12, independent review 10/12; facts canaries 7/7 hit and exactly corrected; findings for P2 listed there |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 | `hep-authoring/SKILL.md` | 8,992 bytes, 73 lines |
