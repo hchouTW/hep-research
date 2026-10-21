@@ -24,8 +24,12 @@ SCAN_BYTES = 1 << 20        # larger files are not read for review material
 
 
 def _expand(p: str, project: Path) -> Path:
+    """A review-hosts.json path with its placeholders filled in for this machine and project."""
     slug = str(project).replace("/", "-")
-    p = p.replace("<project>", str(project)).replace("<project-slug>", slug).replace("<uid>", str(getattr(os, "getuid", lambda: 0)()))
+    config = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join("~", ".claude")
+    p = (p.replace("<project>", str(project)).replace("<project-slug>", slug)
+         .replace("<uid>", str(getattr(os, "getuid", lambda: 0)()))
+         .replace("<tmp>", str(Path("/tmp").resolve())).replace("<claude-config>", config))
     return Path(os.path.expanduser(p))
 
 

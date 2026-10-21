@@ -1,5 +1,5 @@
 {
- "$comment": "Host notes of the independent review mechanism (docs/dev/independent-review-spec.md A7), read by observe in skills/hep-authoring/scripts/review.py. P1 covers Claude Code only. Paths use ~ for the home folder, <project> for the project root and <project-slug> for the project path with '/' replaced by '-'. Entries marked inferred are not from the host documentation and need maintainer confirmation; session_start.obtainable is false, so isolation_not_yet_effective is never raised and the report says the setting's effect cannot be confirmed (spec 7.3, last paragraph).",
+ "$comment": "Host notes of the independent review mechanism (docs/dev/independent-review-spec.md A7), read by observe in skills/hep-authoring/scripts/review.py. P1 covers Claude Code only. Paths use ~ for the home folder, <project> for the project root, <project-slug> for the project path with '/' replaced by '-', <uid> for the numeric user id, <tmp> for the system temporary folder /tmp (resolved, so /private/tmp on macOS) and <claude-config> for the Claude Code configuration folder ($CLAUDE_CONFIG_DIR, else ~/.claude). Entries marked inferred are not from the host documentation and need maintainer confirmation; session_start.obtainable is false, so isolation_not_yet_effective is never raised and the report says the setting's effect cannot be confirmed (spec 7.3, last paragraph).",
  "hosts_version": "1.0.0",
  "hosts": {
   "claude-code": {
@@ -27,9 +27,8 @@
    "loading_settings": ["claudeMdExcludes", "projectInstructions", "pluginConfigs", "--add-dir", "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD", "--setting-sources"],
    "plugin_config_ids": ["cc-plugin-agents-md@builtin", "agents-md@builtin"],
    "shared_dirs": [
-    {"pattern": "/private/tmp/claude-<uid>/<project-slug>/*/scratchpad", "inferred": true},
-    {"pattern": "/tmp/claude-<uid>/<project-slug>/*/scratchpad", "inferred": true},
-    {"pattern": "~/.claude/projects/<project-slug>/*/tool-results", "inferred": true}
+    {"pattern": "<tmp>/claude-<uid>/<project-slug>/*/scratchpad", "inferred": true},
+    {"pattern": "<claude-config>/projects/<project-slug>/*/tool-results", "inferred": true}
    ],
    "terms": ["CLAUDE_CODE_FORK_SUBAGENT", "Agent(fork)", "permissions.deny", "claudeMdExcludes", "CLAUDE.md", "CLAUDE.local.md",
              "AGENTS.md", "settings.json", "pluginConfigs", "cc-plugin-agents-md@builtin", "agents-md@builtin", "--add-dir",

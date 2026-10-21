@@ -160,19 +160,17 @@ hep-authoring (ownership row "Independent review packets, review records and the
 
 ## Open items (stop conditions and questions for the maintainer)
 
-1. **Packaging scan (stop condition).** `tools/check_packaging.py` rule `restricted-site-fact` matches
-   `[A-Za-z0-9-]+\.local\b` (local hostnames) and so flags the Claude Code per-directory local memory file (the name
-   `CLAUDE` followed by `.local` and `.md`, spec A7), which the spec
-   requires verbatim (A7, committed unchanged as `docs/dev/independent-review-spec.md`) and which
-   `review-hosts.json` must list. Clean `main` passes the scan. Passing it needs either narrowing the rule (for
-   example `\.local\b(?!\.md)`), an allow-list entry the spec does not call for, or altering the spec text; this task
-   did none of them. The same scan also flags `skills/hep-authoring/assets/review-hosts.json`, which A7 requires to
-   list the host's settings and shared directories: `restricted-site-fact` on the project-local settings file name
-   (`settings` followed by `.local` and `.json`) and on the memory file name above, and `private-path` on the inferred
-   shared-directory patterns (the Claude Code scratchpad under the system temp folder and the per-project folder
-   under `~/.claude/`). Both rules guard against shipping a user's private paths; here they match host-documented
-   file names and generic patterns. Maintainer decision needed: narrow the rules for these host terms, allow-list
-   the two files, or move the host notes out of the shipped plugin.
+1. **Packaging scan (stop condition; resolved by the maintainer 2026-10-21, options A and B).**
+   `tools/check_packaging.py` flagged host-documented names that spec A7 requires: rule `restricted-site-fact`
+   (local hostnames, `[A-Za-z0-9-]+\.local\b`) matched the Claude Code per-directory memory file and the project-local
+   settings file (the names `CLAUDE` and `settings` followed by `.local` and `.md` or `.json`) in the spec and in
+   `review-hosts.json`; rule `private-path` matched the inferred shared-directory patterns in `review-hosts.json`.
+   Chosen: (A) the hostname rule no longer matches a name followed by `.md` or `.json` (a hostname never is;
+   `tests/tools/test_check_packaging_rules.py` keeps planted hostnames failing); (B) `review-hosts.json` writes the
+   paths with the placeholders `<tmp>` (the resolved system temporary folder) and `<claude-config>`
+   (`$CLAUDE_CONFIG_DIR`, else `~/.claude`), filled in by observe, so the private-path rule is unchanged. Not chosen:
+   exempting the two files (too broad), moving the host notes out of the plugin or editing the spec (both contradict
+   the spec).
 2. The four maintainer decisions of spec section 13 (subagent statements and the invariant, evidence categories,
    contracts 3.3.0 and its release number, P3 budget) and whether a closed agent review may count toward O04/O14.
 3. Confirm the Claude Code shared-directory patterns and any concrete way to read the session start time

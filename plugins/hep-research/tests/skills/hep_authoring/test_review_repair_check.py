@@ -294,3 +294,24 @@ class FollowUpTests(unittest.TestCase):
                 self.assertEqual(R.check(Path("."))["status"], "incomplete")
             finally:
                 os.chdir(cwd)
+
+
+class HostPathTests(unittest.TestCase):
+    """review-hosts.json placeholders are filled in for this machine (no private path ships in the asset)."""
+
+    def test_shared_dir_patterns_expand(self):
+        from unittest import mock
+        from review_lib import observe as OBS
+        project = Path("/work/proj")
+        with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": "/cfg/claude"}):
+            got = str(OBS._expand("<claude-config>/projects/<project-slug>/*/tool-results", project))
+        self.assertEqual(got, "/cfg/claude/projects/-work-proj/*/tool-results")
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CLAUDE_CONFIG_DIR", None)
+            got = str(OBS._expand("<claude-config>/projects", project))
+        self.assertEqual(got, str(Path.home() / ".claude" / "projects"))
+        tmp = str(OBS._expand("<tmp>/claude-<uid>/<project-slug>/*/scratchpad", project))
+        self.assertEqual(tmp, f"{Path('/tmp').resolve()}/claude-{os.getuid()}/-work-proj/*/scratchpad")
+        text = (H.PLUGIN / "skills" / "hep-authoring" / "assets" / "review-hosts.json").read_text(encoding="utf-8")
+        self.assertNotIn("/" + "tmp/claude", text)
+        self.assertNotIn("." + "claude/projects", text)

@@ -374,6 +374,7 @@
   "tests.tools.test_check_instruction_text": 3.5,
   "tests.tools.test_check_layering": 4.7,
   "tests.tools.test_check_ownership": 0.3,
+  "tests.tools.test_check_packaging_rules": 0.1,
   "tests.tools.test_check_packaging_size": 0.3,
   "tests.tools.test_check_retired_names": 3.0,
   "tests.tools.test_companion_independence": 0.1,

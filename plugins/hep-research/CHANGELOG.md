@@ -28,6 +28,9 @@ Contracts 3.3.0 (minor): independent review of drafts, P1 (`docs/dev/independent
   the session start time (a warning). Thresholds are provisional until the P3 evaluation. A closed agent review is not
   a non-author review record for the v6.3 conditions O04/O14; the architecture decision and the invariant at
   `docs/protected-data-architecture.md:526` await the maintainer (`docs/dev/decision-independent-review.md`).
+- `tools/check_packaging.py`: the local-hostname rule no longer matches a name followed by `.md` or `.json`, so the
+  Claude Code memory and settings file names the review host notes need are not read as hostnames (planted hostnames
+  still fail; maintainer decision). The host notes write temporary and Claude configuration folders as placeholders.
 - Ownership row "Independent review packets, review records and the review log" (hep-authoring; `independent
   review`, `review packet`); four routing cases (en, zh-Hant).
 - Contracts 3.3.0 adds sidecar formats only: no artifact, vocabulary or capability change; fixtures, examples and
