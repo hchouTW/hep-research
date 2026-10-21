@@ -1317,6 +1317,13 @@ def _placeholder(v) -> bool:
     return isinstance(v, str) and v.strip().lower() in PLACEHOLDER_TOKENS
 
 
+def _mask_names_something(mask: dict) -> bool:
+    """A blinding mask with a non-blank region name or an interval dict with a non-blank variable (triage T14)."""
+    regions, intervals = mask.get("regions"), mask.get("intervals")
+    return any(not _blank(r) for r in (regions if isinstance(regions, list) else [])) or \
+        any(isinstance(iv, dict) and not _blank(iv.get("variable")) for iv in (intervals if isinstance(intervals, list) else []))
+
+
 def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
     """measurement-spec rules of contracts 2.6.0 (hep-measurement audit 2026-10-13): the SKILL.md invariants. Native for
     artifacts of contract 2.6.0 or later; an older artifact gets them only in strict mode, so its promised outcome is
@@ -1332,7 +1339,8 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     period ending before it starts; a misspelled key. Unresolved: a listed missing marker, a background without
     closure. Warnings: partial selection validation, a 'cancels' entry without verification, unknown keys; a conditional
     denominator that is not a string or is a placeholder ('n/a', 'none', 'tbd', ...), a placeholder
-    no_backgrounds_reason (triage 2026-10-22: warnings, so older specs keep their outcome)."""
+    no_backgrounds_reason, a blinding mask that names nothing (triage 2026-10-22: warnings, so older specs keep their
+    outcome)."""
     obs: Any = ext.get("observable") if isinstance(ext.get("observable"), dict) else {}
     x = "$.extension"
     est = ext.get("estimand")
@@ -1472,6 +1480,9 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
         if not (isinstance(mask, dict) and (mask.get("regions") or mask.get("intervals"))):
             rep.add("error", f"{x}.blinding.mask", "measurement.blinding_mask_missing",
                     "a blinded measurement needs its mask (regions or observable intervals)")
+        elif not _mask_names_something(mask):
+            rep.add("warning", f"{x}.blinding.mask", "measurement.blinding_mask_empty",
+                    "the mask names nothing: give a non-blank region name or an interval with its variable")
         if "observed" in set(doc.get("status", [])):
             rep.add("error", "$.status", "measurement.blinded_observed",
                     "a blinded spec cannot carry 'observed' results: only an authorized person unblinds, outside the "

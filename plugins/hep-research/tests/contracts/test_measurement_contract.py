@@ -138,6 +138,22 @@ class MeasurementRules(unittest.TestCase):
                 self.assertTrue(rep.ok, rep.as_dict())
                 self.assertEqual(codes(rep, "warning"), {"measurement.no_backgrounds_reason_placeholder"})
 
+    def test_blinding_mask_naming_nothing_warns(self):
+        """Triage T14: a blinded spec passed with mask {'regions': ['']}, which names no region."""
+        empty = ({"regions": [""]}, {"regions": ["  "], "intervals": []}, {"intervals": [{"variable": " "}]},
+                 {"regions": [""], "intervals": [{"variable": ""}]})
+        for mask in empty:
+            with self.subTest(mask=mask):
+                rep = self._edited(lambda e, mask=mask: e.update(blinding={"blinded": True, "mask": mask}))
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertEqual(codes(rep, "warning"), {"measurement.blinding_mask_empty"})
+        for mask in ({"regions": ["", "signal region"]}, {"intervals": [{"variable": "x", "low": 0.9}]}):
+            with self.subTest(mask=mask):
+                rep = self._edited(lambda e, mask=mask: e.update(blinding={"blinded": True, "mask": mask}))
+                self.assertEqual(rep.findings, [], rep.as_dict())
+        rep = self._edited(lambda e: e.update(blinding={"blinded": True, "mask": {}}))
+        self.assertEqual(codes(rep), {"measurement.blinding_mask_missing"})
+
     def test_no_backgrounds_with_a_reason_passes(self):
         d = copy.deepcopy(CURRENT)
         d["extension"]["backgrounds"] = []
