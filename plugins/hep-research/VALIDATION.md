@@ -2147,7 +2147,7 @@ is a `sci-fix:`. Each item was re-verified on this tree before the fix (the new 
 - **T30** `tools/check_packaging.py`: the placeholder local-part exemption (`author@`, `user@`, ...) applied at any
   domain. An address is now exempt only at a reserved domain (RFC 2606 / RFC 6761: `example.com/.org/.net` and their
   subdomains, `*.example`, `*.invalid`, `*.test`, `*.localhost`) or as the commit trailer address. The tightened rule
-  found one shipped address, `\emailAdd{author@inst.edu}` in `skills/hep-authoring/references/latex-venue-setup.md`,
+  found one shipped address (a placeholder local part at the non-reserved domain `inst.edu`, in an `\emailAdd` example) in `skills/hep-authoring/references/latex-venue-setup.md`,
   now `author@example.org` (`docs/reference-inventory.json` regenerated, +3 bytes).
 - **T35** `docs/profile-authoring.md` said the registry stays under 2 KiB; it now says at or under 3,072 bytes
   (`REGISTRY_BUDGET` in `contracts/registry.py`), matching the code and `docs/maintenance.md`.
