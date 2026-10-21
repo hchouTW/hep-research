@@ -110,6 +110,34 @@ class MeasurementRules(unittest.TestCase):
         self.assertTrue(rep.ok, rep.as_dict())
         self.assertIn("measurement.input_unresolved", codes(rep, "unresolved"))
 
+    def _edited(self, fn):
+        d = copy.deepcopy(CURRENT)
+        fn(d["extension"])
+        return v.validate_artifact(d)
+
+    def test_placeholder_denominator_warns(self):
+        """Triage T11: null, a number or 'n/a' as conditional denominator passed with no finding. A warning (stable code
+        measurement.denominator_placeholder), so older specs keep their outcome; a blank string stays an error."""
+        for den in (None, 0, False, "n/a", " N/A ", "none", "TBD", "-", "?"):
+            with self.subTest(den=den):
+                rep = self._edited(lambda e, den=den: e["selections"][0].update(conditional_denominator=den))
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertEqual(codes(rep, "warning"), {"measurement.denominator_placeholder"})
+        for den in ("generated events in the truth bin", "nan-free sample"):
+            with self.subTest(den=den):
+                rep = self._edited(lambda e, den=den: e["selections"][0].update(conditional_denominator=den))
+                self.assertEqual(rep.findings, [])
+        rep = self._edited(lambda e: e["selections"][0].update(conditional_denominator="  "))
+        self.assertEqual((rep.ok, codes(rep), codes(rep, "warning")), (False, {"measurement.denominator_blank"}, set()))
+
+    def test_placeholder_no_backgrounds_reason_warns(self):
+        """Triage T12: backgrounds [] with no_backgrounds_reason 'n/a' passed with no finding."""
+        for reason in ("n/a", "None", " tbd "):
+            with self.subTest(reason=reason):
+                rep = self._edited(lambda e, reason=reason: e.update(backgrounds=[], no_backgrounds_reason=reason))
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertEqual(codes(rep, "warning"), {"measurement.no_backgrounds_reason_placeholder"})
+
     def test_no_backgrounds_with_a_reason_passes(self):
         d = copy.deepcopy(CURRENT)
         d["extension"]["backgrounds"] = []

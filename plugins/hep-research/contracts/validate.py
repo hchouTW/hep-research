@@ -1307,6 +1307,16 @@ def _is_zero(v) -> bool:
     return isinstance(v, (int, float)) and not isinstance(v, bool) and v == 0
 
 
+# Strings that fill a required text field without stating anything (triage T11, T12). A missing marker ('unknown',
+# 'not-provided') is not one of them: it goes through the unresolved_inputs rule.
+PLACEHOLDER_TOKENS = frozenset({"n/a", "na", "none", "null", "tbd", "todo", "-", "--", "?", "..."})
+
+
+def _placeholder(v) -> bool:
+    """A non-blank string that is only a placeholder token (case and surrounding space ignored)."""
+    return isinstance(v, str) and v.strip().lower() in PLACEHOLDER_TOKENS
+
+
 def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
     """measurement-spec rules of contracts 2.6.0 (hep-measurement audit 2026-10-13): the SKILL.md invariants. Native for
     artifacts of contract 2.6.0 or later; an older artifact gets them only in strict mode, so its promised outcome is
@@ -1320,7 +1330,9 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     systematic name; a missing marker not named in unresolved_inputs; a blinded spec without mask, or blinded with
     'observed' status; a ratio quantity without ratio block, a ratio of a quantity to itself, no cancellation entry; a
     period ending before it starts; a misspelled key. Unresolved: a listed missing marker, a background without
-    closure. Warnings: partial selection validation, a 'cancels' entry without verification, unknown keys."""
+    closure. Warnings: partial selection validation, a 'cancels' entry without verification, unknown keys; a conditional
+    denominator that is not a string or is a placeholder ('n/a', 'none', 'tbd', ...), a placeholder
+    no_backgrounds_reason (triage 2026-10-22: warnings, so older specs keep their outcome)."""
     obs: Any = ext.get("observable") if isinstance(ext.get("observable"), dict) else {}
     x = "$.extension"
     est = ext.get("estimand")
@@ -1349,6 +1361,10 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
         if isinstance(den, str) and not den.strip():
             rep.add("error", f"{x}.selections[{i}].conditional_denominator", "measurement.denominator_blank",
                     f"selection '{s.get('name')}' needs its conditional denominator")
+        elif not isinstance(den, str) or _placeholder(den):  # a warning: older specs with these values stay valid
+            rep.add("warning", f"{x}.selections[{i}].conditional_denominator", "measurement.denominator_placeholder",
+                    f"selection '{s.get('name')}': conditional denominator {den!r} names no sample; state what the "
+                    "selection is conditional on, or write a missing marker listed in unresolved_inputs")
         val = s.get("validation")
         if isinstance(val, dict) and not all(not _blank(val.get(k)) for k in ("metric", "threshold", "action")):
             rep.add("warning", f"{x}.selections[{i}].validation", "measurement.selection_validation_partial",
@@ -1358,6 +1374,10 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     if isinstance(bkgs, list) and not bkgs and _blank(ext.get("no_backgrounds_reason")):
         rep.add("error", f"{x}.backgrounds", "measurement.backgrounds_empty",
                 "no background listed: give each background, or state why there is none in no_backgrounds_reason")
+    elif isinstance(bkgs, list) and not bkgs and _placeholder(ext.get("no_backgrounds_reason")):
+        rep.add("warning", f"{x}.no_backgrounds_reason", "measurement.no_backgrounds_reason_placeholder",
+                f"no_backgrounds_reason {ext.get('no_backgrounds_reason')!r} states no reason: say why the "
+                "measurement has no background")
     for i, b in enumerate(bkgs if isinstance(bkgs, list) else []):
         if not isinstance(b, dict):
             continue
