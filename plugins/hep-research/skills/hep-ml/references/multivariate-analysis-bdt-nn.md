@@ -181,8 +181,10 @@ HistGradientBoosting as a fallback; optional extra `bdt`; exit 3 with the pip co
   install, so without them it exits 3 with the install command. The written file's sha256 is the model_hash to carry.
 - **Scores from another tool** (TMVA, LightGBM): `assets/inference.py --external-scores` applies the same checks to a
   score file: a leakage check, run only with `--split-manifest`, that refuses scores on events of the manifest's
-  training part (or, for k-fold, scored by another fold's model) and only counts scored events absent from the
-  manifest; the training-domain flags; and a calibration that names the model's sha256; `--run-summary-out` feeds `write_ml_artifact.py`.
+  training part (or, for k-fold, scored by another fold's model) and keeps scored events absent from the manifest
+  with a warning (the check cannot exclude that the model was trained on them; for simulated events of the training
+  sample the manifest is incomplete); the training-domain flags; and a calibration that names the model's sha256;
+  `--run-summary-out` feeds `write_ml_artifact.py`.
 
 TMVA options for the same choices (`MethodBDT`, checked against ROOT master `tmva/tmva/src/MethodBDT.cxx`, read
 2026-10-17; classification defaults):

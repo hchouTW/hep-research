@@ -254,7 +254,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `ml-analysis-weights.md` | hep-ml | 6.0 | no | 7 | - | 485e96cb 2026-10-17 |
 | `ml-analysis.md` | hep-ml | 7.5 | yes | 25 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `monitoring-and-lifecycle.md` | hep-ml | 2.1 | no | 3 | - | 9257d7b5 2026-10-15 |
-| `multivariate-analysis-bdt-nn.md` | hep-ml | 15.8 | yes | 12 | hep-detector | 32450b32 2026-10-22 |
+| `multivariate-analysis-bdt-nn.md` | hep-ml | 16.0 | yes | 12 | hep-detector | 32450b32 2026-10-22 |
 | `optimization-and-training-dynamics.md` | hep-ml | 3.8 | no | 1 | - | 9257d7b5 2026-10-15 |
 | `parallelism-strategy.md` | hep-ml | 3.5 | no | 5 | - | 9257d7b5 2026-10-15 |
 | `particle-and-jet-architectures.md` | hep-ml | 8.5 | yes | 8 | - | 9257d7b5 2026-10-15 |
@@ -276,7 +276,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 42.8 | yes | 6 | hep-detector, hep-measurement | a73d421e 2026-10-17 |
 | `core-stats-guide.md` | hep-statistics | 15.1 | yes | 12 | hep-measurement | 73b525a2 2026-10-21 |
-| `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 32450b32 2026-10-22 |
+| `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2adbd9bb 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
 | `nuisance-modeling.md` | hep-statistics | 20.3 | yes | 9 | hep-measurement | 100eb1c3 2026-10-16 |

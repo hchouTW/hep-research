@@ -30,7 +30,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 193198,
+   "bytes": 193345,
    "uncited": 0
   },
   "hep-statistics": {
@@ -3218,8 +3218,8 @@
   {
    "path": "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
    "owner": "hep-ml",
-   "bytes": 15831,
-   "lines": 209,
+   "bytes": 15978,
+   "lines": 211,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -3635,7 +3635,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "2adbd9bb 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
