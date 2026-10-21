@@ -33,6 +33,13 @@ evidence; `sanity` benchmarks are plausibility checks; `interface` hands a compa
                     (RPP 2024 Eqs. 34.34-34.36, b = 0.5 by default; config keys depth_x0, critical_energy_MeV, b):
                     the profile is a fit to EGS4 showers (1-100 GeV), so this is never validation; a reference for
                     leakage needs published data (published-data).
+  longitudinal-profile (reference) shower maximum t_max = (alpha - 1) / beta of the per-layer mean deposits of a
+                    sampling calorimeter, from the fit dQ/dt = Q_E beta (beta t)^(alpha-1) e^(-beta t) / Gamma(alpha)
+                    + Q0 (weighted least squares, layers and their depths t from the config key layers), against the
+                    same fit to published test-beam data (config key published: alpha and beta with their uncertainties
+                    and source); the reference accuracy is the published t_max uncertainty (alpha and beta propagated
+                    without their correlation, conservative) plus a stated systematic_relative for known differences
+                    between the planar model and the measurement; SE by a seeded bootstrap of the events (refit).
   published-data    (interface) the Geant4 mean of a named column and a published value, handed to hep-statistics.
 Verdict: |G4 - ref| / ref <= tolerance, tolerance = reference accuracy + k x SE (SE by a seeded bootstrap of the
 events), plus a stated binning term for the MPV. Detection limit: tolerance + |observed relative difference| + 2 SE
@@ -44,7 +51,8 @@ Input: a benchmark config JSON (schema geant4-benchmarks/1; paths relative to th
   {"schema", "study_spec", "benchmarks": [{"benchmark", "csv", "run_record", "slab", "material", "particle",
    "energy_MeV", "thickness_mm", "tolerance": {"reference_accuracy_relative", "k_sigma"}, "bootstrap": {"resamples",
    "seed"}, "binning": {"bin_width_MeV"}, "negative_control": {"csv", "run_record", "injected", "injected_relative"},
-   "reference_table" (range), "column"/"published" (published-data)}]}
+   "reference_table" (range), "column"/"published" (published-data), "layers" [{"t", "column"}], "published"
+   {"alpha", "beta", "source"}, "systematic_relative" (longitudinal-profile)}]}
 Usage: geant4_benchmarks.py run --config CONFIG.json [--out OUT.json] [--status LABEL]
        geant4_benchmarks.py reference --study-spec SPEC.json --material NAME --particle P --energy-mev E [--thickness-mm T]
 Output JSON: status, status_label, inputs, defaults_used, benchmarks [{benchmark, grade, reference {source, version,
@@ -83,7 +91,7 @@ J_LANDAU = 0.200  # PDG RPP 2024 eq. 34.12
 TRUNC_98 = 0.8673  # RMS of a unit Gaussian truncated to its central 98 %
 GRADES = {"stopping-power": "reference", "range": "reference", "thin-layer-mpv": "reference",
           "thin-layer-width": "sanity", "multiple-scattering": "sanity", "em-shower-shape": "sanity",
-          "shower-containment": "sanity", "published-data": "interface"}
+          "shower-containment": "sanity", "longitudinal-profile": "reference", "published-data": "interface"}
 RPP = "PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)"
 HADRONIC_END = ("Inelastic", "hadElastic", "nCapture", "CoulombScat")
 
@@ -502,6 +510,112 @@ def bench_containment(b: dict, rows: list[dict]) -> dict:
             "reference": ref_block}
 
 
+def gamma_profile(t: float, alpha: float, beta: float) -> float:
+    """beta (beta t)^(alpha-1) e^(-beta t) / Gamma(alpha): the unit-normalized longitudinal profile."""
+    return math.exp(math.log(beta) + (alpha - 1) * math.log(beta * t) - beta * t - math.lgamma(alpha))
+
+
+def _linear_amplitudes(ts, ys, ws, alpha, beta):
+    """Weighted least-squares Q_E and Q0 of y = Q_E g(t) + Q0 for fixed alpha, beta; returns (chi2, Q_E, Q0)."""
+    g = [gamma_profile(t, alpha, beta) for t in ts]
+    s_w, s_g, s_gg = sum(ws), sum(w * x for w, x in zip(ws, g)), sum(w * x * x for w, x in zip(ws, g))
+    s_y, s_gy = sum(w * y for w, y in zip(ws, ys)), sum(w * x * y for w, x, y in zip(ws, g, ys))
+    det = s_gg * s_w - s_g * s_g
+    if det <= 0:
+        return math.inf, 0.0, 0.0
+    qe, q0 = (s_gy * s_w - s_g * s_y) / det, (s_gg * s_y - s_g * s_gy) / det
+    return sum(w * (y - qe * x - q0) ** 2 for w, x, y in zip(ws, g, ys)), qe, q0
+
+
+def fit_gamma_profile(ts, ys, ses) -> dict:
+    """Fit of Q_E Gamma-profile + Q0 to (t, y +- se): Q_E and Q0 linear, (ln alpha, ln beta) by Nelder-Mead."""
+    ws = [1 / s ** 2 if s > 0 else 0.0 for s in ses]
+    k = max(range(len(ys)), key=ys.__getitem__)
+    start = [math.log(1 + 0.5 * ts[k]), math.log(0.5)]
+
+    def f(v):
+        return _linear_amplitudes(ts, ys, ws, math.exp(v[0]), math.exp(v[1]))[0]
+    simplex = [start, [start[0] + 0.1, start[1]], [start[0], start[1] + 0.1]]
+    vals = [f(v) for v in simplex]
+    for _ in range(2000):
+        order = sorted(range(3), key=vals.__getitem__)
+        simplex, vals = [simplex[i] for i in order], [vals[i] for i in order]
+        if abs(vals[2] - vals[0]) <= 1e-12 * (abs(vals[0]) + 1e-300) and max(
+                abs(simplex[i][j] - simplex[0][j]) for i in (1, 2) for j in (0, 1)) < 1e-10:
+            break
+        c = [(simplex[0][j] + simplex[1][j]) / 2 for j in (0, 1)]
+        r = [c[j] + (c[j] - simplex[2][j]) for j in (0, 1)]
+        fr = f(r)
+        if fr < vals[0]:
+            e = [c[j] + 2 * (c[j] - simplex[2][j]) for j in (0, 1)]
+            fe = f(e)
+            simplex[2], vals[2] = (e, fe) if fe < fr else (r, fr)
+        elif fr < vals[1]:
+            simplex[2], vals[2] = r, fr
+        else:
+            cc = [c[j] + 0.5 * (simplex[2][j] - c[j]) for j in (0, 1)]
+            fc = f(cc)
+            if fc < vals[2]:
+                simplex[2], vals[2] = cc, fc
+            else:
+                for i in (1, 2):
+                    simplex[i] = [simplex[0][j] + 0.5 * (simplex[i][j] - simplex[0][j]) for j in (0, 1)]
+                    vals[i] = f(simplex[i])
+    best = min(range(3), key=vals.__getitem__)
+    alpha, beta = math.exp(simplex[best][0]), math.exp(simplex[best][1])
+    chi2, qe, q0 = _linear_amplitudes(ts, ys, ws, alpha, beta)
+    return {"alpha": alpha, "beta": beta, "Q_E": qe, "Q0": q0, "t_max": (alpha - 1) / beta, "chi2": chi2,
+            "ndf": len(ts) - 4}
+
+
+def bench_profile(b: dict, rows: list[dict]) -> dict:
+    """t_max of the per-layer mean profile against the same Gamma fit to published test-beam data."""
+    layers = b.get("layers")
+    if not isinstance(layers, list) or len(layers) < 5 or not all(
+            isinstance(x, dict) and isinstance(x.get("t"), (int, float)) and x.get("column") in rows[0] for x in layers):
+        raise BenchmarkError("longitudinal-profile: layers must list at least five {t, column} with existing columns")
+    pub = b.get("published") or {}
+    try:
+        (a_ref, a_se), (b_ref, b_se) = pub["alpha"], pub["beta"]
+    except (KeyError, TypeError, ValueError):
+        raise BenchmarkError("longitudinal-profile: published needs alpha and beta as [value, uncertainty]") from None
+    if not pub.get("source"):
+        raise BenchmarkError("longitudinal-profile: published.source (citation and table) is required")
+    ts = [x["t"] for x in layers]
+
+    def fit(sample):
+        n = len(sample)
+        means = [statistics.fmean(r[x["column"]] for r in sample) for x in layers]
+        ses = [statistics.stdev([r[x["column"]] for r in sample]) / math.sqrt(n) for x in layers]
+        return fit_gamma_profile(ts, means, ses)
+    res = fit(rows)
+    bs = b.get("bootstrap", {})
+    rng = random.Random(bs.get("seed", 1))
+    reps = [fit([rows[rng.randrange(len(rows))] for _ in rows])["t_max"] for _ in range(bs.get("resamples", 100))]
+    se = statistics.stdev(reps)
+    ref = (a_ref - 1) / b_ref
+    ref_se = math.hypot(a_se / b_ref, (a_ref - 1) * b_se / b_ref ** 2)
+    syst = b.get("systematic_relative", 0.0)
+    if not isinstance(syst, (int, float)) or syst < 0:
+        raise BenchmarkError("longitudinal-profile: systematic_relative must be a nonnegative number")
+    b = {**b, "tolerance": {**b.get("tolerance", {}), "reference_accuracy_relative": ref_se / ref + syst}}
+    rel = (res["t_max"] - ref) / ref
+    tol, parts, _ = _tol(b, se / res["t_max"])
+    parts["published_uncertainty"], parts["systematic"] = ref_se / ref, syst
+    return {"statistic": "shower maximum t_max = (alpha - 1) / beta of the Gamma fit to the per-layer mean deposits "
+                         "(layer units)",
+            "geant4": res["t_max"], "geant4_se": se, "reference_value": ref, "reference_se": ref_se,
+            "relative_difference": rel, "tolerance": {"total": tol, "parts": parts},
+            "detection_limit_relative": detection_limit(tol, rel, se / res["t_max"]),
+            "verdict": "pass" if abs(rel) <= tol else "fail",
+            "fit": {k: res[k] for k in ("alpha", "beta", "Q_E", "Q0", "chi2", "ndf")},
+            "published_fit": {"alpha": [a_ref, a_se], "beta": [b_ref, b_se]},
+            "layers_fitted": ts, "events": len(rows),
+            "reference": {"source": pub["source"], "version": pub.get("version"),
+                          "validity": "the measured configuration only (stack, energy, particle, readout window); "
+                                      + (pub.get("validity") or "")}}
+
+
 def bench_published(b: dict, rows: list[dict]) -> dict:
     col = b.get("column")
     if not col or col not in rows[0]:
@@ -531,6 +645,8 @@ def evaluate(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
         return bench_shower(b, rows, study)
     if name == "shower-containment":
         return bench_containment(b, rows)
+    if name == "longitudinal-profile":
+        return bench_profile(b, rows)
     return bench_published(b, rows)
 
 

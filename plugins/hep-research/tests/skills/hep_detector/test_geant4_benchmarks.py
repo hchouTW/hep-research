@@ -261,3 +261,60 @@ class Containment(_Cfg):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LongitudinalProfile(_Cfg):
+    """longitudinal-profile: Gamma fit of per-layer means against a published fit (SYNTHETIC profiles)."""
+    LAYERS = [t for t in range(1, 21) if t not in (5, 7, 10)]
+    PUB = {"alpha": [5.42, 0.11], "beta": [0.50, 0.01], "source": "SYNTHETIC published fit (test)"}
+
+    def rows(self, name, alpha=5.42, beta=0.5, stretch=1.0, n=300, seed=3):
+        rng = random.Random(seed)
+        cols = ["event"] + [f"edep_copy{t}_MeV" for t in self.LAYERS]
+        lines = []
+        for i in range(n):
+            q = 4000 * rng.gauss(1, 0.05)
+            lines.append([i] + [max(q * G.gamma_profile(t / stretch, alpha, beta) * rng.gauss(1, 0.1) + 1.0, 0.0)
+                                for t in self.LAYERS])
+        (self.d / name).write_text("# SIMULATION\n" + ",".join(cols) + "\n"
+                                   + "".join(",".join(map(str, r)) + "\n" for r in lines))
+        return name
+
+    def bench(self, csv, **over):
+        b = {"benchmark": "longitudinal-profile", "csv": csv, "particle": "e-", "energy_MeV": 100000.0,
+             "layers": [{"t": t, "column": f"edep_copy{t}_MeV"} for t in self.LAYERS], "published": self.PUB,
+             "systematic_relative": 0.01, "tolerance": {"k_sigma": 3}, "bootstrap": {"resamples": 30, "seed": 2}}
+        b.update(over)
+        return b
+
+    def config(self, benches):
+        p = self.d / "cfg.json"
+        p.write_text(json.dumps({"schema": "geant4-benchmarks/1", "study_spec": "study.json", "benchmarks": benches}))
+        return p
+
+    def test_fit_recovers_a_noiseless_profile(self):
+        ts = list(range(1, 21))
+        ys = [38000 * G.gamma_profile(t, 5.4, 0.5) + 70 for t in ts]
+        fit = G.fit_gamma_profile(ts, ys, [1.0] * len(ts))
+        for k, v in (("alpha", 5.4), ("beta", 0.5), ("Q_E", 38000), ("Q0", 70), ("t_max", 8.8)):
+            self.assertAlmostEqual(fit[k], v, delta=1e-6 * max(1, v), msg=k)
+
+    def test_pass_and_a_stretched_profile_caught_as_control(self):
+        good, bad = self.rows("good.csv"), self.rows("stretched.csv", stretch=1.12, seed=4)
+        code, out = run("run", "--config", self.config([self.bench(good, negative_control={
+            "csv": bad, "injected": "depth scale x 1.12 (SYNTHETIC)", "injected_relative": 0.12})]))
+        r = out["benchmarks"][0]
+        self.assertEqual((code, r["grade"], r["verdict"]), (0, "reference", "pass"), out)
+        self.assertAlmostEqual(r["reference_value"], 4.42 / 0.5, places=12)
+        self.assertAlmostEqual(r["reference_se"], math.hypot(0.11 / 0.5, 4.42 * 0.01 / 0.25), places=12)
+        self.assertAlmostEqual(r["tolerance"]["parts"]["reference_accuracy"], r["reference_se"] / r["reference_value"]
+                               + 0.01, places=12)
+        self.assertEqual(r["negative_control"]["status"], "caught", r)
+        self.assertLess(r["detection_limit_relative"], 0.12)
+
+    def test_published_source_and_layers_are_required(self):
+        good = self.rows("good.csv")
+        for over in ({"published": {"alpha": [5.4, 0.1], "beta": [0.5, 0.01]}}, {"layers": [{"t": 1, "column": "x"}]}):
+            with self.subTest(over=sorted(over)):
+                code, out = run("run", "--config", self.config([self.bench(good, **over)]))
+                self.assertEqual(code, 2, out)
