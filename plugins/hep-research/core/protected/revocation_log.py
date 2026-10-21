@@ -131,19 +131,28 @@ class RevocationUnverified(RuntimeError):
 
 @dataclass
 class RevocationStatus:
+    """The outcome of verify(). The events are read through `events` (or revoked(), revoked_digests(), status_doc()),
+    which raise RevocationUnverified when the log did not verify: a failed status has no events to read, in particular
+    not an empty list meaning 'nothing revoked' (triage T26)."""
     ok: bool
     findings: list[dict]
     log_id: str | None = None
     count: int = 0
     as_of: str | None = None
     source: str | None = None
-    events: list[dict] = field(default_factory=list)
+    _events: list[dict] = field(default_factory=list, repr=False)
     log_sha256: str | None = None
     head_sha256: str | None = None
 
     def _require(self) -> None:
         if not self.ok:
             raise RevocationUnverified("the revocation log did not verify; its status is unknown")
+
+    @property
+    def events(self) -> list[dict]:
+        """The verified events after genesis; RevocationUnverified when the log did not verify."""
+        self._require()
+        return self._events
 
     def revoked(self, kind: str | None = None, ref: str | None = None, sha256: str | None = None) -> dict | None:
         """The first event revoking a subject that matches (kind optional; ref or sha256), or None."""
@@ -263,7 +272,7 @@ def _verify(log_bytes: bytes | None, head, *, source: str, now: datetime.datetim
         return RevocationStatus(ok=False, findings=findings)
     assert log_bytes is not None
     return RevocationStatus(ok=True, findings=[], log_id=records[0]["genesis"]["log_id"], count=len(records),
-                            as_of=head["as_of"], source=head["source"], events=records[1:],
+                            as_of=head["as_of"], source=head["source"], _events=records[1:],
                             log_sha256=hashlib.sha256(log_bytes).hexdigest(), head_sha256=canonical_sha256(head))
 
 

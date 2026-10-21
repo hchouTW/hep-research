@@ -77,6 +77,23 @@ class ChainTests(unittest.TestCase):
             with self.assertRaises(rv.RevocationUnverified):
                 call()
 
+    def test_failed_status_has_no_readable_events(self):
+        """Triage T26: a status that failed verification exposed events = [] as a public field, which a caller reading
+        it directly took as 'nothing revoked'. Every way of failing verification now refuses the read."""
+        recs = [dict(r) for r in self.recs]
+        recs[-1] = dict(recs[-1], reason="edited")
+        failed = (self.check(blob(recs)), self.check(b""), self.check(None), self.check(b"{not json\n"),
+                  rv.verify(blob(self.recs), self.head, source=SRC, now=NOW, max_age_s=0))
+        for st in failed:
+            with self.subTest(findings=st.findings):
+                self.assertFalse(st.ok)
+                with self.assertRaises(rv.RevocationUnverified):
+                    _ = st.events  # the read itself must refuse
+        st = self.check(blob(self.recs))
+        self.assertTrue(st.ok, st.findings)
+        self.assertEqual([e["seq"] for e in st.events], [1, 2])
+        self.assertNotIn("events", repr(self.check(b"")))  # nothing printed as an empty event list either
+
     def test_truncated_by_records(self):
         st = self.check(blob(self.recs[:2]))
         self.assertIn("revocation.truncated", self.codes(st))
