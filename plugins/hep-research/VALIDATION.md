@@ -1961,6 +1961,25 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## GEANT4-PHASE2 (2026-10-21, E2 and the CI lock; branch `feat/geant4-phase2` from `538e7c28`, release 0.19.0)
+
+Contracts 3.1.0: evidence records, the `geant4.upgrade_*` rule, the stanza exception, `label --upgrade`,
+`build_response.py --input-record`. J14: 27/27 criteria; both study records re-issued as `validated-in-scope` for
+their benchmarked scope (10 GeV mu- MPV and 100 MeV p stopping power in 300 um Si) pass `validate.py --strict` and
+`dependencies.py` (run records resolved as evidence, labels not inherited); the coarse-cut scenario's upgrade is
+refused; tampered copies fail with the named codes (`tests/contracts/test_geant4_upgrade.py`). Shared stanza point 5
+changed, so every SKILL.md changed: the hep-measurement and hep-statistics entry references were trimmed (about 60
+bytes) to keep the quick load within 25,600 bytes; `measure_entrypoints.py` reports no warning.
+
+Full live routing rerun (`evals/routing/run_routing_eval.py`, claude-sonnet-5-5, all 415 cases, one pass; the CLI
+updated itself from 2.1.305 to 2.1.306 during the run; `evals/routing/results/phase2-full-r1.json`): 388/415 strict
+(390 lenient), $33.29. Against the last full run (`split-final-e79ccf80`, CLI 2.1.303, 404 common cases): 379 before,
+378 after; 5 regressed, 4 improved. Three passes more of the 5 regressed cases (`phase2-regress-r1..3`, $1.33):
+`co-roofit-neg-1` and `rc-neighbor-1` 3/3 pass, `t19-turns-1` 2/3; `b-ms-transform-1` (to hep-theory) and
+`c-nuc-iso-2` (to hep-detector) 0/3. Control on the released 0.19.0 tree with the same CLI (`v0190-control-r1..2`,
+$0.26): both 0/2, so these two follow the CLI and model environment, not this change. Total routing spend $34.88
+(cap $35). No baseline was written (mixed CLI versions).
+
 ## 0.19.0 release check (2026-10-21, E2 and the CI lock)
 
 Release branch `release/0.19.0` from main `f9a38965` (#183 Geant4 capability, #184 follow-ups; main CI green). Minor

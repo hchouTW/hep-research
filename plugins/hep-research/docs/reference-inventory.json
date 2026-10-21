@@ -2075,7 +2075,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "28f7d9c7 2026-10-21"
+   "last_commit": "73b525a2 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2646,7 +2646,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "73b525a2 2026-10-21"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -3608,7 +3608,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "497042d0 2026-10-18"
+   "last_commit": "73b525a2 2026-10-21"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
