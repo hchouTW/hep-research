@@ -285,6 +285,16 @@ def codex_load() -> dict:
             "exit_code": 0 if ok else 1, "status": "pass" if ok else "fail", "detail": row.strip()}
 
 
+def git_commit() -> str:
+    """HEAD of the plugin's checkout, or "unknown" when git is absent, hangs or fails: the summary is still written."""
+    try:
+        p = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=str(ROOT),
+                           timeout=MODULE_TIMEOUT)
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
+    return p.stdout.strip() if p.returncode == 0 and p.stdout.strip() else "unknown"
+
+
 def host_versions() -> dict:
     out = {}
     for host in ("claude", "codex"):
@@ -394,7 +404,7 @@ def main(argv=None) -> int:
         "plugin_version": json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())["version"],
         "environment": {"python": platform.python_version(), "platform": platform.platform(), "executable": py,
                         "hosts": host_versions()},
-        "git_commit": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=str(ROOT), timeout=MODULE_TIMEOUT).stdout.strip() or "unknown",
+        "git_commit": git_commit(),
         "ci": {k: os.environ[v] for k, v in (("run_id", "GITHUB_RUN_ID"), ("run_attempt", "GITHUB_RUN_ATTEMPT"),
                                               ("sha", "GITHUB_SHA"), ("job", "GITHUB_JOB")) if os.environ.get(v)},
         "part": opts.part,
