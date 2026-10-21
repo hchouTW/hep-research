@@ -462,10 +462,10 @@ class MemoryEstimateCliTests(unittest.TestCase):
         self.assertIn("advice", payload)
 
     def test_text_report_names_the_binding_term(self):
-        result = subprocess.run(
+        result = subprocess.run(  # 7e9 x 16 bytes = 104 GiB per GPU without ZeRO: does not fit 80 GB, exit 1 (T33)
             [sys.executable, self.SCRIPT, "--params", "7e9", "--gpus", "8"],
             capture_output=True, text=True, timeout=600)
-        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("Binding term:", result.stdout)
 
     def test_flags_override_the_plan_file(self):
