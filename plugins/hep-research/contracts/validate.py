@@ -10,7 +10,8 @@ advisory: it never authorizes a use. --protected switches protected mode on (cor
 inputs of the project's authoritative agent_policy must be established, else the run is refused) and with it the
 stricter version policy; --strict-versions applies only that version policy (a newer minor contract version is an
 error, not a warning), without protected mode. A skill name that is not a current skill (contracts.skill_names) is
-always an error. --strict applies the statistical-result
+an error, except an unknown, not retired, name under an extension 'handoff' key, which is a warning
+(skill.unknown_handoff; an ml-artifact under the 2.8.0 ml rules reports it as the error ml.handoff_unknown instead). --strict applies the statistical-result
 semantic rules of contracts 2.2.0 (p-values and confidence levels in range, ordered expected bands, typed coverage and global
 calibration) and the response semantic rules of contracts 2.4.0 (controlled correction vocabulary, a matrix or
 matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
@@ -2239,6 +2240,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
                     _stat_semantics(doc, ext, rep, strict)
                     if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM):
                         _observable_source(doc, ext, rep)
+    if any(f.code == "ml.handoff_unknown" for f in rep.findings):  # the ml rule already reports the unknown handoff
+        rep.findings = [f for f in rep.findings if f.code != skill_names.HANDOFF_CODE]
     return rep
 
 
