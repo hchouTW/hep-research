@@ -9,7 +9,7 @@ For each case in tests/routing/cases.json:
   carries the "no validated domain profile" notice, and so does every skill in its optional "also_accept" list;
 - handoff chains use real skills, end, and contain at most one round trip between two skills.
 Coverage: at least one direct, one neighboring and one negative case per skill (direct and negative counted for
-the skill the case is about), one case per journey J1-J12, English, Traditional and Simplified Chinese, Japanese and
+the skill the case is about), one case per journey listed in docs/researcher-journeys.md, English, Traditional and Simplified Chinese, Japanese and
 German, the special categories (AMS-mentioning computing, theory without experiment, recasting, out-of-v1,
 underspecified, multi-turn) and the variants (adversarial: a tool is named but the deliverable belongs to another
 skill; quick: a short quick question). A multi-turn case lists later turns, each with its own expected skill and
@@ -44,6 +44,12 @@ DISPATCH = re.compile(r"\b(dispatch|invoke_skill|call_skill|route_to)\s*\(", re.
 NATURAL_NGRAM = 4  # a natural prompt may not reuse this many consecutive description words
 TOPICS_MARKER = "<!-- description-topics: read by tools/check_routing_static.py -->"
 CAPABILITY_MAP = ROOT / "docs" / "capability-map.json"
+
+
+def journeys_listed() -> list[str]:
+    """Journey IDs (J1, J2, ...) from the rows of the journey table in docs/researcher-journeys.md."""
+    text = (ROOT / "docs" / "researcher-journeys.md").read_text(encoding="utf-8")
+    return re.findall(r"^\| (J\d+) ", text, re.M)
 
 
 def description_topics() -> dict:
@@ -207,7 +213,7 @@ def main() -> int:
     coverage_errors = [f"{s}: missing {sorted({'direct', 'neighboring', 'negative'} - k)}" for s, k in cov.items()
                        if {"direct", "neighboring", "negative"} - k]
     journeys = {c.get("journey") for c in cases}
-    coverage_errors += [f"no case for J{i}" for i in range(1, 13) if f"J{i}" not in journeys]
+    coverage_errors += [f"no case for {j}" for j in journeys_listed() if j not in journeys]
     coverage_errors += [f"no {k} case" for k in CATEGORIES if not any(c["kind"] == k for c in cases)]
     langs = {c["lang"] for c in cases}
     coverage_errors += [f"no {lang} cases" for lang in LANGS if lang not in langs]

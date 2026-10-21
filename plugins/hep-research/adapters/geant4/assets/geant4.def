@@ -4,7 +4,8 @@
 # Build (user-approved, contacts the registry, github.com and cern.ch):
 #   apptainer build geant4.sif adapters/geant4/assets/geant4.def
 Bootstrap: docker
-From: ubuntu@sha256:<pin the digest of the ubuntu:24.04 image you pull, e.g. from `docker pull ubuntu:24.04`>
+# ubuntu:24.04 multi-arch index digest, read from registry-1.docker.io on 2026-10-21
+From: ubuntu@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
 
 %files
     build_spec.example.json /opt/hep-research-geant4/build_spec.json
