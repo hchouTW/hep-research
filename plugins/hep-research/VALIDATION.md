@@ -2037,6 +2037,43 @@ that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as co
 | `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4707 tests in 395 modules, 4575 pass, 0 failures, 132 skipped |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4707 tests, 4484 pass, 0 failures, 223 skipped |
 
+## ANISO-CL-RANGE (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `fix/aniso-cl-bdt-gate` from `b45e4037`)
+
+Robust-fix S4, parent `b45e4037` (release 0.22.0). `skills/hep-measurement/scripts/anisotropy.py harmonic --cl 0.3`
+(with or without `--exposure-map`) ended in a TypeError reported as `rejected` (`'>' not supported between instances
+of 'NoneType' and 'float'`): below CL 0.5 the expected limit, the Neyman limit at the median isotropic amplitude, is
+empty (even s = 0 is excluded there), and `amplitude_upper_limit` compared it with the observed limit. The same
+TypeError hit CL 0.5 itself with an anisotropic map (n = 2000 and 500 with `1 + 0.9 cos(alpha - 30 deg)`, 24 bins),
+where the expected limit is 0 analytically but the bisection found it empty by rounding; and the library function at
+cl = 1.0 did not terminate (the bracket search doubles while P >= 0; the CLI already rejected 1.0).
+
+The fix (maintainer's decision: an upper limit below CL 0.5 is not supported, the power constraint is undefined): the
+CLI rejects `--cl` outside [0.5, 1) with that reason (status `rejected`, exit 2, as for other bad input);
+`amplitude_upper_limit` raises ValueError with the same reason for cl outside [0.5, 1) (NaN included); an expected
+limit found empty within rounding of cl = 1/2 is reported as its analytic value 0. `AnisotropicNull.neyman` and
+`_neyman` are unchanged, so the CL 0.3 and 0.2 evidence of ANISO-WEIGHTED-COV, which calls the class directly, still
+runs. The module docstring states the range; the reference `cosmic-ray-measurements.md` states no CL range and is
+unchanged.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_measurement/test_anisotropy_cl_range.py::CliRange::test_cl_below_one_half_is_rejected_with_the_reason` | behavioral (status, exit 2, the stated range, no TypeError; CL 0.3 and 0.4999, Rice and anisotropic) | fail (assertion, 4 subtests): exit 2 but the error is the TypeError text | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_cl_range.py::CliRange::test_cl_one_half_with_an_anisotropic_map_gives_a_limit` | behavioral (CL 0.5: ok, expected limit 0, the limit is the Neyman limit) | fail (assertion, 2 subtests): exit 2, rejected with the TypeError | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_cl_range.py::LibraryRange::test_amplitude_upper_limit_raises_value_error_below_one_half` | behavioral (ValueError naming the range, Rice and anisotropic, with and without r_obs) | fail: 2 errors (TypeError, not ValueError, with r_obs), 2 failures (no exception without r_obs: the dict carries an empty expected limit) | pass | no | E2v, CIlock |
+| `tests/skills/hep_measurement/test_anisotropy_cl_range.py::LibraryRange::test_amplitude_upper_limit_rejects_cl_outside_the_range` | behavioral (cl 1.0, NaN, 0.0 raise ValueError; 0.5 gives a limit) | fail: did not finish in 90 s (cl = 1.0 does not terminate) | pass | no | E2v (parent and fix), CIlock (fix) |
+
+- Parent record: an adapted parent tree (`git archive b45e4037`) to which only the new test module was added; the
+  code under test is the parent's, unchanged. Each test run alone (`python -m unittest MODULE.Class.method`, 90 s
+  limit): 4 of 4 fail on the parent (E2v; the first three also in the CI lock venv), 4 of 4 pass on the fix (E2v and
+  the CI lock).
+- Results kept bit for bit: the full CLI JSON (stdout) and stderr of 45 runs, three synthetic event sets (3000, 2000
+  and 500 events with declination and time columns), no map, a uniform 24-bin map and the non-uniform one, at CL 0.5,
+  0.68, 0.9, 0.95 and 0.99, plus a default run, compared byte for byte before and after the fix: the 43 runs that
+  succeeded on the parent are identical; the 2 that changed are the CL 0.5 runs with the non-uniform map that were
+  rejected with the TypeError and now report the limit with expected limit 0.
+- `tests/skills/hep_measurement/test_anisotropy.py` and `test_anisotropy_weighted_covariance.py` pass on the fix (24
+  run, 3 slow-tier skips), unchanged.
+
 ## ANISO-WEIGHTED-COV (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv: NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0; CI lock venv: NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0)
 
 Sci-fix S1, fix `3c10ac23`, parent `32450b32`. `skills/hep-measurement/scripts/anisotropy.py harmonic` with

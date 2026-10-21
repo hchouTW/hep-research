@@ -1023,6 +1023,24 @@
      "detail": "scipy dblquad CDF over the 72-phase grid at AnisotropicNull.neyman for CL 0.3 and 0.2, where the deciding phase is not the major axis, equals 1 - CL within 1e-7"
     }
    ]
+  },
+  {
+   "id": "ANISO-CL-RANGE",
+   "title": "anisotropy.py: --cl below 0.5 is rejected with its reason (the expected limit is empty there) instead of a TypeError; amplitude_upper_limit raises ValueError",
+   "changelog": "CHANGELOG Unreleased, anisotropy.py --cl range (robust-fix ANISO-CL-RANGE)",
+   "severity": "S4",
+   "evidence_tests": [
+    "tests/skills/hep_measurement/test_anisotropy_cl_range.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "per-test parent record against parent b45e4037 (4 of 4 evidence tests fail on the parent: three by assertion or a TypeError where ValueError is expected, the boundary test does not finish in 90 s because amplitude_upper_limit at cl = 1.0 never ends its bracket search; adapted parent tree adds only the new test module; VALIDATION ANISO-CL-RANGE 2026-10-22); every CL >= 0.5 result that the parent produced is unchanged bit for bit (45 CLI runs compared, with and without --exposure-map); at CL 0.5 a rounding-level empty expected limit is reported as its analytic value 0",
+   "independence": []
   }
  ],
  "documentation_fixes": [
