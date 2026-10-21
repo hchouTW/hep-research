@@ -213,8 +213,8 @@ assumption, and the uncertainty has two parts that must stay apart.
 3. **Report the envelope between models separately.** The spread of the central SR predictions over the models that
    passed is a model uncertainty. With only one passing model the spread is zero by construction, not a measured
    model uncertainty; `tail_extrapolation.py` then reports `low = high` (and `gaussian_sigma = 0` under a
-   prescription) without a warning, so state that the model uncertainty was not assessed. The spread is not a
-   Gaussian standard deviation; it becomes one only through a prescription the analysis declares and owns
+   prescription) with a warning that names the model: state that the model uncertainty was not assessed. The spread
+   is not a Gaussian standard deviation; it becomes one only through a prescription the analysis declares and owns
    (half-range, or a uniform distribution over the range), and the choice is stated with the result.
 4. **State the extrapolation distance.** Declare how far beyond the CR the prediction may reach; beyond it, the result
    carries a warning.

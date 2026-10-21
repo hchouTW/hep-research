@@ -109,6 +109,35 @@ class Basics(unittest.TestCase):
         code, out, _ = run(doc(counts, max_extrapolation=20.0))
         self.assertTrue(any("extrapolation" in w for w in out["warnings"]))
 
+    def test_one_usable_model_warns_that_the_envelope_has_zero_width(self):
+        # REVIEW-CODE-WARN: with one model passing validation the envelope is low = high by construction (and
+        # gaussian_sigma = 0 under a prescription); that is not a measured model uncertainty, so a warning names
+        # the model. The numbers are unchanged: low = high = the model's own prediction.
+        norm, lam = 20000.0, 0.05
+        counts = [round(norm * (math.exp(-lam * (a - 100)) - math.exp(-lam * (b - 100))))
+                  for a, b in zip(EDGES[:-1], EDGES[1:])]
+        for models, kw in ((("exponential",), {}), (("exponential", "power-law"), {}),
+                           (("exponential",), {"envelope_prescription": "half-range"})):
+            with self.subTest(models=models, **kw):
+                code, out, err = run(doc(counts, models=models, **kw))
+                self.assertEqual(code, 0, err)
+                env = out["envelope"]
+                self.assertEqual(env["models"], ["exponential"])  # the power law fails validation on this tail
+                self.assertEqual(env["low"], env["high"])
+                self.assertEqual(env["low"], out["models"]["exponential"]["signal_region"]["prediction"])
+                if kw:
+                    self.assertEqual(env["gaussian_sigma"], 0.0)
+                hits = [w for w in out["warnings"] if "zero width" in w]
+                self.assertEqual(len(hits), 1, out["warnings"])
+                self.assertIn("'exponential'", hits[0])
+                self.assertIn("not assessed", hits[0])
+        # Negative control: two models pass, the envelope has a width and no such warning is given.
+        code, out, err = run(doc(counts, models=("exponential", "exp+power")))
+        self.assertEqual(code, 0, err)
+        self.assertEqual(out["envelope"]["models"], ["exponential", "exp+power"])
+        self.assertLess(out["envelope"]["low"], out["envelope"]["high"])
+        self.assertFalse([w for w in out["warnings"] if "zero width" in w], out["warnings"])
+
     def test_failed_validation_of_the_nominal_model_is_failed(self):
         rng = random.Random(5)
         counts = pow_counts(20000.0, 6.0, rng)  # a power-law tail, fitted by an exponential
