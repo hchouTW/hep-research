@@ -1041,6 +1041,148 @@
    "gaps": [],
    "note": "per-test parent record against parent b45e4037 (4 of 4 evidence tests fail on the parent: three by assertion or a TypeError where ValueError is expected, the boundary test does not finish in 90 s because amplitude_upper_limit at cl = 1.0 never ends its bracket search; adapted parent tree adds only the new test module; VALIDATION ANISO-CL-RANGE 2026-10-22); every CL >= 0.5 result that the parent produced is unchanged bit for bit (45 CLI runs compared, with and without --exposure-map); at CL 0.5 a rounding-level empty expected limit is reported as its analytic value 0",
    "independence": []
+  },
+  {
+   "id": "CLI-MISSING-INPUT-EXIT2",
+   "title": "A missing or unreadable input file is bad input (exit 2), not a negative verdict: six tools exited 1 with status failed",
+   "changelog": "CHANGELOG Unreleased (triage batch A, T17)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/test_cli_contract.py",
+    "tests/skills/hep_detector/test_detector_helpers.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix 018e7b23; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: test_refused_input_prints_a_json_status fails on the parent (calorimeter_resolution, multiple_scattering, pileup_reweight, hepdata_export, hepdata_record, geant4_build exit 1) and passes on the fix; the pileup missing-file CLI test (now expects 2) fails on the parent and passes; also checked in the CI lock venv (the only exit 3 there is inspect_checkpoint.py with missing-dependency, allowed). Invalid file content keeps its documented exit 1",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/test_cli_contract.py::CliContract::test_refused_input_prints_a_json_status",
+     "basis": "exhaustive",
+     "detail": "the hep-computing script contract (skills/hep-computing/SKILL.md: 2 bad input, 3 missing dependency) applied to every tool in tests/skills/test_cli_robustness.py MISSING_FILE_ARGS (108 tools; the 20 JSON_STATUS_FOLLOW_UP adapters and text-error scripts stay exempt): exit 2, or 3 only with status missing-dependency, and a JSON status"
+    }
+   ]
+  },
+  {
+   "id": "ADAPTER-MISSING-DEPENDENCY",
+   "title": "Adapters report a missing optional dependency as status missing-dependency, exit 3 (were exit 1 or 2, text, refused/failed, or a traceback)",
+   "changelog": "CHANGELOG Unreleased (triage batch A, T19)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/adapters/test_adapter_missing_dependency.py",
+    "tests/adapters/test_pyhf_nuisance_diagnostics.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix 61920170; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: the pair test fails on the parent (24 of 28 pairs: every pair except dragon2_to_prediction without numpy and unfold.py without numpy, pyunfold or ROOT, which already complied) and passes on the fix; NoPyhf::test_exits_3_without_pyhf (was the pinned exit-2 test) fails on the parent and passes; the domain-completeness test passes on both (it defines the domain, not the verdict). Also passes in the CI lock venv. Per-script changes: the adapters share no helper module",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/adapters/test_adapter_missing_dependency.py::AdapterMissingDependency::test_each_hidden_module_gives_exit_3_and_status_missing_dependency",
+     "basis": "exhaustive",
+     "detail": "every adapter command-line tool and every third-party module it imports, found from the source by AST (14 tools, 28 pairs; test_domain_is_every_adapter_with_a_third_party_import keeps the table complete), each run with that one module hidden; the hep-computing script contract (exit 3, JSON status missing-dependency) as the expected value"
+    }
+   ]
+  },
+  {
+   "id": "PYHF-REJECTED-STATUS",
+   "title": "backend_comparison.py and model_card.py report input they cannot read or map as rejected (exit 2), not refused (a negative verdict in core/status.py)",
+   "changelog": "CHANGELOG Unreleased (triage batch A, T18)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/adapters/test_pyhf_adapter_statuses.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix 61920170 (same commit as ADAPTER-MISSING-DEPENDENCY); parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: fails on the parent (6 of 6 subtests print refused) and passes on the fix; needs pyhf (E2 pyhf installed), listed in tools/run_required_backends.py and the pyhf optional selection so a skip there fails; exit codes unchanged",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/adapters/test_pyhf_adapter_statuses.py::PyhfAdapterRejectedInput::test_unreadable_or_unmappable_input_is_rejected_with_exit_2",
+     "basis": "exhaustive",
+     "detail": "every input-refusal path of both tools (missing file, not JSON, a model or card the tool cannot map: 3 x 2 cases, the exception types the refusal branch catches) against the contract's bad-input code 2 and the core/status.py name rejected"
+    }
+   ]
+  },
+  {
+   "id": "TRAINING-MEMORY-VERDICT",
+   "title": "estimate_training_memory.py exits 1 with status failed when the estimate does not fit (exited 0), and states the micro-batch size and sequence length",
+   "changelog": "CHANGELOG Unreleased (triage batch A, T33, T34)",
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_training_memory_verdict.py",
+    "tests/skills/hep_ml/test_hep_ml_skill.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix 117f5375; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: the four TrainingMemoryVerdict tests fail on the parent (no status key, exit 0 for a configuration that does not fit, no micro_batch/seq_len) and pass on the fix; MemoryEstimateCliTests::test_text_report_names_the_binding_term (7e9 parameters, 104 GiB per GPU, now expects exit 1) fails on the parent and passes. Closed-form anchors (16 bytes per parameter for mixed-precision Adam: 7e10 does not fit 80 GB, 1e8 does) are behavioral checks here, not counted as an independent kind (no located source recorded). T34 is an enhancement carried in the same commit",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_exit_code_and_status_follow_the_verdict_over_the_grid",
+     "basis": "exhaustive",
+     "detail": "216 configurations (all 9 precision/optimizer pairs the tool offers x ZeRO 0-3 x 1 or 8 GPUs x 1e8, 7e9, 7e10 parameters; both verdicts occur): the contract mapping fits -> (0, ok), does not fit -> (1, failed)"
+    }
+   ]
+  },
+  {
+   "id": "STATUS-UNKNOWN-EXIT",
+   "title": "core/status.exit_code on an unknown status names it on stderr and returns 3 (incomplete) instead of a KeyError traceback with exit 1",
+   "changelog": "CHANGELOG Unreleased (triage batch A, T16)",
+   "severity": "S4",
+   "evidence_tests": [
+    "tests/core/test_status.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix 01d8f357; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: the two new SharedVocabulary tests fail on the parent (KeyError; a script exits 1 with a traceback) and pass on the fix. Latent: a scan of status literals in the scripts calling exit_code() with a computed status found none outside RUN_STATUSES",
+   "independence": []
+  },
+  {
+   "id": "RUN-ALL-CHECKS-GIT",
+   "title": "run_all_checks.py writes its summary with git_commit unknown when git is missing or hangs",
+   "changelog": "CHANGELOG Unreleased (triage batch A, T21)",
+   "severity": "S4",
+   "evidence_tests": [
+    "tests/tools/test_run_all_checks_git.py"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix 17a3dad8; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: both tests error on the parent (TimeoutExpired, FileNotFoundError out of main) and pass on the fix",
+   "independence": []
   }
  ],
  "documentation_fixes": [
@@ -1079,6 +1221,12 @@
    "title": "Negative weights: dropping them from training only is option 3's kind of distortion (positive-weight density instead of the signed one), acceptable only with its effect shown, never for evaluation; train_bdt.py warns under drop and abs-train-signed-eval (VALIDATION REVIEW-CODE-WARN)",
    "severity": "S3",
    "sources_with_locators": "yes; Andersen, Gütschow, Maier and Prestel, arXiv:2005.09375v1 Sec. 1 p. 3 (the sample's cross section is sigma = sigma_p - sigma_n, so dropping the negative-weight events keeps sigma_p only) and Andersen and Maier, arXiv:2109.07851 Sec. 2 p. 4 (negative-weight counterevents correct the overestimation by the positive weights), both opened 2026-10-22; skills/hep-ml/scripts/train_bdt.py train_ok and the evaluation block (signed weights) checked; maintainer decision 2026-10-22"
+  },
+  {
+   "id": "STATUS-REFUSED-MEANING",
+   "severity": "doc",
+   "title": "core/status.py states that refused is a negative verdict (exit 1), names the protected-use guard and permit check exception (exit 3) and the older tools that print refused with exit 2; new code uses rejected for unusable input (T18)",
+   "sources_with_locators": "in-repo contracts, read 2026-10-22: core/status.py RUN_STATUSES; core/protected/guard.py protected_main (exit 3); contracts/permit.py usage (3 when the permit is refused); docs/protected-data-architecture.md; skills/hep-computing/references/engineering-playbook.md (refuses with exit 3); usage text of contracts/comparison/gate.py, core/evidence/query.py, contracts/migrate_statistical_result.py, core/partition/campaign.py, skills/hep-ml/assets/inference.py; fix 14c0ff94"
   }
  ]
 }

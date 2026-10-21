@@ -2059,6 +2059,180 @@ of the extra within the extra's range (dropping a module or pinning scikit-learn
 - Branch protection is a repository setting: `bdt-backend` must be added to the required status checks there; the
   workflow cannot make it required by itself (as for `torch-backend`).
 
+## TRIAGE-A (2026-10-22, Python 3.13 on macOS arm64; E2 venv (pyhf, NumPy, SciPy, uproot, awkward, PyYAML, torch; no coffea, pyarrow, hepdata_lib) and the CI lock venv; branch `fix/triage-A`)
+
+Plugin triage batch A (TRIAGE.md T16, T17, T18, T19, T21, T33, T34), all on the hep-computing script contract
+(skills/hep-computing/SKILL.md: 0 ok, 1 negative verdict, 2 bad input, 3 missing dependency or incomplete; names in
+core/status.py). Every item reproduced on the tree before its fix. Parent for every row: `b45e4037` (main, 0.22.0)
+with the fix commit's evidence test files copied in (only test files added or replaced; no code under test touched).
+Fix result: the fix commit's own tree (`git archive`). Each test run on its own with `python -m unittest <id>`.
+
+Fix commits: T17 `018e7b23` (sci-fix CLI-MISSING-INPUT-EXIT2); T19 and T18 code `61920170` (sci-fix
+ADAPTER-MISSING-DEPENDENCY, PYHF-REJECTED-STATUS); T18 docs `14c0ff94` (STATUS-REFUSED-MEANING); T33/T34 `117f5375`
+(sci-fix TRAINING-MEMORY-VERDICT); T21 `17a3dad8` (robust-fix RUN-ALL-CHECKS-GIT); T16 `01d8f357` (robust-fix
+STATUS-UNKNOWN-EXIT).
+
+**Correctness.** S2 items (C2): the contract applied exhaustively over a stated domain (basis exhaustive): every tool in
+MISSING_FILE_ARGS (108; T17), every adapter tool and every third-party module it imports, found from the source
+(14 tools, 28 pairs; T19), every input-refusal path of the two pyhf model checks (6; T18), and a 216-configuration grid
+of the memory estimator plus two closed-form anchors (T33). S4 items (C1): behavioral.
+
+**Discrimination (D2):**
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/test_cli_contract.py::CliContract::test_refused_input_prints_a_json_status` (tightened) | exhaustive | fail (assertion): geant4_build, hepdata_export, hepdata_record, calorimeter_resolution, multiple_scattering, pileup_reweight exit 1 | pass (018e7b23) | no | E2 |
+| `tests/skills/hep_detector/test_detector_helpers.py::PileupReweightTests::test_cli_missing_file_fails_cleanly` (now expects 2) | behavioral | fail (assertion): 1 != 2 | pass (018e7b23) | no | E2 |
+| `tests/adapters/test_adapter_missing_dependency.py::AdapterMissingDependency::test_each_hidden_module_gives_exit_3_and_status_missing_dependency` | exhaustive | fail (assertion): 24 of 28 pairs (all but dragon2_to_prediction/numpy and unfold.py/numpy, pyunfold, ROOT) | pass (61920170) | no | E2 |
+| `tests/adapters/test_adapter_missing_dependency.py::AdapterMissingDependency::test_domain_is_every_adapter_with_a_third_party_import` (domain completeness, not a verdict test) | behavioral | pass | pass (61920170) | no | E2 |
+| `tests/adapters/test_pyhf_nuisance_diagnostics.py::NoPyhf::test_exits_3_without_pyhf` (was the exit-2 test) | behavioral | fail (assertion): exit 2 | pass (61920170) | no | E2 |
+| `tests/adapters/test_pyhf_adapter_statuses.py::PyhfAdapterRejectedInput::test_unreadable_or_unmappable_input_is_rejected_with_exit_2` | exhaustive | fail (assertion): 6 subtests, status refused | pass (61920170) | no (pyhf installed; in the stats-backends gate) | E2 |
+| `tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_closed_form_anchors` | behavioral (closed-form anchor) | fail (error): no status key, 2 subtests | pass (117f5375) | no | E2 |
+| `tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_exit_code_and_status_follow_the_verdict_over_the_grid` | exhaustive | fail (assertion): exit 0 / no status for the configurations that do not fit | pass (117f5375) | no | E2 |
+| `tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_the_text_report_fails_with_exit_1` | behavioral | fail (assertion): exit 0 | pass (117f5375) | no | E2 |
+| `tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_report_and_json_state_micro_batch_and_sequence_length` (T34) | behavioral | fail (error): no micro_batch key | pass (117f5375) | no | E2 |
+| `tests/skills/hep_ml/test_hep_ml_skill.py::MemoryEstimateCliTests::test_text_report_names_the_binding_term` (now expects 1) | behavioral | fail (assertion): 0 != 1 | pass (117f5375) | no | E2 |
+| `tests/tools/test_run_all_checks_git.py::GitFailureSummary::test_git_timeout_still_writes_the_summary` | behavioral | fail (error): TimeoutExpired out of main | pass (17a3dad8) | no | E2 |
+| `tests/tools/test_run_all_checks_git.py::GitFailureSummary::test_missing_git_still_writes_the_summary` | behavioral | fail (error): FileNotFoundError out of main | pass (17a3dad8) | no | E2 |
+| `tests/core/test_status.py::SharedVocabulary::test_unknown_status_is_incomplete_with_a_message_not_a_traceback` | behavioral | fail (error): KeyError/TypeError, 6 subtests | pass (01d8f357) | no | E2 |
+| `tests/core/test_status.py::SharedVocabulary::test_a_script_with_an_unknown_status_exits_3_without_a_traceback` | behavioral | fail (assertion): exit 1 with a traceback | pass (01d8f357) | no | E2 |
+
+Also run in the CI lock venv (no pyhf, uproot, awkward, PyYAML): the T17 contract survey (the only exit 3 is
+inspect_checkpoint.py with missing-dependency) and the T19 pair test pass. No local mutants run (D2, not D3).
+
+**Decisions.** T17: the hep-detector scripts echo the artifact label under "status", so a missing file uses their
+existing exit-2 shape (`status` failed, `error_kind` invalid-input, as their tool contracts declare for exit 2); the
+adapters print `rejected`. Invalid file content keeps its documented exit 1. T18: "refused" stays exit 1 in
+core/status.py (most tools that print it use 1 and document it); the protected guard's exit 3 is a documented contract
+and is written down as the exception; the pyhf model checks moved to `rejected`. T16: an unknown status maps to 3 with
+a stderr message (the outcome cannot be classified), not 2 (the user's input was not at fault) and not a raise (an
+uncaught exception exits 1). T19: no shared helper (the adapters share no module). Not changed: the root-uproot entries
+stay in JSON_STATUS_FOLLOW_UP (with PyROOT or uproot installed a missing input is still a text error).
+
+## TRIAGE-B checker gaps (2026-10-22, Python 3.13.2 on macOS 26.5 arm64, E2 venv; changed test modules also under the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
+
+Plugin-issue triage batch B (`plugin-triage/TRIAGE.md` items T01, T02, T03, T04, T07, T27, T29, T30, T35), on branch
+`fix/triage-B` from `b45e4037` (release 0.22.0). Each item is a development or packaging checker that enforced less
+than the rule it states, plus one doc number. No scientific number, verdict or method guidance changes; none of these
+is a `sci-fix:`. Each item was re-verified on this tree before the fix (the new tests failed on it).
+
+**What changed.**
+
+- **T01** `tools/measure_entrypoints.py`, `tools/validate_skill_bundle.py`: a folded or literal block description
+  (`description: >-`, `|`) or a plain value continued on indented lines was read as its first line only, so a
+  2,000-character description measured 2 characters and passed the 1,024 limit. Both tools now use one helper,
+  `skill_description()` in `measure_entrypoints.py`, which joins block and continued values with single spaces.
+  Measures of the eight shipped skills are unchanged (all use quoted one-line descriptions).
+- **T02** `tools/measure_entrypoints.py`: `lines` counted newline characters, so 501 lines without a final newline
+  counted 500; it is now `len(text.splitlines())`.
+- **T03** `tools/check_layering.py`: the import scan read only absolute static imports and skipped every `.py` under a
+  `fixtures/` folder. Relative imports are now resolved against the file's package (a level that climbs above `core/`
+  lands at the plugin root, so `from ..contracts import x` in `core/x.py` is `contracts.x`; inside the own skill,
+  profile or adapter a relative import stays internal), constant-string `importlib.import_module(...)` and
+  `__import__(...)` calls are read, and `fixtures/` outside `tests/` is scanned. No such import exists in the tree
+  (latent).
+- **T04** `tools/check_layering.py`: the steward check only tested that a core module had a key in `core/OWNERS.json`;
+  the steward must now be a skill name (`contracts.skill_names.SKILLS`), so `''`, `'TBD'` or a missing field fails.
+  All eight current stewards are skill names.
+- **T07** `tools/check_ownership.py`: `claims()` required a non-letter right after the term, so `BDTs` in another
+  skill's Owns line did not claim `BDT`; an `s` or `es` suffix is now allowed. The tree still passes (21 topics).
+- **T27** `tools/check_packaging.py`: content rules ran only on files whose suffix was in `TEXT`. A file is now scanned
+  when its suffix is in `TEXT` (fast path) or its first 8 KiB hold no NUL byte. On the tree this adds 119 files
+  (92 `.keep`, 6 `.out`, 5 `.hh`, 2 `.def`, 1 `.patch`, `Snakefile`, `LICENSE`, `.gitignore`, 10 suffix-less batch
+  shims); none raises a finding.
+- **T29** `tools/check_packaging.py`: `batch_site_facts()` looked only at the top level and a direct `slurm`/`htcondor`
+  block, with case-sensitive keys. It now walks the JSON recursively; an object with a slurm or htcondor backend or
+  section opens a batch scope over everything below it; keys and the backend value compare case-insensitively. The
+  documented `synthetic` prefix stays accepted.
+- **T30** `tools/check_packaging.py`: the placeholder local-part exemption (`author@`, `user@`, ...) applied at any
+  domain. An address is now exempt only at a reserved domain (RFC 2606 / RFC 6761: `example.com/.org/.net` and their
+  subdomains, `*.example`, `*.invalid`, `*.test`, `*.localhost`) or as the commit trailer address. The tightened rule
+  found one shipped address, `\emailAdd{author@inst.edu}` in `skills/hep-authoring/references/latex-venue-setup.md`,
+  now `author@example.org` (`docs/reference-inventory.json` regenerated, +3 bytes).
+- **T35** `docs/profile-authoring.md` said the registry stays under 2 KiB; it now says at or under 3,072 bytes
+  (`REGISTRY_BUDGET` in `contracts/registry.py`), matching the code and `docs/maintenance.md`.
+
+**Per-test record.** Parent = `git archive b45e4037` with the new test files copied in; fix = `11031f81`. Every
+evidence test fails on the parent and passes on the fix; the controls pass on both.
+
+| Item | Test | Parent b45e4037 | Fix 11031f81 |
+|---|---|---|---|
+| T01 | `tests/tools/test_measure_entrypoints_budget.py::Budget::test_block_scalar_description_is_measured_in_full` (`>-`, `\|`, `>`, continued plain value; short folded control) | FAIL (4/4 subtests) | pass |
+| T01 | `tests/tools/test_validate_skill_bundle.py::DescriptionLimitTests::test_folded_description_over_the_limit_is_a_problem` | FAIL | pass |
+| T01 | `tests/tools/test_validate_skill_bundle.py::DescriptionLimitTests::test_short_folded_description_passes` (control) | pass | pass |
+| T02 | `tests/tools/test_measure_entrypoints_budget.py::Budget::test_line_count_without_final_newline` | FAIL | pass |
+| T03 | `tests/tools/test_check_layering.py::LayeringTests::test_core_relative_and_dynamic_imports_of_contracts` (relative, `import_module`, `__import__`, `fixtures/`, `from ... import contracts`) | FAIL (5/5 subtests) | pass |
+| T03 | `tests/tools/test_check_layering.py::LayeringTests::test_skill_relative_import_of_another_skill` | FAIL | pass |
+| T03 | `tests/tools/test_check_layering.py::LayeringTests::test_core_relative_imports_inside_core_are_clean` (control) | pass | pass |
+| T04 | `tests/tools/test_check_layering.py::LayeringTests::test_empty_or_placeholder_steward` | FAIL | pass |
+| T07 | `tests/tools/test_check_ownership.py::OwnershipCheckTests::test_plural_of_a_term_is_a_claim` | FAIL | pass |
+| T27 | `tests/tools/test_check_packaging_rules.py::TextScanCoverageTests::test_every_text_file_is_scanned` (`.hh`, suffix-less shim, `.patch`, `Snakefile`, `.out`, `LICENSE`) | FAIL (6/6 subtests) | pass |
+| T27 | `tests/tools/test_check_packaging_rules.py::TextScanCoverageTests::test_binary_files_are_not_scanned` (control) | pass | pass |
+| T29 | `tests/tools/test_check_packaging_rules.py::BatchSiteFactTests::test_nested_and_mixed_case_site_keys_are_found` | FAIL (5/5 subtests) | pass |
+| T29 | `tests/tools/test_check_packaging_rules.py::BatchSiteFactTests::test_placeholders_and_synthetic_values_pass` (control) | pass | pass |
+| T30 | `tests/tools/test_check_packaging_rules.py::PlaceholderEmailTests::test_placeholder_local_part_at_a_real_domain_is_reported` | FAIL (3/3 subtests) | pass |
+| T30 | `tests/tools/test_check_packaging_rules.py::PlaceholderEmailTests::test_reserved_domains_are_exempt` | FAIL (3/8 subtests: `.net`, `.invalid`, `.test` were not exempt) | pass |
+| T35 | `tests/contracts/test_contracts.py::RegistryTests::test_registry_budget_in_the_docs_matches_the_code` | FAIL | pass |
+
+Totals: 12 evidence tests fail on the parent (33 failing subtests and tests) and pass on the fix; 4 controls pass on
+both. The changed test modules (108 tests: measure_entrypoints_budget, validate_skill_bundle, check_layering,
+check_ownership, check_packaging_rules, check_packaging_size, contracts) pass in the E2 venv and in the CI-lock venv.
+`ruff 0.16.10 check core contracts` and on the five changed tools: clean.
+
+**Aggregate.** `python3 tools/run_all_checks.py --no-cli --jobs 6 --out <dir>` on `11031f81`: 25 pass, 0 fail, 2 skip (`claude-plugin-validate` and `codex-plugin-load`, by `--no-cli`); unittest 4,723 run, 4,591 pass, 0 failures, 0 errors, 132 skipped (395 modules); every registered profile suite passes; report `check-run-2026-10-21T221938Z.json`.
+
+**Environment.** E2: macOS 26.5 (Darwin 25.5.0) arm64, Python 3.13.2 (`~/.venvs/hep-research-e2`); CI lock venv
+(`~/.venvs/hep-research-ci`, Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) for the changed test modules.
+
+## TRIAGE-C (2026-10-22, E2: macOS 26.5 arm64, Python 3.13.2; lint with the CI lock venv)
+
+Plugin triage batch C (`~/Workspace/hep-research-tasks/plugin-triage/TRIAGE.md` items T09, T11, T12, T14, T15, T23,
+T26, T36), branch `fix/triage-C` from `b45e4037` (0.22.0, contracts 3.3.0). Every item was reproduced on the parent
+before the fix. No contracts major: artifact-validation gaps are new warning codes (T09 is an error, see below); no
+schema field added and `CONTRACTS_VERSION` unchanged. Codes are not registered in a vocabulary file (no registry of
+validator finding codes exists; `contracts/rules/registry.json` lists none of the measurement codes), so they are
+defined in the code and its docstrings.
+
+**What changed.**
+
+| Item | Change | Level, code |
+|---|---|---|
+| T09 | `validate_directory` compares the suffix case-insensitively: `bad.JSON` is validated as an artifact (or is `not_artifact`) | error (existing codes). The docstring already stated every JSON file is validated; a valid artifact named `*.JSON` still passes; no shipped file has a non-lower-case `.json` suffix |
+| T11 | `conditional_denominator` null, number, bool, or a placeholder token (`n/a`, `na`, `none`, `null`, `tbd`, `todo`, `-`, `--`, `?`, `...`) | warning `measurement.denominator_placeholder` (blank string stays error `measurement.denominator_blank`) |
+| T12 | empty `backgrounds` with a placeholder `no_backgrounds_reason` | warning `measurement.no_backgrounds_reason_placeholder` |
+| T14 | blinded mask with no non-blank region and no interval with a non-blank variable | warning `measurement.blinding_mask_empty` (absent/empty mask stays error `measurement.blinding_mask_missing`) |
+| T15 | unknown, not retired, skill name under an extension `handoff` key, any artifact type; dropped where `ml.handoff_unknown` already reports it | warning `skill.unknown_handoff` (retired names stay error `skill.unknown_name`) |
+| T36 | observable at level `unfolded` whose `phase_space.definition` names no other level term (core or profile, not `detector`) | warning `observable.unfolded_target_undeclared`; `Vocabulary.terms()` added |
+| T23 | `validate_manifest` refuses chunks sharing a seed | `PartitionError("partition.duplicate_seed")` (a `ValueError`; `campaign.init` wraps it as `campaign.bad_manifest`) |
+| T26 | `RevocationStatus.events` is a property calling `_require()`; field renamed `_events` | `RevocationUnverified` on a failed status |
+
+**Regression tests, parent and fix.** Parent = `git archive b45e4037` with the new test modules copied in (adaptation
+adds tests only, never the code under test). T15 uses the literal code string so the parent fails on the assertion.
+
+| Item | Test | Parent b45e4037 | Fix |
+|---|---|---|---|
+| T09 | `tests.contracts.test_validate_directory.ValidateDirectory.test_upper_case_json_suffix_is_validated` | FAIL (1) | pass |
+| T11 | `tests.contracts.test_measurement_contract.MeasurementRules.test_placeholder_denominator_warns` | FAIL (9 subtests) | pass |
+| T12 | `tests.contracts.test_measurement_contract.MeasurementRules.test_placeholder_no_backgrounds_reason_warns` | FAIL (3) | pass |
+| T14 | `tests.contracts.test_measurement_contract.MeasurementRules.test_blinding_mask_naming_nothing_warns` | FAIL (4) | pass |
+| T15 | `tests.contracts.test_skill_names.ArtifactTests.test_unknown_extension_handoff_warns` | FAIL (1) | pass |
+| T23 | `tests.core.test_partition_preflight.ManifestTests.test_duplicate_seeds_are_refused` | FAIL (1) | pass |
+| T26 | `tests.contracts.test_revocation.ChainTests.test_failed_status_has_no_readable_events` | FAIL (6 subtests) | pass |
+| T36 | `tests.contracts.test_levels_f14.UnfoldedTarget.test_unfolded_without_target_warns` | FAIL (3) | pass |
+| T36 control | `...UnfoldedTarget.test_unfolded_with_a_named_target_passes`, `...test_other_levels_are_untouched` | pass (control) | pass |
+
+Each item's test module also passes at its own commit (`git archive <commit>`).
+
+**Nothing existing breaks.** All 360 artifacts in the tree (contracts fixtures valid/invalid/unresolved, examples,
+skill assets, test data) validated on parent and fix with every profile's vocabulary: no change of `ok` or of the error
+set; the only difference is one added warning (`observable.unfolded_target_undeclared`) on the invalid fixture
+`dataset_simulated_unfolded.json`, whose expected error stays `dataset.simulated_level`.
+`tools/run_all_checks.py --no-cli --jobs 6`: 25 pass, 0 fail, 2 skip (`--no-cli`); unittest 4717 run, 4585 pass,
+0 failures, 0 errors, 132 skip; all profile suites pass. Lint (CI pins, `~/.venvs/hep-research-ci`): ruff 0.16.10
+`check core contracts` all passed; mypy 2.4.0 no issues in 98 files.
+
+**Environment.** E2 (`~/.venvs/hep-research-e2`, Python 3.13.2) for tests and the check suite; CI-lock venv for lint.
+
 ## ANISO-CL-RANGE (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `fix/aniso-cl-bdt-gate` from `b45e4037`)
 
 Robust-fix S4, parent `b45e4037` (release 0.22.0). `skills/hep-measurement/scripts/anisotropy.py harmonic --cl 0.3`

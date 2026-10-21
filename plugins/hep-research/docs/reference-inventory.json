@@ -456,7 +456,7 @@
     "tests/skills/hep_authoring/test_venues_and_sources_com4.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "4eae529b 2026-10-22"
   },
   {
    "path": "skills/hep-authoring/references/legends-panels-and-export.md",
@@ -3720,7 +3720,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "da0e37d2 2026-10-22"
+   "last_commit": "61920170 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
