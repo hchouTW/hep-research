@@ -347,3 +347,82 @@ def top_up(units: list[dict], base: list[str], candidates: list[str], n: int, se
         have += sample_deep(units, rest, n - len(have), seed_hex)
     order = [u["id"] for u in units]
     return [u for u in order if u in set(have)]
+
+
+# --- copies of the document (P3 pilot: reviewers read the original elsewhere on the host) ----------------------------
+
+COPY_SHARE = 0.5          # a file holding at least this share of the document's long units is a copy or a version
+COPY_MIN_CHARS = 40       # units shorter than this are too generic to count
+COPY_MAX_BYTES = 4 << 20
+COPY_SUFFIXES = {".md", ".markdown", ".txt", ".tex", ".rst", ".html", ".json", ".yaml", ".yml", ".orig", ".bak", ""}
+
+
+def copy_probes(units: list[dict]) -> list[str]:
+    """Whitespace-normalised texts of the document's long units: what a copy or version of it would contain."""
+    return [t for t in (norm_ws(u["text"]) for u in units) if len(t) >= COPY_MIN_CHARS]
+
+
+def copy_share(text: str, probes: list[str]) -> float:
+    if not probes:
+        return 0.0
+    body = norm_ws(text)
+    return sum(1 for p in probes if p in body) / len(probes)
+
+
+def is_copy(path: Path, probes: list[str]) -> bool:
+    try:
+        if not path.is_file() or path.stat().st_size > COPY_MAX_BYTES:
+            return False
+        text = path.read_bytes().decode("utf-8", errors="ignore")
+    except OSError:
+        return False
+    if probes and not any(p in norm_ws(text) for p in sorted(probes, key=len, reverse=True)[:5]):
+        return False
+    return copy_share(text, probes) >= COPY_SHARE
+
+
+_TEXTS: dict = {}
+
+
+def _texts(root: Path, cache: bool) -> list[tuple[Path, str]]:
+    """(path, whitespace-normalised text) of the text files under root; cached per process for the plugin, which
+    does not change while the driver runs."""
+    if cache and root in _TEXTS:
+        return _TEXTS[root]
+    out = []
+    for parent, dirs, files in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith(".") and d != "reviews")
+        for f in sorted(files):
+            p = Path(parent) / f
+            if p.suffix.lower() not in COPY_SUFFIXES:
+                continue
+            try:
+                if p.stat().st_size > COPY_MAX_BYTES:
+                    continue
+                out.append((p, norm_ws(p.read_bytes().decode("utf-8", errors="ignore"))))
+            except OSError:
+                continue
+    if cache:
+        _TEXTS[root] = out
+    return out
+
+
+def find_copies(roots: list[Path], units: list[dict], skip: list[Path], cached: tuple = (PLUGIN,)) -> list[str]:
+    """Readable files under roots that are copies or versions of the document (for the start warning)."""
+    probes = copy_probes(units)
+    if not probes:
+        return []
+    top = sorted(probes, key=len, reverse=True)[:5]
+    skip = [Path(s).resolve() for s in skip]
+    cached = {Path(c).resolve() for c in cached}
+    out = []
+    for root in roots:
+        root = Path(root).resolve()
+        if not root.is_dir():
+            continue
+        for p, body in _texts(root, root in cached):
+            if any(p == s or s in p.parents for s in skip) or not any(t in body for t in top):
+                continue
+            if sum(1 for q in probes if q in body) / len(probes) >= COPY_SHARE:
+                out.append(str(p))
+    return out

@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 
 from contracts.review import parse_time, sha256_file
+from review_lib import units as U
 from review_lib.store import read_json
 
 PLUGIN = Path(__file__).resolve().parents[4]
@@ -31,7 +32,7 @@ def _within(p: Path, d: Path) -> bool:
     return p == d or d in p.parents
 
 
-def classify(rv, adir: Path, path_str: str, started, shared: list[Path], doc: Path) -> dict:
+def classify(rv, adir: Path, path_str: str, started, shared: list[Path], doc: Path, probes=()) -> dict:
     """{exists, local, sha256, forbidden (reason or None), in_work} of one path a record names; a relative path is
     relative to the attempt folder, or to the plugin root when it names no file there."""
     if URLISH.match(path_str):
@@ -58,6 +59,8 @@ def classify(rv, adir: Path, path_str: str, started, shared: list[Path], doc: Pa
         rel = p.relative_to(PLUGIN).as_posix()
         if any(fnmatch.fnmatch(rel, pat) for pat in IMPLEMENTATION):
             forbidden = "the mechanism's implementation files"
+    if forbidden is None and probes and not _within(p, (adir / "packet").resolve()) and U.is_copy(p, list(probes)):
+        forbidden = "a copy or version of the delivered document"
     if forbidden is None and p.exists():
         for d in shared:
             if _within(p, d.resolve()):
@@ -88,10 +91,11 @@ def build_context(rv, *, r: int, sid: str, k: int, slot: dict, dispatched: dict,
     canaries = read_json(cpath)["canaries"] if cpath.exists() else []
     started = parse_time(dispatched["started"])
     doc = (rv.project / rv_document(rv)).resolve()
+    probes = U.copy_probes(read_json(rv.units_path(r))["units"])
     files = {}
     if isinstance(record, dict):
         for p in record_paths(record):
-            files[p] = classify(rv, adir, p, started, shared, doc)
+            files[p] = classify(rv, adir, p, started, shared, doc, probes)
     items = {}
     if slot["role"] == "arbiter":
         for it in read_json(pdir / "items.json")["items"]:

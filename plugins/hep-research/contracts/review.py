@@ -383,7 +383,8 @@ def receipt_codes(record, ctx: dict) -> list[tuple[str, str]]:
     elif ident == ctx.get("author"):
         out.append(_p("same_identity", "the reviewer's identity is the author's"))
     files = ctx.get("files", {})
-    bad_read = [p["path"] for p in record["paths_read"] if (files.get(p["path"]) or {}).get("forbidden")]
+    bad_read = [f"{p['path']} ({files[p['path']]['forbidden']})" for p in record["paths_read"]
+                if (files.get(p["path"]) or {}).get("forbidden")]
     if bad_read:
         out.append(_p("read_outside_packet", f"forbidden paths read: {bad_read}"))
     hashed = [(p["path"], p["sha256"]) for p in record["paths_read"]]

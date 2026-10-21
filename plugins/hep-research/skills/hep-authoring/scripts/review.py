@@ -149,10 +149,29 @@ def attempt_seed(rv: Review, r: int, sid: str, k: int) -> str:
     return U.derive(round_seed(rv, r), "attempt", sid, k)
 
 
-def allocate_slots(lenses: list[str], models: list[str], seed: str, first: int = 1, offset: int = 0) -> dict:
-    """A2: one lens and one shadow slot per lens, random labels, models in rotation (a shadow's model differs from its
-    lens's when there is more than one model)."""
-    roles = [("lens", L) for L in lenses] + [("shadow", L) for L in lenses]
+def slot_plan(units: list[dict], lenses: list[str], deep: dict) -> tuple[list, dict]:
+    """Which lenses get a lens slot and a shadow slot (A2), and why the others get none: a lens with no in-scope unit
+    has nothing to review; its shadow needs focus units, i.e. canaries (facts, design) or decoy candidates. Found in
+    the P3 pilot: empty slots cost an agent each and review nothing."""
+    plan, none = [], {}
+    table = lens_table()
+    for L in lenses:
+        if not any(u["in_scope"].get(L) for u in units):
+            none[L] = "no unit in scope: no lens or shadow slot"
+            continue
+        plan.append(("lens", L))
+        if table.get(L, {}).get("canary") in ("facts", "design") or _decoys(units, deep.get(L, []), set(), L, "0" * 64):
+            plan.append(("shadow", L))
+        else:
+            none[L] = "no canaries and no decoy candidates: no shadow slot"
+    return [p for p in plan if p[0] == "lens"] + [p for p in plan if p[0] == "shadow"], none
+
+
+def allocate_slots(lenses: list[str], models: list[str], seed: str, first: int = 1, offset: int = 0,
+                   plan: list | None = None) -> dict:
+    """A2: one lens and one shadow slot per lens (or the given plan), random labels, models in rotation (a shadow's
+    model differs from its lens's when there is more than one model)."""
+    roles = plan if plan is not None else [("lens", L) for L in lenses] + [("shadow", L) for L in lenses]
     ids = [f"S{i}" for i in range(first, first + len(roles))]
     U.rng(U.derive(seed, "slots")).shuffle(ids)
     out = {}
@@ -228,9 +247,13 @@ def cmd_start(ctx: Ctx) -> dict:
     rs = round_seed(rv, 1)
     deep = {L: U.sample_deep(units, [u["id"] for u in units if u["in_scope"][L]], int(eff["deep_sample"]),
                              U.derive(rs, "deep", L)) for L in lenses}
-    slots = allocate_slots(lenses, eff["models"], rs)
+    plan, no_slot = slot_plan(units, lenses, deep)
+    slots = allocate_slots(lenses, eff["models"], rs, plan=plan)
     rv.save_slots({"1": slots})
-    write_json(rv.private / "round-1" / "sample.json", {"lenses": lenses, "deep": deep})
+    copies = U.find_copies([PLUGIN, ctx.project], units, [doc, ctx.project / "reviews"])
+    shown = [_shown_path(c, ctx.project) for c in copies]
+    write_json(rv.private / "round-1" / "sample.json", {"lenses": lenses, "deep": deep, "no_slot": no_slot,
+                                                         "copies": shown})
     rv.save_seeds({"seed": str(seed), "master": master, "rounds": {"1": rs}})
     rv.append("round_started", ctx.now, {
         "review_id": rid, "round": 1, "document": rel, "source_sha256": source_sha,
@@ -238,8 +261,25 @@ def cmd_start(ctx: Ctx) -> dict:
         "slots": [{"slot_id": s, "model": slots[s]["model"]} for s in sorted(slots, key=R._slot_order)],
         "author": {"identity": a.author, "model": a.author_model}, "carry_forward": {}, "removed_findings": []})
     ctx.observe()
-    return {"status": "ok", "review_id": rid, "round": 1, "units": len(units), "lenses": lenses,
-            "slots": len(slots), "next": "run next"}
+    out = {"status": "ok", "review_id": rid, "round": 1, "units": len(units), "lenses": lenses,
+           "slots": len(slots), "no_slot": no_slot, "next": "run next"}
+    if shown:
+        out["warning"] = ("reviewers can read copies or versions of this document (receipt rejects a record that cites "
+                          "one, but reading one is still possible): " + ", ".join(shown) + ". For an evaluation, "
+                          "review a document that exists nowhere else on the host, git history included.")
+        out["copies"] = shown
+    return out
+
+
+def _shown_path(p: str, project: Path) -> str:
+    """A path for messages and the report, relative to the plugin or the project (no absolute paths in the report)."""
+    q = Path(p)
+    for root, label in ((PLUGIN, "<plugin root>"), (project, "<project>")):
+        try:
+            return f"{label}/{q.relative_to(root.resolve()).as_posix()}"
+        except ValueError:
+            continue
+    return p
 
 
 def cmd_next(ctx: Ctx) -> dict:
@@ -331,6 +371,8 @@ def cmd_dispatch(ctx: Ctx) -> dict:
         mc = _main_lens_canaries(ctx, rv, r, main, lens)
         cu = [c["unit"] for c in mc]
         focus = cu + _decoys(units, sample["deep"][lens], set(cu), lens, U.derive(aseed, "decoys"))
+        if not focus:  # no canaries this attempt and no decoy that meets the evidence rule: relax it (never empty)
+            focus = _decoys(units, sample["deep"][lens], set(), lens, U.derive(aseed, "decoys"), relaxed=True)
         focus = [u["id"] for u in units if u["id"] in set(focus)]
     else:
         it = st["items"][info["item"]]
@@ -410,16 +452,16 @@ def _previous(rv: Review, c: dict) -> dict:
     return {"claim": claim["summary"], "verdict": v["verdict"], "rationale": v["rationale"]}
 
 
-def _decoys(units: list[dict], lens_deep: list[str], exclude: set, lens: str, seed: str) -> list[str]:
+def _decoys(units: list[dict], lens_deep: list[str], exclude: set, lens: str, seed: str, relaxed: bool = False) -> list[str]:
     """Two decoys for a shadow: from the main lens's deep units first, then its in-scope units; facts and sources
-    decoys must carry a plugin path, file:line or URL (spec 4.5)."""
+    decoys must carry a plugin path, file:line or URL (spec 4.5) unless relaxed."""
     by = {u["id"]: u for u in units}
 
     def ok(uid):
         if uid in exclude:
             return False
         t = by[uid]["text"]
-        return lens not in ("facts", "sources") or bool(U.plugin_paths_in(t) or U.FILE_LINE.search(t) or U.URL.search(t))
+        return relaxed or lens not in ("facts", "sources") or bool(U.plugin_paths_in(t) or U.FILE_LINE.search(t) or U.URL.search(t))
 
     r = U.rng(seed)
     first = [u for u in lens_deep if ok(u)]
@@ -627,7 +669,9 @@ def cmd_rereview(ctx: Ctx) -> dict:
     rs = round_seed(rv, nr)
     allslots = rv.slots()
     old = allslots[str(r)]
-    slots = allocate_slots(lenses, cfg["models"], rs, offset=r)
+    deep_pre = {L: [u["id"] for u in units if u["in_scope"].get(L)] for L in lenses}
+    plan, no_slot = slot_plan(units, lenses, deep_pre)
+    slots = allocate_slots(lenses, cfg["models"], rs, offset=r, plan=plan)
     allslots[str(nr)] = slots
     rv.save_slots(allslots)
     new_lens_slot = {v["lens"]: s for s, v in slots.items() if v["role"] == "lens"}
@@ -642,7 +686,7 @@ def cmd_rereview(ctx: Ctx) -> dict:
             if f["round"] == r and old.get(f["slot"], {}).get("lens") == L:
                 base += [old_to_new[u] for u in f["units"] if u in old_to_new]
         deep[L] = U.top_up(units, base, scope_ids, int(cfg["deep_sample"]), U.derive(rs, "deep", L))
-    write_json(rv.private / f"round-{nr}" / "sample.json", {"lenses": lenses, "deep": deep})
+    write_json(rv.private / f"round-{nr}" / "sample.json", {"lenses": lenses, "deep": deep, "no_slot": no_slot})
     rv.append("round_started", ctx.now, {
         "review_id": rv.id, "round": nr, "document": st["document"], "source_sha256": table["source_sha256"],
         "units_sha256": R.sha256_file(rv.units_path(nr)), "config": st["rounds"][r]["config"],

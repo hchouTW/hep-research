@@ -9,7 +9,7 @@
             "review_points": "hep-citations: what a source states, read levels; hep-computing: what code and scripts do"},
   "design": {"fixed": true, "evidence": "any", "canary": "design",
              "scope": "All substantive units",
-             "witness": "The cited section or table row exists; the new section or row exists and says something else",
+             "witness": "Types: a reference to a numbered section or table row (the cited one exists; the new one exists and says something else); a value the document states twice with the same following word (the other unit states the original; nothing states the new value); a back-quoted name the document uses twice (the other unit uses the original; the misspelt name occurs nowhere)",
              "task": "Check that the design is consistent: rules, tables, states and cross-references agree with each other and with the stated goals.",
              "review_points": "hep-computing: engineering playbook (failure modes, definitions of done)"},
   "sources": {"fixed": true, "evidence": "external", "canary": null,

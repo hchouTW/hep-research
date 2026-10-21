@@ -154,7 +154,15 @@ hep-authoring (ownership row "Independent review packets, review records and the
 17. The instruction file names `contracts/review.py` by its absolute path so that a reviewer can run the self-check;
     the packet and instruction hashes therefore differ between plugin installs at different paths. Runs on one
     install are byte-for-byte reproducible (tested); across installs they are not.
-18. The hep-authoring description gained "independent review of a draft by agents that did not write it", so the
+18. Fixes from the P3 stage-1 pilot (Decision 4): a lens with no unit in scope gets no lens or shadow slot, and a
+    shadow is allocated only when its lens has canaries or decoy candidates (spec A2 says each lens has one shadow
+    slot; an empty slot reviews nothing and costs an agent); a shadow whose focus would still be empty relaxes the
+    decoy evidence rule rather than run empty. Receipt treats any file holding at least half of the document's longer
+    units as a copy or version of the delivered document (`read_outside_packet`), and `start` warns about such files
+    in the plugin and the project. Design canaries add two types under the spec's design witness rule (the cited unit
+    exists and contradicts the mutated statement): a repeated value made inconsistent, and a repeated back-quoted
+    name misspelt once.
+19. The hep-authoring description gained "independent review of a draft by agents that did not write it", so the
     English routing cases have a trigger in its "Use when" part.
 
 ## Open items (stop conditions and questions for the maintainer)
@@ -197,7 +205,7 @@ Maintainer, 2026-10-21 (recommendations accepted; the numbers follow spec sectio
    PR (one seed reused across reviews repeated nonces; plugin-relative paths were rejected), and P2 items: copies of
    the delivered document elsewhere on the host leak it (two reviewers diffed against the plugin original), design
    canaries never fired on documents without numbered references, empty-scope slots still cost an agent. Full P3
-   only after those. Recommended: stage it. A pilot of 5 documents with two arms (author self-check, four lenses;
+   only after those; the three are fixed in this PR (reading 18). Recommended: stage it. A pilot of 5 documents with two arms (author self-check, four lenses;
    about 50 agent runs) checks the injection script and the provisional thresholds; the full design (at least 20
    documents, four arms, about 19 agent runs per document, about 500 with re-dispatches) only after it.
 5. **O04/O14: a closed agent review does not count** as a review record by a non-author reviewer and does not meet

@@ -33,6 +33,12 @@ forge it. It is advisory input that a human reviewer may cite in their own recor
 | Review directory | `<project>/reviews/<review-id>/`: the event log and head, unit tables, packets, records, the report file (report.md) |
 | Private directory | config `private_dir`, else `$XDG_STATE_HOME/hep-research/reviews/` or `~/.local/state/hep-research/reviews/`: canaries, witnesses, seeds, the slot table. Outside the project and the host's shared directories |
 
+**Copies of the document.** Review a document that exists nowhere else on the host. `start` warns when the plugin
+or the project holds a copy or version of it (at least half of its longer units), and receipt rejects a record that
+cites one (`read_outside_packet`), but an agent can still read one without citing it; git history and installed
+plugin caches are not scanned. **Slots.** A lens with no unit in scope gets no slot, and its shadow only when it can
+have focus units; `start` lists both under `no_slot` and the report says why.
+
 Every command prints one JSON object with a `status`. Pass `--now` and `--observation FILE` only for reproducible test
 runs. All review state is in files, so a review resumes after a host restart.
 

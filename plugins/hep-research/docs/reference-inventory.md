@@ -107,7 +107,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `general-diagram-principles.md` | hep-authoring | 7.8 | no | 2 | - | ebb58136 2026-10-19 |
 | `grant-and-fellowship-proposal-writing.md` | hep-authoring | 4.8 | no | 1 | - | ebb58136 2026-10-19 |
 | `graphviz-patterns.md` | hep-authoring | 3.5 | no | 2 | - | ebb58136 2026-10-19 |
-| `independent-review.md` | hep-authoring | 9.7 | yes | 2 | - | 95d79322 2026-10-21 |
+| `independent-review.md` | hep-authoring | 10.2 | yes | 3 | - | 54823740 2026-10-21 |
 | `latex-mechanics-and-tooling.md` | hep-authoring | 13.4 | no | 7 | - | ebb58136 2026-10-19 |
 | `latex-venue-setup.md` | hep-authoring | 30.4 | yes | 13 | - | ebb58136 2026-10-19 |
 | `legends-panels-and-export.md` | hep-authoring | 6.6 | no | 2 | - | ebb58136 2026-10-19 |

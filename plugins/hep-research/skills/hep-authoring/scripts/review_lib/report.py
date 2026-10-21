@@ -75,6 +75,15 @@ def build(rv, events: list) -> str:
         if d["canaries_expected"]:
             (nocontrol if d["canaries"] == 0 else shortfall if d["canaries"] < d["canaries_expected"] else []).append(f"{r}/{sid}")
     out += ["", f"Agents dispatched: {dispatched_total}.", ""]
+    for r in sorted(st["rounds"]):
+        sp = rv.private / f"round-{r}" / "sample.json"
+        sample = read_json(sp) if sp.exists() else {}
+        for lens, why in sorted((sample.get("no_slot") or {}).items()):
+            out.append(f"- Round {r}, lens {lens}: {why}.")
+        if sample.get("copies"):
+            out.append(f"- Round {r}: copies or versions of the document were readable by reviewers (a record citing "
+                       f"one is rejected): {', '.join(sample['copies'])}.")
+    out.append("")
     out += ["## Canaries", "", f"- Hit rate (skim): {_pct(*hits['skim'])}", f"- Hit rate (deep): {_pct(*hits['deep'])}",
             f"- Exact-correction rate: {_pct(*exact)}",
             f"- canary_shortfall: {', '.join(shortfall) or 'none'}",

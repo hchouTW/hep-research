@@ -174,6 +174,60 @@ def design_candidates(unit: dict, units: list[dict], r) -> list[dict]:
     return out
 
 
+def _word_after(text: str, end: int) -> str:
+    m = re.match(r"\s*([A-Za-z][\w-]*)", text[end:])
+    return m.group(1) if m else ""
+
+
+def repeated_value_candidates(unit: dict, units: list[dict], doc: str, r) -> list[dict]:
+    """A number the document states again elsewhere with the same following word ('80 V parts' twice): changing one
+    occurrence makes the document contradict itself. Right: the other unit states the original; wrong: nothing in
+    the document states the new value with that word."""
+    out, text = [], unit["text"]
+    taken = [(m.start(), m.end()) for m in LINE_REF.finditer(text)] + [(m.start(), m.end()) for m in re.finditer(r"`[^`]*`", text)]
+    for m in NUM_TOKEN.finditer(text):
+        if any(s <= m.start() < e for s, e in taken):
+            continue
+        val, word = m.group(0), _word_after(text, m.end())
+        if not word or val in ("0", "1"):
+            continue
+        same = re.compile(r"(?<![\d.])" + re.escape(val) + r"\s*" + re.escape(word) + r"\b")
+        others = [u for u in units if u["id"] != unit["id"] and u["kind"] != "heading" and same.search(u["text"])]
+        if not others:
+            continue
+        new = _shift(val, r, lambda c: re.search(r"(?<![\d.])" + re.escape(c) + r"\s*" + re.escape(word) + r"\b", doc))
+        if new is None:
+            continue
+        out.append({"span": (m.start(), m.end()), "new_token": new, "type": "repeated-value",
+                    "witness_right": {"cited": others[0]["id"], "kind": "repeated-value", "ref": f"{val} {word}"},
+                    "witness_wrong": {"cited": others[0]["id"], "kind": "repeated-value", "ref": f"{new} {word}",
+                                      "reason": f"the document elsewhere says {val} {word}"}})
+        break
+    return out
+
+
+def repeated_term_candidates(unit: dict, units: list[dict], doc: str, r) -> list[dict]:
+    """A back-quoted name the document uses again elsewhere: misspelling one occurrence makes the names disagree.
+    Right: another unit uses the name; wrong: the misspelt name occurs nowhere else."""
+    out, text = [], unit["text"]
+    for m in re.finditer(r"`([A-Za-z][\w./-]{3,})`", text):
+        term = m.group(1)
+        others = [u for u in units if u["id"] != unit["id"] and f"`{term}`" in u["text"]]
+        if not others:
+            continue
+        stem, dot, ext = term.rpartition(".")
+        new = f"{stem}s.{ext}" if dot and stem and "/" not in ext else term + "s"
+        if new in doc:
+            continue
+        a = m.start(1)
+        out.append({"span": (a, a + len(term)), "new_token": new, "type": "repeated-term",
+                    "witness_right": {"cited": others[0]["id"], "kind": "repeated-term", "ref": term},
+                    "witness_wrong": {"cited": others[0]["id"], "kind": "repeated-term", "ref": new,
+                                      "reason": f"the document elsewhere writes {term}"}})
+        break
+    return out
+
+
 def two_sided(c: dict) -> bool:
     return bool(c.get("witness_right")) and bool(c.get("witness_wrong"))
 
@@ -188,7 +242,13 @@ def make_canaries(lens: str, units: list[dict], doc: str, eligible: list[str], e
         if uid in exclude:
             continue
         u = by_id[uid]
-        found = facts_candidates(u, doc, r, root) if lens == "facts" else design_candidates(u, units, r) if lens == "design" else []
+        if lens == "facts":
+            found = facts_candidates(u, doc, r, root)
+        elif lens == "design":
+            found = (design_candidates(u, units, r) or repeated_value_candidates(u, units, doc, r)
+                     or repeated_term_candidates(u, units, doc, r))
+        else:
+            found = []
         for c in found:
             a, b = c["span"]
             win = unique_window(doc, u["text"], a, b)

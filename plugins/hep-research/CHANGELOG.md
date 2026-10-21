@@ -33,6 +33,11 @@ Contracts 3.3.0 (minor): independent review of drafts, P1 (`docs/dev/independent
   `docs/maintenance.md` plus the non-independent `tool-output` and `internal`. A closed agent review is not a
   non-author review record for the v6.3 conditions O04/O14 (the author agent could forge one); it is advisory input a
   human reviewer may cite.
+- **Fixes from the P3 stage-1 pilot.** Receipt rejects a record that cites a copy or version of the delivered
+  document anywhere on the host (`read_outside_packet`), and `start` warns about copies in the plugin and the project;
+  design canaries fire on documents without numbered references (a repeated value made inconsistent, a repeated name
+  misspelt); a lens with nothing in scope gets no slot and a shadow only when it can have focus units; one `--seed`
+  reused for several reviews no longer repeats their nonces; records may cite plugin-relative paths.
 - `tools/check_packaging.py`: the local-hostname rule no longer matches a name followed by `.md` or `.json`, so the
   Claude Code memory and settings file names the review host notes need are not read as hostnames (planted hostnames
   still fail; maintainer decision). The host notes write temporary and Claude configuration folders as placeholders.

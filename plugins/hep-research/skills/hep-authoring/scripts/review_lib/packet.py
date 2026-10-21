@@ -162,7 +162,10 @@ def render_instructions(*, kind: str, lens: str, lens_info: dict, scope: dict, r
               "working directory. Write every file you create (fetched copies, script outputs, scripts) in `work/`.",
               "- Read the packet files freely. You may read files of the hep-research plugin and public web pages as "
               "evidence; save a copy of every fetched page in `work/` and record its URL.",
-              "- Never read: the original delivered document (review the packet's document.md), the private review "
+              "- Never read any other copy or version of the document under review: not the original delivered "
+              "document, and not a copy of it in the plugin, in git history, in an installed plugin cache or "
+              "anywhere else (review the packet's document.md only). A record that cites such a file is rejected.",
+              "- Never read: the private review "
               "directory, the review event log, other slots' or other attempts' folders, the author's traceability "
               "records, or the mechanism's implementation files (skills/hep-authoring/scripts/review*.py, "
               "skills/hep-authoring/scripts/review_lib/, skills/hep-authoring/assets/review-lenses.json, "
