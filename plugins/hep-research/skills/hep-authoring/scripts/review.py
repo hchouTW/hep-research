@@ -96,6 +96,8 @@ class Ctx:
             if not rid:
                 open_ = [x for x in find_reviews(self.project)
                          if R.fold(Review(self.project, x, self.private_root).events())["terminal"] is None]
+                if not open_ and len(find_reviews(self.project)) == 1:
+                    open_ = find_reviews(self.project)  # a finished review answers next with stop
                 if len(open_) != 1:
                     raise ReviewError(f"{len(open_)} open reviews in {self.project / 'reviews'}; name one with --review")
                 rid = open_[0]
@@ -113,6 +115,8 @@ class Ctx:
         events, problems = self.rv.verified()
         if problems:
             return events, None, problems
+        if R.fold(events)["terminal"]:
+            return self.state()  # a closed or superseded review is never written again
         data, late = OBS.observe(self.rv, self.now, self.given, self.private_root)
         for d in late:
             self.rv.append("late", self.now, d)
@@ -172,7 +176,7 @@ def build_round(ctx: Ctx, rv: Review, r: int, text: str, lenses: list[str], prev
 def cmd_start(ctx: Ctx) -> dict:
     a = ctx.args
     doc = Path(a.doc)
-    doc = (doc if doc.is_absolute() else Path.cwd() / doc).resolve()
+    doc = (doc if doc.is_absolute() else ctx.project / doc).resolve()
     if not doc.is_file():
         raise ReviewError(f"no document {a.doc}")
     try:

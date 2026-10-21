@@ -12,7 +12,7 @@ from pathlib import Path
 
 from review_lib.units import PLUGIN, path_tokens, plugin_index, rng
 
-LINE_REF = re.compile(r"(?P<path>(?:<plugin root>/)?[\w./-]+\.[A-Za-z0-9]+):(?P<a>\d+)(?:-(?P<b>\d+))?(?![\d-])")
+LINE_REF = re.compile(r"(?P<path>(?:<plugin root>/)?[A-Za-z_.][\w./-]*):(?P<a>\d+)(?:-(?P<b>\d+))?(?![\d-])")
 NUM_TOKEN = re.compile(r"(?<![\w.])\d+(?:\.\d+)?(?![\w.]*\d)")
 SECTION_REF = re.compile(r"§\s?(?P<n>\d+(?:\.\d+)*)|\b[Ss]ection (?P<m>\d+(?:\.\d+)*)")
 ROW_REF = re.compile(r"\brow (?P<n>\d+)\b")

@@ -30,11 +30,11 @@ BACKTICK = re.compile(r"`[^`\n]+`")
 PATH = re.compile(r"(?:<plugin root>/)?(?:[\w.~-]+/)+[\w.-]*|\b[\w-]+\.(?:py|json|jsonl|md|txt|toml|yaml|yml|tex|sh|cfg|csv|lock|C|cpp|h)\b")
 QUOTED = re.compile(r"“[^”]+”|\"[^\"\n]+\"|「[^」]+」|『[^』]+』")
 URL = re.compile(r"https?://[^\s)>\]]+")
-FILE_LINE = re.compile(r"[\w./<>-]+\.[A-Za-z0-9]+:\d+(?:-\d+)?")
+FILE_LINE = re.compile(r"(?<![\w/])(?:<plugin root>/)?(?:[A-Za-z_.][\w.-]*/)*[A-Za-z_][\w.-]*:\d+(?:-\d+)?")
 ZH_NORMATIVE = ("必須", "不得", "不能", "不會", "不包含", "從不", "只有", "應", "應該", "至少", "至多", "只能", "一律", "禁止")
 EN_NORMATIVE = re.compile(r"\b(?:must|must not|should|shall|cannot|never|always|only)\b", re.I)
 ATTRIBUTION = re.compile(r"寫著|依.{0,30}?文件|according to", re.I)
-NAMED_SOURCE = re.compile(r"`[^`]+`|“[^”]+”|\"[^\"]+\"|「[^」]+」|\b(?:docs?|documentation|document|paper|spec|specification|section)\b|§", re.I)
+NAMED_SOURCE = re.compile(r"`[^`]+`|“[^”]+”|\"[^\"]+\"|「[^」]+」|《[^》]+》|\b(?:docs?|documentation|document|paper|spec|specification|section)\b|§", re.I)
 RULE_CODE = re.compile(r"`[a-z]+(?:_[a-z]+)+`")
 ROW_REF = re.compile(r"\brows? \d+|第\s*\d+\s*列")
 
@@ -225,7 +225,8 @@ def in_scope(unit: dict, lens: str, hosts_terms=(), keywords=(), root: Path = PL
     if lens == "facts":
         return bool(plugin_paths_in(t, root)) or any(term in t for term in hosts_terms)
     if lens == "sources":
-        return bool(FILE_LINE.search(t) or URL.search(t) or (ATTRIBUTION.search(t) and NAMED_SOURCE.search(t)))
+        named_zh = re.search(r"依(?:據|照)?\s*\S{1,30}?文件", t)  # 依<name>文件 names the document itself
+        return bool(FILE_LINE.search(t) or URL.search(t) or named_zh or (ATTRIBUTION.search(t) and NAMED_SOURCE.search(t)))
     if lens == "bypass":
         return normative(t) or bool(NUMBER.search(LIST_MARK.sub("", t, count=1)) or RULE_CODE.search(t) or ROW_REF.search(t))
     return any(k.lower() in t.lower() for k in keywords)
