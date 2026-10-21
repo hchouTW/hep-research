@@ -170,7 +170,7 @@ def _filter_lines(st: dict, decisions: dict) -> list[str]:
     """What happened to the filtering pass (spec 6.9, A8)."""
     f = st.get("filter")
     if f is None:
-        return ["- Not run: no accepted round-1 finding to judge." if not filter_pool(st) else "- Pending.", ""]
+        return ["- Not run: no accepted round-1 finding to judge." if not filter_pool(st) else "- Pending."]
     r, sid = f["round"], f["slot_id"]
     atts = st["attempts"].get((r, sid), {})
     head = f"- Slot {sid}, model {f['model']}: {len(f['findings'])} findings, {len(atts)} attempt(s)."
@@ -192,7 +192,7 @@ def _filter_lines(st: dict, decisions: dict) -> list[str]:
         out.append("- Not applied: the filter slot used up its attempts; the findings below are unfiltered.")
     else:
         out.append("- Not applied yet.")
-    return out + [""]
+    return out
 
 
 def _doc_of(p):

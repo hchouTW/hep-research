@@ -5,6 +5,21 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Independent review: per-lens model choice and an optional filtering pass after round 1 (contracts 3.4.0).** Two
+  optional `review-config.json` fields, both set at `review.py start` and both off unless set; without them every
+  allocation, event, packet and report is unchanged bit for bit. `lens_models` (`--lens-model LENS=MODEL`, repeatable;
+  the model must be in `models`) fixes the model of that lens's lens slot in every round; its shadow keeps the
+  rotation and moves off the fixed model. The P3 tuning run found Haiku design-lens slots missing their canaries in 8
+  of 9 attempts, so the reference recommends the strongest model on the design lens. `filter` (`--filter-model M`)
+  adds one filtering pass once round 1's records are received (decide row 8a, before escalation, arbitration and
+  dispose): one agent judges every accepted round-1 finding, controls excepted, from a packet with random ids and no
+  reviewer identity, as `keep` or `drop` with a reason (`filter_record.json`, new sidecar format
+  `review_filter_record` 1.0.0, receipt codes `decisions_incomplete` and `duplicate_target`); at most two attempts,
+  after which the filter is not applied. Its decisions are advice: `next` shows them with `dispose`, every finding is
+  still disposed, and the report lists the kept findings first and the dropped ones apart with their reasons. In the
+  tuning run one Opus pass raised precision from 0.53 to 0.88 at about 2% of the review's tokens. Contracts 3.4.0:
+  the new schema, the `filter_needed` event and the two config fields (fixtures, templates and example artifacts carry
+  the new version string only). Evidence: VALIDATION REVIEW-FILTER-PASS.
 - **anisotropy.py: `--cl` below 0.5 is rejected with its reason, not a TypeError (robust-fix ANISO-CL-RANGE).** An
   upper limit below CL 0.5 is not supported: the expected limit (the Neyman limit at the median isotropic amplitude)
   is empty there and the power constraint undefined. `harmonic --cl` outside [0.5, 1) is rejected (exit 2) with that
