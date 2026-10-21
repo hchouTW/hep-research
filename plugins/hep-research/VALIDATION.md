@@ -1961,6 +1961,23 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## 0.20.0 release check (2026-10-21, E2 and the CI lock)
+
+Release branch `release/0.20.0` from main `c325d678` (#186 Geant4 phase 2; main CI green). Minor release with
+contracts 3.1.0 (GEANT4-PHASE2 below). The ams02-research companion (requires hep-research `>=0.11.0`, profile
+contracts `>=2.0`) needs no change.
+
+What changed: version 0.20.0 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts; CHANGELOG `Unreleased` is `0.20.0`. Examples regenerated (E2; `bc-propagation-fit` with the CI lock): only
+version strings and the hashes that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as
+committed); the sbottom benchmark artifacts' `plugin` string edited by hand; theory-profile artifacts regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4491 tests, 4363 pass, 0 failures, 128 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4491 tests, 4270 pass, 0 failures, 221 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
 ## GEANT4-PHASE2 (2026-10-21, E2 and the CI lock; branch `feat/geant4-phase2` from `538e7c28`, release 0.19.0)
 
 Contracts 3.1.0: evidence records, the `geant4.upgrade_*` rule, the stanza exception, `label --upgrade`,
