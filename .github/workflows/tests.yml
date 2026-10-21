@@ -1,8 +1,8 @@
 # tests: the hep-research test suite (T13). Runs on pushes to main, on pull requests, and weekly against the latest
 # releases. Branch pushes are tested through their pull request only, so each PR commit runs once, not twice.
 #   checks     unit tests (fast tier), profile suites and the static checks, on Python 3.13 (the supported floor) with the
-#              pinned set (plugins/hep-research/requirements-ci.lock); required. The Python version runs as four
-#              parallel jobs: the test modules in two shards balanced by tools/module_timings.json, the profile
+#              pinned set (plugins/hep-research/requirements-ci.lock); required. The Python version runs as five
+#              parallel jobs: the test modules in three shards balanced by tools/module_timings.json, the profile
 #              suites with the static checks, and the AMS-optionality check (run_all_checks.py --part / --shard);
 #              every module is in one shard. Each job writes failures and timings to the job summary.
 #   checks-complete  reconciles the check-run records of all checks jobs (tools/reconcile_check_runs.py): every
@@ -53,8 +53,9 @@ jobs:
       matrix:
         python: ["3.13"]
         part:
-          - {name: "units 1/2", key: units-1, args: "--part units --shard 1/2"}
-          - {name: "units 2/2", key: units-2, args: "--part units --shard 2/2"}
+          - {name: "units 1/3", key: units-1, args: "--part units --shard 1/3"}
+          - {name: "units 2/3", key: units-2, args: "--part units --shard 2/3"}
+          - {name: "units 3/3", key: units-3, args: "--part units --shard 3/3"}
           - {name: "static and profiles", key: static, args: "--part static"}
           - {name: "AMS optional", key: ams-optional, args: "--part ams-optional"}
     steps:
@@ -111,7 +112,7 @@ jobs:
           pattern: check-run-py*
           path: check-runs
       - name: Reconcile the check-run records
-        run: python tools/reconcile_check_runs.py ../../check-runs --python 3.13 --shards 2 --parts static,ams-optional --sha "$GITHUB_SHA" --summary "$GITHUB_STEP_SUMMARY"
+        run: python tools/reconcile_check_runs.py ../../check-runs --python 3.13 --shards 3 --parts static,ams-optional --sha "$GITHUB_SHA" --summary "$GITHUB_STEP_SUMMARY"
 
   stats-backends:
     # hep-statistics audit (CI gate 1): the backends the statistics tests promise (pyhf 0.7.6, ArviZ 0.23.4; NumPy and
