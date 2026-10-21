@@ -67,6 +67,25 @@ class ManifestTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     engine.validate_manifest(self.broken(edit))
 
+    def test_duplicate_seeds_are_refused(self):
+        """Triage T23: a re-hashed manifest whose chunks share one seed was accepted (correlated toys or events)."""
+        m = self.broken(lambda m: [ch.update(seed=42) for ch in m["chunks"]])
+        with self.assertRaises(engine.PartitionError) as cm:
+            engine.validate_manifest(m)
+        self.assertEqual(cm.exception.code, "partition.duplicate_seed")
+        self.assertIsInstance(cm.exception, ValueError)  # callers that catch ValueError still refuse it
+        m = self.broken(lambda m: m["chunks"][2].update(seed=m["chunks"][0]["seed"]))
+        with self.assertRaises(engine.PartitionError):
+            engine.validate_manifest(m)
+        for args in (("j", 10, 5, 7), ("j", 1000, 1, 0), ("j", 7, 3, -4)):  # made manifests keep validating
+            with self.subTest(args=args):
+                made = engine.make_manifest(*args)
+                self.assertIs(engine.validate_manifest(made), made)
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(cp.CampaignError) as cc:
+            cp.init(Path(tmp) / "c", self.broken(lambda m: [ch.update(seed=1) for ch in m["chunks"]]), GOOD)
+        self.assertEqual(cc.exception.code, "campaign.bad_manifest")
+        self.assertIn("partition.duplicate_seed", str(cc.exception))
+
     def test_stale_hash_is_rejected(self):
         with self.assertRaises(ValueError):
             engine.validate_manifest(self.broken(lambda m: m["chunks"][0].update(seed=99), rehashed=False))

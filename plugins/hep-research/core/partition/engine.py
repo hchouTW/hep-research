@@ -120,7 +120,8 @@ PLACEHOLDERS = ("start", "stop", "seed", "out", "id")
 def validate_manifest(manifest) -> dict:
     """The manifest unchanged, or ValueError: a job ID and chunk IDs from a safe charset (a chunk ID builds output
     paths, so '../x' would write outside the campaign), integer ranges that tile [0, n_items) in order, integer seeds,
-    and a manifest_hash that matches the content."""
+    one seed per chunk (two chunks with one seed give correlated toys or events; PartitionError
+    'partition.duplicate_seed', a ValueError), and a manifest_hash that matches the content."""
     if not isinstance(manifest, dict):
         raise ValueError("the manifest must be a JSON object")
     body = {k: v for k, v in manifest.items() if k != "manifest_hash"}
@@ -133,6 +134,7 @@ def validate_manifest(manifest) -> dict:
     if not isinstance(n, int) or isinstance(n, bool) or n <= 0 or not isinstance(chunks, list) or not chunks:
         raise ValueError("the manifest needs a positive integer n_items and a non-empty chunk list")
     seen, pos = set(), 0
+    seeds: dict[int, str] = {}  # seed -> the chunk that took it first
     for ch in chunks:
         cid = ch.get("id") if isinstance(ch, dict) else None
         if not isinstance(cid, str) or not CHUNK_ID.match(cid):
@@ -144,6 +146,11 @@ def validate_manifest(manifest) -> dict:
             raise ValueError(f"chunk {cid}: start, stop and seed must be integers")
         if ch["start"] != pos or ch["stop"] <= ch["start"]:
             raise ValueError(f"chunk {cid}: ranges must tile [0, n_items) in order without gaps or overlaps")
+        if ch["seed"] in seeds:
+            raise PartitionError("partition.duplicate_seed",
+                                 f"chunks {seeds[ch['seed']]} and {cid} share seed {ch['seed']}: every chunk needs its "
+                                 "own seed, or their toys or events are correlated (make_manifest derives them)")
+        seeds[ch["seed"]] = cid
         pos = ch["stop"]
     if pos != n:
         raise ValueError(f"the chunk ranges end at {pos}, not at n_items = {n}")
