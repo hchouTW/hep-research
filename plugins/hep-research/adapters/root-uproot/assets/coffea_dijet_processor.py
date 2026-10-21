@@ -14,7 +14,7 @@ It reads the `Events` tree with coffea's BaseSchema (plain branches: `Jet_pt`, `
 
 Usage: coffea_dijet_processor.py FILE.root [FILE.root ...] [--dataset NAME] [--chunksize 100000]
        [--pt-min 30] [--eta-max 2.5] [--out result.json]
-Prints a JSON summary. Exit 0 done, 2 bad input or a missing package. Requires coffea (tested with 2026.9.0), awkward,
+Prints a JSON summary. Exit 0 done, 2 bad input, 3 a missing package (JSON status missing-dependency). Requires coffea (tested with 2026.9.0), awkward,
 numpy and uproot.
 """
 from __future__ import annotations
@@ -92,8 +92,9 @@ def main(argv=None) -> int:
     ap.add_argument("--out", type=Path)
     args = ap.parse_args(argv)
     if MISSING:
+        print(json.dumps({"status": "missing-dependency", "reason": f"{MISSING} is not installed: pip install coffea"}))
         print(f"coffea_dijet_processor.py: error: {MISSING} is not installed: pip install coffea", file=sys.stderr)
-        return 2
+        return 3
     missing = [f for f in args.files if not Path(f).is_file()]
     if missing:
         print(f"coffea_dijet_processor.py: error: no such file: {missing[0]}", file=sys.stderr)

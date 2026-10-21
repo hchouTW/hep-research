@@ -9,7 +9,8 @@ uproot, awkward and pyarrow versions; the conversion fails (exit 1) if the parts
 
 Usage: root_to_parquet.py --input FILE.root --out DIR [--tree Events] [--branches Jet_pt,Jet_eta,genWeight]
        [--step-size 100000]
-Exit 0 written and checked, 1 entry count mismatch, 2 bad input or a missing package. Requires uproot (tested with 5.7),
+Exit 0 written and checked, 1 entry count mismatch, 2 bad input, 3 a missing package (JSON status
+missing-dependency). Requires uproot (tested with 5.7),
 awkward (2.14) and pyarrow.
 """
 from __future__ import annotations
@@ -68,8 +69,10 @@ def main(argv=None) -> int:
     ap.add_argument("--step-size", type=int, default=100_000)
     args = ap.parse_args(argv)
     if MISSING:
-        print(f"root_to_parquet.py: error: {MISSING} is not installed: pip install uproot awkward pyarrow", file=sys.stderr)
-        return 2
+        reason = f"{MISSING} is not installed: pip install uproot awkward pyarrow"
+        print(json.dumps({"status": "missing-dependency", "reason": reason}))
+        print(f"root_to_parquet.py: error: {reason}", file=sys.stderr)
+        return 3
     if not args.input.is_file():
         print(f"root_to_parquet.py: error: no such file: {args.input}", file=sys.stderr)
         return 2

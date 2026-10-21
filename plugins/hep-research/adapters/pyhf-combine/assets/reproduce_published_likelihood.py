@@ -22,7 +22,7 @@ Published-values file:
 
 Usage: reproduce_published_likelihood.py --bkgonly BkgOnly.json --patchset patchset.json --published P.json --out DIR
 Exit 0 every given value reproduced, 1 a value outside tolerance or refused input, 3 incomplete (a value
-not provided). Needs pyhf (tested with 0.7.6).
+not provided) or pyhf not installed (status missing-dependency). Needs pyhf (tested with 0.7.6).
 """
 from __future__ import annotations
 
@@ -31,12 +31,13 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
-
 try:
+    import numpy as np
     import pyhf
-except ImportError:  # reported by main(), so --help works without pyhf
-    pyhf = None
+    MISSING = None
+except ImportError as _exc:  # reported by main() (exit 3), so --help works without pyhf
+    np = pyhf = None
+    MISSING = _exc.name or "pyhf"
 
 
 def reproduce(bkg_doc, patchset_doc, patch):
@@ -107,8 +108,8 @@ def main(argv=None) -> int:
     ap.add_argument("--out", type=Path, required=True)
     opts = ap.parse_args(argv)
     if pyhf is None:
-        print(json.dumps({"status": "failed", "reason": "pyhf is not installed: pip install 'pyhf>=0.7'"}))
-        return 2
+        print(json.dumps({"status": "missing-dependency", "reason": f"{MISSING} is not installed: pip install 'pyhf>=0.7'"}))
+        return 3
     published = json.loads(opts.published.read_text(encoding="utf-8"))
     try:
         got = reproduce(json.loads(opts.bkgonly.read_text(encoding="utf-8")),

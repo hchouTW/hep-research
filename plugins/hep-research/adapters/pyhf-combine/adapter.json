@@ -35,7 +35,8 @@
   "../../tests/adapters/test_pyhf_publication.py",
   "../../tests/examples/test_end_to_end_sample.py",
   "../../tests/adapters/test_combine_datacard_template.py",
-  "../../tests/adapters/test_pyhf_published_reproduction.py"
+  "../../tests/adapters/test_pyhf_published_reproduction.py",
+  "../../tests/adapters/test_pyhf_adapter_statuses.py"
  ],
  "owner_skill": "hep-statistics",
  "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]"

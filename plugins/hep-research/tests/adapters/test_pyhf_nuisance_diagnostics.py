@@ -56,9 +56,10 @@ def ref_fit_fixed(ref, fixed):
 
 
 class NoPyhf(unittest.TestCase):
-    def test_exits_2_without_pyhf(self):
+    def test_exits_3_without_pyhf(self):  # a missing dependency (hep-computing script contract, T19)
         p = subprocess.run([sys.executable, "-c", NO_PYHF, str(SCRIPT), str(WS)], capture_output=True, text=True, timeout=600)
-        self.assertEqual(p.returncode, 2, p.stderr)
+        self.assertEqual(p.returncode, 3, p.stderr)
+        self.assertEqual(json.loads(p.stdout)["status"], "missing-dependency")
         self.assertIn("pyhf not installed", p.stdout)
 
 

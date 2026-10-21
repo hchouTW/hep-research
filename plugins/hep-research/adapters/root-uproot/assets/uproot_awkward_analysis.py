@@ -7,11 +7,14 @@ below to mirror `rdf_cutflow_analysis.cpp` (nMuon >= 2, leading pT > 25,
 The output histogram keeps sum(w^2), so errors are correct with negative weights.
 
 Usage: python3 uproot_awkward_analysis.py --config analysis-config.example.yaml
-Requires: uproot, awkward, numpy, PyYAML (no ROOT installation needed).
+Requires: uproot, awkward, numpy, PyYAML (no ROOT installation needed); without them it exits 3 with the JSON status
+missing-dependency.
 """
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -83,9 +86,11 @@ def weighted_th1(
 
 def main() -> None:
     args = parse_args()
-    if MISSING:
-        raise SystemExit(f"uproot_awkward_analysis.py: error: {MISSING} is not installed: "
-                         "pip install uproot awkward numpy PyYAML")
+    if MISSING:  # exit 3, a missing dependency, with a JSON status (hep-computing script contract)
+        reason = f"{MISSING} is not installed: pip install uproot awkward numpy PyYAML"
+        print(json.dumps({"status": "missing-dependency", "reason": reason}))
+        print(f"uproot_awkward_analysis.py: error: {reason}", file=sys.stderr)
+        raise SystemExit(3)
     config = load_config(args.config)
 
     tree_name = config["inputs"]["tree"]

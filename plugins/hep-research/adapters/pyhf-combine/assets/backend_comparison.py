@@ -31,7 +31,8 @@ bins), not the toy caps (S7).
 
 Usage: backend_comparison.py --model SHAPE_MODEL.json [--mu-grid 0,0.5,1,2,3] [--out REPORT.json]
 Exit codes: 0 every pointwise and profiled check within tolerance; 1 a check outside tolerance; 2 the model cannot be
-mapped (refused, with the reason) or pyhf is not installed. Needs pyhf (tested with 0.7.6) and NumPy.
+read or mapped (status rejected, with the reason); 3 pyhf is not installed (status missing-dependency). Needs pyhf
+(tested with 0.7.6) and NumPy.
 """
 from __future__ import annotations
 
@@ -178,14 +179,14 @@ def main(argv=None) -> int:
     try:
         import pyhf  # noqa: F401
     except ImportError:
-        print(json.dumps({"status": "refused", "reason": "pyhf is not installed"}))
-        return 2
+        print(json.dumps({"status": "missing-dependency", "reason": "pyhf is not installed: pip install 'pyhf>=0.7'"}))
+        return 3
     try:
         doc = json.loads(Path(a.model).read_text())
         grid = [float(x) for x in a.mu_grid.split(",") if x.strip()]
         rep = compare(doc, grid)
     except (OSError, ValueError, ll.LikelihoodError) as exc:
-        print(json.dumps({"status": "refused", "reason": str(exc)}))
+        print(json.dumps({"status": "rejected", "reason": str(exc)}))  # bad input: exit 2 (core/status.py)
         return 2
     text = json.dumps(rep, indent=1)
     if a.out:

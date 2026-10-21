@@ -24,7 +24,7 @@ to upload, archive the folder's files (tar czf submission.tar.gz -C DIR .).
 Usage: hepdata_export.py --artifact RECORD.json --out DIR [--table-name "Table 1"] [--description TEXT]
        [--engine plain|hepdata_lib]
 Exit 0 written, 1 refused (invalid artifact, unsupported shape, missing covariance file), 2 bad arguments or an
-unreadable --artifact file (status rejected).
+unreadable --artifact file (status rejected), 3 --engine hepdata_lib without hepdata_lib (status missing-dependency).
 Standard library only for the plain engine.
 """
 from __future__ import annotations
@@ -226,6 +226,13 @@ def main(argv=None) -> int:
     ap.add_argument("--engine", choices=("plain", "hepdata_lib"), default="plain")
     ap.add_argument("--permit", type=Path, help="formal-use permit (protected mode only; contracts/permit.py)")
     args = ap.parse_args(argv)
+    if args.engine == "hepdata_lib":
+        try:
+            import hepdata_lib  # noqa: F401
+        except ImportError:  # exit 3, a missing dependency (hep-computing script contract)
+            print(json.dumps({"status": "missing-dependency",
+                              "reason": "hepdata_lib is not installed: pip install hepdata_lib"}))
+            return 3
     try:
         text = args.artifact.read_text(encoding="utf-8")
     except OSError as exc:  # a missing or unreadable input is bad input (exit 2), not a refusal
@@ -236,11 +243,6 @@ def main(argv=None) -> int:
         comment, entries = build_tables(doc, args.artifact.parent, args.table_name, args.description, args.permit,
                                         [args.artifact])
         if args.engine == "hepdata_lib":
-            try:
-                import hepdata_lib  # noqa: F401
-            except ImportError:
-                print(json.dumps({"status": "failed", "reason": "hepdata_lib is not installed: pip install hepdata_lib"}))
-                return 1
             files = write_hepdata_lib(args.out, comment, entries)
         else:
             files = write_plain(args.out, comment, entries)
