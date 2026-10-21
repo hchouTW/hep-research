@@ -174,6 +174,7 @@ def key_in(text: str, key: str) -> bool:
 def effective_config(cfg: dict) -> dict:
     out: dict[str, Any] = {k: v[0] for k, v in CONFIG_RULES.items()}
     out["extra_lenses"] = []
+    out["lens_models"] = {}
     out.update({k: v for k, v in (cfg or {}).items()})
     return out
 
@@ -189,6 +190,14 @@ def config_problems(cfg) -> list[str]:
             continue
         if not low <= v <= high:
             out.append(f"{name}: {v} outside the allowed range {low}-{high}")
+    models: list = cfg["models"] if isinstance(cfg.get("models"), list) else []
+    lm = cfg.get("lens_models")
+    if isinstance(lm, dict):
+        for lens, model in sorted(lm.items()):
+            if not re.fullmatch(r"[a-z][a-z0-9-]*", lens):
+                out.append(f"lens_models: {lens!r} is not a lens name")
+            if isinstance(model, str) and model not in models:
+                out.append(f"lens_models.{lens}: {model} is not in models")
     return out
 
 

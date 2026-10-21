@@ -6,6 +6,8 @@ Baseline: hep-research 0.21.0, contracts 3.2.0 (rechecked 2026-10-21; the design
 
 > Translation note: this is an English translation of `proposal-final.md` (Chinese). Where the spec matches literal Chinese tokens, such as the normative words in §4.3 and the attribution phrases in §4.4, the Chinese tokens are kept, with English glosses, because they are part of the matching rules.
 
+> Amendment (contracts 3.4.0, 2026-10-22): an optional setting from the P3 tuning run (`p3-tune`), off unless the configuration names it. `lens_models` fixes the model of a lens's lens slot (§5.1, A2). Without it every rule below is unchanged, bit for bit.
+
 ## Purpose of the final edition
 
 This is the final design after ten real review rounds. The last round, on the 12th edition, gave these results:
@@ -71,7 +73,7 @@ Main changes from the 12th edition:
 
 | Command | Purpose |
 |---|---|
-| `start DOC [--supersede ID --reason TEXT]` | Start a review: split sentences, assign scope, sample, and allocate slots and models |
+| `start DOC [--supersede ID --reason TEXT] [--lens-model LENS=MODEL ...]` | Start a review: split sentences, assign scope, sample, and allocate slots and models. `--lens-model` (repeatable) sets `lens_models` in the configuration (§5.1); start refuses it when the change would alter a configuration that another unfinished review uses |
 | `next` | Run observe, then decide, and print the next action |
 | `dispatch SLOT` | Build this attempt's packet with its canaries, seed and instruction file, validate the example, produce the dispatch message, and write a `dispatched` event |
 | `returned SLOT` | Run by the author agent when the host reports that an agent has finished |
@@ -201,10 +203,12 @@ The report records the share of substantive units, and P3 calibrates it.
 | `canaries_per_slot` | 2 | 1–3 | Provisional; lower is looser |
 | `extra_lenses[]` | empty | additions only | — |
 | `private_dir` | see §2 | must be outside the project tree and the host's shared directories | — |
+| `lens_models` | empty | lens name → model; every model must be in `models[]`, every lens in the lens table (or `extra_lenses`) | Contracts 3.4.0. P3 tuning: design-lens slots run by Haiku missed their canaries in 8 of 9 attempts, so 4 of 5 were exhausted. Recommended: the strongest model in `models[]` on the design lens (A2) |
 
 - Python rules check the allowed ranges. Any out-of-range value triggers `config_out_of_range`.
 - When any quality threshold is **looser than its default** (the last column above gives the loose direction), a `weak_config` warning is raised and written into the report. For example, setting `unresolved_max_ratio` to 0.49 triggers it even though 0.49 is inside the allowed range.
 - Every value marked "provisional" is on the P3 calibration list. The report prints the full configuration actually used.
+- `lens_models` is not a quality threshold: it never triggers `weak_config`. A `lens_models` model outside `models[]`, or a key that is not a lens name, is `config_out_of_range`. Without it the configuration is read exactly as in contracts 3.3.0.
 
 ### 5.2 Packets
 
@@ -521,6 +525,7 @@ If the session start time cannot be obtained, `isolation_not_yet_effective` is n
 - Fixed lenses: `facts`, `design`, `sources`, `bypass`. Domain lenses are added automatically by keyword. The author can only add lenses with `extra_lenses`, never remove them.
 - Each lens has one shadow slot. Arbitration slots are created as needed.
 - Models are assigned in rotation. Where possible, a shadow uses a different model from its main lens, and an arbiter uses a different model from both parties under arbitration.
+- **Per-lens model (contracts 3.4.0)**: `lens_models` (set with `start --lens-model LENS=MODEL`) fixes the model of that lens's **lens slot** in every round, re-review rounds included. Its shadow keeps the rotation; when the rotation would give the shadow the lens slot's fixed model and `models[]` has another, the shadow takes the next model in the rotation. Lenses not named, and every allocation without `lens_models`, are unchanged bit for bit. Recommendation from the P3 tuning run: put the strongest model of `models[]` on the design lens (`--lens-model design=<strongest>`), since Haiku missed the design canaries (repeated values and terms) in 8 of 9 attempts.
 
 ### A3. Recomputation and verification
 

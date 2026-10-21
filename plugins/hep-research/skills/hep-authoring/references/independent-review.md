@@ -49,6 +49,15 @@ runs. All review state is in files, so a review resumes after a host restart.
 2. Repeat: run `next`, do the action it prints, run `next` again, until it prints `stop`. When the host reports that
    an agent has finished, run `returned SLOT`.
 
+**An optional setting** (contracts 3.4.0; spec sections 5.1 and A2), off unless set, and set at `start`
+(it is written to `review-config.json`; `start` refuses to change a configuration another unfinished review uses):
+
+- `--lens-model LENS=MODEL` (repeatable; config `lens_models`) fixes the model of that lens's lens slot in every round,
+  re-review rounds included. MODEL must be in `models`. The lens's shadow keeps the rotation and never shares the
+  fixed model while `models` has another. **Recommended: the strongest model of `models` on the design lens**, for
+  example `--models haiku,sonnet,opus --lens-model design=opus`: in the P3 tuning run Haiku missed the design-lens
+  canaries (repeated values and terms) in 8 of 9 attempts, and 4 of 5 Haiku design-lens slots were exhausted.
+
 | `next` prints | Do |
 |---|---|
 | `dispatch` with slots | For each slot: `dispatch SLOT`, then pass the two lines it prints, and only those, to a new agent. On Claude Code name a non-fork subagent type. On a host without subagents, open a new session per slot |
@@ -130,6 +139,8 @@ for the document under review or files the author wrote for it. The report count
 evidence separately.
 
 ## Check and report
+
+The report lists the configuration, with `lens_models` when set.
 
 `python3 <plugin root>/contracts/review.py check <review dir>` is read-only. Exit 0 when the review is closed and
 consistent (warnings such as `adopted_unverified`, `no_control`, `canary_shortfall`, `weak_config`,

@@ -37,6 +37,8 @@ def build(rv, events: list) -> str:
     for k, (default, *_r) in CONFIG_RULES.items():
         out.append(f"| {k} | {eff[k]} | {default} |")
     out.append(f"| extra_lenses | {', '.join(eff.get('extra_lenses') or []) or '-'} | - |")
+    if eff.get("lens_models"):
+        out.append("| lens_models | " + ", ".join(f"{k}={v}" for k, v in sorted(eff["lens_models"].items())) + " | - |")
     weak = weak_config(cfg)
     out += ["", f"weak_config: {', '.join(weak) if weak else 'none'}", ""]
     out += ["## Slots", "", "| Round | Slot | Role | Lens | Model | Attempts | Outcome | Reasons | Skim marks | "

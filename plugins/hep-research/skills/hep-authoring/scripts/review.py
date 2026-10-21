@@ -6,6 +6,8 @@ prints a fixed two-line message, which the author agent passes to a new agent th
 
 Usage: python3 review.py COMMAND [options]   (run from the project root, or pass --project)
   start DOC [--supersede ID --reason TEXT] [--seed S] [--author NAME] [--author-model M] [--models A,B]
+        [--lens-model LENS=MODEL ...]
+                               --lens-model fixes the model of a lens's lens slot (repeatable; MODEL in models)
   next                         observe, decide, print the next action (JSON)
   dispatch SLOT                build this attempt's packet, validate its example, print the dispatch message
   returned SLOT                the host reported the agent finished
@@ -168,17 +170,28 @@ def slot_plan(units: list[dict], lenses: list[str], deep: dict) -> tuple[list, d
 
 
 def allocate_slots(lenses: list[str], models: list[str], seed: str, first: int = 1, offset: int = 0,
-                   plan: list | None = None) -> dict:
+                   plan: list | None = None, lens_models: dict | None = None) -> dict:
     """A2: one lens and one shadow slot per lens (or the given plan), random labels, models in rotation (a shadow's
-    model differs from its lens's when there is more than one model)."""
+    model differs from its lens's when there is more than one model). lens_models (config, contracts 3.4.0) fixes the
+    model of a lens's lens slot; its shadow keeps the rotation, moved on to the next model when the rotation would
+    give it the lens slot's fixed model. Without lens_models the allocation is the same as before, bit for bit."""
     roles = plan if plan is not None else [("lens", L) for L in lenses] + [("shadow", L) for L in lenses]
     ids = [f"S{i}" for i in range(first, first + len(roles))]
     U.rng(U.derive(seed, "slots")).shuffle(ids)
+    fixed = lens_models or {}
     out = {}
     m = len(models)
     for n, ((role, lens), sid) in enumerate(zip(roles, ids)):
         i = lenses.index(lens)
         model = models[(i + offset) % m] if role == "lens" else models[(i + offset + 1) % m]
+        if lens in fixed:
+            if role == "lens":
+                model = fixed[lens]
+            elif len(set(models)) > 1:
+                j = i + offset + 1
+                while models[j % m] == fixed[lens]:
+                    j += 1
+                model = models[j % m]
         out[sid] = {"role": role, "lens": lens, "model": model}
     return out
 
@@ -206,26 +219,38 @@ def cmd_start(ctx: Ctx) -> dict:
     except ValueError as exc:
         raise ReviewError("the document must be inside the project") from exc
     text = OBS.read_doc(doc)
-    if not ctx.cfg_path.is_file():
+    existed = ctx.cfg_path.is_file()
+    if not existed:
         models = [m for m in (a.models or "host-default").split(",") if m]
         write_json(ctx.cfg_path, {"config_version": "1.0.0", "models": models})
     cfg = read_json(ctx.cfg_path)
-    probs = R.config_problems(cfg) + OBS.private_dir_problems(cfg, ctx.project, ctx.private_root, ctx.given)
+    new_cfg = _config_options(cfg, a)
+    probs = R.config_problems(new_cfg) + OBS.private_dir_problems(new_cfg, ctx.project, ctx.private_root, ctx.given)
     if probs:
         raise ReviewError("config_out_of_range: " + "; ".join(probs))
-    eff = R.effective_config(cfg)
+    eff = R.effective_config(new_cfg)
     table_l = lens_table()
     unknown = [x for x in eff["extra_lenses"] if x not in table_l]
     if unknown:
         raise ReviewError(f"extra_lenses not in the lens table: {unknown}")
-    open_same = []
+    unknown = [x for x in eff["lens_models"] if x not in table_l and x not in eff["extra_lenses"]]
+    if unknown:
+        raise ReviewError(f"lens_models names lenses not in the lens table: {unknown}")
+    open_same, open_other = [], []
     for x in find_reviews(ctx.project):
         old = Review(ctx.project, x, ctx.private_root)
         st = R.fold(old.events())
-        if st["terminal"] is None and st["document"] == rel:
-            open_same.append(old)
+        if st["terminal"] is None:
+            (open_same if st["document"] == rel else open_other).append(old)
     if open_same and not a.supersede:
         raise ReviewError(f"{rel} already has an unfinished review ({open_same[0].id}); use --supersede ID --reason TEXT")
+    if new_cfg != cfg:
+        keep = [o.id for o in open_same if o.id != a.supersede] + [o.id for o in open_other]
+        if existed and keep:
+            raise ReviewError("--lens-model changes reviews/review-config.json, which the unfinished "
+                              f"review(s) {', '.join(keep)} also use (config_changed there): finish them first")
+        write_json(ctx.cfg_path, new_cfg)
+        cfg = read_json(ctx.cfg_path)
     seed = a.seed if a.seed is not None else secrets.token_hex(16)
     source_sha = U.sha256_text(text)
     rid = "R" + U.derive(source_sha, ctx.now, seed)[:10]
@@ -248,7 +273,7 @@ def cmd_start(ctx: Ctx) -> dict:
     deep = {L: U.sample_deep(units, [u["id"] for u in units if u["in_scope"][L]], int(eff["deep_sample"]),
                              U.derive(rs, "deep", L)) for L in lenses}
     plan, no_slot = slot_plan(units, lenses, deep)
-    slots = allocate_slots(lenses, eff["models"], rs, plan=plan)
+    slots = allocate_slots(lenses, eff["models"], rs, plan=plan, lens_models=eff["lens_models"])
     rv.save_slots({"1": slots})
     copies = U.find_copies([PLUGIN, ctx.project], units, [doc, ctx.project / "reviews"])
     shown = [_shown_path(c, ctx.project) for c in copies]
@@ -268,6 +293,17 @@ def cmd_start(ctx: Ctx) -> dict:
                           "one, but reading one is still possible): " + ", ".join(shown) + ". For an evaluation, "
                           "review a document that exists nowhere else on the host, git history included.")
         out["copies"] = shown
+    return out
+
+
+def _config_options(cfg: dict, a) -> dict:
+    """The configuration with start's --lens-model applied (a copy; unchanged without it)."""
+    out = json.loads(json.dumps(cfg))
+    for item in a.lens_model or []:
+        lens, sep, model = item.partition("=")
+        if not sep or not lens.strip() or not model.strip():
+            raise ReviewError(f"--lens-model needs LENS=MODEL, not {item!r}")
+        out.setdefault("lens_models", {})[lens.strip()] = model.strip()
     return out
 
 
@@ -671,7 +707,7 @@ def cmd_rereview(ctx: Ctx) -> dict:
     old = allslots[str(r)]
     deep_pre = {L: [u["id"] for u in units if u["in_scope"].get(L)] for L in lenses}
     plan, no_slot = slot_plan(units, lenses, deep_pre)
-    slots = allocate_slots(lenses, cfg["models"], rs, offset=r, plan=plan)
+    slots = allocate_slots(lenses, cfg["models"], rs, offset=r, plan=plan, lens_models=cfg["lens_models"])
     allslots[str(nr)] = slots
     rv.save_slots(allslots)
     new_lens_slot = {v["lens"]: s for s, v in slots.items() if v["role"] == "lens"}
@@ -799,6 +835,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--author", default="author-agent")
     p.add_argument("--author-model", default="unspecified")
     p.add_argument("--models", help="models for a new review-config.json, comma-separated")
+    p.add_argument("--lens-model", action="append", metavar="LENS=MODEL",
+                   help="fix the model of LENS's lens slot (config lens_models; repeatable; MODEL must be in models)")
     for name in ("next", "arbitrate", "rereview", "report", "close"):
         sub.add_parser(name, parents=[common])
     for name in ("dispatch", "returned", "receive"):
