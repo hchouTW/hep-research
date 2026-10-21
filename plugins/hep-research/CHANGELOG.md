@@ -3,9 +3,9 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.21.0 (2026-10-21)
 
-Contracts 3.2.0 (minor): simulated dataset-records.
+Contracts 3.2.0 (minor): simulated dataset-records; a reference benchmark for shower development; CI speedup.
 
 - **Tables derived from simulation runs have their own dataset status.** `dataset-record` `extension.status` accepts
   `simulated`: the envelope inputs are the Geant4 run records or study record the table came from (checked by
@@ -45,6 +45,9 @@ Contracts 3.2.0 (minor): simulated dataset-records.
   torch-cpu 9, columnar 9, root-uproot 8, ROOT 4, hepdata 1); pushes to main, the weekly and manual runs keep the full
   suites, and the new `optional-selection` job fails there when a module with an unlocked test is not listed. Tests
   that behave differently with an extra without being skipped are still covered only by those full runs.
+- `tools/check_routing_static.py` reads the journey list from `docs/researcher-journeys.md` (journey coverage was
+  hard-coded to J1-J12, so a missing J13 or J14 case passed); `adapters/geant4/assets/geant4.def` pins the
+  `ubuntu:24.04` base image by digest (still declared only, not built).
 
 ## 0.20.0 (2026-10-21)
 

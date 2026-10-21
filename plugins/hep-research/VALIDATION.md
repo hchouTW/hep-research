@@ -1978,6 +1978,24 @@ committed); the sbottom benchmark artifacts' `plugin` string edited by hand; the
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4491 tests, 4270 pass, 0 failures, 221 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## 0.21.0 release check (2026-10-21, E2 and the CI lock)
+
+Release branch `release/0.21.0` from main `bae1be9a` (#188-#192; main CI green, `optional-selection` ok). Minor release
+with contracts 3.2.0 (simulated dataset status), the Gluckstern few-layer warning, the FoCal-E `longitudinal-profile`
+reference benchmark with mixture materials (GEANT4-FOCAL below) and the CI speedup. The ams02-research companion
+(requires hep-research `>=0.11.0`, profile contracts `>=2.0`) needs no change.
+
+What changed: version 0.21.0 in both manifests, `pyproject.toml`, the README, the two assets, the theory-profile scripts
+and the sbottom benchmark artifacts' `plugin` string (by hand); CHANGELOG `Unreleased` is `0.21.0`. Examples
+regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was left as committed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4510 tests in 383 modules, 4381 pass, 0 failures, 129 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
 ## GEANT4-FOCAL (2026-10-21, E2: macOS 26.5 arm64, Geant4 11.4.3 build A; branch `feat/geant4-focal-benchmark` from main)
 
 Longitudinal-profile reference benchmark against ALICE FoCal-E test-beam data (M. Aehle et al., JINST 19 (2024)
