@@ -32,6 +32,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -150,7 +151,8 @@ def contiguous(units) -> bool:
     pos = [unit_pos(u) for u in units]
     if not pos or None in pos or len(set(pos)) != len(pos):
         return False
-    return max(pos) - min(pos) == len(pos) - 1
+    ints = [p for p in pos if p is not None]
+    return max(ints) - min(ints) == len(ints) - 1
 
 
 def is_numeric_key(key: str) -> bool:
@@ -170,7 +172,7 @@ def key_in(text: str, key: str) -> bool:
 # --- configuration (section 5.1) -------------------------------------------------------------------------------------
 
 def effective_config(cfg: dict) -> dict:
-    out = {k: v[0] for k, v in CONFIG_RULES.items()}
+    out: dict[str, Any] = {k: v[0] for k, v in CONFIG_RULES.items()}
     out["extra_lenses"] = []
     out.update({k: v for k, v in (cfg or {}).items()})
     return out
@@ -279,7 +281,7 @@ def record_rules(record, role: str | None = None, max_units: int = 3) -> list[tu
         for x in v["evidence_ids"]:
             e = ev.get(x)
             if e and e["basis"] == "internal":
-                near = [u for u in e["units"] if unit_pos(u) is not None and any(abs(unit_pos(u) - p) <= 2 for p in own_pos)]
+                near = [u for u in e["units"] if any(abs((unit_pos(u) or -99) - (p or -99)) <= 2 for p in own_pos if p)]
                 if near:
                     out.append(_p("self_citation", f"verdict {v['claim_id']}: internal evidence {x} cites {near}, "
                                                    "the claim's own or adjacent units"))
@@ -324,7 +326,7 @@ def basis_class(e: dict) -> str:
 def _finding_text_ok(f: dict, unit_text: dict) -> bool:
     if not all(u in unit_text for u in f["units"]):
         return False
-    ordered = sorted(f["units"], key=unit_pos)
+    ordered = sorted(f["units"], key=lambda u: unit_pos(u) or 0)
     return norm_ws(f["value"]) in norm_ws(" ".join(unit_text[u] for u in ordered))
 
 
@@ -336,7 +338,7 @@ def finding_ok(f: dict, unit_text: dict, max_units: int) -> bool:
 def canary_hits(record: dict, canaries: list, unit_text: dict, max_units: int) -> dict:
     """{canary unit: [finding ids that hit it]}; a hit passes finding_shape, cites the unit and its value carries the
     new value's key diff (A5)."""
-    out = {c["unit"]: [] for c in canaries}
+    out: dict[str, list] = {c["unit"]: [] for c in canaries}
     for f in record.get("findings", []):
         if not finding_ok(f, unit_text, max_units):
             continue
@@ -455,14 +457,14 @@ def receipt_codes(record, ctx: dict) -> list[tuple[str, str]]:
     attempts = [(a["method"].strip(), a["target"].strip()) for v in verdicts
                 if set(claims[v["claim_id"]]["units"]) & deep_set for a in v["refutation_attempts"]]
     if attempts and len(attempts) >= int(lim["refutation_min_attempts_effective"]):
-        counts = {}
+        counts: dict[tuple, int] = {}
         for a in attempts:
             counts[a] = counts.get(a, 0) + 1
         dup = sum(1 for a in attempts if counts[a] > 1)
         if dup / len(attempts) > float(lim["refutation_duplicate_max"]):
             out.append(_p("refutation_weak", f"{dup} of {len(attempts)} refutation attempts repeat a (method, target)"))
     if deep:
-        by_unit = {u: [] for u in deep}
+        by_unit: dict[str, list] = {u: [] for u in deep}
         for v in verdicts:
             for u in claims[v["claim_id"]]["units"]:
                 if u in by_unit:
@@ -498,10 +500,10 @@ def record_metrics(record: dict, ctx: dict) -> dict:
                 "bases": _basis_counts(record)}
     claims = {c["id"]: c for c in record.get("claims", [])}
     deep = set(ctx.get("deep_units", []))
-    skim = {}
+    skim: dict[str, int] = {}
     for s in record.get("skim", []):
         skim[s["mark"]] = skim.get(s["mark"], 0) + 1
-    dv = {}
+    dv: dict[str, int] = {}
     for v in record.get("verdicts", []):
         if set(claims.get(v["claim_id"], {}).get("units", [])) & deep:
             dv[v["verdict"]] = dv.get(v["verdict"], 0) + 1
@@ -576,7 +578,9 @@ def verify_log(records: list, head) -> list[str]:
         if rec["seq"] != i or rec["prev_sha256"] != (ZERO if prev is None else canonical_sha256(prev)):
             out.append(f"line {i + 1}: chain broken (seq or prev_sha256)")
             break
-        if prev is not None and parse_time(rec["time"]) < parse_time(prev["time"]):
+        t_now = parse_time(rec["time"])
+        t_prev: datetime.datetime | None = parse_time(prev["time"]) if prev is not None else None
+        if t_now and t_prev and t_now < t_prev:
             out.append(f"line {i + 1}: time goes backwards")
             break
         prev = rec
@@ -596,11 +600,15 @@ def verify_log(records: list, head) -> list[str]:
 def transition_problems(records: list) -> list[str]:
     """Event order rules: round_started first; attempts numbered from 1 within the configured maximum; an outcome only
     for a dispatched attempt and at most one; late only after withdrawn; no event after a terminal one."""
-    out = []
+    out: list[str] = []
     if records[0]["event"] != "round_started":
         return ["the first event is not round_started"]
     max_att = None
-    rounds, slots, atts, items, findings = set(), set(), {}, set(), set()
+    rounds: set = set()
+    slots: set = set()
+    atts: dict[tuple, dict] = {}
+    items: set = set()
+    findings: set = set()
     for rec in records:
         e, d, s = rec["event"], rec["data"], rec["seq"]
         if out:
@@ -652,7 +660,7 @@ def _gid(r, sid, local):
 
 def fold(events: list) -> dict:
     """The review state the events describe."""
-    st = {"review_id": None, "document": None, "rounds": {}, "round": 0, "attempts": {}, "arb_slots": {},
+    st: dict[str, Any] = {"review_id": None, "document": None, "rounds": {}, "round": 0, "attempts": {}, "arb_slots": {},
           "observed": None, "findings": {}, "verdicts": {}, "items": {}, "escalations": [], "human": {},
           "terminal": None, "author": None, "extra_rounds": 0, "accept_round_limit": False, "resolved_slots": set(),
           "late": [], "reported": []}
@@ -850,7 +858,7 @@ def snapshot(st: dict, log_ok: bool = True) -> dict:
     for s in rd.get("slots", []):
         slots[s["slot_id"]] = dict(slot_state(st, r, s["slot_id"]), kind="review",
                                    resolved=f"slot:{r}/{s['slot_id']}" in st["human"])
-    for (rr, sid), iid in st["arb_slots"].items():
+    for (rr, sid) in st["arb_slots"]:
         if rr == r:
             slots[sid] = dict(slot_state(st, r, sid), kind="arbiter", resolved=False)
     items = {}
@@ -953,7 +961,8 @@ def carry_forward_plan(st: dict, mapping: dict, slot_roles: dict, new_lens_slot:
     to {role, lens}; new_lens_slot maps a lens to its main slot in the new round."""
     r = st["round"]
     old_to_new = {a: b for a, b in mapping.get("unchanged", []) + mapping.get("changed", [])}
-    plan, removed = {sid: [] for sid in sorted(new_lens_slot.values())}, []
+    plan: dict[str, list] = {sid: [] for sid in sorted(new_lens_slot.values())}
+    removed: list[str] = []
     n = 0
     for g, v in sorted(st["verdicts"].items()):
         info = slot_roles.get(v["slot"], {})
