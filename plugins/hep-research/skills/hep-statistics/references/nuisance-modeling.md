@@ -141,7 +141,7 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
 - **Discrete profiling** (Dauncey, Kenzie, Wardle and Davies, arXiv:1408.6865): the choice among background
   functions is a discrete nuisance; the profile at each value of the parameter of interest is the envelope (minimum)
   over the functions of `-2 ln L` plus a penalty per free parameter fixed in advance (the paper uses one unit of
-  `-2 ln L` per parameter, as in CMS H->gamma gamma, and says the size must be chosen per application). Its
+  `-2 ln L` per parameter, as in the H->gamma gamma search it describes, and says the size must be chosen per application). Its
   coverage must be checked with toys from several functions in the family and from one outside it;
   `skills/hep-statistics/scripts/discrete_profile.py` (EXPERIMENTAL) runs that study.
 
