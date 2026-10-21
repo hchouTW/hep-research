@@ -13,23 +13,35 @@ Subcommands:
             default: the user's ephemeris gives it). Exposure per bin = sum over periods of live fraction x time x the
             fraction of the bin in view, integrated in steps of 1/steps_per_sidereal_day of a sidereal day.
   harmonic  first harmonic of the right ascensions (Linsley 1975): with weights w_i = 1 / relative exposure,
-            a = (2/W) sum w cos(alpha), b = (2/W) sum w sin(alpha), r = sqrt(a^2 + b^2), phase atan2(b, a); under
-            isotropy P(>= r) = exp(-N r^2 / 4) with N the effective count (W^2 / sum w^2). With declinations, the
-            equatorial dipole projection d_perp = r / <cos(delta)>. The amplitude upper limit is the Neyman limit from
-            the Rice distribution of r (sigma^2 = 2/N per component; the CDF as a Poisson mixture of chi-square
-            CDFs), power-constrained at the expected limit (the limit for the median isotropic amplitude) so it is
-            never empty. With --time-column, the first harmonic of event times at the solar (86400 s), sidereal and
-            anti-sidereal (2/86400 - 1/86164.0905 per s) frequencies: an anti-sidereal amplitude with Rayleigh
-            probability below --spurious-alpha means a seasonal modulation leaks into the sidereal frequency, and the
-            run status is failed (exit 1).
+            a = (2/W) sum w cos(alpha), b = (2/W) sum w sin(alpha), r = sqrt(a^2 + b^2), phase atan2(b, a). Under
+            isotropy (v = (a, b), null covariance V) the Rayleigh probability is P(chi^2 >= v^T V^-1 v) =
+            exp(-chi^2 / 2), which is exp(-N r^2 / 4) for V = (2/N) I (no map, or a uniform one). With
+            --exposure-map, V is exact for the binned map (rho_j constant per bin) and N events, to leading order in
+            1/N: Var(a) = (4/N) (int cos^2 / rho) (int rho) / (2 pi)^2, Var(b) likewise with sin^2, Cov(a, b) with
+            sin cos (harmonic_covariance; a non-uniform exposure makes the variances unequal, and W^2 / sum w^2,
+            reported as n_effective, does not give them). With declinations, the equatorial dipole projection
+            d_perp = r / <cos(delta)>. The amplitude upper limit is the Neyman limit, power-constrained at the
+            expected limit (the limit for the median isotropic amplitude) so it is never empty: from the Rice
+            distribution of r (sigma^2 = 2/N per component; the CDF as a Poisson mixture of chi-square CDFs) when V
+            is isotropic, otherwise from P(r <= x | s, phi, V) (the bivariate normal over the disk: a closed-form
+            radial integral, a periodic trapezoid in the polar angle), a true amplitude s being excluded only if it
+            is excluded for every dipole phase phi on a 72-point grid aligned with V's eigen-axes. With
+            --time-column, the first harmonic of event times at the solar (86400 s), sidereal and anti-sidereal
+            (2/86400 - 1/86164.0905 per s) frequencies (unweighted, V = (2/N) I): an anti-sidereal amplitude with
+            Rayleigh probability below --spurious-alpha means a seasonal modulation leaks into the sidereal frequency,
+            and the run status is failed (exit 1).
 Assumptions and validity: a top-hat field of view in right ascension (a planning model of the exposure; a real one
-comes from the acceptance per direction and is supplied as the map); large N for the Rayleigh and Rice laws; the
-full three-dimensional dipole needs whole-sky exposure (not computed here).
+comes from the acceptance per direction and is supplied as the map, with exposure in every right-ascension bin); large
+N for the Gaussian law of (a, b) behind the Rayleigh probability and the limits; the full three-dimensional dipole
+needs whole-sky exposure (not computed here).
 Input: exposure: --config JSON {"key", "start_column", "duration_column", "live_fraction_column", "lst_at_t0_deg",
 "fov_half_width_deg", "ra_bins", "steps_per_sidereal_day" (optional)} and period tables (CSV); harmonic: --events CSV
 with a right-ascension column in degrees (default ra_deg), optional declination and time columns, optional
 --exposure-map (the JSON exposure prints).
-Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, and the result.
+Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, and the result. harmonic reports
+covariance_ab (the null V), rayleigh_probability (exp(-chi^2 / 2)), chi2_ab (when V is not isotropic),
+sigma_per_component (the root-mean-square null standard deviation of a and b, sqrt(trace(V) / 2); the per-component
+values are in covariance_ab) and n_effective (W^2 / sum w^2, informational).
 Exit codes: 0 ok; 1 a spurious-modulation check failed; 2 bad input.
 Run: python3 <plugin root>/skills/hep-measurement/scripts/anisotropy.py exposure --config exp.json periods.csv
      python3 <plugin root>/skills/hep-measurement/scripts/anisotropy.py harmonic --events events.csv --exposure-map map.json
@@ -73,8 +85,55 @@ def _num(x, name: str) -> float:
 
 # ---------------------------------------------------------------- statistics
 
-def first_harmonic(ras, weights=None, decs=None) -> dict:
-    """Weighted first harmonic of right ascensions in degrees (Linsley 1975)."""
+ISOTROPY_RTOL = 1e-12  # equal variances and zero covariance within this relative tolerance: the isotropic (Rice) case
+PHASE_STEP_DEG = 5.0  # the dipole-phase grid of the anisotropic limit: 72 points on the circle, aligned with V's axes
+
+
+def harmonic_covariance(edges, rel, n) -> dict:
+    """Null covariance of the weighted harmonic components (a, b) for n events under isotropy, exact for a binned
+    relative exposure rho_j (constant in each right-ascension bin) and weights w = 1 / rho: with R = int rho dalpha,
+    Var(a) = (4/n) (int cos^2 / rho dalpha) R / (2 pi)^2, Var(b) likewise with sin^2 and Cov(a, b) with sin cos
+    (W -> n E[w] = 2 pi n / R to leading order in 1/n; the integrals are closed-form per bin). Uniform exposure gives
+    2/n, 2/n and 0 exactly. Returns covariance_ab, isotropic (equal variances and zero covariance within
+    ISOTROPY_RTOL) and n_isotropic (the count with covariance (2/n_isotropic) I, None if not isotropic)."""
+    if len(edges) != len(rel) + 1 or len(rel) < 1:
+        raise ValueError("the exposure map needs len(ra_edges_deg) = len(relative_exposure) + 1")
+    if any(not math.isfinite(x) for x in (*edges, *rel)) or any(b <= a for a, b in zip(edges, edges[1:])):
+        raise ValueError("the exposure map edges must be finite and increasing, the exposures finite")
+    if abs(edges[-1] - edges[0] - 360.0) > 1e-9:
+        raise ValueError("the exposure map must cover the full circle of right ascension (360 deg)")
+    if any(x <= 0.0 for x in rel):
+        raise ValueError("the exposure map has a bin without exposure: the weighted harmonic and its null covariance "
+                         "need exposure in every right-ascension bin")
+    if n <= 0:
+        raise ValueError("no events")
+    if all(x == rel[0] for x in rel):  # constant exposure cancels: exactly the unweighted case
+        m_aa, m_bb, m_ab = 2.0, 2.0, 0.0
+    else:
+        icc, iss, isc, big_r = [], [], [], []
+        for lo, hi, rho in zip(edges, edges[1:], rel):
+            x0, x1 = math.radians(lo), math.radians(hi)
+            half = 0.5 * (x1 - x0)
+            dsin2 = 0.25 * (math.sin(2.0 * x1) - math.sin(2.0 * x0))
+            icc.append((half + dsin2) / rho)  # int cos^2 = x/2 + sin(2x)/4
+            iss.append((half - dsin2) / rho)  # int sin^2 = x/2 - sin(2x)/4
+            isc.append(0.5 * (math.sin(x1) ** 2 - math.sin(x0) ** 2) / rho)  # int sin cos = sin^2(x)/2
+            big_r.append(rho * (x1 - x0))
+        scale = 4.0 * math.fsum(big_r) / (2.0 * math.pi) ** 2
+        m_aa, m_bb, m_ab = scale * math.fsum(icc), scale * math.fsum(iss), scale * math.fsum(isc)
+    cov = [[m_aa / n, m_ab / n], [m_ab / n, m_bb / n]]
+    mean = 0.5 * (m_aa + m_bb)
+    iso = abs(m_aa - m_bb) <= ISOTROPY_RTOL * mean and abs(m_ab) <= ISOTROPY_RTOL * mean
+    return {"covariance_ab": cov, "isotropic": iso, "n_isotropic": 2.0 * n / mean if iso else None}
+
+
+def first_harmonic(ras, weights=None, decs=None, null=None) -> dict:
+    """Weighted first harmonic of right ascensions in degrees (Linsley 1975). null is the harmonic_covariance result
+    for the weights (required with non-uniform weights). Without it (unweighted events) the null covariance of (a, b)
+    is (2/N) I. rayleigh_probability is P(chi^2 >= v^T V^-1 v) = exp(-chi^2 / 2) for v = (a, b) and the null
+    covariance V (exact for a bivariate normal; exp(-N r^2 / 4) when V = (2/N) I); sigma_per_component is the
+    root-mean-square null standard deviation of a and b, sqrt(trace(V) / 2); n_effective = W^2 / sum w^2 is
+    informational only."""
     if not ras:
         raise ValueError("no events")
     w = [1.0] * len(ras) if weights is None else list(weights)
@@ -85,8 +144,28 @@ def first_harmonic(ras, weights=None, decs=None) -> dict:
     r = math.hypot(a, b)
     n_eff = big_w * big_w / sw2
     out = {"a": a, "b": b, "amplitude": r, "phase_deg": math.degrees(math.atan2(b, a)) % 360.0,
-           "n_events": len(ras), "n_effective": n_eff, "sigma_per_component": math.sqrt(2.0 / n_eff),
-           "rayleigh_probability": math.exp(-n_eff * r * r / 4.0)}
+           "n_events": len(ras), "n_effective": n_eff}
+    if null is None:
+        if weights is not None and any(x != w[0] for x in w):
+            raise ValueError("non-uniform weights need the null covariance (harmonic_covariance of the exposure map)")
+        n_iso, cov = n_eff, None
+        source = "unweighted (or uniform) events: (2/N) I"
+    else:
+        n_iso, cov = null["n_isotropic"], null["covariance_ab"]
+        source = ("exposure map: exact for the binned relative exposure under isotropy"
+                  + ("; isotropic within 1e-12, so (2/n_isotropic) I" if null["isotropic"] else ""))
+    if n_iso is not None:
+        var = 2.0 / n_iso
+        out.update({"sigma_per_component": math.sqrt(2.0 / n_iso),
+                    "rayleigh_probability": math.exp(-n_iso * r * r / 4.0),
+                    "covariance_ab": cov if cov is not None else [[var, 0.0], [0.0, var]]})
+    else:
+        (vaa, vab), (_, vbb) = cov
+        det = vaa * vbb - vab * vab
+        chi2 = (vbb * a * a - 2.0 * vab * a * b + vaa * b * b) / det
+        out.update({"sigma_per_component": math.sqrt(0.5 * (vaa + vbb)), "rayleigh_probability": math.exp(-0.5 * chi2),
+                    "covariance_ab": cov, "chi2_ab": chi2})
+    out["covariance_source"] = source
     if decs is not None:
         mean_cos = math.fsum(wi * math.cos(math.radians(d)) for wi, d in zip(w, decs)) / big_w
         out["mean_cos_dec"] = mean_cos
@@ -136,14 +215,152 @@ def _neyman(r_obs: float, n: float, cl: float) -> float | None:
     return 0.5 * (lo + hi)
 
 
-def amplitude_upper_limit(r_obs, n: float, cl: float = DEFAULT_CL) -> dict:
-    """Neyman upper limit on the amplitude from the Rice distribution, power-constrained at the expected limit."""
-    median_iso = math.sqrt(4.0 * math.log(2.0) / n)
-    expected = _neyman(median_iso, n, cl)
-    out = {"confidence_level": cl, "expected_limit": expected, "median_isotropic_amplitude": median_iso,
-           "construction": "Neyman upper limit from the Rice distribution of r, power-constrained at the expected limit"}
+class AnisotropicNull:
+    """The amplitude r = |mu + eps| of the harmonic for a true dipole mu = s (cos phi, sin phi) and Gaussian noise
+    eps ~ N(0, V) with an anisotropic null covariance V (unequal variances or a covariance of a and b)."""
+
+    def __init__(self, cov):
+        (vaa, vab), (vba, vbb) = cov
+        if not all(math.isfinite(x) for x in (vaa, vab, vba, vbb)) or vab != vba:
+            raise ValueError("the covariance of (a, b) must be a finite symmetric 2 x 2 matrix")
+        det = vaa * vbb - vab * vab
+        if vaa <= 0.0 or vbb <= 0.0 or det <= 0.0:
+            raise ValueError("the covariance of (a, b) must be positive definite")
+        self.lam1 = 0.5 * (vaa + vbb) + math.hypot(0.5 * (vaa - vbb), vab)  # the larger eigenvalue
+        self.lam2 = det / self.lam1
+        self.axis = 0.5 * math.atan2(2.0 * vab, vaa - vbb)  # direction of the lam1 eigenvector
+        self.sqrt_det = math.sqrt(det)
+        self._grids: dict = {}
+
+    def _n_theta(self, s: float) -> int:
+        """Points of the periodic trapezoid in the polar angle: the integrand is analytic and periodic, so the error
+        falls exponentially with the number of points; its angular scale is set by sqrt(lam2 / lam1) and, for a true
+        amplitude s, by sqrt(lam2) / s."""
+        n = max(64, math.ceil(40.0 * math.sqrt(self.lam1 / self.lam2)), math.ceil(12.0 * s / math.sqrt(self.lam2)))
+        return min(8192, 8 * math.ceil(n / 8))
+
+    def _grid(self, n: int):
+        if n not in self._grids:
+            pts = []
+            for k in range(n):
+                t = 2.0 * math.pi * k / n
+                ct, st = math.cos(t), math.sin(t)
+                g = ct * ct / self.lam1 + st * st / self.lam2
+                pts.append((ct / self.lam1, st / self.lam2, g, math.sqrt(0.5 * g), math.sqrt(0.5 * math.pi / g)))
+            self._grids[n] = pts
+        return self._grids[n]
+
+    def cdf_eigen(self, x: float, s: float, phi: float) -> float:
+        """P(r <= x) for the dipole phase phi measured from the lam1 eigen-axis: the bivariate normal integrated over
+        the disk of radius x in polar coordinates, the radial integral in closed form (the exponent is quadratic in
+        the radius: an exponential and an erf term), the polar angle by the periodic trapezoid rule."""
+        if x <= 0.0:
+            return 0.0
+        cp, sp = math.cos(phi), math.sin(phi)
+        if s > 40.0 * math.sqrt(self.lam1):
+            # far from the noise (s above 40 sigma) r = s + eps_par + eps_perp^2 / (2 s) to second order: Gaussian about
+            # the shifted mean (it differs from the trapezoid by up to about 6e-4 in the CDF at 40 sigma)
+            from statistics import NormalDist
+            v_par = cp * cp * self.lam1 + sp * sp * self.lam2
+            v_perp = sp * sp * self.lam1 + cp * cp * self.lam2
+            return NormalDist(s + 0.5 * v_perp / s, math.sqrt(v_par)).cdf(x)
+        n = self._n_theta(s)
+        terms = []
+        if s == 0.0:
+            for _, _, g, _, _ in self._grid(n):
+                terms.append(-math.expm1(-0.5 * g * x * x) / g)
+        else:
+            c = s * s * (cp * cp / self.lam1 + sp * sp / self.lam2)
+            e_c = math.exp(-0.5 * c)
+            for pa, pb, g, k, pref in self._grid(n):
+                h = s * (pa * cp + pb * sp)  # u^T V^-1 mu
+                m = h / g
+                q = max(c - h * m, 0.0)  # c - h^2 / g >= 0 (Cauchy-Schwarz)
+                lo_arg, hi_arg = k * m, k * (x - m)
+                if lo_arg * hi_arg >= 0.0:
+                    erf_sum = math.erf(hi_arg) + math.erf(lo_arg)
+                elif hi_arg < 0.0:
+                    erf_sum = math.erfc(-hi_arg) - math.erfc(lo_arg)
+                else:
+                    erf_sum = math.erfc(-lo_arg) - math.erfc(hi_arg)
+                terms.append((e_c - math.exp(-0.5 * q - 0.5 * g * (x - m) ** 2)) / g
+                             + math.exp(-0.5 * q) * m * pref * erf_sum)
+        return min(max(math.fsum(terms) / (n * self.sqrt_det), 0.0), 1.0)
+
+    def cdf(self, x: float, s: float, phase_deg: float) -> float:
+        """P(r <= x | s, phase) with the phase in degrees in the frame of (a, b)."""
+        return self.cdf_eigen(x, s, math.radians(phase_deg) - self.axis)
+
+    def median_null(self) -> float:
+        """Median of r under isotropy: P(r <= x) = (1 / (2 pi sqrt(det V))) int (1 - exp(-x^2 g / 2)) / g dtheta,
+        g = u^T V^-1 u, solved for 1/2 by bisection."""
+        lo, hi = 0.0, 2.0 * math.sqrt(self.lam1)
+        while self.cdf_eigen(hi, 0.0, 0.0) < 0.5:
+            hi *= 2.0
+        for _ in range(100):
+            mid = 0.5 * (lo + hi)
+            if self.cdf_eigen(mid, 0.0, 0.0) < 0.5:
+                lo = mid
+            else:
+                hi = mid
+            if hi - lo <= 1e-15 * hi:
+                break
+        return 0.5 * (lo + hi)
+
+    def allowed(self, r_obs: float, s: float, target: float) -> bool:
+        """True when s is not excluded: P(r <= r_obs | s, phi) >= target for some dipole phase phi on the grid. The
+        72-point phase grid (steps of PHASE_STEP_DEG) is aligned with the eigen-axes of V; r has the same law for phi,
+        -phi and phi + pi (eps and its reflections about the axes have the same law), so the 19 phases from one axis
+        to the other cover it."""
+        steps = round(90.0 / PHASE_STEP_DEG)
+        return any(self.cdf_eigen(r_obs, s, math.radians(j * PHASE_STEP_DEG)) >= target for j in range(steps + 1))
+
+    def neyman(self, r_obs: float, cl: float) -> float | None:
+        """Largest s not excluded for any dipole phase (P(r <= r_obs | s, phi) is nonincreasing in s for each phase,
+        Anderson's theorem for a centrally symmetric unimodal density and a disk); None when s = 0 is excluded."""
+        target = 1.0 - cl
+        if not self.allowed(r_obs, 0.0, target):
+            return None
+        lo, hi = 0.0, r_obs + 10.0 * math.sqrt(self.lam1)
+        while self.allowed(r_obs, hi, target):
+            hi *= 2.0
+        for _ in range(80):
+            mid = 0.5 * (lo + hi)
+            if self.allowed(r_obs, mid, target):
+                lo = mid
+            else:
+                hi = mid
+            if hi - lo <= 1e-13 * hi:
+                break
+        return 0.5 * (lo + hi)
+
+
+def amplitude_upper_limit(r_obs, n: float | None, cl: float = DEFAULT_CL, covariance=None) -> dict:
+    """Neyman upper limit on the amplitude, power-constrained at the expected limit (the limit for the median isotropic
+    amplitude). Without a covariance (or n given for an isotropic null covariance (2/n) I) the limit comes from the
+    Rice distribution of r. With an anisotropic null covariance of (a, b) a true amplitude s is excluded only when
+    P(r <= r_obs | s, phi) < 1 - cl for every dipole phase phi on the grid (AnisotropicNull.allowed), so the limit
+    holds whatever the phase."""
+    if covariance is None:
+        median_iso = math.sqrt(4.0 * math.log(2.0) / n)
+        expected = _neyman(median_iso, n, cl)
+        out = {"confidence_level": cl, "expected_limit": expected, "median_isotropic_amplitude": median_iso,
+               "construction": "Neyman upper limit from the Rice distribution of r, power-constrained at the expected "
+                               "limit"}
+        if r_obs is not None:
+            ney = _neyman(r_obs, n, cl)
+    else:
+        model = AnisotropicNull(covariance)
+        median_iso = model.median_null()
+        expected = model.neyman(median_iso, cl)
+        out = {"confidence_level": cl, "expected_limit": expected, "median_isotropic_amplitude": median_iso,
+               "construction": "Neyman upper limit for the anisotropic null covariance of (a, b): s is excluded only "
+                               "if excluded for every dipole phase on a 72-point grid (steps of 5 deg aligned with "
+                               "the covariance's eigen-axes); power-constrained at the expected limit",
+               "phase_grid_deg": PHASE_STEP_DEG}
+        if r_obs is not None:
+            ney = model.neyman(r_obs, cl)
     if r_obs is not None:
-        ney = _neyman(r_obs, n, cl)
         out["neyman_limit"] = ney
         out["upper_limit"] = max(ney if ney is not None else 0.0, expected)
         out["power_constrained"] = ney is None or ney < expected
@@ -240,7 +457,7 @@ def harmonic_run(args) -> tuple[str, dict]:
     rows = read_csv(args.events)
     ras = column(rows, args.ra_column, args.events, 0.0, 360.0)
     decs = column(rows, args.dec_column, args.events, -90.0, 90.0000001) if args.dec_column else None
-    warnings, weights = [], None
+    warnings, weights, null = [], None, None
     if args.exposure_map:
         emap = json.loads(args.exposure_map.read_text(encoding="utf-8"))
         edges, rel = emap["ra_edges_deg"], emap["relative_exposure"]
@@ -250,11 +467,17 @@ def harmonic_run(args) -> tuple[str, dict]:
             if rel[i] <= 0:
                 raise ValueError(f"an event at right ascension {a} falls where the exposure is zero")
             weights.append(1.0 / rel[i])
+        null = harmonic_covariance(edges, rel, len(ras))
     else:
         warnings.append("no --exposure-map: uniform exposure assumed in right ascension; an exposure modulation would "
                         "appear as an anisotropy")
-    h = first_harmonic(ras, weights, decs)
-    out = {"harmonic": h, "upper_limit": amplitude_upper_limit(h["amplitude"], h["n_effective"], args.cl),
+    h = first_harmonic(ras, weights, decs, null)
+    if null is None or null["isotropic"]:
+        n_iso = h["n_effective"] if null is None else null["n_isotropic"]
+        limit = amplitude_upper_limit(h["amplitude"], n_iso, args.cl)
+    else:
+        limit = amplitude_upper_limit(h["amplitude"], None, args.cl, covariance=null["covariance_ab"])
+    out = {"harmonic": h, "upper_limit": limit,
            "label": LABEL, "warnings": warnings}
     status = "ok"
     if args.time_column:

@@ -25,7 +25,7 @@
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 116852,
+   "bytes": 117832,
    "uncited": 0
   },
   "hep-ml": {
@@ -2588,8 +2588,8 @@
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
    "owner": "hep-measurement",
-   "bytes": 22475,
-   "lines": 212,
+   "bytes": 23455,
+   "lines": 221,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-measurement/README.md",
@@ -3162,7 +3162,7 @@
     "tests/skills/hep_ml/test_training_pipeline.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "33bd6464 2026-10-22"
   },
   {
    "path": "skills/hep-ml/references/ml-analysis.md",
@@ -3240,7 +3240,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "4dddc8b7 2026-10-22"
+   "last_commit": "33bd6464 2026-10-22"
   },
   {
    "path": "skills/hep-ml/references/optimization-and-training-dynamics.md",
@@ -3637,7 +3637,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "2adbd9bb 2026-10-22"
+   "last_commit": "2b221f92 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",

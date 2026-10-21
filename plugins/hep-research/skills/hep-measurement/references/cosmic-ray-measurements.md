@@ -131,9 +131,14 @@ back through a field model, and state the model and epoch.
   `b = (2/W) sum w_i sin alpha_i`, `W = sum w_i`, amplitude `r = sqrt(a^2 + b^2)`, phase `phi = atan2(b, a)`. Under
   isotropy, for large N and uniform exposure, a and b are Gaussian with variance `2/N` each, so r follows the Rayleigh
   distribution and `P(>= r) = exp(-N r^2 / 4)`. With a non-uniform exposure the weights enlarge the variances, unequally
-  for a and b (for a, `4 E[w^2 cos^2 alpha] / (N E[w]^2)` over the observed right-ascension distribution); replacing N
-  by `N_eff = W^2 / sum w_i^2` is only an approximation (Inferred: for `omega` proportional to `1 + 0.9 cos alpha`,
-  `N Var(a)` is 6.4, against 4.6 with `N_eff` and 2 with N), so check the Rayleigh probability on simulated skies.
+  for a and b, and correlate them: under isotropy, to leading order in 1/N, `Var(a) = (4/N) (int cos^2 alpha / omega)
+  (int omega) / (2 pi)^2`, `Var(b)` likewise with `sin^2`, `Cov(a, b)` with `sin cos` (Inferred, from
+  `4 E[w^2 cos^2 alpha] / (N E[w]^2)` over the observed right-ascension distribution). Replacing N by
+  `N_eff = W^2 / sum w_i^2` gets only their mean right, not each one (for `omega` proportional to `1 + 0.9 cos alpha`,
+  `N Var(a) = (4/e^2)(1/sqrt(1 - e^2) - 1) = 6.39` with `e = 0.9`, `N Var(b) = 2.79`, against 4.59 for both with
+  `N_eff` and 2 with N), so it overstates the significance of a dipole along the less exposed axis. Use the full
+  covariance V of `(a, b)`: `chi^2 = (a, b) V^-1 (a, b)^T` and `P(>= chi^2) = exp(-chi^2 / 2)` for a bivariate normal.
+  The covariance is only as good as the exposure model, so check that model on simulated skies.
 - **Full-sky dipole** (Sommers, Astropart. Phys. 14 (2001) 271, arXiv:astro-ph/0004016): with exposure on the whole sky,
   `d = 3 sum_i (u_i / omega(u_i)) / sum_i (1 / omega(u_i))`, the unit vectors `u_i` weighted by the inverse exposure;
   for uniform exposure each Cartesian component has variance about `3/N` (Inferred from `Var(3 u_x) = 3` per event).
@@ -181,12 +186,16 @@ a Bayesian bound, its coverage checked on simulated skies drawn with the real ex
   `collection_time.py`), for a top-hat field of view of declared half-width around the zenith right ascension, which
   advances one turn per sidereal day from the user's local sidereal time at the clock's zero (no default). A planning
   model; a real exposure comes from the acceptance per direction and can be passed as the map.
-- `harmonic`: the weighted first harmonic (amplitude, phase, Rayleigh probability with the effective count), `d_perp`
-  when declinations are given, the amplitude upper limit (Neyman, from the Rice distribution, power-constrained at the
-  expected limit so it is never empty; its coverage is checked on toys in one slow test only, at uniform exposure,
-  n = 1500, s = 0.03, CL 0.9) and, with event times, the solar, sidereal and anti-sidereal harmonics: a significant
-  anti-sidereal amplitude makes the run `failed` (exit 1). Without an exposure map it warns that uniform exposure is
-  assumed; without times the checks are reported as not run.
+- `harmonic`: the weighted first harmonic (amplitude, phase, and the Rayleigh probability `exp(-chi^2 / 2)` from the
+  null covariance of `(a, b)`, reported as `covariance_ab`: exact for the binned exposure map, `(2/N) I` without one),
+  `d_perp` when declinations are given, the amplitude upper limit (Neyman, power-constrained at the expected limit so it
+  is never empty: from the Rice distribution when the covariance is isotropic; otherwise from the distribution of r for
+  the full covariance, a true amplitude being excluded only if excluded for every dipole phase on a 72-point grid
+  aligned with the covariance's axes; its coverage is checked on toys at uniform exposure, n = 1500, s = 0.03, CL 0.9,
+  and with a `1 + 0.9 cos alpha` exposure at four dipole phases) and, with event times, the solar, sidereal and
+  anti-sidereal harmonics: a significant anti-sidereal amplitude makes the run `failed` (exit 1). Without an exposure
+  map it warns that uniform exposure is assumed; a map with an empty right-ascension bin is rejected; without times the
+  checks are reported as not run.
 
 The full three-dimensional dipole (whole-sky exposure) and the joint multipole fit for partial coverage are not
 implemented; they belong to hep-statistics.
