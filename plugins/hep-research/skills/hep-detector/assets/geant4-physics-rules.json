@@ -4,88 +4,411 @@
  "geant4_version": "11.4.3",
  "conditions_help": "a condition is {all: [...]} or {any: [...]} of {field, op, value}; op is eq, ne, in, not_in, lt, le, gt, ge, exists, missing; field is a dotted path into the study spec, with the derived fields derived.em_only, derived.min_thickness_mm, derived.pai_requested, derived.step_limits, derived.cut_scan_values, derived.hadronic_list",
  "rules": [
-  {"id": "G4R-HP-NEUTRON",
-   "condition": {"all": [{"field": "observable.kind", "op": "in", "value": ["neutron-flux", "neutron-dose", "neutron-capture", "activation"]},
-                         {"field": "particle.energy_MeV", "op": "lt", "value": 20.0}]},
+  {
+   "id": "G4R-HP-NEUTRON",
+   "condition": {
+    "all": [
+     {
+      "field": "observable.kind",
+      "op": "in",
+      "value": [
+       "neutron-flux",
+       "neutron-dose",
+       "neutron-capture",
+       "activation"
+      ]
+     },
+     {
+      "field": "particle.energy_MeV",
+      "op": "lt",
+      "value": 20.0
+     }
+    ]
+   },
    "concern": "below 20 MeV the data-driven neutron models (ParticleHP, G4NDL) are only in the _HP lists; a non-_HP list uses G4NeutronInelasticXS and a cascade model there",
-   "requires": {"field": "derived.hadronic_list", "op": "in", "value": ["FTFP_BERT_HP", "FTFP_INCLXX_HP", "QGSP_BERT_HP", "QGSP_BIC_HP", "QGSP_BIC_AllHP", "QGSP_INCLXX_HP", "Shielding", "ShieldingM", "ShieldingLIQMD", "FTFP_BERT_HPT", "FTFP_INCLXX_HPT", "QGSP_BERT_HPT", "QGSP_BIC_HPT", "QGSP_BIC_AllHPT", "QGSP_INCLXX_HPT", "Shielding_HPT", "ShieldingM_HPT", "ShieldingLIQMD_HPT"]},
+   "requires": {
+    "field": "derived.hadronic_list",
+    "op": "in",
+    "value": [
+     "FTFP_BERT_HP",
+     "FTFP_INCLXX_HP",
+     "QGSP_BERT_HP",
+     "QGSP_BIC_HP",
+     "QGSP_BIC_AllHP",
+     "QGSP_INCLXX_HP",
+     "Shielding",
+     "ShieldingM",
+     "ShieldingLIQMD",
+     "FTFP_BERT_HPT",
+     "FTFP_INCLXX_HPT",
+     "QGSP_BERT_HPT",
+     "QGSP_BIC_HPT",
+     "QGSP_BIC_AllHPT",
+     "QGSP_INCLXX_HPT",
+     "Shielding_HPT",
+     "ShieldingM_HPT",
+     "ShieldingLIQMD_HPT"
+    ]
+   },
    "read": "the hadronic inelastic constructor of the chosen list; the _HP variants register G4ParticleHPInelastic with SetMaxEnergy(20 MeV) and need the G4NDL dataset (G4NEUTRONHPDATA)",
-   "source": {"document": "geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BIC_HP.cc (G4ParticleHPInelastic, SetMaxEnergy(20*CLHEP::MeV)); geant4:source/physics_lists/lists/src/G4PhysListFactory.cc (list names; Shielding is built with \"HP\"); geant4:cmake/Modules/G4DatasetDefinitions.cmake (G4NDL, ENVVAR G4NEUTRONHPDATA)", "version": "11.4.3", "section": "neutron inelastic below 20 MeV"},
-   "severity": "error"},
-  {"id": "G4R-THIN-FLUCT",
-   "condition": {"all": [{"field": "observable.kind", "op": "in", "value": ["energy-deposit", "energy-loss", "most-probable-value", "thin-layer-width"]},
-                         {"field": "derived.min_thickness_mm", "op": "lt", "value": 1.0}]},
+   "source": {
+    "document": "geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BIC_HP.cc (G4ParticleHPInelastic, SetMaxEnergy(20*CLHEP::MeV)); geant4:source/physics_lists/lists/src/G4PhysListFactory.cc (list names; Shielding is built with \"HP\"); geant4:cmake/Modules/G4DatasetDefinitions.cmake (G4NDL, ENVVAR G4NEUTRONHPDATA)",
+    "version": "11.4.3",
+    "section": "neutron inelastic below 20 MeV"
+   },
+   "severity": "error"
+  },
+  {
+   "id": "G4R-THIN-FLUCT",
+   "condition": {
+    "all": [
+     {
+      "field": "observable.kind",
+      "op": "in",
+      "value": [
+       "energy-deposit",
+       "energy-loss",
+       "most-probable-value",
+       "thin-layer-width"
+      ]
+     },
+     {
+      "field": "derived.min_thickness_mm",
+      "op": "lt",
+      "value": 1.0
+     }
+    ]
+   },
    "concern": "in a thin layer the energy-loss fluctuation model shapes the distribution (Urban by default in the standard EM constructors; PAI on request per region); the fluctuation model is a model choice to vary, not a constant",
-   "requires": {"field": "variation_plan", "op": "exists"},
+   "requires": {
+    "field": "variation_plan",
+    "op": "exists"
+   },
    "read": "the SetFluctuationType call of the chosen EM constructor and /process/em/AddPAIRegion (particle, region, PAI or PAIphoton)",
-   "source": {"document": "geant4:source/physics_lists/constructors/electromagnetic/src/G4EmStandardPhysics_option4.cc (param->SetFluctuationType(fUrbanFluctuation)); geant4:source/processes/electromagnetic/utils/src/G4EmExtraParametersMessenger.cc (/process/em/AddPAIRegion)", "version": "11.4.3", "section": "energy-loss fluctuations"},
-   "severity": "warning"},
-  {"id": "G4R-THIN-CUT-SCAN",
-   "condition": {"all": [{"field": "observable.kind", "op": "in", "value": ["energy-deposit", "most-probable-value", "thin-layer-width"]},
-                         {"field": "derived.min_thickness_mm", "op": "lt", "value": 1.0}]},
+   "source": {
+    "document": "geant4:source/physics_lists/constructors/electromagnetic/src/G4EmStandardPhysics_option4.cc (param->SetFluctuationType(fUrbanFluctuation)); geant4:source/processes/electromagnetic/utils/src/G4EmExtraParametersMessenger.cc (/process/em/AddPAIRegion)",
+    "version": "11.4.3",
+    "section": "energy-loss fluctuations"
+   },
+   "severity": "warning"
+  },
+  {
+   "id": "G4R-THIN-CUT-SCAN",
+   "condition": {
+    "all": [
+     {
+      "field": "observable.kind",
+      "op": "in",
+      "value": [
+       "energy-deposit",
+       "most-probable-value",
+       "thin-layer-width"
+      ]
+     },
+     {
+      "field": "derived.min_thickness_mm",
+      "op": "lt",
+      "value": 1.0
+     }
+    ]
+   },
    "concern": "a deposit in a layer thinner than the electron range at the production cut is cut dependent (delta rays above the cut are tracked and may escape); the reference example of a 20 um silicon layer sets a 7 um cut",
-   "requires": {"field": "convergence_plan.parameters", "op": "exists"},
+   "requires": {
+    "field": "convergence_plan.parameters",
+    "op": "exists"
+   },
    "read": "the /run/setCut values of geant4:examples/extended/electromagnetic/TestEm5/TestEm5.in (7 um for 20 um Si) and the cut table the run prints",
-   "source": {"document": "geant4:examples/extended/electromagnetic/TestEm5/TestEm5.in (/run/setCut 7 um before the 20 um Silicon run)", "version": "11.4.3", "section": "run 0"},
-   "severity": "error"},
-  {"id": "G4R-PRECISION-EM",
-   "condition": {"all": [{"field": "observable.kind", "op": "in", "value": ["energy-deposit", "energy-loss", "most-probable-value", "stopping-power", "range"]},
-                         {"field": "derived.em_only", "op": "eq", "value": true}]},
+   "source": {
+    "document": "geant4:examples/extended/electromagnetic/TestEm5/TestEm5.in (/run/setCut 7 um before the 20 um Silicon run)",
+    "version": "11.4.3",
+    "section": "run 0"
+   },
+   "severity": "error"
+  },
+  {
+   "id": "G4R-PRECISION-EM",
+   "condition": {
+    "all": [
+     {
+      "field": "observable.kind",
+      "op": "in",
+      "value": [
+       "energy-deposit",
+       "energy-loss",
+       "most-probable-value",
+       "stopping-power",
+       "range"
+      ]
+     },
+     {
+      "field": "derived.em_only",
+      "op": "eq",
+      "value": true
+     }
+    ]
+   },
    "concern": "the EM constructors differ in models and options; option 4 is described by its author as the best standard and low-energy models with the most advanced options for precise simulation at low and intermediate energies",
-   "requires": {"field": "physics.justification", "op": "exists"},
+   "requires": {
+    "field": "physics.justification",
+    "op": "exists"
+   },
    "read": "the header comment and ConstructProcess of the chosen constructor",
-   "source": {"document": "geant4:source/physics_lists/constructors/electromagnetic/include/G4EmStandardPhysics_option4.hh (class comment)", "version": "11.4.3", "section": "class description"},
-   "severity": "warning"},
-  {"id": "G4R-UI-TIMING",
-   "condition": {"all": [{"field": "physics.layered_sim.ui_commands", "op": "exists"}]},
+   "source": {
+    "document": "geant4:source/physics_lists/constructors/electromagnetic/include/G4EmStandardPhysics_option4.hh (class comment)",
+    "version": "11.4.3",
+    "section": "class description"
+   },
+   "severity": "warning"
+  },
+  {
+   "id": "G4R-UI-TIMING",
+   "condition": {
+    "all": [
+     {
+      "field": "physics.layered_sim.ui_commands",
+      "op": "exists"
+     }
+    ]
+   },
    "concern": "EM parameter commands (/process/em, /process/msc, /process/eLoss) exist only after an EM constructor has called G4EmParameters::SetDefaults, i.e. after the physics list is built, and must precede /run/initialize",
-   "requires": {"field": "physics.ui_order", "op": "eq", "value": "after-physics-list-before-initialize"},
+   "requires": {
+    "field": "physics.ui_order",
+    "op": "eq",
+    "value": "after-physics-list-before-initialize"
+   },
    "read": "the constructor of the chosen EM constructor (param->SetDefaults()); layered_sim applies the spec's commands at that point and records them verbatim",
-   "source": {"document": "geant4:source/physics_lists/constructors/electromagnetic/src/G4EmStandardPhysics.cc (param->SetDefaults() in the constructor); geant4:source/processes/electromagnetic/utils/src/G4EmParametersMessenger.cc", "version": "11.4.3", "section": "EM parameters"},
-   "severity": "error"},
-  {"id": "G4R-SPECIALCUTS",
-   "condition": {"all": [{"field": "derived.step_limits", "op": "eq", "value": true}]},
+   "source": {
+    "document": "geant4:source/physics_lists/constructors/electromagnetic/src/G4EmStandardPhysics.cc (param->SetDefaults() in the constructor); geant4:source/processes/electromagnetic/utils/src/G4EmParametersMessenger.cc",
+    "version": "11.4.3",
+    "section": "EM parameters"
+   },
+   "severity": "error"
+  },
+  {
+   "id": "G4R-SPECIALCUTS",
+   "condition": {
+    "all": [
+     {
+      "field": "derived.step_limits",
+      "op": "eq",
+      "value": true
+     }
+    ]
+   },
    "concern": "G4StepLimiterPhysics attaches G4UserSpecialCuts to every particle; a track killed by it has its kinetic energy booked as a local deposit (ProposeLocalEnergyDeposit) and a killed e+ does not annihilate: the energy balance and any deposit observable must account for it",
-   "requires": {"field": "convergence_plan.parameters", "op": "exists"},
+   "requires": {
+    "field": "convergence_plan.parameters",
+    "op": "exists"
+   },
    "read": "PostStepDoIt of G4UserSpecialCuts",
-   "source": {"document": "geant4:source/physics_lists/constructors/limiters/src/G4UserSpecialCuts.cc (ProposeLocalEnergyDeposit(aTrack.GetKineticEnergy()), fStopAndKill)", "version": "11.4.3", "section": "PostStepDoIt"},
-   "severity": "warning"},
-  {"id": "G4R-BIC-RANGE",
-   "condition": {"all": [{"field": "observable.domain", "op": "eq", "value": "hadronic"},
-                         {"field": "variation_plan", "op": "exists"}]},
+   "source": {
+    "document": "geant4:source/physics_lists/constructors/limiters/src/G4UserSpecialCuts.cc (ProposeLocalEnergyDeposit(aTrack.GetKineticEnergy()), fStopAndKill)",
+    "version": "11.4.3",
+    "section": "PostStepDoIt"
+   },
+   "severity": "warning"
+  },
+  {
+   "id": "G4R-BIC-RANGE",
+   "condition": {
+    "all": [
+     {
+      "field": "observable.domain",
+      "op": "eq",
+      "value": "hadronic"
+     },
+     {
+      "field": "variation_plan",
+      "op": "exists"
+     }
+    ]
+   },
    "concern": "QGSP_BIC uses the Binary cascade only for protons and neutrons up to 1.5 GeV (Bertini from 1 GeV); for pions below 3 GeV and for any hadron between 6 and 12 GeV it uses the same model as FTFP_BERT (Bertini, then FTFP), so comparing the two lists there gives a false zero difference",
-   "requires": {"field": "variation_plan.model_assignment_checked", "op": "eq", "value": true},
+   "requires": {
+    "field": "variation_plan.model_assignment_checked",
+    "op": "eq",
+    "value": true
+   },
    "read": "the transition energies of both hadronic constructors",
-   "source": {"document": "geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BIC.cc (maxBIC_proton = maxBIC_neutron = 1.5 GeV, minBERT 1 GeV); geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BERT.cc and G4HadronPhysicsFTFP_BERT.cc; geant4:source/processes/hadronic/util/src/G4HadronicParameters.cc (FTF-cascade transition 3 to 6 GeV, QGS-FTF transition 12 to 25 GeV)", "version": "11.4.3", "section": "model transitions"},
-   "severity": "error"},
-  {"id": "G4R-DATASETS",
-   "condition": {"all": [{"field": "physics.layered_sim.reference_list", "op": "exists"}]},
+   "source": {
+    "document": "geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BIC.cc (maxBIC_proton = maxBIC_neutron = 1.5 GeV, minBERT 1 GeV); geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BERT.cc and G4HadronPhysicsFTFP_BERT.cc; geant4:source/processes/hadronic/util/src/G4HadronicParameters.cc (FTF-cascade transition 3 to 6 GeV, QGS-FTF transition 12 to 25 GeV)",
+    "version": "11.4.3",
+    "section": "model transitions"
+   },
+   "severity": "error"
+  },
+  {
+   "id": "G4R-DATASETS",
+   "condition": {
+    "all": [
+     {
+      "field": "physics.layered_sim.reference_list",
+      "op": "exists"
+     }
+    ]
+   },
    "concern": "an unset dataset variable does not necessarily fail: G4FindDataDir searches GEANT4_DATA_DIR, the install data directory, /usr/local, /usr and /cvmfs/geant4.cern.ch and may silently use another copy; the run must record the resolved paths",
-   "requires": {"field": "reproducibility.data_paths_recorded", "op": "eq", "value": true},
+   "requires": {
+    "field": "reproducibility.data_paths_recorded",
+    "op": "eq",
+    "value": true
+   },
    "read": "G4FindDataDir and the dataset list of the build",
-   "source": {"document": "geant4:source/global/management/src/G4FindDataDir.cc; geant4:cmake/Modules/G4DatasetDefinitions.cmake", "version": "11.4.3", "section": "data directory resolution"},
-   "severity": "warning"},
-  {"id": "G4R-REPLICA-OVERLAP",
-   "condition": {"all": [{"field": "geometry_source.uses_replicas", "op": "eq", "value": true}]},
+   "source": {
+    "document": "geant4:source/global/management/src/G4FindDataDir.cc; geant4:cmake/Modules/G4DatasetDefinitions.cmake",
+    "version": "11.4.3",
+    "section": "data directory resolution"
+   },
+   "severity": "warning"
+  },
+  {
+   "id": "G4R-REPLICA-OVERLAP",
+   "condition": {
+    "all": [
+     {
+      "field": "geometry_source.uses_replicas",
+      "op": "eq",
+      "value": true
+     }
+    ]
+   },
    "concern": "G4PVReplica does not override CheckOverlaps, so replicated volumes are never overlap-checked; /geometry/test/run is a sampled check",
-   "requires": {"field": "geometry_source.uses_replicas", "op": "eq", "value": false},
+   "requires": {
+    "field": "geometry_source.uses_replicas",
+    "op": "eq",
+    "value": false
+   },
    "read": "G4PVReplica and the /geometry/test commands",
-   "source": {"document": "geant4:source/geometry/volumes/include/G4PVReplica.hh; geant4:source/geometry/navigation/src/G4GeometryMessenger.cc", "version": "11.4.3", "section": "overlap checks"},
-   "severity": "warning"},
-  {"id": "G4R-BIASED-BALANCE",
-   "condition": {"all": [{"field": "physics.layered_sim.ui_commands", "op": "exists"},
-                         {"field": "derived.secondary_biasing", "op": "eq", "value": true}]},
+   "source": {
+    "document": "geant4:source/geometry/volumes/include/G4PVReplica.hh; geant4:source/geometry/navigation/src/G4GeometryMessenger.cc",
+    "version": "11.4.3",
+    "section": "overlap checks"
+   },
+   "severity": "warning"
+  },
+  {
+   "id": "G4R-BIASED-BALANCE",
+   "condition": {
+    "all": [
+     {
+      "field": "physics.layered_sim.ui_commands",
+      "op": "exists"
+     },
+     {
+      "field": "derived.secondary_biasing",
+      "op": "eq",
+      "value": true
+     }
+    ]
+   },
    "concern": "with secondary biasing the deposit is weighted but a leakage sum that ignores weights is not; TestEm3 run 1 does not close its energy balance",
-   "requires": {"field": "observable.weighted", "op": "eq", "value": true},
+   "requires": {
+    "field": "observable.weighted",
+    "op": "eq",
+    "value": true
+   },
    "read": "TestEm3 run 1 (/process/em/setSecBiasing) and how the observable applies track weights",
-   "source": {"document": "geant4:examples/extended/electromagnetic/TestEm3/TestEm3.in and TestEm3.out (run 1)", "version": "11.4.3", "section": "run 1"},
-   "severity": "error"},
-  {"id": "G4R-BETHE-RANGE",
-   "condition": {"all": [{"field": "observable.kind", "op": "eq", "value": "stopping-power"}]},
+   "source": {
+    "document": "geant4:examples/extended/electromagnetic/TestEm3/TestEm3.in and TestEm3.out (run 1)",
+    "version": "11.4.3",
+    "section": "run 1"
+   },
+   "severity": "error"
+  },
+  {
+   "id": "G4R-BETHE-RANGE",
+   "condition": {
+    "all": [
+     {
+      "field": "observable.kind",
+      "op": "eq",
+      "value": "stopping-power"
+     }
+    ]
+   },
    "concern": "the Bethe mean rate is accurate to a few percent only for 0.1 <~ beta gamma <~ 1000; outside it the stopping-power benchmark is not applicable",
-   "requires": {"field": "validation_plan.scope.beta_gamma", "op": "exists"},
+   "requires": {
+    "field": "validation_plan.scope.beta_gamma",
+    "op": "exists"
+   },
    "read": "RPP 2024 Passage of particles through matter, Bethe equation",
-   "source": {"document": "PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)", "version": "RPP 2024", "section": "Bethe equation (eq. 34.5)"},
-   "severity": "warning"}
+   "source": {
+    "document": "PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)",
+    "version": "RPP 2024",
+    "section": "Bethe equation (eq. 34.5)"
+   },
+   "severity": "warning"
+  },
+  {
+   "id": "G4R-SHOWER",
+   "condition": {
+    "all": [
+     {
+      "field": "observable.kind",
+      "op": "in",
+      "value": [
+       "leakage",
+       "containment",
+       "shower-shape",
+       "energy-resolution"
+      ]
+     }
+    ]
+   },
+   "concern": "electromagnetic shower observables depend on the production cut and the EM constructor, and leakage is energy leaving the world: unless split by face it includes the albedo (backscatter) and lateral escape; an escaping e+ carries its 2 m_e c^2 (TestEm3 convention); the PDG longitudinal profile is a fit to EGS4 showers (1-100 GeV) and supports only a sanity check, so a reference for leakage needs published data",
+   "requires": {
+    "all": [
+     {
+      "field": "convergence_plan.parameters",
+      "op": "exists"
+     },
+     {
+      "field": "variation_plan",
+      "op": "exists"
+     },
+     {
+      "field": "observable.leakage_faces",
+      "op": "exists"
+     }
+    ]
+   },
+   "read": "TestEm3 TrackingAction (leakage definition) and RPP 2024 Eqs. 34.34-34.36; layered_sim leak_rear_MeV, leak_front_MeV, leak_lateral_MeV",
+   "source": {
+    "document": "geant4:examples/extended/electromagnetic/TestEm3/src/TrackingAction.cc (leakage, 2 m_e c^2 added for an escaping e+); PDG RPP 2024, Passage of particles through matter, Eqs. 34.34-34.36",
+    "version": "11.4.3",
+    "section": "energy leakage; longitudinal shower profile"
+   },
+   "severity": "warning"
+  },
+  {
+   "id": "G4R-CITATION",
+   "condition": {
+    "all": [
+     {
+      "field": "downstream_use.kind",
+      "op": "in",
+      "value": [
+       "report",
+       "paper",
+       "talk",
+       "thesis",
+       "proposal"
+      ]
+     }
+    ]
+   },
+   "concern": "Geant4 asks users to cite its reference papers (the run banner of 11.4.3 prints them); a written result cites the Geant4 papers, the version and the documents relied on from a literature record, never from memory",
+   "requires": {
+    "field": "citations.literature_record",
+    "op": "exists"
+   },
+   "read": "the run banner printed by G4RunManagerKernel and hep-citations primary-sources-and-version-checks (Geant4 row)",
+   "source": {
+    "document": "geant4:source/run/src/G4RunManagerKernel.cc (banner listing NIM A 506 (2003) 250-303, IEEE-TNS 53 (2006) 270-278, NIM A 835 (2016) 186-225)",
+    "version": "11.4.3",
+    "section": "run banner"
+   },
+   "severity": "warning"
+  }
  ]
 }

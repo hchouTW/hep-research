@@ -104,6 +104,21 @@ class Spec(_Tmp):
         self.assertEqual(f["severity"], "error")
         self.assertIn("G4HadronPhysicsQGSP_BIC_HP.cc", f["source"]["document"])
 
+    def test_shower_and_citation_rules(self):
+        obs = dict(self.example["observable"], kind="leakage")
+        obs.pop("leakage_faces", None)
+        down = {"kind": "paper", "handoff": ["hep-authoring"]}
+        code, out = run("spec", "--spec", self.study(observable=obs, downstream_use=down, citations=None))
+        fired = {f["rule"] for f in out["findings"]}
+        self.assertIn("G4R-SHOWER", fired)
+        self.assertIn("G4R-CITATION", fired)
+        obs["leakage_faces"] = ["rear"]
+        code, out = run("spec", "--spec", self.study(observable=obs, downstream_use=down,
+                                                     citations={"literature_record": "lit.json"}))
+        fired = {f["rule"] for f in out["findings"]}
+        self.assertNotIn("G4R-SHOWER", fired)
+        self.assertNotIn("G4R-CITATION", fired)
+
     def test_a_rule_without_a_source_is_refused(self):
         rules = json.loads((ASSETS / "geant4-physics-rules.json").read_text(encoding="utf-8"))
         rules["rules"][0].pop("source")
@@ -117,6 +132,32 @@ class Spec(_Tmp):
             with self.subTest(rule=r["id"]):
                 self.assertTrue(r["source"]["document"] and r["source"]["section"])
                 self.assertIn(r["source"]["version"], ("11.4.3", "RPP 2024"))
+
+
+class Summarize(_Tmp):
+    def test_leakage_observables_by_face(self):
+        cols = ["event", "primary_ekin_MeV", "primary_fate", "edep_A_MeV", "edep_B_MeV", "edep_world_MeV",
+                "leak_gamma_MeV", "leak_e_MeV", "leak_nu_MeV", "leak_other_MeV", "leak_rear_MeV", "leak_front_MeV",
+                "leak_lateral_MeV"]
+        rows = [f"{i},1000,0,30,20,0,600,350,0,0,940,8,2" for i in range(40)]
+        csv = self.d / "e.csv"
+        csv.write_text("# SIMULATION\n" + ",".join(cols) + "\n" + "\n".join(rows) + "\n")
+        rec = self.write("rec.json", {"artifact_id": "geant4-run-x", "extension": {"simulation": {
+            "physics": {"default_cut_mm": 0.7, "em_constructor": "G4EmStandardPhysics_option4"},
+            "gun": {"particle": "e-", "energy_MeV": 1000.0}}}})
+        code, out = run("summarize", "--record", rec, "--csv", csv, "--slab", "all", "--out", self.d / "s.json",
+                        "--bootstrap", 20, "--observables", "mean_deposit_MeV", "leakage_fraction",
+                        "rear_leakage_fraction", "albedo_fraction", "lateral_leakage_fraction")
+        self.assertEqual(code, 0, out)
+        o = out["observables"]
+        self.assertAlmostEqual(o["mean_deposit_MeV"]["value"], 50.0)
+        self.assertAlmostEqual(o["leakage_fraction"]["value"], 0.95)
+        self.assertAlmostEqual(o["rear_leakage_fraction"]["value"], 0.94)
+        self.assertAlmostEqual(o["albedo_fraction"]["value"], 0.008)
+        self.assertNotIn("tail_fraction", o)  # only what was asked for
+        code, out = run("summarize", "--record", rec, "--csv", csv, "--slab", "all", "--out", self.d / "s.json",
+                        "--observables", "no_such")
+        self.assertEqual(code, 2, out)
 
 
 class RunGate(_Tmp):
@@ -245,6 +286,16 @@ class StudyRecord(unittest.TestCase):
         codes = {f["code"] for f in out["findings"]}
         self.assertIn("dependency.status_undeclared", codes)
         bad.unlink()
+
+    def test_a_written_result_without_a_literature_record_is_a_gap(self):
+        spec = json.loads((self.root / "study-sp.json").read_text(encoding="utf-8"))
+        spec["citations"] = {"literature_record": "missing.json"}
+        (self.root / "nolit.json").write_text(json.dumps(spec), encoding="utf-8")
+        o = "output"
+        code, out = run("label", "--spec", "nolit.json", "--benchmarks", f"{o}/benchmarks-sp.json", "--convergence",
+                        f"{o}/convergence-sp.json", "--variations", f"{o}/variations-sp.json", "--project-root", ".",
+                        cwd=self.root)
+        self.assertTrue(any("literature record" in g for g in out["gaps"]), out["gaps"])
 
     def test_label_propagates_user_supplied_from_a_reference_record(self):
         lit = self.root / "output" / "artifacts" / "geant4.literature-record.json"

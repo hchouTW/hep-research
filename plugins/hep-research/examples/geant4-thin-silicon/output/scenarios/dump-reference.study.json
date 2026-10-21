@@ -1,4 +1,7 @@
 {
+ "citations": {
+  "literature_record": "../artifacts/geant4.literature-record.json"
+ },
  "convergence_plan": {
   "observables": [
    "mean_deposit_MeV"

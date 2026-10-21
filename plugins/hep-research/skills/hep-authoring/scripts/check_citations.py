@@ -41,7 +41,9 @@ CITE_RE = re.compile(r"\\(?:no)?cite[a-zA-Z]*\*?(?:\[[^\]]*\]){0,2}\{([^}]*)\}")
 PANDOC_RE = re.compile(r"\[[^\]]*@[^\]]*\]")
 PANDOC_KEY_RE = re.compile(r"-?@([\w:.#$%&\-+?<>~/]+)")
 ARXIV_TEXT_RE = re.compile(r"\barXiv:\s*((?:\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?/\d{7})(?:v\d+)?)", re.I)
-DOI_TEXT_RE = re.compile(r"(?:\bdoi:\s*|https?://(?:dx\.)?doi\.org/)(10\.\d{4,9}/[^\s\]\)>,;\"'}]+)", re.I)
+# a DOI may hold balanced parentheses (10.1016/S0168-9002(03)01368-8); an unbalanced ")" ends it, as in "(doi:10.x/y)"
+DOI_TEXT_RE = re.compile(r"(?:\bdoi:\s*|https?://(?:dx\.)?doi\.org/)(10\.\d{4,9}/(?:[^\s\]\[()>,;\"'}]|\([^\s()]*\))+)",
+                         re.I)
 BIB_ENTRY_RE = re.compile(r"@(\w+)\s*\{\s*([^,\s]+)\s*,", re.S)
 BIB_FIELD_RE = re.compile(r"(\w+)\s*=\s*(?:\{((?:[^{}]|\{[^{}]*\})*)\}|\"([^\"]*)\"|(\d+))", re.S)
 WEAK_LEVELS = ("not-verified", "not-opened", "metadata-only")

@@ -143,5 +143,8 @@
     "change": "G4EmStandardPhysics_option3"
    }
   ]
+ },
+ "citations": {
+  "literature_record": "output/artifacts/geant4.literature-record.json"
  }
 }

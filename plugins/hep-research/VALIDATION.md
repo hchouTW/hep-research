@@ -1961,6 +1961,25 @@ other new split cases and `j13` (`cithop-others`): 8/9; `lit-bound-related-1` lo
 hep-authoring, as in its earlier runs (1/3). Spend $1.43, of which $0.47 on a first attempt with a relative
 `--plugin-dir` that loaded no plugin (discarded; the harness does not yet fail when the plugin is missing).
 
+## GEANT4-FOLLOWUPS (2026-10-21, E2, branch `feat/geant4-followups` from `b1048f66`)
+
+Live routing of the 11 Geant4 cases (`evals/routing/run_routing_eval.py`, claude-sonnet-5-5, Claude Code 2.1.305,
+one pass, $0.88, `evals/routing/results/geant4-cases-r1.json`): 10/11 strict. The miss, `g4-underspec-2` (zh-Hant
+"simulate this with Geant4 for me"), loaded hep-detector first and then asked five clarifying questions (setup,
+particle and energy, observable, physics list, installation), refusing to guess detector parameters: scored
+skill-instead-of-question by the harness; it did not ask for a precision target and offered a default physics list.
+No description changed.
+
+Gaps from GEANT4-INDEPENDENT closed: leakage by face (live, 200 lead-glass showers: the three faces sum to the four
+categories within 1e-6 per event; 1 GeV e- in 2 cm lead glass gives rear leakage 0.9416, albedo 0.0006, lateral 0.0001
+of the beam energy, against 0.956 from the PDG profile with b = 0.5, plausible); leakage observables in `summarize`;
+`shower-containment` (gamma_p checked against closed forms to 1e-13); the shower and citation rules (citation source:
+the run banner in 11.4.3 `G4RunManagerKernel.cc`); optional Sternheimer inputs. Highland E4 text revised from the RPP
+2024 chapter read 2026-10-21. `check_citations.py` DOI fix with a regression test. J14 regenerated: 21/21 criteria,
+byte-identical replay; the study records cite the literature record and gain no gap.
+`run_all_checks.py --no-cli --jobs 6`: 25 pass, 0 fail, 2 skipped; 4484 tests, 4306 pass, 0 failures, 178 skipped;
+live `tests.adapters.test_geant4.Live` pass (5 tests, with the leakage-by-face sum).
+
 ## GEANT4-ADAPTER (2026-10-21, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Python 3.13; branch `feat/geant4-capability` from `cb64cba5`)
 
 Epic TASK-geant4-00 to 03, WP1. Geant4 11.4.3 (commit 2ee379e6843e55b9c6bbb835d2a2b03cc998fef0) built by

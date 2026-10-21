@@ -27,27 +27,32 @@
  },
  "missing": [],
  "rule_coverage": {
-  "applicable": 3,
+  "applicable": 4,
   "applicable_ids": [
    "G4R-THIN-FLUCT",
    "G4R-THIN-CUT-SCAN",
-   "G4R-PRECISION-EM"
+   "G4R-PRECISION-EM",
+   "G4R-CITATION"
   ],
   "fired": 0,
   "kinds_with_a_rule": [
    "activation",
+   "containment",
    "energy-deposit",
    "energy-loss",
+   "energy-resolution",
+   "leakage",
    "most-probable-value",
    "neutron-capture",
    "neutron-dose",
    "neutron-flux",
    "range",
+   "shower-shape",
    "stopping-power",
    "thin-layer-width"
   ],
   "observable_kind": "most-probable-value",
-  "rules": 11
+  "rules": 13
  },
  "status": "ok",
  "status_label": "unvalidated"

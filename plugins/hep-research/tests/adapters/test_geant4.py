@@ -595,6 +595,25 @@ class Live(_Tmp):
         events = [int(r.split(",")[0]) for r in rows]
         self.assertEqual(events, list(range(2000)))
 
+    def test_leakage_by_face_adds_up_to_the_total(self):
+        s = self.small()
+        s["geometry"]["layers"] = [{"repeat": 10, "slabs": [{"name": "PbGl", "material": "G4_GLASS_LEAD",
+                                                             "thickness_mm": 2.0, "sensitive": True}]}]
+        s["geometry"]["lateral_mm"] = 100.0
+        s["geometry"]["world"] = {"material": "G4_Galactic", "scale": 1.2}
+        s["gun"] = {"particle": "e-", "energy_MeV": 1000.0, "world_fraction": -0.499}
+        s["physics"] = {"em_constructor": "G4EmStandardPhysics_option4", "default_cut_mm": 0.7}
+        s["run"]["events"] = 200
+        code, out = self.go(s, "leak")
+        self.assertEqual(code, 0, out)
+        lines = (self.d / "work" / "leak" / "events.csv").read_text(encoding="utf-8").splitlines()
+        cols = lines[1].split(",")
+        for ln in lines[2:]:
+            v = dict(zip(cols, ln.split(",")))
+            cats = sum(float(v[c]) for c in ("leak_gamma_MeV", "leak_e_MeV", "leak_nu_MeV", "leak_other_MeV"))
+            faces = sum(float(v[c]) for c in ("leak_rear_MeV", "leak_front_MeV", "leak_lateral_MeV"))
+            self.assertAlmostEqual(cats, faces, delta=1e-6 * max(cats, 1.0))
+
     def test_mirror_run_passes_the_checks(self):
         code, out = self.go(self.small(), "m5")
         self.assertEqual(code, 0, out)

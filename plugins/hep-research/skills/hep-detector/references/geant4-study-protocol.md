@@ -33,7 +33,7 @@ run. Its fields:
 |---|---|
 | `observable` | name, kind (for example `most-probable-value`, `stopping-power`, `energy-deposit`), domain (`em` or `hadronic`), exact definition, unit, whether weights apply |
 | `particle` | species and kinetic energy |
-| `geometry_source`, `materials` | where the geometry and materials come from; for each reference material: density, Z/A, mean excitation energy I, Sternheimer parameters, their source, and `reference_origin` (`independent`, never the Geant4 material dump) |
+| `geometry_source`, `materials` | where the geometry and materials come from; for each reference material: density, its source, and `reference_origin` (`independent`, never the Geant4 material dump); Z/A, mean excitation energy I and the Sternheimer parameters when a benchmark uses them (stopping power, thin-layer MPV and width) |
 | `physics` | the layered_sim spec, the order of UI commands, and a justification per choice with its source |
 | `convergence_plan` | the cut or step-limit scan, the observables checked and their relative tolerances |
 | `statistical_target` | the observable and the relative standard error required |
@@ -75,6 +75,12 @@ coverage. The items say when to look and where, not which list to use.
   <~ 1000. Rule `G4R-BETHE-RANGE`.
 - **Datasets, UI timing, replicas, step limiters, biasing**: rules `G4R-DATASETS`, `G4R-UI-TIMING`,
   `G4R-REPLICA-OVERLAP`, `G4R-SPECIALCUTS`, `G4R-BIASED-BALANCE` (section 5).
+- **Shower and leakage observables**: cut and EM constructor matter; leakage is energy leaving the world, so state
+  which faces count (`observable.leakage_faces`: layered_sim splits it into `leak_rear_MeV`, `leak_front_MeV`, the
+  albedo, and `leak_lateral_MeV`; an escaping e+ carries its 2 m_e c^2 as in
+  `geant4:examples/extended/electromagnetic/TestEm3/src/TrackingAction.cc`). Rule `G4R-SHOWER`.
+- **Written results**: name the literature record in `citations.literature_record` (the 11.4.3 run banner,
+  `geant4:source/run/src/G4RunManagerKernel.cc`, lists the three papers to cite). Rule `G4R-CITATION`.
 
 ## 4. The convergence gate and the event count
 
@@ -87,6 +93,10 @@ coverage. The items say when to look and where, not which list to use.
   errors, and `run` reports the events needed as N (SE/target)^2. The delta-ray tail makes means converge slowly: in
   the official TestEm5 run 0 (5 GeV pi+, 20 um Si, 1e5 events) the error on the primary's leakage is about 8 % of the
   mean energy loss. Do not take rms/sqrt(N) of a mean energy loss at face value.
+- **Observables for the gate.** `summarize` computes the thin-layer set by default (mean deposit, most probable
+  deposit and loss, tail fraction); for thick absorbers ask for what the study measures with `--observables`
+  (`leakage_fraction`, `rear_leakage_fraction`, `albedo_fraction`, `lateral_leakage_fraction`) and `--slab all`.
+  `geant4_run.py scan` gives every point its own seeds, so the SE of a difference is that of independent samples.
 
 ## 5. The validation ladder and verified pitfalls
 
@@ -132,7 +142,8 @@ material dump; constants from `core/constants`.
 | `thin-layer-mpv` | reference | Delta_p, RPP 2024 Eq. 34.12 (j = 0.200), only for kappa < 0.05; thickness of validity and accuracy declared in the spec, as RPP states neither |
 | `thin-layer-width` | sanity | Landau width 4 xi; thin-layer distributions are significantly wider (RPP 2024) |
 | `multiple-scattering` | sanity | Highland, RPP 2024 Eq. 34.16, through `multiple_scattering.py`; RPP gives no numerical accuracy |
-| `em-shower-shape` | sanity | t_max, RPP 2024 Eq. 34.36 |
+| `em-shower-shape` | sanity | t_max, RPP 2024 Eq. 34.36 (not applicable when the stack does not contain t_max) |
+| `shower-containment` | sanity | rear leakage against the gamma-function profile, RPP 2024 Eqs. 34.34-34.36 (a fit to EGS4 showers, 1-100 GeV; b = 0.5 by default): never validation; a reference for leakage needs published data (`published-data`) |
 | `published-data` | interface | handed to hep-statistics |
 
 Each reference benchmark has a tolerance (reference accuracy + k SE + binning) and a detection limit (tolerance +
@@ -163,6 +174,14 @@ below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
 - A response from the runs: `build_response.py build ... --status unvalidated` (it writes empty `inputs`, a
   provenance gap listed in the study record). Inference goes to hep-statistics; plots of simulation alone are labelled
   "Simulation" (hep-authoring).
+- Phase 2 (re-issuing an eligible scope as `validated-in-scope`) is deferred by maintainer decision (2026-10-21). It
+  would need all of: an explicit exception in point 5 of the shared context-resolution stanza (regenerating every
+  SKILL.md and a live routing rerun); a contract rule after 3.0.1 requiring a `study` block with a passed reference
+  benchmark whose negative control held, a passed convergence gate and a declared scope inside the benchmark scope;
+  a field that references the provisional run records by path and hash without inheriting their labels, resolved by
+  `dependencies.py`; the study spec kept in `extension.input_manifest`; `build_response.py` able to link run records
+  and carry several labels; and recorded fixtures not tied to the current contract version. Until then never relabel a
+  study record: `dependencies.py` reports `dependency.status_undeclared` for exactly that.
 
 ## 8. The Geant4 adapter
 

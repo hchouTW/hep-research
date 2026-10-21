@@ -9,8 +9,10 @@ Subcommands:
   spec        completeness of the study spec (assets/geant4-study-spec.schema.json) and the sourced rule table
               (assets/geant4-physics-rules.json; a rule without a source is refused); reports the rule coverage.
               Exit 1 when the observable, statistical target or validation scope is missing or an error rule fires.
-  summarize   per-run observables from a layered_sim CSV (mean deposit, tail fraction, most probable deposit and
-              energy loss, with seeded-bootstrap standard errors), tied to the run record by hash.
+  summarize   per-run observables from a layered_sim CSV, with seeded-bootstrap standard errors, tied to the run
+              record by hash: the thin-layer set (mean deposit, most probable deposit and energy loss, tail fraction;
+              the default) or, with --observables, leakage fractions (total, rear, albedo, lateral); --slab all sums
+              the deposits of every slab.
   run         run records against the spec (physics, gun, geometry, spec hash, data paths and dataset hashes), the
               statistical target (bootstrap SE, not only rms/sqrt(N); too few events gives the N needed), and the
               convergence gate (hard): across each declared cut or step-limit scan, every declared observable changes
@@ -26,7 +28,7 @@ Subcommands:
               listing the gaps; only invalid input is refused (exit 2).
 Usage (paths relative to the current folder):
   check_geant4_study.py spec --spec STUDY.json [--rules RULES.json]
-  check_geant4_study.py summarize --record RUN.json --csv EVENTS.csv[.gz] --slab NAME --out SUMMARY.json [--bootstrap 200 --seed 1]
+  check_geant4_study.py summarize --record RUN.json --csv EVENTS.csv[.gz] --slab NAME|all --out SUMMARY.json [--observables ...] [--bootstrap 200 --seed 1]
   check_geant4_study.py run --spec STUDY.json --summary SUMMARY.json [...] [--out CONVERGENCE.json]
   check_geant4_study.py variations --spec STUDY.json --nominal SUMMARY.json --variation NAME=SUMMARY.json [...] --out VARIATIONS.json
   check_geant4_study.py label --spec STUDY.json --benchmarks BENCH.json --convergence CONV.json [--variations VAR.json]
@@ -76,6 +78,10 @@ HADRONIC = {"QGSP_BIC": {"nucleon": [(1000.0, "BIC"), (1500.0, "BIC/BERT"), (300
             "FTFP_BERT": {"nucleon": [(3000.0, "BERT"), (6000.0, "BERT/FTFP"), (math.inf, "FTFP")],
                           "pion": [(3000.0, "BERT"), (6000.0, "BERT/FTFP"), (math.inf, "FTFP")]}}
 NUCLEONS, PIONS = ("proton", "neutron"), ("pi+", "pi-")
+THIN_OBSERVABLES = ["mean_deposit_MeV", "mpv_deposit_MeV", "tail_fraction", "mpv_loss_MeV"]
+# leakage observables: energy leaving the world over the primary kinetic energy (an escaping e+ counts its 2 m_e c^2);
+# rear = through the +x end face, albedo = the -x end face, lateral = the y and z faces
+LEAK_OBSERVABLES = ["leakage_fraction", "rear_leakage_fraction", "albedo_fraction", "lateral_leakage_fraction"]
 
 
 class StudyError(ValueError):
@@ -246,24 +252,46 @@ def cmd_summarize(args) -> tuple[str, dict]:
         raise StudyError("--record is not a Geant4 run record (no extension.simulation)")
     csv = Path(args.csv)
     rows = read_csv(csv)
-    col = f"edep_{args.slab}_MeV"
-    if col not in rows[0]:
-        raise StudyError(f"{csv.name} has no column {col}")
-    dep = [r[col] for r in rows]
+    if args.slab == "all":  # the summed deposit of every slab (thick or segmented absorbers)
+        cols = [c for c in rows[0] if c.startswith("edep_") and c.endswith("_MeV") and c != "edep_world_MeV"
+                and not c.startswith("edep_copy")]
+        dep = [math.fsum(r[c] for c in cols) for r in rows]
+    else:
+        col = f"edep_{args.slab}_MeV"
+        if col not in rows[0]:
+            raise StudyError(f"{csv.name} has no column {col}")
+        dep = [r[col] for r in rows]
     width = args.mpv_bin_mev
     tail_thr = args.tail_threshold_mev
-    mean = statistics.fmean(dep)
-    obs = {"mean_deposit_MeV": {"value": mean, "se": boot(dep, statistics.fmean, args.bootstrap, args.seed)},
-           "mpv_deposit_MeV": {"value": _mpv(dep, width), "se": boot(dep, lambda v: _mpv(v, width), args.bootstrap,
-                                                                     args.seed)}}
-    p = sum(d > tail_thr for d in dep) / len(dep)
-    obs["tail_fraction"] = {"value": p, "se": math.sqrt(max(p * (1 - p), 1 / len(dep) ** 2) / len(dep)),
-                            "threshold_MeV": tail_thr}
-    if "primary_eloss_MeV" in rows[0]:
+    wanted = set(args.observables or THIN_OBSERVABLES)
+    unknown = wanted - set(THIN_OBSERVABLES) - set(LEAK_OBSERVABLES)
+    if unknown:
+        raise StudyError(f"unknown observables {sorted(unknown)}; known: {THIN_OBSERVABLES + LEAK_OBSERVABLES}")
+    obs = {}
+
+    def add(name, values, stat=statistics.fmean):
+        obs[name] = {"value": stat(values), "se": boot(values, stat, args.bootstrap, args.seed)}
+    if "mean_deposit_MeV" in wanted:
+        add("mean_deposit_MeV", dep)
+    if "mpv_deposit_MeV" in wanted:
+        add("mpv_deposit_MeV", dep, lambda v: _mpv(v, width))
+    if "tail_fraction" in wanted:
+        p = sum(d > tail_thr for d in dep) / len(dep)
+        obs["tail_fraction"] = {"value": p, "se": math.sqrt(max(p * (1 - p), 1 / len(dep) ** 2) / len(dep)),
+                                "threshold_MeV": tail_thr}
+    if "mpv_loss_MeV" in wanted and "primary_eloss_MeV" in rows[0]:
         loss = [r["primary_eloss_MeV"] for r in rows if r.get("primary_fate") == 1]
         if len(loss) > 1:
-            obs["mpv_loss_MeV"] = {"value": _mpv(loss, width), "se": boot(loss, lambda v: _mpv(v, width),
-                                                                          args.bootstrap, args.seed)}
+            add("mpv_loss_MeV", loss, lambda v: _mpv(v, width))
+    leak_cols = {"leakage_fraction": ("leak_gamma_MeV", "leak_e_MeV", "leak_nu_MeV", "leak_other_MeV"),
+                 "rear_leakage_fraction": ("leak_rear_MeV",), "albedo_fraction": ("leak_front_MeV",),
+                 "lateral_leakage_fraction": ("leak_lateral_MeV",)}
+    for name, cs in leak_cols.items():
+        if name in wanted:
+            if not all(c in rows[0] for c in cs):
+                raise StudyError(f"{name} needs the CSV columns {list(cs)} (layered_sim from the leakage-by-face "
+                                 "version on)")
+            add(name, [math.fsum(r[c] for c in cs) / r["primary_ekin_MeV"] for r in rows])
     doc = {"schema": "geant4-run-summary/1", "run_record": {"artifact_id": rec["artifact_id"],
                                                             "sha256": sha256_file(Path(args.record))},
            "csv": {"name": csv.name, "sha256": sha256_file(csv)}, "events": len(rows),
@@ -493,6 +521,14 @@ def cmd_label(args) -> tuple[str, dict]:
                         "the spec would enter the reference too and cancel")
     if var is None:
         gaps.append("no variation table")
+    if get(study, "downstream_use.kind") in ("report", "paper", "talk", "thesis", "proposal"):
+        lit = get(study, "citations.literature_record")
+        lit_doc = None
+        if isinstance(lit, str) and (spec_path.parent / lit).is_file():
+            lit_doc = load_json(spec_path.parent / lit)
+        if not lit_doc or lit_doc.get("artifact_type") != "literature-record":
+            gaps.append("written downstream use without a literature record (citations.literature_record): cite the "
+                        "Geant4 papers, version and documents from one, never from memory (R8)")
     gaps.append("build_response.py writes empty inputs and one --status: a response built from these runs cannot link "
                 "the run records (phase 2 requirement 5)")
     if not any(b.get("validation_evidence") for b in bench.get("benchmarks", [])):
@@ -579,6 +615,9 @@ def main(argv=None) -> int:
     p.add_argument("--seed", type=int, default=1)
     p.add_argument("--mpv-bin-mev", type=float, default=0.002)
     p.add_argument("--tail-threshold-mev", type=float, default=0.25)
+    p.add_argument("--observables", nargs="+", help="which observables to compute (default the thin-layer set: "
+                   "mean_deposit_MeV mpv_deposit_MeV tail_fraction mpv_loss_MeV; leakage: leakage_fraction "
+                   "rear_leakage_fraction albedo_fraction lateral_leakage_fraction)")
     p = sub.add_parser("run", help="records against the spec, statistical target, convergence gate")
     p.add_argument("--spec", required=True)
     p.add_argument("--summary", action="append", required=True, help="[ROLE=]SUMMARY.json; ROLE nominal or scan")
