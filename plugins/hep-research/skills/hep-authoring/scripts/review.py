@@ -140,6 +140,8 @@ def host_terms() -> list[str]:
 
 
 def round_seed(rv: Review, r: int) -> str:
+    """The round seed; the master seed is bound to the review id, so one --seed reused for several reviews never
+    repeats their nonces, slot labels or samples."""
     return U.derive(rv.seeds()["master"], "round", r)
 
 
@@ -219,7 +221,8 @@ def cmd_start(ctx: Ctx) -> dict:
     if rv.log.exists():
         raise ReviewError(f"review {rid} exists")
     ctx._rv = rv
-    rv.save_seeds({"master": str(seed)})
+    master = U.derive(str(seed), rid)
+    rv.save_seeds({"seed": str(seed), "master": master})
     lenses = U.active_lenses(text, table_l, eff["extra_lenses"])
     units, table, _ = build_round(ctx, rv, 1, text, lenses)
     rs = round_seed(rv, 1)
@@ -228,7 +231,7 @@ def cmd_start(ctx: Ctx) -> dict:
     slots = allocate_slots(lenses, eff["models"], rs)
     rv.save_slots({"1": slots})
     write_json(rv.private / "round-1" / "sample.json", {"lenses": lenses, "deep": deep})
-    rv.save_seeds({"master": str(seed), "rounds": {"1": rs}})
+    rv.save_seeds({"seed": str(seed), "master": master, "rounds": {"1": rs}})
     rv.append("round_started", ctx.now, {
         "review_id": rid, "round": 1, "document": rel, "source_sha256": source_sha,
         "units_sha256": R.sha256_file(rv.units_path(1)), "config": cfg, "config_sha256": R.sha256_file(ctx.cfg_path),

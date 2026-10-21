@@ -107,6 +107,18 @@ class EndToEndTests(unittest.TestCase):
                      "## Limitations that applied", "Agents dispatched"):
             self.assertIn(part, text)
 
+    def test_one_seed_for_two_documents_gives_different_nonces(self):
+        with tempfile.TemporaryDirectory(prefix="hep-review-seed-") as tmp:
+            nonces = []
+            for n, doc in enumerate((H.DOC, H.DOC.replace("synthetic test data", "synthetic fixture data"))):
+                h = H.Harness(Path(tmp) / f"p{n}").setup()
+                h.write_doc(doc)
+                h.start()
+                act = h.next()
+                h.run("dispatch", act["slots"][0], expect=0)
+                nonces.append(h.dispatched(act["slots"][0])["nonce"])
+            self.assertNotEqual(nonces[0], nonces[1])
+
     def test_reproducible_byte_for_byte(self):
         with tempfile.TemporaryDirectory(prefix="hep-review-e2e-b-") as tmp:
             h2, _ = H.run_e2e(Path(tmp) / "a")

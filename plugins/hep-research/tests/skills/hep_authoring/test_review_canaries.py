@@ -73,10 +73,11 @@ class WitnessTests(unittest.TestCase):
     def test_shortfall_reaches_the_dispatched_event(self):
         with tempfile.TemporaryDirectory() as t:
             h = H.Harness(Path(t), config={"config_version": "1.0.0", "models": ["a", "b"], "canaries_per_slot": 3}).setup()
+            h.write_doc(H.DOC.replace("The definitions heading is at `LICENSE:8` of the plugin.\n", ""))  # two facts candidate units for three canaries
             h.start()
             H.dispatch_all(h, h.next())
-            ds = [h.dispatched(h.slot_of("lens", lens)) for lens in ("facts", "design")]
-            self.assertTrue(any(d["canaries"] < d["canaries_expected"] == 3 for d in ds), ds)
+            d = h.dispatched(h.slot_of("lens", "facts"))
+            self.assertEqual((d["canaries"], d["canaries_expected"]), (2, 3))
             self.assertIn("canary_shortfall", [c["code"] for c in R.check(h.rv.dir)["codes"]])
 
     def test_key_diff_widening(self):

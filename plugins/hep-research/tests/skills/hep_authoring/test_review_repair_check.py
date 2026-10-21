@@ -220,6 +220,7 @@ class CheckTests(unittest.TestCase):
         cfg = {"config_version": "1.0.0", "models": ["only-model"], "unresolved_max_ratio": 0.49, "canaries_per_slot": 3}
         with tempfile.TemporaryDirectory() as t:
             h = H.Harness(Path(t), config=cfg).setup()
+            h.write_doc(H.DOC.replace("The definitions heading is at `LICENSE:8` of the plugin.\n", ""))  # two facts candidate units for three canaries
             h.start()
             H.dispatch_all(h, h.next())
             status, codes = self.codes(h)
