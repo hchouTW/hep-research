@@ -11,8 +11,10 @@
 #   lint       ruff and mypy on core/ and contracts/; required
 #   stats-backends  the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4 required, and NumPy and hypothesis from the
 #              lock (the sci-fix eigenvalue oracle and the property tests): a skip for any of them fails; required
-#   optional-* the same unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
-#              blocking a merge for now, but their results are shown on the run
+#   optional-* the unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
+#              blocking a merge for now, but their results are shown on the run. On pull requests each runs only the
+#              modules its extra unlocks (run_all_checks.py --extra, tools/optional_modules.json); pushes to main,
+#              weekly and manual runs keep the full suite, and optional-selection verifies the list against them
 #   release-manifests  published release bundles unchanged (C10); required
 #   latest     weekly and on demand: the latest releases (no lock) and the slow tier (HEP_SLOW_TESTS=1), with a
 #              1800 s module limit (HEP_MODULE_TIMEOUT): the slowest slow-tier module takes about 545 s alone
@@ -265,7 +267,8 @@ jobs:
           python -m pip install -r requirements-ci.lock
           python -m pip install ${{ matrix.install }}
       - name: Unit tests with ${{ matrix.extra }} available
-        run: python tools/run_all_checks.py --part units --no-cli --jobs 4 --out ../../check-runs --summary "$GITHUB_STEP_SUMMARY"
+        # pull requests: only the modules with tests this extra unlocks (tools/optional_modules.json); main and weekly: all
+        run: python tools/run_all_checks.py --part units --no-cli --jobs 4 ${{ github.event_name == 'pull_request' && format('--extra {0}', matrix.extra) || '' }} --out ../../check-runs --summary "$GITHUB_STEP_SUMMARY"
       - name: Keep the check-run record
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
@@ -289,13 +292,36 @@ jobs:
         run: |
           if command -v git >/dev/null; then git config --global --add safe.directory "$GITHUB_WORKSPACE"; fi  # checkout owned by another user
           python3 -c "import ROOT; print('ROOT', ROOT.gROOT.GetVersion())"
-          python3 tools/run_all_checks.py --part units --no-cli --jobs 4 --out ../../check-runs --summary "$GITHUB_STEP_SUMMARY"
+          python3 tools/run_all_checks.py --part units --no-cli --jobs 4 ${{ github.event_name == 'pull_request' && '--extra ROOT' || '' }} --out ../../check-runs --summary "$GITHUB_STEP_SUMMARY"
       - name: Keep the check-run record
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: check-run-optional-ROOT
           path: check-runs/
+
+  optional-selection:
+    # Pushes to main, the weekly and manual runs: the full optional runs show which modules each extra unlocks
+    # (tests the required shards skip); tools/optional_selection.py verify fails when one of them is not listed in
+    # tools/optional_modules.json, which pull requests use to run the optional jobs selectively.
+    needs: [checks, optional-python, optional-root]
+    if: ${{ github.event_name != 'pull_request' && !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          pattern: check-run-*
+          path: check-runs
+      - name: Verify the optional-module selection
+        run: |
+          opt=""
+          for d in ../../check-runs/check-run-optional-*; do opt="$opt ${d##*check-run-optional-}=$d"; done
+          python tools/optional_selection.py verify --required ../../check-runs/check-run-py3.13-units-* --optional $opt
 
   latest:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

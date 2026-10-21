@@ -15,7 +15,9 @@ profile suites and the static and host checks; every module belongs to exactly o
 suites, static and host checks) plus 'ams-optional' (tools/check_ams_optional.py, the generic suites in a copy without
 the AMS-02 profile), so CI can run the two in parallel jobs.
 Every check records its seconds; a units run records its plan (the full module list with its digest and the modules
-of this shard), which tools/reconcile_check_runs.py checks across shards. Failed test ids and traceback tails are
+of this shard), which tools/reconcile_check_runs.py checks across shards. --extra NAME (with --part units) runs only
+the modules tools/optional_modules.json lists for an optional extra: the CI optional jobs on pull requests; pushes to
+main and the weekly run keep the full suite, and tools/optional_selection.py verify checks the list against them. Failed test ids and traceback tails are
 printed, and written as Markdown to --summary FILE (CI passes $GITHUB_STEP_SUMMARY).
 Passing checks shows software consistency only, not physical validity or statistical coverage.
 """
@@ -56,6 +58,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 MODULE_TIMEOUT = float(os.environ.get("HEP_MODULE_TIMEOUT", "600"))  # seconds per test module or check
 TIMINGS = ROOT / "tools" / "module_timings.json"
+OPTIONAL_MODULES = ROOT / "tools" / "optional_modules.json"
 SLOW_MODULE_SECONDS = 60.0  # a fast-tier module above this belongs in the slow tier (HEP_SLOW_TESTS=1)
 
 
@@ -146,12 +149,29 @@ def run_module(module: str, timeout: float) -> dict:
             "failed": r["failed"], "skipped": r["skipped_list"], "messages": r.get("messages") or {}}
 
 
-def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1, shard: tuple[int, int] | None = None) -> dict:
+def extra_modules(extra: str, every: list[str], path: Path | None = None) -> list[str]:
+    """The test modules listed for an optional extra in tools/optional_modules.json (written by
+    tools/optional_selection.py generate). An unknown extra, or a listed module that no longer exists, is refused."""
+    doc = json.loads((path or OPTIONAL_MODULES).read_text(encoding="utf-8"))
+    listed = doc.get("extras", {}).get(extra)
+    if not listed:
+        raise ValueError(f"--extra {extra}: not in {OPTIONAL_MODULES.name} (known: {sorted(doc.get('extras', {}))})")
+    gone = sorted(set(listed) - set(every))
+    if gone:
+        raise ValueError(f"--extra {extra}: listed modules no longer exist: {gone} (regenerate with optional_selection.py)")
+    return sorted(listed)
+
+
+def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1, shard: tuple[int, int] | None = None,
+                  extra: str | None = None) -> dict:
     timings = load_timings()
     every = test_modules()
-    modules = shard_modules(every, *shard, timings) if shard else list(every)
+    if extra:
+        modules = extra_modules(extra, every)
+    else:
+        modules = shard_modules(every, *shard, timings) if shard else list(every)
     plan = {"all_modules": every, "all_modules_sha256": modules_digest(every), "modules": sorted(modules),
-            "shard": f"{shard[0]}/{shard[1]}" if shard else "1/1",
+            "shard": f"{shard[0]}/{shard[1]}" if shard else "1/1", "extra": extra,
             "timings_sha256": hashlib.sha256(json.dumps(timings, sort_keys=True).encode()).hexdigest()}
     modules = slowest_first(modules, timings)  # a long module started last would hold up the whole run
     start = time.monotonic()
@@ -329,6 +349,9 @@ def parse_args(argv=None) -> argparse.Namespace:
                          "host checks; ams-optional: tools/check_ams_optional.py only (default all)")
     ap.add_argument("--shard", type=parse_shard, metavar="K/N",
                     help="run only shard K of N of the test modules, balanced by tools/module_timings.json")
+    ap.add_argument("--extra", metavar="NAME",
+                    help="run only the test modules listed for this optional extra in tools/optional_modules.json (the "
+                         "modules with tests that run only when the extra is installed); with --part units")
     ap.add_argument("--summary", type=Path, metavar="FILE",
                     help="append a Markdown summary (status and seconds per check, failed tests with traceback tails, "
                          "slowest modules) to FILE, e.g. $GITHUB_STEP_SUMMARY")
@@ -342,9 +365,16 @@ def main(argv=None) -> int:
     if opts.shard and opts.part not in ("all", "units"):
         print(f"--shard applies to the test modules; it cannot be combined with --part {opts.part}", file=sys.stderr)
         return 2
+    if opts.extra and (opts.part != "units" or opts.shard):
+        print("--extra selects test modules: use it with --part units and without --shard", file=sys.stderr)
+        return 2
     py = sys.executable
     t = opts.module_timeout
-    units = [run_unittests(opts.module_timeout, opts.jobs, opts.shard)] if opts.part in ("all", "units") else []
+    try:
+        units = [run_unittests(opts.module_timeout, opts.jobs, opts.shard, opts.extra)] if opts.part in ("all", "units") else []
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
     static = opts.part in ("all", "checks", "static")
     checks = units + (run_profile_tests() if static else [])
     for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli):
@@ -369,6 +399,7 @@ def main(argv=None) -> int:
                                               ("sha", "GITHUB_SHA"), ("job", "GITHUB_JOB")) if os.environ.get(v)},
         "part": opts.part,
         "shard": f"{opts.shard[0]}/{opts.shard[1]}" if opts.shard else None,
+        "extra": opts.extra,
         "counts": {s: sum(1 for c in checks if c["status"] == s) for s in ("pass", "fail", "skip")},
         "checks": checks,
         "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind.",

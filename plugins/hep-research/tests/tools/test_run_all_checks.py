@@ -110,6 +110,52 @@ class ShardTests(unittest.TestCase):
             self.assertIn("--part checks", p.stderr)
 
 
+class TimingCoverageTests(unittest.TestCase):
+    """The shards balance only when the timings cover the modules: 143 of 382 modules had no record on 2026-10-21 and
+    the two CI shards took 444 s and 547 s. Refresh tools/module_timings.json from a CI run when this fails."""
+
+    def test_at_most_a_tenth_of_the_modules_lack_a_timing(self):
+        mod = _load("run_all_checks", TOOL)
+        modules, timings = mod.test_modules(), mod.load_timings()
+        missing = sorted(set(modules) - set(timings))
+        self.assertLessEqual(len(missing), len(modules) // 10, f"{len(missing)} modules without a timing: {missing[:10]}")
+
+
+class ExtraSelectionTests(unittest.TestCase):
+    """--extra NAME runs only the modules tools/optional_modules.json lists for an optional extra (CI optional jobs
+    on pull requests); every listed module must exist, and it combines only with --part units."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.mod = _load("run_all_checks", TOOL)
+        cls.modules = cls.mod.test_modules()
+
+    def test_committed_selection_lists_existing_modules_for_every_ci_extra(self):
+        import json
+        doc = json.loads(self.mod.OPTIONAL_MODULES.read_text(encoding="utf-8"))
+        self.assertEqual(sorted(doc["extras"]), ["ROOT", "columnar", "hepdata", "pyhf", "root-uproot", "torch-cpu"])
+        for extra in doc["extras"]:
+            with self.subTest(extra=extra):
+                self.assertTrue(set(self.mod.extra_modules(extra, self.modules)) <= set(self.modules))
+
+    def test_unknown_extra_and_stale_module_are_refused(self):
+        import json
+        with self.assertRaises(ValueError):
+            self.mod.extra_modules("no-such-extra", self.modules)
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "sel.json"
+            f.write_text(json.dumps({"extras": {"x": ["tests.tools.test_gone_module"]}}))
+            with self.assertRaisesRegex(ValueError, "no longer exist"):
+                self.mod.extra_modules("x", self.modules, f)
+
+    def test_extra_needs_part_units_without_shard(self):
+        for extra_args in (("--extra", "pyhf"), ("--extra", "pyhf", "--part", "units", "--shard", "1/2")):
+            with self.subTest(args=extra_args), tempfile.TemporaryDirectory() as td:
+                p = run(*extra_args, cwd=td)
+                self.assertEqual(p.returncode, 2, p.stdout[-300:])
+                self.assertIn("--part units", p.stderr)
+
+
 class AmsOptionalSuiteTests(unittest.TestCase):
     """check_ams_optional.py runs each test module on its own; a suite still fails when any of its modules fails."""
 
