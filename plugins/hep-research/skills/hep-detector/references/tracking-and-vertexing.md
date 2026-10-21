@@ -145,7 +145,8 @@ measurement: eq. (35.68), p. 112, RPP 2025, eq. (35.61), p. 109, RPP 2024, read 
     scattering:  sigma(p_T)/p_T ~= 0.016 / (0.3 * beta * B * L) * sqrt(L/X0)
 
 PDG states the measurement term for many (N >= 10) uniformly spaced points; for N = 3
-the exact coefficient is `8 sqrt(3/2) = 9.8`, not `sqrt(720/7) = 10.1`. `L` in the
+the exact coefficient is `8 sqrt(3/2) = 9.8`, not `sqrt(720/7) = 10.1`. Below N = 10, `multiple_scattering.py` reports the
+exact coefficient for equally spaced points next to Gluckstern and warns (Gluckstern is 5.4% high at N = 4). `L` in the
 measurement term is the track length projected onto the bending plane, and `X0` is a
 length (the radiation length in g/cm^2 divided by the density, here in m). The
 scattering term carries `beta` to the first power: PDG eq. 35.70 gives

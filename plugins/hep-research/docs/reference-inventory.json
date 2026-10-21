@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 492832,
+   "bytes": 492992,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2411,8 +2411,8 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 16228,
-   "lines": 244,
+   "bytes": 16388,
+   "lines": 245,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",

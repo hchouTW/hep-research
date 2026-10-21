@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **`multiple_scattering.py` says when the Gluckstern term is an approximation.** PDG states
+  `sigma_x sqrt(720/(N+4)) / (0.3 B L^2)` for N >= 10 equally spaced points; with fewer measuring layers it overstates
+  the intrinsic term (3.5% at N = 3, 5.4% at N = 4, 2.4% at N = 8; the crossover and the intrinsic MDR move by the
+  same factor). The output now carries `intrinsic_coefficient` (Gluckstern, the exact least-squares coefficient for N
+  equally spaced points `sqrt(720 (N-1)^3 / ((N-2) N (N+1) (N+2)))`, their variance ratio, and which one is used) and
+  a warning below N = 10 that points to `tracker_resolution.py momentum` for the actual layer positions. The numbers
+  it reports are unchanged (Gluckstern stays the term used); `toy_spectrometer.py` keeps Gluckstern as the definition
+  of its synthetic slope.
+
 ## 0.20.0 (2026-10-21)
 
 Contracts 3.1.0 (minor): Geant4 phase 2.
