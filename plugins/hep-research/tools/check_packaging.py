@@ -11,9 +11,10 @@ content rules below apply to every text file (a known text suffix, or no NUL byt
 - no e-mail addresses other than the commit trailer address; no file over 2 MiB
 - no restricted-site or personal-machine facts (EOS, AFS or AMS CVMFS paths, lxplus node names, home folders, local
   hostnames), no AMS Offline software identifiers, and no trace of the plugin's pre-release development repository
-- no site facts in shipped batch-scheduler configs (JSON under adapters/ or examples/ with a slurm or htcondor
-  backend or section): partition, account, QoS, constraint, gres, requirements and container image must be
-  placeholders ("<...>") or start with "synthetic"; campaign_dir must not be an absolute path
+- no site facts in shipped batch-scheduler configs (JSON under adapters/ or examples/; any object at any depth with a
+  slurm or htcondor backend or section, and everything below it; keys compared case-insensitively): partition,
+  account, QoS, constraint, gres, requirements and container image must be placeholders ("<...>") or start with
+  "synthetic"; campaign_dir must not be an absolute path
 - the README's stated package size ("about N files, X MB uncompressed") within 10% of the measured file count and
   byte total, so the figure an uploader relies on does not drift
 Usage: python3 tools/check_packaging.py [--root PLUGIN_ROOT]   Exit 0 clean, 1 findings. Output: JSON.
@@ -68,21 +69,30 @@ def files() -> list[Path]:
     return [p for p in ROOT.rglob("*") if (p.is_file() or p.is_symlink()) and not CACHE.search(p.relative_to(ROOT).as_posix())]
 
 
-def batch_site_facts(obj) -> list[str]:
-    """Site keys in a batch config that hold neither a placeholder nor a synthetic value."""
-    if not isinstance(obj, dict) or not (obj.get("backend") in ("slurm", "htcondor") or "slurm" in obj or "htcondor" in obj):
-        return []
-    bad = []
-    for scope in (obj, obj.get("slurm"), obj.get("htcondor")):
-        if not isinstance(scope, dict):
-            continue
-        for k in SITE_KEYS:
-            v = scope.get(k)
-            if isinstance(v, str) and not (v.startswith("<") and v.endswith(">")) and not v.lower().startswith("synthetic"):
+def batch_site_facts(obj, inside: bool = False) -> list[str]:
+    """Site keys in a batch config that hold neither a placeholder nor a synthetic value. The JSON is walked
+    recursively; a dict with a slurm or htcondor backend or section opens a batch scope that covers everything below
+    it. Keys and the backend value are compared case-insensitively."""
+    bad: list[str] = []
+    if isinstance(obj, list):
+        for item in obj:
+            bad += batch_site_facts(item, inside)
+        return bad
+    if not isinstance(obj, dict):
+        return bad
+    keys = {str(k).lower(): v for k, v in obj.items()}
+    backend = keys.get("backend")
+    inside = inside or (isinstance(backend, str) and backend.lower() in ("slurm", "htcondor")) \
+        or "slurm" in keys or "htcondor" in keys
+    if inside:
+        for k, v in obj.items():
+            if str(k).lower() in SITE_KEYS and isinstance(v, str) and not (v.startswith("<") and v.endswith(">")) \
+                    and not v.lower().startswith("synthetic"):
                 bad.append(f"{k}={v}")
-        cd = scope.get("campaign_dir")
-        if isinstance(cd, str) and cd.startswith(("/", "~")):
-            bad.append(f"campaign_dir={cd}")  # an absolute path names someone's file system
+            if str(k).lower() == "campaign_dir" and isinstance(v, str) and v.startswith(("/", "~")):
+                bad.append(f"{k}={v}")  # an absolute path names someone's file system
+    for v in obj.values():
+        bad += batch_site_facts(v, inside)
     return bad
 
 

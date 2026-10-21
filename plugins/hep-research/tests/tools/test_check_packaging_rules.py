@@ -71,5 +71,25 @@ class TextScanCoverageTests(unittest.TestCase):
         self.assertEqual(scan({"docs/img.bin": b"\x89PNG\x00\x00" + HOME.encode() + b"secret"}), [])
 
 
+class BatchSiteFactTests(unittest.TestCase):
+    """T29: site keys were matched case-sensitively and only at the top level or in a direct slurm/htcondor block."""
+
+    def test_nested_and_mixed_case_site_keys_are_found(self):
+        cases = ({"backend": "slurm", "Partition": "gpu-real"},
+                 {"sites": [{"backend": "slurm", "account": "realacct"}]},
+                 {"backend": "slurm", "slurm": {"partition": "synthetic-qos", "nested": {"account": "realacct"}}},
+                 {"campaign": {"HTCondor": {"Requirements": "Machine == real"}}},
+                 {"backend": "SLURM", "QOS": "long"})
+        for obj in cases:
+            with self.subTest(obj=obj):
+                found = scan({"examples/x/batch.json": json.dumps(obj)})
+                self.assertEqual([f["rule"] for f in found], ["batch-site-fact"], found)
+
+    def test_placeholders_and_synthetic_values_pass(self):
+        obj = {"sites": [{"backend": "slurm", "Partition": "<partition>", "account": "synthetic-acct",
+                          "slurm": {"qos": "<qos>"}}], "partition": "not a batch scope"}
+        self.assertEqual(scan({"examples/x/batch.json": json.dumps(obj)}), [])
+
+
 if __name__ == "__main__":
     unittest.main()
