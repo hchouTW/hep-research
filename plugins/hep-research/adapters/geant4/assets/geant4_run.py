@@ -142,17 +142,35 @@ def validate_spec(spec: dict) -> None:
             raise SpecError("geometry.world.size_mm must have three numbers")
         for x in world["size_mm"]:
             _num(x, "geometry.world.size_mm", positive=True)
+    defined = set()
     for i, m in enumerate(spec.get("materials", [])):
         w = f"materials[{i}]"
-        _keys(m, w, ("name", "z", "a_g_mole", "density_g_cm3", "state", "temperature_K", "pressure_Pa", "source"),
-              ("name", "z", "a_g_mole", "density_g_cm3"))
-        _int(m["z"], f"{w}.z", 1)
-        _num(m["a_g_mole"], f"{w}.a_g_mole", positive=True)
+        _keys(m, w, ("name", "z", "a_g_mole", "components", "density_g_cm3", "state", "temperature_K", "pressure_Pa",
+                     "source"), ("name", "density_g_cm3"))
+        if ("components" in m) == ("z" in m or "a_g_mole" in m):
+            raise SpecError(f"{w} needs either z and a_g_mole (one element) or components (a mixture), not both")
+        if "components" in m:
+            comps = m["components"]
+            if not isinstance(comps, list) or len(comps) < 2:
+                raise SpecError(f"{w}.components must list at least two {{material, mass_fraction}} entries")
+            for j, c in enumerate(comps):
+                _keys(c, f"{w}.components[{j}]", ("material", "mass_fraction"), ("material", "mass_fraction"))
+                if not isinstance(c["material"], str) or not (c["material"].startswith("G4_") or c["material"] in defined):
+                    raise SpecError(f"{w}.components[{j}].material must be a NIST G4_ name or a material defined above")
+                _num(c["mass_fraction"], f"{w}.components[{j}].mass_fraction", positive=True)
+            if abs(math.fsum(c["mass_fraction"] for c in comps) - 1) > 1e-6:
+                raise SpecError(f"{w}.components: mass fractions must sum to 1")
+        else:
+            _keys(m, w, ("name", "z", "a_g_mole", "density_g_cm3", "state", "temperature_K", "pressure_Pa", "source"),
+                  ("name", "z", "a_g_mole", "density_g_cm3"))
+            _int(m["z"], f"{w}.z", 1)
+            _num(m["a_g_mole"], f"{w}.a_g_mole", positive=True)
         _num(m["density_g_cm3"], f"{w}.density_g_cm3", positive=True)
         if m.get("state", "solid") not in STATES:
             raise SpecError(f"{w}.state must be one of {STATES}")
         if m["name"].startswith("G4_"):
             raise SpecError(f"{w}.name: G4_ names are NIST materials; give a user material another name")
+        defined.add(m["name"])
     p = spec["physics"]
     _keys(p, "physics", ("reference_list", "em_constructor", "decay", "default_cut_mm", "regions", "step_limit_mm",
                          "min_ekin_MeV", "kill_secondaries", "justification"), ("default_cut_mm",))

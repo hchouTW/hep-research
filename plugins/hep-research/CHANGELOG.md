@@ -3,6 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **A reference benchmark for electromagnetic shower development (`longitudinal-profile`).** `geant4_benchmarks.py`
+  fits dQ/dt = Q_E beta (beta t)^(alpha-1) e^(-beta t) / Gamma(alpha) + Q0 to the per-layer mean deposits of a
+  layered_sim sampling stack (weighted least squares, standard library) and compares the shower maximum
+  t_max = (alpha - 1)/beta with the same fit to published test-beam data; the reference uncertainty propagates the
+  published alpha and beta without their correlation (conservative), `systematic_relative` covers stated
+  model-versus-measurement differences, the SE is a seeded event bootstrap with refits. First reference: ALICE FoCal-E
+  (JINST 19 (2024) P07006, arXiv:2311.07413, Table 3), replacing the paywalled Bathow et al. 1970 and the LumiCal
+  Moliere radius (figures only) as the open-access shower reference. Lateral leakage still has no reference.
+- **layered_sim materials can be mixtures.** A `materials[]` entry takes either `z` and `a_g_mole` (one element) or
+  `components` (at least two NIST `G4_` materials or earlier user materials with mass fractions summing to 1), with a
+  density; checked by `geant4_run.py` and the C++ reader (G4Material::AddMaterial). Needed for alloys (W-Ni-Cu), FR4
+  and glues; existing specs are unchanged.
+
 ## 0.20.0 (2026-10-21)
 
 Contracts 3.1.0 (minor): Geant4 phase 2.

@@ -144,6 +144,7 @@ material dump; constants from `core/constants`.
 | `multiple-scattering` | sanity | Highland, RPP 2024 Eq. 34.16, through `multiple_scattering.py`; RPP gives no numerical accuracy |
 | `em-shower-shape` | sanity | t_max, RPP 2024 Eq. 34.36 (not applicable when the stack does not contain t_max) |
 | `shower-containment` | sanity | rear leakage against the gamma-function profile, RPP 2024 Eqs. 34.34-34.36 (a fit to EGS4 showers, 1-100 GeV; b = 0.5 by default): never validation; a reference for leakage needs published data (`published-data`) |
+| `longitudinal-profile` | reference | the shower maximum t_max = (alpha - 1)/beta of a Gamma fit to per-layer mean deposits against the same fit to published test-beam data (config `published`: alpha, beta with uncertainties and source; their correlation is not used, so the reference uncertainty is conservative); `systematic_relative` covers stated differences between the planar model and the measurement (readout window, beam spot, upstream material). First reference: a W/Si forward-calorimeter prototype test beam, JINST 19 (2024) P07006 (arXiv:2311.07413), Table 3 |
 | `published-data` | interface | handed to hep-statistics |
 
 Each reference benchmark has a tolerance (reference accuracy + k SE + binning) and a detection limit (tolerance +

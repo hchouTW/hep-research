@@ -124,8 +124,6 @@
     "additionalProperties": false,
     "required": [
      "name",
-     "z",
-     "a_g_mole",
      "density_g_cm3"
     ],
     "properties": {
@@ -160,8 +158,63 @@
      },
      "source": {
       "type": "string"
+     },
+     "components": {
+      "type": "array",
+      "minItems": 2,
+      "description": "a mixture by mass fraction of NIST G4_ materials or materials defined earlier in the list (fractions sum to 1); exactly one of components and z + a_g_mole",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": [
+        "material",
+        "mass_fraction"
+       ],
+       "properties": {
+        "material": {
+         "type": "string"
+        },
+        "mass_fraction": {
+         "type": "number",
+         "exclusiveMinimum": 0,
+         "maximum": 1
+        }
+       }
+      }
      }
-    }
+    },
+    "oneOf": [
+     {
+      "required": [
+       "z",
+       "a_g_mole"
+      ],
+      "not": {
+       "required": [
+        "components"
+       ]
+      }
+     },
+     {
+      "required": [
+       "components"
+      ],
+      "not": {
+       "anyOf": [
+        {
+         "required": [
+          "z"
+         ]
+        },
+        {
+         "required": [
+          "a_g_mole"
+         ]
+        }
+       ]
+      }
+     }
+    ]
    }
   },
   "physics": {

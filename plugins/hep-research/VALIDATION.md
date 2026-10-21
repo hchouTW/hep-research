@@ -1978,6 +1978,44 @@ committed); the sbottom benchmark artifacts' `plugin` string edited by hand; the
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4491 tests, 4270 pass, 0 failures, 221 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## GEANT4-FOCAL (2026-10-21, E2: macOS 26.5 arm64, Geant4 11.4.3 build A; branch `feat/geant4-focal-benchmark` from main)
+
+Longitudinal-profile reference benchmark against ALICE FoCal-E test-beam data (M. Aehle et al., JINST 19 (2024)
+P07006, arXiv:2311.07413, full text read 2026-10-21: Sec. 3, Tables 1-4, Sec. 5.7). Replaces Bathow et al. 1970
+(paywalled; DESY-69-39 not on the DESY server, CDS bot challenge) and the LumiCal Moliere radius (EPJC 78 (2018) 135:
+profiles in figures only, needs radial binning) as the open-access shower reference.
+
+- layered_sim rebuilt with mixture materials (`~/Workspace/geant4-work/sim-focal`, executable sha256 d39225ea2470...);
+  live suite 6/6 with `HEP_GEANT4_LIVE_TEST=1` (new: W-Ni-Cu alloy X0 within 1% of the mass-fraction rule with PDG
+  X0 of W, Ni, Cu). Material dump: alloy X0 0.366 cm (Table 2 prints 0.37 cm and 6.80 g/cm2, which disagree at
+  19 g/cm3); FR4 17.2 cm (Table 2: 16.0), glue as G4_MYLAR (Table 2 lists 50.3 cm for PET): together < 1.1% X0 per layer.
+- Model: 20 layers (W alloy 3.5 mm, glue 0.11, Si 0.30 + 0.02, glue 0.13, Cu 0.14, FR4 1.60, air 2.70 mm; pixel
+  layers 5 and 10: Al 1.5, Si 0.025, Kapton 0.05, air 2.0, Al 1.5 mm), 50 mm lateral (the 5 x 5 cm window), pencil
+  e- beam, FTFP_BERT, cut 0.7 mm, 2000 events per run. Fit to pad layers 1-20 without 5, 7, 10 (t = layer number).
+- Results (t_max = (alpha-1)/beta; reference = Table 3 data, alpha/beta uncertainties propagated without correlation;
+  systematic 1.3% = the 50 -> 90 mm lateral variation at 100 GeV, which brackets the window):
+
+| E (GeV) | Geant4 t_max | data t_max | rel. diff. | tolerance | detection limit | control (density) | control rel. | verdict |
+|---|---|---|---|---|---|---|---|---|
+| 20 | 6.790 +- 0.022 | 6.873 +- 0.781 | -1.2% | 13.6% | 15.5% | x 1.188 (15.5%) | -16.0% caught | pass |
+| 60 | 8.016 +- 0.020 | 8.294 +- 0.495 | -3.4% | 8.0% | 11.8% | x 1.138 (11.9%) | -14.7% caught | pass |
+| 80 | 8.335 +- 0.022 | 8.442 +- 0.434 | -1.3% | 7.2% | 9.0% | x 1.101 (9.0%) | -10.0% caught | pass |
+| 100 | 8.499 +- 0.016 | 8.840 +- 0.282 | -3.9% | 5.1% | 9.3% | x 1.09 (8.1%) | -10.7% caught | pass |
+
+- Stated plainly: without the window systematic the 100 GeV comparison fails by 0.1% (-3.85% against 3.77%); the
+  variation run was planned before the results. All four energies are low (shower maximum earlier than the data), and
+  our t_max is 1.6-2.8% below the authors' own Geant4 10.7 fit (Table 4) with the same stack; not modelled: pixel
+  layers in the data fit (Eq. 5.2, except 60 GeV), upstream material, beam spot and leading-pad window offset (up to
+  5 mm), air gap (Table 1: 2.7 mm; Sec. 3: 1.2 mm). The Gamma form does not describe the high-statistics profile
+  (chi2/ndf 24-31 on 13 ndf); t_max is used as a fit summary, its SE from a 100-resample bootstrap with refits.
+- Scope: e- 20-100 GeV, this stack, t_max of the pad profile in the 5 x 5 cm window. Lateral leakage still has no
+  reference benchmark. Run outputs (events.csv sha256): e20 257ffef0d19d, e60 e94d7ad5f699, e80 175019cc2355, e100
+  cbcaeaa2878a, e100-lat90 08da0a358c35, controls bb4dcc2e0fd2, 11824c1d261b, 0769f1e72696, 720721fbf932; specs,
+  records and the benchmark output in `~/Workspace/geant4-work/focal` (not packaged: about 5 MB per run).
+- Offline tests: mixture spec refusals (`RunAndPartition.test_mixture_materials_are_checked`), the Gamma fit on a
+  noiseless profile, pass and a stretched-profile control caught, refusals without a published source or layers
+  (`tests/skills/hep_detector/test_geant4_benchmarks.py::LongitudinalProfile`).
+
 ## GEANT4-PHASE2 (2026-10-21, E2 and the CI lock; branch `feat/geant4-phase2` from `538e7c28`, release 0.19.0)
 
 Contracts 3.1.0: evidence records, the `geant4.upgrade_*` rule, the stanza exception, `label --upgrade`,

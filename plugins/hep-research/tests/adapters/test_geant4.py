@@ -352,6 +352,22 @@ class RunAndPartition(_Tmp):
                 code, out = self.go(bad, run_id=f"bad{k}")
                 self.assertEqual(code, 2, out)
 
+    def test_mixture_materials_are_checked(self):
+        alloy = {"name": "W_alloy", "density_g_cm3": 19.0,
+                 "components": [{"material": "G4_W", "mass_fraction": 0.94}, {"material": "G4_Ni", "mass_fraction": 0.04},
+                                {"material": "G4_Cu", "mass_fraction": 0.02}]}
+        self.assertEqual(self.go(spec(materials=[alloy]), run_id="mix")[0], 0)
+        bads = [{**alloy, "components": alloy["components"][:2]},  # fractions sum to 0.98
+                {**alloy, "components": [{"material": "W_undefined", "mass_fraction": 0.5},
+                                         {"material": "G4_Ni", "mass_fraction": 0.5}]},
+                {**alloy, "z": 74, "a_g_mole": 183.84},  # one element and a mixture at once
+                {**alloy, "components": [{"material": "G4_W", "mass_fraction": 1.0}]}]
+        for k, bad in enumerate(bads):
+            with self.subTest(k=k):
+                code, out = self.go(spec(materials=[bad]), run_id=f"badmix{k}")
+                self.assertEqual(code, 2, out)
+                self.assertIn("materials[0]", out["error"])
+
     def test_run_writes_a_valid_unvalidated_record_with_a_simulation_block(self):
         code, out = self.go(spec(ui_commands=["/process/msc/Skin 1"]))
         self.assertEqual(code, 0, out)
@@ -594,6 +610,25 @@ class Live(_Tmp):
         rows = (self.d / "work" / "mt" / "events.csv").read_text(encoding="utf-8").splitlines()[2:]
         events = [int(r.split(",")[0]) for r in rows]
         self.assertEqual(events, list(range(2000)))
+
+    def test_a_mixture_material_is_built_with_its_mass_fractions(self):
+        alloy = {"name": "W_alloy", "density_g_cm3": 19.0,
+                 "components": [{"material": "G4_W", "mass_fraction": 0.94}, {"material": "G4_Ni", "mass_fraction": 0.04},
+                                {"material": "G4_Cu", "mass_fraction": 0.02}]}
+        s = self.small(materials=[alloy])
+        s["geometry"]["layers"] = [{"repeat": 1, "slabs": [{"name": "W", "material": "W_alloy", "thickness_mm": 0.5,
+                                                            "sensitive": True}]}]
+        s["geometry"]["world"] = {"material": "G4_Galactic", "scale": 1.2}
+        s["physics"].pop("regions")
+        s["run"]["events"] = 50
+        code, out = self.go(s, "mix")
+        self.assertEqual(code, 0, out)
+        dump = json.loads((self.d / "work" / "mix" / "materials.json").read_text(encoding="utf-8"))
+        w = next(m for m in dump["materials"] if m["name"] == "W_alloy")
+        self.assertAlmostEqual(w["density_g_cm3"], 19.0, places=9)
+        # 1/X0 = sum w_i / X0_i (mass fractions); PDG X0: W 6.76, Ni 12.68, Cu 12.86 g/cm2
+        x0 = 1 / (0.94 / 6.76 + 0.04 / 12.68 + 0.02 / 12.86) / 19.0
+        self.assertAlmostEqual(w["radiation_length_cm"], x0, delta=0.01 * x0)
 
     def test_leakage_by_face_adds_up_to_the_total(self):
         s = self.small()

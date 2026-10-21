@@ -5,12 +5,14 @@
 
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
-struct MaterialDef {  // a single-element material defined by Z, A and density
+struct MaterialDef {  // a single element (Z, A) or a mixture by mass fraction of named materials, with a density
   std::string name;
   int z = 0;
   double a_g_mole = 0., density_g_cm3 = 0.;
+  std::vector<std::pair<std::string, double>> components;  // (material name, mass fraction); empty: single element
   std::string state = "solid";  // solid, liquid, gas
   double temperature_K = -1., pressure_Pa = -1.;  // < 0: Geant4 default
 };

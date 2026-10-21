@@ -85,14 +85,22 @@ Spec ReadSpec(const std::string& path) {
     for (const auto& mv : root.obj.at("materials").array("materials")) {
       MaterialDef m;
       m.name = mv.at("name", "material").string("material.name");
-      m.z = static_cast<int>(mv.at("z", "material").number("material.z"));
-      m.a_g_mole = mv.at("a_g_mole", "material").number("material.a_g_mole");
+      if (mv.has("components")) {
+        for (const auto& cv : mv.obj.at("components").array("material.components"))
+          m.components.emplace_back(cv.at("material", "component").string("component.material"),
+                                    cv.at("mass_fraction", "component").number("component.mass_fraction"));
+      } else {
+        m.z = static_cast<int>(mv.at("z", "material").number("material.z"));
+        m.a_g_mole = mv.at("a_g_mole", "material").number("material.a_g_mole");
+      }
       m.density_g_cm3 = mv.at("density_g_cm3", "material").number("material.density_g_cm3");
       m.state = optString(mv, "state", "solid", "material");
       m.temperature_K = optNumber(mv, "temperature_K", -1, "material");
       m.pressure_Pa = optNumber(mv, "pressure_Pa", -1, "material");
-      if (m.z < 1 || m.a_g_mole <= 0 || m.density_g_cm3 <= 0)
+      if (m.components.empty() && (m.z < 1 || m.a_g_mole <= 0 || m.density_g_cm3 <= 0))
         throw JsonError("material " + m.name + ": z, a_g_mole and density_g_cm3 must be positive");
+      if (!m.components.empty() && (m.components.size() < 2 || m.density_g_cm3 <= 0))
+        throw JsonError("material " + m.name + ": a mixture needs at least two components and a positive density");
       s.materials.push_back(m);
     }
 
