@@ -2893,6 +2893,45 @@ scikit-learn 1.9.1.
 | touched modules (tail_extrapolation, train_bdt, train_bdt_extensions, write_ml_artifact) | E2: 56 run, OK, 25 skipped; CI venv: 56 run, OK, 1 skipped |
 | `run_all_checks.py --no-cli --jobs 6`, E2, at `33bd6464` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4515 tests in 383 modules, 4384 pass, 0 failures, 131 skipped; profile tests all pass |
 
+## REVIEW-REFS-4 (2026-10-22; branch `fix/review-refs-4` from main `c2fc9f5c`)
+
+Five references were the documents of review batch 1 (`--models sonnet,haiku --lens-model design=sonnet
+--filter-model opus`), run with a prospective expert-slot test (`--own-config --expert-model opus`, a separate review
+of the same text) and an out-of-driver Sonnet filter on the same pooled findings; all outside the repository. A blind
+Opus adjudicator per document judged the pooled findings of both arms: 41 issues upheld (4 substantive), none named
+that no finding raised. Scores: lens slots 79 findings, precision 0.65; kept by the Opus filter 42, precision 0.92 (2
+issues lost, minor and trivial); kept by the Sonnet filter 53, precision 0.69; expert slot 9 findings, 9 upheld, 4
+substantive, 3 of them raised by no lens slot, at about 10% of the lens slots' tokens. The receipt check rejected 2 of 5
+Opus filter attempts with `read_outside_packet` (recursive greps over the mechanism files; one read the installed copy
+of the page); both retries were accepted. The 16 findings of the earlier retrospective expert-slot test were rechecked
+against the current text of ten references: 13 fixed here, 3 already fixed. Each change was rechecked against its source
+before the edit; for a partly correct finding only the upheld part changed. Severity S3, ledger `documentation_fixes`
+REVIEW-REFS-4.
+
+| Reference | Issues | Main changes | Sources (locators) |
+|---|---|---|---|
+| hep-detector `performance-metrics-and-residual-diagnostics.md` | 8 | biased residual positively correlated (C = V_pred, substantive); its covariance singular, fit chi^2 with V_meas and n - n_par; unbiased residual: the exclusive prediction is uncorrelated; pull width 1 needs the right covariance, not Gaussian errors; purity with correct identity; acceptance vs geometric factor; calorimeter residual coverage; escaped table pipes | least-squares algebra (straight-line toy, expert record); `skills/hep-detector/references/*` technology files |
+| hep-detector `geant4-study-protocol.md` | 8 | QGSP_BIC/FTFP_BERT coincide for pions below 12 GeV and nucleons 1.5-12 GeV (substantive); the convergence gate uses the finest supplied runs and the scope check ignores the observable and an omitted thickness (substantive); output hashes checked for presence only; _HPT/_AllHP and Shielding lists use ParticleHP; t_max correlation conservative only for rho >= 0; scan step limit; vacuous Done-when | `check_geant4_study.py` HADRONIC table (75-80), `convergence()`, `scope_within()`; `contracts/validate.py _scope_inside`; `contracts/dependencies.py`; `geant4-physics-rules.json`; `adapters/geant4/assets/geant4_run.py` 457, 469; Var(t) cross term |
+| hep-detector `response-and-forward-folding.md` | 7 | era mixing exact only when every era-varying factor is in R_t or w_tj; A*eps*T or stacking for selected-normalized eras (substantive); "pass" allows unresolved findings; `--strict`; `periods` vs the `mixing` record; species "outside" wording; test citation; S1/S6 labels | `mix_period_responses.py`, `species_response.py`, `contracts/validate.py`, `response_adapter.py` runs on a fixture copy; 2x2 counterexample (expert record) |
+| hep-detector `core-detector-equations.md` | 10 | track-fit chi^2 uses the measurement covariance (substantive); Bethe range 0.1 < beta*gamma < 1000 and units; exact TOF difference, 1/p^2 asymptotic; delta omitted by `pid_separation_power.py` only; labels used; purity renamed; E1 wording; "single home" narrowed | PDG RPP 2024 chapter 34 (text after eq. 34.5); `geant4_benchmarks.py` 143-159; `pid_separation_power.py` 244-248; TOF recomputation |
+| hep-statistics `astroparticle-statistics.md` | 8 | one-sided p-values (two-sided 1.33e-2); mixture needs the spectral index fixed too (Davies); Braun et al. used a flux-model background; alpha = t_on/t_off; RA scrambling needs uniform RA acceptance; sqrt(2) sentence; RooFit pointer; internal reference removed | `li_ma_significance.py` run; arXiv:0801.1604 Eq. 6 |
+| ten references (retrospective expert findings) | 13 | `nuisance-modeling.md` code1/code4 difference; `time-series-inference.md` charge-sign comparison and harmonic trials; `front-end-electronics-and-signal-processing.md` unipolar anode signals, induced-charge sign; `calibration-and-alignment.md` most probable value vs angle, electron-only E/p symmetry; `triggers-luminosity-pileup.md` tag-and-probe shapes, reweighting check; `statistical-inference-for-physics.md` Bayesian vs profile intervals; `analysis-design.md` Z_A for discovery, non-nested trigger bootstrap | pyhf code1/code4 run; PDG RPP 2024 eq. 34.12; Z_A computation; trigger-efficiency algebra |
+
+Also: the G4R-BIC-RANGE and G4R-HP-NEUTRON `concern` strings in `geant4-physics-rules.json` (text only), the
+reference inventory, and the hep-authoring `independent-review.md` recommendation of `--expert-model` (with the strongest
+model, alongside the lens slots and `--filter-model`) and of an Opus over a Sonnet filter.
+
+Code follow-ups (not changed here): `convergence()` should use the declared values and require a run for each;
+`scope_within()` and `_scope_inside()` should compare the observable and an omitted thickness; `dependencies.py`
+should compare output hashes with the files; an unresolved `mc_stat` on an unfolding response could fail the gate;
+`mix_period_responses.py` could warn on acceptance x time weights for selected-normalized eras.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 venv | 25 pass, 0 fail, 2 skipped (CLI host checks) |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock venv | 25 pass, 0 fail, 2 skipped (CLI host checks) |
+| `unittest discover -s tests/skills`, E2 | 2297 tests, OK (74 skipped) |
+
 ## REVIEW-REFS-3 (2026-10-22; branch `fix/live-reference-issues` from main `a53af7e0`)
 
 Five 0.23.0 references were the documents of the first live review with the new options (`--lens-model design=sonnet

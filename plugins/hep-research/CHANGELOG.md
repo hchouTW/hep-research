@@ -60,6 +60,19 @@ Software checks establish contract consistency only, not physical validity.
   anti-conservative. The white null is unchanged. Output gains `global.p_single_level`, `global.null_fit` and, with
   the refit, `global.inner_surrogates`; a refit costs N x (M + 1) surrogate series (new cap 4e6). The docstring's
   "conservative" wording and `time-series-inference.md` now state the measured calibration.
+- **Fifteen references corrected after review batch 1 and the expert-slot tests (54 issues; VALIDATION
+  REVIEW-REFS-4).** Substantive: the track-fit chi^2 uses the measurement covariance (the fitted-residual covariance is
+  singular) and the biased residual is positively correlated with the measurement (`core-detector-equations.md`,
+  `performance-metrics-and-residual-diagnostics.md`); QGSP_BIC and FTFP_BERT coincide for pions below 12 GeV and
+  nucleons from 1.5 to 12 GeV, and the Geant4 convergence gate and scope check are described as what they enforce
+  (`geant4-study-protocol.md`, rules G4R-BIC-RANGE and G4R-HP-NEUTRON); era mixing is exact only when every
+  era-varying factor is inside the response or the weights (`response-and-forward-folding.md`). Also one-sided p-values,
+  the Chernoff condition and the Braun et al. background (`astroparticle-statistics.md`), and 13 earlier expert-slot
+  findings in ten references (code1/code4 differences, charge-sign comparisons, harmonic trials, unipolar anode
+  signals, induced-charge sign, angle-dependent most probable value, electron-only E/p symmetry, tag-and-probe shapes,
+  Bayesian vs profile intervals, Z_A for discovery, non-nested trigger bootstrap). The independent-review reference now
+  recommends `--expert-model` with the strongest model alongside the lens slots, and an Opus filter over Sonnet.
+  Guidance only.
 - **Five more references corrected after the first live review with the 0.23.0 options (42 issues; VALIDATION
   REVIEW-REFS-3).** Ignoring a positive correlation overstates the uncertainty of a difference or ratio, not only
   understates it (`statistical-inference-for-physics.md`); geomagnetic cutoff deliverables use the backtraced maximum

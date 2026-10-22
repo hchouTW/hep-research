@@ -49,9 +49,13 @@ Background contamination in the probe sample (real tag paired with a misidentifi
 combinatorial probe) biases the measured efficiency, and a background-subtracted pass
 or fail count is no longer a binomial count: Clopper-Pearson does not apply to it. Fit
 the tag-probe invariant-mass spectra of passing and failing probes simultaneously, with
-a shared signal shape and their own background shapes, and take the efficiency from the
-two signal normalizations; its uncertainty then comes from the likelihood and includes
-the background subtraction (CMS, the same section). That fit is a statistical inference:
+their own background shapes, and take the efficiency from the two signal normalizations;
+its uncertainty then comes from the likelihood and includes the background subtraction
+(CMS, the same section). Let the passing and failing signal shapes differ (a common
+template with separate resolution parameters, or simulation templates per category):
+failing probes often have worse resolution or longer tails, and a fully shared shape
+then moves signal into the failing background and biases the efficiency beyond the
+likelihood uncertainty; alternative signal models give a shape systematic. That fit is a statistical inference:
 hand it to hep-statistics.
 <!-- /example -->
 
@@ -180,7 +184,8 @@ itself carries a systematic uncertainty (from the minimum-bias cross section ass
 convert instantaneous luminosity into an expected interaction count) that the analysis
 must propagate as an up/down variation of the reweighting target, not treat as exact.
 After reweighting, the mean of `mu` in reweighted MC equals the data mean by construction
-(whenever every data-populated bin has a defined weight), so it tests nothing. Validate on a variable
+(whenever every data-populated bin has a defined weight), so it checks only that the weights
+were computed and applied, not the target profile. Validate on a variable
 that was not reweighted: the number of reconstructed primary vertices (or another
 pileup-sensitive observable) in a control region, data against reweighted MC. A
 reweighting step that is applied but silently no-ops (e.g. from a units or binning

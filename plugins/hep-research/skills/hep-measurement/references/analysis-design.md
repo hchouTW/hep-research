@@ -26,7 +26,9 @@ Check era-dependent trigger menus, prescales, turn-ons, plateaus, and OR/overlap
   trigger that does not depend on the probed quantity (a muon trigger for a jet or missing-energy trigger), with the
   offline selection applied: `eps = N(reference and signal trigger) / N(reference)`, binned in the offline variable.
 - **Bootstrap.** For a high threshold, chain the efficiencies: `eps(T2) = eps(T2 | T1) x eps(T1)`, each measured where
-  the looser trigger T1 (often prescaled) is itself efficient or measured.
+  the looser trigger T1 (often prescaled) is itself efficient or measured. The chain holds only when T2 implies T1
+  (nested triggers, e.g. the same seed with a higher threshold); otherwise `eps(T2) = P(T1 and T2) + P(T2 and not T1)`
+  and the second term is measured or shown to be zero.
 - **Unbiased or prescaled samples (space and fixed-target instruments).** A minimum-bias or unbiased trigger recorded
   with a prescale p gives `eps = N(unbiased and physics) / N(unbiased)` on the recorded events; the prescale cancels in
   the ratio, but every rate or exposure computed from the unbiased stream is multiplied by p, and the unbiased sample's
@@ -47,8 +49,10 @@ Choose binning using resolution, MC statistics, background stability, systematic
 
 ## Selection optimization without bias
 
-- **Figure of merit, chosen before optimizing.** `s / sqrt(s + b)` for a large expected signal; the Asimov significance
-  `Z_A = sqrt(2 ((s + b) ln(1 + s / b) - s))` when s/b is not small; it reduces to `s / sqrt(b)` only for s << b
+- **Figure of merit, chosen before optimizing.** `s / sqrt(s + b)` for the statistical precision of a signal yield
+  that will be measured (an established signal), not for discovery; for discovery sensitivity the Asimov significance
+  `Z_A = sqrt(2 ((s + b) ln(1 + s / b) - s))` at any counts (at s = 10, b = 1 it is 5.7 where `s / sqrt(s + b)` gives
+  3.0); it reduces to `s / sqrt(b)` only for s << b
   ([Cowan et al. 2011, arXiv:1007.1727](https://arxiv.org/abs/1007.1727), Sec. 5.1);
   the Punzi figure `eps_s / (a / 2 + sqrt(b))` when the signal rate is unknown and the goal is discovery at a
   significance of a sigma ([Punzi 2003, arXiv:physics/0308063](https://arxiv.org/abs/physics/0308063)). `s / sqrt(b)`

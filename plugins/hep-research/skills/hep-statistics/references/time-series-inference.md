@@ -98,13 +98,18 @@ is part of the null hypothesis and is stated.
 
 **Known or unknown period.** A period with a physical reason to test (the ~27-day solar rotation and its harmonics, an
 orbital or attitude period of the instrument) is tested alone, for example by folding the series at that period
-(epoch folding) against the same red-noise null: one trial, no search penalty, provided the period is fixed before the
-series is examined (a period read off the same series is a search and pays the trials). A periodogram search
+(epoch folding) against the same red-noise null: one trial, no search penalty, only for a single period fixed before
+the series is examined and tested with one statistic in one series (a period read off the same series is a search and
+pays the trials). Each harmonic tested separately, a period window (the recurrence near 27 days is seen anywhere from
+about 25 to 29 days) and each rigidity bin or species add trials. A periodogram search
 (Lomb-Scargle for uneven sampling and gaps) is for a genuinely unknown or approximate period and pays the trials
 below. Comparing the amplitude and phase of the same candidate period between species of opposite charge sign (a
-particle and its antiparticle, protons and electrons) separates a drift-related heliospheric effect from an
-instrumental or environmental artefact, which affects both signs alike; the comparison is a joint fit with the shared
-normalization and its covariance, not two separate significances.
+particle and its antiparticle, protons and electrons) separates charge-sign-dependent effects from
+charge-sign-independent ones, not physics from artefacts: drifts are charge-sign dependent, but so are a periodic
+curvature-scale or alignment drift and charge confusion, which shift the two signs oppositely; diffusive and
+convective modulation (which carry most of the 27-day signal) and charge-symmetric instrumental effects act on both
+signs alike. Instrumental causes are excluded by their own monitors, not by this comparison; the comparison is a
+joint fit with the shared normalization and its covariance, not two separate significances.
 
 **Test.** At the Fourier frequencies `f_j` of a Gaussian stationary series, the periodogram ordinates are approximately
 independent and distributed as `S(f_j) chi2_2 / 2` (Brockwell and Davis 1991, Ch. 10). The local test compares each

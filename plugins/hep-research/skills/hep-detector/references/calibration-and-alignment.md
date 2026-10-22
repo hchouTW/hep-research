@@ -82,9 +82,11 @@ enter the alignment fit itself, as in the example above):
 
 - **A resonance of known mass**, whose reconstructed mass must not depend on the
   charge, the direction, or the momentum of its decay products.
-- **`E/p` symmetry** between positive and negative particles - a calorimeter energy
-  measurement is charge-blind, so a charge-dependent `E/p` is a tracker alignment
-  signature, not a calorimeter one.
+- **`E/p` symmetry** between electrons and positrons - their calorimeter response is
+  nearly charge-blind, so a charge-dependent electron `E/p` is a tracker alignment
+  signature, not a calorimeter one. Hadron response depends on the charge (charge
+  exchange of negative pions, antiproton annihilation, different proton and kaon
+  content), so a charge-dependent hadron `E/p` is not by itself an alignment signature.
 - **Cosmic-ray or halo tracks** traversing the detector, which are fitted as two
   independent halves and compared; a coherent deformation appears as a mismatch.
 - **Comparison of independent subdetectors** measuring the same track.
@@ -109,8 +111,10 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
   the Z is larger than with the J/psi (pT dependent).
   <!-- /example -->
 - **MIP calibration**: use the most probable value of the Landau-like deposit, not the mean, which is pulled by the
-  tail (PDG RPP 2024, Passage of particles through matter, secs. 34.2.3 and 34.2.9), with a geometric path-length
-  correction (`1/cos theta` for inclined tracks).
+  tail (PDG RPP 2024, Passage of particles through matter, secs. 34.2.3 and 34.2.9). The most probable loss is not
+  proportional to path length (per unit length it grows as `a ln x + b`, PDG Eq. 34.12), so a pure `1/cos theta`
+  correction leaves an angle-dependent bias (in 300 um silicon about 1% at 30 deg and 5% at 60 deg): compare MPVs
+  at fixed path length (angle bins) or correct with the Landau-Vavilov-Bichsel thickness dependence.
 - **Intercalibration**: pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
   absolute scale still needs a reference.
 - **Hadronic calorimeters**: `E/p` of isolated single hadrons, with its own selection bias from the isolation cut.

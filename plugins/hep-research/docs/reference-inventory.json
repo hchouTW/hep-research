@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 354707,
+   "bytes": 355272,
    "uncited": 0
   },
   "hep-citations": {
@@ -20,12 +20,12 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 498220,
+   "bytes": 505457,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 119883,
+   "bytes": 120267,
    "uncited": 0
   },
   "hep-ml": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 188533,
+   "bytes": 190284,
    "uncited": 0
   },
   "hep-theory": {
@@ -405,8 +405,8 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 15858,
-   "lines": 194,
+   "bytes": 16423,
+   "lines": 199,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
@@ -1318,7 +1318,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "338f8d78 2026-10-19"
+   "last_commit": "ceed8ab2 2026-10-22"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1665,8 +1665,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 19860,
-   "lines": 278,
+   "bytes": 20356,
+   "lines": 282,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1758,8 +1758,8 @@
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
    "owner": "hep-detector",
-   "bytes": 8181,
-   "lines": 41,
+   "bytes": 9848,
+   "lines": 44,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-design-principles.md",
@@ -2029,8 +2029,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 25139,
-   "lines": 381,
+   "bytes": 25618,
+   "lines": 387,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2073,8 +2073,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 19829,
-   "lines": 230,
+   "bytes": 21051,
+   "lines": 240,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2264,8 +2264,8 @@
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "owner": "hep-detector",
-   "bytes": 18539,
-   "lines": 244,
+   "bytes": 19836,
+   "lines": 260,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2328,8 +2328,8 @@
   {
    "path": "skills/hep-detector/references/response-and-forward-folding.md",
    "owner": "hep-detector",
-   "bytes": 14230,
-   "lines": 167,
+   "bytes": 15880,
+   "lines": 181,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/references/preservation-checklist.md",
@@ -2363,6 +2363,7 @@
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2458,8 +2459,8 @@
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
    "owner": "hep-detector",
-   "bytes": 16079,
-   "lines": 236,
+   "bytes": 16505,
+   "lines": 241,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2483,8 +2484,8 @@
   {
    "path": "skills/hep-measurement/references/analysis-design.md",
    "owner": "hep-measurement",
-   "bytes": 13556,
-   "lines": 135,
+   "bytes": 13940,
+   "lines": 139,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -3541,8 +3542,8 @@
   {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",
    "owner": "hep-statistics",
-   "bytes": 11577,
-   "lines": 159,
+   "bytes": 12414,
+   "lines": 167,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -3703,8 +3704,8 @@
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 20624,
-   "lines": 252,
+   "bytes": 20807,
+   "lines": 254,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
@@ -3730,6 +3731,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/likelihood-fitting.md",
     "skills/hep-statistics/scripts/roofit_fit_check.py",
@@ -3741,8 +3743,8 @@
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
    "owner": "hep-statistics",
-   "bytes": 13126,
-   "lines": 231,
+   "bytes": 13294,
+   "lines": 233,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
@@ -3783,8 +3785,8 @@
   {
    "path": "skills/hep-statistics/references/time-series-inference.md",
    "owner": "hep-statistics",
-   "bytes": 20790,
-   "lines": 252,
+   "bytes": 21353,
+   "lines": 257,
    "linked_from_skill_md": true,
    "cited_by": [
     "examples/multi-era-fit/run.py",
@@ -3792,6 +3794,7 @@
     "profiles/theory/heliospheric-modulation/index.md",
     "profiles/theory/heliospheric-modulation/models/heliospheric-modulation-models.md",
     "profiles/theory/heliospheric-modulation/profile.json",
+    "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
