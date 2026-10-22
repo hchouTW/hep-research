@@ -28,6 +28,8 @@ Two changes of method:
 - Every SE is estimated with **batch means over K = 16 chunks**, replacing the bootstrap. The MPV needs K = 16 anyway, so no events are added, and a whole counter-hash bootstrap goes away.
 - The MPV is found from the histogram by **three-point parabolic interpolation**, with a **bias limit**: a toy shows |bias| ≤ tol/10.
 
+Section 10 tests generality against five kinds of use case: the boundary artifact itself is engine-independent, but ten places would lock generality in (source of geometry, scope dimensions, the field definition of isolation, weights, one-dimensional observables and more); eight of them are recommended for a cheap fix now.
+
 These changes reinterpret the user's decision "core code in C++": **per-event computation is in C++; only inference on tens to hundreds of numbers is in Python.** The user is asked to confirm (§7).
 
 ---
@@ -225,3 +227,91 @@ Of the earlier open decisions, "a new required CI job that builds `simcore`" mov
 1. Rewrite `task-a-core.md` (A1, A2a, A2b) and `task-b-j15.md` (B0, B1) per §4 and §5, both languages together.
 2. Update the file table, decisions and order of work in `README.md`.
 3. Have an agent that did not write the specs review them independently, focusing on summary accumulation and merging, batch-means coverage, and the interfaces between stages.
+
+---
+
+## 10. Generality assessment
+
+### 10.1 Method
+
+Test the architecture of §2 against five kinds of real use case, layer by layer, looking for places where a different use case would force a change to the core:
+
+| Use case | Typical needs |
+|---|---|
+| material-level references (J14-like) | isolated slabs, analytic or PDG references |
+| a spectrometer with a field (J15, space or cosmic-ray detectors) | field, several subsystems, reconstruction, rigidity and β resolution |
+| a collider or test-beam detector module | non-slab geometry (cylinders, rotations, GDML), comparison with test-beam data |
+| rare events (dark matter, 0νββ, background studies) | radioactive sources and decay chains, time windows, event weights (biasing), very small counts |
+| other simulation engines or fast simulation (FLUKA, parametrizations, ML surrogates) | no Geant4 probe; per-event processing not in C++ |
+
+### 10.2 What is already general
+
+- **The run-summary boundary itself is engine-independent.** Any producer (`layered_sim`, `simreco`, a user's Geant4 application, another engine, an offline reducer) that writes the same schema reaches inference and decisions. This is the main source of generality in §2.
+- **Batch means does not depend on the form of the observable.** Any estimator computable per chunk from a summary (mean, fraction, ratio, quantile, mode) gets its SE the same way, and correlations between observables are handled automatically, with no Σxy needed.
+- **The contract's upgrade logic does not depend on geometric shape.** "Grade from the contracts table, scope compared by kind, target compared by hash" holds for any geometry; `longitudinal-profile` already shows a reference measurement tied to a specific configuration.
+- **The number of chunks and where they run are unconstrained.** A chunk can be a local process or a cluster job; accumulators carry their merge rules, independent of the partition's naming rules.
+
+### 10.3 What would lock generality in
+
+| # | Where | Today | Problem with another use case |
+|---|---|---|---|
+| G1 | source of configuration and the target hash | derived from the spec's slab list (A1.3) | non-slab geometry, GDML and user applications cannot be derived, so they can never upgrade |
+| G2 | scope dimensions | hard-wired particle, material, energy, thickness (`validate.py` lines 350–355) | a detector-level scope needs incidence angle, position, rigidity, field strength and so on; slab "thickness" means nothing for a module |
+| G3 | the isolation rule's field requirement | isolated only with no field | a test-beam measurement in a field (a spectrometer module) is always embedded, even when the reference was measured in the same field |
+| G4 | accumulators without weights | `n`, `sum`, `sum2` | events from biasing or importance sampling carry weights (the CSV already has a `weight` column, unused downstream); unweighted accumulation gives wrong means and SEs |
+| G5 | one dimension per observable | single-column accumulators and 1D histograms | "y in bins of x" quantities such as resolution against energy or efficiency against position are impossible; per-event combinations (ratios, differences) and event selections have nowhere to be defined |
+| G6 | only one SE method | batch means | for rare counts (many chunks at 0) the t approximation fails; exact Poisson or binomial intervals are needed |
+| G7 | only a `gun` source | point, direction, single energy | spectra, isotropic fluxes, radioactive sources and decay chains, external event files (HepMC) cannot be expressed; flux normalization (geometric factor) has nowhere to be recorded |
+| G8 | `effective_config` is Geant4-specific | EM parameters, cuts, hadronic models | other engines cannot provide it; the rules (`G4R-*`) are tied to Geant4 |
+| G9 | the derived-simulation marker has one level | a reconstruction record's inputs must be simulation runs (C2) | multi-stage chains (simulation → digitization → reconstruction → analysis) break after the second level |
+| G10 | the number of chunks is fixed at 16 | K = 16 | wastes information with hundreds of cluster chunks; skewed distributions may need a larger K |
+
+### 10.4 Recommendations
+
+Three tiers, by whether not doing it now would force a change to a core interface later. The rule: **define interfaces to be extensible now, implement only what the use case at hand needs; no general expression language, no plug-in system.**
+
+**Tier 1: do now (cheap; avoids changing interfaces later)**
+
+| # | Change | Where |
+|---|---|---|
+| G1 | configuration and the target hash are derived from **the actual geometry tree dumped by the probe**: walk `G4PhysicalVolumeStore` and record each placement's solid type and parameters, material, transform, mother and attached field. Deriving from the spec is only the fallback without a probe, marked `source: declared`, and then cannot upgrade. This also follows principle 3 (trust the actual state) | A2a probe; A1.3 derives from the spec first, the probe takes over from A2a |
+| G2 | scope becomes **a list of dimensions declared per kind**: each benchmark in the contracts table lists its dimensions and their types (categorical or numeric range); the comparison rule is unchanged (a missing dimension is outside). The current four dimensions become the default list for material-level kinds | A1.1, A1.2 (done within C1, so C2 need not change the comparison logic again) |
+| G3 | isolation becomes "nothing outside the target": a field attached to volumes inside the target is part of the target and enters the target hash; only a field extending beyond the target makes it embedded. J14's verdicts do not change | A1.3 |
+| G4 | accumulators carry weights from the start: `n`, `Σw`, `Σw²`, `Σw·x`, `Σw·x²`, weighted histograms; unweighted is the special case w = 1. Weights are quantized to integers too, keeping the result exact and order-independent; the effective event count n_eff = (Σw)²/Σw² goes into the summary | A2b (in the first version of `layered_sim.summary/1`) |
+| G6 | each estimator declares its SE method: batch means by default; counting estimators switch to exact intervals (Garwood for Poisson, Clopper–Pearson for binomial) from the merged accumulators when the total count is below a threshold (for example any chunk at 0, or a total < 100) | A1 (Python inference) |
+| G8 | `effective_config` gets an engine-independent envelope: `{engine, engine_version, config_sha256, sections{...}}`, with the Geant4 content in `sections.geant4`; rules are chosen as a rule pack by `engine` | A2a |
+| G9 | the derived-simulation marker becomes transitive: the input chain of a simulated table may have any depth, as long as every level is a recorded computational-run and every root of the chain is a simulation run | B1 (C2) |
+| G10 | K becomes a declared value, at least 16; the two-stage factor follows from K (F₀.₉₀(K−1, K−1)) | A1 |
+
+**Tier 2: define the interface now, implement with the first use case**
+
+| # | Interface | First use case |
+|---|---|---|
+| G5 | `output.observables` allows three declarations: a single column; limited per-event combinations (a linear combination of columns, the ratio of two columns); event selection (AND of column-against-constant comparisons). Accumulators gain profiles (n, Σw·y, Σw·y² in bins of x) and 2D histograms. Any computation beyond these is a separate recorded step (a C++ reducer that reads the event file and writes a summary of the same schema) | J15's resolution against rigidity (B1) |
+| G7 | spec/2's `source` block is distinguished by `type`: `gun` (existing), `gps` (`G4GeneralParticleSource`, declarative settings only), `event-file` (HepMC and other external events); the summary records the source area and solid angle needed for flux normalization | the first spectrum or flux study |
+| — | a reducer `simreduce`: reads ROOT event files (with `simroot`'s reading code) and writes summaries as declared, so observables decided after the fact need no rerun of the simulation | the first need after B0 |
+
+**Tier 3: defer (with triggers)**
+
+| Item | Trigger |
+|---|---|
+| non-slab geometry in `layered_sim` (GDML input, cylinders, rotations) | the first study that needs non-slab geometry and cannot use a user application with the header; G1 already lets user applications upgrade, so `layered_sim` itself is not urgent |
+| rule packs and probes for other engines | the first non-Geant4 backend |
+| biasing-specific rules (weight distribution, minimum n_eff) | the first study with biasing; G4 already makes the accumulators correct |
+| optical photons, long time windows and decay chains | the first scintillator or rare-event study |
+| probes for several Geant4 versions | the first application on a version other than 11.4 |
+
+### 10.5 Generalizations deliberately not made
+
+- **A general expression language.** Declarative combinations stop at linear combinations, ratios and AND selections; anything more is a recorded program step. An expression language would become a second programming language to validate.
+- **A plug-in system for estimators.** Estimators are a small set of tested Python functions in the control plane; adding one is an ordinary code change with review.
+- **One probe for all engines.** Only the envelope is unified (G8); each engine describes its own content. Forcing one schema would lose engine-specific information that matters for decisions.
+- **Adaptive binning or approximate quantile sketches (t-digest, say).** Their merged results depend on order, which breaks the exactness of summaries; bins are always declared in advance.
+
+### 10.6 Effect on the stages and open decisions
+
+- A1 (C1) gains two items: scope dimensions declared per kind (G2) and the field definition of isolation (G3). It also gains exact counting intervals (G6) and a declared K (G10). All change verdicts and go into the S2 sci-fix entries.
+- A2a gains two items: the probe's geometry-tree dump (G1) and the engine-independent `effective_config` envelope (G8).
+- A2b's first summary version carries weights (G4) and reserves the fields for profiles and 2D histograms (the interface of G5).
+- B1's C2 marker becomes transitive (G9); J15's resolution against rigidity is the first user of profiles.
+- New open decisions: whether per-kind scope dimensions go into C1 (recommended, or C2 has to change the comparison logic again); the threshold for switching to exact counting intervals.
