@@ -1,0 +1,18 @@
+{
+ "kind": "error",
+ "category": "C05",
+ "planter": "ai",
+ "summary": "The helium flux is made differential in kinetic energy per nucleon (bin width x Z/A) while its bins stay in rigidity and the proton flux stays per GV, so the He/p ratio divides fluxes per different variables.",
+ "code_change": "analyse() takes a width argument; run_analysis passes width = WIDTH * abs_Z / A for helium (the period average keeps WIDTH).",
+ "description_change": "context.json: units of flux-helium-p1 and flux-helium-p2 changed to 1/(m2 sr s GeV/n); binning still the rigidity edges.",
+ "affected": [
+  "bin-width",
+  "bin_width",
+  "helium-p1",
+  "helium-p2",
+  "flux-helium-p1",
+  "flux-helium-p2",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

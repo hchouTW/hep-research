@@ -1,0 +1,15 @@
+{
+ "kind": "error",
+ "category": "C06",
+ "planter": "ai",
+ "summary": "The reported range is extended to include the 100-150 GV bin, which is a migration buffer with no truth above it, but only in the code: the spec edges still stop at 100 GV.",
+ "code_change": "REPORTED = slice(1, len(EDGES) - 1) (was len(EDGES) - 2); EDGES comment says only the first bin is a buffer.",
+ "description_change": "response artifacts: provenance text now says only the first bin is a buffer and 100-150 GV is reported; spec edges unchanged.",
+ "affected": [
+  "proton-p1",
+  "proton-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "rigidity_migration"
+ ]
+}

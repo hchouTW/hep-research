@@ -1,0 +1,20 @@
+{
+ "kind": "error",
+ "category": "C02",
+ "planter": "ai",
+ "summary": "The exposure used to normalize the flux omits the geomagnetic cutoff livetime fraction (taken to be handled by the event selection), so low-rigidity bins, where only part of the livetime is above cutoff, are underestimated.",
+ "code_change": "build_world stores 'exposure': acceptance(sp) * per['livetime'] for the analysis instead of exposure(sp, per); the simulated selected counts still use the full exposure with the cutoff fraction.",
+ "description_change": "measurement spec: normalization convention now 'exposure = acceptance x livetime per period (the cutoff selection acts on events)'; the ratio cancellation 'livetime_and_cutoff' renamed 'livetime'.",
+ "affected": [
+  "exposure",
+  "acceptance",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

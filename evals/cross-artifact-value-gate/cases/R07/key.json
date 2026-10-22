@@ -1,0 +1,10 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "The per-bin selection uncertainty is named before forming the diagonal block; the systematic's description is reworded with the same meaning.",
+ "code_change": "analyse(): sel_sigma = flux * sigma_sel / eff_sel_hat; sel = diag(sel_sigma**2).",
+ "description_change": "measurement spec: systematic selection_efficiency applied_via 'diagonal covariance (bins independent), separate per species'.",
+ "affected": [
+  "selection_efficiency"
+ ]
+}

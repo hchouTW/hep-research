@@ -1,0 +1,13 @@
+{
+ "kind": "error",
+ "category": "C12",
+ "planter": "ai",
+ "summary": "The background transfer-factor block is left out of the helium total covariance (the flux pulls and published uncertainties lose the 10% TF component) although it is still listed as a systematic.",
+ "code_change": "analyse(): 'total' = stat + trig + sel (bkg_cov no longer added).",
+ "description_change": "ratio result: nuisance 'background transfer factor (helium)' removed; spec systematic background applied_via says 'covariance block reported separately'.",
+ "affected": [
+  "background",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

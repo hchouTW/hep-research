@@ -1,0 +1,17 @@
+{
+ "kind": "error",
+ "category": "C08",
+ "planter": "ai",
+ "summary": "The charge-tail background is removed from the helium signal-region histogram when it is read, and analyse() subtracts the same TF x sideband estimate again, so the background is subtracted twice.",
+ "code_change": "run_analysis: helium counts = blind_counts(counts - tf_hat * sideband) while the sideband and tf are still passed to analyse().",
+ "description_change": "recipe.json: a step 'charge-tail' (subtract_background) is added before step 'background'.",
+ "affected": [
+  "background",
+  "helium-p1",
+  "helium-p2",
+  "flux-helium-p1",
+  "flux-helium-p2",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "recipe_version": "1.0.0",
+ "recipe_id": "flux-tsvd",
+ "semantics": {
+  "table_id": "differential-flux",
+  "sha256": "126407076c775268589c65501c05cda08ef623923b70a458325e33fbbd911a49"
+ },
+ "input": {
+  "kind": "counts",
+  "applied_effects": []
+ },
+ "estimand_kind": "differential_flux",
+ "steps": [
+  {
+   "step_id": "background",
+   "operator": "subtract_background"
+  },
+  {
+   "step_id": "unfold",
+   "operator": "unfold"
+  },
+  {
+   "step_id": "efficiency",
+   "operator": "correct_efficiency"
+  },
+  {
+   "step_id": "acceptance",
+   "operator": "correct_efficiency"
+  },
+  {
+   "step_id": "exposure",
+   "operator": "divide_exposure"
+  },
+  {
+   "step_id": "bin-width",
+   "operator": "divide_bin_width"
+  }
+ ],
+ "not_applied": []
+}

@@ -1,0 +1,12 @@
+{
+ "kind": "error",
+ "category": "C09",
+ "planter": "ai",
+ "summary": "The ratio is computed as proton over helium (arguments of ratio_block and the truth swapped together, so closure still passes) while the context and objective call it He/p.",
+ "code_change": "run_analysis calls ratio_block(proton, helium); ratio_truth is proton / helium.",
+ "description_change": "measurement spec: ratio numerator 'proton flux', denominator 'helium flux'; context ratio-p1/ratio-p2 still helium over proton.",
+ "affected": [
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

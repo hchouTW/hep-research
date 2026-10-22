@@ -24,7 +24,7 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `crflux-review.md` | D03b | term-by-term review of the cosmic-ray level terms; companion public-interface matrix |
 | `cross-artifact-check-architecture.en.md`, `.zh.md` | architecture | the final architecture of the checker (two planes, value gate, phases); the Chinese version prevails |
 | `decision-architecture.md` | DR-1 to DR-15 | the architecture's decision items and their decisions |
-| `decision-value-gate.md` | DR-13 | value-gate protocol and pre-registered thresholds; later the result and the decision |
+| `decision-value-gate.md` | DR-13 | value-gate protocol, pre-registered thresholds, the measurement (harness in the repository's `evals/cross-artifact-value-gate/`), the result and the decision (Stop) |
 | `decision-phase0.md` | Phase 0 (R1) | the Phase 0 gate record: work done, exit conditions, evidence |
 | `g21-classification.md` | Phase 0 item 8 | why tool-produced recipe fragments fail L2, and the fix options |
 

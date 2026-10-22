@@ -1,0 +1,20 @@
+{
+ "kind": "error",
+ "category": "C07",
+ "planter": "ai",
+ "summary": "Before unfolding, each truth column of the response is renormalized to unity, so migration out of [1.5, 150] GV (explicit underflow/overflow) is treated as staying in range and the edge bins are biased.",
+ "code_change": "analyse(): m = m / m.sum(axis=0, keepdims=True) before unfold().",
+ "description_change": "response artifacts: provenance text now says the analysis renormalizes each truth column to unity (underflow_overflow still explicit_bins).",
+ "affected": [
+  "rigidity_migration",
+  "unfold",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

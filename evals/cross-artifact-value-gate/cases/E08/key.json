@@ -1,0 +1,19 @@
+{
+ "kind": "error",
+ "category": "C04",
+ "planter": "ai",
+ "summary": "The per-period livetimes used in the analysis exposure are typed swapped from the run list (period 1 gets 2.6e6 s, period 2 gets 1.5e6 s), so each period's flux is normalized by the other period's livetime.",
+ "code_change": "New LIVETIME_S table with swapped values; build_world stores 'exposure': acceptance x LIVETIME_S[pname] x cutoff fraction for the analysis, while the simulation uses PERIODS livetimes.",
+ "description_change": "measurement spec: normalization convention lists the livetimes as period 1: 2.6e6 s, period 2: 1.5e6 s.",
+ "affected": [
+  "exposure",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

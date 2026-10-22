@@ -1,0 +1,20 @@
+{
+ "kind": "error",
+ "category": "C04",
+ "planter": "ai",
+ "summary": "The acceptance, already a geometric factor in m^2 sr, is treated as a projected area in m^2 and multiplied by pi sr for an isotropic flux, so every flux is low by a factor pi.",
+ "code_change": "build_world stores 'exposure': expo * math.pi for the analysis.",
+ "description_change": "measurement spec: acceptance correction notes now read 'acceptance (m^2) x pi sr enters once, inside the exposure'.",
+ "affected": [
+  "acceptance",
+  "exposure",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

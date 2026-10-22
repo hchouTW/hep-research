@@ -1,0 +1,264 @@
+{
+ "context_version": "1.0.0",
+ "suite": {
+  "id": "counting-chain",
+  "version": "1.0.0"
+ },
+ "spec": "spec",
+ "scope_axes": {
+  "species": [
+   "proton",
+   "helium"
+  ],
+  "period": [
+   "synthetic-period-1",
+   "synthetic-period-2"
+  ]
+ },
+ "roots": [
+  {
+   "root_id": "flux-proton-p1",
+   "quantity": "differential_flux",
+   "unit": "1/(m2 sr s GV)",
+   "binning": {
+    "item": "spec",
+    "pointer": "/extension/observable/variables/0/edges"
+   },
+   "scope": "species:proton/period:synthetic-period-1",
+   "output": {
+    "instance": "proton-p1"
+   }
+  },
+  {
+   "root_id": "flux-proton-p2",
+   "quantity": "differential_flux",
+   "unit": "1/(m2 sr s GV)",
+   "binning": {
+    "item": "spec",
+    "pointer": "/extension/observable/variables/0/edges"
+   },
+   "scope": "species:proton/period:synthetic-period-2",
+   "output": {
+    "instance": "proton-p2"
+   }
+  },
+  {
+   "root_id": "flux-helium-p1",
+   "quantity": "differential_flux",
+   "unit": "1/(m2 sr s GV)",
+   "binning": {
+    "item": "spec",
+    "pointer": "/extension/observable/variables/0/edges"
+   },
+   "scope": "species:helium/period:synthetic-period-1",
+   "output": {
+    "instance": "helium-p1"
+   }
+  },
+  {
+   "root_id": "flux-helium-p2",
+   "quantity": "differential_flux",
+   "unit": "1/(m2 sr s GV)",
+   "binning": {
+    "item": "spec",
+    "pointer": "/extension/observable/variables/0/edges"
+   },
+   "scope": "species:helium/period:synthetic-period-2",
+   "output": {
+    "instance": "helium-p2"
+   }
+  }
+ ],
+ "recipe_instances": [
+  {
+   "instance_id": "proton-p1",
+   "recipe": "flux-tsvd",
+   "scope": "species:proton/period:synthetic-period-1",
+   "variation": "nominal",
+   "role": "nominal",
+   "nominal": null,
+   "calibrations": {}
+  },
+  {
+   "instance_id": "proton-p2",
+   "recipe": "flux-tsvd",
+   "scope": "species:proton/period:synthetic-period-2",
+   "variation": "nominal",
+   "role": "nominal",
+   "nominal": null,
+   "calibrations": {}
+  },
+  {
+   "instance_id": "helium-p1",
+   "recipe": "flux-tsvd",
+   "scope": "species:helium/period:synthetic-period-1",
+   "variation": "nominal",
+   "role": "nominal",
+   "nominal": null,
+   "calibrations": {}
+  },
+  {
+   "instance_id": "helium-p2",
+   "recipe": "flux-tsvd",
+   "scope": "species:helium/period:synthetic-period-2",
+   "variation": "nominal",
+   "role": "nominal",
+   "nominal": null,
+   "calibrations": {}
+  }
+ ],
+ "bindings": [
+  {
+   "binding_id": "use-proton-p1",
+   "type": "response_used_by",
+   "from": {
+    "item": "response-proton-p1"
+   },
+   "to": {
+    "instance": "proton-p1"
+   }
+  },
+  {
+   "binding_id": "use-proton-p2",
+   "type": "response_used_by",
+   "from": {
+    "item": "response-proton-p2"
+   },
+   "to": {
+    "instance": "proton-p2"
+   }
+  },
+  {
+   "binding_id": "use-helium-p1",
+   "type": "response_used_by",
+   "from": {
+    "item": "response-helium-p1"
+   },
+   "to": {
+    "instance": "helium-p1"
+   }
+  },
+  {
+   "binding_id": "use-helium-p2",
+   "type": "response_used_by",
+   "from": {
+    "item": "response-helium-p2"
+   },
+   "to": {
+    "instance": "helium-p2"
+   }
+  }
+ ],
+ "declarations": [
+  {
+   "declaration_id": "map-trigger_efficiency",
+   "type": "instance_mapping",
+   "asserted_by": {
+    "kind": "agent",
+    "id": "claude-code"
+   },
+   "basis": {
+    "rationale": "the spec's corrections apply to every species and period of this analysis"
+   },
+   "content": {
+    "correction": "trigger_efficiency",
+    "instances": [
+     "proton-p1",
+     "proton-p2",
+     "helium-p1",
+     "helium-p2"
+    ]
+   }
+  },
+  {
+   "declaration_id": "map-selection_efficiency",
+   "type": "instance_mapping",
+   "asserted_by": {
+    "kind": "agent",
+    "id": "claude-code"
+   },
+   "basis": {
+    "rationale": "helium: the selection efficiency is part of the helium acceptance model"
+   },
+   "content": {
+    "correction": "selection_efficiency",
+    "instances": [
+     "proton-p1",
+     "proton-p2"
+    ]
+   }
+  },
+  {
+   "declaration_id": "map-acceptance",
+   "type": "instance_mapping",
+   "asserted_by": {
+    "kind": "agent",
+    "id": "claude-code"
+   },
+   "basis": {
+    "rationale": "the spec's corrections apply to every species and period of this analysis"
+   },
+   "content": {
+    "correction": "acceptance",
+    "instances": [
+     "proton-p1",
+     "proton-p2",
+     "helium-p1",
+     "helium-p2"
+    ]
+   }
+  },
+  {
+   "declaration_id": "map-rigidity_migration",
+   "type": "instance_mapping",
+   "asserted_by": {
+    "kind": "agent",
+    "id": "claude-code"
+   },
+   "basis": {
+    "rationale": "the spec's corrections apply to every species and period of this analysis"
+   },
+   "content": {
+    "correction": "rigidity_migration",
+    "instances": [
+     "proton-p1",
+     "proton-p2",
+     "helium-p1",
+     "helium-p2"
+    ]
+   }
+  }
+ ],
+ "suites": [
+  {
+   "id": "ratio-subset",
+   "version": "1.0.0"
+  }
+ ],
+ "ratio_roots": [
+  {
+   "root_id": "ratio-p1",
+   "numerator": {
+    "root": "flux-helium-p1"
+   },
+   "denominator": {
+    "root": "flux-proton-p1"
+   },
+   "over_axis": "species",
+   "quantity": "ratio",
+   "unit": "1"
+  },
+  {
+   "root_id": "ratio-p2",
+   "numerator": {
+    "root": "flux-helium-p2"
+   },
+   "denominator": {
+    "root": "flux-proton-p2"
+   },
+   "over_axis": "species",
+   "quantity": "ratio",
+   "unit": "1"
+  }
+ ]
+}

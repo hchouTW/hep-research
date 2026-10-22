@@ -1,0 +1,10 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "The unfolding function is renamed unfold_tsvd and the recipe step 'unfold' is renamed 'unfold-tsvd'; the operator and the computation are unchanged.",
+ "code_change": "def unfold -> def unfold_tsvd and its call in analyse().",
+ "description_change": "recipe.json: step_id unfold -> unfold-tsvd (operator unfold).",
+ "affected": [
+  "unfold"
+ ]
+}
