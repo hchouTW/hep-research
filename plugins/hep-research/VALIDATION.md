@@ -2109,6 +2109,13 @@ uniform; AR(1) phi 0.7 n 100 rejects 0.05 +- 0.02, now with the refit). Ledger P
 advisory SFA-2026-038 (introduced 0.14.0, no fixed event yet). Docstring, `time-series-inference.md`, the
 hep-statistics README and the capability matrix state the measured calibration; reference inventory regenerated.
 
+## SCIFIX-EVIDENCE-CI (2026-10-22, CI lock venv plus pyhf 0.7.6, ArviZ 0.23.4, pdg 2026.0, SQLAlchemy 2.1.5, typing_extensions 4.16.0; branch `scifix/evidence-ci-pdg` from main `f238ef3e`, 0.24.0)
+
+| Check | Result |
+|---|---|
+| `run_required_backends.py --from-ledger --require pyhf==0.7.6,arviz==0.23.4,pdg==2026.0 --no-skips` (the new weekly `ledger-evidence` job, run locally) | exit 0; 56 nodes in 25 modules: 56 pass, 0 environment errors, 0 unverified, 0 do not hold, 0 skipped |
+| `tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package` (TH9-MASSES) on parent `84c0a68c` and fix `23910085`, each in a detached worktree with the current test file copied in, CI lock plus pdg 2026.0 | pass on both: `core/constants` exists on the parent and the fix does not change it, so the oracle cannot show the defect; parent record updated (was skip), TH9-MASSES stays D1 |
+
 ## SCIFIX-PLAN-A2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-1-identity-runtime-dir` from main `a53af7e0`)
 
 Sci-fix improvement plan v3, PR-1 (A2; findings F-03, F-25). `core/protected/identity.py` gains

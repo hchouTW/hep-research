@@ -157,7 +157,8 @@ Oracle rules:
   `requirements-core.txt` and sympy's mpmath; backend: pyhf, arviz, pdg, torch, xgboost, sklearn), and each backend
   must be locked by a required CI gate. `python3 tools/run_required_backends.py --from-ledger --no-skips` runs every
   oracle node and classifies each one that does not pass: a missing core dependency is an environment error, a
-  missing backend leaves the evidence unverified, any other failure means the evidence does not hold.
+  missing backend leaves the evidence unverified, any other failure means the evidence does not hold. The weekly
+  `ledger-evidence` job of `statistics-validation` runs it with every backend installed (pyhf, ArviZ, pdg).
 - Kinds: **analytic**, an expected value derived in closed form; **independent implementation**, a different algorithm
   computing the same quantity; **symbolic**, a computer-algebra derivation; **published**, a value printed in a source;
   **exhaustive**, every case of a stated finite domain. Invariants, closures and behavioral checks are evidence, not
