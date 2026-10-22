@@ -5,7 +5,10 @@
   {
    "id": "CLS-LOGINTERP",
    "title": "CLs crossings interpolate log CLs",
-   "changelog": "CHANGELOG 0.6.13",
+   "changelog": {
+    "kind": "release",
+    "release": "0.6.13"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/examples/test_stats_benchmarks.py",
@@ -39,7 +42,10 @@
   {
    "id": "F01",
    "title": "Poisson domain in the likelihoods",
-   "changelog": "CHANGELOG 0.6.11",
+   "changelog": {
+    "kind": "release",
+    "release": "0.6.11"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_p0_regressions.py",
@@ -75,7 +81,10 @@
   {
    "id": "F02",
    "title": "Toy tails are bounds at zero exceedances",
-   "changelog": "CHANGELOG 0.6.11",
+   "changelog": {
+    "kind": "release",
+    "release": "0.6.11"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_p0_regressions.py",
@@ -116,7 +125,10 @@
   {
    "id": "F03",
    "title": "Fit verdicts",
-   "changelog": "CHANGELOG 0.6.11",
+   "changelog": {
+    "kind": "release",
+    "release": "0.6.11"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/core/test_stats_p0_regressions.py"
@@ -142,7 +154,10 @@
   {
    "id": "BAYES-T24",
    "title": "bayes_diagnostics ties, constant chains, ESS and MCSE",
-   "changelog": "CHANGELOG 0.6.11",
+   "changelog": {
+    "kind": "release",
+    "release": "0.6.11"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_statistics/test_bayes_arviz_oracle.py",
@@ -182,7 +197,10 @@
   {
    "id": "FC-MONOTONE",
    "title": "Feldman-Cousins upper ends follow the published construction",
-   "changelog": "CHANGELOG 0.4.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.4.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_poisson.py",
@@ -198,7 +216,9 @@
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope (sci-fix improvement plan F-23): the parent record of fix 04338bbf covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope, tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+   ],
    "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only; per-test parent record of fix 04338bbf (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
     {
@@ -218,7 +238,10 @@
   {
    "id": "POISSON-SF",
    "title": "Exact Poisson p-values no longer underflow",
-   "changelog": "CHANGELOG 0.4.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.4.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_poisson.py",
@@ -233,7 +256,9 @@
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope (sci-fix improvement plan F-23): the parent record of fix a2adc126 covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+   ],
    "note": "negative control added 2026-10-18; per-test parent record of fix a2adc126 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
     {
@@ -253,7 +278,10 @@
   {
    "id": "COV-NOREPAIR",
    "title": "Covariance matrices are no longer repaired silently",
-   "changelog": "CHANGELOG 0.4.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.4.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_linalg.py",
@@ -269,7 +297,9 @@
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope (sci-fix improvement plan F-23): the parent record of fix 6a81109c covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale, tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+   ],
    "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20; per-test parent record of fix 6a81109c (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
     {
@@ -289,7 +319,10 @@
   {
    "id": "POISSON-500",
    "title": "Poisson limits and intervals no longer clipped at 500",
-   "changelog": "CHANGELOG 0.4.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.4.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/core/test_stats_poisson.py",
@@ -304,7 +337,9 @@
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope (sci-fix improvement plan F-23): the parent record of fix b7b7825a covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+   ],
    "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20; per-test parent record of fix b7b7825a (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
     {
@@ -324,7 +359,10 @@
   {
    "id": "TH9-MASSES",
    "title": "PID and Cherenkov masses from CODATA 2022 / PDG 2026",
-   "changelog": "CHANGELOG 0.14.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.14.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py",
@@ -365,7 +403,11 @@
   {
    "id": "DR-WP1-01",
    "title": "Cherenkov photon yield carries z^2",
-   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "changelog": {
+    "kind": "audit",
+    "name": "audit DR-WP1 to DR-WP4",
+    "release": "0.10.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py"
@@ -398,7 +440,11 @@
   {
    "id": "DR-WP1-02",
    "title": "Gaisser-Hillas profile stable at any X_max",
-   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "changelog": {
+    "kind": "audit",
+    "name": "audit DR-WP1 to DR-WP4",
+    "release": "0.10.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py",
@@ -432,7 +478,11 @@
   {
    "id": "DR-WP2-06-CALO",
    "title": "Calorimeter resolution fit weights by a constant relative error without per-point errors",
-   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "changelog": {
+    "kind": "audit",
+    "name": "audit DR-WP1 to DR-WP4",
+    "release": "0.10.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py"
@@ -466,7 +516,11 @@
   {
    "id": "DR-WP2-06-PID",
    "title": "PID refuses electrons in the heavy-particle Bethe formula and uses water I = 79.7 eV",
-   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "changelog": {
+    "kind": "audit",
+    "name": "audit DR-WP1 to DR-WP4",
+    "release": "0.10.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py",
@@ -500,7 +554,11 @@
   {
    "id": "DR-WP2-06-MS",
    "title": "Multiple scattering derives beta(R) from mass and charge and solves the crossover and MDR with it",
-   "changelog": "CHANGELOG audit DR-WP1 to DR-WP4",
+   "changelog": {
+    "kind": "audit",
+    "name": "audit DR-WP1 to DR-WP4",
+    "release": "0.10.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py"
@@ -533,7 +591,10 @@
   {
    "id": "ROBUST-MALFORMED",
    "title": "Malformed input gives findings, not tracebacks",
-   "changelog": "CHANGELOG 0.4.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.4.0"
+   },
    "severity": "S4",
    "evidence_tests": [
     "tests/contracts/test_robustness.py",
@@ -546,14 +607,19 @@
    "correctness": "C1",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
-   "gaps": [],
+   "gaps": [
+    "D scope (sci-fix improvement plan F-23): the parent record of fix d7148901 covers the regression tests at the fix; the evidence tests added after the fix were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+   ],
    "note": "per-test parent record of fix d7148901 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": []
   },
   {
    "id": "BLINDING-SCANNER",
    "title": "Blinding scanner: fewer false alarms, no silent passes",
-   "changelog": "CHANGELOG 0.4.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.4.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/core/test_blinding.py",
@@ -566,7 +632,9 @@
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope (sci-fix improvement plan F-23): the parent record of fix b6334c04 covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+   ],
    "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; every claimed rendering, generated independently, found in all seven claimed encodings; the printed-precision rule against exact Decimal arithmetic, with tokens that must not alarm; the pre-fix UTF-8 decoding and short-value rule as negative controls; 9 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the rounding-zeros gap found by these tests is fixed as BLINDING-ROUNDING-ZEROS",
    "independence": [
     {
@@ -580,7 +648,10 @@
   {
    "id": "BLINDING-ROUNDING-ZEROS",
    "title": "Blinding scanner reads an integer's trailing zeros as rounding",
-   "changelog": "CHANGELOG Unreleased",
+   "changelog": {
+    "kind": "release",
+    "release": "0.18.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/core/test_blinding.py",
@@ -607,7 +678,10 @@
   {
    "id": "ROBUST-CAMPAIGN",
    "title": "Batch campaigns survive interruptions and concurrent commands",
-   "changelog": "CHANGELOG 0.4.0",
+   "changelog": {
+    "kind": "release",
+    "release": "0.4.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/core/test_partition_safety.py",
@@ -621,7 +695,9 @@
    "correctness": "C2",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
-   "gaps": [],
+   "gaps": [
+    "D scope (sci-fix improvement plan F-23): the parent record of fix f7b677c9 covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+   ],
    "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; the merged campaign equals closed forms that do not use engine merging, also after an interrupted then confirmed submit; a file-forced two-process test refuses the second submit with campaign.locked; 3 local mutants killed, including a _sum error that the single_run reference misses (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
    "independence": [
     {
@@ -635,7 +711,11 @@
   {
    "id": "RC-A2",
    "title": "Displayed number that disagrees with its passage fails",
-   "changelog": "CHANGELOG RC-AUDIT-2",
+   "changelog": {
+    "kind": "audit",
+    "name": "RC-AUDIT-2",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_authoring/test_review_fixes2.py",
@@ -662,7 +742,11 @@
   {
    "id": "RC-A3",
    "title": "Adaptation drafts read numbers at sentence end and next to Chinese text",
-   "changelog": "CHANGELOG RC-AUDIT-2",
+   "changelog": {
+    "kind": "audit",
+    "name": "RC-AUDIT-2",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_authoring/test_review_fixes2.py"
@@ -688,7 +772,11 @@
   {
    "id": "RC-A5",
    "title": "Every display is checked against its source",
-   "changelog": "CHANGELOG RC-AUDIT-2",
+   "changelog": {
+    "kind": "audit",
+    "name": "RC-AUDIT-2",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_authoring/test_review_fixes2.py",
@@ -715,7 +803,11 @@
   {
    "id": "RC-A6",
    "title": "Rounding rules round half up",
-   "changelog": "CHANGELOG RC-AUDIT-2",
+   "changelog": {
+    "kind": "audit",
+    "name": "RC-AUDIT-2",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_authoring/test_review_fixes2.py"
@@ -740,7 +832,11 @@
   {
    "id": "ML-SPLITS",
    "title": "Split tools check what they claim",
-   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_ml/test_audit_split_tools.py",
@@ -768,7 +864,10 @@
   {
    "id": "CANONICAL-KEY-ZERO-FRACTION",
    "title": "Split keys: a text ID with a zero fraction keeps its digits as written",
-   "changelog": "CHANGELOG Unreleased",
+   "changelog": {
+    "kind": "release",
+    "release": "0.18.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_ml/test_audit_split_tools.py",
@@ -794,7 +893,11 @@
   {
    "id": "ML-CALIBRATION",
    "title": "A calibration evaluated on its fit sample never validates",
-   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_ml/test_audit_calibration_identity.py"
@@ -827,7 +930,10 @@
   {
    "id": "SAMPLE-NAME-DOT-SEGMENTS",
    "title": "Validator sample names drop '.' segments anywhere in the path",
-   "changelog": "CHANGELOG Unreleased",
+   "changelog": {
+    "kind": "release",
+    "release": "0.18.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_ml/test_audit_calibration_identity.py"
@@ -852,7 +958,11 @@
   {
    "id": "ML-K05",
    "title": "Domain-shift outcome",
-   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/contracts/test_ml_mutation_probe.py",
@@ -880,7 +990,11 @@
   {
    "id": "ML-DOMAIN",
    "title": "One training-domain method",
-   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_ml/test_audit_domain_method.py"
@@ -913,7 +1027,11 @@
   {
    "id": "ML-NEGWEIGHTS",
    "title": "Negative weights are never dropped; the metric layer flags or refuses",
-   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_ml/test_audit_metric_layer.py",
@@ -947,7 +1065,11 @@
   {
    "id": "ML-SMALL",
    "title": "Small corrections (C10, C24, C25, C26, K13)",
-   "changelog": "CHANGELOG ML audit (ML-C, ML-K, ML-R items)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_ml/test_audit_small_corrections.py"
@@ -976,7 +1098,11 @@
   {
    "id": "ANISO-WEIGHTED-COV",
    "title": "Weighted first harmonic: the exact null covariance of (a, b) from the exposure map replaces 2/N_eff, with a chi^2 significance and a phase-free Neyman limit",
-   "changelog": "CHANGELOG Unreleased, anisotropy.py weighted harmonic (sci-fix ANISO-WEIGHTED-COV)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.22.0",
+    "detail": "anisotropy.py weighted harmonic (sci-fix ANISO-WEIGHTED-COV"
+   },
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
@@ -1027,7 +1153,11 @@
   {
    "id": "ANISO-CL-RANGE",
    "title": "anisotropy.py: --cl below 0.5 is rejected with its reason (the expected limit is empty there) instead of a TypeError; amplitude_upper_limit raises ValueError",
-   "changelog": "CHANGELOG Unreleased, anisotropy.py --cl range (robust-fix ANISO-CL-RANGE)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.23.0",
+    "detail": "anisotropy.py --cl range (robust-fix ANISO-CL-RANGE"
+   },
    "severity": "S4",
    "evidence_tests": [
     "tests/skills/hep_measurement/test_anisotropy_cl_range.py"
@@ -1045,7 +1175,11 @@
   {
    "id": "CLI-MISSING-INPUT-EXIT2",
    "title": "A missing or unreadable input file is bad input (exit 2), not a negative verdict: six tools exited 1 with status failed",
-   "changelog": "CHANGELOG Unreleased (triage batch A, T17)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.23.0",
+    "detail": "triage batch A, T17"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/test_cli_contract.py",
@@ -1072,7 +1206,11 @@
   {
    "id": "ADAPTER-MISSING-DEPENDENCY",
    "title": "Adapters report a missing optional dependency as status missing-dependency, exit 3 (were exit 1 or 2, text, refused/failed, or a traceback)",
-   "changelog": "CHANGELOG Unreleased (triage batch A, T19)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.23.0",
+    "detail": "triage batch A, T19"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/adapters/test_adapter_missing_dependency.py",
@@ -1099,7 +1237,11 @@
   {
    "id": "PYHF-REJECTED-STATUS",
    "title": "backend_comparison.py and model_card.py report input they cannot read or map as rejected (exit 2), not refused (a negative verdict in core/status.py)",
-   "changelog": "CHANGELOG Unreleased (triage batch A, T18)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.23.0",
+    "detail": "triage batch A, T18"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/adapters/test_pyhf_adapter_statuses.py"
@@ -1124,7 +1266,11 @@
   {
    "id": "TRAINING-MEMORY-VERDICT",
    "title": "estimate_training_memory.py exits 1 with status failed when the estimate does not fit (exited 0), and states the micro-batch size and sequence length",
-   "changelog": "CHANGELOG Unreleased (triage batch A, T33, T34)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.23.0",
+    "detail": "triage batch A, T33, T34"
+   },
    "severity": "S2",
    "evidence_tests": [
     "tests/skills/hep_ml/test_training_memory_verdict.py",
@@ -1151,7 +1297,11 @@
   {
    "id": "STATUS-UNKNOWN-EXIT",
    "title": "core/status.exit_code on an unknown status names it on stderr and returns 3 (incomplete) instead of a KeyError traceback with exit 1",
-   "changelog": "CHANGELOG Unreleased (triage batch A, T16)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.23.0",
+    "detail": "triage batch A, T16"
+   },
    "severity": "S4",
    "evidence_tests": [
     "tests/core/test_status.py"
@@ -1169,7 +1319,11 @@
   {
    "id": "RUN-ALL-CHECKS-GIT",
    "title": "run_all_checks.py writes its summary with git_commit unknown when git is missing or hangs",
-   "changelog": "CHANGELOG Unreleased (triage batch A, T21)",
+   "changelog": {
+    "kind": "release",
+    "release": "0.23.0",
+    "detail": "triage batch A, T21"
+   },
    "severity": "S4",
    "evidence_tests": [
     "tests/tools/test_run_all_checks_git.py"

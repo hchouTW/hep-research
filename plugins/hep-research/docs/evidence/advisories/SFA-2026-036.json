@@ -26,7 +26,9 @@
    ],
    "database_specific": {
     "fixed_commit": "3c10ac23ff7627385e08fd3c2d57f169bd129231",
-    "introduced_commit": "f79b4c5ff0621cd7ed9b571f43a3aedb0dae8a56"
+    "introduced_commit": "f79b4c5ff0621cd7ed9b571f43a3aedb0dae8a56",
+    "no_artifact": true,
+    "outputs": "skills/hep-measurement/scripts/anisotropy.py harmonic with --exposure-map prints JSON on stdout (harmonic, upper_limit, label, warnings) and writes no artifact"
    }
   }
  ],

@@ -26,7 +26,9 @@
    ],
    "database_specific": {
     "fixed_commit": "117f537517cc7501775687a986bc0395df0cd51d",
-    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e"
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
+    "no_artifact": true,
+    "outputs": "skills/hep-ml/scripts/estimate_training_memory.py prints a text report, or JSON with --json (per_gpu_bytes, per_gpu_gb, fits), and writes no artifact; its exit code carried the verdict"
    }
   }
  ],
