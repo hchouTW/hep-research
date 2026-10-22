@@ -105,6 +105,14 @@ Evidence is graded on two axes, reported separately and never combined (vocabula
 - **Discrimination (D):** would the evidence have caught the defect? D1 a combined count or before/after values;
   D2 a per-test record that each evidence test failed on the parent commit and passes on the fix; D3 D2 plus local
   mutants of the changed function killed (at least the revert of the fix).
+- **D scope (maintainer decision, 2026-10-22).** "Each evidence test" means each oracle node named by the entry's
+  `independence` records: D2 needs, for every one of them, a parent record that fails on the parent and passes on
+  the fix. When only other regression tests have parent records, the grade is at most D1 and `gaps` says so; an
+  entry without independence records (C1) needs such a record for a regression test. A parent failure counts when
+  the test reached the parent's code and failed by assertion, or by an exception that is the defect itself (a
+  traceback on malformed input, a missing verdict); an import error, or a function, argument, input form or output
+  key new in the fix, is a parent `error` and does not count. D3 additionally needs at least one killed `revert`
+  mutant (one that restores the parent's code or behavior of a function the fix changed).
 
 Minimum: S1 C3 and D2 (C4 where the domain is finite or a closed form exists); S2 C2 and D2; S3 a located source
 and a second source; S4 C1 and D2.
@@ -136,7 +144,8 @@ Oracle rules:
   **exhaustive**, every case of a stated finite domain. Invariants, closures and behavioral checks are evidence, not
   independent kinds.
 - A parent record from an adapted parent tree is D2 when the adaptation only adds modules the test imports (new in the
-  fix) or guards an import, never the code under test, and the record says so.
+  fix) or guards an import, never the code under test, and the record says so. Copying the evidence test files
+  (with their fixtures and test helpers) into the parent tree is the method, not an adaptation.
 - Tolerances are fixed before the first run and justified (precision, grid step, Monte Carlo error); a failing
   check is never repaired by widening its tolerance.
 - A negative control that emulates the pre-fix behavior inside the test is correctness evidence; it is not a parent
@@ -153,6 +162,14 @@ Oracle rules:
   it passes on a newer one, bump the `torch-backend` pins.
 
 Record each correction in `docs/evidence/sci-fixes.json` and in `VALIDATION.md` with one row per evidence test.
+The ledger entry carries the D axis as data: `commits` (`parent`, `fix`, `follow_up`: full 40-character hashes),
+`parent_records` (`test` as file::Class::method; `parent` fail, pass, error or skip; `fix`; `failure` assertion,
+error or null; `env`; `adapted_parent`, with `adaptation` only when true, `adds new modules` or `guards an import`;
+`validation`, the VALIDATION.md section that holds the row; `requires` as for independence records) and `mutants`
+as VALIDATION records them (`function`, a path or path::name; `mutation` revert or other; `killed_by`, the tests;
+`detail`); `evidence_tests` lists the nodes of both. `tests/tools/test_scifix_ledger.py` recomputes D2 and D3 from
+these records. One entry is one fix: an entry that bundled several is split, and its id stays as a tombstone in
+`superseded` (`id`, `superseded_by`, `note`); advisories name the new entries.
 The ledger's `changelog` names where the fix shipped: `{"kind": "release", "release": "X.Y.Z"}`, `{"kind": "audit",
 "name": ..., "release": ...}` (a release section's audit subsection), or `{"kind": "unreleased"}` until the release
 (an optional `detail` gives the item label); the release is a CHANGELOG section and, when an advisory names the entry,

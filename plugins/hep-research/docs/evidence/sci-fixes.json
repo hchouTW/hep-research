@@ -1,6 +1,6 @@
 {
- "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric), rechecked and extended on 2026-10-20 (VALIDATION SCIFIX-* sections); reviewed 2026-10-21 under the maintainer's decisions on oracle independence (docs/maintenance.md): every counted independent kind has a basis (locator, third-party, exhaustive or person) in its entry's independence records, locators read at page level or better (VALIDATION SCIFIX-LEDGER-REVIEW); since 2026-10-22 every locator record names its source and located claim (source_id, locator_id in scifix-sources.json and scifix-claims.json) and every independence record lists the import names its oracle test requires (requires: core, backend; VALIDATION SCIFIX-PLAN-B1-B4)",
+ "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record (fails on the parent, passes on the fix) for every oracle node named by the entry's independence records, or, for an entry without one, for its regression tests (D-scope rule, maintainer decision 2026-10-22); D3 D2 plus a killed revert mutant. Each entry records commits (parent, fix, follow_up: 40-hex), parent_records (test, parent, fix, failure, env, adapted_parent, adaptation, validation, requires) and mutants (function, mutation, killed_by, detail); evidence_tests lists the nodes of both. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric), rechecked and extended on 2026-10-20 (VALIDATION SCIFIX-* sections); reviewed 2026-10-21 under the maintainer's decisions on oracle independence (docs/maintenance.md): every counted independent kind has a basis (locator, third-party, exhaustive or person) in its entry's independence records, locators read at page level or better (VALIDATION SCIFIX-LEDGER-REVIEW); since 2026-10-22 every locator record names its source and located claim (source_id, locator_id in scifix-sources.json and scifix-claims.json) and every independence record lists the import names its oracle test requires (requires: core, backend; VALIDATION SCIFIX-PLAN-B1-B4); on 2026-10-22 the D axis became structured (commits, parent_records, mutants) and every grade was recomputed under the D-scope rule from those records, with the missing parent records rerun in detached worktrees, and ML-SMALL was split into four entries (VALIDATION SCIFIX-PLAN-B3-B6)",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -11,8 +11,8 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/examples/test_stats_benchmarks.py",
-    "tests/core/test_stats_likelihood_limits.py"
+    "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_toy_crossings_on_exact_counting_cls_meet_the_interpolation_bound",
+    "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_crossing_at_zero_events_is_ln_20_for_any_background"
    ],
    "oracle_kinds": [
     "symbolic",
@@ -20,9 +20,11 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the symbolic oracle test_crossing_at_zero_events_is_ln_20_for_any_background errors on parent 90388aa0 (AttributeError: _crossing is new in the fix), so it is not shown to catch the defect; D2 needs a parent failure of every oracle node (D-scope rule, 2026-10-22): D1 (VALIDATION SCIFIX-PLAN-B3-B6)"
+   ],
    "note": "core _toy_cls crossing extracted to _log_cls_crossing (move) and tested 2026-10-18. The benchmark's toy_based() run in process on exact counting CLs (n = 3, b = 3.232 and the expected quantiles) against mpmath roots within the log-interpolation error bound; fails by assertion on parent 90388aa0 (observed 5.335 against 5.284) and passes on fix 99a18fd8; n = 0 crossing is ln 20 for any b (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20). The core toy CLs (likelihood_limits._toy_cls) interpolated log CLs since it was written (cc44988d): the fix changed the benchmark only",
    "independence": [
     {
@@ -52,7 +54,48 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "90388aa0704206991992f8d30752c3a4aa85e661",
+    "fix": "99a18fd8880b95e22767feb51c32e0529ecdb0c1",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_toy_crossings_on_exact_counting_cls_meet_the_interpolation_bound",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ORACLES-BATCH3",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_crossing_at_zero_events_is_ln_20_for_any_background",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "F01",
@@ -63,9 +106,10 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/core/test_stats_p0_regressions.py",
-    "tests/core/test_stats_counting_asymptotic_oracles.py",
-    "tests/core/test_properties.py"
+    "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson",
+    "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_negative_mean_with_zero_count_is_invalid",
+    "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_single_bin_log_likelihood_rejects_negative_mean",
+    "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_zero_mean_zero_count_is_valid_and_positive_count_is_not"
    ],
    "oracle_kinds": [
     "behavioral",
@@ -109,7 +153,85 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "1d42271a99111128f45670c93830e1e2df9db304",
+    "fix": "9f1ee4a9f5810a846000181423ee50e22d487029",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": true,
+     "adaptation": "adds new modules",
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_negative_mean_with_zero_count_is_invalid",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "adds new modules",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_single_bin_log_likelihood_rejects_negative_mean",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "adds new modules",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_zero_mean_zero_count_is_valid_and_positive_count_is_not",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "adds new modules",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "F02",
@@ -120,9 +242,10 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/core/test_stats_p0_regressions.py",
-    "tests/core/test_stats_statistical_toys.py",
-    "tests/core/test_properties.py"
+    "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_clopper_pearson_against_scipy",
+    "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_extreme_exact_tail_in_log_space",
+    "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedance_bound_solves_the_binomial_equation_symbolically",
+    "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedances_give_a_bound_not_a_zero"
    ],
    "oracle_kinds": [
     "symbolic",
@@ -130,9 +253,11 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the three oracle nodes (T02T03ToyTails clopper_pearson, extreme tail, zero-exceedance bound) test core/stats/tail_estimation.py, new in the fix: on parent 1d42271a the module does not import, and the adapted tree that adds it passes because it then holds the fix's code under test, which the adapted-parent rule excludes; only the regression test test_zero_exceedances_give_a_bound_not_a_zero has a parent record: D1 (VALIDATION SCIFIX-PLAN-B3-B6)"
+   ],
    "note": "toys_not_evaluated path tested 2026-10-18; property test of the Clopper-Pearson ends against exact binomial sums (mpmath), Wald at k = 0 as negative control, 2026-10-20; per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)",
    "independence": [
     {
@@ -176,7 +301,82 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "1d42271a99111128f45670c93830e1e2df9db304",
+    "fix": "9f1ee4a9f5810a846000181423ee50e22d487029",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_clopper_pearson_against_scipy",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_extreme_exact_tail_in_log_space",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedance_bound_solves_the_binomial_equation_symbolically",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedances_give_a_bound_not_a_zero",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "adds new modules",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "F03",
@@ -187,16 +387,20 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/core/test_stats_p0_regressions.py"
+    "tests/core/test_stats_p0_regressions.py::T04AnalyticOracle::test_converged_fits_match_a_third_party_minimum",
+    "tests/core/test_stats_p0_regressions.py::T04FitStatus::test_shape_limit_reports_failed_status_and_cli_exit"
    ],
    "oracle_kinds": [
     "behavioral",
     "independent-implementation"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the oracle T04AnalyticOracle::test_converged_fits_match_a_third_party_minimum tests newton_fit in core/stats/fit_diagnostics.py, new in the fix (import error on parent 1d42271a; the adapted tree that adds the module holds the fix's code under test); only the regression test has a parent record: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 5 killed local mutants without naming them; not transcribed"
+   ],
    "note": "per-test parent record of fix 9f1ee4a9, adapted: the parent tree takes the new modules fit_diagnostics.py and tail_estimation.py (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the parent failure is a missing status key, the defect itself; the T05 tests need a method new in the fix; newton_fit's minimum, value, EDM and verdict against a closed-form two-parameter Poisson and Gaussian model at every stop of truncated fits; the pre-fix no-verdict rule as negative control (14 of 24 stops are not minima); 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
    "independence": [
     {
@@ -212,7 +416,48 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "1d42271a99111128f45670c93830e1e2df9db304",
+    "fix": "9f1ee4a9f5810a846000181423ee50e22d487029",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T04AnalyticOracle::test_converged_fits_match_a_third_party_minimum",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_p0_regressions.py::T04FitStatus::test_shape_limit_reports_failed_status_and_cli_exit",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "adds new modules",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "BAYES-T24",
@@ -223,8 +468,12 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py",
-    "tests/skills/hep_statistics/test_bayes_diagnostics.py"
+    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::ArviZOracle::test_rhat_ess_and_mcse_match",
+    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_diagnostics_match_the_reference_and_the_pre_fix_rules_do_not",
+    "tests/skills/hep_statistics/test_bayes_diagnostics.py::Diagnostics::test_ar1_bulk_ess",
+    "tests/core/test_stats_weighted_mc.py::SignedWeightTemplates::test_effective_count_likelihood_refuses_signed_weights",
+    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::Health::test_ties_do_not_crash_and_undefined_mcse_is_flagged",
+    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::Health::test_unhealthy_chains_are_never_converged"
    ],
    "oracle_kinds": [
     "independent-implementation",
@@ -232,9 +481,12 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D3",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the analytic oracle Diagnostics::test_ar1_bulk_ess passes on parent bb0774f0, so it is not shown to catch the defect; D2 needs a parent failure of every oracle node: D1, and the killed revert mutant no longer gives D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH2 names the mutated rule, not the function, and says killed by the independent oracle (class IndependentOracle); the file is the advisory's"
+   ],
    "note": "ArviZ oracle skipped unless arviz 0.23.4 is installed; required in the stats-backends gate. A SciPy oracle written from Vehtari et al. 2021 runs without ArviZ (R-hat, bulk and tail ESS, quantile MCSE to 1e-12) with invariants and the pre-fix ESS and MCSE as negative control; it fails by assertion on parent bb0774f0 and passes on fix d161b3b7; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20; earlier tie and signed-weight parts: SCIFIX-PARENT-RECORDS); with ArviZ 0.23.4 the fix's ArviZ oracle fails by assertion on parent bb0774f0 (five cases: MCSE ratios 0.954, 1.036, 0.956, bulk ESS 0.993, 0.994, the same as the SciPy oracle) and crashes on the tie case, and passes on fix d161b3b7 (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)",
    "independence": [
     {
@@ -295,6 +547,146 @@
       "backend": []
      }
     }
+   ],
+   "commits": {
+    "parent": "bb0774f099ea025fb768f0d3b494b498cebb1cfa",
+    "fix": "d161b3b705f89de272edd7bded8104b203f696e5",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::ArviZOracle::test_rhat_ess_and_mcse_match",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock + ArviZ 0.23.4",
+     "adapted_parent": false,
+     "validation": "SCIFIX-GAPS-CLOSED",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": [
+       "arviz"
+      ]
+     }
+    },
+    {
+     "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_diagnostics_match_the_reference_and_the_pre_fix_rules_do_not",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ORACLES-BATCH2",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_statistics/test_bayes_diagnostics.py::Diagnostics::test_ar1_bulk_ess",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_weighted_mc.py::SignedWeightTemplates::test_effective_count_likelihood_refuses_signed_weights",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::Health::test_ties_do_not_crash_and_undefined_mcse_is_flagged",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::Health::test_unhealthy_chains_are_never_converged",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-statistics/scripts/bayes_diagnostics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle"
+     ],
+     "detail": "no improved last term in the ESS"
+    },
+    {
+     "function": "skills/hep-statistics/scripts/bayes_diagnostics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle"
+     ],
+     "detail": "no monotone step in the ESS"
+    },
+    {
+     "function": "skills/hep-statistics/scripts/bayes_diagnostics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle"
+     ],
+     "detail": "folded R-hat dropped"
+    },
+    {
+     "function": "skills/hep-statistics/scripts/bayes_diagnostics.py",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle"
+     ],
+     "detail": "pre-fix MCSE rule"
+    },
+    {
+     "function": "skills/hep-statistics/scripts/bayes_diagnostics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle"
+     ],
+     "detail": "rank-normalization offsets (r - 1/2)/S instead of Blom's (r - 3/8)/(S + 1/4)"
+    }
    ]
   },
   {
@@ -306,10 +698,10 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/core/test_stats_poisson.py",
-    "tests/core/test_published_tables.py",
-    "tests/core/test_properties.py",
-    "tests/core/test_stats_counting_asymptotic_oracles.py"
+    "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips",
+    "tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope",
+    "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_published_values",
+    "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_upper_end_is_non_increasing_in_b"
    ],
    "oracle_kinds": [
     "published",
@@ -317,10 +709,11 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope (sci-fix improvement plan F-23): the parent record of fix 04338bbf covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope, tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+    "D scope (F-23, rerun 2026-10-22): the independent-envelope oracle T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope errors on parent b3734189 (TypeError: fc_interval's monotone argument is new in the fix), so it is not shown to catch the defect; the published-table oracle fails on the parent by assertion: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "the parent record of FeldmanCousinsTests::test_full_published_tables (SCIFIX-PARENT-RECORDS) names a test that no longer exists under that name; not converted"
    ],
    "note": "independent monotone-envelope oracle and negative control added 2026-10-18; full-table comparison runs in the slow tier only; per-test parent record of fix 04338bbf (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
@@ -351,7 +744,70 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "b373418933361bc86a3a583b7edf70f0ed4e5c35",
+    "fix": "04338bbf2ae60d9f15b034bbabbecc01ecd91b87",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_published_values",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_upper_end_is_non_increasing_in_b",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "POISSON-SF",
@@ -362,9 +818,9 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/core/test_stats_poisson.py",
-    "tests/core/test_stats_likelihood_limits.py",
-    "tests/core/test_stats_statistical_toys.py"
+    "tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails",
+    "tests/core/test_stats_likelihood_limits.py::SingleBinTests::test_exact_p_value_does_not_underflow",
+    "tests/core/test_stats_statistical_toys.py::BoundaryTests::test_exact_p_value_does_not_underflow"
    ],
    "oracle_kinds": [
     "independent-implementation",
@@ -372,10 +828,10 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope (sci-fix improvement plan F-23): the parent record of fix a2adc126 covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+    "D scope (F-23, rerun 2026-10-22): the oracle UpperTailTests::test_matches_third_party_and_symbolic_tails errors on parent 04338bbf (AttributeError: poisson_sf is new in the fix); only the regression tests have parent records: D1 (VALIDATION SCIFIX-PLAN-B3-B6)"
    ],
    "note": "negative control added 2026-10-18; per-test parent record of fix a2adc126 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
@@ -409,7 +865,59 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "04338bbf2ae60d9f15b034bbabbecc01ecd91b87",
+    "fix": "a2adc12601736296d32ea44800103404850e2cbe",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_likelihood_limits.py::SingleBinTests::test_exact_p_value_does_not_underflow",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_statistical_toys.py::BoundaryTests::test_exact_p_value_does_not_underflow",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "COV-NOREPAIR",
@@ -420,9 +928,12 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/core/test_stats_linalg.py",
-    "tests/core/test_stats_statistical_toys.py",
-    "tests/core/test_properties.py"
+    "tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale",
+    "tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3",
+    "tests/core/test_stats_likelihood_limits.py::PriorTests::test_a_singular_correlation_is_rejected",
+    "tests/core/test_stats_statistical_toys.py::RatioMeasuredTests::test_gls_constant_rejects_an_impossible_correlation",
+    "tests/core/test_stats_statistical_toys.py::RatioMeasuredTests::test_indefinite_covariance_is_rejected_and_named",
+    "tests/core/test_stats_unfolding_diagnostics.py::ResponseMeasuredTests::test_rejections"
    ],
    "oracle_kinds": [
     "independent-implementation",
@@ -431,10 +942,10 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope (sci-fix improvement plan F-23): the parent record of fix 6a81109c covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale, tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+    "D scope (F-23, rerun 2026-10-22): both oracles (test_stats_linalg.py) fail to import on parent a2adc126 (core.stats._linalg is new in the fix and is the code under test, so adding it is not an allowed adaptation); only the regression tests have parent records: D1 (VALIDATION SCIFIX-PLAN-B3-B6)"
    ],
    "note": "eigenvalue oracle (numpy.linalg.eigvalsh) and jitter-repair negative control added 2026-10-18; GLS constant fit against the two-point closed form and numpy.linalg.solve, 2026-10-20; per-test parent record of fix 6a81109c (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
@@ -463,7 +974,98 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "a2adc12601736296d32ea44800103404850e2cbe",
+    "fix": "6a81109ca0e0150c37a90e19e74f143773091f47",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_likelihood_limits.py::PriorTests::test_a_singular_correlation_is_rejected",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_statistical_toys.py::RatioMeasuredTests::test_gls_constant_rejects_an_impossible_correlation",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_statistical_toys.py::RatioMeasuredTests::test_indefinite_covariance_is_rejected_and_named",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_unfolding_diagnostics.py::ResponseMeasuredTests::test_rejections",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "POISSON-500",
@@ -474,9 +1076,9 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/core/test_stats_poisson.py",
-    "tests/core/test_stats_poisson_numerics.py",
-    "tests/core/test_stats_edge_cases.py"
+    "tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs",
+    "tests/core/test_stats_poisson.py::MeanLimitTests::test_fc_scan_keeps_its_own_documented_limit",
+    "tests/core/test_stats_poisson.py::MeanLimitTests::test_garwood_and_classical_limit_beyond_500"
    ],
    "oracle_kinds": [
     "independent-implementation",
@@ -486,9 +1088,7 @@
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "D scope (sci-fix improvement plan F-23): the parent record of fix b7b7825a covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
-   ],
+   "gaps": [],
    "note": "chi-square relation (SciPy) and mpmath incomplete-gamma roots as two oracles, the clipped [0, 500] search as negative control, 2026-10-20; per-test parent record of fix b7b7825a (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
    "independence": [
     {
@@ -521,7 +1121,59 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "6a81109ca0e0150c37a90e19e74f143773091f47",
+    "fix": "b7b7825af140bee72e27aa6950045b44b664eb1c",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_poisson.py::MeanLimitTests::test_fc_scan_keeps_its_own_documented_limit",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_stats_poisson.py::MeanLimitTests::test_garwood_and_classical_limit_beyond_500",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "TH9-MASSES",
@@ -532,9 +1184,9 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_detector/test_hep_detector_audit.py",
-    "tests/core/test_constant_literals.py",
-    "tests/core/test_constants.py"
+    "tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package",
+    "tests/skills/hep_detector/test_hep_detector_audit.py::SpeciesMassPropertyTests::test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not",
+    "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared"
    ],
    "oracle_kinds": [
     "published",
@@ -542,9 +1194,11 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the PDG cross-check PdgPackageTests::test_bundled_masses_equal_the_package skips without pdg (not in the CI lock or E2 venvs), so it has no parent record; it reads core/constants, which the fix does not change: D1 (VALIDATION SCIFIX-PLAN-B3-B6)"
+   ],
    "note": "expected values computed from closed forms in the test since 2026-10-18; binding energies of d, 3He, 4He from the CODATA 2022 masses against AME2020 mass excesses (a second evaluation), property tests over species and momenta, the pre-fix 10 eV table as negative control (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the PDG cross-check (pdg 2026.0, 2026 edition) runs in the required CI job pdg-cross-check, where a skip naming pdg fails (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)",
    "independence": [
     {
@@ -584,7 +1238,56 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "84c0a68c2f7cac69e2192788beb792f6ecf6ad93",
+    "fix": "2391008579c952d3f4308a191900f7bfa3885abb",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package",
+     "parent": "skip",
+     "fix": "skip",
+     "failure": null,
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": [
+       "pdg"
+      ]
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::SpeciesMassPropertyTests::test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "DR-WP1-01",
@@ -596,7 +1299,8 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_detector/test_hep_detector_audit.py"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
+    "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength"
    ],
    "oracle_kinds": [
     "analytic",
@@ -604,9 +1308,11 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D2",
+   "discrimination": "D0",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: neither oracle has a parent record: on parent 4aebc0be the CLI has no charge input (KeyError 'charge'), the Frank-Tamm test imports core.constants (added after the fix) and errors on the fix too, and the z^2 test fails on the fix by 4e-8 (it passes from TH9's fix 23910085 on); the fix commit's own tests (mass:charge syntax, --rigidity, the charge key) all need input forms new in the fix: no per-test parent record, D0 (VALIDATION SCIFIX-PLAN-B3-B6)"
+   ],
    "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)",
    "independence": [
     {
@@ -639,7 +1345,44 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "4aebc0be7686fd7f4c8856393d9733fd22173e9a",
+    "fix": "70f7fbcbc617c012a9b16c2aa391095aca79b80e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
+     "parent": "error",
+     "fix": "fail",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength",
+     "parent": "error",
+     "fix": "error",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "DR-WP1-02",
@@ -651,8 +1394,7 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_detector/test_hep_detector_audit.py",
-    "tests/skills/hep_measurement/test_astroparticle.py"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form"
    ],
    "oracle_kinds": [
     "analytic",
@@ -689,7 +1431,28 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "70f7fbcbc617c012a9b16c2aa391095aca79b80e",
+    "fix": "0f3a2e3fee0a5f236ab598e1ef5ace9691283258",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "DR-WP2-06-CALO",
@@ -701,7 +1464,8 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_detector/test_hep_detector_audit.py"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq",
+    "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance"
    ],
    "oracle_kinds": [
     "independent-implementation",
@@ -710,9 +1474,12 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D3",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the analytic oracle test_calorimeter_fit_closure_and_energy_scale_covariance passes on parent f6a64702, so it is not shown to catch the defect: D1, and the killed revert mutant no longer gives D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and 'toy study', not the function; the file is the advisory's"
+   ],
    "independence": [
     {
      "kind": "independent-implementation",
@@ -739,7 +1506,60 @@
      }
     }
    ],
-   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); the 2000-toy bias study (bias of c 0.06 sd; pre-fix unit weights: c^2 < 0 in 24.8%, c about 10 sd high), closure and energy-scale covariance; 2 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-017"
+   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); the 2000-toy bias study (bias of c 0.06 sd; pre-fix unit weights: c^2 < 0 in 24.8%, c about 10 sd high), closure and energy-scale covariance; 2 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-017",
+   "commits": {
+    "parent": "f6a64702c655dbbf13e7209031b8c98c56c381a0",
+    "fix": "6c7933634eb1ab1f43acb9368379fd362e5f642f",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/calorimeter_resolution.py",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq"
+     ],
+     "detail": "calorimeter fit with unit weights (pre-fix)"
+    },
+    {
+     "function": "skills/hep-detector/scripts/calorimeter_resolution.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq"
+     ],
+     "detail": "calorimeter weights 1/r^2 instead of 1/r^4"
+    }
+   ]
   },
   {
    "id": "DR-WP2-06-PID",
@@ -751,8 +1571,7 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_detector/test_hep_detector_audit.py",
-    "tests/skills/hep_detector/test_reference_values.py"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy"
    ],
    "oracle_kinds": [
     "published",
@@ -793,7 +1612,28 @@
      }
     }
    ],
-   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); invariant: the loss scales exactly as z^2 at fixed momentum and mass; negative control: I = 75 eV gives 2.05062; electrons (m < 10 MeV) refused; parent record of 6c793363 (VALIDATION SCIFIX-PARENT-RECORDS); advisory SFA-2026-018"
+   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); invariant: the loss scales exactly as z^2 at fixed momentum and mass; negative control: I = 75 eV gives 2.05062; electrons (m < 10 MeV) refused; parent record of 6c793363 (VALIDATION SCIFIX-PARENT-RECORDS); advisory SFA-2026-018",
+   "commits": {
+    "parent": "f6a64702c655dbbf13e7209031b8c98c56c381a0",
+    "fix": "6c7933634eb1ab1f43acb9368379fd362e5f642f",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "DR-WP2-06-MS",
@@ -805,7 +1645,7 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_detector/test_hep_detector_audit.py"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms"
    ],
    "oracle_kinds": [
     "analytic",
@@ -813,9 +1653,12 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D3",
+   "discrimination": "D0",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the oracle test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms errors on parent f6a64702 (TypeError: summarize's mass_gev argument is new in the fix); no node has a parent record: D0, and the killed revert mutants no longer give D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and the closed-form test, not the function; the file is the advisory's"
+   ],
    "independence": [
     {
      "kind": "analytic",
@@ -860,7 +1703,64 @@
      }
     }
    ],
-   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); 45 stacks, masses and charges; invariant: (2m, 2z) gives the same crossover and MDR; negative control: the pre-fix beta = 1 crossover off in 14 of 45; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-019"
+   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); 45 stacks, masses and charges; invariant: (2m, 2z) gives the same crossover and MDR; negative control: the pre-fix beta = 1 crossover off in 14 of 45; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-019",
+   "commits": {
+    "parent": "f6a64702c655dbbf13e7209031b8c98c56c381a0",
+    "fix": "6c7933634eb1ab1f43acb9368379fd362e5f642f",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/multiple_scattering.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms"
+     ],
+     "detail": "beta from R instead of zR"
+    },
+    {
+     "function": "skills/hep-detector/scripts/multiple_scattering.py",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms"
+     ],
+     "detail": "crossover with beta = 1 (pre-fix)"
+    },
+    {
+     "function": "skills/hep-detector/scripts/multiple_scattering.py",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms"
+     ],
+     "detail": "MDR with beta = 1 (pre-fix)"
+    },
+    {
+     "function": "skills/hep-detector/scripts/multiple_scattering.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms"
+     ],
+     "detail": "bisection stopped after 20 steps"
+    }
+   ]
   },
   {
    "id": "ROBUST-MALFORMED",
@@ -871,8 +1771,8 @@
    },
    "severity": "S4",
    "evidence_tests": [
-    "tests/contracts/test_robustness.py",
-    "tests/core/test_evidence_ledger.py"
+    "tests/contracts/test_robustness.py::GateMalformedInputTests::test_artifact_type_of_the_wrong_json_type",
+    "tests/core/test_evidence_ledger.py::LedgerTests::test_malformed_records_are_findings_with_field_paths"
    ],
    "oracle_kinds": [
     "behavioral",
@@ -881,11 +1781,43 @@
    "correctness": "C1",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": false,
-   "gaps": [
-    "D scope (sci-fix improvement plan F-23): the parent record of fix d7148901 covers the regression tests at the fix; the evidence tests added after the fix were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
-   ],
+   "gaps": [],
    "note": "per-test parent record of fix d7148901 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent",
-   "independence": []
+   "independence": [],
+   "commits": {
+    "parent": "b7b7825af140bee72e27aa6950045b44b664eb1c",
+    "fix": "d7148901bc545813001a884a159abc995591bb87",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_robustness.py::GateMalformedInputTests::test_artifact_type_of_the_wrong_json_type",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_evidence_ledger.py::LedgerTests::test_malformed_records_are_findings_with_field_paths",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "BLINDING-SCANNER",
@@ -896,18 +1828,20 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/core/test_blinding.py",
-    "tests/core/test_blinding_u11.py"
+    "tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding",
+    "tests/core/test_blinding.py::LowCountAndEncodingTests::test_low_counts_need_a_standalone_token",
+    "tests/core/test_blinding.py::LowCountAndEncodingTests::test_undecodable_text_is_incomplete_never_pass"
    ],
    "oracle_kinds": [
     "behavioral",
     "independent-implementation"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope (sci-fix improvement plan F-23): the parent record of fix b6334c04 covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+    "D scope (F-23, rerun 2026-10-22): the oracle RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding errors on parent d7148901 (_significant_digits, added later) and fails on fix b6334c04 (it encodes the later rounding-zeros rule), so it has no parent record; only the regression tests do: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 9 killed local mutants without naming them; not transcribed"
    ],
    "note": "per-test parent record of fix b6334c04 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; every claimed rendering, generated independently, found in all seven claimed encodings; the printed-precision rule against exact Decimal arithmetic, with tokens that must not alarm; the pre-fix UTF-8 decoding and short-value rule as negative controls; 9 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the rounding-zeros gap found by these tests is fixed as BLINDING-ROUNDING-ZEROS",
    "independence": [
@@ -921,7 +1855,54 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "d7148901bc545813001a884a159abc995591bb87",
+    "fix": "b6334c0432a8fc66e7a787e1be7e64c4ad302d72",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding",
+     "parent": "error",
+     "fix": "fail",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_blinding.py::LowCountAndEncodingTests::test_low_counts_need_a_standalone_token",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_blinding.py::LowCountAndEncodingTests::test_undecodable_text_is_incomplete_never_pass",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "BLINDING-ROUNDING-ZEROS",
@@ -932,8 +1913,10 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/core/test_blinding.py",
-    "tests/core/test_blinding_u11.py"
+    "tests/core/test_blinding.py::RoundingZerosTests::test_rounding_zeros_exhaustively_against_decimal_rounding",
+    "tests/core/test_blinding.py::RoundingZerosTests::test_scan_text_flags_rounded_integers_and_not_coarser_ones",
+    "tests/core/test_blinding.py::RenderingOracleTests::test_printed_precision_rule_against_exact_decimal_arithmetic",
+    "tests/core/test_blinding_u11.py::RenderingsN12::test_unrelated_numbers_still_pass"
    ],
    "oracle_kinds": [
     "exhaustive",
@@ -955,6 +1938,107 @@
       "backend": []
      }
     }
+   ],
+   "commits": {
+    "parent": "b34d363aa9f5a6df28eed923f29fc5ef60b59132",
+    "fix": "bd1064e2e406a706beba605ed0799fa7aac6fb60",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_blinding.py::RoundingZerosTests::test_rounding_zeros_exhaustively_against_decimal_rounding",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ROUNDING-ZEROS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_blinding.py::RoundingZerosTests::test_scan_text_flags_rounded_integers_and_not_coarser_ones",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ROUNDING-ZEROS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_blinding.py::RenderingOracleTests::test_printed_precision_rule_against_exact_decimal_arithmetic",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ROUNDING-ZEROS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_blinding_u11.py::RenderingsN12::test_unrelated_numbers_still_pass",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ROUNDING-ZEROS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "core/blinding/blinding.py::_printed_match",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/core/test_blinding.py::RoundingZerosTests"
+     ],
+     "detail": "the revert (no rounding zeros)"
+    },
+    {
+     "function": "core/blinding/blinding.py::_printed_match",
+     "mutation": "other",
+     "killed_by": [
+      "tests/core/test_blinding.py::RoundingZerosTests"
+     ],
+     "detail": "a 2-digit floor"
+    },
+    {
+     "function": "core/blinding/blinding.py::_printed_match",
+     "mutation": "other",
+     "killed_by": [
+      "tests/core/test_blinding.py::RoundingZerosTests"
+     ],
+     "detail": "a 4-digit floor"
+    },
+    {
+     "function": "core/blinding/blinding.py::_printed_match",
+     "mutation": "other",
+     "killed_by": [
+      "tests/core/test_blinding.py::RoundingZerosTests"
+     ],
+     "detail": "at most one rounding zero"
+    },
+    {
+     "function": "core/blinding/blinding.py::_printed_match",
+     "mutation": "other",
+     "killed_by": [
+      "tests/core/test_blinding.py::RoundingZerosTests"
+     ],
+     "detail": "rounding zeros also before a point"
+    }
    ]
   },
   {
@@ -966,8 +2050,10 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/core/test_partition_safety.py",
-    "tests/core/test_partition_robustness.py"
+    "tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form",
+    "tests/core/test_partition_safety.py::MergeGuardTests::test_non_finite_results_are_refused",
+    "tests/core/test_partition_safety.py::MergeGuardTests::test_strings_are_not_concatenated",
+    "tests/core/test_partition_safety.py::SafetyTests::test_concurrent_submits_cannot_both_run"
    ],
    "oracle_kinds": [
     "behavioral",
@@ -975,10 +2061,11 @@
     "independent-implementation"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": false,
    "gaps": [
-    "D scope (sci-fix improvement plan F-23): the parent record of fix f7b677c9 covers the regression tests at the fix; the oracle tests that carry the C grade (tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form) were not run on the parent, so they are not shown to catch the defect; grade kept until the D-scope rule is applied (plan B3)"
+    "D scope (F-23, rerun 2026-10-22): the closed-form oracle IndependentClosureTests::test_merged_campaign_equals_the_closed_form passes on parent f5070718 (the merge was right before the fix; the defect was the unlocked, unrecorded submit), so it does not catch the defect; only the regression tests do: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 3 killed local mutants without naming them; not transcribed"
    ],
    "note": "the label T15 also names an unrelated convergence study in VALIDATION.md; per-test parent record of fix f7b677c9 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); later evidence tests were not run on the parent; the merged campaign equals closed forms that do not use engine merging, also after an interrupted then confirmed submit; a file-forced two-process test refuses the second submit with campaign.locked; 3 local mutants killed, including a _sum error that the single_run reference misses (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
    "independence": [
@@ -992,7 +2079,68 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "f50707188ae1c4eb8fb505b672f5f17e517feac7",
+    "fix": "f7b677c996b0e7639846c3e6396192e2da3b1c17",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "ci-lock",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_partition_safety.py::MergeGuardTests::test_non_finite_results_are_refused",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_partition_safety.py::MergeGuardTests::test_strings_are_not_concatenated",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_partition_safety.py::SafetyTests::test_concurrent_submits_cannot_both_run",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "RC-A2",
@@ -1004,17 +2152,20 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_authoring/test_review_fixes2.py",
-    "tests/skills/hep_authoring/test_communication_audit.py"
+    "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages",
+    "tests/skills/hep_authoring/test_communication_audit.py::ManuscriptOccurrences::test_value_not_in_passage_is_an_error_compared_as_a_number"
    ],
    "oracle_kinds": [
     "behavioral",
     "independent-implementation"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the oracle test_tokens_equal_the_numbers_put_into_generated_passages does not import on parent 2b439e74 (communication_lib.numbers is new in a later commit) and fails on fix ffd7804e (it reads the later tokenizer), so it has no parent record; the fix commit's own regression test fails on the parent: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 7 killed local mutants without naming them; not transcribed"
+   ],
    "note": "tokens and contains_value against 3000 generated passages with numbers known by construction (values as fractions, digits counted); the pre-fix substring rule as negative control (3368 of 14,344 checks wrong); 7 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
    "independence": [
     {
@@ -1027,7 +2178,41 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "2b439e74918e952e6ec3ea00aa53925cecee12d5",
+    "fix": "ffd7804e1315cdfddfb86e775fcb34cc130f09f4",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages",
+     "parent": "error",
+     "fix": "fail",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_authoring/test_communication_audit.py::ManuscriptOccurrences::test_value_not_in_passage_is_an_error_compared_as_a_number",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "RC-A3",
@@ -1039,7 +2224,7 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_authoring/test_review_fixes2.py"
+    "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages"
    ],
    "oracle_kinds": [
     "behavioral",
@@ -1061,7 +2246,28 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "ffd7804e1315cdfddfb86e775fcb34cc130f09f4",
+    "fix": "dc97a00c19ad2b76bcb63f4f4a41bc0da3477fd0",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "RC-A5",
@@ -1073,17 +2279,20 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_authoring/test_review_fixes2.py",
-    "tests/skills/hep_authoring/test_claim_audit.py"
+    "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_classification_exhaustively_against_integer_arithmetic",
+    "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_accepts_only_a_rounding_of_the_source"
    ],
    "oracle_kinds": [
     "behavioral",
     "exhaustive"
    ],
    "correctness": "C4",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the exhaustive oracle errors on parent 111585dd (ImportError: _rounds_somehow is new in the fix); only the regression test test_no_rule_accepts_only_a_rounding_of_the_source has a parent record: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 4 killed local mutants without naming them; not transcribed"
+   ],
    "note": "rule-less display classification exhaustive over 111,581 source and display cells (three-decimal sources in [-2, 2], displays with 0 to 4 decimals within two last-digit steps) against integer arithmetic, 12 cells end to end through audit_claims; the pre-fix 'never an error' rule as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
    "independence": [
     {
@@ -1096,7 +2305,41 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "111585dd653006edb3e7f717108739b02c95a9de",
+    "fix": "7e0ee2392ee64effff04bcef2168581b1ede6ca5",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_classification_exhaustively_against_integer_arithmetic",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_accepts_only_a_rounding_of_the_source",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "RC-A6",
@@ -1108,15 +2351,18 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_authoring/test_review_fixes2.py"
+    "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_rounding_rules_exhaustively_against_integer_arithmetic",
+    "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_default_rounding_is_half_up_and_half_even_is_opt_in"
    ],
    "oracle_kinds": [
     "exhaustive"
    ],
    "correctness": "C4",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the exhaustive oracle errors on parent 111585dd (the rule syntax decimals:n:mode is new in the fix, so the parent's _round returns None); only the regression test test_default_rounding_is_half_up_and_half_even_is_opt_in has a parent record: D1 (VALIDATION SCIFIX-PLAN-B3-B6)"
+   ],
    "note": "exhaustive integer-arithmetic check on a stated domain added 2026-10-18",
    "independence": [
     {
@@ -1129,7 +2375,41 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "111585dd653006edb3e7f717108739b02c95a9de",
+    "fix": "7e0ee2392ee64effff04bcef2168581b1ede6ca5",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_rounding_rules_exhaustively_against_integer_arithmetic",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_default_rounding_is_half_up_and_half_even_is_opt_in",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "ML-SPLITS",
@@ -1141,8 +2421,19 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_audit_split_tools.py",
-    "tests/skills/hep_ml/test_audit_train_keys.py"
+    "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_numeric_forms_of_an_integer_are_one_group_exhaustively",
+    "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_a4_check_reports_leakage_across_numeric_spellings",
+    "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_a4_numeric_group_values_are_one_group",
+    "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_boolean_list_object_groups_are_invalid",
+    "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_label_column_reports_class_counts_and_refuses_an_empty_class",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_a1_nan_timestamp_is_invalid_input",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_a2_single_entry_temporal_order",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_a2_unknown_split_names_in_temporal_order",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_booleans_and_unpadded_dates_are_invalid",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_empty_split_is_incomplete_under_strict",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_misspelled_reserved_key_is_invalid",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_mixed_numbers_and_dates_are_invalid",
+    "tests/skills/hep_ml/test_audit_split_tools.py::TemporalSplitTests::test_a3_unpadded_date_is_refused"
    ],
    "oracle_kinds": [
     "behavioral",
@@ -1150,9 +2441,12 @@
     "exhaustive"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the exhaustive oracle calls canonical_key, new in the fix (import error on parent 2b439e74; with the import guarded it cannot run); only the regression tests have parent records: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 4 killed local mutants without naming them; not transcribed"
+   ],
    "note": "per-test parent record of fix 811f02b6, adapted: the new canonical_key import guarded (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); canonical_key against an independent decimal and string-splitting reading of its rule over a generated domain, an integer/float/text one-key invariant, the pre-fix str().strip().casefold() as negative control; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the zero-fraction gap found by these tests is fixed as CANONICAL-KEY-ZERO-FRACTION",
    "independence": [
     {
@@ -1165,7 +2459,196 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "2b439e74918e952e6ec3ea00aa53925cecee12d5",
+    "fix": "811f02b626af71d6273798f7a44cdf4e26a6925d",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_numeric_forms_of_an_integer_are_one_group_exhaustively",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_a4_check_reports_leakage_across_numeric_spellings",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_a4_numeric_group_values_are_one_group",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_boolean_list_object_groups_are_invalid",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_label_column_reports_class_counts_and_refuses_an_empty_class",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_a1_nan_timestamp_is_invalid_input",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_a2_single_entry_temporal_order",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_a2_unknown_split_names_in_temporal_order",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_booleans_and_unpadded_dates_are_invalid",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_empty_split_is_incomplete_under_strict",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_misspelled_reserved_key_is_invalid",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalCheckTests::test_mixed_numbers_and_dates_are_invalid",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::TemporalSplitTests::test_a3_unpadded_date_is_refused",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": true,
+     "adaptation": "guards an import",
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "CANONICAL-KEY-ZERO-FRACTION",
@@ -1176,8 +2659,8 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_audit_split_tools.py",
-    "tests/skills/hep_ml/test_audit_train_keys.py"
+    "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_text_with_a_zero_fraction_keeps_its_digits_exhaustively",
+    "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_canonical_key_against_an_independent_reading_of_its_rule"
    ],
    "oracle_kinds": [
     "exhaustive"
@@ -1198,6 +2681,73 @@
       "backend": []
      }
     }
+   ],
+   "commits": {
+    "parent": "54ee003a6f9de6150b8837cee104f6361fad5c3b",
+    "fix": "6344738ed8d397e554e1089175bba1c654889548",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_text_with_a_zero_fraction_keeps_its_digits_exhaustively",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CANONICAL-KEY",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_canonical_key_against_an_independent_reading_of_its_rule",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CANONICAL-KEY",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-ml/scripts/check_split_integrity.py::canonical_key",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests"
+     ],
+     "detail": "the revert (split tools; CI lock)"
+    },
+    {
+     "function": "skills/hep-ml/scripts/check_split_integrity.py::canonical_key",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests"
+     ],
+     "detail": "stripping only a '+'"
+    },
+    {
+     "function": "skills/hep-ml/scripts/check_split_integrity.py::canonical_key",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests"
+     ],
+     "detail": "dropping leading zeros"
+    },
+    {
+     "function": "skills/hep-ml/assets/train_classifier.py::canonical_key",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_train_keys.py::KeyAgreementTests::test_asset_copy_matches_the_split_tools"
+     ],
+     "detail": "a revert of the trainer copy only (agreement test; E2v)"
+    }
    ]
   },
   {
@@ -1210,7 +2760,8 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_audit_calibration_identity.py"
+    "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_event_id_check_is_exhaustively_right_over_all_subset_pairs",
+    "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_validator_names_one_sample_under_every_spelling_of_its_path"
    ],
    "oracle_kinds": [
     "behavioral",
@@ -1218,9 +2769,12 @@
     "independent-implementation"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the exhaustive oracle test_event_id_check_is_exhaustively_right_over_all_subset_pairs passes on parent 811f02b6, so it is not shown to catch the defect: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 5 killed local mutants without naming them; not transcribed"
+   ],
    "note": "the event-id check exhaustively right over all 4096 subset pairs of six ids; the validator's sample-name rule fires exactly for same-file spellings (PurePosixPath); the pre-fix exact-string comparison as negative control; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20); the middle './' gap found by these tests is fixed as SAMPLE-NAME-DOT-SEGMENTS",
    "independence": [
     {
@@ -1245,7 +2799,43 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "811f02b626af71d6273798f7a44cdf4e26a6925d",
+    "fix": "f7846755e9b47180fb6276250e2cb46617366fac",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_event_id_check_is_exhaustively_right_over_all_subset_pairs",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_validator_names_one_sample_under_every_spelling_of_its_path",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "SAMPLE-NAME-DOT-SEGMENTS",
@@ -1256,7 +2846,7 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_audit_calibration_identity.py"
+    "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample"
    ],
    "oracle_kinds": [
     "independent-implementation"
@@ -1277,6 +2867,52 @@
       "backend": []
      }
     }
+   ],
+   "commits": {
+    "parent": "6344738ed8d397e554e1089175bba1c654889548",
+    "fix": "21a4a5b9a0752b8c39c2a6e8a03d9bca6d182a55",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-SAMPLE-NAME",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "contracts/validate.py::_sample_name",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample"
+     ],
+     "detail": "the revert"
+    },
+    {
+     "function": "contracts/validate.py::_sample_name",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample"
+     ],
+     "detail": "'.' segments kept"
+    },
+    {
+     "function": "contracts/validate.py::_sample_name",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample"
+     ],
+     "detail": "empty segments kept"
+    }
    ]
   },
   {
@@ -1289,8 +2925,10 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/contracts/test_ml_mutation_probe.py",
-    "tests/skills/hep_ml/test_domain_shift_report.py"
+    "tests/skills/hep_ml/test_domain_shift_report.py::ShiftCarriedByNuisance::test_fit_against_pyhf",
+    "tests/contracts/test_ml_mutation_probe.py::MutationProbe::test_legacy_artifacts_keep_their_outcome_and_strict_reports",
+    "tests/contracts/test_ml_mutation_probe.py::MutationProbe::test_report_silent_count",
+    "tests/contracts/test_ml_mutation_probe.py::MutationProbe::test_rows_reach_their_level_natively"
    ],
    "oracle_kinds": [
     "behavioral",
@@ -1298,9 +2936,12 @@
     "independent-implementation"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the oracle ShiftCarriedByNuisance::test_fit_against_pyhf errors on parent 879e0733 (TypeError: shape_model's b_up argument is new in the fix); only the fix commit's mutation-probe tests have parent records: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 5 killed local mutants without naming them; not transcribed"
+   ],
    "note": "J9's shape_model and fit_mu with the shift nuisance against an independent profile likelihood (SciPy) on a synthetic three-bin template; without the nuisance (pre-fix) the shifted Asimov interval misses mu = 1, with it the interval covers it; 5 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
    "independence": [
     {
@@ -1318,7 +2959,72 @@
       ]
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "879e0733d39a11241934a5f913aa77f8996ab671",
+    "fix": "7b32b109562476c59bdff84fe11c0709e28eebdc",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_domain_shift_report.py::ShiftCarriedByNuisance::test_fit_against_pyhf",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": [
+       "pyhf"
+      ]
+     }
+    },
+    {
+     "test": "tests/contracts/test_ml_mutation_probe.py::MutationProbe::test_legacy_artifacts_keep_their_outcome_and_strict_reports",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_ml_mutation_probe.py::MutationProbe::test_report_silent_count",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_ml_mutation_probe.py::MutationProbe::test_rows_reach_their_level_natively",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "ML-DOMAIN",
@@ -1330,7 +3036,11 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_audit_domain_method.py"
+    "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank",
+    "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_false_positive_interval_is_the_beta_quantile_clopper_pearson",
+    "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_cli_groups_and_categorical",
+    "tests/skills/hep_ml/test_audit_domain_method.py::TrainingAndInferenceTests::test_inference_flags_the_broken_constraint_and_scores_no_non_finite_row",
+    "tests/skills/hep_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_inference_flags_and_rejects_out_of_domain"
    ],
    "oracle_kinds": [
     "analytic",
@@ -1338,9 +3048,12 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D3",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: both oracles error on parent 50d3e922 (DomainModel and the false_positive_rate_interval_68 key are new in the fix); only the fix commit's regression tests have parent records: D1, and no killed revert mutant is recorded (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH2 names the rule and the per-statistic rate test, not the function; the file is the advisory's"
+   ],
    "note": "per-statistic flag rates at the split-conformal value and the union in [a, 2a] (two-sided), the reported interval against scipy.stats.beta Clopper-Pearson, the pre-fix min/max box as negative control; 3 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the torch-cpu CI job ran tests.skills.hep_ml.test_audit_domain_method in full on 54ee003a (13 run, 0 skipped, pass) (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20); the PyTorch tests also run in the required CI job torch-backend (torch 2.14.1 pinned), where a skip for PyTorch fails (VALIDATION SCIFIX-TORCH-GATE 2026-10-20)",
    "independence": [
     {
@@ -1369,6 +3082,127 @@
       "backend": []
      }
     }
+   ],
+   "commits": {
+    "parent": "50d3e922e349f90dc10dbef1a1c897d8949a436f",
+    "fix": "7011baaf80af10d67ff4fd726a71829d7ad5150e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_false_positive_interval_is_the_beta_quantile_clopper_pearson",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_cli_groups_and_categorical",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_domain_method.py::TrainingAndInferenceTests::test_inference_flags_the_broken_constraint_and_scores_no_non_finite_row",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": [
+       "torch"
+      ]
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_inference_flags_and_rejects_out_of_domain",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": [
+       "torch"
+      ]
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-ml/scripts/check_surrogate_domain.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank"
+     ],
+     "detail": "threshold always the held-out maximum"
+    },
+    {
+     "function": "skills/hep-ml/scripts/check_surrogate_domain.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank"
+     ],
+     "detail": "no halving of 1 - q across the two statistics (level = q)"
+    },
+    {
+     "function": "skills/hep-ml/scripts/check_surrogate_domain.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank"
+     ],
+     "detail": "conformal rank one too low"
+    }
    ]
   },
   {
@@ -1381,8 +3215,14 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_audit_metric_layer.py",
-    "tests/skills/hep_ml/test_training_pipeline.py"
+    "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_against_pyhf",
+    "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2",
+    "tests/skills/hep_ml/test_audit_metric_layer.py::DiscoTests::test_negative_weights_refused_by_default",
+    "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_inputs_and_precision",
+    "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_fractional_label_is_refused_by_both_clis",
+    "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_prior_shift_needs_positive_ratio",
+    "tests/skills/hep_ml/test_calibration.py::Cli::test_cli_strict_json_and_calibration_block",
+    "tests/skills/hep_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_negative_weights_signed_with_net_weight_batch_report"
    ],
    "oracle_kinds": [
     "analytic",
@@ -1390,9 +3230,12 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D3",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: the analytic oracle test_asimov_against_pyhf passes on parent 153307a6 and the brute-force eq. 2.2 oracle errors there (cell_resample is new in the fix); only the regression tests have parent records: D1, and no killed revert mutant is recorded (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH2 names the rule and the reference each mutant failed, not the function; the file is the advisory's"
+   ],
    "note": "per-test parent record of fix ef5d068f (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); Asimov Z against q0 on the Asimov dataset and Eq. 20 against the profiled on/off likelihood (mpmath), cell resampling against a brute-force reading of eq. 2.2, the pre-fix float expression and dropped negative events as negative controls; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20)",
    "independence": [
     {
@@ -1425,11 +3268,183 @@
       "backend": []
      }
     }
+   ],
+   "commits": {
+    "parent": "153307a6735496f6ae596c8fb3151d64c86275ba",
+    "fix": "ef5d068fc18d206a23e590b55344a597b46f44f4",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_against_pyhf",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": [
+       "pyhf"
+      ]
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::DiscoTests::test_negative_weights_refused_by_default",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": [
+       "torch"
+      ]
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_inputs_and_precision",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_fractional_label_is_refused_by_both_clis",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_prior_shift_needs_positive_ratio",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_calibration.py::Cli::test_cli_strict_json_and_calibration_block",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_negative_weights_signed_with_net_weight_batch_report",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": [
+       "torch"
+      ]
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-ml/assets/hep_metrics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2"
+     ],
+     "detail": "cell stops one event late"
+    },
+    {
+     "function": "skills/hep-ml/assets/hep_metrics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2"
+     ],
+     "detail": "equal shares in a cell instead of proportional to abs(w_i)"
+    },
+    {
+     "function": "skills/hep-ml/assets/hep_metrics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests"
+     ],
+     "detail": "Eq. 20 second term with log(1 + x) instead of log1p"
+    },
+    {
+     "function": "skills/hep-ml/assets/hep_metrics.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_against_pyhf"
+     ],
+     "detail": "series switch moved from s/b = 1e-6 to 1e-9"
+    }
    ]
   },
   {
-   "id": "ML-SMALL",
-   "title": "Small corrections (C10, C24, C25, C26, K13)",
+   "id": "ML-SMALL-C10",
+   "title": "Small-seed model comparison decides with a Student-t interval (ML-C10)",
    "changelog": {
     "kind": "audit",
     "name": "ML audit (ML-C, ML-K, ML-R items)",
@@ -1437,20 +3452,23 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_audit_small_corrections.py"
+    "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_student_t_quantile_against_scipy_and_the_published_table",
+    "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_false_improvement_rate_is_at_most_nominal_with_few_seeds",
+    "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_false_improvement_rate_is_the_t_test_size_and_the_bootstrap_rate_is_not"
    ],
    "oracle_kinds": [
     "independent-implementation",
     "behavioral"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "K13 corrects a test, not code: no parent failure is possible; its discrimination is the in-test negative control",
-    "the NIST/SEMATECH t-table is cited without a table locator"
+    "the NIST/SEMATECH t-table is cited without a table locator",
+    "D scope: the oracle test_student_t_quantile_against_scipy_and_the_published_table errors on parent f5cc59a7 (AttributeError: student_t_quantile is new in the fix); only the regression test test_false_improvement_rate_is_at_most_nominal_with_few_seeds has a parent record: D1 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION SCIFIX-ORACLES-S2 records 4 killed local mutants for the former ML-SMALL without naming them; not transcribed"
    ],
-   "note": "C10 alone is C2 / D2; parent record of fix fd637dcc: C10, C24, C25 and C26 fail on the parent; the K13 evidence (tests/examples/test_ml_classifier_to_inference.py) passes on it (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20); the t quantile against scipy.stats.t and the NIST/SEMATECH e-Handbook t-table; the false-improvement rate equals the exact t-test size (two-sided, 2000 trials per n) against the pre-fix bootstrap; the two-sided test fails by assertion on parent f5cc59a7 (rate 0.22 at n = 3) and on fix fd637dcc (rate 0 at n <= 5: that fix over-corrected) and passes on follow-up db40e842; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
+   "note": "split from ML-SMALL (sci-fix improvement plan B6, 2026-10-22); compare_model_runs.py: fix fd637dcc (exact permutation test below 10 seeds) over-corrected (false-improvement rate 0 at 3 and 5 seeds) and follow-up db40e842 decides with a Student-t interval (advisory SFA-2026-025's fixed_commit); the t quantile against scipy.stats.t and the NIST/SEMATECH e-Handbook t-table; the false-improvement rate equals the exact t-test size (two-sided, 2000 trials per n) against the pre-fix bootstrap; that test fails by assertion on parent f5cc59a7 (rate 0.22 at n = 3) and on fix fd637dcc (rate 0 at n <= 5) and passes on db40e842 (VALIDATION SCIFIX-ORACLES-S2 2026-10-20)",
    "independence": [
     {
      "kind": "independent-implementation",
@@ -1465,7 +3483,212 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "f5cc59a75c9a57d16549c647b7fb31fc773822d1",
+    "fix": "fd637dcc8b5469e1e5fd882e1b61e42c5fc216db",
+    "follow_up": [
+     "db40e842474e196192af05474f5e8b3c3a4bc4ee"
+    ]
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_student_t_quantile_against_scipy_and_the_published_table",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-B3-B6",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_false_improvement_rate_is_at_most_nominal_with_few_seeds",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_false_improvement_rate_is_the_t_test_size_and_the_bootstrap_rate_is_not",
+     "parent": "fail",
+     "fix": "fail",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ORACLES-S2",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "ML-SMALL-C24",
+   "title": "Mass-sculpting noise baseline is a quantile of at least 20 resamplings (ML-C24)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_small_corrections.py::SculptingBaselineTests::test_baseline_is_a_quantile_of_at_least_20_resamplings"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D0",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "C1: no independent oracle kind; S2 needs C2",
+    "D0: the only parent record, test_baseline_is_a_quantile_of_at_least_20_resamplings, errors on parent f5cc59a7 (KeyError: the n_baseline output is new in the fix), so no test is shown to catch the defect (VALIDATION SCIFIX-PARENT-RECORDS, SCIFIX-PLAN-B3-B6)"
+   ],
+   "note": "split from ML-SMALL (sci-fix improvement plan B6, 2026-10-22); hep_metrics.mass_sculpting_jsd took its noise baseline from one resampling; fix fd637dcc uses the median and 95% quantile of at least 20 (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)",
+   "independence": [],
+   "commits": {
+    "parent": "f5cc59a75c9a57d16549c647b7fb31fc773822d1",
+    "fix": "fd637dcc8b5469e1e5fd882e1b61e42c5fc216db",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_small_corrections.py::SculptingBaselineTests::test_baseline_is_a_quantile_of_at_least_20_resamplings",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "ML-SMALL-C25",
+   "title": "A feature constant on the training split is refused, exit 2 (ML-C25)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_audit_small_corrections.py::TrainerTests::test_constant_training_feature_is_exit_2"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "C1: no independent oracle kind; S2 needs C2"
+   ],
+   "note": "split from ML-SMALL (sci-fix improvement plan B6, 2026-10-22); train_classifier.py standardized a feature constant on the training split by 1e-12; fix fd637dcc refuses it with exit 2; the test fails by assertion on parent f5cc59a7 (exit 0) and needs PyTorch (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)",
+   "independence": [],
+   "commits": {
+    "parent": "f5cc59a75c9a57d16549c647b7fb31fc773822d1",
+    "fix": "fd637dcc8b5469e1e5fd882e1b61e42c5fc216db",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_audit_small_corrections.py::TrainerTests::test_constant_training_feature_is_exit_2",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": [
+       "torch"
+      ]
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "ML-SMALL-C26",
+   "title": "model_hash covers the weights only (ML-C26)",
+   "changelog": {
+    "kind": "audit",
+    "name": "ML audit (ML-C, ML-K, ML-R items)",
+    "release": "0.10.0"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/skills/hep_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_clean_manifest_summary_shape_and_hash"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "C1: no independent oracle kind; S2 needs C2"
+   ],
+   "note": "split from ML-SMALL (sci-fix improvement plan B6, 2026-10-22); train_classifier.py hashed the checkpoint file with its paths and optimizer state; fix fd637dcc hashes the weights only (names, dtypes, shapes, bytes); the test fails by assertion on parent f5cc59a7 (another hash) (VALIDATION SCIFIX-PARENT-RECORDS 2026-10-20)",
+   "independence": [],
+   "commits": {
+    "parent": "f5cc59a75c9a57d16549c647b7fb31fc773822d1",
+    "fix": "fd637dcc8b5469e1e5fd882e1b61e42c5fc216db",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_training_pipeline.py::TrainClassifierPipelineTests::test_clean_manifest_summary_shape_and_hash",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PARENT-RECORDS",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": [
+       "torch"
+      ]
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "ANISO-WEIGHTED-COV",
@@ -1477,7 +3700,13 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_covariance_matches_the_sympy_delta_method",
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_cdf_matches_scipy",
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_rayleigh_probability_matches_scipy_chi2",
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_limit_meets_the_neyman_condition_by_scipy",
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_limit_takes_the_largest_cdf_over_the_phase_grid",
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_negative_control_pre_fix_n_eff_fails_the_oracle",
+    "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_negative_control_pre_fix_rice_limit_fails_the_neyman_condition"
    ],
    "oracle_kinds": [
     "symbolic",
@@ -1485,9 +3714,12 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D3",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "D scope: three of the five oracles (the SymPy covariance, test_cdf_matches_scipy, test_limit_takes_the_largest_cdf_over_the_phase_grid) error on parent 32450b32 because harmonic_covariance and AnisotropicNull are new in the fix; only the Rayleigh and Neyman oracles fail on the parent by assertion: D1, and the killed revert mutant no longer gives D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "mutants: VALIDATION ANISO-WEIGHTED-COV names each mutant and the count of failing fast evidence tests, not which tests; killed_by names the module"
+   ],
    "note": "per-test parent record of fix 3c10ac23 against parent 32450b32 (12 of 12 evidence tests fail on the parent: 4 by assertion on the released CLI numbers, 8 because harmonic_covariance, AnisotropicNull or covariance_ab are new; adapted parent tree adds only the new test module; VALIDATION ANISO-WEIGHTED-COV 2026-10-22); 16 local mutants killed, the revert among them; negative controls emulate exp(-N_eff r^2 / 4) and the Rice limit with sigma^2 = 2/N_eff (scipy ncx2) and show both fail the oracles; invariants: a uniform map reproduces the unweighted outputs bit for bit, toy skies have the reported covariance, coverage at four dipole phases (fast Gaussian toys, slow event-level toys in the slow-evidence job)",
    "independence": [
     {
@@ -1563,6 +3795,267 @@
       "backend": []
      }
     }
+   ],
+   "commits": {
+    "parent": "32450b32c28735c07a76683a5b04a5cde99acdea",
+    "fix": "3c10ac23ff7627385e08fd3c2d57f169bd129231",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_covariance_matches_the_sympy_delta_method",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-WEIGHTED-COV",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_cdf_matches_scipy",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-WEIGHTED-COV",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_limit_takes_the_largest_cdf_over_the_phase_grid",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-WEIGHTED-COV",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_rayleigh_probability_matches_scipy_chi2",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-WEIGHTED-COV",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_limit_meets_the_neyman_condition_by_scipy",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-WEIGHTED-COV",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_negative_control_pre_fix_n_eff_fails_the_oracle",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-WEIGHTED-COV",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_negative_control_pre_fix_rice_limit_fails_the_neyman_condition",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-WEIGHTED-COV",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M01 revert to the parent script (11 tests fail)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M02 cos^2 * rho for cos^2 / rho (4)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M03 covariance off-diagonal dropped (3)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M04 covariance replaced by its isotropic mean, the N_eff idea (6)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M05 chi^2 without the covariance term (1)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M06 exp(-chi^2 / 4) (1)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M07 radial integral without the erf term (5)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M08 phase grid reduced to the major axis (1)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M09 to the minor axis (4)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M10 phase not rotated into the eigenframe (1)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M11 CLI keeps the Rice limit with N_eff (2)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M12 null median at the 45 % point (1)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M13 every covariance treated as isotropic (5)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M14 trapezoid with 4 points (3)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M15 phase step 45 deg (1)"
+    },
+    {
+     "function": "skills/hep-measurement/scripts/anisotropy.py",
+     "mutation": "other",
+     "killed_by": [
+      "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py"
+     ],
+     "detail": "M16 uniform-map shortcut removed (1)"
+    }
    ]
   },
   {
@@ -1575,7 +4068,10 @@
    },
    "severity": "S4",
    "evidence_tests": [
-    "tests/skills/hep_measurement/test_anisotropy_cl_range.py"
+    "tests/skills/hep_measurement/test_anisotropy_cl_range.py::CliRange::test_cl_below_one_half_is_rejected_with_the_reason",
+    "tests/skills/hep_measurement/test_anisotropy_cl_range.py::CliRange::test_cl_one_half_with_an_anisotropic_map_gives_a_limit",
+    "tests/skills/hep_measurement/test_anisotropy_cl_range.py::LibraryRange::test_amplitude_upper_limit_raises_value_error_below_one_half",
+    "tests/skills/hep_measurement/test_anisotropy_cl_range.py::LibraryRange::test_amplitude_upper_limit_rejects_cl_outside_the_range"
    ],
    "oracle_kinds": [
     "behavioral"
@@ -1585,7 +4081,67 @@
    "negative_control_emulates_pre_fix": false,
    "gaps": [],
    "note": "per-test parent record against parent b45e4037 (4 of 4 evidence tests fail on the parent: three by assertion or a TypeError where ValueError is expected, the boundary test does not finish in 90 s because amplitude_upper_limit at cl = 1.0 never ends its bracket search; adapted parent tree adds only the new test module; VALIDATION ANISO-CL-RANGE 2026-10-22); every CL >= 0.5 result that the parent produced is unchanged bit for bit (45 CLI runs compared, with and without --exposure-map); at CL 0.5 a rounding-level empty expected limit is reported as its analytic value 0",
-   "independence": []
+   "independence": [],
+   "commits": {
+    "parent": "b45e4037b9bb013b66771fffbabe10f567034e1f",
+    "fix": "1853e619f5559095584255bec3dcdf89448d7b50",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_cl_range.py::CliRange::test_cl_below_one_half_is_rejected_with_the_reason",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-CL-RANGE",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_cl_range.py::CliRange::test_cl_one_half_with_an_anisotropic_map_gives_a_limit",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-CL-RANGE",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_cl_range.py::LibraryRange::test_amplitude_upper_limit_raises_value_error_below_one_half",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v, ci-lock",
+     "adapted_parent": false,
+     "validation": "ANISO-CL-RANGE",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_measurement/test_anisotropy_cl_range.py::LibraryRange::test_amplitude_upper_limit_rejects_cl_outside_the_range",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "ANISO-CL-RANGE",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "CLI-MISSING-INPUT-EXIT2",
@@ -1597,8 +4153,8 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/test_cli_contract.py",
-    "tests/skills/hep_detector/test_detector_helpers.py"
+    "tests/skills/test_cli_contract.py::CliContract::test_refused_input_prints_a_json_status",
+    "tests/skills/hep_detector/test_detector_helpers.py::PileupReweightTests::test_cli_missing_file_fails_cleanly"
    ],
    "oracle_kinds": [
     "exhaustive",
@@ -1620,7 +4176,41 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "b45e4037b9bb013b66771fffbabe10f567034e1f",
+    "fix": "018e7b23ebf0648964be2d9be024f1d59cfb42ec",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/test_cli_contract.py::CliContract::test_refused_input_prints_a_json_status",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_detector_helpers.py::PileupReweightTests::test_cli_missing_file_fails_cleanly",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "ADAPTER-MISSING-DEPENDENCY",
@@ -1632,8 +4222,8 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/adapters/test_adapter_missing_dependency.py",
-    "tests/adapters/test_pyhf_nuisance_diagnostics.py"
+    "tests/adapters/test_adapter_missing_dependency.py::AdapterMissingDependency::test_each_hidden_module_gives_exit_3_and_status_missing_dependency",
+    "tests/adapters/test_pyhf_nuisance_diagnostics.py::NoPyhf::test_exits_3_without_pyhf"
    ],
    "oracle_kinds": [
     "exhaustive",
@@ -1655,7 +4245,41 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "b45e4037b9bb013b66771fffbabe10f567034e1f",
+    "fix": "619201704b04aba2ce7189616078f8748edf8c72",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/adapters/test_adapter_missing_dependency.py::AdapterMissingDependency::test_each_hidden_module_gives_exit_3_and_status_missing_dependency",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/adapters/test_pyhf_nuisance_diagnostics.py::NoPyhf::test_exits_3_without_pyhf",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "PYHF-REJECTED-STATUS",
@@ -1667,7 +4291,7 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/adapters/test_pyhf_adapter_statuses.py"
+    "tests/adapters/test_pyhf_adapter_statuses.py::PyhfAdapterRejectedInput::test_unreadable_or_unmappable_input_is_rejected_with_exit_2"
    ],
    "oracle_kinds": [
     "exhaustive"
@@ -1690,7 +4314,30 @@
       ]
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "b45e4037b9bb013b66771fffbabe10f567034e1f",
+    "fix": "619201704b04aba2ce7189616078f8748edf8c72",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/adapters/test_pyhf_adapter_statuses.py::PyhfAdapterRejectedInput::test_unreadable_or_unmappable_input_is_rejected_with_exit_2",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": [
+       "pyhf"
+      ]
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "TRAINING-MEMORY-VERDICT",
@@ -1702,8 +4349,9 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/skills/hep_ml/test_training_memory_verdict.py",
-    "tests/skills/hep_ml/test_hep_ml_skill.py"
+    "tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_exit_code_and_status_follow_the_verdict_over_the_grid",
+    "tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_the_text_report_fails_with_exit_1",
+    "tests/skills/hep_ml/test_hep_ml_skill.py::MemoryEstimateCliTests::test_text_report_names_the_binding_term"
    ],
    "oracle_kinds": [
     "exhaustive",
@@ -1725,7 +4373,58 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "b45e4037b9bb013b66771fffbabe10f567034e1f",
+    "fix": "117f537517cc7501775687a986bc0395df0cd51d",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_exit_code_and_status_follow_the_verdict_over_the_grid",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_the_text_report_fails_with_exit_1",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_ml/test_hep_ml_skill.py::MemoryEstimateCliTests::test_text_report_names_the_binding_term",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": [
+       "torch"
+      ]
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "STATUS-UNKNOWN-EXIT",
@@ -1737,7 +4436,8 @@
    },
    "severity": "S4",
    "evidence_tests": [
-    "tests/core/test_status.py"
+    "tests/core/test_status.py::SharedVocabulary::test_unknown_status_is_incomplete_with_a_message_not_a_traceback",
+    "tests/core/test_status.py::SharedVocabulary::test_a_script_with_an_unknown_status_exits_3_without_a_traceback"
    ],
    "oracle_kinds": [
     "behavioral"
@@ -1747,7 +4447,41 @@
    "negative_control_emulates_pre_fix": false,
    "gaps": [],
    "note": "fix 01d8f357; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: the two new SharedVocabulary tests fail on the parent (KeyError; a script exits 1 with a traceback) and pass on the fix. Latent: a scan of status literals in the scripts calling exit_code() with a computed status found none outside RUN_STATUSES",
-   "independence": []
+   "independence": [],
+   "commits": {
+    "parent": "b45e4037b9bb013b66771fffbabe10f567034e1f",
+    "fix": "01d8f3575179964717d29578eeb396e2560a6741",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_status.py::SharedVocabulary::test_unknown_status_is_incomplete_with_a_message_not_a_traceback",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_status.py::SharedVocabulary::test_a_script_with_an_unknown_status_exits_3_without_a_traceback",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "RUN-ALL-CHECKS-GIT",
@@ -1759,7 +4493,8 @@
    },
    "severity": "S4",
    "evidence_tests": [
-    "tests/tools/test_run_all_checks_git.py"
+    "tests/tools/test_run_all_checks_git.py::GitFailureSummary::test_git_timeout_still_writes_the_summary",
+    "tests/tools/test_run_all_checks_git.py::GitFailureSummary::test_missing_git_still_writes_the_summary"
    ],
    "oracle_kinds": [
     "behavioral"
@@ -1769,7 +4504,41 @@
    "negative_control_emulates_pre_fix": false,
    "gaps": [],
    "note": "fix 17a3dad8; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: both tests error on the parent (TimeoutExpired, FileNotFoundError out of main) and pass on the fix",
-   "independence": []
+   "independence": [],
+   "commits": {
+    "parent": "b45e4037b9bb013b66771fffbabe10f567034e1f",
+    "fix": "17a3dad8c258f7b24e6ed04ca4b27fc975a4a495",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/tools/test_run_all_checks_git.py::GitFailureSummary::test_git_timeout_still_writes_the_summary",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/tools/test_run_all_checks_git.py::GitFailureSummary::test_missing_git_still_writes_the_summary",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2",
+     "adapted_parent": false,
+     "validation": "TRIAGE-A",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "SCAN-VERDICT-ORDER",
@@ -1780,7 +4549,10 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/tools/test_scifix_advisories.py"
+    "tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_over_every_combination_of_the_five_steps",
+    "tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_order_no_artifact_and_manifest_paths",
+    "tests/tools/test_scifix_advisories.py::ProjectScan::test_shipped_no_artifact_advisories_skip_the_hadd_job",
+    "tests/tools/test_scifix_advisories.py::ProjectScan::test_release_basis_and_verdicts"
    ],
    "oracle_kinds": [
     "exhaustive",
@@ -1802,7 +4574,67 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "8472cdb5eb485a7653cba0597b512723ba9ae97a",
+    "fix": "e48396a46e0f3262041bb26fe6cc0b7761dc2bbe",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_over_every_combination_of_the_five_steps",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-SCAN-VERDICT-ORDER",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_order_no_artifact_and_manifest_paths",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-SCAN-VERDICT-ORDER",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_shipped_no_artifact_advisories_skip_the_hadd_job",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-SCAN-VERDICT-ORDER",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_release_basis_and_verdicts",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-SCAN-VERDICT-ORDER",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "SCAN-MISSING-MARKER",
@@ -1813,7 +4645,7 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/tools/test_scifix_advisories.py"
+    "tests/tools/test_scifix_advisories.py::ProjectScan::test_missing_markers_and_empty_values_do_not_show_the_code_ran"
    ],
    "oracle_kinds": [
     "exhaustive",
@@ -1835,7 +4667,28 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "8e7517dae13838aaec67c5f84d9c2c44daae7880",
+    "fix": "01dd65a684fd8aa2855abbde5e47206b933a9c26",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_missing_markers_and_empty_values_do_not_show_the_code_ran",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-PLAN-A1-TRACE",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "ADVISORY-MATCH-V2",
@@ -1846,17 +4699,20 @@
    },
    "severity": "S2",
    "evidence_tests": [
-    "tests/tools/test_scifix_advisories.py"
+    "tests/tools/test_scifix_advisories.py::ThreeValuedMatch::test_every_match_of_up_to_two_groups_of_up_to_two_conditions",
+    "tests/tools/test_scifix_advisories.py::AcceptanceMatrix::test_every_advisory_cell_by_cell"
    ],
    "oracle_kinds": [
     "exhaustive",
     "behavioral"
    ],
    "correctness": "C2",
-   "discrimination": "D2",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": false,
-   "gaps": [],
-   "note": "fix cc7357ba; parent c3d9208a (plan PR-4) in a detached worktree with the fix commit's test file and tests/tools/fixtures/advisory_matrix.json copied in (adapted parent tree: only test files added or replaced, no code under test touched); CI lock venv, 2026-10-22; VALIDATION SCIFIX-ADVISORY-V2: on the parent the acceptance matrix fails by assertion for the 11 advisories whose /1 keys could not discriminate (SFA-2026-001, 002, 004, 006, 010, 020, 023, 025, 030, 031, 033: affected where the hand-written verdict is none or possibly affected) and passes for the other 20; the exhaustive three-valued oracle errors on the parent (match_verdict absent: the /1 scan has no undecided state); all pass on the fix. The scan is a shadow-mode report and writes nothing into a project; no released result changes, so no advisory (the waiver field comes with plan PR-8)",
+   "gaps": [
+    "D scope (maintainer decision 2026-10-22): the exhaustive oracle errors on the parent because match_verdict is new in the fix, which is not a parent failure; the acceptance matrix (behavioral) fails on the parent by assertion; no oracle node has a valid parent failure"
+   ],
+   "note": "fix 5cb720b8; parent c3d9208a (plan PR-4) in a detached worktree with the fix commit's test file and tests/tools/fixtures/advisory_matrix.json copied in (adapted parent tree: only test files added or replaced, no code under test touched); CI lock venv, 2026-10-22; VALIDATION SCIFIX-ADVISORY-V2: on the parent the acceptance matrix fails by assertion for the 11 advisories whose /1 keys could not discriminate (SFA-2026-001, 002, 004, 006, 010, 020, 023, 025, 030, 031, 033: affected where the hand-written verdict is none or possibly affected) and passes for the other 20; the exhaustive three-valued oracle errors on the parent (match_verdict absent: the /1 scan has no undecided state); all pass on the fix. The scan is a shadow-mode report and writes nothing into a project; no released result changes, so no advisory (the waiver field comes with plan PR-8)",
    "independence": [
     {
      "kind": "exhaustive",
@@ -1868,7 +4724,41 @@
       "backend": []
      }
     }
-   ]
+   ],
+   "commits": {
+    "parent": "c3d9208a7efaf2c0ce08f1133b63f72c02577868",
+    "fix": "5cb720b855e7b7a10e0cdae354724c0a4e5be02c",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/tools/test_scifix_advisories.py::ThreeValuedMatch::test_every_match_of_up_to_two_groups_of_up_to_two_conditions",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ADVISORY-V2",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/tools/test_scifix_advisories.py::AcceptanceMatrix::test_every_advisory_cell_by_cell",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-ADVISORY-V2",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   },
   {
    "id": "PERIODICITY-REFIT",
@@ -1879,7 +4769,9 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_statistics/test_periodicity_refit_null.py"
+    "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series",
+    "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_does_not_depend_on_phi",
+    "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source"
    ],
    "oracle_kinds": [
     "analytic",
@@ -1931,6 +4823,99 @@
       ],
       "backend": []
      }
+    }
+   ],
+   "commits": {
+    "parent": "a53af7e03d7849ef67470a40ba4174ef4581cef5",
+    "fix": "573f093a7db4434d650fded6a34ad6080d864e75",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "e2",
+     "adapted_parent": false,
+     "validation": "PERIODICITY-REFIT",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_does_not_depend_on_phi",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "e2",
+     "adapted_parent": false,
+     "validation": "PERIODICITY-REFIT",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "e2",
+     "adapted_parent": false,
+     "validation": "PERIODICITY-REFIT",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-statistics/scripts/periodicity_scan.py::scan",
+     "mutation": "revert",
+     "detail": "M1 default reverted to once",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series",
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_does_not_depend_on_phi",
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source"
+     ]
+    },
+    {
+     "function": "skills/hep-statistics/scripts/periodicity_scan.py::scan",
+     "mutation": "other",
+     "detail": "M2 no bias correction",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series",
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_does_not_depend_on_phi",
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source"
+     ]
+    },
+    {
+     "function": "skills/hep-statistics/scripts/periodicity_scan.py::scan",
+     "mutation": "other",
+     "detail": "M3 inner surrogates from the data's fit",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source"
+     ]
+    },
+    {
+     "function": "skills/hep-statistics/scripts/periodicity_scan.py::scan",
+     "mutation": "other",
+     "detail": "M5 correction sign flipped",
+     "killed_by": [
+      "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source"
+     ]
     }
    ]
   }
@@ -1989,6 +4974,18 @@
    "title": "Five references corrected after the first live review with the 0.23.0 options (42 adjudicated issues; VALIDATION REVIEW-REFS-3)",
    "severity": "S3",
    "sources_with_locators": "mostly; external claims located and opened 2026-10-22 (arXiv:0901.4118 sects. 3-4, 1608.03953 sects. 4.1 and 7.3, 2212.09379 sect. 8.1, 1206.4071 sect. 6, 1403.2286 sect. 4.4, 1007.1727 sect. 5.1, hep-ex/0201015 Stormer section, PDG RPP 2024 sects. 34.2.3 and 34.2.9, SILSO pages via web.archive.org, CERN Open Data page), internal ones by file:line and script runs (cosmic_ray_flux.py, propagate_scale_distortion.py, tag_and_probe_efficiency.py, pileup_reweight.py, review_measurement_spec.py, residual.py, the AMS-02 evidence index); single-source items: the negative-charge Stormer sign (reasoning, not quoted), the balloon overburden figure, the variance identity for correlated systematics"
+  }
+ ],
+ "superseded": [
+  {
+   "id": "ML-SMALL",
+   "superseded_by": [
+    "ML-SMALL-C10",
+    "ML-SMALL-C24",
+    "ML-SMALL-C25",
+    "ML-SMALL-C26"
+   ],
+   "note": "split on 2026-10-22 (sci-fix improvement plan B6, F-14): one entry bundled four code fixes of commit fd637dcc (ML-C10, C24, C25, C26; the C10 follow-up db40e842) and K13, while its grade (C2, D2) held for C10 alone. K13 corrected a test, not code (tests/examples/test_ml_classifier_to_inference.py compares the committed artifacts with a fresh run instead of the rounded results.json only; it passes on the parent and the fix, VALIDATION SCIFIX-ORACLES-S2), so it is not a sci-fix and left the ledger. Advisory SFA-2026-025 names the four entries"
   }
  ]
 }

@@ -101,6 +101,17 @@ Software checks establish contract consistency only, not physical validity.
   16 not in its `MODULES`) one by one and classifies each failure: a missing core dependency is an environment error,
   a missing backend is unverified, anything else means the evidence does not hold; with `--no-skips` an unverified
   or skipped node fails too. Evidence: VALIDATION SCIFIX-PLAN-B1-B4.
+- **Sci-fix ledger: the D axis is data, and D2 covers every oracle (plan B3 and B6; F-11, F-14, F-23; maintainer
+  decision 2026-10-22).** Each entry records its commits (parent, fix, follow-ups; full hashes), its per-test parent
+  records (outcome on the parent and the fix, failure kind, environment, adaptation, VALIDATION section, what the test
+  needs) and its mutants; `evidence_tests` lists the test nodes used. D2 now needs a parent failure of every oracle
+  node named by the entry's independence records (at most D1 when only other regression tests have one), D3 also a
+  killed revert mutant, and the ledger test recomputes both. The oracle nodes without a record were run on their
+  parent and fix commits in detached worktrees: many test functions, arguments or outputs that are new in the fix,
+  so they cannot reach the parent's code, and some pass on the parent. 22 grades fall (13 S1 and 9 S2 entries now
+  D1 or D0, each with a `gaps` line); none rises. ML-SMALL is split into ML-SMALL-C10, -C24, -C25 and -C26 (K13
+  corrected a test and left the ledger; the old id stays in `superseded`), and SFA-2026-025 names the four. No code
+  changes; no released number changes. Evidence: VALIDATION SCIFIX-PLAN-B3-B6.
 
 ## 0.23.0 (2026-10-22)
 
