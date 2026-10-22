@@ -180,8 +180,11 @@ its output) in every affected block instead; the scan cannot see such results. T
 before it existed are frozen in `NONDISCRIMINATING_ALLOWED` until their migration; none is added. `affected` lists the releases in range that hold an affected file,
 from `release-manifests/` (a file moved between skill folders is found by its path below the folder); `scan
 PROJECT_DIR` reports, read-only, which of a project's artifacts an advisory touches, with the release that made each
-(verified by the `versions.plugin_release` digest, claimed, or unknown; a build between releases claims the last
-release, so it is only possibly affected). Shadow mode: the scan exits 0 whatever it finds and blocks nothing. No
+(`digest-consistent`, formerly `verified`, when the `versions.plugin_release` digest equals that release's manifest;
+claimed; or unknown; a build between releases claims the last release, so it is only possibly affected). Per
+advisory the scan decides in order: an advisory whose code writes no artifact is listed apart
+(`outputs_not_artifacts`) and never matched; then the artifact type, the extension keys, the release range, and
+whether that release's manifest holds an affected file. Shadow mode: the scan exits 0 whatever it finds and blocks nothing. No
 `provenance.producer` field is added to the envelope: `versions.plugin_release` already identifies the code, and the
 artifact type and extension keys show which code path ran.
 
