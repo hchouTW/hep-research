@@ -21,7 +21,7 @@
 | **B1** `element_sim` 與事件檔 | `element_sim`（盒狀元件、一層巢狀、場、平面穿越）；逐事件 ROOT 檔；`simroot`；兩個後端的介面一致性 | adapter **0.3.0** |
 | **B2** 重建、J15 與 C2 | `simreco`；J15 研究（驗證梯、收斂、variation、TOF 敏感度）；C2（verification、regression、surrogate、遞移的處理鏈）；J15 journey | adapter **0.4.0**、contracts **C2**（minor） |
 
-**不在範圍內：** 任務 A 的任何介面變更（若必要，先在任務 A 範圍內以 adapter 修補版處理）；`layered_sim` 的新幾何功能（它凍結於維護模式）；離子源與 Birks（未來 J16）；真實幾何與場圖（§8）。
+**不在範圍內：** 任務 A 的任何介面變更（若必要，先在任務 A 範圍內以 adapter 修補版處理）；`layered_sim` 的新幾何功能（它凍結於維護模式）；離子源與 Birks（未來 J17；J16 用於任務 C 的自動設計範例）；真實幾何與場圖（§8）。
 
 **交付物：** `element_sim`、`simroot`、`simreco` 與其測試；`geant4_run.py reco` 與 `table`；J15 範例（`examples/` 下的新資料夾、README、recorded 資料）；C2 契約變更；J15 journey 與路由案例；VALIDATION 條目 GEANT4-ELEMENT（B1）與 GEANT4-J15（B2）；CHANGELOG；release manifest。
 
@@ -470,7 +470,7 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | `skills/hep-detector/scripts/digitize_reconstruct.py` | 不做 | 改為 C++ 的 `simreco` |
 | `layered_sim` 的新幾何功能 | 不做 | 新功能只加在 `element_sim` |
 | 管線中以 Python 直接讀 ROOT（uproot） | 不做 | 經 `simroot` |
-| 離子源與 Birks 可見能量（未來 J16） | 延後 | 宇宙線核素研究，且 PVT 的 Birks 常數有文獻紀錄。實作時依 11.4.3：在 `GeneratePrimaries` 中以 `GetIon(Z, A)` 取得離子；在 `Construct` 設定 kB（`GetIonisation()->SetBirksConstant`）、PreInit 呼叫 `G4EmParameters::Instance()->SetBirks(true)`，再以 `G4LossTableManager::Instance()->EmSaturation()` 取得（API 名稱實作時以 11.4.3 原始碼核對） |
+| 離子源與 Birks 可見能量（未來 J17；J16 用於任務 C 的自動設計範例） | 延後 | 宇宙線核素研究，且 PVT 的 Birks 常數有文獻紀錄。實作時依 11.4.3：在 `GeneratePrimaries` 中以 `GetIon(Z, A)` 取得離子；在 `Construct` 設定 kB（`GetIonisation()->SetBirksConstant`）、PreInit 呼叫 `G4EmParameters::Instance()->SetBirks(true)`，再以 `G4LossTableManager::Instance()->EmSaturation()` 取得（API 名稱實作時以 11.4.3 原始碼核對） |
 | `element_sim` 的非盒狀 solid、旋轉、GDML 讀入、field map、邊緣場 | 延後 | 第一個需要它們、又不能用使用者應用的研究 |
 | 分布層級的 benchmark（含 regression 的直方圖比較）、觀測量的組合、profile、`gps` 與 `event-file` 粒子源、`simreduce` | 延後（介面已定義於架構 §9.2） | 各自的第一個用例 |
 | RNTuple、vector 欄 | 延後 | ROOT 檔大小或讀取速度成為瓶頸 |

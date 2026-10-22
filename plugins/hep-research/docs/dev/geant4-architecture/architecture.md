@@ -471,7 +471,7 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 | 其他引擎的規則包與探針 | 第一個非 Geant4 的後端 |
 | EDM4hep 的縮減工具 | 第一個 Key4hep 後端 |
 | 光學光子、長時間窗、衰變鏈 | 第一個閃爍體或稀有事件研究 |
-| 離子源與 Birks（J16） | 宇宙線核素研究，且 PVT 的 Birks 常數有文獻紀錄 |
+| 離子源與 Birks（J17） | 宇宙線核素研究，且 PVT 的 Birks 常數有文獻紀錄 |
 | 多個 Geant4 版本的探針 | 第一個使用 11.4 以外版本的應用（regression 類別會先用到） |
 | `physics_config_comparison` | 需要比較物理設定的研究 |
 | RNTuple、vector 欄 | ROOT 檔大小或讀取速度成為瓶頸 |
@@ -539,11 +539,17 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 
 **內容：** `simreco`（輸出 summary 與逐事件結果）；J15 研究（幾何與參數見 `task-b-j15.md` §4；B = 0.5 T、六片 Si、每站兩層 TOF、50 層 Pb/PVT）；驗證梯、量能器 cut 收斂、variation；TOF σ_t 的 100 與 150 ps 敏感度；C2（verification、regression、surrogate、遞移的處理鏈）；J15 journey 與路由案例；J15 README 註明 PAMELA 與 AMS-02 為最接近的實際儀器，並強調 J15 是合成幾何。
 
-**驗收：** 見 `task-b-j15.md` §10，另加：
+**驗收：** 見 `task-b-j15.md` B2.11，另加：
 - [ ] `simreco` 的 summary 通過與 A2 相同的一致性測試。
 - [ ] 三層以上的處理鏈（模擬 → 重建 → 表格）被 `dependencies.py` 接受；根不是模擬 run 時被拒。
-- [ ] 一個回歸檢查（例如 J14 在兩個 plugin 版本上）產生 `changed` 或 `unchanged` 的紀錄，且不影響 label。
-- [ ] surrogate 規則的契約測試：代理模型不能得到參考模擬沒有的升級。
+- [ ] 一個回歸檢查（例如 J14 在兩個 plugin 版本上）產生 `changed`、`unchanged` 或 `unresolved` 的紀錄，且不影響 label。
+- [ ] surrogate 規則的契約測試：帶 `extension.study.surrogate` 的紀錄宣告 `validated-in-scope` 時被拒。
+
+### C 自動化探測器設計搜尋（提案；C1 在任務 A 後、C2 在任務 B 後）
+
+**內容：** 使用者寫下物理需求；Claude 從元件目錄（磁場區、徑跡平面、TOF 層、取樣與均勻量能器、被動層）自由選擇與組合結構，並提出有物理根據的種子設計；標準函式庫的 NSGA-II（選用 MOBO）在 F0 解析式、F1 少量事件的 Geant4、F2 完整統計三種保真度上搜尋；回報的性能只來自種子獨立的確認 run；契約 C3。規格見 [`task-c-design-search.md`](task-c-design-search.md)。
+
+**驗收：** 見 `task-c-design-search.md` C1.9 與 C2.9。
 
 ---
 

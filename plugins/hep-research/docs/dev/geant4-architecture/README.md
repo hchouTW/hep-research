@@ -32,6 +32,8 @@ J15 uses a new box-element backend, `element_sim`.
 | A2 | A | `g4sim`, per-event seeding, `layered_sim` writes the three boundary artifacts, study layer reads only them | adapter 0.2.0 |
 | B1 | B | `element_sim` (box elements, field, plane crossings), per-event ROOT files, `simroot` | adapter 0.3.0 |
 | B2 | B | `simreco`, J15 study, C2 (verification, regression, surrogate, transitive processing chains) | adapter 0.4.0, contracts C2 |
+| C1 | C (proposal) | Automated design search: requirements spec, component catalogue and design grammar, F0 analytic evaluation, standard-library NSGA-II, closure tests (after task A) | new adapter `detector-design` 0.1.0 |
+| C2 | C (proposal) | F1/F2 simulation evaluation with `element_sim` and `simreco`, confirmation runs, robustness, optional MOBO, J16 automated-design example (after task B) | adapter 0.2.0, contracts C3 |
 
 ## Files
 
@@ -44,6 +46,9 @@ J15 uses a new box-element backend, `element_sim`.
 | `task-a-core.en.md` | English translation of `task-a-core.md` |
 | `task-b-j15.md` | **Task B** (Traditional Chinese original): J15 design (§4), B1 (B1.1–B1.8) and B2 (B2.1–B2.11) |
 | `task-b-j15.en.md` | English translation of `task-b-j15.md` |
+| `task-c-design-search.md` | **Task C** (Traditional Chinese original, proposal, 2026-10-23): automated detector design search. Claude chooses and combines structure types from a component catalogue; an optimizer searches at three fidelities; reported performance comes only from independent confirmation runs. C1 (C1.1–C1.9), C2 (C2.1–C2.9) |
+| `task-c-design-search.en.md` | English translation of `task-c-design-search.md` |
+| `design_search_closure.py` | Reference values of task C's plane-placement closure test (appendix A). Standard library; a design aid, not plugin code |
 | `j15_design_estimates.py` | Design numbers for J15 (task B appendix A). Standard library; scipy optional. Not a benchmark reference |
 | `prototype/phase1-core.patch` | Reference prototype of A1.1, A1.2, the first half of A1.3 and the enum fix of A1.12, with tests. Applies to `9f08796` with `git apply`. Predates the current spec: it lacks `target_slabs`, validation classes, per-benchmark scope dimensions, `hash_scheme`, the `dependencies.py` re-derivation and C1 gating, and gates at a hard-coded 3.6.0. Not reviewed for merge |
 

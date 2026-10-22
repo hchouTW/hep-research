@@ -471,7 +471,7 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 | rule packs and probes for other engines | the first non-Geant4 backend |
 | a reducer for EDM4hep | the first Key4hep backend |
 | optical photons, long time windows, decay chains | the first scintillator or rare-event study |
-| ion sources and Birks (J16) | a cosmic-ray nuclei study and a literature record for PVT's Birks constant |
+| ion sources and Birks (J17) | a cosmic-ray nuclei study and a literature record for PVT's Birks constant |
 | probes for several Geant4 versions | the first application on a version other than 11.4 (the regression class will need it first) |
 | `physics_config_comparison` | a study that needs to compare physics settings |
 | RNTuple, vector columns | ROOT file size or read speed becomes a bottleneck |
@@ -539,11 +539,17 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 
 **Content:** `simreco` (writing summaries and per-event results); the J15 study (geometry and parameters in `task-b-j15.md` §4: B = 0.5 T, six Si planes, two TOF layers per station, 50 Pb/PVT layers); the validation ladder, calorimeter cut convergence, variations; TOF σ_t sensitivity at 100 and 150 ps; C2 (verification, regression, surrogate, transitive processing chains); the J15 journey and routing case; the J15 README names PAMELA and AMS-02 as the closest real instruments and stresses that J15 is a synthetic geometry.
 
-**Acceptance:** as in `task-b-j15.md` §10, plus:
+**Acceptance:** as in `task-b-j15.md` B2.11, plus:
 - [ ] `simreco`'s summaries pass the same consistency tests as A2.
 - [ ] A processing chain of three or more levels (simulation → reconstruction → table) is accepted by `dependencies.py`; one whose root is not a simulation run is refused.
-- [ ] A regression check (J14 on two plugin versions, say) produces a `changed` or `unchanged` record without affecting labels.
-- [ ] Contract tests of the surrogate rule: a surrogate cannot get an upgrade its reference simulation does not have.
+- [ ] A regression check (J14 on two plugin versions, say) produces a `changed`, `unchanged` or `unresolved` record without affecting labels.
+- [ ] Contract tests of the surrogate rule: a record carrying `extension.study.surrogate` that declares `validated-in-scope` is refused.
+
+### C Automated detector design search (proposal; C1 after task A, C2 after task B)
+
+**Content:** the user writes down physics requirements; Claude freely chooses and combines structures from a component catalogue (magnet region, tracker planes, TOF layers, sampling and homogeneous calorimeters, passive layers) and proposes physically motivated seed designs; a standard-library NSGA-II (optional MOBO) searches at three fidelities: F0 analytic formulas, F1 Geant4 with few events, F2 full statistics; reported performance comes only from confirmation runs with independent seeds; contracts C3. Spec in [`task-c-design-search.en.md`](task-c-design-search.en.md).
+
+**Acceptance:** as in `task-c-design-search.en.md` C1.9 and C2.9.
 
 ---
 

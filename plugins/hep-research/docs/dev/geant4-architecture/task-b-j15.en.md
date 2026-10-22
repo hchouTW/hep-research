@@ -21,7 +21,7 @@
 | **B1** `element_sim` and event files | `element_sim` (box elements, one level of nesting, field, plane crossings); per-event ROOT files; `simroot`; interface consistency between the two backends | adapter **0.3.0** |
 | **B2** Reconstruction, J15 and C2 | `simreco`; the J15 study (validation ladder, convergence, variations, TOF sensitivity); C2 (verification, regression, surrogate, transitive processing chains); J15 journey | adapter **0.4.0**, contracts **C2** (minor) |
 
-**Out of scope:** any change to task A's interfaces (if needed, handle it first as an adapter patch release within task A); new geometry features in `layered_sim` (it is frozen in maintenance mode); ion sources and Birks (future J16); real geometries and field maps (§8).
+**Out of scope:** any change to task A's interfaces (if needed, handle it first as an adapter patch release within task A); new geometry features in `layered_sim` (it is frozen in maintenance mode); ion sources and Birks (future J17; J16 is the automated-design example of task C); real geometries and field maps (§8).
 
 **Deliverables:** `element_sim`, `simroot`, `simreco` and their tests; `geant4_run.py reco` and `table`; the J15 example (a new folder under `examples/`, README, recorded data); C2 contract changes; J15 journey and routing case; VALIDATION entries GEANT4-ELEMENT (B1) and GEANT4-J15 (B2); CHANGELOG; release manifest.
 
@@ -470,7 +470,7 @@ The Si production cut is not converged in J15: it affects only the Si deposit, a
 | `skills/hep-detector/scripts/digitize_reconstruct.py` | Not done | Replaced by `simreco` in C++ |
 | New geometry features in `layered_sim` | Not done | New features only in `element_sim` |
 | Reading ROOT directly from Python (uproot) in the pipeline | Not done | Through `simroot` |
-| Ion sources and Birks visible energy (future J16) | Deferred | Cosmic-ray nuclide studies, and a documented Birks constant for PVT. Implementation per 11.4.3: get the ion with `GetIon(Z, A)` in `GeneratePrimaries`; set kB in `Construct` (`GetIonisation()->SetBirksConstant`), call `G4EmParameters::Instance()->SetBirks(true)` at PreInit, then get it via `G4LossTableManager::Instance()->EmSaturation()` (check the API names against the 11.4.3 source when implementing) |
+| Ion sources and Birks visible energy (future J17; J16 is the automated-design example of task C) | Deferred | Cosmic-ray nuclide studies, and a documented Birks constant for PVT. Implementation per 11.4.3: get the ion with `GetIon(Z, A)` in `GeneratePrimaries`; set kB in `Construct` (`GetIonisation()->SetBirksConstant`), call `G4EmParameters::Instance()->SetBirks(true)` at PreInit, then get it via `G4LossTableManager::Instance()->EmSaturation()` (check the API names against the 11.4.3 source when implementing) |
 | Non-box solids, rotations, GDML input, field maps, fringe fields in `element_sim` | Deferred | The first study that needs them and cannot use a user application |
 | Distribution-level benchmarks (including histogram comparison for regression), combination of observables, profiles, `gps` and `event-file` sources, `simreduce` | Deferred (interfaces defined in architecture §9.2) | Each one's first use case |
 | RNTuple, vector columns | Deferred | ROOT file size or read speed becomes a bottleneck |
