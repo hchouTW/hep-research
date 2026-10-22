@@ -13,14 +13,21 @@ load_subject(bundle_path, root): the check view (items, context, lock, tables, c
 input diagnostics, each of kind input-invalid (schema, references, digests, a frozen file missing) or
 dependency-missing (a definition the check needs is not available).
 
+Snapshots are on by default (D11b): freeze stores the pinned definitions in <root>/.hep-research/snapshots/ and
+records the bundle in <root>/.hep-research/bundles.json; check reproduces a drifted subject from that store when it
+exists. 'snapshots gc' lists (dry run) or deletes (--apply) only snapshots no indexed bundle references.
+
 Usage: python3 contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json --context CONTEXT.json --out FILE
-                                            [--snapshots DIR] [--mode chain|model]
+                                            [--snapshots DIR | --no-snapshots] [--mode chain|model]
        python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT] [--snapshots DIR]
                                             [--exceptions FILE] [--results BINDING] [--project DIR]
        python3 contracts/analysis_check.py summary REPORT [--cursor N] [--max-bytes N]
+       python3 contracts/analysis_check.py snapshots gc --root DIR [--apply]
 Exit codes of check: 0 inputs valid and the suite complete and consistent; 1 a violation, or invalid schema,
 references or digests of an input already read; 2 usage error or an unreadable top-level input; 3 otherwise
-incomplete or a required dependency missing (precedence 2 > 1 > 3 > 0). freeze: 0 written, 1 refused, 2 bad usage.
+incomplete, a required dependency missing, or definitions that differ from the semantic lock (precedence
+2 > 1 > 3 > 0); the status is 'complete' only with exit 0 (P6). freeze: 0 written, 1 refused, 2 bad usage.
+snapshots gc: 0 done, 1 refused (an indexed bundle is unreadable), 2 bad usage.
 A report is a diagnostic: it authorizes nothing (HC-05), and it is never written into the bundle it examines.
 """
 from __future__ import annotations
@@ -62,6 +69,9 @@ CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__ini
                  "contracts/analysis_checks/outcomes.py", "contracts/analysis_checks/readers.py",
                  "contracts/analysis_checks/model.py", "contracts/analysis_checks/runs.py",
                  "contracts/effect_catalog.py", "contracts/recipe_semantics.py")
+# the code the obligation generator runs: the generator itself, the model-card subjects and the catalog it resolves
+GENERATOR_FILES = ("contracts/analysis_checks/obligations.py", "contracts/analysis_checks/model.py", "contracts/effect_catalog.py")
+STATE_DIR = ".hep-research"
 
 
 class UsageError(ValueError):
@@ -74,11 +84,29 @@ def _file_sha(rel: str) -> str | None:
 
 
 def generator_code_digest() -> str | None:
-    return _file_sha("contracts/analysis_checks/obligations.py")
+    files = {f: _file_sha(f) for f in GENERATOR_FILES}
+    return canonical_sha256(files) if all(files.values()) else None
+
+
+def _loaded_plugin_files() -> set[str]:
+    """Plugin modules (contracts/, core/) loaded in this process: the code a check actually ran."""
+    out = set()
+    for mod in list(sys.modules.values()):
+        f = getattr(mod, "__file__", None)
+        if not f:
+            continue
+        try:
+            rel = Path(f).resolve().relative_to(ROOT).as_posix()
+        except ValueError:
+            continue
+        if rel.endswith(".py") and rel.split("/", 1)[0] in ("contracts", "core"):
+            out.add(rel)
+    return out
 
 
 def checker_identity() -> dict:
-    files = {f: _file_sha(f) for f in CHECKER_FILES}
+    """The digests of the checker's files and of every other plugin module loaded at run time (G10)."""
+    files = {f: _file_sha(f) for f in sorted(set(CHECKER_FILES) | _loaded_plugin_files())}
     return {"files": files, "digest": canonical_sha256(files)}
 
 
@@ -153,36 +181,41 @@ def _is_json(ref) -> bool:
     return str(ref).lower().endswith(".json")
 
 
-def shape_diagnostics(items: dict) -> list[dict]:
+def shape_diagnostics(items: dict, context_version="1.0.0") -> list[dict]:
     """Input-invalid diagnostics for item documents the rules read, checked against their schemas; a document that
-    fails is set to None so no rule or generator reads it (the check reports the input, never a traceback)."""
+    fails is set to None so no rule or generator reads it (the check reports the input, never a traceback). Only the
+    input checks the context version enables run (P3)."""
+    from contracts.analysis_checks.context import input_check_enabled
+    on = lambda name: input_check_enabled(context_version, name)  # noqa: E731
     diags = []
     for iid, it in sorted(items.items()):
         role, doc = it.get("role"), it.get("doc")
         if role in JSON_ROLES and _is_json(it.get("ref")) and doc is None:
             continue  # unreadable: verify reports the frozen file
-        if role in JSON_ROLES and not isinstance(doc, dict):
+        if role in JSON_ROLES and not isinstance(doc, dict) and on("item.not_an_object"):
             diags.append({"kind": "input-invalid", "code": "item.not_an_object", "message": f"{iid}: a {role} is a JSON object"})
             it["doc"] = None
-        elif role == "model-card":
+        elif role == "model-card" and on("item.schema"):
             from contracts.analysis_checks.model import card_shape
             problems = card_shape(doc)
             if problems:
                 diags.append({"kind": "input-invalid", "code": "item.schema:model-card", "message": f"{iid}: " + "; ".join(problems[:5])})
                 it["doc"] = None
-        elif role in SHAPES:
+        elif role in SHAPES and on("item.schema"):
             res = validate(doc, SHAPES[role])
             if not res.ok:
                 diags.append({"kind": "input-invalid", "code": f"item.schema:{role}",
                               "message": f"{iid}: " + "; ".join(f"{f.path}: {f.code}" for f in res.errors[:5])})
                 it["doc"] = None
-        elif role == "measurement-spec":
+        elif role == "measurement-spec" and isinstance(doc, dict):
             corr = (doc.get("extension") or {}).get("corrections") if isinstance(doc.get("extension"), dict) else None
-            if corr is not None and not (isinstance(corr, list) and all(isinstance(c, dict) for c in corr)):
+            if not on("spec.bad_corrections"):
+                pass
+            elif corr is not None and not (isinstance(corr, list) and all(isinstance(c, dict) for c in corr)):
                 diags.append({"kind": "input-invalid", "code": "spec.bad_corrections", "message": f"{iid}: corrections are objects"})
                 it["doc"] = None
                 continue
-            ids = [c.get("effect_id") for c in corr or []]
+            ids = [c.get("effect_id") for c in corr or []] if on("spec.duplicate_effect_id") and isinstance(corr, list) else []
             for d in sorted({str(x) for x in ids if ids.count(x) > 1}):
                 diags.append({"kind": "input-invalid", "code": "spec.duplicate_effect_id",
                               "message": f"{iid}: effect_id {d!r} names two corrections"})
@@ -260,6 +293,57 @@ def snapshot_lookup(store):
     return lookup
 
 
+def default_snapshot_store(root) -> Path:
+    return Path(root).resolve() / STATE_DIR / "snapshots"
+
+
+def record_bundle(root, bundle_path, bundle: dict) -> None:
+    """Add a frozen bundle to <root>/.hep-research/bundles.json, the index 'snapshots gc' keeps alive."""
+    root = Path(root).resolve()
+    index_path = root / STATE_DIR / "bundles.json"
+    index: dict = {"index_version": "1.0.0", "bundles": []}
+    if index_path.is_file():
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    try:
+        ref = Path(bundle_path).resolve().relative_to(root).as_posix()
+    except ValueError:
+        ref = str(Path(bundle_path).resolve())
+    entry = {"path": ref, "bundle_digest": bundle.get("bundle_digest")}
+    if entry not in index["bundles"]:
+        index["bundles"].append(entry)
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = index_path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(index, indent=1) + "\n", encoding="utf-8")
+    tmp.replace(index_path)
+
+
+def snapshots_gc(root, apply: bool = False) -> dict:
+    """Snapshots no indexed bundle references: listed (dry run) or deleted (apply). An indexed bundle that cannot be
+    read, or whose semantic lock cannot be read, refuses the whole run: nothing is deleted on a guess."""
+    root = Path(root).resolve()
+    store = default_snapshot_store(root)
+    index_path = root / STATE_DIR / "bundles.json"
+    keep: set[str] = set()
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.is_file() else {"bundles": []}
+        for entry in index["bundles"]:
+            p = Path(entry["path"])
+            bundle = json.loads((p if p.is_absolute() else root / p).read_text(encoding="utf-8"))
+            lock_item = next(it for it in bundle["items"] if it["role"] == "semantic-lock")
+            lock = json.loads(_read(root, lock_item["ref"]).decode("utf-8"))
+            keep |= {d["digest"] for d in lock.get("definitions", []) if d.get("digest")}
+            keep |= {m["closure_digest"] for m in lock.get("member_sets", []) if m.get("closure_digest")}
+    except (OSError, ValueError, KeyError, TypeError, StopIteration, BundleRefused) as exc:
+        return {"status": "refused", "error": f"an indexed bundle cannot be read: {exc}", "deleted": [], "unreferenced": []}
+    stored = sorted(p.stem for p in store.glob("*.json")) if store.is_dir() else []
+    unreferenced = [d for d in stored if d not in keep]
+    if apply:
+        for d in unreferenced:
+            (store / f"{d}.json").unlink()
+    return {"status": "deleted" if apply else "dry-run", "kept": len(stored) - len(unreferenced),
+            "unreferenced": unreferenced, "deleted": unreferenced if apply else []}
+
+
 def _registry_doc():
     try:
         return json.loads(REGISTRY.read_text(encoding="utf-8"))
@@ -267,8 +351,14 @@ def _registry_doc():
         return None
 
 
-def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain", snapshots=None) -> dict:
+DEFAULT = "default"
+
+
+def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain", snapshots=DEFAULT) -> dict:
+    """snapshots: a store folder, DEFAULT (<root>/.hep-research/snapshots/) or None (no snapshots)."""
     root = Path(root).resolve()
+    if snapshots == DEFAULT:
+        snapshots = default_snapshot_store(root)
     if not isinstance(items, list) or not items:
         raise BundleRefused("bundle.no_items", "a bundle needs its items")
     for it in items:
@@ -292,7 +382,7 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
         view = draft_view(root, items, context)
     except (UnicodeError, ValueError) as exc:
         raise BundleRefused("bundle.bad_json", f"an item is not readable JSON: {exc}") from None
-    shapes = shape_diagnostics(view["items"])
+    shapes = shape_diagnostics(view["items"], context.get("context_version"))
     if shapes:
         raise BundleRefused("bundle.item_schema", "; ".join(d["message"] for d in shapes))
     roles = {it["id"]: it["role"] for it in items}
@@ -306,6 +396,9 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
     for s in suites:
         if s.get("mode", "chain") != mode:
             raise BundleRefused("bundle.suite_mode", f"suite {s.get('suite_id')!r} checks {s.get('mode')} bundles, not {mode}")
+        if not obl.generator_supported(s):
+            raise BundleRefused("bundle.generator_unsupported", f"suite {s.get('suite_id')!r} names generator "
+                                f"{s.get('generator')!r}, which this checker does not implement")
     full = dict(context, obligations=obl.generate_all(suites, view))
     view["context"] = full
     view["suites"] = suites
@@ -390,7 +483,8 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
             except (BundleRefused, UnicodeError, ValueError):
                 pass  # reported by verify as a missing or changed frozen file
         items[it["id"]] = rec
-    diags += shape_diagnostics(items)
+    ctx_doc: dict = next((i["doc"] for i in items.values() if i.get("role") == "context" and isinstance(i.get("doc"), dict)), {})
+    diags += shape_diagnostics(items, ctx_doc.get("context_version"))
     ctx_items = [i for i in items.values() if i.get("role") == "context"]
     lock_items = [i for i in items.values() if i.get("role") == "semantic-lock"]
     context = ctx_items[0]["doc"] if ctx_items and isinstance(ctx_items[0]["doc"], dict) else {}
@@ -415,6 +509,10 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
             diags.append({"kind": "dependency-missing", "code": "definition.suite_missing",
                           "message": f"suite {s.get('id')!r} version {s.get('version')!r} is not installed"})
             continue
+        if not obl.generator_supported(loaded):
+            diags.append({"kind": "dependency-missing", "code": "definition.generator_unsupported",
+                          "message": f"suite {s.get('id')!r} names generator {loaded.get('generator')!r}, which this "
+                                     "checker does not implement: its inventory is not regenerated"})
         view["suites"].append(loaded)
         if k == 0:
             view["suite"] = loaded
@@ -429,6 +527,8 @@ def check_inventory(view: dict) -> list[dict]:
     frozen = (view.get("context") or {}).get("obligations") or {}
     if view.get("suite") is None or len(view.get("suites") or []) != len(context_suites(view.get("context") or {})):
         return []
+    if not all(obl.generator_supported(s) for s in view["suites"]):
+        return []  # generator guard: reported as dependency-missing by load_subject
     return obl.check_inventory(frozen, obl.generate_all(view["suites"], view))
 
 
@@ -525,13 +625,15 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     assessment = {"subject": bundle.get("bundle_digest"), "suite": {"id": suite.get("suite_id"), "version": suite.get("version")},
                   "suites": [{"id": s.get("suite_id"), "version": s.get("version")} for s in view.get("suites") or []],
                   "rules": rules_used, "registry": registry_digest(), "checker": checker["digest"],
-                  "readers": lock.get("readers"), "settings": settings}
+                  "readers": lock.get("readers"), "settings": settings, "plugin_release": dict(plugin_release())}
     decl_ids = {d for o in outcomes for d in o.get("declarations", [])}
+    # P6: a missing dependency or definitions that differ from the lock never leave the status complete (exit 3)
+    blocked = bool(lock_diff) or any(d["kind"] == "dependency-missing" for d in diags)
     report = {
         "report_version": REPORT_VERSION, "kind": "analysis-check-report",
         "status": ("invalid" if not input_valid else "inconsistent" if summary["consistency"] == "inconsistent"
                    else "complete" if summary["coverage"]["value"] == "complete" and summary["consistency"] == "consistent"
-                   else "incomplete"),
+                   and not blocked else "incomplete"),
         "subject_digest": bundle.get("bundle_digest"), "assessment_id": canonical_sha256(assessment),
         "assessment": assessment, "inventory_digest": inv.get("digest"), "suite": assessment["suite"],
         "checker": checker, "input_validity": "valid" if input_valid else "invalid",
@@ -689,11 +791,12 @@ def scope_delta(previous: dict, subject: str | None, obligations: list[dict]) ->
 
 
 def exit_code(report: dict) -> int:
-    """1 for a violation or invalid inputs, 3 for an incomplete check or a missing dependency, 0 when complete and
-    consistent (2, a usage error, is decided before a report exists)."""
+    """1 for a violation or invalid inputs, 3 for an incomplete check, a missing dependency or definitions that differ
+    from the semantic lock, 0 when complete and consistent (2, a usage error, is decided before a report exists)."""
     if report["input_validity"] == "invalid" or report["consistency"] == "inconsistent":
         return 1
-    if any(d["kind"] == "dependency-missing" for d in report["input_diagnostics"]) or report["coverage"]["value"] != "complete":
+    if (any(d["kind"] == "dependency-missing" for d in report["input_diagnostics"]) or report["lock_differences"]
+            or report["coverage"]["value"] != "complete"):
         return 3
     return 0
 
@@ -762,7 +865,9 @@ def main(argv=None) -> int:
     f.add_argument("--items", type=Path, required=True)
     f.add_argument("--context", type=Path, required=True)
     f.add_argument("--out", type=Path, required=True)
-    f.add_argument("--snapshots", type=Path, help="store the pinned definitions content-addressed here (D11b)")
+    f.add_argument("--snapshots", type=Path, help="store the pinned definitions content-addressed here (D11b; default "
+                   "<root>/.hep-research/snapshots)")
+    f.add_argument("--no-snapshots", action="store_true", help="store no snapshots")
     f.add_argument("--mode", choices=sorted(MODE_ROLES), default="chain", help="bundle mode (model: model-only diagnostics)")
     c = sub.add_parser("check")
     c.add_argument("bundle", type=Path)
@@ -770,7 +875,8 @@ def main(argv=None) -> int:
     c.add_argument("--out", type=Path)
     c.add_argument("--previous", type=Path)
     c.add_argument("--profiles-from", type=Path, help="project config whose profiles extend the vocabulary of the legacy L1 run")
-    c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since freezing")
+    c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since "
+                   "freezing (default <root>/.hep-research/snapshots when it exists)")
     c.add_argument("--exceptions", type=Path, help="scoped exceptions (JSON list): judged and listed, never change a state")
     c.add_argument("--results", type=Path, help="a result binding: assess after execution (run-lineage/v1)")
     c.add_argument("--project", type=Path, help="project folder or config whose blinding block applies (allowed_outputs)")
@@ -778,6 +884,10 @@ def main(argv=None) -> int:
     s.add_argument("report", type=Path)
     s.add_argument("--cursor", type=int, default=0)
     s.add_argument("--max-bytes", type=int, default=SUMMARY_BYTES)
+    g = sub.add_parser("snapshots")
+    g.add_argument("action", choices=["gc"])
+    g.add_argument("--root", type=Path, required=True)
+    g.add_argument("--apply", action="store_true", help="delete (default: dry run, list only)")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
@@ -792,14 +902,24 @@ def main(argv=None) -> int:
                 raise UsageError(f"{args.out} is where freeze writes the context or lock")
             if not args.out.parent.is_dir():
                 raise UsageError(f"{args.out.parent} is not a directory")
+            if args.no_snapshots and args.snapshots is not None:
+                raise UsageError("--snapshots and --no-snapshots exclude each other")
+            store = None if args.no_snapshots else (args.snapshots or DEFAULT)
             try:
-                doc = freeze(args.root, args.analysis, items, context, mode=args.mode, snapshots=args.snapshots)
+                doc = freeze(args.root, args.analysis, items, context, mode=args.mode, snapshots=store)
             except BundleRefused as exc:
                 print(json.dumps({"status": "refused", "code": exc.code, "error": str(exc)}, indent=1))
                 return 1
             args.out.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+            record_bundle(args.root, args.out, doc)
             print(json.dumps({"status": "frozen", "bundle_digest": doc["bundle_digest"], "out": str(args.out)}, indent=1))
             return 0
+        if args.cmd == "snapshots":
+            if not args.root.is_dir():
+                raise UsageError(f"{args.root} is not a directory")
+            res = snapshots_gc(args.root, apply=args.apply)
+            print(json.dumps(res, indent=1))
+            return 1 if res["status"] == "refused" else 0
         if args.cmd == "summary":
             report = json.loads(args.report.read_text(encoding="utf-8"))
             if not (isinstance(report, dict) and isinstance(report.get("obligations"), list)):
@@ -835,7 +955,10 @@ def main(argv=None) -> int:
     except (OSError, ValueError, TypeError) as exc:
         print(json.dumps({"status": "usage", "error": str(exc)}, indent=1))
         return 2
-    report = evaluate(view, diags, previous, vocab, snapshots=getattr(args, "snapshots", None), exceptions=exceptions,
+    store = args.snapshots
+    if store is None and default_snapshot_store(args.root).is_dir():
+        store = default_snapshot_store(args.root)
+    report = evaluate(view, diags, previous, vocab, snapshots=store, exceptions=exceptions,
                       results=results, blinding=blinding)
     if args.out is not None:
         args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")

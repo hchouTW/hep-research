@@ -105,3 +105,29 @@ Snapshots are files `<canonical sha256>.json` in a store the caller names (`--sn
 lives and how long it is kept) stays open, so nothing is stored inside the plugin or the bundle. Reproduction rebuilds
 coverage contracts, catalog and suites from the store by the lock's digests only. `contracts/migrate.py` writes the
 migrated analysis to a new folder; the completion marker is the last file written.
+
+## Phase 0 of the cross-artifact check architecture (2026-10-22)
+
+Changes of release R1 (`cross-artifact-check-architecture.en.md` section 9.1); no rule outcome changes:
+
+- **Version guard (P3, G18).** Rules are dispatched by (rule_id, version) (`IMPLEMENTED` in
+  `contracts/analysis_checks/rules.py`); an obligation of a version this checker does not implement is
+  `check.rule_not_run`. Suites name generator (id, version) pairs from `obligations.GENERATORS`; another one is
+  refused at freeze (`bundle.generator_unsupported`) and dependency-missing at check. Input checks are enabled per
+  context version (`context.INPUT_CHECKS`).
+- **Source digests.** Registry 1.1.0 records each rule version's function-level source digest
+  (`contracts/analysis_checks/source_digest.py`); `rule_registry.py check` fails when the code changes without a new
+  version.
+- **Checker identity (G10, A1).** The report's checker identity covers every plugin module loaded at run time; the
+  generator digest covers `obligations.py`, `model.py` and `effect_catalog.py`.
+- **P6 (G20).** With dependency-missing diagnostics or lock differences the status is never `complete` and the exit
+  code is 3; differences reproduced from a snapshot (`installed_differences`) may be complete.
+- **Snapshots on by default (DR-5, O07 answered for plane A).** `freeze` writes the pinned definitions to
+  `<root>/.hep-research/snapshots/` and indexes the bundle in `<root>/.hep-research/bundles.json`; `check` uses that
+  store when it exists; `analysis_check.py snapshots gc` deletes only digests no indexed bundle references, dry run
+  by default. `--no-snapshots` turns it off.
+- **Cheap `check-report` refusals (G11, G19 drift):** `permit.report_dependency_missing`, `_lock_differences`,
+  `_prerelease_suite`, `_inventory_mismatch` (`contracts/permit.py` `cheap_refusals`).
+- **`assessment.plugin_release`** names the release that produced the report.
+
+`required: false` (DR-2) is unchanged until check-context 1.1.0 (Phase 2).

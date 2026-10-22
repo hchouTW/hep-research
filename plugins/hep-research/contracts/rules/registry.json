@@ -1,6 +1,6 @@
 {
- "registry_version": "1.0.0",
- "$comment": "v6.3 D12a minimal rule and obligation registry. Rules: kind legacy may carry outcome_contract 'pending' (evaluated as unverified); kind new or changed needs reason codes for all five states. V cases: per slice part, status not-run | expected-failure | required-before-enforcement | passing; expected-failure and passing name the tests that run them. Impact groups map changed paths to test modules or run_all_checks parts; a not-available check, an unmatched path or a full group forces the full closure.",
+ "registry_version": "1.1.0",
+ "$comment": "v6.3 D12a minimal rule and obligation registry. Rules: kind legacy may carry outcome_contract 'pending' (evaluated as unverified); kind new or changed needs reason codes for all five states. V cases: per slice part, status not-run | expected-failure | required-before-enforcement | passing; expected-failure and passing name the tests that run them. Impact groups map changed paths to test modules or run_all_checks parts; a not-available check, an unmatched path or a full group forces the full closure. Registry 1.1.0 (cross-artifact check architecture, Phase 0): every new or changed rule records source_sha256, the function-level source digest of its implementation; rule_registry.py check fails when the code changes without a new version (P3). Slices P0-P2 and work packages P<phase>.<nn> / WP-R name the architecture's phases.",
  "states": [
   "satisfied",
   "violated",
@@ -133,7 +133,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "88ee6570417a1e7f7062bdd4a9902416d621cc8e0f0e384fd2aa422f1551aca8"
   },
   {
    "rule_id": "r-map.classification",
@@ -177,7 +178,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "8960f5a688b126a4ec888a252700708608b14aa47b5ac9bf6249564f3c20e5cb"
   },
   {
    "rule_id": "r-real.description",
@@ -234,7 +236,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "0ace67c53ce93c2760e4e94d06d2411aedfc2490ec3a17adb1ca53e1a064b84e"
   },
   {
    "rule_id": "r-stage.position",
@@ -278,7 +281,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "63c4f1b782b872747e56476d34becd51be24417beb3bf4efc47a31c406dd5890"
   },
   {
    "rule_id": "r-rep.repetition",
@@ -333,7 +337,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "ec52f2adfdb198988d1e0a660d0437664dacd14c329d76f0c92eef40f8d77f1f"
   },
   {
    "rule_id": "r-comp.composition",
@@ -377,7 +382,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "5ddffa13fc13d75160ede5770db7812ed8774ea4a2440a9f74708add7f2addf1"
   },
   {
    "rule_id": "r-comp.factor_values",
@@ -419,7 +425,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "4eeae5cd616ecc73744c244ff4ff6c35cef03a7929891bad8855714660a1c709"
   },
   {
    "rule_id": "r-resp.response_use",
@@ -467,7 +474,8 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "69a49690e6c342c5f8eef3bbe56a68a92768850f1b3b818ec2b7da6cafd781df"
   },
   {
    "rule_id": "r-ratio.operands",
@@ -509,7 +517,8 @@
    "owner": "hep-statistics",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "3d75aa0c8ba4d26300063606d4de39dd3e7d6362679e9e03a3ce553548c92bef"
   },
   {
    "rule_id": "r-ratio.cancellation",
@@ -554,7 +563,8 @@
    "owner": "hep-statistics",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "fda592c423f7d828ca6c018c95b7d0b813de5f694d08d5336b95e91e4770d94c"
   },
   {
    "rule_id": "r-ratio.correlation",
@@ -598,7 +608,8 @@
    "owner": "hep-statistics",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "70f44de1685ade7073d67212b024ed843f0b69ddbaf93eb6f392126661c7735d"
   },
   {
    "rule_id": "r-model.root",
@@ -642,7 +653,8 @@
    "owner": "hep-statistics",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "7a979880e8e1fe5061ca7ff509c954ddac35647f6282f4c2d5fc39a7c590af2b"
   },
   {
    "rule_id": "r-model.pairing",
@@ -690,7 +702,8 @@
    "owner": "hep-statistics",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "0451c7998692102f9cd8909cac02339d653d4cf9ec9067043a11eb04b5d3cf12"
   },
   {
    "rule_id": "r-aux.use",
@@ -745,7 +758,8 @@
    "owner": "hep-statistics",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "dc5f3eeac0e3ce4ff895ab733992780273bbe2ea7e9b8e8419e807b2b066edd3"
   },
   {
    "rule_id": "r-share.parameters",
@@ -790,7 +804,8 @@
    "owner": "hep-statistics",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "source_sha256": "782876ac68c9474aa3ec43f83373650057bf7ffc6d58ef371a18e8caaeaf2fd5"
   },
   {
    "rule_id": "r-run.binding",
@@ -838,7 +853,8 @@
    "owner": "hep-computing",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "source_sha256": "23277ed8da0b066fc5a28d0e4f06006cba560c9eb150ef90fef08dfe1e5844e4"
   },
   {
    "rule_id": "r-run.status",
@@ -885,7 +901,8 @@
    "owner": "hep-computing",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "source_sha256": "d934f43a3d87df5b4a94b2e67709cc8b49a8fa48e73f0e30c49480941bf8229e"
   },
   {
    "rule_id": "r-run.closure",
@@ -935,7 +952,8 @@
    "owner": "hep-computing",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "source_sha256": "f7c0c17bd394c094607741cdc1052f7786a1ac290a57bfc3a1c86090c679403d"
   },
   {
    "rule_id": "r-run.campaign",
@@ -988,7 +1006,8 @@
    "owner": "hep-computing",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "source_sha256": "d0a6f6cfe21905b736ac73429322d448b7e1a19a16829d653797f30304e35667"
   },
   {
    "rule_id": "r-run.blinding",
@@ -1033,7 +1052,8 @@
    "owner": "hep-computing",
    "review_status": "unreviewed",
    "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "source_sha256": "df77885848fba7e2d489a573134ff3c2652616b6fd268a2b511f48ee1fdcf6b1"
   }
  ],
  "v_cases": [
@@ -2526,6 +2546,113 @@
      "tests": [
       "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_within_budget_names_missing_bindings",
       "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_pages"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V72",
+   "scenario": "A rule, the obligation generator or an input check has another version than the suite names (G18)",
+   "expected": "Not evaluated: check.rule_not_run, generator dependency-missing, input checks per context version; registry check fails when rule code changes without a new version",
+   "parts": [
+    {
+     "slice": "P0",
+     "suite": null,
+     "work_packages": [
+      "P0.01",
+      "P0.02"
+     ],
+     "host": "checker core",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_analysis_check_foundations.V72VersionGuard.test_unimplemented_rule_version_is_not_run",
+      "tests.contracts.test_analysis_check_foundations.V72VersionGuard.test_unsupported_generator_is_refused_at_freeze_and_missing_at_check",
+      "tests.contracts.test_analysis_check_foundations.V72VersionGuard.test_registry_records_current_source_digests",
+      "tests.contracts.test_cross_artifact_check_gap_probes.Phase0Probes.test_g18_rule_versions_are_guarded"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V73",
+   "scenario": "Dependency-missing diagnostics or lock differences on an otherwise complete check (G20)",
+   "expected": "Status is not complete and the exit code is 3 (P6); complete only with exit 0",
+   "parts": [
+    {
+     "slice": "P0",
+     "suite": null,
+     "work_packages": [
+      "P0.04"
+     ],
+     "host": "checker core",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_analysis_check_foundations.V73StatusAndExitCode.test_lock_differences_without_snapshot_are_never_complete",
+      "tests.contracts.test_analysis_check_foundations.V73StatusAndExitCode.test_complete_only_with_exit_zero",
+      "tests.contracts.test_cross_artifact_check_gap_probes.Phase0Probes.test_g20_status_agrees_with_the_exit_code"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V74",
+   "scenario": "A plugin module the check loads at run time changes (G10, A1)",
+   "expected": "The checker identity names every loaded plugin module; the generator digest covers obligations.py, model.py and effect_catalog.py",
+   "parts": [
+    {
+     "slice": "P0",
+     "suite": null,
+     "work_packages": [
+      "P0.03"
+     ],
+     "host": "checker core",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_analysis_check_foundations.V74CheckerIdentity.test_identity_includes_loaded_modules_and_generator_files",
+      "tests.contracts.test_cross_artifact_check_gap_probes.Phase0Probes.test_g10_checker_identity_covers_loaded_modules"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V75",
+   "scenario": "check-report gets a report with a missing dependency, lock differences, a pre-release suite, or obligations other than the frozen inventory (G11, G19 drift)",
+   "expected": "Cheap refusals permit.report_dependency_missing, _lock_differences, _prerelease_suite, _inventory_mismatch; forgery stays with the assurance plane",
+   "parts": [
+    {
+     "slice": "P0",
+     "suite": null,
+     "work_packages": [
+      "P0.06"
+     ],
+     "host": "checker core",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_analysis_check_foundations.V75CheapRefusals.test_clean_report_has_no_cheap_refusal",
+      "tests.contracts.test_analysis_check_foundations.V75CheapRefusals.test_dependency_missing",
+      "tests.contracts.test_analysis_check_foundations.V75CheapRefusals.test_inventory_digest_mismatch",
+      "tests.contracts.test_cross_artifact_check_gap_probes.Phase0Probes.test_g11_dropped_report_obligation_is_refused",
+      "tests.contracts.test_cross_artifact_check_gap_probes.Phase0Probes.test_g19_drift_and_forged_suite_are_refused"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V76",
+   "scenario": "Mutation operators of the diagnostic plane applied to a frozen case",
+   "expected": "Skeleton: reorder and rename keep every state; drop and loosen never improve the status or remove obligations (P4, P5); remaining operators named for Phase 2",
+   "parts": [
+    {
+     "slice": "P0",
+     "suite": null,
+     "work_packages": [
+      "P0.09"
+     ],
+     "host": "checker core",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_analysis_check_foundations.V76MutationSkeleton.test_operators_keep_their_invariants_on_the_chain_case",
+      "tests.contracts.test_analysis_check_foundations.V76MutationSkeleton.test_pending_operators_are_named"
      ]
     }
    ]

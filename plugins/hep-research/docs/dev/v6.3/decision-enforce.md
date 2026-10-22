@@ -113,3 +113,17 @@ CASE-MODEL is built from public synthetic files, and the M2c campaign cases are 
 
 Everything stays in shadow mode and synthetic only. There is no schema change to `attestation.json` or
 `permit.json`, and no change to `core/partition/`.
+
+## Exit conditions changed (2026-10-22): the cross-artifact check architecture
+
+The final architecture (`cross-artifact-check-architecture.en.md`, adopted in `decision-architecture.md`) replaces
+the stacked-PR plan with its phases (section 9) and adds conditions for leaving shadow mode (section 13.5). For any
+rule to become an enforcing condition, **all** of the following must hold:
+
+- the six conditions above;
+- the value gate passed (`decision-value-gate.md`);
+- a non-author human review is complete (C15, O04);
+- the custodian has adopted the gate requirement (O17);
+- the roles that may accept reports are decided (O14).
+
+Every rule stays in shadow mode. Recorded on the maintainer's instruction of 2026-10-22 (DR-11, DR-13).

@@ -37,7 +37,11 @@ Usage: python3 contracts/permit.py verify PERMIT --project DIR [--scope formal-u
 
 check-report (v6.3 D10, advisory): an analysis-check report counts only among an accepted, bound review's evidence,
 about the permit's bundle, internally consistent, from the suites and checker the custodian's purpose policy names,
-complete and without violation (codes permit.report_*). It never reports a use as allowed.
+complete and without violation (codes permit.report_*). Cheap refusals of the diagnostic plane come first: a report
+with a missing dependency (permit.report_dependency_missing), definitions that differ from its semantic lock
+(permit.report_lock_differences), a pre-release suite (permit.report_prerelease_suite), or obligations, suites or an
+inventory digest other than the bundle's frozen inventory (permit.report_inventory_mismatch). They catch drift and
+dropped obligations; a forged report or bundle is the custodian rerun's job. It never reports a use as allowed.
 Exit 0 when nothing is refused, 3 when the permit is refused, 2 bad usage. Output: JSON.
 """
 from __future__ import annotations
@@ -255,6 +259,49 @@ def _levels_follow(rep_doc: dict) -> bool:
     return levels == derived
 
 
+def _frozen_inventory(bundle: dict, root: Path) -> dict | None:
+    """The obligation inventory frozen in the bundle's check-context, or None when it cannot be read."""
+    for it in (bundle or {}).get("items", []):
+        if isinstance(it, dict) and it.get("role") == "context":
+            try:
+                ctx = json.loads((root / it["ref"]).read_text(encoding="utf-8"))
+            except (OSError, ValueError, KeyError, TypeError):
+                return None
+            inv = ctx.get("obligations") if isinstance(ctx, dict) else None
+            if isinstance(inv, dict):
+                return dict(inv, _suites=[ctx.get("suite")] + list(ctx.get("suites") or []))
+    return None
+
+
+def cheap_refusals(rep_doc: dict, bundle: dict, root: Path, where: str) -> list[dict]:
+    """Diagnostic-plane refusals that need no rerun (G11, G19 drift, G20): dependency-missing diagnostics, lock
+    differences, a pre-release suite, and a report whose obligations do not match the bundle's frozen inventory."""
+    out = []
+    if any(isinstance(d, dict) and d.get("kind") == "dependency-missing" for d in rep_doc.get("input_diagnostics", [])):
+        out.append(_r("permit.report_dependency_missing", where, "the report has dependency-missing diagnostics"))
+    if rep_doc.get("lock_differences"):
+        out.append(_r("permit.report_lock_differences", where,
+                      "the report's definitions differ from the bundle's semantic lock (not reproduced from a snapshot)"))
+    suites = rep_doc["assessment"].get("suites") or [rep_doc["assessment"].get("suite")]
+    if any("-" in str((x or {}).get("version")) for x in suites):
+        out.append(_r("permit.report_prerelease_suite", where, "a pre-release suite: no purpose accepts it"))
+    inv = _frozen_inventory(bundle, root)
+    if inv is None:
+        out.append(_r("permit.report_inventory_mismatch", where, "the bundle's frozen inventory cannot be read"))
+        return out
+    frozen = sorted((o.get("obligation_id"), o.get("rule_id")) for o in inv.get("items", []) if isinstance(o, dict))
+    reported = sorted((o.get("obligation_id"), o.get("rule_id")) for o in rep_doc.get("obligations", []) if isinstance(o, dict))
+    frozen_suites = [{"id": x.get("id"), "version": x.get("version")} for x in inv["_suites"] if isinstance(x, dict)]
+    frozen_suites = [x for k, x in enumerate(frozen_suites) if x not in frozen_suites[:k]]
+    have = [{"id": (x or {}).get("id"), "version": (x or {}).get("version")} for x in suites]
+    if frozen != reported or rep_doc.get("inventory_digest") != inv.get("digest") or have != frozen_suites:
+        missing = len({o for o, _ in frozen} - {o for o, _ in reported})
+        out.append(_r("permit.report_inventory_mismatch", where,
+                      f"the report's obligations or suites are not the bundle's frozen inventory ({missing} frozen "
+                      "obligation(s) missing from the report)"))
+    return out
+
+
 def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, purpose: str = FORMAL_PURPOSE, *,
                  permit: dict | None = None, now: datetime.datetime | None = None, revocations=None,
                  roles: list | None = None) -> list[dict]:
@@ -329,6 +376,7 @@ def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, pur
             refusals.append(_r("permit.report_inconsistent", where,
                                "the report's summary or assessment does not follow from its obligations (edited?)"))
             continue
+        refusals += cheap_refusals(rep_doc, bundle, root, where)
         have = rep_doc["assessment"].get("suites") or [rep_doc["assessment"].get("suite")]
         missing = [x for x in rules.get("suites", []) if x not in have]
         if missing:
