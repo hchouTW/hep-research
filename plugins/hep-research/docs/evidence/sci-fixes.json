@@ -1,6 +1,6 @@
 {
  "note": "Evidence ledger of scientific corrections (sci-fix). correctness: C0 none, C1 pinned values or behavioral assertions only, C2 one independent oracle kind, C3 two or more independent oracle kinds plus an invariant and a negative control, C4 exhaustive or symbolic over a stated finite domain. discrimination: D0 no record that the evidence failed on the parent, D1 a combined count or before/after values only, D2 a per-test parent record, D3 D2 plus local mutants killed. The axes are reported separately and never combined. Requirements: S1 C3 and D2; S2 C2 and D2; S4 C1 and D2. A negative control that emulates the pre-fix behavior inside the test is evidence on the correctness axis, not a parent record.",
- "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric), rechecked and extended on 2026-10-20 (VALIDATION SCIFIX-* sections); reviewed 2026-10-21 under the maintainer's decisions on oracle independence (docs/maintenance.md): every counted independent kind has a basis (locator, third-party, exhaustive or person) in its entry's independence records, locators read at page level or better (VALIDATION SCIFIX-LEDGER-REVIEW)",
+ "assessed": "agent audit 2026-10-18 on 0.14.1 (three independent reviewers, same rubric), rechecked and extended on 2026-10-20 (VALIDATION SCIFIX-* sections); reviewed 2026-10-21 under the maintainer's decisions on oracle independence (docs/maintenance.md): every counted independent kind has a basis (locator, third-party, exhaustive or person) in its entry's independence records, locators read at page level or better (VALIDATION SCIFIX-LEDGER-REVIEW); since 2026-10-22 every locator record names its source and located claim (source_id, locator_id in scifix-sources.json and scifix-claims.json) and every independence record lists the import names its oracle test requires (requires: core, backend; VALIDATION SCIFIX-PLAN-B1-B4)",
  "fixes": [
   {
    "id": "CLS-LOGINTERP",
@@ -29,13 +29,28 @@
      "kind": "independent-implementation",
      "test": "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_toy_crossings_on_exact_counting_cls_meet_the_interpolation_bound",
      "basis": "third-party",
-     "detail": "counting CLs against scipy.stats.poisson.cdf ratios at every grid point (1e-12)"
+     "detail": "counting CLs against scipy.stats.poisson.cdf ratios at every grid point (1e-12)",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "symbolic",
      "test": "tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_crossing_at_zero_events_is_ln_20_for_any_background",
      "basis": "third-party",
-     "detail": "sympy.stats Poisson CDF ratio at n = 0 simplifies to exp(-S), root ln 20"
+     "detail": "sympy.stats Poisson CDF ratio at n = 0 simplifies to exp(-S), root ln 20",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -68,13 +83,31 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson",
      "basis": "third-party",
-     "detail": "scipy.stats.poisson.logpmf + lgamma(n+1), n 0..30, mu 1e-6..200; nan for mu < 0"
+     "detail": "scipy.stats.poisson.logpmf + lgamma(n+1), n 0..30, mu 1e-6..200; nan for mu < 0",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "symbolic",
      "test": "tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson",
      "basis": "third-party",
-     "detail": "log of the sympy.stats Poisson density; sympy refuses a negative rate"
+     "detail": "log of the sympy.stats Poisson density; sympy refuses a negative rate",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -106,19 +139,42 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_clopper_pearson_against_scipy",
      "basis": "third-party",
-     "detail": "the defining tail equations via scipy.stats.binom.sf/cdf (1e-8)"
+     "detail": "the defining tail equations via scipy.stats.binom.sf/cdf (1e-8)",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_extreme_exact_tail_in_log_space",
      "basis": "third-party",
-     "detail": "scipy.stats.poisson.logpmf with logsumexp"
+     "detail": "scipy.stats.poisson.logpmf with logsumexp",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "symbolic",
      "test": "tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedance_bound_solves_the_binomial_equation_symbolically",
      "basis": "third-party",
-     "detail": "sympy.stats Binomial P(K = 0) = 0.05 solved at 30 digits, N = 1, 7, 100, 1000"
+     "detail": "sympy.stats Binomial P(K = 0) = 0.05 solved at 30 digits, N = 1, 7, 100, 1000",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -147,7 +203,14 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_p0_regressions.py::T04AnalyticOracle::test_converged_fits_match_a_third_party_minimum",
      "basis": "third-party",
-     "detail": "NLL from scipy.stats.poisson.logpmf and norm.logpdf, minimized by scipy.optimize (Nelder-Mead)"
+     "detail": "NLL from scipy.stats.poisson.logpmf and norm.logpdf, minimized by scipy.optimize (Nelder-Mead)",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -178,19 +241,59 @@
      "kind": "independent-implementation",
      "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::ArviZOracle::test_rhat_ess_and_mcse_match",
      "basis": "third-party",
-     "detail": "ArviZ 0.23.4 R-hat, ESS and MCSE (required stats-backends gate)"
+     "detail": "ArviZ 0.23.4 R-hat, ESS and MCSE (required stats-backends gate)",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": [
+       "arviz"
+      ]
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py::IndependentOracle::test_diagnostics_match_the_reference_and_the_pre_fix_rules_do_not",
      "basis": "locator",
-     "detail": "Vehtari et al., Bayesian Analysis 16 (2021) 667, arXiv:1903.08008v5 (read in full 2026-10-21): eqs. (1)-(4), (10), (12)-(16), (20); follows Stan/ArviZ in three small points (hepstats:S07 notes)"
+     "detail": "Vehtari et al., Bayesian Analysis 16 (2021) 667, arXiv:1903.08008v5 (read in full 2026-10-21): eqs. (1)-(4), (10), (12)-(16), (20); follows Stan/ArviZ in three small points (hepstats:S07 notes)",
+     "source_id": "scifix:S05",
+     "locator_id": [
+      "scifix:C13",
+      "scifix:C14",
+      "scifix:C15",
+      "scifix:C16",
+      "scifix:C17",
+      "scifix:C18",
+      "scifix:C19"
+     ],
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "analytic",
      "test": "tests/skills/hep_statistics/test_bayes_diagnostics.py::Diagnostics::test_ar1_bulk_ess",
      "basis": "locator",
-     "detail": "AR(1) tau = (1 + rho)/(1 - rho): Thompson, arXiv:1011.0175v1, eq. (7), p. 2 (p. 3: rho = 0.98 gives 99), with ESS = NM/tau, Vehtari et al. eq. (12) (read 2026-10-21)"
+     "detail": "AR(1) tau = (1 + rho)/(1 - rho): Thompson, arXiv:1011.0175v1, eq. (7), p. 2 (p. 3: rho = 0.98 gives 99), with ESS = NM/tau, Vehtari et al. eq. (12) (read 2026-10-21)",
+     "source_id": [
+      "scifix:S08",
+      "scifix:S05"
+     ],
+     "locator_id": [
+      "scifix:C24",
+      "scifix:C25",
+      "scifix:C15"
+     ],
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -225,13 +328,28 @@
      "kind": "published",
      "test": "tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips",
      "basis": "locator",
-     "detail": "Feldman & Cousins 1998 Tables IV/VI, transcribed in tests/core/fixtures/fc1998_tables.json (full grid: test_published_tables.py, slow tier)"
+     "detail": "Feldman & Cousins 1998 Tables IV/VI, transcribed in tests/core/fixtures/fc1998_tables.json (full grid: test_published_tables.py, slow tier)",
+     "source_id": "scifix:S06",
+     "locator_id": "scifix:C21",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope",
      "basis": "locator",
-     "detail": "the construction of Feldman & Cousins, Phys. Rev. D 57 (1998) 3873, arXiv:physics/9711021v2: ordering ratio eq. (4.1) and the non-increasing adjustment, Sec. IV.A, p. 8 (read in full 2026-10-21)"
+     "detail": "the construction of Feldman & Cousins, Phys. Rev. D 57 (1998) 3873, arXiv:physics/9711021v2: ordering ratio eq. (4.1) and the non-increasing adjustment, Sec. IV.A, p. 8 (read in full 2026-10-21)",
+     "source_id": "scifix:S06",
+     "locator_id": "scifix:C20",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -265,13 +383,31 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails",
      "basis": "third-party",
-     "detail": "scipy.stats.poisson.sf and logsf, 8 cases including n = 60, b = 5 (1e-10)"
+     "detail": "scipy.stats.poisson.sf and logsf, 8 cases including n = 60, b = 5 (1e-10)",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "symbolic",
      "test": "tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails",
      "basis": "third-party",
-     "detail": "sympy.stats P(N >= 60 | 5) at 30 digits = 7.6496e-43"
+     "detail": "sympy.stats P(N >= 60 | 5) at 30 digits = 7.6496e-43",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -306,13 +442,26 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale",
      "basis": "third-party",
-     "detail": "numpy.linalg.eigvalsh decides definiteness, 400 random matrices"
+     "detail": "numpy.linalg.eigvalsh decides definiteness, 400 random matrices",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "exhaustive",
      "test": "tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3",
      "basis": "exhaustive",
-     "detail": "all 343 3x3 unit-diagonal matrices with off-diagonals in {-3/2, ..., 3/2} step 1/2, sympy exact definiteness"
+     "detail": "all 343 3x3 unit-diagonal matrices with off-diagonals in {-3/2, ..., 3/2} step 1/2, sympy exact definiteness",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -346,13 +495,31 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs",
      "basis": "third-party",
-     "detail": "brentq on scipy.stats.poisson.cdf for the Garwood ends and the classical limit, n 490..5000 (1e-9)"
+     "detail": "brentq on scipy.stats.poisson.cdf for the Garwood ends and the classical limit, n 490..5000 (1e-9)",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "symbolic",
      "test": "tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs",
      "basis": "third-party",
-     "detail": "root of the sympy.stats Poisson CDF at n = 490, 50 digits"
+     "detail": "root of the sympy.stats Poisson CDF at n = 490, 50 digits",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -384,19 +551,38 @@
      "kind": "published",
      "test": "tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package",
      "basis": "third-party",
-     "detail": "bundled PDG 2026 masses equal the pdg package 2026.0 (required CI job pdg-cross-check)"
+     "detail": "bundled PDG 2026 masses equal the pdg package 2026.0 (required CI job pdg-cross-check)",
+     "requires": {
+      "core": [],
+      "backend": [
+       "pdg"
+      ]
+     }
     },
     {
      "kind": "published",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::SpeciesMassPropertyTests::test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not",
      "basis": "third-party",
-     "detail": "bundled CODATA 2022 against AME2020 (deuteron; the He electron-binding energies are typed values); CODATA and AME2020 share input data, so this and the pdg check are one published kind"
+     "detail": "bundled CODATA 2022 against AME2020 (deuteron; the He electron-binding energies are typed values); CODATA and AME2020 share input data, so this and the pdg check are one published kind",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     },
     {
      "kind": "analytic",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
      "basis": "locator",
-     "detail": "PDG RPP 2024 Passage of Particles Through Matter eqs. (34.41), (34.43), pp. 33-34 (read 2026-10-21)"
+     "detail": "PDG RPP 2024 Passage of Particles Through Matter eqs. (34.41), (34.43), pp. 33-34 (read 2026-10-21)",
+     "source_id": "scifix:S01",
+     "locator_id": [
+      "scifix:C05",
+      "scifix:C06"
+     ],
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -427,13 +613,31 @@
      "kind": "analytic",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
      "basis": "locator",
-     "detail": "N = N0 L z^2 sin^2 theta_C: PDG RPP 2024 eq. (34.43), p. 34, angle eq. (34.41), p. 33"
+     "detail": "N = N0 L z^2 sin^2 theta_C: PDG RPP 2024 eq. (34.43), p. 34, angle eq. (34.41), p. 33",
+     "source_id": "scifix:S01",
+     "locator_id": [
+      "scifix:C06",
+      "scifix:C05"
+     ],
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength",
      "basis": "locator",
-     "detail": "PDG RPP 2024 eq. (34.44), p. 34, integrated with scipy.integrate.quad; alpha and hbar c from the bundled CODATA 2022 table"
+     "detail": "PDG RPP 2024 eq. (34.44), p. 34, integrated with scipy.integrate.quad; alpha and hbar c from the bundled CODATA 2022 table",
+     "source_id": "scifix:S01",
+     "locator_id": "scifix:C07",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -465,13 +669,25 @@
      "kind": "analytic",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form",
      "basis": "locator",
-     "detail": "the Gaisser-Hillas form of Pierre Auger Collaboration, JCAP 03 (2019) 018, arXiv:1811.04660, eq. (2.1), p. 3 (read in full 2026-10-21)"
+     "detail": "the Gaisser-Hillas form of Pierre Auger Collaboration, JCAP 03 (2019) 018, arXiv:1811.04660, eq. (2.1), p. 3 (read in full 2026-10-21)",
+     "source_id": "scifix:S07",
+     "locator_id": "scifix:C22",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form",
      "basis": "locator",
-     "detail": "the located form in 60-digit decimal arithmetic, a different algorithm from the script's log1p form"
+     "detail": "the located form in 60-digit decimal arithmetic, a different algorithm from the script's log1p form",
+     "source_id": "scifix:S07",
+     "locator_id": "scifix:C22",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -502,13 +718,25 @@
      "kind": "independent-implementation",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq",
      "basis": "third-party",
-     "detail": "numpy.linalg.lstsq with weights 1/r^4 on every one of 2000 toys (1e-10)"
+     "detail": "numpy.linalg.lstsq with weights 1/r^4 on every one of 2000 toys (1e-10)",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "analytic",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance",
      "basis": "locator",
-     "detail": "E9, PDG RPP 2024 Particle Detectors at Accelerators eq. (35.43), p. 82 (read 2026-10-21): points on the model are fitted exactly"
+     "detail": "E9, PDG RPP 2024 Particle Detectors at Accelerators eq. (35.43), p. 82 (read 2026-10-21): points on the model are fitted exactly",
+     "source_id": "scifix:S02",
+     "locator_id": "scifix:C08",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ],
    "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); the 2000-toy bias study (bias of c 0.06 sd; pre-fix unit weights: c^2 < 0 in 24.8%, c about 10 sd high), closure and energy-scale covariance; 2 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-017"
@@ -540,13 +768,29 @@
      "kind": "published",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy",
      "basis": "locator",
-     "detail": "I = 79.7 eV, PDG Atomic and Nuclear Properties, water (liquid), https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/water_liquid.html (read 2026-10-21)"
+     "detail": "I = 79.7 eV, PDG Atomic and Nuclear Properties, water (liquid), https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/water_liquid.html (read 2026-10-21)",
+     "source_id": "scifix:S04",
+     "locator_id": "scifix:C12",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     },
     {
      "kind": "analytic",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy",
      "basis": "locator",
-     "detail": "Bethe, PDG RPP 2024 Passage of Particles Through Matter eq. (34.5), p. 4, W_max eq. (34.4), K Table 34.1 (read 2026-10-21): the 0.3 GeV/c muon loss in water"
+     "detail": "Bethe, PDG RPP 2024 Passage of Particles Through Matter eq. (34.5), p. 4, W_max eq. (34.4), K Table 34.1 (read 2026-10-21): the 0.3 GeV/c muon loss in water",
+     "source_id": "scifix:S01",
+     "locator_id": [
+      "scifix:C01",
+      "scifix:C02",
+      "scifix:C03"
+     ],
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ],
    "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); invariant: the loss scales exactly as z^2 at fixed momentum and mass; negative control: I = 75 eV gives 2.05062; electrons (m < 10 MeV) refused; parent record of 6c793363 (VALIDATION SCIFIX-PARENT-RECORDS); advisory SFA-2026-018"
@@ -577,13 +821,43 @@
      "kind": "analytic",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms",
      "basis": "locator",
-     "detail": "closed forms (quadratics in R^2) of the Gluckstern term, PDG RPP 2025 eq. (35.68), p. 112, and the Highland leading term, RPP 2024 eq. (34.16), p. 16 (read 2026-10-21)"
+     "detail": "closed forms (quadratics in R^2) of the Gluckstern term, PDG RPP 2025 eq. (35.68), p. 112, and the Highland leading term, RPP 2024 eq. (34.16), p. 16 (read 2026-10-21)",
+     "source_id": [
+      "scifix:S03",
+      "scifix:S01"
+     ],
+     "locator_id": [
+      "scifix:C10",
+      "scifix:C04"
+     ],
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms",
      "basis": "locator",
-     "detail": "scipy.optimize.brentq roots of the same located defining equations, to 1e-12"
+     "detail": "scipy.optimize.brentq roots of the same located defining equations, to 1e-12",
+     "source_id": [
+      "scifix:S03",
+      "scifix:S01"
+     ],
+     "locator_id": [
+      "scifix:C10",
+      "scifix:C04"
+     ],
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ],
    "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); 45 stacks, masses and charges; invariant: (2m, 2z) gives the same crossover and MDR; negative control: the pre-fix beta = 1 crossover off in 14 of 45; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-019"
@@ -641,7 +915,11 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding",
      "basis": "third-party",
-     "detail": "renderings from Python repr()/format(); encodings by str.encode for the seven codecs"
+     "detail": "renderings from Python repr()/format(); encodings by str.encode for the seven codecs",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -671,7 +949,11 @@
      "kind": "exhaustive",
      "test": "tests/core/test_blinding.py::RoundingZerosTests::test_rounding_zeros_exhaustively_against_decimal_rounding",
      "basis": "exhaustive",
-     "detail": "1,149,200 pairs, sealed n and n + 0.5 for n = 100..4999, Decimal.quantize; a sampled check of 4000 values from 5000 to 1e7 beyond the domain"
+     "detail": "1,149,200 pairs, sealed n and n + 0.5 for n = 100..4999, Decimal.quantize; a sampled check of 4000 values from 5000 to 1e7 beyond the domain",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -704,7 +986,11 @@
      "kind": "independent-implementation",
      "test": "tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form",
      "basis": "third-party",
-     "detail": "the expected sum from Python's built-in sum(range(n)), no chunks, no engine code"
+     "detail": "the expected sum from Python's built-in sum(range(n)), no chunks, no engine code",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -735,7 +1021,11 @@
      "kind": "independent-implementation",
      "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages",
      "basis": "third-party",
-     "detail": "numbers chosen by construction, grouped with format(n, ','), compared as fractions.Fraction"
+     "detail": "numbers chosen by construction, grouped with format(n, ','), compared as fractions.Fraction",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -765,7 +1055,11 @@
      "kind": "independent-implementation",
      "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages",
      "basis": "third-party",
-     "detail": "adaptation numbers against the same format()/Fraction generator"
+     "detail": "adaptation numbers against the same format()/Fraction generator",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -796,7 +1090,11 @@
      "kind": "exhaustive",
      "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_classification_exhaustively_against_integer_arithmetic",
      "basis": "exhaustive",
-     "detail": "111,581 cells; a sampled check of 4000 sources with 4-7 decimals beyond the grid"
+     "detail": "111,581 cells; a sampled check of 4000 sources with 4-7 decimals beyond the grid",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -825,7 +1123,11 @@
      "kind": "exhaustive",
      "test": "tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_rounding_rules_exhaustively_against_integer_arithmetic",
      "basis": "exhaustive",
-     "detail": "both modes over the stated domain; a sampled check of 4000 values beyond it"
+     "detail": "both modes over the stated domain; a sampled check of 4000 values beyond it",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -857,7 +1159,11 @@
      "kind": "exhaustive",
      "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_numeric_forms_of_an_integer_are_one_group_exhaustively",
      "basis": "exhaustive",
-     "detail": "every integer in [-9999, 9999] in 7 forms gives one key, distinct across integers"
+     "detail": "every integer in [-9999, 9999] in 7 forms gives one key, distinct across integers",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -886,7 +1192,11 @@
      "kind": "exhaustive",
      "test": "tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_text_with_a_zero_fraction_keeps_its_digits_exhaustively",
      "basis": "exhaustive",
-     "detail": "33,330 digit strings of 1 to 4 digits x 3 zero fractions; a sampled 5-8 digit check beyond the domain"
+     "detail": "33,330 digit strings of 1 to 4 digits x 3 zero fractions; a sampled 5-8 digit check beyond the domain",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -917,13 +1227,23 @@
      "kind": "exhaustive",
      "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_event_id_check_is_exhaustively_right_over_all_subset_pairs",
      "basis": "exhaustive",
-     "detail": "all 4096 subset pairs of 6 ids; a sampled check on 200-id sets beyond the domain"
+     "detail": "all 4096 subset pairs of 6 ids; a sampled check on 200-id sets beyond the domain",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_validator_names_one_sample_under_every_spelling_of_its_path",
      "basis": "third-party",
-     "detail": "pathlib.PurePosixPath decides which spellings name one file"
+     "detail": "pathlib.PurePosixPath decides which spellings name one file",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -951,7 +1271,11 @@
      "kind": "independent-implementation",
      "test": "tests/skills/hep_ml/test_audit_calibration_identity.py::SampleNameDotSegmentTests::test_dot_segments_anywhere_in_the_path_name_one_sample",
      "basis": "third-party",
-     "detail": "pathlib.PurePosixPath"
+     "detail": "pathlib.PurePosixPath",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -983,7 +1307,16 @@
      "kind": "independent-implementation",
      "test": "tests/skills/hep_ml/test_domain_shift_report.py::ShiftCarriedByNuisance::test_fit_against_pyhf",
      "basis": "third-party",
-     "detail": "pyhf HistFactory (normfactor, staterror, histosys) with its own likelihood and fitter, 2e-9 (required stats-backends gate)"
+     "detail": "pyhf HistFactory (normfactor, staterror, histosys) with its own likelihood and fitter, 2e-9 (required stats-backends gate)",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": [
+       "pyhf"
+      ]
+     }
     }
    ]
   },
@@ -1014,13 +1347,27 @@
      "kind": "analytic",
      "test": "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank",
      "basis": "exhaustive",
-     "detail": "the rank formula a = 1 - min(r, n)/(n+1), verified by exact enumeration of every ordering for n <= 7 (test_the_split_conformal_rank_formula_by_enumeration)"
+     "detail": "the rank formula a = 1 - min(r, n)/(n+1), verified by exact enumeration of every ordering for n <= 7 (test_the_split_conformal_rank_formula_by_enumeration)",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_false_positive_interval_is_the_beta_quantile_clopper_pearson",
      "basis": "third-party",
-     "detail": "scipy.stats.beta.ppf"
+     "detail": "scipy.stats.beta.ppf",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -1052,13 +1399,31 @@
      "kind": "analytic",
      "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_against_pyhf",
      "basis": "third-party",
-     "detail": "pyhf q0 on the Asimov dataset, shapesys for sigma_b, 6e-13 (required stats-backends gate)"
+     "detail": "pyhf q0 on the Asimov dataset, shapesys for sigma_b, 6e-13 (required stats-backends gate)",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": [
+       "pyhf"
+      ]
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2",
      "basis": "locator",
-     "detail": "arXiv:2109.07851 sect. 2.2, eq. 2.2 (cited in hep_metrics.py and references/ml-analysis-weights.md)"
+     "detail": "Andersen & Maier, arXiv:2109.07851v2 Sec. 2, eq. (2.2), p. 3 (read 2026-10-22; it was cited as sect. 2.2, which is the nearest-neighbour search): seed, cell grown until its summed weight is non-negative, w_i -> |w_i| sum_C w / sum_C |w|",
+     "source_id": "scifix:S11",
+     "locator_id": "scifix:C27",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -1091,7 +1456,14 @@
      "kind": "independent-implementation",
      "test": "tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_student_t_quantile_against_scipy_and_the_published_table",
      "basis": "third-party",
-     "detail": "scipy.stats.t.ppf"
+     "detail": "scipy.stats.t.ppf",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -1122,31 +1494,74 @@
      "kind": "symbolic",
      "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Covariance::test_covariance_matches_the_sympy_delta_method",
      "basis": "third-party",
-     "detail": "SymPy 1.14.0 integrates the moments of X = w cos, S = w sin, Y = w for the exposure 1 + (9/10) cos(alpha - axis), axis 0 and 30 deg, and applies the delta method to a = 2 mean(X) / mean(Y), b = 2 mean(S) / mean(Y) (sympy jacobian); 1e-4 relative against harmonic_covariance on 3600 bins (binning bound 2.1e-5); the closed forms (4/e^2)(1/sqrt(1-e^2) - 1) and (4/e^2)(1 - sqrt(1-e^2)) checked symbolically"
+     "detail": "SymPy 1.14.0 integrates the moments of X = w cos, S = w sin, Y = w for the exposure 1 + (9/10) cos(alpha - axis), axis 0 and 30 deg, and applies the delta method to a = 2 mean(X) / mean(Y), b = 2 mean(S) / mean(Y) (sympy jacobian); 1e-4 relative against harmonic_covariance on 3600 bins (binning bound 2.1e-5); the closed forms (4/e^2)(1/sqrt(1-e^2) - 1) and (4/e^2)(1 - sqrt(1-e^2)) checked symbolically",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_cdf_matches_scipy",
      "basis": "third-party",
-     "detail": "scipy.stats.multivariate_normal density integrated over the disk by scipy.integrate.dblquad (epsabs 1e-12, epsrel 1e-10), and scipy.stats.ncx2 for the isotropic Rice case, against AnisotropicNull.cdf at 11 points, 1e-8 absolute"
+     "detail": "scipy.stats.multivariate_normal density integrated over the disk by scipy.integrate.dblquad (epsabs 1e-12, epsrel 1e-10), and scipy.stats.ncx2 for the isotropic Rice case, against AnisotropicNull.cdf at 11 points, 1e-8 absolute",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_rayleigh_probability_matches_scipy_chi2",
      "basis": "third-party",
-     "detail": "scipy.spatial.distance.mahalanobis and scipy.stats.chi2.sf(chi^2, 2) with V from the SymPy oracle against the CLI's rayleigh_probability, chi^2 at 1e-4 relative (binning)"
+     "detail": "scipy.spatial.distance.mahalanobis and scipy.stats.chi2.sf(chi^2, 2) with V from the SymPy oracle against the CLI's rayleigh_probability, chi^2 at 1e-4 relative (binning)",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::Significance::test_limit_meets_the_neyman_condition_by_scipy",
      "basis": "third-party",
-     "detail": "scipy dblquad CDF over the 72-phase grid from numpy.linalg.eigh's axis at the CLI's Neyman limit equals 1 - CL within 1e-4, the continuous maximum (scipy minimize_scalar) within 2e-3, the null median (scipy brentq) within 1e-4 relative"
+     "detail": "scipy dblquad CDF over the 72-phase grid from numpy.linalg.eigh's axis at the CLI's Neyman limit equals 1 - CL within 1e-4, the continuous maximum (scipy minimize_scalar) within 2e-3, the null median (scipy brentq) within 1e-4 relative",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_measurement/test_anisotropy_weighted_covariance.py::LimitConstruction::test_limit_takes_the_largest_cdf_over_the_phase_grid",
      "basis": "third-party",
-     "detail": "scipy dblquad CDF over the 72-phase grid at AnisotropicNull.neyman for CL 0.3 and 0.2, where the deciding phase is not the major axis, equals 1 - CL within 1e-7"
+     "detail": "scipy dblquad CDF over the 72-phase grid at AnisotropicNull.neyman for CL 0.3 and 0.2, where the deciding phase is not the major axis, equals 1 - CL within 1e-7",
+     "requires": {
+      "core": [
+       "mpmath",
+       "numpy",
+       "scipy",
+       "sympy"
+      ],
+      "backend": []
+     }
     }
    ]
   },
@@ -1199,7 +1614,11 @@
      "kind": "exhaustive",
      "test": "tests/skills/test_cli_contract.py::CliContract::test_refused_input_prints_a_json_status",
      "basis": "exhaustive",
-     "detail": "the hep-computing script contract (skills/hep-computing/SKILL.md: 2 bad input, 3 missing dependency) applied to every tool in tests/skills/test_cli_robustness.py MISSING_FILE_ARGS (108 tools; the 20 JSON_STATUS_FOLLOW_UP adapters and text-error scripts stay exempt): exit 2, or 3 only with status missing-dependency, and a JSON status"
+     "detail": "the hep-computing script contract (skills/hep-computing/SKILL.md: 2 bad input, 3 missing dependency) applied to every tool in tests/skills/test_cli_robustness.py MISSING_FILE_ARGS (108 tools; the 20 JSON_STATUS_FOLLOW_UP adapters and text-error scripts stay exempt): exit 2, or 3 only with status missing-dependency, and a JSON status",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -1230,7 +1649,11 @@
      "kind": "exhaustive",
      "test": "tests/adapters/test_adapter_missing_dependency.py::AdapterMissingDependency::test_each_hidden_module_gives_exit_3_and_status_missing_dependency",
      "basis": "exhaustive",
-     "detail": "every adapter command-line tool and every third-party module it imports, found from the source by AST (14 tools, 28 pairs; test_domain_is_every_adapter_with_a_third_party_import keeps the table complete), each run with that one module hidden; the hep-computing script contract (exit 3, JSON status missing-dependency) as the expected value"
+     "detail": "every adapter command-line tool and every third-party module it imports, found from the source by AST (14 tools, 28 pairs; test_domain_is_every_adapter_with_a_third_party_import keeps the table complete), each run with that one module hidden; the hep-computing script contract (exit 3, JSON status missing-dependency) as the expected value",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -1259,7 +1682,13 @@
      "kind": "exhaustive",
      "test": "tests/adapters/test_pyhf_adapter_statuses.py::PyhfAdapterRejectedInput::test_unreadable_or_unmappable_input_is_rejected_with_exit_2",
      "basis": "exhaustive",
-     "detail": "every input-refusal path of both tools (missing file, not JSON, a model or card the tool cannot map: 3 x 2 cases, the exception types the refusal branch catches) against the contract's bad-input code 2 and the core/status.py name rejected"
+     "detail": "every input-refusal path of both tools (missing file, not JSON, a model or card the tool cannot map: 3 x 2 cases, the exception types the refusal branch catches) against the contract's bad-input code 2 and the core/status.py name rejected",
+     "requires": {
+      "core": [],
+      "backend": [
+       "pyhf"
+      ]
+     }
     }
    ]
   },
@@ -1290,7 +1719,11 @@
      "kind": "exhaustive",
      "test": "tests/skills/hep_ml/test_training_memory_verdict.py::TrainingMemoryVerdict::test_exit_code_and_status_follow_the_verdict_over_the_grid",
      "basis": "exhaustive",
-     "detail": "216 configurations (all 9 precision/optimizer pairs the tool offers x ZeRO 0-3 x 1 or 8 GPUs x 1e8, 7e9, 7e10 parameters; both verdicts occur): the contract mapping fits -> (0, ok), does not fit -> (1, failed)"
+     "detail": "216 configurations (all 9 precision/optimizer pairs the tool offers x ZeRO 0-3 x 1 or 8 GPUs x 1e8, 7e9, 7e10 parameters; both verdicts occur): the contract mapping fits -> (0, ok), does not fit -> (1, failed)",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -1363,7 +1796,11 @@
      "kind": "exhaustive",
      "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_over_every_combination_of_the_five_steps",
      "basis": "exhaustive",
-     "detail": "all 40 combinations of writes-no-artifact x type listed x key present x release (in range and held, in range but absent from its manifest, in range without a manifest, out of range, unknown) against the A5 rule written out in the test"
+     "detail": "all 40 combinations of writes-no-artifact x type listed x key present x release (in range and held, in range but absent from its manifest, in range without a manifest, out of range, unknown) against the A5 rule written out in the test",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -1392,7 +1829,11 @@
      "kind": "exhaustive",
      "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_missing_markers_and_empty_values_do_not_show_the_code_ran",
      "basis": "exhaustive",
-     "detail": "every value class a valid extension key can hold (the three markers of contracts/vocab/core.json written out in the test, null, false, empty object and list, object, list, text, a marker-like text in another case, 0, 1.5, true): 14 cases against the A4 rule"
+     "detail": "every value class a valid extension key can hold (the three markers of contracts/vocab/core.json written out in the test, null, false, empty object and list, object, list, text, a marker-like text in another case, 0, 1.5, true): 14 cases against the A4 rule",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   },
@@ -1421,7 +1862,11 @@
      "kind": "exhaustive",
      "test": "tests/tools/test_scifix_advisories.py::ThreeValuedMatch::test_every_match_of_up_to_two_groups_of_up_to_two_conditions",
      "basis": "exhaustive",
-     "detail": "all 156 matches of one or two groups of one or two conditions, each true, false or undecided, and match [], against Kleene's three-valued logic written as min over a group and max over groups on false < undecided < true"
+     "detail": "all 156 matches of one or two groups of one or two conditions, each true, false or undecided, and match [], against Kleene's three-valued logic written as min over a group and max over groups on false < undecided < true",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ]
   }

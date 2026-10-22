@@ -73,6 +73,18 @@ Software checks establish contract consistency only, not physical validity.
   (0.10.0). Seven entries graded D2 whose later oracle tests were never run on the parent (FC-MONOTONE, POISSON-SF,
   COV-NOREPAIR, POISSON-500, ROBUST-MALFORMED, BLINDING-SCANNER, ROBUST-CAMPAIGN) state it in `gaps`; their grades
   are unchanged until the D-scope rule. Evidence: VALIDATION SCIFIX-PLAN-P0-CHECK.
+- **Sci-fix ledger: located sources in the evidence ledger format, and evidence that runs (plan B1 and B4; F-10,
+  F-12).** The *Sources read for locators* table is now `docs/evidence/scifix-sources.json` and
+  `scifix-claims.json` (11 sources, 27 located claims, checked by `core/evidence/ledger.py`, index
+  `scifix-index.md`), and each of the 15 `locator` records names its `source_id` and `locator_id`; the source must
+  have been read at `page` or `full-text`. arXiv:2109.07851 (ML-NEGWEIGHTS), cited only in prose, was read
+  (v2, 2026-10-22, page level): eq. (2.2) is in Sec. 2, p. 3, not in Sec. 2.2 as the ledger and
+  `hep_metrics.cell_resample` said; the citation is corrected and the grade (C3) stands. Each of the 60
+  `independence` records states `requires: {"core", "backend"}`, found by hiding each package in turn; every backend
+  is locked by a required CI gate. `run_required_backends.py --from-ledger` runs the 52 oracle nodes (24 modules,
+  16 not in its `MODULES`) one by one and classifies each failure: a missing core dependency is an environment error,
+  a missing backend is unverified, anything else means the evidence does not hold; with `--no-skips` an unverified
+  or skipped node fails too. Evidence: VALIDATION SCIFIX-PLAN-B1-B4.
 
 ## 0.23.0 (2026-10-22)
 
