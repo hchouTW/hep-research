@@ -5265,6 +5265,35 @@
     "single-source items: the negative-charge Stormer sign (reasoning, not quoted), the balloon overburden figure, the variance identity for correlated systematics"
    ],
    "note": "mostly; external claims located and opened 2026-10-22 (arXiv:0901.4118 sects. 3-4, 1608.03953 sects. 4.1 and 7.3, 2212.09379 sect. 8.1, 1206.4071 sect. 6, 1403.2286 sect. 4.4, 1007.1727 sect. 5.1, hep-ex/0201015 Stormer section, PDG RPP 2024 sects. 34.2.3 and 34.2.9, SILSO pages via web.archive.org, CERN Open Data page), internal ones by file:line and script runs (cosmic_ray_flux.py, propagate_scale_distortion.py, tag_and_probe_efficiency.py, pileup_reweight.py, review_measurement_spec.py, residual.py, the AMS-02 evidence index); single-source items: the negative-charge Stormer sign (reasoning, not quoted), the balloon overburden figure, the variance identity for correlated systematics"
+  },
+  {
+   "id": "REVIEW-REFS-4",
+   "title": "Fifteen references corrected after review batch 1 and the expert-slot tests (54 adjudicated issues; VALIDATION REVIEW-REFS-4)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2024",
+     "locator": "sect. 34.2.3 (text after eq. 34.5), eq. 34.12",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:0801.1604",
+     "locator": "Eq. 6 and sect. 4",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1206.4071",
+     "locator": "sect. 6",
+     "read": "2026-10-22"
+    }
+   ],
+   "gaps": [
+    "single-source items: the Shielding-family ParticleHP use (plugin rule table, Geant4 source not fetched), the 1% and 5% angle bias figures (computed, not quoted)"
+   ],
+   "note": "mostly; external claims located and opened 2026-10-22 (PDG RPP 2024 sect. 34.2.3 and eq. 34.12, arXiv:0801.1604 Eq. 6, arXiv:1206.4071 sect. 6), internal ones by file:line and script runs (check_geant4_study.py, contracts/validate.py, contracts/dependencies.py, geant4_run.py, mix_period_responses.py, species_response.py, response_adapter.py, li_ma_significance.py, pid_separation_power.py, geant4_benchmarks.py, pyhf code1/code4) and by calculation (least-squares residual covariance, TOF difference, t_max variance, Z_A); single-source items: the Shielding-family ParticleHP use, the angle bias figures"
   }
  ],
  "superseded": [

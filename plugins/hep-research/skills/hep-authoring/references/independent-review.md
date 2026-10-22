@@ -67,7 +67,8 @@ not edit either file during a review (`config_changed`; `repair config_changed` 
   duplicate or a setup artefact), with a reason. **Recommended, with the strongest model.** In the P3 tuning run one
   Opus pass raised precision from 0.53 to 0.88 and kept every substantive issue (4 minor ones lost); in the first live
   run (five references, `--filter-model opus`) it raised precision from 0.59 to 0.84, kept 39 of 40 real issues and cost
-  about 10% of the review's tokens. Its decisions are advice: nothing is deleted, and you still verify and dispose every
+  about 10% of the review's tokens. On five further references Opus raised precision from 0.65 to 0.92 and a Sonnet
+  filter on the same findings only to 0.69, so use the strongest model. Its decisions are advice: nothing is deleted, and you still verify and dispose every
   finding.
 - `--expert-model MODEL` (config `expert`, contracts 3.6.0) adds one **expert slot** to round 1: one agent of MODEL reads
   the whole document as a domain expert and reports only substantive physics, statistics or method errors (a general
@@ -75,7 +76,11 @@ not edit either file during a review (`config_changed`; `repair config_changed` 
   plugin's own tools contradict), never style. It is dispatched with the other round-1 slots, carries no canaries,
   has at most two attempts and never escalates; its findings are filtered, disposed and reported like any other, and
   a changed one is rechecked by the design lens in round 2. Reason: in two evaluation runs the substantive errors no
-  reviewer found were whole-page reasoning errors. **Being evaluated; not yet recommended.** `start` prints its slot
+  reviewer found were whole-page reasoning errors. **Recommended with the strongest model, together with the lens
+  slots and `--filter-model`, for references whose physics matters:** in a prospective test on five references (one
+  Opus expert per page, about 10% of the lens slots' tokens) all 9 of its findings were upheld, 4 of them substantive,
+  3 of which no lens slot raised; the lens slots in turn found 2 substantive tool-enforcement gaps the expert did not.
+  It does not replace the lens slots. `start` prints its slot
   as `expert_slot`. To run only the expert slot (for an evaluation), start with `--own-config --expert-model MODEL`,
   run `next`, then `dispatch` only that slot, `returned` and `receive` it; its findings are in the accepted record and
   the review stays unfinished (the other slots are never dispatched).

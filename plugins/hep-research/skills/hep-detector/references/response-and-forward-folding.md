@@ -55,17 +55,25 @@ then either
 
 - **mix** them per truth bin: `R_eff[:, j] = sum_t w_tj R_t[:, j] / sum_t w_tj` with `w_tj = A_tj T_tj` (acceptance x
   collection time in that truth bin, from hep-measurement's `collection_time.py`). Folding `R_eff` with the summed
-  weights equals the sum of the per-era folds exactly; the per-truth-bin weights matter, because acceptance and
+  weights equals the sum of the per-era folds exactly only when every era-dependent factor is inside `R_t` or in
+  `w_tj`: for `conditional_on_generated` eras `A_tj T_tj` suffices; for `conditional_on_selected` eras weight by
+  `A_tj eps_tj T_tj` (pass it as the per-truth-bin `weight`), since an era-dependent efficiency applied after the mix
+  gives the wrong shape, or stack instead; an era-dependent reco-space correction (`D_reco`) cannot be mixed in truth
+  space at all. The per-truth-bin weights matter, because acceptance and
   collection time depend on the variable. A single exposure weight per era (`R_eff = sum_t w_t R_t / sum_t w_t`) is
   the special case of flat weights; or
 - **stack** them for a joint fit over eras: `S = [R_1 diag(w_1); R_2 diag(w_2); ...]`, an (n_era x n_reco) x n_truth
-  matrix whose blocks give each era's expected reco counts (hep-statistics fits it; S1 and S6).
+  matrix whose blocks give each era's expected reco counts (hep-statistics fits it: the "Multi-era joint fits"
+  section of its [time-series inference](../../hep-statistics/references/time-series-inference.md) reference, and
+  `split_consistency.py` for the agreement between eras).
 
 Mix only responses that agree on the truth and reco axes, orientation, normalization (a probability, not
 `joint_counts`), inefficiency and acceptance placement, flow handling and intended use; refuse a truth bin with zero
 total weight; record the checksum of the weight source. `scripts/mix_period_responses.py` (`mix`, `stack`) does this
-and validates the mixed artifact like any other response. Record the eras in the artifact's `periods` (`id`,
-`exposure_weight`, `matrix` or `matrix_ref`) rather than in the free `conditions` string
+and validates the mixed artifact like any other response. The schema's `periods` array (`id`, a scalar
+`exposure_weight`, `matrix` or `matrix_ref`) is the place for the eras, but the script writes none: it records the
+eras only in the free `conditions` string and in `mixing` (`eras`, per-truth-bin `weights`). Keep the `mixing` block,
+since a scalar `exposure_weight` cannot hold per-truth-bin weights, and keep each era's conditions
 ([calibration and alignment](calibration-and-alignment.md)).
 
 ## Species migration
@@ -77,7 +85,10 @@ normalized per generated true particle), so nothing in the response contract cha
 blocks together: `{"manifest_version": "0.1.0", "species": [...], "variable": {...}, "inefficiency_location":
 "outside", "blocks": [{"true", "reco", "response", "source", "effects"}]}`.
 - Every block shares the same truth and reco axes; for each true species the column sums over all reco species are
-  at most 1, the rest being lost outside the blocks (survival, inefficiency).
+  at most 1 (the script refuses a sum above `1 + 1e-9`), the rest being the losses (survival, inefficiency). Here
+  `inefficiency_location: "outside"` means only that the losses are not a block: with blocks normalized per generated
+  true particle the inefficiency is already in the column deficit, so it is not applied again in the chain (unlike
+  the `conditional_on_selected` meaning of "outside" below). Column sums cannot show a missing block.
 - An effect modelled by a block (charge confusion, feed-down) is not also corrected in the chain: a fragmentation
   block and a feed-down subtraction, or a sign-confusion block and a confusion background, count it twice.
 - The flattened matrix has (species x bins) rows and columns; above about 60 a joint fit is better done with
@@ -133,14 +144,17 @@ the inefficiency inside (`conditional_on_generated`), the acceptance and the lum
 
 The truth-bin sums 0.8 and 0.7 are the efficiencies inside the matrix. Folding `x = (1000, 500)` (already corrected
 for acceptance and luminosity) with `b = (5, 5)`: `nu_1 = 0.7*1000 + 0.1*500 + 5 = 755`,
-`nu_2 = 0.1*1000 + 0.6*500 + 5 = 405`. `contracts.response_adapter.fold` gives the same numbers
-(`tests/contracts/test_response_contract.py`). With `N_j = 10000`, `sigma(R_11) = sqrt(0.7*0.3/10000) = 0.0046`.
+`nu_2 = 0.1*1000 + 0.6*500 + 5 = 405`. `contracts.response_adapter.fold` gives the same numbers for this matrix
+(`tests/contracts/test_response_contract.py` folds it in a `forward_folding` document built in the test; the fixture
+itself is only validated there). With `N_j = 10000`, `sigma(R_11) = sqrt(0.7*0.3/10000) = 0.0046`.
 
 ## Double-counting checks
 
-Write the `response` artifact, then run `python3 "<plugin root>/contracts/validate.py" <artifact>` and
+Write the `response` artifact, then run `python3 "<plugin root>/contracts/validate.py" <artifact> --strict` (without
+`--strict` an artifact older than contracts 2.8.0 skips the hardening rules) and
 `python3 "<plugin root>/contracts/response_adapter.py" <artifact> --validate`; both must pass before another skill
-consumes it.
+consumes it. Passing means no error: both exit 0 with `unresolved` findings and warnings (for example an unfolding
+response without `mc_stat`, or a `not_assessable` closure), so read the findings and resolve them before unfolding.
 
 | Tool | Checks | Does not check |
 |---|---|---|

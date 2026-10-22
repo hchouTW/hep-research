@@ -103,7 +103,9 @@ hi/lo = 1.1/0.9):
 | asymmetric 1.3/0.95, `code1` | 19.4936 | 22.8035 | 2.0525 |
 
 At `theta = +-1` and beyond the two codes agree exactly. For a nearly symmetric variation the limit moves by 0.05%;
-for an asymmetric one by 3%. The difference grows with the asymmetry and with how far the fit pulls the nuisance.
+for an asymmetric one by 3%. The difference grows with the asymmetry of the variation, not with the pull: it is
+confined to `0 < |theta| < 1`, vanishes at `theta = 0` and for `|theta| >= 1`, and peaks near `|theta| ~ 0.3` (for
+1.3/0.95 the `code4` yield factor there is about 1.5% below `code1`).
 
 ## Two-point and one-sided systematics
 

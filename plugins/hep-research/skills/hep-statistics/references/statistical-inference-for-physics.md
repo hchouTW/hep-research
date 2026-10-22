@@ -119,8 +119,10 @@ Other checks:
 - Identify the prior, the likelihood, and what marginalization was performed to
   obtain the reported posterior or credible interval.
 - Check whether nuisance parameters were marginalized (integrated out) or
-  profiled (optimized out) — these give numerically different intervals and the
-  paper should say which.
+  profiled (optimized out) — these can give numerically different intervals
+  (they coincide for a Gaussian likelihood linear in the nuisance parameters with
+  a flat prior, and differ for non-Gaussian, non-linear or prior-sensitive cases)
+  and the paper should say which.
 - For a result that could plausibly be prior-sensitive (weak data, informative
   prior, a boundary-adjacent parameter), check whether a prior-sensitivity
   check or an alternative prior was reported; its absence is a gap, not

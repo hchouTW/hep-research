@@ -211,7 +211,7 @@ The report records the share of substantive units, and P3 calibrates it.
 | `private_dir` | see §2 | must be outside the project tree and the host's shared directories | — |
 | `lens_models` | empty | lens name → model; every model must be in `models[]`, every lens in the lens table (or `extra_lenses`) | Contracts 3.4.0. P3 tuning: design-lens slots run by Haiku missed their canaries in 8 of 9 attempts, so 4 of 5 were exhausted. Recommended: the strongest model in `models[]` on the design lens (A2) |
 | `filter` | absent | `{"model": M}`; any model name | Contracts 3.4.0. P3 tuning: one Opus filtering pass raised precision from 0.53 to 0.88 at about 2% of the review's token cost (§6.9) |
-| `expert` | absent | `{"model": M}`; any model name | Contracts 3.6.0. Two evaluation runs: the substantive errors no reviewer found were whole-page reasoning errors (§6.10). Being evaluated; not yet recommended |
+| `expert` | absent | `{"model": M}`; any model name | Contracts 3.6.0. Two evaluation runs: the substantive errors no reviewer found were whole-page reasoning errors (§6.10). A prospective test on five references (VALIDATION REVIEW-REFS-4): 9 of 9 findings upheld, 4 substantive, 3 raised by no lens slot. Recommended alongside the lens slots and `filter` |
 
 - Python rules check the allowed ranges. Any out-of-range value triggers `config_out_of_range`.
 - When any quality threshold is **looser than its default** (the last column above gives the loose direction), a `weak_config` warning is raised and written into the report. For example, setting `unresolved_max_ratio` to 0.49 triggers it even though 0.49 is inside the allowed range.

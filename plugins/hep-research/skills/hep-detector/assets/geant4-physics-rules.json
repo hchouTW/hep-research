@@ -25,7 +25,7 @@
      }
     ]
    },
-   "concern": "below 20 MeV the data-driven neutron models (ParticleHP, G4NDL) are only in the _HP lists; a non-_HP list uses G4NeutronInelasticXS and a cascade model there",
+   "concern": "below 20 MeV the data-driven neutron models (ParticleHP, G4NDL) are only in the _HP, _HPT and _AllHP lists and the Shielding family; any other list uses G4NeutronInelasticXS and a cascade model there",
    "requires": {
     "field": "derived.hadronic_list",
     "op": "in",
@@ -223,7 +223,7 @@
      }
     ]
    },
-   "concern": "QGSP_BIC uses the Binary cascade only for protons and neutrons up to 1.5 GeV (Bertini from 1 GeV); for pions below 3 GeV and for any hadron between 6 and 12 GeV it uses the same model as FTFP_BERT (Bertini, then FTFP), so comparing the two lists there gives a false zero difference",
+   "concern": "QGSP_BIC uses the Binary cascade only for protons and neutrons up to 1.5 GeV (Bertini from 1 GeV); for pions below 12 GeV and for nucleons between 1.5 and 12 GeV it uses the same models as FTFP_BERT (Bertini, the shared 3-6 GeV transition, then FTFP), so comparing the two lists there gives a false zero difference",
    "requires": {
     "field": "variation_plan.model_assignment_checked",
     "op": "eq",

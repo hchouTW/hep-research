@@ -13,7 +13,7 @@ comparable.
 
 | Metric | Definition (numerator / denominator) | Condition, matching | Estimator, uncertainty | Common misuse |
 |---|---|---|---|---|
-| Geometric/kinematic acceptance `A` | truth in fiducial geometry and phase space / generated in the reference phase space | truth only; no detector response | ratio of counts or integral of a flux over geometry ([detector systems overview](detector-systems-overview.md)) | using it as "efficiency"; changing the reference phase space between MC and data |
+| Geometric/kinematic acceptance `A` | truth in fiducial geometry and phase space / generated in the reference phase space | truth only; no detector response | ratio of counts (a dimensionless fraction); the integral of a flux over geometry is the geometric factor `G` (m^2 sr), a different quantity ([detector systems overview](detector-systems-overview.md)) | using it as "efficiency"; changing the reference phase space between MC and data |
 | Reconstructibility | truth objects that leave the minimum information needed (e.g. `>= n` hits) / truth in acceptance | truth-level definition of "could be found" | count ratio | denominator differs between experiments |
 | Hit efficiency | hit found where expected / tracks crossing active area (from other layers) | unbiased track prediction (excluding the layer) | binomial (Clopper-Pearson) | biasing by requiring the hit in the track fit |
 | Reconstruction efficiency `eps_R` | reconstructed and matched / eligible truth (in acceptance) | matching criterion stated | binomial | denominator not the fiducial one |
@@ -26,10 +26,10 @@ comparable.
 | Response / scale | `<x_reco/x_true>` (or median) at fixed truth | binned in *truth*, not reco | mean/median, `+-` standard error | binning in reco (selection bias) |
 | Bias | `<x_reco - x_true>` | as above | as above | mixing bias with core width |
 | Resolution | width of `x_reco - x_true` (or `/x_true`, or `1/pT` form) | binned in truth; state definition | core Gaussian `sigma`, `RMS`, robust `1.4826*MAD`, `sigma_68`; `+-` statistical | quoting RMS of a heavy-tailed shape |
-| Tail / catastrophic fraction | `|r| > k*sigma_core` / population | `k` and definition stated | binomial | not reported next to core width |
+| Tail / catastrophic fraction | `\|r\| > k*sigma_core` / population | `k` and definition stated | binomial | not reported next to core width |
 | PID efficiency & rejection | `epsilon_sig`, `1/epsilon_bkg` at a working point | truth species, phase space | binomial; ROC/AUC | quoting rejection without the signal efficiency |
-| Separation `N_sigma` | `|mu_a-mu_b| / sigma_a` (single-measurement, default) or `|mu_a-mu_b| / sqrt(sigma_a^2+sigma_b^2)` (quadrature); see below | Gaussian shapes (approximate); convention stated | from fits | mixing conventions (a factor `sqrt(2)`); applied to non-Gaussian tails ([particle identification](particle-identification.md)) |
-| Confusion matrix | `M_{ab} = P(ID=b | true=a)` rows normalized by truth | eligible truth per row | counts | wrong normalization axis |
+| Separation `N_sigma` | `\|mu_a-mu_b\| / sigma_a` (single-measurement, default) or `\|mu_a-mu_b\| / sqrt(sigma_a^2+sigma_b^2)` (quadrature); see below | Gaussian shapes (approximate); convention stated | from fits | mixing conventions (a factor `sqrt(2)`); applied to non-Gaussian tails ([particle identification](particle-identification.md)) |
+| Confusion matrix | `M_{ab} = P(ID=b \| true=a)` rows normalized by truth | eligible truth per row | counts | wrong normalization axis |
 | Effective area / volume, exposure, containment, PSF | point source: `A_eff = A_gen N_pass/N_gen` (m^2), exposure `sum_t A_eff T_live,t`; diffuse flux: acceptance `G = A_gen Omega_gen N_pass/N_gen` (m^2 sr), `Omega_gen = pi` for directions generated with a cosine law through the generation surface, exposure `sum_t G T_live,t`; never multiply a `G` that already integrates direction by a solid angle again | as defined for astroparticle | ratio/MC | quoting without energy/angle dependence ([space based direct detection](space-based-direct-detection.md), [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md)) |
 
 Object-level versus event-level: a per-object probability `p` with `k` independent
@@ -59,8 +59,9 @@ nothing about tails or few-photon distributions.
 The last three are robust to a small tail fraction but are not equal to each other for
 non-Gaussian shapes; quote the estimator with the number.
 
-**Why fake rate is not universally `1 - P`.** `P = N_matched/N_selected`, so
-`1 - P` = (unmatched + matched-but-wrong-identity) / selected. A *fake* is a selected
+**Why fake rate is not universally `1 - P`.** `P = N_correct/N_selected`, with
+`N_correct` the selected objects matched to truth with the correct identity, so
+`1 - P` = (unmatched + matched-but-wrong-identity + duplicates) / selected. A *fake* is a selected
 object with no valid truth counterpart (reconstruction failure); a *mis-ID* is a real
 particle with the wrong species. `1-P` mixes both plus duplicates. Also fake rate is
 often defined per eligible candidate, not per selected object, so its denominator
@@ -105,8 +106,8 @@ single-electron-like particles.
 | In fiducial (truth) | truth in acceptance | 8000 | `A = 8000/10000 = 0.800` |
 | Reconstructed (matched) | of the 8000 | 7200 | `eps_R = 7200/8000 = 0.900` (conditional on `A`) |
 | Pass ID | of the 7200 | 6480 | `eps_S = 6480/7200 = 0.900` (conditional on `R, A`) |
-| Total (of fiducial) | | | `eps_tot|A = 6480/8000 = 0.810 = eps_R * eps_S` |
-| Total (of generated) | | | `A * eps_tot|A = 6480/10000 = 0.648 = 0.8*0.9*0.9` |
+| Total (of fiducial) | | | `eps_tot\|A = 6480/8000 = 0.810 = eps_R * eps_S` |
+| Total (of generated) | | | `A * eps_tot\|A = 6480/10000 = 0.648 = 0.8*0.9*0.9` |
 
 Uncertainty on `eps_S` (large `N`, `p` not near 0 or 1, so binomial ≈ Gaussian):
 `sqrt(0.9*0.1/7200) = 0.0035`.
@@ -139,24 +140,36 @@ Resolution/bias of a relative energy residual `r = (E_reco - E_true)/E_true` (%)
 r = x_meas - x_pred        p = r / sigma_r        chi^2 = r^T V_r^{-1} r
 ```
 
+(`sigma_r` is the square root of the matching diagonal element of `V_r`; the `chi^2` form
+holds for unbiased residuals, see the biased case below.)
+
 `x_meas` the measurement, `x_pred` the prediction from a model/fit (in the
 measurement's units); `V_r` the covariance of `r`, **not** of the measurement alone:
 `V_r = V_meas + V_pred - C - C^T` where `C` is the measurement-prediction covariance.
 
 - **Biased residual**: prediction from a fit that *includes* the hit. It is
-  anticorrelated with the measurement, so `V_r = V_meas - V_pred` (narrower than
-  `sigma_meas`), and pulls built with `sigma_meas` are too small.
+  positively correlated with the measurement (for a least-squares fit
+  `C = Cov(x_meas, x_pred) = V_pred`), so `V_r = V_meas + V_pred - 2 V_pred = V_meas - V_pred`
+  (narrower than `sigma_meas`), and pulls built with `sigma_meas` are too small. This
+  `V_r` is singular (rank `n - n_par` for `n` measurements and `n_par` fitted
+  parameters), so `V_r^{-1}` does not exist: the fit `chi^2` is `r^T V_meas^{-1} r` with
+  `n - n_par` degrees of freedom.
 - **Unbiased (exclusive) residual**: prediction from a fit that excludes the hit:
-  `V_r = V_meas + V_pred'` (wider). It is uncorrelated with the measurement to first
-  order and is the correct quantity for measuring intrinsic resolution and efficiency.
+  `V_r = V_meas + V_pred'` (wider). The exclusive prediction is uncorrelated with the
+  measurement (exactly for a linear fit with independent hits), while the residual itself
+  has `Cov(r, x_meas) = V_meas`; it is the correct quantity for measuring intrinsic
+  resolution (`V_meas = V_r - V_pred'`) and efficiency.
 - **Leave-one-out**: repeat over hits to make the unbiased residual for each.
-- **Pull mean 0, width 1** only if: the model is correct, the estimator is unbiased, the
-  residual uncertainty uses the correct covariance (including `C`), errors are Gaussian,
-  and the population is not selected on the residual. A pull width `> 1` means
+- **Pull mean 0, standard deviation 1** only if: the model is correct, the estimator is
+  unbiased, the residual uncertainty uses the correct covariance (including `C`), and the
+  population is not selected on the residual. Gaussian errors are not needed for this;
+  they are needed for the pull to be `N(0,1)` in shape (tails, `k`-sigma coverage) and for
+  a Gaussian core fit to return width 1. A pull width `> 1` means
   under-estimated uncertainty, missing correlations, or model mismatch; `< 1` means
   over-estimated errors or using a biased residual with `sigma_meas`.
-- **`chi^2`**: with `n` degrees of freedom the expectation is `n` (Gaussian, correct
-  covariance); distribution tails, not just the mean, diagnose outliers.
+- **`chi^2`**: the expectation equals the degrees of freedom (`n`, or `n - n_par` for a
+  fit's own residuals) with the correct covariance; the `chi^2` distribution shape also
+  needs Gaussian errors; distribution tails, not just the mean, diagnose outliers.
 
 **Reading residual plots.** *Mean* versus a variable: bias/misalignment/calibration;
 *width* versus a variable: resolution scaling or unmodeled term; *trends* (linear, sinusoidal in `phi`):
@@ -165,9 +178,12 @@ region edge, a step in conditions (interval of validity); *tails*: outliers, wro
 association, delta rays; *multimodality*: two populations (left-right ambiguity, wrong
 bunch, two clusters). Cover, in each detector: hit-to-track (position), drift-time,
 Cherenkov-angle, cluster-energy, shower-position, segment-match, waveform (fit
-residual), optical (charge/time vs model), and timing residuals - see the technology
+residual), optical (charge/time vs model), and timing residuals. The technology
 files ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md),
-[timing detectors](timing-detectors.md), [muon systems](muon-systems.md), [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md)).
+[timing detectors](timing-detectors.md), [muon systems](muon-systems.md), [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md))
+give the tracking, drift, segment, waveform, timing, Cherenkov-angle and optical ones; no
+reference here gives a dedicated calorimeter cluster-energy or shower-position residual
+diagnostic, so apply the same mean/width/trend/tail reading to them.
 
 **Coverage.** A `k`-sigma interval should contain the truth at the nominal
 probability (68.3% for `k=1`, Gaussian). Coverage is tested on *truth* in simulation or

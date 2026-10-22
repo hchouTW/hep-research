@@ -7,7 +7,8 @@ steeply falling flux. General likelihood, interval, and combination machinery
 (profile likelihoods, CLs, Asimov data, RooFit/pyhf) is unchanged from
 [likelihood-fitting.md](likelihood-fitting.md) through
 [statistical-tools.md](statistical-tools.md) and
-[inference-recipes.md](inference-recipes.md) and applies here without
+[inference-recipes.md](inference-recipes.md) (RooFit and RooStats in
+[roofit-and-roostats-methods.md](roofit-and-roostats-methods.md)) and applies here without
 modification; this file covers what is different about the astroparticle setting,
 not a restatement of general HEP statistics.
 
@@ -19,8 +20,8 @@ resolution spillover, background), read
 
 The canonical astroparticle measurement is a Poisson counting experiment with signal
 region counts `N_on` (source direction/energy/time window) and a background estimate
-`N_off` drawn from a region with no expected signal but `alpha` times less (or more)
-exposure/normalization than the ON region - used throughout
+`N_off` drawn from a region with no expected signal, where `alpha` is the ratio of ON to OFF
+exposure/normalization (`alpha = t_on/t_off`; the OFF region has `1/alpha` times the ON exposure) - used throughout
 [imaging Cherenkov](../../hep-detector/references/imaging-atmospheric-cherenkov.md) and
 [neutrino astronomy](../../hep-detector/references/neutrino-astronomy.md) alike. The **Li & Ma (1983)**
 significance, derived from the likelihood ratio between the signal-plus-background and
@@ -37,13 +38,14 @@ cases `N_on = 0` and `N_off = 0` where one logarithm's argument vanishes. Two po
 recur in review of this statistic:
 
 - It is the likelihood-ratio statistic itself, `S = sqrt(-2 ln lambda)` with the sign of
-  the excess (Li & Ma 1983, eq. 17); the `sqrt(2)` above sits in front of the log sum, not
-  outside `sqrt(-2 ln lambda)`. Reading `S` as a standard-normal deviate is asymptotic
+  the excess (Li & Ma 1983, eq. 17): `-2 ln lambda` is twice the log sum, so
+  `sqrt(2) * sqrt(log sum) = sqrt(-2 ln lambda)`. Reading `S` as a standard-normal deviate is asymptotic
   (Wilks' theorem), and its accuracy degrades for small `N_on` and `N_off`. It is still
   preferred to the naive Gaussian formula `(N_on - alpha*N_off)/sqrt(N_on + alpha^2*N_off)`,
   which fails much sooner, but it is not exact at low counts. At `N_on = 4`, `N_off = 2`,
-  `alpha = 0.25` the asymptotic p-value is 6.65e-3, the toy-calibrated value (plug-in
-  background) 9.03e-3 ± 0.21e-3, and the exact conditional (binomial) value 1.70e-2
+  `alpha = 0.25` the one-sided asymptotic p-value is 6.65e-3 (two-sided 1.33e-2), the one-sided
+  toy-calibrated value (plug-in background) 9.03e-3 ± 0.21e-3, and the one-sided exact conditional
+  (binomial) value 1.70e-2
   (`li_ma_significance.py --on 4 --off 2 --alpha 0.25 --toys 200000 --seed 1
   --exact-conditional`, checked in `tests/skills/hep_statistics/test_li_ma_significance.py`). For a few
   counts, quote a calibrated p-value: `--toys N --seed S` (background fitted under the
@@ -75,9 +77,12 @@ specific, recurring forms in this domain that are easy to under-count:
   has `p_global` about 0.74 for `N_eff = 1000` and about 0.13 even for `N_eff = 100` -
   not a detection either way. Estimating the correct global
   p-value from pixel-level local p-values is standard practice done via simulated
-  background-only sky maps (scrambled data, per
-  [neutrino astronomy](../../hep-detector/references/neutrino-astronomy.md)'s RA-scrambling) rather than an
-  analytic pixel-count correction, precisely because of this correlation.
+  background-only sky maps, which handle this correlation that an analytic pixel-count
+  correction only approximates. The scrambling or simulation must keep the detector's acceptance structure:
+  scrambling in right ascension, as in
+  [neutrino astronomy](../../hep-detector/references/neutrino-astronomy.md), assumes an acceptance
+  uniform in right ascension and does not carry over in general to imaging Cherenkov or space-based sky
+  scans, which need simulated skies with their own exposure maps.
 - **Multiple energy bins, time windows, or source catalogs tested and not fully
   reported**: an analysis that quotes the single most significant bin/window/catalog
   entry out of several examined must correct for all of them, not only the one
@@ -108,19 +113,22 @@ spectrum shifts the effective exposure (and hence the limit) systematically.
 
 ## Point sources, test statistics, periodicity and variability
 
-These are statistical methods and belong here (order question Q15); the instrument response they use (point-spread
+These are statistical methods and belong here; the instrument response they use (point-spread
 function, energy dispersion, effective area) belongs to hep-detector.
 
 - **Unbinned point-source likelihood** (Braun et al., Astropart. Phys. 29 (2008) 299, arXiv:0801.1604): each event
   enters with a signal density (the point-spread function around the source position, times an energy term for the
-  assumed spectrum) and a background density estimated from the data themselves (for example scrambled in right
-  ascension), `L(n_s, gamma) = prod_i [n_s/N S_i + (1 - n_s/N) B_i]`; the number of signal events `n_s >= 0` is fitted.
-  The background-only distribution of the test statistic comes from scrambled data, not from Wilks alone.
+  assumed spectrum) and a background density (in Braun et al. `B_i = P(E_i | phi_atm)/Omega_band`, from an assumed
+  atmospheric-neutrino flux and detector simulation; later analyses estimate it from the data, for example scrambled
+  in right ascension), `L(n_s, gamma) = prod_i [n_s/N S_i + (1 - n_s/N) B_i]`; the number of signal events `n_s >= 0`
+  is fitted. The background-only distribution of the test statistic comes from background-only trials (simulated in
+  Braun et al., scrambled data in later practice), not from Wilks alone.
 - **Test statistic and its reference** (Mattox et al., ApJ 461 (1996) 396): `TS = 2 ln(L_1 / L_0)`. With the flux
-  bounded at zero and the position fixed, the asymptotic background-only distribution is the half-and-half mixture
-  `1/2 chi2_0 + 1/2 chi2_1` (Chernoff, Ann. Math. Stat. 25 (1954) 573), so `sqrt(TS)` is the one-sided significance;
-  with the position (or the spectral index) also free, more degrees of freedom enter and a scan over positions is a
-  look-elsewhere problem (section above). Calibrate with simulated or scrambled skies when it matters.
+  bounded at zero and the position and spectral index (every parameter present only under the alternative) fixed,
+  the asymptotic background-only distribution is the half-and-half mixture `1/2 chi2_0 + 1/2 chi2_1` (Chernoff, Ann.
+  Math. Stat. 25 (1954) 573), so `sqrt(TS)` is the one-sided significance. With the position or the spectral index
+  also free, those parameters are undefined under the null (the Davies problem), so no chi-square mixture with extra
+  degrees of freedom applies, and a scan over positions is a look-elsewhere problem (section above). Calibrate with simulated or scrambled skies when it matters.
 - **Periodicity in arrival times.** With phases `phi_i` at a trial frequency, the Rayleigh test is
   `Z_1^2 = (2/N) [(sum cos phi_i)^2 + (sum sin phi_i)^2]` and the `Z_m^2` test (Buccheri et al., A&A 128 (1983) 245)
   sums the first `m` harmonics, `chi2` with `2m` degrees of freedom for uniform phases and large `N`. The H-test
