@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.5.0"
+CONTRACTS_VERSION = "3.6.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -125,6 +125,14 @@ CONTRACTS_VERSION = "3.5.0"
 # by advisory-named shared functions), written by contracts/trace.py, so a sci-fix advisory can tell whether the
 # affected code was loaded for an artifact. No capability: provenance has no additionalProperties limit, so a 3.4
 # reader accepts and ignores both, and an artifact without them reads exactly as in 3.4.0.
+# 3.6.0 (independent review; docs/dev/independent-review-spec.md sections 5.1, 5.3, 6.10, 7.6 and A8) adds the
+# optional expert slot of round 1: the review_config field expert ({"model": M}), the review_record role expert (a
+# record with claims, verdicts and findings but no skim, carry_forward or resolves, checked by contracts.review
+# record_rules and receipt_codes with the reason code finding_without_verdict), and the optional round_started data
+# key expert {slot_id, model}. A configuration, log or record without them reads exactly as in 3.5.0. No capability:
+# like every review file they live under <project>/reviews/, never in an artifacts_dir, and no artifact type,
+# vocabulary term or envelope field changes; a 3.5 driver refuses a configuration with expert as config_out_of_range
+# and a record with role expert as schema_invalid instead of misreading either.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

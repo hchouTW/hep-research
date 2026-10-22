@@ -1,5 +1,5 @@
 {
- "contract_version": "3.5.0",
+ "contract_version": "3.6.0",
  "artifact_id": "fixture-synthetic-statistical-result",
  "artifact_type": "statistical-result",
  "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.6.17",
-  "contracts": "3.5.0",
+  "contracts": "3.6.0",
   "profiles": {}
  },
  "provenance": {

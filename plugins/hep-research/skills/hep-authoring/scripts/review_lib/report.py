@@ -41,6 +41,10 @@ def build(rv, events: list) -> str:
         out.append("| lens_models | " + ", ".join(f"{k}={v}" for k, v in sorted(eff["lens_models"].items())) + " | - |")
     if eff.get("filter"):
         out.append(f"| filter | model {eff['filter']['model']} | - |")
+    if eff.get("expert"):
+        out.append(f"| expert | model {eff['expert']['model']} | - |")
+    if first.get("config_file"):
+        out.append(f"| configuration file | `{first['config_file']}` (this review's own) | - |")
     weak = weak_config(cfg)
     out += ["", f"weak_config: {', '.join(weak) if weak else 'none'}", ""]
     out += ["## Slots", "", "| Round | Slot | Role | Lens | Model | Attempts | Outcome | Reasons | Skim marks | "
@@ -67,7 +71,8 @@ def build(rv, events: list) -> str:
         b = m.get("bases", {})
         out.append(f"| {r} | {sid} | {info.get('role', '?')} | {info.get('lens') or '-'} | {info.get('model', '?')} | "
                    f"{len(atts)} | {last['outcome'] or 'open'} | {'; '.join(reasons) or '-'} | "
-                   f"{_dist(m.get('skim'))} | {_dist(m.get('deep_verdicts'))} | {m.get('partially_supported_share', '-')} | "
+                   f"{_dist(m.get('skim'))} | {_dist(m.get('deep_verdicts') or m.get('verdicts'))} | "
+                   f"{m.get('partially_supported_share', '-')} | "
                    f"{b.get('independent', 0)} / {b.get('external', 0)} / {b.get('tool-output', 0)} / {b.get('internal', 0)} |")
         for c in m.get("canaries", []):
             hits[c["place"]][1] += 1
@@ -105,9 +110,11 @@ def build(rv, events: list) -> str:
             m = (last["data"] or {}).get("metrics", {}) if last["outcome"] == "accepted" else {}
             out.append(f"- round {r} {sid} (shadow of {info.get('lens')}): {last['outcome'] or 'open'}, "
                        f"deep verdicts {_dist(m.get('deep_verdicts'))}")
+    if eff.get("expert"):
+        out += ["", "## Expert slot", ""] + _expert_lines(st, slots_priv)
     decisions = {d["finding"]: d for d in ((st.get("filter") or {}).get("decisions") or [])}
     if eff.get("filter"):
-        out += ["", "## Filtering pass", ""] + _filter_lines(st, decisions)
+        out += ["", "## Filtering pass", ""] + _filter_lines(st, decisions, rv)
     if not decisions:
         out += ["", "## Findings", "", "| Finding | Severity | State | Disposition | Verification |", "|---|---|---|---|---|"]
         for g, f in sorted(st["findings"].items()):
@@ -166,7 +173,7 @@ def _cell(text: str) -> str:
     return " ".join(str(text).split()).replace("|", "\\|")
 
 
-def _filter_lines(st: dict, decisions: dict) -> list[str]:
+def _filter_lines(st: dict, decisions: dict, rv=None) -> list[str]:
     """What happened to the filtering pass (spec 6.9, A8)."""
     f = st.get("filter")
     if f is None:
@@ -184,6 +191,12 @@ def _filter_lines(st: dict, decisions: dict) -> list[str]:
     out = [head]
     if reasons:
         out.append("- " + "; ".join(reasons) + ".")
+    ids_path = rv.private_attempt(r, sid, max(atts)) / "filter_ids.json" if rv is not None and atts else None
+    if ids_path is not None and ids_path.exists():
+        total = (read_json(ids_path).get("scrubbed") or {}).get("total") or {}
+        names = (("slot_id", "slot ids"), ("identity", "reviewer identities"), ("model", "model names"))
+        out.append("- Reviewer identity removed from the findings' free text (latest attempt): "
+                   + (", ".join(f"{total[k]} {label}" for k, label in names if total.get(k)) or "none") + ".")
     if decisions:
         kept = sum(1 for d in decisions.values() if d["decision"] == "keep")
         out.append(f"- Applied: kept {kept}, dropped {len(decisions) - kept}. Dropped findings are listed apart below "
@@ -192,6 +205,35 @@ def _filter_lines(st: dict, decisions: dict) -> list[str]:
         out.append("- Not applied: the filter slot used up its attempts; the findings below are unfiltered.")
     else:
         out.append("- Not applied yet.")
+    return out
+
+
+def _expert_lines(st: dict, slots_priv: dict) -> list[str]:
+    """What happened to the expert slot of round 1 (contracts 3.6.0, spec 6.10, A8)."""
+    ex = sorted(st.get("expert_slots", {}).items())
+    if not ex:
+        return ["- Not run: no expert slot was allocated."]
+    out = []
+    for (r, sid), model in ex:
+        atts = st["attempts"].get((r, sid), {})
+        reasons = []
+        for k in sorted(atts):
+            a = atts[k]
+            if a["outcome"] == "rejected":
+                reasons.append(f"a{k}: rejected {', '.join(a['data']['codes'])}")
+            elif a["outcome"] == "withdrawn":
+                reasons.append(f"a{k}: withdrawn ({a['data']['reason']})")
+        state = slot_state(st, r, sid)["state"] if atts else "none"
+        found = sorted(g for g, f in st["findings"].items() if f["round"] == r and f["slot"] == sid)
+        out.append(f"- Round {r}, slot {sid}, model {model}: {len(atts)} attempt(s), {state}"
+                   + (f" ({'; '.join(reasons)})" if reasons else "") + ".")
+        if state == "accepted":
+            out.append(f"- Findings: {len(found)}" + (f" ({', '.join(found)}); they are disposed like any other." if found
+                                                      else "."))
+        elif state == "exhausted":
+            out.append("- Not applied: the expert slot used up its attempts; nothing escalates.")
+    out.append("- The expert slot carries no canaries: receipt checks its record's structure, evidence and isolation, "
+               "not whether it read the whole page.")
     return out
 
 

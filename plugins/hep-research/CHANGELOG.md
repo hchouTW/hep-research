@@ -5,6 +5,26 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Independent review: an optional expert slot in round 1, a per-review configuration file, and reviewer identity
+  removed from the filter packet (contracts 3.6.0).** All three are off unless asked for; without them every
+  allocation, event, packet and report is unchanged bit for bit (the P1 end-to-end review is byte-identical).
+  `start --expert-model M` (config `expert`) adds one round-1 slot: an agent of M reads the whole document as a domain
+  expert and reports only substantive physics, statistics or method errors (a general statement false in some regime,
+  inconsistent reasoning, treatments called equivalent that are not, statements the plugin's own tools contradict),
+  never style. In two evaluation runs the substantive errors no reviewer found were such whole-page reasoning errors.
+  It is dispatched with the other round-1 slots, has no canaries (the R0 self-check, the read rules and the copy guard
+  are its controls), at most two attempts, never escalates, and writes `review_record.json` with the new role
+  `expert`: claims, verdicts and findings in the reviewers' shape and evidence bases, no skim, deep list or
+  carry-forward; receipt applies the reviewer rules minus coverage, controls and re-review, accepts any evidence basis,
+  and adds `finding_without_verdict`. Its findings go to the filter, arbitration, dispose and the report like any
+  other; a changed one is rechecked by the design lens in round 2. Being evaluated, not yet recommended. `start
+  --own-config` writes the review's configuration to `reviews/<id>/review-config.json` (recorded in `round_started`
+  as `config_file`; observe and `check` watch it) instead of the shared file, so concurrent reviews can use different
+  settings and no unfinished review blocks another's options. The filter packet's `correction`, `description` and
+  `fix` now have the raising slot's id, its reported identity and the model names replaced by `[redacted]`, with the
+  counts in the private `filter_ids.json` and the report. Contracts 3.6.0: the config field, the record role and the
+  optional `round_started` key (fixtures, templates and example artifacts carry the new version string only).
+  Evidence: VALIDATION REVIEW-EXPERT-SLOT.
 - **Advisories: OSV timestamps, waivers, regression links; schemas for the ledger and the advisories (sci-fix
   improvement plan C1, C2, C6; F-13, F-17, F-18, F-22).** Advisories carry OSV `published` (first commit, UTC) and
   `modified`. `scifix_advisories.py check` warns, never fails, when an advisory was introduced by another advisory's
@@ -24,7 +44,6 @@ Software checks establish contract consistency only, not physical validity.
   (5). Every independence record states `expected_from`; documentation fixes list `sources` (the three whose ledger
   text never itemized them, and the two internal-only warning fixes, state the gap). Evidence: VALIDATION
   SCIFIX-PLAN-B2-B5-B7.
-
 - **Validator: the same efficiency under two namespaces now warns.** A measurement spec listing a bare `efficiency`
   next to `<ns>:efficiency` (or `<ns>:efficiency` next to `<other-ns>:efficiency`) counted the efficiency twice and
   passed with no finding. It now gets the warning `measurement.efficiency_counted_twice_namespaced`; the existing

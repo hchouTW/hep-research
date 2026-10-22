@@ -4,7 +4,8 @@ the shared state-transition table and the overall check. Pure: nothing here writ
 (skills/hep-authoring/scripts/review.py) and `check` both use these functions, so the state logic exists once.
 
 Schemas (contracts/schemas/): review_config, review_units, review_manifest, review_record, review_event, review_head,
-review_observation, and (contracts 3.4.0) review_filter_record, the record of the optional filtering pass. The built-in
+review_observation, and (contracts 3.4.0) review_filter_record, the record of the optional filtering pass; contracts 3.6.0
+adds the optional expert slot of round 1 (role expert in review_record, config expert). The built-in
 validator has no oneOf, if/then, maxItems or maximum, so ranges, conditional fields, the loose direction of thresholds
 (weak_config) and every rule that needs more than one field are functions below.
 
@@ -18,7 +19,7 @@ what the events say: sidecar files and the clock enter through observed events.
 
 Usage:
   review.py check REVIEW_DIR [--project ROOT]        overall check (section 7.4); read-only
-  review.py check --record-only RECORD [--role reviewer|arbiter|filter] [--max-units-per-claim N]
+  review.py check --record-only RECORD [--role reviewer|arbiter|expert|filter] [--max-units-per-claim N]
                                                      schema and context-free rules of one review record
                                                      (--role filter: a filter record, filter_record.json)
 Output: JSON with a "status" key. Exit 0 ok (warnings may be listed), 1 fail, 2 unreadable input, 3 incomplete
@@ -79,6 +80,13 @@ FILTER_CODES = tuple(c for c in COMMON_CODES if c != "output_mismatch") + ("same
                                                                            "duplicate_target")
 FILTER_DECISIONS = ("keep", "drop")
 FILTER_MAX_ATTEMPTS = 2     # at most; fewer when max_attempts_per_slot is lower
+# the optional expert slot of round 1 (contracts 3.6.0, spec 6.10 and 7.6): the whole document, no canaries, no skim
+# or deep lists and no carry_forward, so the coverage, canary and re-review codes never apply; a finding must come
+# from a verdict that carries evidence (finding_without_verdict)
+EXPERT_CODES = COMMON_CODES + ("same_identity", "finding_shape", "claim_shape", "basis_missing", "self_citation",
+                               "refutation_weak", "verdict_without_finding", "finding_without_verdict")
+EXPERT_MAX_ATTEMPTS = 2     # at most; fewer when max_attempts_per_slot is lower
+EXPERT_CARRY_LENS = "design"  # a changed expert finding is confirmed in the next round by the design lens (all units)
 SIDECAR = "review_record.json"
 FILTER_SIDECAR = "filter_record.json"
 REPAIR_CODES = ("config_changed", "config_out_of_range", "canary_in_deliverable", "isolation_precondition",
@@ -88,7 +96,8 @@ CHECK_CODES = {"log_broken": "fail", "not_closed": "incomplete", "changed_after_
                "adopted_unverified": "warning", "no_model_diversity": "warning", "canary_shortfall": "warning",
                "no_control": "warning", "weak_config": "warning", "superseded_reviews": "listing",
                "late_records": "listing"}
-ROLE_REQUIRED = {"reviewer": ("skim", "claims", "verdicts", "findings"), "arbiter": ("resolves",)}
+ROLE_REQUIRED = {"reviewer": ("skim", "claims", "verdicts", "findings"), "arbiter": ("resolves",),
+                 "expert": ("claims", "verdicts", "findings")}
 ALLOWED_CONCLUSIONS = {"decline": ("uphold-finding", "accept-decline", "unresolved"),
                        "conflict": ("uphold-first", "uphold-second", "unresolved")}
 HUMAN_DECISIONS = {"finding": ("close", "reopen"), "item-decline": ("uphold-finding", "accept-decline"),
@@ -187,6 +196,7 @@ def effective_config(cfg: dict) -> dict:
     out["extra_lenses"] = []
     out["lens_models"] = {}
     out["filter"] = None
+    out["expert"] = None
     out.update({k: v for k, v in (cfg or {}).items()})
     return out
 
@@ -258,8 +268,11 @@ def record_rules(record, role: str | None = None, max_units: int = 3) -> list[tu
     for key in ("skim", "claims", "verdicts", "findings", "carry_forward"):
         if rrole == "arbiter" and record.get(key):
             out.append(_p("schema_invalid", f"$.{key}: an arbiter record carries no {key}"))
-    if rrole == "reviewer" and record.get("resolves"):
+    if rrole in ("reviewer", "expert") and record.get("resolves"):
         out.append(_p("schema_invalid", "$.resolves: only an arbiter record carries resolves"))
+    for key in ("skim", "carry_forward"):
+        if rrole == "expert" and record.get(key):
+            out.append(_p("schema_invalid", f"$.{key}: an expert record carries no {key}"))
     if any(not str(record.get(k, "")).strip() for k in ("limitations",)):
         out.append(_p("schema_invalid", "$.limitations: must not be blank"))
     ev = {}
@@ -316,6 +329,13 @@ def record_rules(record, role: str | None = None, max_units: int = 3) -> list[tu
     for cid, n in counts.items():
         if n != 1:
             out.append(_p("claim_shape", f"claim {cid}: {n} verdicts (exactly one needed)"))
+    if rrole == "expert":
+        backed = {x for v in record.get("verdicts", []) if v["verdict"] in ("partially-supported", "unsupported")
+                  for x in v["finding_ids"]}
+        for fid in findings:
+            if fid not in backed:
+                out.append(_p("finding_without_verdict", f"finding {fid}: no partially-supported or unsupported "
+                                                         "verdict lists it"))
     for s in record.get("skim", []):
         if s["mark"] == "issue" and s.get("finding_id") not in findings:
             out.append(_p("skim_missing", f"skim {s['unit']}: an issue without a matching finding"))
@@ -375,14 +395,14 @@ def exact_correction(f: dict, old_key: str) -> bool:
 
 def receipt_codes(record, ctx: dict) -> list[tuple[str, str]]:
     """Every receipt problem of a record, given the facts the driver gathered (ctx):
-    kind (lens|shadow|arbiter), lens, slot_id, dispatched {packet_sha256, nonce, instructions_sha256}, author,
+    kind (lens|shadow|arbiter|expert), lens, slot_id, dispatched {packet_sha256, nonce, instructions_sha256}, author,
     limits {max_units_per_claim, na_max_ratio, unresolved_max_ratio, refutation_duplicate_max,
     refutation_min_attempts_effective}, unit_text {id: text in this slot's version}, skim_units, deep_units,
     canaries [{unit, new_key}], carry_refs, items {item_id: {type, lenses}}, parties [identities],
     files {path string: {exists, sha256, forbidden, in_work}}, instructions_changed (bool).
     A schema problem stops the other rules; every other code is reported independently."""
     kind = ctx["kind"]
-    role = "arbiter" if kind == "arbiter" else "reviewer"
+    role = kind if kind in ("arbiter", "expert") else "reviewer"
     lim = ctx["limits"]
     max_units = int(lim["max_units_per_claim"])
     base = record_rules(record, role, max_units)
@@ -454,6 +474,11 @@ def receipt_codes(record, ctx: dict) -> list[tuple[str, str]]:
     for f in record["findings"]:
         if len(f["units"]) <= max_units and contiguous(f["units"]) and not _finding_text_ok(f, unit_text):
             out.append(_p("finding_shape", f"finding {f['id']}: value is not an excerpt of its units in this packet"))
+    if kind == "expert":  # spec 7.6: no skim, deep, canary or carry_forward rules; any evidence for every verdict
+        for v in record["verdicts"]:
+            if v["claim_id"] in claims and v["verdict"] != "unresolved" and not [x for x in v["evidence_ids"] if x in ev]:
+                out.append(_p("basis_missing", f"verdict {v['claim_id']}: no evidence"))
+        return _dedupe(out)
     deep = list(ctx["deep_units"])
     covered = {u for c in claims.values() for u in c["units"]}
     miss = [u for u in deep if u not in covered]
@@ -519,6 +544,12 @@ def record_metrics(record: dict, ctx: dict) -> dict:
     """Quality metrics written into the accepted event and the report (A8)."""
     if record.get("role") == "arbiter":
         return {"resolves": {r["item_id"]: r["conclusion"] for r in record.get("resolves", [])},
+                "bases": _basis_counts(record)}
+    if record.get("role") == "expert":
+        vs: dict[str, int] = {}
+        for v in record.get("verdicts", []):
+            vs[v["verdict"]] = vs.get(v["verdict"], 0) + 1
+        return {"verdicts": dict(sorted(vs.items())), "findings": len(record.get("findings", [])),
                 "bases": _basis_counts(record)}
     claims = {c["id"]: c for c in record.get("claims", [])}
     deep = set(ctx.get("deep_units", []))
@@ -729,6 +760,7 @@ def transition_problems(records: list) -> list[str]:
     items: set = set()
     findings: set = set()
     filter_slots: set = set()
+    expert_slots: set = set()
     for rec in records:
         e, d, s = rec["event"], rec["data"], rec["seq"]
         if out:
@@ -739,6 +771,8 @@ def transition_problems(records: list) -> list[str]:
             rounds.add(d["round"])
             max_att = int(effective_config(d["config"])["max_attempts_per_slot"])
             slots |= {(d["round"], x["slot_id"]) for x in d["slots"]}
+            if d.get("expert"):
+                expert_slots.add((d["round"], d["expert"]["slot_id"]))
         elif e == "arbitration_needed":
             slots.add((d["round"], d["slot_id"]))
             items.add(d["item_id"])
@@ -752,7 +786,8 @@ def transition_problems(records: list) -> list[str]:
             if key not in slots:
                 out.append(f"seq {s}: dispatched for unknown slot {key}")
             prev = atts.get(key, {})
-            limit = min(FILTER_MAX_ATTEMPTS, max_att or 0) if key in filter_slots else max_att
+            limit = min(FILTER_MAX_ATTEMPTS, max_att or 0) if key in filter_slots else \
+                min(EXPERT_MAX_ATTEMPTS, max_att or 0) if key in expert_slots else max_att
             if d["attempt"] != len(prev) + 1 or d["attempt"] > limit or (prev and prev[max(prev)] is None):
                 out.append(f"seq {s}: attempt {d['attempt']} out of order for {key}")
             atts.setdefault(key, {})[d["attempt"]] = None
@@ -789,7 +824,7 @@ def fold(events: list) -> dict:
     st: dict[str, Any] = {"review_id": None, "document": None, "rounds": {}, "round": 0, "attempts": {}, "arb_slots": {},
           "observed": None, "findings": {}, "verdicts": {}, "items": {}, "escalations": [], "human": {},
           "terminal": None, "author": None, "extra_rounds": 0, "accept_round_limit": False, "resolved_slots": set(),
-          "late": [], "reported": [], "human_seq": {}, "filter_slots": {}, "filter": None}
+          "late": [], "reported": [], "human_seq": {}, "filter_slots": {}, "filter": None, "expert_slots": {}}
     F, V = st["findings"], st["verdicts"]
     for ev in events:
         e, d = ev["event"], ev["data"]
@@ -798,6 +833,8 @@ def fold(events: list) -> dict:
             st["round"] = r
             st["review_id"], st["document"], st["author"] = d["review_id"], d["document"], d["author"]
             st["rounds"][r] = d
+            if d.get("expert"):
+                st["expert_slots"][(r, d["expert"]["slot_id"])] = d["expert"]["model"]
             for g in d.get("removed_findings", []):
                 if g in F:
                     F[g]["state"] = "removed-pending"
@@ -938,6 +975,8 @@ def slot_state(st: dict, r: int, sid: str) -> dict:
     max_att = int(cfg["max_attempts_per_slot"])
     if (r, sid) in st.get("filter_slots", {}):
         max_att = min(FILTER_MAX_ATTEMPTS, max_att)
+    elif (r, sid) in st.get("expert_slots", {}):
+        max_att = min(EXPERT_MAX_ATTEMPTS, max_att)
     atts = st["attempts"].get((r, sid), {})
     if not atts:
         return {"state": "none", "attempt": 0, "deadline": None}
@@ -991,7 +1030,8 @@ def snapshot(st: dict, log_ok: bool = True) -> dict:
     cfg = effective_config(rd.get("config", {}))
     slots = {}
     for s in rd.get("slots", []):
-        slots[s["slot_id"]] = dict(slot_state(st, r, s["slot_id"]), kind="review",
+        expert = (r, s["slot_id"]) in st.get("expert_slots", {})
+        slots[s["slot_id"]] = dict(slot_state(st, r, s["slot_id"]), kind="expert" if expert else "review",
                                    resolved=f"slot:{r}/{s['slot_id']}" in st["human"])
     for (rr, sid) in st["arb_slots"]:
         if rr == r:
@@ -1117,7 +1157,9 @@ def carry_forward_plan(st: dict, mapping: dict, slot_roles: dict, new_lens_slot:
         if f["state"] != "changed":
             continue
         units = [old_to_new[u] for u in f.get("units_now") or f["units"] if u in old_to_new]
-        tgt = new_lens_slot.get(slot_roles.get(str(f["round"]), {}).get(f["slot"], {}).get("lens") or f.get("lens"))
+        info = slot_roles.get(str(f["round"]), {}).get(f["slot"], {})
+        lens = info.get("lens") or f.get("lens") or (EXPERT_CARRY_LENS if info.get("role") == "expert" else None)
+        tgt = new_lens_slot.get(lens)
         if not units or tgt is None:
             removed.append(g)
             continue
@@ -1167,6 +1209,9 @@ def check(review_dir, project: Path | None = None) -> dict:
     for r, rnd in st["rounds"].items():
         if sha256_file(review_dir / "units" / f"round-{r}.json") != rnd["units_sha256"]:
             changed.append(f"units/round-{r}.json")
+        own = rnd.get("config_file")  # a review started with --own-config: its configuration is one of its files
+        if own and sha256_file(project / own) != rnd["config_sha256"] and own not in changed:
+            changed.append(own)
     for (r, sid), atts in st["attempts"].items():
         for k, a in atts.items():
             adir = review_dir / f"round-{r}" / sid / f"attempt-{k}"
@@ -1260,7 +1305,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("check", help="overall check of a review directory, or --record-only on one record")
     p.add_argument("target", type=Path, help="the review directory, or with --record-only the record file")
     p.add_argument("--record-only", action="store_true")
-    p.add_argument("--role", choices=("reviewer", "arbiter", "filter"))
+    p.add_argument("--role", choices=("reviewer", "arbiter", "expert", "filter"))
     p.add_argument("--max-units-per-claim", type=int, default=CONFIG_RULES["max_units_per_claim"][0])
     p.add_argument("--project", type=Path, help="project root (default: two levels above the review directory)")
     try:
