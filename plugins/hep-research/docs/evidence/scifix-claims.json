@@ -1,0 +1,518 @@
+[
+ {
+  "id": "scifix:C01",
+  "claim": "The Bethe equation gives the mean rate of energy loss of a moderately relativistic heavy charged particle.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S01"
+  ],
+  "location": "RPP 2024 eq. (34.5), p. 4",
+  "scope": {
+   "text": "pid_separation_power.py dE/dx (DR-WP2-06-PID)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C02",
+  "claim": "The maximum energy transfer to an electron in a single collision, W_max, enters the Bethe equation.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S01"
+  ],
+  "location": "RPP 2024 eq. (34.4), p. 3",
+  "scope": {
+   "text": "pid_separation_power.py dE/dx (DR-WP2-06-PID)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C03",
+  "claim": "The coefficient K of the Bethe equation and the other constants are listed in Table 34.1.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S01"
+  ],
+  "location": "RPP 2024 Table 34.1, p. 2",
+  "scope": {
+   "text": "pid_separation_power.py dE/dx (DR-WP2-06-PID)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C04",
+  "claim": "The Highland formula gives the width theta_0 of the projected multiple-scattering angle distribution.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S01"
+  ],
+  "location": "RPP 2024 eq. (34.16), p. 16",
+  "scope": {
+   "text": "multiple_scattering.py, Highland leading term (DR-WP2-06-MS)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C05",
+  "claim": "The Cherenkov angle satisfies cos theta_C = 1/(n beta).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S01"
+  ],
+  "location": "RPP 2024 eq. (34.41), p. 33",
+  "scope": {
+   "text": "cherenkov_angle.py (TH9-MASSES, DR-WP1-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C06",
+  "claim": "The number of Cherenkov photons per unit length scales as z^2 sin^2 theta_C (N = N0 L z^2 sin^2 theta_C for a detector of response N0).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S01"
+  ],
+  "location": "RPP 2024 eq. (34.43), p. 34",
+  "scope": {
+   "text": "cherenkov_angle.py yield (TH9-MASSES, DR-WP1-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C07",
+  "claim": "The Frank-Tamm photon spectrum per unit length and wavelength, integrated over wavelength, gives the Cherenkov yield.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S01"
+  ],
+  "location": "RPP 2024 eq. (34.44), p. 34",
+  "scope": {
+   "text": "cherenkov_angle.py yield (DR-WP1-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C08",
+  "claim": "The calorimeter energy resolution is parametrized as stochastic, noise and constant terms added in quadrature.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S02"
+  ],
+  "location": "RPP 2024 eq. (35.43), p. 82",
+  "scope": {
+   "text": "calorimeter_resolution.py fit (DR-WP2-06-CALO)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C09",
+  "claim": "The 2025 edition gives the same calorimeter energy resolution parametrization (stochastic, noise and constant terms in quadrature) under a new equation number.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 eq. (35.50), p. 92",
+  "scope": {
+   "text": "calorimeter_resolution.py fit (DR-WP2-06-CALO)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C10",
+  "claim": "The Gluckstern formula gives the momentum resolution from the position measurement error of N equally spaced points.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 eq. (35.68), p. 112",
+  "scope": {
+   "text": "multiple_scattering.py crossover and MDR (DR-WP2-06-MS)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C11",
+  "claim": "The multiple-scattering contribution to the momentum resolution (with the 0.016 coefficient).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 eq. (35.70), p. 112",
+  "scope": {
+   "text": "multiple_scattering.py; the script uses the Highland leading term (scifix:C04) instead, as tracking-and-vertexing.md states"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C12",
+  "claim": "The mean excitation energy of liquid water is I = 79.7 eV.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S04"
+  ],
+  "location": "PDG Atomic and Nuclear Properties, water (liquid) page",
+  "scope": {
+   "text": "pid_separation_power.py water (DR-WP2-06-PID)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C13",
+  "claim": "The split R-hat compares between- and within-chain variances of split chains.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S05"
+  ],
+  "location": "arXiv:1903.08008v5 eqs. (1)-(4)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C14",
+  "claim": "The combined autocorrelation estimate over chains.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S05"
+  ],
+  "location": "arXiv:1903.08008v5 eq. (10)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "limitations": "as printed, the lag term is scaled by N/(N-1); the code follows Stan/ArviZ (biased autocovariance)",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C15",
+  "claim": "The effective sample size is ESS = NM/tau with tau = 1 + 2 sum of the autocorrelations, truncated as stated.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S05"
+  ],
+  "location": "arXiv:1903.08008v5 eqs. (12)-(13)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C16",
+  "claim": "Rank normalization of the draws before R-hat and ESS.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S05"
+  ],
+  "location": "arXiv:1903.08008v5 eq. (14)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C17",
+  "claim": "Folding of the draws about the median for the folded R-hat.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S05"
+  ],
+  "location": "arXiv:1903.08008v5 eq. (15)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C18",
+  "claim": "Tail ESS from the 5% and 95% quantile indicators.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S05"
+  ],
+  "location": "arXiv:1903.08008v5 eq. (16)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "limitations": "the code takes the 95% indicator as x >= q95 (equal unless draws tie at q95)",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C19",
+  "claim": "The Monte Carlo standard error of a quantile.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S05"
+  ],
+  "location": "arXiv:1903.08008v5 eq. (20)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C20",
+  "claim": "The Feldman-Cousins ordering ratio R = P(n|mu)/P(n|mu_best) and the adjustment that makes the upper end non-increasing in the background.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S06"
+  ],
+  "location": "Phys. Rev. D 57 (1998) 3873, eq. (4.1) and Sec. IV.A, p. 8",
+  "scope": {
+   "text": "core/stats/poisson_diagnostics.py (FC-MONOTONE)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C21",
+  "claim": "Table IV gives the 90% C.L. intervals for the Poisson signal mean with known background, which the repository fixture transcribes.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S06"
+  ],
+  "location": "Phys. Rev. D 57 (1998) 3873, Table IV, p. 37",
+  "scope": {
+   "text": "tests/core/fixtures/fc1998_tables.json (FC-MONOTONE)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C22",
+  "claim": "The Gaisser-Hillas form of the longitudinal shower profile.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S07"
+  ],
+  "location": "arXiv:1811.04660v2 eq. (2.1), p. 3",
+  "scope": {
+   "text": "xmax_gaisser_hillas.py (DR-WP1-02)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C23",
+  "claim": "The integrated autocorrelation time is tau = 1 + 2 sum_k rho_k.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S08"
+  ],
+  "location": "arXiv:1011.0175v1 eq. (4)",
+  "scope": {
+   "text": "bayes_diagnostics.py (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C24",
+  "claim": "The autocorrelation time of an AR(p) process, which gives (1 + rho)/(1 - rho) for AR(1).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S08"
+  ],
+  "location": "arXiv:1011.0175v1 eq. (7), p. 2",
+  "scope": {
+   "text": "test_bayes_diagnostics.py AR(1) ESS (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C25",
+  "claim": "For AR(1) with rho = 0.98 the autocorrelation time is 99.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S08"
+  ],
+  "location": "arXiv:1011.0175v1 p. 3",
+  "scope": {
+   "text": "test_bayes_diagnostics.py AR(1) ESS (BAYES-T24)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C26",
+  "claim": "The PDG cosmic-ray review does not state the Gaisser-Hillas form.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "absence_search",
+  "evidence_status": "absence-search",
+  "source_ids": [
+   "scifix:S09"
+  ],
+  "location": "RPP 2024 30. Cosmic Rays (whole review)",
+  "scope": {
+   "text": "where the Gaisser-Hillas form was looked for (DR-WP1-02)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-21"
+ },
+ {
+  "id": "scifix:C27",
+  "claim": "Cell resampling: around a negative-weight event (the seed) a cell grows until the summed weight of the events inside is non-negative, then every weight in the cell is replaced by |w_i| sum_C w_j / sum_C |w_j|, which preserves the cell's summed weight; the steps are applied successively to each negative-weight event.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S11"
+  ],
+  "location": "arXiv:2109.07851v2 Sec. 2, eq. (2.2), p. 3 (successive application, p. 4)",
+  "scope": {
+   "text": "skills/hep-ml/assets/hep_metrics.py cell_resample (ML-NEGWEIGHTS)"
+  },
+  "limitations": "the paper's distance is a phase-space distance on physics objects (Sec. 2.1); cell_resample uses Euclidean distance in the model's input features; the seed order is discussed in Appendix A (not read)",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-22"
+ }
+]

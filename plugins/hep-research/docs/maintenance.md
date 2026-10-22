@@ -123,7 +123,14 @@ Oracle rules:
   pyhf, pathlib, Python's decimal rounding), not from a library evaluating a formula the assistant wrote;
   **exhaustive**, an enumeration over a stated finite domain; **person**, a person checked it and the record says so.
   Each counted kind is recorded in its entry's `independence` list (kind, test, basis, detail);
-  `tests/tools/test_scifix_ledger.py` checks it.
+  `tests/tools/test_scifix_ledger.py` checks it. A `locator` record also names its source and located claim
+  (`source_id`, `locator_id`: a string, or a list when it rests on several) in `docs/evidence/scifix-sources.json` and
+  `scifix-claims.json`, the core/evidence format (index `scifix-index.md`); the source must be read at `page` or
+  `full-text`. Every record states what its oracle test imports, `requires: {"core": [...], "backend": [...]}` (core:
+  `requirements-core.txt` and sympy's mpmath; backend: pyhf, arviz, pdg, torch, xgboost, sklearn), and each backend
+  must be locked by a required CI gate. `python3 tools/run_required_backends.py --from-ledger --no-skips` runs every
+  oracle node and classifies each one that does not pass: a missing core dependency is an environment error, a
+  missing backend leaves the evidence unverified, any other failure means the evidence does not hold.
 - Kinds: **analytic**, an expected value derived in closed form; **independent implementation**, a different algorithm
   computing the same quantity; **symbolic**, a computer-algebra derivation; **published**, a value printed in a source;
   **exhaustive**, every case of a stated finite domain. Invariants, closures and behavioral checks are evidence, not

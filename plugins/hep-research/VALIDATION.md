@@ -2090,6 +2090,41 @@ worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in
 Limit found while implementing: `result_artifact.py`, the statistical-result writer, wraps the JSON a core/stats CLI
 printed in another process, so its `code_paths` never shows `core/stats/*`; an advisory about core/stats code must
 match on fields the CLI output carries, or say that no field shows it (plan PR-5).
+## SCIFIX-PLAN-B1-B4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0, mpmath 1.3.0, no pyhf, ArviZ, pdg or torch; E2: NumPy 2.5.3, SciPy 1.18.1, pyhf 0.7.6, PyTorch 2.14.1, no ArviZ or pdg; branch `scifix/pr-6-evidence-sources`, stacked on `scifix/pr-4-execution-trace`)
+
+Sci-fix improvement plan v3, PR-6 (B1, B4; F-10, F-12). Counts recomputed on the branch: 40 ledger entries, 60
+`independence` records, 15 of them `locator`, 52 distinct oracle nodes in 24 modules, 16 of which are not in
+`run_required_backends.py` `MODULES`.
+
+B1: the *Sources read for locators* table of SCIFIX-LEDGER-REVIEW is now `docs/evidence/scifix-sources.json`
+(scifix:S01-S11) and `scifix-claims.json` (scifix:C01-C27, one per locator; index `scifix-index.md`). The PDG
+chapter 35 row became two sources (2024 and 2025 editions, S02 and S03); Gaisser and Hillas 1977 is `not-opened`
+(S10, cited by no claim); the cosmic-ray review's "does not state the form" is an `absence_search` claim (C26). The
+FC-MONOTONE published record points at Table IV, p. 37 (C21), the table read with its page; Table VI has no page in
+the reading record and is not claimed. arXiv:2109.07851 (S11, ML-NEGWEIGHTS) was read on 2026-10-22: the v2 abstract
+page and pp. 1-5 of the v2 PDF (page level). Eq. (2.2), w_i -> (sum_C w_j / sum_C |w_j|) |w_i| for every event in a
+cell grown around a negative-weight seed until its summed weight is non-negative, is in Sec. 2 "Cell Resampling",
+p. 3, and p. 4 applies the steps successively to each negative-weight event: this supports the brute-force oracle
+(C27), so the basis holds and the grade stays C3. Sec. 2.2 is the nearest-neighbour search (p. 9); the ledger detail
+and the `hep_metrics.cell_resample` docstring cited "sect. 2.2" and are corrected.
+
+B4: each record's `requires` was found by hiding one package at a time (a meta-path blocker plus a patched
+`importlib.util.find_spec`, also in subprocesses) and running all 52 nodes in E2: hiding numpy changes 27 nodes,
+scipy 22, sympy 11, mpmath 12 (sympy needs mpmath), pyhf 3, torch and matplotlib 0; ArviZ and pdg (not in E2) come
+from the nodes' own guards (one node each).
+
+| Check | Result |
+|---|---|
+| `core/evidence/ledger.py --namespace scifix --strict --today 2026-10-22` | pass: 11 sources, 27 claims, 0 errors, 0 warnings; 1 note (S10 cited by no claim) |
+| `core/evidence/render_index.py` on `scifix-index.md` | in sync |
+| `run_required_backends.py --from-ledger --no-skips`, CI lock | exit 1: 47 pass, 5 unverified (backend missing: pyhf 3, ArviZ 1, pdg 1), 0 environment errors, 0 do not hold, 0 skipped |
+| Same without `--no-skips`, CI lock | exit 0, same classes |
+| `run_required_backends.py --from-ledger --no-skips`, E2 | exit 1: 50 pass, 2 unverified (ArviZ 1, pdg 1), 0 environment errors, 0 do not hold, 0 skipped |
+| Backends in `requires` (pyhf, arviz, pdg) against the required gates' `--require` | each locked: pyhf and arviz by `stats-backends`, pdg by `pdg-cross-check` |
+| New tests (5 in `test_scifix_ledger`, 3 in `test_run_required_backends`) with the ledger and the tool reverted | fail: 5 failures and 14 errors (subtests); with `scifix-sources.json` removed as well, 1 failure and 4 errors |
+| Same on the change | pass: `test_scifix_ledger` 10 tests, `test_run_required_backends` 6 tests |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock | 23 pass, 2 fail, 2 skipped (CLI); 4822 tests, 4572 pass, 1 failure, 249 skipped. Both failures are `retired_names` on the 11 `changelog.name` values of the 0.10.0 detector and ML audits, which spell the retired skill names and which `8f8c66f9` (PR-2) added; a `git archive` of this branch's parent fails the same way |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
 ## SCIFIX-SCAN-VERDICT-ORDER (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-3-scan-order`, stacked on `scifix/pr-2-advisory-check`)
 
