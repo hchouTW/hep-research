@@ -150,3 +150,19 @@ Changes of the first R2 slice (architecture sections 8.1 and 9.4); no rule outco
   (rule_id, version); a retired version stays listed and is not checked for an implementation or a digest.
 - **Conversion (V90).** `migrate.py --convert check-context=context-1.0.0-to-1.1.0` drops `required: true`, refuses a
   deferred root for manual completion, and moves each suite to the lowest installed version at or above 1.1.0.
+
+## Phase 2, release R2: input checks of check-context 1.1.0 (2026-10-22)
+
+Enabled only for 1.1.0 contexts (`INPUT_CHECKS["1.1.0"]`, P3), so a frozen 1.0.0 subject keeps its outcomes (the
+Phase 0 comparison set of 403 obligations is unchanged). Each finding is input-invalid: freeze refuses it
+(`bundle.item_schema` for item shapes, `bundle.context_input` for context fields) and check reports it.
+
+| Check | Gap, V case | Rule |
+| --- | --- | --- |
+| `calibration.shape` | G16, V79 (first part) | a factor table (`factors` or `factor_table_version`) maps each effect to exactly one of `values` (non-empty list of finite numbers), `scalar` (finite) or `by_scope` (scope → such a list); `tolerance` is `{"relative": finite >= 0}`. Auxiliary inputs of model cards are not factor tables |
+| `coverage.duplicate_contract` | G15, V81 | two different bundle coverage contracts for one table: both are dropped, no first-wins |
+| `context.shared_within_model` | G12, V80 | a shared parameter joins parameters of different models only |
+| `context.unit_placeholder` | G22, V89 (minimal fix) | a root or ratio-root unit that is blank or a placeholder (`TODO`, `TBD`, `?`, `<unit>`, …); the full unit check is coverage extension |
+
+G2 (V78) is closed by the format itself: 1.1.0 has no `required`. The G4 part of V79 (tolerance from declared
+significant digits, DR-6) changes a rule and comes with the rule fixes.

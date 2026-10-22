@@ -13,6 +13,11 @@ Software checks establish contract consistency only, not physical validity.
   1.2.0 keys rules by (rule_id, version) and keeps retired versions listed. `migrate.py` converts a frozen context with
   `context-1.0.0-to-1.1.0` (V90) and refuses a deferred root. V77-V90 are registered. A 0.25.1 reader refuses a 1.1.0
   bundle as invalid input.
+- **Cross-artifact check, input checks of check-context 1.1.0.** A 1.1.0 context is input-invalid (refused at freeze)
+  for a malformed factor table or tolerance (`calibration.shape`, G16), two different bundle coverage contracts for one
+  table (`coverage.duplicate_contract`, G15), a shared parameter inside one model (`context.shared_within_model`,
+  G12), and a blank or placeholder root unit (`context.unit_placeholder`, G22). 1.0.0 contexts are not judged by
+  these checks. Probes G2, G12, G15, G16 and G22 now pass; V78, V80, V81, V89 and the G16 part of V79 pass.
 
 ## 0.25.1 (2026-10-22)
 

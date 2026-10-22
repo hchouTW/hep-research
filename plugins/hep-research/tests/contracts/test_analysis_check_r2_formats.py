@@ -17,17 +17,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import analysis_check_cases as cases  # noqa: E402
 
-DEV = "1.1.0-dev.1"
+DEV = cases.DEV_SUITE
 
 
-def to_1_1(c) -> None:
-    """A draft context in format 1.1.0 on the 1.1.0-dev.1 suites (what the converter writes)."""
-    c.context["context_version"] = "1.1.0"
-    c.context["suite"] = dict(c.context["suite"], version=DEV)
-    c.context["suites"] = [dict(s, version=DEV) for s in c.context.get("suites", [])]
-    for key in ("roots", "ratio_roots"):
-        for r in c.context.get(key, []):
-            r.pop("required", None)
+to_1_1 = cases.context_1_1
 
 
 def states(bundle: Path, root: Path) -> dict:
@@ -173,6 +166,94 @@ class Context110(unittest.TestCase):
         rep = ac.evaluate(view, diags)
         codes = [f["code"] for f in permit.cheap_refusals(rep, json.loads(bundle.read_text()), r, "$")]
         self.assertIn("permit.report_prerelease_suite", codes)
+
+
+class InputChecks110(unittest.TestCase):
+    """The input checks check-context 1.1.0 enables (G12, G15, G16, G22); a 1.0.0 context is not judged by them (P3)."""
+
+    TABLE = {"factor_table_version": "1.0.0", "factors": {"exposure": {"values": [1.0, 2.0]},
+                                                          "trigger_efficiency": {"scalar": 0.97},
+                                                          "selection_efficiency": {"by_scope": {"species:p": [0.9, 0.8]}}},
+             "tolerance": {"relative": 1e-6}}
+
+    def shape(self, doc, version="1.1.0") -> list[str]:
+        from contracts.analysis_check import shape_diagnostics
+        items = {"cal": {"role": "calibration", "ref": "cal.json", "doc": copy.deepcopy(doc)}}
+        return [d["code"] for d in shape_diagnostics(items, version)]
+
+    def test_a_well_formed_factor_table_passes(self):
+        self.assertEqual(self.shape(self.TABLE), [])
+
+    def test_malformed_factor_tables_are_input_invalid_only_in_1_1_0(self):
+        bad = []
+        for path, value in ((("factors", "exposure", "values"), [1.0, "2"]), (("factors", "exposure", "values"), []),
+                            (("factors", "trigger_efficiency", "scalar"), float("inf")), (("tolerance",), {"relative": -1}),
+                            (("tolerance",), {"relative": "nan"}), (("tolerance",), {"relative": 1e-6, "absolute": 1}),
+                            (("factor_table_version",), "2.0.0")):
+            doc = copy.deepcopy(self.TABLE)
+            target = doc
+            for k in path[:-1]:
+                target = target[k]
+            target[path[-1]] = value
+            bad.append(doc)
+        two_forms = copy.deepcopy(self.TABLE)
+        two_forms["factors"]["exposure"]["scalar"] = 1.0
+        bad.append(two_forms)
+        for doc in bad:
+            with self.subTest(doc=doc):
+                self.assertEqual(self.shape(doc), ["calibration.shape"])
+                self.assertEqual(self.shape(doc, "1.0.0"), [])
+
+    def test_auxiliary_inputs_of_model_cards_are_not_factor_tables(self):
+        self.assertEqual(self.shape(cases.OBS), [])
+
+    def test_different_bundle_coverage_contracts_for_one_table(self):
+        from contracts.analysis_check import shape_diagnostics
+        from contracts.effect_catalog import load_coverage
+        a = load_coverage("differential-flux")
+        b = copy.deepcopy(a)
+        b["operators"] = b["operators"][1:]
+
+        def items():
+            return {"c1": {"role": "coverage-contract", "ref": "c1.json", "doc": copy.deepcopy(a)},
+                    "c2": {"role": "coverage-contract", "ref": "c2.json", "doc": copy.deepcopy(b)}}
+        it = items()
+        self.assertIn("coverage.duplicate_contract", [d["code"] for d in shape_diagnostics(it, "1.1.0")])
+        self.assertEqual((it["c1"]["doc"], it["c2"]["doc"]), (None, None))
+        self.assertNotIn("coverage.duplicate_contract", [d["code"] for d in shape_diagnostics(items(), "1.0.0")])
+        same = {"c1": {"role": "coverage-contract", "ref": "c1.json", "doc": copy.deepcopy(a)},
+                "c2": {"role": "coverage-contract", "ref": "c2.json", "doc": copy.deepcopy(a)}}
+        self.assertEqual(shape_diagnostics(same, "1.1.0"), [])
+
+    def test_context_findings_follow_the_version(self):
+        from contracts.analysis_checks.context import input_findings
+        ctx = {"context_version": "1.1.0", "roots": [{"root_id": "a", "unit": "TODO"}, {"root_id": "b", "unit": "1/(m2 sr s GV)"}],
+               "evaluations": [{"shared_parameters": [{"parameter_id": "lumi", "members": [
+                   {"model": "m", "parameter": "x"}, {"model": "m", "parameter": "y"}]}]}]}
+        self.assertEqual(sorted(f["code"] for f in input_findings(ctx)),
+                         ["context.shared_within_model", "context.unit_placeholder"])
+        self.assertEqual(input_findings(dict(ctx, context_version="1.0.0")), [])
+        across = copy.deepcopy(ctx)
+        across["roots"][0]["unit"] = "1"
+        across["evaluations"][0]["shared_parameters"][0]["members"][1]["model"] = "n"
+        self.assertEqual(input_findings(across), [])
+
+    def test_check_reports_context_findings_as_input_invalid(self):
+        from contracts import analysis_check as ac
+        r = Path(self._tmp().name)
+        bundle = cases.positive_case(r, to_1_1)
+        doc = json.loads(bundle.read_text())
+        ref = next(i["ref"] for i in doc["items"] if i["role"] == "context")
+        ctx = json.loads((r / ref).read_text())
+        ctx["roots"][0]["unit"] = "TODO"
+        (r / ref).write_text(json.dumps(ctx))
+        view, diags = ac.load_subject(bundle, r)
+        self.assertIn("context.unit_placeholder", [d["code"] for d in diags if d["kind"] == "input-invalid"])
+
+    def _tmp(self):
+        t = tempfile.TemporaryDirectory()
+        self.addCleanup(t.cleanup)
+        return t
 
 
 class V90ContextConversion(unittest.TestCase):

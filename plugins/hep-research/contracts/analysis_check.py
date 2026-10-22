@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -42,7 +43,7 @@ if __package__ in (None, ""):
 
 from contracts.analysis_bundle import BundleRefused, _no_duplicates, _read, item_digest  # noqa: E402
 from contracts.analysis_checks import obligations as obl  # noqa: E402
-from contracts.analysis_checks.context import check_context, version_findings  # noqa: E402
+from contracts.analysis_checks.context import check_context, input_findings, version_findings  # noqa: E402
 from contracts.analysis_checks.lock import build_lock  # noqa: E402
 from contracts.effect_catalog import load_catalog  # noqa: E402
 from contracts.release_manifest import canonical_sha256  # noqa: E402
@@ -207,6 +208,11 @@ def shape_diagnostics(items: dict, context_version="1.0.0") -> list[dict]:
                 diags.append({"kind": "input-invalid", "code": f"item.schema:{role}",
                               "message": f"{iid}: " + "; ".join(f"{f.path}: {f.code}" for f in res.errors[:5])})
                 it["doc"] = None
+        elif role == "calibration" and isinstance(doc, dict) and on("calibration.shape") and _is_factor_table(doc):
+            problems = factor_table_shape(doc)
+            if problems:
+                diags.append({"kind": "input-invalid", "code": "calibration.shape", "message": f"{iid}: " + "; ".join(problems[:5])})
+                it["doc"] = None
         elif role == "measurement-spec" and isinstance(doc, dict):
             corr = (doc.get("extension") or {}).get("corrections") if isinstance(doc.get("extension"), dict) else None
             if not on("spec.bad_corrections"):
@@ -219,7 +225,58 @@ def shape_diagnostics(items: dict, context_version="1.0.0") -> list[dict]:
             for d in sorted({str(x) for x in ids if ids.count(x) > 1}):
                 diags.append({"kind": "input-invalid", "code": "spec.duplicate_effect_id",
                               "message": f"{iid}: effect_id {d!r} names two corrections"})
+    if on("coverage.duplicate_contract"):
+        by_table: dict = {}
+        for iid, it in sorted(items.items()):
+            if it.get("role") == "coverage-contract" and isinstance(it.get("doc"), dict):
+                by_table.setdefault(str(it["doc"].get("table_id")), []).append((iid, canonical_sha256(it["doc"])))
+        for tid, docs in sorted(by_table.items()):
+            if len({sha for _, sha in docs}) > 1:
+                diags.append({"kind": "input-invalid", "code": "coverage.duplicate_contract",
+                              "message": f"table {tid!r} has {len(docs)} different bundle coverage contracts: "
+                                         f"{[i for i, _ in docs]} (no first-wins)"})
+                for iid, _ in docs:
+                    items[iid]["doc"] = None
     return diags
+
+
+def _is_factor_table(doc: dict) -> bool:
+    return "factor_table_version" in doc or "factors" in doc
+
+
+def _finite(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+
+
+def factor_table_shape(doc: dict) -> list[str]:
+    """Shape of a factor-table calibration (check-context 1.1.0, G16): factors maps an effect to exactly one of
+    values (a non-empty list of finite numbers), scalar (a finite number) or by_scope (scope -> such a list); an
+    optional tolerance is {"relative": a finite number >= 0}."""
+    out = []
+    if doc.get("factor_table_version") != "1.0.0":
+        out.append("factor_table_version is '1.0.0'")
+    factors = doc.get("factors")
+    if not isinstance(factors, dict) or not factors:
+        return out + ["factors is a non-empty object"]
+    finite_list = lambda v: isinstance(v, list) and bool(v) and all(_finite(x) for x in v)  # noqa: E731
+    for name, entry in sorted(factors.items()):
+        forms = [k for k in ("values", "scalar", "by_scope") if isinstance(entry, dict) and k in entry]
+        if len(forms) != 1:
+            out.append(f"factors.{name}: exactly one of values, scalar, by_scope")
+        elif forms[0] == "values" and not finite_list(entry["values"]):
+            out.append(f"factors.{name}.values: a non-empty list of finite numbers")
+        elif forms[0] == "scalar" and not _finite(entry["scalar"]):
+            out.append(f"factors.{name}.scalar: a finite number")
+        elif forms[0] == "by_scope" and not (isinstance(entry["by_scope"], dict) and entry["by_scope"]
+                                              and all(finite_list(v) for v in entry["by_scope"].values())):
+            out.append(f"factors.{name}.by_scope: scope -> a non-empty list of finite numbers")
+    if "tolerance" in doc:
+        tol = doc["tolerance"]
+        rel = tol.get("relative") if isinstance(tol, dict) else None
+        if not (isinstance(tol, dict) and set(tol) == {"relative"} and isinstance(rel, (int, float)) and _finite(rel)
+                and rel >= 0):
+            out.append("tolerance is {\"relative\": a finite number >= 0}")
+    return out
 
 
 def draft_view(root, items: list, context: dict, files: dict | None = None) -> dict:
@@ -381,6 +438,9 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
     pairing = version_findings(context)
     if pairing:
         raise BundleRefused("bundle.context_version", "; ".join(f"{f['where']}: {f['message']}" for f in pairing))
+    bad_input = input_findings(context)
+    if bad_input:
+        raise BundleRefused("bundle.context_input", "; ".join(f"{f['where']}: {f['message']}" for f in bad_input))
     try:
         view = draft_view(root, items, context)
     except (UnicodeError, ValueError) as exc:
@@ -496,7 +556,8 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
         rep = validate(doc, name)
         for f in rep.errors:
             diags.append({"kind": "input-invalid", "code": f"{name.split('.')[0]}.{f.code}", "message": f"{f.path}: {f.message}"})
-    diags += [{"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"} for f in version_findings(context)]
+    diags += [{"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"}
+              for f in version_findings(context) + input_findings(context)]
     view, more = _view(items, context)
     diags += more
     view.update(bundle=bundle, lock=lock, bundle_verified=ver["status"], root=str(root))

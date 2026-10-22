@@ -81,13 +81,21 @@ class ChainProbes(Probe):
         rep = self.positive(drop)
         self.assertNotEqual(rep["status"], "complete", "an undescribed applied correction leaves the check complete")
 
-    @PHASE2
     def test_g2_required_false_cannot_hide_a_violation(self):
-        # G2 (DR-2, V78): a root marked required:false whose output conflicts is not silently not_applicable
-        def hide(c):
+        # G2 (DR-2, V78): check-context 1.1.0 has no 'required': a deferral cannot be written, and the conflicting
+        # root is violated (a frozen 1.0.0 context keeps its semantics, P3)
+        from contracts.analysis_bundle import BundleRefused
+
+        def conflict(c):
             c.context["roots"][0]["quantity"] = "integrated_flux"
+
+        def hide(c):
+            conflict(c)
             c.context["roots"][0]["required"] = False
-        rep = self.positive(hide)
+        with self.assertRaises(BundleRefused) as cm:
+            cases.positive_case(self.root(), cases.both(cases.context_1_1, hide))
+        self.assertEqual(cm.exception.code, "bundle.context_version")
+        rep = self.positive(cases.both(cases.context_1_1, conflict))
         self.assertEqual(by_rule(rep, "r-inv.root")[0]["state"], "violated")
 
     @PHASE2
@@ -106,22 +114,28 @@ class ChainProbes(Probe):
         rep = self.positive(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0]), key="acceptance"))
         self.assertTrue(by_rule(rep, "r-comp.factor_values"), "no factor obligation for a table under a child key")
 
-    @PHASE2
     def test_g15_two_bundle_coverage_contracts_for_one_table(self):
-        # G15 (V81): two different bundle coverage contracts for one table are input-invalid, not first-wins
+        # G15 (V81): two different bundle coverage contracts for one table are input-invalid (1.1.0), not first-wins
         def two(c):
             cases.custom_table(c, "differential-flux-x", None, None)
             second = copy.deepcopy(c.doc("differential-flux-x-coverage"))
             second["operators"][0]["covers"] = []
             c.add("coverage-contract", "differential-flux-x-coverage-2", "differential-flux-x.coverage-2.json", second)
-        rep = self.positive(two)
-        self.assertEqual(rep["input_validity"], "invalid", [d["code"] for d in rep["input_diagnostics"]])
+        from contracts.analysis_bundle import BundleRefused
+        with self.assertRaises(BundleRefused) as cm:  # input-invalid: refused at freeze
+            self.positive(cases.both(two, cases.context_1_1))
+        self.assertEqual(cm.exception.code, "bundle.item_schema")
+        self.assertIn("coverage contracts", str(cm.exception))
 
-    @PHASE2
     def test_g16_a_nan_tolerance_is_input_invalid(self):
-        # G16 (V79): a NaN tolerance makes every comparison false; it must not yield satisfied
-        rep = self.positive(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0], tolerance="nan")))
-        self.assertNotEqual(by_rule(rep, "r-comp.factor_values")[0]["state"], "satisfied")
+        # G16 (V79): a NaN or string tolerance makes every comparison false; in a 1.1.0 context the calibration is
+        # input-invalid and never yields satisfied
+        from contracts.analysis_bundle import BundleRefused
+        for tol in ("nan", float("nan")):
+            with self.subTest(tolerance=tol), self.assertRaises(BundleRefused) as cm:  # input-invalid: refused at freeze
+                self.positive(cases.both(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0],
+                                                                          tolerance=tol)), cases.context_1_1))
+            self.assertIn("tolerance", str(cm.exception))
 
     @PHASE2
     def test_g17_exclusion_does_not_depend_on_declaration_order(self):
@@ -143,15 +157,14 @@ class ChainProbes(Probe):
         second = rules._exclusion(Env([excl, contra]), a, b)[0]
         self.assertEqual(first, second)
 
-    @PHASE2
     def test_g22_freeze_refuses_an_empty_or_placeholder_unit(self):
-        # G22 (V89): a root's unit must be stated; freeze refuses an empty or placeholder unit
+        # G22 (V89): a root's unit must be stated; freeze refuses an empty or placeholder unit (1.1.0 context)
         from contracts.analysis_bundle import BundleRefused
-        for unit in ("", "TODO"):
+        for unit in ("", " ", "TODO", "tbd", "?", "<unit>"):
             def v(c, unit=unit):
                 c.context["roots"][0]["unit"] = unit
             with self.subTest(unit=unit), self.assertRaises(BundleRefused):
-                cases.positive_case(self.root(), v)
+                cases.positive_case(self.root(), cases.both(cases.context_1_1, v))
 
 
 class RatioProbes(Probe):
@@ -194,7 +207,6 @@ class ModelProbes(Probe):
         self.assertEqual(next(o for o in rep["obligations"] if o["obligation_id"] == "r-aux.use:fit#sr-cr/lumi-copy")["state"],
                          "violated")
 
-    @PHASE2
     def test_g12_shared_parameters_within_one_model_do_not_hide_v07(self):
         # G12 (V80): sharing two parameters of one model merges two constraint terms and hides a repeated observation
         def hide(c):
@@ -206,11 +218,10 @@ class ModelProbes(Probe):
             c.context["evaluations"][0]["shared_parameters"] = [
                 {"parameter_id": "lumi", "members": [{"model": "sr-cr", "parameter": "lumi"},
                                                      {"model": "sr-cr", "parameter": "lumi_cr"}]}]
-        try:
-            rep = self.model(hide)
-        except Exception:  # noqa: BLE001  refused at freeze: the intended input-invalid outcome
-            return
-        self.assertNotEqual(rep["status"], "complete")
+        from contracts.analysis_bundle import BundleRefused
+        with self.assertRaises(BundleRefused) as cm:  # 1.1.0: input-invalid, refused at freeze
+            self.model(cases.both(hide, cases.context_1_1))
+        self.assertEqual(cm.exception.code, "bundle.context_input")
 
 
 class RunProbes(Probe):
