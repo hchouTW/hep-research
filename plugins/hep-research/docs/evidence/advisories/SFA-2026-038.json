@@ -1,6 +1,8 @@
 {
  "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-038",
+ "published": "2026-10-22T01:47:39Z",
+ "modified": "2026-10-22T06:07:57Z",
  "severity": "S1",
  "ledger": [
   "PERIODICITY-REFIT"

@@ -1,6 +1,8 @@
 {
  "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-037",
+ "published": "2026-10-22T00:37:17Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S2",
  "ledger": [
   "TRAINING-MEMORY-VERDICT"

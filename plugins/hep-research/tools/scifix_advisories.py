@@ -4,7 +4,8 @@
 An advisory (docs/evidence/advisories/SFA-YYYY-NNN.json, format hep-research-scifix-advisory/2, provisional: shadow
 mode; the scan still reads /1 for one release) records a defect that a sci-fix corrected, for people holding results made before the fix. It does not repeat
 the correctness evidence: it names the entries of docs/evidence/sci-fixes.json. Fields:
-  id, summary, severity (S1-S4, the ledger's), ledger (ledger ids),
+  id, published, modified (OSV: UTC timestamps YYYY-MM-DDTHH:MM:SSZ; published is when the advisory was first
+  committed, modified the last change), summary, severity (S1-S4, the ledger's), ledger (ledger ids),
   affected: [{paths: [plugin-relative files with the defect], ranges: [{type: "SEMVER", events: [{introduced},
              {fixed} | {last_affected}]}], database_specific: {fixed_commit}}]  (OSV semantics: introduced "0" is
              every earlier release; no fixed event means every later release, the fix not released yet),
@@ -35,7 +36,10 @@ Subcommands (all read-only):
                         file against the release before it (when both have a manifest); an introduced release that
                         already held an affected path states introduced_basis. applies_to: known artifact types,
                         well-formed conditions that discriminate, match_basis for match [], outputs naming files of
-                        the plugin
+                        the plugin; published and modified timestamps, modified not before published. Warnings
+                        (not problems): an advisory whose introduced_commit is another advisory's fixed_commit, unless
+                        a ledger entry it names records that entry in regression_of (a person confirms the link: merge
+                        and squash commits can make it misleading)
   affected [--id ID]    the releases each advisory affects, computed from release-manifests/ (in range and holding
                         an affected path); releases in range older than the first manifest are listed apart
   scan PROJECT_DIR      the project's artifacts (artifacts_dir of hep-research.project.json, default
@@ -65,6 +69,7 @@ MANIFESTS = ROOT / "release-manifests"
 FORMAT = "hep-research-scifix-advisory/2"
 FORMAT_V1 = "hep-research-scifix-advisory/1"  # read by scan for one more release, never written
 ID = re.compile(r"^SFA-\d{4}-\d{3}$")
+TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+$")
 SEVERITIES = ("S1", "S2", "S3", "S4")
 CONFIG_NAME = "hep-research.project.json"
@@ -292,6 +297,11 @@ def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root
         seen.add(adv.get("id"))
         if adv.get("severity") not in SEVERITIES:
             problems.append(f"{name}: severity must be one of {SEVERITIES}")
+        stamps = [adv.get(k) for k in ("published", "modified")]
+        if not all(isinstance(t, str) and TIMESTAMP.match(t) for t in stamps):
+            problems.append(f"{name}: published and modified are UTC timestamps YYYY-MM-DDTHH:MM:SSZ")
+        elif stamps[1] < stamps[0]:
+            problems.append(f"{name}: modified {stamps[1]} is before published {stamps[0]}")
         refs = adv.get("ledger") or []
         if not refs:
             problems.append(f"{name}: names no ledger entry (the correctness evidence)")
@@ -350,6 +360,30 @@ def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root
                     not affected_releases(adv, manifests)["before_first_manifest"]:
                 problems.append(f"{name}: no release is affected (range or paths wrong)")
     return problems
+
+
+def regression_warnings(advisories: list[dict], ledger: dict) -> list[str]:
+    """Plan C1: an advisory introduced by the commit that fixed another advisory's defect is probably a regression of
+    that fix; warn unless a ledger entry the advisory names records it in regression_of."""
+    entries = {f["id"]: f for f in ledger["fixes"]}
+    fixed_by = {}
+    for adv in advisories:
+        for block in adv.get("affected") or []:
+            commit = (block.get("database_specific") or {}).get("fixed_commit")
+            if isinstance(commit, str) and len(commit) == 40:
+                fixed_by.setdefault(commit, set()).add(adv["id"])
+    advisory_ledger = {adv["id"]: set(adv.get("ledger") or []) for adv in advisories}
+    warnings = []
+    for adv in advisories:
+        recorded = {r for ref in adv.get("ledger") or [] for r in (entries.get(ref) or {}).get("regression_of", [])}
+        for block in adv.get("affected") or []:
+            commit = (block.get("database_specific") or {}).get("introduced_commit")
+            for other in sorted(fixed_by.get(commit, set()) - {adv["id"]}):
+                if not advisory_ledger[other] & recorded:
+                    warnings.append(f"{adv['id']}: introduced by {commit[:8]}, the fix of {other}: if it is a "
+                                    f"regression of that fix, record {', '.join(sorted(advisory_ledger[other]))} in "
+                                    f"regression_of of {', '.join(adv.get('ledger') or [])}")
+    return warnings
 
 
 def holds(manifest_paths: set[str], path: str) -> bool:
@@ -583,8 +617,10 @@ def main(argv=None) -> int:
     try:
         advisories, manifests = load_advisories(), load_manifests()
         if args.cmd == "check":
-            problems = check(advisories, load_json(LEDGER), manifests)
-            out = {"status": "failed" if problems else "passed", "advisories": len(advisories), "problems": problems}
+            ledger = load_json(LEDGER)
+            problems = check(advisories, ledger, manifests)
+            out = {"status": "failed" if problems else "passed", "advisories": len(advisories), "problems": problems,
+                   "warnings": regression_warnings(advisories, ledger)}
             code = 1 if problems else 0
         elif args.cmd == "affected":
             chosen = [a for a in advisories if args.id in (None, a["id"])]

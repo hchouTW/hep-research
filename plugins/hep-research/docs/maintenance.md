@@ -188,7 +188,15 @@ these records. One entry is one fix: an entry that bundled several is split, and
 The ledger's `changelog` names where the fix shipped: `{"kind": "release", "release": "X.Y.Z"}`, `{"kind": "audit",
 "name": ..., "release": ...}` (a release section's audit subsection), or `{"kind": "unreleased"}` until the release
 (an optional `detail` gives the item label); the release is a CHANGELOG section and, when an advisory names the entry,
-the advisory's `fixed` release; an unreleased entry's advisory range is still open.
+the advisory's `fixed` release; an unreleased entry's advisory range is still open. An S1 or S2 entry is named by an
+advisory or carries `advisory_waiver` `{reason, decided}` (for example: only the status of input that produced no
+result changed). `regression_of` lists the entries whose fix introduced this defect; `scifix_advisories.py check`
+warns when an advisory's `introduced_commit` is another advisory's `fixed_commit` until a person confirms the link
+there (merge and squash commits can make it misleading; an over-correction inside one entry is a follow-up commit,
+not a regression). A sci-fix that changes input normalisation (separators, signs, leading zeros, fractional parts,
+path segments) comes with a property or exhaustive test, and its PR description lists the other callers of the
+changed function and whether their input range changes (maintainer decision 2026-10-22, after SFA-2026-002 and
+-003).
 
 | Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
 |---|---|---|---|---|---|
@@ -202,7 +210,8 @@ Under `tests/skills/`: `physics_ml/` is now `hep_ml/`, `detector_response/` is `
 `hep_citations/`). A parent record names the path at the fix commit, where its test ran.
 
 **Advisories (shadow mode).** A sci-fix that changed a released number or verdict gets an advisory,
-`docs/evidence/advisories/SFA-YYYY-NNN.json` (format `hep-research-scifix-advisory/2`, provisional; the scan reads `/1` for one more release), for people who
+`docs/evidence/advisories/SFA-YYYY-NNN.json` (numbers never reused; `README.md` there lists the gaps; OSV
+`published` and `modified` UTC timestamps; format `hep-research-scifix-advisory/2`, provisional; the scan reads `/1` for one more release), for people who
 hold results made before the fix. It names the ledger entries instead of repeating the evidence, gives the affected
 plugin files and an OSV `SEMVER` range (`introduced`, then `fixed` or `last_affected`; no closing event while the fix
 is unreleased, with `database_specific.fixed_commit`), the scientific impact apart from the range (`observables`,
