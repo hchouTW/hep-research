@@ -2126,6 +2126,23 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-PLAN-C3-C4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-9-scan-surface` from main `168ede40`)
+
+Sci-fix improvement plan v3, PR-9 parts C3 and C4.
+
+| Check | Result |
+|---|---|
+| `release_manifest.py backfill --commit hep-research--v0.3.0` | 955 files, digest `d75dbfdd1d3091df…`, commit `351029c0bfdd…` (the root import) |
+| `release_manifest.py backfill --commit 9870a35a` (0.4.0, never tagged: the merge of PR #6, whose `plugin.json` says 0.4.0) | 1013 files, digest `a755680f6011b12f…`, commit `9870a35ab49e…` |
+| `check-published` on the branch | pass; both backfilled manifests identical to their tag or commit; no pending tags; no unrecorded tags left |
+| `scifix_advisories.py check` with the two manifests | 0 problems; the fixed-release rule now also checks 0.4.0 against 0.3.0 for SFA-2026-008 to -011, -030, -031 (all changed) |
+| `tests/tools/test_release_manifest.py` (new: backfill from an untagged commit, checked against it, its record may not change, a short commit is refused) | pass, 10 tests |
+| C3: `check_routing_static.py`, `check_ownership.py`, `measure_entrypoints.py` after the reference-index rule | pass; reference inventory regenerated |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock, after the rebase on main `168ede40` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4856 tests, 4605 pass, 0 failures, 251 skipped |
+
+Not run: live routing for the C3 rule (maintainer decision 2026-10-22: the reference-index option, no paid run). The
+rule sits in a reference, not in the SKILL.md body, so it triggers only when the reference is read.
+
 ## SCIFIX-ADVISORY-V2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-5-advisory-v2`, stacked on `scifix/pr-4-execution-trace`)
 
 Sci-fix improvement plan v3, PR-5 (A1 change 1), sci-fix ADVISORY-MATCH-V2 (S2, C2, D2). Fix `5cb720b8`, parent

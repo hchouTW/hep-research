@@ -166,5 +166,42 @@ class PublishedImmutabilityC10(unittest.TestCase):
         self.assertTrue(any("was changed" in p for p in rep["problems"]), rep)
 
 
+    def backfill(self, commit):
+        out = self.d / "backfilled.json"
+        p = subprocess.run([sys.executable, str(self.plugin / "tools" / "release_manifest.py"), "backfill", "--commit",
+                            commit, "--out", str(out)], cwd=self.plugin, capture_output=True, text=True, timeout=300)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        return json.loads(out.read_text())
+
+    def test_untagged_release_is_backfilled_from_its_commit(self):
+        """Plan C4 (F-20): a release made before manifests and never tagged (0.4.0) is recorded from its commit and
+        then checked against that commit; editing the record later is a change to a published one."""
+        self.d = Path(self.tmp.name)
+        (self.plugin / "core" / "a.py").write_text("x = 7  # release 9.9.8, never tagged\n")
+        git(self.repo, "commit", "-qam", "release 9.9.8")
+        release = git(self.repo, "rev-parse", "HEAD").stdout.strip()
+        man = self.backfill(release)
+        self.assertEqual((man["backfilled"], man["commit"], man["version"]), (True, release, "9.9.9"))
+        path = self.plugin / "release-manifests" / "9.9.8.json"
+        path.write_text(json.dumps(man))
+        git(self.repo, "add", "-A")
+        git(self.repo, "commit", "-qm", "backfill 9.9.8")
+        base = git(self.repo, "rev-parse", "HEAD").stdout.strip()
+        (self.plugin / "core" / "a.py").write_text("x = 8  # later work\n")
+        git(self.repo, "commit", "-qam", "later work")
+        code, rep = self.check("--base", base)
+        self.assertEqual((code, rep["pending_tags"]), (0, []), rep)
+        self.assertIn({"tag": "hep-research--v9.9.8", "ref": release, "status": "identical", "digest": man["digest"]},
+                      rep["checked"])
+        path.write_text(json.dumps(dict(man, generator="edited")))
+        git(self.repo, "commit", "-qam", "edit the backfilled record")
+        code, rep = self.check("--base", base)
+        self.assertTrue(any("9.9.8.json: a recorded release manifest was changed" in p for p in rep["problems"]), rep)
+        path.write_text(json.dumps(dict(man, commit="abc")))
+        git(self.repo, "commit", "-qam", "short commit")
+        code, rep = self.check()
+        self.assertTrue(any("names its full release commit" in p for p in rep["problems"]), rep)
+
+
 if __name__ == "__main__":
     unittest.main()
