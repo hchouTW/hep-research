@@ -2434,6 +2434,26 @@ scikit-learn 1.9.1.
 | touched modules (tail_extrapolation, train_bdt, train_bdt_extensions, write_ml_artifact) | E2: 56 run, OK, 25 skipped; CI venv: 56 run, OK, 1 skipped |
 | `run_all_checks.py --no-cli --jobs 6`, E2, at `33bd6464` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4515 tests in 383 modules, 4384 pass, 0 failures, 131 skipped; profile tests all pass |
 
+## REVIEW-REFS-3 (2026-10-22; branch `fix/live-reference-issues` from main `a53af7e0`)
+
+Five 0.23.0 references were the documents of the first live review with the new options (`--lens-model design=sonnet
+--filter-model opus`; outside the repository). A blind Opus adjudicator per document upheld 40 issues from the
+findings (none substantive) and named 2 more that no reviewer raised (one substantive). Each was rechecked against its
+source before the edit; for a partly correct finding only the upheld part changed. Severity S3, ledger
+`documentation_fixes` REVIEW-REFS-3. Sources opened 2026-10-22.
+
+| Reference | Issues | Main changes | Sources (locators) |
+|---|---|---|---|
+| hep-detector `space-based-direct-detection.md` | 17 | Garwood level labelled 68.27%; T = 4.641 GeV is the bin-centre value; the cutoff deliverable and the worked example use the backtraced maximum over the cone (east-horizontal 5.99 GV vs vertical 4.54 GV); the Stormer formula is directional; a pure dipole has a penumbra; negative-particle sign; cutoff by charge sign; positron fraction rises from about 10 GeV; profile claims for the fraction and antiprotons; spectrometer items in the response checklist; scope, typo, links and read dates | `cosmic_ray_flux.py` run (level 0.6827); Stormer recomputation; Nolty, arXiv:hep-ex/0201015 Stormer section; AMS-02 evidence index C04, C06, C96, C110, C113; hep-theory `cosmic-ray-propagation.md`; SILSO pages (web.archive.org copies) |
+| hep-detector `calibration-and-alignment.md` | 7 + 1 | measured-value notation `x_m` in the inverse-offset row (raised by the adjudicator; sign unchanged); 0.3 is a tool warning, not a bound; PDG cited for the most probable value only; muon scale anchors as the paper states them (no Upsilon); weak-mode constraints may enter the alignment fit; "must" for per-period stability; LED/laser monitoring; "300%" not equated with a factor of 3 | `propagate_scale_distortion.py` (`WARN_QXD`, edge mapping); PDG RPP 2024 sects. 34.2.3, 34.2.9; arXiv:1206.4071 sect. 6; arXiv:1403.2286 sect. 4.4; arXiv:2603.25085 abstract |
+| hep-detector `triggers-luminosity-pileup.md` | 8 | Lendermann locators and the exclusion/inclusion weights; ATLAS 8 TeV sections 4-7 and the 13 TeV correlation section; tag-and-probe weight support; pileup script guards; prescales divide the live-time sum; `n1 n2` in the visible cross section; luminosity uncertainty about 1-2%; page title | arXiv:0901.4118 sects. 3-4 eqs. 3-13; arXiv:1608.03953 sects. 4.1, 7.3; arXiv:2212.09379 sect. 8.1; arXiv:2104.01927; `tag_and_probe_efficiency.py`, `pileup_reweight.py` |
+| hep-statistics `statistical-inference-for-physics.md` | 2 + 1 | ignoring a positive correlation understates a sum but overstates a difference, ratio or shape (substantive, raised by the adjudicator); CLs is a modified exclusion criterion; citation style | Var(a +- b) = Var(a) + Var(b) +- 2 Cov(a, b); `inference-recipes.md`, `scientific-style.md` |
+| hep-measurement `analysis-design.md` | 6 | only the boundary era check runs with one era; `batch_campaign.py` path; `residual.py` is advisory and partial; Z_A applies when s/b is not small; k-fold pointer to hep-ml; look-elsewhere script pointer | `review_measurement_spec.py` (two-era gate); `adapters/batch-schedulers/batch_campaign.py`; `core/blinding/residual.py` docstring; arXiv:1007.1727 sect. 5.1; `ml-analysis.md` "Splits and leakage"; `inference-recipes.md`, `core-stats-commands.md` |
+
+Also: the `geomagnetic_cutoff.py` docstring penumbra wording (no behaviour change), and the hep-authoring
+`independent-review.md` recommendation of `--filter-model` with the live-run numbers (precision 0.59 to 0.84, 39 of 40
+real issues kept, about 10% of the review's tokens) and the design-lens result (5 of 5 accepted at the first attempt).
+
 ## REVIEW-REFS-2 (2026-10-22; branch `fix/tune-reference-issues` from main `5350266b`)
 
 Five 0.22.0 references were the documents of the review tuning run (8-slot reviews of PR #194's mechanism, outside the

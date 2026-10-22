@@ -31,8 +31,9 @@ environment. Test-beam constants are a starting point, not a final answer.
 **In-situ** calibration derives constants from the data itself, using physics that is
 known independently: a resonance of known mass, momentum-energy consistency (`E/p`),
 back-to-back balance in transverse momentum, or the uniformity of an isotropic flux.
-It is the only way to capture the real environment and its time evolution, and it is
-what sets the achievable constant term of a calorimeter (see
+It captures the real environment and its time evolution (LED, laser and
+single-photoelectron monitoring also track gain drift without physics events, but not the
+absolute scale), and it is what sets the achievable constant term of a calorimeter (see
 [calorimetry](calorimetry-ecal-hcal.md)).
 
 The limitation of in-situ calibration is circularity: the reference physics is measured
@@ -75,7 +76,9 @@ field off, vertex knowledge and resonance masses are the inputs the paper uses a
 weak modes; the cosmic tracks have limited power against a twist.
 <!-- /example -->
 
-Weak modes must be constrained with information the alignment fit does not use:
+Weak modes must be constrained with information beyond the track residuals the
+alignment fit minimizes (some of it, such as cosmic tracks or a resonance mass, can
+enter the alignment fit itself, as in the example above):
 
 - **A resonance of known mass**, whose reconstructed mass must not depend on the
   charge, the direction, or the momentum of its decay products.
@@ -98,14 +101,16 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
   use it with a bremsstrahlung-aware track fit, in bins where both are controlled.
 - **A resonance mass**: fit the line shape (natural width convolved with the resolution, with a final-state-radiation
   tail), not the peak position; a peak position moves with the resolution and the radiation.
-- **Low-momentum scale**: the J/psi and Upsilon resonances anchor the scale at low transverse momentum, and the Z at
-  higher; the extrapolation between them in pT is part of the uncertainty
+- **Low-momentum scale**: a low-mass resonance anchors the scale at low transverse momentum and the Z at higher;
+  the extrapolation between the anchors in pT is part of the uncertainty.
   <!-- example: source citation -->
-  (CMS muon performance, JINST 7 (2012) P10002, arXiv:1206.4071, section 6; read 2026-10-14).
+  In CMS muon performance (JINST 7 (2012) P10002, arXiv:1206.4071, section 6; read 2026-10-22) the J/psi and Z
+  dimuon masses calibrate the scale below about 100 GeV/c and cosmic-ray muons above it, and the bias found with
+  the Z is larger than with the J/psi (pT dependent).
   <!-- /example -->
-- **MIP calibration**: use the most probable value of the Landau-like deposit with a path-length correction
-  (`1/cos theta` for inclined tracks), not the mean, which is pulled by the tail (PDG RPP 2024, Passage of particles
-  through matter).
+- **MIP calibration**: use the most probable value of the Landau-like deposit, not the mean, which is pulled by the
+  tail (PDG RPP 2024, Passage of particles through matter, secs. 34.2.3 and 34.2.9), with a geometric path-length
+  correction (`1/cos theta` for inclined tracks).
 - **Intercalibration**: pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
   absolute scale still needs a reference.
 - **Hadronic calorimeters**: `E/p` of isolated single hadrons, with its own selection bias from the isolation cut.
@@ -143,8 +148,9 @@ The AMS-02 Layer-0 upgrade (public sources only) adds a new silicon microstrip t
 detector. The beam-test paper arXiv:2603.25085 (abstract read 2026-10-17; full text not read) reports flight-model
 ladders of 8 to 12 silicon microstrip sensors in series, tested in a 350 GeV mixed hadron beam at the CERN SPS, with
 an intrinsic spatial resolution at normal incidence from 9.5 um to 11.4 um, and states that the layer increases the
-cosmic-ray acceptance by a factor of 3; the profile claim ams02:C101 records the same gain as quoted by the AMS
-website and a CERN news item (promotional wording, not an analysis acceptance). For an analysis this means a new
+cosmic-ray acceptance by a factor of 3; the profile claim ams02:C101 records the gain as "300%" as quoted by the AMS
+website and a CERN news item (promotional wording, a factor of 4 if read literally, so not to be equated with the
+factor of 3; not an analysis acceptance). For an analysis this means a new
 detector era with its own acceptance, alignment and rigidity scale; the era boundary must come from the
 experiment's own sources (the installation and commissioning dates), not from a change point found in the data.
 <!-- /example -->
@@ -166,7 +172,7 @@ requirements:
   describes no real detector state. A simulation using a single snapshot of the
   dead-channel map or the gain set is likewise wrong for the dataset as a whole.
 - **Analyses combining periods must confirm the constants were applied consistently**
-  in each, and should check stability by repeating the measurement per period. A
+  in each, and must check stability by repeating the measurement per period. A
   result that varies across periods beyond its statistical uncertainty has an
   unaccounted conditions problem, and finding it after unblinding is much worse than
   finding it before.
@@ -224,14 +230,17 @@ weak-mode bound) is propagated as a systematic. Declare its form, then compute w
 | Form | Model | Effect on a power law `dN/dx ~ x^-gamma` |
 |---|---|---|
 | Scale | `x_m = (1+s) x` (energy or momentum scale) | every bin `(1+s)^(gamma-1) - 1 ~ (gamma-1) s`, the same in all bins |
-| Inverse offset | `1/x_m = 1/x + q delta` (curvature offset, e.g. a weak mode) | density factor `(1 - q x delta)^(gamma-2)`, first order `(2-gamma) q x delta`: grows with x, opposite for the two charge signs |
+| Inverse offset | `1/x_m = 1/x + q delta` (curvature offset, e.g. a weak mode) | density factor `(1 - q x_m delta)^(gamma-2)`, first order `(2-gamma) q x_m delta`: grows with x_m, opposite for the two charge signs |
 | Resolution | core and tail widths scaled by `1 +/- r` | factor `E[(1+eps)^(gamma-1)]`, about `1 + (gamma-1)(gamma-2) sigma^2/2` for a Gaussian |
 
 - **Opposite-sign ratios.** One curvature offset moves both operands, in opposite directions: the signed shifts
   subtract and their magnitudes add. A ratio does not cancel this residual; it doubles it. Same-sign operands with
   different spectral indices cancel only partly.
-- **Validity.** The first-order inverse-offset form fails when `|q x delta|` approaches 0.3; at `q x delta >= 1` the
-  mapping is no longer one-to-one and events change charge sign (see [charge-confusion.md](charge-confusion.md)).
+- **Validity.** In the inverse-offset row, x_m is the measured value (the bin value), x the true one. The tool warns
+  when `|q x_m delta|` exceeds 0.3, a conventional threshold, not a derived bound: the error of the first-order form
+  depends on gamma (at 0.3 about 1.4% of the factor at gamma 2.7, 3.8% at gamma 1.5, none at gamma 2 or 3), so use
+  the exact factor where `|q x_m delta|` is not small. At `q x_m delta >= 1` the mapping is no longer one-to-one and
+  events change charge sign (see [charge-confusion.md](charge-confusion.md)).
 - **No default size.** `s` or `delta` comes from the calibration itself (a reference line, E/p, a known-mass peak,
   the external constraint on a weak mode), never from a typical value.
 - **Deliverables.** Per-variation yields and per-bin shifts, `{nominal, up, down}` for

@@ -1,15 +1,17 @@
 # Space-Based and Balloon-Borne Direct Cosmic-Ray Detection
 
 Covers cosmic-ray measurements made *above the atmosphere* (satellite or long-duration
-balloon magnetic spectrometers and calorimeters), where
+balloon magnetic spectrometers and calorimeters; balloons fly under a few g/cm^2 of
+residual atmosphere), where
 individual nuclei are measured directly rather than inferred from an air shower. The
 detector technology - magnetic spectrometry, calorimetry, TOF, TRD, RICH - is exactly
 the material in
 [detector-systems-overview.md](detector-systems-overview.md) through
-[particle-identification.md](particle-identification.md), applied
-unchanged; this file covers what is specific to the near-Earth space environment:
-geomagnetic and solar effects that ground- and space-based measurements alike must
-correct for, and that have no collider-physics analog.
+[particle-identification.md](particle-identification.md); this file covers what is
+specific to the near-Earth space environment: geomagnetic and solar effects that
+ground- and space-based measurements alike must correct for, and that have no
+collider-physics analog, plus the instrument points listed below (calorimeter
+unfolding, balloon overburden, fragmentation).
 
 <!-- example: experiment-specific illustration -->
 Example: AMS-02-class instruments (a magnetic spectrometer on a space station).
@@ -36,10 +38,12 @@ Space instruments are of two kinds, and they measure different things:
   and so have no charge confusion, and do not separate isotopes.
 <!-- /example -->
 
-Every geomagnetic and solar effect below acts on rigidity, not on energy or momentum
+The geomagnetic effects below act on rigidity, not on energy or momentum
 separately - because both the geomagnetic field's confinement and a Fermi-accelerated
 source's maximum energy are set by how a particle's gyroradius compares to a length
-scale, which depends on `p/(Ze)`. A spectrometer flux is therefore reported in rigidity;
+scale, which depends on `p/(Ze)`. Solar modulation does so only approximately: the
+force-field shift is `|Z| phi` in energy, a rigidity shift only for relativistic
+particles, and drifts depend on the charge sign. A spectrometer flux is therefore reported in rigidity;
 reporting it only in kinetic energy per nucleon discards this scaling and makes
 comparison across species (which differ in `Z` and `A`) needlessly indirect. A
 calorimetric flux is reported in (kinetic) energy, and any comparison in rigidity needs
@@ -50,12 +54,13 @@ an `A/Z` assumption.
 The Earth's magnetic field acts as a rigidity filter: a charged particle arriving from
 a given direction at a given geomagnetic location can only reach the top of the
 atmosphere (or a near-Earth satellite) if its rigidity exceeds a minimum, the
-**geomagnetic cutoff rigidity**. For a simple dipole approximation, the vertical
-(zenith-pointing) cutoff at geomagnetic latitude `lambda_m` is the **Störmer cutoff**:
+**geomagnetic cutoff rigidity**. For a simple dipole approximation, the cutoff for
+zenith angle `eps` and azimuth `xi` at geomagnetic latitude `lambda_m` is the **Störmer
+cutoff** (the vertical cutoff when `eps = 0`):
 
     R_c = C * cos^4(lambda_m) / (r^2 * (1 + sqrt(1 - sin(eps) sin(xi) cos^3(lambda_m)))^2)
 
-with zenith angle `eps`, azimuth `xi` measured clockwise from geomagnetic north (east = 90 deg; this sign is for a positive particle), `C = 59.6 GV` (proportional to the Earth's dipole
+with zenith angle `eps`, azimuth `xi` measured clockwise from geomagnetic north (east = 90 deg; this sign is for a positive particle; for a negative particle the product `sin(eps) sin(xi)` changes sign, i.e. `xi -> xi + 180 deg`), `C = 59.6 GV` (proportional to the Earth's dipole
 moment `M`; 59.6 GV corresponds to the IGRF-14 dipole of 1955, and the 2025 dipole gives
 values about 4.5% lower, from the degree-1 IGRF-14 coefficients) and `r` the geocentric distance in Earth radii. For vertical arrival the
 square root is 1, so `R_c = 14.9 GV * cos^4(lambda_m) / r^2` (Smart & Shea 2005): about
@@ -73,9 +78,10 @@ uniformly higher: in the eastern half of the sky horizontal particles have a hig
 cutoff than vertical ones, in the western half a lower one.
 From the formula above at the equator and the surface, horizontal arrival from the west
 (`sin(eps) sin(xi) = -1`) gives `59.6/(1 + sqrt(2))^2 ≈ 10.2 GV` against the vertical
-14.9 GV, and from the east (`sin(eps) sin(xi) = +1`) `59.6 GV`. The real, non-dipolar
-field further complicates this into a "penumbra" of partially-forbidden trajectories
-requiring backtracing simulation rather than the analytic formula. `<plugin root>/skills/hep-measurement/scripts/geomagnetic_cutoff.py` evaluates the
+14.9 GV, and from the east (`sin(eps) sin(xi) = +1`) `59.6 GV`. The Störmer formula neglects the shadow of the solid
+Earth, so even a pure dipole has a "penumbra" of partially-forbidden trajectories; the real,
+non-dipolar field changes its structure, and it requires backtracing simulation rather than
+the analytic formula. `<plugin root>/skills/hep-measurement/scripts/geomagnetic_cutoff.py` evaluates the
 analytic vertical Störmer cutoff as a first-order estimate; a rigorous cutoff for a
 specific orbit and epoch requires particle backtracing through a full geomagnetic
 field model and is not something the analytic formula replaces. For backtracing, the optional adapter
@@ -85,7 +91,7 @@ pure dipole its lowest allowed vertical rigidity is at or above the Störmer val
 output is a model cutoff, not any experiment's official one.
 
 **Selection rule for a flux.** Keep an event in a rigidity bin only if the bin's lower edge
-is above a safety factor times the maximum cutoff (1.2 is one experiment's convention,
+is above a safety factor times the maximum cutoff for that charge sign (1.2 is one experiment's convention,
 not a general standard; state the value used), where the cutoff is
 backtraced through a realistic field model (e.g. IGRF plus an external-field model) over the
 detector's acceptance cone at that second. Add that second's livetime to the exposure of the
@@ -97,7 +103,7 @@ is not primary cosmic radiation reaching from outside the magnetosphere - it is
 albedo particles (atmospheric secondaries: splash albedo moving upward, re-entrant albedo guided to
 the conjugate point and arriving downward) or trapped radiation-belt particles; near the cutoff
 primaries also arrive through penumbral windows, and the transmission differs between charge signs,
-so treat e+/e- and antiproton/proton cutoffs separately. They and must be excluded from a
+so treat e+/e- and antiproton/proton cutoffs separately. They (the below-cutoff albedo and trapped particles) must be excluded from a
 primary-spectrum measurement rather than corrected for.
 
 ## Solar modulation
@@ -130,8 +136,8 @@ the sunspot record instead of guessing. Solar cycle 24 began at a minimum in Dec
 peaked in April 2014 (13-month smoothed). It had a double maximum: a first peak from the northern
 hemisphere (hemispheric maximum November 2011), a long plateau between the peaks (early 2012 to mid 2013), and the higher
 second peak from the southern hemisphere in early 2014. So about 2011-2014 is **solar maximum**,
-not a declining phase, and the solar magnetic polarity reversed during it ([SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm), [SILSO news: 2014, maximum year for cycle 24](https://www.sidc.be/SILSO/news004)). Solar cycle 25 began at the December 2019 minimum ([Royal Observatory of Belgium, 15 September 2020](https://astro.oma.be/en/december-2019-confirmed-as-starting-point-of-the-new-solar-activity-cycle)) and reached its smoothed maximum in October 2024 ([SIDC](https://www.sidc.be/article/solar-cycle-25-reached-its-maximum-october-2024); both read 2026-10-14; smoothed values are revised, so re-check the cycle table). Data from 2020 on need their own phase and polarity statement. In that period `phi` is higher than at the 2009 minimum,
-and it changes fast enough that a single `phi` for all three years is itself an approximation.
+not a declining phase, and the solar magnetic polarity reversed during it ([SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm), [SILSO news: 2014, maximum year for cycle 24](https://www.sidc.be/SILSO/news004); both read 2026-10-22 from their web.archive.org copies of 2026-08-13 and 2026-09-08). Solar cycle 25 began at the December 2019 minimum ([Royal Observatory of Belgium, 15 September 2020](https://astro.oma.be/en/december-2019-confirmed-as-starting-point-of-the-new-solar-activity-cycle)) and reached its smoothed maximum in October 2024 ([SIDC](https://www.sidc.be/article/solar-cycle-25-reached-its-maximum-october-2024); both read 2026-10-14; smoothed values are revised, so re-check the cycle table). Data from 2020 on need their own phase and polarity statement. In that period `phi` is higher than at the 2009 minimum,
+and it changes fast enough that a single `phi` for the whole span from 2020 on is itself an approximation.
 
 **Forbush decreases** - sudden, transient flux depressions lasting days, caused by a
 coronal mass ejection's magnetic structure sweeping past Earth - and **solar
@@ -171,9 +177,9 @@ for composition, isotopic ratios, and antiparticle fluxes, even though its
 geometric-factor-limited exposure caps its reach well below the knee. Two antiparticle
 results are often quoted together but differ in status. The measured **positron
 fraction** (positron flux relative to positron-plus-electron flux) rises with energy
-above a few GeV, whereas standard secondary production (cosmic-ray nuclei spallating
+from about 10 GeV, whereas standard secondary production (cosmic-ray nuclei spallating
 on the interstellar medium, per
-[cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md))
+[cosmic-ray propagation](../../hep-theory/references/cosmic-ray-propagation.md))
 predicts a falling fraction; this positron excess is interpreted either as nearby
 primary sources of `e+ e-` pairs (pulsars are the leading astrophysical candidate) or,
 more speculatively, as dark-matter annihilation or decay. Pulsars produce only `e+-`,
@@ -185,8 +191,9 @@ hypotheses requires the spectral shape (including any published high-energy drop
 model-dependent significance) and consistency with other channels (gamma-ray, anisotropy), not an
 excess alone. For numbers, significances and the current status read the bound experiment profile's
 ledger (for AMS-02: the [antimatter and leptons
-module](../../../profiles/experiments/ams-02/modules/species/antimatter-and-leptons.md), claims C04
-and C96), not this file.
+module](../../../profiles/experiments/ams-02/modules/species/antimatter-and-leptons.md): claims C04
+and C96 for the positron flux, C110 and C113 for the positron fraction, C06 for the
+antiprotons), not this file.
 <!-- /example -->
 
 ## Worked walkthrough: a proton flux point from counts (verified 2026-09-24)
@@ -202,15 +209,17 @@ python3 <plugin root>/skills/hep-measurement/scripts/solar_modulation_force_fiel
 ```
 
 1. **Cutoff.** The real selection uses the per-second backtraced cutoff (see the selection rule
-   above). As a planning check only, the vertical Stormer cutoff here is 4.54 GV. With a 1.2
-   safety factor (5.45 GV), this position contributes exposure only to bins above about 5.5 GV,
-   so for this bin the exposure comes only from time spent where `1.2 * Rc < 5.0 GV`.
+   above). As a planning check only, the vertical Stormer cutoff here is 4.54 GV. It is not the
+   maximum over the acceptance cone: east-horizontal arrival gives about 5.99 GV from the same
+   formula. Even on the vertical value with a 1.2 safety factor (5.45 GV), this position would
+   contribute exposure only to bins above about 5.5 GV, so for this bin the exposure comes only
+   from time spent where 1.2 times the maximum backtraced cutoff over the cone is below 5.0 GV.
 2. **Flux.** For 320 counts with exposure 2.4e5 m^2 sr s (already cutoff-filtered) and a 1 GV
-   bin, the flux is 1.333e-3 (m^2 sr s GV)^-1 with an exact 68% interval of
+   bin, the flux is 1.333e-3 (m^2 sr s GV)^-1 with an exact 68.27% (1 sigma) interval of
    [1.259, 1.412]e-3. Report the counts, exposure, and bin width separately. Plot the point at
    the spectrum-weighted rigidity, not at the bin center.
 3. **Solar modulation.** The flux is top-of-instrument (TOA). To compare it with a LIS,
-   convert to kinetic energy (5.5 GV, the bin centre, is used here for simplicity; a real analysis uses the spectrum-weighted rigidity -> T = 4.641 GeV for a proton), convert the flux per GV to
+   convert to kinetic energy (5.5 GV, the bin centre, gives T = 4.641 GeV for a proton and is used here for simplicity; a real analysis uses the spectrum-weighted rigidity and the T computed from it), convert the flux per GV to
    a flux per GeV, and demodulate. At phi = 0.6 GV the LIS flux is 1.233x the TOA flux, at
    T_LIS = 5.241 GeV. The force field is a one-parameter approximation, so state phi, the
    epoch, and the model.
@@ -221,13 +230,13 @@ For 4 events in 1.3-2.0 TV with exposure 2.0e7 m^2 sr s
 (`<plugin root>/skills/hep-measurement/scripts/cosmic_ray_flux.py --counts 4 --exposure 2.0e7 --bin-width 700 --bin-width-unit GV`, verified 2026-09-25):
 
 - If a user proposes `sqrt(N)/exposure/dR` for a bin with a few counts, the answer is **no**.
-  Do not call it "approximately correct". Use the exact (Garwood) Poisson interval. At 68% it
+  Do not call it "approximately correct". Use the exact (Garwood) Poisson interval. At 68.27% (1 sigma) it
   is [2.09, 7.16] counts, which is asymmetric. **Run the script to get the interval. Do not
   estimate it by hand**, because the rounded integer bounds a model guesses (e.g. [2, 6]) are
   wrong.
 - Convert TV to GV before dividing, since fluxes are quoted per GV. A 0.7 TV bin used as
   `dR = 0.7` makes the flux 1000x too large. Write the bin width in GV (700 GV here) and give units with every flux value:
-  2.86e-10 (m^2 sr s GV)^-1, with interval [1.49, 5.12]e-10.
+  2.86e-10 (m^2 sr s GV)^-1, with 68.27% interval [1.49, 5.12]e-10.
 - At TV rigidities, finite resolution approaches the maximum detectable rigidity (MDR). The
   steep spectrum then spills events into the bin from lower rigidities, so correct for this
   with unfolding or a forward-folded fit and state the resolution model.
@@ -236,7 +245,7 @@ For 4 events in 1.3-2.0 TV with exposure 2.0e7 m^2 sr s
 
 ### Instrument response functions (checklist)
 
-State, with its version: the acceptance (geometric factor times selection efficiency, m^2 sr) versus rigidity or energy, per species; for a calorimeter also the energy response matrix; the energy threshold and the energy bias and resolution versus energy; the angular
+State, with its version: the acceptance (geometric factor times selection efficiency, m^2 sr) versus rigidity or energy, per species; for a calorimeter also the energy response matrix; the energy threshold and the energy bias and resolution versus energy; for a spectrometer the rigidity resolution, MDR and charge-confusion probability versus rigidity; the angular
 resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
 (zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
 
@@ -248,8 +257,8 @@ made in it) and fragmentation of nuclei inside the instrument, which moves event
 - Whether the reported spectrum is quoted at the top of the atmosphere/instrument
   (rigidity- or kinetic-energy-per-nucleon-binned) or corrected to the local
   interstellar spectrum, and if the latter, the modulation potential and model used.
-- The geomagnetic cutoff applied (vertical Störmer as a first-order estimate, or a
-  backtraced penumbra), the orbit/epoch it was computed for, and how off-vertical
+- The geomagnetic cutoff applied (the backtraced cutoff, with its penumbra, used for both
+  events and exposure; a vertical Störmer value only as a planning check), the orbit/epoch it was computed for, and how off-vertical
   arrival directions and re-entrant/albedo contamination below cutoff were handled.
 - The solar-activity epoch (dates, and neutron-monitor or modulation-potential proxy)
   the dataset spans, and whether Forbush-decrease or SEP-event periods were

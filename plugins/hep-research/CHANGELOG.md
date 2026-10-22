@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Five more references corrected after the first live review with the 0.23.0 options (42 issues; VALIDATION
+  REVIEW-REFS-3).** Ignoring a positive correlation overstates the uncertainty of a difference or ratio, not only
+  understates it (`statistical-inference-for-physics.md`); geomagnetic cutoff deliverables use the backtraced maximum
+  over the acceptance cone, and the Garwood level is 68.27% (`space-based-direct-detection.md`); measured-value
+  notation in the inverse-offset model (`calibration-and-alignment.md`); trigger-weight and luminosity citations
+  (`triggers-luminosity-pileup.md`); era checks, `residual.py` scope and Z_A regime (`analysis-design.md`). The
+  independent-review reference now recommends `--filter-model` with the live-run numbers. Guidance only.
+
 ## 0.23.0 (2026-10-22)
 
 Contracts 3.4.0 (minor): independent review gains a per-lens model and an optional filtering pass; 27 more
