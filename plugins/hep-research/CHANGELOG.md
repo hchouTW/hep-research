@@ -3,7 +3,11 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.23.0 (2026-10-22)
+
+Contracts 3.4.0 (minor): independent review gains a per-lens model and an optional filtering pass; 27 more
+reference corrections; 24 triaged plugin issues fixed (exit codes, checkers, validator warnings); a required
+`bdt-backend` CI gate (advisory SFA-2026-037).
 
 - **Independent review: per-lens model choice and an optional filtering pass after round 1 (contracts 3.4.0).** Two
   optional `review-config.json` fields, both set at `review.py start` and both off unless set; without them every

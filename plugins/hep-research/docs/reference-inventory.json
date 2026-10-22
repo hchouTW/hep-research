@@ -2048,7 +2048,7 @@
     "skills/hep-detector/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "fcc1034c 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2260,7 +2260,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "f7d5722d 2026-10-17"
+   "last_commit": "fcc1034c 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -2598,7 +2598,7 @@
     "hep-detector",
     "hep-theory"
    ],
-   "last_commit": "ecd989f1 2026-10-17"
+   "last_commit": "fcc1034c 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -3720,7 +3720,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "61920170 2026-10-22"
+   "last_commit": "1857c829 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -3807,7 +3807,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "e2cb73b9 2026-10-17"
+   "last_commit": "fcc1034c 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
