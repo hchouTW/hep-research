@@ -21,6 +21,13 @@ Software checks establish contract consistency only, not physical validity.
   anti-conservative. The white null is unchanged. Output gains `global.p_single_level`, `global.null_fit` and, with
   the refit, `global.inner_surrogates`; a refit costs N x (M + 1) surrogate series (new cap 4e6). The docstring's
   "conservative" wording and `time-series-inference.md` now state the measured calibration.
+- **Five more references corrected after the first live review with the 0.23.0 options (42 issues; VALIDATION
+  REVIEW-REFS-3).** Ignoring a positive correlation overstates the uncertainty of a difference or ratio, not only
+  understates it (`statistical-inference-for-physics.md`); geomagnetic cutoff deliverables use the backtraced maximum
+  over the acceptance cone, and the Garwood level is 68.27% (`space-based-direct-detection.md`); measured-value
+  notation in the inverse-offset model (`calibration-and-alignment.md`); trigger-weight and luminosity citations
+  (`triggers-luminosity-pileup.md`); era checks, `residual.py` scope and Z_A regime (`analysis-design.md`). The
+  independent-review reference now recommends `--filter-model` with the live-run numbers. Guidance only.
 
 ## 0.23.0 (2026-10-22)
 

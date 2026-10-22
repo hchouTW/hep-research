@@ -56,12 +56,15 @@ runs. All review state is in files, so a review resumes after a host restart.
   re-review rounds included. MODEL must be in `models`. The lens's shadow keeps the rotation and never shares the
   fixed model while `models` has another. **Recommended: the strongest model of `models` on the design lens**, for
   example `--models haiku,sonnet,opus --lens-model design=opus`: in the P3 tuning run Haiku missed the design-lens
-  canaries (repeated values and terms) in 8 of 9 attempts, and 4 of 5 Haiku design-lens slots were exhausted.
+  canaries (repeated values and terms) in 8 of 9 attempts, and 4 of 5 Haiku design-lens slots were exhausted; in the
+  first live run with `--lens-model design=sonnet` all 5 design-lens slots were accepted at the first attempt.
 - `--filter-model MODEL` (config `filter`) adds one filtering pass after round 1: one agent of MODEL judges every
   accepted round-1 finding (controls excepted) as `keep` (the page should change) or `drop` (wrong, a preference, a
-  duplicate or a setup artefact), with a reason. In the P3 tuning run one Opus pass raised precision from 0.53 to 0.88
-  at about 2% of the review's token cost; it kept every substantive issue and lost 4 minor ones. Its decisions are
-  advice: nothing is deleted, and you still verify and dispose every finding.
+  duplicate or a setup artefact), with a reason. **Recommended, with the strongest model.** In the P3 tuning run one
+  Opus pass raised precision from 0.53 to 0.88 and kept every substantive issue (4 minor ones lost); in the first live
+  run (five references, `--filter-model opus`) it raised precision from 0.59 to 0.84, kept 39 of 40 real issues and cost
+  about 10% of the review's tokens. Its decisions are advice: nothing is deleted, and you still verify and dispose every
+  finding.
 
 | `next` prints | Do |
 |---|---|

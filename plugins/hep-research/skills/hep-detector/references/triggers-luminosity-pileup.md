@@ -38,9 +38,11 @@ Efficiency is a ratio of counts (`pass / total`, both from data or side-by-side 
 data and MC for a scale factor), so its uncertainty is binomial, not a
 simple-Gaussian propagation of the numerator and denominator separately.
 `<plugin root>/skills/hep-detector/scripts/tag_and_probe_efficiency.py` gives the
-Clopper-Pearson interval, which applies to unweighted, background-free, independent
-counts only - that is the script's scope. Cross-check any framework-provided efficiency
-uncertainty against it rather than assuming a naive `sqrt(N)/N` treatment was used.
+Clopper-Pearson interval, exact for unweighted (or frequency-weighted), background-free,
+independent counts; with positive sampling weights it gives an approximate interval from
+the Kish effective sample size, and it refuses zero or signed weights. Cross-check any
+framework-provided efficiency uncertainty against it rather than assuming a naive
+`sqrt(N)/N` treatment was used.
 
 <!-- example: source citation (experiment named as the source of a general method or number) -->
 Background contamination in the probe sample (real tag paired with a misidentified or
@@ -92,18 +94,19 @@ collected with a prescaled trigger without folding in the prescale; a single
 run-averaged prescale is an approximation, so use the per-run or per-lumi-block record
 when precision requires it. To combine several differently prescaled paths (an OR of
 paths covering different pT ranges, say), either use one path per region of the offline
-variable, efficient there, with its own prescale record (division method), or a
-combination that weights each event by all considered paths' prescales and overlaps
-(exclusion or inclusion method); simply summing raw counts across paths double-counts
-events that fired more than one (V. Lendermann et al., "Combining triggers in HEP data
-analysis", NIM A604 (2009) 707, arXiv:0901.4118, eqs. 3-5).
+variable, efficient there, with its own prescale record (division method), or weight
+each event by the smallest prescale among the paths that fired (exclusion method) or by
+the inverse probability that any considered path kept it (inclusion method); simply
+summing raw counts across paths double-counts events that fired more than one (V.
+Lendermann et al., "Combining triggers in HEP data analysis", NIM A604 (2009) 707,
+arXiv:0901.4118, eqs. 3-5 for one path, section 4 and eqs. 6-13 for combinations).
 
 **Check:** Prescaled data are normalized with the per-run or per-block prescale record, uncertainties come from the sum of squared weights, and several paths are combined by one documented method without double counting.
 
 ## Luminosity
 
 The integrated luminosity normalizing a data-driven yield or MC-to-data comparison
-carries its own measurement uncertainty (about 1% or below for recent LHC
+carries its own measurement uncertainty (about 1-2% for recent LHC
 measurements, larger for other periods and experiments; take it from the
 experiment's luminosity measurement for the relevant data-taking period) that is
 usually treated as a fully correlated normalization nuisance across all
@@ -126,17 +129,18 @@ arXiv:2212.09379).
 
 <!-- example: source citation (experiment named as the source of a general method) -->
 The absolute luminosity scale comes from a dedicated calibration (general method, described for example in ATLAS,
-Eur. Phys. J. C 76 (2016) 653, arXiv:1608.03953, sections 4-6; read 2026-10-14):
+Eur. Phys. J. C 76 (2016) 653, arXiv:1608.03953, sections 4-7; read 2026-10-14):
 
 - **van der Meer scans** separate the beams in steps in x and in y under special low-pileup conditions; the overlap
-  width and the peak rate give the visible cross section `sigma_vis = epsilon sigma_inel` of each luminometer and
-  algorithm.
+  width, the peak rate and the bunch-population product `n1 n2` give the visible cross section
+  `sigma_vis = epsilon sigma_inel` of each luminometer and algorithm (eq. 11).
 - **Corrections to the scan**: x-y factorization of the bunch densities (non-factorization), the length scale of the
   beam separation, orbit drifts, and beam-beam deflection and dynamic-beta effects.
 - **Transfer to physics conditions**: the calibration is made at low pileup and applied at high pileup, so the
   luminometer's linearity in `mu` is checked against independent algorithms.
 - **Long-term stability**: compare luminometers over the year; drifts between them are an uncertainty.
-- **Correlations**: state which uncertainty components are correlated across years and periods for a combination.
+- **Correlations**: state which uncertainty components are correlated across years and periods for a combination
+  (EPJC 83 (2023) 982, arXiv:2212.09379, section 8.1).
 <!-- /example -->
 
 **Check:** The luminosity value, its uncertainty and its correlations across periods come from the experiment's calibration, and the certified run and block lists match the event selection.
@@ -160,7 +164,7 @@ measurement gives (`L_b = mu f_r / sigma_inel` per bunch, ATLAS, Eur. Phys. J. C
 653, arXiv:1608.03953, eq. 1; opened 2026-10-14); the number of interactions in a given
 crossing is not observed. In simulation the generator draws a mean per event (recorded, for example, as
 CMS's "true number of interactions") and then a Poisson count around it ("number of
-pileup interactions"; CERN Open Data, "CMS pileup simulation",
+pileup interactions"; CERN Open Data, "CMS Pile-up simulation",
 <https://opendata.cern.ch/about/CMS-Pileup-Simulation>, opened 2026-10-14). The Poisson
 count has a wider distribution than the mean, so dividing the data `mu` profile by the
 simulated count profile reweights the wrong distribution. The reconstructed-vertex count
@@ -168,15 +172,15 @@ is worse still: it is resolution- and efficiency-limited.
 <!-- /example -->
 
 `<plugin root>/skills/hep-detector/scripts/pileup_reweight.py` implements this from two histograms (data profile, MC
-profile) with the usual failure modes guarded explicitly: a bin with zero MC
-probability produces a division by zero (undefined reweighting factor for a pileup
-condition the MC sample doesn't populate at all - this must be flagged, not silently
-turned into 0 or inf), and the data pileup profile itself carries a systematic
-uncertainty (from the minimum-bias cross section assumed to convert instantaneous
-luminosity into an expected interaction count) that should be propagated as an
-up/down variation of the reweighting target, not treated as exact. After reweighting,
-the mean of `mu` in reweighted MC equals the data mean by construction (whenever every
-data-populated bin has a defined weight), so it tests nothing. Validate on a variable
+profile) and flags (ok false) a bin with zero MC probability, which produces a division
+by zero (undefined reweighting factor for a pileup condition the MC sample doesn't
+populate at all - this must be flagged, not silently turned into 0 or inf), and a
+non-finite ratio. It takes no minimum-bias cross-section input: the data pileup profile
+itself carries a systematic uncertainty (from the minimum-bias cross section assumed to
+convert instantaneous luminosity into an expected interaction count) that the analysis
+must propagate as an up/down variation of the reweighting target, not treat as exact.
+After reweighting, the mean of `mu` in reweighted MC equals the data mean by construction
+(whenever every data-populated bin has a defined weight), so it tests nothing. Validate on a variable
 that was not reweighted: the number of reconstructed primary vertices (or another
 pileup-sensitive observable) in a control region, data against reweighted MC. A
 reweighting step that is applied but silently no-ops (e.g. from a units or binning
@@ -205,7 +209,7 @@ live*.
 - **Application**: the effective luminosity is `sum_i L_i f_i` over blocks `i`, not the
   total luminosity times the time-averaged live fraction, because the live fraction falls
   when the instantaneous luminosity (and rate) is high; the same holds for exposure,
-  `sum_i A_i T_i f_i`. Prescales enter the same sum.
+  `sum_i A_i T_i f_i`. Prescales enter the same sum as divisors, `sum_i L_i f_i / d_i`.
 - **Event-dependent losses**: buffer overflow and derandomizer losses fall
   preferentially on large or closely spaced events, so they are an efficiency that
   depends on the event, not only a time fraction; check with random triggers whether

@@ -48,14 +48,16 @@ Choose binning using resolution, MC statistics, background stability, systematic
 ## Selection optimization without bias
 
 - **Figure of merit, chosen before optimizing.** `s / sqrt(s + b)` for a large expected signal; the Asimov significance
-  `Z_A = sqrt(2 ((s + b) ln(1 + s / b) - s))` for small counts ([Cowan et al. 2011, arXiv:1007.1727](https://arxiv.org/abs/1007.1727));
+  `Z_A = sqrt(2 ((s + b) ln(1 + s / b) - s))` when s/b is not small; it reduces to `s / sqrt(b)` only for s << b
+  ([Cowan et al. 2011, arXiv:1007.1727](https://arxiv.org/abs/1007.1727), Sec. 5.1);
   the Punzi figure `eps_s / (a / 2 + sqrt(b))` when the signal rate is unknown and the goal is discovery at a
   significance of a sigma ([Punzi 2003, arXiv:physics/0308063](https://arxiv.org/abs/physics/0308063)). `s / sqrt(b)`
   overstates the sensitivity at small b.
 - **Optimize on samples that are not measured.** Use simulation, sidebands or control regions, or an independent
   (disjoint) part of the data, and record which events were used. Optimizing on the events that give the result is
   biased unless a pre-designed procedure removes the bias, such as cross-fitting or k-fold where each event's selection
-  is fixed without it ([backgrounds](backgrounds.md)); validate that procedure (for example on toys) before relying on
+  is fixed without it ([hep-ml splits](../../hep-ml/references/ml-analysis.md#splits-and-leakage); for a reweighter,
+  [backgrounds](backgrounds.md)); validate that procedure (for example on toys) before relying on
   it. Keep three uses apart: independent performance evaluation, method selection, and the formal inference.
 - **Fix the outcome of the optimization** (cuts, categories, binning) before unblinding, and treat later changes with
   the change-review procedure (`review_analysis_change.py`).
@@ -63,13 +65,15 @@ Choose binning using resolution, MC statistics, background stability, systematic
   hidden common scale each conceal one feature and keep others (`core/blinding/README.md`): an offset leaks through
   physical boundaries and integer counts (offsets on counts are refused), a scale through scaled counts and unscaled
   companions, a removal through totals shown elsewhere. Run on real data, preparation is the data custodian's
-  (`contracts/release_prepare.py`), and `core/blinding/residual.py` lists what a prepared release can still give away.
+  (`contracts/release_prepare.py`), and `core/blinding/residual.py` checks some of what a prepared release can still
+  give away (advisory and partial: an empty result is not proof that nothing leaks).
 - **Record what was seen.** The custodian's exposure record (`exposure_record.json`: which releases reached which
   session or relay, and the kinds of data seen) is the source of the `data_exposure` state: give it to
-  `review_analysis_change.py --exposure-record` and `batch_campaign.py freeze --exposure-record`, and record each
-  analysis decision in a decision record bound to the exposure entries seen (`contracts/lineage.py`). A missing record
-  is `unknown`, never `unexposed`, and a new session does not reset exposure. In a protected project the blinding
-  tools and the change review check the protected inputs first and refuse when they cannot be established.
+  `review_analysis_change.py --exposure-record` and
+  `adapters/batch-schedulers/batch_campaign.py freeze --exposure-record`, and record each analysis decision in a
+  decision record bound to the exposure entries seen (`contracts/lineage.py`). A missing record is `unknown`, never
+  `unexposed`, and a new session does not reset exposure. In a protected project the blinding tools and the change
+  review check the protected inputs first and refuse when they cannot be established.
 
 Worked example (synthetic): s = 10, b = 100 gives `s / sqrt(s + b)` = 0.953 and `Z_A` = 0.984; with a signal efficiency
 of 0.5 and a = 3, the Punzi figure is 0.5 / (1.5 + 10) = 0.0435.
@@ -98,8 +102,8 @@ acceptance, efficiencies, resolution and response, so the design names the eras 
   several periods" in its time-series reference); a monitored quantity that drifts within an era is a stability
   question for hep-detector.
 
-`review_measurement_spec.py` runs these four checks whenever the spec declares eras; specs without eras are reviewed as
-before.
+`review_measurement_spec.py` runs the boundary check whenever the spec declares eras and the other three only when it
+declares two or more; specs without eras are reviewed as before.
 
 ## Look-elsewhere at the design stage
 
@@ -111,7 +115,9 @@ depends on how many, so the trials are part of the design, fixed before unblindi
 - Decide how the global p-value will be computed (toys of the full scan, or an asymptotic bound for a correlated
   scan) and which local significance is reported next to it. The computation belongs to hep-statistics
   ([look-elsewhere](../../hep-statistics/references/inference-recipes.md#look-elsewhere-global-significance-of-a-scan),
-  `skills/hep-statistics/scripts/global_significance.py`); the spec records the grid and the method.
+  `skills/hep-statistics/scripts/look_elsewhere.py`; for toys of a complete procedure, the EXPERIMENTAL
+  `global_significance.py` in the "Toys, coverage, and trials" section there); the spec records the grid and the
+  method.
 
 Worked example (synthetic): a local p-value of 1.0e-3 in a scan of 50 independent windows has a global p-value of
 `1 - (1 - 1.0e-3)^50` = 0.0488, about 1.66 sigma instead of 3.09; correlated windows give fewer effective trials, which

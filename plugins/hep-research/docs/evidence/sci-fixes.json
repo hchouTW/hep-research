@@ -1270,6 +1270,12 @@
    "title": "Five more references corrected after the review tuning run (27 adjudicated issues, 3 substantive; VALIDATION REVIEW-REFS-2)",
    "severity": "S3",
    "sources_with_locators": "mostly; external claims located and opened 2026-10-22 (Combine docs part3/nonstandard and part2/bin-wise-stats; arXiv:1408.6865 p. 18; PDG RPP 2024 sections 34.7 and 35.5; Horne and Baliunas 1986 abstract via OpenAlex), internal ones by file:line (periodicity_scan.py, covariance_fit.py, acceptance_from_generation.py, spectrum_transform.py, contracts/validate.py, pid_separation_power.py runs); single-source items: the Horne-Baliunas white-noise scope (abstract only) and the AC-coupling recovery (a numerical check)"
+  },
+  {
+   "id": "REVIEW-REFS-3",
+   "title": "Five references corrected after the first live review with the 0.23.0 options (42 adjudicated issues; VALIDATION REVIEW-REFS-3)",
+   "severity": "S3",
+   "sources_with_locators": "mostly; external claims located and opened 2026-10-22 (arXiv:0901.4118 sects. 3-4, 1608.03953 sects. 4.1 and 7.3, 2212.09379 sect. 8.1, 1206.4071 sect. 6, 1403.2286 sect. 4.4, 1007.1727 sect. 5.1, hep-ex/0201015 Stormer section, PDG RPP 2024 sects. 34.2.3 and 34.2.9, SILSO pages via web.archive.org, CERN Open Data page), internal ones by file:line and script runs (cosmic_ray_flux.py, propagate_scale_distortion.py, tag_and_probe_efficiency.py, pileup_reweight.py, review_measurement_spec.py, residual.py, the AMS-02 evidence index); single-source items: the negative-charge Stormer sign (reasoning, not quoted), the balloon overburden figure, the variance identity for correlated systematics"
   }
  ]
 }
