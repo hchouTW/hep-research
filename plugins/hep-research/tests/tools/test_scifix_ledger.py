@@ -495,6 +495,29 @@ class SciFixLedger(unittest.TestCase):
              "review": {"by": "x", "date": "2026-10-22", "scope": "whole entry"}}]})
         self.assertEqual(rep["unsigned_s1"], ["A"])
         self.assertEqual(rep["below_minimum"], [{"id": "B", "severity": "S1", "grade": "C3D1", "minimum": "C3D2"}])
+    def test_s1_and_s2_have_an_advisory_or_a_waiver(self):
+        """Plan C2 (F-17): every S1 and S2 entry is named by an advisory or says why it has none."""
+        named = set()
+        for path in (ROOT / "docs" / "evidence" / "advisories").glob("SFA-*.json"):
+            named |= set(json.loads(path.read_text(encoding="utf-8"))["ledger"])
+        for f in self.doc["fixes"]:
+            with self.subTest(f["id"]):
+                waiver = f.get("advisory_waiver")
+                if waiver is not None:
+                    self.assertEqual(set(waiver), {"reason", "decided"})
+                    self.assertTrue(waiver["reason"] and waiver["decided"])
+                    self.assertNotIn(f["id"], named, "an entry with an advisory needs no waiver")
+                if f["severity"] in ("S1", "S2"):
+                    self.assertTrue(f["id"] in named or waiver, "S1 and S2 need an advisory or advisory_waiver")
+
+    def test_regression_of_names_other_entries(self):
+        """Plan C1 (F-13): regression_of lists the entries whose fix introduced this defect."""
+        ids = {f["id"] for f in self.doc["fixes"]}
+        for f in self.doc["fixes"]:
+            with self.subTest(f["id"]):
+                for ref in f.get("regression_of", []):
+                    self.assertIn(ref, ids)
+                    self.assertNotEqual(ref, f["id"])
 
     def test_entries_below_their_requirement_state_their_gaps(self):
         for f in self.doc["fixes"]:

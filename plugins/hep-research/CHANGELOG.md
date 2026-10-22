@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Advisories: OSV timestamps, waivers, regression links; schemas for the ledger and the advisories (sci-fix
+  improvement plan C1, C2, C6; F-13, F-17, F-18, F-22).** Advisories carry OSV `published` (first commit, UTC) and
+  `modified`. `scifix_advisories.py check` warns, never fails, when an advisory was introduced by another advisory's
+  fix commit, until the ledger records the link: CANONICAL-KEY-ZERO-FRACTION is a regression of ML-SPLITS,
+  SAMPLE-NAME-DOT-SEGMENTS of ML-CALIBRATION (`regression_of`). Every S1 and S2 entry is named by an advisory or states
+  an `advisory_waiver` (seven do: CLS-LOGINTERP, the three triage status fixes, the three scan fixes).
+  `docs/evidence/advisories/README.md` records that SFA-2026-012, -013 and -026 to -029 were never published.
+  `docs/evidence/schemas/` holds JSON schemas of the ledger and of format /2 advisories, checked in the tests. The
+  normalisation rule of C1 (a property or exhaustive test, and the callers listed in the PR) is in
+  `docs/maintenance.md`. Evidence: VALIDATION SCIFIX-PLAN-C1-C2-C6.
+
 - **Sci-fix ledger report: transcription rule, structured S3 sources, per-entry sign-off (sci-fix improvement plan
   B2, B5, B7; F-08, F-15, F-16).** `tools/scifix_ledger.py report` lists, read-only: entries below their severity's
   minimum (27), C3 entries whose oracles all compute their expected value from a formula transcribed into the

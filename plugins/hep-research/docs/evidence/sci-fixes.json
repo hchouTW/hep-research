@@ -97,7 +97,11 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "the defect was in the example benchmark script only (examples/stats-benchmarks); the core toy CLs interpolated log CLs since it was written, so no released result of the plugin's tools changed",
+    "decided": "2026-10-20, commit 6e7274c3 (advisory backfill: skipped with reasons)"
+   }
   },
   {
    "id": "F01",
@@ -2794,6 +2798,9 @@
      ],
      "detail": "a revert of the trainer copy only (agreement test; E2v)"
     }
+   ],
+   "regression_of": [
+    "ML-SPLITS"
    ]
   },
   {
@@ -2962,6 +2969,9 @@
      ],
      "detail": "empty segments kept"
     }
+   ],
+   "regression_of": [
+    "ML-CALIBRATION"
    ]
   },
   {
@@ -4271,7 +4281,11 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "changes only the exit code and status of six tools given a missing or unreadable input file (exit 2, was 1 with failed), where no result was produced",
+    "decided": "2026-10-22, VALIDATION 0.23.0 release check"
+   }
   },
   {
    "id": "ADAPTER-MISSING-DEPENDENCY",
@@ -4341,7 +4355,11 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "changes only the status of a run whose optional dependency is missing, where no result was produced",
+    "decided": "2026-10-22, VALIDATION 0.23.0 release check"
+   }
   },
   {
    "id": "PYHF-REJECTED-STATUS",
@@ -4400,7 +4418,11 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "changes only the status of backend_comparison.py and model_card.py on input they cannot read or map (rejected, exit 2, was refused), where no result was produced",
+    "decided": "2026-10-22, VALIDATION 0.23.0 release check"
+   }
   },
   {
    "id": "TRAINING-MEMORY-VERDICT",
@@ -4699,7 +4721,11 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "the advisory scan is a shadow-mode report that writes nothing into a project; no result a user holds changed",
+    "decided": "2026-10-22, sci-fix improvement plan C2 (maintainer decision 2026-10-22)"
+   }
   },
   {
    "id": "SCAN-MISSING-MARKER",
@@ -4754,7 +4780,11 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "the advisory scan is a shadow-mode report that writes nothing into a project; no result a user holds changed",
+    "decided": "2026-10-22, sci-fix improvement plan C2 (maintainer decision 2026-10-22)"
+   }
   },
   {
    "id": "ADVISORY-MATCH-V2",
@@ -4825,7 +4855,11 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "the advisory scan is a shadow-mode report that writes nothing into a project; no result a user holds changed",
+    "decided": "2026-10-22, sci-fix improvement plan C2 (maintainer decision 2026-10-22)"
+   }
   },
   {
    "id": "PERIODICITY-REFIT",
