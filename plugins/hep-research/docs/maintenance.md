@@ -145,7 +145,11 @@ Oracle rules:
   name the gate matches). The unpinned `optional (torch-cpu)` job is an early warning for new PyTorch releases: when
   it passes on a newer one, bump the `torch-backend` pins.
 
-Record each correction in `docs/evidence/sci-fixes.json` and in `VALIDATION.md` with one row per evidence test:
+Record each correction in `docs/evidence/sci-fixes.json` and in `VALIDATION.md` with one row per evidence test.
+The ledger's `changelog` names where the fix shipped: `{"kind": "release", "release": "X.Y.Z"}`, `{"kind": "audit",
+"name": ..., "release": ...}` (a release section's audit subsection), or `{"kind": "unreleased"}` until the release
+(an optional `detail` gives the item label); the release is a CHANGELOG section and, when an advisory names the entry,
+the advisory's `fixed` release; an unreleased entry's advisory range is still open.
 
 | Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
 |---|---|---|---|---|---|
@@ -166,7 +170,14 @@ is unreleased, with `database_specific.fixed_commit`), the scientific impact apa
 `bias`, `trigger`), which artifacts it touches (`applies_to`: artifact types and the extension keys that show the
 affected code ran) and a `remedy`. At the release that ships a fix, add its `fixed` event. `tools/scifix_advisories.py`:
 `check` validates every advisory against the ledger, the plugin tree and the release manifests
-(`tests/tools/test_scifix_advisories.py` runs it); `affected` lists the releases in range that hold an affected file,
+(`tests/tools/test_scifix_advisories.py` runs it): X.Y.Z versions, no two events at one version, each `fixed` above
+its `introduced`; a `fixed` release changes an affected file against the release before it; an `introduced` release
+that already held an affected file states `database_specific.introduced_basis`; artifact types from the contracts'
+vocabulary; and extension keys that discriminate: at least one, and none required by a listed type's extension schema
+(a key every artifact carries cannot show the affected code ran). When the affected code writes no artifact (a
+script that prints JSON), set `database_specific.no_artifact: true` and `outputs` (the producer and how to recognise
+its output) in every affected block instead; the scan cannot see such results. The advisories that broke the key rule
+before it existed are frozen in `NONDISCRIMINATING_ALLOWED` until their migration; none is added. `affected` lists the releases in range that hold an affected file,
 from `release-manifests/` (a file moved between skill folders is found by its path below the folder); `scan
 PROJECT_DIR` reports, read-only, which of a project's artifacts an advisory touches, with the release that made each
 (verified by the `versions.plugin_release` digest, claimed, or unknown; a build between releases claims the last

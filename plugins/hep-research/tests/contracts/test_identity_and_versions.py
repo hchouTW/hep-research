@@ -67,6 +67,53 @@ class ReleaseIdentityT03(unittest.TestCase):
         identity._plugin_release.cache_clear()
         self.assertEqual(identity.plugin_release(self.root), identity.UNKNOWN)
 
+    def test_runtime_folder_only_at_the_root_is_outside_the_identity(self):
+        """A2 (F-03): the plugin system writes `.in_use/<pid>` into an installed copy; it must not change the release.
+        The same name deeper in the tree, a module beside runnable assets and a globbed data file still do."""
+        man = self.record()
+        (self.root / ".in_use").mkdir()
+        (self.root / ".in_use" / "72").write_text("")
+        self.assertEqual(identity.plugin_release(self.root), {"release": "9.9.9", "digest": man["digest"]})
+        for rel in ("core/.in_use/x.py", "adapters/demo/assets/json.py", "contracts/tool_contracts/new.json"):
+            with self.subTest(added=rel):
+                f = self.root / rel
+                f.parent.mkdir(parents=True, exist_ok=True)
+                f.write_text("x = 1\n")
+                identity._plugin_release.cache_clear()
+                rep = identity.verify(self.root, man)
+                self.assertEqual(rep["differences"], [{"path": rel, "change": "added"}])
+                self.assertEqual(identity.plugin_release(self.root), identity.UNKNOWN)
+                f.unlink()
+
+    def test_runtime_folder_is_excluded_in_a_git_checkout_too(self):
+        """bundle_files takes the `git ls-files` path inside a work tree; an untracked root `.in_use/` stays out."""
+        import shutil
+        import subprocess
+        if shutil.which("git") is None:
+            self.skipTest("git not installed")
+        git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "-c", "commit.gpgsign=false"]
+        subprocess.run(git + ["init", "-q"], cwd=self.root, check=True, timeout=60)
+        subprocess.run(git + ["add", "-A"], cwd=self.root, check=True, timeout=60)
+        subprocess.run(git + ["commit", "-qm", "x"], cwd=self.root, check=True, timeout=60)
+        before = identity.bundle_files(self.root)
+        (self.root / ".in_use").mkdir()
+        (self.root / ".in_use" / "97").write_text("")
+        (self.root / "core").mkdir()
+        (self.root / "core" / ".in_use").mkdir()
+        (self.root / "core" / ".in_use" / "x.py").write_text("")
+        self.assertEqual(identity.bundle_files(self.root), sorted(before + ["core/.in_use/x.py"]))
+
+    def test_bytecode_is_reported_as_a_warning_not_a_difference(self):
+        """F-25: .pyc files are outside the identity; verify() says they are there without changing the verdict."""
+        man = self.record()
+        self.assertNotIn("warnings", identity.verify(self.root, man))
+        (self.root / "__pycache__").mkdir()
+        (self.root / "__pycache__" / "core.cpython-313.pyc").write_bytes(b"\0" * 16)
+        rep = identity.verify(self.root, man)
+        self.assertEqual(rep["status"], "identical")
+        self.assertEqual([(w["code"], w["paths"]) for w in rep["warnings"]],
+                         [("identity.bytecode_unverified", ["__pycache__/core.cpython-313.pyc"])])
+
     def test_schema_accepts_identity_and_legacy_absence(self):
         doc = at(CONTRACTS_VERSION)
         self.assertTrue(validate_artifact(doc).ok)  # legacy: no plugin_release, identity unknown

@@ -115,6 +115,91 @@ class CheckProblems(unittest.TestCase):
             artifact_types=["communication"], extension_keys=["occurrences"])))
 
 
+class StricterCheck(unittest.TestCase):
+    """Plan A0 and A3 (F-01, F-04, F-05, F-07, F-27): each new rule rejects its broken advisory; expected messages
+    are written by hand."""
+
+    def setUp(self):
+        self.ledger = json.loads(sa.LEDGER.read_text())
+        self.manifests = {"0.3.0": manifest(["contracts/validate.py"])}
+        self.good = copy.deepcopy(ADVISORY)
+        self.good["affected"][0]["paths"] = ["contracts/validate.py"]
+
+    def problems(self, edit, manifests=None):
+        adv = copy.deepcopy(self.good)
+        edit(adv)
+        return " ".join(sa.check([adv], self.ledger, manifests or self.manifests))
+
+    def events(self, *events):
+        return lambda a: a["affected"][0]["ranges"][0].update(events=list(events))
+
+    def test_ranges(self):
+        self.assertIn("not above the introduced", self.problems(self.events({"introduced": "0.3.0"}, {"fixed": "0.2.0"})))
+        self.assertIn("not above the introduced", self.problems(self.events({"introduced": "0.2.0"},
+                                                                            {"last_affected": "0.2.0"})))
+        self.assertIn("two events at version 0.3.0", self.problems(self.events(
+            {"introduced": "0.2.0"}, {"fixed": "0.3.0"}, {"introduced": "0.3.0"})))
+        # a malformed version is a problem, not a ValueError from the range arithmetic
+        self.assertIn("X.Y.Z", self.problems(self.events({"introduced": "0.x"}, {"fixed": "0.4.0"})))
+        self.assertIn("X.Y.Z", self.problems(self.events({"introduced": "0.2.0"}, {"fixed": "0"})))
+        self.assertEqual(self.problems(self.events({"introduced": "0"}, {"fixed": "0.4.0"})), "")
+
+    def test_unknown_artifact_type(self):
+        self.assertIn("not in the contracts' vocabulary", self.problems(
+            lambda a: a["applies_to"].update(artifact_types=["no-such-type"])))
+
+    def test_extension_keys_must_discriminate(self):
+        # 'splits' is required by ext_ml_artifact, so every ml-artifact carries it; no key at all decides nothing
+        self.assertIn("splits required for ml-artifact", self.problems(
+            lambda a: a["applies_to"].update(extension_keys=["calibration", "splits"])))
+        self.assertIn("no extension key", self.problems(lambda a: a["applies_to"].pop("extension_keys")))
+        frozen = lambda a: a.update(id="SFA-2026-001", _file="SFA-2026-001.json")  # noqa: E731
+        self.assertNotIn("cannot show", self.problems(lambda a: (frozen(a), a["applies_to"].pop("extension_keys"))))
+        self.assertIn("remove it from NONDISCRIMINATING_ALLOWED", self.problems(frozen))
+
+    def test_no_artifact_needs_outputs_in_every_block(self):
+        def mark(a, outputs="prints JSON on stdout"):
+            a["applies_to"]["extension_keys"] = ["tools"]
+            a["applies_to"]["artifact_types"] = ["computational-run"]
+            a["affected"][0]["database_specific"] = {"no_artifact": True, "outputs": outputs}
+        self.assertEqual(self.problems(mark), "")
+        self.assertIn("needs database_specific.outputs", self.problems(lambda a: mark(a, "")))
+        self.assertIn("every affected block or none", self.problems(
+            lambda a: (mark(a), a["affected"].append(copy.deepcopy(self.good["affected"][0])))))
+
+    def test_fixed_release_changes_an_affected_file(self):
+        def man(sha):
+            return {"digest": "d" * 64, "paths": {"contracts/validate.py"}, "sha256": {"contracts/validate.py": sha}}
+        events = self.events({"introduced": "0.2.0"}, {"fixed": "0.4.0"})
+        same = {"0.2.0": man("a"), "0.3.0": man("a"), "0.4.0": man("a")}
+        self.assertIn("fixed 0.4.0 changes no affected path against 0.3.0", self.problems(events, same))
+        changed = dict(same, **{"0.4.0": man("b")})
+        self.assertNotIn("changes no affected path", self.problems(events, changed))
+
+    def test_introduced_release_that_already_held_the_file_says_why(self):
+        mans = {"0.2.0": manifest(["contracts/validate.py"]), "0.3.0": manifest(["contracts/validate.py"])}
+        events = self.events({"introduced": "0.3.0"}, {"fixed": "0.4.0"})
+        self.assertIn("introduced_basis", self.problems(events, mans))
+        self.assertNotIn("introduced_basis", self.problems(
+            lambda a: (events(a), a["affected"][0].update(database_specific={"introduced_basis": "a later change"})),
+            mans))
+        # the file is new in the introduced release: nothing to explain
+        self.assertNotIn("introduced_basis", self.problems(events, {"0.2.0": manifest(["core/other.py"]),
+                                                                    "0.3.0": manifest(["contracts/validate.py"])}))
+
+    def test_frozen_allowlist_only_shrinks(self):
+        """F-27: no advisory joins the allowlist; PR-5 of the improvement plan empties it."""
+        self.assertLessEqual(sa.NONDISCRIMINATING_ALLOWED, {
+            "SFA-2026-001", "SFA-2026-002", "SFA-2026-004", "SFA-2026-006", "SFA-2026-010", "SFA-2026-020",
+            "SFA-2026-023", "SFA-2026-025", "SFA-2026-030", "SFA-2026-031", "SFA-2026-033"})
+
+    def test_scripts_without_artifacts_are_marked(self):
+        """The shipped advisories whose affected scripts print JSON and write no artifact (F-02)."""
+        marked = {a["id"] for a in sa.load_advisories() if sa.writes_no_artifact(a)}
+        self.assertEqual(marked, {"SFA-2026-014", "SFA-2026-015", "SFA-2026-016", "SFA-2026-017", "SFA-2026-018",
+                                  "SFA-2026-019", "SFA-2026-036", "SFA-2026-037"})
+
+
 class ProjectScan(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

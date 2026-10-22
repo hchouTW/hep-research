@@ -414,7 +414,7 @@
     "tests/skills/hep_authoring/test_review_pilot_fixes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "29c2380f 2026-10-22"
+   "last_commit": "c90b601b 2026-10-22"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -1693,7 +1693,7 @@
     "tests/skills/hep_detector/test_adding_layer_d6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1d03565d 2026-10-17"
+   "last_commit": "c90b601b 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2403,7 +2403,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "ed36cea3 2026-10-17"
+   "last_commit": "c90b601b 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
@@ -2478,7 +2478,7 @@
     "skills/hep-detector/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "c90b601b 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/analysis-design.md",
@@ -2509,7 +2509,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "fe71ebcf 2026-10-17"
+   "last_commit": "c90b601b 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/analysis-validation.md",
@@ -3763,7 +3763,7 @@
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "c90b601b 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",

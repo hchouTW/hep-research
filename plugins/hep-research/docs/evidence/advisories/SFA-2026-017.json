@@ -27,7 +27,9 @@
    "database_specific": {
     "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
     "fixed_commit": "6c7933634eb1ab1f43acb9368379fd362e5f642f",
-    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)",
+    "no_artifact": true,
+    "outputs": "skills/hep-detector/scripts/calorimeter_resolution.py prints JSON on stdout (points, weighting, ndof, energy_range_gev, stochastic_squared and the other resolution terms) and writes no artifact"
    }
   }
  ],

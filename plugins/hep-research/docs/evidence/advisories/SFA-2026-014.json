@@ -27,7 +27,9 @@
    "database_specific": {
     "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
     "fixed_commit": "2391008579c952d3f4308a191900f7bfa3885abb",
-    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)",
+    "no_artifact": true,
+    "outputs": "skills/hep-detector/scripts/pid_separation_power.py prints JSON on stdout (mode, species_a and species_b with mass_gev, observable, n_sigma) and writes no artifact; cherenkov_angle.py output (expected_photons, photon_regime) used the same mass table"
    }
   }
  ],

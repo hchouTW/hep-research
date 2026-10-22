@@ -27,7 +27,9 @@
    "database_specific": {
     "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
     "fixed_commit": "70f7fbcbc617c012a9b16c2aa391095aca79b80e",
-    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)",
+    "no_artifact": true,
+    "outputs": "skills/hep-detector/scripts/cherenkov_angle.py prints JSON on stdout (Cherenkov angle, expected_photons, p_no_photon, photon_regime) and writes no artifact"
    }
   }
  ],

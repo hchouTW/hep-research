@@ -11,11 +11,21 @@ the correctness evidence: it names the entries of docs/evidence/sci-fixes.json. 
   impact: {observables: [...], bias, trigger}  (the scientific effect, separate from the version range),
   applies_to: {artifact_types: [...], extension_keys: [...]}  (an artifact is touched when its type is listed and,
              if keys are given, its extension has one of them: the affected code ran for it),
+  affected[].database_specific: {fixed_commit, introduced_commit, introduced_basis (why the defect starts at a
+             release that already held an affected path), no_artifact (true: the affected code writes no artifact,
+             so no artifact can show it ran), outputs (with no_artifact: the producer and how to recognise its
+             output)},
   remedy, references: [commits].
 
 Subcommands (all read-only):
   check                 every advisory against the ledger, the plugin tree and the release manifests; exit 1 on a
-                        problem
+                        problem. Ranges: X.Y.Z versions (introduced may be "0"), no two events at one version, each
+                        fixed or last_affected above the introduced before it; a fixed release changes an affected
+                        file against the release before it (when both have a manifest); an introduced release that
+                        already held an affected path states introduced_basis. applies_to: known artifact types, and
+                        extension keys that discriminate (no key required by any listed type's extension schema, and
+                        at least one key), unless the advisory writes no artifact (no_artifact) or is one of the
+                        NONDISCRIMINATING_ALLOWED advisories awaiting migration
   affected [--id ID]    the releases each advisory affects, computed from release-manifests/ (in range and holding
                         an affected path); releases in range older than the first manifest are listed apart
   scan PROJECT_DIR      the project's artifacts (artifacts_dir of hep-research.project.json, default
@@ -45,6 +55,12 @@ VERSION = re.compile(r"^\d+\.\d+\.\d+$")
 SEVERITIES = ("S1", "S2", "S3", "S4")
 CONFIG_NAME = "hep-research.project.json"
 DEFAULT_ARTIFACTS_DIR = "./hep-research-artifacts/"
+# Advisories whose extension keys cannot show that the affected code ran (a key every artifact of a listed type
+# carries, or no key). Frozen: sci-fix improvement plan PR-5 migrates them to discriminating matches and empties this
+# set; a new advisory is never added to it.
+NONDISCRIMINATING_ALLOWED = frozenset({
+    "SFA-2026-001", "SFA-2026-002", "SFA-2026-004", "SFA-2026-006", "SFA-2026-010", "SFA-2026-020", "SFA-2026-023",
+    "SFA-2026-025", "SFA-2026-030", "SFA-2026-031", "SFA-2026-033"})
 
 
 def version_key(text: str) -> tuple[int, ...]:
@@ -78,8 +94,30 @@ def load_manifests(folder: Path = MANIFESTS) -> dict[str, dict]:
     out = {}
     for p in folder.glob("*.json"):
         doc = load_json(p)
-        out[doc["version"]] = {"digest": doc["digest"], "paths": {f["path"] for f in doc["files"]}}
+        out[doc["version"]] = {"digest": doc["digest"], "paths": {f["path"] for f in doc["files"]},
+                               "sha256": {f["path"]: f["sha256"] for f in doc["files"]}}
     return dict(sorted(out.items(), key=lambda kv: version_key(kv[0])))
+
+
+def artifact_types(root: Path = ROOT) -> set[str]:
+    """The artifact type vocabulary: the enum of artifact_type in the envelope schema."""
+    return set(load_json(root / "contracts" / "schemas" / "envelope.json")["properties"]["artifact_type"]["enum"])
+
+
+def required_extension_keys(artifact_type: str, root: Path = ROOT) -> set[str]:
+    """Extension properties every valid artifact of the type carries: `required` of ext_<type>.json and its variants
+    (the validator applies the base schema to every contract version)."""
+    stem, folder, found = f"ext_{artifact_type.replace('-', '_')}", root / "contracts" / "schemas", set()
+    for schema in [folder / f"{stem}.json", *sorted(folder.glob(f"{stem}_*.json"))]:
+        if schema.is_file():
+            found |= set(load_json(schema).get("required") or [])
+    return found
+
+
+def writes_no_artifact(adv: dict) -> bool:
+    """The affected code writes no artifact (every affected block says database_specific.no_artifact)."""
+    blocks = adv.get("affected") or []
+    return bool(blocks) and all((b.get("database_specific") or {}).get("no_artifact") is True for b in blocks)
 
 
 def extension_properties(artifact_types: list[str], root: Path = ROOT) -> set[str] | None:
@@ -97,10 +135,70 @@ def extension_properties(artifact_types: list[str], root: Path = ROOT) -> set[st
     return found if any_schema else None
 
 
+def _range_problems(name: str, events: list[dict]) -> list[str]:
+    """Event order and versions within one SEMVER range (the caller has checked the event kinds)."""
+    problems, versions, introduced = [], set(), None
+    for event in events:
+        (kind, at), = event.items()
+        if not isinstance(at, str) or not (VERSION.match(at) or (kind == "introduced" and at == "0")):
+            problems.append(f"{name}: event {event} needs an X.Y.Z version")
+            continue
+        if at in versions:
+            problems.append(f"{name}: two events at version {at} in one range")
+        versions.add(at)
+        if kind == "introduced":
+            introduced = at
+        elif introduced is None or version_key(at) <= version_key(introduced):
+            problems.append(f"{name}: {kind} {at} is not above the introduced version before it ({introduced})")
+            introduced = None
+        else:
+            introduced = None
+    return problems
+
+
+def _manifest_path(manifest: dict, path: str) -> str | None:
+    """The path under which a release holds the file (see holds()), or None."""
+    if path in manifest["paths"]:
+        return path
+    parts = path.split("/", 2)
+    if len(parts) < 3 or parts[0] != "skills":
+        return None
+    found = [p for p in manifest["paths"] if p.startswith("skills/") and p.split("/", 2)[2:] == parts[2:]]
+    return found[0] if len(found) == 1 else None
+
+
+def _previous(manifests: dict[str, dict], version: str) -> str | None:
+    earlier = [v for v in manifests if version_key(v) < version_key(version)]
+    return max(earlier, key=version_key) if earlier else None
+
+
+def _release_problems(name: str, block: dict, events: list[dict], manifests: dict[str, dict]) -> list[str]:
+    """A fixed release changes an affected file; an introduced release that already held one says why."""
+    problems, paths = [], block.get("paths") or []
+    for event in events:
+        (kind, at), = event.items()
+        before = _previous(manifests, at) if at in manifests else None
+        if before is None:
+            continue
+        now, then = manifests[at], manifests[before]
+        if kind == "fixed" and "sha256" in now and "sha256" in then:
+            pairs = [(_manifest_path(now, p), _manifest_path(then, p)) for p in paths]
+            pairs = [(a, b) for a, b in pairs if a and b]
+            if pairs and all(now["sha256"][a] == then["sha256"][b] for a, b in pairs):
+                problems.append(f"{name}: fixed {at} changes no affected path against {before}")
+        if kind == "introduced" and any(_manifest_path(then, p) for p in paths) and \
+                not (block.get("database_specific") or {}).get("introduced_basis"):
+            problems.append(f"{name}: introduced {at}, but {before} already holds an affected path: "
+                            "database_specific.introduced_basis says why the defect starts there")
+    return problems
+
+
 def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root: Path = ROOT) -> list[str]:
-    """Problems in the advisories: format, ids, ledger references and severities, version ranges, paths."""
+    """Problems in the advisories: format, ids, ledger references and severities, version ranges, paths, artifact
+    types and whether the extension keys discriminate."""
     problems, seen = [], set()
     entries = {f["id"]: f for f in ledger["fixes"]}
+    known_types = artifact_types(root)
     for adv in advisories:
         name = adv.get("id", adv["_file"])
         if adv.get("format") != FORMAT:
@@ -127,6 +225,29 @@ def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root
         applies = adv.get("applies_to") or {}
         if not applies.get("artifact_types"):
             problems.append(f"{name}: applies_to needs artifact_types")
+        for artifact_type in applies.get("artifact_types") or []:
+            if artifact_type not in known_types:
+                problems.append(f"{name}: artifact type {artifact_type} is not in the contracts' vocabulary")
+        blocks = adv.get("affected") or []
+        marked = [b for b in blocks if (b.get("database_specific") or {}).get("no_artifact") is not None]
+        if marked and not writes_no_artifact(adv):
+            problems.append(f"{name}: database_specific.no_artifact must be true in every affected block or none")
+        if writes_no_artifact(adv):
+            if not all(isinstance(b["database_specific"].get("outputs"), str) and b["database_specific"]["outputs"]
+                       for b in blocks):
+                problems.append(f"{name}: no_artifact needs database_specific.outputs (producer and how to "
+                                "recognise its output)")
+        else:
+            keys = applies.get("extension_keys") or []
+            required = {t: required_extension_keys(t, root) & set(keys) for t in applies.get("artifact_types") or []}
+            blind = not keys or any(required.values())
+            if blind and adv.get("id") not in NONDISCRIMINATING_ALLOWED:
+                why = "no extension key" if not keys else "; ".join(
+                    f"{', '.join(sorted(k))} required for {t}" for t, k in required.items() if k)
+                problems.append(f"{name}: extension keys cannot show the affected code ran ({why}): name a key only "
+                                "the affected code writes, or mark no_artifact when it writes no artifact")
+            if not blind and adv.get("id") in NONDISCRIMINATING_ALLOWED:
+                problems.append(f"{name}: discriminates now: remove it from NONDISCRIMINATING_ALLOWED")
         known = extension_properties(applies.get("artifact_types") or [], root)
         for key in applies.get("extension_keys") or []:
             if known is not None and key not in known:
@@ -139,20 +260,28 @@ def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root
             for path in paths:
                 if not (root / path).is_file():
                     problems.append(f"{name}: affected path {path} is not a file of the plugin")
+            well_formed = True
             for rng in ranges:
                 events = rng.get("events") or []
-                if rng.get("type") != "SEMVER" or not events or "introduced" not in events[0]:
+                if rng.get("type") != "SEMVER" or not events or not isinstance(events[0], dict) or \
+                        "introduced" not in events[0]:
                     problems.append(f"{name}: a range is SEMVER and starts with an introduced event")
+                    well_formed = False
                     continue
-                for event in events:
-                    if len(event) != 1 or next(iter(event)) not in ("introduced", "fixed", "last_affected"):
-                        problems.append(f"{name}: event {event} is not introduced, fixed or last_affected")
-                    elif not (VERSION.match(next(iter(event.values()))) or event == {"introduced": "0"}):
-                        problems.append(f"{name}: event {event} needs an X.Y.Z version")
+                bad = [e for e in events if not isinstance(e, dict) or len(e) != 1 or
+                       next(iter(e)) not in ("introduced", "fixed", "last_affected")]
+                for event in bad:
+                    problems.append(f"{name}: event {event} is not introduced, fixed or last_affected")
+                found = [] if bad else _range_problems(name, events)
+                problems += found
+                if bad or found:
+                    well_formed = False
+                    continue
+                problems += _release_problems(name, block, events, manifests)
                 closed = [e for e in events if "fixed" in e or "last_affected" in e]
                 if not closed and not (block.get("database_specific") or {}).get("fixed_commit"):
                     problems.append(f"{name}: an open range (fix not released) names database_specific.fixed_commit")
-            if paths and ranges and not affected_releases(adv, manifests)["releases"] and \
+            if paths and ranges and well_formed and not affected_releases(adv, manifests)["releases"] and \
                     not affected_releases(adv, manifests)["before_first_manifest"]:
                 problems.append(f"{name}: no release is affected (range or paths wrong)")
     return problems
