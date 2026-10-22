@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.24.0 (2026-10-22)
 
 - **Independent review: an optional expert slot in round 1, a per-review configuration file, and reviewer identity
   removed from the filter packet (contracts 3.6.0).** All three are off unless asked for; without them every

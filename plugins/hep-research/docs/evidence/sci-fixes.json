@@ -4630,7 +4630,8 @@
    "id": "SCAN-VERDICT-ORDER",
    "title": "scifix_advisories.py scan lists advisories whose code writes no artifact apart and reports a release only when its manifest holds an affected file",
    "changelog": {
-    "kind": "unreleased",
+    "kind": "release",
+    "release": "0.24.0",
     "detail": "sci-fix improvement plan PR-3 (A5)"
    },
    "severity": "S2",
@@ -4731,7 +4732,8 @@
    "id": "SCAN-MISSING-MARKER",
    "title": "scifix_advisories.py scan treats a missing marker (unknown, not-applicable, not-provided) as absent, not as a sign the affected code ran",
    "changelog": {
-    "kind": "unreleased",
+    "kind": "release",
+    "release": "0.24.0",
     "detail": "sci-fix improvement plan PR-4 (A4)"
    },
    "severity": "S2",
@@ -4790,7 +4792,8 @@
    "id": "ADVISORY-MATCH-V2",
    "title": "Advisories format /2: match conditions on what an artifact can show, and possibly affected (no trace) when it cannot",
    "changelog": {
-    "kind": "unreleased",
+    "kind": "release",
+    "release": "0.24.0",
     "detail": "sci-fix improvement plan PR-5 (A1 change 1)"
    },
    "severity": "S2",
@@ -4865,7 +4868,8 @@
    "id": "PERIODICITY-REFIT",
    "title": "periodicity_scan.py red-noise global p: the null is refitted on every surrogate (double parametric bootstrap, bias-corrected lag-1 for AR(1)) instead of estimated once",
    "changelog": {
-    "kind": "unreleased",
+    "kind": "release",
+    "release": "0.24.0",
     "detail": "periodicity_scan.py refits the red-noise null (sci-fix PERIODICITY-REFIT)"
    },
    "severity": "S1",
