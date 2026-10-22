@@ -282,8 +282,8 @@ def read_label(value, where=""):
 
 
 def cell_resample(x, w, metric_scale=None, max_cell=None):
-    """Cell resampling of signed event weights (Andersen & Maier, EPJC 82 (2022) 433, arXiv:2109.07851, sect. 2.2,
-    eq. 2.2): for each event with negative weight (the seed), add the nearest events (Euclidean distance in x,
+    """Cell resampling of signed event weights (Andersen & Maier, EPJC 82 (2022) 433, arXiv:2109.07851, Sec. 2,
+    eq. (2.2), p. 3): for each event with negative weight (the seed), add the nearest events (Euclidean distance in x,
     scaled by metric_scale) until the cell's summed weight is non-negative, then replace every weight in the cell by
     |w_i| * sum_C w / sum_C |w|. The sum of weights in each cell, and so every observable coarser than the cells, is
     preserved. With max_cell a cell stops at that many events even if its sum is still negative (the seed's weight

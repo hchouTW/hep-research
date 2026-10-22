@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-024",
  "severity": "S1",
  "ledger": [
@@ -48,9 +48,15 @@
   "artifact_types": [
    "ml-artifact"
   ],
-  "extension_keys": [
-   "weights"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.weights",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "retrain with --negative-weights signed, abs (bias recorded) or resample, and recompute the weighted metrics and significances with a release that has the fix",
  "references": [

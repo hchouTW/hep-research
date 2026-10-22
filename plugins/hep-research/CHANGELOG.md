@@ -49,6 +49,18 @@ Software checks establish contract consistency only, not physical validity.
   must change an affected file against the release before it, and an `introduced` release that already held one
   states `introduced_basis` (added to SFA-2026-002 and -003); an unknown artifact type is a problem. Scan verdicts
   are unchanged in this step.
+- **Advisories format /2: match what an artifact can show, and say "possibly affected (no trace)" when it cannot
+  (sci-fix ADVISORY-MATCH-V2, S2; plan A1 change 1).** `applies_to.match` replaces `extension_keys`: groups of
+  conditions on any envelope path (`exists`, `eq`, `in`, `regex`; `[*]` expands lists), undecided when the artifact
+  predates the field (`unknown_before`) or the execution trace, and `match: []` with `match_basis` when no field can
+  show the affected code ran. Every group must discriminate; the frozen allowlist is gone. All 31 advisories are
+  rewritten: ten list outputs only (the blinding scanner, the five detector scripts, `anisotropy.py`,
+  `estimate_training_memory.py`), which no artifact can show; six cannot be decided from any field (SFA-2026-004, 006,
+  010: the statistical-result writer wraps a core/stats CLI's output; 023, 025: required ml-artifact keys; 033: required
+  claims), so their artifacts in range are now possibly affected (no trace) instead of affected; the others match on
+  fields the affected code writes (SFA-2026-020 only from contracts 2.5.0, when its fields appeared; 031 on the
+  partition runner's tool name). The number of findings on old artifacts does not drop: what changes is that a
+  finding says what it rests on. The scan still reads `/1` for one release. Evidence: VALIDATION SCIFIX-ADVISORY-V2.
 - **Envelope execution trace: `provenance.code_paths` and `code_tags` (contracts 3.5.0, minor; sci-fix improvement
   plan A1 change 2, maintainer decision 2026-10-22).** Twelve artifact writers add the plugin `.py` files their process
   had loaded and the tags advisory-named shared functions set (`core/trace.py`, imported as `contracts.trace`; tags cleared per envelope), so a
@@ -77,6 +89,18 @@ Software checks establish contract consistency only, not physical validity.
   (0.10.0). Seven entries graded D2 whose later oracle tests were never run on the parent (FC-MONOTONE, POISSON-SF,
   COV-NOREPAIR, POISSON-500, ROBUST-MALFORMED, BLINDING-SCANNER, ROBUST-CAMPAIGN) state it in `gaps`; their grades
   are unchanged until the D-scope rule. Evidence: VALIDATION SCIFIX-PLAN-P0-CHECK.
+- **Sci-fix ledger: located sources in the evidence ledger format, and evidence that runs (plan B1 and B4; F-10,
+  F-12).** The *Sources read for locators* table is now `docs/evidence/scifix-sources.json` and
+  `scifix-claims.json` (11 sources, 27 located claims, checked by `core/evidence/ledger.py`, index
+  `scifix-index.md`), and each of the 15 `locator` records names its `source_id` and `locator_id`; the source must
+  have been read at `page` or `full-text`. arXiv:2109.07851 (ML-NEGWEIGHTS), cited only in prose, was read
+  (v2, 2026-10-22, page level): eq. (2.2) is in Sec. 2, p. 3, not in Sec. 2.2 as the ledger and
+  `hep_metrics.cell_resample` said; the citation is corrected and the grade (C3) stands. Each of the 60
+  `independence` records states `requires: {"core", "backend"}`, found by hiding each package in turn; every backend
+  is locked by a required CI gate. `run_required_backends.py --from-ledger` runs the 52 oracle nodes (24 modules,
+  16 not in its `MODULES`) one by one and classifies each failure: a missing core dependency is an environment error,
+  a missing backend is unverified, anything else means the evidence does not hold; with `--no-skips` an unverified
+  or skipped node fails too. Evidence: VALIDATION SCIFIX-PLAN-B1-B4.
 
 ## 0.23.0 (2026-10-22)
 

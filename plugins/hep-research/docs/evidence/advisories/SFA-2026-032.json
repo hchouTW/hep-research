@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-032",
  "severity": "S2",
  "ledger": [
@@ -42,9 +42,15 @@
   "artifact_types": [
    "communication"
   ],
-  "extension_keys": [
-   "occurrences"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.occurrences",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "run check_communication / audit_claims again with a release that has the fix; a new occurrence.value_not_in_passage error names the display to correct",
  "references": [

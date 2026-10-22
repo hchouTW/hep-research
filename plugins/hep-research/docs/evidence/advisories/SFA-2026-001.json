@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-001",
  "severity": "S2",
  "ledger": [
@@ -38,12 +38,14 @@
   "trigger": "a sealed value written in an output as an integer whose trailing zeros are rounding (22000, 22,000, 22010 for 22014)"
  },
  "applies_to": {
-  "artifact_types": [
-   "measurement-spec"
-  ],
-  "extension_keys": [
-   "blinding"
-  ]
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-computing/scripts/audit_blinded_outputs.py",
+    "contracts/scan_verdict.py"
+   ],
+   "how_to_recognize": "the blinding audit's JSON report (stdout, or --report FILE) and scan verdicts; the scanner writes no artifact, and a measurement-spec does not record that it ran"
+  }
  },
  "remedy": "rescan the outputs of the blinded analysis with a release that has the fix (audit_blinded_outputs.py); a new hit means a blinded value was exposed and goes to the custodian",
  "references": [

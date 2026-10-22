@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-020",
  "severity": "S2",
  "ledger": [
@@ -68,9 +68,24 @@
   "artifact_types": [
    "ml-artifact"
   ],
-  "extension_keys": [
-   "splits"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.splits.overlap_check.tool",
+     "op": "regex",
+     "value": "check_split_integrity",
+     "unknown_before": "2.5.0"
+    }
+   ],
+   [
+    {
+     "path": "extension.splits.manifest",
+     "op": "exists",
+     "unknown_before": "2.5.0"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "rerun check_split_integrity.py (and make_grouped_splits.py for temporal splits) with a release that has the fix on the original split files; a new failure means the reported test metrics may be optimistic",
  "references": [

@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-025",
  "severity": "S2",
  "ledger": [
@@ -69,9 +69,9 @@
   "artifact_types": [
    "ml-artifact"
   ],
-  "extension_keys": [
-   "model_hash"
-  ]
+  "match": [],
+  "match_basis": "model_hash is required in every ml-artifact, and compare_model_runs.py, hep_metrics.py and train_classifier.py run apart from write_ml_artifact.py, so no field shows that the corrected code ran",
+  "no_trace": "possibly-affected"
  },
  "remedy": "rerun compare_model_runs.py and the sculpting check, and retrain a model with a constant feature, with a release that has the fix; compare models by the new weights-only model_hash",
  "references": [

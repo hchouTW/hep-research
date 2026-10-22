@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-005",
  "severity": "S1",
  "ledger": [
@@ -43,9 +43,15 @@
   "artifact_types": [
    "statistical-result"
   ],
-  "extension_keys": [
-   "significance"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.significance",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "recompute the toy p-value with a release that has the fix (0.6.11 or later); a zero becomes an upper bound, so run more toys if a value is needed",
  "references": [

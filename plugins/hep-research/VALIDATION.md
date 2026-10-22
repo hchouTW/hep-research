@@ -2126,6 +2126,38 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-ADVISORY-V2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-5-advisory-v2`, stacked on `scifix/pr-4-execution-trace`)
+
+Sci-fix improvement plan v3, PR-5 (A1 change 1), sci-fix ADVISORY-MATCH-V2 (S2, C2, D2). Fix `cc7357ba`, parent
+`c3d9208a` (PR-4's head) in a detached worktree with the fix commit's `tests/tools/test_scifix_advisories.py` and
+`tests/tools/fixtures/advisory_matrix.json` copied in; the worktree was removed after the run.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/tools/test_scifix_advisories.py::ThreeValuedMatch::test_every_match_of_up_to_two_groups_of_up_to_two_conditions` | exhaustive (156 matches and `[]`) | error (`match_verdict` absent: the /1 scan has no undecided state) | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::AcceptanceMatrix::test_every_advisory_cell_by_cell` | behavioral (31 advisories, hand-written verdicts) | fail by assertion for 11 advisories: SFA-2026-001, 002, 004, 006, 010, 020, 023, 025, 030, 031, 033 | pass | no | CI lock |
+
+The acceptance matrix (`tests/tools/fixtures/advisory_matrix.json`) gives, per advisory, synthetic artifacts in and out
+of range, with and without a trace, positive and negative, and for SFA-2026-020 one written under contracts 2.4.0,
+before its fields existed; every verdict is written by hand from the advisory's `applies_to`. A mutation check (two
+expectations altered) made the matrix test fail for exactly those two advisories. The plan's two `hadd` jobs of F-01
+(0.12.0 and 0.21.0, digest-consistent) get no finding from any shipped advisory.
+
+Migration of the 31 advisories (each read against the code that writes the artifact):
+
+| Class | Advisories | Basis |
+|---|---|---|
+| outputs only (`artifact_types: []`) | 001, 030 (blinding scanner), 014 to 019 (detector scripts), 036 (`anisotropy.py`), 037 (`estimate_training_memory.py`) | the affected code prints a report and writes no artifact, and no artifact writer imports it within the range (checked: the writers' imports) |
+| `match: []`, possibly affected (no trace) | 004, 006, 010 | `result_artifact.py` writes the statistical-result from a core/stats CLI's JSON printed in another process; no field names the code (the listed keys were required, or do not show it) |
+| `match: []` | 023, 025 (ml-artifact), 033 (communication) | the keys were required in every artifact of the type; the affected scripts run apart from the writer |
+| discriminating fields | 002, 020 (`splits.overlap_check.tool` matching `check_split_integrity`, or `splits.manifest`; 020 `unknown_before` 2.5.0, when they appeared), 003, 021 (`calibration`), 005, 009 (`significance`), 007 (`convergence`, `sampler`), 008 (`construction`), 011 (`results`), 022 (`domain_shift`), 024 (`weights`), 032, 034, 035 (`occurrences`), 031 (`tools[*].name` equal to `hep-research core/partition runner`, the name in 0.3.0's `batch_campaign.py`, plus `local_partition.py` outputs) | each top-level key existed in the extension schema at every release tag in the advisory's range (checked against the tags) |
+
+Full gate: `run_all_checks.py --no-cli --jobs 4`, CI lock, branch head: 25 pass, 0 fail, 2 skipped (CLI host
+checks); 4828 tests, 4579 pass, 0 failures, 249 skipped.
+
+Expected effect, as the plan states: findings on old artifacts do not drop. The six `match: []` advisories now say
+"possibly affected (no trace)" where they said "affected"; the outputs-only ones no longer match any artifact.
+
 ## SCIFIX-PLAN-A1-TRACE (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; E2 venv for fixtures and examples; branch `scifix/pr-4-execution-trace`, stacked on `scifix/pr-3-scan-order`)
 
 Sci-fix improvement plan v3, PR-4: A1 change 2 (contracts 3.5.0, `contracts/trace.py`, maintainer decision
@@ -2147,6 +2179,41 @@ worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in
 Limit found while implementing: `result_artifact.py`, the statistical-result writer, wraps the JSON a core/stats CLI
 printed in another process, so its `code_paths` never shows `core/stats/*`; an advisory about core/stats code must
 match on fields the CLI output carries, or say that no field shows it (plan PR-5).
+## SCIFIX-PLAN-B1-B4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0, mpmath 1.3.0, no pyhf, ArviZ, pdg or torch; E2: NumPy 2.5.3, SciPy 1.18.1, pyhf 0.7.6, PyTorch 2.14.1, no ArviZ or pdg; branch `scifix/pr-6-evidence-sources`, stacked on `scifix/pr-4-execution-trace`)
+
+Sci-fix improvement plan v3, PR-6 (B1, B4; F-10, F-12). Counts recomputed on the branch: 40 ledger entries, 60
+`independence` records, 15 of them `locator`, 52 distinct oracle nodes in 24 modules, 16 of which are not in
+`run_required_backends.py` `MODULES`.
+
+B1: the *Sources read for locators* table of SCIFIX-LEDGER-REVIEW is now `docs/evidence/scifix-sources.json`
+(scifix:S01-S11) and `scifix-claims.json` (scifix:C01-C27, one per locator; index `scifix-index.md`). The PDG
+chapter 35 row became two sources (2024 and 2025 editions, S02 and S03); Gaisser and Hillas 1977 is `not-opened`
+(S10, cited by no claim); the cosmic-ray review's "does not state the form" is an `absence_search` claim (C26). The
+FC-MONOTONE published record points at Table IV, p. 37 (C21), the table read with its page; Table VI has no page in
+the reading record and is not claimed. arXiv:2109.07851 (S11, ML-NEGWEIGHTS) was read on 2026-10-22: the v2 abstract
+page and pp. 1-5 of the v2 PDF (page level). Eq. (2.2), w_i -> (sum_C w_j / sum_C |w_j|) |w_i| for every event in a
+cell grown around a negative-weight seed until its summed weight is non-negative, is in Sec. 2 "Cell Resampling",
+p. 3, and p. 4 applies the steps successively to each negative-weight event: this supports the brute-force oracle
+(C27), so the basis holds and the grade stays C3. Sec. 2.2 is the nearest-neighbour search (p. 9); the ledger detail
+and the `hep_metrics.cell_resample` docstring cited "sect. 2.2" and are corrected.
+
+B4: each record's `requires` was found by hiding one package at a time (a meta-path blocker plus a patched
+`importlib.util.find_spec`, also in subprocesses) and running all 52 nodes in E2: hiding numpy changes 27 nodes,
+scipy 22, sympy 11, mpmath 12 (sympy needs mpmath), pyhf 3, torch and matplotlib 0; ArviZ and pdg (not in E2) come
+from the nodes' own guards (one node each).
+
+| Check | Result |
+|---|---|
+| `core/evidence/ledger.py --namespace scifix --strict --today 2026-10-22` | pass: 11 sources, 27 claims, 0 errors, 0 warnings; 1 note (S10 cited by no claim) |
+| `core/evidence/render_index.py` on `scifix-index.md` | in sync |
+| `run_required_backends.py --from-ledger --no-skips`, CI lock | exit 1: 47 pass, 5 unverified (backend missing: pyhf 3, ArviZ 1, pdg 1), 0 environment errors, 0 do not hold, 0 skipped |
+| Same without `--no-skips`, CI lock | exit 0, same classes |
+| `run_required_backends.py --from-ledger --no-skips`, E2 | exit 1: 50 pass, 2 unverified (ArviZ 1, pdg 1), 0 environment errors, 0 do not hold, 0 skipped |
+| Backends in `requires` (pyhf, arviz, pdg) against the required gates' `--require` | each locked: pyhf and arviz by `stats-backends`, pdg by `pdg-cross-check` |
+| New tests (5 in `test_scifix_ledger`, 3 in `test_run_required_backends`) with the ledger and the tool reverted | fail: 5 failures and 14 errors (subtests); with `scifix-sources.json` removed as well, 1 failure and 4 errors |
+| Same on the change | pass: `test_scifix_ledger` 10 tests, `test_run_required_backends` 6 tests |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock | 23 pass, 2 fail, 2 skipped (CLI); 4822 tests, 4572 pass, 1 failure, 249 skipped. Both failures are `retired_names` on the 11 `changelog.name` values of the 0.10.0 detector and ML audits, which spell the retired skill names and which `8f8c66f9` (PR-2) added; a `git archive` of this branch's parent fails the same way |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
 ## SCIFIX-SCAN-VERDICT-ORDER (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-3-scan-order`, stacked on `scifix/pr-2-advisory-check`)
 
