@@ -3,11 +3,11 @@
 \providecommand{\hepSynthetic}[1]{\ifdefined\hepfinalbuild\errmessage{render_results: a SYNTHETIC value in a final build}\fi#1}
 \providecommand{\hepPreliminary}[1]{\ifdefined\hepfinalbuild\errmessage{render_results: a PRELIMINARY value in a final build}\fi#1}
 % ---
-% Mu: artifact synthetic-e4-mu sha256 0e42953786478afec917907f9d3c9c213aeef67015743b2aa2c940662f0e9fcb results.mu_hat +- results.sigma_mu; rounding pdg; labels ['synthetic']
+% Mu: artifact synthetic-e4-mu sha256 89da9b8fdfea295fff46e759a3163176438b569fc0beec7e72efd47a52c12f17 results.mu_hat +- results.sigma_mu; rounding pdg; labels ['synthetic']
 \newcommand{\MuValue}{1.04}
 \newcommand{\MuUnc}{0.06}
 \newcommand{\Mu}{\hepSynthetic{1.04 \pm 0.06}}
-% Mass: artifact synthetic-e4-selected-mass sha256 841620a3ccdfc88c6fc3610225049b05dacf21648492dcfe04e306197349254e; total uncertainty = components in quadrature; rounding pdg; labels ['synthetic']
+% Mass: artifact synthetic-e4-selected-mass sha256 b405066c4bae7f25f3e65733b5f04ce388a866ebcee299cd73ab457eedce7ae7; total uncertainty = components in quadrature; rounding pdg; labels ['synthetic']
 \newcommand{\MassTable}{\begin{tabular}{lc}
 m [GeV] & event-count \\
 \hline
