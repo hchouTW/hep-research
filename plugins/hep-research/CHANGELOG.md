@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Cross-artifact check: Phase 2 may start.** The maintainer changed the value gate's decision from Stop to
+  Continue (`docs/dev/cross-artifact-check/decision-value-gate.md`). The measurement is unchanged (no incremental
+  detection in 28 AI-planted errors) and the gate is not passed, so every rule stays in shadow mode and the check
+  stays experimental until Phase 2 releases its fixes. No behavior change.
+
 ## 0.25.1 (2026-10-22)
 
 Patch release: the cross-artifact check's value gate and the owner's Stop decision; no artifact contract change
