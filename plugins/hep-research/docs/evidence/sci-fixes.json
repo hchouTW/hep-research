@@ -1326,7 +1326,8 @@
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared",
-    "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength",
+    "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_geant4_cerenkov_for_protons_and_alphas"
    ],
    "oracle_kinds": [
     "analytic",
@@ -1334,13 +1335,12 @@
     "invariant"
    ],
    "correctness": "C3",
-   "discrimination": "D0",
+   "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope: neither oracle has a parent record: on parent 4aebc0be the CLI has no charge input (KeyError 'charge'), the Frank-Tamm test imports core.constants (added after the fix) and errors on the fix too, and the z^2 test fails on the fix by 4e-8 (it passes from TH9's fix 23910085 on); the fix commit's own tests (mass:charge syntax, --rigidity, the charge key) all need input forms new in the fix: no per-test parent record, D0 (VALIDATION SCIFIX-PLAN-B3-B6)",
-    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
+    "D scope: of the three oracle nodes only test_yield_matches_geant4_cerenkov_for_protons_and_alphas reaches the parent's code (fails on parent 4aebc0be by assertion, He4 yield 4 times low, passes on fix 70f7fbcb, VALIDATION SCIFIX-TRANSCRIPTION-ORACLES); the z^2 test errors on the parent (KeyError 'charge') and fails on the fix by 4e-8 (it passes from TH9's fix 23910085 on), the Frank-Tamm test imports core.constants (added after the fix) and errors on both (VALIDATION SCIFIX-PLAN-B3-B6): D1"
    ],
-   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)",
+   "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20); Geant4 11.4.3 G4Cerenkov photon counts for p and alpha as a third-party oracle, 2026-10-22 (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES)",
    "independence": [
     {
      "kind": "analytic",
@@ -1373,6 +1373,17 @@
       "backend": []
      },
      "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_geant4_cerenkov_for_protons_and_alphas",
+     "basis": "third-party",
+     "detail": "Geant4 11.4.3 G4Cerenkov (OpNovice2, 2000 events per row, G4_Galactic radiator, constant RINDEX 1.05 over 2.0-2.5 eV, 199.995 cm): photon totals for p and alpha at 12, 20 and 40 GeV/c frozen in the test with tool and version; N0 from Geant4's Rfact 369.81/(eV cm); 5 Poisson sigma",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -1409,6 +1420,19 @@
       ],
       "backend": []
      }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_geant4_cerenkov_for_protons_and_alphas",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-TRANSCRIPTION-ORACLES",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ],
    "mutants": []
@@ -1423,7 +1447,8 @@
    },
    "severity": "S1",
    "evidence_tests": [
-    "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form",
+    "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_reaches_the_gaussian_limit_at_large_x_max"
    ],
    "oracle_kinds": [
     "analytic",
@@ -1433,10 +1458,8 @@
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [
-    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
-   ],
-   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes); grid of x_max, lambda and depths against the textbook form in 60-digit decimal arithmetic, the pre-fix form as negative control, half-maximum bracketing, 2026-10-20",
+   "gaps": [],
+   "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes); grid of x_max, lambda and depths against the textbook form in 60-digit decimal arithmetic, the pre-fix form as negative control, half-maximum bracketing, 2026-10-20; Gaussian limit at large x_max as a general-result oracle, 2026-10-22 (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES)",
    "independence": [
     {
      "kind": "analytic",
@@ -1463,6 +1486,19 @@
       "backend": []
      },
      "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_reaches_the_gaussian_limit_at_large_x_max",
+     "basis": "locator",
+     "detail": "general result: the (L, R) form is a Gaussian of standard deviation L times a distortion governed by R (arXiv:1811.04660v2 eq. (3.1), p. 5, read 2026-10-22), so for R -> 0 (1.4e-7 to 1.7e-5) the profile at x_max + t L is exp(-t^2/2); tolerance (2/3)|t|^3 R + 2 eps |t|/R + 1e-12, fixed before the run",
+     "source_id": "scifix:S07",
+     "locator_id": "scifix:C31",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "general-result"
     }
    ],
    "commits": {
@@ -1483,6 +1519,19 @@
       "core": [],
       "backend": []
      }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_reaches_the_gaussian_limit_at_large_x_max",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-TRANSCRIPTION-ORACLES",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
     }
    ],
    "mutants": []
@@ -1498,7 +1547,8 @@
    "severity": "S1",
    "evidence_tests": [
     "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq",
-    "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance"
+    "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance",
+    "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets"
    ],
    "oracle_kinds": [
     "independent-implementation",
@@ -1510,9 +1560,8 @@
    "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope: the analytic oracle test_calorimeter_fit_closure_and_energy_scale_covariance passes on parent f6a64702, so it is not shown to catch the defect: D1, and the killed revert mutant no longer gives D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
-    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and 'toy study', not the function; the file is the advisory's",
-    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
+    "D scope: the analytic oracle test_calorimeter_fit_closure_and_energy_scale_covariance passes on parent f6a64702, so it is not shown to catch the defect: D1, and the killed revert mutant no longer gives D3 (VALIDATION SCIFIX-PLAN-B3-B6); the two other oracle nodes fail on the parent by assertion (SCIFIX-PLAN-B3-B6, SCIFIX-TRANSCRIPTION-ORACLES)",
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and 'toy study', not the function; the file is the advisory's"
    ],
    "independence": [
     {
@@ -1540,9 +1589,24 @@
       "backend": []
      },
      "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets",
+     "basis": "locator",
+     "detail": "general result: a consistent, (nearly) unbiased estimator recovers the truth (PDG RPP 2024 Statistics sec. 40.2 (a), (b), p. 2, read 2026-10-22); 3 term sets x 2000 toys, real terms in >= 99% of toys and each mean within 0.003 truth + 5 MC sigma, fixed before the run",
+     "source_id": "scifix:S13",
+     "locator_id": "scifix:C32",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     },
+     "expected_from": "general-result"
     }
    ],
-   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); the 2000-toy bias study (bias of c 0.06 sd; pre-fix unit weights: c^2 < 0 in 24.8%, c about 10 sd high), closure and energy-scale covariance; 2 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-017",
+   "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); the 2000-toy bias study (bias of c 0.06 sd; pre-fix unit weights: c^2 < 0 in 24.8%, c about 10 sd high), closure and energy-scale covariance; 2 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-017; truth recovery over three term sets as a general-result oracle, 2026-10-22 (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES)",
    "commits": {
     "parent": "f6a64702c655dbbf13e7209031b8c98c56c381a0",
     "fix": "6c7933634eb1ab1f43acb9368379fd362e5f642f",
@@ -1574,6 +1638,21 @@
      "validation": "SCIFIX-PLAN-B3-B6",
      "requires": {
       "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "SCIFIX-TRANSCRIPTION-ORACLES",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
       "backend": []
      }
     }
@@ -1696,7 +1775,7 @@
    "gaps": [
     "D scope: the oracle test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms errors on parent f6a64702 (TypeError: summarize's mass_gev argument is new in the fix); no node has a parent record: D0, and the killed revert mutants no longer give D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
     "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and the closed-form test, not the function; the file is the advisory's",
-    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
+    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it; searched 2026-10-22 without result (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES): no located source prints a crossover, MDR or beta(R) value for a stated stack; Geant4 11.4.3 TestEm5 offers its own Highland value only in the older form 1 + 0.038 ln(x/X0), without z^2/beta^2, and a simulated angle whose beta dependence PDG RPP 2024 (p. 16, below eq. (34.16)) states without a numerical accuracy ('for large Z and small x the beta-dependence is not well represented'), so no tolerance could be fixed from a located source before a run; the C grade is left to the maintainer; maintainer decision 2026-10-22: C3 is kept with this gap open until a printed value or a third-party implementation is found"
    ],
    "independence": [
     {

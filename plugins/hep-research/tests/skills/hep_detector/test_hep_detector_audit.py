@@ -169,6 +169,29 @@ class GaisserHillasPropertyTests(unittest.TestCase):
                             old_misses += abs(old / want - 1.0) > 1e-6
         self.assertGreater(old_misses, 0)  # negative control: the pre-fix form fails part of this grid
 
+    def test_profile_reaches_the_gaussian_limit_at_large_x_max(self):
+        """sci-fix DR-WP1-02, general-result oracle (expected value not from the transcribed profile): in the (L, R)
+        form of Pierre Auger Collaboration, JCAP 03 (2019) 018, arXiv:1811.04660, eq. (3.1), p. 5, the profile "is a
+        Gaussian with standard deviation L, multiplied by a term that distorts it, with the asymmetry governed by R",
+        L = sqrt(lambda (x_max - x0)), R = sqrt(lambda / (x_max - x0)). For R -> 0 (here 1.4e-7 to 1.7e-5) the profile
+        at x_max + t L must therefore be exp(-t^2 / 2) (the normal limit of the gamma shape). Tolerance, fixed before
+        the first run: the distortion is ln N + t^2/2 = (t^3 R / 3)(1 + O(t R)), bounded by (2/3) |t|^3 R for
+        |t R| <= 1/2, plus the fix's own rounding 2 eps |t| / R (test_profile_against_high_precision_and_the_old_form)
+        and 1e-12. On the parent's double-precision form the base rounding is amplified by (x_max - x0) / lambda, about
+        1e-3 at x_max = 1e15, far above the bound (2e-5)."""
+        for x_max in (1e12, 1e15):
+            for lam in (20.0, 60.0, 300.0):
+                width = math.sqrt(lam * (x_max - self.X0))
+                asym = math.sqrt(lam / (x_max - self.X0))
+                for t in (-3.0, -2.0, -1.0, -0.5, 0.5, 1.0, 2.0, 3.0):
+                    depth = x_max + t * width
+                    t_eff = (depth - x_max) / width  # the depth as represented
+                    with self.subTest(x_max=x_max, lam=lam, t=t):
+                        got = xmax_gaisser_hillas.gaisser_hillas(depth, 1.0, x_max, self.X0, lam)
+                        self.assertGreater(got, 0.0)
+                        tol = 2.0 / 3.0 * abs(t_eff) ** 3 * asym + 2.0 * 2.3e-16 * abs(t_eff) / asym + 1e-12
+                        self.assertLessEqual(abs(math.log(got) + 0.5 * t_eff * t_eff), tol)
+
     def test_half_maximum_depths_bracket_half_the_maximum(self):
         tol = 1e-6
         for x_max, lam in ((750.0, 60.0), (750.0, 3e5), (5e6, 2e5), (1e12, 60.0), (1e15, 30.0)):
@@ -257,6 +280,43 @@ class CherenkovChargeTests(unittest.TestCase):
                 self.assertAlmostEqual(got / (2.0 * spectrum), 1.0, delta=1e-11)
                 if z > 1:
                     self.assertGreater(abs(got / z ** 2 / (2.0 * spectrum) - 1.0), 0.5)
+
+    # Geant4 11.4.3, OpNovice2 example (G4Cerenkov through G4OpticalPhysics; FTFP_BERT), run 2026-10-22: box of
+    # G4_Galactic (no energy loss, no delta rays, no hadronic interactions) with a constant RINDEX 1.05 between 2.0
+    # and 2.5 eV, world G4_AIR without RINDEX, primary started at x = -999.95 mm along +x through the box (half
+    # length 1 m): path 199.995 cm. 2000 events per row; /gun/momentumAmp sets p; the counts are the exact totals of
+    # optical photons created by the Cerenkov process (Run.cc patched to print the integer total only). G4Cerenkov's
+    # own normalization is Rfact = 369.81 / (eV cm) (G4Cerenkov.cc, GetAverageNumberOfPhotons), and its photon count
+    # per step is Poisson, so the total of n events is Poisson.
+    G4_CERENKOV = {  # momentum GeV/c: (proton total, alpha total), 2000 events each
+        40.0: (6836393, 25183431),
+        20.0: (6728768, 18180150),
+        12.0: (6465855, 1616253),
+    }
+    G4_EVENTS, G4_PATH_CM, G4_RFACT, G4_WINDOW_EV = 2000, 199.995, 369.81, 0.5
+
+    def test_yield_matches_geant4_cerenkov_for_protons_and_alphas(self):
+        """sci-fix DR-WP1-01, third-party-definition oracle: the Geant4 G4Cerenkov photon counts above (Geant4's own
+        algorithm, kinematics and particle definitions, frozen with the tool and version stated) against the script
+        for p and He4 at the same momentum, with N0 = Rfact x 0.5 eV (Geant4's constant) and L = 199.995 cm.
+        Tolerance, fixed before the first comparison: 5 Poisson sigma of the Geant4 totals (relative 1/sqrt(total),
+        6e-4 to 4e-3) plus 1e-6 for the particle masses; the He4/p ratio within 5 sigma of the two totals combined.
+        The parent's yield (no z^2) is 4 times low for He4 and fails."""
+        n0 = self.G4_RFACT * self.G4_WINDOW_EV
+        for momentum, (proton_total, alpha_total) in self.G4_CERENKOV.items():
+            with self.subTest(momentum=momentum):
+                payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p', 'He4',
+                                   '--momentum', repr(momentum), '--radiator-length', repr(self.G4_PATH_CM),
+                                   '--figure-of-merit', repr(n0))
+                got_p = payload['species_a']['expected_photons']
+                got_he = payload['species_b']['expected_photons']
+                for got, total in ((got_p, proton_total), (got_he, alpha_total)):
+                    mean = total / self.G4_EVENTS
+                    tol = 5.0 * math.sqrt(total) / self.G4_EVENTS + 1e-6 * mean
+                    self.assertLessEqual(abs(got - mean), tol, (got, mean))
+                ratio = alpha_total / proton_total
+                ratio_tol = 5.0 * ratio * math.sqrt(1.0 / alpha_total + 1.0 / proton_total)
+                self.assertLessEqual(abs(got_he / got_p - ratio), ratio_tol, (got_he / got_p, ratio))
 
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
@@ -475,6 +535,40 @@ class ScriptPhysicsOracleTests(unittest.TestCase):
                 self.assertAlmostEqual(scaled['stochastic_squared'] / (s * fit['stochastic_squared']), 1, delta=1e-9)
                 self.assertAlmostEqual(scaled['noise_squared'] / (s * s * fit['noise_squared']), 1, delta=1e-9)
                 self.assertAlmostEqual(scaled['constant_squared'] / fit['constant_squared'], 1, delta=1e-9)
+
+    def test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets(self):
+        """sci-fix DR-WP2-06-CALO, general-result oracle (expected values are the truth parameters of the toys, not a
+        transcribed formula's output): a consistent estimator converges to the true value and its bias
+        E[theta_hat] - theta should vanish (PDG RPP 2024, 40. Statistics, sec. 40.2 (a) and (b), p. 2). Toys: 2000 per
+        term set, 2% Gaussian relative scatter on sigma/E, no per-point errors (the default the fix changed).
+        Criteria and tolerances, fixed before the first run: (1) every term has a real value in at least 99% of the
+        toys (a None counts as a failed recovery); (2) the mean of each term is within 0.003 x truth + 5 x its toy
+        spread / sqrt(2000) of the truth: the 0.003 allows the second-order bias of weighting by the observed r (about
+        -3.5 x 0.02^2 = -0.14% relative on a, b, c, doubled), the second term is 5 Monte Carlo sigma. The parent's
+        unit-weight fit gives c^2 < 0 in about a quarter of the toys and fails (1)."""
+        import numpy as np
+
+        e = np.array(self.ENERGIES, dtype=float)
+        n_toys = 2000
+        for k, (a, b, c) in enumerate(((0.10, 0.20, 0.0070), (0.05, 0.10, 0.010), (0.15, 0.30, 0.020))):
+            with self.subTest(a=a, b=b, c=c):
+                truth = np.sqrt(a * a / e + b * b / e ** 2 + c * c)
+                rng = np.random.default_rng(1000 + k)
+                values = {'stochastic': [], 'noise': [], 'constant': []}
+                failed = 0
+                for _ in range(n_toys):
+                    r = truth * (1 + 0.02 * rng.standard_normal(e.size))
+                    fit = calorimeter_resolution.fit_resolution([[float(x), float(y)] for x, y in zip(e, r)])
+                    if any(fit[name] is None for name in values):
+                        failed += 1
+                        continue
+                    for name in values:
+                        values[name].append(fit[name])
+                self.assertLessEqual(failed, 0.01 * n_toys, failed)
+                for name, want in (('stochastic', a), ('noise', b), ('constant', c)):
+                    got = np.array(values[name])
+                    tol = 0.003 * want + 5.0 * np.std(got, ddof=1) / math.sqrt(got.size)
+                    self.assertLessEqual(abs(got.mean() - want), tol, (name, got.mean(), want, tol))
 
     def test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms(self):
         """Analytic oracle: with beta(R) = zR / sqrt((zR)^2 + m^2), ms1/beta(R) = k R squares to

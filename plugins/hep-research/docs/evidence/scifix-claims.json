@@ -571,5 +571,43 @@
   "verification_strength": "page",
   "numeric_quotation_allowed": true,
   "last_reviewed": "2026-10-22"
+ },
+ {
+  "id": "scifix:C31",
+  "claim": "Written with R = sqrt(lambda/|X0'|), L = sqrt(|X0'| lambda) and X0' = X0 - Xmax, the Gaisser-Hillas function is a Gaussian with standard deviation L multiplied by a term that distorts it, with the asymmetry governed by R.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S07"
+  ],
+  "location": "arXiv:1811.04660v2 eq. (3.1) and the sentence below it, p. 5",
+  "scope": {
+   "text": "xmax_gaisser_hillas.py Gaussian limit at large x_max (DR-WP1-02)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-22"
+ },
+ {
+  "id": "scifix:C32",
+  "claim": "An estimator is consistent if its estimate converges in probability to the true value as the amount of data increases; its bias b = E[theta_hat] - theta is zero for an unbiased estimator, and the bias depends on the metric (theta_hat^2 is not in general unbiased for theta^2).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S13"
+  ],
+  "location": "RPP 2024 sec. 40.2 items (a) and (b), p. 2",
+  "scope": {
+   "text": "calorimeter_resolution.py toy truth recovery (DR-WP2-06-CALO)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-22"
  }
 ]

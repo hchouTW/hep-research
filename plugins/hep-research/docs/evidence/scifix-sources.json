@@ -121,7 +121,7 @@
   "supersedes": [],
   "superseded_by": [],
   "attribution": "Pierre Auger Collaboration",
-  "notes": "arXiv:1811.04660v2 read in full 2026-10-21 for the Gaisser-Hillas form; the title is not recorded in VALIDATION SCIFIX-LEDGER-REVIEW and is given here by the journal reference only."
+  "notes": "arXiv:1811.04660v2 read in full 2026-10-21 for the Gaisser-Hillas form; the title is not recorded in VALIDATION SCIFIX-LEDGER-REVIEW and is given here by the journal reference only. Page 5 (eq. (3.1), the (L, R) form and the Gaussian statement) reread 2026-10-22 for the DR-WP1-02 general-result oracle (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES)."
  },
  {
   "id": "scifix:S08",
@@ -209,5 +209,21 @@
   "superseded_by": [],
   "attribution": "G. Cavaliere, S. Gonçalves, M. Ø. Nielsen",
   "notes": "arXiv:2208.02028v1 (3 Aug 2022, econ.EM) read 2026-10-22 at page level for PERIODICITY-REFIT: the abstract page and pp. 1, 7-8 (H_n(u) = P(p_n <= u) and the exact test that rejects when H_n(p_n) <= alpha) and 14-15 (sect. 3.2.2 Double bootstrap, Theorem 3.2). Later versions and a journal reference were not checked in this reading."
+ },
+ {
+  "id": "scifix:S13",
+  "title": "Review of Particle Physics 2024, 40. Statistics (rev. August 2023)",
+  "authors": "G. Cowan (Particle Data Group)",
+  "year": 2024,
+  "url": "https://pdg.lbl.gov/2024/reviews/rpp2024-rev-statistics.pdf",
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-22",
+  "publication_date": "2024",
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Read 2026-10-22 at page level for the DR-WP2-06-CALO general-result oracle (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES): sec. 40.2, p. 2 (consistency and bias of an estimator) and sec. 40.2.3 (least squares, linear model, eqs. (40.21)-(40.23))."
  }
 ]
