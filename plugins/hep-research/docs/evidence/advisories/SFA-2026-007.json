@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-007",
  "severity": "S1",
  "ledger": [
@@ -44,10 +44,21 @@
   "artifact_types": [
    "statistical-result"
   ],
-  "extension_keys": [
-   "convergence",
-   "sampler"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.convergence",
+     "op": "exists"
+    }
+   ],
+   [
+    {
+     "path": "extension.sampler",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "rerun bayes_diagnostics.py (and any wbb-fit on signed-weight templates) with a release that has the fix (0.6.11 or later); a chain set reported converged before may now be not-converged",
  "references": [

@@ -1,20 +1,31 @@
 #!/usr/bin/env python3
 """Sci-fix advisories: which releases a scientific correction affects, and which of a project's artifacts they touch.
 
-An advisory (docs/evidence/advisories/SFA-YYYY-NNN.json, format hep-research-scifix-advisory/1, provisional: shadow
-mode) records a defect that a sci-fix corrected, for people holding results made before the fix. It does not repeat
+An advisory (docs/evidence/advisories/SFA-YYYY-NNN.json, format hep-research-scifix-advisory/2, provisional: shadow
+mode; the scan still reads /1 for one release) records a defect that a sci-fix corrected, for people holding results made before the fix. It does not repeat
 the correctness evidence: it names the entries of docs/evidence/sci-fixes.json. Fields:
   id, summary, severity (S1-S4, the ledger's), ledger (ledger ids),
   affected: [{paths: [plugin-relative files with the defect], ranges: [{type: "SEMVER", events: [{introduced},
              {fixed} | {last_affected}]}], database_specific: {fixed_commit}}]  (OSV semantics: introduced "0" is
              every earlier release; no fixed event means every later release, the fix not released yet),
   impact: {observables: [...], bias, trigger}  (the scientific effect, separate from the version range),
-  applies_to: {artifact_types: [...], extension_keys: [...]}  (an artifact is touched when its type is listed and,
-             if keys are given, its extension has one of them: the affected code ran for it),
+  applies_to: {artifact_types: [...], match: [[condition, ...], ...], match_basis, no_trace, outputs}
+             match: OR over groups, AND within a group, of conditions {path, op, value | values, unknown_before}.
+             path: envelope keys joined by '.', '[*]' expands a list (extension.tools[*].name). op: exists (present,
+             not null and not a missing marker), eq (value), in (values), regex
+             (value, re.search on a string). A condition is undecided when the artifact cannot show it: a trace path
+             (provenance.code_paths, provenance.code_tags) on an artifact without that field, or a contract_version
+             below unknown_before (the field did not exist yet). A group holds when all its conditions hold, fails
+             when one fails, else is undecided; the advisory touches the artifact when a group holds, may touch it
+             when none holds and one is undecided, or when match is [] (no field can show the affected code ran:
+             match_basis says why). no_trace ("possibly-affected") names that verdict. Each group needs a condition
+             that discriminates: anything but `exists` on a top-level extension key every artifact of a listed type
+             carries. code_paths records only code loaded by the writing process: a script run in another process
+             (a core/stats CLI whose output result_artifact.py wraps, a training asset) is never in it.
+             outputs {producer: [paths], how_to_recognize}: the affected code writes output that is no artifact;
+             listed apart. artifact_types may be [] when outputs is given and no artifact can show the code ran,
   affected[].database_specific: {fixed_commit, introduced_commit, introduced_basis (why the defect starts at a
-             release that already held an affected path), no_artifact (true: the affected code writes no artifact,
-             so no artifact can show it ran), outputs (with no_artifact: the producer and how to recognise its
-             output)},
+             release that already held an affected path)},
   remedy, references: [commits].
 
 Subcommands (all read-only):
@@ -22,20 +33,19 @@ Subcommands (all read-only):
                         problem. Ranges: X.Y.Z versions (introduced may be "0"), no two events at one version, each
                         fixed or last_affected above the introduced before it; a fixed release changes an affected
                         file against the release before it (when both have a manifest); an introduced release that
-                        already held an affected path states introduced_basis. applies_to: known artifact types, and
-                        extension keys that discriminate (no key required by any listed type's extension schema, and
-                        at least one key), unless the advisory writes no artifact (no_artifact) or is one of the
-                        NONDISCRIMINATING_ALLOWED advisories awaiting migration
+                        already held an affected path states introduced_basis. applies_to: known artifact types,
+                        well-formed conditions that discriminate, match_basis for match [], outputs naming files of
+                        the plugin
   affected [--id ID]    the releases each advisory affects, computed from release-manifests/ (in range and holding
                         an affected path); releases in range older than the first manifest are listed apart
   scan PROJECT_DIR      the project's artifacts (artifacts_dir of hep-research.project.json, default
                         ./hep-research-artifacts/) against the advisories: per artifact the release that made it
                         (digest-consistent when versions.plugin_release's digest equals that release's manifest
                         digest, else claimed, else unknown) and the advisories that touch it. Verdict order per
-                        advisory: (1) code that writes no artifact is listed apart (outputs_not_artifacts), never
-                        matched; (2) artifact type; (3) extension keys; (4) release in an affected range; (5) that
-                        release's manifest holds an affected path of the same block. Shadow mode: a report only,
-                        exit 0 whatever it finds; nothing in the project is written.
+                        advisory: (1) outputs that are no artifact are listed apart (outputs_not_artifacts); (2)
+                        artifact type; (3) match (affected, or possibly affected (no trace) when undecided); (4)
+                        release in an affected range; (5) that release's manifest holds an affected path of the same
+                        block. Shadow mode: a report only, exit 0 whatever it finds; nothing in the project is written.
 Output: JSON on stdout with "status" (passed, failed, rejected; core/status.py). Exit codes: 0 ok (scan: always,
 shadow mode), 1 check found problems, 2 bad input.
 Usage: python3 <plugin root>/tools/scifix_advisories.py scan /path/to/project
@@ -52,18 +62,17 @@ ROOT = Path(__file__).resolve().parents[1]
 ADVISORIES = ROOT / "docs" / "evidence" / "advisories"
 LEDGER = ROOT / "docs" / "evidence" / "sci-fixes.json"
 MANIFESTS = ROOT / "release-manifests"
-FORMAT = "hep-research-scifix-advisory/1"
+FORMAT = "hep-research-scifix-advisory/2"
+FORMAT_V1 = "hep-research-scifix-advisory/1"  # read by scan for one more release, never written
 ID = re.compile(r"^SFA-\d{4}-\d{3}$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+$")
 SEVERITIES = ("S1", "S2", "S3", "S4")
 CONFIG_NAME = "hep-research.project.json"
 DEFAULT_ARTIFACTS_DIR = "./hep-research-artifacts/"
-# Advisories whose extension keys cannot show that the affected code ran (a key every artifact of a listed type
-# carries, or no key). Frozen: sci-fix improvement plan PR-5 migrates them to discriminating matches and empties this
-# set; a new advisory is never added to it.
-NONDISCRIMINATING_ALLOWED = frozenset({
-    "SFA-2026-001", "SFA-2026-002", "SFA-2026-004", "SFA-2026-006", "SFA-2026-010", "SFA-2026-020", "SFA-2026-023",
-    "SFA-2026-025", "SFA-2026-030", "SFA-2026-031", "SFA-2026-033"})
+OPS = ("exists", "eq", "in", "regex")
+SEGMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\[\*\])?$")
+TRACE_PATHS = ("provenance.code_paths", "provenance.code_tags")  # contracts 3.5.0 (contracts/trace.py)
+NO_TRACE = ("possibly-affected",)
 
 
 def version_key(text: str) -> tuple[int, ...]:
@@ -118,7 +127,7 @@ def required_extension_keys(artifact_type: str, root: Path = ROOT) -> set[str]:
 
 
 def writes_no_artifact(adv: dict) -> bool:
-    """The affected code writes no artifact (every affected block says database_specific.no_artifact)."""
+    """Format /1: the affected code writes no artifact (every affected block says database_specific.no_artifact)."""
     blocks = adv.get("affected") or []
     return bool(blocks) and all((b.get("database_specific") or {}).get("no_artifact") is True for b in blocks)
 
@@ -196,6 +205,76 @@ def _release_problems(name: str, block: dict, events: list[dict], manifests: dic
     return problems
 
 
+def _condition_problems(name: str, cond) -> list[str]:
+    if not isinstance(cond, dict):
+        return [f"{name}: a match condition is an object"]
+    problems, path, op = [], cond.get("path"), cond.get("op")
+    if not isinstance(path, str) or not all(SEGMENT.match(seg) for seg in path.split(".")):
+        problems.append(f"{name}: condition path {path!r} is keys joined by '.', a key optionally followed by [*]")
+    if op not in OPS:
+        problems.append(f"{name}: condition op {op!r} is one of {', '.join(OPS)}")
+    if op in ("eq", "regex") and "value" not in cond:
+        problems.append(f"{name}: condition {op} needs value")
+    if op == "regex":
+        try:
+            re.compile(cond.get("value"))  # type: ignore[arg-type]
+        except (re.error, TypeError):
+            problems.append(f"{name}: condition regex {cond.get('value')!r} does not compile")
+    if op == "in" and not (isinstance(cond.get("values"), list) and cond["values"]):
+        problems.append(f"{name}: condition in needs a non-empty values list")
+    if set(cond) - {"path", "op", "value", "values", "unknown_before"}:
+        problems.append(f"{name}: condition has unknown fields {sorted(set(cond) - {'path', 'op', 'value', 'values', 'unknown_before'})}")
+    if "unknown_before" in cond and not VERSION.match(str(cond["unknown_before"])):
+        problems.append(f"{name}: unknown_before needs an X.Y.Z contract version")
+    return problems
+
+
+def _applies_problems(name: str, applies: dict, known_types: set[str], root: Path) -> list[str]:
+    """Format /2 applies_to: types, match conditions that discriminate, match_basis, no_trace, outputs."""
+    problems: list[str] = []
+    types, outputs = applies.get("artifact_types"), applies.get("outputs")
+    if not isinstance(types, list) or (not types and outputs is None):
+        return [f"{name}: applies_to needs artifact_types (or [] with outputs when no artifact can show the code ran)"]
+    if "extension_keys" in applies:
+        problems.append(f"{name}: extension_keys is format /1: write match conditions")
+    for artifact_type in types:
+        if artifact_type not in known_types:
+            problems.append(f"{name}: artifact type {artifact_type} is not in the contracts' vocabulary")
+    if outputs is not None:
+        producers = outputs.get("producer") if isinstance(outputs, dict) else None
+        if not (isinstance(producers, list) and producers and isinstance(outputs.get("how_to_recognize"), str)
+                and outputs["how_to_recognize"]):
+            problems.append(f"{name}: outputs needs producer (plugin files) and how_to_recognize")
+        for path in producers or []:
+            if not (isinstance(path, str) and (root / path).is_file()):
+                problems.append(f"{name}: outputs producer {path} is not a file of the plugin")
+    if not types:
+        return problems
+    match = applies.get("match")
+    if applies.get("no_trace") not in NO_TRACE:
+        problems.append(f"{name}: no_trace is one of {', '.join(NO_TRACE)}")
+    if not isinstance(match, list):
+        return problems + [f"{name}: applies_to needs match (condition groups; [] when no field can show the code ran)"]
+    if not match and not applies.get("match_basis"):
+        problems.append(f"{name}: match [] needs match_basis (why no field can show the affected code ran)")
+    required = set().union(*(required_extension_keys(t, root) for t in types))
+    for group in match:
+        if not isinstance(group, list) or not group:
+            problems.append(f"{name}: a match group is a non-empty list of conditions")
+            continue
+        blind = True
+        for cond in group:
+            problems += _condition_problems(name, cond)
+            path = cond.get("path", "") if isinstance(cond, dict) else ""
+            if not (isinstance(cond, dict) and cond.get("op") == "exists" and path.count(".") == 1 and
+                    path.startswith("extension.") and path.split(".")[1] in required):
+                blind = False
+        if blind:
+            problems.append(f"{name}: a match group cannot show the affected code ran (only exists on extension keys "
+                            f"every {', '.join(types)} artifact carries)")
+    return problems
+
+
 def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root: Path = ROOT) -> list[str]:
     """Problems in the advisories: format, ids, ledger references and severities, version ranges, paths, artifact
     types and whether the extension keys discriminate."""
@@ -225,37 +304,20 @@ def check(advisories: list[dict], ledger: dict, manifests: dict[str, dict], root
         impact = adv.get("impact") or {}
         if not (impact.get("observables") and impact.get("bias") and impact.get("trigger")):
             problems.append(f"{name}: impact needs observables, bias and trigger")
-        applies = adv.get("applies_to") or {}
-        if not applies.get("artifact_types"):
-            problems.append(f"{name}: applies_to needs artifact_types")
-        for artifact_type in applies.get("artifact_types") or []:
-            if artifact_type not in known_types:
-                problems.append(f"{name}: artifact type {artifact_type} is not in the contracts' vocabulary")
-        blocks = adv.get("affected") or []
-        marked = [b for b in blocks if (b.get("database_specific") or {}).get("no_artifact") is not None]
-        if marked and not writes_no_artifact(adv):
-            problems.append(f"{name}: database_specific.no_artifact must be true in every affected block or none")
-        if writes_no_artifact(adv):
-            if not all(isinstance(b["database_specific"].get("outputs"), str) and b["database_specific"]["outputs"]
-                       for b in blocks):
-                problems.append(f"{name}: no_artifact needs database_specific.outputs (producer and how to "
-                                "recognise its output)")
-        else:
-            keys = applies.get("extension_keys") or []
-            required = {t: required_extension_keys(t, root) & set(keys) for t in applies.get("artifact_types") or []}
-            blind = not keys or any(required.values())
-            if blind and adv.get("id") not in NONDISCRIMINATING_ALLOWED:
-                why = "no extension key" if not keys else "; ".join(
-                    f"{', '.join(sorted(k))} required for {t}" for t, k in required.items() if k)
-                problems.append(f"{name}: extension keys cannot show the affected code ran ({why}): name a key only "
-                                "the affected code writes, or mark no_artifact when it writes no artifact")
-            if not blind and adv.get("id") in NONDISCRIMINATING_ALLOWED:
-                problems.append(f"{name}: discriminates now: remove it from NONDISCRIMINATING_ALLOWED")
+        applies = adv.get("applies_to") if isinstance(adv.get("applies_to"), dict) else {}
+        problems += _applies_problems(name, applies, known_types, root)
+        for block in adv.get("affected") or []:
+            if {"no_artifact", "outputs"} & set(block.get("database_specific") or {}):
+                problems.append(f"{name}: database_specific no_artifact and outputs are format /1: use "
+                                "applies_to.outputs")
         known = extension_properties(applies.get("artifact_types") or [], root)
-        for key in applies.get("extension_keys") or []:
-            if known is not None and key not in known:
-                problems.append(f"{name}: extension key {key} is not a top-level property of the extension of "
-                                f"{', '.join(applies.get('artifact_types') or [])} (the scan reads top-level keys)")
+        for group in applies.get("match") or []:
+            for cond in group if isinstance(group, list) else []:
+                path = cond.get("path", "") if isinstance(cond, dict) else ""
+                top = path.split(".")[1].removesuffix("[*]") if path.startswith("extension.") and "." in path else None
+                if top and known is not None and top not in known:
+                    problems.append(f"{name}: {path}: {top} is not a top-level property of the extension of "
+                                    f"{', '.join(applies.get('artifact_types') or [])}")
         for block in adv.get("affected") or [{}]:
             paths, ranges = block.get("paths") or [], block.get("ranges") or []
             if not paths or not ranges:
@@ -354,6 +416,66 @@ def present(value, markers: frozenset[str]) -> bool:
     return not (isinstance(value, str) and value in markers)
 
 
+def resolve(doc, path: str) -> list:
+    """Every value at a dotted path ('[*]' expands a list); [] when the path is absent."""
+    nodes = [doc]
+    for segment in path.split("."):
+        expand = segment.endswith("[*]")
+        key = segment[:-3] if expand else segment
+        found: list = []
+        for node in nodes:
+            if isinstance(node, dict) and key in node:
+                if not expand:
+                    found.append(node[key])
+                elif isinstance(node[key], list):
+                    found.extend(node[key])
+        nodes = found
+    return nodes
+
+
+def _same(a, b) -> bool:
+    return a == b and isinstance(a, bool) == isinstance(b, bool)  # true is not 1
+
+
+def condition_holds(cond: dict, doc: dict, markers: frozenset[str] = frozenset()) -> bool | None:
+    """True, False, or None when the artifact cannot show it (no trace field, or written before the field existed)."""
+    values, op = resolve(doc, cond["path"]), cond["op"]
+    if op == "exists":  # format /2: only null and a missing marker are absent (false, 0, {} and [] are values)
+        ok = any(v is not None and not (isinstance(v, str) and v in markers) for v in values)
+    elif op == "eq":
+        ok = any(_same(v, cond["value"]) for v in values)
+    elif op == "in":
+        ok = any(any(_same(v, x) for x in cond["values"]) for v in values)
+    else:
+        ok = any(isinstance(v, str) and re.search(cond["value"], v) is not None for v in values)
+    if ok:
+        return True
+    prov = doc.get("provenance") if isinstance(doc.get("provenance"), dict) else {}
+    trace = next((t for t in TRACE_PATHS if cond["path"].split("[")[0].startswith(t)), None)
+    if trace and trace.split(".")[1] not in prov:
+        return None
+    below = cond.get("unknown_before")
+    written = doc.get("contract_version")
+    if below and (not isinstance(written, str) or not VERSION.match(written) or
+                  version_key(written) < version_key(below)):
+        return None
+    return False
+
+
+def match_verdict(applies: dict, doc: dict, markers: frozenset[str] = frozenset()) -> str | None:
+    """"affected" when a group holds; "possibly" when none holds and one is undecided, or match is []; else None."""
+    groups = applies.get("match") or []
+    if not groups:
+        return "possibly"
+    undecided = False
+    for group in groups:
+        results = [condition_holds(c, doc, markers) for c in group]
+        if all(r is True for r in results):
+            return "affected"
+        undecided = undecided or not any(r is False for r in results)
+    return "possibly" if undecided else None
+
+
 def _touches(adv: dict, doc: dict, markers: frozenset[str] = frozenset()) -> bool:
     applies = adv.get("applies_to") or {}
     if doc.get("artifact_type") not in (applies.get("artifact_types") or []):
@@ -374,6 +496,24 @@ def _release_affected(adv: dict, version: str, manifests: dict[str, dict]) -> bo
     return False
 
 
+def _outputs(adv: dict):
+    """What the affected code writes that is no artifact (listed apart), or None."""
+    if adv.get("format") == FORMAT_V1:
+        return ([(b.get("database_specific") or {}).get("outputs") for b in adv.get("affected") or []]
+                if writes_no_artifact(adv) else None)
+    return (adv.get("applies_to") or {}).get("outputs")
+
+
+def _match(adv: dict, doc: dict, markers: frozenset[str]) -> str | None:
+    """Steps 2 and 3: None, "affected" or "possibly" (format /1: its type and extension keys)."""
+    applies = adv.get("applies_to") or {}
+    if doc.get("artifact_type") not in (applies.get("artifact_types") or []):
+        return None
+    if adv.get("format") == FORMAT_V1:
+        return "affected" if not writes_no_artifact(adv) and _touches(adv, doc, markers) else None
+    return match_verdict(applies, doc, markers)
+
+
 def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> dict:
     """Read-only impact report of a project's artifacts against the advisories (shadow mode)."""
     config = project / CONFIG_NAME
@@ -383,9 +523,7 @@ def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> d
         folder = cfg.get("artifacts_dir", DEFAULT_ARTIFACTS_DIR) if isinstance(cfg, dict) else folder
     artifacts_dir = (project / folder).resolve()
     ranges = {adv["id"]: affected_releases(adv, manifests) for adv in advisories}
-    no_artifact = [adv for adv in advisories if writes_no_artifact(adv)]  # step 1
     markers = missing_markers()
-    matched = [adv for adv in advisories if not writes_no_artifact(adv)]
     findings, unreadable, scanned = [], [], 0
     for path in sorted(artifacts_dir.rglob("*.json")) if artifacts_dir.is_dir() else []:
         try:
@@ -397,15 +535,16 @@ def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> d
             continue  # not an artifact envelope (a sidecar, a table)
         scanned += 1
         version, basis = _artifact_release(doc, manifests)
-        for adv in matched:
-            if not _touches(adv, doc, markers):  # steps 2 and 3
+        for adv in advisories:
+            touch = _match(adv, doc, markers)  # steps 2 and 3
+            if touch is None:
                 continue
             if version is None:
                 verdict = "possibly affected (release unknown)"
             elif _release_affected(adv, version, manifests):  # steps 4 and 5
                 # the version only moves at a release: a build after release V claims V, with or without the fix
                 verdict = ("possibly affected (unreleased build: it may hold the fix)" if "unreleased" in basis
-                           else "affected")
+                           else "affected" if touch == "affected" else "possibly affected (no trace)")
             else:
                 continue
             finding = {"artifact": str(path.relative_to(artifacts_dir)), "artifact_type": doc["artifact_type"],
@@ -415,18 +554,19 @@ def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> d
                 finding["release_basis_legacy"] = "verified"  # the former name, kept for one release
             findings.append(finding)
     outputs = [{"advisory": adv["id"], "severity": adv["severity"],
-                "releases_affected": ranges[adv["id"]]["releases"],
-                "outputs": [(b.get("database_specific") or {}).get("outputs") for b in adv.get("affected") or []],
-                "remedy": adv.get("remedy")} for adv in no_artifact]
+                "releases_affected": ranges[adv["id"]]["releases"], "outputs": _outputs(adv),
+                "remedy": adv.get("remedy")} for adv in advisories if _outputs(adv) is not None]  # step 1
     return {"status": "passed", "mode": "shadow", "project": str(project), "artifacts_dir": str(artifacts_dir),
             "artifacts_scanned": scanned, "unreadable": unreadable, "findings": findings,
             "outputs_not_artifacts": outputs,
             "advisories": {a: {"releases_affected": r["releases"]} for a, r in ranges.items()},
             "note": ("shadow mode: a report only, nothing blocks and nothing in the project is written. An artifact "
-                     "is listed when its type and extension show the affected code ran for it and its release is in "
-                     "an affected range and holds an affected file. outputs_not_artifacts lists advisories whose "
-                     "code writes no artifact: check any output of those scripts made with an affected release; "
-                     "the scan cannot see them. release_basis 'digest-consistent' was 'verified' "
+                     "is listed when its release is in an affected range and holds an affected file, and its type "
+                     "and fields show the affected code ran (affected) or cannot show whether it ran (possibly "
+                     "affected (no trace): artifacts written before contracts 3.5.0 carry no execution trace, and "
+                     "some code runs in another process than the writer). outputs_not_artifacts lists advisories "
+                     "whose code writes output that is no artifact: check any such output made with an affected "
+                     "release; the scan cannot see it. release_basis 'digest-consistent' was 'verified' "
                      "(release_basis_legacy, kept for one release)")}
 
 

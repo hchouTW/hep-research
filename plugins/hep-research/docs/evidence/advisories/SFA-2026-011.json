@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-011",
  "severity": "S1",
  "ledger": [
@@ -45,9 +45,15 @@
   "artifact_types": [
    "statistical-result"
   ],
-  "extension_keys": [
-   "results"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.results",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "recompute limits and intervals with a release that has the fix (0.4.0 or later); a value of exactly 500 is the clipped one",
  "references": [
