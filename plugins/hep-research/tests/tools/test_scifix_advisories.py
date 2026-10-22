@@ -239,7 +239,7 @@ class ProjectScan(unittest.TestCase):
         self.assertEqual(rep["unreadable"], ["broken.json"])
         got = {f["artifact"]: (f["release_basis"], f["verdict"]) for f in rep["findings"]}
         self.assertEqual(got, {
-            "verified.json": ("verified", "affected"),
+            "verified.json": ("digest-consistent", "affected"),
             "claimed.json": ("claimed", "affected"),
             "unreleased.json": ("claimed (unreleased build)",
                                 "possibly affected (unreleased build: it may hold the fix)"),
@@ -247,6 +247,84 @@ class ProjectScan(unittest.TestCase):
             "unknown.json": ("unknown", "possibly affected (release unknown)"),
         })
         self.assertEqual(rep["advisories"], {"SFA-2026-901": {"releases_affected": ["0.2.0", "0.3.0"]}})
+        legacy = {f["artifact"]: f.get("release_basis_legacy") for f in rep["findings"]}
+        self.assertEqual(legacy["verified.json"], "verified")  # the former name, for one release
+        self.assertIsNone(legacy["claimed.json"])
+
+    def test_verdict_order_no_artifact_and_manifest_paths(self):
+        """Plan A5: an advisory whose code writes no artifact is listed apart and matches nothing (the hadd job of
+        F-01 and F-27); a release in range whose manifest lacks every affected path is not affected."""
+        quiet = copy.deepcopy(ADVISORY)
+        quiet.update(id="SFA-2026-902", applies_to={"artifact_types": ["computational-run"],
+                                                    "extension_keys": ["tools"]}, remedy="rerun it")
+        quiet["affected"][0]["database_specific"] = {"no_artifact": True, "outputs": "tool.py prints JSON"}
+        self.artifact("hadd.json", {"plugin": "0.3.0", "plugin_release": {"release": "0.3.0", "digest": "b" * 64}},
+                      artifact_type="computational-run", extension={"tools": [{"name": "hadd", "version": "6.32"}]})
+        self.artifact("ml.json", {"plugin": "0.3.0", "plugin_release": {"release": "0.3.0", "digest": "b" * 64}})
+        self.artifact("old.json", {"plugin": "0.1.5"})  # no manifest for 0.1.5: judged on the range alone
+        manifests = dict(self.manifests, **{"0.2.0": manifest(["core/other.py"], "a" * 64)})
+        self.artifact("moved.json", {"plugin": "0.2.0", "plugin_release": {"release": "0.2.0", "digest": "a" * 64}})
+        wide = copy.deepcopy(ADVISORY)
+        wide["affected"][0]["ranges"][0]["events"] = [{"introduced": "0.1.0"}, {"fixed": "0.4.0"}]
+        rep = sa.scan(self.project, [wide, quiet], manifests)
+        got = {(f["artifact"], f["advisory"]): f["verdict"] for f in rep["findings"]}
+        self.assertEqual(got, {("ml.json", "SFA-2026-901"): "affected", ("old.json", "SFA-2026-901"): "affected"})
+        self.assertEqual(rep["outputs_not_artifacts"], [{"advisory": "SFA-2026-902", "severity": "S2",
+                                                         "releases_affected": ["0.3.0"],
+                                                         "outputs": ["tool.py prints JSON"], "remedy": "rerun it"}])
+
+    def test_shipped_no_artifact_advisories_skip_the_hadd_job(self):
+        """F-01 / F-27 reproduction on the shipped advisories and manifests: a 0.21.0 merge job that only ran hadd,
+        with a digest-consistent identity, is affected by nothing; SFA-2026-036 is listed apart."""
+        manifests = sa.load_manifests()
+        self.artifact("run.json", {"plugin": "0.21.0", "plugin_release": {"release": "0.21.0",
+                                                                          "digest": manifests["0.21.0"]["digest"]}},
+                      artifact_type="computational-run", extension={"tools": [{"name": "hadd", "version": "6.32"}]})
+        rep = sa.scan(self.project, sa.load_advisories(), manifests)
+        self.assertEqual([f for f in rep["findings"] if f["advisory"] in ("SFA-2026-036", "SFA-2026-014")], [])
+        listed = {o["advisory"] for o in rep["outputs_not_artifacts"]}
+        self.assertTrue({"SFA-2026-014", "SFA-2026-036", "SFA-2026-037"} <= listed, listed)
+
+    def test_verdict_over_every_combination_of_the_five_steps(self):
+        """Exhaustive oracle (sci-fix SCAN-VERDICT-ORDER): every combination of writes-no-artifact, type listed, key
+        present and the release (in range and held, in range but the file absent from its manifest, in range without
+        a manifest, out of range, unknown), 2 x 2 x 2 x 5 = 40 cases. The expected verdict is the plan's A5 rule
+        written out here: listed apart when no artifact; otherwise nothing unless type and key match; then affected
+        when the release is in range and its manifest (if any) holds the file, possibly affected when unknown."""
+        import itertools
+        releases = {"held": ("0.3.0", "b"), "absent": ("0.2.0", "a"), "unmanifested": ("0.2.5", None),
+                    "out": ("0.4.0", "c"), "unknown": (None, None)}
+        manifests = {"0.2.0": manifest(["core/other.py"], "a" * 64),
+                     "0.3.0": manifest(["skills/hep-ml/scripts/tool.py"], "b" * 64),
+                     "0.4.0": manifest(["skills/hep-ml/scripts/tool.py"], "c" * 64)}
+        for quiet, typed, keyed, rel in itertools.product((False, True), (False, True), (False, True), releases):
+            with self.subTest(no_artifact=quiet, type=typed, key=keyed, release=rel):
+                for f in self.art.iterdir():
+                    f.unlink()
+                adv = copy.deepcopy(ADVISORY)
+                adv["affected"][0]["ranges"][0]["events"] = [{"introduced": "0.2.0"}, {"fixed": "0.4.0"}]
+                if quiet:
+                    adv["affected"][0]["database_specific"] = {"no_artifact": True, "outputs": "stdout"}
+                version, digest = releases[rel]
+                versions = {} if version is None else {"plugin": version}
+                if digest:
+                    versions["plugin_release"] = {"release": version, "digest": digest * 64}
+                self.artifact("a.json", versions, artifact_type="ml-artifact" if typed else "statistical-result",
+                              extension={"calibration": {"m": 1}} if keyed else {"other": 1})
+                rep = sa.scan(self.project, [adv], manifests)
+                verdicts = [f["verdict"] for f in rep["findings"]]
+                listed = [o["advisory"] for o in rep.get("outputs_not_artifacts", [])]
+                if quiet:
+                    self.assertEqual((verdicts, listed), ([], ["SFA-2026-901"]))
+                    continue
+                self.assertEqual(listed, [])
+                if not (typed and keyed) or rel in ("absent", "out"):
+                    want = []
+                elif rel == "unknown":
+                    want = ["possibly affected (release unknown)"]
+                else:
+                    want = ["affected"]
+                self.assertEqual(verdicts, want)
 
     def test_default_artifacts_dir_and_cli_exit_codes(self):
         (self.project / sa.CONFIG_NAME).unlink()
