@@ -151,7 +151,7 @@ class ModelCardContract(unittest.TestCase):
 
 
 class UnmappedPairings(unittest.TestCase):
-    """O03 gaps (docs/dev/v6.3/o03-model-pairings.md): the converter maps a constrained normalization only with a
+    """O03 gaps (docs/dev/cross-artifact-check/o03-model-pairings.md): the converter maps a constrained normalization only with a
     Gaussian constraint, and fixes the parameter bounds itself; no pyhf needed (to_pyhf builds the spec only)."""
 
     def test_poisson_and_lognormal_constraints_are_refused(self):

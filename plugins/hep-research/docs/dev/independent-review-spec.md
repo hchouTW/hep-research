@@ -774,7 +774,7 @@ The arbiter's instruction file contains only the rules that apply under §7.2, p
 
 A human uses `resolve` to handle escalated items and may choose to give a final sign-off. This mechanism does not write attestations. The attestation reviewer role is a free string, and the plugin's `contracts/schemas/attestation.json` notes that "reviewer roles are assigned under Q-06", which is still undecided.
 
-This mechanism also does not settle the v6.3 open conditions O04 ("reviewers other than the author") and O14 ("which reviewer roles may accept reports as evidence"), which are listed in `docs/dev/v6.3/custodian-gate-requirement.md:42-43`. A closed agent review does not by itself meet the "a review record exists" criterion of `docs/dev/v6.3/decision-enforce.md:20`; whether it can is a maintainer decision. The terms "review packet" and "shadow" here are unrelated to `docs/dev/v6.3/review-packet.md` (a human review of the G-ENFORCE inputs) and `docs/dev/v6.3/shadow-review.md` (a difference review between check suites).
+This mechanism also does not settle the v6.3 open conditions O04 ("reviewers other than the author") and O14 ("which reviewer roles may accept reports as evidence"), which are listed in `docs/dev/cross-artifact-check/custodian-gate-requirement.md:42-43`. A closed agent review does not by itself meet the "a review record exists" criterion of `docs/dev/cross-artifact-check/decision-enforce.md:20`; whether it can is a maintainer decision. The terms "review packet" and "shadow" here are unrelated to `docs/dev/cross-artifact-check/review-packet.md` (a human review of the G-ENFORCE inputs) and `docs/dev/cross-artifact-check/shadow-review.md` (a difference review between check suites).
 
 ### Plugin registration and ownership
 

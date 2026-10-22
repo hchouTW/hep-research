@@ -4,7 +4,10 @@ generate(suite, view) iterates each rule's subject kind over the roots, recipe i
 context, the recipes and tables of the bundle and the catalog compositions. It never reads bindings or declarations,
 so masking one cannot remove an obligation. Obligation IDs are '<rule>:<subject key>' built from context IDs and spec
 effect IDs (never file names or list positions), the items are sorted, and the digest is the canonical SHA-256 of
-generator, suite and items: the same subject under the same suite version regenerates byte-identically."""
+generator, suite and items: the same subject under the same suite version regenerates byte-identically.
+
+Generator guard (P3): GENERATORS lists the generator (id, version) pairs this code implements; a suite naming another
+one is refused at freeze and its frozen inventory is not regenerated at check (dependency-missing)."""
 from __future__ import annotations
 
 from contracts.release_manifest import canonical_sha256
@@ -29,6 +32,13 @@ PREREQUISITES = {
 }
 PREREQUISITES["run_root"] = ["chain root intent", "result binding (after execution)", "computational-runs or campaign records"]
 MODEL_KINDS = ("model_root", "model_parameter", "aux_constraint", "shared_parameter")
+GENERATORS = {("counting-chain-obligations", "1.0.0"), ("ratio-subset-obligations", "1.0.0"),
+              ("model-card-obligations", "1.0.0"), ("run-lineage-obligations", "1.0.0")}
+
+
+def generator_supported(suite: dict) -> bool:
+    g = suite.get("generator") or {}
+    return (g.get("id"), g.get("version")) in GENERATORS
 
 
 def spec_ratio(view: dict) -> dict:

@@ -1,4 +1,4 @@
-"""Run-lineage rules (v6.3 M2c, C9; design docs/dev/v6.3/m2c-design.md): post-execution evidence through a result
+"""Run-lineage rules (v6.3 M2c, C9; design docs/dev/cross-artifact-check/m2c-design.md): post-execution evidence through a result
 binding (contracts/schemas/result_binding.json) that names the analysis bundle and lock used, the computational-runs
 with explicit input sources, the campaigns, and per root the result file and its producer.
 

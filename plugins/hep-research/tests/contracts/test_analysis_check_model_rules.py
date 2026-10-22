@@ -1,6 +1,6 @@
 """v6.3 D07/D08 model part (M2b, suite model-card/v1): the O03 pairings (P1-P3, everything else unsupported), R-AUX
 observation use within a joint evaluation, and cross-model sharing, on the synthetic cases CASE-MODEL, MODEL-USAGE and
-MODEL-SHARING (tests/contracts/v63_cases.py). V06, V07, V08, V46, V47 and the model parts of V11, V15, V18, V24, V25,
+MODEL-SHARING (tests/contracts/analysis_check_cases.py). V06, V07, V08, V46, V47 and the model parts of V11, V15, V18, V24, V25,
 V64. The pyhf-combine adapter confirms structure only (V06), never independence. Synthetic data only."""
 import copy
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 
 def ac():

@@ -16,6 +16,14 @@ DECLARATION_TYPES = ("instance_mapping", "partition_exclusive", "partition_cover
                      "applicability_fact", "provenance_binding", "execution_attribution")
 AUTHOR_KINDS = ("person", "agent", "tool")
 ROLES = ("nominal", "systematic", "alternative")
+# input checks each context version enables (P3): a check added later is enabled for the context version that
+# introduces it, so a frozen 1.0.0 context is never judged by a newer check
+INPUT_CHECKS = {"1.0.0": frozenset({"item.not_an_object", "item.schema", "spec.bad_corrections", "spec.duplicate_effect_id"})}
+
+
+def input_check_enabled(context_version, check: str) -> bool:
+    """A context of unknown version enables every 1.0.0 check (the schema refuses it separately)."""
+    return check in INPUT_CHECKS.get(str(context_version), INPUT_CHECKS["1.0.0"])
 
 
 def _f(code: str, where: str, message: str) -> dict:

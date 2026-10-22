@@ -293,7 +293,17 @@ It then checks a machine-generated list of obligations against five suites:
 python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json [--mode model]
 python3 contracts/analysis_check.py check bundle.json --root <project> [--results result-binding.json] [--project <project>]
 python3 contracts/analysis_check.py summary report.json      # a bounded summary for the agent
+python3 contracts/analysis_check.py snapshots gc --root <project> [--apply]   # dry run unless --apply
 ```
+
+`freeze` stores the definitions it pinned in `<project>/.hep-research/snapshots/` and lists the bundle in
+`<project>/.hep-research/bundles.json` (`--no-snapshots` turns this off); `check` reproduces a bundle whose
+definitions have changed since from that store. Rules run only at the version the suite names: an obligation of
+another rule version is unverified (`check.rule_not_run`). A report is `complete` only with exit code 0.
+
+**Where it stands.** This is the diagnostic plane of the architecture in
+`docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md`: no workflow, skill or example runs it yet,
+and whether it is worth extending is decided by a value gate (`decision-value-gate.md`) before any further work.
 
 **Reading a report.** Each obligation ends in one of five states: satisfied, violated, not applicable, unverified or
 unsupported. Coverage counts the decided obligations; it is never a pass rate.
@@ -305,10 +315,11 @@ unsupported. Coverage counts the decided obligations; it is never a pass rate.
 - `contracts/permit.py check-report` reproduces the custodian's conditions as an advisory check. It never allows a
   use (`formal_use_allowed` is always false).
 - **Every rule is in shadow mode.** No rule becomes an enforcing condition until a reviewer other than the author has
-  reviewed it (`docs/dev/v6.3/review-packet.md`), the custodian's gate has adopted
-  `docs/dev/v6.3/custodian-gate-requirement.md`, and the owner has decided per purpose.
+  reviewed it (`docs/dev/cross-artifact-check/review-packet.md`), the custodian's gate has adopted
+  `docs/dev/cross-artifact-check/custodian-gate-requirement.md`, the value gate has passed, and the owner has decided
+  per purpose.
 
-Design and decision records are in [docs/dev/v6.3/](docs/dev/v6.3/README.md).
+Design and decision records are in [docs/dev/cross-artifact-check/](docs/dev/cross-artifact-check/README.md).
 
 ## Checks for maintainers
 

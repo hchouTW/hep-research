@@ -11,6 +11,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -29,6 +30,10 @@ def new_rule(**kw):
             "lifecycle": "proposed"}
     rule.update(kw)
     return rule
+
+
+def _example_rule(ob, env):  # the implementation registry 1.1.0 requires of l3.example (P3, source digests)
+    return None
 
 
 def with_rule(rule):
@@ -54,7 +59,7 @@ class ShippedRegistry(unittest.TestCase):
         self.assertTrue(rep.ok, [f.as_dict() for f in rep.findings])
 
     def test_catalogue_and_first_entries(self):
-        self.assertEqual([c["v_id"] for c in SHIPPED["v_cases"]], [f"V{i:02d}" for i in range(1, 72)])
+        self.assertEqual([c["v_id"] for c in SHIPPED["v_cases"]], [f"V{i:02d}" for i in range(1, 77)])
         statuses = {p["status"] for c in SHIPPED["v_cases"] for p in c["parts"]}
         self.assertLessEqual(statuses, {"not-run", "expected-failure", "required-before-enforcement", "passing"})
         r4 = {r["rule_id"]: r for r in SHIPPED["rules"] if r["rule_id"].startswith("l2.r4.")}
@@ -78,7 +83,7 @@ class ShippedRegistry(unittest.TestCase):
     def test_cli_check_passes(self):
         code, out = cli("check")
         self.assertEqual((code, out["status"]), (0, "pass"))
-        self.assertEqual(out["counts"]["v_cases"], 71)
+        self.assertEqual(out["counts"]["v_cases"], 76)
 
     def test_wired_into_the_static_gate(self):
         sys.path.insert(0, str(ROOT / "tools"))
@@ -88,7 +93,10 @@ class ShippedRegistry(unittest.TestCase):
 
 class OutcomeContract(unittest.TestCase):
     def test_complete_new_rule_is_accepted(self):
-        self.assertTrue(rr.check(with_rule(new_rule())).ok)
+        from contracts.analysis_checks import rules
+        from contracts.analysis_checks.source_digest import source_digest
+        with mock.patch.dict(rules.IMPLEMENTED, {("l3.example", "1.0.0"): _example_rule}):
+            self.assertTrue(rr.check(with_rule(new_rule(source_sha256=source_digest(_example_rule)))).ok)
 
     def test_new_or_changed_rule_without_a_state_is_rejected(self):
         for kind in ("new", "changed"):
@@ -141,9 +149,9 @@ class Prerequisites(unittest.TestCase):
         part = doc["v_cases"][33]["parts"][0]
         part["status"], part["tests"] = "passing", []
         self.assertIn("registry.v_case_without_test", codes(rr.check(doc)))
-        part["tests"] = ["tests.contracts.test_v63_rule_registry.Prerequisites.test_absent"]
+        part["tests"] = ["tests.contracts.test_analysis_check_rule_registry.Prerequisites.test_absent"]
         self.assertIn("registry.test_missing", codes(rr.check(doc)))
-        part["tests"] = ["tests.contracts.test_v63_rule_registry.Prerequisites.test_prerequisites_are_required"]
+        part["tests"] = ["tests.contracts.test_analysis_check_rule_registry.Prerequisites.test_prerequisites_are_required"]
         self.assertTrue(rr.check(doc).ok)
 
     def test_duplicates_and_gaps(self):
@@ -164,7 +172,7 @@ class ImpactClosure(unittest.TestCase):
     def test_a_bounded_change(self):
         out = rr.impact(["core/evidence/query.py"], SHIPPED)
         self.assertFalse(out["full"])
-        self.assertIn("tests.core.test_v63_evidence_query", out["modules"])
+        self.assertIn("tests.core.test_evidence_query", out["modules"])
         self.assertEqual(out["parts"], [])
 
     def test_every_listed_module_exists(self):

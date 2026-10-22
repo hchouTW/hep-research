@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 SCOPE = "species:proton/period:synthetic-period-1"
 COMP = "exposure_acceptance_livetime"
@@ -102,7 +102,7 @@ class Findings(unittest.TestCase):
         self.assertLess(rep["formal_use_view"]["counts"]["not_applicable"], rep["counts"]["not_applicable"])
 
     def test_response_rule_with_unknown_coverage(self):
-        from v63_cases import custom_table
+        from analysis_check_cases import custom_table
 
         def variant(c):
             custom_table(c, "differential-flux-z", None, None, drop_cov=("divide_bin_width",))

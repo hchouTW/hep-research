@@ -187,7 +187,8 @@ def check_summary(bundle: Path, root: Path) -> dict:
         view, diags = ac.load_subject(bundle, root)
     except (OSError, ValueError) as exc:
         return {'status': 'usage', 'error': str(exc)}
-    return ac.summary_page(ac.evaluate(view, diags))
+    store = ac.default_snapshot_store(root)
+    return ac.summary_page(ac.evaluate(view, diags, snapshots=store if store.is_dir() else None))
 
 
 def main(argv=None) -> int:

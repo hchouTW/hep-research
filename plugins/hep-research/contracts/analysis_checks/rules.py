@@ -1,7 +1,11 @@
 """Chain rules of the counting-chain suite (v6.3 C16): one function per rule, each turning one obligation into one
 outcome {state, reason, evidence, declaration_based, declarations}. Reason codes per state are registered in
 contracts/rules/registry.json; a rule the suite names but this module does not implement leaves its obligations
-unverified (check.rule_not_run), and so does a rule that fails while running."""
+unverified (check.rule_not_run), and so does a rule that fails while running.
+
+Version guard (P3): rules are dispatched by (rule_id, version). An obligation whose rule_version this checker does not
+implement is never evaluated with another version's code: it stays unverified (check.rule_not_run). A fix that
+changes an outcome is a new version, registered with its own source digest (contracts/rule_registry.py)."""
 from __future__ import annotations
 
 import math
@@ -739,15 +743,36 @@ RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
 RULES.update(model_rules.RULES)  # model-card/v1 (contracts.analysis_checks.model)
 RULES.update(run_rules.RULES)  # run-lineage/v1 (contracts.analysis_checks.runs)
 
+# (rule_id, version) -> implementation; every rule above is its version 1.0.0
+IMPLEMENTED = {(rid, "1.0.0"): fn for rid, fn in RULES.items()}
+
+
+def implemented_versions(rule_id: str) -> list[str]:
+    return sorted(v for r, v in IMPLEMENTED if r == rule_id)
+
+
+def _dispatch(ob: dict, rules: dict | None):
+    """(function, None) or (None, why not). A rules dict keyed by rule_id (a test double) is used as given."""
+    rid, ver = str(ob.get("rule_id")), str(ob.get("rule_version"))
+    if rules is not None:
+        fn = rules.get(rid)
+        return (fn, None) if fn is not None else (None, f"rule {rid!r} is not implemented by this checker")
+    fn = IMPLEMENTED.get((rid, ver))
+    if fn is not None:
+        return fn, None
+    have = implemented_versions(rid)
+    if not have:
+        return None, f"rule {rid!r} is not implemented by this checker"
+    return None, f"rule {rid!r} version {ver!r} is not implemented by this checker (it implements {have}): never evaluated with another version"
+
 
 def evaluate(view: dict, obligations: list[dict], rules: dict | None = None) -> list[dict]:
-    rules = RULES if rules is None else rules
     env = Env(view)
     out = []
     for ob in obligations:
-        fn = rules.get(str(ob.get("rule_id")))
+        fn, why = _dispatch(ob, rules)
         if fn is None:
-            res = outcome("unverified", "check.rule_not_run", f"rule {ob.get('rule_id')!r} is not implemented by this checker")
+            res = outcome("unverified", "check.rule_not_run", why)
         else:
             try:
                 res = fn(ob, env)

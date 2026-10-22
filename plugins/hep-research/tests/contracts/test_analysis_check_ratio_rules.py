@@ -1,4 +1,4 @@
-"""v6.3 D07 (M2b, ratio subset): R-RATIO on RATIO-FACTORS and RATIO-EVIDENCE (tests/contracts/v63_cases.ratio_case) and
+"""v6.3 D07 (M2b, ratio subset): R-RATIO on RATIO-FACTORS and RATIO-EVIDENCE (tests/contracts/analysis_check_cases.ratio_case) and
 on the old-style ratio of CASE-CHAIN. V28, V44, V45. Factor cancellation is checked against a hand-computed oracle;
 models stay unsupported until their suite exists (O03)."""
 import copy
@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 NEEDS_AMS = unittest.skipUnless(cases.HAVE_AMS, "the AMS example is not in this copy")
 

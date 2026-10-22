@@ -2184,6 +2184,30 @@ stated stack was found; Geant4's TestEm5 Highland value uses the older logarithm
 simulated angle could be compared only with a tolerance on the beta dependence that no located source gives (PDG
 2024 states none), so it was not run as evidence. The maintainer decides between more evidence and a lower grade.
 
+## CROSS-ARTIFACT-PHASE0 (2026-10-22, Python 3.13.2 on macOS arm64; branch `feat/cross-artifact-phase0` from main `460919eb`, 0.24.1, unreleased)
+
+Phase 0 (release R1) of `docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md`; gate record
+`docs/dev/cross-artifact-check/decision-phase0.md`.
+
+| Check | Result |
+|---|---|
+| Suite 1.0.0 outcomes, main 0.24.1 against this branch | 22 cases (positive, chain, ratio, model, run chain, run campaign and every probe variant), 403 obligations: identical (obligation, state, reason); both outcome files SHA-256 `00655e16…` |
+| `rule_registry.py check` | pass: registry 1.1.0, 23 rules with current source digests, 76 V cases, 85 V parts passing (V72–V76 new) |
+| Analysis-check tests (`test_analysis_check_*`, formerly `test_v63_*`) | 227 pass (205 existing, 22 new in `test_analysis_check_foundations`) |
+| Gap probes `test_cross_artifact_check_gap_probes` | G10, G11, G18, G19, G20 pass; 15 expected failures (G1–G8 except G9, G12–G17, G22), each checked to fail by assertion for its stated reason; G9 and G21 skipped with reason |
+| Rename (WP-R) `rename_analysis_check_ids.py --verify` | ok: no leftovers, 169 registry test IDs resolve, stub present, derived-file checks pass; a second `--apply` changes nothing; 23 moves |
+| Full suite before the rename (`0c1dd20c`) | 26 pass, 1 fail (`unittest`: `test_subprocess_timeouts`, six new calls without timeout); 4955 tests |
+| Full suite after the rename (`cecc4dcb`) | the same failure plus `test_preservation_checklist_c3` (`--snapshots` wording, in `unittest` and `ams_optional`): a documentation edit of that commit, not the rename; skipped sets identical (187) |
+| Full suite on the branch head (`890f8481`, both fixed) | 27 pass, 0 fail; 4955 tests in 410 modules, 0 failures, 187 skipped |
+| ruff 0.16.10, mypy 2.4.0 (CI pins) on `core/` and `contracts/` | pass |
+
+Changed assertions of existing tests (registry 1.1.0): `test_analysis_check_rule_registry` expects V01–V76
+(was V01–V71) and 76 V cases in the CLI count (was 71); `test_complete_new_rule_is_accepted` registers an
+implementation and source digest for its hypothetical rule, which registry 1.1.0 requires.
+
+Not run: the slow tier, live routing (no skill text changed except one reference's wording), the value gate
+(Phase 1). Skipped tests are unverified, not passed.
+
 ## SCIFIX-PLAN-A2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-1-identity-runtime-dir` from main `a53af7e0`)
 
 Sci-fix improvement plan v3, PR-1 (A2; findings F-03, F-25). `core/protected/identity.py` gains

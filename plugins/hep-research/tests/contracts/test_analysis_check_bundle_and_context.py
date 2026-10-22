@@ -1,6 +1,6 @@
 """v6.3 D05b: bundle v2 (per-mode roles, unique IDs, dual digests), check context, the deterministic obligation
 generator and its inventory, and the semantic lock (record and compare). V14, V50, V58 (M2a part), V67, V68 (D05b
-part). Cases are built by tests/contracts/v63_cases.py in temporary folders."""
+part). Cases are built by tests/contracts/analysis_check_cases.py in temporary folders."""
 import copy
 import json
 import sys
@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 NEEDS_AMS = unittest.skipUnless(cases.HAVE_AMS, "the AMS example is not in this copy")
 
