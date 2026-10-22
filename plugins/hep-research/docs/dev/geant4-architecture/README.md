@@ -1,49 +1,65 @@
 # Geant4 architecture: working base
 
 This folder is the starting point for implementing the Geant4 architecture proposal. It lives on the branch
-`worktree-geant4-architecture`, created as an isolated git worktree from `main` at `c4f7954`
-(tag `hep-research--v0.21.0`, contracts 3.2.0).
+`worktree-geant4-architecture`, rebased on `main` at `9f08796` (0.23.0 plus unreleased changes, contracts 3.5.0).
 
 | File | Content |
 |---|---|
-| `proposal.md` | The final proposal, Traditional Chinese original: three phases, every review finding and its resolution, re-checked against 0.21.0 in section 12 |
+| `proposal.md` | The final proposal, Traditional Chinese original: three phases, every review finding and its resolution; section 13 is the second deep check against `9f08796` |
 | `proposal.en.md` | English translation of `proposal.md`, same sections, tables and numbers. Edit both together; if they disagree, the Chinese original wins until the English is corrected |
 | `j15_design_estimates.py` | Design estimates for the J15 minimal spectrometer (geometry, acceptance, resolution, statistics). Standard library; scipy optional. Not a benchmark reference |
+| `prototype/phase1-core.patch` | A reference prototype of phase 1 items 4.1, 4.2, 4.3 and 4.6 (contracts table, scope by observable kind, configuration emission, enum fix) with tests. Applies to `9f08796` with `git apply`. It follows the proposal text **before** the second deep check, so it lacks `target_slabs`, the `longitudinal-profile` target-hash match, the missing-dimension rule, `shower-maximum`, the `dependencies.py` re-derivation and C1 gating of the isolation rule; it gates at 3.6.0. Not reviewed for merge |
 
 ## Before starting any work
 
-1. Check that `main` has not moved past `c4f7954`. If it has, read the new CHANGELOG entries and re-run the checks
-   in `proposal.md` section 12 (defect locations D1-D8, contract version, `GRADES`, quick-load bytes, journey list)
-   before changing code. Update section 12 when anything differs.
-2. Work only on this branch, inside the worktree. Do not push or open a pull request without the maintainer's approval.
-3. Follow `docs/maintenance.md`: the sci-fix process for phase 1 (S2, `sci-fix:` commits, parent record, C2 oracle
-   evidence, `docs/evidence/sci-fixes.json`, advisory), the adapter-change steps for phases 2 and 3, and the release
+1. Check that `main` has not moved past `9f08796`. If it has, read the new CHANGELOG entries and re-run the checks
+   in `proposal.md` section 13 (defect locations D1–D10, `CONTRACTS_VERSION`, `GRADES`, advisory numbers,
+   quick-load bytes, description length, journey list) before changing code. Update section 13 (both languages).
+2. Contract versions are written C1 (the next unused minor at merge time) and C2 (the one after). Fix the numbers
+   only when the change is merged.
+3. Work only on this branch, inside the worktree. Do not push to `main` or open a pull request without the
+   maintainer's approval.
+4. Follow `docs/maintenance.md`: the sci-fix process for phase 1 (one ledger entry per defect with a structured
+   `changelog`; S2 for D1–D4, S1 for D5, S3 for D6; `sci-fix:` commits; parent records; one advisory per severity
+   that passes `tools/scifix_advisories.py check`), the adapter-change steps for phases 2 and 3, and the release
    steps (VALIDATION entry, CHANGELOG, release manifest).
 
 ## Order of work
 
-**Phase 1 (contracts 3.3.0, sci-fix) comes first.** It fixes the existing `validated-in-scope` defects and does not
-depend on the new architecture.
+**Phase 1 (contracts C1, sci-fix) comes first.** It fixes the existing `validated-in-scope` defects and does not
+depend on the new architecture. Start from `prototype/phase1-core.patch` and bring it to the current text:
 
-1. `contracts/validate.py`: a benchmark table (name to grade and supported observable kinds, including
-   `longitudinal-profile`); `_study_upgrade` reads grades from it; `_scope_inside` compares `observable.kind`; gate
-   `strict or _at_least(version, "3.3.0")`. Remove `scope_within()` from `check_geant4_study.py` and import the
-   contracts function.
-2. `geant4_benchmarks.py`: emit `kind`, `configuration` (derived from the run geometry and the benchmark target) and
-   `target_geometry_sha256`; negative control judged by the realized shift in the observable, both signs; MPV as the
-   mean of 16 partition sub-runs with t quantiles.
-3. `check_geant4_study.py`: the intersection-union convergence gate (section 4.5), the two-stage factor
-   F_0.90(15,15) = 1.97, seeds `H(study_id, role, point_id, k)`, `evidence_overlap`.
-4. Study-spec schema: add `shower-containment` and `longitudinal-profile` to the benchmark enum.
-5. Protocol section 4: stopping rule, scan grid and handling of unresolved results declared before the first
-   evidence run.
-6. Re-record J14 on E2 (needs a Geant4 11.4.3 build); sci-fix ledger, advisory SFA-2026-036 (or the next free
-   number), VALIDATION entry GEANT4-CORRECTNESS.
+1. `contracts/validate.py`: the benchmark table (name to grade and supported kinds; `longitudinal-profile` →
+   `shower-maximum`); `_study_upgrade` reads grades from it; `_scope_inside` compares `observable.kind`, treats a
+   missing declared dimension as outside, and for `longitudinal-profile` also requires a matching
+   `target_geometry_sha256`; the isolation rule; gate `strict or _at_least(version, C1)`.
+   `check_geant4_study.py` imports the function and drops `scope_within()`; `label` writes
+   `declared_scope.observable_kind`.
+2. `geant4_benchmarks.py`: `configuration`, `target_geometry_sha256`, `configuration_basis` from the named
+   `run_record` and the declared `target_slabs`; `contracts/dependencies.py` re-derives and compares them.
+3. Negative controls by the shift in the observable; J14's claims restricted to one sign until the live re-record.
+4. `check_geant4_study.py`: the intersection-union gate, `incomplete` (exit 3) for unresolved, the two-stage factor
+   F_0.90(15,15) = 1.97, seeds `H(study_id, role, point_id, k)` in [1, 2^31) with hand-built manifests, sub-run
+   MPVs from chunk CSVs, `evidence_overlap`, `trace.tag()` on the new shared functions.
+5. Schemas: `shower-containment`, `longitudinal-profile`, `shower-maximum`, `validation_plan.scope.observable_kind`;
+   `simulation` as an optional property of `ext_computational_run.json` (needs hep-computing's agreement).
+6. D10: separate the J14 replay fixtures of `test_geant4_upgrade` and `test_simulated_dataset`; check with
+   `python3 -m unittest discover -s tests/contracts -t .`.
+7. Protocol section 4 (stopping rule declared in advance); regenerate J14 by offline replay for 4.1–4.3, then a live
+   re-record on E2 (Geant4 11.4.3 build) for 4.4 and 4.5; ledger, advisories, VALIDATION entry GEANT4-CORRECTNESS.
 
-Phases 2 and 3 follow `proposal.md` sections 5 and 6.
+Phases 2 and 3 follow sections 5 and 6 of the proposal.
 
 ## Open decisions for the maintainer
 
-- Phase 1 as a minor (3.3.0, proposed) or a patch (3.2.1, would be the first patch-level gate).
+- Phase 1 as a minor (C1, proposed).
 - Whether a statistical comparison is acceptable if bit-identical output cannot be reached on the same host (phase 2).
 - How to confirm the G5 statement that no Geant4 example code was copied.
+- hep-computing's agreement to the optional `simulation` property and the C2 "derived simulation" marker.
+
+## Independent review
+
+The text added on 2026-10-22 has not been independently reviewed. The plugin's `review.py`
+(`skills/hep-authoring/references/independent-review.md`) can review `proposal.en.md` on the maintainer's machine:
+it needs fork subagents switched off and a host restart, and the document must exist nowhere else on the host. Its
+record is advisory, not a human review record (O04/O14).

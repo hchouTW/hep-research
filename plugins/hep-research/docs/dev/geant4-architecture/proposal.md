@@ -1,9 +1,10 @@
 # hep-research Geant4 研究架構：最終版
 
 > 狀態：最終提案，待維護者核准
-> 依據：三輪獨立審查（v2、v4、v5，共 7 份審查報告），以及依 0.21.0 的重新核對（第 12 節）；審查指出的事實與數值都已逐項核對
-> 基準：hep-research **0.21.0**（`main` 的 `c4f7954`，tag `hep-research--v0.21.0`），contracts **3.2.0**，adapter geant4 0.1.0，Geant4 11.4.3（commit `2ee379e6`）
-> 日期：2026-10-21（依 0.21.0 重新核對；見第 12 節）
+> 依據：三輪獨立審查（v2、v4、v5，共 7 份審查報告）、依 0.21.0 的重新核對（第 12 節），以及 2026-10-22 依目前 main 的第二次深度檢查（一份差異審查、一個階段 1 原型；第 13 節）；審查指出的事實與數值都已逐項核對
+> 基準：hep-research `main` 的 `9f08796`（**0.23.0** 加未發布的變更），contracts **3.5.0**，adapter geant4 0.1.0，Geant4 11.4.3（commit `2ee379e6`）
+> 日期：2026-10-22（依目前 main 重新核對；見第 13 節）
+> 契約版本記法：**C1** = 合併時下一個未使用的 minor（3.5.0 先發布時為 3.6.0），**C2** = 其後一個。本文不寫死版本號：3.3.0–3.5.0 在本提案撰寫期間已被其他變更使用
 > 語言：本文件為繁體中文原文；英文版見 [`proposal.en.md`](proposal.en.md)，兩者內容一致
 > 範例性質：J15 最小磁譜儀是**合成幾何**，是 verification 的載體，不是任何實驗的偵測器
 
@@ -11,42 +12,43 @@
 
 ## 0. 摘要
 
-本提案分三個階段，修正 hep-research 0.21.0 Geant4 部分的正確性缺陷，讓研究流程不再綁死在單一後端，並以一個最小磁譜儀（J15）示範磁場、多子系統與重建鏈。
+本提案分三個階段，修正 hep-research（0.20.0 起至目前 main）Geant4 部分的正確性缺陷，讓研究流程不再綁死在單一後端，並以一個最小磁譜儀（J15）示範磁場、多子系統與重建鏈。
 
 | 階段 | 內容 | 版本 | J14 |
 |---|---|---|---|
-| 1 | 修正 label 與統計缺陷（sci-fix）：範圍比對 observable kind、benchmark 等級與配置改由契約對照表決定、negative control 依觀測量位移、收斂閘門（IUT）、MPV 的 SE 改用子 run 分割 | **contracts 3.3.0**（minor） | 重錄一次 |
+| 1 | 修正 label 與統計缺陷（sci-fix）：範圍比對 observable kind、benchmark 等級改由契約對照表決定、configuration 由幾何推導並強制隔離規則、negative control 依觀測量位移、收斂閘門（IUT）、MPV 的 SE 改用子 run 分割 | **contracts C1**（minor） | 4.1–4.3 以離線重播重產；4.4、4.5 需 live 重錄一次 |
 | 2 | layered_sim 核心重構：spec/2、scorer 元件、探針、column map；hep-detector 同時讀兩種格式 | **adapter 0.2.0**；contracts 不升版 | 同主機逐位元相同後重錄一次 |
-| 3 | J15 最小磁譜儀：場區、平面穿越 scorer、數位化與重建（混合材料 0.21.0 已支援）；`verification` 等級與隔離規則 | **adapter 0.3.0**、**contracts 3.4.0**（minor） | 不重錄 |
+| 3 | J15 最小磁譜儀：場區、平面穿越 scorer、數位化與重建（混合材料 0.21.0 已支援）；`verification` 等級；重建紀錄可作為 simulated 表格的輸入 | **adapter 0.3.0**、**contracts C2**（minor） | 不重錄 |
 
 **八個最重要的決定：**
 
 1. **現行的 `validated-in-scope` 有漏洞，必須先修。** 範圍檢查跳過觀測量，而且 benchmark 的等級由紀錄自己宣告。
 2. **驗證等級依參考的性質決定。** 參考值是輸入的精確推論的，屬於 verification；參考值是 Geant4 所近似的物理模型的，才可能是 validation。
-3. **升級資格由契約強制。** 契約自帶「benchmark → 等級、kind」對照表；`configuration` 由工具從幾何推導，不接受使用者宣告。
+3. **升級資格由契約強制。** 契約自帶「benchmark → 等級、kind」對照表；`configuration` 由工具從幾何推導、由 `dependencies.py` 重新推導核對，不接受使用者宣告。
 4. **C++ 只保留一條幾何路徑。** spec/1 在 Python 端轉成 spec/2，以同主機逐位元相同證明轉換正確。
 5. **重用既有工具。** 包括 `contracts/schema.py`、`tracker_resolution.py`、`multiple_scattering.py`，不另寫第二份。
 6. **場精度用確定性檢查。** 以 charged geantino 對解析螺旋比較，不需要統計。
-7. **統計規格必須能被執行。** 收斂閘門用 intersection-union test；SE 是估計值時一律用 t 分位數；兩階段事件數的係數為 F₀.₉₀(15,15) ≈ 1.97。
+7. **統計規格必須能被執行。** 收斂閘門用 intersection-union test；SE 是估計值時一律用 t 分位數；兩階段事件數的係數為 F₀.₉₀(15,15) ≈ 1.97；未定案與未達標以 `incomplete`（exit 3）回報，不標 `failed`。
 8. **刪除或延後不必要的項目。** 包括 `uses-validated-physics`、`physics_config_comparison`、離子與 Birks、內容定址快取、契約 4.0 等（第 7 節）。
 
 ---
 
 ## 1. 背景：已確認的現行缺陷
 
-以下各項都已對照 0.21.0 原始碼確認（行號為 0.21.0）。
+以下各項都已對照目前 main（`9f08796`）的原始碼確認（行號為該版本）。
 
 | # | 缺陷 | 位置 | 後果 |
 |---|---|---|---|
-| D1 | 範圍檢查不比對觀測量 | `validate.py` `_scope_inside()`（行 327 起）；`check_geant4_study.py` `scope_within()`（行 481–492，迴圈中明確跳過 observable，且忽略純量） | 用 MPV benchmark 通過的研究可以把其他觀測量標成 `validated-in-scope` |
-| D2 | benchmark 的等級由紀錄自己宣告 | `_study_upgrade`（行 373；篩選在行 397）讀紀錄內的 `grade` | 任何產生端只要寫 `"grade": "reference"` 就能升級 |
+| D1 | 範圍檢查不比對觀測量 | `validate.py` `_scope_inside()`（行 349 起）；`check_geant4_study.py` `scope_within()`（行 482–493，迴圈中明確跳過 observable，且忽略純量） | 用 MPV benchmark 通過的研究可以把其他觀測量標成 `validated-in-scope`；宣告範圍缺少某個維度（例如 material）時，該維度不受限制 |
+| D2 | benchmark 的等級由紀錄自己宣告 | `_study_upgrade`（行 395；篩選在行 419）讀紀錄內的 `grade` | 任何產生端只要寫 `"grade": "reference"` 就能升級 |
 | D3 | negative control 在不同單位間比較、只測單向 | `geant4_benchmarks.py` 行 678 的 `at_limit` | 「位於偵測極限」在觀測量上未被證明 |
-| D4 | 收斂閘門無等價檢定 | `check_geant4_study.py` `convergence()`（判定在行 358） | 真實差值等於容許值時約 50 % 通過 |
+| D4 | 收斂閘門無等價檢定 | `check_geant4_study.py` `convergence()`（判定在行 359） | 真實差值等於容許值時約 50 % 通過 |
 | D5 | MPV 的 SE 用 bootstrap | `geant4_benchmarks.py` 行 369 對 argmax 型的 `mpv()` 做 bootstrap | 變異數估計不一致；J14 的偵測極限建立其上 |
 | D6 | 停止規則未明文禁止依結果加跑 | protocol 第 4 節 | optional stopping 偏差 |
 | D7 | 證據相關性未揭露 | J14 的 nominal run 同時供閘門、統計目標、benchmark、variation 使用 | 被當作獨立證據 |
 | D8 | study spec 的 benchmark enum 缺 `shower-containment` 與 0.21.0 新增的 `longitudinal-profile` | `geant4-study-spec.schema.json`；`GRADES` 有 9 個、enum 有 7 個 | 一致性缺口；`longitudinal-profile` 是 reference 等級，卻無法在 study spec 中宣告 |
 | D9 | 研究層和 layered_sim 的資料格式綁死 | `derived()` 讀 `geometry.layers`；`summarize` 與 benchmark 讀固定欄名 | 其他後端無法進入閘門與 benchmark |
+| D10 | 測試順序相依：`tests/contracts` 整體執行時，`test_geant4_upgrade` 的 `tearDownModule` 刪除共用的 J14 重播目錄，`test_simulated_dataset` 的 5 個測試因此出錯；單獨執行時通過 | `tests/contracts/test_geant4_upgrade.py`、`tests/contracts/test_simulated_dataset.py` | 錯誤依執行順序而定，分片執行時可能被掩蓋 |
 
 ---
 
@@ -58,9 +60,9 @@
 4. **證據的停止規則和格點事先宣告。** 加跑、加密、重做控制組都不得依閘門或 benchmark 的結果決定。
 5. **先找現有實作。** plugin 已有的方法一律重用；oracle 不得 import 被測的模組。
 6. **最小變動。**
-7. **遵守既有規則。** 包括分層（skill 腳本和 adapter 只 import `core`、`contracts`）、quick load 上限（hep-detector 目前 24,669 / 25,600 bytes）、G5 授權邊界、adapter 變更流程、sci-fix 流程。Geant4 相關腳本只用 Python 標準函式庫，這是設計選擇，不是 plugin 的全域規則。
+7. **遵守既有規則。** 包括分層（skill 腳本和 adapter 只 import `core`、`contracts`）、quick load 上限（hep-detector 目前 24,669 / 25,600 bytes）、G5 授權邊界、adapter 變更流程、sci-fix 流程、執行狀態與退出碼（`core/status.py`）、execution trace（`trace.provenance()`）。新的共用模組放在 `core/` 時需在 `core/OWNERS.json` 指定 steward；`skills/` 與 `contracts/` 中不得出現實驗名稱（`check_layering.py`）。Geant4 相關腳本只用 Python 標準函式庫，這是設計選擇，不是 plugin 的全域規則。
 8. **後端自我描述。** layered_sim 在執行時輸出自己的 column map 與實際生效的設定。
-9. **驗證等級依參考的性質決定。** 參考值若是輸入的**精確推論**（解析螺旋、運動學、最小平方代數），檢查屬於 verification，不能用來升級；參考值若是 Geant4 所**近似的物理模型**（Bethe、Landau–Vavilov、Highland、簇射剖面），才可能是 reference 或 sanity。
+9. **驗證等級依參考的性質決定。** 參考值若是輸入的**精確推論**（解析螺旋、運動學、最小平方代數），檢查屬於 verification，不能用來升級；參考值若是 Geant4 所**近似的物理模型**（Bethe、Landau–Vavilov、Highland、簇射剖面）或**已發表的量測**，才可能是 reference 或 sanity。
 10. **可升級的事實由契約認定。** 等級、kind、配置都不得由紀錄自行宣告。
 
 ---
@@ -70,18 +72,21 @@
 ```
 hep-detector（判斷物理）
   check_geant4_study.py     spec / summarize / run / variations / label
-                            ＋ 雙格式幾何存取器（spec/1、spec/2）
-  geant4_benchmarks.py      輸出 observable kind 與 configuration（由幾何推導）
-  digitize_reconstruct.py   （階段 3）數位化、圓擬合、β
+                            ＋ 經 core 的雙格式幾何存取器（spec/1、spec/2）
+  geant4_benchmarks.py      輸出 configuration 與 target_geometry_sha256（由 run record 的幾何推導）
+  digitize_reconstruct.py   （階段 3）數位化、圓擬合、β；simulated 表格
   tracker_resolution.py、multiple_scattering.py（既有；作為參考）
         │  只讀檔；import 只限 core、contracts
         ▼
+core
+  geometry/layered.py       （階段 2）雙格式幾何存取器（steward：hep-detector）
+  trace.py                  （既有）trace.provenance()、trace.tag()
 contracts
-  validate.py               （階段 1，3.3.0）範圍比對 observable kind；benchmark 對照表（名稱 → 等級、kind）
-                            （階段 3，3.4.0）對照表加入 verification；隔離規則
-                            （0.21.0 既有）simulated dataset-record（3.2.0）
+  validate.py               （階段 1，C1）範圍比對 observable kind；benchmark 對照表（名稱 → 等級、kind）；隔離規則
+                            （階段 3，C2）對照表加入 verification；重建紀錄作為 simulated 表格的輸入
+                            （既有）simulated dataset-record（3.2.0）、execution trace（3.5.0）
   schema.py                 （階段 2）加 maxItems、maximum、exclusiveMaximum（不升版）
-  computational-run（既有；extension.study、extension.simulation 為自由格式區塊）
+  computational-run（既有；extension.study 為自由格式區塊；C1 把 extension.simulation 加為選用的自由格式屬性）
         ▲
         │  產生檔案
 adapters/geant4（執行層，紀錄一律 unvalidated）
@@ -98,7 +103,7 @@ hep-computing（run_workflow.py、local_partition.py）
 
 ---
 
-## 4. 階段 1：修正現行缺陷（contracts 3.3.0，sci-fix）
+## 4. 階段 1：修正現行缺陷（contracts C1，sci-fix）
 
 ### 4.1 契約側的 benchmark 對照表（D2）
 
@@ -113,35 +118,39 @@ hep-computing（run_workflow.py、local_partition.py）
 | `multiple-scattering` | sanity | — |
 | `em-shower-shape` | sanity | — |
 | `shower-containment` | sanity | — |
-| `longitudinal-profile` | reference | `shower-shape` |
+| `longitudinal-profile` | reference | `shower-maximum`（新增的 kind；它只量 t_max） |
 | `published-data` | interface | — |
 
-- 表中等級和 0.21.0 的 `GRADES` 相同（含 `longitudinal-profile`），所以 J14 不受影響。
-- 紀錄裡的 `grade` 和表不一致時，判為 error。
-- `geant4_benchmarks.py` 的 `GRADES` 保留給工具使用，並加測試確保和契約表一致。
+- 表中等級和目前的 `GRADES` 相同（9 個名稱；原型已加測試確認）。J14 的判定不變，但所有 study 與 benchmark 檔案的內容會改變（新增欄位；`code_paths` 多出 `contracts/validate.py` 等）。
+- 紀錄裡的 `grade` 和表不一致、或 benchmark 名稱不在表中時，判為 error；適用於所有帶 Geant4 study 區塊的紀錄，不只升級的紀錄。
+- `geant4_benchmarks.py` 的 `GRADES` 保留給工具使用，並加測試確保和契約表一致。benchmark 支持的 kind 只以契約表為準；工具輸出的 kind 僅供閱讀。
 
 ### 4.2 範圍檢查（D1）
 
 - 比對受控的 `observable.kind`（study spec 既有 enum），不比自由文字；自由文字保留供人閱讀。
-- 宣告的 kind 必須在被計入 benchmark 的「支持 kind」之內。
+- 宣告的 kind 由 `label` 從 study spec 的 `observable.kind` 複製到 `declared_scope.observable_kind`（study spec 的 `validation_plan.scope` 是 `additionalProperties: false`，所以 schema 也要加入這個欄位）；它必須在被計入 benchmark 的「支持 kind」之內。
+- benchmark 範圍中有的維度，宣告範圍都必須有；缺少的維度視為超出範圍（目前缺少即不受限制）。
 - 比對維度：observable kind、particle、material、energy、thickness；純量視為 `[v, v]`。
 - 單一實作放在 `validate.py` 並匯出；`check_geant4_study.py` 匯入使用，`scope_within()` 刪除。
-- 閘控方式和其他規則族一致：`strict or _at_least(contract_version, "3.3.0")`，沒有 warning 分支。
-- `longitudinal-profile` 的範圍只含 particle 與 energy（不含 material、thickness），比對時只用這兩維加 kind；它的「材料」是整個取樣堆疊，由 configuration 規則處理（4.3）。
+- 閘控方式和其他規則族一致：`strict or _at_least(contract_version, C1)`，沒有 warning 分支。contract 3.5.0 以下的紀錄只在 `--strict` 下受新規則約束，而且只有帶 `validated-in-scope` 的紀錄會失敗（`_study_upgrade` 對其他紀錄提早返回）。
+- `longitudinal-profile` 的範圍只含 particle 與 energy（工具對它輸出 null 的 material 與 thickness），比對時用這兩維、kind，以及**目標幾何雜湊**：宣告範圍必須帶有和 benchmark 相同的 `target_geometry_sha256`（4.3）。只比 particle 與 energy 會讓任何材料堆疊都能借用已發表堆疊的結果升級（原型驗證過這個放寬）。能量為純量，所以宣告的能量範圍必須等於該值。
 
-### 4.3 configuration 從階段 1 起輸出
+### 4.3 configuration 與隔離規則（階段 1）
 
-- `geant4_benchmarks.py` 為每個 benchmark 結果輸出 `configuration`，由該 run 的幾何推導：沒有場，且世界以外的所有放置都屬於 benchmark 的**目標**時為 `isolated`，否則為 `embedded`。目標的定義：單層 benchmark（stopping-power、range、thin-layer-*）為被量測的那一片平板；`longitudinal-profile` 為它設定中列出的整個取樣堆疊。
-- 另外輸出目標幾何的雜湊（`target_geometry_sha256`），讓審查者核對 `longitudinal-profile` 的堆疊確實是已發表量測的配置；這一點契約無法自動判定，在 protocol 中寫明。
-- 這個欄位不接受使用者輸入。
-- 階段 1 先輸出，**不**設契約規則；規則在階段 3（3.4.0）加入（6.9）。
-- J14 在階段 1、2 重錄時都會帶 `configuration: isolated`，所以 3.4.0 的規則可以要求這個欄位必須存在。
+- `geant4_benchmarks.py` 為每個 benchmark 結果輸出 `configuration`、`target_geometry_sha256` 與 `configuration_basis`，從 benchmark 設定的 `run_record` 所指 run record 的幾何推導，不接受使用者輸入。計入升級的 benchmark 必須有 `run_record`（目前是選用）。
+- **目標**：benchmark 設定宣告 `target_slabs`（目標包含的 slab 名稱，含吸收層）。單層 benchmark 預設為被量測的那一片；`longitudinal-profile` 必須明列整個取樣堆疊。它的 `layers` 只列讀出欄位、不含吸收層，無法推導；原型顯示照字面推導時，真實的取樣堆疊一律是 `embedded`。
+- `isolated` 的條件：沒有場、世界是真空（`G4_Galactic`；J14 符合）、世界以外的每個放置都屬於 `target_slabs`；否則為 `embedded`。spec/1 沒有場的欄位，視為無場；spec/2 以明確的 `field` 區塊判定，階段 2 起再以探針記錄的實際場核對。
+- `target_geometry_sha256`：目標的正規化清單（依序的 slab、厚度、橫向尺寸、材料組成與密度；數值以 `repr`；重複放置逐一列出）的雜湊，spec/1 與 spec/2 結果相同。
+- **契約規則（C1，閘控同 4.2）**：每個被計入的 benchmark 都必須是 `configuration == "isolated"`；缺少或為 `embedded` 都是 error。`dependencies.py` **必須**從 `evidence_records` 中的 run record 重新推導 configuration 與雜湊，並和紀錄比對；否則 configuration 和等級一樣是自行宣告。
+- 原型確認：configuration 可以從既有的 recorded run record 推導，所以 J14 只需離線重播就能帶上 `configuration: isolated`，不必為此 live 重錄。
+- 殘餘限制：J14 的 recorded CSV 是縮減版，其雜湊無法和 run record 的 `output_hashes` 對上。configuration 描述的是設定檔**指名**的 run record，而不是被證明產生該 CSV 的 run record；protocol 中寫明。negative control run 的幾何不另外檢查。
 
 ### 4.4 negative control（D3）
 
 - 判定量為觀測量上的實際位移：`shift = (control − nominal) / reference`，SE 由兩個 run 合成。
 - 位於偵測極限：`caught` 且 `|shift| ≤ 1.1 × DL`。
 - 兩個方向都要注入，否則把宣稱限縮為單向，寫入 `scope.detection_limit_sign`。
+- J14 現有的控制組只注入 +密度。階段 1 先把兩個 J14 宣稱限縮為單向（`detection_limit_sign: "+"`）；依原型，兩者已滿足 `|shift| ≤ 1.1 × DL`（MPV 0.0856 對 DL 0.0827；stopping power 0.0381 對 0.0378）。live 重錄時補上負向控制組。
 
 ### 4.5 統計規格
 
@@ -172,19 +181,25 @@ hep-computing（run_workflow.py、local_partition.py）
 
 在真實差值為 tol/2 時，通過的檢定力只有約 64 %；這是事先設定 se ≤ tol/4 的代價，在文件中寫明。
 
+**回報方式。** unresolved 以執行狀態 `incomplete`（exit 3）回報，artifact label 保持 `unvalidated`；只有 fail 是 `failed`（exit 1）。目前 `convergence()` 與 `cmd_run` 把非 pass 一律當 `failed`，需要修改。
+
 **MPV 的估計量與 SE（D5）。**
-- nominal 的 N 個事件以 `geant4_run.py chunk` **分割**成 K = 16 個子 run。這是對同一批事件的分割，不增加事件數；每個子 run 的種子不同。
+- nominal 樣本改為以 K = 16 個 chunk 產生（以手動建立的 partition manifest 呼叫 `geant4_run.py chunk`），總事件數仍為 N。這**不是**把既有的單一 nominal run 切開：每個 chunk 都是新的事件，所以 J14 的 nominal 需要 live 重錄。全樣本以各 chunk 的 CSV 串接（`concat`）得到。
 - 回報值改為 **16 個子 run MPV 的平均**，分格寬度固定並寫入 spec；SE = sd(子 run MPV) / √16；分位數用 t₁₅。
 - 全樣本的 MPV 只作為診斷，和平均值的差寫入紀錄。理由是直方圖眾數估計量不依 1/√N 縮放，sd/√K 只對「子 run MPV 的平均」這個估計量成立。審查者的 toy 顯示，對全樣本 MPV 會低估 1.1 到 2.3 倍，視分格寬度而定。
 - bootstrap 不再用於 MPV。
+- 子 run 的 MPV 從各 chunk 的 CSV 分別計算，不得經 partition 的合併規則（`mpv` 不在 `NON_ADDITIVE_TOKENS` 中，若作為 chunk 的數值鍵會被靜默加總）。
 
 **兩階段事件數。**
 - `N = ceil(N_trial · (SE_trial / target)² · f)`。
 - 「未達標」以證據 run 的**估計** SE 判定。當試探 run 和證據 run 的 SE 都來自 K = 16 子 run，達標機率為 P(F₁₅,₁₅ ≤ f)：f = 1.2 時只有 0.636，所以取 **f = F₀.₉₀(15,15) ≈ 1.97**，達標機率為 90 %。
 - SE 來自大樣本 bootstrap 時，f = 1.2。
-- 證據 run 未達標時判為 unresolved，**不得補跑**。
+- 證據 run 未達標時判為 unresolved（`incomplete`，exit 3），**不得補跑**。
 
-**種子。** `seed = H(study_id, role, point_id, k)`，映射為兩個正整數（`run.seeds` 的要求）。角色有 trial、nominal、scan、control、variation、calibration；k 是子 run 或 chunk 的索引；正負兩個方向的控制組使用不同的 point_id。同一研究內不得重複。
+**種子。** `H(study_id, role, point_id, k)` 映射為 [1, 2³¹) 內的**一個**整數（C++ 以 double 讀取種子，超過 2⁵³ 會失去精度）。角色有 trial、nominal、scan、control、variation、calibration；k 是 chunk 索引；正負兩個方向的控制組使用不同的 point_id。
+- chunk：manifest 由研究手動建立，每個 chunk 的種子為 H；layered_sim 的第二個種子沿用 `cmd_chunk` 的 `start + 1`。不使用 `make_manifest` 的 `seed × 100003 + k`。
+- scan：各點的種子改用 H，不再用 `cmd_scan` 的 `[s0, s1 + k]`。
+- 檢查：`validate_manifest` 只拒絕同一 manifest 內的重複種子；`check_geant4_study.py` 另外檢查一個研究的所有 run record 中，種子對不得重複。
 
 **bootstrap**（用於平均、分位數、比例）。
 - Poisson(1) 權重由 64 位元計數器雜湊（study_seed、run_id、chunk_id、event_id、replica_id）產生，以反 CDF 轉換。
@@ -193,31 +208,48 @@ hep-computing（run_workflow.py、local_partition.py）
 
 **證據相關性（D7）。** `extension.study.evidence_overlap` 列出被多個判定共用的 run，附 `evidence_overlap_version`。
 
+**execution trace。** 新的共用函式呼叫 `trace.tag()`（小寫連字號名稱）：範圍比對 `geant4-scope-kind`、configuration 推導 `geant4-configuration`、IUT 閘門 `geant4-convergence-iut`、子 run MPV `geant4-mpv-subrun`、種子雜湊 `geant4-seed-hash`。advisory 掃描目前還不讀 tag，但之後的 advisory 可以用它判斷受影響的程式是否執行過。`check_geant4_study.py` 改 import `contracts.validate` 後，study record 的 `code_paths` 會多出 `contracts/validate.py` 等，這是預期的變化。
+
 ### 4.6 其他修正
 
-- study spec 的 benchmark enum 補上 `shower-containment` 與 `longitudinal-profile`（D8）。
+- study spec 的 benchmark enum 補上 `shower-containment` 與 `longitudinal-profile`（D8）。D8 本身在執行時沒有作用：目前沒有程式以 schema 驗證 study spec，spec 中的 `grade` 也不會被讀取；這是一致性修正。
+- study spec 的 observable kind enum 加入 `shower-maximum`；`validation_plan.scope` 加入 `observable_kind`。
+- `ext_computational_run.json` 加入選用的自由格式屬性 `simulation`（schema 擁有者 hep-computing 需同意），讓 advisory 可以用它作為鍵。
+- D10：`test_geant4_upgrade` 與 `test_simulated_dataset` 不再共用會被刪除的暫存目錄（各自建立重播，或改為 package 層級的 fixture）。
 - protocol 第 4 節加入（D6）：停止規則、掃描格點、unresolved 的處理方式必須在第一個證據 run 之前寫入 study spec。
 
 ### 4.7 版本與 sci-fix 流程
 
-- **版本：contracts 3.3.0（minor）。** 0.21.0 已使用 3.2.0（simulated dataset-record）。現有所有閘控都設在 x.y.0；新增閘控規則族的先例（2.4.0、2.6.0、2.8.0、3.1.0、3.2.0）都是 minor。
-- **sci-fix**（依 `docs/maintenance.md`）：
-  - 等級 S2（改變判定）；提交前綴 `sci-fix:`；附 parent record（`docs/maintenance.md` 的 D2 層級；不是本文缺陷編號 D2）。
-  - oracle 證據至少 C2；assistant 撰寫的 oracle 必須符合四種獨立依據之一。
-  - `docs/evidence/sci-fixes.json` 新增條目。
-  - 0.20.0 與 0.21.0 已發布受影響的判定路徑，需發 advisory（截至 0.21.0，下一個編號為 SFA-2026-036）。
-- 0.20.0、0.21.0 產生的 study record 缺少 kind 與 configuration，在 `--strict` 下會失敗；advisory 說明處理方式（以新版本重產）。
-- 0.21.0 的 simulated dataset-record 規定：輸入 study record 帶 `validated-in-scope` 時，表格可以不帶 `unvalidated`。範圍修正後，這條路徑也會跟著收緊，advisory 一併說明。
+- **版本：contracts C1（minor）。** 現有所有閘控都設在 x.y.0；新增閘控規則族的先例（2.4.0、2.6.0、2.8.0、3.1.0、3.2.0）都是 minor。
+- **ledger**：每個缺陷一筆，`changelog` 為結構化物件（`{"kind": "unreleased", ...}`）：
+
+| 缺陷 | ledger 條目 | 等級 | 理由 |
+|---|---|---|---|
+| D1 | scope-kind | S2 | 改變判定 |
+| D2 | grade-table | S2 | 改變判定 |
+| D3 | control-shift | S2 | 改變判定 |
+| D4 | gate-IUT | S2 | 改變判定 |
+| D5 | MPV-subrun | **S1** | 改變回報的數值（MPV 與其 SE） |
+| D6 | stopping-rule | S3 | 只是指引 |
+
+- **證據**：S2 至少 C2；S1 需 C3 與 D2。證據測試透過 `validate.py` 與 `check_geant4_study.py` 的命令列執行，才能在 parent commit 上執行（`docs/maintenance.md` 的 D2 層級，不是本文的缺陷 D2）；無法在 parent 上執行的寫入 `gaps`。
+- **advisory**：`scifix_advisories.py check` 要求 advisory 的等級和它列出的每個 ledger 條目相同，所以 S1 與 S2 各發一份（編號取合併時下一個未使用者；目前為 SFA-2026-038 與 -039）。
+  - 鍵：`artifact_types: [computational-run]`、`extension_keys: ["study", "evidence_records"]`（兩者都是選用欄位，可以區分）。
+  - 範圍：introduced 0.20.0，附 `database_specific.introduced_basis`（0.19.0 已有 `contracts/validate.py`）；受影響的版本為 0.20.0–0.23.x 與未發布的版本。
+  - simulated dataset-record 無法用鍵區分：`status`、`observable` 是必填欄位，而掃描只看鍵是否存在、不看值。remedy 要求持有者對每個 simulated 表格執行 `contracts/dependencies.py`，從輸入鏈找到受影響的 study record。以值比對的掃描是另一項工具變更。
+- 0.20.0 以後產生、帶 `validated-in-scope` 的 study record 缺少 kind 與 configuration，在 `--strict` 下會失敗；advisory 說明處理方式（以新版本重產）。
 
 ### 4.8 階段 1 驗收
 
-- [ ] kind 不符、等級和契約表不符的紀錄，在 `--strict` 與 3.3.0 下被拒；純量範圍正確比對。
+- [ ] kind 不符、宣告缺少維度、等級和契約表不符、configuration 缺少或為 `embedded`、`target_geometry_sha256` 不符的紀錄，在 `--strict` 與 C1 下被拒；`dependencies.py` 重新推導的 configuration 與紀錄不符時被拒；純量範圍正確比對。
 - [ ] 重產的 J14 study record（含 kind、configuration）通過 `validate.py --strict` 與 `dependencies.py`。
 - [ ] negative control 以觀測量位移判定，正負兩個方向都有測試。
-- [ ] 閘門 toy 測試（每格 10⁴ 次）：真實差值 = tol 時通過率 ≤ 0.05 + 3σ_MC；真實差值 = 0 時通過率 ≥ 0.97；失敗端校正的通過率和 4.5 的表一致到 3σ_MC 內。
+- [ ] 閘門 toy 測試（每格 10⁴ 次）：真實差值 = tol 時通過率 ≤ 0.05 + 3σ_MC；真實差值 = 0 時通過率 ≥ 0.97；失敗率（m = 1、6、30）和 4.5 的表一致到 3σ_MC 內；unresolved 以 exit 3 回報。
 - [ ] MPV：在 J14 的同一個 N 下，比較子 run 平均與全樣本 MPV 的差值，以及子 run SE 與 bootstrap SE；結果記錄在 VALIDATION。
+- [ ] 4.1–4.3 的 J14 重產以離線重播完成（原型已示範）；4.4 負向控制組與 4.5 子 run 以 live 重錄完成。
+- [ ] D10 修正後，`python3 -m unittest discover -s tests/contracts -t .` 沒有錯誤。
 - [ ] J14 在 E2 重錄後，每個 reference benchmark 的控制組仍在 `|shift| ≤ 1.1 × DL` 內被抓到；若不成立，以新的偵測極限重新設計控制組，並記錄原因。
-- [ ] sci-fix ledger、advisory、parent record 齊全；VALIDATION 條目 GEANT4-CORRECTNESS；CHANGELOG；release manifest。
+- [ ] 六筆 ledger 條目、兩份 advisory（S1、S2）通過 `scifix_advisories.py check`、parent record 齊全；live Geant4 證據以 release-gate 執行記錄；VALIDATION 條目 GEANT4-CORRECTNESS；CHANGELOG；release manifest。
 
 ---
 
@@ -238,7 +270,7 @@ hep-computing（run_workflow.py、local_partition.py）
 
 | 因素 | 影響 | 轉換規則 |
 |---|---|---|
-| 材料建立 | **有**（0.21.0 的混合材料以 `G4Material::AddMaterial` 依序加入成分，順序影響質量分率的浮點累加） | 轉換保留 `materials[]` 與 `components[]` 的順序，數值以 `repr` 輸出 |
+| 材料建立 | **有**（混合材料以 `G4Material::AddMaterial` 依序加入成分；順序決定材料內元素向量的順序，模型依亂數抽選元素時依這個順序，所以會改變事件，不只是質量分率的浮點累加） | 轉換保留 `materials[]` 與 `components[]` 的順序，數值以 `repr` 輸出 |
 | 放置位置 | **有**：差一個 ulp 就會改變步長 | 轉換器以 IEEE double 重現 C++ 的運算順序：`stack = Σ repeat × Σt`、`world = world_scale × stack`（或 `world.size_mm`）、`x = −stack/2`、`center = x + t/2`、`x += t`；輸出用 `repr`；新 C++ 以 `at + t/2` 求中心 |
 | `shift_mm ≠ 0` | **有** | `(x + t/2) + shift` 和 `(x + shift) + t/2` 不保證逐位元相同；只對 `shift = 0` 保證（J14 與 mirror 都是 0），其他情況做統計比對 |
 | 粒子源位置 | **有** | `gun_world_fraction × world 長度`，以相同順序計算後寫入 |
@@ -249,7 +281,7 @@ hep-computing（run_workflow.py、local_partition.py）
 | overlap 檢查 | **無**（使用獨立的 `G4QuickRand`） | — |
 | 輸出欄位集合與順序 | 影響比對 | spec/1 轉換來的 spec 啟用舊 scorer 集合，順序和 `CsvColumns` 相同 |
 
-**驗收：** 在同一主機、同一 Geant4 build 上，0.21.0 的 layered_sim 與新版對 TestEm3、TestEm5 mirror 與 J14 spec 產生逐位元相同的 CSV（同種子、serial），而且兩版每個放置的 hex-float 傾印（名稱、copy number、平移、母體）完全相同。跨主機只做統計比對；已提交的 J14 CSV 不作為逐位元參考。
+**驗收：** 在同一主機、同一 Geant4 build 上，階段 2 開始前的 layered_sim 與新版對 TestEm3、TestEm5 mirror 與 J14 spec 產生逐位元相同的 CSV（同種子、serial），而且兩版每個放置的 hex-float 傾印（名稱、copy number、平移、母體）完全相同。跨主機只做統計比對；已提交的 J14 CSV 不作為逐位元參考。
 
 ### 5.4 hep-detector 的雙格式支援
 
@@ -259,7 +291,7 @@ J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時�
 |---|---|
 | run record | 記錄 `spec_sha256`（使用者給的 spec）與 `effective_spec_sha256`（C++ 執行的 spec/2） |
 | `check_records` | 比對 study 中的 spec 和 run 的 `spec_sha256` |
-| 幾何存取器（新函式） | 從 `layers` 或 `elements` 取得元件清單、最小厚度、材料；以 J14 紀錄測試 |
+| 幾何存取器（新模組 `core/geometry/layered.py`，steward hep-detector，登記於 `core/OWNERS.json`） | 從 `layers` 或 `elements` 取得元件清單、最小厚度、材料；`check_geant4_study.py`、`geant4_benchmarks.py`、`geant4_verify.py` 共用（skill 腳本與 adapter 只能 import `core`、`contracts`）；以 J14 紀錄測試 |
 | `derived()` | `min_thickness_mm` 經存取器計算；加測試確保 `G4R-THIN-FLUCT`、`G4R-THIN-CUT-SCAN` 在兩種格式下都觸發 |
 | `cmd_summarize` | 粒子源能量從 run record 的 `extension.simulation.gun` 讀取；定義 spec/2 的 gun 欄位（`energy_MeV`，階段 3 起另有 `ekin_per_nucleon_MeV`） |
 | `geant4_verify.py` | 體積計數（overlaps）與物質預算（budget）經存取器讀取 |
@@ -267,8 +299,8 @@ J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時�
 
 ### 5.5 schema 驗證
 
-- 擴充 `contracts/schema.py`：`maxItems`、`maximum`、`exclusiveMaximum`（0.21.0 的 `SUPPORTED_KEYWORDS` 仍沒有這三個；layered_sim 的 schema 已用到 `maxItems` 與 `exclusiveMaximum`）。更新 `SUPPORTED_KEYWORDS`，並擴充 `tests/contracts/test_schema_keywords.py`，讓它也掃描 adapter 的 schema（現在只掃描 `contracts/schemas/*.json`）。
-- `geant4_run.py` 改用 `contracts.schema.validate()`。原 `validate_spec()`（0.21.0 行 103）中 schema 表達不了的跨欄位規則保留為 `cross_field_checks()`，包括：混合材料的 components 與 z/a_g_mole 擇一、至少兩個成分、質量分率和為 1、成分只能引用 NIST 或先前定義的材料；slab 名稱重用時材料與厚度必須一致、world 的 scale 與 size 恰好擇一、`reference_list` 與 `em_constructor` 擇一、region 的 slab 名稱存在、禁用的 UI 指令、粒子源位置範圍。
+- 擴充 `contracts/schema.py`：`maxItems`、`maximum`、`exclusiveMaximum`（目前的 `SUPPORTED_KEYWORDS` 仍沒有這三個；layered_sim 的 schema 已用到全部三個）。更新 `SUPPORTED_KEYWORDS`，並擴充 `tests/contracts/test_schema_keywords.py`，讓它也掃描 adapter 的 schema（現在只掃描 `contracts/schemas/*.json`）。
+- `geant4_run.py` 改用 `contracts.schema.validate()`。原 `validate_spec()`（行 103）中 schema 表達不了的跨欄位規則保留為 `cross_field_checks()`，包括：混合材料的 components 與 z/a_g_mole 擇一、至少兩個成分、質量分率和為 1、成分只能引用 NIST 或先前定義的材料；slab 名稱重用時材料與厚度必須一致、world 的 scale 與 size 恰好擇一、`reference_list` 與 `em_constructor` 擇一、region 的 slab 名稱存在、禁用的 UI 指令、粒子源位置範圍。
 - C++ 只檢查執行所需的最低限度。
 - contracts **不升版**：沒有任何契約 schema 使用新增的關鍵字。
 
@@ -278,7 +310,7 @@ J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時�
 
 | 項目 | 規格 |
 |---|---|
-| 時機 | master 的 `BeginOfRunAction`；狀態為 `G4State_GeomClosed` 且 couple 數大於 0，否則拒絕並記錄原因。依 11.4.3 原始碼，這時物理表已建好；fake run（`/run/beamOn 0`）會在 `BeginOfRunAction` 之前返回，所以探針不會執行 |
+| 時機 | master 的 `BeginOfRunAction`；狀態為 `G4State_GeomClosed` 且 couple 數大於 0；否則寫入 `effective_config: {"recorded": false, "reason": ...}`，layered_sim 照常以 exit 0 結束（不用「refused」：在 `core/status.py` 中它表示負向判定）。依 11.4.3 原始碼，這時物理表已建好；fake run（`/run/beamOn 0`）會在 `BeginOfRunAction` 之前返回，所以探針不會執行 |
 | 頻率 | 每個 run 一次 |
 | 執行緒 | 只在 master；輸出註明「workers assumed identical」 |
 | EM 參數 | `G4EmParameters::StreamInfo(os)` 全文加上解析出的欄位；不用 `Dump()`（11.4.3 中每個行程只印一次） |
@@ -286,12 +318,13 @@ J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時�
 | 強子模型 | 逐 process、逐模型，以材料與元素查詢能量範圍；重疊區間標示為隨機選擇 |
 | run manager | 型別、`seedOncePerCommunication`、`G4RUN_MANAGER_TYPE`；SubEvt 或非 0 的種子模式回報 gap |
 | 其他 | `G4UserLimits`、biasing、資料集路徑與內容雜湊 |
+| 路徑 | 經 `tilde()` 寫出（`check_packaging.py` 會掃描所有文字檔） |
 | 版本 | 11.4.x；附 `probe_version` |
 | 輸出位置 | `extension.simulation.effective_config` |
 
 規則與 variation 的模型指派優先讀探針，讀不到才退回宣告，並輸出 `source: probe | declared`；兩者都有而不一致時報錯。
 
-**測試觸發**：加一個只在測試建置中存在的 UI 指令，在 `/run/initialize` 之後、第一次 `BeamOn` 之前呼叫探針，必須被拒絕。
+**測試觸發**：加一個只在測試建置中存在的 UI 指令，在 `/run/initialize` 之後、第一次 `BeamOn` 之前呼叫探針，必須寫出 `recorded: false`。
 
 **column map：**
 - 檔名 `column_map.json`，schema `layered_sim.output/2`，和 `output.schema.json` 一起放在 adapter。
@@ -314,14 +347,14 @@ J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時�
 
 - [ ] 5.3 的同主機逐位元相同，以及放置傾印完全相同。
 - [ ] J14 經存取器讀取 spec/1 與 spec/2 結果一致；兩條薄層規則在兩種格式下都觸發。
-- [ ] 探針在測試指令觸發的錯誤時機被拒絕；J14 每個 run 都有 `effective_config`；與宣告一致，故意製造的不一致被抓到。
+- [ ] 探針在測試指令觸發的錯誤時機寫出 `recorded: false`；J14 每個 run 都有 `effective_config`；與宣告一致，故意製造的不一致被抓到。
 - [ ] 一個只改欄名的假後端加上手寫 column map，通過 J14 的 summarize、閘門、benchmark。
 - [ ] `contracts.schema.validate()` 加 `cross_field_checks()` 對一組合法與非法 spec 的結論，和原 `validate_spec()` 及 C++ 一致。
 - [ ] J14 在 E2 重錄一次；VALIDATION 條目 GEANT4-CORE；CHANGELOG；release manifest。
 
 ---
 
-## 6. 階段 3：J15 最小磁譜儀（adapter 0.3.0，contracts 3.4.0）
+## 6. 階段 3：J15 最小磁譜儀（adapter 0.3.0，contracts C2）
 
 ### 6.1 幾何
 
@@ -441,9 +474,9 @@ x:  −1000   −800      −520 −500        …         300  320    500    55
 | 量能器 | 主動層總沉積除以**電子**取樣比例；取樣比例由 `calibration` 角色的 10 GeV 電子樣本求得；另外輸出 e/mip |
 | 亂數 | 計數器雜湊，和 Geant4 的亂數流分開 |
 
-每次執行寫一份 computational-run 紀錄，輸入為 adapter 的 run record（含雜湊），程式碼雜湊寫入 provenance。改變數位化參數不需要重跑模擬。
+每次執行寫一份 computational-run 紀錄（含 `**trace.provenance()`），輸入為 adapter 的 run record（含雜湊）。改變數位化參數不需要重跑模擬。退出碼依 `core/status.py`：0 ok、1 負向判定、2 `rejected`（無法讀取的輸入，含缺檔）、3 incomplete；在 `tests/skills/test_cli_robustness.py` 的 `MISSING_FILE_ARGS` 登記。
 
-重建後的結果表（例如剛度解析度對剛度）以 0.21.0 的 **simulated dataset-record** 發布：`extension.status: simulated`、輸入為 run record 或 study record、level `detector`。J15 的 study record 是 `unvalidated`，所以表格保持 `unvalidated`；使用它的 communication 會得到 `communication.simulated_source` 警告，圖表標示「Simulation」。
+重建後的結果表（例如剛度解析度對剛度）以 **simulated dataset-record** 發布，由 `digitize_reconstruct.py table` 寫出（含 `trace.provenance()`）。目前 `dependencies.py` 要求 simulated 表格的每個輸入都是帶 `extension.simulation` 或 `extension.study` 的 computational-run，而重建紀錄兩者都沒有；只列原始 run record 又會讓改變數值的步驟不在輸入鏈中。所以 C2 新增一個標記（例如 `extension.derived_from_simulation`），接受「輸入全是模擬 run 的 computational-run」作為 simulated 表格的輸入。J15 的 study record 是 `unvalidated`，表格保持 `unvalidated`；使用它的 communication 會得到 `communication.simulated_source` 警告，圖表標示「Simulation」。
 
 ### 6.6 驗證梯
 
@@ -486,7 +519,7 @@ x:  −1000   −800      −520 −500        …         300  320    500    55
 - 每點事件數取兩者的較大值。
 - 判定依 4.5。
 
-Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 的 Si 結果不作為證據。各 benchmark 依賴的參數組在 study spec 中事先宣告，並以探針的實際設定核對。
+Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 的 Si 結果不作為證據。study spec 的 `convergence_plan.observables` enum 目前只有四個薄層觀測量，階段 3 加入總沉積與後漏比例。各 benchmark 依賴的參數組在 study spec 中事先宣告，並以探針的實際設定核對。
 
 ### 6.8 variation
 
@@ -496,11 +529,11 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | FTFP_BERT_EMZ 對 **QGSP_BIC_EMZ** | 只看量能器中的作用機率與第一次作用深度；1.5 GeV 以下核子 | `G4R-BIC-RANGE`；3 GeV 以下 π、6–12 GeV 強子兩者模型相同，不得作為 variation |
 | 真空對空氣 | 多重散射、剛度解析度 | — |
 
-### 6.9 label 與 contracts 3.4.0
+### 6.9 label 與 contracts C2
 
 - 契約的 benchmark 對照表加入 J15 的檢查，等級為 `verification` 或 `sanity`；只有 reference 會被 `_study_upgrade` 計入。
-- **隔離規則**：在 `strict or _at_least(version, "3.4.0")` 下，每個被計入的 benchmark 都必須有 `configuration == "isolated"`；**缺少或為 `embedded` 都是 error**。J14 在階段 1、2 重錄時已帶這個欄位，所以通過；0.20.0、0.21.0 的舊紀錄已在階段 1 因缺少 kind 而失敗，由 advisory 涵蓋。
-- `configuration` 由工具從 run 的幾何推導，紀錄中不接受宣告值。可另加：`dependencies.py` 檢查證據 run record 的放置數，交叉驗證。
+- 隔離規則已在階段 1（C1）生效（4.3）；J15 的所有 benchmark 都是 `embedded`，不會被計入。
+- C2 另外包含：重建紀錄作為 simulated 表格輸入的標記（6.5）。
 - **J15 的定位**：verification 載體。完整探測器中的所有結果都是 `unvalidated`，README 與 study record 都寫明。
 - `geant4_benchmarks.py` 的 `GRADES` 與 study spec 的 grade enum 都加入 `verification`。
 
@@ -521,6 +554,9 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | journey | J15；`docs/researcher-journeys.md`、`docs/maintenance.md` 範例表；`tests/examples/test_geant4_minimal_spectrometer.py`（重播並和已提交輸出比對） |
 | capability | `docs/capability-map`（在 `full-detector-simulation` 下新增項目，執行 `capability_map.py --write`）、`docs/capability-matrix.md` |
 | 路由 | 新增 J15 的路由案例；0.21.0 起 `check_routing_static.py` 從 `docs/researcher-journeys.md` 讀取 journey 清單，所以 J15 一列入表就**必須**有路由案例。重跑 live 的 Geant4 案例，包括既有的繁中欠規格案例 `g4-underspec-2` |
+| 描述長度 | hep-detector 的 description 目前 1,018 / 1,024 字元（`measure_entrypoints.py` 會完整量測折疊描述）；J15 的路由案例必須沿用描述中已有的觸發詞，不改描述 |
+| 實驗名稱 | `check_layering.py` 不允許 `skills/`、`contracts/` 中出現實驗名稱（含 ALICE）；契約表與 protocol 引用 `longitudinal-profile` 的參考時用引用鍵 |
+| 獨立審查 | 各階段的 Markdown（protocol 變更、J15 README、本提案）以 0.22.0 的 `review.py` 審查（`--lens-model design=<最強模型>`、`--filter-model`）；其紀錄只是 advisory，依 O04/O14 不取代人工的 G5 確認 |
 | 共享 stanza | 文字**不改**（點 5 寫的是「3.1.0 upgrade rule」；修改會牽動全部 SKILL.md 與 live 路由重跑） |
 | 其他 | `reference_inventory.py --check`、CHANGELOG、release manifest、adapter 0.3.0、`SIM_SOURCES` 加入 `FieldSetup.*` |
 
@@ -584,13 +620,14 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 
 | 物件 | 位置 | 版本 |
 |---|---|---|
-| simulated dataset-record | `contracts/validate.py` | 3.2.0（0.21.0 既有） |
-| 範圍比對（observable kind）、benchmark 對照表、等級不得自行宣告 | `contracts/validate.py` | 3.3.0（minor、閘控、sci-fix） |
+| simulated dataset-record、execution trace | `contracts/validate.py`、`core/trace.py` | 3.2.0、3.5.0（既有） |
+| 範圍比對（observable kind）、benchmark 對照表、等級不得自行宣告、configuration 與隔離規則、`extension.simulation` 選用屬性 | `contracts/validate.py`、`contracts/dependencies.py`、`ext_computational_run.json` | C1（minor、閘控、sci-fix） |
 | schema 關鍵字擴充 | `contracts/schema.py` | 不升版 |
-| 對照表加入 verification、隔離規則 | `contracts/validate.py` | 3.4.0（minor、閘控） |
+| 對照表加入 verification；重建紀錄作為 simulated 表格的輸入 | `contracts/validate.py`、`contracts/dependencies.py` | C2（minor、閘控） |
 | `effective_config`、`evidence_overlap` | computational-run 的自由格式區塊 | 不改契約 |
 | `layered_sim.spec/2`、`layered_sim.output/2`、`column_map` | adapter | adapter 0.2.0、0.3.0 |
 | `GRADES`、kind 與 configuration 的輸出 | hep-detector | 隨 plugin 版本 |
+| 幾何存取器 | `core/geometry/layered.py` | 隨 plugin 版本 |
 
 computational-run schema 的擁有者是 hep-computing；本提案不修改該 schema。
 
@@ -604,6 +641,8 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 - `reference_inventory.py --check`、`capability_map.py --check`、`check_routing_static.py`
 - 每份 study record 都通過 `validate.py --strict` 與 `dependencies.py`
 - `tests.adapters.test_geant4` 離線與 live（`HEP_GEANT4_LIVE_TEST=1`）
+- `python3 -m unittest discover -s tests/contracts -t .`（整體執行，以抓測試順序相依）
+- `tools/scifix_advisories.py check`（有 advisory 的階段）
 - 由沒參與撰寫的 agent 執行一個新問題，並附通過條件
 - VALIDATION 條目、CHANGELOG、release manifest
 
@@ -612,9 +651,10 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 ## 11. 待維護者決定的事項與殘餘風險
 
 **待決定：**
-1. 階段 1 的版本歸類。本提案依閘控設在 x.y.0 的慣例，定為 3.3.0 minor 加 sci-fix；若維護者認為應為 patch，第一個 patch 版閘控（3.2.1）就是新的先例。
+1. 階段 1 的版本歸類。本提案依閘控設在 x.y.0 的慣例，定為 C1（minor）加 sci-fix。
 2. 逐位元相同若在同主機也無法達成，是否接受改為統計比對（在 VALIDATION 記錄原因）。
 3. G5「未複製範例程式碼」的確認方式。
+4. `ext_computational_run.json` 加入選用的 `simulation` 屬性，以及 C2 的「衍生模擬」標記：需要 schema 擁有者 hep-computing 同意。
 
 **殘餘風險：**
 1. J14 的偵測極限可能因子 run 估計量、t 分位數與觀測量單位的控制組而改變，需要重新設計控制組。
@@ -623,11 +663,12 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 4. 取樣比例的參考需要 PDG 的 μ 能損表；選用的 PVT benchmark 需要 Sternheimer 參數。兩者都要經 hep-citations 取得文獻紀錄後才能使用。
 5. 量能器簇射主導 CPU 時間；後漏的收斂每點約需 5000 個簇射，事件數由 trial run 決定並記錄。
 6. 探針假設 worker 和 master 的設定相同；若發現 thread-local 差異，改為逐執行緒傾印。
-7. `longitudinal-profile` 的 `isolated` 只保證幾何中沒有目標以外的東西；目標堆疊是否就是已發表量測的配置，契約無法判定，只能由審查者以 `target_geometry_sha256` 核對。
+7. `longitudinal-profile` 的 `target_slabs` 由人宣告；契約只能以 `target_geometry_sha256` 比對宣告與 benchmark，無法判定目標堆疊就是論文中的配置，仍需審查者核對。
+8. 工作量：原型估計階段 1 約 8–12 個工作天，另加 Geant4 執行時間（4.1、4.2、4.6 約 1 天；4.3 1–2 天；4.4 1–2 天；4.5 3–5 天；sci-fix 流程約 1 天）。
 
 ---
 
-## 12. 依 0.21.0 重新核對（2026-10-21）
+## 12. 依 0.21.0 重新核對（2026-10-21；歷史紀錄，目前狀態見第 13 節）
 
 本文件原以 0.20.0 撰寫。0.21.0（`main` 的 `c4f7954`）合併後，在隔離的 worktree（分支 `worktree-geant4-architecture`）中逐項重新核對。
 
@@ -635,7 +676,7 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 
 | 0.21.0 變更 | 對本提案的影響 | 處理 |
 |---|---|---|
-| contracts 3.2.0：simulated dataset-record | 本提案原定的 3.2.0 已被使用 | 階段 1 改為 3.3.0、階段 3 改為 3.4.0 |
+| contracts 3.2.0：simulated dataset-record | 本提案原定的 3.2.0 已被使用 | 當時改為 3.3.0、3.4.0；這兩個版本後來也被使用，現改用 C1、C2（第 13 節） |
 | simulated dataset-record：輸入 study record 為 `validated-in-scope` 時，表格可不帶 `unvalidated` | 範圍漏洞（D1、D2）會經由這條路徑傳到表格 | advisory 一併說明（4.7）；J15 的重建表格以此格式發布（6.5） |
 | 新的 reference benchmark `longitudinal-profile`（ALICE FoCal-E） | 契約對照表要加入；它的「目標」是整個取樣堆疊，原本「唯一一片平板」的 isolated 定義會誤判它 | 對照表加入（4.1）；configuration 改以「benchmark 目標」定義，並輸出目標幾何雜湊（4.3） |
 | study spec 的 benchmark enum 仍未列 `shower-containment`，也未列 `longitudinal-profile` | D8 擴大 | 4.6 兩者都補上 |
@@ -674,6 +715,66 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 | journey 表 | J1–J14 |
 
 ---
+
+---
+
+## 13. 依目前 main 的第二次深度檢查（2026-10-22）
+
+基準為 `main` 的 `9f08796`（0.23.0 加未發布的變更，contracts 3.5.0）。工作分支 `worktree-geant4-architecture` 已 rebase 到這個提交。檢查分三部分：一位沒參與撰寫的 agent 以 0.22.0、0.23.0 與未發布的變更審查本提案（含 0.21.0 新增的部分與中英對照）；另一位在獨立的 worktree 中照階段 1 的規格做原型；主要證據由撰寫者重新核對。
+
+**0.22.0、0.23.0 與未發布變更的影響**
+
+| 變更 | 對本提案的影響 | 處理 |
+|---|---|---|
+| contracts 3.3.0（審查格式）、3.4.0（審查篩選）、3.5.0（execution trace）已被使用 | 原定的 3.3.0、3.4.0 失效 | 改用 C1、C2 記法 |
+| execution trace：`provenance.code_paths`、`code_tags`、`trace.tag()` | 新的寫入者需加 `trace.provenance()`；新的共用函式應加 tag；import `contracts.validate` 會改變 `code_paths` | 4.5、6.5 |
+| `scifix_advisories.py check`：鍵必須可區分、advisory 與 ledger 等級一致、範圍與 `introduced_basis` | 原 advisory 寫法無法通過；simulated 表格無法用鍵區分；D5 是 S1 | 4.7 |
+| `core/status.py`：`refused` 是負向判定，`rejected` 是無法使用的輸入；exit 0/1/2/3 | unresolved、未達標、探針、新腳本的狀態 | 4.5、5.6、6.5 |
+| partition：manifest 內重複種子被拒；`make_manifest` 的種子規則；`cmd_chunk` 的 `start + 1` | 原種子公式與既有程式衝突；子 run 不是切分既有 run | 4.5 |
+| `check_layering.py` 更嚴、`core/OWNERS.json` 需 steward | 幾何存取器放在 `core/`；不得寫實驗名稱 | 2、5.4、6.11 |
+| `measure_entrypoints.py` 完整量測折疊描述 | hep-detector 描述 1,018 / 1,024 字元 | 6.11 |
+| `check_packaging.py` 掃描所有文字檔 | 探針寫出的路徑經 `tilde()` | 5.6 |
+| 獨立審查工具 `review.py`（0.22.0） | 可作為各階段文件的 advisory 審查 | 6.11 |
+
+**階段 1 原型的結果**（程式與測試變更見 `prototype/phase1-core.patch`，可直接套用到 `9f08796`）
+
+| 項目 | 結果 |
+|---|---|
+| 實作範圍 | 4.1、4.2、4.3、4.6；跳過 4.4、4.5 |
+| 測試 | 四個相關模組 55 個測試通過；`tests/skills/hep_detector` 346 個通過；`check_layering`、`reference_inventory --check`、`check_ownership`、`check_packaging` 通過 |
+| J14 | 離線重播重產後，7 份 study record 都通過 `validate.py --strict` 與 `dependencies.py`；27 個準則全部通過。舊的已提交紀錄在 `--strict` 下以 `geant4.upgrade_scope_outside` 失敗，不加 `--strict` 時通過，證明閘控有效 |
+| 被推翻或修正的宣稱 | 版本號已過時；「舊紀錄在 `--strict` 下失敗」只對帶 `validated-in-scope` 者成立；4.1–4.3 不需 live 重錄；「J14 不受影響」只對判定成立；`longitudinal-profile` 照字面推導一律 `embedded`，只比 particle 與 energy 會放寬範圍 |
+| 規格不足處（本版已補） | kind 存放位置、benchmark kind 的來源、等級檢查的適用範圍、宣告缺少維度、雜湊的正規形式、`run_record` 為選用、重複放置、場的判定、CSV 與 run record 無法以雜湊連結、D8 在執行時沒有作用 |
+| 工作量 | 階段 1 約 8–12 個工作天，另加 Geant4 執行時間 |
+
+原型在獨立 worktree 中重跑的結果已由撰寫者確認（55 個測試通過）。D10 也已在乾淨的 main 上重現：`tests/contracts` 整體執行有 5 個錯誤，單獨執行 `test_simulated_dataset` 則通過。
+
+**目前的缺陷位置（`9f08796`）**
+
+| # | 位置 | 狀態 |
+|---|---|---|
+| D1 | `validate.py` `_scope_inside()` 行 349；`check_geant4_study.py` `scope_within()` 行 482 | 未修正 |
+| D2 | `validate.py` `_study_upgrade()` 行 395，篩選行 419 | 未修正 |
+| D3 | `geant4_benchmarks.py` 行 678 | 未修正 |
+| D4 | `check_geant4_study.py` 行 359 | 未修正 |
+| D5 | `geant4_benchmarks.py` 行 369 | 未修正 |
+| D8 | study spec enum 7 個、`GRADES` 9 個 | 未修正 |
+| D10 | `tests/contracts` 的測試順序相依 | 新發現，未修正 |
+
+**其他核對結果**
+
+| 項目 | 目前的值 |
+|---|---|
+| `CONTRACTS_VERSION` | 3.5.0 |
+| `GEANT4_UPGRADE_FROM` | 3.1.0（行 346） |
+| J14 study record | contract 3.5.0，帶 `code_paths`、`code_tags` |
+| J14 世界材料 | `G4_Galactic` |
+| advisory | 最新 SFA-2026-037 |
+| hep-detector | quick load 24,669 / 25,600 bytes；description 1,018 / 1,024 字元 |
+| `longitudinal-profile` 設定 | 只有 `layers: [{t, column}]`，沒有放置清單 |
+| benchmark 輸出的 scope | `material`、`thickness_mm` 取自設定（`longitudinal-profile` 通常為 null），`observable` 為自由文字 |
+
+**尚未做的檢查**：本版新增的文字還沒有經過獨立審查。建議在維護者本機以 `review.py` 審查本提案（依 `independent-review.md`，需先關閉 fork 子代理並重啟 host，且文件在 host 上沒有其他副本）。
 
 ## 附錄 A：數值
 
@@ -738,4 +839,5 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 | v4 | 整合為五階段 | 三份審查：幾何不自洽、J14 會失效、收斂不可行、契約不強制升級限制、重複實作 |
 | v5 | 三階段 | 兩份審查：磁場方向、場檢查網格、MPV 估計量、F 分布係數（0.74 更正為 0.64）、等級自行宣告、隔離漏洞、種子索引、多處 plugin 事實 |
 | 最終版 | 三階段；所有審查發現已處理 | — |
-| **最終版（0.21.0 基準）** | **依 0.21.0 重新核對：契約版本順延、`longitudinal-profile`、混合材料、simulated dataset-record、journey 檢查** | 見第 12 節 |
+| 最終版（0.21.0 基準） | 依 0.21.0 重新核對：契約版本順延、`longitudinal-profile`、混合材料、simulated dataset-record、journey 檢查 | 見第 12 節 |
+| **最終版（main `9f08796` 基準）** | **第二次深度檢查：差異審查與階段 1 原型；版本改為 C1、C2；隔離規則移到階段 1；`longitudinal-profile` 的目標與 kind；sci-fix 拆分；種子與退出碼；D10** | 見第 13 節 |
