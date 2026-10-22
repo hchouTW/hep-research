@@ -18,7 +18,7 @@
 | Stage | Content | Version | Language |
 |---|---|---|---|
 | **A1** Correctness fixes | Contracts (benchmark table, scope, configuration and isolation), statistical rules (block batch means, exact intervals, MPV, IUT gate, detection limit, two-stage event count), first run summary (produced by Python from the per-event CSV); J14 regenerated | contracts **C1** (minor, sci-fix) | Python |
-| **A2** Shared library and boundary artifacts | `g4common` (per-event seeds, summary, probe); `layered_sim` writes the three boundary artifacts and supports per-event seeding; the study layer reads only the boundary artifacts | adapter **0.2.0**; contracts unchanged | C++ (`g4common`, `layered_sim`) and Python |
+| **A2** Shared library and boundary artifacts | `g4sim` (per-event seeds, summary, probe); `layered_sim` writes the three boundary artifacts and supports per-event seeding; the study layer reads only the boundary artifacts | adapter **0.2.0**; contracts unchanged | C++ (`g4sim`, `layered_sim`) and Python |
 
 **Out of scope:** `element_sim`, fields, plane crossings, ROOT files, `simroot`, `simreco`, J15, contracts C2 (all in task B). The `layered_sim` spec format (spec/1) is not restructured; only optional fields are added.
 
@@ -75,13 +75,13 @@ Breaking any of these blocks the merge.
 
 1. **Layering.** Skill scripts and adapters import only `core` and `contracts`. New shared Python modules go in `core/`, with a steward named in `core/OWNERS.json`.
 2. **Experiment names.** No experiment names (ALICE included) in `skills/` or `contracts/` (`check_layering.py`); use citation keys where needed.
-3. **Python uses only the standard library**; no Python bindings.
-4. **C++ dependencies.** `g4common/SimSummary.hh` uses only the C++17 standard library; `SimProbe.hh`, `SimSeed.hh` and `layered_sim` link Geant4. No third-party libraries.
+3. **Python uses only the standard library**; no Python bindings. The t and F quantiles (non-integer degrees of freedom) and Garwood intervals needed by the statistics are implemented on the existing `beta_ppf` of `core/stats/` as `t_ppf`, `f_ppf` and `garwood`, placed in `core/stats/` with a steward named in `core/OWNERS.json` (shared numerical functions, not the "new core validators" of §10).
+4. **C++ dependencies.** `g4sim/SimSummary.hh`, `SimHash.hh` and `MiniJson.hh` use only the C++17 standard library; `SimProbe.hh`, `SimSeed.hh` and `layered_sim` link Geant4. No third-party libraries.
 5. **G5 licence boundary.** Python exchanges only JSON and CSV with separate executables; code is written from the Geant4 API, without copying or adapting Geant4 example code.
 6. **Status and exit codes** (`core/status.py`): 0 ok, 1 negative verdict (`refused`/`failed`), 2 unusable input (`rejected`), 3 `incomplete`. Unresolved and target-missed are always 3.
 7. **Execution trace.** New record writers call `trace.provenance()`; new shared functions call `trace.tag()`; calls to C++ executables record the sha256 of the executable and its sources, the version and the subcommand.
 8. **Size and paths.** Each file ≤ 2 MiB, and `check_packaging.py` scans all text files; written paths go through `tilde()`; size claims in the plugin README must be within 10 % of the actual value.
-9. **Entry budget.** hep-detector quick load ≤ 25,600 bytes (now 24,669), description ≤ 1,024 characters (now 1,018). This task does not change `skills/hep-detector/SKILL.md` or the description.
+9. **Entry budget.** hep-detector quick load ≤ 25,600 bytes (now 24,669), description ≤ 1,024 characters (`measure_entrypoints.py` reports 1,016; the raw length with quotes is 1,018). This task does not change `skills/hep-detector/SKILL.md` or the description.
 10. **Process.** A1 follows the sci-fix process; A2 the adapter-change process; both follow the release steps. Work only on branch `worktree-geant4-architecture`; do not push to `main` or open a pull request without the maintainer's approval.
 11. **Contract versions.** New rules are gated with `strict or _at_least(contract_version, C1)`, with no warning branch.
 12. **The offline replay of J14** always runs, without Geant4 or a compiler.
@@ -141,7 +141,9 @@ A1 changes only Python. Statistics are computed by Python from the per-event CSV
 
 ### A1.1 Benchmark table (D2)
 
-**Change:** `contracts/validate.py` (new constant table; `_study_upgrade` takes class, grade, kind and scope dimensions only from the table); `geant4_benchmarks.py` (`GRADES` kept for the tool, plus a consistency test).
+**Change:** `contracts/validate.py` (new constant table; `_study_upgrade` takes class, grade, kind and scope dimensions only from the table); `geant4_benchmarks.py` (`GRADES` kept for the tool, its values changed to the table's class, plus a consistency test).
+
+**Grade is class.** The table's second column is also the value the record's `grade` field must have; there is no separate grade column.
 
 | benchmark | Class | Supported kind | Scope dimensions (type) |
 |---|---|---|---|
@@ -159,7 +161,8 @@ A1 changes only Python. Statistics are computed by Python from the per-event CSV
 - A class or grade in the record that differs from the table, or a benchmark name not in the table: error. Applies to every record with a Geant4 study block.
 - Only reference and setup-matched are counted by `_study_upgrade`.
 - A benchmark's supported kinds and scope dimensions come only from the table; values output by the tool are for reading only.
-- Grades in the table equal the current `GRADES` (9 names); J14's decisions are unchanged, but the content of study and benchmark files changes (new fields; `code_paths` gains `contracts/validate.py`).
+- The table's 9 benchmark names equal the current `GRADES`; the values of `GRADES` become the table's class, the only change being `longitudinal-profile`: reference → setup-matched (`geant4_benchmarks.py` lines 92–94). The study spec's grade enum gains `setup-matched` (A1.12); the prototype patch's `("reference", ("shower-shape",))` is corrected along with it.
+- J14's decisions are unchanged, but the content of study and benchmark files changes (new fields; `code_paths` gains `contracts/validate.py`).
 
 ### A1.2 Scope check (D1)
 
@@ -187,20 +190,22 @@ A1 changes only Python. Statistics are computed by Python from the per-event CSV
 
 ### A1.4 Logical runs and seeds
 
-- Each evidence point (trial, nominal, scan, control, variation, calibration, regression) is one logical run, with seed S = H(study_id, role, point_id) mapped to an integer in [1, 2³¹); the two directions of a control use different point_ids. H is the first 8 bytes of SHA-256 as an unsigned integer, taken modulo 2³¹ − 1, plus 1.
-- New recordings in A1 always use `seeding: stream` (`layered_sim`'s current behaviour); the second seed follows `cmd_chunk`'s `start + 1`. Do not use `make_manifest`'s `seed × 100003 + k`, nor `cmd_scan`'s `[s0, s1 + k]` any more.
-- A logical run may be split into several jobs (`geant4_run.py chunk` with a hand-made manifest, each job covering a range of event numbers); under `stream`, different splits give different events, but statistically equivalent ones.
-- `check_geant4_study.py` checks that S is not repeated across all run records of a study; `validate_manifest` still rejects repeated seeds within one manifest.
+- Each evidence point (trial, nominal, scan, control, variation, calibration, regression) is one logical run, with seed S = H(study_id, role, point_id); the two directions of a control use different point_ids.
+- **Definition of H** (Python and C++ must agree; the C++ one is in `SimHash.hh` of A2.1): H(x₁, …, x_n) = int.from_bytes(sha256("\x1f".join(str(x) for x in (x₁, …, x_n)).encode("utf-8"))[:8], "big") % (2³¹ − 1) + 1, with values in [1, 2³¹ − 1]. Integers are written as decimal strings without leading zeros.
+- New recordings in A1 always use `seeding: stream` (`layered_sim`'s current behaviour). A single job's seed pair is (H(S, 0, 0), H(S, 0, 1)). Do not use `make_manifest`'s `seed × 100003 + k`, nor `cmd_scan`'s `[s0, s1 + k]` or `cmd_chunk`'s `start + 1` any more.
+- A logical run may be split into several jobs (`geant4_run.py chunk` with a hand-made manifest, each job covering a range of event numbers): the job starting at event e has seed pair (H(S, e, 0), H(S, e, 1)); S is recorded separately in the run record. Seeds within one manifest then differ, and `validate_manifest`'s `partition.duplicate_seed` check needs no change. Under `stream`, different splits give different events, but statistically equivalent ones.
+- `check_geant4_study.py` checks that S is not repeated across all run records of a study. The 5 J14 runs not re-recorded in A1 (A1.13) have no S: they are registered with their original seed pairs (first seed 1401 or 1402) as `seed_scheme: legacy`, and only their full seed pairs are checked for repetition.
 
 ### A1.5 First run summary and the Python producer
 
 **Change:** new `adapters/geant4/assets/summary_from_csv.py` (or a `summarize-blocks` subcommand of `geant4_run.py`); the `simulation-summary/1` schema goes in `adapters/geant4/assets/`.
 
-- **Input:** per-event CSVs of one or more jobs, the observable declarations (study spec `observables`: source column, binning, thresholds), block size B and block count K.
+- **Input:** per-event CSVs of one or more jobs, the observable declarations (the new top-level `observables` of the study spec, defined in A1.12), block size B and block count K.
+- **Selection:** each observable accumulates only events that satisfy its `selection` (e.g. MPV and `tail_fraction` need `primary_fate == 1` and `primary_end_process == "Transportation"`; see `geant4_benchmarks.py` lines 232–236 and `check_geant4_study.py` line 284); `n` is the number of selected events, and the total number of events per block is recorded as well.
 - **Blocks:** event i (the `event` column minus the logical run's first event number) belongs to block ⌊i/B⌋; events with i ≥ K·B are ignored and their number noted in the record.
 - **Accumulators per block and observable:** integers `n`, per-bin histogram counts (fixed binning; overflow and underflow separate), `count_if[]`; floating point Σx, Σx², `min`, `max` (Neumaier compensated summation).
 - **Output fields:** `run` (logical-run identity and seed, event range, `seeding`, B, K, spec hash, producer `python-csv` and version), `observables[]`, a `merge` rule for each accumulator (`sum`, `min`, `max`, `hist`). Multiple jobs merge by block number.
-- **Event weights:** the CSV's `weight` column must be all 1, otherwise exit 2 (deposits are already multiplied by the track weight; see `Actions.cc` line 113).
+- **Event weights:** if the CSV has a `weight` column it must be all 1, otherwise exit 2 (deposits are already multiplied by the track weight; see `Actions.cc` line 113). Without a `weight` column (J14's 5 reduced CSVs have none), the summary records `weight_column: absent`, justified by the absence of biasing commands in the run record's spec; with biasing commands in the spec, exit 2.
 - From A2, `layered_sim` writes the summary with the same schema; this Python producer then stays only in tests as an oracle.
 
 ### A1.6 Estimators and SE
@@ -210,41 +215,47 @@ A1 changes only Python. Statistics are computed by Python from the per-event CSV
 - For each block b compute θ_b; report θ̄ = mean, SE = sd(θ_b)/√K with K − 1 degrees of freedom. K ≥ 16, declared before the first evidence run.
 - Several observables: the per-block vector of estimates is kept together, and covariances are estimated from these vectors.
 - Full-sample values: means and proportions are also computed from the merged accumulators, and their difference from θ̄ is recorded as a diagnostic.
-- Quantiles: linear interpolation within the histogram; bin width must be below 1/10 of the tolerance; landing in the overflow or underflow bin makes it incomplete.
+- Quantiles: linear interpolation within the histogram; bin width divided by the estimate must be below 1/10 of the relative tolerance; landing in the overflow or underflow bin makes it incomplete.
+- The t and F quantiles and Garwood intervals of this section and of A1.7–A1.10 use `t_ppf`, `f_ppf` and `garwood` in `core/stats/` (§2 rule 3); Clopper–Pearson uses the existing `clopper_pearson` (`core/stats/tail_estimation.py`).
 - **Low counts:** when any block of a count estimator is 0, or the merged total is < 100 (threshold can be declared), use exact intervals on the merged accumulators instead: Clopper–Pearson for proportions, Garwood for counts; comparing two runs uses the exact conditional-binomial interval for the ratio of rates, relative difference = ratio − 1. There is then no SE, and the gate decides on interval endpoints (A1.8).
 - Assumption: no state between events. The probe (A2) records biasing and similar settings; in A1, J14 satisfies the assumption.
 
 ### A1.7 MPV (D5)
 
-- In each block's histogram take the maximum bin and interpolate the mode with a three-point parabola through it and its two neighbours; report the mean of the K modes and its SE (A1.6).
+- In each block's histogram take the maximum bin and interpolate the mode with a three-point parabola through it and its two neighbours; report the mean of the K modes and its SE (A1.6). This replaces the five-point least-squares fit of the current `mpv()`, noted in the S1 ledger entry.
+- **Edge cases:** bin origin and width come from `observables[].bins`; ties for the maximum bin take the lowest index; when the maximum bin is the first or last valid bin, or the denominator y₋ − 2y₀ + y₊ = 0, that block's mode is the centre of the maximum bin, and such blocks are counted and recorded; if they exceed K/4 the benchmark is incomplete.
 - **At design time:** estimate the bias with toys at the declared B and bin width; the toys' 95 % upper bound must be ≤ tol/10. The toys use a Landau–Vavilov distribution, checked against the histogram shape of one high-statistics Geant4 run.
-- **Every execution:** the difference between θ̄ and the three-point interpolated mode of the merged histogram must be ≤ tol/5 + 2·SE; otherwise that benchmark is incomplete.
+- **Every execution:** with m the three-point interpolated mode of the merged histogram, |θ̄ − m|/|m| ≤ tol/5 + 2·SE/|m| (tol is the relative tolerance); otherwise that benchmark is incomplete.
 - Block MPVs must not go through the partition merge rules (`mpv` is not in `NON_ADDITIVE_TOKENS`); they are computed only from the summary histograms.
 
 ### A1.8 Convergence gate and reporting (D4)
 
 **Change:** `convergence()` and `cmd_run` in `check_geant4_study.py`.
 
-- **Difference:** diff = (a − b)/b, with b the finer setting (the convention of line 357); se_diff = √(se_a² + se_b²)/|b|; ν from the Welch formula per pair (30 for equal variances and K = 16).
-- **Event-count target:** the se target per point is tol/(4√2).
-- **Decision:** pass |diff| + t₀.₉₅(ν)·se_diff ≤ tol; fail |diff| − t_{1−α/m}(ν)·se_diff > tol (α = 0.05, m the number of (parameter × observable) pairs); otherwise unresolved. Low counts: pass = the 90 % interval lies inside [−tol, tol]; fail = the one-sided 1 − α/m interval lies entirely outside.
+- **Difference:** keeps the convention of line 357: a is the finest setting and b the second-finest (`vals` sorted ascending, a = `finest[0]`, b = `finest[1]`). Each observable's tolerance declares a `tolerance_mode`: with `relative` (default) diff = (a − b)/b and se_diff = √(se_a² + se_b²)/|b|; with `absolute` diff = a − b and se_diff = √(se_a² + se_b²). ν from the Welch formula per pair (30 for equal variances and K = 16).
+- **Event-count target:** the se target per point is tol/(4√2) (a relative se under `relative`).
+- **Decision:** pass |diff| + t₀.₉₅(ν)·se_diff ≤ tol, **and both points meet their se target**; fail |diff| − t_{1−α/m}(ν)·se_diff > tol (α = 0.05, m the number of (parameter × observable) pairs; a point that missed its se target can still give fail, since a larger se only makes fail harder); otherwise unresolved. Low counts: pass = the 90 % interval lies inside [−tol, tol]; fail = the one-sided 1 − α/m interval lies entirely outside.
 - **Reporting:** unresolved and target-missed are reported as `incomplete` (exit 3), and the label stays `unvalidated`; only fail is `failed` (exit 1). Today every non-pass is treated as `failed`; this must change.
 
-**Operating characteristics** (t(30), estimated se; recomputed by `gate_operating_characteristics.py`):
+**Operating characteristics** (recomputed by `gate_operating_characteristics.py`, 2×10⁶ toys per cell. "se = target": se_diff equal to the target, estimated with ν = 30; "two-stage": each of the two points designed per A1.9, K = K_trial = 16, ν from the Welch formula on the estimated se):
 
-| True difference | Pass (se = target) | Pass (two-stage design) | Fail m = 1 | Fail m = 30 (se = target) | Fail m = 30 (two-stage design) |
-|---|---|---|---|---|---|
-| 0 | 0.976 | 0.989 | 0.000 | 0.000 | 0.000 |
-| tol/2 | 0.621 | 0.830 | 0.000 | 0.000 | 0.000 |
-| tol | 0.050 | 0.050 | 0.050 | 0.002 | 0.002 |
-| 2 tol | 0.000 | 0.000 | 0.988 | 0.780 | 0.933 |
+| True difference | Pass (se = target) | Pass (two-stage) | Pass (two-stage, given both points met the target) | Fail m = 1 (se = target) | Fail m = 30 (se = target) | Fail m = 30 (two-stage) |
+|---|---|---|---|---|---|---|
+| 0 | 0.976 | 0.809 | 0.999 | 0.000 | 0.000 | 0.000 |
+| tol/2 | 0.621 | 0.696 | 0.860 | 0.000 | 0.000 | 0.000 |
+| tol | 0.050 | 0.044 | 0.054 | 0.050 | 0.002 | 0.002 |
+| 2 tol | 0.000 | 0.000 | 0.000 | 0.988 | 0.780 | 0.952 |
 
-At a true difference of tol about 90 % are unresolved; the protocol states the expected incomplete rate.
+- Under the two-stage design about 19 % of point pairs have at least one point that missed its target, which is why the pass rate at a true difference of 0 is only 0.809.
+- At a true difference of tol the unconditional pass rate is 0.044 ≤ 0.05, but given that both points met the target it is 0.054, slightly above the nominal 0.05 (points that meet the target have a smaller se); the protocol discloses this.
+- At a true difference of tol about 90 % are unresolved; the protocol states the expected incomplete rate.
 
 ### A1.9 Two-stage event count
 
 - N = ceil(N_trial·(SE_trial/target)²·f), f = F₀.₉₀(K − 1, K_trial − 1) (≈ 1.97 when both are 16).
 - About 10 % of evidence runs miss their target and are incomplete; **no top-up is allowed** (if the maintainer chooses F₀.₉₅ ≈ 2.40, about 5 %, with about 22 % more events; §11).
+- Misses are independent per run: about 19 % of the point pairs of a convergence gate are incomplete; a study needing n runs with an se target has all of them meet it with probability about 0.9ⁿ (about 0.53 at n = 6). The protocol states this; regenerated J14 may lose `validated-in-scope` by chance, and how to handle that is the maintainer's decision (§11).
+- The 5 J14 runs not re-recorded in A1 have fixed event counts not planned by this design; their se is still compared with the target, and a miss is likewise incomplete.
 - With low counts, plan with the trial run's Poisson variance.
 
 ### A1.10 Negative controls and detection limit (D3)
@@ -252,8 +263,9 @@ At a true difference of tol about 90 % are unresolved; the protocol states the e
 **Change:** `geant4_benchmarks.py`.
 
 - Test quantity: shift = (control − nominal)/reference, SE combined from the two runs.
-- Detection limit: DL = tol + |rel| + t_{0.977}(ν)·se_rel (replacing `2 * se_rel` at line 274).
-- Design requirement: toys show the probability of catching an injection at DL is ≥ 0.977.
+- **Definition of caught:** the control's benchmark verdict is fail, i.e. |rel_c| > tol (rel_c is the control's deviation from the reference); consistent with the current code, which uses the control's benchmark verdict (`geant4_benchmarks.py` around line 672).
+- Detection limit: DL = tol + |rel| + t_{0.977}(ν)·se_rel (replacing `2 * se_rel` at line 274); rel is the nominal's deviation from the reference, se_rel the combined SE of the shift, ν its Welch degrees of freedom.
+- Design requirement: toys show the probability of catching an injection at DL is ≥ 0.977. With the definition above the true power is near 0.977 (the reviewer's calculation: about 0.9785 at ν = 15 and 30; it varies slightly with the ratio of the control's SE to the shift's SE), so the toy acceptance threshold is 0.977 − 3σ_MC (A1.15).
 - Inject in both directions; otherwise narrow the claim to one direction, recorded in `scope.detection_limit_sign`. At the detection limit = caught and |shift| ≤ 1.1 × DL.
 - A single miss is recorded and explained, not an automatic failure; rerunning with another seed is not allowed.
 - J14's existing controls inject only +density; until negative controls are recorded, J14's two claims are narrowed to `detection_limit_sign: "+"`.
@@ -266,8 +278,12 @@ At a true difference of tol about 90 % are unresolved; the protocol states the e
 
 ### A1.12 Other fixes (D8, D10)
 
-- The study-spec benchmark enum gains `shower-containment` and `longitudinal-profile`; the observable-kind enum gains `shower-maximum`; `validation_plan.scope` gains `observable_kind`; the study spec gains `observables[].bins`, `observables[].thresholds` and `blocks: {K, B}`.
-- `ext_computational_run.json` gains an optional free-form property `simulation` (needs hep-computing's agreement).
+- The study-spec benchmark enum gains `shower-containment` and `longitudinal-profile`; the grade enum (now reference, sanity, interface) gains `setup-matched`; the observable-kind enum gains `shower-maximum`; `validation_plan.scope` gains `observable_kind`.
+- The study spec (top-level `additionalProperties: false`) gains top-level properties:
+  - `observables`: an array, each item `{name, source_column, selection, bins: {lo, hi, width}, thresholds, tolerance_mode}`. `name` must equal the names used in `convergence_plan.observables` (e.g. `mpv_deposit_MeV`); `selection` is a declarative filter on CSV columns (column name, comparator `==`, `!=`, `<`, `<=`, `>`, `>=`, value; several conditions are ANDed); `thresholds` feed `count_if`; `tolerance_mode` see A1.8.
+  - `blocks: {K, B}`.
+  - The existing singular `observable` is unchanged and remains the study's main observable.
+- `ext_computational_run.json` declares the existing `simulation` property in the schema (J14's run records already carry `extension.simulation` and `_study_upgrade` already tests it; the schema does not declare it yet; needs hep-computing's agreement).
 - D10: `test_geant4_upgrade` and `test_simulated_dataset` no longer share a temporary directory that gets deleted (each builds its own replay, or a package-level fixture is used).
 
 ### A1.13 Regenerating and recording J14
@@ -276,7 +292,7 @@ At a true difference of tol about 90 % are unresolved; the protocol states the e
 |---|---|---|
 | The 5 runs with per-event CSV (`events/`, with an `event` column) | A single reduced CSV | No re-recording: cut blocks offline with the A1.5 producer, produce and commit `simulation-summary/1` |
 | 13 scan, variation and scenario runs (e.g. `mpv-cut-0.1`, `sp-em-option3`, `mpv-density-10`) | Only `geant4-run-summary/1` (one value plus a bootstrap SE) | Re-record live in E2 with `seeding: stream`; produce and commit the summary; CSV not committed |
-| Negative controls | Do not exist | Record new ones in E2; commit the summary |
+| Negative-direction (−density) controls | Do not exist (the existing `mpv-control` and `sp-control` inject only +density) | Record new ones in E2; commit the summary |
 
 - Replay: `examples/geant4-thin-silicon/run.py` computes from the committed summaries instead, meeting the replay requirement of §4.2; no Geant4 or compiler needed.
 - Old `geant4-run-summary/1` files are kept, only for replaying old records.
@@ -297,7 +313,7 @@ At a true difference of tol about 90 % are unresolved; the protocol states the e
 | Isolation definition (incl. vacuum) | isolation | S2 | Changes decisions |
 | D6 | stopping-rule | S3 | Guidance only |
 
-- **Evidence:** S2 at least level C2; S1 needs levels C3 and D2 (evidence levels from `docs/maintenance.md`, not this document's defect D2). Evidence tests run through the command lines of `validate.py` and `check_geant4_study.py` so that they can run on the parent commit; what cannot run goes in `gaps`.
+- **Evidence:** S2 needs levels C2 and D2; S1 needs levels C3 and D2 (evidence levels from `docs/maintenance.md`, not this document's defect D2). Evidence tests run through the command lines of `validate.py` and `check_geant4_study.py` so that they can run on the parent commit; what cannot run goes in `gaps`.
 - **Advisories:** one for S1 and one for S2 (`scifix_advisories.py check` requires an advisory's severity to equal that of every ledger entry it lists); numbers are the next unused at merge (now SFA-2026-038 and -039).
   - Keys: `artifact_types: [computational-run]`, `extension_keys: ["study", "evidence_records"]`.
   - Range: introduced 0.20.0, with `database_specific.introduced_basis`; affected versions 0.20.0–0.23.x and unreleased.
@@ -308,10 +324,10 @@ At a true difference of tol about 90 % are unresolved; the protocol states the e
 
 - [ ] Records with a kind mismatch, a declaration missing a dimension, a class or grade differing from the table, a missing or embedded configuration, or a mismatched target hash or `hash_scheme` are rejected under `--strict` and C1; a `dependencies.py` re-derivation mismatch is rejected; scalar scopes compare correctly.
 - [ ] Regenerated J14 study records pass `validate.py --strict` and `dependencies.py`; any change in decisions is recorded with its reason.
-- [ ] Gate toys (10⁴ per cell) agree with the A1.8 table to ±3σ_MC; the interval decisions for low counts are tested.
+- [ ] Gate toys (10⁴ per cell, with the model stated in the A1.8 table header) agree with the A1.8 table to ±3σ_MC; the `absolute` mode and the interval decisions for low counts are tested.
 - [ ] Coverage toys for block batch means: for each class of J14 estimator (mean, proportion, quantile, mode), the actual coverage of a nominal 90 % interval satisfies |coverage − 0.90| ≤ 0.02 + 3σ_MC, reported per class.
 - [ ] MPV bias toys: 95 % upper bound ≤ tol/10; the per-execution check is in effect.
-- [ ] Detection-limit toys: probability of catching an injection at DL ≥ 0.977; the outcome of J14's realised controls recorded in VALIDATION.
+- [ ] Detection-limit toys (the caught definition of A1.10): probability of catching an injection at DL ≥ 0.977 − 3σ_MC; the outcome of J14's realised controls recorded in VALIDATION.
 - [ ] J14's offline replay runs from the committed summaries, decisions meet §4.2, without Geant4 or a compiler.
 - [ ] Unit tests of the Python producer: block division, merging, exit 2 when `weight ≠ 1`, overflow bins.
 - [ ] `python3 -m unittest discover -s tests/contracts -t .` has no errors.
@@ -323,30 +339,32 @@ At a true difference of tol about 90 % are unresolved; the protocol states the e
 
 A2 does not change `layered_sim`'s spec format or existing outputs; it only adds optional fields and files.
 
-### A2.1 `g4common`
+### A2.1 `g4sim`
 
-**Location:** `adapters/geant4/assets/g4common/` (headers; shared by `layered_sim` and task B's `element_sim`; owner hep-detector).
+**Location:** `adapters/geant4/assets/g4sim/` (headers; shared by `layered_sim` and task B's `element_sim` and `simreco`; owner hep-detector). The directory is not named `g4common`, to avoid confusion with the existing Python module `assets/g4common.py` (imported by four scripts, listed in `adapter.json`).
 
 | File | Content | Dependency |
 |---|---|---|
-| `SimSeed.hh` | H(S, i) → two seeds for event i; calls `G4Random::setTheSeeds` in `BeginOfEventAction` | Geant4 |
+| `SimHash.hh` | SHA-256 (written in the plugin) and H(x₁, …, x_n) as defined in A1.4, checked against the Python implementation with test vectors; also a SplitMix64 generator and Box–Muller normal deviates (for programs not linked to Geant4, identical across platforms) | C++17 standard library only |
+| `SimSeed.hh` | The two seeds of event i, (H(S, i, 0), H(S, i, 1)); calls `G4Random::setTheSeeds` | Geant4, `SimHash.hh` |
 | `SimSummary.hh` | Block accumulators (the fields of A1.5), Neumaier summation, merging, JSON writing of `simulation-summary/1` | C++17 standard library only |
+| `MiniJson.hh` | Moved from `layered_sim/` (content unchanged; `layered_sim` includes this copy instead) | C++17 standard library only |
 | `SimProbe.hh` | The probe (A2.4) | Geant4 |
 | Helpers | Material construction (including the order of mixtures), physics-list selection, CSV writing | Geant4 |
 
-- For `layered_sim`, moving code with the same function into `g4common` must not change its behaviour (guaranteed by the regression check).
+- For `layered_sim`, moving code with the same function into `g4sim` must not change its behaviour (guaranteed by the regression check).
 - `SimSummary.hh` is tested in an environment without Geant4 by an optional ctest (optional CI job).
 
 ### A2.2 Per-event seeding
 
 - `layered_sim` spec/1 gains an optional `run.seeding`: `stream` (default, existing behaviour) or `per-event`.
-- `per-event`: event i reseeds in `BeginOfEventAction` with H(S, global event number). The same logical run gives identical events for any split into jobs and any thread count.
+- `per-event`: event i reseeds with `SimSeed.hh` at the **start** of `GeneratePrimaries` (before any random draw), i being the global event number. Geant4 calls `GeneratePrimaries` before `BeginOfEventAction`, so reseeding cannot happen in `BeginOfEventAction`; `BeginOfEventAction` must not draw random numbers. The same logical run gives identical events for any split into jobs and any thread count.
 - J14's existing specs are not changed and stay `stream`. Specs of new studies get `per-event` written by the adapter by default.
 
 ### A2.3 `layered_sim` writes the run summary
 
 - spec/1 gains optional `output.observables` (source column, binning, thresholds) and `output.blocks` (K, B, the logical run's first event number). `geant4_run.py` writes them into the execution spec from the study spec's observable declarations.
-- At the end of each event, the declared observables are accumulated into their block; under MT they merge through a custom `G4VAccumulable`: workers call `G4AccumulableManager::Merge()` in their own `EndOfRunAction`, the master writes in its own `EndOfRunAction`; master and workers register in the same order.
+- At the end of each event, the declared observables are accumulated into their block; under MT they merge through a custom `G4VAccumulable`: `G4AccumulableManager::Reset()` is called at the start of every run (`BeginOfRunAction`); workers call `G4AccumulableManager::Merge()` in their own `EndOfRunAction`, the master writes in its own `EndOfRunAction`; master and workers register in the same order.
 - Output `summary.json` (`simulation-summary/1`, producer `layered_sim`), its hash written into the run record.
 - Event weight ≠ 1: exit 2.
 - **Test dump:** with `output.debug_observable_dump: true` in the spec, a side file lists the declared observables per event as `%.17g`; used only in tests, and the CSV itself is unchanged.
@@ -365,15 +383,16 @@ A2 does not change `layered_sim`'s spec format or existing outputs; it only adds
 
 | Item | Spec |
 |---|---|
-| When | The master's `BeginOfRunAction` (after `RunInitialization`); state `G4State_GeomClosed` and more than 0 couples; otherwise `recorded: false` (layered_sim still exits 0), and that run cannot upgrade. A fake run (`/run/beamOn 0`) returns before `BeginOfRunAction`, so the probe does not run |
+| When | The master's `BeginOfRunAction` (called inside `G4RunManager::RunInitialization`, after the kernel closes the geometry); state `G4State_GeomClosed` and more than 0 couples; otherwise `recorded: false` (layered_sim still exits 0), and that run cannot upgrade. A fake run (`/run/beamOn 0`) returns before `BeginOfRunAction`, so the probe does not run |
 | Frequency and threads | Once per run; master only; noted as "workers assumed identical" |
-| Geometry tree | Rebuilt from `G4PhysicalVolumeStore` (a flat list in creation order) and each volume's mother logical volume; per placement: name, copy number, solid type and parameters, material (composition and density as resolved by Geant4), transform, mother, attached field manager and parameters; numbers in Python `float.hex()` format; replica and parameterised volumes record their parameterisation |
+| Geometry tree | Rebuilt from `G4PhysicalVolumeStore` (a flat list in creation order) and each volume's mother logical volume; per placement: name, copy number, solid type and parameters, material (composition and density as resolved by Geant4), transform, mother, attached field manager and parameters; numbers written in the format of Python `float.hex()` (e.g. `0x1.0000000000000p+0`): C's `%a` output differs (`0x1p+0`), so `SimProbe.hh` carries its own formatter, checked against Python with test vectors; replica and parameterised volumes record their parameterisation |
 | `tree-v1` target hash | sha256 of the JSON (sorted keys, no whitespace) of the target placement's subtree (ordered placements, solid parameters, material composition and density, transforms, attached fields) |
 | GDML | The plugin's build has GDML off; when a user build has GDML, `gdml_sha256` may be attached, but is not required |
 | EM parameters | Full text of `G4EmParameters::StreamInfo(os)` plus parsed fields; not `Dump()` |
 | Cuts | Per material-cuts couple: material, region, range cut, energy threshold per particle |
-| Hadronic models | Per process and model, energy ranges queried by material and element; overlapping ranges marked as random selection |
-| Run manager | Type, `seedOncePerCommunication`, `G4RUN_MANAGER_TYPE`; SubEvt or a non-zero seed mode reports a gap |
+| Hadronic models | Per process and model, energy ranges queried with `GetHadronicInteractionList()` and `GetMinEnergy(mat, elm)`, `GetMaxEnergy(mat, elm)`; overlapping ranges marked as random selection. **Must not** call `G4EnergyRangeManager::GetHadronicInteraction` or `ChooseHadronicInteraction`: with overlapping ranges they call `G4UniformRand`, which shifts the serial random stream |
+| Random numbers | The probe must draw no random numbers (otherwise it breaks the bit-identity of §2 rule 13); a test confirms the random-engine state is the same before and after the probe |
+| Run manager | The actual run-manager type (with `MTOnly`/`SerialOnly`, as `layered_sim` uses, the environment variable `G4RUN_MANAGER_TYPE` is ignored, so the actual type is recorded rather than the variable), `seedOncePerCommunication`; SubEvt or a non-zero seed mode reports a gap |
 | Other | `G4UserLimits`, biasing (with biasing, flag "events may share state") |
 | Datasets | Paths and content hashes computed once in the build record; the probe refers to it via `environment_ref` |
 | Field | Field managers are per thread; a declared field the master cannot see is marked `source: declared` (`layered_sim` has no field) |
@@ -396,7 +415,7 @@ A2 does not change `layered_sim`'s spec format or existing outputs; it only adds
 | `cmd_summarize`, benchmarks | Read only the summary (and the column map's semantic names); no CSV column names |
 | `derived()` and the thin-layer rule | Minimum thickness from the effective config's geometry tree; records from before A2 (no effective config) still use spec/1's `geometry.layers` |
 | Configuration and target hash | Records from A2 use `tree-v1`; A1 records keep `spec-v1`; comparison only between the same `hash_scheme`; `dependencies.py` re-derives by the record's `hash_scheme` |
-| `layered_sim` consistency check | Every run checks that the configuration derived via `spec-v1` and the one derived via `tree-v1` give the same decision; exit 2 if not |
+| Consistency check | `geant4_run.py` (not `layered_sim`, to avoid a second implementation of `spec-v1` in C++) checks after every `layered_sim` run that the configuration derived via `spec-v1` and the one derived via `tree-v1` give the same decision; exit 2 if not |
 | `geant4_verify.py` | Volume counts and material budget from the geometry tree |
 
 ### A2.7 Schema keywords
@@ -410,8 +429,8 @@ A2 does not change `layered_sim`'s spec format or existing outputs; it only adds
 | Item | Content |
 |---|---|
 | Version | 0.1.0 → 0.2.0 |
-| `adapter.json` | `assets` gains `g4common/`, the summary and column-map schemas, `summary_from_csv.py`; update `purpose`; `status` stays `demonstrated-on-synthetic-data` |
-| `SIM_SOURCES` | Add the `g4common/` files so that `sources_sha256` covers everything |
+| `adapter.json` | `assets` gains `g4sim/`, the summary and column-map schemas, `summary_from_csv.py`; update `purpose`; `status` stays `demonstrated-on-synthetic-data` |
+| `SIM_SOURCES` | Add the `g4sim/` files so that `sources_sha256` covers everything |
 | G5 | Statement "written from the Geant4 API; no example code copied or adapted", confirmed by the reviewer in the VALIDATION entry |
 | Tests | The assets check in `tests/adapters/test_geant4.py`; offline tests; live tests with `HEP_GEANT4_LIVE_TEST=1`; ctest of `SimSummary.hh` (optional) |
 | Docs | The Geant4 row of `docs/capability-matrix.md`; `geant4-study-protocol.md` (boundary artifacts, blocks, validation classes) |
@@ -423,9 +442,11 @@ A2 does not change `layered_sim`'s spec format or existing outputs; it only adds
 
 ### A2.10 A2 acceptance
 
-- [ ] Regression check: J14's existing specs produce a CSV bit-identical to the pre-A2 one on the same host.
+- [ ] Regression check: J14's existing specs produce a CSV bit-identical to the pre-A2 one on the same host; the random-engine state is the same before and after the probe.
+- [ ] H in `SimHash.hh` equals Python's H on the test vectors; the hex format of `SimProbe.hh` equals Python's `float.hex()`.
+- [ ] Under `per-event`, if `GeneratePrimaries` draws random numbers (a random gun in a test), event content still does not depend on how the run is split into jobs.
 - [ ] Both tests of A2.9 pass.
-- [ ] Every J14 run has an effective config; `tree-v1` and `spec-v1` give the same decisions; a deliberate inconsistency is caught; a run with `recorded: false` cannot upgrade.
+- [ ] The J14 specs rerun in E2 for the regression check (all 18, still `stream`) have new run records that all carry an effective config, and `tree-v1` and `spec-v1` give the same decisions on them; a deliberate inconsistency is caught; a run with `recorded: false` cannot upgrade. The committed J14 records stay at their A1 version (`spec-v1`) and are not regenerated in A2.
 - [ ] The thin-layer rule takes the minimum thickness from the effective config, with the same conclusion for J14 as in A1.
 - [ ] The study layer's production code reads no CSV column names (confirmed by a test).
 - [ ] Event weight ≠ 1 gives exit 2.
@@ -443,10 +464,10 @@ A2 does not change `layered_sim`'s spec format or existing outputs; it only adds
 | Low counts | Any block 0 or total < 100: Clopper–Pearson, Garwood, conditional binomial; the gate decides on interval endpoints | A1.6, A1.8 |
 | MPV | Mean of three-point interpolations of block histograms; bias toy 95 % upper bound ≤ tol/10; per-execution check ≤ tol/5 + 2·SE | A1.7 |
 | Quantiles | Linear interpolation within the histogram; bin < tol/10; incomplete on overflow | A1.6 |
-| Convergence gate | IUT; relative difference; se_diff; Welch ν; per-point se target tol/(4√2) | A1.8 |
-| Two-stage | f = F₀.₉₀(K−1, K_trial−1); target missed → incomplete, no top-up | A1.9 |
+| Convergence gate | IUT; relative or absolute difference (`tolerance_mode`); se_diff; Welch ν; per-point se target tol/(4√2); pass needs both points to meet the target | A1.8 |
+| Two-stage | f = F₀.₉₀(K−1, K_trial−1); target missed → incomplete, no top-up; about 19 % of point pairs incomplete, all n runs meet the target with probability about 0.9ⁿ | A1.9 |
 | Negative control | Shift in the observable; DL = tol + \|rel\| + t_{0.977}(ν)·se_rel; both directions | A1.10 |
-| Seeds | S = H(study_id, role, point_id); A1 `stream`, new studies `per-event` from A2 | A1.4, A2.2 |
+| Seeds | S = H(study_id, role, point_id); job seeds H(S, e, 0/1); event seeds H(S, i, 0/1); A1 `stream`, new studies `per-event` from A2 | A1.4, A2.2 |
 | Evidence correlation | `evidence_overlap` | A1.11 |
 | Reproducibility | Same decisions, numbers within relative 1e-9, near-threshold flag | §4.2 |
 | New block versions | `probe_version`, `column_map_version`, `evidence_overlap_version`, `summary_version` | A1.5, A1.11, A2.4, A2.5 |
@@ -460,7 +481,7 @@ A2 does not change `layered_sim`'s spec format or existing outputs; it only adds
 | Benchmark table (class, grade, kind, scope dimensions), scope comparison, configuration and isolation, `hash_scheme`, `extension.simulation` | `contracts/validate.py`, `contracts/dependencies.py`, `ext_computational_run.json` | C1 (minor, gated, sci-fix) |
 | Schema-keyword extension | `contracts/schema.py` | not bumped |
 | `simulation-summary/1`, `simulation-columns/1`, effective config | adapter | adapter 0.2.0 (the first summary schema is added in A1 with the Python producer) |
-| `g4common`, the `seeding` option | adapter (C++) | adapter 0.2.0 |
+| `g4sim`, the `seeding` option | adapter (C++) | adapter 0.2.0 |
 | `GRADES`, kind and configuration output | hep-detector | with the plugin version |
 
 The owner of the computational-run schema is hep-computing; this task only adds the optional `simulation` property (needs its agreement). C2 belongs to task B.
@@ -515,7 +536,7 @@ The owner of the computational-run schema is hep-computing; this task only adds 
 1. Classification of C1 (proposed: minor plus sci-fix).
 2. How to confirm the G5 statement "no example code copied".
 3. hep-computing's agreement to the `simulation` property.
-4. Two-stage factor F₀.₉₀ (about 10 % miss) or F₀.₉₅ (about 5 %, about 22 % more events).
+4. Two-stage factor F₀.₉₀ (about 10 % miss) or F₀.₉₅ (about 5 %, about 22 % more events); and what to do if regenerated J14 loses `validated-in-scope` by chance through a missed target (A1.9).
 5. Live re-recording of J14's scan and variation runs in A1, and the cap on `recorded/` size.
 6. The switch threshold for exact intervals (default: any block 0 or total < 100).
 
@@ -545,7 +566,7 @@ The owner of the computational-run schema is hep-computing; this task only adds 
 8. A1.14: ledger, advisories, parent records, VALIDATION, CHANGELOG, release manifest; run the checks of §9.
 
 **A2 (after A1 is merged)**
-1. `g4common/SimSummary.hh` and its ctest (no Geant4), with the A1.5 Python producer as oracle.
+1. `g4sim/SimSummary.hh` and its ctest (no Geant4), with the A1.5 Python producer as oracle.
 2. `SimSeed.hh` and `run.seeding`; `SimProbe.hh` and the geometry tree.
 3. `layered_sim` integration: summary, effective config, column map, test dump; confirm J14's CSV is bit-unchanged.
 4. Study layer reads boundary artifacts (A2.6); schema keywords (A2.7).
@@ -560,7 +581,8 @@ Computed by `gate_operating_characteristics.py` (needs numpy and scipy; a design
 - F₀.₉₀(15,15) = 1.972; F₀.₉₅(15,15) = 2.403; F₀.₉₀(31,31) = 1.594.
 - t₀.₉₅(30) = 1.697, t₀.₉₅(15) = 1.753, t₀.₉₇₅(15) = 2.131; fail quantile for m = 30, t_{1−0.05/30}(30) = 3.189.
 - Welch ν (K = 16): 30 at variance ratio 1, 27 at 2, 22.1 at 4, 18.0 at 10.
-- Mean se under the two-stage design ≈ 0.18 tol (target 0.25 tol).
+- Mean se_diff under the two-stage design ≈ 0.189 tol (target 0.25 tol); probability that at least one point of a pair misses its target 0.190.
+- Detection-limit power (the caught definition of A1.10) is near 0.977 (the reviewer's calculation about 0.9785), so acceptance uses 0.977 − 3σ_MC.
 
 ## Appendix B: Baseline values (`9f08796`)
 
@@ -572,7 +594,10 @@ Computed by `gate_operating_characteristics.py` (needs numpy and scipy; a design
 | J14 world material | `G4_Galactic` |
 | J14 `recorded/` | 2.6 MB; `events/` 5 reduced CSVs (`event`, `primary_eloss_MeV`, `edep_Si_MeV`, `primary_fate`, `primary_end_process`); `runs/` 18 run records (5 with per-event CSV; 13 scan, variation and scenario runs with only single-value summaries in `summaries/`) |
 | Advisory | latest SFA-2026-037 |
-| hep-detector | quick load 24,669 / 25,600 bytes; description 1,018 / 1,024 characters; `DetectorScriptCount` 21 |
+| hep-detector | quick load 24,669 / 25,600 bytes; description 1,016 / 1,024 characters (`measure_entrypoints.py`); `DetectorScriptCount` 21 |
+| `GRADES` | `longitudinal-profile: "reference"` (lines 92–94); the study spec's grade enum is reference, sanity, interface |
+| `ext_computational_run.json` | Does not declare `simulation`; J14's run records already carry `extension.simulation` |
+| J14 seeds | The first seed of the 5 non-re-recorded runs is 1401 or 1402 |
 | `SUPPORTED_KEYWORDS` | no maxItems, maximum, exclusiveMaximum |
 | `check_packaging.py` MAX_BYTES | 2 MiB |
 | Geant4 build | `GEANT4_USE_GDML: OFF`; `layered_sim` MT uses `G4RunManagerType::MTOnly` |
@@ -590,4 +615,5 @@ The experiments and frameworks the design refers to (ATLAS, CMS, ALICE, Key4hep,
 |---|---|
 | Before 2026-10-21 | Three rounds of independent review, two checks against 0.21.0 and `9f08796`, stage 1 prototype |
 | 2026-10-22 | Language split, per-event ROOT files, task split, organized as an implementation spec; soundness and generality reviews; third deep check (25 items); redesign referencing real experiments (`architecture.md`) |
-| **2026-10-22 (this version)** | **Rewritten for the redesigned architecture: A1 (contracts and statistics, block batch means, Python summary producer, offline recomputation of J14), A2 (`g4common`, per-event seeds, three boundary artifacts); spec/2, `simcore` and quantization removed** |
+| 2026-10-22 | Rewritten for the redesigned architecture: A1 (contracts and statistics, block batch means, Python summary producer, offline recomputation of J14), A2 (`g4common`, per-event seeds, three boundary artifacts); spec/2, `simcore` and quantization removed |
+| **2026-10-23 (this version)** | **Fixes after independent review: two-stage operating characteristics recomputed (the old script double-counted the trial χ²); pass needs both points to meet the target; `tolerance_mode`; grade is class, `longitudinal-profile` becomes setup-matched; top-level `observables` declaration and selection; `weight` column may be absent; byte-level definition of H, job seeds and legacy runs; caught definition and toy threshold; reseeding at the start of `GeneratePrimaries`; the probe draws no random numbers; `SimHash.hh` and `MiniJson.hh` in the shared directory; shared directory renamed `g4sim` (formerly `g4common`); other small fixes** |

@@ -116,7 +116,7 @@ A1、A2 是「任務 A」；B1、B2 是「任務 B」，在任務 A 合併後才
 - G5 授權邊界：Python 只和獨立執行檔交換 JSON 與 CSV；不複製 Geant4 範例程式碼。
 - 分層：skill 腳本與 adapter 只 import `core`、`contracts`；`skills/`、`contracts/` 不出現實驗名稱（實驗名稱可以出現在 `docs/` 與 `examples/`）。
 - 狀態與退出碼（`core/status.py`）：0 ok、1 負向判定、2 `rejected`、3 `incomplete`。
-- 檔案 ≤ 2 MiB；hep-detector quick load ≤ 25,600 bytes（目前 24,669）、description ≤ 1,024 字元（目前 1,018）。
+- 檔案 ≤ 2 MiB；hep-detector quick load ≤ 25,600 bytes（目前 24,669）、description ≤ 1,024 字元（`measure_entrypoints.py` 回報 1,016）。
 - J14 的離線重播必須永遠可以執行，不需要 Geant4 與編譯器。
 
 ### 2.3 原則
@@ -153,16 +153,16 @@ A1、A2 是「任務 A」；B1、B2 是「任務 B」，在任務 A 合併後才
         │    effective config   引擎無關外框 + 實際幾何樹 （§3.3）
         │
 資料平面（C++）
-  g4common/         共用 Geant4 輔助程式庫（標頭檔）：
+  g4sim/         共用 Geant4 輔助程式庫（標頭檔）：
                       SimSeed.hh     逐事件種子 H(邏輯 run 種子, 事件編號)
                       SimSummary.hh  區塊累加器、合併、JSON 寫出（只依賴標準函式庫）
                       SimProbe.hh    探針：設定與實際幾何樹（依賴 Geant4）
                       材料、physics list 選擇、CSV 寫出
-  layered_sim       既有的平板程式；spec/1 不變；加上 g4common
+  layered_sim       既有的平板程式；spec/1 不變；加上 g4sim
   element_sim       （B1）通用的盒狀元件程式：巢狀、場、平面穿越、逐事件 ROOT 檔
   simroot           （B1）只連結 Geant4 的 analysis 函式庫：ROOT 檔的 info / dump / hash
   simreco           （B2）不連結 Geant4：數位化與重建，輸出 run summary 與逐事件結果
-  其他後端           使用者的 Geant4 應用（引入 g4common）、其他引擎或框架（以縮減工具轉換）
+  其他後端           使用者的 Geant4 應用（引入 g4sim）、其他引擎或框架（以縮減工具轉換）
 ```
 
 | 元件 | 語言 | 階段 | 依賴 |
@@ -170,9 +170,9 @@ A1、A2 是「任務 A」；B1、B2 是「任務 B」，在任務 A 合併後才
 | 契約 | Python | A1（C1）、B2（C2） | — |
 | 推論與判定 | Python | A1 | — |
 | run summary 的 Python 產生器（由逐事件 CSV） | Python | A1；A2 起只作為 oracle | — |
-| `g4common`（`SimSeed.hh`、`SimSummary.hh`、`SimProbe.hh`、輔助） | C++ | A2 | Geant4（`SimSummary.hh` 只依賴標準函式庫） |
-| `layered_sim` | C++ | 既有；A2 加 `g4common` | Geant4 |
-| `element_sim` | C++ | B1 | Geant4、`g4common` |
+| `g4sim`（`SimSeed.hh`、`SimSummary.hh`、`SimProbe.hh`、輔助） | C++ | A2 | Geant4（`SimSummary.hh` 只依賴標準函式庫） |
+| `layered_sim` | C++ | 既有；A2 加 `g4sim` | Geant4 |
+| `element_sim` | C++ | B1 | Geant4、`g4sim` |
 | `simroot` | C++ | B1 | Geant4 analysis（g4tools） |
 | `simreco` | C++ | B2 | 標準函式庫、`SimSummary.hh`、`MiniJson.hh` |
 
@@ -180,12 +180,12 @@ A1、A2 是「任務 A」；B1、B2 是「任務 B」，在任務 A 合併後才
 
 | 後端 | 用途 | 幾何 | 狀態 |
 |---|---|---|---|
-| `layered_sim` | 材料層級的平板研究（J14） | spec/1：沿 x 的平板堆疊 | 既有；A2 後只做維護與 `g4common` 整合，不再加幾何功能 |
+| `layered_sim` | 材料層級的平板研究（J14） | spec/1：沿 x 的平板堆疊 | 既有；A2 後只做維護與 `g4sim` 整合，不再加幾何功能 |
 | `element_sim` | 探測器層級的研究（J15 起） | 盒狀元件、一層巢狀、場區 | B1 新增；之後的幾何功能都加在這裡 |
-| 使用者的 Geant4 應用 | 實驗組自己的幾何 | 任意（含 GDML） | 引入 `g4common` 即可交出邊界產物 |
+| 使用者的 Geant4 應用 | 實驗組自己的幾何 | 任意（含 GDML） | 引入 `g4sim` 即可交出邊界產物 |
 | 其他引擎或框架 | FLUKA、快速模擬、ML 代理模型、Key4hep 等 | 任意 | 以縮減工具把其輸出轉成邊界產物；探針只有宣告（`source: declared`）時不能升級 |
 
-**為什麼新增 `element_sim` 而不是改造 `layered_sim`。** 把 `layered_sim` 改成新的幾何格式，需要 spec 轉換與同主機逐位元相同的驗證，還要永久維護雙格式存取器；這是上一版成本最高、價值最低的一步（§13）。新增一個程式則讓 J14 的程式完全不動，並從第一天就有兩個真正的後端驗證輸出層介面。兩者共用 `g4common`，避免重複。
+**為什麼新增 `element_sim` 而不是改造 `layered_sim`。** 把 `layered_sim` 改成新的幾何格式，需要 spec 轉換與同主機逐位元相同的驗證，還要永久維護雙格式存取器；這是上一版成本最高、價值最低的一步（§13）。新增一個程式則讓 J14 的程式完全不動，並從第一天就有兩個真正的後端驗證輸出層介面。兩者共用 `g4sim`，避免重複。
 
 ### 3.3 effective config
 
@@ -207,12 +207,12 @@ A1、A2 是「任務 A」；B1、B2 是「任務 B」，在任務 A 合併後才
 | `sections.geant4` | `G4EmParameters::StreamInfo` 全文與解析欄位；逐 couple 的 cut 與能量閾值；逐 process、逐模型的能量範圍；run manager 型別；`G4UserLimits`、biasing |
 | 資料集 | 路徑與內容雜湊只在 build 紀錄中計算一次；探針以 `environment_ref` 引用 |
 | 時機 | master 的 `BeginOfRunAction`（`RunInitialization` 之後）、`G4State_GeomClosed` 且 couple 數大於 0；否則 `recorded: false`，該 run 不能升級 |
-| 場 | field manager 逐執行緒；master 也呼叫 `ConstructSDandField`，所以 `g4common` 的後端在 master 看得到場；宣告了場而 master 看不到時，標記 `source: declared` |
+| 場 | field manager 逐執行緒；master 也呼叫 `ConstructSDandField`，所以 `g4sim` 的後端在 master 看得到場；宣告了場而 master 看不到時，標記 `source: declared` |
 | 混合模擬器 | 後端若依粒子或區域分派給不同模擬器，在 `sections` 中描述分派規則 |
 
 ### 3.4 縮減工具（外部後端的接入點）
 
-不能引入 `g4common` 的後端（其他引擎、Key4hep 的 EDM4hep 檔、ML 代理模型）以一個有紀錄的縮減步驟接入：讀它的逐事件輸出，依 `output.observables` 的宣告寫出 run summary 與 column map；effective config 只有宣告。這個步驟本身是一份 computational-run 紀錄，列在處理鏈中（§7.4）。第一個縮減工具 `simreduce` 讀 `simroot dump` 的輸出（B1 之後、第一個需要時實作）。
+不能引入 `g4sim` 的後端（其他引擎、Key4hep 的 EDM4hep 檔、ML 代理模型）以一個有紀錄的縮減步驟接入：讀它的逐事件輸出，依 `output.observables` 的宣告寫出 run summary 與 column map；effective config 只有宣告。這個步驟本身是一份 computational-run 紀錄，列在處理鏈中（§7.4）。第一個縮減工具 `simreduce` 讀 `simroot dump` 的輸出（B1 之後、第一個需要時實作）。
 
 ### 3.5 column map（`simulation-columns/1`）
 
@@ -357,32 +357,33 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 
 ### 6.5 回歸與模型對模型（C2）
 
-- **回歸：** 對同一研究、同一設定，在新舊兩個版本（plugin、後端或 Geant4）上各執行一次，比較每個觀測量。純量用 §6.6 的差值與 SE，以「是否有顯著改變」判定（雙邊檢定，事先宣告 α）；直方圖用 χ² 的 p 值。結果寫入紀錄，標記 `changed` 或 `unchanged`；不影響 label。顯著改變的 reference 觀測量可觸發 sci-fix 的檢查。
-- **模型對模型：** 代理模型的研究宣告它的參考模擬（必須是有紀錄的完整模擬 run）與範圍；以 IUT 或 χ² 判定。通過時，代理模型的紀錄得到 `consistent-with-reference-simulation`（附參考 run 的雜湊與範圍）；物理 label 只能繼承參考模擬本身已有的升級，而且範圍取兩者的交集。
+- **回歸：** 對同一研究、同一設定，在新舊兩個版本（plugin、後端或 Geant4）上各執行一次（point_id 為版本標籤，樣本獨立），比較每個純量觀測量。三種判定：`changed`（|diff| − t_{1−α/m}·se_diff > tol）、`unchanged`（§6.6 的通過規則）、`unresolved`；「不顯著」不等於「沒有改變」。直方圖的比較延後到分布層級的 benchmark。不影響 label；reference 觀測量 `changed` 時可觸發 sci-fix 的檢查。
+- **模型對模型：** 代理模型永遠不改變物理 label。代理模型的研究宣告它的參考研究（study record）與範圍；以 IUT 判定（χ² 只作診斷）。通過時記錄 `extension.study.surrogate`（參考研究的引用與雜湊、範圍取兩者的交集）。
 
 ### 6.6 收斂閘門（IUT）
 
-- **差值：** diff = (a − b)/b，b 為較細的設定；se_diff = √(se_a² + se_b²)/|b|（兩個點是獨立的邏輯 run）；ν 以 Welch 公式逐對計算。
+- **差值：** a 為最細的設定，b 為第二細的設定；`relative` 模式 diff = (a − b)/b、se_diff = √(se_a² + se_b²)/|b|，`absolute` 模式 diff = a − b、se_diff = √(se_a² + se_b²)（兩個點是獨立的邏輯 run）；ν 以 Welch 公式逐對計算。
 - **事件數目標：** 每個點的 se 目標為 tol/(4√2)，使 se_diff ≤ tol/4。
-- **判定：** 通過：|diff| + t₀.₉₅(ν)·se_diff ≤ tol；失敗：|diff| − t_{1−α/m}(ν)·se_diff > tol，m 為（參數 × 觀測量）組數；其他為 unresolved。計數很少時改用區間端點：通過 = 90 % 區間落在 [−tol, tol] 內；失敗 = 單邊 1 − α/m 區間完全落在外側。
+- **判定：** 通過：|diff| + t₀.₉₅(ν)·se_diff ≤ tol，且兩點都達到 se 目標；失敗（未達標也可判）：|diff| − t_{1−α/m}(ν)·se_diff > tol，m 為（參數 × 觀測量）組數；其他為 unresolved。計數很少時改用區間端點：通過 = 90 % 區間落在 [−tol, tol] 內；失敗 = 單邊 1 − α/m 區間完全落在外側。
 - **回報：** unresolved 與未達標以 `incomplete`（exit 3）回報，label 保持 `unvalidated`；只有失敗是 `failed`（exit 1）。
 
-**操作特性**（α = 0.05，t(30) 與估計的 se，2×10⁶ 次模擬；以本資料夾的 `gate_operating_characteristics.py` 重算）：
+**操作特性**（α = 0.05，2×10⁶ 次模擬；以本資料夾的 `gate_operating_characteristics.py` 重算；模型見任務 A 的 A1.8）：
 
-| 真實差值 | 通過（se = 目標） | 通過（兩階段設計） | 失敗 m = 1（se = 目標） | 失敗 m = 30（se = 目標） | 失敗 m = 30（兩階段設計） |
-|---|---|---|---|---|---|
-| 0 | 0.976 | 0.989 | 0.000 | 0.000 | 0.000 |
-| tol/2 | 0.621 | 0.830 | 0.000 | 0.000 | 0.000 |
-| tol | 0.050 | 0.050 | 0.050 | 0.002 | 0.002 |
-| 2 tol | 0.000 | 0.000 | 0.988 | 0.780 | 0.933 |
+| 真實差值 | 通過（se = 目標） | 通過（兩階段） | 通過（兩階段，兩點都達標的條件下） | 失敗 m = 1（se = 目標） | 失敗 m = 30（se = 目標） | 失敗 m = 30（兩階段） |
+|---|---|---|---|---|---|---|
+| 0 | 0.976 | 0.809 | 0.999 | 0.000 | 0.000 | 0.000 |
+| tol/2 | 0.621 | 0.696 | 0.860 | 0.000 | 0.000 | 0.000 |
+| tol | 0.050 | 0.044 | 0.054 | 0.050 | 0.002 | 0.002 |
+| 2 tol | 0.000 | 0.000 | 0.000 | 0.988 | 0.780 | 0.952 |
 
-真實差值為 tol 時約 90 % 是 unresolved，這是等價檢定的本質。
+真實差值為 tol 時約 90 % 是 unresolved，這是等價檢定的本質。兩階段設計下約 19 % 的點對有一點未達標而不完整。2026-10-23 的獨立審查發現舊版的兩階段欄重複計入試探的 χ²，已重算。
 
 ### 6.7 negative control 與偵測極限
 
 - 判定量：shift = (control − nominal)/reference，SE 由兩個 run 合成。
 - 偵測極限：DL = tol + |rel| + t_{0.977}(ν)·se_rel。
-- 設計要求：toy 證明在 DL 注入時抓到的機率 ≥ 0.977（A1 的驗收條件）。
+- caught：控制組的 benchmark 判定為失敗（|rel_c| > tol）。
+- 設計要求：toy 證明在 DL 注入時抓到的機率 ≥ 0.977；真實檢定力在 0.977 附近，所以驗收門檻為 0.977 − 3σ_MC（A1 的驗收條件）。
 - 實現：正負兩個方向都注入（否則宣稱限縮為單向）；位於偵測極限 = caught 且 |shift| ≤ 1.1 × DL。單次未抓到時記錄並說明，不自動失敗，不得換種子重跑。
 
 ### 6.8 停止規則與證據相關性
@@ -431,8 +432,8 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 | `contracts/validate.py`、`dependencies.py` | §6、§7 |
 | `contracts/schema.py` | `maxItems`、`maximum`、`exclusiveMaximum`（`element_sim` 的 schema 需要；不升契約版本） |
 | `skills/hep-detector/scripts/` | 推論與判定只讀邊界產物；幾何事實（最小厚度、configuration）從 effective config 讀取，A2 前的紀錄仍從 spec/1 讀取；不新增腳本，`SKILL.md` 與 description 不改 |
-| `adapters/geant4/assets/` | `g4common/`；`layered_sim/` 加入 `g4common`；`geant4_run.py`（邏輯 run 與工作切分、A1 的 Python summary 產生器、B2 的 `reco` 與 `table`）；B1 `element_sim/` 與 `simroot`；B2 `simreco` |
-| `SIM_SOURCES` | 涵蓋 `g4common` 與各程式的原始碼 |
+| `adapters/geant4/assets/` | `g4sim/`；`layered_sim/` 加入 `g4sim`；`geant4_run.py`（邏輯 run 與工作切分、A1 的 Python summary 產生器、B2 的 `reco` 與 `table`）；B1 `element_sim/` 與 `simroot`；B2 `simreco` |
+| `SIM_SOURCES` | 涵蓋 `g4sim` 與各程式的原始碼 |
 | CI | 任務 A 不需要新的必要 CI 工作；`SimSummary.hh` 的 ctest 可作為選用工作。B2 的 `simreco` 需要必要的 C++17 CI 工作 |
 
 ---
@@ -513,13 +514,13 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 
 ### A2 共用程式庫與邊界產物（adapter 0.2.0）
 
-**內容：** `g4common`（`SimSeed.hh`、`SimSummary.hh`、`SimProbe.hh`、輔助）；`layered_sim` 寫出 summary、effective config、column map，並支援 `seeding: per-event`；研究層只讀邊界產物，幾何事實從 effective config 讀取；`hash_scheme: tree-v1`。
+**內容：** `g4sim`（`SimSeed.hh`、`SimSummary.hh`、`SimProbe.hh`、輔助）；`layered_sim` 寫出 summary、effective config、column map，並支援 `seeding: per-event`；研究層只讀邊界產物，幾何事實從 effective config 讀取；`hash_scheme: tree-v1`。
 
 **驗收：**
 - [ ] 回歸檢查：J14 的既有 spec 在同一主機上產生和 A2 前逐位元相同的 CSV。
 - [ ] `seeding: per-event` 下，同一邏輯 run 以 1、2、4 個工作與 1、2、4 個執行緒執行，事件內容相同；summary 的整數累加量相同，浮點相對差 ≤ 1e-12。
 - [ ] `layered_sim` 寫出的 summary 和 Python 由同一 run 的觀測量傾印產生的 summary 一致（整數相同、浮點相對差 ≤ 1e-12）。傾印是只在測試中開啟的旁檔（`%.17g`），CSV 本身不變。
-- [ ] J14 每個 run 都有 effective config；`tree-v1` 推導的 configuration 與 `spec-v1` 的判定相同；故意的不一致被抓到；`recorded: false` 的 run 不能升級。
+- [ ] 為回歸檢查重跑的 J14 spec 都有 effective config；`tree-v1` 推導的 configuration 與 `spec-v1` 的判定相同；故意的不一致被抓到；`recorded: false` 的 run 不能升級。
 - [ ] 研究層的薄層規則從 effective config 取得最小厚度，對 J14 的結論和 A1 相同。
 - [ ] 事件權重 ≠ 1 時 exit 2。
 - [ ] VALIDATION GEANT4-SUMMARY；CHANGELOG；release manifest。
@@ -529,9 +530,9 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 **內容：** `element_sim`（spec `element_sim.spec/1`：盒狀元件、一層巢狀、`field`、`source.type = gun`、`output.observables`、`output.event_file`）；場（`ConstructSDandField`、thread-local、`delta_intersection` 1e-5 mm、DormandPrince745）；平面穿越 scorer；逐事件 ROOT 檔（`G4AnalysisManager`、g4tools、扁平 ntuple、MT 合併、`content_sha256`）；`simroot`（先以一天確認 `G4RootAnalysisReader` 的能力）。
 
 **驗收：**
-- [ ] `element_sim` 交出的三個邊界產物通過和 `layered_sim` 相同的介面測試；一個和 J14 相同的平板配置在兩個後端上的 benchmark 判定相同（統計一致）。
+- [ ] `element_sim` 交出的三個邊界產物通過和 `layered_sim` 相同的介面測試；一個和 J14 相同的平板配置在兩個後端上，兩者都產生的觀測量（矽中沉積的平均與眾數、後漏比例）統計一致。
 - [ ] MT 測試：各執行緒的 field manager 指標彼此不同；探針記錄的場參數和 spec 一致。
-- [ ] 確定性場檢查（J15 的設計見 `task-b-j15.md` §4 與 B2.2）在名義值下通過；delta intersection 1e-3 mm 如預期不通過。
+- [ ] 確定性場檢查（J15 的設計見 `task-b-j15.md` §4 與 B2.5）在名義值下通過；各格點的結果都回報；B × (1 ± δ) 的 negative control 被抓到。
 - [ ] `simroot` 往返：各層級與 I、D、S 欄的值相同；`seeding: per-event` 下 serial 與不同執行緒數的 `content_sha256` 相同；`deposits` 依事件加總等於 CSV 的子系統總沉積。
 
 ### B2 重建、J15 與 C2（adapter 0.4.0、contracts C2）
@@ -553,7 +554,7 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 3. 區塊獨立的前提在事件之間有狀態時不成立；探針記錄相關設定，有疑慮時改為多個獨立的邏輯 run。
 4. 兩階段設計下約 10 % 的證據 run 未達標（§5.5）。
 5. 以容差比較時，接近門檻的判定在不同平台可能不同；以邊距標記與「CI 平台為準」處理。
-6. 兩個 Geant4 程式：`layered_sim` 凍結於維護模式，靠 `g4common` 控制重複。
+6. 兩個 Geant4 程式：`layered_sim` 凍結於維護模式，靠 `g4sim` 控制重複。
 7. 探針假設 worker 與 master 設定相同；若發現 thread-local 差異，改為逐執行緒傾印。
 8. 以目標雜湊對應已發表量測時，契約只能比對雜湊，無法判定目標就是論文中的配置；仍需審查者核對。
 9. `G4RootAnalysisReader` 的讀取能力未驗證（B1 的試作）。
@@ -580,7 +581,7 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 3. **事件決定性：** 新 spec 預設 `seeding: per-event`；工作切分與執行緒數不影響事件。
 4. **重現的定義是「判定相同」**，數值以容差比較；不做整數量化與逐位元相同的統計量。
 5. **區塊 batch means：** 一個 run 內依事件編號分 K ≥ 16 個區塊；J14 有逐事件資料的 run 離線重算，不重錄。
-6. **新增 `element_sim`**，`layered_sim` 不改 spec 格式；兩者共用 `g4common`。
+6. **新增 `element_sim`**，`layered_sim` 不改 spec 格式；兩者共用 `g4sim`。
 7. **五種驗證類別**，其中 regression 與 surrogate 在 C2 加入。
 8. **四個階段**（A1、A2、B1、B2），ROOT 檔與 `simroot` 在 B1。
 9. 兩階段係數用 F₀.₉₀ 或 F₀.₉₅；精確區間的切換門檻（任一區塊為 0 或總數 < 100）。

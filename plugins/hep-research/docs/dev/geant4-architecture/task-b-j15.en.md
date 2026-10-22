@@ -54,7 +54,7 @@
 | Processing chain | simulation → reduction → digitization and reconstruction → table, one computational-run record per step |
 | Notation | "B1.3" is a work item of this document; "§4.2" a section of this document; "A1.6", "A2.4" work items of task A; "task A §2" a section of task A; "architecture §6" a section of `architecture.en.md` |
 
-**Main files (relative to `plugins/hep-research/`):** `adapters/geant4/assets/g4common/` (created by task A, extended here); `adapters/geant4/assets/element_sim/` (new); `adapters/geant4/assets/simroot/` (new); `adapters/geant4/assets/simreco/` (new, not linked to Geant4); `adapters/geant4/assets/geant4_run.py` (new `reco`, `table`); `contracts/validate.py`, `contracts/dependencies.py` (C2); `skills/hep-detector/scripts/geant4_benchmarks.py` (`GRADES`); `skills/hep-detector/assets/geant4-study-spec.schema.json`; `skills/hep-detector/references/geant4-study-protocol.md`; `docs/researcher-journeys.md`, `docs/maintenance.md`, `docs/capability-matrix.md`, `docs/capability-map`; `tests/examples/test_geant4_minimal_spectrometer.py` (new).
+**Main files (relative to `plugins/hep-research/`):** `adapters/geant4/assets/g4sim/` (created by task A, extended here); `adapters/geant4/assets/element_sim/` (new); `adapters/geant4/assets/simroot/` (new); `adapters/geant4/assets/simreco/` (new, not linked to Geant4); `adapters/geant4/assets/geant4_run.py` (new `reco`, `table`); `contracts/validate.py`, `contracts/dependencies.py` (C2); `skills/hep-detector/scripts/geant4_benchmarks.py` (`GRADES`); `skills/hep-detector/assets/geant4-study-spec.schema.json`; `skills/hep-detector/references/geant4-study-protocol.md`; `docs/researcher-journeys.md`, `docs/maintenance.md`, `docs/capability-matrix.md`, `docs/capability-map`; `tests/examples/test_geant4_minimal_spectrometer.py` (new).
 
 ---
 
@@ -63,9 +63,10 @@
 | Provided by task A | Use in task B |
 |---|---|
 | C1: benchmark table (class, grade, kind, scope dimensions), scope comparison, configuration and isolation (A1.1–A1.3) | J15's benchmarks are all embedded and do not count for upgrade; C2 adds verification, regression, surrogate to the table (B2.3) |
-| Statistical spec: block batch means, exact intervals, MPV, IUT gate, two-stage event count, detection limit (A1.6–A1.10) | Decisions for J15's benchmarks, convergence scans and variations |
-| Seeds S = H(study_id, role, point_id) and `seeding: per-event` (A1.4, A2.2) | `element_sim` supports only `per-event` |
-| `g4common`: `SimSeed.hh`, `SimSummary.hh`, `SimProbe.hh`, material and physics-list helpers (A2.1) | Used directly by `element_sim` and `simreco` |
+| Statistical spec: block batch means, exact intervals, MPV, IUT gate (including `tolerance_mode: absolute`), two-stage event count, detection limit (A1.6–A1.10) | Decisions for J15's benchmarks, convergence scans and variations |
+| The study spec's top-level `observables` declaration (with `selection`) and `blocks` (A1.12) | J15's observable declarations |
+| Seeds S = H(study_id, role, point_id) and `seeding: per-event` (A1.4, A2.2; reseeded at the start of `GeneratePrimaries`) | `element_sim` supports only `per-event` |
+| `g4sim`: `SimHash.hh` (SHA-256, H, SplitMix64, Box–Muller, not linked to Geant4), `SimSeed.hh`, `SimSummary.hh`, `MiniJson.hh`, `SimProbe.hh`, material and physics-list helpers (A2.1) | `element_sim` uses all of them; `simreco` only the Geant4-free `SimHash.hh`, `SimSummary.hh`, `MiniJson.hh` |
 | The three boundary artifacts, and the study layer reading only them (A2.3–A2.6) | `element_sim` and `simreco` deliver the same three artifacts; the study layer needs no change |
 | `tree-v1` target hash (A2.4) | A field attached to a volume inside the target counts in the hash |
 | Schema keywords `maxItems`, `maximum`, `exclusiveMaximum` (A2.7) | Used by the `element_sim.spec/1` schema |
@@ -76,7 +77,7 @@
 
 All of task A §2 applies. In addition:
 
-1. Do not change `skills/hep-detector/SKILL.md` or hep-detector's description (quick load has only 931 bytes left; description 1,018 / 1,024 characters). J15's routing case must reuse trigger words already in the description.
+1. Do not change `skills/hep-detector/SKILL.md` or hep-detector's description (quick load has only 931 bytes left; description 1,016 / 1,024 characters per `measure_entrypoints.py`). J15's routing case must reuse trigger words already in the description.
 2. No experiment names in `skills/` or `contracts/`; the contract table and the protocol refer to `longitudinal-profile`'s reference by citation key. Experiment names (PAMELA, AMS-02) may appear only in `docs/` and in J15's `examples/` README.
 3. Field code is written from the Geant4 API, without copying or adapting the B5 example's code (G5).
 4. The text of the shared stanza is not changed (point 5 says "3.1.0 upgrade rule"; changing it would touch every SKILL.md and rerun the live routing).
@@ -109,7 +110,8 @@ x:  −1000   −810 … −780   −520 −500        …         300  320    4
 | Field-region mother | `G4_Galactic` | −520 | 840 | −520 … 320 | 300 × 300 |
 | Si1–Si6 (daughters) | `G4_Si` | −500.15 + 160k | 0.3 | centres −500, −340, −180, −20, 140, 300 | 200 × 200 |
 | TOF2a, TOF2b | `G4_PLASTIC_SC_VINYLTOLUENE` (same as TOF1) | 490, 510 | 10 each | 490 … 500, 510 … 520 | 400 × 400 |
-| Calorimeter | 50 × (`G4_Pb` 2 + PVT 5) | 550 | 350 | 550 … 900 | 500 × 500 |
+| Calorimeter mother | `G4_Galactic` | 550 | 350 | 550 … 900 | 500 × 500 |
+| Calorimeter sampling layers (daughters) | 50 × (`G4_Pb` 2 + PVT 5) | 550 | 350 | 550 … 900 | 500 × 500 |
 
 **TOF stations.** TOF1 and TOF2 have two layers each; all four layers have the same material and thickness (10 mm), with a 10 mm vacuum gap between the two layers of a station. Each layer is a whole slab, not segmented, with no paddle direction (a deliberate simplification); the two layers give two independent time measurements and dE/dx samples, and make the consistency of a station's two layers a check (B2.4).
 
@@ -185,17 +187,17 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 
 ### B1.1 `element_sim` and its spec
 
-**Location:** `adapters/geant4/assets/element_sim/` (CMake project linking Geant4 and `g4common`).
+**Location:** `adapters/geant4/assets/element_sim/` (CMake project linking Geant4 and `g4sim`).
 
 **Spec `element_sim.spec/1`** (schema in the same directory, using only keywords supported by `contracts/schema.py`):
 
 | Block | Content |
 |---|---|
-| Coordinates | Origin at the world centre, mm; elements given by centre and half-lengths (boxes) |
-| `materials` | NIST names or mixtures (component order kept; `g4common`'s material helper) |
-| `elements` | Box elements: name, material, centre, half-lengths, mother (the world or one element; only one level of nesting), role (`passive`, `tracker-plane`, `tof-layer`, `calorimeter-active`, `calorimeter-passive`), repetition (for calorimeter sampling layers) |
+| Coordinates | Origin at the world centre, mm; elements given by centre and half-lengths (boxes). **All centres are world coordinates** (daughters included); `element_sim` converts them to mother coordinates when placing (e.g. the field-region mother's centre is at x = −100, so Si1's world centre x = −500 becomes −400 in the mother) |
+| `materials` | NIST names or mixtures (component order kept; `g4sim`'s material helper) |
+| `elements` | Box elements: name, material, centre, half-lengths, mother (the world or one element; only one level of nesting), role (`passive`, `tracker-plane`, `tof-layer`, `calorimeter` (the mother), `calorimeter-active`, `calorimeter-passive`), repetition (for calorimeter sampling layers) |
 | `field` | Uniform magnetic field: element it is attached to, B vector, accuracy parameters (B1.2) |
-| `physics` | Physics list and EM option, cuts, regions (same semantics as `layered_sim`, through `g4common`) |
+| `physics` | Physics list and EM option, cuts, regions (same semantics as `layered_sim`, through `g4sim`) |
 | `source` | `type: gun`: particle, energy (`energy_MeV` or `ekin_per_nucleon_MeV`), position, direction; `gps` and `event-file` only have their interface defined (architecture §9.2) and exit 2 when met |
 | `run` | Number of events, threads, logical-run seed; `seeding` allows only `per-event` |
 | `output.observables`, `output.blocks` | Same as task A's A2.3 |
@@ -209,7 +211,7 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 - Build `G4UniformMagField`, `G4FieldManager` and `G4ChordFinder` in `ConstructSDandField`, stored as `G4ThreadLocal`; the master and each worker have their own. Building them in `Construct()` would make workers share a non-thread-safe chord finder.
 - Attach to the field-region mother with `SetFieldManager(fm, true)`, propagating to all daughters.
 - With a field, add `G4StepLimiterPhysics`.
-- The stepper class is written into the spec and recorded by the probe (a helix stepper would make the field-propagation check meaningless).
+- Stepper and driver are **built explicitly**: a `G4DormandPrince745` on a `G4Mag_UsualEqRhs`, passed to `G4ChordFinder`; not the stepper chosen by `G4ChordFinder`'s default constructor (which `G4FieldParameters` does not control). The stepper class is written into the spec, and the probe records the actual stepper and driver class names via RTTI (a helix stepper would make the field-propagation check meaningless).
 - Written from the API, without copying or adapting the B5 example's code (G5).
 
 | Parameter | Nominal | Note |
@@ -220,7 +222,7 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 | `min_epsilon_step` | 5e-5 | |
 | `max_epsilon_step` | 1e-3 | epsilon = delta one step / step length, clamped at this upper bound |
 | `max_step_mm` | 10 | Needs `G4StepLimiterPhysics`; `G4UserLimits` must be set per volume and does not propagate to daughters |
-| `stepper` | DormandPrince745 | Default of `G4FieldParameters` in 11.4.3 |
+| `stepper` | DormandPrince745 | Built explicitly (see above) |
 
 - **Probe:** `SimProbe.hh` walks `G4LogicalVolumeStore`, reads back B, the chord finder and each accuracy parameter via `GetFieldManager()`; deduplicates by pointer, records the volume of the original attachment; notes that the master sees only the master's copy. A field attached to a volume inside the target counts in the `tree-v1` target hash.
 - **MT test:** a UI command that exists only in the test build reports each thread's field-manager pointer; they must all differ.
@@ -229,7 +231,9 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 
 - When the primary (track ID 1) **first** enters a `tracker-plane` or `tof-layer` element (pre-step point status `fGeomBoundary` and its volume is that plane), record the pre-step point's position, direction, kinetic energy, global time and PDG code; one "recorded" flag per plane.
 - If the source lies inside a plane there is no `fGeomBoundary`, and no row is written for that plane.
-- The per-event CSV keeps only summary columns (primary truth, total deposit per subsystem); crossings and per-layer deposits go into the ROOT file (B1.4).
+- The per-event CSV keeps only summary columns (primary truth, total deposit per subsystem, calorimeter leakage); crossings and per-layer deposits go into the ROOT file (B1.4).
+
+**Calorimeter leakage.** For the mother element with role `calorimeter`, each event records the energy carried out of the mother by particles leaving it from inside (steps whose `post` point leaves that mother; a positron adds 2 mₑc²; multiplied by the track weight), split by the face crossed into `leak_rear_MeV` (+x face), `leak_front_MeV` (−x face) and `leak_lateral_MeV` (y and z faces), with the same semantics as `layered_sim`'s columns of the same names (`layered_sim` uses the world boundary as the faces, `element_sim` the calorimeter mother). The three columns go into the CSV, the `events` ntuple and the column map, for shower-containment (`geant4_benchmarks.py` line 487) and the rear-leakage fraction of B2.5.
 
 ### B1.4 Per-event ROOT files
 
@@ -241,16 +245,17 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 | Row order | Not fixed after MT merging; readers always sort by key |
 | When written | Rows filled in `EndOfEventAction`; the file written and closed at end of run. If the run is interrupted the file is incomplete and the run is incomplete (exit 3) |
 | Version | Structure `element_sim.events/1`, `event_file_version` in the file |
-| Hashes | File bytes include the write time and are not bit-identical; the run record keeps both the file sha256 (integrity) and the `content_sha256` from `simroot hash` (comparison and provenance) |
+| Hashes | File bytes include the write time and are not bit-identical; the run record keeps both the file sha256 (integrity) and the `content_sha256` from `simroot hash` (comparison and provenance). When a logical run has several job files, `content_sha256` is computed over the union of all files sorted by key (except the `run` ntuple, which differs per file), so it does not depend on the split |
 | Size | Not committed; the run record keeps path, hashes, row counts and size per ntuple |
 
 | ntuple | Level | One row per | Columns |
 |---|---|---|---|
-| `run` | from `summary` | file | sha256 of spec and column map, program version and source hash, Geant4 version, logical-run seed, event range, `event_file_version`, process-number table |
-| `events` | from `summary` | event | `event_id`, primary PDG code, kinetic energy, origin, direction; total deposit per subsystem; energy leaving the world; flags |
+| `run` | from `summary` | file | sha256 of spec and column map, program version and source hash, Geant4 version, logical-run seed, event range, `event_file_version` |
+| `processes` | from `summary` | process | `process_id`, `name` (the process-number table for `hits`) |
+| `events` | from `summary` | event | `event_id`, primary PDG code, kinetic energy, origin, direction; total deposit per subsystem; `leak_rear_MeV`, `leak_front_MeV`, `leak_lateral_MeV`; energy leaving the world; flags |
 | `deposits` | from `summary` | event × volume with a deposit | `event_id`, `volume_id`, `copy`, total deposit, deposit by charged particles |
 | `crossings` | from `crossings` (also in `hits`) | event × crossed plane | `event_id`, `plane_id`, `track_id`, PDG code, pre-step position, direction, kinetic energy, global time |
-| `hits` | `hits` only | step with a deposit | `event_id`, `track_id`, `parent_id`, PDG code, `volume_id`, `copy`, pre- and post-step positions, time, deposit, step length, process number |
+| `hits` | `hits` only | step with a deposit | `event_id`, `track_id`, `step_index` (the track's step number; with `event_id` and `track_id` a unique key), `parent_id`, PDG code, `volume_id`, `copy`, pre- and post-step positions, time, deposit, step length, `process_id` |
 
 - If the number of events with `hits` exceeds `max_events_hits`, spec validation rejects it as `rejected` (exit 2).
 - Estimate (J15, `crossings` level): at most about 4 kB per event uncompressed (`crossings` 10 rows × 80 B, `deposits` up to 110 rows × 28 B, `events` about 120 B); at most about 400 MB uncompressed for 10⁵ events.
@@ -272,7 +277,8 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 ### B1.6 Interface consistency between the two backends
 
 - The three boundary artifacts from `element_sim` pass the same interface tests as `layered_sim`'s (schema, hashes, semantic names in the column map).
-- A slab configuration identical to J14 gives the same benchmark decisions on `layered_sim` and `element_sim` (their events differ, so only statistical agreement is required: each observable's difference within 3·se_diff).
+- **Statistical agreement compares only observables both backends produce.** J14's `stopping-power` and `thin-layer-mpv` need `primary_eloss_MeV`, `primary_fate` and `primary_end_process` (`geant4_benchmarks.py` lines 233, 284, 325, 365), which `element_sim` does not produce (it records only entry crossings), so J14's benchmark decisions are not compared.
+- Method: a slab identical to J14's nominal (`Si_study` declared as a mixture with the same composition and density, same physics settings and cuts), one logical run on each backend (`layered_sim` with `stream`, `element_sim` with `per-event`; the events differ); compare the mean and mode (A1.7) of the silicon deposit `edep_Si_MeV`, and the `leak_rear_MeV` fraction of a calorimeter-like configuration. Each observable's difference within 3·se_diff.
 
 ### B1.7 Adapter-change process
 
@@ -280,7 +286,7 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 |---|---|
 | Version | 0.2.0 → 0.3.0 |
 | `adapter.json` | `assets` gains `element_sim/`, `simroot/`, the `element_sim.spec/1` schema; update `purpose` |
-| `SIM_SOURCES` | Add the sources of `element_sim` and `simroot` (including `FieldSetup.*`) |
+| `SIM_SOURCES` | Today a flat tuple of file names, hashed only under `ASSETS/"layered_sim"` (`geant4_run.py` lines 63, 327). Change it to a table grouped by program, `{"layered_sim": [...], "element_sim": [...], "simroot": [...], "g4sim": [...]}`; each run record records the program used and the hashes of the `g4sim` files; `element_sim`'s actual file names are listed once B1.1 is settled (field code in `element_sim/Field.hh`, `Field.cc`); `layered_sim`'s hash keys are unchanged, so old records still compare |
 | G5 | Statement "written from the Geant4 API; no example code (B5 included) copied or adapted", confirmed by the reviewer in the VALIDATION entry; the same entry notes the ROOT file type and `simroot` |
 | Tests | Offline tests (spec validation, cross-field rules); live tests (`HEP_GEANT4_LIVE_TEST=1`): geometry, field, event files, `simroot` round trip |
 | Docs | The Geant4 row of `docs/capability-matrix.md`; adapter docs |
@@ -291,7 +297,7 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 - [ ] Interface consistency of B1.6 and statistical agreement of the two backends.
 - [ ] Under `per-event`, the same logical run with 1, 2, 4 jobs and 1, 2, 4 threads: summary integers identical, floating-point relative difference ≤ 1e-12.
 - [ ] The field-manager pointers reported by the MT test command differ between threads; the field parameters recorded by the probe agree with the spec; the field counts in the target hash.
-- [ ] The deterministic field check of B2.5 passes at nominal values; delta intersection 1e-3 mm fails as expected (field verification is completed in B1 because it needs only `element_sim`).
+- [ ] The deterministic field check of B2.5 passes at nominal values; the result of every grid point is reported; the negative control of `field-propagation` (B × (1 ± δ) on the Geant4 side, δ chosen by a trial run so that the deviation exceeds the criterion) is caught (field verification is completed in B1 because it needs only `element_sim`).
 - [ ] `simroot` round trip: values of I, D, S columns identical at each level; `content_sha256` identical between serial and different thread counts; `deposits` summed per event equals the subsystem totals in the CSV; `hits` above the cap gives exit 2; an interrupted run is incomplete.
 - [ ] VALIDATION GEANT4-ELEMENT; CHANGELOG; release manifest.
 
@@ -301,7 +307,7 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 
 ### B2.1 `simreco` (digitization and reconstruction)
 
-**Location:** `adapters/geant4/assets/simreco/` (CMake project; uses only the C++17 standard library, `SimSummary.hh` and `MiniJson.hh`; not linked to Geant4). Interface: `geant4_run.py reco`. Parameters (ε, σ_t, nominal B, calibration sample) are in a reco spec owned by hep-detector. No new scripts in hep-detector.
+**Location:** `adapters/geant4/assets/simreco/` (CMake project; uses only the C++17 standard library and the Geant4-free `SimHash.hh`, `SimSummary.hh` and `MiniJson.hh` of `g4sim`; not linked to Geant4). Interface: `geant4_run.py reco`. Parameters (ε, σ_t, nominal B, calibration sample) are in a reco spec owned by hep-detector. No new scripts in hep-detector.
 
 **Input:** `crossings` and `deposits` taken from the ROOT file by `simroot dump` (sorted by key, passed through a pipe, not stored), and the summary CSV.
 
@@ -309,17 +315,18 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 |---|---|
 | Silicon | Gaussian smearing of crossing points: bending direction (y) ε = 10 µm, non-bending direction (z) 30 µm; the fit uses the same x as the scorer (entry face) |
 | TOF | Independent Gaussian smearing σ_t of each layer's time (100 ps; 150 ps separately for sensitivity); station time = mean of the two layers' times (after converting both to the station centre with the fitted track); also outputs each layer's dE/dx and the time difference of a station's two layers |
-| Track | Circle fit in the x–y plane with multiple-scattering covariance (without it, χ²/dof is in the thousands at 1 GV); straight-line fit in the x–z plane; outputs R, χ², degrees of freedom; uses the nominal B |
-| True rigidity | Mean of C·B / p_T,i from the crossing records of the six planes (C = 0.2998), using transverse momentum |
+| Track | Circle fit in the x–y plane with multiple-scattering covariance (without it, χ²/dof is in the thousands at 1 GV), giving the curvature κ; straight-line fit in the x–z plane, giving the dip angle λ; R_reco = C·B/(κ cos λ) with the nominal B (total momentum, C = 0.2998 GV/(T·m)); outputs R, χ², degrees of freedom |
+| True rigidity | 1/R_true = mean of \|q\|/p_i from the crossing records of the six planes (**total momentum** p_i; for unit charge 1/R = 1/p); R_true and R_reco both use total momentum, avoiding the p vs p_T difference (about 0.125 % at 50 mrad, more than the 0.05 % tolerance of the muon field check) |
 | β | Path length with the two station centres as end points, including the straight segments TOF1→Si1 and Si6→TOF2 and the 3D inclination; at low β reports the change in β between the stations |
 | Calorimeter | Total deposit in active layers divided by the **electron** sampling fraction; the sampling fraction is obtained from a 10 GeV electron sample of role `calibration`; also outputs e/mip |
-| Random numbers | Digitization random numbers from H(logical-run seed, event number, "digi") (the same hash as `SimSeed.hh`), separate from Geant4's random stream |
+| Random numbers | Each event's digitization random stream comes from the SplitMix64 of `SimHash.hh`, seeded with H(S, i, "digi") (H of A1.4; S the logical-run seed, i the event number); normal deviates from the Box–Muller of `SimHash.hh`; not `std::normal_distribution` (libstdc++ and libc++ give different output). Separate from Geant4's random stream, identical across platforms |
 
 **Output:** a per-event result CSV (R, χ², β, calorimeter energy, etc.) and a run summary (`simulation-summary/1`, producer `simreco`; block accumulators of observables such as 1/R_reco − 1/R_true and β − β_true).
 
 - Each `geant4_run.py reco` execution writes one computational-run record (with `**trace.provenance()`, `simreco`'s program hash, the hashes of the input run records and the ROOT file's `content_sha256`, and the list of dumped ntuples and columns). Changing digitization parameters does not require rerunning the simulation.
-- Exit codes per `core/status.py`: 0 ok, 1 negative verdict, 2 `rejected` (unreadable input, including missing files), 3 incomplete; `reco` is registered in `MISSING_FILE_ARGS` of `tests/skills/test_cli_robustness.py`.
-- The fitter's unit tests use Python's `tracker_resolution.py` (an independent implementation) as reference.
+- Exit codes per `core/status.py`: 0 ok, 1 negative verdict, 2 `rejected` (unreadable input, including missing files), 3 incomplete.
+- **CLI registration:** `MISSING_FILE_ARGS` in `tests/skills/test_cli_robustness.py` maps each script to a single argv list today, and `geant4_run.py`'s entry is taken by `run` (line 130). Extend it so that a script may map to one or more argv lists, then add `reco` and `table`.
+- **Fitter unit tests:** `tracker_resolution.py` does not fit; it only computes the curvature resolution from a parabola least-squares fit (`curvature_sigma`, line 89). The test therefore compares, on toys without multiple scattering (R ≥ 300 GV), the σ(1/R) and pull width of the C++ fit with the measurement-term resolution from `tracker_resolution.py momentum` (`mdr_intrinsic_gev`), within the toys' MC error; pull width within 1 ± 3σ_MC.
 
 ### B2.2 Result tables and transitive processing chains (C2)
 
@@ -329,9 +336,21 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 
 ### B2.3 C2 validation classes
 
-- **verification:** the table gains J15's checks (`field-propagation`, `tof-beta`, `tof-layer-consistency`); they do not count for upgrade. `GRADES` and the study spec's grade enum gain `verification`.
-- **regression:** a general entry. The same study with the same settings runs once at each of two versions (plugin, backend or Geant4); scalars use the difference and SE of A1.8 with a two-sided test (α declared in advance) for a significant change; histograms use the χ² p-value (statistical uncertainty on both sides). The record is marked `changed` or `unchanged` and does not affect the label; a significant change in a reference observable may trigger a sci-fix check.
-- **surrogate:** a general entry. A study of a surrogate model declares its reference simulation (a recorded full-simulation run) and scope; decided by IUT or χ². On pass it gets `consistent-with-reference-simulation` (with the reference run's hash and scope); the physics label can only inherit upgrades the reference simulation already has, with the scope being the intersection of the two.
+**New benchmark table entries** (A1.1 format; grade is class; `GRADES` and the study spec's benchmark and grade enums gain them as well; the new functions go in `geant4_benchmarks.py` and read only summaries):
+
+| benchmark | Class | Supported kind | Scope dimensions | Computed in |
+|---|---|---|---|---|
+| `field-propagation` | verification | — | — | `field_propagation()` in `geant4_benchmarks.py`, reading `crossings` from `simroot dump` and the analytic helix |
+| `field-propagation-muon` | sanity | — | — | `field_propagation_muon()`, reading `simreco`'s summary (block accumulators of 1/R) |
+| `tof-beta` | verification | — | — | `tof_beta()`, reading `simreco`'s summary |
+| `tof-layer-consistency` | verification | — | — | `tof_layer_consistency()`, reading `simreco`'s summary |
+| `sampling-fraction` | sanity | — | — | `sampling_fraction()`, reading `element_sim`'s summary |
+| `regression-comparison` | regression | — | — | `regression_comparison()`, reading the summaries of two versions |
+| `surrogate-comparison` | surrogate | — | — | `surrogate_comparison()`, reading the summaries of the surrogate and the reference simulation |
+
+- **verification:** does not count for upgrade.
+- **regression:** the same study with the same settings runs once at each of two versions (plugin, backend or Geant4); the point_id of each is the version tag, so S differs and the samples are independent (no clash with A1.4's no-repeated-S rule). Only scalar observables are compared (histogram comparison belongs to the distribution-level benchmarks deferred in §8). Three outcomes: `changed`: |diff| − t_{1−α/m}·se_diff > tol; `unchanged`: the pass rule of A1.8; otherwise `unresolved`. Tolerance and α are declared in advance. The record does not affect the label; a reference observable marked `changed` may trigger a sci-fix check.
+- **surrogate:** a surrogate model **never changes the physics label**. A surrogate study declares its reference study (a study record, not a run record; run records carry no upgrade) and scope; decided by the IUT of A1.8 (χ² only as a diagnostic, never as the pass criterion). On pass it records `extension.study.surrogate = {reference_study_ref, reference_sha256, scope}`, the scope being the intersection of the declared scope and the reference study's scope.
 - Gated as in C1: `strict or _at_least(contract_version, C2)`, no warning branch.
 
 ### B2.4 J15 validation ladder
@@ -342,15 +361,15 @@ J15's README uses this table to show that J15 is reasonable, and stresses that J
 | Per-event energy balance (J15 geometry) | implementation | Energy conservation | — | Omit 2 mₑc², double counting |
 | Material budget (geantino) | implementation | PDG X₀ sum | Tolerance about 2 % (Geant4's X₀ formula differs from PDG by about 1 %) | Pb density ± δ |
 | `field-propagation` | **verification** | Charged geantino against the analytic helix | See B2.5 | B × (1 ± δ) on the Geant4 side |
-| `field-propagation-muon` | **sanity** | Plane-averaged true 1/R (B2.1) | μ⁻ 1, 10, 100 GV; tolerance = t·SE + 0.05 %; N ≈ 400 (1 GV), ≈ 7400 (100 GV) | B × (1 ± 1 %) on the Geant4 side |
-| Fitter unit test | test (not a benchmark) | Toy truth (R ≥ 300 GV): `simreco`'s C++ fit against `tracker_resolution.py` | — | — |
+| `field-propagation-muon` | **sanity** | Plane-averaged true 1/R (B2.1) | μ⁻ 1, 10, 100 GV; observable: mean of (1/R_reco − 1/R_true)·R_true; tolerance = t_{K−1}·SE + 0.05 %; relative SE target 0.1 %, N from the trial run per A1.9 (estimates: about 400 at 1 GV, about 7400 at 100 GV, for SE of about 0.07 % and 0.10 %) | B × (1 ± 1 %) on the Geant4 side |
+| Fitter unit test | test (not a benchmark) | Toys without multiple scattering (R ≥ 300 GV): `simreco`'s σ(1/R) and pull width against the measurement-term resolution of `tracker_resolution.py` (B2.1) | — | — |
 | One-off multiple-scattering comparison | sanity | The analytic term of `multiple_scattering.py` (no log); optionally `toy_spectrometer.py` (needs NumPy) | μ and p, 1–10 GV, with β | — |
 | `tof-beta` | **verification** (bookkeeping) | Kinematics along the true trajectory | — | Scorer test flag injects a time offset; there is no physics control on the Geant4 side, noted in the docs |
 | `tof-layer-consistency` | **verification** (bookkeeping) | Time difference between a station's two layers against "inter-layer path length / βc" (66.7 ps at β = 1, normal incidence) | Mean residual 0; width √2 σ_t (141 ps at 100 ps) | Test flag injects an offset into one layer's scorer time |
 | `sampling-fraction` | sanity | Ratio of ionization dE/dx at the run momentum from the PDG muon energy-loss tables (Groom et al., obtained via hep-citations) | μ⁻ 1 GeV; statistic Σ PVT deposit / Σ (PVT + Pb) deposit; plausible range ±10 % (the reviewer's Bethe estimate is about 0.271); different seed from the `calibration` sample | PVT density ± δ |
 | Shower containment | sanity | PDG gamma profile, effective critical energy of the mixture about 10.2 MeV | Electrons 1–100 GeV | — |
 | `longitudinal-profile` (0.21.0) | not applicable | Its reference is the published ALICE FoCal-E measurement, valid only for that stack; J15's calorimeter differs, and is embedded | — | — |
-| Optional: stopping power in an isolated PVT slab | reference (`configuration: isolated`) | Bethe (RPP 2024 eq. 34.5) | p, T = 200–600 MeV (βγ ≈ 0.67–1.37, below PVT's 10^x₀ ≈ 1.40, so the density correction is 0), 1 cm slab, nuclear interactions excluded (about 1 %); Sternheimer parameters from Sternheimer, Berger & Seltzer (1984), checked via hep-citations | PVT density ± δ |
+| Optional: stopping power in an isolated PVT slab | reference (`configuration: isolated`) | Bethe (RPP 2024 eq. 34.5) | p, T = 200–600 MeV (βγ ≈ 0.69–1.30, below PVT's 10^x₀ ≈ 1.40, so the density correction is 0), 1 cm slab, nuclear interactions excluded (about 1 %); Sternheimer parameters from Sternheimer, Berger & Seltzer (1984), checked via hep-citations | PVT density ± δ |
 
 The optional last item runs in an isolated slab (a single element of `element_sim`), not as part of the J15 detector, to show the upgrade path for a new material. Event counts and decisions follow A1.6–A1.10.
 
@@ -364,7 +383,7 @@ The optional last item runs in an isolated slab (a single element of `element_si
 
 | Scan | Grid | Decision |
 |---|---|---|
-| delta intersection | 1e-3, 1e-4, 1e-5, 1e-6 mm | At nominal (1e-5), the in-plane distance √(Δy² + Δz²) ≤ 0.5 µm (ε/20) on all planes; the two finest differ by ≤ 0.2 µm; 1e-3 mm is expected to fail |
+| delta intersection | 1e-3, 1e-4, 1e-5, 1e-6 mm | At nominal (1e-5), the in-plane distance √(Δy² + Δz²) ≤ 0.5 µm (ε/20) on all planes, the analytic track evaluated at the plane's x; the two finest differ by ≤ 0.2 µm; \|x − x_plane\| of Geant4's crossing point is also recorded. The result of every grid point is reported; 1e-3 mm is not assumed to fail (Geant4's intersection error is mainly along x, and in the plane it becomes only about slope × δ ≤ 0.25 µm) |
 | Maximum step | 100, 30, 10, 3 mm | Same |
 | delta one step and epsilon | nominal and 1/10 | Expected no change; confirmed once |
 | TOF2 path time (both layers) | — | \|Δt\| ≤ 1 ps (about 0.3 mm of path), checks path length only |
@@ -372,7 +391,7 @@ The optional last item runs in an isolated slab (a single element of `element_si
 **Calorimeter production cut:**
 - Grid: 0.1, 0.3, 0.7, 1.0 mm.
 - Sample: 10 GeV e⁻; trial first, then N per A1.9.
-- Observables: total deposit (relative tolerance 1 %, about 400 showers per point), rear leakage fraction (computed from the existing `leak_rear_MeV`, back face only; **absolute** tolerance 0.002, about 5000 showers per point).
+- Observables: total deposit (relative tolerance 1 %, about 400 showers per point), rear leakage fraction (`element_sim`'s `leak_rear_MeV` (B1.3) divided by the incident kinetic energy, back face of the calorimeter mother only; **absolute** tolerance 0.002, `tolerance_mode: absolute`, about 5000 showers per point).
 - Events per point: the larger of the two; decision per A1.8 (IUT).
 
 The Si production cut is not converged in J15: it affects only the Si deposit, and J15's Si results are not used as evidence. The study spec's `convergence_plan.observables` enum gains total deposit and rear leakage fraction. The parameter sets each benchmark depends on are declared in advance and checked against the probe's actual settings.
@@ -382,7 +401,7 @@ The Si production cut is not converged in J15: it affects only the Si deposit, a
 | Variation | Scope | Rule |
 |---|---|---|
 | EM option4 vs option3 | Calorimeter profile, sampling fraction | `G4R-PRECISION-EM` |
-| FTFP_BERT_EMZ vs **QGSP_BIC_EMZ** | Only interaction probability and first-interaction depth in the calorimeter; nucleons below 1.5 GeV | `G4R-BIC-RANGE`; below 3 GeV for π and at 6–12 GeV for hadrons both use the same model and must not be used as a variation |
+| FTFP_BERT_EMZ vs **QGSP_BIC_EMZ** | Nucleons below 1.5 GeV; final-state observables: deposit in the 5 layers after the first interaction, energy of charged secondaries after the interaction. Interaction probability and first-interaction depth are reported only when the probe confirms the two inelastic cross sections differ (the two physics lists may share nucleon cross sections, and then the difference is 0 by construction, the false zero warned about at protocol line 161) | `G4R-BIC-RANGE`; below 3 GeV for π and at 6–12 GeV for hadrons both use the same model and must not be used as a variation |
 | Vacuum vs air | Multiple scattering, rigidity resolution | — |
 
 ### B2.7 TOF time-resolution sensitivity
@@ -407,26 +426,28 @@ The Si production cut is not converged in J15: it affects only the Si deposit, a
 | Item | Content |
 |---|---|
 | Script count | No new scripts in hep-detector; `DetectorScriptCount` stays 21, line 47 of `docs/capability-matrix.md` unchanged |
-| CLI registration | `geant4_run.py reco` and `table` registered in `tests/skills/test_cli_robustness.py` and the adapter tests; `simreco` sources listed in `assets` of `adapter.json` |
+| CLI registration | `geant4_run.py reco` and `table` registered in `tests/skills/test_cli_robustness.py` (with `MISSING_FILE_ARGS` extended per B2.1) and the adapter tests; `simreco` sources listed in `assets` of `adapter.json` |
 | Routing table | `skills/hep-detector/SKILL.md` not changed; descriptions of J15, `element_sim` and `simreco` go into `geant4-study-protocol.md` and the adapter docs |
 | Journey | J15; `docs/researcher-journeys.md`, the examples table of `docs/maintenance.md`; `tests/examples/test_geant4_minimal_spectrometer.py` (replay and compare decisions) |
 | Capability | `docs/capability-map` (new entry under `full-detector-simulation`, run `capability_map.py --write`), `docs/capability-matrix.md` |
 | Routing | New routing case for J15; `check_routing_static.py` reads the journey list from `docs/researcher-journeys.md`, so once J15 is in the table it **must** have a routing case. Rerun the live Geant4 cases, including the existing Traditional Chinese underspecified case `g4-underspec-2` |
-| Description length | Description 1,018 / 1,024 characters; routing cases reuse existing trigger words, the description is not changed |
+| Description length | Description 1,016 / 1,024 characters (`measure_entrypoints.py`); routing cases reuse existing trigger words, the description is not changed |
 | Independent review | This task's Markdown (protocol changes, J15 README, this document) is reviewed with 0.22.0's `review.py`; its record is advisory only and, per O04/O14, does not replace the human G5 confirmation |
-| Other | `reference_inventory.py --check`, CHANGELOG, release manifest, adapter 0.4.0, `SIM_SOURCES` gains `simreco`'s sources; a required C++17 CI job builds and tests `simreco` |
+| Other | `reference_inventory.py --check`, CHANGELOG, release manifest, adapter 0.4.0, a `simreco` group in `SIM_SOURCES`; a C++17 CI job builds and tests `simreco` (required or optional is the maintainer's decision, §9) |
 
 ### B2.11 B2 acceptance
 
 - [ ] `field-propagation-muon`, `tof-beta`, `tof-layer-consistency` and `sampling-fraction` are complete; each negative control is caught per B2.4, or the absence of a control is noted.
-- [ ] `simreco`'s fitter unit tests pass with `tracker_resolution.py` as reference; `simreco` is built and tested in a required CI job.
+- [ ] `simreco`'s fitter unit tests pass per B2.1; `simreco` is built and tested in a CI job (a required job if the maintainer approves one; otherwise an optional job plus a local build-and-test record).
+- [ ] `simreco`'s digitization output is bit-identical on Linux (libstdc++) and macOS (libc++).
+- [ ] The new benchmark table entries (B2.3) agree with `GRADES` and the study spec's enums (consistency test).
 - [ ] `simreco`'s summary passes the same consistency test as task A's A2.9 (Python recomputes from the per-event result CSV).
 - [ ] A processing chain of three or more levels (simulation → reconstruction → table) is accepted by `dependencies.py`; it is rejected when a root is not a simulation run.
-- [ ] The verification class does not count for upgrade; a regression check (e.g. J14 on two plugin versions) produces a `changed` or `unchanged` record without affecting the label; a contract test of the surrogate rule (a surrogate cannot get an upgrade the reference simulation lacks).
+- [ ] The verification class does not count for upgrade; a regression check (e.g. J14 on two plugin versions) produces a `changed`, `unchanged` or `unresolved` record without affecting the label; contract tests of the surrogate rule: a record carrying `extension.study.surrogate` that declares `validated-in-scope` is rejected; a reference that is not a study record is rejected.
 - [ ] Contract tests of the isolation rule: missing configuration, embedded, and class differing from the table are all rejected; J14 still passes under `--strict`.
 - [ ] The TOF σ_t sensitivity at 100 and 150 ps is reported.
 - [ ] Recorded budget, registration items and docs all done; VALIDATION GEANT4-J15.
-- [ ] An independent agent, using only the docs and tools, completes "rigidity resolution of a 1 GV proton in J15": the result record passes `validate.py --strict`, the label is `unvalidated`, the resolution lies within the range of the §4.2 table, and no maintainer help is needed.
+- [ ] An independent agent, using only the docs and tools, completes "rigidity resolution of a 1 GV proton in J15": the result record passes `validate.py --strict`, the label is `unvalidated`, the resolution (central 68 % half-width of the distribution of (1/R_reco − 1/R_true)·R_true) lies within the range of the 1 GV proton row of the §4.2 multiple-scattering table (1.8–2.6 %; the measurement term is negligible at 1 GV), and no maintainer help is needed.
 
 ---
 
@@ -449,9 +470,9 @@ The Si production cut is not converged in J15: it affects only the Si deposit, a
 | `skills/hep-detector/scripts/digitize_reconstruct.py` | Not done | Replaced by `simreco` in C++ |
 | New geometry features in `layered_sim` | Not done | New features only in `element_sim` |
 | Reading ROOT directly from Python (uproot) in the pipeline | Not done | Through `simroot` |
-| Ion sources and Birks visible energy (future J16) | Deferred | Cosmic-ray nuclide studies, and a documented Birks constant for PVT. Implementation per 11.4.3: get the ion with `GetIon(Z, A)` in `GeneratePrimaries`; set kB in `Construct` and `SetBirksActive(true)` at PreInit, then get it via `G4LossTableManager::Instance()->EmSaturation()` |
+| Ion sources and Birks visible energy (future J16) | Deferred | Cosmic-ray nuclide studies, and a documented Birks constant for PVT. Implementation per 11.4.3: get the ion with `GetIon(Z, A)` in `GeneratePrimaries`; set kB in `Construct` (`GetIonisation()->SetBirksConstant`), call `G4EmParameters::Instance()->SetBirks(true)` at PreInit, then get it via `G4LossTableManager::Instance()->EmSaturation()` (check the API names against the 11.4.3 source when implementing) |
 | Non-box solids, rotations, GDML input, field maps, fringe fields in `element_sim` | Deferred | The first study that needs them and cannot use a user application |
-| Distribution-level benchmarks, combination and selection of observables, profiles, `gps` and `event-file` sources, `simreduce` | Deferred (interfaces defined in architecture §9.2) | Each one's first use case |
+| Distribution-level benchmarks (including histogram comparison for regression), combination of observables, profiles, `gps` and `event-file` sources, `simreduce` | Deferred (interfaces defined in architecture §9.2) | Each one's first use case |
 | RNTuple, vector columns | Deferred | ROOT file size or read speed becomes a bottleneck |
 
 For other items not done or deferred, see task A §10.
@@ -463,7 +484,7 @@ For other items not done or deferred, see task A §10.
 **To decide:**
 1. The transitive processing chain of C2: needs agreement from hep-computing, owner of the computational-run schema.
 2. Classification of C2 (proposed minor).
-3. `simreco` needs a required C++17 CI job.
+3. Whether `simreco`'s C++17 CI job is required (B2.11's acceptance follows the decision).
 4. Where ROOT files are stored and for how long (not committed to the repo).
 5. Maintenance ownership of `element_sim` as the second Geant4 program (proposed hep-detector).
 
@@ -472,10 +493,12 @@ For other items not done or deferred, see task A §10.
 2. Calorimeter showers dominate CPU time; convergence of rear leakage needs about 5000 showers per point; event counts are set by trial runs and recorded.
 3. The read capability of `G4RootAnalysisReader` is unverified (the B1.5 trial).
 4. ROOT files of large samples can reach hundreds of MB; under MT merging, worker baskets stay in memory until end of run; `hits` has an event cap; size and memory confirmed in trial runs.
-5. Maintenance cost of two Geant4 programs; duplication controlled through `g4common`.
+5. Maintenance cost of two Geant4 programs; duplication controlled through `g4sim`.
 6. Quick load has only 931 bytes left, description 1,018 / 1,024 characters: this task must not change `SKILL.md` or the description.
-7. Effort not yet estimated; re-estimate after task A based on the actual `g4common`.
+7. Effort not yet estimated; re-estimate after task A based on the actual `g4sim`.
 8. Task A's residual risks (the block-independence assumption, near-threshold decisions, the probe assuming worker and master settings are the same) also apply; see task A §11.
+9. The hadronic variation of B2.6: if the two physics lists share nucleon inelastic cross sections, the interaction probability does not change; only final-state observables are reported (B2.6).
+10. Some Geant4 behaviour in this document (stepper construction, the Birks API, the direction of the intersection error) rests on the reviewer's experience and was not checked line by line against the 11.4.3 source; check it first when implementing.
 
 ---
 
@@ -553,4 +576,5 @@ If the direction is the same as the bending (−50 mrad): y at Si6 is −151 mm 
 |---|---|
 | Detector document and v5 | Single-axis stacked spectrometer; Gluckstern small-N formula corrected; field direction and field-check grid |
 | 2026-10-22 | TOF1 and TOF2 with two layers each; digitization and reconstruction moved to C++; per-event ROOT files; split out as task B |
-| **2026-10-22 (this version)** | **Rewritten for the architecture redesigned with reference to real experiments: new `element_sim` as a second backend (replacing spec/2 and the rework of `layered_sim`); B1 (`element_sim`, field, crossings, ROOT files, `simroot`), B2 (`simreco`, J15, C2's verification, regression, surrogate and transitive chains); PAMELA and AMS-02 comparison and TOF sensitivity added** |
+| 2026-10-22 | Rewritten for the architecture redesigned with reference to real experiments: new `element_sim` as a second backend (replacing spec/2 and the rework of `layered_sim`); B1 (`element_sim`, field, crossings, ROOT files, `simroot`), B2 (`simreco`, J15, C2's verification, regression, surrogate and transitive chains); PAMELA and AMS-02 comparison and TOF sensitivity added |
+| **2026-10-23 (this version)** | **Fixes after independent review: B1.6 compares only observables both backends produce; calorimeter mother and `leak_*_MeV`; new benchmark table entries and where they are computed; surrogates never change the physics label; three regression outcomes and point_id; rigidity defined with total momentum; `MISSING_FILE_ARGS` extended; `SIM_SOURCES` grouped by program; `simreco` uses `SimHash.hh`'s SplitMix64 and Box–Muller; stepper built explicitly; field check does not assume 1e-3 mm fails; hadronic variation uses final-state observables; `processes` ntuple and `step_index`; other small fixes** |

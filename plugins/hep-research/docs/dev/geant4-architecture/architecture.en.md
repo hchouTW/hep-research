@@ -116,7 +116,7 @@ Each point has a source (§14). "Taken" is what this architecture adopts; "not t
 - G5 licence boundary: Python exchanges only JSON and CSV with separate executables; no Geant4 example code is copied.
 - Layering: skill scripts and adapters import only `core` and `contracts`; no experiment names in `skills/` or `contracts/` (experiment names may appear in `docs/` and `examples/`).
 - Statuses and exit codes (`core/status.py`): 0 ok, 1 a negative verdict, 2 `rejected`, 3 `incomplete`.
-- Files ≤ 2 MiB; hep-detector quick load ≤ 25,600 bytes (24,669 now), description ≤ 1,024 characters (1,018 now).
+- Files ≤ 2 MiB; hep-detector quick load ≤ 25,600 bytes (24,669 now), description ≤ 1,024 characters (`measure_entrypoints.py` reports 1,016).
 - J14's offline replay must always run, with no Geant4 and no compiler.
 
 ### 2.3 Principles
@@ -153,16 +153,16 @@ Control plane (Python, standard library)
         │    effective config   engine-independent envelope + actual geometry tree (§3.3)
         │
 Data plane (C++)
-  g4common/         shared Geant4 helper library (headers):
+  g4sim/         shared Geant4 helper library (headers):
                       SimSeed.hh     per-event seed H(logical-run seed, event number)
                       SimSummary.hh  block accumulators, merging, JSON writer (standard library only)
                       SimProbe.hh    the probe: settings and actual geometry tree (depends on Geant4)
                       materials, physics-list selection, CSV writer
-  layered_sim       the existing slab program; spec/1 unchanged; gains g4common
+  layered_sim       the existing slab program; spec/1 unchanged; gains g4sim
   element_sim       (B1) a general box-element program: nesting, field, plane crossings, per-event ROOT files
   simroot           (B1) links only Geant4's analysis library: info / dump / hash of ROOT files
   simreco           (B2) no Geant4: digitization and reconstruction, writes run summaries and per-event results
-  other backends    a user's Geant4 application (including g4common), other engines or frameworks (converted by a reducer)
+  other backends    a user's Geant4 application (including g4sim), other engines or frameworks (converted by a reducer)
 ```
 
 | Component | Language | Stage | Depends on |
@@ -170,9 +170,9 @@ Data plane (C++)
 | contracts | Python | A1 (C1), B2 (C2) | — |
 | inference and decisions | Python | A1 | — |
 | Python run-summary producer (from per-event CSVs) | Python | A1; only the oracle from A2 | — |
-| `g4common` (`SimSeed.hh`, `SimSummary.hh`, `SimProbe.hh`, helpers) | C++ | A2 | Geant4 (`SimSummary.hh` standard library only) |
-| `layered_sim` | C++ | existing; gains `g4common` in A2 | Geant4 |
-| `element_sim` | C++ | B1 | Geant4, `g4common` |
+| `g4sim` (`SimSeed.hh`, `SimSummary.hh`, `SimProbe.hh`, helpers) | C++ | A2 | Geant4 (`SimSummary.hh` standard library only) |
+| `layered_sim` | C++ | existing; gains `g4sim` in A2 | Geant4 |
+| `element_sim` | C++ | B1 | Geant4, `g4sim` |
 | `simroot` | C++ | B1 | Geant4 analysis (g4tools) |
 | `simreco` | C++ | B2 | standard library, `SimSummary.hh`, `MiniJson.hh` |
 
@@ -180,12 +180,12 @@ Data plane (C++)
 
 | Backend | Purpose | Geometry | Status |
 |---|---|---|---|
-| `layered_sim` | material-level slab studies (J14) | spec/1: a stack of slabs along x | existing; after A2 only maintenance and `g4common` integration, no new geometry features |
+| `layered_sim` | material-level slab studies (J14) | spec/1: a stack of slabs along x | existing; after A2 only maintenance and `g4sim` integration, no new geometry features |
 | `element_sim` | detector-level studies (from J15) | box elements, one level of nesting, field regions | new in B1; future geometry features go here |
-| a user's Geant4 application | an experiment group's own geometry | anything (GDML included) | delivers the boundary artifacts by including `g4common` |
+| a user's Geant4 application | an experiment group's own geometry | anything (GDML included) | delivers the boundary artifacts by including `g4sim` |
 | other engines or frameworks | FLUKA, fast simulation, ML surrogates, Key4hep and others | anything | a reducer converts their output into boundary artifacts; with probe content declared only (`source: declared`) they cannot upgrade |
 
-**Why a new `element_sim` rather than reworking `layered_sim`.** Moving `layered_sim` to a new geometry format needs a spec conversion with a same-host bit-identical check, plus a dual-format accessor maintained forever; it was the most costly and least valuable step of the previous version (§13). A new program leaves J14's program untouched and gives two real backends to test the output interface from day one. Both share `g4common`, avoiding duplication.
+**Why a new `element_sim` rather than reworking `layered_sim`.** Moving `layered_sim` to a new geometry format needs a spec conversion with a same-host bit-identical check, plus a dual-format accessor maintained forever; it was the most costly and least valuable step of the previous version (§13). A new program leaves J14's program untouched and gives two real backends to test the output interface from day one. Both share `g4sim`, avoiding duplication.
 
 ### 3.3 Effective config
 
@@ -207,12 +207,12 @@ Data plane (C++)
 | `sections.geant4` | the full text of `G4EmParameters::StreamInfo` plus parsed fields; per-couple cuts and energy thresholds; energy ranges per process and model; run-manager type; `G4UserLimits`, biasing |
 | datasets | paths and content hashes computed once in the build record; the probe refers to it by `environment_ref` |
 | timing | master `BeginOfRunAction` (after `RunInitialization`), in `G4State_GeomClosed` with more than 0 couples; otherwise `recorded: false`, and the run cannot upgrade |
-| field | field managers are per thread; the master also calls `ConstructSDandField`, so backends using `g4common` see the field on the master; a declared field the master cannot see marks the config `source: declared` |
+| field | field managers are per thread; the master also calls `ConstructSDandField`, so backends using `g4sim` see the field on the master; a declared field the master cannot see marks the config `source: declared` |
 | mixed simulators | a backend that routes particles or regions to different simulators describes the routing in `sections` |
 
 ### 3.4 Reducers (where external backends join)
 
-A backend that cannot include `g4common` (other engines, Key4hep's EDM4hep files, ML surrogates) joins through a recorded reduction step: it reads that backend's per-event output and writes a run summary and a column map as declared in `output.observables`; its effective config is declared only. The step is itself a computational-run record in the processing chain (§7.4). The first reducer, `simreduce`, reads the output of `simroot dump` (implemented after B1, at the first need).
+A backend that cannot include `g4sim` (other engines, Key4hep's EDM4hep files, ML surrogates) joins through a recorded reduction step: it reads that backend's per-event output and writes a run summary and a column map as declared in `output.observables`; its effective config is declared only. The step is itself a computational-run record in the processing chain (§7.4). The first reducer, `simreduce`, reads the output of `simroot dump` (implemented after B1, at the first need).
 
 ### 3.5 Column map (`simulation-columns/1`)
 
@@ -357,32 +357,33 @@ A record whose class or grade disagrees with the table, or whose name is not in 
 
 ### 6.5 Regression and model-to-model (C2)
 
-- **Regression:** the same study with the same settings runs once on each of two versions (plugin, backend or Geant4), and every observable is compared. Scalars use the difference and SE of §6.6, decided as "significant change or not" (a two-sided test, α declared in advance); histograms use the χ² p-value. The result goes into the record as `changed` or `unchanged`; labels are not affected. A significant change of a reference observable can trigger a sci-fix check.
-- **Model-to-model:** a surrogate's study declares its reference simulation (which must be a recorded full-simulation run) and scope; the decision uses IUT or χ². If it passes, the surrogate's record gets `consistent-with-reference-simulation` (with the reference run's hash and the scope); a physics label can only be inherited from upgrades the reference simulation itself has, with the intersection of the two scopes.
+- **Regression:** the same study with the same settings runs once on each of two versions (plugin, backend or Geant4) (point_id is the version tag, so the samples are independent), and every scalar observable is compared. Three outcomes: `changed` (|diff| − t_{1−α/m}·se_diff > tol), `unchanged` (the pass rule of §6.6), `unresolved`; "not significant" does not mean "unchanged". Histogram comparison is deferred to distribution-level benchmarks. Labels are not affected; a reference observable marked `changed` can trigger a sci-fix check.
+- **Model-to-model:** a surrogate never changes the physics label. A surrogate's study declares its reference study (a study record) and scope; decided by IUT (χ² only as a diagnostic). On pass, `extension.study.surrogate` is recorded (reference study's reference and hash, scope the intersection of the two).
 
 ### 6.6 Convergence gate (IUT)
 
-- **Difference:** diff = (a − b)/b, with b the finer setting; se_diff = √(se_a² + se_b²)/|b| (the two points are independent logical runs); ν by Welch's formula for each pair.
+- **Difference:** a is the finest setting, b the second-finest; in `relative` mode diff = (a − b)/b and se_diff = √(se_a² + se_b²)/|b|, in `absolute` mode diff = a − b and se_diff = √(se_a² + se_b²) (the two points are independent logical runs); ν by Welch's formula for each pair.
 - **Event-count target:** each point's se target is tol/(4√2), so that se_diff ≤ tol/4.
-- **Decision:** pass: |diff| + t₀.₉₅(ν)·se_diff ≤ tol; fail: |diff| − t_{1−α/m}(ν)·se_diff > tol, with m the number of (parameter × observable) pairs; otherwise unresolved. For small counts, interval endpoints: pass = the 90 % interval lies within [−tol, tol]; fail = the one-sided 1 − α/m interval lies entirely outside.
+- **Decision:** pass: |diff| + t₀.₉₅(ν)·se_diff ≤ tol, and both points meet their se target; fail (possible even with a missed target): |diff| − t_{1−α/m}(ν)·se_diff > tol, with m the number of (parameter × observable) pairs; otherwise unresolved. For small counts, interval endpoints: pass = the 90 % interval lies within [−tol, tol]; fail = the one-sided 1 − α/m interval lies entirely outside.
 - **Reporting:** unresolved and missed targets are `incomplete` (exit 3) and the label stays `unvalidated`; only fail is `failed` (exit 1).
 
-**Operating characteristics** (α = 0.05, t(30) with an estimated se, 2×10⁶ simulated trials; recompute with `gate_operating_characteristics.py` in this folder):
+**Operating characteristics** (α = 0.05, 2×10⁶ simulated trials; recompute with `gate_operating_characteristics.py` in this folder; model in task A's A1.8):
 
-| True difference | Pass (se = target) | Pass (two-stage design) | Fail m = 1 (se = target) | Fail m = 30 (se = target) | Fail m = 30 (two-stage design) |
-|---|---|---|---|---|---|
-| 0 | 0.976 | 0.989 | 0.000 | 0.000 | 0.000 |
-| tol/2 | 0.621 | 0.830 | 0.000 | 0.000 | 0.000 |
-| tol | 0.050 | 0.050 | 0.050 | 0.002 | 0.002 |
-| 2 tol | 0.000 | 0.000 | 0.988 | 0.780 | 0.933 |
+| True difference | Pass (se = target) | Pass (two-stage) | Pass (two-stage, given both points met the target) | Fail m = 1 (se = target) | Fail m = 30 (se = target) | Fail m = 30 (two-stage) |
+|---|---|---|---|---|---|---|
+| 0 | 0.976 | 0.809 | 0.999 | 0.000 | 0.000 | 0.000 |
+| tol/2 | 0.621 | 0.696 | 0.860 | 0.000 | 0.000 | 0.000 |
+| tol | 0.050 | 0.044 | 0.054 | 0.050 | 0.002 | 0.002 |
+| 2 tol | 0.000 | 0.000 | 0.000 | 0.988 | 0.780 | 0.952 |
 
-At a true difference of tol about 90 % of results are unresolved, which is inherent to an equivalence test.
+At a true difference of tol about 90 % of results are unresolved, which is inherent to an equivalence test. Under the two-stage design about 19 % of point pairs are incomplete because one point missed its target. The independent review of 2026-10-23 found that the old two-stage columns double-counted the trial χ²; they have been recomputed.
 
 ### 6.7 Negative controls and the detection limit
 
 - Decision quantity: shift = (control − nominal)/reference, with the SE combined from both runs.
 - Detection limit: DL = tol + |rel| + t_{0.977}(ν)·se_rel.
-- Design requirement: a toy shows that an injection at the DL is caught with probability ≥ 0.977 (an A1 acceptance condition).
+- Caught: the control's benchmark verdict is fail (|rel_c| > tol).
+- Design requirement: a toy shows that an injection at the DL is caught with probability ≥ 0.977; the true power is near 0.977, so the acceptance threshold is 0.977 − 3σ_MC (an A1 acceptance condition).
 - Realization: inject both signs (otherwise restrict the claim to one sign); at the detection limit = caught and |shift| ≤ 1.1 × DL. A single miss is recorded and explained, does not fail automatically, and the control is never rerun with another seed.
 
 ### 6.8 Stopping rule and evidence correlation
@@ -431,8 +432,8 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 | `contracts/validate.py`, `dependencies.py` | §6, §7 |
 | `contracts/schema.py` | `maxItems`, `maximum`, `exclusiveMaximum` (needed by `element_sim`'s schema; no contracts version change) |
 | `skills/hep-detector/scripts/` | inference and decisions read only boundary artifacts; geometry facts (minimum thickness, configuration) come from the effective config, records from before A2 still from spec/1; no new script, `SKILL.md` and description unchanged |
-| `adapters/geant4/assets/` | `g4common/`; `layered_sim/` gains `g4common`; `geant4_run.py` (logical runs and job splitting, the A1 Python summary producer, B2's `reco` and `table`); B1 `element_sim/` and `simroot`; B2 `simreco` |
-| `SIM_SOURCES` | covers `g4common` and the sources of each program |
+| `adapters/geant4/assets/` | `g4sim/`; `layered_sim/` gains `g4sim`; `geant4_run.py` (logical runs and job splitting, the A1 Python summary producer, B2's `reco` and `table`); B1 `element_sim/` and `simroot`; B2 `simreco` |
+| `SIM_SOURCES` | covers `g4sim` and the sources of each program |
 | CI | task A needs no new required CI job; a ctest of `SimSummary.hh` can be an optional job. B2's `simreco` needs a required C++17 CI job |
 
 ---
@@ -513,13 +514,13 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 
 ### A2 Shared library and boundary artifacts (adapter 0.2.0)
 
-**Content:** `g4common` (`SimSeed.hh`, `SimSummary.hh`, `SimProbe.hh`, helpers); `layered_sim` writes the summary, effective config and column map, and supports `seeding: per-event`; the study layer reads only boundary artifacts, with geometry facts from the effective config; `hash_scheme: tree-v1`.
+**Content:** `g4sim` (`SimSeed.hh`, `SimSummary.hh`, `SimProbe.hh`, helpers); `layered_sim` writes the summary, effective config and column map, and supports `seeding: per-event`; the study layer reads only boundary artifacts, with geometry facts from the effective config; `hash_scheme: tree-v1`.
 
 **Acceptance:**
 - [ ] Regression check: J14's existing specs produce, on the same host, CSVs bit-identical to those from before A2.
 - [ ] With `seeding: per-event`, one logical run executed as 1, 2 and 4 jobs and with 1, 2 and 4 threads gives the same event content; integer accumulators of the summary identical, floating point within a relative difference of 1e-12.
 - [ ] The summary written by `layered_sim` agrees with the one Python produces from the same run's observable dump (integers identical, floating point within 1e-12 relative). The dump is a side file switched on only in tests (`%.17g`); the CSV itself is unchanged.
-- [ ] Every J14 run has an effective config; the configuration derived with `tree-v1` gives the same verdicts as `spec-v1`; a deliberate disagreement is caught; a run with `recorded: false` cannot upgrade.
+- [ ] The J14 specs rerun for the regression check all have an effective config; the configuration derived with `tree-v1` gives the same verdicts as `spec-v1`; a deliberate disagreement is caught; a run with `recorded: false` cannot upgrade.
 - [ ] The thin-layer rules take the minimum thickness from the effective config, reaching the same conclusions for J14 as in A1.
 - [ ] An event weight ≠ 1 exits 2.
 - [ ] VALIDATION GEANT4-SUMMARY; CHANGELOG; release manifest.
@@ -529,9 +530,9 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 **Content:** `element_sim` (spec `element_sim.spec/1`: box elements, one level of nesting, `field`, `source.type = gun`, `output.observables`, `output.event_file`); the field (`ConstructSDandField`, thread-local, `delta_intersection` 1e-5 mm, DormandPrince745); the plane-crossing scorer; per-event ROOT files (`G4AnalysisManager`, g4tools, flat ntuples, MT merging, `content_sha256`); `simroot` (starting with one day confirming what `G4RootAnalysisReader` can do).
 
 **Acceptance:**
-- [ ] The three boundary artifacts from `element_sim` pass the same interface tests as `layered_sim`'s; a slab configuration identical to J14's gives the same benchmark verdicts on both backends (statistically consistent).
+- [ ] The three boundary artifacts from `element_sim` pass the same interface tests as `layered_sim`'s; on a slab configuration identical to J14's, the observables both backends produce (mean and mode of the silicon deposit, rear-leakage fraction) agree statistically.
 - [ ] MT test: each thread's field-manager pointer differs; the field parameters recorded by the probe match the spec.
-- [ ] The deterministic field checks (J15's design is in `task-b-j15.md` §4 and B2.2) pass at the nominal settings; delta intersection 1e-3 mm fails as expected.
+- [ ] The deterministic field checks (J15's design is in `task-b-j15.md` §4 and B2.5) pass at the nominal settings; the result of every grid point is reported; the B × (1 ± δ) negative control is caught.
 - [ ] `simroot` round trip: values of every level and I, D, S columns are identical; with `seeding: per-event`, serial and different thread counts give the same `content_sha256`; the per-event sum of `deposits` equals the CSV's total deposit per subsystem.
 
 ### B2 Reconstruction, J15 and C2 (adapter 0.4.0, contracts C2)
@@ -553,7 +554,7 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 3. Block independence fails when state is carried between events; the probe records the relevant settings, and several independent logical runs are used when in doubt.
 4. Under the two-stage design about 10 % of evidence runs miss their target (§5.5).
 5. With tolerance comparisons, decisions close to a threshold may differ across platforms; handled by margin flags and "the CI platform decides".
-6. Two Geant4 programs: `layered_sim` is frozen in maintenance mode, and `g4common` keeps duplication down.
+6. Two Geant4 programs: `layered_sim` is frozen in maintenance mode, and `g4sim` keeps duplication down.
 7. The probe assumes workers match the master; if a thread-local difference appears, dump per thread.
 8. When a target hash is matched to a published measurement, the contract can only compare hashes, not decide that the target is the configuration in the paper; a reviewer still checks.
 9. The reading ability of `G4RootAnalysisReader` is unverified (the B1 trial).
@@ -580,7 +581,7 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 3. **Event determinism:** `seeding: per-event` by default for new specs; job splitting and thread count do not affect events.
 4. **Reproducibility means "same decisions"**, with numbers compared within tolerances; no integer quantization and no bit-identical statistics.
 5. **Block batch means:** K ≥ 16 blocks by event number within one run; J14 runs with per-event data are recomputed offline without re-recording.
-6. **A new `element_sim`**, with `layered_sim`'s spec format unchanged; both share `g4common`.
+6. **A new `element_sim`**, with `layered_sim`'s spec format unchanged; both share `g4sim`.
 7. **Five validation classes**, with regression and surrogate added in C2.
 8. **Four stages** (A1, A2, B1, B2), with ROOT files and `simroot` in B1.
 9. The two-stage factor F₀.₉₀ or F₀.₉₅; the threshold for exact intervals (any block at 0 or a total < 100).

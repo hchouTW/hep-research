@@ -40,15 +40,43 @@ for d in (0, 0.5, 1, 2):
     F1 = (np.abs(D) - qf(1) * S > tol).mean()
     F30 = (np.abs(D) - qf(30) * S > tol).mean()
     print("est-se d", d, "pass", P, "fail m1", F1, "fail m30", F30, "unres", 1 - P - F1)
-# se drawn from the two-stage design: se_actual = target * sqrt(F / f)
+# Two-stage design, modelled per point (two points a, b; K = K_trial = 16):
+#   trial: estimated SE_trial^2 = sigma^2/N_trial * X_t, X_t ~ chi2_15/15
+#   N = N_trial (SE_trial/target)^2 f  ->  true se = target / sqrt(f X_t)
+#   final estimated se = true se * sqrt(chi2_15/15), independent of X_t
+#   a point whose estimated se exceeds its target is incomplete (no top-up)
+# The gate uses se_diff = sqrt(se_a^2 + se_b^2) and Welch nu from the estimated se.
+# (Revised 2026-10-23: the earlier version drew the true se as target*sqrt(F/f),
+# which double-counted the trial chi2 factor.)
 f = stats.f.ppf(0.9, 15, 15)
-Fr = rng.f(15, 15, N)
-seA = se * np.sqrt(Fr / f)
+tgt = tol / (4 * np.sqrt(2))
+Kd = 15
+
+
+def point():
+    true = tgt / np.sqrt(f * rng.chisquare(Kd, N) / Kd)
+    est = true * np.sqrt(rng.chisquare(Kd, N) / Kd)
+    return true, est
+
+
 for d in (0, 0.5, 1, 2):
-    D = rng.normal(d, seA)
-    S = seA * np.sqrt(rng.chisquare(nu, N) / nu)
-    print("two-stage d", d, "pass", (np.abs(D) + qp * S <= tol).mean(),
-          "fail30", (np.abs(D) - qf(30) * S > tol).mean(), "E[se]/tol", seA.mean())
+    ta, ea = point()
+    tb, eb = point()
+    D = rng.normal(d, np.sqrt(ta ** 2 + tb ** 2))
+    S = np.sqrt(ea ** 2 + eb ** 2)
+    nuw = S ** 4 / (ea ** 4 / Kd + eb ** 4 / Kd)
+    met = (ea <= tgt) & (eb <= tgt)
+    qpw = stats.t.ppf(0.95, nuw)
+    qfw = stats.t.ppf(1 - 0.05 / 30, nuw)
+    passed = np.abs(D) + qpw * S <= tol
+    failed = np.abs(D) - qfw * S > tol
+    print("two-stage d", d,
+          "pass(both met)", (passed & met).mean(),
+          "pass|met", passed[met].mean(),
+          "fail30(both met)", (failed & met).mean(),
+          "fail30 any", failed.mean(),
+          "pair incomplete (target)", 1 - met.mean(),
+          "E[se_diff]/tol", np.sqrt(ta ** 2 + tb ** 2).mean())
 # Welch degrees of freedom with unequal variances (K = 16 each)
 for r in (1, 2, 4, 10):
     v1, v2 = 1.0, r

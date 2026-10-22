@@ -29,7 +29,7 @@ J15 uses a new box-element backend, `element_sim`.
 | Stage | Task | Content | Version |
 |---|---|---|---|
 | A1 | A | Correctness fixes D1–D10: benchmark table, scope, configuration and isolation, statistics, Python summary producer; J14 regenerated | contracts C1 (minor, sci-fix) |
-| A2 | A | `g4common`, per-event seeding, `layered_sim` writes the three boundary artifacts, study layer reads only them | adapter 0.2.0 |
+| A2 | A | `g4sim`, per-event seeding, `layered_sim` writes the three boundary artifacts, study layer reads only them | adapter 0.2.0 |
 | B1 | B | `element_sim` (box elements, field, plane crossings), per-event ROOT files, `simroot` | adapter 0.3.0 |
 | B2 | B | `simreco`, J15 study, C2 (verification, regression, surrogate, transitive processing chains) | adapter 0.4.0, contracts C2 |
 
@@ -101,12 +101,21 @@ Task A §11 and task B §9 list them in full; the main ones:
 - hep-computing's agreement to the optional `simulation` property (task A) and to transitive processing chains (task B);
 - the two-stage factor F₀.₉₀ or F₀.₉₅;
 - live re-recording of J14's scan and variation runs, and the cap on `recorded/` size;
-- a required C++17 CI job for `simreco`;
+- what to do if regenerated J14 loses `validated-in-scope` by chance through a missed se target (about 0.9ⁿ for n runs);
+- whether the C++17 CI job for `simreco` is required;
 - where ROOT files are stored and for how long.
 
 ## Independent review
 
-The rewritten specs have not been independently reviewed. The plugin's `review.py`
+On 2026-10-23 two agents that did not write the specs reviewed `task-a-core.en.md` and `task-b-j15.en.md` against the
+code (A: 7 confirmed major, 1 plausible major, minor items; B: 2 blockers, 9 major, minor items). The findings were
+checked against the code and fixed in both languages and in `architecture.md`; each spec's version history lists them.
+The two-stage columns of the gate table were wrong (the script double-counted the trial χ²) and have been recomputed.
+Some Geant4 behaviour the reviewers flagged as plausible (stepper construction, the Birks API, the direction of the
+intersection error, the hadronic cross sections of the two physics lists) is marked in task B §9 to be checked against
+the 11.4.3 source when implementing.
+
+That review is not the plugin's formal review. The plugin's `review.py`
 (`skills/hep-authoring/references/independent-review.md`) can review `task-a-core.en.md` and `task-b-j15.en.md` on
 the maintainer's machine: it needs fork subagents switched off and a host restart, and the document must exist nowhere
 else on the host. Its record is advisory, not a human review record (O04/O14).
