@@ -1,5 +1,5 @@
 {
- "contract_version": "3.6.0",
+ "contract_version": "3.7.0",
  "artifact_id": "multi-era-response-e2",
  "artifact_type": "response",
  "objective": "SYNTHETIC E-3 example",
@@ -8,8 +8,8 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.24.1",
-  "contracts": "3.6.0",
+  "plugin": "0.25.0",
+  "contracts": "3.7.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

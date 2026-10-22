@@ -1,5 +1,5 @@
 {
- "contract_version": "3.6.0",
+ "contract_version": "3.7.0",
  "artifact_id": "fixture-synthetic-ml-artifact",
  "artifact_type": "ml-artifact",
  "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.6.16",
-  "contracts": "3.6.0",
+  "contracts": "3.7.0",
   "profiles": {}
  },
  "provenance": {

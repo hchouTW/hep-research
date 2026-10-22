@@ -1432,7 +1432,7 @@
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cecc4dcb 2026-10-22"
+   "last_commit": "890f8481 2026-10-22"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",

@@ -1,5 +1,5 @@
 {
- "contract_version": "3.6.0",
+ "contract_version": "3.7.0",
  "artifact_id": "multi-era-mixed",
  "artifact_type": "response",
  "objective": "SYNTHETIC E-3 example",
@@ -8,8 +8,8 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.24.1",
-  "contracts": "3.6.0",
+  "plugin": "0.25.0",
+  "contracts": "3.7.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -142,7 +142,7 @@
    ]
   ],
   "conditions": "mixed over eras e1, e2 with per-truth-bin weights (mix_period_responses.py)",
-  "provenance": "exposure-weighted mixture of the era responses e1 (sha256 c45417787184), e2 (sha256 5532e55a1efc)",
+  "provenance": "exposure-weighted mixture of the era responses e1 (sha256 a62d0abfdff0), e2 (sha256 76ca32e48f96)",
   "applied_separately": [],
   "underflow": [
    0.018462121466570537,

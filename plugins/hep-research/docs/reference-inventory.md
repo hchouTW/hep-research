@@ -165,7 +165,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `loop-engineering.md` | hep-computing | 7.0 | no | 7 | - | 4665f433 2026-10-13 |
 | `numerical-and-computational-methods.md` | hep-computing | 9.3 | yes | 7 | hep-authoring, hep-citations, hep-theory | ebb58136 2026-10-19 |
 | `performance-profiling.md` | hep-computing | 6.7 | yes | 5 | - | 9257d7b5 2026-10-15 |
-| `preservation-checklist.md` | hep-computing | 4.5 | yes | 3 | - | cecc4dcb 2026-10-22 |
+| `preservation-checklist.md` | hep-computing | 4.5 | yes | 3 | - | 890f8481 2026-10-22 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 5.7 | yes | 5 | hep-ml | 8eefac0f 2026-10-13 |
 | `python-hep-coding-patterns.md` | hep-computing | 6.6 | yes | 7 | - | 9257d7b5 2026-10-15 |

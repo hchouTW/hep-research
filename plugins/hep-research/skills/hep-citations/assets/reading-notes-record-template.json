@@ -1,5 +1,5 @@
 {
- "contract_version": "3.6.0",
+ "contract_version": "3.7.0",
  "artifact_id": "reading-notes-TEMPLATE",
  "artifact_type": "communication",
  "objective": "Reading notes for one paper (template): which sources were read, at what level, and which claims the notes take from them",
@@ -8,8 +8,8 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.24.1",
-  "contracts": "3.6.0",
+  "plugin": "0.25.0",
+  "contracts": "3.7.0",
   "profiles": {}
  },
  "provenance": {
