@@ -6,10 +6,18 @@ This folder holds the implementation specs for the Geant4 architecture work in h
 **If you are an agent starting work here:** read this file, then the task card (§0) of the task you are working on.
 Do task A first; task B starts only after task A is merged.
 
+**Current state (2026-10-22):** `architecture.md` is the consolidated architecture proposal. It changes where the
+C++/Python boundary lies (a run summary of mergeable sufficient statistics), the variance method (batch means), the
+stages (A1, A2a, A2b, B0, B1) and several interfaces for generality. Until the user and the maintainer approve it, the
+task specs below describe the previous architecture; once approved they are rewritten from `architecture.md`
+(its section 12). Do not start implementation from the task specs before that.
+
 ## Files
 
 | File | Content |
 |---|---|
+| `architecture.md` | **Consolidated architecture** (Traditional Chinese original): problems found, two-plane design, interfaces (spec/2, run summary, effective config, column map, event files, backend interface), statistical methods, contracts, stages, generality, decision record. Section 11 lists what needs approval |
+| `architecture.en.md` | English translation of `architecture.md` |
 | `task-a-core.md` | **Task A** (Traditional Chinese original): phase 1 fixes the `validated-in-scope` defects D1–D10 (sci-fix, contracts C1); phase 2 moves the compute core to C++ (`simcore`, `simroot`, per-event ROOT files; adapter 0.2.0). Work items A1.1–A1.12 and A2.1–A2.12 |
 | `task-a-core.en.md` | English translation of `task-a-core.md` |
 | `task-b-j15.md` | **Task B** (Traditional Chinese original): the J15 minimal spectrometer (field, plane crossings and the ROOT `crossings` level, `simreco`, `verification` grade, contracts C2; adapter 0.3.0). Work items B1.1–B1.5 and B2.1–B2.3 |
