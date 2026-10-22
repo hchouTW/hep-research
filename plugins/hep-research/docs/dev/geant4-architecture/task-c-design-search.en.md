@@ -1,8 +1,8 @@
 # Task C: automated detector design search
 
-> Document type: design proposal and implementation spec (for the implementing agent and reviewers). Status: proposal, awaiting the user's and the maintainer's approval
-> Basis: [`architecture.en.md`](architecture.en.md) (simulation architecture), [`task-a-core.en.md`](task-a-core.en.md) (statistics and boundary artifacts), [`task-b-j15.en.md`](task-b-j15.en.md) (`element_sim`, `simreco`, J15)
-> Order: C1 needs only task A; C2 starts after task B is merged
+> Document type: design and implementation spec (for the implementing agent and reviewers). Status: proposal, awaiting the user's and the maintainer's approval
+> Plan: [`plan.en.md`](plan.en.md) (stage order, numbering, interface ownership, gates, open decisions). Rationale: [`architecture.en.md`](architecture.en.md). This document is the executable spec of C1, C2 and C3; where it disagrees with other documents, this document wins on content and acceptance, and the disagreement is reported
+> Order: C1 after A1 (may run in parallel with A2 and B); C2 after B2 and C1; C3 after B3 and C2
 > Date: 2026-10-23
 > Language: English translation of the Traditional Chinese original [`task-c-design-search.md`](task-c-design-search.md), with the same content. If they disagree, the Chinese wins and the English is corrected at the same time
 > In one sentence: the user writes down the physics requirements; Claude freely chooses and combines detector structure types from a component catalogue, an optimizer searches on multi-fidelity simulation, and independent confirmation runs report the best designs meeting the requirements and their trade-offs
@@ -13,31 +13,33 @@
 
 **Goal.** Let the AI start from "physics requirements", choose detector structure types by itself (tracker planes, magnet region, TOF, calorimeters, passive layers, …), combine them freely and tune their parameters, and arrive at an optimized design (or a Pareto front of trade-offs) that meets the requirements, with results that withstand statistical and provenance checks.
 
-**Two stages:**
+**Three stages:**
 
 | Stage | Content | Prerequisite | Version |
 |---|---|---|---|
-| **C1** Requirements, grammar and fast search | Schemas for requirements and design grammar; first component catalogue; realization of a design as `element_sim.spec/1`; F0 analytic evaluation; standard-library search (Sobol, NSGA-II); search record; closure tests | Task A merged; the `element_sim.spec/1` schema (B1.1) may be used as a draft | new adapter `detector-design` **0.1.0** |
-| **C2** Simulation evaluation and confirmation | F1 and F2 evaluation (`element_sim` and `simreco`); confirmation runs; robustness and guards against exploiting simulation defects; optional MOBO backend; contracts C3; J16 automated-design example | Task B merged | adapter **0.2.0**, contracts **C3** (minor) |
+| **C1** Requirements, grammar and fast search | Requirements spec, component catalogue, design grammar and realization, F0 analytic evaluation, standard-library optimizer (Sobol, NSGA-II), search record (F0-only), agent protocol, closure tests | A1 | new adapter `detector-design` **0.1.0** |
+| **C2** Simulation evaluation and confirmation | Additions to `core/` (`threshold`, `order`, paired comparison, `values`, search roles and seed_group); F1/F2 evaluation; confirmation runs and requirement decisions; robustness and guards; CV3 | B2, C1 | detector-design **0.2.0**, geant4 adapter **0.5.0**, contracts **CV3** (minor) |
+| **C3** Example | J16 automated-design example (compared with J15); optional MOBO backend; journey and routing | B3, C2 | detector-design **0.3.0** |
 
 **Out of scope:** differentiable simulation and differentiable surrogates (the MODE route, §9); non-box geometry (cylindrical collider detectors); optical physics (Cherenkov, RICH); reinforcement learning; letting an LLM alone decide the best design.
 
-**Deliverables:** `adapters/detector-design/` (schemas, catalogue, realization, evaluation, search, report); hep-detector reference `detector-design-search.md` (with the agent protocol); contract rules for search records (C3); closure tests; the J16 example; VALIDATION entries DESIGN-SEARCH-F0 (C1) and DESIGN-SEARCH (C2); CHANGELOG; release manifest.
+**Deliverables:** `adapters/detector-design/` (schemas, catalogue, realization, evaluation, search, report); additions to `core/` (C2.1); hep-detector reference `detector-design-search.md` (with the agent protocol); CV3 contract rules; closure tests; the J16 example; VALIDATION entries DESIGN-SEARCH-F0 (C1), DESIGN-SEARCH (C2), DESIGN-SEARCH-J16 (C3); CHANGELOG; release manifest.
 
-**Definition of done:** every box in the acceptance lists C1.9 and C2.9 is ticked; every check in task A §9 passes.
+**Definition of done:** every box in the acceptance lists C1.9, C2.9 and C3.4 is ticked; every check in task A §8 passes; gates G-C1, G-C2a, G-C2b, G-C3 (plan §6) pass.
 
 **Main decisions:**
-1. **Claude is the designer, not the judge.** Claude chooses structure types, proposes seed designs, sets the search ranges and interprets results; but "which design is best and whether it meets the requirements" is decided only by recorded evaluation and statistics. Claude's proposals go through the same evaluation pipeline as randomly generated candidates, with no privilege (§5.1).
-2. **Free combination, within a grammar.** Structural freedom comes from "component catalogue × composition rules": any sequence of components passing the validity rules is a legal design. New component types enter only through a reviewed catalogue change, never invented ad hoc during a search (§5.3).
-3. **Multi-fidelity.** F0 analytic formulas (microseconds per design) screen 10⁴–10⁶ designs; F1 Geant4 with few events refines hundreds; F2 full statistics only for a few finalists (§5.4). This is the common practice of AID(2)E, dRICH and the MODE studies.
-4. **Search and confirmation are separate.** Search-stage values suffer from the "winner's curse" (choosing the best of many noisy evaluations is necessarily optimistic), so they are used only for ranking and are never reported as results; reported performance comes only from pre-declared confirmation runs with independent seeds (§5.6).
+1. **Claude is the designer, not the judge.** Claude chooses structure types, proposes seed designs, sets the search ranges and interprets results; "which design is best and whether it meets the requirements" is decided only by recorded evaluation and statistics. Claude's proposals go through the same evaluation pipeline as randomly generated candidates, with no privilege (§4.2).
+2. **Free combination, within a grammar.** Structural freedom comes from "component catalogue × composition rules": any sequence of components passing the validity rules is a legal design. New component types enter only through a reviewed catalogue change (§4.4).
+3. **Multi-fidelity.** F0 analytic formulas screen 10⁴–10⁶ designs; F1 Geant4 with few events refines hundreds; F2 full statistics only for a few finalists (§4.5).
+4. **Search and confirmation are separate.** Search-stage values suffer from the "winner's curse", are used only for ranking and are never reported as results; reported performance comes only from pre-declared confirmation runs with independent seeds (§4.7).
 5. **The result is a proposal, not a validation.** Searched designs are always labelled `unvalidated`; the record states "simulation-optimized design", with the search size, confirmation runs and robustness.
+6. **The statistical additions task C needs are added by task C itself** (plan principle R1), located in `core/` so that hep-detector and the adapter share them (C2.1).
 
-**Before starting:** read task A §1, §2, §4, A1.8 (gate) and A1.9 (two-stage event count); for C2 also task B §4, B1.1 and B2.1. Check the facts this document quotes with the method of task A appendix B.
+**Before starting:** read plan §0–§6; read task A §1, §3, §4 and A1.4–A1.9; for C2 also task B §4, B1.1, B1.6, B2.1, B2.4. Check the facts this document quotes with the method of task A appendix C.
 
 ---
 
-## 1. Terms and notation
+## 1. Terms and files
 
 | Term | Meaning |
 |---|---|
@@ -52,11 +54,54 @@
 | winner's curse | When choosing the best of n noisy evaluations, the expectation of its estimate is optimistic |
 | Pareto front | The set of designs no other design matches or beats on every objective while beating on at least one |
 | search size | The number of designs actually evaluated at each fidelity; written into the record, like a look-elsewhere effect |
-| Notation | "C1.3" is a work item of this document; "A1.8", "B2.1" are work items of tasks A and B; "architecture §6" is a section of `architecture.en.md` |
+| seed_group, paired comparison | A group of runs sharing one S; the SE of a difference is estimated from per-block differences (common random numbers; C2.1) |
+| Notation | "C1.3" is a work item of this document; "A1.8", "B2.1" are work items of tasks A and B; "plan §n", "architecture §n" are sections of other documents |
+
+**Main files (relative to `plugins/hep-research/`):** `adapters/detector-design/` (new: `adapter.json`, `assets/design_search.py`, `assets/catalogue/`, `assets/schemas/`); `core/stats/decisions.py`, `core/stats/batch_means.py`, `core/simulation/summary.py`, `core/simulation/seeds.py` (additions in C2); `contracts/validate.py`, `contracts/dependencies.py` (CV3); `adapters/geant4/assets/g4sim/SimSummary.hh` (`values` added in C2); `skills/hep-detector/references/detector-design-search.md` (new); `skills/hep-detector/scripts/tracker_resolution.py`, `multiple_scattering.py` (called as subprocesses by F0).
 
 ---
 
-## 2. Practice in the field and lessons
+## 2. Prerequisites and interfaces provided
+
+| Provider | Interface | Use in task C | Needed in |
+|---|---|---|---|
+| Task A | `core/simulation/seeds.py` (H, S) | S of a design evaluation = H(search_id, role, design_sha256) | C1 (record), C2 |
+| Task A | `core/simulation/summary.py`, `simulation-observables/1` | The search spec references the same observable declaration; reading F1/F2 summaries | C2 |
+| Task A | `core/stats/batch_means.py`, `equivalence` of `decisions.py`; two-stage event count (A1.9) | F1/F2 estimates; event counts of confirmation runs; comparing F0 with confirmation | C2 |
+| Task A | Evidence roles, uniqueness of S (A1.4) | C2 adds search roles, confirmation and seed_group | C2 |
+| Task A | Name-free `tree-v1`; effective configs stored by content hash (A2.4) | Design cache; settings of hundreds of runs are not stored repeatedly | C2 |
+| Task A | Schema keywords (A2.7) | detector-design schemas | C1 |
+| Task B | `element_sim.spec/1` and `geant4_run.py check-spec` (B1.1, B1.6) | Validation of realizations (subprocess) | C1 (test added after B1 merges), C2 |
+| Task B | Calorimeter mother and `leak_*_MeV` (B1.3) | Objectives of calorimeter components | C2 |
+| Task B | `simreco`, `geant4_run.py reco` (B2.1, B2.2) | Reconstruction at F1/F2 | C2 |
+| Task B | Surrogate class, decision-engine `change` (B2.4) | F0 and F1 are architecturally surrogates; C2 adds decisions through the same interface | C2 |
+| Task B | J15 design and results (B3) | The comparison target of J16 | C3 |
+| Existing tools | `tracker_resolution.py`, `multiple_scattering.py` | Tracking resolution at F0 (called as subprocesses, formulas not rewritten) | C1 |
+
+**Interfaces provided to other tasks:** the decisions, paired comparison, `values` and roles that C2.1 adds to `core/` are usable by any study (e.g. a convergence gate may declare paired mode).
+
+---
+
+## 3. Hard rules
+
+All of task A §3 and task B §3 apply. In addition:
+
+1. **The optimizer core uses only the standard library.** Sobol sequences, NSGA-II and (optionally) CMA-ES are implemented with the standard library. Bayesian optimization (Ax/BoTorch) is only an optional backend (C3), with tested versions recorded in `adapter.json`; the search still runs without it.
+2. **Adapters do not import each other.** detector-design calls `geant4_run.py` (`check-spec`, `run`, `reco`) and hep-detector's scripts as subprocesses, exchanging JSON files; shared Python code is imported only from `core/`.
+3. **One production implementation per quantity.** F0 calls the existing tracking and multiple-scattering scripts; material constants come from Geant4's NIST tables or PDG (via hep-citations), not a separate copy.
+4. **Declared in advance.** Requirements, catalogue version, grammar, search budget, optimizer settings and seeds are written into the search spec and hashed before the first evaluation. Any later change creates a new search version; old versions and their results stay in the record.
+5. **Search values are not reported.** Search-stage objective values are used only for ranking; every externally reported performance number must cite confirmation runs.
+6. **LLM proposals have no privilege.** Designs proposed by Claude are marked `proposer: llm` and go through the same validity checks and evaluation; Claude may not change evaluation outputs, nor change the requirements after seeing results without opening a new version.
+7. **Cost and mass models are declared inputs.** The plugin ships only placeholder models marked `assumed`; real unit prices and mass models are supplied by the user with sources. Without a model, cost and mass are not used as objectives or constraints.
+8. **Experiment names** appear only in `docs/` and example READMEs; the component catalogue uses generic names.
+9. **Do not change `skills/hep-detector/SKILL.md`**, unless the maintainer approves one routing line pointing to the reference (plan §7 item 12).
+10. Contract rules are gated with `strict or _at_least(contract_version, CV3)`.
+
+---
+
+## 4. Design
+
+### 4.1 Practice in the field and lessons
 
 | Study | Approach | Lesson adopted here |
 |---|---|---|
@@ -71,45 +116,7 @@
 
 Summary: in no real case does the LLM declare "the best" by itself; successful approaches all have "explicit objectives and constraints + reproducible evaluation + a recorded optimizer + confirmation with full simulation". The LLM's value lies in turning requirements into a search problem, proposing physically motivated starting points, decomposing the problem and following up anomalies.
 
----
-
-## 3. Prerequisites: interfaces provided by tasks A and B
-
-| Provider | Interface | Use in task C |
-|---|---|---|
-| Task A | `core/stats/batch_means.py` (block batch means, SE, exact intervals, quantiles), `core/stats/decisions.py` (decision engine), `core/simulation/summary.py`; all in `core/`, importable by an adapter (task A §4.4) | Objective estimates at F1 and F2; requirement decisions use `threshold`, ordering of finalists uses `order`, comparing confirmation with F0 uses `equivalence` |
-| Task A | Two-stage event count (A1.9) | Event counts of confirmation runs |
-| Task A | Paired comparison and seed_group (A1.4, A1.8) | Designs of one generation in S2 share a seed_group, to reduce ranking noise |
-| Task A | Role classes: `search-F1`, `search-F2`, `confirmation` (A1.4) | Search runs are never evidence; the S of a confirmation run never equals that of any search run |
-| Task A | `simulation-observables/1`, the `values` accumulator (A1.5) | The search spec references the same observable declaration; accurate quantiles even for designs with widely different resolutions |
-| Task A | Name-free `tree-v1` and effective configs stored by content hash (A2.4) | Design cache; settings of hundreds of runs are not stored repeatedly |
-| Task A | Seed hash H and S = H(study_id, role, point_id) (A1.4) | point_id of each design evaluation = design hash; confirmation runs have role `confirmation` |
-| Task A | Three boundary artifacts, `tree-v1` (A2.3–A2.6) | Evaluation reads only summaries; the design hash is checked against the realized geometry tree |
-| Task B | `element_sim.spec/1` (B1.1), field (B1.2), calorimeter leakage (B1.3) | Realization target of designs |
-| Task B | `simreco` (B2.1): rigidity, β, calorimeter energy | Reconstruction at F1 and F2 |
-| Task B | surrogate class (B2.3) | Positioning of F0 and F1 relative to F2: surrogates that do not change the label |
-| Existing tools | `tracker_resolution.py`, `multiple_scattering.py` | Tracking resolution at F0 (called as subprocesses, formulas not rewritten) |
-
----
-
-## 4. Hard rules
-
-All of task A §2 and task B §3 apply. In addition:
-
-1. **The optimizer core uses only the standard library.** Sobol sequences, NSGA-II and (optionally) CMA-ES are implemented with the standard library. Bayesian optimization (Ax/BoTorch) is only an optional backend of the adapter, with tested versions recorded in `adapter.json` like other adapters' external tools; the search still runs without it.
-2. **One production implementation per quantity.** F0 calls the existing tracking and multiple-scattering scripts; material constants come from Geant4's NIST tables or PDG (via hep-citations), not a separate copy.
-3. **Declared in advance.** Requirements, catalogue version, grammar, search budget, optimizer settings and seeds are written into the search spec and hashed before the first evaluation. Any later change creates a new search version; old versions and their results stay in the record.
-4. **Search values are not reported.** Search-stage objective values are used only for ranking; every externally reported performance number must cite confirmation runs.
-5. **LLM proposals have no privilege.** Designs proposed by Claude are marked `proposer: llm` and go through the same validity checks and evaluation; Claude may not change evaluation outputs, nor change the requirements after seeing results without opening a new version.
-6. **Cost and mass models are declared inputs.** The plugin ships only placeholder models marked `assumed`; real unit prices and mass models are supplied by the user with sources. Without a model, cost and mass are not used as objectives or constraints.
-7. **Experiment names** appear only in `docs/` and example READMEs; the component catalogue uses generic names.
-8. **Do not change `skills/hep-detector/SKILL.md`**, unless the maintainer approves one routing line pointing to the reference (§10).
-
----
-
-## 5. Design
-
-### 5.1 Three roles
+### 4.2 Three roles
 
 ```
  User ──requirements──▶ Claude (designer) ──design brief, seed designs, search ranges──▶ Optimizer (recorded, reproducible)
@@ -124,7 +131,7 @@ All of task A §2 and task B §3 apply. In addition:
 | Optimizer | Generate candidates in genome space; run per budget, seed and settings; record every evaluation | Decide whether requirements are met (that is the job of evaluation and statistics) |
 | Evaluation pipeline | Realize designs, check validity, compute objectives and constraints at the requested fidelity, with SE | Behave differently depending on the proposer |
 
-### 5.2 Requirements spec `detector-requirements/1`
+### 4.3 Requirements spec `detector-requirements/1`
 
 Illustration (`//` marks comments, not part of the JSON):
 
@@ -151,7 +158,7 @@ Illustration (`//` marks comments, not part of the JSON):
 - Objective and constraint names must be in the catalogue; adding one needs a catalogue change and tests.
 - Claude drafts the requirements from the user's description, but they must be confirmed by the user (`confirmed_by_user`) before the search starts.
 
-### 5.3 Design grammar `detector-design/1` and component catalogue
+### 4.4 Design grammar `detector-design/1` and component catalogue
 
 **First component catalogue** (all realizable as `element_sim` box elements, at most one level of nesting):
 
@@ -159,8 +166,8 @@ Illustration (`//` marks comments, not part of the JSON):
 |---|---|---|---|
 | `magnet-region` | B (continuous, T), length, aperture (continuous, mm) | Field-region mother (`field`), can hold tracker and TOF daughters | Bending; MDR; mass model (declared) |
 | `tracker-plane` | Material (categorical), thickness, position resolution (bending/non-bending), size | `tracker-plane` element; resolution written into the reco spec | `tracker_resolution.py` (measurement term), `multiple_scattering.py` (scattering term) |
-| `tof-layer` | Material, thickness, σ_t, size | `tof-layer` element | σβ/β = σ_t c / D (averaged over layers) |
-| `calorimeter-sampling` | Absorber material and thickness, active material and thickness, layer count (integer), transverse size | `calorimeter` mother + repeated sampling layers | X₀, λ_I, effective Molière radius; an energy-resolution parametrization for F0 ranking only |
+| `tof-layer` | Material, thickness, σ_t, size | `tof-layer` element | σβ/β = σ_t c / D (averaged over layers; task B §4.2) |
+| `calorimeter-sampling` | Absorber material and thickness, active material and thickness, layer count (integer), transverse size | `calorimeter` mother + repeated sampling layers | X₀, λ_I, effective Molière radius; an energy-resolution parametrization for F0 ranking only, its source recorded through hep-citations |
 | `calorimeter-homogeneous` | Material, length, transverse size | `calorimeter` mother + one active volume | X₀, λ_I |
 | `passive` | Material, thickness, size | `passive` element | Material budget, multiple scattering |
 
@@ -171,56 +178,56 @@ Illustration (`//` marks comments, not part of the JSON):
 - Parameters within catalogue ranges; materials from the catalogue's material list.
 - Structurally "unreasonable" combinations (e.g. requiring rigidity resolution without a field) are **not** forbidden by rules but naturally eliminated by objectives and constraints; rules handle only what is physically or programmatically impossible. This keeps the "free combination".
 
-**Genome encoding:** a fixed number of slots, each with an "enabled" bit, a component type (categorical) and that type's parameters; disabled slots are not realized. Order follows the slots' x positions. This lets the genetic algorithm add and remove components and switch types (AIDO handles materials one-hot; here categorical genes handle types and materials).
+**Genome encoding:** a fixed number of slots, each with an "enabled" bit, a component type (categorical) and that type's parameters; disabled slots are not realized. Order follows the slots' x positions. This lets the genetic algorithm add and remove components and switch types.
 
-**Realization:** `realize(design) → (element_sim.spec/1, reco spec)` is deterministic; design hash = sha256 of the normalized design JSON; after realization the geometry is checked with `tree-v1` (A2.4). Evaluations with the same design hash can be reused (cache), but the cache key includes fidelity, catalogue version and program hash.
+**Realization:** `realize(design) → (element_sim.spec/1, reco spec)` is deterministic; design hash = sha256 of the normalized design JSON; the realized spec is validated with `geant4_run.py check-spec` (B1.6); after a run the geometry is checked with `tree-v1` (A2.4). Evaluations with the same design hash can be reused (cache); the cache key includes fidelity, catalogue version and program hash.
 
-### 5.4 Multi-fidelity evaluation
+### 4.5 Multi-fidelity evaluation
 
 | Fidelity | Method | Cost per design | Output | Use |
 |---|---|---|---|---|
 | F0 | Analytic formulas and existing tools (tracking measurement and scattering terms, material budget, helix geometry for acceptance, TOF formula, X₀ and λ_I) | Microseconds to milliseconds | Objective values (no statistical error, but model error) | Structure search; screening 10⁴–10⁶ designs |
 | F1 | `element_sim` + `simreco`, about 10³ events per design, K = 16 | Minutes | Objective values ± SE (block batch means) | Refining continuous parameters of hundreds of designs; calibrating F0 |
-| F2 | As F1, event count from A1.9's two-stage design; convergence gate (A1.8) and variations (B2.6) | Hours | Objective values ± SE, decisions | Finalists |
+| F2 | As F1, event count from A1.9's two-stage design; convergence gate (A1.8) and variations (rules of B3.4) | Hours | Objective values ± SE, decisions | Finalists |
 | Confirmation | As F2, role `confirmation`, independent seeds | Hours | Reported performance and requirement decisions | The only reportable numbers |
 
 - **The F0 vs F2 difference** is recorded for each finalist (`fidelity_gap`). If it exceeds the declared threshold, that objective is ranked by F2 only at the final selection, and the report explains the F0 model's limitation.
-- Architecturally F0 and F1 belong to the surrogate class (B2.3): they never change the label.
+- Architecturally F0 and F1 belong to the surrogate class (B2.4): they never change the label.
 
-### 5.5 Search strategy
+### 4.6 Search strategy
 
 | Step | Content | Default method | Budget (default, declarable) |
 |---|---|---|---|
 | S0 Design brief | Claude reads the requirements and writes candidate structure types, 2–6 seed topologies with physics reasoning, and a decomposition of the problem | Claude | — |
 | S1 Structure search | Search the full genome (structure + parameters) at F0; initial population = seed topologies + Sobol random designs | NSGA-II (standard library) | population 200 × 100 generations = 2×10⁴ F0 evaluations |
-| S2 Parameter refinement | Take the top K designs with **distinct topologies** (deduplicated by topology hash, keeping diversity) and refine continuous parameters at F1 | NSGA-II or CMA-ES; optional MOBO (qNEHVI), limited to ≤ 4 objectives and ≤ 20 parameters | K = 5, about 100 F1 evaluations each |
+| S2 Parameter refinement | Take the top K designs with **distinct topologies** (deduplicated by topology hash) and refine continuous parameters at F1; designs of one generation share a seed_group (paired comparison, gate G-C2a) | NSGA-II or CMA-ES; from C3 optionally MOBO (qNEHVI), limited to ≤ 4 objectives and ≤ 20 parameters | K = 5, about 100 F1 evaluations each |
 | S3 Final selection | The best design of each topology goes to F2; convergence gate, variations | — | ≤ 5 designs |
 | S4 Confirmation | Confirmation runs of the finalists; requirement decisions; robustness | — | ≤ 5 designs |
 
 - Stopping rule: budget exhausted, or hypervolume improves by less than the declared value over G consecutive generations. No budget increase based on results; more budget is a new search version.
 - After S0, Claude may add new seed topologies (e.g. to follow up an anomaly), but these proposals are likewise marked `proposer: llm` and count toward the search size.
 
-### 5.6 Statistical integrity
+### 4.7 Statistical integrity
 
 | Risk | Handling |
 |---|---|
 | Winner's curse | Search values only rank; reports come only from confirmation runs (role `confirmation`, S never used in the search); the report gives "search estimate − confirmation estimate" for each finalist as a diagnostic |
-| Noisy constraints | Requirement decisions are made by the decision engine's `threshold` (task A A1.8), one-sided: for a "≤ threshold" requirement, met = estimate + t₀.₉₅·SE ≤ threshold; not met = estimate − t_{1−α/m}·SE > threshold; otherwise unresolved (m = finalists × requirements). Exact intervals for low counts |
-| Claiming dominance in noise | Ordering among finalists is decided by the decision engine's `order`, claimed only when the bound of the difference excludes 0; the report gives "the statistically non-dominated set" |
-| Ranking noise | Designs of one generation in S2 share a seed_group (task A's paired comparison), so differences vary less; confirmation runs do not share one and stay independent |
+| Noisy constraints | Requirement decisions are made by the decision engine's `threshold` (C2.1), one-sided: for a "≤ threshold" requirement, met = estimate + t₀.₉₅·SE ≤ threshold; not met = estimate − t_{1−α/m}·SE > threshold; otherwise unresolved (m = finalists × requirements). Exact intervals for low counts |
+| Claiming dominance in noise | Ordering among finalists is decided by `order` (C2.1), claimed only when the bound of the difference excludes 0; the report gives "the statistically non-dominated set" |
+| Ranking noise | Designs of one generation in S2 share a seed_group (paired comparison), so differences vary less; confirmation runs do not share one and stay independent |
 | Search size | The record gives the number of designs evaluated at each fidelity, the number of topologies, optimizer settings and seeds |
-| Exploiting simulation defects | Finalists must pass the convergence gate for their relevant parameters (production cut, maximum step, field accuracy); physics-model variations (rules of B2.6); designs in materials or energy regions outside every reference benchmark's scope are flagged in the report (the label is `unvalidated` anyway; this is information for the reader) |
+| Exploiting simulation defects | Finalists must pass the convergence gate for their relevant parameters (production cut, maximum step, field accuracy); physics-model variations (rules of B3.4); designs in materials or energy regions outside every reference benchmark's scope are flagged in the report (the label is `unvalidated` anyway; this is information for the reader) |
 | Robustness | Continuous parameters are perturbed within the requirements' `tolerance` and the catalogue's manufacturing tolerances (F0 full factorial or F1 sampling) and the performance distribution reported; the worst case within tolerance is also decided, and results are classed as "robustly met" or "nominally met" |
 | Changing requirements | Any change to requirements or budget is a new search version; the report lists all versions |
 
-### 5.7 Records and contracts (C3)
+### 4.8 Records and contracts (CV3)
 
 A search record is a computational-run with `extension.design_search`:
 
 ```
 { "requirements_sha256": "...", "catalogue_version": "1", "catalogue_sha256": "...",
   "search_spec_sha256": "...", "search_version": 1, "previous_versions": [],
-  "optimizer": {"name": "nsga2", "implementation": "detector-design 0.1.0", "backend": null, "seed": 12345, "config": {...}},
+  "optimizer": {"name": "nsga2", "implementation": "detector-design 0.2.0", "backend": null, "seed": 12345, "config": {...}},
   "budgets": {"F0": 20000, "F1": 500, "F2": 5, "confirmation": 5},
   "evaluated": {"F0": 20000, "F1": 487, "F2": 5, "topologies": 143},
   "evaluations_ref": {"path": "...", "sha256": "..."},
@@ -232,31 +239,30 @@ A search record is a computational-run with `extension.design_search`:
   "label": "unvalidated" }
 ```
 
-**Contract rules (C3, gated as in C1):**
-- The label of a search record must be `unvalidated`.
-- Each finalist's `confirmation_runs` must exist with role `confirmation`, their spec hash must equal the design's realization, and their seed S must not appear in any search evaluation listed in `evaluations_ref` (re-derived by `dependencies.py`).
-- Tables or communications derived from a search record must take their numbers from confirmation runs; citing search-stage values is rejected.
-- A communication using search results gets the `communication.simulation_optimized_design` warning.
+The rules are in C2.6. C1 records carry only the F0 fields and are marked `fidelity: F0-only`.
 
 ---
 
-## 6. Stage C1: requirements, grammar and fast search (adapter detector-design 0.1.0)
+## 5. Stage C1: requirements, grammar and fast search (detector-design 0.1.0)
 
 ### C1.1 Schemas
 
-`detector-requirements/1`, `detector-design/1`, `catalogue/1`, `design-search-spec/1` (requirements hash, catalogue version, slot count and caps, budget, optimizer settings, seed, stopping rule), in `adapters/detector-design/assets/`, using only keywords supported by `contracts/schema.py`; cross-field rules checked in Python.
+`detector-requirements/1`, `detector-design/1`, `catalogue/1`, `design-search-spec/1` (requirements hash, catalogue version, slot count and caps, budget, optimizer settings, seed, stopping rule), in `adapters/detector-design/assets/schemas/`, using only keywords supported by `contracts/schema.py`; cross-field rules checked in Python.
 
 ### C1.2 First component catalogue
 
-The six components of §5.3; each with parameter ranges, material list (NIST names), manufacturing tolerances, mass model (density × volume; magnet mass is a declared placeholder model marked `assumed`), F0 model and realization rule. Each catalogue entry has unit tests (realized geometry, material budget).
+The six components of §4.4; each with parameter ranges, material list (NIST names), manufacturing tolerances, mass model (density × volume; magnet mass is a declared placeholder model marked `assumed`), F0 model and realization rule. Each catalogue entry has unit tests (realized geometry, material budget).
 
 ### C1.3 Realization and validity
 
-`design_search.py realize`: design → `element_sim.spec/1` and reco spec; validated with the B1.1 schema and cross-field rules; no Geant4 needed. Invalid designs return the reason (overlap, outside envelope, nesting, range), exit 2.
+`design_search.py realize`: design → `element_sim.spec/1` and reco spec; no Geant4 needed. Invalid designs return the reason (overlap, outside envelope, nesting, range), exit 2.
+
+- Before B1 merges: detector-design's own validity rules and the draft of `element_sim.spec/1` (the table of task B B1.1) apply.
+- After B1 merges: add a test that calls `geant4_run.py check-spec` as a subprocess to validate the realization of every catalogue component type.
 
 ### C1.4 F0 evaluation
 
-`design_search.py evaluate --fidelity F0`: calls `tracker_resolution.py` and `multiple_scattering.py` as subprocesses; material budget, X₀ and λ_I from the composition of Geant4 NIST materials (the same method as `geant4_verify.py`, factored into a shared `core/` function with a steward if needed); acceptance threshold from a helix in a uniform field and box boundaries (the same formula as task B appendix A); TOF resolution from the formula of §4.2 of task B. Each objective carries a `model` field describing the approximation.
+`design_search.py evaluate --fidelity F0`: calls `tracker_resolution.py` and `multiple_scattering.py` as subprocesses; material budget, X₀ and λ_I from the composition of Geant4 NIST materials (the same method as `geant4_verify.py`, factored into a shared `core/` function with a steward if needed); acceptance threshold from a helix in a uniform field and box boundaries (the same formula as task B appendix A); TOF resolution from the formula of task B §4.2. Each objective carries a `model` field describing the approximation.
 
 ### C1.5 Optimizer
 
@@ -264,11 +270,13 @@ The six components of §5.3; each with parameter ranges, material list (NIST nam
 
 ### C1.6 Search record and report
 
-`design_search.py report`: Pareto front, best design per topology, search size, F0 model limitations; outputs the record (§5.7; in C1 the confirmation-related fields are empty and marked `fidelity: F0-only`) and a Markdown summary for the user. C1 results are clearly marked "based on analytic models only".
+`design_search.py report`: Pareto front, best design per topology, search size, F0 model limitations; outputs the record (§4.8, `fidelity: F0-only`) and a Markdown summary for the user. C1 results are clearly marked "based on analytic models only".
 
-### C1.7 Agent protocol
+### C1.7 Agent protocol and docs
 
-`skills/hep-detector/references/detector-design-search.md`: the roles and limits of §5.1, the requirement-confirmation flow, the format of the design brief, when to escalate fidelity, how to report (must state search size, confirmation status and robustness).
+- `skills/hep-detector/references/detector-design-search.md`: the roles and limits of §4.2, the requirement-confirmation flow, the format of the design brief, when to escalate fidelity, how to report (must state search size, confirmation status and robustness).
+- Adapter docs; a detector-design row in `docs/capability-matrix.md`.
+- Routing: per the decision on plan §7 item 12, either one line in `SKILL.md` pointing to the reference, or only routing cases and the reference.
 
 ### C1.8 Closure tests
 
@@ -283,46 +291,64 @@ The six components of §5.3; each with parameter ranges, material list (NIST nam
 ### C1.9 C1 acceptance
 
 - [ ] Tests of the four schemas and the cross-field rules; every kind of invalid-design reason has a test.
-- [ ] Realization tests for the six catalogue components; realized specs pass the `element_sim.spec/1` schema (draft or merged version).
+- [ ] Realization tests for the six catalogue components; after B1 merges, realizations pass `geant4_run.py check-spec`.
 - [ ] Every F0 objective agrees with the existing tools or the analytic values of the appendix.
-- [ ] All closure tests of C1.8 pass.
+- [ ] All closure tests of C1.8 pass (gate G-C1).
 - [ ] An independent agent, following the agent protocol, completes from a natural-language requirement: requirement confirmation (a test plays the user), design brief, F0 search, report; the report says "based on analytic models only" and lists the search size.
-- [ ] VALIDATION DESIGN-SEARCH-F0; CHANGELOG; release manifest; `check_layering`, `check_packaging`.
+- [ ] `check_layering.py` (detector-design imports only `core` and `contracts`) and `check_packaging.py` pass.
+- [ ] VALIDATION DESIGN-SEARCH-F0; CHANGELOG; release manifest.
 
 ---
 
-## 7. Stage C2: simulation evaluation and confirmation (adapter 0.2.0, contracts C3)
+## 6. Stage C2: simulation evaluation and confirmation (detector-design 0.2.0, geant4 adapter 0.5.0, contracts CV3)
 
-### C2.1 F1 and F2 evaluation
+### C2.1 Additions to `core/` and the contracts
 
-`design_search.py evaluate --fidelity F1|F2`: realization → `geant4_run.py` (`element_sim`) → `simreco` → summary; each design evaluation is a logical run, point_id = design hash, role `search-F1` or `search-F2`. Event counts: F1 fixed (declared), F2 per A1.9. Batches run through the existing partition and batch machinery (hep-computing), cached by design hash.
+Following plan principles R1 and R2 (additions only, no change to existing behaviour):
 
-### C2.2 Confirmation and requirement decisions
+| Addition | Location | Content |
+|---|---|---|
+| `threshold(est, se, ν, op, value, m)` | `core/stats/decisions.py` | met / not-met / unresolved; met = the one-sided 95 % bound satisfies the threshold; not met = the one-sided 1 − α/m bound violates it; exact-interval branch |
+| `order(diff, se, ν, m)` | Same | better / worse / indistinct; better or worse claimed only when the t_{1−α/m} bound of the difference excludes 0 |
+| Paired mode | Same (`equivalence`, `change` and `order` all accept `pairing: paired`) | Both points belong to one seed_group, with the same K and B; per-block differences d_b = θ_a,b − θ_b,b; diff = d̄ (`absolute`) or d̄ / b̄ (`relative`, the uncertainty of b̄ is second order, ignored and noted in the protocol); se_diff = sd(d_b)/√K (divided by \|b̄\| under `relative`); ν = K − 1; the se target is directly se_diff ≤ tol/4. The default stays `independent` |
+| `values` accumulator | `core/simulation/summary.py` and schema (minor increase of `summary_version`); `core/stats/batch_means.py` | Each block's raw selected values (sorted by event number), written only when `n` ≤ `values_max` (from the observable declaration, default 10⁴); `merge` rule `concat`; with `values`, quantiles are empirical (Hyndman–Fan type 7, recorded as `quantile_method`). Reason: resolutions differ widely between designs, and no fixed binning suits every design |
+| C++ implementation of `values` | `g4sim/SimSummary.hh`; written by `element_sim` and `simreco` | Agrees with the Python producer (the method of A2.9) |
+| Roles | `contracts/`, schemas of the study spec and the search spec | Add `confirmation` (evidence role) and `search-F1`, `search-F2` (search roles); runs with a search role are never evidence for any upgrade or report |
+| seed_group | `core/simulation/seeds.py`; `contracts/` | Runs of one seed_group share S = H(id, role, seed_group), have the same K, B and `seeding`, and mutually different spec hashes; uniqueness becomes "(S, spec hash) does not repeat; S repeats only within a declared seed_group"; the S of an evidence role must not equal the S of any search role |
 
-`design_search.py confirm`: confirmation runs of the finalists (role `confirmation`); the one-sided requirement decisions of §5.6; statistical dominance among finalists; `search_minus_confirmation` and `fidelity_gap`.
+### C2.2 F1 and F2 evaluation
 
-### C2.3 Guards and robustness
+`design_search.py evaluate --fidelity F1|F2`: realization → `geant4_run.py run` (`element_sim`) → `geant4_run.py reco` (`simreco`) → summary; each design evaluation is a logical run, point_id = design hash, role `search-F1` or `search-F2`. Event counts: F1 fixed (declared), F2 per A1.9. Batches run through the existing partition and batch machinery (hep-computing), cached by design hash.
 
-Convergence gate of the finalists (production cut, maximum step, field accuracy; A1.8); variations (rules of B2.6); tolerance perturbations; flags for regions outside benchmark scopes.
+### C2.3 Paired comparison in the search
 
-### C2.4 Optional MOBO backend
+- Each generation of S2 declares a seed_group; designs of one generation share S, and ranking uses `order` in paired mode.
+- **Gate G-C2a:** in the trial of the first search, measure the ratio of the variance of differences under independent and paired comparison; if the ratio is below the declared value (default 2), S2 uses independent comparison instead, noted in the record. The paired estimate is valid at any degree of correlation; only the gain may be small (in Geant4 different designs soon consume different random numbers).
 
-Ax/BoTorch (qNEHVI), used only in S2, limited to ≤ 4 objectives and ≤ 20 continuous parameters; version recorded in the record and in `adapter.json`; without it, fall back to NSGA-II and note it in the record. A test compares the two on the DTLZ2 closure test.
+### C2.4 Confirmation and requirement decisions
 
-### C2.5 Contracts C3
+`design_search.py confirm`: confirmation runs of the finalists (role `confirmation`, S in no search evaluation); the one-sided requirement decisions of §4.7 (`threshold`); ordering among finalists (`order`, independent mode); `search_minus_confirmation` and `fidelity_gap`.
 
-The rules of §5.7; the `dependencies.py` re-derivation (spec hash of confirmation runs, no seed overlap); the communication warning. Gated with `strict or _at_least(contract_version, C3)`.
+### C2.5 Guards and robustness
 
-### C2.6 J16: automated-design example
+Convergence gate of the finalists (production cut, maximum step, field accuracy; A1.8); variations (rules of B3.4); tolerance perturbations; flags for regions outside benchmark scopes (decided with the scope comparison exported by `contracts/validate.py`).
 
-- Requirements: taken from J15's design goals (MDR ≥ 1 TV, σβ/β ≤ 3 %, acceptance threshold ≤ 0.8 GV, calorimeter ≥ 16 X₀, upstream material ≤ 15 % X₀, length ≤ 2 m, a declared mass model); J15's geometry is **not** given.
-- Run S0–S4; the report compares the search result with J15: whether a J15-type topology was found, on which objectives it is better or worse, and why (e.g. clustering planes at the ends and centre raises the MDR but worsens resolution where multiple scattering dominates).
-- Like J15 it is a synthetic study; the README says it demonstrates the process, not a new detector design (the same positioning as the AIDO and SWGO studies).
-- The ion-source and Birks study (previously reserved as J16) moves to J17.
+### C2.6 Contracts CV3
 
-### C2.7 Docs and registration
+- The label of a search record must be `unvalidated`.
+- Each finalist's `confirmation_runs` must exist with role `confirmation`, their spec hash must equal the design's realization, and their seed S must not appear in any search evaluation listed in `evaluations_ref` (re-derived by `dependencies.py`).
+- Tables or communications derived from a search record must take their numbers from confirmation runs; citing search-stage values is rejected.
+- A communication using search results gets the `communication.simulation_optimized_design` warning.
+- The role and seed_group rules of C2.1.
+- Gated with `strict or _at_least(contract_version, CV3)`; needs hep-computing's agreement to `extension.design_search` (plan §7 item 13).
 
-`docs/researcher-journeys.md`, routing case (reusing the trigger words "design principles and trade-offs" already in hep-detector's description), capability map, capability matrix, adapter docs, protocol.
+### C2.7 Adapter changes
+
+| Item | Content |
+|---|---|
+| detector-design | 0.1.0 → 0.2.0: `evaluate --fidelity F1|F2`, `confirm`; the search spec references `simulation-observables/1`; `adapter.json` and docs |
+| geant4 adapter | 0.4.0 → 0.5.0: `values` in `SimSummary.hh`; `element_sim` and `simreco` write `values` per the observable declaration; `SIM_SOURCES` structure unchanged |
+| G5 | New C++ changes written from the Geant4 API; the reviewer confirms in the VALIDATION entry |
 
 ### C2.8 Compute budget
 
@@ -330,13 +356,42 @@ F0 for 2×10⁴ designs: minutes; F1 about 500 × 10³ events; F2 and confirmati
 
 ### C2.9 C2 acceptance
 
+- [ ] `threshold` toys: probability of met when the true value equals the threshold ≤ 0.05 + 3σ_MC; `order` toys: probability of claiming an ordering when the true difference is 0 ≤ α/m + 3σ_MC.
+- [ ] Paired-mode toys: coverage of the nominal 90 % interval from se_diff satisfies |coverage − 0.90| ≤ 0.02 + 3σ_MC; the variance ratio measured in the trial is recorded (gate G-C2a).
+- [ ] `values` accumulator: Python and `SimSummary.hh` agree; above `values_max` it is omitted and noted; empirical quantiles have unit tests; old summaries (without `values`) are still readable.
+- [ ] Contract tests of roles and seed_group: a search role listed as evidence is rejected; an S repeated outside a seed_group, or equal spec hashes within one seed_group, are rejected; a confirmation run whose S equals that of a search run is rejected.
 - [ ] F1 and F2 summaries pass task A's consistency tests; the evaluation cache is keyed by design hash, fidelity, catalogue version and program hash.
-- [ ] Seeds of confirmation runs appear in no search evaluation (contract test); a table citing search values is rejected; a search record whose label is not `unvalidated` is rejected.
-- [ ] Toys of the one-sided requirement decision: probability of "met" at the threshold ≤ 0.05 + 3σ_MC.
-- [ ] Winner's-curse toys: on a set of pure-noise designs, the search estimate is significantly optimistic while the confirmation estimate is unbiased (showing why §5.6 is needed).
-- [ ] J16 completed, with a report containing search size, confirmation decisions, robustness and the comparison with J15.
+- [ ] CV3 contract tests: a table citing search values is rejected; a search record whose label is not `unvalidated` is rejected.
+- [ ] Winner's-curse toys: on a set of pure-noise designs, the search estimate is significantly optimistic while the confirmation estimate is unbiased (gate G-C2b).
+- [ ] A complete small search (e.g. the structure-choice problem of C1.8, evaluated at F1/F2) runs S0–S4, with a report containing search size, confirmation decisions and robustness.
+- [ ] J14 and J15 still pass under `--strict`.
+- [ ] VALIDATION DESIGN-SEARCH; CHANGELOG; release manifest; the checks of task A §8.
+
+---
+
+## 7. Stage C3: example (detector-design 0.3.0)
+
+### C3.1 J16: automated-design example
+
+- Requirements: taken from J15's design goals (MDR ≥ 1 TV, σβ/β ≤ 3 %, acceptance threshold ≤ 0.8 GV, calorimeter ≥ 16 X₀, upstream material ≤ 15 % X₀, length ≤ 2 m, a declared mass model); J15's geometry is **not** given.
+- Run S0–S4; the report compares the search result with J15 (the results of B3): whether a J15-type topology was found, on which objectives it is better or worse, and why (e.g. clustering planes at the ends and centre raises the MDR but worsens resolution where multiple scattering dominates; appendix A).
+- Like J15 it is a synthetic study; the README says it demonstrates the process, not a new detector design (the same positioning as the AIDO and SWGO studies).
+
+### C3.2 Optional MOBO backend
+
+Ax/BoTorch (qNEHVI), used only in S2, limited to ≤ 4 objectives and ≤ 20 continuous parameters; version recorded in the record and in `adapter.json` (whether it is listed as a tested tool: plan §7 item 14); without it, fall back to NSGA-II and note it in the record. The two are compared on the DTLZ2 closure test.
+
+### C3.3 Registration and docs
+
+`docs/researcher-journeys.md` (J16), routing case (reusing the trigger words "design principles and trade-offs" already in hep-detector's description; `check_routing_static.py` requires a routing case for every journey in the table), `tests/examples/test_detector_design_j16.py` (replay and compare decisions), capability map, capability matrix, adapter docs, protocol; this task's Markdown reviewed with `review.py` (advisory).
+
+### C3.4 C3 acceptance
+
+- [ ] J16 completed, with a report containing search size, confirmation decisions, robustness and the comparison with J15 (gate G-C3).
+- [ ] J16's offline replay (from the committed records and summaries) gives the same decisions.
 - [ ] MOBO backend (if installed) passes the DTLZ2 closure test; without it, fallback noted.
-- [ ] VALIDATION DESIGN-SEARCH; CHANGELOG; release manifest; the checks of task A §9.
+- [ ] Registration and docs done; the routing case passes.
+- [ ] VALIDATION DESIGN-SEARCH-J16; CHANGELOG; release manifest; the checks of task A §8.
 
 ---
 
@@ -344,9 +399,12 @@ F0 for 2×10⁴ designs: minutes; F1 about 500 × 10³ events; F2 and confirmati
 
 | Object | Location | Version |
 |---|---|---|
-| `detector-requirements/1`, `detector-design/1`, `catalogue/1`, `design-search-spec/1`, F0, optimizer | `adapters/detector-design/` | adapter 0.1.0 (C1) |
-| F1, F2, confirmation, MOBO backend | `adapters/detector-design/` | adapter 0.2.0 (C2) |
-| `extension.design_search` and its rules | `contracts/validate.py`, `contracts/dependencies.py` | C3 (minor, gated) |
+| `detector-requirements/1`, `detector-design/1`, `catalogue/1`, `design-search-spec/1`, F0, optimizer | `adapters/detector-design/` | detector-design 0.1.0 (C1) |
+| F1, F2, confirmation | `adapters/detector-design/` | detector-design 0.2.0 (C2) |
+| `threshold`, `order`, paired mode, `values`, seed_group | `core/` | with the plugin version (C2); minor increase of the summary schema's `summary_version` |
+| C++ implementation of `values` | geant4 adapter | 0.5.0 (C2) |
+| Roles, seed_group rules, `extension.design_search` and its rules | `contracts/validate.py`, `contracts/dependencies.py` | CV3 (minor, gated; C2) |
+| MOBO backend, J16 | `adapters/detector-design/`, `examples/` | detector-design 0.3.0 (C3) |
 | Agent protocol | `skills/hep-detector/references/detector-design-search.md` | with the plugin version |
 
 ---
@@ -358,21 +416,16 @@ F0 for 2×10⁴ designs: minutes; F1 about 500 × 10³ events; F2 and confirmati
 | Letting an LLM alone decide the best design | Not done | No real case does this; decisions must be reproducible |
 | Inventing component types during a search | Not done | New components need a realization rule, F0 model and tests; added through a catalogue change |
 | Differentiable simulation and differentiable surrogates (the MODE route) | Deferred | Geant4 is not differentiable; differentiable surrogates at point-cloud scale are still immature (arXiv:2310.05673). Trigger: a problem with > 20 continuous parameters and an insufficient F1 budget |
-| Cylindrical and non-box geometry, collider detectors | Deferred | `element_sim` has only box elements. Trigger: `element_sim` gains cylindrical elements |
+| Cylindrical and non-box geometry, collider detectors | Deferred | `element_sim` has only box elements. Trigger: `element_sim` gains cylindrical elements (task B §9) |
 | Cherenkov, RICH, TRD | Deferred | Need optical physics and dedicated reconstruction |
 | Reinforcement learning, large neural-network surrogates | Deferred | Data volume and interpretability; NSGA-II and MOBO suffice for up to a few dozen parameters |
 | A real cost database | Not shipped | Supplied by the user with sources |
 
 ---
 
-## 10. Decisions for the maintainer and residual risks
+## 10. Open decisions and residual risks
 
-**To decide:**
-1. Owner of the new adapter `detector-design` (proposed hep-detector).
-2. Adding one routing line to `skills/hep-detector/SKILL.md` pointing to `detector-design-search.md` (about 120 bytes; quick load has only 931 bytes left), or relying only on the reference and routing cases.
-3. Classification of C3 (proposed minor) and hep-computing's agreement to `extension.design_search`.
-4. Whether the MOBO backend (Ax/BoTorch) is listed as a tested tool of the adapter.
-5. The J16 number (the ion-source study moves to J17).
+**Open decisions** (numbered as in plan §7): item 11 (maintenance ownership of detector-design), item 12 (the routing line in `SKILL.md`), item 13 (CV3 and `extension.design_search`), item 14 (MOBO backend).
 
 **Residual risks:**
 1. Bias of the F0 models may make the structure search miss good topologies; mitigated by topology diversity in S2 and `fidelity_gap`, but not excluded.
@@ -380,23 +433,28 @@ F0 for 2×10⁴ designs: minutes; F1 about 500 × 10³ events; F2 and confirmati
 3. The placeholder mass and cost models are crude; without a user model they should not be objectives.
 4. With more than 4 objectives the Pareto front is hard to read; requirements should express the rest as constraints.
 5. Claude's design brief may bring in a bias toward "known instruments"; offset by Sobol random designs and topology diversity, and the report separates the contributions of LLM and random proposals.
-6. Compute: F1 and F2 evaluations with calorimeters are expensive; budgets are adjusted after a trial.
-7. Some references in this document (GRACE, VI-BRATO) are 2026 preprints whose conclusions are not yet peer reviewed.
+6. The variance reduction of paired comparisons in Geant4 may be small (gate G-C2a).
+7. Compute: F1 and F2 evaluations with calorimeters are expensive; budgets are adjusted after a trial.
+8. Among this document's references, GRACE and VI-BRATO are 2026 preprints whose conclusions are not yet peer reviewed.
 
 ---
 
 ## 11. Suggested order of work
 
-**C1**
+**C1 (after A1 is merged; may run in parallel with A2 and B)**
 1. Pre-start checks; schemas (C1.1) and catalogue (C1.2).
 2. Realization and validity (C1.3); F0 (C1.4), checked against the existing tools.
 3. Optimizer (C1.5) and the DTLZ2 and plane-placement closure tests.
-4. Record and report (C1.6); agent protocol (C1.7); the remaining closure tests and the independent-agent acceptance; C1.9.
+4. Record and report (C1.6); agent protocol and docs (C1.7); the remaining closure tests and the independent-agent acceptance; C1.9.
 
-**C2 (after task B is merged)**
-1. F1 and F2 (C2.1); confirmation and requirement decisions (C2.2); contracts C3 (C2.5) and toys.
-2. Guards and robustness (C2.3); optional MOBO (C2.4).
-3. J16 (C2.6); docs and registration (C2.7); C2.9.
+**C2 (after B2 and C1 are merged)**
+1. Additions to `core/` and the contracts (C2.1), with their toys and contract tests.
+2. F1 and F2 (C2.2); paired-comparison trial (C2.3); confirmation and requirement decisions (C2.4).
+3. Guards and robustness (C2.5); CV3 (C2.6); adapter changes (C2.7); C2.9.
+
+**C3 (after B3 and C2 are merged)**
+1. J16 (C3.1); optional MOBO (C3.2).
+2. Registration and docs (C3.3); C3.4.
 
 ---
 
@@ -430,4 +488,5 @@ J15's MDR of 1172 GV becomes about 1389 GV with the best 1/32-grid configuration
 
 | Version | Content |
 |---|---|
-| **2026-10-23 (this version)** | **First proposal: three roles, requirements spec, component catalogue and design grammar, F0/F1/F2 multi-fidelity, search separated from confirmation, C3 contract, stages C1/C2, J16** |
+| 2026-10-23 | First proposal: three roles, requirements spec, component catalogue and design grammar, F0/F1/F2 multi-fidelity, search separated from confirmation, contracts, C1/C2, J16; later updated to use the shared `core/` modules after the re-examination of task A |
+| **2026-10-23 (this version)** | **Reorganized per the plan (`plan.md`): three stages (C1 after A1, C2 after B2 and C1, C3 after B3 and C2); the `threshold`, `order`, paired comparison, `values`, search roles and seed_group that task C needs are added to `core/` and the contracts by C2.1 itself; realizations validated with `geant4_run.py check-spec`; contract version written CV3; J16 and MOBO moved to C3; section numbering aligned with tasks A and B** |
