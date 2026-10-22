@@ -68,8 +68,9 @@ class Probe(unittest.TestCase):
 
 class ChainProbes(Probe):
     def test_baseline_positive_case_is_complete(self):
-        # the reference the probes perturb: the reduced positive case is complete and consistent
-        rep = self.positive()
+        # the reference the probes perturb: the reduced positive case is complete and consistent (on the 1.1.0 rules;
+        # the 1.0.0 counting-chain suite names r-rep.repetition 1.0.0, which release R2 no longer runs)
+        rep = self.positive(cases.context_1_1)
         self.assertEqual((rep["status"], rep["consistency"]), ("complete", "consistent"))
 
     @PHASE2
@@ -78,7 +79,7 @@ class ChainProbes(Probe):
         def drop(c):
             c.doc("spec")["extension"]["corrections"] = [x for x in c.doc("spec")["extension"]["corrections"]
                                                          if x["effect_id"] != "selection_efficiency"]
-        rep = self.positive(drop)
+        rep = self.positive(cases.both(cases.context_1_1, drop))  # 1.0.0 cannot complete in release R2 (vacuous)
         self.assertNotEqual(rep["status"], "complete", "an undescribed applied correction leaves the check complete")
 
     def test_g2_required_false_cannot_hide_a_violation(self):
@@ -137,7 +138,6 @@ class ChainProbes(Probe):
                                                                           tolerance=tol)), cases.context_1_1))
             self.assertIn("tolerance", str(cm.exception))
 
-    @PHASE2
     def test_g17_exclusion_does_not_depend_on_declaration_order(self):
         # G17 (V77): one contradicting and one exclusive partition declaration for the same scopes: same answer both ways
         from contracts.analysis_checks import rules
@@ -156,6 +156,9 @@ class ChainProbes(Probe):
         first = rules._exclusion(Env([contra, excl]), a, b)[0]
         second = rules._exclusion(Env([excl, contra]), a, b)[0]
         self.assertEqual(first, second)
+        self.assertEqual(rules._exclusion(Env([excl, contra]), a, b), ("contradiction", ["d-contra"]))
+        both = dict(contra, declaration_id="d-contra-0")
+        self.assertEqual(rules._exclusion(Env([contra, excl, both]), a, b), ("contradiction", ["d-contra", "d-contra-0"]))
 
     def test_g22_freeze_refuses_an_empty_or_placeholder_unit(self):
         # G22 (V89): a root's unit must be stated; freeze refuses an empty or placeholder unit (1.1.0 context)
@@ -168,9 +171,9 @@ class ChainProbes(Probe):
 
 
 class RatioProbes(Probe):
-    @PHASE2
     def test_g3_validation_record_order_does_not_decide(self):
         # G3 (V77): an agreeing and a contradicting validation record give the same outcome whatever their item IDs
+        # (r-ratio.correlation 1.1.0, a 1.1.0 context): the contradicting record decides
         def two(first_id, second_id):
             def v(c):
                 rec = copy.deepcopy(c.doc("vr-selection"))
@@ -183,9 +186,9 @@ class RatioProbes(Probe):
         states = []
         for ids in (("vr-a", "vr-b"), ("vr-b", "vr-a")):
             r = self.root()
-            rep = report(cases.ratio_case(r, two(*ids)), r)
+            rep = report(cases.ratio_case(r, cases.both(cases.context_1_1, two(*ids))), r)
             states.append(by_rule(rep, "r-ratio.correlation")[0]["state"])
-        self.assertEqual(states[0], states[1], states)
+        self.assertEqual(states, ["violated", "violated"])
 
 
 class ModelProbes(Probe):
@@ -325,7 +328,7 @@ class Phase0Probes(Probe):
         # G20 (P6, V73): a dependency-missing diagnostic never leaves the status complete
         r = self.root()
         missing = {"kind": "dependency-missing", "code": "definition.coverage_missing", "message": "synthetic"}
-        rep = report(cases.positive_case(r), r, extra_diags=[missing])
+        rep = report(cases.positive_case(r, cases.context_1_1), r, extra_diags=[missing])  # complete without it
         self.assertEqual(ac().exit_code(rep), 3)
         self.assertNotEqual(rep["status"], "complete")
 

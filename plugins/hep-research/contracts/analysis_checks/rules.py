@@ -360,15 +360,20 @@ def applications(env: Env, path: list[str], effect: str) -> tuple[list[dict], bo
 
 
 def _exclusion(env: Env, a: str, b: str) -> tuple[str, list[str]]:
-    """('exclusive' | 'contradiction' | 'none', declaration ids) from partition_exclusive declarations."""
+    """('exclusive' | 'contradiction' | 'none', declaration ids) from partition_exclusive declarations. Every
+    declaration naming both scopes is read, so declaration order never decides (G17): one contradicting declaration
+    gives a contradiction, listing every contradicting id."""
+    found: dict[str, list[str]] = {"contradiction": [], "exclusive": []}
     for d in env.decls("partition_exclusive"):
         subs = (d.get("content") or {}).get("subsets") or []
         scopes = [s.get("scope") for s in subs if isinstance(s, dict)]
         if a in scopes and b in scopes:
             sel = {s.get("scope"): s.get("selection") for s in subs if isinstance(s, dict)}
-            if sel.get(a) is not None and sel.get(a) == sel.get(b):
-                return "contradiction", [d["declaration_id"]]
-            return "exclusive", [d["declaration_id"]]
+            same = sel.get(a) is not None and sel.get(a) == sel.get(b)
+            found["contradiction" if same else "exclusive"].append(d["declaration_id"])
+    for rel in ("contradiction", "exclusive"):
+        if found[rel]:
+            return rel, sorted(found[rel])
     return "none", []
 
 
@@ -705,7 +710,10 @@ def r_ratio_correlation(ob: dict, env: Env) -> dict:
     if relation not in RELATIONS:
         return outcome("unsupported", "check.correlation_relation_unsupported", f"relation {relation!r} is not supported", ev)
     operands = {(rr.get(k) or {}).get("root") for k in ("numerator", "denominator")}
+    # every complete record is read, so item order never decides (G3): one contradicting record gives a violation
     incomplete = False
+    agree: list[tuple[str, object]] = []
+    contra: list[tuple[str, object]] = []
     for iid, it in sorted(env.items.items()):
         doc = it.get("doc")
         if it.get("role") != "validation-record" or not isinstance(doc, dict) or (doc.get("claim") or {}).get("effect") != effect:
@@ -714,12 +722,15 @@ def r_ratio_correlation(ob: dict, env: Env) -> dict:
         if not operands <= subjects or not all(doc.get(k) for k in ("method", "tolerance", "scope")):
             incomplete = True
             continue
-        if doc["claim"].get("relation") != relation:
-            return outcome("violated", "check.correlation_contradicted",
-                           f"validation record {iid!r} finds {doc['claim'].get('relation')!r}, the spec claims {relation!r}",
-                           ev + [{"item": iid, "pointer": "/claim"}])
-        return outcome("satisfied", "check.correlation_evidenced", f"validation record {iid!r} binds both operands",
-                       ev + [{"item": iid, "pointer": "/subjects"}])
+        (agree if doc["claim"].get("relation") == relation else contra).append((iid, doc["claim"].get("relation")))
+    if contra:
+        found = ", ".join(f"{iid!r} finds {rel!r}" for iid, rel in contra)
+        return outcome("violated", "check.correlation_contradicted", f"validation record {found}, the spec claims {relation!r}",
+                       ev + [{"item": iid, "pointer": "/claim"} for iid, _ in contra])
+    if agree:
+        ids = ", ".join(repr(iid) for iid, _ in agree)
+        return outcome("satisfied", "check.correlation_evidenced", f"validation record {ids} binds both operands",
+                       ev + [{"item": iid, "pointer": "/subjects"} for iid, _ in agree])
     for d in env.decls("correlation"):
         c = d.get("content") or {}
         if c.get("ratio_root") == rid and c.get("effect") == effect and c.get("relation") == relation:
@@ -743,8 +754,13 @@ RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
 RULES.update(model_rules.RULES)  # model-card/v1 (contracts.analysis_checks.model)
 RULES.update(run_rules.RULES)  # run-lineage/v1 (contracts.analysis_checks.runs)
 
-# (rule_id, version) -> implementation; every rule above is its version 1.0.0
-IMPLEMENTED = {(rid, "1.0.0"): fn for rid, fn in RULES.items()}
+# The version each implementation is (P3). A fixed rule is a new version and its old code is gone: an obligation of a
+# suite that names the old version stays unverified (check.rule_not_run) and is reproduced with the release that has it.
+# 1.1.0 (release R2): r-rep.repetition and r-ratio.correlation read every matching declaration or record (G3, G17).
+VERSIONS = {"r-rep.repetition": "1.1.0", "r-ratio.correlation": "1.1.0"}
+
+# (rule_id, version) -> implementation
+IMPLEMENTED = {(rid, VERSIONS.get(rid, "1.0.0")): fn for rid, fn in RULES.items()}
 
 
 def implemented_versions(rule_id: str) -> list[str]:

@@ -44,18 +44,30 @@ class V72VersionGuard(Base):
     def test_unimplemented_rule_version_is_not_run(self):
         from contracts.analysis_checks import rules
         r = self.root()
-        view, _ = ac().load_subject(cases.positive_case(r), r)
+        view, _ = ac().load_subject(cases.positive_case(r, cases.context_1_1), r)
         obs = view["context"]["obligations"]["items"]
         out = rules.evaluate(view, [dict(o, rule_version="2.0.0") for o in obs])
         self.assertEqual({(o["state"], o["reason"]) for o in out}, {("unverified", "check.rule_not_run")})
         self.assertEqual([o["state"] for o in rules.evaluate(view, obs)].count("unverified"), 0)
 
     def test_every_suite_rule_is_implemented_at_its_version(self):
+        # or retired in the registry (release R2): a retired version is not run (check.rule_not_run), never run with
+        # the new code; the newest pre-release of each suite names implemented versions only
+        from contracts import rule_registry as rr
         from contracts.analysis_checks.rules import IMPLEMENTED
+        from contracts.semver import precedence
+        retired = {(r["rule_id"], r["version"]) for r in json.loads(rr.REGISTRY.read_text())["rules"] if r["lifecycle"] == "retired"}
+        newest: dict[str, tuple] = {}
         for p in sorted((ROOT / "contracts" / "rules" / "suites").glob("*.json")):
             suite = json.loads(p.read_text())
-            for rule in suite["rules"]:
-                self.assertIn((rule["rule_id"], rule["version"]), IMPLEMENTED, p.name)
+            keys = {(rule["rule_id"], rule["version"]) for rule in suite["rules"]}
+            for key in keys:
+                self.assertTrue(key in IMPLEMENTED or key in retired, f"{p.name}: {key}")
+            if suite["suite_id"] not in newest or precedence(suite["version"]) > newest[suite["suite_id"]][0]:
+                newest[suite["suite_id"]] = (precedence(suite["version"]), keys)
+        for sid, (_, keys) in newest.items():
+            self.assertLessEqual(keys, set(IMPLEMENTED), sid)
+        self.assertFalse(retired & set(IMPLEMENTED))
 
     def test_unsupported_generator_is_refused_at_freeze_and_missing_at_check(self):
         from contracts.analysis_bundle import BundleRefused
@@ -84,7 +96,7 @@ class V72VersionGuard(Base):
     def test_registry_records_current_source_digests(self):
         from contracts import rule_registry as rr
         doc = json.loads(rr.REGISTRY.read_text())
-        self.assertEqual(doc["registry_version"], "1.1.0")
+        self.assertEqual(doc["registry_version"], "1.2.0")
         self.assertTrue(rr.check(doc).ok, [f.as_dict() for f in rr.check(doc).findings])
         changed = copy.deepcopy(doc)
         rule = next(x for x in changed["rules"] if x["kind"] != "legacy")
@@ -107,7 +119,7 @@ class V72VersionGuard(Base):
     def test_a_helper_change_reaches_the_rules_that_use_it(self):
         from contracts.analysis_checks import source_digest
         from contracts.analysis_checks.rules import IMPLEMENTED
-        rep = IMPLEMENTED[("r-rep.repetition", "1.0.0")]
+        rep = IMPLEMENTED[("r-rep.repetition", "1.1.0")]
         names = source_digest.closure(rep)
         self.assertIn("contracts.analysis_checks.rules._pair", names)
         self.assertIn("contracts.analysis_checks.scope.compare_scopes", names)
@@ -127,7 +139,7 @@ class V73StatusAndExitCode(Base):
 
     def test_complete_only_with_exit_zero(self):
         r = self.root()
-        rep = report(cases.positive_case(r), r)
+        rep = report(cases.positive_case(r, cases.context_1_1), r)
         self.assertEqual((rep["status"], ac().exit_code(rep)), ("complete", 0))
 
 

@@ -44,7 +44,7 @@ class ReportCheck(unittest.TestCase):
         bundle_path = cases.ratio_case(self.root)
         self.bundle = json.loads(bundle_path.read_text())
         view, diags = ac().load_subject(bundle_path, self.root)
-        self.report = ac().evaluate(view, diags)
+        self.report = ac().evaluate(view, diags, rules=cases.r1_rules())  # a complete 1.0.0 report, as release R1 writes it
         self.recipe = json.loads((self.root / "recipe.json").read_text())
         self.policy = {"policy_version": "1.0.0", "purposes": {"formal-analysis": {
             "suites": [{"id": "counting-chain", "version": "1.0.0"}, {"id": "ratio-subset", "version": "1.0.0"}],

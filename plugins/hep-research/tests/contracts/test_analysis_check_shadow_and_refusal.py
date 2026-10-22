@@ -70,7 +70,8 @@ class ShadowDifferenceReview(unittest.TestCase):
             for name, (builder, variant) in SHADOW_CASES.items():
                 with self.subTest(case=name):
                     root = Path(td) / name
-                    view, diags = ac().load_subject(builder(root, variant), root)
+                    # the 1.1.0 rules (release R2): the 1.0.0 suites name r-rep.repetition 1.0.0, which is not run
+                    view, diags = ac().load_subject(builder(root, cases.both(cases.context_1_1, variant)), root)
                     review = ac().difference_review(view, ac().evaluate(view, diags))
                     self.assertEqual(review["unclassified"], 0, [r for r in review["rows"] if r["class"] == "unclassified"])
                     if name == "v21":
@@ -85,7 +86,7 @@ class ShadowDifferenceReview(unittest.TestCase):
                 spec["contract_version"] = "2.5.0"
                 spec["versions"]["contracts"] = "2.5.0"
             root = Path(td) / "old"
-            bundle = cases.positive_case(root, old)
+            bundle = cases.positive_case(root, cases.both(cases.context_1_1, old))
             code, out, _ = run("contracts/validate.py", root / "spec.json")
             view, diags = ac().load_subject(bundle, root)
             report = ac().evaluate(view, diags)

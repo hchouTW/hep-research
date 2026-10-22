@@ -68,11 +68,12 @@ class ShippedRegistry(unittest.TestCase):
         self.assertIn("semantics.repeated_correction", r4["l2.r4.repeat"]["legacy_codes"])
 
     def test_suite_rules_are_registered_with_full_contracts(self):
-        registered = {r["rule_id"]: r for r in SHIPPED["rules"]}
+        # registry 1.2.0: keyed by (rule_id, version); a fixed version is kind changed beside its retired old version
+        registered = {(r["rule_id"], r["version"]): r for r in SHIPPED["rules"]}
         for rule in [r for f in sorted((ROOT / "contracts" / "rules" / "suites").glob("*.json"))
                      for r in json.loads(f.read_text())["rules"]]:
-            reg = registered[rule["rule_id"]]
-            self.assertEqual((reg["version"], reg["kind"]), (rule["version"], "new"))
+            reg = registered[(rule["rule_id"], rule["version"])]
+            self.assertIn(reg["kind"], ("new", "changed"))
             self.assertIsInstance(reg["outcome_contract"], dict)
 
     def test_split_cases_keep_their_slices(self):

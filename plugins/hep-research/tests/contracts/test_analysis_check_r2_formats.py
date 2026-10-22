@@ -1,7 +1,9 @@
 """Cross-artifact check Phase 2, release R2 formats (architecture sections 8.1 and 9.4): SemVer pre-releases, the
 registry key (rule_id, version) with retired versions, check-context 1.1.0 (DR-2: no 'required') paired with 1.1.0
-pre-release suites, and the context conversion 1.0.0 -> 1.1.0 (V90). No rule outcome changes here: the 1.1.0-dev.1
-suites list the 1.0.0 rules."""
+pre-release suites, and the context conversion 1.0.0 -> 1.1.0 (V90). The 1.1.0-dev.1 suites list the 1.0.0 rules;
+1.1.0-dev.2 replaces r-rep.repetition and r-ratio.correlation by 1.1.0 (G3, G17), so a 1.0.0 suite gives
+check.rule_not_run for them (section 8.2). On the reference cases the 1.1.0 rules give the 1.0.0 outcomes, which are
+computed here with cases.r1_rules() in place of release R1."""
 from __future__ import annotations
 
 import copy
@@ -23,17 +25,17 @@ DEV = cases.DEV_SUITE
 to_1_1 = cases.context_1_1
 
 
-def states(bundle: Path, root: Path) -> dict:
+def states(bundle: Path, root: Path, rules: dict | None = None) -> dict:
     from contracts import analysis_check as ac
     view, diags = ac.load_subject(bundle, root)
-    rep = ac.evaluate(view, diags)
+    rep = ac.evaluate(view, diags, rules=rules)
     return {o["obligation_id"]: (o["state"], o["reason"]) for o in rep["obligations"]}
 
 
 class SemverPrerelease(unittest.TestCase):
     def test_full_versions_parse_and_order_by_semver_precedence(self):
         from contracts import semver
-        self.assertEqual(semver.parse_full(DEV), (1, 1, 0, ("dev", 1)))
+        self.assertEqual(semver.parse_full("1.1.0-dev.1"), (1, 1, 0, ("dev", 1)))
         self.assertTrue(semver.is_prerelease(DEV))
         self.assertFalse(semver.is_prerelease("1.1.0"))
         order = ["1.0.0", "1.1.0-0", "1.1.0-alpha", "1.1.0-dev.1", "1.1.0-dev.2", "1.1.0-dev.10", "1.1.0", "1.1.1"]
@@ -82,6 +84,7 @@ class RegistryKey(unittest.TestCase):
 
     def test_registry_1_1_0_keeps_one_entry_per_rule(self):
         doc = self.registry()
+        doc["registry_version"] = "1.1.0"
         old = copy.deepcopy(self.live(doc))
         old.update(version="0.9.0", lifecycle="retired")
         doc["rules"].append(old)
@@ -114,15 +117,28 @@ class Context110(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_dev_suites_exist_for_every_suite_with_the_same_rules(self):
+        # dev.1: the 1.0.0 rules; dev.2: the same rules, the fixed ones at their new version
         from contracts import analysis_check as ac
+        from contracts.analysis_checks.rules import VERSIONS
         for sid in ("counting-chain", "ratio-subset", "model-card", "run-lineage"):
-            old, dev = ac.load_suite(sid, "1.0.0"), ac.load_suite(sid, DEV)
-            self.assertEqual(dev["version"], DEV)
-            self.assertEqual((dev["rules"], dev["generator"], dev.get("mode")), (old["rules"], old["generator"], old.get("mode")))
+            old, dev1, dev2 = (ac.load_suite(sid, v) for v in ("1.0.0", "1.1.0-dev.1", "1.1.0-dev.2"))
+            self.assertEqual((dev1["rules"], dev1["generator"], dev1.get("mode")), (old["rules"], old["generator"], old.get("mode")))
+            fixed = [dict(r, version=VERSIONS.get(r["rule_id"], r["version"])) for r in old["rules"]]
+            self.assertEqual((dev2["rules"], dev2["generator"], dev2.get("mode")), (fixed, old["generator"], old.get("mode")))
+        self.assertEqual(DEV, "1.1.0-dev.2")
 
     def test_a_1_1_0_context_on_dev_suites_gives_the_1_0_0_outcomes(self):
         a, b = self.tmp / "a", self.tmp / "b"
-        self.assertEqual(states(cases.ratio_case(b, to_1_1), b), states(cases.ratio_case(a), a))
+        self.assertEqual(states(cases.ratio_case(b, to_1_1), b), states(cases.ratio_case(a), a, cases.r1_rules()))
+
+    def test_a_1_0_0_suite_does_not_run_a_fixed_rule(self):
+        # section 8.2: the stable 1.0.0 suites name the retired versions; they are not run, never run with new code
+        out = states(cases.ratio_case(self.tmp / "a"), self.tmp / "a")
+        fixed = {k: v for k, v in out.items() if k.startswith(("r-rep.repetition:", "r-ratio.correlation:"))}
+        self.assertTrue(fixed)
+        self.assertEqual(set(fixed.values()), {("unverified", "check.rule_not_run")})
+        self.assertNotIn(("unverified", "check.rule_not_run"),
+                         {v for k, v in out.items() if k not in fixed})
 
     def test_freeze_refuses_required_in_a_1_1_0_context(self):
         from contracts.analysis_bundle import BundleRefused
@@ -275,7 +291,7 @@ class V90ContextConversion(unittest.TestCase):
         ctx = json.loads((dst / ctx_ref).read_text())
         self.assertEqual(ctx["context_version"], "1.1.0")
         self.assertEqual({s["version"] for s in [ctx["suite"]] + ctx.get("suites", [])}, {DEV})
-        self.assertEqual(states(Path(res["bundle"]), dst), states(bundle, src))
+        self.assertEqual(states(Path(res["bundle"]), dst), states(bundle, src, cases.r1_rules()))
         marker = json.loads(Path(res["marker"]).read_text())
         self.assertEqual(marker["conversions"][0]["converter"], "context-1.0.0-to-1.1.0")
 

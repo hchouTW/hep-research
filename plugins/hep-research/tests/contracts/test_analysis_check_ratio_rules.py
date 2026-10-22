@@ -1,6 +1,8 @@
 """v6.3 D07 (M2b, ratio subset): R-RATIO on RATIO-FACTORS and RATIO-EVIDENCE (tests/contracts/analysis_check_cases.ratio_case) and
 on the old-style ratio of CASE-CHAIN. V28, V44, V45. Factor cancellation is checked against a hand-computed oracle;
-models stay unsupported until their suite exists (O03)."""
+models stay unsupported until their suite exists (O03).
+Cases run on check-context 1.1.0 and the newest 1.1.0 pre-release suites (release R2): the 1.0.0 suites name rule
+versions this checker no longer runs."""
 import copy
 import json
 import sys
@@ -39,14 +41,14 @@ class Ratio(unittest.TestCase):
     def run_case(self, builder=None, variant=None):
         self.n += 1
         root = Path(self.td.name) / f"r{self.n}"
-        b = (builder or cases.ratio_case)(root, variant)
+        b = (builder or cases.ratio_case)(root, cases.both(cases.context_1_1, variant))  # the 1.1.0 rules (release R2)
         view, diags = ac().load_subject(b, root)
         return ac().evaluate(view, diags)
 
     def test_positive_ratio_case(self):
         rep = self.run_case()
         self.assertEqual((rep["status"], rep["consistency"]), ("complete", "consistent"))
-        self.assertIn({"id": "ratio-subset", "version": "1.0.0"}, rep["assessment"]["suites"])
+        self.assertIn({"id": "ratio-subset", "version": cases.DEV_SUITE}, rep["assessment"]["suites"])
         self.assertEqual(get(rep, "r-ratio.operands:ratio-p1")["reason"], "check.ratio_operands_compatible")
 
     def test_v44_factors(self):
@@ -103,7 +105,7 @@ class Ratio(unittest.TestCase):
 
     def test_v28_free_text_ratio(self):
         def ratio_suite(c):
-            c.context["suites"] = [{"id": "ratio-subset", "version": "1.0.0"}]
+            c.context["suites"] = [{"id": "ratio-subset", "version": cases.DEV_SUITE}]
         rep = self.run_case(cases.chain_case, ratio_suite)
         o = get(rep, "r-ratio.operands:spec")
         self.assertEqual((o["state"], o["reason"]), ("unverified", "check.ratio_operands_unbound"))
@@ -123,7 +125,7 @@ class Ratio(unittest.TestCase):
     def test_model_suite_needs_a_model_bundle(self):
         # model-card/v1 exists (M2b model part), but it checks model bundles only: a chain bundle selecting it is refused
         def model_suite(c):
-            c.context["suites"] = [{"id": "model-card", "version": "1.0.0"}]
+            c.context["suites"] = [{"id": "model-card", "version": cases.DEV_SUITE}]
         with self.assertRaises(Exception) as ctx:
             self.run_case(cases.positive_case, model_suite)
         self.assertEqual(getattr(ctx.exception, "code", None), "bundle.suite_mode")
