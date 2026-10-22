@@ -40,7 +40,7 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
 ## Results the analysis check can bind
 
 - The outputs that become published results are bound to the runs that made them with a result binding
-  (`<plugin root>/contracts/schemas/result_binding.json`); the advisory suite `run-lineage/v1` of the analysis check
+  (`<plugin root>/contracts/schemas/result_binding.json`); the advisory, experimental suite `run-lineage/v1` of the analysis check
   (`<plugin root>/contracts/analysis_check.py`, shadow mode) reads those bindings, the run records and the merge
   records to show that a result descends from a complete merge of the declared inputs.
 - Keep run records and bindings with the frozen bundle (see the [preservation checklist](preservation-checklist.md)).

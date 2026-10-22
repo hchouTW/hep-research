@@ -141,3 +141,11 @@ it: freeze the checker code; keep `--check-bundle` but mark it experimental; mar
 instructions in the skill references and the README experimental; no new suites; keep the Phase 0 results. The
 optional spike and the entry path (DR-14) lose their purpose under Stop. If the owner wants the validity point above
 tested, that is a new measurement with its own pre-registered design, not a rerun of this one.
+
+## Decision (2026-10-22, maintainer instruction in the session)
+
+Asked whether "continue" meant the decision-point outcome "continue" or the recommendation, the maintainer chose
+**"Stop (my recommendation)"**. The programme stops at the decision point (architecture section 13.3): the checker
+code is frozen; `--check-bundle` stays, marked experimental, and so do the manual freeze and check instructions in the
+skill references and the README; no new suites; the Phase 0 results stay. Phase 2, the entry path (DR-14) and the
+spike do not start. The AI-planted cap did not bear on this outcome.

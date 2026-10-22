@@ -165,7 +165,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `loop-engineering.md` | hep-computing | 7.0 | no | 7 | - | 4665f433 2026-10-13 |
 | `numerical-and-computational-methods.md` | hep-computing | 9.3 | yes | 7 | hep-authoring, hep-citations, hep-theory | ebb58136 2026-10-19 |
 | `performance-profiling.md` | hep-computing | 6.7 | yes | 5 | - | 9257d7b5 2026-10-15 |
-| `preservation-checklist.md` | hep-computing | 4.5 | yes | 3 | - | 890f8481 2026-10-22 |
+| `preservation-checklist.md` | hep-computing | 4.7 | yes | 3 | - | 890f8481 2026-10-22 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 5.7 | yes | 5 | hep-ml | 8eefac0f 2026-10-13 |
 | `python-hep-coding-patterns.md` | hep-computing | 6.6 | yes | 7 | - | 9257d7b5 2026-10-15 |
@@ -228,7 +228,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 9 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a584954 2026-10-17 |
 | `rare-event-and-neutrino-measurements.md` | hep-measurement | 7.0 | no | 3 | - | c4d801c4 2026-10-17 |
-| `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 77d2607e 2026-10-16 |
+| `review-and-artifacts.md` | hep-measurement | 7.9 | yes | 9 | - | 77d2607e 2026-10-16 |
 | `systematics.md` | hep-measurement | 10.1 | yes | 37 | hep-detector, hep-ml, hep-statistics, hep-theory | 7cd0b7ec 2026-10-17 |
 | `weights-normalization.md` | hep-measurement | 4.5 | yes | 10 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b5 2026-10-15 |
 | `ablation-and-design-review.md` | hep-ml | 2.3 | no | 13 | hep-authoring | 9257d7b5 2026-10-15 |

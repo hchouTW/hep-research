@@ -3,6 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **The cross-artifact analysis check is experimental.** Its value gate (`docs/dev/cross-artifact-check/
+  decision-value-gate.md`; harness in the repository's `evals/cross-artifact-value-gate/`) found that it caught none
+  of 28 AI-planted errors that closure tests and contract checks missed. The owner chose to stop: the checker code is
+  frozen, no suites are added, and the README, the skill references that teach `freeze` and `check`, and
+  `review_measurement_spec.py --check-bundle` now say it is experimental. Behavior is unchanged.
+
 ## 0.25.0 (2026-10-22)
 
 Phase 0 of the cross-artifact check architecture (`docs/dev/cross-artifact-check/`, release R1): foundations of the

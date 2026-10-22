@@ -37,6 +37,8 @@ Each item names the file or command that holds it. Paths are relative to the plu
 
 ## 4. Frozen analysis definition
 
+Only when the analysis uses the experimental cross-artifact check (`<plugin root>/docs/dev/cross-artifact-check/decision-value-gate.md`).
+
 - [ ] The v2 analysis bundle (`<plugin root>/contracts/schemas/analysis_bundle_v2.json`) is frozen with its
       semantic lock: `python3 <plugin root>/contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json
       --context CONTEXT.json --out bundle.json`.

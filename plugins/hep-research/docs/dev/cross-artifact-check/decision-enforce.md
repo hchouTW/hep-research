@@ -127,3 +127,9 @@ rule to become an enforcing condition, **all** of the following must hold:
 - the roles that may accept reports are decided (O14).
 
 Every rule stays in shadow mode. Recorded on the maintainer's instruction of 2026-10-22 (DR-11, DR-13).
+
+## 2026-10-22, value gate result
+
+The value gate failed (`decision-value-gate.md`: I = 0 of 28, outcome Stop, chosen by the maintainer on
+2026-10-22). One of the conditions above can therefore not be met with the current checker, and no rule leaves
+shadow mode. A new gate would need a new measurement with its own pre-registered design.

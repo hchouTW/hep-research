@@ -301,9 +301,11 @@ python3 contracts/analysis_check.py snapshots gc --root <project> [--apply]   # 
 definitions have changed since from that store. Rules run only at the version the suite names: an obligation of
 another rule version is unverified (`check.rule_not_run`). A report is `complete` only with exit code 0.
 
-**Where it stands.** This is the diagnostic plane of the architecture in
-`docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md`: no workflow, skill or example runs it yet,
-and whether it is worth extending is decided by a value gate (`decision-value-gate.md`) before any further work.
+**Where it stands: experimental.** This is the diagnostic plane of the architecture in
+`docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md`: no workflow, skill or example runs it. Its
+value gate (`decision-value-gate.md`, 2026-10-22) found that it caught none of 28 planted errors that closure tests
+and contract checks missed, and the owner chose to stop: the code is frozen, no suites are added, and the check
+stays available as an experimental diagnostic.
 
 **Reading a report.** Each obligation ends in one of five states: satisfied, violated, not applicable, unverified or
 unsupported. Coverage counts the decided obligations; it is never a pass rate.

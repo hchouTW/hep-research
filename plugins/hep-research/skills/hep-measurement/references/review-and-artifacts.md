@@ -62,7 +62,8 @@ One line each; every item maps to an invariant of the skill and, where one exist
 - Status labels (synthetic, Asimov, observed) are carried on everything derived.
 - Unknowns are `unknown` or `not-provided` and listed, never zero (`measurement.zero_value`,
   `measurement.unresolved_not_listed`).
-- When the analysis is frozen as a v2 bundle (`contracts/analysis_check.py freeze`), add the cross-artifact check:
+- Experimental (its value gate found no gain over closure tests and contract checks, `<plugin root>/docs/dev/cross-artifact-check/decision-value-gate.md`): when the analysis is
+  frozen as a v2 bundle (`contracts/analysis_check.py freeze`), you may add the cross-artifact check:
   `review_measurement_spec.py SPEC --check-bundle BUNDLE --check-root DIR` appends a bounded summary of violated and
   unverified obligations and the bindings they miss. Report violations as defects with their obligation IDs and the
   unverified ones under unresolved inputs; the summary is a diagnostic, and declaration-based results need a human
