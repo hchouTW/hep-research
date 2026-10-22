@@ -34,6 +34,29 @@ checks skipped, every planned check reported, and the shards partitioning the mo
 record fails the gate; equal test counts are never taken as evidence. Every subprocess call in the tests and tools
 has a timeout (`tests/tools/test_subprocess_timeouts.py`).
 
+**Selective CI on pull requests.** A `plan` job runs `tools/ci_plan.py` first.
+- **How the plan is made.** The pull request's changed files (its merge commit against `HEAD^1`) go through the impact
+  map in `contracts/rules/registry.json` (`impact` groups; `contracts/rule_registry.py impact`). The plan is the test
+  modules and parts (`static`, `ams-optional`) those groups name, plus any changed test module.
+- **When it is the full run.** Any change the map cannot bound runs everything:
+  - a file outside `plugins/hep-research/` (workflows, root `evals/`);
+  - CI tooling (the runner, the reconciler, `ci_plan.py`, module timings, the lock, `pyproject.toml`);
+  - a path no impact group covers, or a group marked `full`;
+  - an unreadable diff.
+
+  Pushes to main, the weekly and manual runs are always full, so a gap in the map is caught on main within the day.
+- **What each job does with it.** Each checks job runs `run_all_checks.py --plan`:
+  - the units shards split only the selected modules;
+  - a part the plan does not select skips installing the pinned set and writes a record that says so (`selection`).
+- **What the gate checks.** `checks-complete` recomputes the plan itself and passes it to
+  `reconcile_check_runs.py --plan`. Every record must name that plan's digest, the shards must cover exactly the
+  selected modules, and every part, selected or not, must have its record.
+- **Making selection work for more changes.** Extend the impact groups. A path they do not cover keeps the full run,
+  which is the safe default.
+
+`check_ams_optional.py` has its own limit (`AMS_OPTIONAL_TIMEOUT`, 1200 s). It takes about 190 s locally and 7–10 min
+on CI runners, which had reached the 600 s module limit.
+
 Software checks show contract consistency only, not physical validity. Report pass, fail, skip and unverified
 separately; a skipped test (missing tool) is unverified, never passing.
 

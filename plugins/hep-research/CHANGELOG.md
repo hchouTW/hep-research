@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **CI: pull requests run only the checks their changes need.** A new `plan` job (`tools/ci_plan.py`) maps the
+  changed files through the impact map in `contracts/rules/registry.json` to test modules and check parts. Each checks
+  job runs `run_all_checks.py --plan`, and a job with nothing selected skips installing and still writes its record.
+  The `checks-complete` gate recomputes the plan, and `reconcile_check_runs.py --plan` fails a run made under another
+  plan, a part whose selection disagrees with the plan, or shards that do not cover exactly the selected modules.
+  - **Full-run fallback:** a file outside the plugin, CI tooling, a path no impact group covers, or an unreadable
+    diff gives the full run. Pushes to main, the weekly and manual runs stay full.
+  - **Example:** a cross-artifact rule fix like #228 runs 12–18 test modules and the static part instead of every
+    module and the AMS-optional part.
+  - **Limit:** `check_ams_optional.py` now has its own 1200 s limit (it had reached 600 s on CI runners).
+  - **Tests:** `tests/tools/test_ci_plan.py`.
 - **Cross-artifact check: Phase 2 may start.** The maintainer changed the value gate's decision from Stop to
   Continue (`docs/dev/cross-artifact-check/decision-value-gate.md`). The measurement is unchanged (no incremental
   detection in 28 AI-planted errors) and the gate is not passed, so every rule stays in shadow mode and the check
