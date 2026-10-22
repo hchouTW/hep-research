@@ -99,7 +99,7 @@ def rewrite(text: str) -> tuple[str, int]:
 
 
 def git(root: Path, *args) -> str:
-    return subprocess.run(["git", *args], cwd=root, check=True, capture_output=True, text=True).stdout
+    return subprocess.run(["git", *args], cwd=root, check=True, capture_output=True, text=True, timeout=120).stdout
 
 
 def tracked(root: Path) -> list[str]:
@@ -140,12 +140,13 @@ def plan(root: Path, also: list[Path]) -> dict:
 def _derived(root: Path, regenerate: bool) -> list[dict]:
     out = []
     for script, check, write in DERIVED:
-        res = subprocess.run([sys.executable, script, *check], cwd=root, capture_output=True, text=True)
+        res = subprocess.run([sys.executable, script, *check], cwd=root, capture_output=True, text=True, timeout=600)
         row = {"script": script, "check": res.returncode == 0}
         if res.returncode != 0 and regenerate:
-            subprocess.run([sys.executable, script, *write], cwd=root, check=True, capture_output=True, text=True)
+            subprocess.run([sys.executable, script, *write], cwd=root, check=True, capture_output=True, text=True, timeout=600)
             row["regenerated"] = True
-            row["check"] = subprocess.run([sys.executable, script, *check], cwd=root, capture_output=True).returncode == 0
+            row["check"] = subprocess.run([sys.executable, script, *check], cwd=root, capture_output=True,
+                                          timeout=600).returncode == 0
         out.append(row)
     return out
 
@@ -217,6 +218,9 @@ def main(argv=None) -> int:
             out = verify(root, [p.resolve() for p in args.also])
         else:
             out = dict(plan(root, [p.resolve() for p in args.also]), status="dry-run")
+    except subprocess.TimeoutExpired as exc:
+        print(json.dumps({"status": "failed", "error": f"{exc.cmd}: timed out"}))
+        return 1
     except subprocess.CalledProcessError as exc:
         print(json.dumps({"status": "failed", "error": f"{exc.cmd}: {exc.stderr}"}))
         return 1

@@ -1,6 +1,6 @@
 # Decision record: Phase 0 gate (release R1)
 
-Status: **work done 2026-10-22; awaiting the programme owner's confirmation** (see Decision). Architecture
+Status: **accepted 2026-10-22 by the programme owner, conditional on the full suite and CI** (see Decision). Architecture
 `cross-artifact-check-architecture.en.md` section 9.1. Labels: **Confirmed**, **Inferred**, **Unresolved**.
 
 ## Analysis question
@@ -67,4 +67,7 @@ hchouTW.
 
 ## Decision
 
-*(To be filled in by the programme owner: confirm the Phase 0 gate, with the date.)*
+**2026-10-22, maintainer instruction in the session.** After the status report of the work above, the maintainer
+replied "continue; thresholds confirmed, release 0.25.0 after merge": the Phase 0 gate is accepted on the condition
+that the full-suite comparison (VALIDATION CROSS-ARTIFACT-PHASE0) and the required CI jobs pass, and R1 ships as
+0.25.0 after the merge.

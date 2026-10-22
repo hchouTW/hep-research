@@ -1,7 +1,6 @@
 # Decision record: value gate (DR-13)
 
-Status: **design adopted 2026-10-22 (DR-13); thresholds proposed, awaiting the maintainer's confirmation before any
-measurement.** Architecture `cross-artifact-check-architecture.en.md` section 10. Labels: **Confirmed**, **Inferred**,
+Status: **design adopted 2026-10-22 (DR-13); thresholds confirmed 2026-10-22 before any measurement.** Architecture `cross-artifact-check-architecture.en.md` section 10. Labels: **Confirmed**, **Inferred**,
 **Unresolved**.
 
 ## Analysis question
@@ -57,5 +56,6 @@ hchouTW. The error planter is to be named (O04), never a rule author.
 
 ## Decision
 
-*(To be filled in by the maintainer: confirm or change the thresholds above, with the date. No measurement starts
-before this entry.)*
+**2026-10-22, maintainer instruction in the session ("thresholds confirmed").** The thresholds above are confirmed
+as written, before any measurement: Pass I ≥ 0.25 N and F ≤ 1; Shrink 0.10 N ≤ I < 0.25 N, or I ≥ 0.25 N with F = 2;
+Stop I < 0.10 N or F ≥ 3; AI-planted results alone support at most Shrink. They do not change after measuring.

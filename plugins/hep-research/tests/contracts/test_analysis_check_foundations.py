@@ -208,7 +208,7 @@ class DefaultSnapshots(Base):
     def freeze_cli(self, c, *extra):
         return subprocess.run(CLI + ["freeze", "--root", str(c.root), "--analysis", "a", "--items", str(c.root / "items.json"),
                                      "--context", str(c.root / "context.json"), "--out", str(c.root / "bundle.json"), *extra],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=120)
 
     def test_freeze_writes_snapshots_and_the_bundle_index(self):
         c = self.draft()
@@ -244,7 +244,8 @@ class DefaultSnapshots(Base):
         c = self.draft()
         self.assertEqual(self.freeze_cli(c).returncode, 0)
         (c.root / "bundle.json").unlink()
-        res = subprocess.run(CLI + ["snapshots", "gc", "--root", str(c.root), "--apply"], capture_output=True, text=True)
+        res = subprocess.run(CLI + ["snapshots", "gc", "--root", str(c.root), "--apply"], capture_output=True, text=True,
+                             timeout=120)
         self.assertEqual(res.returncode, 1, res.stdout)
         self.assertEqual(json.loads(res.stdout)["deleted"], [])
 
