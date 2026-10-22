@@ -4,7 +4,7 @@
  "additionalProperties": false,
  "properties": {
   "$comment": {"type": "string"},
-  "registry_version": {"$comment": "1.1.0: rule source digests (source_sha256), phase slices and work packages", "type": "string", "enum": ["1.0.0", "1.1.0"]},
+  "registry_version": {"$comment": "1.1.0: rule source digests (source_sha256), phase slices and work packages; 1.2.0: rules keyed by (rule_id, version), a retired version stays listed", "type": "string", "enum": ["1.0.0", "1.1.0", "1.2.0"]},
   "states": {"$comment": "the five obligation states, in this order", "type": "array", "items": {"$ref": "#/$defs/state"}},
   "rules": {"type": "array", "items": {"$ref": "#/$defs/rule"}},
   "v_cases": {"type": "array", "items": {"$ref": "#/$defs/v_case"}},
@@ -16,7 +16,7 @@
   "codes": {"type": "array", "items": {"$ref": "#/$defs/code"}},
   "text": {"type": "string", "minLength": 1},
   "texts": {"type": "array", "items": {"$ref": "#/$defs/text"}},
-  "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+  "version": {"$comment": "registry 1.2.0 (release R2): a SemVer version, a pre-release allowed (1.1.0-dev.1)", "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"},
   "outcome_contract": {"$comment": "reason codes per state; every state needs at least one code for a new or changed rule",
    "type": "object", "required": ["satisfied", "violated", "not_applicable", "unverified", "unsupported"], "additionalProperties": false,
    "properties": {"satisfied": {"$ref": "#/$defs/codes"}, "violated": {"$ref": "#/$defs/codes"},

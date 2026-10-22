@@ -289,6 +289,10 @@ It then checks a machine-generated list of obligations against five suites:
 | `run-lineage/1.0.0` | after execution, through a result binding: input closure, run status, the campaign evidence level, blinding-permitted outputs |
 | (custody) | `contracts/custody.py`: an inventory of where each profile comes from; a missing custody value is never read as public |
 
+While release R2 is in development, each suite also exists as `1.1.0-dev.N` for check contexts in format 1.1.0 (no
+`required` on roots; a 1.0.0 context selects only 1.0.x suites). `contracts/migrate.py --convert
+check-context=context-1.0.0-to-1.1.0` converts a frozen context. `check-report` refuses every pre-release suite.
+
 ```bash
 python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json [--mode model]
 python3 contracts/analysis_check.py check bundle.json --root <project> [--results result-binding.json] [--project <project>]

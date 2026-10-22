@@ -42,7 +42,7 @@ if __package__ in (None, ""):
 
 from contracts.analysis_bundle import BundleRefused, _no_duplicates, _read, item_digest  # noqa: E402
 from contracts.analysis_checks import obligations as obl  # noqa: E402
-from contracts.analysis_checks.context import check_context  # noqa: E402
+from contracts.analysis_checks.context import check_context, version_findings  # noqa: E402
 from contracts.analysis_checks.lock import build_lock  # noqa: E402
 from contracts.effect_catalog import load_catalog  # noqa: E402
 from contracts.release_manifest import canonical_sha256  # noqa: E402
@@ -378,6 +378,9 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
     rep = validate(context, "check_context.json")
     if not rep.ok:
         raise BundleRefused("bundle.context_schema", "; ".join(f"{f.path}: {f.code}" for f in rep.errors))
+    pairing = version_findings(context)
+    if pairing:
+        raise BundleRefused("bundle.context_version", "; ".join(f"{f['where']}: {f['message']}" for f in pairing))
     try:
         view = draft_view(root, items, context)
     except (UnicodeError, ValueError) as exc:
@@ -493,6 +496,7 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
         rep = validate(doc, name)
         for f in rep.errors:
             diags.append({"kind": "input-invalid", "code": f"{name.split('.')[0]}.{f.code}", "message": f"{f.path}: {f.message}"})
+    diags += [{"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"} for f in version_findings(context)]
     view, more = _view(items, context)
     diags += more
     view.update(bundle=bundle, lock=lock, bundle_verified=ver["status"], root=str(root))

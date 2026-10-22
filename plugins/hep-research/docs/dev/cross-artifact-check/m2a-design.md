@@ -131,3 +131,22 @@ Changes of release R1 (`cross-artifact-check-architecture.en.md` section 9.1); n
 - **`assessment.plugin_release`** names the release that produced the report.
 
 `required: false` (DR-2) is unchanged until check-context 1.1.0 (Phase 2).
+
+## Phase 2, release R2: formats (2026-10-22)
+
+Changes of the first R2 slice (architecture sections 8.1 and 9.4); no rule outcome changes yet:
+
+- **check-context 1.1.0 (DR-2).** Roots and ratio roots carry no `required` (`context.required_removed`); a deferral
+  is recorded only as an exception. `root_not_required` therefore cannot arise in a 1.1.0 context.
+- **Version guard between context and suites.** A 1.1.0 context selects suites at or above 1.1.0 (pre-releases
+  included), a 1.0.0 context only 1.0.x suites (`context.suite_version`). Freeze refuses either finding
+  (`bundle.context_version`); check reports it as input-invalid.
+- **Pre-release suites.** `counting-chain`, `ratio-subset`, `model-card` and `run-lineage` exist as `1.1.0-dev.1`
+  with the 1.0.0 rules and generators, so a 1.1.0 context gives the 1.0.0 outcomes. Rule fixes go to later
+  pre-releases. `check-report` refuses every pre-release suite (`permit.report_prerelease_suite`).
+- **SemVer.** `contracts/semver.py` reads pre-releases with `parse_full`, `is_prerelease` and `precedence`; `parse` and
+  ranges still read releases only, so no profile range admits a pre-release.
+- **Registry 1.2.0** (schema; the shipped registry stays 1.1.0 until a rule has two versions): rules are keyed by
+  (rule_id, version); a retired version stays listed and is not checked for an implementation or a digest.
+- **Conversion (V90).** `migrate.py --convert check-context=context-1.0.0-to-1.1.0` drops `required: true`, refuses a
+  deferred root for manual completion, and moves each suite to the lowest installed version at or above 1.1.0.

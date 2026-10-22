@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Cross-artifact check, release R2 formats (Phase 2).** check-context 1.1.0 removes `required` from roots and ratio
+  roots (DR-2: deferral only through an exception) and is paired with suites at or above 1.1.0 (`bundle.context_version`
+  at freeze, input-invalid at check); a 1.0.0 context keeps the 1.0.x suites. Every suite exists as the pre-release
+  `1.1.0-dev.1` with the 1.0.0 rules, so outcomes do not change. `contracts/semver.py` reads SemVer pre-releases
+  (`parse_full`, `is_prerelease`, `precedence`) while `parse` and ranges stay release-only. The rule registry schema
+  1.2.0 keys rules by (rule_id, version) and keeps retired versions listed. `migrate.py` converts a frozen context with
+  `context-1.0.0-to-1.1.0` (V90) and refuses a deferred root. V77-V90 are registered. A 0.25.1 reader refuses a 1.1.0
+  bundle as invalid input.
+
 ## 0.25.1 (2026-10-22)
 
 Patch release: the cross-artifact check's value gate and the owner's Stop decision; no artifact contract change

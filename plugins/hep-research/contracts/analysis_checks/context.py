@@ -19,11 +19,43 @@ ROLES = ("nominal", "systematic", "alternative")
 # input checks each context version enables (P3): a check added later is enabled for the context version that
 # introduces it, so a frozen 1.0.0 context is never judged by a newer check
 INPUT_CHECKS = {"1.0.0": frozenset({"item.not_an_object", "item.schema", "spec.bad_corrections", "spec.duplicate_effect_id"})}
+INPUT_CHECKS["1.1.0"] = INPUT_CHECKS["1.0.0"]
+# the first suite version a 1.1.0 context may select (the lowest pre-release of 1.1.0); a 1.0.0 context selects
+# only versions below it
+FIRST_1_1_SUITE = "1.1.0-0"
 
 
 def input_check_enabled(context_version, check: str) -> bool:
     """A context of unknown version enables every 1.0.0 check (the schema refuses it separately)."""
     return check in INPUT_CHECKS.get(str(context_version), INPUT_CHECKS["1.0.0"])
+
+
+def version_findings(ctx: dict) -> list[dict]:
+    """Format rules of check-context 1.1.0 (release R2) that the schema cannot state: no 'required' on a root or
+    ratio root (DR-2: deferral goes through an exception), and the version guard between context and suites (a 1.1.0
+    context selects 1.1.0 or later suites, pre-releases included; a 1.0.0 context selects 1.0.x suites)."""
+    from contracts.semver import precedence
+    version = ctx.get("context_version")
+    if version not in INPUT_CHECKS:
+        return []
+    new = version != "1.0.0"
+    out = []
+    if new:
+        for key in ("roots", "ratio_roots"):
+            for i, r in enumerate(ctx.get(key) or []):
+                if isinstance(r, dict) and "required" in r:
+                    out.append(_f("context.required_removed", f"$.{key}[{i}].required",
+                                  "check-context 1.1.0 has no 'required': defer a root with an exception record (DR-2)"))
+    for i, s in enumerate([ctx.get("suite")] + list(ctx.get("suites") or [])):
+        try:
+            later = precedence(str((s or {}).get("version"))) >= precedence(FIRST_1_1_SUITE)
+        except ValueError:
+            continue  # the schema reports a malformed version
+        if later != new:
+            out.append(_f("context.suite_version", "$.suite" if i == 0 else f"$.suites[{i - 1}]",
+                          f"a {version} context selects {'1.1.0 or later' if new else '1.0.x'} suites, not "
+                          f"{(s or {}).get('id')} {(s or {}).get('version')}"))
+    return out
 
 
 def _f(code: str, where: str, message: str) -> dict:

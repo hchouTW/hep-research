@@ -11,7 +11,11 @@ diagnostics, no completion marker is written, and the original files are unchang
 physics or scope information is not a converter: it goes to manual completion; changing the mathematical model is a
 new analysis.
 
-Converters: recipe-1.0.0-to-1.1.0 (1.1.0 only adds optional correction keys: lossless).
+Converters: recipe-1.0.0-to-1.1.0 (1.1.0 only adds optional correction keys: lossless); context-1.0.0-to-1.1.0
+(item check-context, V90): the check context in format 1.1.0. A root or ratio root with required: false is a deferral,
+which 1.1.0 records only as an exception (DR-2), so such a context is refused and goes to manual completion;
+required: true is dropped; each suite moves to the lowest installed version at or above 1.1.0 (a pre-release while
+R2 is in development; 1.1.0-dev.1 has the 1.0.0 rules). The suites chosen are part of the lineage.
 
 Usage: python3 contracts/migrate.py SRC_ROOT BUNDLE DST_ROOT --convert ITEM=CONVERTER [--convert ...]
 Exit 0 complete, 1 refused, 2 bad usage. Output: JSON with a status key.
@@ -41,7 +45,40 @@ def recipe_1_0_to_1_1(doc: dict) -> dict:
     return dict(copy.deepcopy(doc), recipe_version="1.1.0")
 
 
-CONVERTERS = {"recipe-1.0.0-to-1.1.0": recipe_1_0_to_1_1}
+def _first_1_1_suite(suite_id: str) -> str:
+    from contracts.analysis_checks.context import FIRST_1_1_SUITE
+    from contracts.semver import precedence
+    found = []
+    for p in ac.SUITE_DIR.glob(f"{suite_id}-*.json"):
+        try:
+            if precedence(p.stem[len(suite_id) + 1:]) >= precedence(FIRST_1_1_SUITE):
+                found.append(p.stem[len(suite_id) + 1:])
+        except ValueError:
+            continue
+    if not found:
+        raise ValueError(f"no installed suite {suite_id} at or above 1.1.0")
+    return min(found, key=precedence)
+
+
+def context_1_0_to_1_1(doc: dict) -> dict:
+    if doc.get("context_version") != "1.0.0":
+        raise ValueError("context-1.0.0-to-1.1.0 reads a 1.0.0 check context")
+    out = copy.deepcopy(doc)
+    for key in ("roots", "ratio_roots"):
+        for r in out.get(key) or []:
+            if r.get("required") is False:
+                raise ValueError(f"{key} {r.get('root_id')!r} is deferred (required: false); check-context 1.1.0 records a "
+                                 "deferral only as an exception (DR-2): complete this conversion by hand")
+            r.pop("required", None)
+    out["context_version"] = "1.1.0"
+    out["suite"] = dict(out["suite"], version=_first_1_1_suite(out["suite"]["id"]))
+    if "suites" in out:
+        out["suites"] = [dict(s, version=_first_1_1_suite(s["id"])) for s in out["suites"]]
+    return out
+
+
+CONVERTERS = {"recipe-1.0.0-to-1.1.0": recipe_1_0_to_1_1, "context-1.0.0-to-1.1.0": context_1_0_to_1_1}
+CONTEXT_CONVERTERS = ("context-1.0.0-to-1.1.0",)
 SCHEMAS = {"recipe": "recipe.json"}
 
 
@@ -74,6 +111,8 @@ def migrate(src_root, bundle_path, dst_root, plan: list, converters: dict | None
     for step in plan:
         if step.get("item") not in items or step.get("converter") not in convs:
             return refused("migrate.bad_plan", f"{step!r}: an item of the bundle and a listed converter")
+        if (items[step["item"]]["role"] == "context") != (step["converter"] in CONTEXT_CONVERTERS):
+            return refused("migrate.bad_plan", f"{step!r}: a context converter converts the check context, and only it")
     generated = ("context", "semantic-lock")
     keep = [{"role": it["role"], "id": it["id"], "ref": it["ref"]} for it in bundle["items"] if it["role"] not in generated]
     context = json.loads((src / next(it["ref"] for it in bundle["items"] if it["role"] == "context")).read_text(encoding="utf-8"))
@@ -91,6 +130,16 @@ def migrate(src_root, bundle_path, dst_root, plan: list, converters: dict | None
     lineage = []
     for step in plan:
         it = items[step["item"]]
+        if it["role"] == "context":
+            try:
+                converted = convs[step["converter"]](context)
+            except (ValueError, KeyError, TypeError) as exc:
+                return refused("migrate.converter_failed", f"{step['item']}: {exc}")
+            lineage.append({"item": step["item"], "converter": step["converter"],
+                            "from_sha256": ac.canonical_sha256(context), "to_sha256": ac.canonical_sha256(converted),
+                            "suites": ac.context_suites(converted)})
+            context = converted
+            continue
         path = dst / it["ref"]
         before = json.loads(path.read_text(encoding="utf-8"))
         try:
