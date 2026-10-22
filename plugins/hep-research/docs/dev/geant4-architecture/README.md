@@ -6,11 +6,13 @@ This folder holds the implementation specs for the Geant4 architecture work in h
 **If you are an agent starting work here:** read this file, then the task card (§0) of the task you are working on.
 Do task A first; task B starts only after task A is merged.
 
-**Current state (2026-10-22):** `architecture.md` is the consolidated architecture proposal. It changes where the
-C++/Python boundary lies (a run summary of mergeable sufficient statistics), the variance method (batch means), the
-stages (A1, A2a, A2b, B0, B1) and several interfaces for generality. Until the user and the maintainer approve it, the
-task specs below describe the previous architecture; once approved they are rewritten from `architecture.md`
-(its section 12). Do not start implementation from the task specs before that.
+**Current state (2026-10-22):** `architecture.md` is the architecture proposal, redesigned with reference to real
+experiments (ATLAS, CMS, ALICE, Belle II, Key4hep, Allpix², geant-val; PAMELA and AMS-02 for J15). It sets a backend
+interface at the output (run summary, column map, effective config with the actual geometry tree), per-event seeding,
+"same decisions" as the meaning of reproducibility, block batch means within one run, five validation classes, a new
+`element_sim` backend for J15 instead of reworking `layered_sim`, and four stages (A1, A2, B1, B2). Until the user and
+the maintainer approve it, the task specs below describe an older architecture; once approved they are rewritten from
+`architecture.md`. Do not start implementation from the task specs before that.
 
 ## Files
 
