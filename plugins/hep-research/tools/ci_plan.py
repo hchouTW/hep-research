@@ -13,7 +13,9 @@ each path must run. The plan is the full run, all modules and both parts, when:
 - the impact map asks for it (a path no group covers, a group marked full, a check not available yet);
 - the diff cannot be read, or nothing changed (the change cannot be bounded);
 - --full is given (pushes to main, the weekly and manual runs).
-Otherwise the plan lists the impact map's test modules (a deleted test module is dropped, and recorded) and its parts.
+Otherwise the plan lists the impact map's test modules (a deleted test module is dropped, and recorded) and its parts,
+plus, for a changed test helper (a .py file under tests/ that is not a test module), every test module that imports it
+by name; a helper no test module imports is the full run (its users cannot be bounded).
 Skipping is never silent: tools/run_all_checks.py --plan writes a record for every part, selected or not, and
 tools/reconcile_check_runs.py --plan recomputes the plan and fails when a run used another one.
 The plan carries plan_sha256 over its content, so runs and the gate can name the plan they used.
@@ -29,6 +31,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path, PurePosixPath
@@ -67,7 +70,26 @@ def full_plan(reasons: list[str], changed: list[str] | None = None, modules: lis
                     "modules": sorted(every), "parts": list(PARTS), "dropped": []})
 
 
-def plan_for(changed: list[str], every: list[str], registry: dict) -> dict:
+def helper_importers(rel: str, every: list[str], root: Path = ROOT) -> list[str]:
+    """Test modules whose source imports the test helper at rel (by its module name, e.g. analysis_check_cases)."""
+    name = PurePosixPath(rel).stem
+    pattern = re.compile(rf"^\s*(?:import|from)\s+(?:[\w.]*\.)?{re.escape(name)}\b", re.M)
+    out = []
+    for m in every:
+        try:
+            if pattern.search((root / Path(*m.split("."))).with_suffix(".py").read_text(encoding="utf-8")):
+                out.append(m)
+        except OSError:
+            continue
+    return sorted(out)
+
+
+def _is_helper(rel: str) -> bool:
+    p = PurePosixPath(rel)
+    return p.parts[:1] == ("tests",) and p.suffix == ".py" and not p.name.startswith("test_") and p.name != "__init__.py"
+
+
+def plan_for(changed: list[str], every: list[str], registry: dict, root: Path = ROOT) -> dict:
     """The plan for these changed repository paths, given the tree's test modules and the impact map."""
     from contracts.rule_registry import impact
     if not changed:
@@ -82,8 +104,15 @@ def plan_for(changed: list[str], every: list[str], registry: dict) -> dict:
     imp = impact(rel, registry)
     if imp["full"]:
         return full_plan(imp.get("reasons") or ["the impact map asks for the full run"], changed, every)
+    users: set[str] = set()
+    for h in (p for p in rel if _is_helper(p)):
+        found = helper_importers(h, every, root)
+        if not found:
+            return full_plan([f"test helper {h}: no test module imports it by name, so its users cannot be bounded"],
+                             changed, every)
+        users |= set(found)
     known = set(every)
-    modules = sorted(m for m in imp["modules"] if m in known)
+    modules = sorted(m for m in set(imp["modules"]) | users if m in known)
     parts = [p for p in PARTS if p in imp["parts"]]
     return _finish({"plan_version": PLAN_VERSION, "full": False, "reasons": [f"impact groups: {imp['groups']}"],
                     "changed": sorted(changed), "modules": modules, "parts": parts,

@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **CI plan: a changed test helper selects the tests that import it.** A non-test `.py` file under `tests/` (for
+  example `analysis_check_cases.py`) now selects every test module that imports it by name. The impact map listed
+  the helper but not all of its importers, so three of them would have been skipped. A helper that no test module
+  imports by name gives the full run.
 - **CI: pull requests run only the checks their changes need.** A new `plan` job (`tools/ci_plan.py`) maps the
   changed files through the impact map in `contracts/rules/registry.json` to test modules and check parts. Each checks
   job runs `run_all_checks.py --plan`, and a job with nothing selected skips installing and still writes its record.

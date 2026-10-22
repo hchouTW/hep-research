@@ -37,7 +37,9 @@ has a timeout (`tests/tools/test_subprocess_timeouts.py`).
 **Selective CI on pull requests.** A `plan` job runs `tools/ci_plan.py` first.
 - **How the plan is made.** The pull request's changed files (its merge commit against `HEAD^1`) go through the impact
   map in `contracts/rules/registry.json` (`impact` groups; `contracts/rule_registry.py impact`). The plan is the test
-  modules and parts (`static`, `ams-optional`) those groups name, plus any changed test module.
+  modules and parts (`static`, `ams-optional`) those groups name, plus any changed test module, plus every test module
+  that imports a changed test helper (a non-test `.py` under `tests/`; a helper nothing imports by name is the full
+  run).
 - **When it is the full run.** Any change the map cannot bound runs everything:
   - a file outside `plugins/hep-research/` (workflows, root `evals/`);
   - CI tooling (the runner, the reconciler, `ci_plan.py`, module timings, the lock, `pyproject.toml`);
