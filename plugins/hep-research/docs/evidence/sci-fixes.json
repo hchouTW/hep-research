@@ -1183,6 +1183,43 @@
    "gaps": [],
    "note": "fix 17a3dad8; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: both tests error on the parent (TimeoutExpired, FileNotFoundError out of main) and pass on the fix",
    "independence": []
+  },
+  {
+   "id": "PERIODICITY-REFIT",
+   "title": "periodicity_scan.py red-noise global p: the null is refitted on every surrogate (double parametric bootstrap, bias-corrected lag-1 for AR(1)) instead of estimated once",
+   "changelog": "CHANGELOG Unreleased, periodicity_scan.py refits the red-noise null (sci-fix PERIODICITY-REFIT)",
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/skills/hep_statistics/test_periodicity_refit_null.py"
+   ],
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "mutant M4 (prepivot count p1*_j < p1 instead of <=) survives: a tie-handling change below the Monte Carlo tolerance",
+    "the first-order correction phi + (1 + 4 phi)/n of the ar1 refit is a declared estimator choice supported by the calibration toys, not by a located source",
+    "the slow-tier calibration (RefitCalibrationSlow) is evidence only when HEP_SLOW_TESTS=1 runs it (VALIDATION PERIODICITY-REFIT records its run)"
+   ],
+   "note": "per-test parent record against a53af7e0 (adapted parent tree adds only the new test module, whose scan() call passes the inner count only where scan has it): the three fast evidence tests fail by assertion on the parent (size 0.113 and 0.207 at alpha 0.05 and 0.1 > the 3-sigma bounds 0.103 and 0.173; |size(phi 0.9) - size(phi 0.3)| = 0.107 > 0.104; |p_parent - p_independent| = 0.287 > 0.05) and pass on the fix (0.047, 0.080; 0.033; 0.003); local mutants: 4 of 5 killed, the revert of the default among them (M1 revert, M2 no bias correction, M3 inner surrogates not refitted, M5 correction sign; M4 survives); negative control: the pre-fix single-level p re-implemented in the test rejects 0.193 at alpha 0.1 on the fix's toys (> 0.173). Calibration study (400 toys per configuration, 199 x 199 surrogates): pre-fix p anti-conservative beyond 2 sigma in 5 cells (worst AR(1) n 50 phi 0.9: 0.147 at 0.05, 0.253 at 0.1), the default after the fix in none (VALIDATION PERIODICITY-REFIT)",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series",
+     "basis": "locator",
+     "detail": "under the null a valid p-value is uniform, so P(p <= alpha) = alpha: Cavaliere, Goncalves and Nielsen, 'Bootstrap Inference in the Presence of Bias', arXiv:2208.02028v1, p. 8 ('a test that rejects H0 whenever H_n(p_n) <= alpha is exact', H_n(u) = P(p_n <= u)) and Theorem 3.2, p. 15 (read 2026-10-22); toys are stationary AR(1) series from scipy.signal.lfilter, not from the module; bound alpha + 3 binomial sigma for 150 toys"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source",
+     "basis": "locator",
+     "detail": "the double bootstrap modified p-value of arXiv:2208.02028v1 section 3.2.2, pp. 14-15 (p*_n = P**(T** <= T*), p~_n = P*(p*_n <= p_n); read 2026-10-22), written in the test for a statistic that rejects when large, with scipy.signal.lfilter surrogates and the power from batched weighted least-squares normal equations (not the module's Zechmeister-Kuerster closed form); one AR(1) series n = 50, phi = 0.9, N = 1999, inner 199: |p_module - p_test| <= 0.05"
+    }
+   ]
   }
  ],
  "documentation_fixes": [

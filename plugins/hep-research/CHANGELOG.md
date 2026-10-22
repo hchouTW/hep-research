@@ -11,6 +11,16 @@ Software checks establish contract consistency only, not physical validity.
   `measurement.correction_category_repeated` errors are unchanged, so no artifact changes outcome (no contracts
   change). `correction-chain.md` says what the validator catches and what it cannot (a profile term with another
   name).
+- **periodicity_scan.py: the red-noise p-value refits the null on every surrogate (sci-fix PERIODICITY-REFIT, S1,
+  advisory SFA-2026-038).** Since 0.14.0 the AR(1) and OU surrogates used phi (or tau) estimated once from the data;
+  the lag-1 estimate is biased low on short series, and the global p was anti-conservative (no-signal AR(1) toys,
+  n = 50, phi = 0.9: 0.147 rejected at alpha = 0.05 and 0.253 at 0.1; n = 100, phi = 0.9: 0.077 and 0.163). The
+  default is now a double parametric bootstrap (`--null-fit refit`, `--inner-surrogates`, default 199) with the
+  first-order bias-corrected lag-1 estimate for AR(1); on the same toys every rejection fraction lies within two
+  binomial sigma of alpha or below it. `--null-fit once` reproduces the old numbers for the same seed and is labeled
+  anti-conservative. The white null is unchanged. Output gains `global.p_single_level`, `global.null_fit` and, with
+  the refit, `global.inner_surrogates`; a refit costs N x (M + 1) surrogate series (new cap 4e6). The docstring's
+  "conservative" wording and `time-series-inference.md` now state the measured calibration.
 
 ## 0.23.0 (2026-10-22)
 
