@@ -7,16 +7,16 @@ test_v63_* modules -> test_analysis_check_* / test_evidence_query, the helpers v
 analysis_check_cases and analysis_check_runs.
 
 Safety rules (normative, section 8.3):
-  R-1 only whole identifiers of the mapping are replaced, never next to a letter, digit or underscore; a bare v63 or
+  RN-1 only whole identifiers of the mapping are replaced, never next to a letter, digit or underscore; a bare v63 or
       v6.3 is never replaced (test_v63_submission_bundle_digests names validation case V63)
-  R-2 never modified: release manifests, CHANGELOG.md, VALIDATION.md, docs/dev/**/decision-*.md, the content of the
+  RN-2 never modified: release manifests, CHANGELOG.md, VALIDATION.md, docs/dev/**/decision-*.md, the content of the
       moved records, contracts/vocab/effects.json, contracts/semantics/**, contracts/rules/suites/**, contracts/schemas/**
-  R-3 records are moved with git mv, content unchanged; the forwarding README.md keeps docs/dev/v6.3/<file> working
-  R-4 test IDs in contracts/rules/registry.json are rewritten together (ship with the other registry changes)
-  R-5 idempotent: a second run changes nothing
-  R-6 --verify: no leftover old identifiers, every registry test ID resolves, the stub exists, the derived-file checks
+  RN-3 records are moved with git mv, content unchanged; the forwarding README.md keeps docs/dev/v6.3/<file> working
+  RN-4 test IDs in contracts/rules/registry.json are rewritten together (ship with the other registry changes)
+  RN-5 idempotent: a second run changes nothing
+  RN-6 --verify: no leftover old identifiers, every registry test ID resolves, the stub exists, the derived-file checks
       pass
-  R-7 after rewriting, the derived files whose --check fails are regenerated (reference inventory, stanzas,
+  RN-7 after rewriting, the derived files whose --check fails are regenerated (reference inventory, stanzas,
       capability map)
 
 Usage: python3 tools/rename_analysis_check_ids.py ROOT                       dry run: list moves and rewrites
