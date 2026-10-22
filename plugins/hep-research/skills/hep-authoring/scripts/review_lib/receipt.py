@@ -113,6 +113,23 @@ def build_context(rv, *, r: int, sid: str, k: int, slot: dict, dispatched: dict,
             "instructions_changed": instructions_changed}
 
 
+def build_filter_context(rv, *, r: int, sid: str, k: int, dispatched: dict, author: str, shared: list[Path],
+                         instructions_changed: bool, finding_ids: list[str], record) -> dict:
+    """The facts a filter record is judged on (contracts.review.filter_receipt_codes)."""
+    adir = rv.attempt_dir(r, sid, k)
+    started = parse_time(dispatched["started"])
+    doc = (rv.project / rv_document(rv)).resolve()
+    probes = U.copy_probes(read_json(rv.units_path(r))["units"])
+    files = {}
+    if isinstance(record, dict):
+        for p in record_paths(record):
+            files[p] = classify(rv, adir, p, started, shared, doc, probes)
+    return {"slot_id": sid, "author": author, "finding_ids": list(finding_ids), "files": files,
+            "dispatched": {"packet_sha256": dispatched["packet_sha256"], "nonce": dispatched["nonce"],
+                           "instructions_sha256": dispatched["instructions_sha256"]},
+            "instructions_changed": instructions_changed}
+
+
 def rv_document(rv) -> str:
     first = rv.events()[0]
     return first["data"]["document"]

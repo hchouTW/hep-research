@@ -4,8 +4,9 @@ the shared state-transition table and the overall check. Pure: nothing here writ
 (skills/hep-authoring/scripts/review.py) and `check` both use these functions, so the state logic exists once.
 
 Schemas (contracts/schemas/): review_config, review_units, review_manifest, review_record, review_event, review_head,
-review_observation. The built-in validator has no oneOf, if/then, maxItems or maximum, so ranges, conditional fields,
-the loose direction of thresholds (weak_config) and every rule that needs more than one field are functions below.
+review_observation, and (contracts 3.4.0) review_filter_record, the record of the optional filtering pass. The built-in
+validator has no oneOf, if/then, maxItems or maximum, so ranges, conditional fields, the loose direction of thresholds
+(weak_config) and every rule that needs more than one field are functions below.
 
 Event log: review_log.jsonl, one canonical JSON record per line {seq, prev_sha256, event, time, data}, each binding the
 canonical SHA-256 (contracts.revocation.canonical_sha256) of the record before it; review_head.json {head_version,
@@ -17,8 +18,9 @@ what the events say: sidecar files and the clock enter through observed events.
 
 Usage:
   review.py check REVIEW_DIR [--project ROOT]        overall check (section 7.4); read-only
-  review.py check --record-only RECORD [--role reviewer|arbiter] [--max-units-per-claim N]
+  review.py check --record-only RECORD [--role reviewer|arbiter|filter] [--max-units-per-claim N]
                                                      schema and context-free rules of one review record
+                                                     (--role filter: a filter record, filter_record.json)
 Output: JSON with a "status" key. Exit 0 ok (warnings may be listed), 1 fail, 2 unreadable input, 3 incomplete
 (not_closed, finding_open).
 """
@@ -71,6 +73,14 @@ REVIEWER_CODES = COMMON_CODES + ("same_identity", "finding_shape", "claim_shape"
                                  "basis_missing", "self_citation", "refutation_weak", "verdict_without_finding",
                                  "unresolved_dominant", "canary_missed", "carry_forward_missing")
 ARBITER_CODES = COMMON_CODES + ("arbiter_identity", "resolves_incomplete", "resolution_type", "resolution_basis")
+# the filter slot of the optional filtering pass (contracts 3.4.0, spec 6.9 and 7.5): it writes no evidence, so
+# output_mismatch never applies
+FILTER_CODES = tuple(c for c in COMMON_CODES if c != "output_mismatch") + ("same_identity", "decisions_incomplete",
+                                                                           "duplicate_target")
+FILTER_DECISIONS = ("keep", "drop")
+FILTER_MAX_ATTEMPTS = 2     # at most; fewer when max_attempts_per_slot is lower
+SIDECAR = "review_record.json"
+FILTER_SIDECAR = "filter_record.json"
 REPAIR_CODES = ("config_changed", "config_out_of_range", "canary_in_deliverable", "isolation_precondition",
                 "isolation_not_yet_effective", "shared_dir_contamination", "change_without_edit")
 CHECK_CODES = {"log_broken": "fail", "not_closed": "incomplete", "changed_after_close": "fail",
@@ -109,6 +119,7 @@ EVENT_FIELDS = {
     "reported": ("report_sha256",),
     "closed": ("report_sha256", "document_sha256"),
     "superseded": ("by", "reason"),
+    "filter_needed": ("round", "slot_id", "model", "findings"),
 }
 TERMINAL = ("closed", "superseded")
 
@@ -174,6 +185,8 @@ def key_in(text: str, key: str) -> bool:
 def effective_config(cfg: dict) -> dict:
     out: dict[str, Any] = {k: v[0] for k, v in CONFIG_RULES.items()}
     out["extra_lenses"] = []
+    out["lens_models"] = {}
+    out["filter"] = None
     out.update({k: v for k, v in (cfg or {}).items()})
     return out
 
@@ -189,6 +202,14 @@ def config_problems(cfg) -> list[str]:
             continue
         if not low <= v <= high:
             out.append(f"{name}: {v} outside the allowed range {low}-{high}")
+    models: list = cfg["models"] if isinstance(cfg.get("models"), list) else []
+    lm = cfg.get("lens_models")
+    if isinstance(lm, dict):
+        for lens, model in sorted(lm.items()):
+            if not re.fullmatch(r"[a-z][a-z0-9-]*", lens):
+                out.append(f"lens_models: {lens!r} is not a lens name")
+            if isinstance(model, str) and model not in models:
+                out.append(f"lens_models.{lens}: {model} is not in models")
     return out
 
 
@@ -526,6 +547,103 @@ def record_metrics(record: dict, ctx: dict) -> dict:
     return m
 
 
+# --- filter records (contracts 3.4.0; spec sections 5.5, 6.9 and 7.5) -------------------------------------------------
+
+def filter_record_rules(record) -> list[tuple[str, str]]:
+    """Problems of one filter record that need no packet: the schema, blank reasons, a finding decided twice, and
+    duplicate_of (only on a drop, naming another finding this record keeps). Used by check --record-only --role
+    filter, by the generator's example validation and by receipt."""
+    if not isinstance(record, dict):
+        return [_p("schema_invalid", "the record is not a JSON object")]
+    errs = validate(record, "review_filter_record.json").errors
+    if errs:
+        return [_p("schema_invalid", f"{e.path}: {e.message}") for e in errs[:20]]
+    out = []
+    if not record["limitations"].strip():
+        out.append(_p("schema_invalid", "$.limitations: must not be blank"))
+    by_id: dict[str, list] = {}
+    for d in record["decisions"]:
+        if not d["reason"].strip():
+            out.append(_p("schema_invalid", f"decision {d['finding_id']}: reason must not be blank"))
+        by_id.setdefault(d["finding_id"], []).append(d["decision"])
+    for fid, ds in by_id.items():
+        if len(ds) > 1:
+            out.append(_p("decisions_incomplete", f"finding {fid}: {len(ds)} decisions (exactly one needed)"))
+    kept = {fid for fid, ds in by_id.items() if set(ds) == {"keep"}}
+    for d in record["decisions"]:
+        if "duplicate_of" not in d:
+            continue
+        if d["decision"] != "drop":
+            out.append(_p("duplicate_target", f"decision {d['finding_id']}: duplicate_of is only for a drop"))
+        elif d["duplicate_of"] == d["finding_id"] or d["duplicate_of"] not in kept:
+            out.append(_p("duplicate_target", f"decision {d['finding_id']}: duplicate_of {d['duplicate_of']} is not "
+                                              "another finding this record keeps"))
+    return out
+
+
+def filter_receipt_codes(record, ctx: dict) -> list[tuple[str, str]]:
+    """Every receipt problem of a filter record (spec 7.5), given the facts the driver gathered (ctx): slot_id,
+    dispatched {packet_sha256, nonce, instructions_sha256}, author, finding_ids (the ids in the packet's findings.json),
+    files {path string: {exists, sha256, forbidden, in_work}}, instructions_changed (bool). A schema problem stops the
+    other rules."""
+    base = filter_record_rules(record)
+    if any(c == "schema_invalid" for c, _ in base):
+        return [p for p in base if p[0] == "schema_invalid"]
+    out = list(base)
+    d = ctx["dispatched"]
+    if record["packet_sha256"] != d["packet_sha256"]:
+        out.append(_p("packet_mismatch", "packet_sha256 differs from the dispatched packet"))
+    if record["dispatch_nonce"] != d["nonce"] or record["instructions_sha256"] != d["instructions_sha256"] \
+            or record["reviewer"]["slot_id"] != ctx["slot_id"]:
+        out.append(_p("dispatch_mismatch", "nonce, instructions_sha256 or slot_id differs from the dispatch"))
+    if record["isolation"]["saw_prior_conversation"]:
+        out.append(_p("prior_conversation", "the filter agent saw a prior conversation"))
+    if record["reviewer"]["identity"].strip() == ctx.get("author"):
+        out.append(_p("same_identity", "the filter agent's identity is the author's"))
+    files = ctx.get("files", {})
+    bad_read = [f"{p['path']} ({files[p['path']]['forbidden']})" for p in record["paths_read"]
+                if (files.get(p["path"]) or {}).get("forbidden")]
+    if bad_read:
+        out.append(_p("read_outside_packet", f"forbidden paths read: {bad_read}"))
+    wrong = [p["path"] for p in record["paths_read"] if (files.get(p["path"]) or {}).get("sha256") != p["sha256"]]
+    if wrong:
+        out.append(_p("file_hash_mismatch", f"whole-file sha256 differs or file missing: {sorted(set(wrong))}"))
+    if ctx.get("instructions_changed"):
+        out.append(_p("instructions_changed", "instruction files or settings changed during the attempt"))
+    ids = set(ctx["finding_ids"])
+    got = {x["finding_id"] for x in record["decisions"]}
+    if ids - got:
+        out.append(_p("decisions_incomplete", f"findings without a decision: {sorted(ids - got)}"))
+    if got - ids:
+        out.append(_p("decisions_incomplete", f"decisions for ids not in findings.json: {sorted(got - ids)}"))
+    return _dedupe(out)
+
+
+def filter_metrics(record: dict) -> dict:
+    ds = record.get("decisions", [])
+    return {"kept": sum(1 for d in ds if d["decision"] == "keep"), "dropped": sum(1 for d in ds if d["decision"] == "drop"),
+            "duplicates": sum(1 for d in ds if d.get("duplicate_of"))}
+
+
+def sidecar_name(st: dict, r: int, sid: str) -> str:
+    """The record file of an attempt folder: filter_record.json for the filter slot, else review_record.json."""
+    return FILTER_SIDECAR if (r, sid) in st.get("filter_slots", {}) else SIDECAR
+
+
+def filter_pool(st: dict) -> list[str]:
+    """The findings the filtering pass judges: every accepted round-1 finding except the control findings closed as
+    auto-canary (they quote mutated text the filter's copy of the document does not contain)."""
+    return sorted(g for g, f in st["findings"].items()
+                  if f["round"] == 1 and not any(x["disposition"] == "auto-canary" for x in f["disposals"]))
+
+
+def filter_needed(st: dict) -> bool:
+    """Spec 6.9: round 1, the configuration names a filter model, no filter slot yet, and at least one finding."""
+    rd = st["rounds"].get(st["round"], {})
+    return bool(effective_config(rd.get("config", {})).get("filter")) and st["round"] == 1 and st.get("filter") is None \
+        and bool(filter_pool(st))
+
+
 def _basis_counts(record):
     out = {"independent": 0, "external": 0, "internal": 0, "tool-output": 0}
     for e in record.get("evidence", []):
@@ -610,6 +728,7 @@ def transition_problems(records: list) -> list[str]:
     atts: dict[tuple, dict] = {}
     items: set = set()
     findings: set = set()
+    filter_slots: set = set()
     for rec in records:
         e, d, s = rec["event"], rec["data"], rec["seq"]
         if out:
@@ -623,12 +742,18 @@ def transition_problems(records: list) -> list[str]:
         elif e == "arbitration_needed":
             slots.add((d["round"], d["slot_id"]))
             items.add(d["item_id"])
+        elif e == "filter_needed":
+            if filter_slots:
+                out.append(f"seq {s}: a second filter_needed")
+            slots.add((d["round"], d["slot_id"]))
+            filter_slots.add((d["round"], d["slot_id"]))
         elif e == "dispatched":
             key = (d["round"], d["slot_id"])
             if key not in slots:
                 out.append(f"seq {s}: dispatched for unknown slot {key}")
             prev = atts.get(key, {})
-            if d["attempt"] != len(prev) + 1 or d["attempt"] > max_att or (prev and prev[max(prev)] is None):
+            limit = min(FILTER_MAX_ATTEMPTS, max_att or 0) if key in filter_slots else max_att
+            if d["attempt"] != len(prev) + 1 or d["attempt"] > limit or (prev and prev[max(prev)] is None):
                 out.append(f"seq {s}: attempt {d['attempt']} out of order for {key}")
             atts.setdefault(key, {})[d["attempt"]] = None
         elif e in ("returned", "accepted", "rejected", "withdrawn", "late"):
@@ -664,7 +789,7 @@ def fold(events: list) -> dict:
     st: dict[str, Any] = {"review_id": None, "document": None, "rounds": {}, "round": 0, "attempts": {}, "arb_slots": {},
           "observed": None, "findings": {}, "verdicts": {}, "items": {}, "escalations": [], "human": {},
           "terminal": None, "author": None, "extra_rounds": 0, "accept_round_limit": False, "resolved_slots": set(),
-          "late": [], "reported": [], "human_seq": {}}
+          "late": [], "reported": [], "human_seq": {}, "filter_slots": {}, "filter": None}
     F, V = st["findings"], st["verdicts"]
     for ev in events:
         e, d = ev["event"], ev["data"]
@@ -693,7 +818,10 @@ def fold(events: list) -> dict:
                 a["returned"] = True
                 continue
             a["outcome"], a["data"] = e, d
-            if e == "accepted" and (d["round"], d["slot_id"]) not in st["arb_slots"]:
+            if e == "accepted" and (d["round"], d["slot_id"]) in st["filter_slots"]:
+                if st["filter"] is not None:
+                    st["filter"]["decisions"] = d.get("decisions")
+            elif e == "accepted" and (d["round"], d["slot_id"]) not in st["arb_slots"]:
                 r, sid = d["round"], d["slot_id"]
                 for f in d.get("findings", []):
                     F[_gid(r, sid, f["id"])] = {"round": r, "slot": sid, "severity": f["severity"], "units": f["units"],
@@ -729,6 +857,9 @@ def fold(events: list) -> dict:
         elif e in ("change_rejected", "change_reverted"):
             if d["finding"] in F:
                 F[d["finding"]]["state"] = "reopened"
+        elif e == "filter_needed":
+            st["filter_slots"][(d["round"], d["slot_id"])] = d["model"]
+            st["filter"] = dict(d, decisions=None)
         elif e == "arbitration_needed":
             st["items"][d["item_id"]] = dict(d, state="dispatched", conclusion=None)
             st["arb_slots"][(d["round"], d["slot_id"])] = d["item_id"]
@@ -805,6 +936,8 @@ def slot_state(st: dict, r: int, sid: str) -> dict:
     """Section 6.2: the state of a slot's latest attempt."""
     cfg = effective_config(st["rounds"][r]["config"]) if r in st["rounds"] else effective_config({})
     max_att = int(cfg["max_attempts_per_slot"])
+    if (r, sid) in st.get("filter_slots", {}):
+        max_att = min(FILTER_MAX_ATTEMPTS, max_att)
     atts = st["attempts"].get((r, sid), {})
     if not atts:
         return {"state": "none", "attempt": 0, "deadline": None}
@@ -863,6 +996,9 @@ def snapshot(st: dict, log_ok: bool = True) -> dict:
     for (rr, sid) in st["arb_slots"]:
         if rr == r:
             slots[sid] = dict(slot_state(st, r, sid), kind="arbiter", resolved=False)
+    for (rr, sid) in st.get("filter_slots", {}):
+        if rr == r:
+            slots[sid] = dict(slot_state(st, r, sid), kind="filter", resolved=False)
     items = {}
     for iid, it in st["items"].items():
         state = it["state"]
@@ -885,7 +1021,7 @@ def snapshot(st: dict, log_ok: bool = True) -> dict:
             "double_verdicts": double_outcome_verdicts(st),
             "doc_differs": bool(obs) and obs.get("document_sha256") != rd.get("source_sha256"),
             "round": r, "round_limit": int(cfg["max_rounds"]) + st["extra_rounds"],
-            "accept_round_limit": st["accept_round_limit"]}
+            "accept_round_limit": st["accept_round_limit"], "filter_needed": filter_needed(st)}
 
 
 # --- decide (section 6.5) --------------------------------------------------------------------------------------------
@@ -933,6 +1069,8 @@ def decide(snap: dict) -> dict:
     if having("dispatched"):
         dl = sorted(v["deadline"] for v in slots.values() if v["state"] == "dispatched")
         return {"row": 8, "action": "await", "deadline": dl[0], "slots": having("dispatched")}
+    if snap.get("filter_needed"):  # row 8a (contracts 3.4.0): only with a filter in the configuration
+        return {"row": "8a", "action": "filter"}
     review = {k: v for k, v in slots.items() if v["kind"] == "review"}
     if any(v["state"] == "exhausted" and not v["resolved"] for v in review.values()):
         return {"row": 9, "action": "escalate", "items": escalation_items(snap)}
@@ -1033,9 +1171,9 @@ def check(review_dir, project: Path | None = None) -> dict:
         for k, a in atts.items():
             adir = review_dir / f"round-{r}" / sid / f"attempt-{k}"
             changed += _packet_changes(adir, a["dispatched"]["packet_sha256"])
-            if a["outcome"] in ("accepted", "rejected") and \
-                    sha256_file(adir / "review_record.json") != a["data"]["review_sha256"]:
-                changed.append(f"{adir.relative_to(review_dir)}/review_record.json")
+            name = sidecar_name(st, r, sid)
+            if a["outcome"] in ("accepted", "rejected") and sha256_file(adir / name) != a["data"]["review_sha256"]:
+                changed.append(f"{adir.relative_to(review_dir)}/{name}")
     if changed:
         add("artifacts_changed", changed)
     open_f = sorted(g for g, f in st["findings"].items() if f["state"] in ("open", "reopened", "declined-pending",
@@ -1122,7 +1260,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("check", help="overall check of a review directory, or --record-only on one record")
     p.add_argument("target", type=Path, help="the review directory, or with --record-only the record file")
     p.add_argument("--record-only", action="store_true")
-    p.add_argument("--role", choices=("reviewer", "arbiter"))
+    p.add_argument("--role", choices=("reviewer", "arbiter", "filter"))
     p.add_argument("--max-units-per-claim", type=int, default=CONFIG_RULES["max_units_per_claim"][0])
     p.add_argument("--project", type=Path, help="project root (default: two levels above the review directory)")
     try:
@@ -1135,7 +1273,8 @@ def main(argv=None) -> int:
         except (OSError, ValueError, UnicodeDecodeError) as exc:
             print(json.dumps({"status": "error", "error": f"unreadable record: {exc}"}))
             return 2
-        probs = record_rules(record, args.role, args.max_units_per_claim)
+        probs = filter_record_rules(record) if args.role == "filter" or (isinstance(record, dict) and record.get(
+            "role") == "filter" and not args.role) else record_rules(record, args.role, args.max_units_per_claim)
         print(json.dumps({"status": "fail" if probs else "ok",
                           "problems": [{"code": c, "message": m} for c, m in probs]}, indent=1, ensure_ascii=False))
         return 1 if probs else 0

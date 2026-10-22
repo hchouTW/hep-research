@@ -27,7 +27,7 @@ forge it. It is advisory input that a human reviewer may cite in their own recor
 |---|---|
 | Driver | `<plugin root>/skills/hep-authoring/scripts/review.py` (`--help` lists every command) |
 | Contract and check | `<plugin root>/contracts/review.py check <review dir>`; `check --record-only RECORD --role reviewer\|arbiter` |
-| Schemas | `<plugin root>/contracts/schemas/` `review_config`, `review_units`, `review_manifest`, `review_record`, `review_event`, `review_head`, `review_observation` |
+| Schemas | `<plugin root>/contracts/schemas/` `review_config`, `review_units`, `review_manifest`, `review_record`, `review_event`, `review_head`, `review_observation`, `review_filter_record` (the filtering pass) |
 | Lens table, host notes | `<plugin root>/skills/hep-authoring/assets/review-lenses.json`, `<plugin root>/skills/hep-authoring/assets/review-hosts.json` |
 | Configuration | `<project>/reviews/review-config.json` (`start` writes one with defaults when missing; `models` is required) |
 | Review directory | `<project>/reviews/<review-id>/`: the event log and head, unit tables, packets, records, the report file (report.md) |
@@ -49,6 +49,20 @@ runs. All review state is in files, so a review resumes after a host restart.
 2. Repeat: run `next`, do the action it prints, run `next` again, until it prints `stop`. When the host reports that
    an agent has finished, run `returned SLOT`.
 
+**Two optional settings** (contracts 3.4.0; spec sections 5.1, 6.9 and A2), both off unless set, and set at `start`
+(they are written to `review-config.json`; `start` refuses to change a configuration another unfinished review uses):
+
+- `--lens-model LENS=MODEL` (repeatable; config `lens_models`) fixes the model of that lens's lens slot in every round,
+  re-review rounds included. MODEL must be in `models`. The lens's shadow keeps the rotation and never shares the
+  fixed model while `models` has another. **Recommended: the strongest model of `models` on the design lens**, for
+  example `--models haiku,sonnet,opus --lens-model design=opus`: in the P3 tuning run Haiku missed the design-lens
+  canaries (repeated values and terms) in 8 of 9 attempts, and 4 of 5 Haiku design-lens slots were exhausted.
+- `--filter-model MODEL` (config `filter`) adds one filtering pass after round 1: one agent of MODEL judges every
+  accepted round-1 finding (controls excepted) as `keep` (the page should change) or `drop` (wrong, a preference, a
+  duplicate or a setup artefact), with a reason. In the P3 tuning run one Opus pass raised precision from 0.53 to 0.88
+  at about 2% of the review's token cost; it kept every substantive issue and lost 4 minor ones. Its decisions are
+  advice: nothing is deleted, and you still verify and dispose every finding.
+
 | `next` prints | Do |
 |---|---|
 | `dispatch` with slots | For each slot: `dispatch SLOT`, then pass the two lines it prints, and only those, to a new agent. On Claude Code name a non-fork subagent type. On a host without subagents, open a new session per slot |
@@ -57,7 +71,8 @@ runs. All review state is in files, so a review resumes after a host restart.
 | `withdraw` | `withdraw SLOT --reason host-failure` or `--reason timeout`, as printed |
 | `repair` | `repair CODE` shows the fix; fix it; `next` confirms |
 | `arbitrate` | `arbitrate` (creates arbitration items and slots; `next` then dispatches them) |
-| `dispose` | Verify each finding, then `dispose FINDING --as ...` (below) |
+| `filter` | `filter` (only with `--filter-model`, after round 1's records are received: creates the filter slot; `next` then dispatches it like any other slot, at most two attempts) |
+| `dispose` | Verify each finding, then `dispose FINDING --as ...` (below). With a filtering pass, `next` also prints its advice per finding (`filter`) |
 | `escalate` | `escalate --reason TEXT`; `next` then asks for `report`; hand the report file (report.md) to a human |
 | `report` | `report` (writes the report file, report.md; it does not close the review) |
 | `rereview` | `rereview` (starts the next round; every change gets a fresh review) |
@@ -99,6 +114,8 @@ as reason) or declined.
   try at least two URL forms (for example the `.md` version and the normal page) and ask for a verbatim quote.
 - If a reviewer gave a verbatim quote you cannot reproduce, dispose `unresolved`, never `declined`.
 - If two or more independent reviewers quote the same verbatim text, say so when you report.
+- A filter `drop` is not a reason to decline by itself: verify the finding as usual; when you decline it, you may cite
+  the filter's reason after you have checked it. A filter `keep` does not verify a finding either.
 - Attach the report file (report.md) unchanged when you report back, with the line on O04/O14 above.
 
 ## Reviewer and arbiter agents
@@ -109,6 +126,13 @@ In short: run the R0 isolation self-check (stop if any prior conversation is vis
 files and public sources; write only in `work/`; skim and judge deep units; give each claim one verdict with external
 evidence where the lens needs it and real refutation attempts; quote the challenged text exactly in `value`; mark
 every carry-forward item on re-review; write `review_record.json.tmp`, check it, then rename it.
+
+The filter agent (with `--filter-model`) reads `findings.json`: the pooled round-1 findings under random ids, with no
+reviewer, slot, lens or model. It writes one decision per finding (`keep` or `drop`, a reason, and `duplicate_of` the
+kept finding for a drop that repeats it) to `filter_record.json`, checked with `check --record-only --role filter`.
+Receipt rejects a record with a finding missing or decided twice, an unknown id (`decisions_incomplete`), or a
+`duplicate_of` that is not a kept finding (`duplicate_target`). After two failed attempts the filter is not applied
+and the report says so; nothing escalates.
 
 The arbiter judges only the items in `items.json` (both verdicts of a conflict in full, or a finding with the author's
 reason for declining it) and writes one conclusion per item: `uphold-finding` or `accept-decline` for a decline,
@@ -130,6 +154,9 @@ for the document under review or files the author wrote for it. The report count
 evidence separately.
 
 ## Check and report
+
+The report lists the configuration (with `lens_models` and `filter` when set) and, with a filtering pass, the findings
+it kept first and the findings it dropped in a separate section with its reasons.
 
 `python3 <plugin root>/contracts/review.py check <review dir>` is read-only. Exit 0 when the review is closed and
 consistent (warnings such as `adopted_unverified`, `no_control`, `canary_shortfall`, `weak_config`,

@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 349050,
+   "bytes": 351752,
    "uncited": 0
   },
   "hep-citations": {
@@ -405,8 +405,8 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 10201,
-   "lines": 141,
+   "bytes": 12903,
+   "lines": 168,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
@@ -414,7 +414,7 @@
     "tests/skills/hep_authoring/test_review_pilot_fixes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "88a40a9a 2026-10-21"
+   "last_commit": "29c2380f 2026-10-22"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -2048,7 +2048,7 @@
     "skills/hep-detector/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "9257d7b5 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2260,7 +2260,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "f7d5722d 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -2598,7 +2598,7 @@
     "hep-detector",
     "hep-theory"
    ],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "ecd989f1 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -3720,7 +3720,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "61920170 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -3807,7 +3807,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "e2cb73b9 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",

@@ -2037,6 +2037,28 @@ that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as co
 | `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4707 tests in 395 modules, 4575 pass, 0 failures, 132 skipped |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4707 tests, 4484 pass, 0 failures, 223 skipped |
 
+## REVIEW-FILTER-PASS (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `feat/review-filter-pass` from main `5350266b`, unreleased)
+
+Two optional settings of the independent review from the P3 tuning run (`p3-tune` report: Haiku design-lens slots
+missed their canaries in 8 of 9 attempts; one Opus filtering pass raised precision from 0.53 to 0.88 at about 2% of the
+review's tokens), contracts 3.4.0. `lens_models` (`start --lens-model LENS=MODEL`) fixes the model of a lens's lens
+slot in every round; `filter` (`start --filter-model M`) adds a filtering pass at decide row 8a, after round 1's
+records are received and before escalation, arbitration and dispose, with the new sidecar format
+`review_filter_record` 1.0.0 (spec sections 5.1, 5.5, 6.9, 7.5, A2, A8). Synthetic data only; no live agent run.
+
+| Check | Result |
+|---|---|
+| New tests: `tests/skills/hep_authoring/test_review_lens_models.py` (7), `test_review_filter_pass.py` (19), `tests/contracts/test_review_filter_contract.py` (20) | 46 pass. Covered: allocation without `lens_models` equal to the 0.22.0 function on 7,848 seed, lens, model, offset and plan combinations and on the harness review; the fixed lens slot and the shadow moving off its model; config and start refusals; an end-to-end review driven by `next` with the filter (one rejected attempt, then accepted), dispose with the filter's advice, a re-review round keeping the fixed design model and running no second filter, close and `check` exit 0; the filter packet holding no slot id, lens, role, model, reviewer name or reviewer finding id; receipt codes for a missing, repeated or unknown id, an unknown decision, `duplicate_of` a dropped finding, same identity, prior conversation, dispatch mismatch, forbidden read and wrong hash; exhaustion after two attempts (not escalated, report says not applied); returned-empty and timeout through rows 5 and 6; `check --record-only --role filter`; `artifacts_changed` on an edited filter record; the spec 5.5 table against the schema; row 8a in an exhaustive slot-state test; the fixtures in `contracts/fixtures/review/` (2 valid, 7 invalid); unchanged behaviour without either option |
+| Unchanged without the options | the P1 end-to-end review (`run_e2e`): review directory and private directory byte-identical to main `5350266b` (172 files, sha256 per file) |
+| `run_all_checks.py --no-cli --jobs 6`, E2 (NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4795 tests in 403 modules, 4663 pass, 0 failures, 132 skipped |
+| Same with the CI lock (NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4795 tests, 4571 pass, 0 failures, 224 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| Contracts 3.4.0 bump | fixtures (`make_fixtures.py`), templates, theory-profile artifacts and examples regenerated (E2; `bc-propagation-fit` with the CI lock): version strings and the hashes that cover them only; `unfolding-coverage` drifted at 1e-14 and was restored |
+
+Both gate runs were on the final tree before this section was written (commit `6113ed8b` plus the report-layout fix
+and the CHANGELOG entry committed after it). Not run: live agent reviews with either option, so the precision gain and
+the design-lens fix are the tuning run's evidence, not this branch's. Skipped tests are unverified, not passed.
+
 ## BDT-BACKEND-GATE (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; CI lock venv with xgboost 3.4.1 and scikit-learn 1.9.1, E2 venv without them; branch `fix/aniso-cl-bdt-gate`)
 
 The tests of `skills/hep-ml/scripts/train_bdt.py` and `export_bdt.py` that need xgboost or scikit-learn, and the BDT

@@ -6,6 +6,8 @@ Baseline: hep-research 0.21.0, contracts 3.2.0 (rechecked 2026-10-21; the design
 
 > Translation note: this is an English translation of `proposal-final.md` (Chinese). Where the spec matches literal Chinese tokens, such as the normative words in §4.3 and the attribution phrases in §4.4, the Chinese tokens are kept, with English glosses, because they are part of the matching rules.
 
+> Amendment (contracts 3.4.0, 2026-10-22): two optional settings from the P3 tuning run (`p3-tune`), both off unless the configuration names them. `lens_models` fixes the model of a lens's lens slot (§5.1, A2). `filter` adds one filtering pass over the accepted round-1 findings (§5.5, §6.9, §7.5, A8). Without them every rule below is unchanged, bit for bit.
+
 ## Purpose of the final edition
 
 This is the final design after ten real review rounds. The last round, on the 12th edition, gave these results:
@@ -59,7 +61,7 @@ Main changes from the 12th edition:
 
 | Component | Location | Contents |
 |---|---|---|
-| Contract | `contracts/review.py`, `contracts/schemas/review_*.json` | Seven schemas: config, unit table, packet manifest, review record, event, head and observation. **The state-transition table and state computation** are pure functions shared by the process driver and `check`, so there are not two implementations that can drift apart. `check` only reads files and produces nothing. |
+| Contract | `contracts/review.py`, `contracts/schemas/review_*.json` | Seven schemas: config, unit table, packet manifest, review record, event, head and observation; since contracts 3.4.0 an eighth, the filter record (§5.5). **The state-transition table and state computation** are pure functions shared by the process driver and `check`, so there are not two implementations that can drift apart. `check` only reads files and produces nothing. |
 | Process driver | `skills/hep-authoring/scripts/review.py` | The commands in the table below, plus sentence splitting, scope assignment, sampling, unit mapping, diff, the canary generator and the instruction-file generator |
 | Lens table | `skills/hep-authoring/assets/review-lenses.json` | Scope rules, canary types and witness rules, and the matching skill review points |
 | Host notes table | `skills/hep-authoring/assets/review-hosts.json` | Isolation preconditions, how to obtain the session start time, the instruction files and settings to record, and the host's shared directories |
@@ -71,7 +73,7 @@ Main changes from the 12th edition:
 
 | Command | Purpose |
 |---|---|
-| `start DOC [--supersede ID --reason TEXT]` | Start a review: split sentences, assign scope, sample, and allocate slots and models |
+| `start DOC [--supersede ID --reason TEXT] [--lens-model LENS=MODEL ...] [--filter-model M]` | Start a review: split sentences, assign scope, sample, and allocate slots and models. `--lens-model` (repeatable) and `--filter-model` set `lens_models` and `filter` in the configuration (§5.1); start refuses them when the change would alter a configuration that another unfinished review uses |
 | `next` | Run observe, then decide, and print the next action |
 | `dispatch SLOT` | Build this attempt's packet with its canaries, seed and instruction file, validate the example, produce the dispatch message, and write a `dispatched` event |
 | `returned SLOT` | Run by the author agent when the host reports that an agent has finished |
@@ -79,6 +81,7 @@ Main changes from the 12th edition:
 | `withdraw SLOT --reason R` | Withdraw an attempt |
 | `dispose FINDING --as X --reason TEXT [--verified EVID \| --adopted-unverified]` | Handle a finding. X is `changed`, `partially-changed`, `declined` or `unresolved`. Only `changed` and `partially-changed` must carry `--verified` or `--adopted-unverified`. |
 | `arbitrate` | Create arbitration items and arbitration slots |
+| `filter` | Create the filter slot over the pooled round-1 findings (§6.9); only when decide row 8a asks for it |
 | `rereview` | Start the next round |
 | `repair CODE` | List how to fix a repair code; the next `next` confirms the fix |
 | `escalate --reason TEXT` | Write an `escalated` event |
@@ -114,18 +117,20 @@ decide can also print two actions that **do not map to a command**: `await` mean
           units.json
           scope.json
           items.json           arbitration slots only: arbitration items (§5.2)
+          findings.json        filter slot only: the pooled round-1 findings under random ids (§5.2, §6.9)
         work/                  the only working directory for this attempt
-        review_record.json
+        review_record.json     (filter_record.json for the filter slot, §5.5)
     report.md
 
 <private_dir>/<review-id>/
   slots.json                   mapping of slot_id to role
   round-<n>/<slot_id>/attempt-<k>/
     canary.json                canaries, key diffs and witnesses
+    filter_ids.json            filter slot only: random finding id -> finding reference
     sample_seed
 ```
 
-- `slot_id` is a randomly assigned label (S1, S2, …). Directory names reveal neither the role nor how slots relate to each other. There are three roles: lens, shadow and arbiter.
+- `slot_id` is a randomly assigned label (S1, S2, …). Directory names reveal neither the role nor how slots relate to each other. There are three roles: lens, shadow and arbiter; with a `filter` in the configuration, a fourth, filter (§6.9).
 - `packet_sha256` is the sha256 of `manifest.json`.
 
 ## 4. Units, scope and sampling
@@ -201,10 +206,13 @@ The report records the share of substantive units, and P3 calibrates it.
 | `canaries_per_slot` | 2 | 1–3 | Provisional; lower is looser |
 | `extra_lenses[]` | empty | additions only | — |
 | `private_dir` | see §2 | must be outside the project tree and the host's shared directories | — |
+| `lens_models` | empty | lens name → model; every model must be in `models[]`, every lens in the lens table (or `extra_lenses`) | Contracts 3.4.0. P3 tuning: design-lens slots run by Haiku missed their canaries in 8 of 9 attempts, so 4 of 5 were exhausted. Recommended: the strongest model in `models[]` on the design lens (A2) |
+| `filter` | absent | `{"model": M}`; any model name | Contracts 3.4.0. P3 tuning: one Opus filtering pass raised precision from 0.53 to 0.88 at about 2% of the review's token cost (§6.9) |
 
 - Python rules check the allowed ranges. Any out-of-range value triggers `config_out_of_range`.
 - When any quality threshold is **looser than its default** (the last column above gives the loose direction), a `weak_config` warning is raised and written into the report. For example, setting `unresolved_max_ratio` to 0.49 triggers it even though 0.49 is inside the allowed range.
 - Every value marked "provisional" is on the P3 calibration list. The report prints the full configuration actually used.
+- `lens_models` and `filter` are not quality thresholds: they never trigger `weak_config`. A `lens_models` model outside `models[]`, or a key that is not a lens name, is `config_out_of_range`. Without either field the configuration is read exactly as in contracts 3.3.0.
 
 ### 5.2 Packets
 
@@ -233,6 +241,7 @@ The report records the share of substantive units, and P3 calibrates it.
   - for a decline: the full finding and the author's reason for declining.
 
   Arbitration slots **can see the verdicts under arbitration**; arbitration cannot work otherwise. Apart from that, like every other slot, they see no verdict unrelated to their items.
+- **The filter slot** (§6.9) gets `manifest.json`, `instructions.md`, `document.md` (this round's document without canaries), `units.json` (no lens scope, no roles), `scope.json` (`slot_id`, `lens` null, `role` `filter`, `finding_ids[]`) and **`findings.json`**: every pooled finding with `id`, `kind`, `severity`, `units[]`, `unit_texts`, `value`, `correction`, `description` and `fix`. The ids are random (`P` plus hex digits, new for every attempt) and the order is shuffled with the attempt seed. The packet carries **no reviewer identity**: no slot id, lens, role or model of the slot that raised a finding, no reviewer name and no finding id from the reviewer's record. The mapping from random ids to findings stays in the private directory (`filter_ids.json`).
 - **No slot's packet contains**:
   - the dispatch message;
   - the hash of the original document;
@@ -302,6 +311,23 @@ All field names use `slot_id` and `carry_forward` consistently; no other spellin
 | `change_reverted` | Finding reference. Written by the pre-close check |
 | `closed`, `superseded` | Terminal events. `closed` records `report_sha256` and the delivered document's hash |
 | `reported` | The report hash. Not a terminal event |
+| `filter_needed` | Contracts 3.4.0: round, slot_id, model, `findings` (the pooled finding references). Written by `filter`; creates the filter slot. The filter slot's `accepted` event also carries `decisions[]` (`finding`, `decision`, `reason`, `duplicate_of`), with the random ids mapped back to finding references |
+
+### 5.5 Filter record `review_filter_record` (1.0.0)
+
+Contracts 3.4.0. The filter agent writes `filter_record.json` in its attempt folder (`.tmp` first, checked with `check --record-only --role filter`, then renamed). `contracts/schemas/review_filter_record.json` is the single source of field names; the instruction file and its example are generated from it.
+
+| Field | Contents |
+|---|---|
+| `packet_sha256`, `dispatch_nonce`, `instructions_sha256` | Filled in using the methods in the instruction file |
+| `role` | Always `filter` |
+| `reviewer` | `identity`, `context` (`fresh` or `human`), `model`, `host`, `slot_id`. **Self-reported** |
+| `isolation` | `saw_prior_conversation`, `host_injected[]`, and `instruction_files_seen[]` or `unknown`. **Self-reported** |
+| `paths_read[]` | `path` and the whole file's `sha256` |
+| `decisions[]` | One per finding in `findings.json`: `finding_id`, `decision` (`keep`, `drop`), `reason` (must not be blank), and `duplicate_of` (optional, only on a drop: the id of a kept finding it repeats) |
+| `limitations` | Required |
+
+**Rules** (Python, `contracts/review.py` `filter_record_rules` and `filter_receipt_codes`): every finding in `findings.json` has exactly one decision and no decision names another id; a reason is never blank; `duplicate_of` appears only on a drop and names another finding the same record keeps. `keep` means the page should change; `drop` means the finding is wrong, a matter of preference, a duplicate or an artefact of the review setup.
 
 ## 6. State machine
 
@@ -327,6 +353,8 @@ Only the slot's **latest attempt** is considered.
 | `exhausted` | The latest attempt is `rejected` or `withdrawn`, and all attempts are used up |
 
 Precedence when determining state: `exhausted` > `rejected`/`withdrawn` > `accepted` > `submitted` > `returned-empty` > `overdue` > `dispatched` > `none`.
+
+The filter slot (§6.9) has at most min(2, `max_attempts_per_slot`) attempts.
 
 ### 6.3 Finding states
 
@@ -363,6 +391,7 @@ When an arbitration slot becomes `exhausted`, its items become `unresolved` dire
 | 6 | A slot is `overdue` | `withdraw --reason timeout` |
 | 7 | A slot is `none`, or `rejected`/`withdrawn` with attempts left | `dispatch` (all of them listed at once) |
 | 8 | A slot is `dispatched` | `await`, with the earliest deadline |
+| 8a | Contracts 3.4.0, only with `filter` in the configuration: round 1, no filter slot yet, and at least one pooled finding (§6.9) | `filter` |
 | 9 | A lens or shadow slot is `exhausted` | `escalate` |
 | 10 | All lens and shadow slots are accepted, and an arbitration item is `needed` (including a high finding that was just declined) | `arbitrate` |
 | 11 | An arbitration item is `unresolved`, or a finding is `unresolved` | `escalate` |
@@ -370,7 +399,7 @@ When an arbitration slot becomes `exhausted`, its items become `unresolved` dire
 | 13 | The delivered document differs from this round's `source_sha256` | Below the round limit: `rereview`; at the limit: `escalate` |
 | 14 | None of the above | `close`: run the pre-close check (§6.7). If it passes, produce the report and write `closed`. If not, write `change_reverted`, and the next decide returns to row 12 |
 
-- Arbitration slots go through rows 4 to 8 like any other slot. Row 9 covers only lens and shadow slots. When an arbitration slot becomes `exhausted`, its arbitration items become `unresolved`, and row 11 handles them.
+- Arbitration slots and the filter slot go through rows 4 to 8 like any other slot. Row 9 covers only lens and shadow slots; an exhausted filter slot is never escalated (§6.9). When an arbitration slot becomes `exhausted`, its arbitration items become `unresolved`, and row 11 handles them.
 - When `receive` receives an arbitration record, it automatically writes `arbitration_resolved` and updates the states of findings and verdicts.
 - The P1 exhaustive test enumerates every combination of slot, arbitration-item and finding states and confirms three things:
   - every combination maps to a row;
@@ -405,6 +434,16 @@ Note: if this round has any changed finding, the delivered document always diffe
 ### 6.8 Round limit
 
 If the last round still has changes, the review escalates. This is deliberate: every change must pass a fresh review before the review can close. The report states the reason for the escalation.
+
+### 6.9 Filtering pass (contracts 3.4.0, optional)
+
+With `filter: {"model": M}` in the configuration, one agent of model M judges the accepted round-1 findings before the author disposes them.
+
+- **Pool**: every finding of an accepted round-1 lens or shadow record, except the control findings closed as `auto-canary` (they quote mutated text the filter's copy of the document does not contain). With an empty pool there is no filtering pass.
+- **Where it sits**: decide row 8a, after rows 4 to 8 (so every round-1 lens and shadow slot is accepted or exhausted: round 1's records are all received) and before row 9 (escalate an exhausted slot), row 10 (arbitrate) and row 12 (dispose). It must come after receipt, because the pool is the received findings; it comes before dispose, because its purpose is to help the author dispose; it comes before arbitration and escalation so that it runs once, on the whole of round 1, without waiting for a human. It changes no finding, verdict or arbitration state: arbitration items are still formed from every accepted verdict and every declined high finding, and every finding is still disposed by the author.
+- **Flow**: `next` prints `filter`; `filter` writes `filter_needed` and creates the filter slot (role `filter`, the configured model); rows 4 to 8 dispatch, receive, withdraw and re-dispatch it like any other slot, with at most min(2, `max_attempts_per_slot`) attempts. When it is exhausted, the filter is not applied: nothing escalates, the report says so, and the review goes on unfiltered.
+- **Result**: the decisions are advice. `next` attaches them to the `dispose` action (`filter`: finding → decision, reason, duplicate_of). The report lists the kept findings first and the dropped findings in a separate section with their reasons (A8). Nothing is deleted.
+- **Only round 1**: re-review rounds have no filtering pass; their findings are few and concern the author's own changes.
 
 ## 7. Rules
 
@@ -487,6 +526,19 @@ If the session start time cannot be obtained, `isolation_not_yet_effective` is n
 | `weak_config` | A quality threshold is set at the loosest end of its allowed range | warning |
 | `superseded_reviews`, `late_records` | Other review-ids for the same delivered document; records that appeared after withdrawal | listed in the report |
 
+### 7.5 Receipt rules (filter slot)
+
+Contracts 3.4.0. Skim, deep, canary and evidence rules do not apply.
+
+| Code | Condition |
+|---|---|
+| Common | `schema_invalid`, `packet_mismatch`, `dispatch_mismatch`, `prior_conversation`, `read_outside_packet`, `file_hash_mismatch`, `instructions_changed` (as in §7.1; the forbidden paths are the same) |
+| `same_identity` | The filter agent's identity is the same as the author's |
+| `decisions_incomplete` | A finding in `findings.json` has no decision or more than one, or a decision names an id that is not in `findings.json` |
+| `duplicate_target` | `duplicate_of` is on a keep, or names a finding that this record does not keep (a dropped finding, the finding itself, or an unknown id) |
+
+A decision outside `keep` and `drop`, or a blank reason, is `schema_invalid`.
+
 ## 8. Automation
 
 ### A1. Process
@@ -521,6 +573,7 @@ If the session start time cannot be obtained, `isolation_not_yet_effective` is n
 - Fixed lenses: `facts`, `design`, `sources`, `bypass`. Domain lenses are added automatically by keyword. The author can only add lenses with `extra_lenses`, never remove them.
 - Each lens has one shadow slot. Arbitration slots are created as needed.
 - Models are assigned in rotation. Where possible, a shadow uses a different model from its main lens, and an arbiter uses a different model from both parties under arbitration.
+- **Per-lens model (contracts 3.4.0)**: `lens_models` (set with `start --lens-model LENS=MODEL`) fixes the model of that lens's **lens slot** in every round, re-review rounds included. Its shadow keeps the rotation; when the rotation would give the shadow the lens slot's fixed model and `models[]` has another, the shadow takes the next model in the rotation. Lenses not named, and every allocation without `lens_models`, are unchanged bit for bit. Recommendation from the P3 tuning run: put the strongest model of `models[]` on the design lens (`--lens-model design=<strongest>`), since Haiku missed the design canaries (repeated values and terms) in 8 of 9 attempts.
 
 ### A3. Recomputation and verification
 
@@ -640,6 +693,7 @@ Instruction files and settings are recorded once at each `dispatched` and once a
   - the witnesses, in two parts: original right and new wrong;
   - the slots with `canary_shortfall` or `no_control`;
 - shadow review results;
+- with a `filter` configured (contracts 3.4.0): the filtering pass (slot, model, attempts and reasons, applied or not applied, kept and dropped counts); then the findings it kept, with its reasons, and the findings it did not judge, followed by a separate section of the findings it dropped, with its reasons and `duplicate_of`. Nothing is deleted;
 - each finding's disposition, and whether the author verified it;
 - arbitration conclusions, `change_reverted`, `change_confirmed`, `change_rejected`, `late` and `returned-empty`;
 - the list of tool outputs the host saved automatically during attempts;
@@ -768,6 +822,8 @@ Guarding against these needs something the author cannot change: external custod
 - P1 has only facts and design canaries. In P1, the sources and bypass slots are all `no_control`, and the report marks them; their quality can only be judged from the other rules and the shadow review.
 - For slots dispatched in parallel, the tool outputs the host saves automatically fall in the same time window, and the mechanism cannot tell which slot a file belongs to. A reviewer may read another slot's tool output during its attempt.
 - A reviewer's identity is a self-reported name, so `same_identity` and `arbiter_identity` catch only identical names.
+- The filtering pass (§6.9) is checked only for structure: one decision per finding, a reason, and a consistent `duplicate_of`. Whether a decision is right is not checked, which is why it is advice and nothing is deleted. In the P3 tuning run it lost 4 minor real issues out of 17.
+- The filter packet hides who raised a finding, but a reviewer may still name itself in a finding's free text.
 
 ## 11. Implementation order
 
@@ -893,5 +949,7 @@ Start P1 in the order of §11. When P1 is done, use its end-to-end example to re
 | Packet `units.json` | The allow-list in §5.2, with no hashes |
 | `scope.json`, `items.json` | See §5.2 |
 | `canary.json` (private) | Per canary: `unit`, `original`, `mutated`, `old_key`, `new_key`, `witness_right`, `witness_wrong` |
-| `slots.json` (private) | Mapping of `slot_id` to role (lens, shadow, arbiter) and model |
+| `slots.json` (private) | Mapping of `slot_id` to role (lens, shadow, arbiter, filter) and model |
+| `filter_ids.json` (private, contracts 3.4.0) | Per filter attempt: `ids`, random finding id → finding reference (`<round>/<slot_id>/<finding id>`) |
+| Packet `findings.json` (filter slot) | See §5.2 |
 | `sample_seed` (private) | The round seed and each attempt's seed |

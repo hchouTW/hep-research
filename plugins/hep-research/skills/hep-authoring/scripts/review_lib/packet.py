@@ -3,7 +3,8 @@
 instructions.md is assembled from contracts/schemas/review_record.json (field names, enums, required fields and
 descriptions, the evidence-basis table), the configuration and the slot role; only the task paragraph comes from the
 lens table. The output example is then extracted from the instructions.md actually written and checked with the same
-rules as check --record-only; the build stops when it fails.
+rules as check --record-only; the build stops when it fails. The filter slot of the optional filtering pass (contracts
+3.4.0, spec 6.9) gets its own instruction file, generated the same way from contracts/schemas/review_filter_record.json.
 """
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ import json
 import re
 from pathlib import Path
 
-from contracts.review import ALLOWED_CONCLUSIONS, ROLE_REQUIRED, record_rules
+from contracts.review import ALLOWED_CONCLUSIONS, FILTER_SIDECAR, ROLE_REQUIRED, filter_record_rules, record_rules
 from contracts.schema import load_schema
 from review_lib.store import ReviewError, dumps
 
@@ -216,6 +217,88 @@ def render_instructions(*, kind: str, lens: str, lens_info: dict, scope: dict, r
     return "\n".join(lines)
 
 
+def filter_example_record(slot_id: str) -> dict:
+    """The output example of the filter role; it passes check --record-only --role filter."""
+    h = "0123456789abcdef" * 4
+    return {"packet_sha256": h, "dispatch_nonce": "n0nce-from-dispatch-line", "instructions_sha256": h, "role": "filter",
+            "reviewer": {"identity": "filter-agent-1", "context": "fresh", "model": "model-name", "host": "claude-code",
+                         "slot_id": slot_id},
+            "isolation": {"saw_prior_conversation": False, "host_injected": ["memory file"], "instruction_files_seen": "unknown"},
+            "paths_read": [{"path": "packet/document.md", "sha256": h}, {"path": "packet/findings.json", "sha256": h}],
+            "decisions": [{"finding_id": "Pa1b2c3d4", "decision": "keep",
+                           "reason": "The cited range does not contain the definition; the page should cite 120-121."},
+                          {"finding_id": "P5e6f7a8b", "decision": "drop", "duplicate_of": "Pa1b2c3d4",
+                           "reason": "The same wrong range as Pa1b2c3d4, reported again."},
+                          {"finding_id": "P9c0d1e2f", "decision": "drop",
+                           "reason": "A wording preference; the statement is correct as written."}],
+            "limitations": "Judged from the packet and the cited plugin files only; URLs not fetched."}
+
+
+def render_filter_instructions(*, scope: dict, review_id: str, round_: int, attempt: int, plugin: Path = PLUGIN,
+                               example: dict | None = None) -> str:
+    """instructions.md of the filter slot: the R0 check, the read rules, the task, the fields of
+    review_filter_record.json, the receipt rules and an example."""
+    schema = load_schema("review_filter_record.json")
+    lines = [f"# Filter instructions: slot {scope['slot_id']}", "",
+             f"Review packet {review_id}, round {round_}, attempt {attempt}. Role: `filter`.", ""]
+    lines += ["## R0 isolation self-check", "",
+              "Before anything else: if any earlier conversation is visible to you, set "
+              "`isolation.saw_prior_conversation` to true, write the record and stop. Record the categories of content the "
+              "host added to your context in `isolation.host_injected`, and the instruction files you can see in "
+              "`isolation.instruction_files_seen` (or `unknown`).", ""]
+    lines += ["## Read rules and working directory", "",
+              "- This file is in your packet folder. Its parent is your attempt folder; `work/` there is your only "
+              "working directory. Write every file you create in `work/`.",
+              "- Read the packet files freely. You may read files of the hep-research plugin and public web pages to "
+              "check a finding; save a copy of every fetched page in `work/`.",
+              "- Never read any other copy or version of the document under review (review the packet's document.md "
+              "only), the private review directory, the review event log, other slots' or other attempts' folders, the "
+              "author's traceability records, or the mechanism's implementation files "
+              "(skills/hep-authoring/scripts/review*.py, skills/hep-authoring/scripts/review_lib/, "
+              "skills/hep-authoring/assets/review-lenses.json, skills/hep-authoring/assets/review-hosts.json, "
+              "contracts/review.py). Files in a host shared directory that existed before your attempt started are also "
+              "forbidden.",
+              "- List every local file you read in `paths_read` with the sha256 of the whole file (`sha256sum FILE`).",
+              ""]
+    lines += ["## Your task", "",
+              "findings.json lists findings that independent reviewers raised on document.md. Each has an id, the units "
+              "it cites with their text (`unit_texts`), the challenged text (`value`), the proposed `correction`, a "
+              "`description` and a `fix`. Who raised a finding is not given, and the order is random.",
+              "",
+              "For every finding write exactly one decision:",
+              "",
+              "- `keep`: the page should change; the finding names a real problem, even when its proposed fix is not the "
+              "best one.",
+              "- `drop`: the page should not change for it: the finding is wrong, a matter of preference, a duplicate of "
+              "another finding, or an artefact of the review setup (for example a complaint about a file or page the "
+              "packet does not contain).",
+              "",
+              "Give a reason for every decision. When you drop a finding because it repeats another, keep one of them "
+              "and name the kept finding's id in `duplicate_of`. Nothing is deleted: the author still sees every "
+              "finding, and the report lists your drops apart with your reasons.", ""]
+    lines += [f"## Output: {FILTER_SIDECAR}", "",
+              f"Write the record as JSON to `{FILTER_SIDECAR}.tmp` in your attempt folder, check it with",
+              "", "```", f"python3 {plugin / 'contracts' / 'review.py'} check --record-only {FILTER_SIDECAR}.tmp --role filter",
+              "```", "", f"and rename it to `{FILTER_SIDECAR}` only after the check passes. Fields marked self-reported "
+              "cannot be verified by the script.", ""]
+    lines += ["### Fields", ""] + _fields_table(schema, schema["required"]) + [""]
+    for sub in ("reviewer", "isolation"):
+        lines += [f"### `{sub}`", ""] + _fields_table(schema["properties"][sub], schema["properties"][sub]["required"]) + [""]
+    d = schema["$defs"]["decision"]
+    lines += ["### `decision` entries", ""] + _fields_table(d, d["required"]) + [""]
+    lines += ["## Receipt rules", "",
+              "- `schema_invalid`, `packet_mismatch`, `dispatch_mismatch`, `prior_conversation`, `same_identity` (your "
+              "identity must differ from the author's), `read_outside_packet`, `file_hash_mismatch`, "
+              "`instructions_changed`: see the fields and read rules above.",
+              f"- `decisions_incomplete`: exactly one decision for each of the {len(scope['finding_ids'])} findings in "
+              "findings.json, and none for any other id.",
+              "- `duplicate_target`: `duplicate_of` only on a `drop`, naming another finding you `keep`.", ""]
+    ex = example if example is not None else filter_example_record(scope["slot_id"])
+    lines += [EXAMPLE_HEAD, "", "Finding ids, paths and hashes below are placeholders; use the ones of your packet.", "",
+              "```json", json.dumps(ex, indent=1, ensure_ascii=False), "```", ""]
+    return "\n".join(lines)
+
+
 def extract_example(text: str):
     """The JSON example after the output-example heading of an instructions.md."""
     part = text.split(EXAMPLE_HEAD, 1)
@@ -233,19 +316,22 @@ def validate_written_example(path: Path, role: str, max_units: int) -> None:
         ex = extract_example(path.read_text(encoding="utf-8"))
     except ValueError as exc:
         raise ReviewError(f"generated instructions: the output example cannot be read ({exc})") from exc
-    probs = record_rules(ex, role, max_units)
+    probs = filter_record_rules(ex) if role == "filter" else record_rules(ex, role, max_units)
     if probs:
         raise ReviewError(f"generated instructions: the output example fails check --record-only: {probs[0]}")
 
 
 def write_packet(pdir: Path, *, slot_id: str, document: str, units: list[dict], scope: dict, items: list | None,
-                 instructions: str) -> dict:
-    """Write the packet files and manifest.json; return {packet_sha256, instructions_sha256}."""
+                 instructions: str, extra: dict | None = None) -> dict:
+    """Write the packet files and manifest.json; return {packet_sha256, instructions_sha256}. extra: more JSON files
+    by name (the filter slot's findings.json)."""
     pdir.mkdir(parents=True, exist_ok=True)
     files = {"document.md": document, "units.json": dumps({"slot_id": slot_id, "units": units}),
              "scope.json": dumps(scope), "instructions.md": instructions}
     if items is not None:
         files["items.json"] = dumps({"items": items})
+    for name, obj in (extra or {}).items():
+        files[name] = dumps(obj)
     entries = []
     for name in sorted(files):
         data = files[name].encode("utf-8")

@@ -1,0 +1,44 @@
+{
+ "packet_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+ "dispatch_nonce": "synthetic-nonce",
+ "instructions_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+ "role": "filter",
+ "reviewer": {
+  "identity": "synthetic-filter-agent",
+  "context": "fresh",
+  "model": "synthetic-model",
+  "host": "synthetic-host",
+  "slot_id": "S9"
+ },
+ "isolation": {
+  "saw_prior_conversation": false,
+  "host_injected": [],
+  "instruction_files_seen": "unknown"
+ },
+ "paths_read": [
+  {
+   "path": "packet/findings.json",
+   "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  }
+ ],
+ "decisions": [
+  {
+   "finding_id": "P00000001",
+   "decision": "keep",
+   "reason": "synthetic: the page should change",
+   "slot_id": "S1"
+  },
+  {
+   "finding_id": "P00000002",
+   "decision": "drop",
+   "duplicate_of": "P00000001",
+   "reason": "synthetic: repeats P00000001"
+  },
+  {
+   "finding_id": "P00000003",
+   "decision": "drop",
+   "reason": "synthetic: a preference"
+  }
+ ],
+ "limitations": "SYNTHETIC structural fixture; values are placeholders, not physics"
+}

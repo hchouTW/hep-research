@@ -1,0 +1,30 @@
+{
+ "note": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "valid": [
+  "filter_record.json",
+  "filter_record_all_kept.json"
+ ],
+ "invalid": {
+  "filter_record_blank_reason.json": [
+   "schema_invalid"
+  ],
+  "filter_record_duplicate_of_dropped.json": [
+   "duplicate_target"
+  ],
+  "filter_record_duplicate_of_on_keep.json": [
+   "duplicate_target"
+  ],
+  "filter_record_repeated_decision.json": [
+   "decisions_incomplete"
+  ],
+  "filter_record_reviewer_identity_in_decision.json": [
+   "schema_invalid"
+  ],
+  "filter_record_unknown_decision.json": [
+   "schema_invalid"
+  ],
+  "filter_record_wrong_role.json": [
+   "schema_invalid"
+  ]
+ }
+}

@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| hep-authoring | 49 | 349 | 0 |
+| hep-authoring | 49 | 352 | 0 |
 | hep-citations | 11 | 83 | 0 |
 | hep-computing | 35 | 298 | 0 |
 | hep-detector | 38 | 496 | 0 |
@@ -107,7 +107,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `general-diagram-principles.md` | hep-authoring | 7.8 | no | 2 | - | ebb58136 2026-10-19 |
 | `grant-and-fellowship-proposal-writing.md` | hep-authoring | 4.8 | no | 1 | - | ebb58136 2026-10-19 |
 | `graphviz-patterns.md` | hep-authoring | 3.5 | no | 2 | - | ebb58136 2026-10-19 |
-| `independent-review.md` | hep-authoring | 10.2 | yes | 3 | - | 88a40a9a 2026-10-21 |
+| `independent-review.md` | hep-authoring | 12.9 | yes | 3 | - | 29c2380f 2026-10-22 |
 | `latex-mechanics-and-tooling.md` | hep-authoring | 13.4 | no | 7 | - | ebb58136 2026-10-19 |
 | `latex-venue-setup.md` | hep-authoring | 30.4 | yes | 13 | - | 4eae529b 2026-10-22 |
 | `legends-panels-and-export.md` | hep-authoring | 6.6 | no | 2 | - | ebb58136 2026-10-19 |
@@ -198,7 +198,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 14 | hep-measurement | 9257d7b5 2026-10-15 |
 | `event-reconstruction.md` | hep-detector | 12.7 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
-| `front-end-electronics-and-signal-processing.md` | hep-detector | 25.1 | yes | 12 | - | fcc1034c 2026-10-22 |
+| `front-end-electronics-and-signal-processing.md` | hep-detector | 25.1 | yes | 12 | - | 9257d7b5 2026-10-15 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `geant4-study-protocol.md` | hep-detector | 19.8 | no | 9 | hep-citations | 7013f194 2026-10-21 |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |
@@ -208,7 +208,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `neutrino-astronomy.md` | hep-detector | 10.2 | no | 7 | hep-statistics | 9257d7b5 2026-10-15 |
 | `noble-liquid-neutrino-and-rare-event-detectors.md` | hep-detector | 12.5 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `nuclear-interactions-in-detector-material.md` | hep-detector | 4.3 | yes | 4 | hep-theory | c3afd32c 2026-10-17 |
-| `particle-identification.md` | hep-detector | 18.7 | yes | 24 | hep-measurement | fcc1034c 2026-10-22 |
+| `particle-identification.md` | hep-detector | 18.7 | yes | 24 | hep-measurement | f7d5722d 2026-10-17 |
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 18.5 | no | 11 | - | 9257d7b5 2026-10-15 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 11 | - | 9257d7b5 2026-10-15 |
@@ -221,7 +221,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-design.md` | hep-measurement | 13.1 | yes | 17 | hep-computing, hep-detector | fe71ebcf 2026-10-17 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `backgrounds.md` | hep-measurement | 5.9 | yes | 26 | hep-detector | ccc1eb2a 2026-10-17 |
-| `correction-chain.md` | hep-measurement | 15.6 | yes | 15 | hep-detector, hep-theory | fcc1034c 2026-10-22 |
+| `correction-chain.md` | hep-measurement | 15.6 | yes | 15 | hep-detector, hep-theory | ecd989f1 2026-10-17 |
 | `cosmic-ray-measurements.md` | hep-measurement | 23.5 | yes | 5 | - | 3c10ac23 2026-10-22 |
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 12 | hep-computing | 9257d7b5 2026-10-15 |
 | `hep-measurement-guide.md` | hep-measurement | 16.4 | yes | 10 | hep-detector | 73b525a2 2026-10-21 |
@@ -280,11 +280,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
-| `nuisance-modeling.md` | hep-statistics | 20.6 | yes | 9 | hep-measurement | fcc1034c 2026-10-22 |
+| `nuisance-modeling.md` | hep-statistics | 20.6 | yes | 9 | hep-measurement | 61920170 2026-10-22 |
 | `roofit-and-roostats-methods.md` | hep-statistics | 7.6 | yes | 5 | - | 09237aee 2026-10-17 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.8 | yes | 11 | hep-authoring, hep-citations, hep-computing, hep-theory | ebb58136 2026-10-19 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | - | 578c12ff 2026-10-13 |
-| `time-series-inference.md` | hep-statistics | 20.2 | yes | 15 | hep-detector, hep-measurement | fcc1034c 2026-10-22 |
+| `time-series-inference.md` | hep-statistics | 20.2 | yes | 15 | hep-detector, hep-measurement | e2cb73b9 2026-10-17 |
 | `unfolding.md` | hep-statistics | 7.9 | yes | 27 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
 | `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |
