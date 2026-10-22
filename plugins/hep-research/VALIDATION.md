@@ -2578,6 +2578,23 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## 0.25.1 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.25.1` from main `ed1f19d9` (#222 architecture clean-up edition; #223 value gate of the
+cross-artifact check, AI-planted, I = 0 of 28, outcome Stop chosen by the maintainer, checker marked experimental;
+main CI green). Patch release, contracts 3.7.0 unchanged; no behavior change; no ledger entry or advisory changes
+release (none is unreleased). The ams02-research companion (requires hep-research `>=0.11.0`) needs no change.
+
+What changed: version 0.25.1 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.25.1`. Examples regenerated (E2;
+`bc-propagation-fit` with the CI lock): only version strings and the hashes that cover them change;
+`unfolding-coverage` drifted at 1e-14 and was restored.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4955 tests in 410 modules, 4819 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4955 tests, 4727 pass, 0 failures, 228 skipped |
+
 ## 0.25.0 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.25.0` from main `0414f783` (#220 cross-artifact check Phase 0, release R1: version guard,

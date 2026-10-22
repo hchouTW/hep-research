@@ -3,7 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.25.1 (2026-10-22)
+
+Patch release: the cross-artifact check's value gate and the owner's Stop decision; no artifact contract change
+(contracts 3.7.0) and no behavior change.
 
 - **The cross-artifact analysis check is experimental.** Its value gate (`docs/dev/cross-artifact-check/
   decision-value-gate.md`; harness in the repository's `evals/cross-artifact-value-gate/`) found that it caught none
