@@ -77,7 +77,12 @@
 
 | 提供者 | 介面 | 任務 C 的用法 |
 |---|---|---|
-| 任務 A | 區塊 batch means、SE、精確區間、IUT 閘門（A1.6–A1.8）、兩階段事件數（A1.9） | F1、F2 的目標估計與確認判定 |
+| 任務 A | `core/stats/batch_means.py`（區塊 batch means、SE、精確區間、分位數）、`core/stats/decisions.py`（判定引擎）、`core/simulation/summary.py`；都在 `core/`，adapter 可以 import（任務 A §4.4） | F1、F2 的目標估計；需求判定用 `threshold`，決選者優劣用 `order`，確認與 F0 的比較用 `equivalence` |
+| 任務 A | 兩階段事件數（A1.9） | 確認 run 的事件數 |
+| 任務 A | 配對比較與 seed_group（A1.4、A1.8） | S2 中同一代的設計共用 seed_group，以降低排序的雜訊 |
+| 任務 A | 角色類別：`search-F1`、`search-F2`、`confirmation`（A1.4） | 搜尋 run 不作證據；確認 run 的 S 不等於任何搜尋 run 的 S |
+| 任務 A | `simulation-observables/1`、`values` 累加器（A1.5） | 搜尋 spec 引用同一份觀測量宣告；解析度差很多的設計仍可精確估計分位數 |
+| 任務 A | 不含名稱的 `tree-v1` 與依內容雜湊存放的 effective config（A2.4） | 設計快取；數百個 run 不重複儲存設定 |
 | 任務 A | 種子 H 與 S = H(study_id, role, point_id)（A1.4） | 每個設計評估的 point_id = 設計雜湊；確認 run 的 role 為 `confirmation` |
 | 任務 A | 三個邊界產物、`tree-v1`（A2.3–A2.6） | 評估只讀 summary；設計雜湊以實現後的幾何樹核對 |
 | 任務 B | `element_sim.spec/1`（B1.1）、場（B1.2）、量能器漏失（B1.3） | 設計的實現目標 |
@@ -200,8 +205,9 @@
 | 風險 | 處理 |
 |---|---|
 | 贏家詛咒 | 搜尋數值只作排序；回報只來自確認 run（role `confirmation`，S 不曾出現在搜尋中）；報告每個決選者的「搜尋估計 − 確認估計」作為診斷 |
-| 帶雜訊的約束 | 需求判定沿用 A1.8 的邏輯，但為單邊：「≤ 門檻」的需求，符合 = 估計 + t₀.₉₅·SE ≤ 門檻；不符合 = 估計 − t_{1−α/m}·SE > 門檻；其他為 unresolved（m = 決選者數 × 需求數）。計數很少時用精確區間 |
-| 在雜訊中宣稱支配 | 決選者之間的支配關係只在差值超過 t·se_diff 時宣稱；報告「統計上非支配的集合」 |
+| 帶雜訊的約束 | 需求判定由判定引擎的 `threshold`（任務 A A1.8）執行，為單邊：「≤ 門檻」的需求，符合 = 估計 + t₀.₉₅·SE ≤ 門檻；不符合 = 估計 − t_{1−α/m}·SE > 門檻；其他為 unresolved（m = 決選者數 × 需求數）。計數很少時用精確區間 |
+| 在雜訊中宣稱支配 | 決選者之間的優劣由判定引擎的 `order` 判定，只在差值的界限不含 0 時宣稱；報告「統計上非支配的集合」 |
+| 排序的雜訊 | S2 中同一代的設計共用一個 seed_group（任務 A 的配對比較），差值的變異較小；確認 run 不共用，維持獨立 |
 | 搜尋規模 | 紀錄寫入各保真度評估的設計數、拓撲數、最佳化器設定與種子 |
 | 利用模擬缺陷 | 決選者必須通過其相關參數（production cut、最大步長、場精度）的收斂閘門；物理模型 variation（B2.6 的規則）；若設計落在任何 reference benchmark 範圍外的材料或能量區，在報告中標記（label 本來就是 `unvalidated`，這是給讀者的資訊） |
 | 穩健性 | 依需求的 `tolerance` 與目錄的製造容差擾動連續參數（F0 全因子或 F1 抽樣），報告性能分布；需求在容差內的最差情形也要判定，結果分為「穩健符合」與「名義符合」 |

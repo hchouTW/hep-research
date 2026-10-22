@@ -431,6 +431,7 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 |---|---|
 | `contracts/validate.py`、`dependencies.py` | §6、§7 |
 | `contracts/schema.py` | `maxItems`、`maximum`、`exclusiveMaximum`（`element_sim` 的 schema 需要；不升契約版本） |
+| `core/stats/`、`core/simulation/` | 區塊估計量、判定引擎（equivalence、threshold、change、order）、分布函式、summary 的讀取與 schema。放在 `core/` 是因為 hep-detector 的腳本與 adapter（`geant4`、任務 C 的 `detector-design`）都要用，而分層規則只允許 adapter import `core` 與 `contracts`（任務 A §4.4） |
 | `skills/hep-detector/scripts/` | 推論與判定只讀邊界產物；幾何事實（最小厚度、configuration）從 effective config 讀取，A2 前的紀錄仍從 spec/1 讀取；不新增腳本，`SKILL.md` 與 description 不改 |
 | `adapters/geant4/assets/` | `g4sim/`；`layered_sim/` 加入 `g4sim`；`geant4_run.py`（邏輯 run 與工作切分、A1 的 Python summary 產生器、B2 的 `reco` 與 `table`）；B1 `element_sim/` 與 `simroot`；B2 `simreco` |
 | `SIM_SOURCES` | 涵蓋 `g4sim` 與各程式的原始碼 |

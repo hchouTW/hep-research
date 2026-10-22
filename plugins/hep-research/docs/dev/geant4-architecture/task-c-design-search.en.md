@@ -77,7 +77,12 @@ Summary: in no real case does the LLM declare "the best" by itself; successful a
 
 | Provider | Interface | Use in task C |
 |---|---|---|
-| Task A | Block batch means, SE, exact intervals, IUT gate (A1.6–A1.8), two-stage event count (A1.9) | Objective estimates and confirmation decisions at F1 and F2 |
+| Task A | `core/stats/batch_means.py` (block batch means, SE, exact intervals, quantiles), `core/stats/decisions.py` (decision engine), `core/simulation/summary.py`; all in `core/`, importable by an adapter (task A §4.4) | Objective estimates at F1 and F2; requirement decisions use `threshold`, ordering of finalists uses `order`, comparing confirmation with F0 uses `equivalence` |
+| Task A | Two-stage event count (A1.9) | Event counts of confirmation runs |
+| Task A | Paired comparison and seed_group (A1.4, A1.8) | Designs of one generation in S2 share a seed_group, to reduce ranking noise |
+| Task A | Role classes: `search-F1`, `search-F2`, `confirmation` (A1.4) | Search runs are never evidence; the S of a confirmation run never equals that of any search run |
+| Task A | `simulation-observables/1`, the `values` accumulator (A1.5) | The search spec references the same observable declaration; accurate quantiles even for designs with widely different resolutions |
+| Task A | Name-free `tree-v1` and effective configs stored by content hash (A2.4) | Design cache; settings of hundreds of runs are not stored repeatedly |
 | Task A | Seed hash H and S = H(study_id, role, point_id) (A1.4) | point_id of each design evaluation = design hash; confirmation runs have role `confirmation` |
 | Task A | Three boundary artifacts, `tree-v1` (A2.3–A2.6) | Evaluation reads only summaries; the design hash is checked against the realized geometry tree |
 | Task B | `element_sim.spec/1` (B1.1), field (B1.2), calorimeter leakage (B1.3) | Realization target of designs |
@@ -200,8 +205,9 @@ Illustration (`//` marks comments, not part of the JSON):
 | Risk | Handling |
 |---|---|
 | Winner's curse | Search values only rank; reports come only from confirmation runs (role `confirmation`, S never used in the search); the report gives "search estimate − confirmation estimate" for each finalist as a diagnostic |
-| Noisy constraints | Requirement decisions follow the logic of A1.8, one-sided: for a "≤ threshold" requirement, met = estimate + t₀.₉₅·SE ≤ threshold; not met = estimate − t_{1−α/m}·SE > threshold; otherwise unresolved (m = finalists × requirements). Exact intervals for low counts |
-| Claiming dominance in noise | Dominance among finalists is claimed only when differences exceed t·se_diff; the report gives "the statistically non-dominated set" |
+| Noisy constraints | Requirement decisions are made by the decision engine's `threshold` (task A A1.8), one-sided: for a "≤ threshold" requirement, met = estimate + t₀.₉₅·SE ≤ threshold; not met = estimate − t_{1−α/m}·SE > threshold; otherwise unresolved (m = finalists × requirements). Exact intervals for low counts |
+| Claiming dominance in noise | Ordering among finalists is decided by the decision engine's `order`, claimed only when the bound of the difference excludes 0; the report gives "the statistically non-dominated set" |
+| Ranking noise | Designs of one generation in S2 share a seed_group (task A's paired comparison), so differences vary less; confirmation runs do not share one and stay independent |
 | Search size | The record gives the number of designs evaluated at each fidelity, the number of topologies, optimizer settings and seeds |
 | Exploiting simulation defects | Finalists must pass the convergence gate for their relevant parameters (production cut, maximum step, field accuracy); physics-model variations (rules of B2.6); designs in materials or energy regions outside every reference benchmark's scope are flagged in the report (the label is `unvalidated` anyway; this is information for the reader) |
 | Robustness | Continuous parameters are perturbed within the requirements' `tolerance` and the catalogue's manufacturing tolerances (F0 full factorial or F1 sampling) and the performance distribution reported; the worst case within tolerance is also decided, and results are classed as "robustly met" or "nominally met" |

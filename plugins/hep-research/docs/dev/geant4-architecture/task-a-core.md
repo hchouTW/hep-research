@@ -26,6 +26,8 @@
 
 **完成的定義：** A1.15 與 A2.10 的驗收清單全部打勾；§9 的檢查全部通過。
 
+**為任務 B、C 預留的介面（2026-10-23 依自動化設計重新審視）：** 任務 C（[`task-c-design-search.md`](task-c-design-search.md)）會以 adapter 大量呼叫任務 A 的統計與邊界產物，而分層規則只允許 adapter import `core` 與 `contracts`。所以任務 A 的統計引擎、判定引擎與 summary 讀取放在 `core/`，hep-detector 的腳本只是薄的呼叫層（§4.4）。另外加入配對比較、搜尋角色、共用的觀測量宣告、`values` 累加器與不受命名影響的幾何雜湊。這些都在 A1、A2 中一次做好，避免任務 C 再改 schema 或搬移程式。
+
 **開始前必做：**
 1. 確認 `main` 是否已超過 `9f08796`。若是，讀新的 CHANGELOG，重做附錄 B 的核對（缺陷位置、`CONTRACTS_VERSION`、`GRADES`、advisory 編號、quick load、description 長度、journey 清單），並更新本文件（中英兩版）。
 2. 讀 [`architecture.md`](architecture.md) 的 §0 與 §2（原則）；讀 `docs/maintenance.md` 的 sci-fix 流程、adapter 變更流程、release 步驟。
@@ -50,6 +52,10 @@
 | `hash_scheme` | 目標雜湊的推導方式：`spec-v1`（A1，由 spec/1 推導）或 `tree-v1`（A2 起，由幾何樹推導） |
 | C1、C2 | 合併時下一個未使用的 contracts minor（C1 屬任務 A；C2 屬任務 B）；版本號在合併時才決定 |
 | E2 | 有 Geant4 11.4.3 建置的執行環境 |
+| 角色類別 | evidence 角色（trial、nominal、scan、control、variation、calibration、regression、confirmation）與 search 角色（`search-F1`、`search-F2`，任務 C）；search 角色的 run 不作為任何升級或回報的證據 |
+| seed_group | 事先宣告的一組 run，共用同一個 S，用於配對比較（A1.4） |
+| 配對比較 | 兩個 run 使用相同的 S、K、B，以逐區塊的差值估計差值的 SE（A1.8）；即 common random numbers |
+| 判定引擎 | `core/stats/decisions.py`：等價（IUT）、單邊門檻、改變、優劣四種判定的唯一實作（A1.8） |
 | IUT | intersection-union test：所有觀測量都等價才通過 |
 | DL | negative control 的偵測極限 |
 | sci-fix | `docs/maintenance.md` 中修正科學正確性缺陷的流程 |
@@ -60,6 +66,7 @@
 | 用途 | 路徑 |
 |---|---|
 | 契約 | `contracts/validate.py`、`contracts/dependencies.py`、`contracts/schema.py`、`contracts/schemas/ext_computational_run.json` |
+| 共用統計與 summary（新增，§4.4） | `core/stats/distributions.py`（`t_ppf`、`f_ppf`、`garwood`）、`core/stats/batch_means.py`（區塊估計量、精確區間、MPV、分位數）、`core/stats/decisions.py`（判定引擎）、`core/simulation/summary.py`（`simulation-summary/1` 的讀取、驗證、合併）、`core/simulation/schemas/`（`simulation-summary/1`、`simulation-observables/1`） |
 | 研究層 | `skills/hep-detector/scripts/check_geant4_study.py`（`convergence()` 行 335、相對差行 357、判定行 359、`scope_within()` 行 482）、`geant4_benchmarks.py`（`bootstrap()` 行 197、`mpv()` 行 204、偵測極限行 274、`at_limit` 行 678）、`tracker_resolution.py`、`multiple_scattering.py`；`skills/hep-detector/assets/geant4-study-spec.schema.json`；`skills/hep-detector/references/geant4-study-protocol.md` |
 | adapter | `adapters/geant4/adapter.json`；`adapters/geant4/assets/geant4_run.py`（`SIM_SOURCES` 行 63、`validate_spec()` 行 103、`cmd_scan` 行 435、`cmd_chunk` 行 491、`cmd_summarize` 行 525）、`geant4_build.py`（`GEANT4_USE_GDML: OFF` 行 53）、`geant4_verify.py`；`adapters/geant4/assets/layered_sim/`（`Detector.cc`、`Spec.cc`、`Actions.cc`（CSV 格式 `%.10g` 行 23；沉積乘 track 權重行 113）、`Physics.cc`、`layered_sim.cc`（種子與 run manager 行 150–154）、`MiniJson.hh`、`spec.schema.json`、`output.schema.json`） |
 | core | `core/status.py`、`core/trace.py`、`core/OWNERS.json`、`core/partition/engine.py`（`NON_ADDITIVE_TOKENS` 行 381） |
@@ -73,9 +80,9 @@
 
 違反任何一條都不能合併。
 
-1. **分層。** skill 腳本與 adapter 只 import `core` 與 `contracts`。新的共用 Python 模組放在 `core/`，並在 `core/OWNERS.json` 指定 steward。
+1. **分層。** skill 腳本與 adapter 只 import `core` 與 `contracts`。新的共用 Python 模組放在 `core/`，並在 `core/OWNERS.json` 指定 steward。凡是 hep-detector 的腳本與 adapter（`geant4`、任務 C 的 `detector-design`）都需要的程式（統計、判定、summary 讀取），一律放在 `core/`（§4.4）；`core/` 不得引用 `skills/`、`adapters/` 的路徑。
 2. **實驗名稱。** `skills/` 與 `contracts/` 中不得出現實驗名稱（含 ALICE；`check_layering.py`）；需要時用引用鍵。
-3. **Python 只用標準函式庫**；不加 Python 綁定。統計需要的 t 與 F 分位數（非整數自由度）與 Garwood 區間，以 `core/stats/` 既有的 `beta_ppf` 實作為 `t_ppf`、`f_ppf`、`garwood`，放在 `core/stats/` 並在 `core/OWNERS.json` 指定 steward（這是共用的數值函式，不是 §10 所說的「新的 core 驗證器」）。
+3. **Python 只用標準函式庫**；不加 Python 綁定。統計需要的 t 與 F 分位數（非整數自由度）與 Garwood 區間，以 `core/stats/` 既有的 `beta_ppf` 實作為 `t_ppf`、`f_ppf`、`garwood`，放在 `core/stats/distributions.py`（steward hep-statistics；這是共用的數值函式，不是 §10 所說的「新的 core 驗證器」）。
 4. **C++ 依賴。** `g4sim/SimSummary.hh`、`SimHash.hh`、`MiniJson.hh` 只用 C++17 標準函式庫；`SimProbe.hh`、`SimSeed.hh` 與 `layered_sim` 連結 Geant4。不引入第三方函式庫。
 5. **G5 授權邊界。** Python 只和獨立執行檔交換 JSON 與 CSV；程式依 Geant4 API 撰寫，不複製或改寫 Geant4 範例程式碼。
 6. **狀態與退出碼**（`core/status.py`）：0 ok、1 負向判定（`refused`/`failed`）、2 無法使用的輸入（`rejected`）、3 `incomplete`。未定案、未達標一律是 3。
@@ -132,6 +139,22 @@
 | regression | 前一個版本的同一研究 | 不能 | C2 |
 | surrogate | 以完整模擬為參考的快速模擬或代理模型 | 不能升級物理 label | C2 |
 | sanity、interface | 合理範圍、介面檢查 | 不能 | 既有 |
+
+### 4.4 共用模組與任務 C 的需求
+
+| 任務 C 的需求 | 任務 A 的提供 | 工作項 |
+|---|---|---|
+| adapter 能使用區塊估計量、精確區間、MPV、分位數 | `core/stats/batch_means.py`（steward hep-statistics） | A1.6、A1.7 |
+| adapter 能做需求判定（單邊門檻）、設計之間的優劣、搜尋與確認的比較 | `core/stats/decisions.py`：等價（IUT）、單邊門檻、改變、優劣四種判定；含精確區間分支與多重性 m | A1.8 |
+| adapter 能讀取與合併 summary | `core/simulation/summary.py`（steward hep-detector）與 `core/simulation/schemas/` | A1.5 |
+| 比較兩個設計時降低差值的變異 | 配對比較（common random numbers）：seed_group 與逐區塊差值 | A1.4、A1.8 |
+| 搜尋用的 run 不污染證據 | 角色類別：search 角色保留在 schema 中；S 的唯一性依角色類別 | A1.4 |
+| 同一份觀測量宣告可用於 study、設計搜尋與模擬程式 | `simulation-observables/1`，study spec 與 `output.observables` 都引用它 | A1.5、A1.12、A2.3 |
+| 解析度差異很大的設計之間，分位數仍可精確估計 | summary 的 `values` 累加器（每區塊的原始值，有上限） | A1.5、A1.6 |
+| 相同的物理設計得到相同的雜湊（快取、setup-matched 比對） | `tree-v1` 不含名稱、子體依正規順序；名稱另計 `naming_sha256` | A2.4 |
+| 數百個 run 的 effective config 不重複儲存 | effective config 依內容雜湊儲存一次 | A2.4 |
+
+hep-detector 的 `check_geant4_study.py` 與 `geant4_benchmarks.py` 改為呼叫這些模組；任務 B 的 regression 判定與任務 C 的需求判定也呼叫同一個判定引擎（同一個量只有一份正式實作）。
 
 ---
 
@@ -194,28 +217,32 @@ A1 只改 Python。統計量由 Python 從逐事件 CSV 計算；A2 起改讀 `l
 - **H 的定義**（Python 與 C++ 必須相同；C++ 在 A2.1 的 `SimHash.hh`）：H(x₁, …, x_n) = int.from_bytes(sha256("\x1f".join(str(x) for x in (x₁, …, x_n)).encode("utf-8"))[:8], "big") % (2³¹ − 1) + 1，值在 [1, 2³¹ − 1]。整數以十進位、無前導零寫成字串。
 - A1 的新錄製一律 `seeding: stream`（`layered_sim` 現有行為）。單一工作的種子對為 (H(S, 0, 0), H(S, 0, 1))。不使用 `make_manifest` 的 `seed × 100003 + k`，也不再用 `cmd_scan` 的 `[s0, s1 + k]`、`cmd_chunk` 的 `start + 1`。
 - 一個邏輯 run 可以切成多個工作（`geant4_run.py chunk` 以手動建立的 manifest，每個工作涵蓋一段事件編號）：起始事件為 e 的工作，種子對為 (H(S, e, 0), H(S, e, 1))；S 另外記錄在 run record。這樣同一 manifest 內的種子彼此不同，`validate_manifest` 的 `partition.duplicate_seed` 檢查不需修改。`stream` 模式下不同切法的事件不同，但統計上等價。
-- `check_geant4_study.py` 檢查同一研究的所有 run record 中 S 不重複。A1 不重錄的 5 個 J14 run（A1.13）沒有 S：它們以原本的種子對（第一個種子 1401 或 1402）登記為 `seed_scheme: legacy`，只檢查完整種子對不重複。
+- **角色類別：** run record 的 `role` enum 為 evidence 角色（trial、nominal、scan、control、variation、calibration、regression、confirmation）加上保留給任務 C 的 search 角色（`search-F1`、`search-F2`）。A1 中 `_study_upgrade` 與所有回報只接受 evidence 角色；帶 search 角色的 run 被列為證據時是 error（C1 閘控）。
+- **seed_group（配對比較）：** 研究或搜尋可以宣告 seed_group；同一 seed_group 的 run 共用 S = H(study_id, role, seed_group)，K、B 與 `seeding` 相同，spec 雜湊必須互不相同（例如收斂掃描的各個 cut 值，或任務 C 的各個設計）。配對比較只在同一 seed_group 內進行（A1.8）。
+- **唯一性：** 同一研究中，(S, spec 雜湊) 不得重複；S 只在宣告的 seed_group 內重複。evidence 角色的 S 不得等於任何 search 角色的 S（確認 run 的獨立性；任務 C 的 C3 再加上搜尋紀錄的跨紀錄檢查）。
+- `check_geant4_study.py` 依上述規則檢查同一研究的所有 run record。A1 不重錄的 5 個 J14 run（A1.13）沒有 S：它們以原本的種子對（第一個種子 1401 或 1402）登記為 `seed_scheme: legacy`，只檢查完整種子對不重複。
 
 ### A1.5 run summary 第一版與 Python 產生器
 
-**修改：** 新增 `adapters/geant4/assets/summary_from_csv.py`（或 `geant4_run.py` 的子命令 `summarize-blocks`）；schema `simulation-summary/1` 放在 `adapters/geant4/assets/`。
+**修改：** 新增 `core/simulation/summary.py`（steward hep-detector；`simulation-summary/1` 的讀取、schema 驗證、依區塊合併、累加器的存取）與 `core/simulation/schemas/`（`simulation-summary/1`、`simulation-observables/1`）；新增 `adapters/geant4/assets/summary_from_csv.py`（或 `geant4_run.py` 的子命令 `summarize-blocks`），它以 `core/simulation/summary.py` 寫出與合併。schema 放在 `core/` 而不是 adapter，因為 hep-detector 的腳本與任務 C 的 adapter 都要讀。
 
 - **輸入：** 一個或多個工作的逐事件 CSV、觀測量宣告（study spec 新增的頂層 `observables`，定義見 A1.12）、區塊大小 B 與區塊數 K。
 - **選擇：** 每個觀測量只累加滿足其 `selection` 的事件（例如 MPV 與 `tail_fraction` 需要 `primary_fate == 1` 且 `primary_end_process == "Transportation"`，見 `geant4_benchmarks.py` 行 232–236、`check_geant4_study.py` 行 284）；`n` 是通過選擇的事件數，另記錄每個區塊的總事件數。
 - **區塊：** 事件 i（`event` 欄減去邏輯 run 的第一個事件編號）屬於區塊 ⌊i/B⌋；i ≥ K·B 的事件忽略並在紀錄中註明數量。
-- **每個區塊、每個觀測量的累加器：** 整數 `n`、直方圖每格計數（固定分格；溢位與下溢分開）、`count_if[]`；浮點 Σx、Σx²、`min`、`max`（Neumaier 補償加總）。
-- **輸出欄位：** `run`（邏輯 run 的識別與種子、事件範圍、`seeding`、B、K、spec 雜湊、產生者 `python-csv` 與版本）、`observables[]`、每個累加器的 `merge` 規則（`sum`、`min`、`max`、`hist`）。多個工作依區塊編號合併。
+- **每個區塊、每個觀測量的累加器：** 整數 `n`、直方圖每格計數（固定分格；溢位與下溢分開）、`count_if[]`；浮點 Σx、Σx²、`min`、`max`（Neumaier 補償加總）；選用的 `values`：該區塊通過選擇的原始值（依事件編號排序），只在 `n` ≤ `values_max`（宣告，預設 10⁴）時寫出，超過時省略並記錄。`values` 讓不同設計之間解析度差很多時仍能精確估計分位數（固定分格無法同時適合所有設計）；大樣本仍用直方圖。
+- **輸出欄位：** `run`（邏輯 run 的識別與種子、`role`、`seed_group`、事件範圍、`seeding`、B、K、spec 雜湊、產生者 `python-csv` 與版本）、`observables[]`、每個累加器的 `merge` 規則（`sum`、`min`、`max`、`hist`、`concat`）。多個工作依區塊編號合併；`values` 依事件編號串接。
+- **觀測量宣告** 的 schema 是獨立的 `simulation-observables/1`（`{name, source_column, selection, bins, thresholds, values_max, tolerance_mode}` 的陣列），study spec（A1.12）、`layered_sim` 與 `element_sim` 的 `output.observables`（A2.3、B1.1）、任務 C 的搜尋 spec 都引用它。
 - **事件權重：** CSV 有 `weight` 欄時必須全為 1，否則 exit 2（沉積已乘 track 權重，見 `Actions.cc` 行 113）。沒有 `weight` 欄時（J14 的 5 個縮減 CSV 就沒有），summary 記錄 `weight_column: absent`，並以 run record 的 spec 中沒有 biasing 指令作為依據；spec 中有 biasing 指令時 exit 2。
 - A2 起 `layered_sim` 以相同 schema 寫出 summary；這個 Python 產生器只留在測試中作為 oracle。
 
 ### A1.6 估計量與 SE
 
-**修改：** `check_geant4_study.py`、`geant4_benchmarks.py`（只讀 summary；刪除 `bootstrap()` 的正式使用，保留在測試中作為對照）。
+**修改：** 新增 `core/stats/batch_means.py`（本節與 A1.7 的估計量、精確區間、分位數、MPV 的唯一實作）；`check_geant4_study.py`、`geant4_benchmarks.py` 改為呼叫它（只讀 summary；刪除 `bootstrap()` 的正式使用，保留在測試中作為對照）。
 
 - 每個區塊 b 算 θ_b；回報 θ̄ = 平均，SE = sd(θ_b)/√K，自由度 K − 1。K ≥ 16，在第一個證據 run 前宣告。
 - 多個觀測量：每個區塊的估計量向量一起保存，共變異由這些向量估計。
 - 全樣本值：平均與比例另由合併累加器算出，和 θ̄ 的差寫入紀錄作為診斷。
-- 分位數：直方圖內線性內插；分格寬度除以估計值須小於相對容許值的 1/10；落在溢位或下溢格時判為 incomplete。
+- 分位數：有 `values` 時以每個區塊的原始值計算經驗分位數（Hyndman–Fan 第 7 型，寫入 summary 的 `quantile_method`）；否則以直方圖內線性內插，分格寬度除以估計值須小於相對容許值的 1/10，落在溢位或下溢格時判為 incomplete。
 - 本節與 A1.7–A1.10 的 t、F 分位數與 Garwood 區間用 `core/stats/` 的 `t_ppf`、`f_ppf`、`garwood`（§2 第 3 條）；Clopper–Pearson 用既有的 `clopper_pearson`（`core/stats/tail_estimation.py`）。
 - **計數很少時：** 計數型估計量在任一區塊為 0 或合併總數 < 100（門檻可宣告）時，改用合併累加器上的精確區間：比例用 Clopper–Pearson，計數用 Garwood；兩個 run 的比較用精確條件二項法求率之比的區間，相對差 = 比 − 1。這時沒有 SE，閘門以區間端點判定（A1.8）。
 - 前提：事件之間沒有狀態。探針（A2）記錄 biasing 等設定；A1 中 J14 符合此前提。
@@ -230,14 +257,24 @@ A1 只改 Python。統計量由 Python 從逐事件 CSV 計算；A2 起改讀 `l
 
 ### A1.8 收斂閘門與回報（D4）
 
-**修改：** `check_geant4_study.py` 的 `convergence()` 與 `cmd_run`。
+**修改：** 新增 `core/stats/decisions.py`（判定引擎，steward hep-statistics）；`check_geant4_study.py` 的 `convergence()` 與 `cmd_run` 改為呼叫它。
+
+**判定引擎的四種判定**（同一份實作；每種都有 SE 分支與計數很少時的精確區間分支，都接受多重性 m，都回傳 `{verdict, margin, reason}`，`reason` 取自封閉的清單）：
+
+| 判定 | 用途 | 結果 |
+|---|---|---|
+| `equivalence(diff, se, ν, tol, m)` | 收斂閘門（本節）、regression 的 unchanged（B2.3）、surrogate（B2.3） | pass／fail／unresolved |
+| `threshold(est, se, ν, op, value, m)` | 任務 C 的需求判定：符合 = 單邊 95 % 界限滿足門檻；不符合 = 單邊 1 − α/m 界限違反門檻 | met／not-met／unresolved |
+| `change(diff, se, ν, tol, m)` | regression（B2.3）：changed = \|diff\| − t_{1−α/m}·se > tol；unchanged = equivalence 的 pass | changed／unchanged／unresolved |
+| `order(diff, se, ν, m)` | 任務 C 決選者之間的優劣：只有差值的 t_{1−α/m} 界限不含 0 時才宣稱優劣 | better／worse／indistinct |
 
 - **差值：** 沿用行 357 的慣例：a 為最細的設定，b 為第二細的設定（`vals` 由小到大排序，a = `finest[0]`、b = `finest[1]`）。觀測量的容許值宣告 `tolerance_mode`：`relative`（預設）時 diff = (a − b)/b、se_diff = √(se_a² + se_b²)/|b|；`absolute` 時 diff = a − b、se_diff = √(se_a² + se_b²)。ν 以 Welch 公式逐對計算（等變異數、K = 16 時為 30）。
-- **事件數目標：** 每個點的 se 目標為 tol/(4√2)（`relative` 時為相對 se）。
+- **配對模式**（`pairing: paired`，事先宣告；兩點必須屬於同一 seed_group，K、B 相同）：逐區塊差值 d_b = θ_a,b − θ_b,b；diff = d̄（`absolute`）或 d̄ / b̄（`relative`，b̄ 為 b 的區塊平均，其不確定度為二階項，忽略並在 protocol 註明）；se_diff = sd(d_b)/√K（`relative` 時再除以 |b̄|）；ν = K − 1。兩個 run 共用亂數使 d_b 的變異通常小於獨立時；實際的變異縮減由 trial 量測，不事先假設。配對模式的 se 目標直接是 se_diff ≤ tol/4。預設為 `independent`（A1 的 J14 證據沿用獨立模式）。
+- **事件數目標：** 獨立模式每個點的 se 目標為 tol/(4√2)（`relative` 時為相對 se）；配對模式見上。
 - **判定：** 通過 |diff| + t₀.₉₅(ν)·se_diff ≤ tol，**且兩個點都達到 se 目標**；失敗 |diff| − t_{1−α/m}(ν)·se_diff > tol（α = 0.05，m 為（參數 × 觀測量）組數；未達 se 目標也可以判失敗，因為較大的 se 只會讓失敗更難成立）；其他為 unresolved。計數很少時：通過 = 90 % 區間落在 [−tol, tol] 內；失敗 = 單邊 1 − α/m 區間完全落在外側。
 - **回報：** unresolved 與未達標以 `incomplete`（exit 3）回報，label 保持 `unvalidated`；只有失敗是 `failed`（exit 1）。目前把非 pass 一律當 `failed`，需要修改。
 
-**操作特性**（以 `gate_operating_characteristics.py` 重算，每格 2×10⁶ 次 toy。「se = 目標」：se_diff 等於目標、以 ν = 30 估計；「兩階段」：兩個點各依 A1.9 設計，K = K_trial = 16，ν 以 Welch 公式由估計的 se 計算）：
+**操作特性**（獨立模式；以 `gate_operating_characteristics.py` 重算，每格 2×10⁶ 次 toy。「se = 目標」：se_diff 等於目標、以 ν = 30 估計；「兩階段」：兩個點各依 A1.9 設計，K = K_trial = 16，ν 以 Welch 公式由估計的 se 計算）：
 
 | 真實差值 | 通過（se = 目標） | 通過（兩階段） | 通過（兩階段，兩點都達標的條件下） | 失敗 m = 1（se = 目標） | 失敗 m = 30（se = 目標） | 失敗 m = 30（兩階段） |
 |---|---|---|---|---|---|---|
@@ -260,7 +297,7 @@ A1 只改 Python。統計量由 Python 從逐事件 CSV 計算；A2 起改讀 `l
 
 ### A1.10 negative control 與偵測極限（D3）
 
-**修改：** `geant4_benchmarks.py`。
+**修改：** `geant4_benchmarks.py`；偵測極限與 t 分位數的計算放在 `core/stats/decisions.py`（`detection_limit()`）。
 
 - 判定量：shift = (control − nominal)/reference，SE 由兩個 run 合成。
 - **抓到（caught）的定義：** 控制組的 benchmark 判定為失敗，即 |rel_c| > tol（rel_c 為控制組相對參考值的偏差）；和現行程式以控制組 benchmark 判定的做法一致（`geant4_benchmarks.py` 約行 672）。
@@ -280,8 +317,9 @@ A1 只改 Python。統計量由 Python 從逐事件 CSV 計算；A2 起改讀 `l
 
 - study spec 的 benchmark enum 補上 `shower-containment` 與 `longitudinal-profile`；grade enum（目前為 reference、sanity、interface）加入 `setup-matched`；observable kind enum 加入 `shower-maximum`；`validation_plan.scope` 加入 `observable_kind`。
 - study spec（頂層 `additionalProperties: false`）新增頂層屬性：
-  - `observables`：陣列，每項 `{name, source_column, selection, bins: {lo, hi, width}, thresholds, tolerance_mode}`。`name` 必須和 `convergence_plan.observables` 中使用的名稱（例如 `mpv_deposit_MeV`）相同；`selection` 是對 CSV 欄位的宣告式篩選（欄名、比較子 `==`、`!=`、`<`、`<=`、`>`、`>=`、值；多個條件為 AND）；`thresholds` 給 `count_if` 用；`tolerance_mode` 見 A1.8。
+  - `observables`：引用 `simulation-observables/1`（A1.5），每項 `{name, source_column, selection, bins: {lo, hi, width}, thresholds, values_max, tolerance_mode}`。`name` 必須和 `convergence_plan.observables` 中使用的名稱（例如 `mpv_deposit_MeV`）相同；`selection` 是對 CSV 欄位的宣告式篩選（欄名、比較子 `==`、`!=`、`<`、`<=`、`>`、`>=`、值；多個條件為 AND）；`thresholds` 給 `count_if` 用；`tolerance_mode` 見 A1.8。
   - `blocks: {K, B}`。
+  - `convergence_plan.pairing`：`independent`（預設）或 `paired`，以及 `seed_groups`（A1.4）。
   - 既有的單數 `observable` 不變，仍是研究的主觀測量。
 - `ext_computational_run.json` 在 schema 中宣告既有的 `simulation` 屬性（J14 的 run record 已帶 `extension.simulation`，`_study_upgrade` 也已檢查它；schema 目前沒有宣告；需 hep-computing 同意）。
 - D10：`test_geant4_upgrade` 與 `test_simulated_dataset` 不再共用會被刪除的暫存目錄（各自建立重播，或改為 package 層級的 fixture）。
@@ -329,7 +367,10 @@ A1 只改 Python。統計量由 Python 從逐事件 CSV 計算；A2 起改讀 `l
 - [ ] MPV 偏差 toy 的 95 % 上界 ≤ tol/10；每次的實測核對生效。
 - [ ] 偵測極限 toy（A1.10 的 caught 定義）：在 DL 注入時抓到的機率 ≥ 0.977 − 3σ_MC；J14 的實現控制組結果記錄於 VALIDATION。
 - [ ] J14 的離線重播由已提交的 summary 執行，判定符合 §4.2，不需要 Geant4 與編譯器。
-- [ ] Python 產生器的單元測試：區塊劃分、合併、`weight ≠ 1` 時 exit 2、溢位格。
+- [ ] Python 產生器的單元測試：區塊劃分、合併、`weight ≠ 1` 時 exit 2、溢位格、`values` 的上限與串接。
+- [ ] `core/stats/batch_means.py`、`core/stats/decisions.py`、`core/stats/distributions.py`、`core/simulation/summary.py` 有各自的單元測試（`t_ppf`、`f_ppf`、`garwood` 對已知值），在 `core/OWNERS.json` 有 steward；一個只 import `core` 的測試（模擬 adapter 的用法）能讀 summary 並呼叫四種判定；`check_layering.py` 通過。
+- [ ] 判定引擎的 toy：`threshold` 在真實值等於門檻時判 met 的機率 ≤ 0.05 + 3σ_MC；`change` 在真實差值為 0 時判 changed 的機率 ≤ α/m + 3σ_MC；配對模式的 se_diff 在 toy 中覆蓋率正確（|覆蓋率 − 0.90| ≤ 0.02 + 3σ_MC）。
+- [ ] 角色與 seed_group 的規則：search 角色列為證據時被拒；seed_group 外重複的 S、同一 seed_group 內相同的 spec 雜湊被拒。
 - [ ] `python3 -m unittest discover -s tests/contracts -t .` 沒有錯誤。
 - [ ] 七筆 ledger 條目、兩份 advisory 通過 `scifix_advisories.py check`、parent record 齊全；live Geant4 證據以 release-gate 執行記錄；VALIDATION GEANT4-CORRECTNESS；CHANGELOG；release manifest。
 
@@ -363,7 +404,7 @@ A2 不改 `layered_sim` 的 spec 格式與既有輸出，只新增選用欄位�
 
 ### A2.3 `layered_sim` 寫出 run summary
 
-- spec/1 加入選用的 `output.observables`（來源欄、分格、門檻）與 `output.blocks`（K、B、邏輯 run 的第一個事件編號）。`geant4_run.py` 從 study spec 的觀測量宣告寫入執行用的 spec。
+- spec/1 加入選用的 `output.observables`（引用 `simulation-observables/1`）與 `output.blocks`（K、B、邏輯 run 的第一個事件編號）；`values` 累加器同樣由 `SimSummary.hh` 實作。`geant4_run.py` 從 study spec 的觀測量宣告寫入執行用的 spec。
 - 事件結束時，把宣告的觀測量累加到所屬區塊；MT 下以自訂的 `G4VAccumulable` 合併：每個 run 開始時（`BeginOfRunAction`）呼叫 `G4AccumulableManager::Reset()`；worker 在自己的 `EndOfRunAction` 呼叫 `G4AccumulableManager::Merge()`，master 在自己的 `EndOfRunAction` 寫出；master 與 worker 的註冊順序相同。
 - 輸出 `summary.json`（`simulation-summary/1`，產生者 `layered_sim`），雜湊寫入 run record。
 - 事件權重 ≠ 1 時 exit 2。
@@ -386,7 +427,8 @@ A2 不改 `layered_sim` 的 spec 格式與既有輸出，只新增選用欄位�
 | 時機 | master 的 `BeginOfRunAction`（在 `G4RunManager::RunInitialization` 之內、kernel 關閉幾何之後呼叫）；狀態為 `G4State_GeomClosed` 且 couple 數大於 0；否則 `recorded: false`（layered_sim 仍 exit 0），該 run 不能升級。fake run（`/run/beamOn 0`）在 `BeginOfRunAction` 之前返回，探針不執行 |
 | 頻率與執行緒 | 每個 run 一次；只在 master；註明「workers assumed identical」 |
 | 幾何樹 | 由 `G4PhysicalVolumeStore`（依建立順序的平面清單）與各體積的母邏輯體積重建樹；每個放置：名稱、copy number、solid 類型與參數、材料（Geant4 解析後的組成與密度）、轉換矩陣、母體、附加的 field manager 與參數；數值以 Python `float.hex()` 的格式（例如 `0x1.0000000000000p+0`）寫出：C 的 `%a` 輸出不同（`0x1p+0`），所以 `SimProbe.hh` 自帶格式器，並以測試向量和 Python 核對；replica 與 parameterised 體積記錄參數化描述 |
-| `tree-v1` 的目標雜湊 | 目標放置的子樹（依序的放置、solid 參數、材料組成與密度、轉換、附加的場）的 JSON（鍵排序、無空白）取 sha256 |
+| `tree-v1` 的目標雜湊 | 目標放置的子樹的 JSON（鍵排序、無空白）取 sha256。內容只含物理：solid 類型與參數、材料組成與密度、相對母體的轉換、附加的場；**不含**體積名稱與 copy number。同一母體的子體依正規順序排列（依轉換的平移、再依 solid 參數、再依材料，全部以 hex 字串比較），不依建立順序。這樣兩個以不同名稱或順序建立的相同幾何得到相同雜湊：setup-matched 可以比對不同程式建立的配置，任務 C 可以快取相同的設計。名稱與 copy number 另計 `naming_sha256`（讀出對應與除錯用） |
+| 整個世界的雜湊 | `tree_sha256` 以同樣的規則對整棵樹計算 |
 | GDML | plugin 的建置關閉 GDML；使用者建置有 GDML 時可附 `gdml_sha256`，非必要 |
 | EM 參數 | `G4EmParameters::StreamInfo(os)` 全文加上解析出的欄位；不用 `Dump()` |
 | cut | 逐 material-cuts couple：材料、region、range cut、各粒子的能量閾值 |
@@ -397,7 +439,7 @@ A2 不改 `layered_sim` 的 spec 格式與既有輸出，只新增選用欄位�
 | 資料集 | 路徑與內容雜湊只在 build 紀錄中計算一次；探針以 `environment_ref` 引用 |
 | 場 | field manager 逐執行緒；宣告了場而 master 看不到時標記 `source: declared`（`layered_sim` 沒有場） |
 | 路徑 | 經 `tilde()` 寫出 |
-| 輸出位置 | `effective_config.json`，雜湊寫入 run record；內容同時放入 `extension.simulation.effective_config` |
+| 輸出位置 | `effective_config.json`，雜湊（`config_sha256`）寫入 run record。內容依雜湊存放一次（`effective_configs/<config_sha256>.json`），相同設定的多個 run 只引用雜湊；`extension.simulation.effective_config` 放引用，提交的 J14 紀錄另附完整內容以便離線重播 |
 
 - 規則與 variation 的模型指派優先讀探針，讀不到才退回宣告，並輸出 `source: probe | declared`；兩者都有而不一致時報錯。
 - 測試觸發：一個只在測試建置中存在的 UI 指令，在 `/run/initialize` 之後、第一次 `BeamOn` 之前呼叫探針，必須寫出 `recorded: false`。
@@ -444,6 +486,9 @@ A2 不改 `layered_sim` 的 spec 格式與既有輸出，只新增選用欄位�
 
 - [ ] 回歸檢查：J14 的既有 spec 在同一主機上產生和 A2 前逐位元相同的 CSV；探針前後的亂數引擎狀態相同。
 - [ ] `SimHash.hh` 的 H 與 Python 的 H 在測試向量上相同；`SimProbe.hh` 的 hex 格式和 Python `float.hex()` 相同。
+- [ ] `tree-v1` 不受命名影響：同一幾何以不同的體積名稱與建立順序建立兩次，`tree_sha256` 與目標雜湊相同，`naming_sha256` 不同；改變任一物理量（厚度、材料、位置）時雜湊改變。
+- [ ] effective config 依內容雜湊只存一次；兩個相同設定的 run 引用同一個檔案。
+- [ ] `SimSummary.hh` 的 `values` 累加器與 Python 產生器一致（A2.9 的方法）。
 - [ ] `per-event` 下，`GeneratePrimaries` 若抽亂數（測試用的隨機 gun），事件內容仍不受工作切法影響。
 - [ ] A2.9 的兩項測試通過。
 - [ ] 為回歸檢查在 E2 重跑的 J14 spec（全部 18 個，仍為 `stream`），新的 run record 都有 effective config，且 `tree-v1` 與 `spec-v1` 的判定相同；故意製造的不一致被抓到；`recorded: false` 的 run 不能升級。已提交的 J14 紀錄維持 A1 的版本（`spec-v1`），不在 A2 重產。
@@ -471,6 +516,10 @@ A2 不改 `layered_sim` 的 spec 格式與既有輸出，只新增選用欄位�
 | 證據相關性 | `evidence_overlap` | A1.11 |
 | 重現 | 判定相同、數值相對差 ≤ 1e-9、接近門檻標記 | §4.2 |
 | 新區塊版本 | `probe_version`、`column_map_version`、`evidence_overlap_version`、`summary_version` | A1.5、A1.11、A2.4、A2.5 |
+| 判定引擎 | `core/stats/decisions.py`：equivalence、threshold、change、order；精確區間分支；多重性 m | A1.8 |
+| 配對比較 | seed_group 內共用 S；逐區塊差值；ν = K − 1；se 目標 tol/4 | A1.4、A1.8 |
+| 分位數 | `values` 累加器時用經驗分位數；否則直方圖 | A1.5、A1.6 |
+| 角色 | evidence 角色與 search 角色；search 角色不作證據 | A1.4 |
 
 ---
 
@@ -480,6 +529,8 @@ A2 不改 `layered_sim` 的 spec 格式與既有輸出，只新增選用欄位�
 |---|---|---|
 | benchmark 表（類別、等級、kind、範圍維度）、範圍比對、configuration 與隔離、`hash_scheme`、`extension.simulation` | `contracts/validate.py`、`contracts/dependencies.py`、`ext_computational_run.json` | C1（minor、閘控、sci-fix） |
 | schema 關鍵字擴充 | `contracts/schema.py` | 不升版 |
+| 角色類別（search 角色不作證據）、seed_group 規則 | `contracts/validate.py`、`check_geant4_study.py` | C1 |
+| `core/stats/distributions.py`、`batch_means.py`、`decisions.py`；`core/simulation/summary.py` 與 schema | `core/` | 隨 plugin 版本；schema 以 `summary_version` 與 `simulation-observables/1` 版本號管理 |
 | `simulation-summary/1`、`simulation-columns/1`、effective config | adapter | adapter 0.2.0（summary schema 第一版在 A1 隨 Python 產生器加入） |
 | `g4sim`、`seeding` 選項 | adapter（C++） | adapter 0.2.0 |
 | `GRADES`、kind 與 configuration 的輸出 | hep-detector | 隨 plugin 版本 |
@@ -539,6 +590,8 @@ computational-run schema 的擁有者是 hep-computing；本任務只加入選�
 4. 兩階段係數 F₀.₉₀（約 10 % 未達標）或 F₀.₉₅（約 5 %，事件數多約 22 %）；以及重產的 J14 若因未達標而偶然失去 `validated-in-scope` 時的處理（A1.9）。
 5. A1 中 J14 掃描與 variation run 的 live 重錄，以及 recorded 大小的上限。
 6. 精確區間的切換門檻（預設：任一區塊為 0 或總數 < 100）。
+7. 新的 `core/` 模組的 steward：統計（`distributions`、`batch_means`、`decisions`）歸 hep-statistics，`core/simulation/` 歸 hep-detector；需兩個 skill 的維護者同意。
+8. 收斂閘門是否在新研究中預設配對模式（建議：維持 `independent` 為預設，由研究在 trial 量測變異縮減後宣告）。
 
 **殘餘風險：**
 1. J14 的偵測極限可能因區塊 batch means、t 分位數與觀測量單位的控制組而改變，需要重新設計控制組。
@@ -549,7 +602,9 @@ computational-run schema 的擁有者是 hep-computing；本任務只加入選�
 6. 探針假設 worker 與 master 設定相同；若發現 thread-local 差異，改為逐執行緒傾印。
 7. setup-matched 的目標雜湊只能證明配置相同，不能證明它就是論文中的配置；仍需審查者核對。
 8. quick load 只剩 931 bytes。
-9. 工作量：原型估計 A1 的契約部分約 8–12 個工作天，另加 Geant4 執行時間；統計部分與 A2 未估計。
+9. 工作量：原型估計 A1 的契約部分約 8–12 個工作天，另加 Geant4 執行時間；統計部分與 A2 未估計。統計移到 `core/` 增加一些介面設計，但避免任務 C 再搬移一次。
+10. 配對比較的變異縮減在 Geant4 中可能不大（不同設定很快消耗不同的亂數，事件分歧）；它只在 trial 量測到縮減時才值得用，估計本身在任何相關程度下都有效。
+11. `tree-v1` 的正規順序在兩個子體的平移、solid 與材料完全相同時無法區分；這時依 copy number 排序並在雜湊中註明（極少見）。
 
 ---
 
@@ -559,8 +614,8 @@ computational-run schema 的擁有者是 hep-computing；本任務只加入選�
 1. 開始前檢查（§0）；套用 `prototype/phase1-core.patch`，補齊 A1.1–A1.3 缺少的部分。
 2. 先修 D10（A1.12），之後一律以 `python3 -m unittest discover -s tests/contracts -t .` 整體執行。
 3. A1.1 → A1.2 → A1.3（契約與 `dependencies.py`），加契約測試。
-4. A1.5 的 Python 產生器與 schema；以 J14 的 5 個逐事件 CSV 離線產生 summary。
-5. A1.6–A1.10 的統計（改讀 summary），加 toy 測試（閘門、覆蓋率、MPV 偏差、偵測極限）。
+4. `core/simulation/summary.py`、schema 與 A1.5 的 Python 產生器；以 J14 的 5 個逐事件 CSV 離線產生 summary。
+5. `core/stats/` 的三個模組（A1.6–A1.10），hep-detector 的腳本改為呼叫它們並改讀 summary；加 toy 測試（閘門、覆蓋率、MPV 偏差、偵測極限、四種判定、配對模式）與只 import `core` 的使用測試。
 6. A1.4 的種子與 A1.11、A1.12 其餘項目（protocol、enum、`simulation` 屬性）。
 7. 在 E2 live 重錄 J14 的掃描、variation 與負向控制組（A1.13）；重產 J14 紀錄，跑 `--strict`。
 8. A1.14：ledger、advisory、parent record、VALIDATION、CHANGELOG、release manifest；跑 §9 的檢查。
@@ -616,4 +671,5 @@ computational-run schema 的擁有者是 hep-computing；本任務只加入選�
 | 2026-10-21 前 | 三輪獨立審查、依 0.21.0 與 `9f08796` 的兩次核對、階段 1 原型 |
 | 2026-10-22 | 語言分工、逐事件 ROOT 檔、任務拆分、整理為實作規格；合理性與通用性評估；第三次深度檢查（25 項）；參考實際實驗重新設計（`architecture.md`） |
 | 2026-10-22 | 依重新設計的架構改寫：A1（契約與統計，區塊 batch means、Python summary 產生器、J14 離線重算）、A2（`g4common`、逐事件種子、三個邊界產物）；刪除 spec/2、`simcore`、量化 |
-| **2026-10-23（本版）** | **獨立審查後修正：兩階段操作特性重算（舊腳本重複計入試探的 χ²）；通過需兩點都達標；`tolerance_mode`；等級即類別、`longitudinal-profile` 改 setup-matched；頂層 `observables` 宣告與選擇；`weight` 欄可缺；H 的位元組定義、工作種子與 legacy run；caught 定義與 toy 門檻；`GeneratePrimaries` 開頭重設種子；探針不抽亂數；`SimHash.hh`、`MiniJson.hh` 移入共用目錄；共用目錄改名 `g4sim`（原 `g4common`）；其他小修正** |
+| **2026-10-23（本版，第二次）** | **依自動化設計（任務 C）重新審視：統計、判定與 summary 讀取移到 `core/`（adapter 依分層規則只能 import `core`）；判定引擎的四種判定（equivalence、threshold、change、order）；配對比較與 seed_group；角色類別（search 角色不作證據）；獨立的 `simulation-observables/1`；`values` 累加器與經驗分位數；`tree-v1` 不含名稱並依正規順序；effective config 依內容雜湊存放** |
+| 2026-10-23 | 獨立審查後修正：兩階段操作特性重算（舊腳本重複計入試探的 χ²）；通過需兩點都達標；`tolerance_mode`；等級即類別、`longitudinal-profile` 改 setup-matched；頂層 `observables` 宣告與選擇；`weight` 欄可缺；H 的位元組定義、工作種子與 legacy run；caught 定義與 toy 門檻；`GeneratePrimaries` 開頭重設種子；探針不抽亂數；`SimHash.hh`、`MiniJson.hh` 移入共用目錄；共用目錄改名 `g4sim`（原 `g4common`）；其他小修正 |

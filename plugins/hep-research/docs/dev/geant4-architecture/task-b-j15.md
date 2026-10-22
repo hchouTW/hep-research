@@ -349,7 +349,7 @@ J15 的 README 以這張表說明 J15 的合理性，並強調 J15 是合成幾�
 | `surrogate-comparison` | surrogate | — | — | `surrogate_comparison()`，讀代理模型與參考模擬的 summary |
 
 - **verification：** 不計入升級。
-- **regression：** 同一研究、同一設定，在新舊兩個版本（plugin、後端或 Geant4）各執行一次；兩次的 point_id 為版本標籤，所以 S 不同、樣本獨立（不違反 A1.4 的 S 不重複）。只比較純量觀測量（直方圖的比較屬於 §8 延後的分布層級 benchmark）。判定有三種：`changed`：|diff| − t_{1−α/m}·se_diff > tol；`unchanged`：A1.8 的通過規則；其他為 `unresolved`。容許值與 α 事先宣告。紀錄不影響 label；reference 觀測量 `changed` 時可觸發 sci-fix 檢查。
+- **regression：** 同一研究、同一設定，在新舊兩個版本（plugin、後端或 Geant4）各執行一次；兩次的 point_id 為版本標籤，所以 S 不同、樣本獨立（不違反 A1.4 的 S 不重複）。只比較純量觀測量（直方圖的比較屬於 §8 延後的分布層級 benchmark）。判定有三種：`changed`：|diff| − t_{1−α/m}·se_diff > tol；`unchanged`：A1.8 的通過規則；其他為 `unresolved`；由判定引擎的 `change`（任務 A A1.8）執行。容許值與 α 事先宣告。紀錄不影響 label；reference 觀測量 `changed` 時可觸發 sci-fix 檢查。
 - **surrogate：** 代理模型**永遠不改變物理 label**。代理模型的研究宣告參考研究（一份 study record，不是 run record；run record 不帶升級）與範圍；以 A1.8 的 IUT 判定（χ² 只作診斷，不作通過依據）。通過時記錄 `extension.study.surrogate = {reference_study_ref, reference_sha256, scope}`，scope 為宣告範圍與參考研究範圍的交集。
 - 閘控方式同 C1：`strict or _at_least(contract_version, C2)`，無 warning 分支。
 

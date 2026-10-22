@@ -431,6 +431,7 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 |---|---|
 | `contracts/validate.py`, `dependencies.py` | §6, §7 |
 | `contracts/schema.py` | `maxItems`, `maximum`, `exclusiveMaximum` (needed by `element_sim`'s schema; no contracts version change) |
+| `core/stats/`, `core/simulation/` | Block estimators, the decision engine (equivalence, threshold, change, order), distribution functions, summary reading and schemas. They are in `core/` because both hep-detector's scripts and adapters (`geant4`, task C's `detector-design`) need them, and the layering rules let adapters import only `core` and `contracts` (task A §4.4) |
 | `skills/hep-detector/scripts/` | inference and decisions read only boundary artifacts; geometry facts (minimum thickness, configuration) come from the effective config, records from before A2 still from spec/1; no new script, `SKILL.md` and description unchanged |
 | `adapters/geant4/assets/` | `g4sim/`; `layered_sim/` gains `g4sim`; `geant4_run.py` (logical runs and job splitting, the A1 Python summary producer, B2's `reco` and `table`); B1 `element_sim/` and `simroot`; B2 `simreco` |
 | `SIM_SOURCES` | covers `g4sim` and the sources of each program |
