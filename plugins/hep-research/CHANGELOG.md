@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Validator: the same efficiency under two namespaces now warns.** A measurement spec listing a bare `efficiency`
+  next to `<ns>:efficiency` (or `<ns>:efficiency` next to `<other-ns>:efficiency`) counted the efficiency twice and
+  passed with no finding. It now gets the warning `measurement.efficiency_counted_twice_namespaced`; the existing
+  `measurement.correction_category_repeated` errors are unchanged, so no artifact changes outcome (no contracts
+  change). `correction-chain.md` says what the validator catches and what it cannot (a profile term with another
+  name).
+
 ## 0.23.0 (2026-10-22)
 
 Contracts 3.4.0 (minor): independent review gains a per-lens model and an optional filtering pass; 27 more

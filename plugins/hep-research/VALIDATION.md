@@ -2020,6 +2020,27 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## EFFICIENCY-NAMESPACED (2026-10-22, E2): same efficiency counted twice under a namespace
+
+Found after 0.23.0, unfixed until now: a measurement spec listing a bare `efficiency` next to `<ns>:efficiency` (or
+two namespaced `<ns>:efficiency` terms) passed with no finding. The bare-efficiency error needs the other name to end
+in `_efficiency`, and the repeated-category error compares names with the namespace kept, while
+`_correction_classes` folds both into one class. Decision: no contracts major, so a new warning
+`measurement.efficiency_counted_twice_namespaced` (the existing errors unchanged and not doubled by it).
+`correction-chain.md` now describes the behavior (a profile term with another name, such as `<ns>:trigger`, still
+passes unflagged: the validator cannot tell it is an efficiency); reference inventory regenerated.
+
+| Evidence test (file::Class::method) | Kind | Parent `a53af7e0` | Fix |
+|---|---|---|---|
+| `tests/contracts/test_measurement_contract.py::MeasurementRules::test_namespaced_efficiency_next_to_bare_efficiency_warns` | behavioral (warning on 3 pairs, no finding on 2 single-efficiency chains, error unchanged on 3) | fail (3 of 3 warning subtests) | pass |
+| `tests/contracts/test_theory_contract.py` warning-fixture test on the new fixture `warning/measurement_v26_efficiency_counted_twice_namespaced.json` | fixture | fail (no warning) | pass |
+
+Outcome check: every JSON artifact in the plugin with an `artifact_type` (360 files: fixtures, examples, assets,
+profiles), validated plain and strict before and after the change: identical `ok` and identical findings for all 720
+validations, so no shipped artifact gains the new warning. Fixtures regenerated with `make_fixtures.py`: only the new
+warning fixture and its `cases.json` entry change; the verdict snapshot (`gate_verdicts.json`) gains its entry
+(valid, default and strict), no other entry moves.
+
 ## 0.23.0 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.23.0` from main `59002566` (#197 anisotropy CL range, `bdt-backend` gate, 24 triaged plugin
