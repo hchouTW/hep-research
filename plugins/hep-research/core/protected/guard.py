@@ -27,7 +27,9 @@ outside the agent-run code. Lower-level functions call guard() themselves, so ca
 Limits (stated, not checked here): release_manifest.py and attestation.py are custodian tools run as the custodian
 identity, which owns the protected inputs, so they are not guarded (their verdicts bind nothing in the session); a
 context established for a command is reused for the library calls it makes and is not re-evaluated while it runs; a
-path a nested call names in another project is judged under the command's context.
+path a nested call names in another project is judged under the command's context; the code identity covers source
+files, not bytecode, so a planted timestamp-based `.pyc` matching its source is not detected (identity.verify() only
+warns that bytecode is present).
 
 Codes: protected.policy_missing, protected.policy_unanchored, protected.policy_anchor_mismatch,
 protected.policy_differs, protected.inputs_missing, protected.qualification_malformed,

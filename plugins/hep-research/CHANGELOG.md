@@ -12,6 +12,15 @@ Software checks establish contract consistency only, not physical validity.
   notation in the inverse-offset model (`calibration-and-alignment.md`); trigger-weight and luminosity citations
   (`triggers-luminosity-pileup.md`); era checks, `residual.py` scope and Z_A regime (`analysis-design.md`). The
   independent-review reference now recommends `--filter-model` with the live-run numbers. Guidance only.
+- **An installed copy of a release keeps its release identity (sci-fix improvement plan A2, F-03).** The plugin
+  system writes `.in_use/<pid>` into the root of an installed copy; the code identity counted it as an added file, so
+  `plugin_release()` returned `unreleased` on every installed copy (reproduced on 0.21.0, 0.22.0 and 0.23.0), the
+  advisory scan treated its artifacts as from an unreleased build, and the protected guard refused every
+  qualification with `protected.qualification_other_plugin`. The identity now leaves out `.in_use/` at the plugin
+  root only; any other added, missing or changed file still makes the copy another plugin (a nested `core/.in_use/`,
+  a module beside runnable assets, a globbed data file). `identity.verify()` also warns
+  (`identity.bytecode_unverified`) when `.pyc` files are present, since bytecode is outside the identity; the guard's
+  docstring states that limit. Evidence: VALIDATION SCIFIX-PLAN-A2.
 
 ## 0.23.0 (2026-10-22)
 
