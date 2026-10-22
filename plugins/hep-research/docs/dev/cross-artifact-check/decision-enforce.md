@@ -133,3 +133,9 @@ Every rule stays in shadow mode. Recorded on the maintainer's instruction of 202
 The value gate failed (`decision-value-gate.md`: I = 0 of 28, outcome Stop, chosen by the maintainer on
 2026-10-22). One of the conditions above can therefore not be met with the current checker, and no rule leaves
 shadow mode. A new gate would need a new measurement with its own pre-registered design.
+
+## 2026-10-22, decision changed to Continue
+
+The maintainer changed the decision-point outcome from Stop to Continue (`decision-value-gate.md`, "Decision
+changed"). Phase 2 may change rules, but the value gate is still not passed, so the condition "the value gate passed"
+above is unmet and every rule stays in shadow mode.

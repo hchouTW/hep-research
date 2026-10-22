@@ -149,3 +149,21 @@ Asked whether "continue" meant the decision-point outcome "continue" or the reco
 code is frozen; `--check-bundle` stays, marked experimental, and so do the manual freeze and check instructions in the
 skill references and the README; no new suites; the Phase 0 results stay. Phase 2, the entry path (DR-14) and the
 spike do not start. The AI-planted cap did not bear on this outcome.
+
+## Decision changed (2026-10-22, maintainer instruction in the session)
+
+Shown the Stop decision above, the maintainer asked to change "Stop (my recommendation)" to start, and chose
+**"Reverse to Continue"** when asked what that meant. The decision-point outcome is now **Continue**: Phase 2
+(architecture section 9.4, releases R2 and R3) may start. "My recommendation" in the section above was the label of
+the implementer's option, not the maintainer's words.
+
+- This **overrides the pre-registered outcome**. The measurement stays as recorded (I = 0 of 28, F = 0, AI-planted);
+  the thresholds are not changed and the gate is **not passed**.
+- Phase 2's other entry condition holds: the post-review revisions of DR-1 to DR-8 were adopted
+  (`decision-architecture.md`).
+- DR-14 (the entry path) was conditional on the gate passing, so it does not start with Phase 2; it needs its own
+  decision.
+- Because the gate is not passed, no rule can leave shadow mode (`decision-enforce.md`, section 13.5), whatever
+  Phase 2 delivers.
+- The experimental labels of 0.25.1 stay until Phase 2 releases its fixes; the code freeze of the Stop decision is
+  lifted for Phase 2 work only.

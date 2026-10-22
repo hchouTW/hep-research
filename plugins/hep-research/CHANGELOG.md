@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-artifact check: Phase 2 may start.** The maintainer changed the value gate's decision from Stop to
+  Continue (`docs/dev/cross-artifact-check/decision-value-gate.md`). The measurement is unchanged (no incremental
+  detection in 28 AI-planted errors) and the gate is not passed, so every rule stays in shadow mode and the check
+  stays experimental until Phase 2 releases its fixes. No behavior change.
 - **Cross-artifact check, release R2 formats (Phase 2).** check-context 1.1.0 removes `required` from roots and ratio
   roots (DR-2: deferral only through an exception) and is paired with suites at or above 1.1.0 (`bundle.context_version`
   at freeze, input-invalid at check); a 1.0.0 context keeps the 1.0.x suites. Every suite exists as the pre-release
