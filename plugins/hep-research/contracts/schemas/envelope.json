@@ -22,7 +22,11 @@
     "provenance": {"type": "object", "required": ["producer_skill", "created"], "properties": {
       "producer_skill": {"$ref": "skill_names.json#/$defs/skill_name"},
       "created": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}"},
-      "evidence_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}}}},
+      "evidence_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}},
+      "code_paths": {"$comment": "3.5.0: plugin .py files loaded when the envelope was written (contracts/trace.py); loaded, not executed; absent in older artifacts",
+        "type": "array", "items": {"type": "string", "pattern": "^(?!/)(?!.*\\.\\./).+\\.py$"}},
+      "code_tags": {"$comment": "3.5.0: tags set by advisory-named shared functions since the previous envelope (contracts/trace.py)",
+        "type": "array", "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"}}}},
     "inputs": {"type": "array", "items": {"type": "object", "required": ["ref"], "properties": {
       "ref": {"type": "string"}, "artifact_type": {"type": "string"}, "sha256": {"type": "string"},
       "artifact_id": {"type": "string"}, "version": {"$ref": "common.json#/$defs/version", "$comment": "the source's contract_version"},

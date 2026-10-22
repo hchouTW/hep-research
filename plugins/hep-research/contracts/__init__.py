@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.4.0"
+CONTRACTS_VERSION = "3.5.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -120,6 +120,11 @@ CONTRACTS_VERSION = "3.4.0"
 # every review file they live under <project>/reviews/, never in an artifacts_dir, and no artifact type, vocabulary
 # term or envelope field changes; a 3.3 driver refuses a configuration with either field as config_out_of_range
 # instead of ignoring it.
+# 3.5.0 (sci-fix improvement plan A1, maintainer decision 2026-10-22) adds two optional envelope fields,
+# provenance.code_paths (the plugin .py files loaded when the envelope was written) and provenance.code_tags (tags set
+# by advisory-named shared functions), written by contracts/trace.py, so a sci-fix advisory can tell whether the
+# affected code was loaded for an artifact. No capability: provenance has no additionalProperties limit, so a 3.4
+# reader accepts and ignores both, and an artifact without them reads exactly as in 3.4.0.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

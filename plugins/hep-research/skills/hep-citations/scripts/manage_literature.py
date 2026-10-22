@@ -42,6 +42,7 @@ for _p in (str(PLUGIN), str(HERE)):
 from contracts import audit_report as R  # noqa: E402
 from literature_lib.literature import import_literature  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.communication_project import output_aliases_input  # noqa: E402
 
 CHECKS = ("ledger", "identifiers", "versions", "notices", "searches", "planned-claims", "citation-keys")
@@ -56,7 +57,7 @@ def envelope(record: dict, args, root: Path) -> dict:
             "objective": f"literature record imported offline from {', '.join(i.get('path') or '?' for i in record['imported'])}",
             "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": plugin, "contracts": CONTRACTS_VERSION, "profiles": {}},
-            "provenance": {"producer_skill": "hep-citations", "created": record["created"], "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-citations", **trace.provenance(), "created": record["created"], "evidence_ids": []},
             "inputs": [], "outputs": [], "status": ["user-supplied"], "unresolved_inputs": [], "extension": record}
 
 

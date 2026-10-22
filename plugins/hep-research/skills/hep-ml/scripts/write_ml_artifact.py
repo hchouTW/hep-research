@@ -59,6 +59,7 @@ sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves 
 sys.path.insert(0, str(PLUGIN))
 
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 
@@ -219,7 +220,7 @@ def build(a: argparse.Namespace) -> dict:
             "artifact_type": "ml-artifact", "objective": a.objective, "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(),
                          "profiles": {}},
-            "provenance": {"producer_skill": "hep-ml", "created": a.created, "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-ml", **trace.provenance(), "created": a.created, "evidence_ids": []},
             "inputs": inputs, "outputs": outputs, "status": statuses(summary, a.status),
             "unresolved_inputs": [], "extension": ext}
 
