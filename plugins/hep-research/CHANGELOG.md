@@ -58,6 +58,16 @@ Software checks establish contract consistency only, not physical validity.
   must change an affected file against the release before it, and an `introduced` release that already held one
   states `introduced_basis` (added to SFA-2026-002 and -003); an unknown artifact type is a problem. Scan verdicts
   are unchanged in this step.
+- **Release manifests of 0.3.0 and 0.4.0, backfilled (sci-fix improvement plan C4, F-20).** `release_manifest.py
+  backfill --commit SHA` records a release made before manifests existed, by today's identity rules, marked
+  `backfilled` with its full commit and the generator; `check-published` checks it against its tag, or its commit when
+  the release was never tagged (0.4.0, `9870a35a`), and treats it as published. The advisories whose range ends
+  before 0.5.0 (SFA-2026-008 to -011, -030, -031) now resolve against the 0.3.0 manifest, and `check` confirms that
+  0.4.0 changed their files.
+- **hep-computing: run the advisory scan when work resumes on an older project (plan C3, F-21).** A rule in the
+  skill's reference index (`engineering-playbook.md`): when a project's artifacts predate the newest fixed release of
+  an advisory, or an advisory is still open, run `tools/scifix_advisories.py scan` and report its three classes
+  (affected, possibly affected, output that is no artifact) with each remedy; read-only, no recomputation.
 - **Advisories format /2: match what an artifact can show, and say "possibly affected (no trace)" when it cannot
   (sci-fix ADVISORY-MATCH-V2, S2; plan A1 change 1).** `applies_to.match` replaces `extension_keys`: groups of
   conditions on any envelope path (`exists`, `eq`, `in`, `regex`; `[*]` expands lists), undecided when the artifact
