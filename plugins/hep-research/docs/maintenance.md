@@ -117,6 +117,21 @@ Evidence is graded on two axes, reported separately and never combined (vocabula
 Minimum: S1 C3 and D2 (C4 where the domain is finite or a closed form exists); S2 C2 and D2; S3 a located source
 and a second source; S4 C1 and D2.
 
+Transcription rule (maintainer decision 2026-10-22; reported by `tools/scifix_ledger.py report`, not yet enforced):
+a C3 grade needs at least one independence record whose expected value is not computed from a formula transcribed
+into the repository. Each record states `expected_from`: `printed` (a value printed in a source), `third-party-definition`
+(another implementation's own algorithm or definition, not a library evaluating our formula), `exhaustive`,
+`general-result` (a property any correct method has, such as a calibrated p-value's size), `person`, or
+`transcribed-formula`. An entry with transcribed formulas only says so in `gaps`; the maintainer then decides between
+more evidence and a lower grade.
+
+A documentation fix lists its `sources` (`kind` external or internal, `citation`, `locator`, `read`); an S3 entry
+below the minimum says what is missing in `gaps` (internal sources only are a gap, maintainer decision 2026-10-22).
+An entry may carry a per-entry human sign-off, `review` `{by, date, scope}`: a person looked at the whole entry, unlike
+an independence record's `basis: person` (a person checked one oracle's expected values). An agent review record is
+not a sign-off. The report lists the S1 entries without one; every S1 entry is to be signed off before the next minor
+release.
+
 Oracle rules:
 
 - An expected value is never copied from the code's output. Compute it in the test from a closed form, read it from

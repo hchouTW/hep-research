@@ -5,6 +5,15 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Sci-fix ledger report: transcription rule, structured S3 sources, per-entry sign-off (sci-fix improvement plan
+  B2, B5, B7; F-08, F-15, F-16).** `tools/scifix_ledger.py report` lists, read-only: entries below their severity's
+  minimum (27), C3 entries whose oracles all compute their expected value from a formula transcribed into the
+  repository (DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO, DR-WP2-06-MS; each now says so in `gaps`, grades unchanged until
+  the maintainer decides), S1 entries without a sign-off (18: none is signed yet), and S3 entries below their minimum
+  (5). Every independence record states `expected_from`; documentation fixes list `sources` (the three whose ledger
+  text never itemized them, and the two internal-only warning fixes, state the gap). Evidence: VALIDATION
+  SCIFIX-PLAN-B2-B5-B7.
+
 - **Validator: the same efficiency under two namespaces now warns.** A measurement spec listing a bare `efficiency`
   next to `<ns>:efficiency` (or `<ns>:efficiency` next to `<other-ns>:efficiency`) counted the efficiency twice and
   passed with no finding. It now gets the warning `measurement.efficiency_counted_twice_namespaced`; the existing
