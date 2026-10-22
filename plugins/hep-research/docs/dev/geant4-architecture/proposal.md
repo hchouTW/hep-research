@@ -17,19 +17,20 @@
 | 階段 | 內容 | 版本 | J14 |
 |---|---|---|---|
 | 1 | 修正 label 與統計缺陷（sci-fix）：範圍比對 observable kind、benchmark 等級改由契約對照表決定、configuration 由幾何推導並強制隔離規則、negative control 依觀測量位移、收斂閘門（IUT）、MPV 的 SE 改用子 run 分割 | **contracts C1**（minor） | 4.1–4.3 以離線重播重產；4.4、4.5 需 live 重錄一次 |
-| 2 | layered_sim 核心重構：spec/2、scorer 元件、探針、column map；hep-detector 同時讀兩種格式 | **adapter 0.2.0**；contracts 不升版 | 同主機逐位元相同後重錄一次 |
-| 3 | J15 最小磁譜儀：場區、平面穿越 scorer、數位化與重建（混合材料 0.21.0 已支援）；`verification` 等級；重建紀錄可作為 simulated 表格的輸入 | **adapter 0.3.0**、**contracts C2**（minor） | 不重錄 |
+| 2 | C++ 計算核心：layered_sim 重構（spec/2、scorer 元件、探針、column map）與新的 `simcore`（spec 轉換、觀測量與統計量）；Python 改為介面；hep-detector 同時讀兩種格式 | **adapter 0.2.0**；contracts 不升版 | 同主機逐位元相同後重錄一次 |
+| 3 | J15 最小磁譜儀：場區、平面穿越 scorer、以 `simcore` 做數位化與重建（混合材料 0.21.0 已支援）；`verification` 等級；重建紀錄可作為 simulated 表格的輸入 | **adapter 0.3.0**、**contracts C2**（minor） | 不重錄 |
 
-**八個最重要的決定：**
+**九個最重要的決定：**
 
 1. **現行的 `validated-in-scope` 有漏洞，必須先修。** 範圍檢查跳過觀測量，而且 benchmark 的等級由紀錄自己宣告。
 2. **驗證等級依參考的性質決定。** 參考值是輸入的精確推論的，屬於 verification；參考值是 Geant4 所近似的物理模型的，才可能是 validation。
 3. **升級資格由契約強制。** 契約自帶「benchmark → 等級、kind」對照表；`configuration` 由工具從幾何推導、由 `dependencies.py` 重新推導核對，不接受使用者宣告。
-4. **C++ 只保留一條幾何路徑。** spec/1 在 Python 端轉成 spec/2，以同主機逐位元相同證明轉換正確。
+4. **C++ 只保留一條幾何路徑。** spec/1 由 C++ 的 `simspec` 轉成 spec/2（沿用舊幾何的浮點運算），以同主機逐位元相同證明轉換正確。
 5. **重用既有工具。** 包括 `contracts/schema.py`、`tracker_resolution.py`、`multiple_scattering.py`，不另寫第二份。
 6. **場精度用確定性檢查。** 以 charged geantino 對解析螺旋比較，不需要統計。
 7. **統計規格必須能被執行。** 收斂閘門用 intersection-union test；SE 是估計值時一律用 t 分位數；兩階段事件數的係數為 F₀.₉₀(15,15) ≈ 1.97；未定案與未達標以 `incomplete`（exit 3）回報，不標 `failed`。
 8. **刪除或延後不必要的項目。** 包括 `uses-validated-physics`、`physics_config_comparison`、離子與 Birks、內容定址快取、契約 4.0 等（第 7 節）。
+9. **計算核心用 C++，Python 是介面與判斷層。** 模擬、scorer、spec 轉換、觀測量與統計量、數位化與重建都在 C++（`layered_sim` 與不連結 Geant4 的 `simcore`），以獨立執行檔交換 JSON/CSV。Python 只負責命令列與流程、獨立的參考公式、規則與閘門判定、label、紀錄寫出與契約；C++ 與 Python 因此互為獨立實作（第 3 節）。
 
 ---
 
@@ -60,42 +61,58 @@
 4. **證據的停止規則和格點事先宣告。** 加跑、加密、重做控制組都不得依閘門或 benchmark 的結果決定。
 5. **先找現有實作。** plugin 已有的方法一律重用；oracle 不得 import 被測的模組。
 6. **最小變動。**
-7. **遵守既有規則。** 包括分層（skill 腳本和 adapter 只 import `core`、`contracts`）、quick load 上限（hep-detector 目前 24,669 / 25,600 bytes）、G5 授權邊界、adapter 變更流程、sci-fix 流程、執行狀態與退出碼（`core/status.py`）、execution trace（`trace.provenance()`）。新的共用模組放在 `core/` 時需在 `core/OWNERS.json` 指定 steward；`skills/` 與 `contracts/` 中不得出現實驗名稱（`check_layering.py`）。Geant4 相關腳本只用 Python 標準函式庫，這是設計選擇，不是 plugin 的全域規則。
+7. **遵守既有規則。** 包括分層（skill 腳本和 adapter 只 import `core`、`contracts`）、quick load 上限（hep-detector 目前 24,669 / 25,600 bytes）、G5 授權邊界、adapter 變更流程、sci-fix 流程、執行狀態與退出碼（`core/status.py`）、execution trace（`trace.provenance()`）。新的共用模組放在 `core/` 時需在 `core/OWNERS.json` 指定 steward；`skills/` 與 `contracts/` 中不得出現實驗名稱（`check_layering.py`）。Geant4 相關腳本只用 Python 標準函式庫，這是設計選擇，不是 plugin 的全域規則。C++ 端只用 C++17 標準函式庫與既有的 `MiniJson.hh`；`simcore` 不連結 Geant4。
 8. **後端自我描述。** layered_sim 在執行時輸出自己的 column map 與實際生效的設定。
 9. **驗證等級依參考的性質決定。** 參考值若是輸入的**精確推論**（解析螺旋、運動學、最小平方代數），檢查屬於 verification，不能用來升級；參考值若是 Geant4 所**近似的物理模型**（Bethe、Landau–Vavilov、Highland、簇射剖面）或**已發表的量測**，才可能是 reference 或 sanity。
 10. **可升級的事實由契約認定。** 等級、kind、配置都不得由紀錄自行宣告。
+11. **語言分工。** 把模擬輸出化為數字的計算（逐事件與逐 run 的縮減、估計量與其 SE、擬合）一律在 C++；由物理輸入算出參考值的公式、門檻比較與判定、紀錄與 provenance、契約一律在 Python。同一個量不得在兩種語言各有一份正式實作；另一種語言的實作只能出現在測試中，作為 oracle。
 
 ---
 
 ## 3. 架構總覽
 
+**語言分工**（使用者決定，2026-10-22）：
+
+| 層 | 語言 | 內容 |
+|---|---|---|
+| 計算核心 | C++ | `layered_sim`（連結 Geant4）：模擬、scorer、探針、column map。`simcore`（C++17 標準函式庫，不連結 Geant4）：`simspec`（spec/1 → spec/2 轉換）、`simstat`（觀測量、MPV 與子 run、bootstrap、收斂差值與其 SE、能量平衡殘差）、`simreco`（階段 3：數位化、擬合、β、量能器） |
+| 介面 | Python | `adapters/geant4/assets/*.py`：命令列、建置、執行 C++ 執行檔、spec 的 schema 與跨欄位驗證、紀錄寫出（含 `trace.provenance()`）、simulated 表格 |
+| 判斷與參考 | Python | hep-detector：規則、獨立的參考公式（Bethe、Δp、Highland、gamma 剖面、PSTAR）、閘門與 benchmark 的判定、label；和 C++ 的計算互為獨立實作 |
+| 契約 | Python | `contracts/`（全 plugin 共用，不變） |
+
+C++ 與 Python 之間只以獨立執行檔交換 JSON/CSV，和現在的 `layered_sim` 相同；不用 Python 綁定。所以 Python 端維持只用標準函式庫、不需編譯，G5 核准的「獨立執行檔交換 JSON 與 CSV」邊界也不變。`simcore` 不連結 Geant4，不受 Geant4 授權影響，而且可以在沒有 Geant4 的 CI 中建置與測試。
+
 ```
-hep-detector（判斷物理）
-  check_geant4_study.py     spec / summarize / run / variations / label
+hep-detector（判斷與參考，Python）
+  check_geant4_study.py     spec / summarize / run / variations / label；規則與閘門判定；數值讀自 simstat 的輸出
                             ＋ 經 core 的雙格式幾何存取器（spec/1、spec/2）
-  geant4_benchmarks.py      輸出 configuration 與 target_geometry_sha256（由 run record 的幾何推導）
-  digitize_reconstruct.py   （階段 3）數位化、圓擬合、β；simulated 表格
-  tracker_resolution.py、multiple_scattering.py（既有；作為參考）
+  geant4_benchmarks.py      參考公式與比較；Geant4 端的統計量讀自 simstat；輸出 configuration 與 target_geometry_sha256
+  tracker_resolution.py、multiple_scattering.py（既有；作為獨立參考）
         │  只讀檔；import 只限 core、contracts
         ▼
 core
   geometry/layered.py       （階段 2）雙格式幾何存取器（steward：hep-detector）
   trace.py                  （既有）trace.provenance()、trace.tag()
-contracts
+contracts（Python，全 plugin 共用）
   validate.py               （階段 1，C1）範圍比對 observable kind；benchmark 對照表（名稱 → 等級、kind）；隔離規則
                             （階段 3，C2）對照表加入 verification；重建紀錄作為 simulated 表格的輸入
                             （既有）simulated dataset-record（3.2.0）、execution trace（3.5.0）
   schema.py                 （階段 2）加 maxItems、maximum、exclusiveMaximum（不升版）
   computational-run（既有；extension.study 為自由格式區塊；C1 把 extension.simulation 加為選用的自由格式屬性）
         ▲
-        │  產生檔案
-adapters/geant4（執行層，紀錄一律 unvalidated）
-  geant4_build.py   build / check
-  geant4_run.py     spec/1 → spec/2 轉換、cross_field_checks、run / scan / chunk / summarize / reduce / oracle
-  geant4_verify.py  overlaps / budget / balance / mirror / datapaths（讀雙格式）
-  layered_sim       只認 spec/2；scorer 元件；探針；column map（layered_sim.output/2）
-                    （0.21.0 既有）混合材料（components）
-                    （階段 3）場區、平面穿越
+        │  產生檔案（JSON、CSV）
+adapters/geant4（紀錄一律 unvalidated）
+  Python 介面
+    geant4_build.py         build / check；建置 layered_sim 與 simcore
+    geant4_run.py           run / scan / chunk / summarize / reduce / oracle；（階段 3）reco / table
+    geant4_verify.py        overlaps / budget / balance / mirror / datapaths（讀雙格式；數值來自 simstat）
+  C++ 計算核心
+    layered_sim             連結 Geant4；只認 spec/2；scorer 元件；探針；column map（layered_sim.output/2）
+                            （0.21.0 既有）混合材料；（階段 3）場區、平面穿越
+    simcore                 不連結 Geant4（C++17 標準函式庫）
+      simspec               spec/1 → spec/2 轉換（沿用舊幾何的浮點運算）
+      simstat               觀測量與統計量（階段 2）
+      simreco               數位化與重建（階段 3）
         │
         ▼
 hep-computing（run_workflow.py、local_partition.py）
@@ -104,6 +121,8 @@ hep-computing（run_workflow.py、local_partition.py）
 ---
 
 ## 4. 階段 1：修正現行缺陷（contracts C1，sci-fix）
+
+階段 1 是 sci-fix：以最小變動，直接在現有的 Python 中修正。4.5 的估計量（子 run MPV、bootstrap、收斂差值）在階段 2 移到 C++ 的 `simstat`，屆時階段 1 的 Python 實作只保留在測試中作為 oracle（5.8）。
 
 ### 4.1 契約側的 benchmark 對照表（D2）
 
@@ -208,7 +227,7 @@ hep-computing（run_workflow.py、local_partition.py）
 
 **證據相關性（D7）。** `extension.study.evidence_overlap` 列出被多個判定共用的 run，附 `evidence_overlap_version`。
 
-**execution trace。** 新的共用函式呼叫 `trace.tag()`（小寫連字號名稱）：範圍比對 `geant4-scope-kind`、configuration 推導 `geant4-configuration`、IUT 閘門 `geant4-convergence-iut`、子 run MPV `geant4-mpv-subrun`、種子雜湊 `geant4-seed-hash`。advisory 掃描目前還不讀 tag，但之後的 advisory 可以用它判斷受影響的程式是否執行過。`check_geant4_study.py` 改 import `contracts.validate` 後，study record 的 `code_paths` 會多出 `contracts/validate.py` 等，這是預期的變化。
+**execution trace。** 新的共用函式呼叫 `trace.tag()`（小寫連字號名稱）：範圍比對 `geant4-scope-kind`、configuration 推導 `geant4-configuration`、IUT 閘門 `geant4-convergence-iut`、子 run MPV `geant4-mpv-subrun`、種子雜湊 `geant4-seed-hash`。advisory 掃描目前還不讀 tag，但之後的 advisory 可以用它判斷受影響的程式是否執行過。`check_geant4_study.py` 改 import `contracts.validate` 後，study record 的 `code_paths` 會多出 `contracts/validate.py` 等，這是預期的變化。階段 2 起，子 run MPV 與 bootstrap 改在 `simstat`（另一個行程）中執行，對應的 tag 由呼叫它的 Python 介面記錄（5.8）。
 
 ### 4.6 其他修正
 
@@ -253,11 +272,11 @@ hep-computing（run_workflow.py、local_partition.py）
 
 ---
 
-## 5. 階段 2：layered_sim 核心重構（adapter 0.2.0）
+## 5. 階段 2：C++ 計算核心（adapter 0.2.0）
 
 ### 5.1 範圍
 
-所有會影響 J14 的 C++ 工作都在這一階段完成：spec/2 讀取、scorer 元件化、探針、column map。場區與平面穿越在階段 3 加入（混合材料 0.21.0 已有）；它們會改變之後 live 重跑的 J14 `sources_sha256`，這是預期的變化，已提交的 J14 紀錄不重錄。
+所有會影響 J14 的 C++ 工作都在這一階段完成：spec/2 讀取、scorer 元件化、探針、column map，以及把觀測量與統計量的計算從 Python 移到新的 `simcore`（5.8）。場區與平面穿越在階段 3 加入（混合材料 0.21.0 已有）；它們會改變之後 live 重跑的 J14 `sources_sha256`，這是預期的變化，已提交的 J14 紀錄不重錄。
 
 ### 5.2 spec/2 的座標與格式
 
@@ -270,8 +289,8 @@ hep-computing（run_workflow.py、local_partition.py）
 
 | 因素 | 影響 | 轉換規則 |
 |---|---|---|
-| 材料建立 | **有**（混合材料以 `G4Material::AddMaterial` 依序加入成分；順序決定材料內元素向量的順序，模型依亂數抽選元素時依這個順序，所以會改變事件，不只是質量分率的浮點累加） | 轉換保留 `materials[]` 與 `components[]` 的順序，數值以 `repr` 輸出 |
-| 放置位置 | **有**：差一個 ulp 就會改變步長 | 轉換器以 IEEE double 重現 C++ 的運算順序：`stack = Σ repeat × Σt`、`world = world_scale × stack`（或 `world.size_mm`）、`x = −stack/2`、`center = x + t/2`、`x += t`；輸出用 `repr`；新 C++ 以 `at + t/2` 求中心 |
+| 材料建立 | **有**（混合材料以 `G4Material::AddMaterial` 依序加入成分；順序決定材料內元素向量的順序，模型依亂數抽選元素時依這個順序，所以會改變事件，不只是質量分率的浮點累加） | 轉換保留 `materials[]` 與 `components[]` 的順序，數值以 `%.17g` 輸出 |
+| 放置位置 | **有**：差一個 ulp 就會改變步長 | 轉換在 C++ 的 `simspec convert` 中進行，沿用舊 `Detector.cc` 的運算順序（`stack = Σ repeat × Σt`、`world = world_scale × stack` 或 `world.size_mm`、`x = −stack/2`、`center = x + t/2`、`x += t`），以 `%.17g` 輸出；新 `Detector.cc` 以 `at + t/2` 求中心。同一種語言、同一套 double 運算，比在 Python 中重現浮點順序可靠 |
 | `shift_mm ≠ 0` | **有** | `(x + t/2) + shift` 和 `(x + shift) + t/2` 不保證逐位元相同；只對 `shift = 0` 保證（J14 與 mirror 都是 0），其他情況做統計比對 |
 | 粒子源位置 | **有** | `gun_world_fraction × world 長度`，以相同順序計算後寫入 |
 | physics list 組成 | **有** | `G4StepLimiterPhysics` 只在 `step_limit_mm > 0`、`min_ekin_MeV > 0` 或（階段 3）有場時加入 |
@@ -285,7 +304,7 @@ hep-computing（run_workflow.py、local_partition.py）
 
 ### 5.4 hep-detector 的雙格式支援
 
-J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時支援 spec/1 與 spec/2；只有 C++ 是單一路徑。
+J14 的已記錄紀錄必須永遠可以重播，所以 Python 的介面與判斷層永久能讀 spec/1 與 spec/2 的幾何事實（元件、厚度、材料；不計算位置）；`layered_sim` 只讀 spec/2，spec/1 一律先經 `simspec convert`。
 
 | 位置 | 變更 |
 |---|---|
@@ -293,15 +312,15 @@ J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時�
 | `check_records` | 比對 study 中的 spec 和 run 的 `spec_sha256` |
 | 幾何存取器（新模組 `core/geometry/layered.py`，steward hep-detector，登記於 `core/OWNERS.json`） | 從 `layers` 或 `elements` 取得元件清單、最小厚度、材料；`check_geant4_study.py`、`geant4_benchmarks.py`、`geant4_verify.py` 共用（skill 腳本與 adapter 只能 import `core`、`contracts`）；以 J14 紀錄測試 |
 | `derived()` | `min_thickness_mm` 經存取器計算；加測試確保 `G4R-THIN-FLUCT`、`G4R-THIN-CUT-SCAN` 在兩種格式下都觸發 |
-| `cmd_summarize` | 粒子源能量從 run record 的 `extension.simulation.gun` 讀取；定義 spec/2 的 gun 欄位（`energy_MeV`，階段 3 起另有 `ekin_per_nucleon_MeV`） |
-| `geant4_verify.py` | 體積計數（overlaps）與物質預算（budget）經存取器讀取 |
+| `cmd_summarize` | 改為讀取 `simstat summarize` 的輸出，不再在 Python 中計算統計量；粒子源能量從 run record 的 `extension.simulation.gun` 讀取；定義 spec/2 的 gun 欄位（`energy_MeV`，階段 3 起另有 `ekin_per_nucleon_MeV`） |
+| `geant4_verify.py` | 體積計數（overlaps）與物質預算（budget）經存取器讀取；能量平衡的逐事件殘差由 `simstat balance` 計算，Python 只做判定 |
 | study spec schema | `$comment` 改為接受 `layered_sim.spec/1` 或 `/2` |
 
 ### 5.5 schema 驗證
 
 - 擴充 `contracts/schema.py`：`maxItems`、`maximum`、`exclusiveMaximum`（目前的 `SUPPORTED_KEYWORDS` 仍沒有這三個；layered_sim 的 schema 已用到全部三個）。更新 `SUPPORTED_KEYWORDS`，並擴充 `tests/contracts/test_schema_keywords.py`，讓它也掃描 adapter 的 schema（現在只掃描 `contracts/schemas/*.json`）。
 - `geant4_run.py` 改用 `contracts.schema.validate()`。原 `validate_spec()`（行 103）中 schema 表達不了的跨欄位規則保留為 `cross_field_checks()`，包括：混合材料的 components 與 z/a_g_mole 擇一、至少兩個成分、質量分率和為 1、成分只能引用 NIST 或先前定義的材料；slab 名稱重用時材料與厚度必須一致、world 的 scale 與 size 恰好擇一、`reference_list` 與 `em_constructor` 擇一、region 的 slab 名稱存在、禁用的 UI 指令、粒子源位置範圍。
-- C++ 只檢查執行所需的最低限度。
+- C++（`layered_sim`、`simspec`）只檢查執行所需的最低限度；schema 與跨欄位規則的判定在 Python 介面。
 - contracts **不升版**：沒有任何契約 schema 使用新增的關鍵字。
 
 ### 5.6 探針與 column map
@@ -338,14 +357,45 @@ J14 的已記錄紀錄必須永遠可以重播，所以 Python 端永久同時�
 |---|---|
 | 版本 | 0.1.0 → 0.2.0 |
 | `adapter.json` | `assets` 加入新檔；更新 `purpose`；`status` 維持 `demonstrated-on-synthetic-data` |
-| `SIM_SOURCES` | 加入 `Scorers.*`、`Probe.hh`（否則 `sources_sha256` 會遺漏新原始碼） |
+| `SIM_SOURCES` | 加入 `Scorers.*`、`Probe.hh`；另設 `SIMCORE_SOURCES` 記錄 `simcore` 的原始碼（否則 `sources_sha256` 會遺漏新原始碼） |
 | G5 | 聲明「依 Geant4 API 撰寫，未複製或改寫任何範例程式碼」，由審查者在 VALIDATION 條目中確認 |
-| 測試 | `tests/adapters/test_geant4.py` 的 assets 檢查；離線測試；`HEP_GEANT4_LIVE_TEST=1` 的 live 測試 |
+| 測試 | `tests/adapters/test_geant4.py` 的 assets 檢查；離線測試；`HEP_GEANT4_LIVE_TEST=1` 的 live 測試；`simcore` 的 ctest 與等價測試（不需 Geant4） |
+| CI | 新增必要的 `simcore` 工作：以 C++17 編譯器建置，執行 ctest 與等價測試 |
 | 文件 | `docs/capability-matrix.md` 的 Geant4 列 |
 
-### 5.8 階段 2 驗收
+### 5.8 C++ 計算核心 `simcore`
 
-- [ ] 5.3 的同主機逐位元相同，以及放置傾印完全相同。
+| 項目 | 規格 |
+|---|---|
+| 位置 | `adapters/geant4/assets/simcore/`（CMake 專案；adapter 的擁有者 hep-detector） |
+| 依賴 | C++17 標準函式庫與既有的 `MiniJson.hh`；不連結 Geant4，不用第三方函式庫 |
+| 執行檔 | `simspec`、`simstat`（本階段）；`simreco`（階段 3） |
+| 介面 | 輸入：spec、CSV、column map、參數 JSON；輸出：一個 JSON 物件（stdout 或 `--out`），含 `status`、`program`（名稱、版本、編譯器）與結果 |
+| 退出碼 | 依 `core/status.py`：0 ok、1 負向判定、2 無法使用的輸入（`rejected`）、3 incomplete；不用其他退出碼 |
+| 數值 | double；加總採用與順序無關的方式（先排序或補償加總），結果不受執行緒與 chunk 順序影響；亂數只用計數器雜湊（SplitMix64），不用標準函式庫的 `<random>` 分布（各實作的輸出不同） |
+| 輸出精度 | 浮點以 `%.17g` 寫出，可無損還原 |
+
+`simstat` 的子命令（取代原本在 Python 中的計算）：
+
+| 子命令 | 內容 | 取代 |
+|---|---|---|
+| `summarize` | 逐 run 的觀測量：平均沉積、尾端比例、洩漏比例、MPV（固定分格寬度）、穿透主粒子的 E_in − E_exit；經 column map 讀欄位 | `check_geant4_study.py summarize` 的計算；`geant4_benchmarks.py` 中 Geant4 端的統計量 |
+| `subrun` | 各 chunk CSV 的 MPV、其平均與 sd/√K | 4.5 的子 run 估計量 |
+| `bootstrap` | Poisson(1) 計數器雜湊權重下的 SE（平均、分位數、比例）；同一事件的所有觀測量共用權重 | `bootstrap()` |
+| `diff` | 兩個掃描點之間觀測量的差值與差值的 SE | `convergence()` 的數值部分；判定留在 Python |
+| `balance` | 逐事件的能量平衡殘差 | `geant4_verify.py balance` 的數值部分 |
+
+**遷移與等價。** 階段 1 的 Python 估計量移到 `tests/`，只作為 oracle，不再出現在正式程式中。等價測試以 J14 的 recorded CSV 比較 `simstat` 與 Python oracle：計數完全相同、MPV 選到相同的分格、其他浮點的相對差 ≤ 1e-12（加總順序不同所致）。日後任一邊改了演算法，另一邊仍是獨立實作。
+
+**為什麼不用 Python 綁定。** 獨立執行檔讓 Python 端維持只用標準函式庫、不需編譯；輸出是有雜湊的檔案，可以直接進入 provenance；G5 的核准文字不必改。
+
+**trace。** `simcore` 在另一個行程執行，不會出現在 `code_paths`。呼叫它的 Python 介面在紀錄中寫入執行檔與原始碼的 sha256、版本與子命令，並以 `trace.tag()` 標記（例如 `geant4-simstat`）。
+
+### 5.9 階段 2 驗收
+
+- [ ] 以 `simspec convert` 轉換後的新 `layered_sim` 與階段 2 開始前的 layered_sim：5.3 的同主機逐位元相同，以及放置傾印完全相同。
+- [ ] `simcore` 在 CI 的必要工作中建置，ctest 通過；等價測試在 J14 的 recorded CSV 上通過（計數相同、MPV 分格相同、其他相對差 ≤ 1e-12）。
+- [ ] hep-detector 與 adapter 的 Python 正式程式中不再有觀測量與統計量的計算（測試確認 `mpv(`、`bootstrap(` 只出現在 `tests/`）。
 - [ ] J14 經存取器讀取 spec/1 與 spec/2 結果一致；兩條薄層規則在兩種格式下都觸發。
 - [ ] 探針在測試指令觸發的錯誤時機寫出 `recorded: false`；J14 每個 run 都有 `effective_config`；與宣告一致，故意製造的不一致被抓到。
 - [ ] 一個只改欄名的假後端加上手寫 column map，通過 J14 的 summarize、閘門、benchmark。
@@ -468,7 +518,7 @@ x:  −1000   −810 … −780   −520 −500        …         300  320    4
 
 ### 6.5 數位化與重建
 
-新腳本 `skills/hep-detector/scripts/digitize_reconstruct.py`，只用標準函式庫，只負責數位化、圓擬合與 β。
+數位化與重建在 C++ 的 `simreco` 中進行，由 Python 介面 `geant4_run.py reco` 呼叫；參數（ε、σ_t、名義 B、標定樣本）寫在 hep-detector 擁有的 reco spec 中。hep-detector 不新增腳本。
 
 | 步驟 | 內容 |
 |---|---|
@@ -480,9 +530,9 @@ x:  −1000   −810 … −780   −520 −500        …         300  320    4
 | 量能器 | 主動層總沉積除以**電子**取樣比例；取樣比例由 `calibration` 角色的 10 GeV 電子樣本求得；另外輸出 e/mip |
 | 亂數 | 計數器雜湊，和 Geant4 的亂數流分開 |
 
-每次執行寫一份 computational-run 紀錄（含 `**trace.provenance()`），輸入為 adapter 的 run record（含雜湊）。改變數位化參數不需要重跑模擬。退出碼依 `core/status.py`：0 ok、1 負向判定、2 `rejected`（無法讀取的輸入，含缺檔）、3 incomplete；在 `tests/skills/test_cli_robustness.py` 的 `MISSING_FILE_ARGS` 登記。
+`geant4_run.py reco` 每次執行寫一份 computational-run 紀錄（含 `**trace.provenance()` 與 `simreco` 的程式雜湊），輸入為 adapter 的 run record（含雜湊）。改變數位化參數不需要重跑模擬。`simreco` 與 `geant4_run.py reco` 的退出碼都依 `core/status.py`：0 ok、1 負向判定、2 `rejected`（無法讀取的輸入，含缺檔）、3 incomplete；`reco` 在 `tests/skills/test_cli_robustness.py` 的 `MISSING_FILE_ARGS` 登記。
 
-重建後的結果表（例如剛度解析度對剛度）以 **simulated dataset-record** 發布，由 `digitize_reconstruct.py table` 寫出（含 `trace.provenance()`）。目前 `dependencies.py` 要求 simulated 表格的每個輸入都是帶 `extension.simulation` 或 `extension.study` 的 computational-run，而重建紀錄兩者都沒有；只列原始 run record 又會讓改變數值的步驟不在輸入鏈中。所以 C2 新增一個標記（例如 `extension.derived_from_simulation`），接受「輸入全是模擬 run 的 computational-run」作為 simulated 表格的輸入。J15 的 study record 是 `unvalidated`，表格保持 `unvalidated`；使用它的 communication 會得到 `communication.simulated_source` 警告，圖表標示「Simulation」。
+重建後的結果表（例如剛度解析度對剛度）以 **simulated dataset-record** 發布，由 `geant4_run.py table` 寫出（含 `trace.provenance()`）。目前 `dependencies.py` 要求 simulated 表格的每個輸入都是帶 `extension.simulation` 或 `extension.study` 的 computational-run，而重建紀錄兩者都沒有；只列原始 run record 又會讓改變數值的步驟不在輸入鏈中。所以 C2 新增一個標記（例如 `extension.derived_from_simulation`），接受「輸入全是模擬 run 的 computational-run」作為 simulated 表格的輸入。J15 的 study record 是 `unvalidated`，表格保持 `unvalidated`；使用它的 communication 會得到 `communication.simulated_source` 警告，圖表標示「Simulation」。
 
 ### 6.6 驗證梯
 
@@ -493,7 +543,7 @@ x:  −1000   −810 … −780   −520 −500        …         300  320    4
 | 物質預算（geantino） | 實作 | PDG X₀ 加總 | 容許約 2 %（Geant4 的 X₀ 公式和 PDG 約差 1 %）；用來抓幾何與材料指定錯誤 | Pb 密度 ± δ |
 | `field-propagation` | **verification** | charged geantino 對解析螺旋（檢驗數值積分精度） | 見 6.7 | Geant4 端 B × (1 ± δ) |
 | `field-propagation-muon` | **sanity** | 平面平均的 1/R 真值（6.5） | μ⁻ 1、10、100 GV；容許 = t·SE + 0.05 %；N ≈ 400（1 GV）、≈ 7400（100 GV） | Geant4 端 B × (1 ± 1 %) |
-| 擬合器單元測試 | 測試（不是 benchmark） | 玩具真值（R ≥ 300 GV）對 `tracker_resolution.py` | — | — |
+| 擬合器單元測試 | 測試（不是 benchmark） | 玩具真值（R ≥ 300 GV）：`simreco` 的 C++ 擬合對 Python 的 `tracker_resolution.py`（獨立實作） | — | — |
 | 多重散射一次性比較 | sanity | `multiple_scattering.py` 的解析項（不含 log，依其約定）；可另用 `toy_spectrometer.py`（需 NumPy） | μ 與 p，1–10 GV，含 β | — |
 | `tof-beta` | **verification**（bookkeeping） | 沿真實軌跡的運動學 | — | scorer 測試旗標注入時間偏移；沒有 Geant4 端的物理控制組，文件中註明 |
 | `tof-layer-consistency` | **verification**（bookkeeping） | 同站兩層的時間差對「層間路徑長 / βc」（β = 1、正入射時 66.7 ps） | 殘差平均為 0；寬度為 √2 σ_t（100 ps 時 141 ps） | 以測試旗標在一層的 scorer 時間注入偏移 |
@@ -555,9 +605,9 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 
 | 項目 | 內容 |
 |---|---|
-| 腳本計數 | `tests/skills/test_documented_output_claims.py` 的 `DetectorScriptCount` 從 21 改為 22；同檔行 74–78 檢查的字串，以及 `docs/capability-matrix.md` 行 47 的「twenty-one scripts」改為「twenty-two」 |
-| 腳本清單 | `skills/hep-detector/README.md`（行 21）、`tests/skills/test_cli_robustness.py`、`tests/skills/hep_detector/test_script_guards.py`、`tests/skills/hep_detector/test_hep_detector_audit.py` |
-| 路由表 | `skills/hep-detector/SKILL.md` 的路由表（計入 quick load）只加一行，≤ 150 bytes；加入後以 `measure_entrypoints.py` 確認 ≤ 25,600 bytes。詳細說明放 `geant4-study-protocol.md` |
+| 腳本計數 | hep-detector 不新增腳本（重建在 `simreco`，介面在 adapter），`DetectorScriptCount` 維持 21，`docs/capability-matrix.md` 行 47 不變 |
+| CLI 登記 | `geant4_run.py reco`、`table` 在 `tests/skills/test_cli_robustness.py` 與 adapter 測試中登記；`simcore` 的原始碼列入 `adapter.json` 的 `assets` |
+| 路由表 | 不需修改 `skills/hep-detector/SKILL.md`（沒有新腳本），quick load 不變；J15 與 `simcore` 的說明放在 `geant4-study-protocol.md` 與 adapter 文件 |
 | journey | J15；`docs/researcher-journeys.md`、`docs/maintenance.md` 範例表；`tests/examples/test_geant4_minimal_spectrometer.py`（重播並和已提交輸出比對） |
 | capability | `docs/capability-map`（在 `full-detector-simulation` 下新增項目，執行 `capability_map.py --write`）、`docs/capability-matrix.md` |
 | 路由 | 新增 J15 的路由案例；0.21.0 起 `check_routing_static.py` 從 `docs/researcher-journeys.md` 讀取 journey 清單，所以 J15 一列入表就**必須**有路由案例。重跑 live 的 Geant4 案例，包括既有的繁中欠規格案例 `g4-underspec-2` |
@@ -565,7 +615,7 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | 實驗名稱 | `check_layering.py` 不允許 `skills/`、`contracts/` 中出現實驗名稱（含 ALICE）；契約表與 protocol 引用 `longitudinal-profile` 的參考時用引用鍵 |
 | 獨立審查 | 各階段的 Markdown（protocol 變更、J15 README、本提案）以 0.22.0 的 `review.py` 審查（`--lens-model design=<最強模型>`、`--filter-model`）；其紀錄只是 advisory，依 O04/O14 不取代人工的 G5 確認 |
 | 共享 stanza | 文字**不改**（點 5 寫的是「3.1.0 upgrade rule」；修改會牽動全部 SKILL.md 與 live 路由重跑） |
-| 其他 | `reference_inventory.py --check`、CHANGELOG、release manifest、adapter 0.3.0、`SIM_SOURCES` 加入 `FieldSetup.*` |
+| 其他 | `reference_inventory.py --check`、CHANGELOG、release manifest、adapter 0.3.0、`SIM_SOURCES` 加入 `FieldSetup.*`、`SIMCORE_SOURCES` 加入 `simreco` 的原始碼 |
 
 ### 6.12 階段 3 驗收
 
@@ -573,7 +623,7 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 - [ ] MT 測試指令回報的各執行緒 field manager 指標彼此不同；探針記錄的場參數和 spec 一致。
 - [ ] 6.7 的確定性場檢查在名義值下通過；delta intersection 1e-3 mm 如預期不通過。
 - [ ] `field-propagation`、`field-propagation-muon`、`tof-beta`、`tof-layer-consistency`、`sampling-fraction` 執行完成；各自的 negative control 依 6.6 被抓到，或註明沒有控制組。
-- [ ] 擬合器單元測試以 `tracker_resolution.py` 為參考通過。
+- [ ] `simreco` 的擬合器單元測試以 Python 的 `tracker_resolution.py` 為參考通過；`simreco` 在 CI 的 `simcore` 工作中建置與測試。
 - [ ] 隔離規則的契約測試：缺少 configuration、`embedded`、等級和契約表不符時，都被拒絕；J14 在 `--strict` 下仍通過。
 - [ ] recorded 預算、註冊項目、文件全部完成；VALIDATION 條目 GEANT4-J15。
 - [ ] 獨立 agent 只依文件與工具完成「1 GV 質子在 J15 的剛度解析度」：結果紀錄通過 `validate.py --strict`、label 為 `unvalidated`、解析度落在 6.2 表的範圍內，過程不需要維護者協助。
@@ -588,7 +638,7 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | `physics_config_comparison` 註記 | 延後 | 目前沒有使用者；J15 無法沿用 J14。觸發：出現需要比較物理設定的研究；屆時差異須經 `evidence_records` 取得 run record 的 `effective_config`，處理 `probe_version` 差異，缺少 `effective_config` 時一律失敗 |
 | 依 SE 自適應停止、以加密掃描作為證據 | 刪除 | optional stopping 偏差 |
 | 量測主導區 σ(1/R) 作為 benchmark | 刪除 | 改為擬合器單元測試 |
-| C++ 雙軌幾何格式 | 刪除 | 改為 Python 端轉換 |
+| C++ 雙軌幾何格式 | 刪除 | 改為由 C++ 的 `simspec convert` 先轉成 spec/2 |
 | 新的 core 驗證器、重寫徑跡與多重散射公式 | 刪除 | 重用 `contracts/schema.py`、`tracker_resolution.py`、`multiple_scattering.py` |
 | 欄位對照放進 contracts | 刪除 | 留在 adapter（`layered_sim.output/2`） |
 | contracts 4.0 | 刪除 | 新增選用區塊與閘控規則屬 minor |
@@ -601,6 +651,8 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | ReferenceMaterial 契約 | 延後 | 觸發：第一個非平板幾何的 reference benchmark |
 | 欄式輸出 | 延後 | 觸發：需要 per-hit 資料且 root-uproot adapter 可用 |
 | 模擬內 bootstrap、內容定址快取、新執行器、replay 後端 | 刪除或延後 | 目前規模不需要；快取鍵難以完整 |
+| Python 綁定（pybind11 等） | 不採用 | 使用者決定以獨立執行檔交換 JSON/CSV（2026-10-22） |
+| `skills/hep-detector/scripts/digitize_reconstruct.py` | 刪除 | 改為 C++ 的 `simreco`，介面為 `geant4_run.py reco`、`table` |
 | 一般化 `scoped_upgrade` | 延後 | 觸發：第二種研究類型需要升級（目前只有 Geant4 study record） |
 | Geant4 10.x 探針 | 延後 | 觸發：第一個使用 10.x 的應用；`StreamInfo`（10.2 起）、`FluctuationType()`（11.x 起）等 API 需依版本條件編譯 |
 
@@ -620,6 +672,7 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | negative control | 觀測量位移、正負兩個方向 | 4.4 |
 | 證據相關性 | `evidence_overlap` | 4.5 |
 | 新區塊版本 | `probe_version`、`column_map_version`、`evidence_overlap_version` | 4.5、5.6 |
+| 計算位置 | 階段 1 在 Python；階段 2 起由 `simstat`（C++）計算，門檻與判定留在 Python | 5.8 |
 
 ---
 
@@ -635,6 +688,7 @@ Si 的 production cut 不在 J15 收斂：它只影響 Si 的沉積，而 J15 �
 | `layered_sim.spec/2`、`layered_sim.output/2`、`column_map` | adapter | adapter 0.2.0、0.3.0 |
 | `GRADES`、kind 與 configuration 的輸出 | hep-detector | 隨 plugin 版本 |
 | 幾何存取器 | `core/geometry/layered.py` | 隨 plugin 版本 |
+| `simcore`（`simspec`、`simstat`、`simreco`） | adapter（C++） | adapter 0.2.0、0.3.0 |
 
 computational-run schema 的擁有者是 hep-computing；本提案不修改該 schema。
 
@@ -648,6 +702,7 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 - `reference_inventory.py --check`、`capability_map.py --check`、`check_routing_static.py`
 - 每份 study record 都通過 `validate.py --strict` 與 `dependencies.py`
 - `tests.adapters.test_geant4` 離線與 live（`HEP_GEANT4_LIVE_TEST=1`）
+- `simcore` 的建置、ctest 與等價測試（CI 必要工作，不需 Geant4）
 - `python3 -m unittest discover -s tests/contracts -t .`（整體執行，以抓測試順序相依）
 - `tools/scifix_advisories.py check`（有 advisory 的階段）
 - 由沒參與撰寫的 agent 執行一個新問題，並附通過條件
@@ -662,6 +717,7 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 2. 逐位元相同若在同主機也無法達成，是否接受改為統計比對（在 VALIDATION 記錄原因）。
 3. G5「未複製範例程式碼」的確認方式。
 4. `ext_computational_run.json` 加入選用的 `simulation` 屬性，以及 C2 的「衍生模擬」標記：需要 schema 擁有者 hep-computing 同意。
+5. 新增必要的 CI 工作建置 `simcore`（需要 C++17 編譯器）；目前 adapter 沒有任何必要的 CI 工作。
 
 **殘餘風險：**
 1. J14 的偵測極限可能因子 run 估計量、t 分位數與觀測量單位的控制組而改變，需要重新設計控制組。
@@ -671,7 +727,9 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 5. 量能器簇射主導 CPU 時間；後漏的收斂每點約需 5000 個簇射，事件數由 trial run 決定並記錄。
 6. 探針假設 worker 和 master 的設定相同；若發現 thread-local 差異，改為逐執行緒傾印。
 7. `longitudinal-profile` 的 `target_slabs` 由人宣告；契約只能以 `target_geometry_sha256` 比對宣告與 benchmark，無法判定目標堆疊就是論文中的配置，仍需審查者核對。
-8. 工作量：原型估計階段 1 約 8–12 個工作天，另加 Geant4 執行時間（4.1、4.2、4.6 約 1 天；4.3 1–2 天；4.4 1–2 天；4.5 3–5 天；sci-fix 流程約 1 天）。
+8. 工作量：原型估計階段 1 約 8–12 個工作天，另加 Geant4 執行時間（4.1、4.2、4.6 約 1 天；4.3 1–2 天；4.4 1–2 天；4.5 3–5 天；sci-fix 流程約 1 天）。階段 2 另需把統計量移植到 `simstat` 並建立 CI 工作，原型未估計。
+9. 兩種語言的維護成本：核心邏輯分在 C++ 與 Python；以 principle 11 的分工規則與等價測試控制，同一個量只有一份正式實作。
+10. 浮點等價：不同編譯器與最佳化（例如 FMA）可能讓 `simstat` 與 Python oracle 在最後幾位不同；等價測試以相對差 ≤ 1e-12 判定，逐位元相同只要求 `simspec` 的放置數值（同一建置）。
 
 ---
 
@@ -848,4 +906,5 @@ computational-run schema 的擁有者是 hep-computing；本提案不修改該 s
 | 最終版 | 三階段；所有審查發現已處理 | — |
 | 最終版（0.21.0 基準） | 依 0.21.0 重新核對：契約版本順延、`longitudinal-profile`、混合材料、simulated dataset-record、journey 檢查 | 見第 12 節 |
 | 最終版（main `9f08796` 基準） | 第二次深度檢查：差異審查與階段 1 原型；版本改為 C1、C2；隔離規則移到階段 1；`longitudinal-profile` 的目標與 kind；sci-fix 拆分；種子與退出碼；D10 | 見第 13 節 |
-| **J15 修訂（2026-10-22）** | **TOF1、TOF2 各改為兩層，四層同材料；TOF 解析度、上游能損、物質預算、接受度與場檢查網格重算；新增 `tof-layer-consistency`** | 數值由 `j15_design_estimates.py` 重算 |
+| J15 修訂（2026-10-22） | TOF1、TOF2 各改為兩層，四層同材料；TOF 解析度、上游能損、物質預算、接受度與場檢查網格重算；新增 `tof-layer-consistency` | 數值由 `j15_design_estimates.py` 重算 |
+| **語言分工（2026-10-22）** | **計算核心改用 C++：新的 `simcore`（`simspec`、`simstat`、`simreco`）；Python 為介面與判斷層；以獨立執行檔交換 JSON/CSV；hep-detector 不新增腳本** | 使用者決定 |

@@ -10,6 +10,18 @@ This folder is the starting point for implementing the Geant4 architecture propo
 | `j15_design_estimates.py` | Design estimates for the J15 minimal spectrometer (geometry, acceptance, resolution, statistics). Standard library; scipy optional. Not a benchmark reference |
 | `prototype/phase1-core.patch` | A reference prototype of phase 1 items 4.1, 4.2, 4.3 and 4.6 (contracts table, scope by observable kind, configuration emission, enum fix) with tests. Applies to `9f08796` with `git apply`. It follows the proposal text **before** the second deep check, so it lacks `target_slabs`, the `longitudinal-profile` target-hash match, the missing-dimension rule, `shower-maximum`, the `dependencies.py` re-derivation and C1 gating of the isolation rule; it gates at 3.6.0. Not reviewed for merge |
 
+## Language split (user decision, 2026-10-22)
+
+The compute core is C++; Python is only the interface and judgement layer. They exchange JSON/CSV through separate
+executables (no Python bindings).
+
+- C++: `layered_sim` (links Geant4) and the new Geant4-free `simcore` under `adapters/geant4/assets/simcore/`
+  (`simspec` spec conversion, `simstat` observables and statistics, `simreco` digitization and reconstruction), C++17
+  standard library plus the existing `MiniJson.hh`.
+- Python: the adapter CLIs that build and run the executables and write records; hep-detector's rules, independent
+  reference formulas, gate and benchmark decisions and labels; the contracts.
+- One production implementation per quantity; the other language only in tests, as an oracle (proposal principle 11).
+
 ## Before starting any work
 
 1. Check that `main` has not moved past `9f08796`. If it has, read the new CHANGELOG entries and re-run the checks
@@ -48,6 +60,10 @@ depend on the new architecture. Start from `prototype/phase1-core.patch` and bri
 7. Protocol section 4 (stopping rule declared in advance); regenerate J14 by offline replay for 4.1–4.3, then a live
    re-record on E2 (Geant4 11.4.3 build) for 4.4 and 4.5; ledger, advisories, VALIDATION entry GEANT4-CORRECTNESS.
 
+Phase 1 stays in Python on purpose (a minimal sci-fix). Phase 2 then ports the statistics to `simstat` (proposal
+5.8), keeping phase 1's Python estimators in `tests/` as oracles, and adds a required CI job that builds `simcore`.
+Phase 3 adds `simreco` (proposal 6.5); hep-detector gets no new script.
+
 Phases 2 and 3 follow sections 5 and 6 of the proposal.
 
 ## Open decisions for the maintainer
@@ -56,6 +72,7 @@ Phases 2 and 3 follow sections 5 and 6 of the proposal.
 - Whether a statistical comparison is acceptable if bit-identical output cannot be reached on the same host (phase 2).
 - How to confirm the G5 statement that no Geant4 example code was copied.
 - hep-computing's agreement to the optional `simulation` property and the C2 "derived simulation" marker.
+- A new required CI job for `simcore` (needs a C++17 compiler).
 
 ## Independent review
 
