@@ -3,7 +3,11 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.24.1 (2026-10-22)
+
+Patch release: sci-fix evidence and tooling after the improvement plan; no artifact contract change (contracts 3.6.0).
+Statistical-results record which core/stats code produced them; every ledger oracle runs weekly with all its backends;
+three C3 entries gain an oracle that does not come from a transcribed formula.
 
 - **Statistical-results show which core/stats code produced them.** The seven core/stats CLIs add `trace`
   (`code_paths`, `code_tags`) to their JSON result, and `result_artifact.py`, which wraps that output from another
