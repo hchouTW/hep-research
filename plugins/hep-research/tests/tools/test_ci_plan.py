@@ -61,6 +61,31 @@ class Planning(unittest.TestCase):
                 self.assertEqual((sorted(p["modules"]), p["parts"]), (sorted(EVERY), ["static", "ams-optional"]))
                 self.assertTrue(any(reason.strip() in r for r in p["reasons"]), p["reasons"])
 
+    def test_a_changed_test_helper_selects_every_module_that_imports_it(self):
+        p = plan(P + "tests/contracts/analysis_check_cases.py")
+        self.assertFalse(p["full"], p["reasons"])
+        importers = PLAN.helper_importers("tests/contracts/analysis_check_cases.py", EVERY)
+        for m in ("tests.contracts.test_analysis_check_foundations", "tests.contracts.test_analysis_check_report_permit",
+                  "tests.contracts.test_analysis_check_shadow_and_refusal", "tests.contracts.test_cross_artifact_check_gap_probes"):
+            self.assertIn(m, importers)
+        self.assertLessEqual(set(importers), set(p["modules"]))
+        self.assertTrue(set(PLAN.helper_importers("tests/contracts/analysis_check_runs.py", EVERY)) <=
+                        set(plan(P + "tests/contracts/analysis_check_runs.py")["modules"]))
+
+    def test_a_helper_no_test_module_imports_is_the_full_run(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "tests" / "x").mkdir(parents=True)
+            (root / "tests" / "x" / "test_a.py").write_text("import json\n")
+            self.assertEqual(PLAN.helper_importers("tests/x/lonely_helper.py", ["tests.x.test_a"], root), [])
+            self.assertEqual(PLAN.helper_importers("tests/x/json.py", ["tests.x.test_a"], root), ["tests.x.test_a"])
+            reg = copy.deepcopy(REGISTRY)  # an impact group covers the helper, so only the importer search decides
+            reg["impact"].append({"id": "x", "change": "x", "patterns": ["tests/x/*.py"], "checks": [], "full": False,
+                                  "not_available": []})
+            p = PLAN.plan_for([P + "tests/x/lonely_helper.py"], ["tests.x.test_a"], reg, root)
+            self.assertTrue(p["full"])
+            self.assertIn("no test module imports it", " ".join(p["reasons"]))
+
     def test_one_unbounded_path_makes_the_whole_plan_full(self):
         self.assertTrue(plan(P + "contracts/analysis_checks/rules.py", P + "core/stats/poisson.py")["full"])
 
