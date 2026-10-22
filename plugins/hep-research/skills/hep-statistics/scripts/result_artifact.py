@@ -47,6 +47,7 @@ sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves 
 sys.path.insert(0, str(PLUGIN))
 
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 
@@ -182,7 +183,7 @@ def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
             "objective": a.objective, "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"],
                          "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {}},
-            "provenance": {"producer_skill": "hep-statistics", "created": a.created, "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-statistics", **trace.provenance(), "created": a.created, "evidence_ids": []},
             "inputs": [], "outputs": [], "status": labels, "unresolved_inputs": [],
             "required_capabilities": ["stats:result-semantics"], "extension": ext}
 

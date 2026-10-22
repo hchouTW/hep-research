@@ -1,12 +1,12 @@
 {
- "contract_version": "3.4.0",
+ "contract_version": "3.5.0",
  "bindings": {
   "experiments": [],
   "theory": []
  },
  "versions": {
   "plugin": "0.23.0",
-  "contracts": "3.4.0",
+  "contracts": "3.5.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -15,6 +15,26 @@
  },
  "provenance": {
   "producer_skill": "hep-statistics",
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/identity.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/trace.py",
+   "skills/hep-statistics/scripts/result_artifact.py"
+  ],
+  "code_tags": [],
   "created": "2026-10-17",
   "evidence_ids": []
  },
@@ -27,7 +47,7 @@
  "inputs": [
   {
    "ref": "signal_strength.json",
-   "sha256": "31579b65d7a5bd0510cc02b003abf0e92574d0d0142d92bed01ba993ee87ed3a",
+   "sha256": "0e42953786478afec917907f9d3c9c213aeef67015743b2aa2c940662f0e9fcb",
    "role": "statistical-result"
   }
  ],

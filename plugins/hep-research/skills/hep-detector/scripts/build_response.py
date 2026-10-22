@@ -60,6 +60,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 sys.dont_write_bytecode = True  # importing core and contracts leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.response_adapter import fold as adapter_fold  # noqa: E402
 from contracts.response_adapter import to_validator_input  # noqa: E402
@@ -259,7 +260,7 @@ def envelope(args, ext: dict) -> dict:
             "objective": args.objective, "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(),
                          "profiles": {}},
-            "provenance": {"producer_skill": "hep-detector", "created": args.created, "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-detector", **trace.provenance(), "created": args.created, "evidence_ids": []},
             "inputs": linked_inputs(args), "outputs": [], "status": labels(args), "unresolved_inputs": [],
             "extension": ext}
 

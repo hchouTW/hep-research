@@ -32,6 +32,7 @@ sys.dont_write_bytecode = True  # the imports below leave no __pycache__ (F-10)
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 STEP_TIMEOUT_S = 3600
@@ -101,7 +102,7 @@ def record(wf_name: str, step: dict, cmd: list[str], inputs: list[dict], outputs
             "objective": f"step {step['id']} of workflow {wf_name}, run by run_workflow.py",
             "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "profiles": {}},
-            "provenance": {"producer_skill": "hep-computing", "created": created, "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-computing", **trace.provenance(), "created": created, "evidence_ids": []},
             "inputs": [], "outputs": [], "status": list(dict.fromkeys(status)), "unresolved_inputs": [],
             "extension": {"input_manifest": inputs, "tools": [{"name": "python", "version": platform.python_version()}],
                           "commands": [" ".join(cmd)], "environment": {"python": platform.python_version()},

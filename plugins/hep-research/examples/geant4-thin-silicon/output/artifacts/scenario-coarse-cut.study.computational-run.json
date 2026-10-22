@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.4.0",
+ "contract_version": "3.5.0",
  "extension": {
   "commands": [
    "check_geant4_study.py label --write"
@@ -325,7 +325,7 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "ae245d9b0a744299"
+    "version": "3392f2d777ed165e"
    },
    {
     "name": "geant4_benchmarks.py",
@@ -337,6 +337,18 @@
  "objective": "Geant4 study record: most probable energy loss for mu- 10000.0 MeV; benchmarks, convergence and scope embedded (unvalidated in phase 1)",
  "outputs": [],
  "provenance": {
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/trace.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/status.py",
+   "core/trace.py",
+   "skills/hep-detector/scripts/check_geant4_study.py",
+   "skills/hep-detector/scripts/geant4_benchmarks.py"
+  ],
+  "code_tags": [],
   "created": "2026-10-21",
   "evidence_ids": [],
   "producer_skill": "hep-detector"
@@ -346,7 +358,7 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.4.0",
+  "contracts": "3.5.0",
   "plugin": "0.23.0",
   "profiles": {}
  }

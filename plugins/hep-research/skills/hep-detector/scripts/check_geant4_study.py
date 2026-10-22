@@ -55,6 +55,7 @@ sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV reader and bootstrap for both scripts)
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
@@ -598,7 +599,7 @@ def cmd_label(args) -> tuple[str, dict]:
                          "(unvalidated in phase 1)",
             "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "profiles": {}},
-            "provenance": {"producer_skill": "hep-detector", "created": created, "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-detector", **trace.provenance(), "created": created, "evidence_ids": []},
             "inputs": run_refs[len(evidence):] if upgrade else run_refs, "outputs": [], "unresolved_inputs": [],
             "status": labels,
             "extension": {"input_manifest": manifest,

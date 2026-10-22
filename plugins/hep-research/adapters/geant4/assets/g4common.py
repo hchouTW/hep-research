@@ -20,6 +20,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 if str(PLUGIN) not in sys.path:
     sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 
 ASSETS = Path(__file__).resolve().parent
 # dataset variables Geant4 11.4 reads (cmake/Modules/G4DatasetDefinitions.cmake) and the search root
@@ -83,7 +84,7 @@ def record_skeleton(artifact_id: str, objective: str, created: str, status: list
     return {"contract_version": CONTRACTS_VERSION, "artifact_id": artifact_id, "artifact_type": "computational-run",
             "objective": objective, "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": plugin_version(), "contracts": CONTRACTS_VERSION, "profiles": {}},
-            "provenance": {"producer_skill": "hep-detector", "created": created, "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-detector", **trace.provenance(), "created": created, "evidence_ids": []},
             "inputs": [], "outputs": [], "unresolved_inputs": [], "status": list(dict.fromkeys(status)),
             "extension": {}}
 

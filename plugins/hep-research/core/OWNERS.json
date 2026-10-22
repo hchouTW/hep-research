@@ -115,6 +115,27 @@
    ],
    "source": "new in this plugin (upgrade plan v1.3, F-04)"
   },
+  "trace": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Execution trace written into artifact provenance (contracts 3.5.0): the plugin files a process loaded and the tags advisory-named shared functions set, so a sci-fix advisory can tell whether affected code was loaded for an artifact",
+   "files": [
+    "trace"
+   ],
+   "consumers": [
+    "contracts/trace.py",
+    "skills/hep-statistics/scripts",
+    "skills/hep-detector/scripts",
+    "skills/hep-ml/scripts",
+    "skills/hep-theory/scripts",
+    "skills/hep-citations/scripts",
+    "skills/hep-computing/scripts",
+    "adapters/hepdata",
+    "adapters/batch-schedulers",
+    "adapters/geant4"
+   ],
+   "source": "new in this plugin (sci-fix improvement plan A1, 2026-10-22)"
+  },
   "constants": {
    "steward": "hep-theory",
    "status": "implemented-Th9",

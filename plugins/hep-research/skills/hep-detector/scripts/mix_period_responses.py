@@ -47,6 +47,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 sys.dont_write_bytecode = True  # importing core and contracts leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.response_adapter import to_validator_input  # noqa: E402
 from contracts.validate import Vocabulary, validate_artifact  # noqa: E402
@@ -234,7 +235,7 @@ def main(argv=None) -> int:
                    "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"],
                                 "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(),
                                 "profiles": (base.get("versions") or {}).get("profiles", {})},
-                   "provenance": {"producer_skill": "hep-detector", "created": args.created, "evidence_ids": []},
+                   "provenance": {"producer_skill": "hep-detector", **trace.provenance(), "created": args.created, "evidence_ids": []},
                    "inputs": [], "outputs": [], "unresolved_inputs": [],
                    "status": sorted({args.status, *[s for p in periods for s in p["doc"].get("status", [])]}),
                    "extension": ext}
