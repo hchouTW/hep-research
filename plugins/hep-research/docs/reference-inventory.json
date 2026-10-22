@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 352047,
+   "bytes": 354707,
    "uncited": 0
   },
   "hep-citations": {
@@ -405,8 +405,8 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 13198,
-   "lines": 171,
+   "bytes": 15858,
+   "lines": 194,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",

@@ -731,9 +731,10 @@ WARNING["ml_v28_environment_free_text.json"] = (ml_v28(_sub("environment", preci
                                                 ["ml.precision_free_text", "ml.device_free_text"])
 
 
-# Independent review filter records (contracts 3.4.0; docs/dev/independent-review-spec.md section 5.5): sidecar
-# records, not artifacts, so they live in contracts/fixtures/review/ and are checked by contracts.review
-# (filter_record_rules); cases.json lists each invalid record's codes.
+# Independent review filter records (contracts 3.4.0; docs/dev/independent-review-spec.md section 5.5) and expert
+# records (contracts 3.6.0; section 7.6): sidecar records, not artifacts, so they live in contracts/fixtures/review/
+# and are checked by contracts.review (filter_record_rules, or record_rules with role expert); cases.json lists each
+# invalid record's codes.
 REVIEW_OUT = ROOT / "contracts" / "fixtures" / "review"
 
 
@@ -754,7 +755,31 @@ def filter_record(mutate=None) -> dict:
     return doc
 
 
+def expert_record(mutate=None) -> dict:
+    h = "0123456789abcdef" * 4
+    doc = {"packet_sha256": h, "dispatch_nonce": "synthetic-nonce", "instructions_sha256": h, "role": "expert",
+           "reviewer": {"identity": "synthetic-expert-agent", "context": "fresh", "model": "synthetic-model",
+                        "host": "synthetic-host", "slot_id": "S7"},
+           "isolation": {"saw_prior_conversation": False, "host_injected": [], "instruction_files_seen": "unknown"},
+           "paths_read": [{"path": "packet/document.md", "sha256": h}],
+           "evidence": [{"id": "E1", "basis": "exhaustive", "script": "work/check.py", "script_sha256": h,
+                         "range": "synthetic: the regime the statement covers", "output_files": [{"path": "work/out.txt", "sha256": h}]},
+                        {"id": "E2", "basis": "internal", "units": ["U0020"]}],
+           "claims": [{"id": "C1", "units": ["U0004", "U0005"], "summary": "synthetic: a general statement"}],
+           "verdicts": [{"claim_id": "C1", "verdict": "unsupported", "rationale": "synthetic: false in one regime",
+                         "evidence_ids": ["E1", "E2"], "finding_ids": ["F1"], "refutation_attempts": []}],
+           "findings": [{"id": "F1", "kind": "other", "severity": "high", "units": ["U0004", "U0005"],
+                         "value": "synthetic value", "correction": "synthetic correction",
+                         "description": "synthetic: false in one regime", "fix": "synthetic fix"}],
+           "limitations": SYN}
+    if mutate:
+        mutate(doc)
+    return doc
+
+
 REVIEW_VALID = {"filter_record.json": filter_record(),
+                "expert_record.json": expert_record(),
+                "expert_record_nothing_found.json": expert_record(lambda d: d.update(claims=[], verdicts=[], findings=[])),
                 "filter_record_all_kept.json": filter_record(lambda d: d.update(decisions=[
                     {"finding_id": "P00000001", "decision": "keep", "reason": "synthetic"}]))}
 REVIEW_INVALID = {
@@ -770,6 +795,18 @@ REVIEW_INVALID = {
     "filter_record_reviewer_identity_in_decision.json": (filter_record(lambda d: d["decisions"][0].update(slot_id="S1")),
                                                          ["schema_invalid"]),
     "filter_record_wrong_role.json": (filter_record(lambda d: d.update(role="reviewer")), ["schema_invalid"]),
+    "expert_record_finding_without_verdict.json": (expert_record(lambda d: d["verdicts"][0].update(
+        verdict="unresolved", finding_ids=[])), ["finding_without_verdict"]),
+    "expert_record_with_skim.json": (expert_record(lambda d: d.update(skim=[{"unit": "U0004", "mark": "ok"}])),
+                                     ["schema_invalid"]),
+    "expert_record_with_carry_forward.json": (expert_record(lambda d: d.update(carry_forward=[
+        {"ref": "CF1", "status": "reopened"}])), ["schema_invalid"]),
+    "expert_record_no_findings_key.json": (expert_record(lambda d: d.pop("findings")), ["schema_invalid"]),
+    "expert_record_self_citation.json": (expert_record(lambda d: d["evidence"][1].update(units=["U0006"])),
+                                         ["self_citation"]),
+    "expert_record_verdict_without_finding.json": (expert_record(lambda d: (d["verdicts"][0].update(finding_ids=[]),
+                                                                            d.update(findings=[]))),
+                                                   ["verdict_without_finding"]),
 }
 
 

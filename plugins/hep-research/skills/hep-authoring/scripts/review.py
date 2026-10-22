@@ -6,9 +6,14 @@ prints a fixed two-line message, which the author agent passes to a new agent th
 
 Usage: python3 review.py COMMAND [options]   (run from the project root, or pass --project)
   start DOC [--supersede ID --reason TEXT] [--seed S] [--author NAME] [--author-model M] [--models A,B]
-        [--lens-model LENS=MODEL ...] [--filter-model M]
+        [--lens-model LENS=MODEL ...] [--filter-model M] [--expert-model M] [--own-config]
                                --lens-model fixes the model of a lens's lens slot (repeatable; MODEL in models);
-                               --filter-model adds the filtering pass over the round-1 findings (spec 6.9)
+                               --filter-model adds the filtering pass over the round-1 findings (spec 6.9);
+                               --expert-model adds the expert slot to round 1 (spec 6.10): one agent reads the
+                               whole document for substantive physics, statistics or method errors;
+                               --own-config gives this review its own configuration file,
+                               reviews/<id>/review-config.json: the shared one (or the defaults) with the options
+                               and --models applied; the shared file is neither read for this review again nor changed
   next                         observe, decide, print the next action (JSON)
   dispatch SLOT                build this attempt's packet, validate its example, print the dispatch message
   returned SLOT                the host reported the agent finished
@@ -20,7 +25,8 @@ Usage: python3 review.py COMMAND [options]   (run from the project root, or pass
   repair CODE                  how to fix a repair code; the next `next` confirms the fix
 Common options: --project DIR (default: current folder), --review ID (default: the only open review), --now
 YYYY-MM-DDTHH:MM:SSZ (default: the clock), --observation FILE (fixed host facts, for reproducible runs).
-Files: <project>/reviews/review-config.json (created with defaults by start when missing), <project>/reviews/<id>/,
+Files: <project>/reviews/review-config.json (created with defaults by start when missing; a review started with
+--own-config uses <project>/reviews/<id>/review-config.json instead), <project>/reviews/<id>/,
 and the private directory (config private_dir, else $XDG_STATE_HOME/hep-research/reviews/ or
 ~/.local/state/hep-research/reviews/). `python3 <plugin root>/contracts/review.py check <review dir>` checks a review.
 Output: one JSON object with a "status" key. Exit 0 ok, 1 negative result (a stop on error, a reverted change at close),
@@ -56,8 +62,9 @@ from review_lib import units as U  # noqa: E402
 from review_lib.store import Review, ReviewError, default_private_root, find_reviews, load_asset, read_json, write_json  # noqa: E402
 
 FIX = {
-    "config_changed": "Restore reviews/review-config.json to the configuration recorded for this round, or restart with "
-                      "start DOC --supersede ID --reason TEXT.",
+    "config_changed": "Restore the review's configuration file (reviews/review-config.json, or reviews/<id>/review-config.json "
+                      "for a review started with --own-config; repair shows which) to the configuration recorded for "
+                      "this round, or restart with start DOC --supersede ID --reason TEXT.",
     "config_out_of_range": "Fix the configuration value(s) listed. If the configuration was changed after the review "
                            "started, use start --supersede.",
     "canary_in_deliverable": "A mutated unit's text appears in the delivered document: delete it.",
@@ -171,11 +178,13 @@ def slot_plan(units: list[dict], lenses: list[str], deep: dict) -> tuple[list, d
 
 
 def allocate_slots(lenses: list[str], models: list[str], seed: str, first: int = 1, offset: int = 0,
-                   plan: list | None = None, lens_models: dict | None = None) -> dict:
+                   plan: list | None = None, lens_models: dict | None = None, expert_model: str | None = None) -> dict:
     """A2: one lens and one shadow slot per lens (or the given plan), random labels, models in rotation (a shadow's
     model differs from its lens's when there is more than one model). lens_models (config, contracts 3.4.0) fixes the
     model of a lens's lens slot; its shadow keeps the rotation, moved on to the next model when the rotation would
-    give it the lens slot's fixed model. Without lens_models the allocation is the same as before, bit for bit."""
+    give it the lens slot's fixed model. Without lens_models the allocation is the same as before, bit for bit. A plan
+    entry ("expert", None) (contracts 3.6.0) is the expert slot, with expert_model; it takes a random label like the
+    others, so without it the labels are unchanged."""
     roles = plan if plan is not None else [("lens", L) for L in lenses] + [("shadow", L) for L in lenses]
     ids = [f"S{i}" for i in range(first, first + len(roles))]
     U.rng(U.derive(seed, "slots")).shuffle(ids)
@@ -183,6 +192,9 @@ def allocate_slots(lenses: list[str], models: list[str], seed: str, first: int =
     out = {}
     m = len(models)
     for n, ((role, lens), sid) in enumerate(zip(roles, ids)):
+        if role == "expert":
+            out[sid] = {"role": "expert", "lens": None, "model": expert_model}
+            continue
         i = lenses.index(lens)
         model = models[(i + offset) % m] if role == "lens" else models[(i + offset + 1) % m]
         if lens in fixed:
@@ -221,10 +233,15 @@ def cmd_start(ctx: Ctx) -> dict:
         raise ReviewError("the document must be inside the project") from exc
     text = OBS.read_doc(doc)
     existed = ctx.cfg_path.is_file()
-    if not existed:
-        models = [m for m in (a.models or "host-default").split(",") if m]
-        write_json(ctx.cfg_path, {"config_version": "1.0.0", "models": models})
-    cfg = read_json(ctx.cfg_path)
+    if a.own_config:  # this review's own configuration: the shared file (or the defaults) is only its starting point
+        cfg = read_json(ctx.cfg_path) if existed else {"config_version": "1.0.0", "models": ["host-default"]}
+        if a.models:
+            cfg = dict(cfg, models=[m for m in a.models.split(",") if m])
+    else:
+        if not existed:
+            models = [m for m in (a.models or "host-default").split(",") if m]
+            write_json(ctx.cfg_path, {"config_version": "1.0.0", "models": models})
+        cfg = read_json(ctx.cfg_path)
     new_cfg = _config_options(cfg, a)
     probs = R.config_problems(new_cfg) + OBS.private_dir_problems(new_cfg, ctx.project, ctx.private_root, ctx.given)
     if probs:
@@ -245,11 +262,14 @@ def cmd_start(ctx: Ctx) -> dict:
             (open_same if st["document"] == rel else open_other).append(old)
     if open_same and not a.supersede:
         raise ReviewError(f"{rel} already has an unfinished review ({open_same[0].id}); use --supersede ID --reason TEXT")
-    if new_cfg != cfg:
-        keep = [o.id for o in open_same if o.id != a.supersede] + [o.id for o in open_other]
+    if a.own_config:
+        cfg = new_cfg
+    elif new_cfg != cfg:
+        keep = [o.id for o in open_same + open_other if o.id != a.supersede and OBS.uses_shared_config(o)]
         if existed and keep:
-            raise ReviewError("--lens-model and --filter-model change reviews/review-config.json, which the unfinished "
-                              f"review(s) {', '.join(keep)} also use (config_changed there): finish them first")
+            raise ReviewError("--lens-model, --filter-model and --expert-model change reviews/review-config.json, which the unfinished "
+                              f"review(s) {', '.join(keep)} also use (config_changed there): finish them first, or "
+                              "start this review with --own-config")
         write_json(ctx.cfg_path, new_cfg)
         cfg = read_json(ctx.cfg_path)
     seed = a.seed if a.seed is not None else secrets.token_hex(16)
@@ -266,6 +286,11 @@ def cmd_start(ctx: Ctx) -> dict:
     if rv.log.exists():
         raise ReviewError(f"review {rid} exists")
     ctx._rv = rv
+    own = {}
+    if a.own_config:
+        write_json(rv.dir / "review-config.json", cfg)
+        own = {"config_file": (rv.dir / "review-config.json").relative_to(ctx.project).as_posix()}
+    cfg_sha = R.sha256_file(rv.dir / "review-config.json") if own else R.sha256_file(ctx.cfg_path)
     master = U.derive(str(seed), rid)
     rv.save_seeds({"seed": str(seed), "master": master})
     lenses = U.active_lenses(text, table_l, eff["extra_lenses"])
@@ -274,7 +299,13 @@ def cmd_start(ctx: Ctx) -> dict:
     deep = {L: U.sample_deep(units, [u["id"] for u in units if u["in_scope"][L]], int(eff["deep_sample"]),
                              U.derive(rs, "deep", L)) for L in lenses}
     plan, no_slot = slot_plan(units, lenses, deep)
-    slots = allocate_slots(lenses, eff["models"], rs, plan=plan, lens_models=eff["lens_models"])
+    expert_model = (eff.get("expert") or {}).get("model")
+    if expert_model:
+        plan = plan + [("expert", None)]
+    slots = allocate_slots(lenses, eff["models"], rs, plan=plan, lens_models=eff["lens_models"],
+                           expert_model=expert_model)
+    ex = [s for s, v in slots.items() if v["role"] == "expert"]
+    expert = {"expert": {"slot_id": ex[0], "model": slots[ex[0]]["model"]}} if ex else {}
     rv.save_slots({"1": slots})
     copies = U.find_copies([PLUGIN, ctx.project], units, [doc, ctx.project / "reviews"])
     shown = [_shown_path(c, ctx.project) for c in copies]
@@ -283,12 +314,16 @@ def cmd_start(ctx: Ctx) -> dict:
     rv.save_seeds({"seed": str(seed), "master": master, "rounds": {"1": rs}})
     rv.append("round_started", ctx.now, {
         "review_id": rid, "round": 1, "document": rel, "source_sha256": source_sha,
-        "units_sha256": R.sha256_file(rv.units_path(1)), "config": cfg, "config_sha256": R.sha256_file(ctx.cfg_path),
+        "units_sha256": R.sha256_file(rv.units_path(1)), "config": cfg, "config_sha256": cfg_sha,
         "slots": [{"slot_id": s, "model": slots[s]["model"]} for s in sorted(slots, key=R._slot_order)],
-        "author": {"identity": a.author, "model": a.author_model}, "carry_forward": {}, "removed_findings": []})
+        "author": {"identity": a.author, "model": a.author_model}, "carry_forward": {}, "removed_findings": [], **own, **expert})
     ctx.observe()
     out = {"status": "ok", "review_id": rid, "round": 1, "units": len(units), "lenses": lenses,
            "slots": len(slots), "no_slot": no_slot, "next": "run next"}
+    if own:
+        out["config"] = own["config_file"]
+    if expert:
+        out["expert_slot"] = expert["expert"]["slot_id"]
     if shown:
         out["warning"] = ("reviewers can read copies or versions of this document (receipt rejects a record that cites "
                           "one, but reading one is still possible): " + ", ".join(shown) + ". For an evaluation, "
@@ -298,7 +333,8 @@ def cmd_start(ctx: Ctx) -> dict:
 
 
 def _config_options(cfg: dict, a) -> dict:
-    """The configuration with start's --lens-model and --filter-model applied (a copy; unchanged without them)."""
+    """The configuration with start's --lens-model, --filter-model and --expert-model applied (a copy; unchanged
+    without them)."""
     out = json.loads(json.dumps(cfg))
     for item in a.lens_model or []:
         lens, sep, model = item.partition("=")
@@ -309,6 +345,10 @@ def _config_options(cfg: dict, a) -> dict:
         if not a.filter_model.strip():
             raise ReviewError("--filter-model needs a model name")
         out["filter"] = {"model": a.filter_model.strip()}
+    if a.expert_model is not None:
+        if not a.expert_model.strip():
+            raise ReviewError("--expert-model needs a model name")
+        out["expert"] = {"model": a.expert_model.strip()}
     return out
 
 
@@ -399,6 +439,8 @@ def cmd_dispatch(ctx: Ctx) -> dict:
     k += 1
     if info["role"] == "filter":
         return _dispatch_filter(ctx, st, r, sid, k, cfg)
+    if info["role"] == "expert":
+        return _dispatch_expert(ctx, st, r, sid, k, cfg)
     aseed = attempt_seed(rv, r, sid, k)
     units = read_json(rv.units_path(r))["units"]
     text = OBS.read_doc(rv.private / f"round-{r}" / "source.md")
@@ -490,6 +532,45 @@ def cmd_dispatch(ctx: Ctx) -> dict:
                     "subagent type. Run returned SLOT when the host reports the agent has finished."}
 
 
+def _dispatch_expert(ctx: Ctx, st: dict, r: int, sid: str, k: int, cfg: dict) -> dict:
+    """The expert slot's packet (contracts 3.6.0, spec 5.2, 6.10): the round's document without canaries, its units
+    (no lens scope, no roles) and a scope with the claim size limit only; the whole document is its scope. No
+    canaries: the R0 self-check, the read rules and the copy guard at receipt are its isolation controls."""
+    rv = ctx.rv
+    aseed = attempt_seed(rv, r, sid, k)
+    units = read_json(rv.units_path(r))["units"]
+    text = OBS.read_doc(rv.private / f"round-{r}" / "source.md")
+    scope = {"slot_id": sid, "lens": None, "role": "expert", "max_units_per_claim": cfg["max_units_per_claim"]}
+    pdir = rv.attempt_dir(r, sid, k) / "packet"
+    instructions = PKT.render_expert_instructions(scope=scope, review_id=rv.id, round_=r, attempt=k, plugin=PLUGIN,
+                                                  example=PKT.expert_example_record(sid))
+    sums = PKT.write_packet(pdir, slot_id=sid, document=PKT.packet_document(text, sid),
+                            units=PKT.packet_units(units, None, {}, {}), scope=scope, items=None,
+                            instructions=instructions)
+    try:
+        PKT.validate_written_example(pdir / "instructions.md", "expert", int(cfg["max_units_per_claim"]))
+    except ReviewError:
+        import shutil
+        shutil.rmtree(rv.attempt_dir(r, sid, k), ignore_errors=True)
+        raise
+    (rv.attempt_dir(r, sid, k) / "work").mkdir(exist_ok=True)
+    priv = rv.private_attempt(r, sid, k)
+    salt = U.derive(aseed, "salt")
+    write_json(priv / "canary.json", {"canaries": [], "rejected": [], "salt": salt})
+    write_json(priv / "sample_seed", {"round_seed": round_seed(rv, r), "attempt_seed": aseed})
+    nonce = U.derive(aseed, "nonce")[:20]
+    rv.append("dispatched", ctx.now, {
+        "round": r, "slot_id": sid, "attempt": k, "packet_sha256": sums["packet_sha256"], "nonce": nonce,
+        "instructions_sha256": sums["instructions_sha256"], "deadline": OBS.deadline(ctx.now, cfg),
+        "canary_commitment": R.sha256_bytes((salt + R.canonical_sha256([])).encode()),
+        "seed_commitment": R.sha256_bytes((salt + aseed).encode()), "started": ctx.now,
+        "canaries": 0, "canaries_expected": 0, "instruction_files_sha256": OBS.instruction_hash(st["observed"])})
+    msg = PKT.dispatch_message(nonce, pdir / "instructions.md", sums["instructions_sha256"])
+    return {"status": "ok", "slot": sid, "attempt": k, "message": msg,
+            "note": "Pass exactly these two lines, and nothing else, to a new agent; on Claude Code name a non-fork "
+                    "subagent type. Run returned SLOT when the host reports the agent has finished."}
+
+
 def _accepted_record(rv: Review, st: dict, r: int, sid: str) -> dict:
     k = max(x for x, a in st["attempts"][(r, sid)].items() if a["outcome"] == "accepted")
     return read_json(rv.attempt_dir(r, sid, k) / R.SIDECAR)
@@ -498,7 +579,9 @@ def _accepted_record(rv: Review, st: dict, r: int, sid: str) -> dict:
 def _dispatch_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int, cfg: dict) -> dict:
     """The filter slot's packet (spec 5.2, 6.9): the round's document without canaries, its units, and the pooled
     findings under random ids, in a random order, with no reviewer identity (slot, lens, role, model or the
-    reviewer's own finding id). The id mapping stays in the private directory."""
+    reviewer's own finding id). The free text of each finding (correction, description, fix) is scrubbed of the
+    raising slot's id, its record's identity and the model names; the id mapping and the scrub counts stay in the
+    private directory (filter_ids.json)."""
     rv = ctx.rv
     aseed = attempt_seed(rv, r, sid, k)
     units = read_json(rv.units_path(r))["units"]
@@ -508,6 +591,7 @@ def _dispatch_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int, cfg: dict) ->
     U.rng(U.derive(aseed, "filter-order")).shuffle(pool)
     ids: dict[str, str] = {}
     findings = []
+    scrubbed: dict[str, dict] = {}
     for g in pool:
         n = 8
         pid = "P" + U.derive(aseed, "filter-id", g)[:n]
@@ -516,10 +600,18 @@ def _dispatch_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int, cfg: dict) ->
             pid = "P" + U.derive(aseed, "filter-id", g)[:n]
         ids[pid] = g
         fr, fsid, fid = g.split("/", 2)
-        f = next(x for x in _accepted_record(rv, st, int(fr), fsid)["findings"] if x["id"] == fid)
+        rec = _accepted_record(rv, st, int(fr), fsid)
+        f = next(x for x in rec["findings"] if x["id"] == fid)
+        terms = PKT.scrub_terms(fsid, rec["reviewer"]["identity"], _config_models(cfg) + [rec["reviewer"]["model"]])
+        free = {}
+        for key in PKT.SCRUB_FIELDS:
+            free[key], counts = PKT.scrub(f[key], terms)
+            for kind, c in counts.items():
+                scrubbed.setdefault(pid, {}).setdefault(kind, 0)
+                scrubbed[pid][kind] += c
         findings.append({"id": pid, "kind": f["kind"], "severity": f["severity"], "units": f["units"],
                          "unit_texts": {u: by_unit.get(u, "") for u in f["units"]}, "value": f["value"],
-                         "correction": f["correction"], "description": f["description"], "fix": f["fix"]})
+                         "correction": free["correction"], "description": free["description"], "fix": free["fix"]})
     scope = {"slot_id": sid, "lens": None, "role": "filter", "finding_ids": [x["id"] for x in findings]}
     pdir = rv.attempt_dir(r, sid, k) / "packet"
     instructions = PKT.render_filter_instructions(scope=scope, review_id=rv.id, round_=r, attempt=k, plugin=PLUGIN,
@@ -537,7 +629,11 @@ def _dispatch_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int, cfg: dict) ->
     priv = rv.private_attempt(r, sid, k)
     salt = U.derive(aseed, "salt")
     write_json(priv / "canary.json", {"canaries": [], "rejected": [], "salt": salt})
-    write_json(priv / "filter_ids.json", {"ids": ids})
+    total: dict[str, int] = {}
+    for counts in scrubbed.values():
+        for kind, c in counts.items():
+            total[kind] = total.get(kind, 0) + c
+    write_json(priv / "filter_ids.json", {"ids": ids, "scrubbed": {"total": total, "findings": scrubbed}})
     write_json(priv / "sample_seed", {"round_seed": round_seed(rv, r), "attempt_seed": aseed})
     nonce = U.derive(aseed, "nonce")[:20]
     rv.append("dispatched", ctx.now, {
@@ -550,6 +646,15 @@ def _dispatch_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int, cfg: dict) ->
     return {"status": "ok", "slot": sid, "attempt": k, "message": msg,
             "note": "Pass exactly these two lines, and nothing else, to a new agent; on Claude Code name a non-fork "
                     "subagent type. Run returned SLOT when the host reports the agent has finished."}
+
+
+def _config_models(cfg: dict) -> list[str]:
+    """Every model name the configuration holds: models, lens_models, the filter's and the expert's."""
+    out = list(cfg.get("models") or []) + list((cfg.get("lens_models") or {}).values())
+    for key in ("filter", "expert"):
+        if cfg.get(key):
+            out.append(cfg[key]["model"])
+    return out
 
 
 def _receive_filter(ctx: Ctx, st: dict, r: int, sid: str, k: int) -> dict:
@@ -788,7 +893,7 @@ def cmd_arbitrate(ctx: Ctx) -> dict:
         party_models = {allslots[x.split("/")[0]][x.split("/")[1]]["model"] for x in refs}
         free = [m for m in cfg["models"] if m not in party_models]
         model = free[0] if free else cfg["models"][n_items % len(cfg["models"])]
-        lenses = sorted({allslots[x.split("/")[0]][x.split("/")[1]]["lens"] for x in refs})
+        lenses = sorted({allslots[x.split("/")[0]][x.split("/")[1]]["lens"] or "expert" for x in refs})
         iid = f"A{r}.{n_items}"
         slots[sid] = {"role": "arbiter", "lens": None, "model": model, "item": iid}
         rv.save_slots(allslots)
@@ -859,7 +964,8 @@ def cmd_rereview(ctx: Ctx) -> dict:
         "units_sha256": R.sha256_file(rv.units_path(nr)), "config": st["rounds"][r]["config"],
         "config_sha256": st["rounds"][r]["config_sha256"],
         "slots": [{"slot_id": s, "model": slots[s]["model"]} for s in sorted(slots, key=R._slot_order)],
-        "author": st["author"], "carry_forward": plan, "removed_findings": removed})
+        "author": st["author"], "carry_forward": plan, "removed_findings": removed,
+        **({"config_file": st["rounds"][r]["config_file"]} if st["rounds"][r].get("config_file") else {})})
     ctx.observe()
     return {"status": "ok", "round": nr, "mapping": {k: len(v) for k, v in mapping.items()},
             "carry_forward": sum(len(v) for v in plan.values()), "removed_findings": removed}
@@ -938,7 +1044,8 @@ def cmd_repair(ctx: Ctx) -> dict:
     obs = (st or {}).get("observed") or {}
     detail = {"config_out_of_range": obs.get("config_problems"),
               "shared_dir_contamination": (obs.get("shared_dirs") or {}).get("contaminated"),
-              "change_without_edit": OBS.unedited_changes(st) if st else None}.get(code)
+              "change_without_edit": OBS.unedited_changes(st) if st else None,
+              "config_changed": OBS.config_rel(st) if st else None}.get(code)
     return {"status": "ok", "code": code, "fix": FIX[code], "detail": detail,
             "next": "fix it, then run next: observe confirms the fix"}
 
@@ -966,10 +1073,17 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--seed")
     p.add_argument("--author", default="author-agent")
     p.add_argument("--author-model", default="unspecified")
-    p.add_argument("--models", help="models for a new review-config.json, comma-separated")
+    p.add_argument("--models", help="models for a new review-config.json (with --own-config: this review's models), "
+                                     "comma-separated")
     p.add_argument("--lens-model", action="append", metavar="LENS=MODEL",
                    help="fix the model of LENS's lens slot (config lens_models; repeatable; MODEL must be in models)")
     p.add_argument("--filter-model", metavar="MODEL", help="add the filtering pass after round 1 (config filter.model)")
+    p.add_argument("--expert-model", metavar="MODEL",
+                   help="add the expert slot to round 1: one agent reads the whole document for substantive errors "
+                        "(config expert.model)")
+    p.add_argument("--own-config", action="store_true",
+                   help="give this review its own configuration file reviews/<id>/review-config.json (the shared one, "
+                        "or the defaults, with the options above applied); the shared file is not changed")
     for name in ("next", "arbitrate", "filter", "rereview", "report", "close"):
         sub.add_parser(name, parents=[common])
     for name in ("dispatch", "returned", "receive"):

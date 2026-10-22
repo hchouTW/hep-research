@@ -1,0 +1,72 @@
+{
+ "packet_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+ "dispatch_nonce": "synthetic-nonce",
+ "instructions_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+ "role": "expert",
+ "reviewer": {
+  "identity": "synthetic-expert-agent",
+  "context": "fresh",
+  "model": "synthetic-model",
+  "host": "synthetic-host",
+  "slot_id": "S7"
+ },
+ "isolation": {
+  "saw_prior_conversation": false,
+  "host_injected": [],
+  "instruction_files_seen": "unknown"
+ },
+ "paths_read": [
+  {
+   "path": "packet/document.md",
+   "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  }
+ ],
+ "evidence": [
+  {
+   "id": "E1",
+   "basis": "exhaustive",
+   "script": "work/check.py",
+   "script_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+   "range": "synthetic: the regime the statement covers",
+   "output_files": [
+    {
+     "path": "work/out.txt",
+     "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    }
+   ]
+  },
+  {
+   "id": "E2",
+   "basis": "internal",
+   "units": [
+    "U0020"
+   ]
+  }
+ ],
+ "claims": [
+  {
+   "id": "C1",
+   "units": [
+    "U0004",
+    "U0005"
+   ],
+   "summary": "synthetic: a general statement"
+  }
+ ],
+ "verdicts": [
+  {
+   "claim_id": "C1",
+   "verdict": "unsupported",
+   "rationale": "synthetic: false in one regime",
+   "evidence_ids": [
+    "E1",
+    "E2"
+   ],
+   "finding_ids": [
+    "F1"
+   ],
+   "refutation_attempts": []
+  }
+ ],
+ "limitations": "SYNTHETIC structural fixture; values are placeholders, not physics"
+}

@@ -1,4 +1,4 @@
-{"$comment": "Independent review record review_record 1.0.0 (docs/dev/independent-review-spec.md section 5.3): what one reviewer or arbiter agent writes as review_record.json in its attempt folder. This schema is the single source of field names, enums and required fields: the instruction-file generator (skills/hep-authoring/scripts/review_lib/packet.py), its output example and the receipt checks all read it. Bounds, contiguity, role-dependent and basis-dependent rules the built-in validator cannot express are Python rules in contracts/review.py (record_rules). Fields the script cannot verify are marked self-reported.",
+{"$comment": "Independent review record review_record 1.0.0 (docs/dev/independent-review-spec.md section 5.3): what one reviewer or arbiter agent (or, contracts 3.6.0, the expert agent of the optional expert slot, role expert) writes as review_record.json in its attempt folder. This schema is the single source of field names, enums and required fields: the instruction-file generator (skills/hep-authoring/scripts/review_lib/packet.py), its output example and the receipt checks all read it. Bounds, contiguity, role-dependent and basis-dependent rules the built-in validator cannot express are Python rules in contracts/review.py (record_rules). Fields the script cannot verify are marked self-reported.",
  "type": "object",
  "required": ["packet_sha256", "dispatch_nonce", "instructions_sha256", "role", "reviewer", "isolation", "paths_read", "evidence", "limitations"],
  "additionalProperties": false,
@@ -6,7 +6,7 @@
   "packet_sha256": {"$ref": "#/$defs/sha256", "description": "the sha256 of manifest.json in your packet folder: run `sha256sum manifest.json` there and copy the 64 hex digits"},
   "dispatch_nonce": {"$ref": "#/$defs/nonempty", "description": "the nonce= value of the second line of the dispatch message you were given, copied exactly"},
   "instructions_sha256": {"$ref": "#/$defs/sha256", "description": "the sha256= value of the second line of the dispatch message; it equals `sha256sum instructions.md`"},
-  "role": {"type": "string", "enum": ["reviewer", "arbiter"], "description": "reviewer for a review slot, arbiter for an arbitration slot; the instruction file says which"},
+  "role": {"type": "string", "enum": ["reviewer", "arbiter", "expert"], "description": "reviewer for a review slot, arbiter for an arbitration slot; the instruction file says which"},
   "reviewer": {"type": "object", "required": ["identity", "context", "model", "host", "slot_id"], "additionalProperties": false,
    "description": "who wrote this record. Self-reported",
    "properties": {

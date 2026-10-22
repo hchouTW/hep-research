@@ -254,7 +254,7 @@ def observe(rv, now: str, given: dict | None, private_root: Path) -> tuple[dict,
         doc_sha = sha256_file(doc)
     except (OSError, UnicodeDecodeError):
         text, doc_sha = None, None
-    cfg_path = rv.project / "reviews" / "review-config.json"
+    cfg_path = rv.project / config_rel(st)
     cfg_sha = sha256_file(cfg_path)
     try:
         cfg = read_json(cfg_path)
@@ -304,6 +304,23 @@ def observe(rv, now: str, given: dict | None, private_root: Path) -> tuple[dict,
             "changed_units": changed, "removed_units": removed, "git_head": git_head(rv.project, given),
             "sidecars": side, "repair": sorted(set(repair)), "warnings": warnings}
     return data, late
+
+
+SHARED_CONFIG = "reviews/review-config.json"
+
+
+def config_rel(st: dict) -> str:
+    """The configuration file of the review's current round, relative to the project: the shared
+    reviews/review-config.json, or the review's own file when it was started with --own-config (round_started
+    config_file)."""
+    rd = st["rounds"].get(st["round"], {})
+    return rd.get("config_file") or SHARED_CONFIG
+
+
+def uses_shared_config(rv) -> bool:
+    """Whether a review reads the shared configuration file (every review not started with --own-config)."""
+    st = fold(rv.events())
+    return config_rel(st) == SHARED_CONFIG
 
 
 def read_doc(path: Path) -> str:

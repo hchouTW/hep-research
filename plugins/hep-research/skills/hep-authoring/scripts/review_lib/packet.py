@@ -21,7 +21,8 @@ PLUGIN = Path(__file__).resolve().parents[4]
 EXAMPLE_HEAD = "## Output example"
 BASIS_ORDER = ("locator", "third-party", "tool-output", "exhaustive", "person", "internal")
 SUBTABLES = {"reviewer": ("path_read", "skim_mark", "claim", "verdict", "refutation_attempt", "carry_item", "finding", "output_file"),
-             "arbiter": ("path_read", "resolve", "output_file")}
+             "arbiter": ("path_read", "resolve", "output_file"),
+             "expert": ("path_read", "claim", "verdict", "refutation_attempt", "finding", "output_file")}
 
 
 def sha256_bytes(b: bytes) -> str:
@@ -202,6 +203,8 @@ def render_instructions(*, kind: str, lens: str, lens_info: dict, scope: dict, r
     props = {k: v for k, v in schema["properties"].items()
              if not (role == "arbiter" and k in ("skim", "claims", "verdicts", "findings", "carry_forward"))
              and not (role == "reviewer" and k == "resolves")}
+    # the expert role (contracts 3.6.0) is never offered to a reviewer or an arbiter slot
+    props["role"] = dict(props["role"], enum=[x for x in props["role"]["enum"] if x != "expert"])
     lines += ["### Fields", ""] + _fields_table({"properties": props}, req, ROLE_REQUIRED[role]) + [""]
     for sub in ("reviewer", "isolation"):
         lines += [f"### `{sub}`", ""] + _fields_table(schema["properties"][sub], schema["properties"][sub]["required"]) + [""]
@@ -213,6 +216,142 @@ def render_instructions(*, kind: str, lens: str, lens_info: dict, scope: dict, r
     lines += ["## Quality rules for this slot", ""] + _rules(kind, lens, scope) + [""]
     ex = example if example is not None else example_record(kind, scope["slot_id"])
     lines += [EXAMPLE_HEAD, "", "Unit ids, paths and hashes below are placeholders; use the ones of your packet.", "",
+              "```json", json.dumps(ex, indent=1, ensure_ascii=False), "```", ""]
+    return "\n".join(lines)
+
+
+def expert_example_record(slot_id: str) -> dict:
+    """The output example of the expert role; it passes check --record-only --role expert. Its topic (rapidity under a
+    boost) is a placeholder chosen to say nothing about the document under review."""
+    h = "0123456789abcdef" * 4
+    return {"packet_sha256": h, "dispatch_nonce": "n0nce-from-dispatch-line", "instructions_sha256": h, "role": "expert",
+            "reviewer": {"identity": "expert-agent-1", "context": "fresh", "model": "model-name", "host": "claude-code",
+                         "slot_id": slot_id},
+            "isolation": {"saw_prior_conversation": False, "host_injected": ["memory file"], "instruction_files_seen": "unknown"},
+            "paths_read": [{"path": "packet/document.md", "sha256": h}, {"path": "packet/units.json", "sha256": h}],
+            "evidence": [{"id": "E1", "basis": "exhaustive", "script": "work/boost_check.py", "script_sha256": h,
+                          "range": "boosts along z with beta from -0.9 to 0.9 in steps of 0.1",
+                          "output_files": [{"path": "work/boost_check.txt", "sha256": h}]},
+                         {"id": "E2", "basis": "internal", "units": ["U0031"]}],
+            "claims": [{"id": "C1", "units": ["U0012"],
+                        "summary": "The page states that a particle's rapidity is unchanged by a boost along the beam axis."}],
+            "verdicts": [{"claim_id": "C1", "verdict": "unsupported",
+                          "rationale": "A boost along the beam axis shifts every rapidity by the same amount; only "
+                                       "rapidity differences are unchanged. The page itself uses that shift in U0031.",
+                          "evidence_ids": ["E1", "E2"], "finding_ids": ["F1"],
+                          "refutation_attempts": [{"method": "looked for a restriction to rapidity differences nearby",
+                                                   "target": "U0011", "outcome": "none: the statement is about rapidity itself"}]}],
+            "findings": [{"id": "F1", "kind": "other", "severity": "high", "units": ["U0012"],
+                          "value": "rapidity is unchanged by a boost along the beam axis",
+                          "correction": "rapidity differences are unchanged by a boost along the beam axis",
+                          "description": "Wrong for rapidity itself, which shifts by the boost's rapidity; the later "
+                                         "derivation relies on the shift.",
+                          "fix": "Say that rapidity differences are boost-invariant along the beam axis."}],
+            "limitations": "Read the whole page once and checked the kinematics statements with a script; the "
+                           "statistics sections were read but no tool was run on them."}
+
+
+EXPERT_OVERRIDES = {"claims": "the statements you found wrong (or judged), each where the page states it most directly; "
+                              "there is no list of units to cover",
+                    "verdicts": "exactly one verdict per claim",
+                    "findings": "the errors you found; each is listed by a partially-supported or unsupported verdict; "
+                                "value is an exact excerpt of the cited units' text in units.json"}
+
+
+def render_expert_instructions(*, scope: dict, review_id: str, round_: int, attempt: int, plugin: Path = PLUGIN,
+                               example: dict | None = None) -> str:
+    """instructions.md of the expert slot (contracts 3.6.0, spec 6.10): the R0 check, the read rules, the whole-page
+    task, the fields of review_record.json for role expert, the evidence-basis table, the receipt rules of spec 7.6
+    and an example."""
+    schema = load_schema("review_record.json")
+    max_units = scope["max_units_per_claim"]
+    lines = [f"# Expert review instructions: slot {scope['slot_id']}", "",
+             f"Review packet {review_id}, round {round_}, attempt {attempt}. Role: `expert`.", ""]
+    lines += ["## R0 isolation self-check", "",
+              "Before anything else: if any earlier conversation is visible to you, set "
+              "`isolation.saw_prior_conversation` to true, write the record and stop. Record the categories of content the "
+              "host added to your context in `isolation.host_injected`, and the instruction files you can see in "
+              "`isolation.instruction_files_seen` (or `unknown`).", ""]
+    lines += ["## Read rules and working directory", "",
+              "- This file is in your packet folder. Its parent is your attempt folder; `work/` there is your only "
+              "working directory. Write every file you create (fetched copies, script outputs, scripts) in `work/`.",
+              "- Read the packet files freely. You may read files of the hep-research plugin, run its tools, and read "
+              "public web pages as evidence; save a copy of every fetched page in `work/` and record its URL.",
+              "- Never read any other copy or version of the document under review: not the original delivered "
+              "document, and not a copy of it in the plugin, in git history, in an installed plugin cache or "
+              "anywhere else (review the packet's document.md only). A record that cites such a file is rejected.",
+              "- Never read: the private review "
+              "directory, the review event log, other slots' or other attempts' folders, the author's traceability "
+              "records, or the mechanism's implementation files (skills/hep-authoring/scripts/review*.py, "
+              "skills/hep-authoring/scripts/review_lib/, skills/hep-authoring/assets/review-lenses.json, "
+              "skills/hep-authoring/assets/review-hosts.json, contracts/review.py). Files in a host shared directory that "
+              "existed before your attempt started are also forbidden; tool outputs the host saved during your attempt "
+              "may be read, but copy them into `work/` before you cite them.",
+              "- List every local file you read in `paths_read` with the sha256 of the whole file (`sha256sum FILE`).",
+              ""]
+    lines += ["## Your task", "",
+              "Read the whole of document.md as a domain expert in the physics, statistics and methods it discusses, "
+              "and report only substantive errors of physics, statistics or method:",
+              "",
+              "- a general statement that is false in some regime, case or limit it claims to cover;",
+              "- reasoning that is internally inconsistent: a step that does not follow, or two parts of the page "
+              "(possibly far apart) that contradict each other;",
+              "- two methods, quantities or treatments called equivalent, or one called sufficient, when they are not;",
+              "- a statement that the hep-research plugin's own tools, benchmarks or references contradict.",
+              "",
+              "Do not report style, wording, formatting, typos, citation format, missing references, or a single wrong "
+              "number, path or line that does not change the reasoning: other reviewers check the page claim by claim. "
+              "There is no list of units to cover and no skim: read the page as a whole, compare its general "
+              "statements with each other and with what you know, and test them in the cases where they are most "
+              "likely to fail. Finding nothing is an acceptable result; then write no claim, verdict or finding, and "
+              "say in `limitations` what you checked.",
+              "",
+              f"- **Claims**: one per error, citing 1 to {max_units} contiguous units of units.json where the page "
+              "states it most directly.",
+              "- **Verdicts**: exactly one per claim, `unsupported` or `partially-supported` for an error, with a "
+              "rationale that names the regime, case or contradiction, and evidence. Prefer external evidence: a "
+              "script of the counter-example in `work/` (`exhaustive`), a plugin tool's output (`tool-output`), or a "
+              "located source (`locator`); other units of the page (`internal`) serve for an inconsistency.",
+              "- **Findings**: one per error, listed by its verdict. `value` gives the text you challenge, copied "
+              "exactly from the units' text in units.json; `correction` gives what you believe is right; use the kind "
+              "`internal-inconsistency` for a contradiction inside the page and `other` for any other error.", ""]
+    lines += ["## Output: review_record.json", "",
+              "Write the record as JSON to `review_record.json.tmp` in your attempt folder, check it with",
+              "", "```", f"python3 {plugin / 'contracts' / 'review.py'} check --record-only review_record.json.tmp "
+              f"--role expert --max-units-per-claim {max_units}", "```", "",
+              "and rename it to `review_record.json` only after the check passes. Fields marked self-reported cannot be "
+              "verified by the script.", ""]
+    req = set(schema["required"])
+    props = {k: v for k, v in schema["properties"].items() if k not in ("skim", "carry_forward", "resolves")}
+    props = {k: (dict(v, description=EXPERT_OVERRIDES[k]) if k in EXPERT_OVERRIDES else v) for k, v in props.items()}
+    props["role"] = {"type": "string", "enum": ["expert"], "description": "always expert in this slot"}
+    lines += ["### Fields", ""] + _fields_table({"properties": props}, req, ROLE_REQUIRED["expert"]) + [""]
+    for sub in ("reviewer", "isolation"):
+        lines += [f"### `{sub}`", ""] + _fields_table(schema["properties"][sub], schema["properties"][sub]["required"]) + [""]
+    for name in SUBTABLES["expert"]:
+        d = schema["$defs"][name]
+        lines += [f"### `{name}` entries", ""] + _fields_table(d, d.get("required", [])) + [""]
+    lines += ["### Evidence bases", "",
+              "Each evidence item has an `id`, a `basis` and that basis's required fields:", ""] + basis_table() + [""]
+    lines += ["## Quality rules for this slot", "",
+              "- `schema_invalid`, `packet_mismatch`, `dispatch_mismatch`, `prior_conversation`, `same_identity` (your "
+              "identity must differ from the author's), `read_outside_packet`, `file_hash_mismatch`, `output_mismatch`, "
+              "`instructions_changed`: see the fields and read rules above.",
+              f"- `claim_shape`: each claim cites 1 to {max_units} contiguous units of units.json and has exactly one "
+              "verdict.",
+              f"- `finding_shape`: each finding cites 1 to {max_units} contiguous units, and its `value` is an exact "
+              "excerpt of those units' text as given in units.json.",
+              "- `finding_without_verdict`: every finding is listed by a `partially-supported` or `unsupported` verdict.",
+              "- `verdict_without_finding`: a `partially-supported` or `unsupported` verdict lists at least one finding.",
+              "- `basis_missing`: every verdict that is not `unresolved` cites at least one evidence item.",
+              "- `self_citation`: `internal` evidence never cites the claim's own units or any unit within two positions "
+              "of them; a refutation attempt never targets the claim's own unit.",
+              "- `refutation_weak`: a `supported` verdict (if you write one) has at least one refutation attempt with a "
+              "non-empty target.",
+              "- There are no controls in this slot, and no skim, deep-coverage or carry-forward rules.", ""]
+    ex = example if example is not None else expert_example_record(scope["slot_id"])
+    lines += [EXAMPLE_HEAD, "", "Unit ids, paths, hashes and the topic below are placeholders; use the ones of your "
+              "packet and the errors you find.", "",
               "```json", json.dumps(ex, indent=1, ensure_ascii=False), "```", ""]
     return "\n".join(lines)
 
@@ -297,6 +436,38 @@ def render_filter_instructions(*, scope: dict, review_id: str, round_: int, atte
     lines += [EXAMPLE_HEAD, "", "Finding ids, paths and hashes below are placeholders; use the ones of your packet.", "",
               "```json", json.dumps(ex, indent=1, ensure_ascii=False), "```", ""]
     return "\n".join(lines)
+
+
+SCRUB_FIELDS = ("correction", "description", "fix")   # a finding's free text; value and unit_texts quote the document
+SCRUB_MIN_LENGTH = 3                                    # shorter identity or model strings are left alone
+REDACTED = "[redacted]"
+
+
+def scrub_terms(slot_id: str, identity: str, models) -> list[tuple[str, str]]:
+    """The reviewer identity strings to remove from a finding's free text before the filter sees it (spec 5.2): the
+    slot id of the slot that raised it, the identity its record reports, and the model names (the configuration's and
+    the record's own). Longest first, so an identity that contains the slot id is removed whole."""
+    terms = [("slot_id", slot_id)]
+    if len(identity.strip()) >= SCRUB_MIN_LENGTH:
+        terms.append(("identity", identity.strip()))
+    for m in sorted({str(m).strip() for m in models if m}):
+        if len(m) >= SCRUB_MIN_LENGTH and m != identity.strip():
+            terms.append(("model", m))
+    return sorted(terms, key=lambda t: (-len(t[1]), t[0], t[1]))
+
+
+def scrub(text: str, terms: list[tuple[str, str]]) -> tuple[str, dict]:
+    """text with every term replaced by [redacted], and the count per kind. A slot id matches exactly; an identity or
+    a model name matches without regard to case. Either matches only as a whole token (not inside a longer word or
+    number)."""
+    counts: dict[str, int] = {}
+    for kind, term in terms:
+        flags = 0 if kind == "slot_id" else re.IGNORECASE
+        pat = re.compile(r"(?<![A-Za-z0-9_])" + re.escape(term) + r"(?![A-Za-z0-9_])", flags)
+        text, n = pat.subn(REDACTED, text)
+        if n:
+            counts[kind] = counts.get(kind, 0) + n
+    return text, counts
 
 
 def extract_example(text: str):

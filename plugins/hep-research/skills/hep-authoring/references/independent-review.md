@@ -26,10 +26,10 @@ forge it. It is advisory input that a human reviewer may cite in their own recor
 | What | Where |
 |---|---|
 | Driver | `<plugin root>/skills/hep-authoring/scripts/review.py` (`--help` lists every command) |
-| Contract and check | `<plugin root>/contracts/review.py check <review dir>`; `check --record-only RECORD --role reviewer\|arbiter` |
-| Schemas | `<plugin root>/contracts/schemas/` `review_config`, `review_units`, `review_manifest`, `review_record`, `review_event`, `review_head`, `review_observation`, `review_filter_record` (the filtering pass) |
+| Contract and check | `<plugin root>/contracts/review.py check <review dir>`; `check --record-only RECORD --role reviewer\|arbiter\|expert\|filter` |
+| Schemas | `<plugin root>/contracts/schemas/` `review_config`, `review_units`, `review_manifest`, `review_record`, `review_event`, `review_head`, `review_observation`, `review_filter_record` (the filtering pass); `review_record` with role `expert` is the expert slot's record |
 | Lens table, host notes | `<plugin root>/skills/hep-authoring/assets/review-lenses.json`, `<plugin root>/skills/hep-authoring/assets/review-hosts.json` |
-| Configuration | `<project>/reviews/review-config.json` (`start` writes one with defaults when missing; `models` is required) |
+| Configuration | `<project>/reviews/review-config.json` (`start` writes one with defaults when missing; `models` is required), or the review's own `<project>/reviews/<review-id>/review-config.json` after `start --own-config` |
 | Review directory | `<project>/reviews/<review-id>/`: the event log and head, unit tables, packets, records, the report file (report.md) |
 | Private directory | config `private_dir`, else `$XDG_STATE_HOME/hep-research/reviews/` or `~/.local/state/hep-research/reviews/`: canaries, witnesses, seeds, the slot table. Outside the project and the host's shared directories |
 
@@ -49,8 +49,12 @@ runs. All review state is in files, so a review resumes after a host restart.
 2. Repeat: run `next`, do the action it prints, run `next` again, until it prints `stop`. When the host reports that
    an agent has finished, run `returned SLOT`.
 
-**Two optional settings** (contracts 3.4.0; spec sections 5.1, 6.9 and A2), both off unless set, and set at `start`
-(they are written to `review-config.json`; `start` refuses to change a configuration another unfinished review uses):
+**Optional settings** (contracts 3.4.0 and 3.6.0; spec sections 5.1, 6.9, 6.10 and A2), all off unless set, and set at
+`start`. They are written to the shared `review-config.json`, and `start` refuses to change it while another
+unfinished review uses it, unless you add **`--own-config`**: the review then gets its own configuration file,
+`reviews/<review-id>/review-config.json` (the shared file, or the defaults, with the options and `--models` applied),
+recorded in the review's log; the shared file is not changed, so concurrent reviews can use different settings. Do
+not edit either file during a review (`config_changed`; `repair config_changed` names the file).
 
 - `--lens-model LENS=MODEL` (repeatable; config `lens_models`) fixes the model of that lens's lens slot in every round,
   re-review rounds included. MODEL must be in `models`. The lens's shadow keeps the rotation and never shares the
@@ -65,6 +69,16 @@ runs. All review state is in files, so a review resumes after a host restart.
   run (five references, `--filter-model opus`) it raised precision from 0.59 to 0.84, kept 39 of 40 real issues and cost
   about 10% of the review's tokens. Its decisions are advice: nothing is deleted, and you still verify and dispose every
   finding.
+- `--expert-model MODEL` (config `expert`, contracts 3.6.0) adds one **expert slot** to round 1: one agent of MODEL reads
+  the whole document as a domain expert and reports only substantive physics, statistics or method errors (a general
+  statement false in some regime, inconsistent reasoning, treatments called equivalent that are not, statements the
+  plugin's own tools contradict), never style. It is dispatched with the other round-1 slots, carries no canaries,
+  has at most two attempts and never escalates; its findings are filtered, disposed and reported like any other, and
+  a changed one is rechecked by the design lens in round 2. Reason: in two evaluation runs the substantive errors no
+  reviewer found were whole-page reasoning errors. **Being evaluated; not yet recommended.** `start` prints its slot
+  as `expert_slot`. To run only the expert slot (for an evaluation), start with `--own-config --expert-model MODEL`,
+  run `next`, then `dispatch` only that slot, `returned` and `receive` it; its findings are in the accepted record and
+  the review stays unfinished (the other slots are never dispatched).
 
 | `next` prints | Do |
 |---|---|
@@ -98,8 +112,8 @@ add `Agent(fork)` to `permissions.deny` (a warning: the docs do not say when the
 the host). Without `CLAUDE_PID` the report says the setting's effect could not be confirmed.
 
 **During the review.** Do not put packets, drafts, canaries or your own tool outputs in the host's shared directories
-(the Claude Code scratchpad and tool-result folders): `shared_dir_contamination`. Do not edit the configuration
-(`config_changed`).
+(the Claude Code scratchpad and tool-result folders): `shared_dir_contamination`. Do not edit the review's
+configuration file (`config_changed`).
 
 **Verify before you dispose.**
 
@@ -131,11 +145,19 @@ evidence where the lens needs it and real refutation attempts; quote the challen
 every carry-forward item on re-review; write `review_record.json.tmp`, check it, then rename it.
 
 The filter agent (with `--filter-model`) reads `findings.json`: the pooled round-1 findings under random ids, with no
-reviewer, slot, lens or model. It writes one decision per finding (`keep` or `drop`, a reason, and `duplicate_of` the
+reviewer, slot, lens or model; the raising slot's id, its reported identity and the model names are also removed
+from each finding's free text (`[redacted]`; the counts are in the private directory and the report). It writes one decision per finding (`keep` or `drop`, a reason, and `duplicate_of` the
 kept finding for a drop that repeats it) to `filter_record.json`, checked with `check --record-only --role filter`.
 Receipt rejects a record with a finding missing or decided twice, an unknown id (`decisions_incomplete`), or a
 `duplicate_of` that is not a kept finding (`duplicate_target`). After two failed attempts the filter is not applied
 and the report says so; nothing escalates.
+
+The expert agent (with `--expert-model`) reads the whole document.md of its packet (no skim or deep list, no controls) and writes
+`review_record.json` with role `expert`: one claim, one `unsupported` or `partially-supported` verdict with evidence
+and one finding per substantive error, nothing for style; finding nothing is a valid record. It is checked with
+`check --record-only --role expert`. Receipt applies the reviewer rules except coverage, controls and re-review, with
+any evidence basis allowed (external preferred), and rejects a finding no such verdict lists
+(`finding_without_verdict`).
 
 The arbiter judges only the items in `items.json` (both verdicts of a conflict in full, or a finding with the author's
 reason for declining it) and writes one conclusion per item: `uphold-finding` or `accept-decline` for a decline,
@@ -158,7 +180,8 @@ evidence separately.
 
 ## Check and report
 
-The report lists the configuration (with `lens_models` and `filter` when set) and, with a filtering pass, the findings
+The report lists the configuration (with `lens_models`, `filter`, `expert` and the review's own configuration file when
+set), the expert slot's outcome and findings, and, with a filtering pass, the identity strings it removed, the findings
 it kept first and the findings it dropped in a separate section with its reasons.
 
 `python3 <plugin root>/contracts/review.py check <review dir>` is read-only. Exit 0 when the review is closed and
