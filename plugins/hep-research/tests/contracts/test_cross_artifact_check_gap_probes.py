@@ -99,14 +99,15 @@ class ChainProbes(Probe):
         rep = self.positive(cases.both(cases.context_1_1, conflict))
         self.assertEqual(by_rule(rep, "r-inv.root")[0]["state"], "violated")
 
-    @PHASE2
     def test_g4_a_factor_table_does_not_choose_its_tolerance(self):
         # G4 (DR-6, V79): exposure 3.0 against acceptance x livetime 2.0 is a violation whatever tolerance the table sets
-        rep = self.positive(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0], tolerance=0.6)))
+        # (r-comp.factor_values 1.1.0, a 1.1.0 context)
+        rep = self.positive(cases.both(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0], tolerance=0.6)),
+                                       cases.context_1_1))
         self.assertEqual(by_rule(rep, "r-comp.factor_values")[0]["state"], "violated")
 
     def test_g4_reference_default_tolerance_finds_the_violation(self):
-        rep = self.positive(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0])))
+        rep = self.positive(cases.both(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0])), cases.context_1_1))
         self.assertEqual(by_rule(rep, "r-comp.factor_values")[0]["state"], "violated")
 
     @PHASE2
@@ -196,9 +197,9 @@ class ModelProbes(Probe):
         r = self.root()
         return report(cases.model_case(r, variant), r)
 
-    @PHASE2
     def test_g5_a_copied_observation_file_is_the_same_observation(self):
         # G5 (DR-3, V85): a byte copy of the auxiliary-input file bound under a second aux_id is the same observation
+        # (r-aux.use 1.1.0, a 1.1.0 context: source identity plus pointer, not the item ID)
         def copy_file(c):
             card = c.doc("card-sr-cr")
             card["samples"][2]["modifiers"][1] = {"type": "constrained-normalization", "parameter": "lumi_cr"}
@@ -206,7 +207,7 @@ class ModelProbes(Probe):
                                         "form": "gaussian", "width": 0.02})
             c.add("calibration", "aux-copy", "aux/inputs-copy.json", copy.deepcopy(cases.OBS))
             c.context["bindings"].append(cases.observes("obs-copy", "sr-cr", "lumi-copy", item="aux-copy"))
-        rep = self.model(copy_file)
+        rep = self.model(cases.both(copy_file, cases.context_1_1))
         self.assertEqual(next(o for o in rep["obligations"] if o["obligation_id"] == "r-aux.use:fit#sr-cr/lumi-copy")["state"],
                          "violated")
 

@@ -209,9 +209,22 @@ def _observations(ctx: dict, model: str, aux: str) -> tuple[set, list[str]]:
             sorted(d["declaration_id"] for d in decls))
 
 
-def _overlap(a: tuple, b: tuple) -> str:
-    """same, overlap (one pointer contains the other) or distinct."""
-    if a[0] != b[0]:
+def _source(view: dict, item: str) -> tuple:
+    """The source identity of an observation's item (DR-3, G5): an artifact envelope's artifact_id, else the item's
+    frozen digest (canonical JSON, or the bytes of another file), so a copy under another item ID is the same source.
+    Values are never compared: a copy with one key added is a different source (known limitation)."""
+    it = (view.get("items") or {}).get(item) or {}
+    doc = it.get("doc")
+    if isinstance(doc, dict) and doc.get("contract_version") and doc.get("artifact_id"):
+        return ("artifact", str(doc["artifact_id"]))
+    if it.get("sha256"):
+        return ("digest", str(it["sha256"]))
+    return ("item", item)
+
+
+def _overlap(a: tuple, b: tuple, view: dict | None = None) -> str:
+    """same, overlap (one pointer contains the other) or distinct; with a view, items compare by source identity."""
+    if (a[0] != b[0]) if view is None else (_source(view, a[0]) != _source(view, b[0])):
         return "distinct"
     if a[1] == b[1]:
         return "same"
@@ -264,7 +277,7 @@ def r_aux_use(ob: dict, env) -> dict:
                 unknown.append(f"{om}/{c['aux_id']}")
                 continue
             used_decls += od
-            rel = {_overlap(me, o) for o in other}
+            rel = {_overlap(me, o, view) for o in other}
             if "same" in rel:
                 return outcome("violated", "check.aux_repeated",
                                f"{om}/{c['aux_id']} encodes the same observation in this evaluation", ev, used_decls)

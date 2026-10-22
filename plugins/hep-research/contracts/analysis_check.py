@@ -251,7 +251,8 @@ def _finite(x) -> bool:
 def factor_table_shape(doc: dict) -> list[str]:
     """Shape of a factor-table calibration (check-context 1.1.0, G16): factors maps an effect to exactly one of
     values (a non-empty list of finite numbers), scalar (a finite number) or by_scope (scope -> such a list); an
-    optional tolerance is {"relative": a finite number >= 0}."""
+    optional tolerance is {"relative": a finite number >= 0} (r-comp.factor_values 1.1.0 does not use it); optional
+    significant_digits is an integer 1..17 (DR-6)."""
     out = []
     if doc.get("factor_table_version") != "1.0.0":
         out.append("factor_table_version is '1.0.0'")
@@ -276,6 +277,10 @@ def factor_table_shape(doc: dict) -> list[str]:
         if not (isinstance(tol, dict) and set(tol) == {"relative"} and isinstance(rel, (int, float)) and _finite(rel)
                 and rel >= 0):
             out.append("tolerance is {\"relative\": a finite number >= 0}")
+    if "significant_digits" in doc:
+        d = doc["significant_digits"]
+        if not (isinstance(d, int) and not isinstance(d, bool) and 1 <= d <= 17):
+            out.append("significant_digits is an integer from 1 to 17")
     return out
 
 

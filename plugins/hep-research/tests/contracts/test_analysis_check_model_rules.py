@@ -1,7 +1,9 @@
 """v6.3 D07/D08 model part (M2b, suite model-card/v1): the O03 pairings (P1-P3, everything else unsupported), R-AUX
 observation use within a joint evaluation, and cross-model sharing, on the synthetic cases CASE-MODEL, MODEL-USAGE and
 MODEL-SHARING (tests/contracts/analysis_check_cases.py). V06, V07, V08, V46, V47 and the model parts of V11, V15, V18, V24, V25,
-V64. The pyhf-combine adapter confirms structure only (V06), never independence. Synthetic data only."""
+V64. The pyhf-combine adapter confirms structure only (V06), never independence. Synthetic data only.
+Cases run on check-context 1.1.0 and the newest 1.1.0 pre-release suites (release R2): the 1.0.0 suites name
+r-aux.use 1.0.0, which this checker no longer runs."""
 import copy
 import json
 import sys
@@ -40,7 +42,7 @@ class ModelCase(unittest.TestCase):
 
     def run_case(self, variant=None, builder=None):
         root = self.root()
-        b = (builder or cases.model_case)(root, variant)
+        b = (builder or cases.model_case)(root, cases.both(variant, cases.context_1_1))  # the 1.1.0 rules (release R2)
         view, diags = ac().load_subject(b, root)
         return ac().evaluate(view, diags)
 
@@ -48,7 +50,7 @@ class ModelCase(unittest.TestCase):
         # V06: a shared parameter acts on several channels with one auxiliary observation: satisfied
         rep = self.run_case()
         self.assertEqual((rep["status"], rep["consistency"]), ("complete", "consistent"), states(rep))
-        self.assertIn({"id": "model-card", "version": "1.0.0"}, rep["assessment"]["suites"])
+        self.assertIn({"id": "model-card", "version": cases.DEV_SUITE}, rep["assessment"]["suites"])
         self.assertEqual(sorted(states(rep)), ["r-aux.use:fit#sr-cr/lumi-2026", "r-model.pairing:sr-cr#lumi",
                                                "r-model.pairing:sr-cr#mu", "r-model.pairing:sr-cr#mu_b",
                                                "r-model.root:mu-fit"])
@@ -196,7 +198,7 @@ class ModelVParts(unittest.TestCase):
         self.addCleanup(self.td.cleanup)
 
     def check(self, root, variant=None):
-        b = cases.model_case(root, variant)
+        b = cases.model_case(root, cases.both(variant, cases.context_1_1))
         view, diags = ac().load_subject(b, root)
         return ac().evaluate(view, diags)
 

@@ -34,6 +34,21 @@ Software checks establish contract consistency only, not physical validity.
   `incomplete`. To reproduce a 1.0.0 result, use hep-research 0.25.x (release R1). Measured on the Phase 0 comparison
   set (403 obligations): on 1.0.0 only the 96 `r-rep.repetition` and 3 `r-ratio.correlation` obligations change, all to
   `rule_not_run`; on dev.2 only G3 changes (both orders are now `violated`).
+- **Cross-artifact check: a factor table no longer chooses its own tolerance (G4, DR-6, V79).**
+  `r-comp.factor_values` 1.1.0 ignores the table's `tolerance`. The relative tolerance is 1e-9 unless the table
+  declares `significant_digits` d (an integer from 1 to 17; shape-checked for 1.1.0 contexts) and every value of the
+  relation has at most d significant digits. It is then Σ|power| · ½·10^(1−d), counting the parent's power as 1, which
+  bounds the effect of rounding every value to d digits. A declaration that the values contradict is not used. Each
+  outcome reports the tolerance it used and its basis. The rule ships in the suites `1.1.0-dev.3`, and the 1.0.0
+  suites give `check.rule_not_run` for it. On the Phase 0 comparison set, on dev.3 only the G4 case changes (a
+  tolerance of 0.6 no longer hides 3.0 against 1.0 × 2.0); on 1.0.0, the 4 `r-comp.factor_values` obligations also
+  become `rule_not_run`.
+- **Cross-artifact check: a copied observation file is the same observation (G5, DR-3, V85).** `r-aux.use` 1.1.0
+  identifies an auxiliary observation by its source identity plus pointer instead of the item ID. The source identity
+  is an artifact envelope's `artifact_id`, or otherwise the item's frozen canonical digest (the bytes for a non-JSON
+  file). A copy bound under a second aux_id is therefore `check.aux_repeated`. Values are never compared, so a copy with
+  one key added is still a different source (a known limitation). The rule ships in `1.1.0-dev.3` (the model-card suite);
+  the 1.0.0 suite gives `check.rule_not_run` for it.
 
 ## 0.25.1 (2026-10-22)
 

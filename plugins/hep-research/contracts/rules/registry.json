@@ -481,9 +481,54 @@
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; retired in release R2: it used the factor table's own tolerance (G4); version 1.1.0 replaces it, and a suite naming 1.0.0 gives check.rule_not_run (reproduce with release R1)",
+   "source_sha256": "4eeae5cd616ecc73744c244ff4ff6c35cef03a7929891bad8855714660a1c709"
+  },
+  {
+   "rule_id": "r-comp.factor_values",
+   "version": "1.1.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "changed",
+   "prerequisites": [
+    "factor table bound to the instance",
+    "catalog composition",
+    "declared significant_digits (optional)"
+   ],
+   "applicability": "R-COMP: per-bin factor values of a bound factor table agree with the catalog composition; the tolerance is 1e-9, or sum|power| * 0.5 * 10**(1-d) for declared significant_digits d that every value honours, never the table's own (DR-6, G4)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.factor_values_consistent"
+    ],
+    "violated": [
+     "check.factor_values_inconsistent"
+    ],
+    "not_applicable": [
+     "check.factor_table_absent"
+    ],
+    "unverified": [
+     "check.factor_values_incomplete"
+    ],
+    "unsupported": [
+     "check.factor_form_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V69",
+    "V79"
+   ],
+   "waivable": true,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
-   "source_sha256": "4eeae5cd616ecc73744c244ff4ff6c35cef03a7929891bad8855714660a1c709"
+   "source_sha256": "6a597a26588d82902cd3fe680edeb49e01b440063fbe957958b8fed72072179c"
   },
   {
    "rule_id": "r-resp.response_use",
@@ -860,9 +905,66 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; retired in release R2: it identified an observation by item ID, so a copied file under another ID was a new observation (G5); version 1.1.0 replaces it, and a suite naming 1.0.0 gives check.rule_not_run (reproduce with release R1)",
+   "source_sha256": "dc5f3eeac0e3ce4ff895ab733992780273bbe2ea7e9b8e8419e807b2b066edd3"
+  },
+  {
+   "rule_id": "r-aux.use",
+   "version": "1.1.0",
+   "layer": "L3",
+   "suites": [
+    "model-card/v1"
+   ],
+   "kind": "changed",
+   "prerequisites": [
+    "model card constraints",
+    "evaluations",
+    "observes bindings or provenance_binding declarations"
+   ],
+   "applicability": "R-AUX: within one evaluation, each auxiliary observation enters the likelihood through exactly one constraint term; an observation is its source identity (an envelope's artifact_id, else the item's frozen canonical digest) plus pointer, values never compared (DR-3, G5)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.aux_single_use"
+    ],
+    "violated": [
+     "check.aux_repeated"
+    ],
+    "not_applicable": [
+     "check.aux_prior"
+    ],
+    "unverified": [
+     "check.aux_unbound",
+     "check.aux_repeat_unknown",
+     "check.aux_binding_ambiguous",
+     "check.aux_overlap_unknown"
+    ],
+    "unsupported": [
+     "check.aux_unsupported"
+    ]
+   },
+   "legacy_codes": [
+    "stats.duplicate_auxiliary"
+   ],
+   "native_from": null,
+   "v_cases": [
+    "V06",
+    "V07",
+    "V08",
+    "V11",
+    "V24",
+    "V25",
+    "V46",
+    "V64",
+    "V85"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
-   "source_sha256": "dc5f3eeac0e3ce4ff895ab733992780273bbe2ea7e9b8e8419e807b2b066edd3"
+   "source_sha256": "afcb53c6f7df0a9ecab5b81c12d2b90fd9609db3d8c50d4cbe488b8a27aeea62"
   },
   {
    "rule_id": "r-share.parameters",
@@ -2824,9 +2926,12 @@
      "work_packages": [
       "P2.16"
      ],
-     "host": "r-comp.factor_values: G4 tolerance from declared significant digits (DR-6)",
-     "status": "not-run",
-     "tests": []
+     "host": "r-comp.factor_values 1.1.0 (release R2, 1.1.0-dev.3): G4 tolerance from declared significant digits (DR-6)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g4_a_factor_table_does_not_choose_its_tolerance",
+      "tests.contracts.test_analysis_check_r2_rules.FactorTolerance.test_rounded_tables_pass_and_a_real_break_fails"
+     ]
     }
    ]
   },
@@ -2932,9 +3037,12 @@
      "work_packages": [
       "P2.10"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "r-aux.use 1.1.0 (release R2, 1.1.0-dev.3)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ModelProbes.test_g5_a_copied_observation_file_is_the_same_observation",
+      "tests.contracts.test_analysis_check_r2_rules.ObservationIdentity.test_envelopes_compare_by_artifact_id_and_other_files_by_digest"
+     ]
     }
    ]
   },

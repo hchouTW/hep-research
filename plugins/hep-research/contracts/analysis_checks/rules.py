@@ -488,7 +488,9 @@ def r_comp_factor_values(ob: dict, env: Env) -> dict:
         return outcome("unverified", "check.factor_values_incomplete", "the factor lists are empty or differ in bin count", ev)
     if not all(math.isfinite(x) for a in arrays.values() for x in a):
         return outcome("unverified", "check.factor_values_incomplete", "a factor value is not a finite number", ev)
-    tol = float((doc.get("tolerance") or {}).get("relative", 1e-9))
+    tol, basis = _factor_tolerance(doc, comp, arrays)
+    if "tolerance" in doc:
+        basis += "; the table's own tolerance is not used"
     failed = []
     for k in range(n):
         prod = 1.0
@@ -498,10 +500,37 @@ def r_comp_factor_values(ob: dict, env: Env) -> dict:
         if abs(parent - prod) > tol * max(abs(parent), abs(prod), 1e-300):
             failed.append(k)
     bins = {"evaluated": n, "failed": len(failed), "first_failures": failed[:5]}
+    tolerance = {"relative": tol, "basis": basis}
     if failed:
         return outcome("violated", "check.factor_values_inconsistent",
-                       f"{len(failed)} of {n} bins break {comp_id} beyond relative tolerance {tol}", ev, bins=bins)
-    return outcome("satisfied", "check.factor_values_consistent", f"all {n} bins agree within {tol}", ev, bins=bins)
+                       f"{len(failed)} of {n} bins break {comp_id} beyond relative tolerance {tol:.3g} ({basis})", ev,
+                       bins=bins, tolerance=tolerance)
+    return outcome("satisfied", "check.factor_values_consistent", f"all {n} bins agree within {tol:.3g} ({basis})", ev,
+                   bins=bins, tolerance=tolerance)
+
+
+DEFAULT_FACTOR_TOLERANCE = 1e-9
+
+
+def _significant_digits(x) -> int:
+    """Significant digits of a number as written (its shortest repr; trailing zeros are not significant)."""
+    import decimal
+    return len(decimal.Decimal(repr(x) if isinstance(x, float) else str(x)).normalize().as_tuple().digits)
+
+
+def _factor_tolerance(doc: dict, comp: dict, arrays: dict) -> tuple[float, str]:
+    """The relative tolerance of a factor relation (DR-6, G4): never the table's own 'tolerance'. Undeclared it is
+    1e-9. A table declaring significant_digits d, which every value of the relation honours, gets sum|power| * u
+    with u = 0.5 * 10**(1 - d), the parent's power counting 1: rounding each value to d digits moves
+    parent / prod(child**power) by at most 1 - (1 - u)**sum|power| <= sum|power| * u. A declaration the values
+    contradict (a value with more digits) is not used."""
+    d = doc.get("significant_digits")
+    if not (isinstance(d, int) and not isinstance(d, bool) and 1 <= d <= 17):
+        return DEFAULT_FACTOR_TOLERANCE, "default: no significant_digits declared"
+    if any(_significant_digits(x) > d for a in arrays.values() for x in a):
+        return DEFAULT_FACTOR_TOLERANCE, f"default: a value has more than the declared {d} significant digits"
+    total = 1 + sum(abs(ch["power"]) for ch in comp["children"])
+    return max(DEFAULT_FACTOR_TOLERANCE, total * 0.5 * 10.0 ** (1 - d)), f"{d} declared significant digits, sum|power| {total}"
 
 
 # --- R-RESP -----------------------------------------------------------------------------------------------------
@@ -757,7 +786,10 @@ RULES.update(run_rules.RULES)  # run-lineage/v1 (contracts.analysis_checks.runs)
 # The version each implementation is (P3). A fixed rule is a new version and its old code is gone: an obligation of a
 # suite that names the old version stays unverified (check.rule_not_run) and is reproduced with the release that has it.
 # 1.1.0 (release R2): r-rep.repetition and r-ratio.correlation read every matching declaration or record (G3, G17).
-VERSIONS = {"r-rep.repetition": "1.1.0", "r-ratio.correlation": "1.1.0"}
+# r-comp.factor_values 1.1.0: the tolerance comes from declared significant digits, never the table (G4, DR-6).
+# r-aux.use 1.1.0: an observation is its source identity plus pointer, not its item ID (G5, DR-3).
+VERSIONS = {"r-rep.repetition": "1.1.0", "r-ratio.correlation": "1.1.0", "r-comp.factor_values": "1.1.0",
+            "r-aux.use": "1.1.0"}
 
 # (rule_id, version) -> implementation
 IMPLEMENTED = {(rid, VERSIONS.get(rid, "1.0.0")): fn for rid, fn in RULES.items()}
