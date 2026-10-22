@@ -5,6 +5,7 @@
 > Date: 2026-10-22
 > Language: English translation of [`architecture.md`](architecture.md) (Traditional Chinese original), same content
 > How to read: §0 is a one-page summary; §1 the design basis taken from real experiments; §2–§9 the architecture; §10–§13 stages, risks, decisions and history
+> Notation: "contracts C1, C2" in this document are the contract versions CV1, CV2 of the plan ([`plan.en.md`](plan.en.md) §5); task C's stages are written C1–C3. Stages, numbering and open decisions follow the plan, work items and acceptance follow the task specs; this document only gives the design rationale
 
 ---
 
@@ -490,67 +491,18 @@ One advisory each for S1 and S2 (keys `artifact_types: [computational-run]`, `ex
 
 ## 10. Stages and acceptance
 
-### 10.0 What J14 records
+Before 2026-10-23 this section copied the content and acceptance of each stage, which easily drifted from the task specs, so it now points to them. Stage order, scope boundaries, interface ownership, gates and open decisions are defined in [`plan.en.md`](plan.en.md); the work items and acceptance of each stage are defined in the task specs.
 
-| Stage | Recorded content | Replay |
+| Stage | In one sentence | Spec |
 |---|---|---|
-| today | reduced CSVs for 5 runs (with an `event` column); the 13 scan and variation runs keep only `geant4-run-summary/1` (one value plus a bootstrap SE); 2.6 MB | pure Python |
-| A1 | runs with per-event CSVs: blocks cut offline from the existing CSV, producing and committing `simulation-summary/1` (no re-record); scan and variation runs with single-value summaries only: live re-recorded with `seeding: stream`, committing summaries; new negative controls | from summaries, pure Python |
-| A2 | an effective config per run; the regression-check record | as above |
-
-### A1 Correctness fixes (contracts C1, sci-fix)
-
-**Content:** §6.2–6.4, §6.6–6.8, §7.1, §7.3; the statistics of §5.2–5.5; the Python summary producer (from per-event CSVs, blocks by the `event` column); the D8 enums, the D10 tests, protocol section 4.
-
-**Acceptance:**
-- [ ] Records with a kind mismatch, a missing declared dimension, a class or grade that disagrees with the table, a missing or embedded configuration, or a mismatched target hash or `hash_scheme` are refused under `--strict` and C1; a mismatch found by `dependencies.py`'s re-derivation is refused.
-- [ ] The regenerated J14 study records pass `validate.py --strict` and `dependencies.py`; any change of verdict is recorded with its reason.
-- [ ] The gate toy (10⁴ trials per cell) matches the table of §6.6 within ±3σ_MC; the interval-based decision for small counts is tested.
-- [ ] Block batch-means coverage toy: for each kind of J14 estimator (mean, fraction, quantile, mode), the actual coverage of a nominal 90 % interval satisfies |coverage − 0.90| ≤ 0.02 + 3σ_MC, reported per kind.
-- [ ] The MPV bias toy's 95 % upper bound ≤ tol/10; the per-run empirical check is in force.
-- [ ] Detection-limit toy: an injection at the DL is caught with probability ≥ 0.977; J14's realized control results are recorded in VALIDATION.
-- [ ] J14's offline replay runs from the committed summaries, its decisions meet §5.6, and it needs neither Geant4 nor a compiler.
-- [ ] `python3 -m unittest discover -s tests/contracts -t .` has no errors.
-- [ ] Ledger entries and two advisories pass `scifix_advisories.py check`; VALIDATION GEANT4-CORRECTNESS; CHANGELOG; release manifest.
-
-### A2 Shared library and boundary artifacts (adapter 0.2.0)
-
-**Content:** `g4sim` (`SimSeed.hh`, `SimSummary.hh`, `SimProbe.hh`, helpers); `layered_sim` writes the summary, effective config and column map, and supports `seeding: per-event`; the study layer reads only boundary artifacts, with geometry facts from the effective config; `hash_scheme: tree-v1`.
-
-**Acceptance:**
-- [ ] Regression check: J14's existing specs produce, on the same host, CSVs bit-identical to those from before A2.
-- [ ] With `seeding: per-event`, one logical run executed as 1, 2 and 4 jobs and with 1, 2 and 4 threads gives the same event content; integer accumulators of the summary identical, floating point within a relative difference of 1e-12.
-- [ ] The summary written by `layered_sim` agrees with the one Python produces from the same run's observable dump (integers identical, floating point within 1e-12 relative). The dump is a side file switched on only in tests (`%.17g`); the CSV itself is unchanged.
-- [ ] The J14 specs rerun for the regression check all have an effective config; the configuration derived with `tree-v1` gives the same verdicts as `spec-v1`; a deliberate disagreement is caught; a run with `recorded: false` cannot upgrade.
-- [ ] The thin-layer rules take the minimum thickness from the effective config, reaching the same conclusions for J14 as in A1.
-- [ ] An event weight ≠ 1 exits 2.
-- [ ] VALIDATION GEANT4-SUMMARY; CHANGELOG; release manifest.
-
-### B1 `element_sim` and event files (adapter 0.3.0)
-
-**Content:** `element_sim` (spec `element_sim.spec/1`: box elements, one level of nesting, `field`, `source.type = gun`, `output.observables`, `output.event_file`); the field (`ConstructSDandField`, thread-local, `delta_intersection` 1e-5 mm, DormandPrince745); the plane-crossing scorer; per-event ROOT files (`G4AnalysisManager`, g4tools, flat ntuples, MT merging, `content_sha256`); `simroot` (starting with one day confirming what `G4RootAnalysisReader` can do).
-
-**Acceptance:**
-- [ ] The three boundary artifacts from `element_sim` pass the same interface tests as `layered_sim`'s; on a slab configuration identical to J14's, the observables both backends produce (mean and mode of the silicon deposit, rear-leakage fraction) agree statistically.
-- [ ] MT test: each thread's field-manager pointer differs; the field parameters recorded by the probe match the spec.
-- [ ] The deterministic field checks (J15's design is in `task-b-j15.md` §4 and B2.5) pass at the nominal settings; the result of every grid point is reported; the B × (1 ± δ) negative control is caught.
-- [ ] `simroot` round trip: values of every level and I, D, S columns are identical; with `seeding: per-event`, serial and different thread counts give the same `content_sha256`; the per-event sum of `deposits` equals the CSV's total deposit per subsystem.
-
-### B2 Reconstruction, J15 and C2 (adapter 0.4.0, contracts C2)
-
-**Content:** `simreco` (writing summaries and per-event results); the J15 study (geometry and parameters in `task-b-j15.md` §4: B = 0.5 T, six Si planes, two TOF layers per station, 50 Pb/PVT layers); the validation ladder, calorimeter cut convergence, variations; TOF σ_t sensitivity at 100 and 150 ps; C2 (verification, regression, surrogate, transitive processing chains); the J15 journey and routing case; the J15 README names PAMELA and AMS-02 as the closest real instruments and stresses that J15 is a synthetic geometry.
-
-**Acceptance:** as in `task-b-j15.md` B2.11, plus:
-- [ ] `simreco`'s summaries pass the same consistency tests as A2.
-- [ ] A processing chain of three or more levels (simulation → reconstruction → table) is accepted by `dependencies.py`; one whose root is not a simulation run is refused.
-- [ ] A regression check (J14 on two plugin versions, say) produces a `changed`, `unchanged` or `unresolved` record without affecting labels.
-- [ ] Contract tests of the surrogate rule: a record carrying `extension.study.surrogate` that declares `validated-in-scope` is refused.
-
-### C Automated detector design search (proposal; C1 after task A, C2 after task B)
-
-**Content:** the user writes down physics requirements; Claude freely chooses and combines structures from a component catalogue (magnet region, tracker planes, TOF layers, sampling and homogeneous calorimeters, passive layers) and proposes physically motivated seed designs; a standard-library NSGA-II (optional MOBO) searches at three fidelities: F0 analytic formulas, F1 Geant4 with few events, F2 full statistics; reported performance comes only from confirmation runs with independent seeds; contracts C3. Spec in [`task-c-design-search.en.md`](task-c-design-search.en.md).
-
-**Acceptance:** as in `task-c-design-search.en.md` C1.9 and C2.9.
+| A1 | Fix the defects that wrongly issue `validated-in-scope`; shared statistics and summary modules in `core/` (contracts CV1) | [`task-a-core.en.md`](task-a-core.en.md) §5 |
+| A2 | `g4sim`, `per-event` seeding, `layered_sim` writes the three boundary artifacts, study layer reads only them | [`task-a-core.en.md`](task-a-core.en.md) §6 |
+| B1 | `element_sim`, field, plane crossings, calorimeter leakage, per-event ROOT files, `simroot`, `check-spec` | [`task-b-j15.en.md`](task-b-j15.en.md) §5 |
+| B2 | `simreco`, processing chains, verification / regression / surrogate (contracts CV2) | [`task-b-j15.en.md`](task-b-j15.en.md) §6 |
+| B3 | The J15 study | [`task-b-j15.en.md`](task-b-j15.en.md) §7 |
+| C1 | Requirements, component catalogue, F0 search, closure tests | [`task-c-design-search.en.md`](task-c-design-search.en.md) §5 |
+| C2 | F1/F2 evaluation, confirmation runs, requirement decisions, paired comparison (contracts CV3) | [`task-c-design-search.en.md`](task-c-design-search.en.md) §6 |
+| C3 | J16 automated-design example, optional MOBO | [`task-c-design-search.en.md`](task-c-design-search.en.md) §7 |
 
 ---
 

@@ -5,6 +5,7 @@
 > 日期：2026-10-22
 > 語言：繁體中文原文；英文版 [`architecture.en.md`](architecture.en.md) 內容相同
 > 讀法：§0 是一頁摘要；§1 是從實際實驗得到的設計依據；§2–§9 是架構本身；§10–§13 是階段、風險、決策與演進紀錄
+> 記法：本文件中的「contracts C1、C2」即計畫（[`plan.md`](plan.md) §5）中的契約版本 CV1、CV2；任務 C 的階段記為 C1–C3。階段、編號與待決事項以計畫為準，工作項與驗收以任務規格為準；本文件只說明設計理由
 
 ---
 
@@ -490,67 +491,18 @@ S1 與 S2 各發一份 advisory（鍵 `artifact_types: [computational-run]`、`e
 
 ## 10. 階段與驗收
 
-### 10.0 J14 的錄製內容
+本節在 2026-10-23 以前複製了各階段的內容與驗收，容易和任務規格不一致，因此改為指向。階段的順序、內容邊界、介面擁有權、閘門與待決事項以 [`plan.md`](plan.md) 為準；每個階段的工作項與驗收以任務規格為準。
 
-| 階段 | recorded 內容 | 重播 |
+| 階段 | 一句話 | 規格 |
 |---|---|---|
-| 目前 | 5 個 run 的縮減 CSV（含 `event` 欄）；13 個掃描與 variation run 只有 `geant4-run-summary/1`（一個值加 bootstrap SE）；2.6 MB | 純 Python |
-| A1 | 有逐事件 CSV 的 run：由現有 CSV 離線切區塊，產生並提交 `simulation-summary/1`（不重錄）；只有單值摘要的掃描與 variation run，以 `seeding: stream` live 重錄並提交 summary；新增負向控制組 | 由 summary，純 Python |
-| A2 | 每個 run 的 effective config；回歸檢查紀錄 | 同上 |
-
-### A1 正確性修正（contracts C1，sci-fix）
-
-**內容：** §6.2–6.4、§6.6–6.8、§7.1、§7.3；§5.2–5.5 的統計；Python 的 summary 產生器（由逐事件 CSV，事件依 `event` 欄分區塊）；D8 enum、D10 測試、protocol 第 4 節。
-
-**驗收：**
-- [ ] kind 不符、宣告缺少維度、類別或等級與表不符、configuration 缺少或 embedded、目標雜湊或 `hash_scheme` 不符的紀錄，在 `--strict` 與 C1 下被拒；`dependencies.py` 重新推導不符時被拒。
-- [ ] 重產的 J14 study record 通過 `validate.py --strict` 與 `dependencies.py`；判定的任何改變都記錄並說明原因。
-- [ ] 閘門 toy（每格 10⁴ 次）和 §6.6 的表一致到 ±3σ_MC；計數很少時的區間判定有測試。
-- [ ] 區塊 batch means 的覆蓋率 toy：J14 各類估計量（平均、比例、分位數、眾數）的名義 90 % 區間，實際覆蓋率滿足 |覆蓋率 − 0.90| ≤ 0.02 + 3σ_MC，逐類回報。
-- [ ] MPV 偏差 toy 的 95 % 上界 ≤ tol/10；每次的實測核對生效。
-- [ ] 偵測極限 toy：在 DL 注入時抓到的機率 ≥ 0.977；J14 的實現控制組結果記錄於 VALIDATION。
-- [ ] J14 的離線重播由已提交的 summary 執行，判定符合 §5.6，且不需要 Geant4 與編譯器。
-- [ ] `python3 -m unittest discover -s tests/contracts -t .` 沒有錯誤。
-- [ ] ledger、兩份 advisory 通過 `scifix_advisories.py check`；VALIDATION GEANT4-CORRECTNESS；CHANGELOG；release manifest。
-
-### A2 共用程式庫與邊界產物（adapter 0.2.0）
-
-**內容：** `g4sim`（`SimSeed.hh`、`SimSummary.hh`、`SimProbe.hh`、輔助）；`layered_sim` 寫出 summary、effective config、column map，並支援 `seeding: per-event`；研究層只讀邊界產物，幾何事實從 effective config 讀取；`hash_scheme: tree-v1`。
-
-**驗收：**
-- [ ] 回歸檢查：J14 的既有 spec 在同一主機上產生和 A2 前逐位元相同的 CSV。
-- [ ] `seeding: per-event` 下，同一邏輯 run 以 1、2、4 個工作與 1、2、4 個執行緒執行，事件內容相同；summary 的整數累加量相同，浮點相對差 ≤ 1e-12。
-- [ ] `layered_sim` 寫出的 summary 和 Python 由同一 run 的觀測量傾印產生的 summary 一致（整數相同、浮點相對差 ≤ 1e-12）。傾印是只在測試中開啟的旁檔（`%.17g`），CSV 本身不變。
-- [ ] 為回歸檢查重跑的 J14 spec 都有 effective config；`tree-v1` 推導的 configuration 與 `spec-v1` 的判定相同；故意的不一致被抓到；`recorded: false` 的 run 不能升級。
-- [ ] 研究層的薄層規則從 effective config 取得最小厚度，對 J14 的結論和 A1 相同。
-- [ ] 事件權重 ≠ 1 時 exit 2。
-- [ ] VALIDATION GEANT4-SUMMARY；CHANGELOG；release manifest。
-
-### B1 `element_sim` 與事件檔（adapter 0.3.0）
-
-**內容：** `element_sim`（spec `element_sim.spec/1`：盒狀元件、一層巢狀、`field`、`source.type = gun`、`output.observables`、`output.event_file`）；場（`ConstructSDandField`、thread-local、`delta_intersection` 1e-5 mm、DormandPrince745）；平面穿越 scorer；逐事件 ROOT 檔（`G4AnalysisManager`、g4tools、扁平 ntuple、MT 合併、`content_sha256`）；`simroot`（先以一天確認 `G4RootAnalysisReader` 的能力）。
-
-**驗收：**
-- [ ] `element_sim` 交出的三個邊界產物通過和 `layered_sim` 相同的介面測試；一個和 J14 相同的平板配置在兩個後端上，兩者都產生的觀測量（矽中沉積的平均與眾數、後漏比例）統計一致。
-- [ ] MT 測試：各執行緒的 field manager 指標彼此不同；探針記錄的場參數和 spec 一致。
-- [ ] 確定性場檢查（J15 的設計見 `task-b-j15.md` §4 與 B2.5）在名義值下通過；各格點的結果都回報；B × (1 ± δ) 的 negative control 被抓到。
-- [ ] `simroot` 往返：各層級與 I、D、S 欄的值相同；`seeding: per-event` 下 serial 與不同執行緒數的 `content_sha256` 相同；`deposits` 依事件加總等於 CSV 的子系統總沉積。
-
-### B2 重建、J15 與 C2（adapter 0.4.0、contracts C2）
-
-**內容：** `simreco`（輸出 summary 與逐事件結果）；J15 研究（幾何與參數見 `task-b-j15.md` §4；B = 0.5 T、六片 Si、每站兩層 TOF、50 層 Pb/PVT）；驗證梯、量能器 cut 收斂、variation；TOF σ_t 的 100 與 150 ps 敏感度；C2（verification、regression、surrogate、遞移的處理鏈）；J15 journey 與路由案例；J15 README 註明 PAMELA 與 AMS-02 為最接近的實際儀器，並強調 J15 是合成幾何。
-
-**驗收：** 見 `task-b-j15.md` B2.11，另加：
-- [ ] `simreco` 的 summary 通過與 A2 相同的一致性測試。
-- [ ] 三層以上的處理鏈（模擬 → 重建 → 表格）被 `dependencies.py` 接受；根不是模擬 run 時被拒。
-- [ ] 一個回歸檢查（例如 J14 在兩個 plugin 版本上）產生 `changed`、`unchanged` 或 `unresolved` 的紀錄，且不影響 label。
-- [ ] surrogate 規則的契約測試：帶 `extension.study.surrogate` 的紀錄宣告 `validated-in-scope` 時被拒。
-
-### C 自動化探測器設計搜尋（提案；C1 在任務 A 後、C2 在任務 B 後）
-
-**內容：** 使用者寫下物理需求；Claude 從元件目錄（磁場區、徑跡平面、TOF 層、取樣與均勻量能器、被動層）自由選擇與組合結構，並提出有物理根據的種子設計；標準函式庫的 NSGA-II（選用 MOBO）在 F0 解析式、F1 少量事件的 Geant4、F2 完整統計三種保真度上搜尋；回報的性能只來自種子獨立的確認 run；契約 C3。規格見 [`task-c-design-search.md`](task-c-design-search.md)。
-
-**驗收：** 見 `task-c-design-search.md` C1.9 與 C2.9。
+| A1 | 修正錯誤發出 `validated-in-scope` 的缺陷；統計與 summary 的共用模組放進 `core/`（contracts CV1） | [`task-a-core.md`](task-a-core.md) §5 |
+| A2 | `g4sim`、`per-event` 種子、`layered_sim` 寫出三個邊界產物、研究層只讀邊界產物 | [`task-a-core.md`](task-a-core.md) §6 |
+| B1 | `element_sim`、場、平面穿越、量能器漏失、逐事件 ROOT 檔、`simroot`、`check-spec` | [`task-b-j15.md`](task-b-j15.md) §5 |
+| B2 | `simreco`、處理鏈、verification／regression／surrogate（contracts CV2） | [`task-b-j15.md`](task-b-j15.md) §6 |
+| B3 | J15 研究 | [`task-b-j15.md`](task-b-j15.md) §7 |
+| C1 | 需求、元件目錄、F0 搜尋、封閉測試 | [`task-c-design-search.md`](task-c-design-search.md) §5 |
+| C2 | F1/F2 評估、確認 run、需求判定、配對比較（contracts CV3） | [`task-c-design-search.md`](task-c-design-search.md) §6 |
+| C3 | J16 自動設計範例、選用的 MOBO | [`task-c-design-search.md`](task-c-design-search.md) §7 |
 
 ---
 

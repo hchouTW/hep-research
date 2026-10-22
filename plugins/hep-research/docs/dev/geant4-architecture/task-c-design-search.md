@@ -1,11 +1,11 @@
 # 任務 C：自動化探測器設計搜尋
 
-> 文件類型：設計提案與實作規格（給執行的 agent 與審查者）。狀態：提案，待使用者與維護者核准
-> 依據：[`architecture.md`](architecture.md)（模擬架構）、[`task-a-core.md`](task-a-core.md)（統計與邊界產物）、[`task-b-j15.md`](task-b-j15.md)（`element_sim`、`simreco`、J15）
-> 順序：C1 只需任務 A；C2 在任務 B 合併後才開始
+> 文件類型：設計與實作規格（給執行的 agent 與審查者）。狀態：提案，待使用者與維護者核准
+> 計畫：[`plan.md`](plan.md)（階段順序、編號、介面擁有權、閘門、待決事項）。理由：[`architecture.md`](architecture.md)。本文件是 C1、C2、C3 的可執行規格；與其他文件不一致時，內容與驗收以本文件為準並回報
+> 順序：C1 在 A1 之後（可與 A2、B 平行）；C2 在 B2 與 C1 之後；C3 在 B3 與 C2 之後
 > 日期：2026-10-23
 > 語言：繁體中文原文；英文版 [`task-c-design-search.en.md`](task-c-design-search.en.md) 內容相同。兩者不一致時以中文為準，並同時修正英文
-> 一句話：使用者寫下物理需求；Claude 從一份元件目錄自由選擇探測器結構種類並組合，最佳化器在多保真度的模擬上搜尋，最後以獨立的確認 run 回報符合需求的最佳設計與取捨
+> 一句話：使用者寫下物理需求；Claude 從元件目錄自由選擇探測器結構種類並組合，最佳化器在多保真度的模擬上搜尋，最後以獨立的確認 run 回報符合需求的最佳設計與取捨
 
 ---
 
@@ -13,31 +13,33 @@
 
 **目標。** 讓 AI 從「物理需求」出發，自行選擇探測器結構種類（徑跡平面、磁場區、TOF、量能器、被動層……）並自由組合與調整參數，得到符合需求的最佳化設計（或一組取捨的 Pareto 前緣），而且結果經得起統計與來源的檢查。
 
-**兩個階段：**
+**三個階段：**
 
 | 階段 | 內容 | 前提 | 版本 |
 |---|---|---|---|
-| **C1** 需求、文法與快速搜尋 | 需求規格與設計文法的 schema；元件目錄第一版；設計 → `element_sim.spec/1` 的實現；F0 解析評估；標準函式庫的搜尋器（Sobol、NSGA-II）；搜尋紀錄；封閉測試 | 任務 A 合併；`element_sim.spec/1` 的 schema（B1.1）可先以草案使用 | 新 adapter `detector-design` **0.1.0** |
-| **C2** 模擬評估與確認 | F1、F2 評估（`element_sim` 與 `simreco`）；確認 run；穩健性與「利用模擬缺陷」的防護；選用的 MOBO 後端；契約 C3；J16 自動設計範例 | 任務 B 合併 | adapter **0.2.0**、contracts **C3**（minor） |
+| **C1** 需求、文法與快速搜尋 | 需求規格、元件目錄、設計文法與實現、F0 解析評估、標準函式庫的搜尋器（Sobol、NSGA-II）、搜尋紀錄（F0-only）、agent 協定、封閉測試 | A1 | 新 adapter `detector-design` **0.1.0** |
+| **C2** 模擬評估與確認 | `core/` 的附加（`threshold`、`order`、配對比較、`values`、search 角色與 seed_group）；F1/F2 評估；確認 run 與需求判定；穩健性與防護；CV3 | B2、C1 | detector-design **0.2.0**、geant4 adapter **0.5.0**、contracts **CV3**（minor） |
+| **C3** 範例 | J16 自動設計範例（與 J15 比較）；選用的 MOBO 後端；journey 與路由 | B3、C2 | detector-design **0.3.0** |
 
 **不在範圍內：** 可微分模擬與可微分代理模型（MODE 路線，§9）；非盒狀幾何（圓柱形對撞機探測器）；光學物理（Cherenkov、RICH）；強化學習；讓 LLM 單獨決定最佳設計。
 
-**交付物：** `adapters/detector-design/`（schema、目錄、實現、評估、搜尋、報告）；hep-detector 的 reference `detector-design-search.md`（含 agent 協定）；搜尋紀錄的契約規則（C3）；封閉測試；J16 範例；VALIDATION 條目 DESIGN-SEARCH-F0（C1）與 DESIGN-SEARCH（C2）；CHANGELOG；release manifest。
+**交付物：** `adapters/detector-design/`（schema、目錄、實現、評估、搜尋、報告）；`core/` 的附加（C2.1）；hep-detector 的 reference `detector-design-search.md`（含 agent 協定）；CV3 的契約規則；封閉測試；J16 範例；VALIDATION 條目 DESIGN-SEARCH-F0（C1）、DESIGN-SEARCH（C2）、DESIGN-SEARCH-J16（C3）；CHANGELOG；release manifest。
 
-**完成的定義：** C1.9 與 C2.9 的驗收清單全部打勾；任務 A §9 的檢查全部通過。
+**完成的定義：** C1.9、C2.9、C3.4 的驗收清單全部打勾；任務 A §8 的檢查全部通過；閘門 G-C1、G-C2a、G-C2b、G-C3（計畫 §6）通過。
 
 **主要決定：**
-1. **Claude 是設計者，不是裁判。** Claude 選結構種類、提出種子設計、劃定搜尋範圍、解讀結果；但「哪個設計最好、是否符合需求」只由有紀錄的評估與統計判定。Claude 的提案和隨機產生的候選走同一條評估管線，沒有特權（§5.1）。
-2. **自由組合，但在文法之內。** 結構的自由度來自「元件目錄 × 組合規則」：任何通過有效性規則的元件序列都是合法設計。新的元件種類只能經由審查過的目錄變更加入，不能在一次搜尋中臨時發明（§5.3）。
-3. **多保真度。** F0 解析式（每個設計微秒級）篩選 10⁴–10⁶ 個設計；F1 少量事件的 Geant4 細化數百個；F2 完整統計只給少數決選者（§5.4）。這是 AID(2)E、dRICH 與 MODE 研究的共同做法。
-4. **搜尋與確認分開。** 搜尋階段的數值有「贏家詛咒」（從許多帶雜訊的評估中挑最好的，必然偏樂觀），所以只作排序，永遠不當結果回報；回報的性能只來自事先宣告、種子獨立的確認 run（§5.6）。
+1. **Claude 是設計者，不是裁判。** Claude 選結構種類、提出種子設計、劃定搜尋範圍、解讀結果；「哪個設計最好、是否符合需求」只由有紀錄的評估與統計判定。Claude 的提案和隨機產生的候選走同一條評估管線，沒有特權（§4.2）。
+2. **自由組合，但在文法之內。** 結構的自由度來自「元件目錄 × 組合規則」：任何通過有效性規則的元件序列都是合法設計。新的元件種類只能經由審查過的目錄變更加入（§4.4）。
+3. **多保真度。** F0 解析式篩選 10⁴–10⁶ 個設計；F1 少量事件的 Geant4 細化數百個；F2 完整統計只給少數決選者（§4.5）。
+4. **搜尋與確認分開。** 搜尋階段的數值有「贏家詛咒」，只作排序，永遠不當結果回報；回報的性能只來自事先宣告、種子獨立的確認 run（§4.7）。
 5. **結果是提案，不是驗證。** 搜尋出的設計 label 一律 `unvalidated`；紀錄寫明「以模擬最佳化的設計」，並附搜尋規模、確認 run 與穩健性。
+6. **任務 C 需要的統計附加由任務 C 自己加入**（計畫原則 R1），位置在 `core/`，讓 hep-detector 與 adapter 共用（C2.1）。
 
-**開始前必做：** 讀任務 A 的 §1、§2、§4 與 A1.8（閘門）、A1.9（兩階段事件數）；C2 另讀任務 B 的 §4、B1.1、B2.1。依任務 A 附錄 B 的方法核對本文件引用的事實。
+**開始前必做：** 讀計畫 §0–§6；讀任務 A 的 §1、§3、§4 與 A1.4–A1.9；C2 另讀任務 B 的 §4、B1.1、B1.6、B2.1、B2.4。依任務 A 附錄 C 的方法核對本文件引用的事實。
 
 ---
 
-## 1. 名詞與記法
+## 1. 名詞與檔案
 
 | 名詞 | 意義 |
 |---|---|
@@ -52,11 +54,54 @@
 | 贏家詛咒 | 從 n 個帶雜訊的評估中選最佳者時，其估計值的期望偏樂觀 |
 | Pareto 前緣 | 沒有任何其他設計在所有目標上都不差且至少一項更好的設計集合 |
 | 搜尋規模 | 各保真度實際評估的設計數；寫入紀錄，類似 look-elsewhere |
-| 記法 | 「C1.3」是本文件的工作項；「A1.8」「B2.1」是任務 A、B 的工作項；「架構 §6」是 `architecture.md` 的節 |
+| seed_group、配對比較 | 一組共用 S 的 run；以逐區塊差值估計差值的 SE（common random numbers；C2.1） |
+| 記法 | 「C1.3」是本文件的工作項；「A1.8」「B2.1」是任務 A、B 的工作項；「計畫 §n」「架構 §n」是其他文件的節 |
+
+**主要檔案（相對 `plugins/hep-research/`）：** `adapters/detector-design/`（新增：`adapter.json`、`assets/design_search.py`、`assets/catalogue/`、`assets/schemas/`）；`core/stats/decisions.py`、`core/stats/batch_means.py`、`core/simulation/summary.py`、`core/simulation/seeds.py`（C2 附加）；`contracts/validate.py`、`contracts/dependencies.py`（CV3）；`adapters/geant4/assets/g4sim/SimSummary.hh`（C2 加入 `values`）；`skills/hep-detector/references/detector-design-search.md`（新增）；`skills/hep-detector/scripts/tracker_resolution.py`、`multiple_scattering.py`（F0 以子行程呼叫）。
 
 ---
 
-## 2. 實際做法的參考與教訓
+## 2. 前提與提供的介面
+
+| 提供者 | 介面 | 任務 C 的用法 | 需要於 |
+|---|---|---|---|
+| 任務 A | `core/simulation/seeds.py`（H、S） | 設計評估的 S = H(search_id, role, design_sha256) | C1（紀錄）、C2 |
+| 任務 A | `core/simulation/summary.py`、`simulation-observables/1` | 搜尋 spec 引用同一份觀測量宣告；讀 F1/F2 的 summary | C2 |
+| 任務 A | `core/stats/batch_means.py`、`decisions.py` 的 `equivalence`；兩階段事件數（A1.9） | F1/F2 的估計；確認 run 的事件數；F0 與確認的比較 | C2 |
+| 任務 A | evidence 角色、S 的唯一性（A1.4） | C2 附加 search 角色、confirmation 與 seed_group | C2 |
+| 任務 A | 不含名稱的 `tree-v1`；effective config 依內容雜湊存放（A2.4） | 設計快取；數百個 run 不重複儲存設定 | C2 |
+| 任務 A | schema 關鍵字（A2.7） | detector-design 的 schema | C1 |
+| 任務 B | `element_sim.spec/1` 與 `geant4_run.py check-spec`（B1.1、B1.6） | 實現結果的驗證（子行程） | C1（B1 合併後加入測試）、C2 |
+| 任務 B | 量能器母體與 `leak_*_MeV`（B1.3） | 量能器元件的目標 | C2 |
+| 任務 B | `simreco`、`geant4_run.py reco`（B2.1、B2.2） | F1/F2 的重建 | C2 |
+| 任務 B | surrogate 類別、判定引擎 `change`（B2.4） | F0、F1 在架構上屬 surrogate；C2 依同一介面附加判定 | C2 |
+| 任務 B | J15 的設計與結果（B3） | J16 的比較對象 | C3 |
+| 既有工具 | `tracker_resolution.py`、`multiple_scattering.py` | F0 的徑跡解析度（以子行程呼叫，不重寫公式） | C1 |
+
+**提供給其他任務的介面：** C2.1 加入 `core/` 的判定、配對比較、`values` 與角色，任何研究都可使用（例如收斂閘門可以宣告配對模式）。
+
+---
+
+## 3. 硬性限制
+
+任務 A §3 與任務 B §3 的限制都適用。另外：
+
+1. **搜尋器核心只用標準函式庫。** Sobol 序列、NSGA-II、（選用）CMA-ES 以標準函式庫實作。貝氏最佳化（Ax/BoTorch）只作為選用後端（C3），在 `adapter.json` 記錄測試過的版本；沒有安裝時搜尋仍可執行。
+2. **adapter 之間不 import。** detector-design 以子行程呼叫 `geant4_run.py`（`check-spec`、`run`、`reco`）與 hep-detector 的腳本，交換 JSON 檔案；共用的 Python 程式只從 `core/` import。
+3. **同一個量只有一份正式實作。** F0 的徑跡與多重散射呼叫既有腳本；材料常數取自 Geant4 的 NIST 表或 PDG（經 hep-citations），不另寫一份。
+4. **事先宣告。** 需求、目錄版本、文法、搜尋預算、最佳化器設定與種子在第一次評估前寫入搜尋 spec 並取雜湊。之後的任何變更產生新的搜尋版本；舊版本與其結果保留在紀錄中。
+5. **搜尋數值不回報。** 搜尋階段的目標值只用於排序；任何對外的性能數字必須引用確認 run。
+6. **LLM 提案沒有特權。** Claude 提出的設計以 `proposer: llm` 標記，經相同的有效性檢查與評估；Claude 不得修改評估輸出，不得在看到結果後改需求而不開新版本。
+7. **成本與質量模型是宣告的輸入。** plugin 只附占位模型，標記 `assumed`；真實的單價與質量模型由使用者提供並附來源。沒有模型時，成本與質量不作為目標或約束。
+8. **實驗名稱** 只出現在 `docs/` 與範例 README；元件目錄用通用名稱。
+9. **不修改 `skills/hep-detector/SKILL.md`**，除非維護者核准一行指向 reference 的路由（計畫 §7 第 12 項）。
+10. 契約規則以 `strict or _at_least(contract_version, CV3)` 閘控。
+
+---
+
+## 4. 設計
+
+### 4.1 實際做法的參考與教訓
 
 | 研究 | 做法 | 本設計採用的教訓 |
 |---|---|---|
@@ -71,45 +116,7 @@
 
 綜合：沒有一個實際案例讓 LLM 自己宣告「最佳」；成功的做法都是「明確的目標與約束＋可重現的評估＋有紀錄的最佳化器＋完整模擬確認」。LLM 的價值在於把需求轉成搜尋問題、提出有物理根據的起點、分解問題、追查異常。
 
----
-
-## 3. 前提：任務 A、B 提供的介面
-
-| 提供者 | 介面 | 任務 C 的用法 |
-|---|---|---|
-| 任務 A | `core/stats/batch_means.py`（區塊 batch means、SE、精確區間、分位數）、`core/stats/decisions.py`（判定引擎）、`core/simulation/summary.py`；都在 `core/`，adapter 可以 import（任務 A §4.4） | F1、F2 的目標估計；需求判定用 `threshold`，決選者優劣用 `order`，確認與 F0 的比較用 `equivalence` |
-| 任務 A | 兩階段事件數（A1.9） | 確認 run 的事件數 |
-| 任務 A | 配對比較與 seed_group（A1.4、A1.8） | S2 中同一代的設計共用 seed_group，以降低排序的雜訊 |
-| 任務 A | 角色類別：`search-F1`、`search-F2`、`confirmation`（A1.4） | 搜尋 run 不作證據；確認 run 的 S 不等於任何搜尋 run 的 S |
-| 任務 A | `simulation-observables/1`、`values` 累加器（A1.5） | 搜尋 spec 引用同一份觀測量宣告；解析度差很多的設計仍可精確估計分位數 |
-| 任務 A | 不含名稱的 `tree-v1` 與依內容雜湊存放的 effective config（A2.4） | 設計快取；數百個 run 不重複儲存設定 |
-| 任務 A | 種子 H 與 S = H(study_id, role, point_id)（A1.4） | 每個設計評估的 point_id = 設計雜湊；確認 run 的 role 為 `confirmation` |
-| 任務 A | 三個邊界產物、`tree-v1`（A2.3–A2.6） | 評估只讀 summary；設計雜湊以實現後的幾何樹核對 |
-| 任務 B | `element_sim.spec/1`（B1.1）、場（B1.2）、量能器漏失（B1.3） | 設計的實現目標 |
-| 任務 B | `simreco`（B2.1）：剛度、β、量能器能量 | F1、F2 的重建 |
-| 任務 B | surrogate 類別（B2.3） | F0 與 F1 相對 F2 的定位：代理，不改變 label |
-| 既有工具 | `tracker_resolution.py`、`multiple_scattering.py` | F0 的徑跡解析度（以子行程呼叫，不重寫公式） |
-
----
-
-## 4. 硬性限制
-
-任務 A §2 與任務 B §3 的限制都適用。另外：
-
-1. **搜尋器核心只用標準函式庫。** Sobol 序列、NSGA-II、（選用）CMA-ES 以標準函式庫實作。貝氏最佳化（Ax/BoTorch）只作為 adapter 的選用後端，像其他 adapter 的外部工具一樣在 `adapter.json` 記錄測試過的版本；沒有安裝時搜尋仍可執行。
-2. **同一個量只有一份正式實作。** F0 的徑跡與多重散射呼叫既有腳本；材料常數取自 Geant4 的 NIST 表或 PDG（經 hep-citations），不另寫一份。
-3. **事先宣告。** 需求、目錄版本、文法、搜尋預算、最佳化器設定與種子在第一次評估前寫入搜尋 spec 並取雜湊。之後的任何變更產生新的搜尋版本；舊版本與其結果保留在紀錄中。
-4. **搜尋數值不回報。** 搜尋階段的目標值只用於排序；任何對外的性能數字必須引用確認 run。
-5. **LLM 提案沒有特權。** Claude 提出的設計以 `proposer: llm` 標記，經相同的有效性檢查與評估；Claude 不得修改評估輸出，不得在看到結果後改需求而不開新版本。
-6. **成本與質量模型是宣告的輸入。** plugin 只附占位模型，標記 `assumed`；真實的單價與質量模型由使用者提供並附來源。沒有模型時，成本與質量不作為目標或約束。
-7. **實驗名稱** 只出現在 `docs/` 與範例 README；元件目錄用通用名稱。
-8. **不修改 `skills/hep-detector/SKILL.md`**，除非維護者核准一行指向 reference 的路由（§10）。
-
----
-
-## 5. 設計
-
-### 5.1 三個角色
+### 4.2 三個角色
 
 ```
  使用者 ──需求──▶ Claude（設計者）──設計摘要、種子設計、搜尋範圍──▶ 搜尋器（有紀錄、可重現）
@@ -124,7 +131,7 @@
 | 搜尋器 | 在基因空間中產生候選；依預算、種子與設定執行；記錄每次評估 | 判定是否符合需求（那是評估與統計的工作） |
 | 評估管線 | 實現設計、檢查有效性、在指定保真度計算目標與約束、附 SE | 依提案者改變行為 |
 
-### 5.2 需求規格 `detector-requirements/1`
+### 4.3 需求規格 `detector-requirements/1`
 
 示意（`//` 為說明，不是 JSON 的一部分）：
 
@@ -151,7 +158,7 @@
 - 目標與約束的名稱必須在目錄中；新增需要目錄變更與測試。
 - 需求由 Claude 從使用者的描述整理，但必須經使用者確認（`confirmed_by_user`）後才能開始搜尋。
 
-### 5.3 設計文法 `detector-design/1` 與元件目錄
+### 4.4 設計文法 `detector-design/1` 與元件目錄
 
 **元件目錄第一版**（全部可實現為 `element_sim` 的盒狀元件，最多一層巢狀）：
 
@@ -159,8 +166,8 @@
 |---|---|---|---|
 | `magnet-region` | B（連續，T）、長度、孔徑（連續，mm） | 場區母體（`field`），可容納徑跡與 TOF 子體 | 偏轉；MDR；質量模型（宣告） |
 | `tracker-plane` | 材料（類別）、厚度、位置解析度（偏轉／非偏轉）、尺寸 | `tracker-plane` 元件；解析度寫入 reco spec | `tracker_resolution.py`（量測項）、`multiple_scattering.py`（散射項） |
-| `tof-layer` | 材料、厚度、σ_t、尺寸 | `tof-layer` 元件 | σβ/β = σ_t c / D（多層平均） |
-| `calorimeter-sampling` | 吸收層材料與厚度、主動層材料與厚度、層數（整數）、橫向尺寸 | `calorimeter` 母體 + 重複的取樣層 | X₀、λ_I、有效 Molière 半徑；能量解析度的參數化只作 F0 排序 |
+| `tof-layer` | 材料、厚度、σ_t、尺寸 | `tof-layer` 元件 | σβ/β = σ_t c / D（多層平均；任務 B §4.2） |
+| `calorimeter-sampling` | 吸收層材料與厚度、主動層材料與厚度、層數（整數）、橫向尺寸 | `calorimeter` 母體 + 重複的取樣層 | X₀、λ_I、有效 Molière 半徑；能量解析度的參數化只作 F0 排序，參數化的來源經 hep-citations 記錄 |
 | `calorimeter-homogeneous` | 材料、長度、橫向尺寸 | `calorimeter` 母體 + 單一主動體 | X₀、λ_I |
 | `passive` | 材料、厚度、尺寸 | `passive` 元件 | 物質預算、多重散射 |
 
@@ -171,56 +178,56 @@
 - 參數在目錄範圍內；材料在目錄的材料清單中。
 - 結構上「不合理」的組合（例如沒有磁場卻要求剛度解析度）**不**由規則禁止，而由目標與約束自然淘汰；規則只處理物理上或程式上不可能的情形。這保留了「自由組合」。
 
-**基因編碼：** 固定數量的槽位（slot），每個槽位有「啟用」位元、元件種類（類別）與該種類的參數；停用的槽位不實現。順序由槽位的 x 位置決定。這讓遺傳演算法可以增刪元件與更換種類（AIDO 以 one-hot 處理材料；這裡以類別基因處理種類與材料）。
+**基因編碼：** 固定數量的槽位（slot），每個槽位有「啟用」位元、元件種類（類別）與該種類的參數；停用的槽位不實現。順序由槽位的 x 位置決定。這讓遺傳演算法可以增刪元件與更換種類。
 
-**實現：** `realize(design) → (element_sim.spec/1, reco spec)` 是確定性函式；設計雜湊 = 正規化設計 JSON 的 sha256；實現後以 `tree-v1`（A2.4）核對幾何。相同設計雜湊的評估可以重用（快取），但快取鍵包含保真度、目錄版本與程式雜湊。
+**實現：** `realize(design) → (element_sim.spec/1, reco spec)` 是確定性函式；設計雜湊 = 正規化設計 JSON 的 sha256；實現的 spec 以 `geant4_run.py check-spec`（B1.6）驗證；執行後以 `tree-v1`（A2.4）核對幾何。相同設計雜湊的評估可以重用（快取），快取鍵包含保真度、目錄版本與程式雜湊。
 
-### 5.4 多保真度評估
+### 4.5 多保真度評估
 
 | 保真度 | 方法 | 每個設計的成本 | 輸出 | 用途 |
 |---|---|---|---|---|
 | F0 | 解析式與既有工具（徑跡量測項與散射項、物質預算、接受度的螺旋幾何、TOF 公式、X₀ 與 λ_I） | 微秒到毫秒 | 目標值（無統計誤差，但有模型誤差） | 結構搜尋；篩選 10⁴–10⁶ 個設計 |
 | F1 | `element_sim` + `simreco`，每個設計約 10³ 事件，K = 16 | 分鐘 | 目標值 ± SE（區塊 batch means） | 細化數百個設計的連續參數；校正 F0 |
-| F2 | 同 F1，事件數依 A1.9 的兩階段設計；收斂閘門（A1.8）與 variation（B2.6） | 小時 | 目標值 ± SE，判定 | 決選者 |
+| F2 | 同 F1，事件數依 A1.9 的兩階段設計；收斂閘門（A1.8）與 variation（B3.4 的規則） | 小時 | 目標值 ± SE，判定 | 決選者 |
 | 確認 | 同 F2，role `confirmation`，種子獨立 | 小時 | 回報的性能與需求判定 | 唯一可回報的數字 |
 
 - **F0 與 F2 的差異** 在每個決選者上記錄（`fidelity_gap`）。若差異超過宣告的門檻，該目標在決選時只依 F2 排序，並在報告中說明 F0 的模型限制。
-- F0、F1 在架構上屬於 surrogate 類別（B2.3）：它們從不改變 label。
+- F0、F1 在架構上屬於 surrogate 類別（B2.4）：它們從不改變 label。
 
-### 5.5 搜尋策略
+### 4.6 搜尋策略
 
 | 步驟 | 內容 | 預設方法 | 預算（預設，可宣告） |
 |---|---|---|---|
 | S0 設計摘要 | Claude 讀需求，寫出候選結構種類、2–6 個種子拓撲與物理理由、問題的分解 | Claude | — |
 | S1 結構搜尋 | 在 F0 上搜尋完整基因（結構＋參數）；初始族群 = 種子拓撲 + Sobol 隨機設計 | NSGA-II（標準函式庫） | 族群 200 × 100 代 = 2×10⁴ 次 F0 |
-| S2 參數細化 | 取前 K 個**拓撲不同**的設計（以拓撲雜湊去重，保持多樣性），在 F1 上細化連續參數 | NSGA-II 或 CMA-ES；選用 MOBO（qNEHVI），限目標 ≤ 4、參數 ≤ 20 | K = 5，每個約 100 次 F1 |
+| S2 參數細化 | 取前 K 個**拓撲不同**的設計（以拓撲雜湊去重），在 F1 上細化連續參數；同一代的設計共用 seed_group（配對比較，閘門 G-C2a） | NSGA-II 或 CMA-ES；C3 起可選 MOBO（qNEHVI），限目標 ≤ 4、參數 ≤ 20 | K = 5，每個約 100 次 F1 |
 | S3 決選 | 每個拓撲的最佳設計進入 F2；收斂閘門、variation | — | ≤ 5 個設計 |
 | S4 確認 | 決選者的確認 run；需求判定；穩健性 | — | ≤ 5 個設計 |
 
 - 停止規則：預算用完，或超體積（hypervolume）在連續 G 代內改善小於宣告值。不依結果加預算；加預算是新的搜尋版本。
 - Claude 在 S0 之後可以加入新的種子拓撲（例如追查一個異常），但這些提案同樣標記為 `proposer: llm`、計入搜尋規模。
 
-### 5.6 統計完整性
+### 4.7 統計完整性
 
 | 風險 | 處理 |
 |---|---|
 | 贏家詛咒 | 搜尋數值只作排序；回報只來自確認 run（role `confirmation`，S 不曾出現在搜尋中）；報告每個決選者的「搜尋估計 − 確認估計」作為診斷 |
-| 帶雜訊的約束 | 需求判定由判定引擎的 `threshold`（任務 A A1.8）執行，為單邊：「≤ 門檻」的需求，符合 = 估計 + t₀.₉₅·SE ≤ 門檻；不符合 = 估計 − t_{1−α/m}·SE > 門檻；其他為 unresolved（m = 決選者數 × 需求數）。計數很少時用精確區間 |
-| 在雜訊中宣稱支配 | 決選者之間的優劣由判定引擎的 `order` 判定，只在差值的界限不含 0 時宣稱；報告「統計上非支配的集合」 |
-| 排序的雜訊 | S2 中同一代的設計共用一個 seed_group（任務 A 的配對比較），差值的變異較小；確認 run 不共用，維持獨立 |
+| 帶雜訊的約束 | 需求判定由判定引擎的 `threshold`（C2.1）執行，為單邊：「≤ 門檻」的需求，符合 = 估計 + t₀.₉₅·SE ≤ 門檻；不符合 = 估計 − t_{1−α/m}·SE > 門檻；其他為 unresolved（m = 決選者數 × 需求數）。計數很少時用精確區間 |
+| 在雜訊中宣稱支配 | 決選者之間的優劣由 `order`（C2.1）判定，只在差值的界限不含 0 時宣稱；報告「統計上非支配的集合」 |
+| 排序的雜訊 | S2 中同一代的設計共用一個 seed_group（配對比較），差值的變異較小；確認 run 不共用，維持獨立 |
 | 搜尋規模 | 紀錄寫入各保真度評估的設計數、拓撲數、最佳化器設定與種子 |
-| 利用模擬缺陷 | 決選者必須通過其相關參數（production cut、最大步長、場精度）的收斂閘門；物理模型 variation（B2.6 的規則）；若設計落在任何 reference benchmark 範圍外的材料或能量區，在報告中標記（label 本來就是 `unvalidated`，這是給讀者的資訊） |
-| 穩健性 | 依需求的 `tolerance` 與目錄的製造容差擾動連續參數（F0 全因子或 F1 抽樣），報告性能分布；需求在容差內的最差情形也要判定，結果分為「穩健符合」與「名義符合」 |
+| 利用模擬缺陷 | 決選者必須通過相關參數（production cut、最大步長、場精度）的收斂閘門；物理模型 variation（B3.4 的規則）；設計落在任何 reference benchmark 範圍外的材料或能量區時在報告中標記（label 本來就是 `unvalidated`，這是給讀者的資訊） |
+| 穩健性 | 依需求的 `tolerance` 與目錄的製造容差擾動連續參數（F0 全因子或 F1 抽樣），報告性能分布；容差內的最差情形也要判定，結果分為「穩健符合」與「名義符合」 |
 | 改需求 | 需求或預算的任何改變是新的搜尋版本；報告列出所有版本 |
 
-### 5.7 紀錄與契約（C3）
+### 4.8 紀錄與契約（CV3）
 
 搜尋紀錄是帶 `extension.design_search` 的 computational-run：
 
 ```
 { "requirements_sha256": "...", "catalogue_version": "1", "catalogue_sha256": "...",
   "search_spec_sha256": "...", "search_version": 1, "previous_versions": [],
-  "optimizer": {"name": "nsga2", "implementation": "detector-design 0.1.0", "backend": null, "seed": 12345, "config": {...}},
+  "optimizer": {"name": "nsga2", "implementation": "detector-design 0.2.0", "backend": null, "seed": 12345, "config": {...}},
   "budgets": {"F0": 20000, "F1": 500, "F2": 5, "confirmation": 5},
   "evaluated": {"F0": 20000, "F1": 487, "F2": 5, "topologies": 143},
   "evaluations_ref": {"path": "...", "sha256": "..."},
@@ -232,27 +239,26 @@
   "label": "unvalidated" }
 ```
 
-**契約規則（C3，閘控同 C1）：**
-- 搜尋紀錄的 label 必須是 `unvalidated`。
-- 每個決選者的 `confirmation_runs` 必須存在，role 為 `confirmation`，其 spec 雜湊等於該設計的實現，其種子 S 不在 `evaluations_ref` 所列的任何搜尋評估中（`dependencies.py` 重新推導）。
-- 由搜尋紀錄衍生的表格或 communication，其數值必須來自確認 run；引用搜尋階段數值時被拒。
-- communication 使用搜尋結果時得到 `communication.simulation_optimized_design` 警告。
+規則見 C2.6。C1 的紀錄只有 F0 的欄位，標記 `fidelity: F0-only`。
 
 ---
 
-## 6. 階段 C1：需求、文法與快速搜尋（adapter detector-design 0.1.0）
+## 5. 階段 C1：需求、文法與快速搜尋（detector-design 0.1.0）
 
 ### C1.1 schema
 
-`detector-requirements/1`、`detector-design/1`、`catalogue/1`、`design-search-spec/1`（需求雜湊、目錄版本、槽位數與上限、預算、最佳化器設定、種子、停止規則），放在 `adapters/detector-design/assets/`，只用 `contracts/schema.py` 支援的關鍵字；跨欄位規則在 Python 中檢查。
+`detector-requirements/1`、`detector-design/1`、`catalogue/1`、`design-search-spec/1`（需求雜湊、目錄版本、槽位數與上限、預算、最佳化器設定、種子、停止規則），放在 `adapters/detector-design/assets/schemas/`，只用 `contracts/schema.py` 支援的關鍵字；跨欄位規則在 Python 中檢查。
 
 ### C1.2 元件目錄第一版
 
-§5.3 的六種元件；每種附參數範圍、材料清單（NIST 名稱）、製造容差、質量模型（密度 × 體積；磁鐵質量為宣告的占位模型，標記 `assumed`）、F0 模型、實現規則。目錄的每個條目有單元測試（實現後的幾何、物質預算）。
+§4.4 的六種元件；每種附參數範圍、材料清單（NIST 名稱）、製造容差、質量模型（密度 × 體積；磁鐵質量為宣告的占位模型，標記 `assumed`）、F0 模型、實現規則。目錄的每個條目有單元測試（實現後的幾何、物質預算）。
 
 ### C1.3 實現與有效性
 
-`design_search.py realize`：設計 → `element_sim.spec/1` 與 reco spec；以 B1.1 的 schema 與跨欄位規則驗證；不需 Geant4。無效設計回傳原因（重疊、超出包絡、巢狀、範圍），exit 2。
+`design_search.py realize`：設計 → `element_sim.spec/1` 與 reco spec；不需 Geant4。無效設計回傳原因（重疊、超出包絡、巢狀、範圍），exit 2。
+
+- B1 合併前：以 detector-design 自己的有效性規則與 `element_sim.spec/1` 的草案（任務 B B1.1 的表）為準。
+- B1 合併後：加入一個測試，以子行程呼叫 `geant4_run.py check-spec` 驗證目錄中每種元件的實現結果。
 
 ### C1.4 F0 評估
 
@@ -260,15 +266,17 @@
 
 ### C1.5 搜尋器
 
-`design_search.py search`：Sobol 初始化、NSGA-II（模擬二元交配與多項式突變處理連續與整數；類別基因以均勻交配與隨機重設；槽位啟用位元以位元翻轉）、約束以 constrained-domination 處理。標準函式庫實作；同一種子結果逐位元相同。
+`design_search.py search`：Sobol 初始化、NSGA-II（模擬二元交配與多項式突變處理連續與整數基因；類別基因以均勻交配與隨機重設；槽位啟用位元以位元翻轉）、約束以 constrained-domination 處理。標準函式庫實作；同一種子結果逐位元相同。
 
 ### C1.6 搜尋紀錄與報告
 
-`design_search.py report`：Pareto 前緣、每個拓撲的最佳設計、搜尋規模、F0 模型限制；輸出紀錄（§5.7，C1 中確認相關欄位為空，並標記 `fidelity: F0-only`）與一份給使用者的 Markdown 摘要。C1 的結果明確標示「只基於解析模型」。
+`design_search.py report`：Pareto 前緣、每個拓撲的最佳設計、搜尋規模、F0 模型限制；輸出紀錄（§4.8，`fidelity: F0-only`）與一份給使用者的 Markdown 摘要。C1 的結果明確標示「只基於解析模型」。
 
-### C1.7 agent 協定
+### C1.7 agent 協定與文件
 
-`skills/hep-detector/references/detector-design-search.md`：§5.1 的角色與限制、需求確認流程、設計摘要的格式、何時升保真度、如何回報（必須說明搜尋規模、確認狀態與穩健性）。
+- `skills/hep-detector/references/detector-design-search.md`：§4.2 的角色與限制、需求確認流程、設計摘要的格式、何時升保真度、如何回報（必須說明搜尋規模、確認狀態與穩健性）。
+- adapter 文件；`docs/capability-matrix.md` 加入 detector-design 列。
+- 路由：依計畫 §7 第 12 項的決定，在 `SKILL.md` 加一行指向 reference，或只靠路由案例與 reference。
 
 ### C1.8 封閉測試
 
@@ -283,46 +291,64 @@
 ### C1.9 C1 驗收
 
 - [ ] 四個 schema 與跨欄位規則的測試；無效設計的每種原因都有測試。
-- [ ] 目錄六種元件的實現測試；實現的 spec 通過 `element_sim.spec/1` 的 schema（草案或已合併版本）。
+- [ ] 目錄六種元件的實現測試；B1 合併後，實現結果通過 `geant4_run.py check-spec`。
 - [ ] F0 的每個目標和既有工具或附錄的解析值一致。
-- [ ] C1.8 的封閉測試全部通過。
+- [ ] C1.8 的封閉測試全部通過（閘門 G-C1）。
 - [ ] 一個獨立 agent 依 agent 協定，從一段自然語言需求完成：需求確認（由測試扮演使用者）、設計摘要、F0 搜尋、報告；報告標示「只基於解析模型」並列出搜尋規模。
-- [ ] VALIDATION DESIGN-SEARCH-F0；CHANGELOG；release manifest；`check_layering`、`check_packaging`。
+- [ ] `check_layering.py`（detector-design 只 import `core` 與 `contracts`）與 `check_packaging.py` 通過。
+- [ ] VALIDATION DESIGN-SEARCH-F0；CHANGELOG；release manifest。
 
 ---
 
-## 7. 階段 C2：模擬評估與確認（adapter 0.2.0、contracts C3）
+## 6. 階段 C2：模擬評估與確認（detector-design 0.2.0、geant4 adapter 0.5.0、contracts CV3）
 
-### C2.1 F1、F2 評估
+### C2.1 `core/` 與契約的附加
 
-`design_search.py evaluate --fidelity F1|F2`：實現 → `geant4_run.py`（`element_sim`）→ `simreco` → summary；每個設計評估是一個邏輯 run，point_id = 設計雜湊，role 為 `search-F1`、`search-F2`。事件數：F1 固定（宣告），F2 依 A1.9。批次執行經既有的 partition 與 batch 機制（hep-computing），以設計雜湊快取。
+依計畫原則 R1 與 R2（只附加、不改既有行為）：
 
-### C2.2 確認與需求判定
+| 附加 | 位置 | 內容 |
+|---|---|---|
+| `threshold(est, se, ν, op, value, m)` | `core/stats/decisions.py` | met／not-met／unresolved；符合 = 單邊 95 % 界限滿足門檻；不符合 = 單邊 1 − α/m 界限違反門檻；精確區間分支 |
+| `order(diff, se, ν, m)` | 同上 | better／worse／indistinct；只有差值的 t_{1−α/m} 界限不含 0 時才宣稱優劣 |
+| 配對模式 | 同上（`equivalence`、`change`、`order` 都接受 `pairing: paired`） | 兩點屬於同一 seed_group，K、B 相同；逐區塊差值 d_b = θ_a,b − θ_b,b；diff = d̄（`absolute`）或 d̄ / b̄（`relative`，b̄ 的不確定度為二階項，忽略並在 protocol 註明）；se_diff = sd(d_b)/√K（`relative` 時再除以 \|b̄\|）；ν = K − 1；se 目標直接是 se_diff ≤ tol/4。預設仍為 `independent` |
+| `values` 累加器 | `core/simulation/summary.py` 與 schema（`summary_version` 的 minor 增加）；`core/stats/batch_means.py` | 每個區塊通過選擇的原始值（依事件編號排序），只在 `n` ≤ `values_max`（觀測量宣告，預設 10⁴）時寫出；`merge` 規則 `concat`；有 `values` 時以經驗分位數（Hyndman–Fan 第 7 型，寫入 `quantile_method`）估計。理由：不同設計的解析度差很多，固定分格無法同時適合所有設計 |
+| `values` 的 C++ 實作 | `g4sim/SimSummary.hh`；`element_sim` 與 `simreco` 寫出 | 和 Python 產生器一致（A2.9 的方法） |
+| 角色 | `contracts/`、study spec 與搜尋 spec 的 schema | 加入 `confirmation`（evidence 角色）與 `search-F1`、`search-F2`（search 角色）；search 角色的 run 不能作為任何升級或回報的證據 |
+| seed_group | `core/simulation/seeds.py`；`contracts/` | 同一 seed_group 的 run 共用 S = H(id, role, seed_group)，K、B、`seeding` 相同，spec 雜湊互不相同；唯一性改為「(S, spec 雜湊) 不重複；S 只在宣告的 seed_group 內重複」；evidence 角色的 S 不得等於任何 search 角色的 S |
 
-`design_search.py confirm`：決選者的確認 run（role `confirmation`）；§5.6 的單邊需求判定；決選者之間的統計支配；`search_minus_confirmation` 與 `fidelity_gap`。
+### C2.2 F1、F2 評估
 
-### C2.3 防護與穩健性
+`design_search.py evaluate --fidelity F1|F2`：實現 → `geant4_run.py run`（`element_sim`）→ `geant4_run.py reco`（`simreco`）→ summary；每個設計評估是一個邏輯 run，point_id = 設計雜湊，role 為 `search-F1` 或 `search-F2`。事件數：F1 固定（宣告），F2 依 A1.9。批次執行經既有的 partition 與 batch 機制（hep-computing），以設計雜湊快取。
 
-決選者的收斂閘門（production cut、最大步長、場精度，A1.8）；variation（B2.6 的規則）；容差擾動；benchmark 範圍外的標記。
+### C2.3 搜尋中的配對比較
 
-### C2.4 選用的 MOBO 後端
+- S2 的每一代宣告一個 seed_group；同一代的設計共用 S，排序以 `order` 的配對模式進行。
+- **閘門 G-C2a：** 在第一次搜尋的 trial 中，量測配對與獨立兩種方式下差值變異的比；比小於宣告值（預設 2）時，S2 改用獨立比較並在紀錄中註明。配對的估計在任何相關程度下都有效，只是增益可能很小（Geant4 中不同設計很快消耗不同的亂數）。
 
-Ax/BoTorch（qNEHVI），只在 S2 使用，限目標 ≤ 4、連續參數 ≤ 20；版本記錄在紀錄與 `adapter.json`；沒有安裝時退回 NSGA-II，並在紀錄中註明。測試以 DTLZ2 封閉測試比較兩者。
+### C2.4 確認與需求判定
 
-### C2.5 契約 C3
+`design_search.py confirm`：決選者的確認 run（role `confirmation`，S 不在任何搜尋評估中）；§4.7 的單邊需求判定（`threshold`）；決選者之間的優劣（`order`，獨立模式）；`search_minus_confirmation` 與 `fidelity_gap`。
 
-§5.7 的規則；`dependencies.py` 的重新推導（確認 run 的 spec 雜湊與種子不重疊）；communication 警告。閘控 `strict or _at_least(contract_version, C3)`。
+### C2.5 防護與穩健性
 
-### C2.6 J16：自動設計範例
+決選者的收斂閘門（production cut、最大步長、場精度；A1.8）；variation（B3.4 的規則）；容差擾動；benchmark 範圍外的標記（以 `contracts/validate.py` 匯出的範圍比對判斷）。
 
-- 需求：由 J15 的設計目標整理（MDR ≥ 1 TV、σβ/β ≤ 3 %、接受度門檻 ≤ 0.8 GV、量能器 ≥ 16 X₀、上游物質 ≤ 15 % X₀、長度 ≤ 2 m、宣告的質量模型）；**不**提供 J15 的幾何。
-- 執行 S0–S4；報告比較搜尋結果與 J15：是否找到 J15 型的拓撲、在哪些目標上更好或更差、原因（例如平面向兩端與中央聚集提高 MDR，但多重散射主導區的解析度變差）。
-- 和 J15 一樣是合成研究；README 說明它展示的是流程，不是新的探測器設計（AIDO 與 SWGO 研究的同樣定位）。
-- 離子源與 Birks 的研究（原預留 J16）順延為 J17。
+### C2.6 契約 CV3
 
-### C2.7 文件與註冊
+- 搜尋紀錄的 label 必須是 `unvalidated`。
+- 每個決選者的 `confirmation_runs` 必須存在，role 為 `confirmation`，其 spec 雜湊等於該設計的實現，其種子 S 不在 `evaluations_ref` 所列的任何搜尋評估中（`dependencies.py` 重新推導）。
+- 由搜尋紀錄衍生的表格或 communication，其數值必須來自確認 run；引用搜尋階段數值時被拒。
+- communication 使用搜尋結果時得到 `communication.simulation_optimized_design` 警告。
+- C2.1 的角色與 seed_group 規則。
+- 閘控 `strict or _at_least(contract_version, CV3)`；需 hep-computing 同意 `extension.design_search`（計畫 §7 第 13 項）。
 
-`docs/researcher-journeys.md`、路由案例（沿用 hep-detector description 中已有的「design principles and trade-offs」觸發詞）、capability map、capability matrix、adapter 文件、protocol。
+### C2.7 adapter 變更
+
+| 項目 | 內容 |
+|---|---|
+| detector-design | 0.1.0 → 0.2.0：`evaluate --fidelity F1|F2`、`confirm`；搜尋 spec 引用 `simulation-observables/1`；`adapter.json` 與文件 |
+| geant4 adapter | 0.4.0 → 0.5.0：`SimSummary.hh` 的 `values`；`element_sim` 與 `simreco` 依觀測量宣告寫出 `values`；`SIM_SOURCES` 不變結構 |
+| G5 | 新的 C++ 變更依 Geant4 API 撰寫；審查者在 VALIDATION 條目中確認 |
 
 ### C2.8 計算預算
 
@@ -330,13 +356,42 @@ F0 2×10⁴ 個設計：分鐘級；F1 約 500 × 10³ 事件；F2 與確認各 
 
 ### C2.9 C2 驗收
 
+- [ ] `threshold` 的 toy：真實值等於門檻時判 met 的機率 ≤ 0.05 + 3σ_MC；`order` 的 toy：真實差值為 0 時宣稱優劣的機率 ≤ α/m + 3σ_MC。
+- [ ] 配對模式的 toy：se_diff 名義 90 % 區間的覆蓋率 |覆蓋率 − 0.90| ≤ 0.02 + 3σ_MC；trial 中量測的變異比已記錄（閘門 G-C2a）。
+- [ ] `values` 累加器：Python 與 `SimSummary.hh` 一致；超過 `values_max` 時省略並記錄；經驗分位數有單元測試；舊的 summary（沒有 `values`）仍可讀。
+- [ ] 角色與 seed_group 的契約測試：search 角色列為證據時被拒；seed_group 外重複的 S、同一 seed_group 內相同的 spec 雜湊被拒；確認 run 的 S 等於某個搜尋 run 的 S 時被拒。
 - [ ] F1、F2 的 summary 通過任務 A 的一致性測試；評估快取以設計雜湊、保真度、目錄版本與程式雜湊為鍵。
-- [ ] 確認 run 的種子不在任何搜尋評估中（契約測試）；引用搜尋數值的表格被拒；搜尋紀錄 label 非 `unvalidated` 時被拒。
-- [ ] 單邊需求判定的 toy：在門檻處的「符合」機率 ≤ 0.05 + 3σ_MC。
-- [ ] 贏家詛咒的 toy：在純雜訊的設計集合上，搜尋估計顯著偏樂觀，而確認估計無偏（示範 §5.6 的必要性）。
-- [ ] J16 執行完成，報告含搜尋規模、確認判定、穩健性與和 J15 的比較。
+- [ ] CV3 的契約測試：引用搜尋數值的表格被拒；搜尋紀錄的 label 不是 `unvalidated` 時被拒。
+- [ ] 贏家詛咒的 toy：在純雜訊的設計集合上，搜尋估計顯著偏樂觀，確認估計無偏（閘門 G-C2b）。
+- [ ] 一次完整的小型搜尋（例如 C1.8 的結構選擇問題，以 F1/F2 評估）完成 S0–S4，報告含搜尋規模、確認判定與穩健性。
+- [ ] J14 與 J15 在 `--strict` 下仍通過。
+- [ ] VALIDATION DESIGN-SEARCH；CHANGELOG；release manifest；任務 A §8 的檢查。
+
+---
+
+## 7. 階段 C3：範例（detector-design 0.3.0）
+
+### C3.1 J16：自動設計範例
+
+- 需求：由 J15 的設計目標整理（MDR ≥ 1 TV、σβ/β ≤ 3 %、接受度門檻 ≤ 0.8 GV、量能器 ≥ 16 X₀、上游物質 ≤ 15 % X₀、長度 ≤ 2 m、宣告的質量模型）；**不**提供 J15 的幾何。
+- 執行 S0–S4；報告比較搜尋結果與 J15（B3 的結果）：是否找到 J15 型的拓撲、在哪些目標上更好或更差、原因（例如平面向兩端與中央聚集提高 MDR，但多重散射主導區的解析度變差；附錄 A）。
+- 和 J15 一樣是合成研究；README 說明它展示的是流程，不是新的探測器設計（AIDO 與 SWGO 研究的同樣定位）。
+
+### C3.2 選用的 MOBO 後端
+
+Ax/BoTorch（qNEHVI），只在 S2 使用，限目標 ≤ 4、連續參數 ≤ 20；版本記錄在紀錄與 `adapter.json`（是否列為測試過的工具見計畫 §7 第 14 項）；沒有安裝時退回 NSGA-II，並在紀錄中註明。以 DTLZ2 封閉測試比較兩者。
+
+### C3.3 註冊與文件
+
+`docs/researcher-journeys.md`（J16）、路由案例（沿用 hep-detector description 中已有的「design principles and trade-offs」觸發詞；`check_routing_static.py` 要求列入表的 journey 都有路由案例）、`tests/examples/test_detector_design_j16.py`（重播並比對判定）、capability map、capability matrix、adapter 文件、protocol；本任務的 Markdown 以 `review.py` 審查（advisory）。
+
+### C3.4 C3 驗收
+
+- [ ] J16 完成；報告含搜尋規模、確認判定、穩健性與和 J15 的比較（閘門 G-C3）。
+- [ ] J16 的離線重播（由已提交的紀錄與 summary）判定相同。
 - [ ] MOBO 後端（若安裝）通過 DTLZ2 封閉測試；未安裝時退回並註明。
-- [ ] VALIDATION DESIGN-SEARCH；CHANGELOG；release manifest；任務 A §9 的檢查。
+- [ ] 註冊與文件完成；路由案例通過。
+- [ ] VALIDATION DESIGN-SEARCH-J16；CHANGELOG；release manifest；任務 A §8 的檢查。
 
 ---
 
@@ -344,9 +399,12 @@ F0 2×10⁴ 個設計：分鐘級；F1 約 500 × 10³ 事件；F2 與確認各 
 
 | 物件 | 位置 | 版本 |
 |---|---|---|
-| `detector-requirements/1`、`detector-design/1`、`catalogue/1`、`design-search-spec/1`、F0、搜尋器 | `adapters/detector-design/` | adapter 0.1.0（C1） |
-| F1、F2、確認、MOBO 後端 | `adapters/detector-design/` | adapter 0.2.0（C2） |
-| `extension.design_search` 與其規則 | `contracts/validate.py`、`contracts/dependencies.py` | C3（minor、閘控） |
+| `detector-requirements/1`、`detector-design/1`、`catalogue/1`、`design-search-spec/1`、F0、搜尋器 | `adapters/detector-design/` | detector-design 0.1.0（C1） |
+| F1、F2、確認 | `adapters/detector-design/` | detector-design 0.2.0（C2） |
+| `threshold`、`order`、配對模式、`values`、seed_group | `core/` | 隨 plugin 版本（C2）；summary schema 的 `summary_version` minor 增加 |
+| `values` 的 C++ 實作 | geant4 adapter | 0.5.0（C2） |
+| 角色、seed_group 規則、`extension.design_search` 與其規則 | `contracts/validate.py`、`contracts/dependencies.py` | CV3（minor、閘控；C2） |
+| MOBO 後端、J16 | `adapters/detector-design/`、`examples/` | detector-design 0.3.0（C3） |
 | agent 協定 | `skills/hep-detector/references/detector-design-search.md` | 隨 plugin 版本 |
 
 ---
@@ -358,21 +416,16 @@ F0 2×10⁴ 個設計：分鐘級；F1 約 500 × 10³ 事件；F2 與確認各 
 | 讓 LLM 單獨決定最佳設計 | 不做 | 沒有實際案例這樣做；判定必須可重現 |
 | 搜尋中臨時發明元件種類 | 不做 | 新元件需要實現規則、F0 模型與測試；經目錄變更加入 |
 | 可微分模擬與可微分代理模型（MODE 路線） | 延後 | Geant4 不可微；可微分代理模型對點雲尺度仍不成熟（arXiv:2310.05673）。觸發：一個連續參數 > 20 的問題，且 F1 預算不足 |
-| 圓柱與非盒狀幾何、對撞機探測器 | 延後 | `element_sim` 只有盒狀元件。觸發：`element_sim` 加入圓柱元件 |
+| 圓柱與非盒狀幾何、對撞機探測器 | 延後 | `element_sim` 只有盒狀元件。觸發：`element_sim` 加入圓柱元件（任務 B §9） |
 | Cherenkov、RICH、TRD | 延後 | 需要光學物理與專用重建 |
 | 強化學習、大型神經網路代理模型 | 延後 | 資料量與可解釋性；NSGA-II 與 MOBO 對 ≤ 數十個參數已足夠 |
 | 真實成本資料庫 | 不附 | 由使用者提供並附來源 |
 
 ---
 
-## 10. 待維護者決定的事項與殘餘風險
+## 10. 待決事項與殘餘風險
 
-**待決定：**
-1. 新 adapter `detector-design` 的擁有者（建議 hep-detector）。
-2. 在 `skills/hep-detector/SKILL.md` 加一行指向 `detector-design-search.md` 的路由（約 120 bytes；quick load 只剩 931 bytes），或只靠 reference 與路由案例。
-3. C3 的版本歸類（建議 minor）與 hep-computing 對 `extension.design_search` 的同意。
-4. MOBO 後端（Ax/BoTorch）是否列為 adapter 的測試工具。
-5. J16 的編號（離子源研究順延為 J17）。
+**待決事項**（編號見計畫 §7）：第 11 項（detector-design 的維護歸屬）、第 12 項（`SKILL.md` 的路由行）、第 13 項（CV3 與 `extension.design_search`）、第 14 項（MOBO 後端）。
 
 **殘餘風險：**
 1. F0 模型的偏差可能讓結構搜尋錯過好的拓撲；以 S2 的拓撲多樣性與 `fidelity_gap` 緩解，但不能排除。
@@ -380,23 +433,28 @@ F0 2×10⁴ 個設計：分鐘級；F1 約 500 × 10³ 事件；F2 與確認各 
 3. 質量與成本的占位模型很粗；沒有使用者模型時不應把它們當目標。
 4. 目標超過 4 個時，Pareto 前緣難以解讀；需求應把其餘目標寫成約束。
 5. Claude 的設計摘要可能帶入「已知儀器」的偏見；以 Sobol 隨機設計與拓撲多樣性抵銷，並在報告中區分 LLM 與隨機提案的貢獻。
-6. 計算量：量能器的 F1、F2 評估成本高；預算需在 trial 後調整。
-7. 本文件的參考資料（GRACE、VI-BRATO）是 2026 年的預印本，結論尚未經同儕審查。
+6. 配對比較在 Geant4 中的變異縮減可能很小（閘門 G-C2a）。
+7. 計算量：量能器的 F1、F2 評估成本高；預算在 trial 後調整。
+8. 本文件的參考資料中，GRACE、VI-BRATO 是 2026 年的預印本，結論尚未經同儕審查。
 
 ---
 
 ## 11. 建議的執行步驟
 
-**C1**
+**C1（A1 合併後；可與 A2、B 平行）**
 1. 開始前檢查；schema（C1.1）與目錄（C1.2）。
 2. 實現與有效性（C1.3）；F0（C1.4），以既有工具核對。
 3. 搜尋器（C1.5）與 DTLZ2、平面配置的封閉測試。
-4. 紀錄與報告（C1.6）；agent 協定（C1.7）；其餘封閉測試與獨立 agent 驗收；C1.9。
+4. 紀錄與報告（C1.6）；agent 協定與文件（C1.7）；其餘封閉測試與獨立 agent 驗收；C1.9。
 
-**C2（任務 B 合併後）**
-1. F1、F2（C2.1）；確認與需求判定（C2.2）；契約 C3（C2.5）與 toy。
-2. 防護與穩健性（C2.3）；選用的 MOBO（C2.4）。
-3. J16（C2.6）；文件與註冊（C2.7）；C2.9。
+**C2（B2 與 C1 合併後）**
+1. `core/` 與契約的附加（C2.1）及其 toy 與契約測試。
+2. F1、F2（C2.2）；配對比較的 trial（C2.3）；確認與需求判定（C2.4）。
+3. 防護與穩健性（C2.5）；CV3（C2.6）；adapter 變更（C2.7）；C2.9。
+
+**C3（B3 與 C2 合併後）**
+1. J16（C3.1）；選用的 MOBO（C3.2）。
+2. 註冊與文件（C3.3）；C3.4。
 
 ---
 
@@ -430,4 +488,5 @@ J15 的 MDR 1172 GV 在 1/32 格點的最佳配置下約為 1389 GV；但聚集�
 
 | 版本 | 內容 |
 |---|---|
-| **2026-10-23（本版）** | **初版提案：三個角色、需求規格、元件目錄與設計文法、F0/F1/F2 多保真度、搜尋與確認分開、C3 契約、C1/C2 階段、J16** |
+| 2026-10-23 | 初版提案：三個角色、需求規格、元件目錄與設計文法、F0/F1/F2 多保真度、搜尋與確認分開、契約、C1/C2、J16；之後依任務 A 的重新審視引用 `core/` 的共用模組 |
+| **2026-10-23（本版）** | **依計畫（`plan.md`）重新整理：三個階段（C1 在 A1 後、C2 在 B2 與 C1 後、C3 在 B3 與 C2 後）；任務 C 需要的 `threshold`、`order`、配對比較、`values`、search 角色與 seed_group 由 C2.1 自己加入 `core/` 與契約；實現以 `geant4_run.py check-spec` 驗證；契約版本改記 CV3；J16 與 MOBO 移到 C3；節的編號與任務 A、B 一致** |
