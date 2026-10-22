@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
+import analysis_check_cases as cases  # noqa: E402
 import analysis_check_runs as runs  # noqa: E402
 
 R = runs.ROOT_ID
@@ -46,7 +47,8 @@ class RunChain(Base):
 
     def test_v53_v56_positive_declared_level(self):
         # V53: run B uses run A's product through a provenance binding; V56: self-reported manifests stay declared
-        post = runs.run_chain(self.root())
+        # (a 1.1.0 context: complete needs the counting-chain rules this checker runs, release R2)
+        post = runs.run_chain(self.root(), spec_variant=cases.context_1_1)
         rep = post.check()
         self.assertEqual(rep["phase"], "post-execution")
         self.assertEqual(run_state(rep, "r-run.closure"), ("satisfied", "check.closure_complete"))

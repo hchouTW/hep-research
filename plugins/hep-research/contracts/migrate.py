@@ -14,8 +14,9 @@ new analysis.
 Converters: recipe-1.0.0-to-1.1.0 (1.1.0 only adds optional correction keys: lossless); context-1.0.0-to-1.1.0
 (item check-context, V90): the check context in format 1.1.0. A root or ratio root with required: false is a deferral,
 which 1.1.0 records only as an exception (DR-2), so such a context is refused and goes to manual completion;
-required: true is dropped; each suite moves to the lowest installed version at or above 1.1.0 (a pre-release while
-R2 is in development; 1.1.0-dev.1 has the 1.0.0 rules). The suites chosen are part of the lineage.
+required: true is dropped; each suite moves to the newest installed version at or above 1.1.0 (a pre-release while
+R2 is in development: an older pre-release names rule versions the checker no longer runs). The suites chosen are part
+of the lineage.
 
 Usage: python3 contracts/migrate.py SRC_ROOT BUNDLE DST_ROOT --convert ITEM=CONVERTER [--convert ...]
 Exit 0 complete, 1 refused, 2 bad usage. Output: JSON with a status key.
@@ -45,7 +46,7 @@ def recipe_1_0_to_1_1(doc: dict) -> dict:
     return dict(copy.deepcopy(doc), recipe_version="1.1.0")
 
 
-def _first_1_1_suite(suite_id: str) -> str:
+def _latest_1_1_suite(suite_id: str) -> str:
     from contracts.analysis_checks.context import FIRST_1_1_SUITE
     from contracts.semver import precedence
     found = []
@@ -57,7 +58,7 @@ def _first_1_1_suite(suite_id: str) -> str:
             continue
     if not found:
         raise ValueError(f"no installed suite {suite_id} at or above 1.1.0")
-    return min(found, key=precedence)
+    return max(found, key=precedence)  # the newest: an older pre-release names rule versions this checker no longer runs
 
 
 def context_1_0_to_1_1(doc: dict) -> dict:
@@ -71,9 +72,9 @@ def context_1_0_to_1_1(doc: dict) -> dict:
                                  "deferral only as an exception (DR-2): complete this conversion by hand")
             r.pop("required", None)
     out["context_version"] = "1.1.0"
-    out["suite"] = dict(out["suite"], version=_first_1_1_suite(out["suite"]["id"]))
+    out["suite"] = dict(out["suite"], version=_latest_1_1_suite(out["suite"]["id"]))
     if "suites" in out:
-        out["suites"] = [dict(s, version=_first_1_1_suite(s["id"])) for s in out["suites"]]
+        out["suites"] = [dict(s, version=_latest_1_1_suite(s["id"])) for s in out["suites"]]
     return out
 
 

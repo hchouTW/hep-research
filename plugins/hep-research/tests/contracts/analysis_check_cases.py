@@ -67,7 +67,7 @@ class Case:
         return out
 
 
-DEV_SUITE = "1.1.0-dev.1"
+DEV_SUITE = "1.1.0-dev.2"
 
 
 def context_1_1(c, suite_version: str = DEV_SUITE) -> None:
@@ -80,6 +80,15 @@ def context_1_1(c, suite_version: str = DEV_SUITE) -> None:
     for key in ("roots", "ratio_roots"):
         for r in c.context.get(key, []):
             r.pop("required", None)
+
+
+def r1_rules() -> dict:
+    """Rules double keyed by rule_id (analysis_check.evaluate(rules=...)): the current implementations standing in for
+    the release-R1 rules, for tests of report and permit handling that need a complete 1.0.0 report. Release R2 no
+    longer runs the retired 1.0.0 versions (check.rule_not_run); on the reference cases, with one validation record
+    and no partition declarations, their 1.1.0 replacements give the same outcomes."""
+    from contracts.analysis_checks.rules import IMPLEMENTED
+    return {rid: fn for (rid, _), fn in IMPLEMENTED.items()}
 
 
 def both(*variants):

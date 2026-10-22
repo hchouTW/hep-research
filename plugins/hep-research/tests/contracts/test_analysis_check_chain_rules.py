@@ -1,7 +1,9 @@
 """v6.3 D06: chain rules (R-REAL, R-STAGE, R-REP, R-COMP, R-RESP) on CASE-CHAIN, the reduced positive case and their
 named variants (CHAIN-ID, CHAIN-SCOPE, CHAIN-RESPONSE, CHAIN-FLOW, L2 regression). V01-V04, V09, V10, V16, V21-V23,
 V34, V35, V37, V39-V41, V43, V48, V49, V69 and the rule-dependent parts of V11, V12, V18, V64. Synthetic and public
-inputs only, built in temporary folders by tests/contracts/analysis_check_cases.py."""
+inputs only, built in temporary folders by tests/contracts/analysis_check_cases.py.
+Cases run on check-context 1.1.0 and the newest 1.1.0 pre-release suites (release R2): the 1.0.0 suites name rule
+versions this checker no longer runs."""
 import copy
 import json
 import sys
@@ -70,7 +72,7 @@ class Tmp(unittest.TestCase):
     def run_case(self, builder, variant=None) -> dict:
         self.n += 1
         root = Path(self.td.name) / f"c{self.n}"
-        bundle = builder(root, variant)
+        bundle = builder(root, cases.both(cases.context_1_1, variant))  # the 1.1.0 rules (release R2)
         view, diags = ac().load_subject(bundle, root)
         return ac().evaluate(view, diags)
 

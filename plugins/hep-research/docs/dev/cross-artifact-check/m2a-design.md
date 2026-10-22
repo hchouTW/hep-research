@@ -166,3 +166,34 @@ Phase 0 comparison set of 403 obligations is unchanged). Each finding is input-i
 
 G2 (V78) is closed by the format itself: 1.1.0 has no `required`. The G4 part of V79 (tolerance from declared
 significant digits, DR-6) changes a rule and comes with the rule fixes.
+
+## Phase 2, release R2: first rule fixes (2026-10-23)
+
+The first rule changes of R2 (architecture section 8.2: "Yes, only in `1.1.0-dev.N` suites"):
+
+- **Per-rule versions.** `contracts/analysis_checks/rules.py` dispatches by `VERSIONS` (rule_id → the version its
+  code is; default 1.0.0). A fixed rule's old code is gone: an obligation naming the old version is unverified
+  (`check.rule_not_run`), never evaluated with the new code (P3).
+- **G3 (V77): `r-ratio.correlation` 1.1.0.** Every complete validation record for the claimed effect is read; one whose
+  relation differs from the spec's gives `check.correlation_contradicted`, citing every contradicting record. 1.0.0
+  returned on the first complete record in item-ID order, so renaming the records changed the outcome.
+- **G17 (V77): `r-rep.repetition` 1.1.0.** `_exclusion` reads every `partition_exclusive` declaration naming both
+  scopes; one that gives both the same selection is a contradiction, and all such declarations are listed (sorted).
+  1.0.0 used the first in declaration order. A contradiction decides in both rules, so removing an agreeing record or
+  declaration never improves the outcome (P4), and adding one cannot hide a contradiction.
+- **Registry 1.2.0.** The 1.0.0 entries of both rules stay listed with `lifecycle: retired` (not digest-checked);
+  1.1.0 entries are `kind: changed` with their source digests.
+- **Suites `1.1.0-dev.2`.** The same as dev.1 except the two rules at 1.1.0. The conversion `context-1.0.0-to-1.1.0`
+  now chooses the newest installed suite at or above 1.1.0. This replaces "the lowest" in the formats section above,
+  which was written when dev.1 was the only pre-release and named only versions the checker ran.
+
+Measured on the Phase 0 comparison set (403 obligations, against 0.25.1):
+
+| Contexts | Changed obligations |
+| --- | --- |
+| 1.0.0 (stable suites) | 99: all 96 `r-rep.repetition` and all 3 `r-ratio.correlation` are now `rule_not_run`; 16 cases go from complete to incomplete (`g3-ba` from inconsistent) |
+| 1.1.0 on dev.2 | G3 only: `g3-ab` is now `violated`, the same as `g3-ba`. G2, G15 and G16 change through the earlier R2 input checks |
+
+Tests that need a complete 1.0.0 report for report or permit handling use `cases.r1_rules()`, the current
+implementations keyed by rule_id. These stand in for release R1 and give the same outcomes on the reference cases.
+Rule tests run on 1.1.0 contexts.

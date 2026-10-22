@@ -22,6 +22,18 @@ Software checks establish contract consistency only, not physical validity.
   table (`coverage.duplicate_contract`, G15), a shared parameter inside one model (`context.shared_within_model`,
   G12), and a blank or placeholder root unit (`context.unit_placeholder`, G22). 1.0.0 contexts are not judged by
   these checks. Probes G2, G12, G15, G16 and G22 now pass; V78, V80, V81, V89 and the G16 part of V79 pass.
+- **Cross-artifact check, first rule fixes: outcomes no longer depend on input order (G3, G17, V77).**
+  `r-ratio.correlation` 1.1.0 reads every complete validation record for a claim, so one contradicting record gives
+  `violated` whatever the item IDs (1.0.0 took the first record by ID). `r-rep.repetition` 1.1.0 reads every
+  `partition_exclusive` declaration naming both scopes, so one contradicting declaration gives
+  `check.exclusion_contradiction` and every such declaration is listed. Rules are dispatched by a per-rule version
+  table; the rule registry moves to 1.2.0, with the two 1.0.0 entries marked `retired` beside the new `changed` 1.1.0
+  entries. The fixed rules ship in the pre-release suites `1.1.0-dev.2`, and `migrate.py context-1.0.0-to-1.1.0` now
+  moves each suite to the newest installed 1.1.0 version. **The stable 1.0.0 suites now give `check.rule_not_run` for
+  these two rules** (P3: an old version is never run with new code), so a 1.0.0 counting-chain or ratio-subset check is
+  `incomplete`. To reproduce a 1.0.0 result, use hep-research 0.25.x (release R1). Measured on the Phase 0 comparison
+  set (403 obligations): on 1.0.0 only the 96 `r-rep.repetition` and 3 `r-ratio.correlation` obligations change, all to
+  `rule_not_run`; on dev.2 only G3 changes (both orders are now `violated`).
 
 ## 0.25.1 (2026-10-22)
 

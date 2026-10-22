@@ -1,6 +1,6 @@
 {
- "registry_version": "1.1.0",
- "$comment": "v6.3 D12a minimal rule and obligation registry. Rules: kind legacy may carry outcome_contract 'pending' (evaluated as unverified); kind new or changed needs reason codes for all five states. V cases: per slice part, status not-run | expected-failure | required-before-enforcement | passing; expected-failure and passing name the tests that run them. Impact groups map changed paths to test modules or run_all_checks parts; a not-available check, an unmatched path or a full group forces the full closure. Registry 1.1.0 (cross-artifact check architecture, Phase 0): every new or changed rule records source_sha256, the function-level source digest of its implementation; rule_registry.py check fails when the code changes without a new version (P3). Slices P0-P2 and work packages P<phase>.<nn> / WP-R name the architecture's phases.",
+ "registry_version": "1.2.0",
+ "$comment": "v6.3 D12a minimal rule and obligation registry. Rules: kind legacy may carry outcome_contract 'pending' (evaluated as unverified); kind new or changed needs reason codes for all five states. V cases: per slice part, status not-run | expected-failure | required-before-enforcement | passing; expected-failure and passing name the tests that run them. Impact groups map changed paths to test modules or run_all_checks parts; a not-available check, an unmatched path or a full group forces the full closure. Registry 1.1.0 (cross-artifact check architecture, Phase 0): every new or changed rule records source_sha256, the function-level source digest of its implementation; rule_registry.py check fails when the code changes without a new version (P3). Slices P0-P2 and work packages P<phase>.<nn> / WP-R name the architecture's phases. Registry 1.2.0 (release R2): a rule is keyed by (rule_id, version); a fixed rule is a new entry (kind changed) beside its old version, which stays listed with lifecycle retired, needs no implementation and is not digest-checked.",
  "states": [
   "satisfied",
   "violated",
@@ -336,9 +336,66 @@
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; retired in release R2: its outcome depended on declaration or item order (G3/G17); version 1.1.0 replaces it, and a suite naming 1.0.0 gives check.rule_not_run (reproduce with release R1)",
+   "source_sha256": "ec52f2adfdb198988d1e0a660d0437664dacd14c329d76f0c92eef40f8d77f1f"
+  },
+  {
+   "rule_id": "r-rep.repetition",
+   "version": "1.1.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "changed",
+   "prerequisites": [
+    "instance views on the root's path",
+    "input_of bindings",
+    "coverage contract"
+   ],
+   "applicability": "R-REP: no effect slot is applied twice on one computation path with overlapping scope and covered members; every matching partition_exclusive declaration is read, one contradicting declaration decides (G17)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.no_repetition",
+     "check.exclusive_scopes"
+    ],
+    "violated": [
+     "check.repeated_application",
+     "check.exclusion_contradiction"
+    ],
+    "not_applicable": [
+     "check.effect_not_applied"
+    ],
+    "unverified": [
+     "check.scope_relation_unknown",
+     "check.keys_incomplete",
+     "check.coverage_undefined",
+     "check.branch_unbound"
+    ],
+    "unsupported": [
+     "check.unsupported_operator"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V03",
+    "V04",
+    "V16",
+    "V21",
+    "V22",
+    "V40",
+    "V41",
+    "V49",
+    "V77"
+   ],
+   "waivable": true,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
-   "source_sha256": "ec52f2adfdb198988d1e0a660d0437664dacd14c329d76f0c92eef40f8d77f1f"
+   "source_sha256": "afd56a29dc126280ee6ae0cca6d1b9392ddc04618cf4755d61c9770180551583"
   },
   {
    "rule_id": "r-comp.composition",
@@ -607,9 +664,55 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; retired in release R2: its outcome depended on declaration or item order (G3/G17); version 1.1.0 replaces it, and a suite naming 1.0.0 gives check.rule_not_run (reproduce with release R1)",
+   "source_sha256": "70f44de1685ade7073d67212b024ed843f0b69ddbaf93eb6f392126661c7735d"
+  },
+  {
+   "rule_id": "r-ratio.correlation",
+   "version": "1.1.0",
+   "layer": "L3",
+   "suites": [
+    "ratio-subset/v1"
+   ],
+   "kind": "changed",
+   "prerequisites": [
+    "spec ratio correlation claim",
+    "validation record or correlation declaration"
+   ],
+   "applicability": "R-RATIO: an independence or correlation claim rests on a validation record binding both operands, or on a sourced or scoped declaration; every complete validation record is read, one contradicting record decides (G3)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.correlation_evidenced",
+     "check.correlation_declared"
+    ],
+    "violated": [
+     "check.correlation_contradicted"
+    ],
+    "not_applicable": [
+     "check.correlation_not_claimed"
+    ],
+    "unverified": [
+     "check.correlation_unsupported_claim",
+     "check.correlation_evidence_incomplete"
+    ],
+    "unsupported": [
+     "check.correlation_relation_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V45",
+    "V77"
+   ],
+   "waivable": true,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
-   "source_sha256": "70f44de1685ade7073d67212b024ed843f0b69ddbaf93eb6f392126661c7735d"
+   "source_sha256": "6749d0c6860a4ee1b5df7d153ac68c77a91473b6c60bf63ff4760c54893e7103"
   },
   {
    "rule_id": "r-model.root",
@@ -2668,9 +2771,12 @@
      "work_packages": [
       "P2.02"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "checker, release R2 (1.1.0-dev.2)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g17_exclusion_does_not_depend_on_declaration_order",
+      "tests.contracts.test_cross_artifact_check_gap_probes.RatioProbes.test_g3_validation_record_order_does_not_decide"
+     ]
     }
    ]
   },
