@@ -2020,6 +2020,25 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## 0.23.0 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.23.0` from main `59002566` (#197 anisotropy CL range, `bdt-backend` gate, 24 triaged plugin
+issues; #198 REVIEW-REFS-2; #199 per-lens model and filtering pass, contracts 3.4.0; main CI green on all three).
+Minor release. The ams02-research companion (requires hep-research `>=0.11.0`, profile contracts `>=2.0`) needs no
+change.
+
+What changed: version 0.23.0 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.23.0`; new advisory SFA-2026-037
+(TRAINING-MEMORY-VERDICT, fixed 0.23.0; the other new S2 entries change only the status of unusable input or a
+missing dependency, where no result was produced). Examples regenerated (E2; `bc-propagation-fit` with the CI lock):
+only version strings and the hashes that cover them change (`unfolding-coverage` drifted at 1e-14 and was left as
+committed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4795 tests in 403 modules, 4663 pass, 0 failures, 132 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4795 tests, 4571 pass, 0 failures, 224 skipped |
+
 ## 0.22.0 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.22.0` from main `9db118e5` (#194 independent review P1, contracts 3.3.0; #195 the five

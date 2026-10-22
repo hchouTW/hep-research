@@ -1,0 +1,53 @@
+{
+ "format": "hep-research-scifix-advisory/1",
+ "id": "SFA-2026-037",
+ "severity": "S2",
+ "ledger": [
+  "TRAINING-MEMORY-VERDICT"
+ ],
+ "summary": "estimate_training_memory.py printed 'Does not fit' but exited 0 (and its --json output had no status), so a script or workflow that read the exit code took a configuration that does not fit in GPU memory as one that fits.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-ml/scripts/estimate_training_memory.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.3.0"
+      },
+      {
+       "fixed": "0.23.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "fixed_commit": "117f537517cc7501775687a986bc0395df0cd51d",
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "exit code of estimate_training_memory.py",
+   "status of its --json output"
+  ],
+  "bias": "the verdict carried by the exit code was 'fits' for every valid input; the printed text and the memory numbers were right",
+  "trigger": "a configuration whose estimated per-GPU memory exceeds the stated capacity, when the caller reads the exit code or the JSON instead of the text"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "computational-run"
+  ],
+  "extension_keys": [
+   "tools"
+  ]
+ },
+ "remedy": "rerun estimate_training_memory.py on a release that has the fix (or read its text verdict) for any configuration accepted on the exit code alone; the memory numbers themselves did not change",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/117f537517cc7501775687a986bc0395df0cd51d"
+ ]
+}
