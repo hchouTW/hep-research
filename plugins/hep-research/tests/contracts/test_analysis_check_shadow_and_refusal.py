@@ -1,7 +1,7 @@
 """v6.3 D09: shadow integration and the reader refusal matrix (V31, V59). The new check runs beside the old entry points
 without changing them; every legacy finding and every new violation gets a class in the difference review, and none
 stays unclassified. contracts/rules/refusal_matrix.json states what each old entry point does with each new format;
-the current-tree column is checked here (the 0.11.0 column is measured in docs/dev/v6.3/refusal-matrix.md)."""
+the current-tree column is checked here (the 0.11.0 column is measured in docs/dev/cross-artifact-check/refusal-matrix.md)."""
 import json
 import subprocess
 import sys
@@ -12,8 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
-from test_v63_d06 import PRE_STEPS, add_instance, keyed  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
+from test_analysis_check_chain_rules import PRE_STEPS, add_instance, keyed  # noqa: E402
 
 NEEDS_AMS = unittest.skipUnless(cases.HAVE_AMS, "the AMS example is not in this copy")
 MATRIX = json.loads((ROOT / "contracts" / "rules" / "refusal_matrix.json").read_text())
@@ -97,11 +97,11 @@ class ShadowDifferenceReview(unittest.TestCase):
 
 
 class ModelAndRunShadowReview(unittest.TestCase):
-    """The shadow review on the model and run cases (added for the G-ENFORCE inputs, docs/dev/v6.3/shadow-review.md):
+    """The shadow review on the model and run cases (added for the G-ENFORCE inputs, docs/dev/cross-artifact-check/shadow-review.md):
     zero unclassified; the legacy model-card errors that decide the same question as a new rule agree with it."""
 
     def test_zero_unclassified(self):
-        import v63_runs as runs
+        import analysis_check_runs as runs
 
         def dup(c):
             card = c.doc("card-sr-cr")

@@ -31,7 +31,7 @@ and the private directory (config private_dir, else $XDG_STATE_HOME/hep-research
 ~/.local/state/hep-research/reviews/). `python3 <plugin root>/contracts/review.py check <review dir>` checks a review.
 Output: one JSON object with a "status" key. Exit 0 ok, 1 negative result (a stop on error, a reverted change at close),
 2 refused command or bad input, 3 incomplete. A closed review here is not a review record by a non-author reviewer
-in the sense of docs/dev/v6.3/decision-enforce.md (maintainer decision 2026-10-21); it is advisory input a human
+in the sense of docs/dev/cross-artifact-check/decision-enforce.md (maintainer decision 2026-10-21); it is advisory input a human
 reviewer may cite.
 """
 from __future__ import annotations

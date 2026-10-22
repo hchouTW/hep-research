@@ -1,6 +1,6 @@
 """v6.3 D03a: namespace ownership, the alias contract (V13, V29) and consumers that respect profile load errors.
 
-Every consumer of profile loading results in the D01 inventory (docs/dev/v6.3/m0-baseline.md §4) has a
+Every consumer of profile loading results in the D01 inventory (docs/dev/cross-artifact-check/m0-baseline.md §4) has a
 failing-profile case here: a profile the registry reports as incompatible is never used. Profiles are synthetic
 stand-ins (tests/contracts/make_registry_fixtures.py) written to temporary folders outside the plugin."""
 import copy

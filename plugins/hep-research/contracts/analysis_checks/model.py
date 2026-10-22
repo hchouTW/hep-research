@@ -1,4 +1,4 @@
-"""Model rules of the model-card suite (v6.3 M2b, C7; design docs/dev/v6.3/m2b-model-design.md): the O03 pairings
+"""Model rules of the model-card suite (v6.3 M2b, C7; design docs/dev/cross-artifact-check/m2b-model-design.md): the O03 pairings
 (contracts/semantics/model_pairings.json), observation use within one evaluation (R-AUX) and cross-model sharing.
 
 A model is a model-card item under a context ID; a parameter is (model, name); an observation is (item, JSON pointer),

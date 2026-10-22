@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 
 NOW = datetime.datetime(2026, 10, 16, 12, 0, 0, tzinfo=datetime.UTC)

@@ -1,5 +1,5 @@
 """v6.3 D05d/D08 run (M2c, suite run-lineage/v1): post-execution evidence through a result binding on RUN-CHAIN,
-RUN-STATUS, RUN-LINEAGE, RUN-CAMPAIGN and a blinded variant (tests/contracts/v63_runs.py). V20, V33, V38, V53, V54,
+RUN-STATUS, RUN-LINEAGE, RUN-CAMPAIGN and a blinded variant (tests/contracts/analysis_check_runs.py). V20, V33, V38, V53, V54,
 V55, V56, V61, V62, V63, V70, plus V32 and the post-execution part of V60 (D10). Synthetic only: the campaign is a
 core.partition campaign with LocalExecutor in a temporary folder; no record outside it is touched."""
 import copy
@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_runs as runs  # noqa: E402
+import analysis_check_runs as runs  # noqa: E402
 
 R = runs.ROOT_ID
 
@@ -174,7 +174,7 @@ class RunChain(Base):
             post.binding["semantic_lock_sha256"] = "f" * 64
         self.assertEqual(run_state(runs.run_chain(self.root(), other_lock).check(), "r-run.binding"),
                          ("violated", "check.semantic_drift"))
-        from test_v63_d11b import install_new_definitions
+        from test_analysis_check_snapshots import install_new_definitions
         store = Path(self.td.name) / "snapshots"
         post = runs.run_chain(self.root(), snapshots=store)
         rep = post.check(snapshots=store, view_edit=install_new_definitions)
@@ -353,7 +353,7 @@ class PostExecutionPermit(Base):
 
     def test_model_only_bundle_is_diagnostics_only(self):
         # O13: a model-only bundle never counts toward formal use
-        import v63_cases as cases
+        import analysis_check_cases as cases
         from contracts.permit import report_check
         root = self.root()
         bundle = json.loads(cases.model_case(root).read_text())

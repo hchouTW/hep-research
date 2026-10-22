@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 355272,
+   "bytes": 355336,
    "uncited": 0
   },
   "hep-citations": {
@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 35,
-   "bytes": 298463,
+   "bytes": 298525,
    "uncited": 0
   },
   "hep-detector": {
@@ -405,7 +405,7 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 16423,
+   "bytes": 16487,
    "lines": 199,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1423,8 +1423,8 @@
   {
    "path": "skills/hep-computing/references/preservation-checklist.md",
    "owner": "hep-computing",
-   "bytes": 4446,
-   "lines": 71,
+   "bytes": 4508,
+   "lines": 72,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",

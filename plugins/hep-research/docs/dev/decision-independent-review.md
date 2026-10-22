@@ -5,8 +5,8 @@ Status: **partly decided 2026-10-21** (see Decision: items 1, 2, 5 and 6 decided
 repository or by a committed test), **Inferred** (a reading to sanity-check), **Unresolved** (needs a decision).
 
 Terminology: "review packet" and "shadow slot" in this record and in the spec are the mechanism's terms. They are
-unrelated to `docs/dev/v6.3/review-packet.md` (a human, maintainer-named review of the G-ENFORCE inputs) and
-`docs/dev/v6.3/shadow-review.md` (a difference review between check suites).
+unrelated to `docs/dev/cross-artifact-check/review-packet.md` (a human, maintainer-named review of the G-ENFORCE inputs) and
+`docs/dev/cross-artifact-check/shadow-review.md` (a difference review between check suites).
 
 ## Question
 
@@ -81,8 +81,8 @@ free number (0.22.0 at the time of writing; **Unresolved** until merge).
 ## Relation to v6.3 O04, O14 and decision-enforce
 
 The mechanism does not settle O04 ("reviewers other than the author") or O14 ("which reviewer roles may accept reports
-as evidence"), `docs/dev/v6.3/custodian-gate-requirement.md:42-43`. A closed agent review is **not** presented as
-meeting the "a review record exists" criterion of `docs/dev/v6.3/decision-enforce.md:20`: the report's limitations,
+as evidence"), `docs/dev/cross-artifact-check/custodian-gate-requirement.md:42-43`. A closed agent review is **not** presented as
+meeting the "a review record exists" criterion of `docs/dev/cross-artifact-check/decision-enforce.md:20`: the report's limitations,
 the procedure reference and `review.py --help` say so. Decided 2026-10-21: it does not count (see Decision). The mechanism writes no attestation; the attestation reviewer role is still under Q-06
 (`contracts/schemas/attestation.json`).
 
@@ -182,7 +182,7 @@ hep-authoring (ownership row "Independent review packets, review records and the
    Decision). Open: the release that carries contracts 3.3.0, after a live pilot review; the P3 budget.
 3. Resolved 2026-10-21: the shared-directory patterns are confirmed and the session start is read from `CLAUDE_PID`
    (Decision 6).
-4. Location of the spec and of this record (`docs/dev/` rather than a versioned subfolder such as `docs/dev/v6.3/`).
+4. Location of the spec and of this record (`docs/dev/` rather than a versioned subfolder such as `docs/dev/cross-artifact-check/`).
 
 ## Decision
 
@@ -209,7 +209,7 @@ Maintainer, 2026-10-21 (recommendations accepted; the numbers follow spec sectio
    about 50 agent runs) checks the injection script and the provisional thresholds; the full design (at least 20
    documents, four arms, about 19 agent runs per document, about 500 with re-dispatches) only after it.
 5. **O04/O14: a closed agent review does not count** as a review record by a non-author reviewer and does not meet
-   the "a review record exists" criterion of `docs/dev/v6.3/decision-enforce.md:20`. Reason: the threat model
+   the "a review record exists" criterion of `docs/dev/cross-artifact-check/decision-enforce.md:20`. Reason: the threat model
    excludes deliberate fraud by the author agent (spec sections 0 and 10), who can write a reviewer's record; an
    enforcement gate needs records the author cannot produce. It is advisory input that a human reviewer may cite in
    their own record. Revisit only if P4 adds external custody or a process other than the author's.

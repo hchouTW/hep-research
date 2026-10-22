@@ -1,4 +1,4 @@
-"""Gap probes G1-G22 of the cross-artifact check architecture (docs/dev/v6.3/cross-artifact-check-architecture.en.md,
+"""Gap probes G1-G22 of the cross-artifact check architecture (docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md,
 section 6). Each probe states the intended behaviour. Gaps fixed in Phase 0 (G10, G11, G18, the diagnostic part of
 G19, G20) pass; gaps scheduled for Phase 2 are expected failures until their fix lands (an unexpected success fails
 the suite, so a fix must flip its probe); assurance-plane gaps (G9) and the classification item G21 are skipped with
@@ -15,8 +15,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
-import v63_runs as runs  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
+import analysis_check_runs as runs  # noqa: E402
 
 PHASE2 = unittest.expectedFailure  # scheduled for Phase 2 (R2/R3); the fix flips the probe
 
@@ -318,7 +318,7 @@ class Phase0Probes(Probe):
         self.assertEqual(ac().exit_code(rep), 3)
         self.assertNotEqual(rep["status"], "complete")
 
-    @unittest.skip("G21 is classified in docs/dev/v6.3/g21-classification.md; a fix needs its own decision")
+    @unittest.skip("G21 is classified in docs/dev/cross-artifact-check/g21-classification.md; a fix needs its own decision")
     def test_g21_tool_recipe_fragments_compose(self):
         pass
 

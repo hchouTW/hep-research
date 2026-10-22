@@ -1,6 +1,6 @@
 """v6.3 D05c: evaluation adapter, aggregation, report, assessment identity and CLI exit codes. V27, V51, V52 and the
-D05c parts of V15, V24, V25, V68; the rule-dependent parts of V11, V12, V18, V64 and V69 are in test_v63_d06.py.
-Cases are built by tests/contracts/v63_cases.py in temporary folders."""
+D05c parts of V15, V24, V25, V68; the rule-dependent parts of V11, V12, V18, V64 and V69 are in test_analysis_check_chain_rules.py.
+Cases are built by tests/contracts/analysis_check_cases.py in temporary folders."""
 import contextlib
 import copy
 import io
@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 NEEDS_AMS = unittest.skipUnless(cases.HAVE_AMS, "the AMS example is not in this copy")
 

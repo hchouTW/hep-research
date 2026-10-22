@@ -12,14 +12,14 @@ close, contradicting records, a stalled process. It does not detect deliberate f
 section 10), and it is not an attestation.
 
 **What a closed review is not.** A closed agent review is not a review record by a reviewer other than the author in
-the sense of the v6.3 open conditions O04 and O14 (`<plugin root>/docs/dev/v6.3/custodian-gate-requirement.md`), and
-it does not meet the "a review record exists" criterion of `<plugin root>/docs/dev/v6.3/decision-enforce.md`
+the sense of the v6.3 open conditions O04 and O14 (`<plugin root>/docs/dev/cross-artifact-check/custodian-gate-requirement.md`), and
+it does not meet the "a review record exists" criterion of `<plugin root>/docs/dev/cross-artifact-check/decision-enforce.md`
 (maintainer decision 2026-10-21, `<plugin root>/docs/dev/decision-independent-review.md`): the author agent could
 forge it. It is advisory input that a human reviewer may cite in their own record. Say so when you report it.
 
 **Terminology.** "Review packet" and "shadow slot" here are this mechanism's terms. They are unrelated to
-`<plugin root>/docs/dev/v6.3/review-packet.md` (a human review of the G-ENFORCE inputs) and
-`<plugin root>/docs/dev/v6.3/shadow-review.md` (a difference review between check suites).
+`<plugin root>/docs/dev/cross-artifact-check/review-packet.md` (a human review of the G-ENFORCE inputs) and
+`<plugin root>/docs/dev/cross-artifact-check/shadow-review.md` (a difference review between check suites).
 
 ## Files and tools
 

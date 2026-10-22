@@ -3,6 +3,38 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Phase 0 of the cross-artifact check architecture (`docs/dev/cross-artifact-check/`, release R1): foundations of the
+opt-in analysis check. No rule outcome changes: the same 403 obligations over 22 cases give the same state and
+reason as on 0.24.1. Every rule stays in shadow mode.
+
+- **Rules run only at their own version.** The check dispatches rules by (rule_id, version); an obligation whose rule
+  version this checker does not implement is unverified (`check.rule_not_run`) instead of being evaluated with other
+  code. Suites name a supported obligation generator (freeze refuses another one, `bundle.generator_unsupported`),
+  and input checks are enabled per check-context version.
+- **Rule registry 1.1.0.** Each rule version records the source digest of its code (`source_sha256`);
+  `rule_registry.py check` fails when the code changes without a new version. New V cases V72–V76.
+- **The status agrees with the exit code.** A report with a missing dependency or with definitions that differ from
+  its semantic lock is never `complete` and exits 3.
+- **Snapshots are on by default.** `freeze` stores the pinned definitions in `<root>/.hep-research/snapshots/` and
+  lists the bundle in `<root>/.hep-research/bundles.json` (`--no-snapshots` turns this off); `check` uses that store;
+  `analysis_check.py snapshots gc` deletes only unreferenced snapshots (dry run unless `--apply`). Bundles frozen
+  earlier without snapshots now report `lock_differences` (the registry changed) and are reproduced with the
+  release that froze them.
+- **Report identity.** The checker identity covers every plugin module loaded at run time; the generator digest
+  covers the generator, the model-card subjects and the effect catalog; `assessment.plugin_release` names the
+  release.
+- **`permit.py check-report` refuses more without a rerun:** `permit.report_dependency_missing`,
+  `permit.report_lock_differences`, `permit.report_prerelease_suite`, `permit.report_inventory_mismatch` (a report
+  whose obligations or suites are not the bundle's frozen inventory).
+- **Renamed code-name identifiers** (DR-15): `docs/dev/v6.3/` is now `docs/dev/cross-artifact-check/` (a forwarding
+  README stays at the old path), the `test_v63_*` modules are `test_analysis_check_*` and `tests/core/test_evidence_query`,
+  done with `tools/rename_analysis_check_ids.py`.
+- **Records:** the architecture (English and Chinese), `decision-architecture.md` (DR-1 to DR-15),
+  `decision-value-gate.md` (thresholds proposed, to be confirmed before measuring), `decision-phase0.md`,
+  `g21-classification.md`; gap probes G1–G22 (`tests/contracts/test_cross_artifact_check_gap_probes.py`).
+
 ## 0.24.1 (2026-10-22)
 
 Patch release: sci-fix evidence and tooling after the improvement plan; no artifact contract change (contracts 3.6.0).

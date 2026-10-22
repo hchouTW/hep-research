@@ -1,4 +1,4 @@
-"""Phase 0 foundations of the cross-artifact check (docs/dev/v6.3/cross-artifact-check-architecture.en.md, section
+"""Phase 0 foundations of the cross-artifact check (docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md, section
 9.1; release R1): V72 version guard and rule source digests, V73 status and exit code (P6), V74 checker identity,
 V75 cheap check-report refusals, V76 mutation-testing skeleton; plus default snapshots and assessment.plugin_release.
 No rule outcome changes in Phase 0. Synthetic and public example content only."""
@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
 import analysis_check_mutations as mutations  # noqa: E402
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 CLI = [sys.executable, str(ROOT / "contracts" / "analysis_check.py")]
 

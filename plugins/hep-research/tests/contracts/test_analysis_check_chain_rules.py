@@ -1,7 +1,7 @@
 """v6.3 D06: chain rules (R-REAL, R-STAGE, R-REP, R-COMP, R-RESP) on CASE-CHAIN, the reduced positive case and their
 named variants (CHAIN-ID, CHAIN-SCOPE, CHAIN-RESPONSE, CHAIN-FLOW, L2 regression). V01-V04, V09, V10, V16, V21-V23,
 V34, V35, V37, V39-V41, V43, V48, V49, V69 and the rule-dependent parts of V11, V12, V18, V64. Synthetic and public
-inputs only, built in temporary folders by tests/contracts/v63_cases.py."""
+inputs only, built in temporary folders by tests/contracts/analysis_check_cases.py."""
 import copy
 import json
 import sys
@@ -12,8 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
-from v63_cases import custom_table  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
+from analysis_check_cases import custom_table  # noqa: E402
 
 NEEDS_AMS = unittest.skipUnless(cases.HAVE_AMS, "the AMS example is not in this copy")
 SCOPE = "species:proton/period:synthetic-period-1"

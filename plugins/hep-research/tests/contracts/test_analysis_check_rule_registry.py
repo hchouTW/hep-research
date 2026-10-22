@@ -149,9 +149,9 @@ class Prerequisites(unittest.TestCase):
         part = doc["v_cases"][33]["parts"][0]
         part["status"], part["tests"] = "passing", []
         self.assertIn("registry.v_case_without_test", codes(rr.check(doc)))
-        part["tests"] = ["tests.contracts.test_v63_rule_registry.Prerequisites.test_absent"]
+        part["tests"] = ["tests.contracts.test_analysis_check_rule_registry.Prerequisites.test_absent"]
         self.assertIn("registry.test_missing", codes(rr.check(doc)))
-        part["tests"] = ["tests.contracts.test_v63_rule_registry.Prerequisites.test_prerequisites_are_required"]
+        part["tests"] = ["tests.contracts.test_analysis_check_rule_registry.Prerequisites.test_prerequisites_are_required"]
         self.assertTrue(rr.check(doc).ok)
 
     def test_duplicates_and_gaps(self):
@@ -172,7 +172,7 @@ class ImpactClosure(unittest.TestCase):
     def test_a_bounded_change(self):
         out = rr.impact(["core/evidence/query.py"], SHIPPED)
         self.assertFalse(out["full"])
-        self.assertIn("tests.core.test_v63_evidence_query", out["modules"])
+        self.assertIn("tests.core.test_evidence_query", out["modules"])
         self.assertEqual(out["parts"], [])
 
     def test_every_listed_module_exists(self):

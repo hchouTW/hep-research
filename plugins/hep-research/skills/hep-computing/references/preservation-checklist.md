@@ -39,10 +39,11 @@ Each item names the file or command that holds it. Paths are relative to the plu
 
 - [ ] The v2 analysis bundle (`<plugin root>/contracts/schemas/analysis_bundle_v2.json`) is frozen with its
       semantic lock: `python3 <plugin root>/contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json
-      --context CONTEXT.json --out bundle.json --snapshots SNAPSHOTS/`.
-- [ ] The definition snapshots written by `--snapshots` are archived with the bundle: they let a later check use
-      the definitions that were current at freeze time, not today's.
-- [ ] `analysis_check.py check bundle.json --root DIR --snapshots SNAPSHOTS/` reruns on the archive. Its report is a
+      --context CONTEXT.json --out bundle.json`.
+- [ ] The definition snapshots freeze writes to `DIR/.hep-research/snapshots/` (with the bundle index
+      `DIR/.hep-research/bundles.json`) are archived with the bundle: they let a later check use the definitions that
+      were current at freeze time, not today's.
+- [ ] `analysis_check.py check bundle.json --root DIR` reruns on the archive (it reads that store). Its report is a
       diagnostic; it authorizes nothing.
 
 ## 5. Results and their bindings

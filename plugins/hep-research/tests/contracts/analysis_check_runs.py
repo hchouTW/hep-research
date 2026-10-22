@@ -1,5 +1,5 @@
 """v6.3 D08 run cases (M2c, run-lineage/v1): RUN-CHAIN and RUN-CAMPAIGN on the reduced positive case, with the
-result binding written after execution (docs/dev/v6.3/m2c-design.md). Everything is synthetic and written inside the
+result binding written after execution (docs/dev/cross-artifact-check/m2c-design.md). Everything is synthetic and written inside the
 given folder; the campaign is a core.partition campaign run with LocalExecutor in that folder, with an execution
 bundle frozen by the test (the fake-scheduler example has no freeze step and is not changed)."""
 from __future__ import annotations
@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 RUN_SUITE = {"id": "run-lineage", "version": "1.0.0"}
 ROOT_ID = "flux-proton-p1"

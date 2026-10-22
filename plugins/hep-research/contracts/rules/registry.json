@@ -1071,7 +1071,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Realization.test_v01_one_more_consistent_description"
+      "tests.contracts.test_analysis_check_chain_rules.Realization.test_v01_one_more_consistent_description"
      ]
     }
    ]
@@ -1090,7 +1090,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Realization.test_v02_calibration_differs"
+      "tests.contracts.test_analysis_check_chain_rules.Realization.test_v02_calibration_differs"
      ]
     }
    ]
@@ -1109,7 +1109,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v03_same_slot_twice_on_one_path"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v03_same_slot_twice_on_one_path"
      ]
     }
    ]
@@ -1128,7 +1128,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v04_alternative_branches"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v04_alternative_branches"
      ]
     }
    ]
@@ -1148,9 +1148,9 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05a.V05InstanceViews.test_template_filled_with_sources",
-      "tests.contracts.test_v63_d05a.V05InstanceViews.test_literal_is_never_overridden",
-      "tests.contracts.test_v63_d05a.V05InstanceViews.test_calibration_binding_fills_the_digest"
+      "tests.contracts.test_analysis_check_identity_and_instances.V05InstanceViews.test_template_filled_with_sources",
+      "tests.contracts.test_analysis_check_identity_and_instances.V05InstanceViews.test_literal_is_never_overridden",
+      "tests.contracts.test_analysis_check_identity_and_instances.V05InstanceViews.test_calibration_binding_fills_the_digest"
      ]
     }
    ]
@@ -1169,8 +1169,8 @@
      "host": "CASE-MODEL",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v06_positive_shared_parameter",
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v06_consistent_with_the_adapter"
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v06_positive_shared_parameter",
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v06_consistent_with_the_adapter"
      ]
     }
    ]
@@ -1189,8 +1189,8 @@
      "host": "CASE-MODEL variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v07_two_aux_ids_one_observation",
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v07_same_aux_id_twice"
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v07_two_aux_ids_one_observation",
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v07_same_aux_id_twice"
      ]
     }
    ]
@@ -1209,7 +1209,7 @@
      "host": "CASE-MODEL variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v08_two_components_of_one_file"
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v08_two_components_of_one_file"
      ]
     }
    ]
@@ -1228,7 +1228,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Realization.test_v09_parent_described_by_a_child"
+      "tests.contracts.test_analysis_check_chain_rules.Realization.test_v09_parent_described_by_a_child"
      ]
     }
    ]
@@ -1247,7 +1247,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Composition.test_v10_parent_and_decomposition"
+      "tests.contracts.test_analysis_check_chain_rules.Composition.test_v10_parent_and_decomposition"
      ]
     }
    ]
@@ -1267,8 +1267,8 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.ResponseUse.test_v11_missing_response_binding",
-      "tests.contracts.test_v63_d05c.Declarations.test_removing_a_file_fails_integrity"
+      "tests.contracts.test_analysis_check_chain_rules.ResponseUse.test_v11_missing_response_binding",
+      "tests.contracts.test_analysis_check_report.Declarations.test_removing_a_file_fails_integrity"
      ]
     },
     {
@@ -1280,7 +1280,7 @@
      "host": "CASE-MODEL",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelVParts.test_v11_missing_observation_binding"
+      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v11_missing_observation_binding"
      ]
     }
    ]
@@ -1299,7 +1299,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.ResponseUse.test_v12_response_not_needed"
+      "tests.contracts.test_analysis_check_chain_rules.ResponseUse.test_v12_response_not_needed"
      ]
     }
    ]
@@ -1318,7 +1318,7 @@
      "host": "resolver unit test",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d03a.V13AliasKeys.test_equal_values_merge_and_conflicts_are_rejected"
+      "tests.contracts.test_analysis_check_profile_loading.V13AliasKeys.test_equal_values_merge_and_conflicts_are_rejected"
      ]
     }
    ]
@@ -1337,7 +1337,7 @@
      "host": "resolver and bundle",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05b.SemanticLock.test_definition_change_is_a_lock_difference"
+      "tests.contracts.test_analysis_check_bundle_and_context.SemanticLock.test_definition_change_is_a_lock_difference"
      ]
     }
    ]
@@ -1357,7 +1357,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05c.Identity.test_rename_and_reorder"
+      "tests.contracts.test_analysis_check_report.Identity.test_rename_and_reorder"
      ]
     },
     {
@@ -1369,7 +1369,7 @@
      "host": "CASE-MODEL",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelVParts.test_v15_renaming_and_reordering"
+      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v15_renaming_and_reordering"
      ]
     }
    ]
@@ -1388,7 +1388,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v16_opaque_scope_strings"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v16_opaque_scope_strings"
      ]
     }
    ]
@@ -1407,8 +1407,8 @@
      "host": "reader test",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d11a.V17OldTableReader.test_operator_through_pinned_semantics",
-      "tests.contracts.test_v63_d11a.V17OldTableReader.test_unpinned_or_changed_semantics_are_not_used"
+      "tests.contracts.test_analysis_check_coverage_reader.V17OldTableReader.test_operator_through_pinned_semantics",
+      "tests.contracts.test_analysis_check_coverage_reader.V17OldTableReader.test_unpinned_or_changed_semantics_are_not_used"
      ]
     }
    ]
@@ -1427,7 +1427,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Coverage.test_v18_unsupported_operator"
+      "tests.contracts.test_analysis_check_chain_rules.Coverage.test_v18_unsupported_operator"
      ]
     },
     {
@@ -1439,7 +1439,7 @@
      "host": "CASE-MODEL variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v18_unsupported_pairings"
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v18_unsupported_pairings"
      ]
     }
    ]
@@ -1458,8 +1458,8 @@
      "host": "migration test",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d11b.V19Migration.test_leaf_to_root",
-      "tests.contracts.test_v63_d11b.V19Migration.test_failure_leaves_no_marker"
+      "tests.contracts.test_analysis_check_snapshots.V19Migration.test_leaf_to_root",
+      "tests.contracts.test_analysis_check_snapshots.V19Migration.test_failure_leaves_no_marker"
      ]
     }
    ]
@@ -1478,7 +1478,7 @@
      "host": "CASE-CHAIN post-execution",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v20_results_after_execution"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v20_results_after_execution"
      ]
     }
    ]
@@ -1497,7 +1497,7 @@
      "host": "L2 regression",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v21_same_scope_two_calibrations"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v21_same_scope_two_calibrations"
      ]
     }
    ]
@@ -1516,7 +1516,7 @@
      "host": "L2 regression",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v22_incomplete_keys"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v22_incomplete_keys"
      ]
     }
    ]
@@ -1535,7 +1535,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Realization.test_v23_ambiguous_mapping"
+      "tests.contracts.test_analysis_check_chain_rules.Realization.test_v23_ambiguous_mapping"
      ]
     }
    ]
@@ -1555,8 +1555,8 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05c.Declarations.test_masking_keeps_obligations",
-      "tests.contracts.test_v63_d05c.Declarations.test_removing_a_file_fails_integrity"
+      "tests.contracts.test_analysis_check_report.Declarations.test_masking_keeps_obligations",
+      "tests.contracts.test_analysis_check_report.Declarations.test_removing_a_file_fails_integrity"
      ]
     },
     {
@@ -1568,7 +1568,7 @@
      "host": "CASE-MODEL",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelVParts.test_v24_masking_a_binding"
+      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v24_masking_a_binding"
      ]
     }
    ]
@@ -1587,7 +1587,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05c.Declarations.test_waiver_is_not_counted"
+      "tests.contracts.test_analysis_check_report.Declarations.test_waiver_is_not_counted"
      ]
     },
     {
@@ -1599,7 +1599,7 @@
      "host": "CASE-MODEL",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelVParts.test_v25_waiver_not_counted"
+      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v25_waiver_not_counted"
      ]
     }
    ]
@@ -1618,7 +1618,7 @@
      "host": "report test",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d10.V26Exceptions.test_scoped_exception"
+      "tests.contracts.test_analysis_check_report_permit.V26Exceptions.test_scoped_exception"
      ]
     }
    ]
@@ -1637,8 +1637,8 @@
      "host": "CLI",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05c.V27ExitCodes.test_each_cause_and_the_precedence",
-      "tests.contracts.test_v63_d05c.V27ExitCodes.test_report_outside_the_bundle"
+      "tests.contracts.test_analysis_check_report.V27ExitCodes.test_each_cause_and_the_precedence",
+      "tests.contracts.test_analysis_check_report.V27ExitCodes.test_report_outside_the_bundle"
      ]
     }
    ]
@@ -1657,7 +1657,7 @@
      "host": "CASE-CHAIN old version",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07.Ratio.test_v28_free_text_ratio"
+      "tests.contracts.test_analysis_check_ratio_rules.Ratio.test_v28_free_text_ratio"
      ]
     }
    ]
@@ -1676,10 +1676,10 @@
      "host": "resolver unit test",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d03a.V29AliasContract.test_cross_owner_takeover",
-      "tests.contracts.test_v63_d03a.V29AliasContract.test_cycle",
-      "tests.contracts.test_v63_d03a.V29AliasContract.test_ambiguous_missing_target_conversion_and_malformed",
-      "tests.contracts.test_v63_d03a.V29AliasContract.test_a_promotion_by_the_owner_passes"
+      "tests.contracts.test_analysis_check_profile_loading.V29AliasContract.test_cross_owner_takeover",
+      "tests.contracts.test_analysis_check_profile_loading.V29AliasContract.test_cycle",
+      "tests.contracts.test_analysis_check_profile_loading.V29AliasContract.test_ambiguous_missing_target_conversion_and_malformed",
+      "tests.contracts.test_analysis_check_profile_loading.V29AliasContract.test_a_promotion_by_the_owner_passes"
      ]
     }
    ]
@@ -1698,8 +1698,8 @@
      "host": "project",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d12b.CustodyInventory.test_v30_stage1_statuses",
-      "tests.contracts.test_v63_d12b.CustodyInventory.test_v30_refusals_unchanged"
+      "tests.contracts.test_analysis_check_custody.CustodyInventory.test_v30_stage1_statuses",
+      "tests.contracts.test_analysis_check_custody.CustodyInventory.test_v30_refusals_unchanged"
      ]
     }
    ]
@@ -1718,8 +1718,8 @@
      "host": "regression test",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d09.ShadowDifferenceReview.test_v31_old_contract_version",
-      "tests.contracts.test_v63_d09.ShadowDifferenceReview.test_zero_unclassified"
+      "tests.contracts.test_analysis_check_shadow_and_refusal.ShadowDifferenceReview.test_v31_old_contract_version",
+      "tests.contracts.test_analysis_check_shadow_and_refusal.ShadowDifferenceReview.test_zero_unclassified"
      ]
     }
    ]
@@ -1738,7 +1738,7 @@
      "host": "gate integration",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v32_lock_drift"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v32_lock_drift"
      ]
     }
    ]
@@ -1757,7 +1757,7 @@
      "host": "CASE-CHAIN post-execution",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v33_input_neither_frozen_nor_produced"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v33_input_neither_frozen_nor_produced"
      ]
     }
    ]
@@ -1776,7 +1776,7 @@
      "host": "CASE-CHAIN variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.ResponseUse.test_v34_unfolding_against_not_applied"
+      "tests.contracts.test_analysis_check_chain_rules.ResponseUse.test_v34_unfolding_against_not_applied"
      ]
     }
    ]
@@ -1795,8 +1795,8 @@
      "host": "effect catalog and coverage contract (definition part)",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d04.V35Definition.test_class_alone_is_not_coverage",
-      "tests.contracts.test_v63_d04.V35Definition.test_listed_members_are_covered"
+      "tests.contracts.test_analysis_check_effect_catalog.V35Definition.test_class_alone_is_not_coverage",
+      "tests.contracts.test_analysis_check_effect_catalog.V35Definition.test_listed_members_are_covered"
      ]
     },
     {
@@ -1808,7 +1808,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Coverage.test_v35_effective_exposure"
+      "tests.contracts.test_analysis_check_chain_rules.Coverage.test_v35_effective_exposure"
      ]
     }
    ]
@@ -1827,9 +1827,9 @@
      "host": "L1 regression",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05a.V36SpecKeys.test_capability_makes_the_keys_known",
-      "tests.contracts.test_v63_d05a.V36SpecKeys.test_without_capability_the_legacy_threshold_holds",
-      "tests.contracts.test_v63_d05a.V36SpecKeys.test_malformed_keys_are_errors"
+      "tests.contracts.test_analysis_check_identity_and_instances.V36SpecKeys.test_capability_makes_the_keys_known",
+      "tests.contracts.test_analysis_check_identity_and_instances.V36SpecKeys.test_without_capability_the_legacy_threshold_holds",
+      "tests.contracts.test_analysis_check_identity_and_instances.V36SpecKeys.test_malformed_keys_are_errors"
      ]
     }
    ]
@@ -1849,7 +1849,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Realization.test_v37_scopeless_correction_against_four_instances"
+      "tests.contracts.test_analysis_check_chain_rules.Realization.test_v37_scopeless_correction_against_four_instances"
      ]
     }
    ]
@@ -1868,7 +1868,7 @@
      "host": "CASE-CHAIN post-execution",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v38_json_inside_the_bundle"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v38_json_inside_the_bundle"
      ]
     }
    ]
@@ -1887,7 +1887,7 @@
      "host": "CHAIN-ID",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Realization.test_v39_application_id_mismatch"
+      "tests.contracts.test_analysis_check_chain_rules.Realization.test_v39_application_id_mismatch"
      ]
     }
    ]
@@ -1906,7 +1906,7 @@
      "host": "CHAIN-SCOPE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v40_no_basis_for_exclusion"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v40_no_basis_for_exclusion"
      ]
     }
    ]
@@ -1925,7 +1925,7 @@
      "host": "CHAIN-SCOPE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v41_declared_exclusion"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v41_declared_exclusion"
      ]
     }
    ]
@@ -1944,8 +1944,8 @@
      "host": "scope parser",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05a.V42ScopeParser.test_grammar",
-      "tests.contracts.test_v63_d05a.V42ScopeParser.test_comparison"
+      "tests.contracts.test_analysis_check_identity_and_instances.V42ScopeParser.test_grammar",
+      "tests.contracts.test_analysis_check_identity_and_instances.V42ScopeParser.test_comparison"
      ]
     }
    ]
@@ -1964,9 +1964,9 @@
      "host": "effect catalog and coverage contract (definition part)",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d04.V43Definition.test_new_member_is_not_covered",
-      "tests.contracts.test_v63_d04.V43Definition.test_unknown_effect_or_operator_is_unsupported",
-      "tests.contracts.test_v63_d04.V43Definition.test_bare_efficiency_keeps_legacy_coverage"
+      "tests.contracts.test_analysis_check_effect_catalog.V43Definition.test_new_member_is_not_covered",
+      "tests.contracts.test_analysis_check_effect_catalog.V43Definition.test_unknown_effect_or_operator_is_unsupported",
+      "tests.contracts.test_analysis_check_effect_catalog.V43Definition.test_bare_efficiency_keeps_legacy_coverage"
      ]
     },
     {
@@ -1978,7 +1978,7 @@
      "host": "catalog",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Coverage.test_v43_new_member"
+      "tests.contracts.test_analysis_check_chain_rules.Coverage.test_v43_new_member"
      ]
     }
    ]
@@ -1997,7 +1997,7 @@
      "host": "RATIO-FACTORS",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07.Ratio.test_v44_factors"
+      "tests.contracts.test_analysis_check_ratio_rules.Ratio.test_v44_factors"
      ]
     }
    ]
@@ -2016,7 +2016,7 @@
      "host": "RATIO-EVIDENCE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07.Ratio.test_v45_evidence"
+      "tests.contracts.test_analysis_check_ratio_rules.Ratio.test_v45_evidence"
      ]
     }
    ]
@@ -2035,7 +2035,7 @@
      "host": "MODEL-USAGE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v46_alternative_models_versus_joint"
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v46_alternative_models_versus_joint"
      ]
     }
    ]
@@ -2054,7 +2054,7 @@
      "host": "MODEL-SHARING",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelCase.test_v47_cross_model_sharing"
+      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v47_cross_model_sharing"
      ]
     }
    ]
@@ -2073,7 +2073,7 @@
      "host": "CHAIN-RESPONSE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.ResponseUse.test_v48_not_applied_only"
+      "tests.contracts.test_analysis_check_chain_rules.ResponseUse.test_v48_not_applied_only"
      ]
     }
    ]
@@ -2092,7 +2092,7 @@
      "host": "CHAIN-FLOW",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Repetition.test_v49_variation_rejoins"
+      "tests.contracts.test_analysis_check_chain_rules.Repetition.test_v49_variation_rejoins"
      ]
     }
    ]
@@ -2111,7 +2111,7 @@
      "host": "bundle lifecycle",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05b.Subjects.test_deleting_a_root"
+      "tests.contracts.test_analysis_check_bundle_and_context.Subjects.test_deleting_a_root"
      ]
     }
    ]
@@ -2130,7 +2130,7 @@
      "host": "report adapter",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05c.V51V52Aggregation.test_rule_not_run"
+      "tests.contracts.test_analysis_check_report.V51V52Aggregation.test_rule_not_run"
      ]
     }
    ]
@@ -2149,7 +2149,7 @@
      "host": "report aggregation",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05c.V51V52Aggregation.test_invalid_versus_inconsistent"
+      "tests.contracts.test_analysis_check_report.V51V52Aggregation.test_invalid_versus_inconsistent"
      ]
     }
    ]
@@ -2168,7 +2168,7 @@
      "host": "RUN-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v53_v56_positive_declared_level"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v53_v56_positive_declared_level"
      ]
     }
    ]
@@ -2187,8 +2187,8 @@
      "host": "RUN-STATUS",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v54_failed_run_and_retries",
-      "tests.contracts.test_v63_d05d.RunChain.test_failure_propagates_downstream"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v54_failed_run_and_retries",
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_failure_propagates_downstream"
      ]
     }
    ]
@@ -2207,7 +2207,7 @@
      "host": "RUN-LINEAGE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v55_ambiguous_producer_cycle_and_role"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v55_ambiguous_producer_cycle_and_role"
      ]
     }
    ]
@@ -2226,7 +2226,7 @@
      "host": "RUN-EVIDENCE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunChain.test_v53_v56_positive_declared_level"
+      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v53_v56_positive_declared_level"
      ]
     }
    ]
@@ -2245,9 +2245,9 @@
      "host": "LOCK-SNAPSHOT",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d11b.V57Snapshots.test_reproduced_from_the_old_snapshot",
-      "tests.contracts.test_v63_d11b.V57Snapshots.test_missing_snapshot",
-      "tests.contracts.test_v63_d11b.V57Snapshots.test_rewritten_snapshot"
+      "tests.contracts.test_analysis_check_snapshots.V57Snapshots.test_reproduced_from_the_old_snapshot",
+      "tests.contracts.test_analysis_check_snapshots.V57Snapshots.test_missing_snapshot",
+      "tests.contracts.test_analysis_check_snapshots.V57Snapshots.test_rewritten_snapshot"
      ]
     }
    ]
@@ -2266,7 +2266,7 @@
      "host": "effect catalog and coverage contract (definition part)",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d04.V58Definition.test_member_closure"
+      "tests.contracts.test_analysis_check_effect_catalog.V58Definition.test_member_closure"
      ]
     },
     {
@@ -2278,7 +2278,7 @@
      "host": "LOCK-CLOSURE",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05b.SemanticLock.test_member_sets"
+      "tests.contracts.test_analysis_check_bundle_and_context.SemanticLock.test_member_sets"
      ]
     }
    ]
@@ -2297,8 +2297,8 @@
      "host": "reader matrix",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d09.V59RefusalMatrix.test_current_column",
-      "tests.contracts.test_v63_d09.V59RefusalMatrix.test_non_refusing_rows_are_blockers"
+      "tests.contracts.test_analysis_check_shadow_and_refusal.V59RefusalMatrix.test_current_column",
+      "tests.contracts.test_analysis_check_shadow_and_refusal.V59RefusalMatrix.test_non_refusing_rows_are_blockers"
      ]
     }
    ]
@@ -2317,9 +2317,9 @@
      "host": "gate integration",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d10.ReportCheck.test_v60_wrong_bindings",
-      "tests.contracts.test_v63_d10.ReportCheck.test_incomplete_or_violated",
-      "tests.contracts.test_v63_d05d.PostExecutionPermit.test_v60_post_execution_bindings"
+      "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_v60_wrong_bindings",
+      "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_incomplete_or_violated",
+      "tests.contracts.test_analysis_check_run_lineage.PostExecutionPermit.test_v60_post_execution_bindings"
      ]
     }
    ]
@@ -2338,7 +2338,7 @@
      "host": "CASE-CHAIN campaign (fake schedulers)",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunCampaign.test_v61_only_the_collected_output_is_adopted"
+      "tests.contracts.test_analysis_check_run_lineage.RunCampaign.test_v61_only_the_collected_output_is_adopted"
      ]
     }
    ]
@@ -2357,7 +2357,7 @@
      "host": "RUN-CAMPAIGN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunCampaign.test_v62_digest_conflict_uncollected_and_orphan"
+      "tests.contracts.test_analysis_check_run_lineage.RunCampaign.test_v62_digest_conflict_uncollected_and_orphan"
      ]
     }
    ]
@@ -2376,7 +2376,7 @@
      "host": "RUN-CAMPAIGN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.RunCampaign.test_v63_submission_bundle_digests"
+      "tests.contracts.test_analysis_check_run_lineage.RunCampaign.test_v63_submission_bundle_digests"
      ]
     }
    ]
@@ -2395,7 +2395,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.DeclarationFlags.test_v64_declaration_based"
+      "tests.contracts.test_analysis_check_chain_rules.DeclarationFlags.test_v64_declaration_based"
      ]
     },
     {
@@ -2407,7 +2407,7 @@
      "host": "CASE-MODEL",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d07_model.ModelVParts.test_v64_declaration_based_binding"
+      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v64_declaration_based_binding"
      ]
     }
    ]
@@ -2426,7 +2426,7 @@
      "host": "gate integration",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d10.ReportCheck.test_v65_accepted_review_with_report"
+      "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_v65_accepted_review_with_report"
      ]
     }
    ]
@@ -2445,7 +2445,7 @@
      "host": "gate integration",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d10.ReportCheck.test_v66_no_accepted_review"
+      "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_v66_no_accepted_review"
      ]
     }
    ]
@@ -2464,8 +2464,8 @@
      "host": "obligation generator",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05b.Inventory.test_regeneration_is_byte_identical_and_order_free",
-      "tests.contracts.test_v63_d05b.Inventory.test_a_differing_inventory_is_invalid_input"
+      "tests.contracts.test_analysis_check_bundle_and_context.Inventory.test_regeneration_is_byte_identical_and_order_free",
+      "tests.contracts.test_analysis_check_bundle_and_context.Inventory.test_a_differing_inventory_is_invalid_input"
      ]
     }
    ]
@@ -2485,8 +2485,8 @@
      "host": "obligation generator",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05c.Identity.test_previous_report_and_assessment",
-      "tests.contracts.test_v63_d05b.Subjects.test_new_suite_version"
+      "tests.contracts.test_analysis_check_report.Identity.test_previous_report_and_assessment",
+      "tests.contracts.test_analysis_check_bundle_and_context.Subjects.test_new_suite_version"
      ]
     }
    ]
@@ -2506,7 +2506,7 @@
      "host": "CASE-CHAIN",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d06.Composition.test_v69_factor_check_across_bins"
+      "tests.contracts.test_analysis_check_chain_rules.Composition.test_v69_factor_check_across_bins"
      ]
     }
    ]
@@ -2525,7 +2525,7 @@
      "host": "CASE-CHAIN blinded variant",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d05d.Blinding.test_v70"
+      "tests.contracts.test_analysis_check_run_lineage.Blinding.test_v70"
      ]
     }
    ]
@@ -2544,8 +2544,8 @@
      "host": "skill integration",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_within_budget_names_missing_bindings",
-      "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_pages"
+      "tests.contracts.test_analysis_check_review_integration.V71ReviewCallsTheCheck.test_summary_within_budget_names_missing_bindings",
+      "tests.contracts.test_analysis_check_review_integration.V71ReviewCallsTheCheck.test_summary_pages"
      ]
     }
    ]
@@ -2680,14 +2680,14 @@
     "tests.contracts.test_profile_vocab_hint",
     "tests.contracts.test_strict_versions",
     "tests.contracts.test_communication_project",
-    "tests.contracts.test_v63_baseline_gaps",
+    "tests.contracts.test_analysis_check_baseline_gaps",
     "part:static",
-    "tests.contracts.test_v63_d03a",
+    "tests.contracts.test_analysis_check_profile_loading",
     "tests.contracts.test_companion_validation_cli",
     "tests.skills.hep_measurement.test_review_procedure",
     "tests.skills.hep_measurement.test_cli_contract",
     "tests.skills.test_cli_robustness",
-    "tests.contracts.test_v63_d12b"
+    "tests.contracts.test_analysis_check_custody"
    ],
    "not_available": [],
    "full": false
@@ -2706,16 +2706,16 @@
    "checks": [
     "tests.contracts.test_r5_contracts",
     "tests.contracts.test_recipe_semantics",
-    "tests.contracts.test_v63_baseline_gaps",
-    "tests.contracts.test_v63_d04",
-    "tests.contracts.test_v63_d05a",
-    "tests.contracts.test_v63_d05b",
-    "tests.contracts.test_v63_d05c",
-    "tests.contracts.test_v63_d06",
-    "tests.contracts.test_v63_d07",
-    "tests.contracts.test_v63_d11a",
-    "tests.contracts.test_v63_d17",
-    "tests.contracts.test_v63_review_fixes"
+    "tests.contracts.test_analysis_check_baseline_gaps",
+    "tests.contracts.test_analysis_check_effect_catalog",
+    "tests.contracts.test_analysis_check_identity_and_instances",
+    "tests.contracts.test_analysis_check_bundle_and_context",
+    "tests.contracts.test_analysis_check_report",
+    "tests.contracts.test_analysis_check_chain_rules",
+    "tests.contracts.test_analysis_check_ratio_rules",
+    "tests.contracts.test_analysis_check_coverage_reader",
+    "tests.contracts.test_analysis_check_review_integration",
+    "tests.contracts.test_analysis_check_review_fixes"
    ],
    "not_available": [
     "CASE-MODEL (D08, M2b model part, waits for O03)"
@@ -2731,21 +2731,21 @@
     "contracts/migrate.py",
     "contracts/resolve.py",
     "contracts/rules/suites/**",
-    "tests/contracts/v63_cases.py",
-    "tests/contracts/v63_runs.py"
+    "tests/contracts/analysis_check_cases.py",
+    "tests/contracts/analysis_check_runs.py"
    ],
    "checks": [
-    "tests.contracts.test_v63_d05a",
-    "tests.contracts.test_v63_d05b",
-    "tests.contracts.test_v63_d05c",
-    "tests.contracts.test_v63_d06",
-    "tests.contracts.test_v63_d07",
-    "tests.contracts.test_v63_d11a",
-    "tests.contracts.test_v63_d11b",
-    "tests.contracts.test_v63_d17",
-    "tests.contracts.test_v63_review_fixes",
-    "tests.contracts.test_v63_d07_model",
-    "tests.contracts.test_v63_d05d"
+    "tests.contracts.test_analysis_check_identity_and_instances",
+    "tests.contracts.test_analysis_check_bundle_and_context",
+    "tests.contracts.test_analysis_check_report",
+    "tests.contracts.test_analysis_check_chain_rules",
+    "tests.contracts.test_analysis_check_ratio_rules",
+    "tests.contracts.test_analysis_check_coverage_reader",
+    "tests.contracts.test_analysis_check_snapshots",
+    "tests.contracts.test_analysis_check_review_integration",
+    "tests.contracts.test_analysis_check_review_fixes",
+    "tests.contracts.test_analysis_check_model_rules",
+    "tests.contracts.test_analysis_check_run_lineage"
    ],
    "not_available": [],
    "full": false
@@ -2763,10 +2763,10 @@
    "checks": [
     "tests.contracts.test_permits",
     "tests.contracts.test_r5_contracts",
-    "tests.contracts.test_v63_baseline_gaps",
-    "tests.contracts.test_v63_d05b",
-    "tests.contracts.test_v63_d05c",
-    "tests.contracts.test_v63_d09"
+    "tests.contracts.test_analysis_check_baseline_gaps",
+    "tests.contracts.test_analysis_check_bundle_and_context",
+    "tests.contracts.test_analysis_check_report",
+    "tests.contracts.test_analysis_check_shadow_and_refusal"
    ],
    "not_available": [
     "run dependencies and status propagation (D05d)",
@@ -2792,7 +2792,7 @@
     "tests.adapters.test_batch_hardening",
     "tests.adapters.test_batch_provenance",
     "tests.adapters.test_batch_bundle",
-    "tests.contracts.test_v63_baseline_gaps"
+    "tests.contracts.test_analysis_check_baseline_gaps"
    ],
    "not_available": [
     "campaign reader field matrix (D05d)",
@@ -2815,7 +2815,7 @@
     "tests.contracts.test_permits",
     "tests.contracts.test_protected_entry_points",
     "tests.contracts.test_revocation",
-    "tests.contracts.test_v63_d10"
+    "tests.contracts.test_analysis_check_report_permit"
    ],
    "not_available": [],
    "full": false
@@ -2832,7 +2832,7 @@
    ],
    "checks": [
     "part:static",
-    "tests.contracts.test_v63_d17",
+    "tests.contracts.test_analysis_check_review_integration",
     "tests.routing.test_routing_static",
     "tests.tools.test_check_instruction_text"
    ],
@@ -2862,7 +2862,7 @@
     "contracts/schemas/rule_registry.json"
    ],
    "checks": [
-    "tests.contracts.test_v63_rule_registry",
+    "tests.contracts.test_analysis_check_rule_registry",
     "part:static"
    ],
    "not_available": [],
@@ -2875,7 +2875,7 @@
     "core/evidence/**"
    ],
    "checks": [
-    "tests.core.test_v63_evidence_query",
+    "tests.core.test_evidence_query",
     "tests.core.test_properties",
     "tests.tools.test_statistics_evidence",
     "tests.contracts.test_protected_entry_points",

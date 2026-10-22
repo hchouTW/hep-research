@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
-import v63_cases as cases  # noqa: E402
+import analysis_check_cases as cases  # noqa: E402
 
 REVIEW = ROOT / "skills" / "hep-measurement" / "scripts" / "review_measurement_spec.py"
 
