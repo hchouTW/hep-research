@@ -18,6 +18,7 @@ task specs below describe the previous architecture; once approved they are rewr
 |---|---|
 | `architecture.md` | **Consolidated architecture** (Traditional Chinese original): problems found, two-plane design, interfaces (spec/2, run summary, effective config, column map, event files, backend interface), statistical methods, contracts, stages, generality, decision record. Section 11 lists what needs approval |
 | `architecture.en.md` | English translation of `architecture.md` |
+| `gate_operating_characteristics.py` | Recomputes the convergence-gate operating characteristics, two-stage factors and Welch degrees of freedom quoted in `architecture.md` §5.5–5.6. Needs numpy and scipy; a design aid, not plugin code |
 | `task-a-core.md` | **Task A** (Traditional Chinese original): phase 1 fixes the `validated-in-scope` defects D1–D10 (sci-fix, contracts C1); phase 2 moves the compute core to C++ (`simcore`, `simroot`, per-event ROOT files; adapter 0.2.0). Work items A1.1–A1.12 and A2.1–A2.12 |
 | `task-a-core.en.md` | English translation of `task-a-core.md` |
 | `task-b-j15.md` | **Task B** (Traditional Chinese original): the J15 minimal spectrometer (field, plane crossings and the ROOT `crossings` level, `simreco`, `verification` grade, contracts C2; adapter 0.3.0). Work items B1.1–B1.5 and B2.1–B2.3 |
