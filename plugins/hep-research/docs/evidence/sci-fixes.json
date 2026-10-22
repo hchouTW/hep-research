@@ -39,7 +39,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "symbolic",
@@ -52,7 +53,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -136,7 +138,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "symbolic",
@@ -151,7 +154,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -271,7 +275,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "independent-implementation",
@@ -284,7 +289,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "symbolic",
@@ -299,7 +305,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -414,7 +421,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -501,7 +509,8 @@
       "backend": [
        "arviz"
       ]
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "independent-implementation",
@@ -524,7 +533,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     },
     {
      "kind": "analytic",
@@ -545,7 +555,8 @@
        "numpy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "commits": {
@@ -727,7 +738,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "printed"
     },
     {
      "kind": "independent-implementation",
@@ -742,7 +754,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "commits": {
@@ -848,7 +861,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "symbolic",
@@ -863,7 +877,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -959,7 +974,8 @@
        "numpy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "exhaustive",
@@ -972,7 +988,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -1104,7 +1121,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "symbolic",
@@ -1119,7 +1137,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -1211,7 +1230,8 @@
       "backend": [
        "pdg"
       ]
-     }
+     },
+     "expected_from": "printed"
     },
     {
      "kind": "published",
@@ -1221,7 +1241,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "printed"
     },
     {
      "kind": "analytic",
@@ -1236,7 +1257,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "commits": {
@@ -1311,7 +1333,8 @@
    "discrimination": "D0",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope: neither oracle has a parent record: on parent 4aebc0be the CLI has no charge input (KeyError 'charge'), the Frank-Tamm test imports core.constants (added after the fix) and errors on the fix too, and the z^2 test fails on the fix by 4e-8 (it passes from TH9's fix 23910085 on); the fix commit's own tests (mass:charge syntax, --rigidity, the charge key) all need input forms new in the fix: no per-test parent record, D0 (VALIDATION SCIFIX-PLAN-B3-B6)"
+    "D scope: neither oracle has a parent record: on parent 4aebc0be the CLI has no charge input (KeyError 'charge'), the Frank-Tamm test imports core.constants (added after the fix) and errors on the fix too, and the z^2 test fails on the fix by 4e-8 (it passes from TH9's fix 23910085 on); the fix commit's own tests (mass:charge syntax, --rigidity, the charge key) all need input forms new in the fix: no per-test parent record, D0 (VALIDATION SCIFIX-PLAN-B3-B6)",
+    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
    ],
    "note": "expected values computed from closed forms, negative control and z = 1 check added 2026-10-18; z^2 invariant at fixed velocity through the CLI, 2026-10-20; the yield against the Frank-Tamm spectrum integrated numerically in wavelength (CODATA alpha, ideal-detector N0) for z = 1 to 26 (VALIDATION SCIFIX-ORACLES-BATCH3 2026-10-20)",
    "independence": [
@@ -1328,7 +1351,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     },
     {
      "kind": "independent-implementation",
@@ -1343,7 +1367,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "commits": {
@@ -1404,7 +1429,9 @@
    "correctness": "C3",
    "discrimination": "D2",
    "negative_control_emulates_pre_fix": true,
-   "gaps": [],
+   "gaps": [
+    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
+   ],
    "note": "the huge-x_max test requires the computed width since 2026-10-18 (a refusal no longer passes); grid of x_max, lambda and depths against the textbook form in 60-digit decimal arithmetic, the pre-fix form as negative control, half-maximum bracketing, 2026-10-20",
    "independence": [
     {
@@ -1417,7 +1444,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     },
     {
      "kind": "independent-implementation",
@@ -1429,7 +1457,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "commits": {
@@ -1478,7 +1507,8 @@
    "negative_control_emulates_pre_fix": true,
    "gaps": [
     "D scope: the analytic oracle test_calorimeter_fit_closure_and_energy_scale_covariance passes on parent f6a64702, so it is not shown to catch the defect: D1, and the killed revert mutant no longer gives D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
-    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and 'toy study', not the function; the file is the advisory's"
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and 'toy study', not the function; the file is the advisory's",
+    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
    ],
    "independence": [
     {
@@ -1491,7 +1521,8 @@
        "numpy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     },
     {
      "kind": "analytic",
@@ -1503,7 +1534,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); the 2000-toy bias study (bias of c 0.06 sd; pre-fix unit weights: c^2 < 0 in 24.8%, c about 10 sd high), closure and energy-scale covariance; 2 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-017",
@@ -1593,7 +1625,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "printed"
     },
     {
      "kind": "analytic",
@@ -1609,7 +1642,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); invariant: the loss scales exactly as z^2 at fixed momentum and mass; negative control: I = 75 eV gives 2.05062; electrons (m < 10 MeV) refused; parent record of 6c793363 (VALIDATION SCIFIX-PARENT-RECORDS); advisory SFA-2026-018",
@@ -1657,7 +1691,8 @@
    "negative_control_emulates_pre_fix": true,
    "gaps": [
     "D scope: the oracle test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms errors on parent f6a64702 (TypeError: summarize's mass_gev argument is new in the fix); no node has a parent record: D0, and the killed revert mutants no longer give D3 (VALIDATION SCIFIX-PLAN-B3-B6)",
-    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and the closed-form test, not the function; the file is the advisory's"
+    "mutants: VALIDATION SCIFIX-ORACLES-BATCH3 names the mutated rule and the closed-form test, not the function; the file is the advisory's",
+    "transcription rule (maintainer decision 2026-10-22, reported before it is enforced): every independence record computes its expected value from a formula transcribed into the repository, so one transcription error could make both oracles wrong; a printed value, a third-party library's own definition or an exhaustive check would close it"
    ],
    "independence": [
     {
@@ -1679,7 +1714,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     },
     {
      "kind": "independent-implementation",
@@ -1700,7 +1736,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "note": "split from DR-WP2-06 (ledger review 2026-10-21); fix 6c793363 (0.10.0); 45 stacks, masses and charges; invariant: (2m, 2z) gives the same crossover and MDR; negative control: the pre-fix beta = 1 crossover off in 14 of 45; 4 local mutants killed (VALIDATION SCIFIX-ORACLES-BATCH3); advisory SFA-2026-019",
@@ -1853,7 +1890,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -1936,7 +1974,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -2077,7 +2116,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -2176,7 +2216,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -2244,7 +2285,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -2303,7 +2345,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -2373,7 +2416,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -2457,7 +2501,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -2679,7 +2724,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -2787,7 +2833,8 @@
        "numpy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     },
     {
      "kind": "independent-implementation",
@@ -2797,7 +2844,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -2865,7 +2913,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -2957,7 +3006,8 @@
       "backend": [
        "pyhf"
       ]
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -3067,7 +3117,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     },
     {
      "kind": "independent-implementation",
@@ -3080,7 +3131,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -3251,7 +3303,8 @@
       "backend": [
        "pyhf"
       ]
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "independent-implementation",
@@ -3266,7 +3319,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "commits": {
@@ -3481,7 +3535,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -3733,7 +3788,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "independent-implementation",
@@ -3748,7 +3804,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "independent-implementation",
@@ -3763,7 +3820,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "independent-implementation",
@@ -3778,7 +3836,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     },
     {
      "kind": "independent-implementation",
@@ -3793,7 +3852,8 @@
        "sympy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "third-party-definition"
     }
    ],
    "commits": {
@@ -4174,7 +4234,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -4243,7 +4304,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -4312,7 +4374,8 @@
       "backend": [
        "pyhf"
       ]
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -4371,7 +4434,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -4572,7 +4636,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -4665,7 +4730,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -4722,7 +4788,8 @@
      "requires": {
       "core": [],
       "backend": []
-     }
+     },
+     "expected_from": "exhaustive"
     }
    ],
    "commits": {
@@ -4804,7 +4871,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "general-result"
     },
     {
      "kind": "independent-implementation",
@@ -4822,7 +4890,8 @@
        "scipy"
       ],
       "backend": []
-     }
+     },
+     "expected_from": "transcribed-formula"
     }
    ],
    "commits": {
@@ -4925,55 +4994,243 @@
    "id": "DR-REFS",
    "title": "Detector references corrected (DR-WP1-05, -06, WP3)",
    "severity": "S3",
-   "sources_with_locators": "mostly; one source without a page or section"
+   "sources": [],
+   "gaps": [
+    "sources not itemized in the ledger (recorded as 'mostly; one source without a page or section'); the per-item sources are in VALIDATION (detector audit DR-WP1 to DR-WP4) and are not transcribed here"
+   ],
+   "note": "mostly; one source without a page or section"
   },
   {
    "id": "ML-REFS",
    "title": "ML physics references (ML-R01..R25)",
    "severity": "S3",
-   "sources_with_locators": "yes; not every citation has an opened date"
+   "sources": [],
+   "gaps": [
+    "sources not itemized in the ledger (recorded as 'yes; not every citation has an opened date'); the per-item sources are in VALIDATION (ML remediation, ML-R items) and are not transcribed here"
+   ],
+   "note": "yes; not every citation has an opened date"
   },
   {
    "id": "REVIEW-REFS",
    "title": "Five released references corrected after the independent-review evaluation (45 adjudicated issues; VALIDATION REVIEW-REFS)",
    "severity": "S3",
-   "sources_with_locators": "mostly; each external claim has a paper, equation or page and the 2026-10-22 opening date, internal ones a file:line; three statements rest on one source (Baker-Cousins normalization bias, abstract only; Huber limits; the weighted-dipole variance, computed here and marked Inferred)"
+   "sources": [],
+   "gaps": [
+    "sources not itemized in the ledger; VALIDATION REVIEW-REFS lists them per reference (column 'Sources (locators)'); three statements rest on one source (Baker-Cousins normalization bias, abstract only; Huber limits; the weighted-dipole variance, computed and marked Inferred)"
+   ],
+   "note": "mostly; each external claim has a paper, equation or page and the 2026-10-22 opening date, internal ones a file:line; three statements rest on one source (Baker-Cousins normalization bias, abstract only; Huber limits; the weighted-dipole variance, computed here and marked Inferred)"
   },
   {
    "id": "REVIEW-CODE-WARN-TAIL",
    "title": "tail_extrapolation.py warns when exactly one model passes validation: the envelope has zero width by construction, the model uncertainty was not assessed (VALIDATION REVIEW-CODE-WARN)",
    "severity": "S3",
-   "sources_with_locators": "internal only; skills/hep-statistics/scripts/tail_extrapolation.py analyse() (envelope over the models that pass, low = min, high = max, gaussian_sigma = (high - low) / prescription) and skills/hep-statistics/references/inference-recipes.md step 3 (a one-model spread is zero by construction, not a measured model uncertainty; REVIEW-REFS); no external source, the statement is definitional (max - min over one value is 0)"
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-statistics/scripts/tail_extrapolation.py",
+     "locator": "analyse()",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-statistics/references/inference-recipes.md",
+     "locator": "step 3",
+     "read": "2026-10-22"
+    }
+   ],
+   "gaps": [
+    "internal sources only, below the S3 minimum of a located external source and a second source; the statement is definitional (max - min over one value is 0) (maintainer decision 2026-10-22: recorded as a gap, not reclassified)"
+   ],
+   "note": "internal only; skills/hep-statistics/scripts/tail_extrapolation.py analyse() (envelope over the models that pass, low = min, high = max, gaussian_sigma = (high - low) / prescription) and skills/hep-statistics/references/inference-recipes.md step 3 (a one-model spread is zero by construction, not a measured model uncertainty; REVIEW-REFS); no external source, the statement is definitional (max - min over one value is 0)"
   },
   {
    "id": "REVIEW-CODE-WARN-MANIFEST",
    "title": "assets/inference.py --external-scores warns that scored events missing from the split manifest cannot be excluded as training events, without refusing them (VALIDATION REVIEW-CODE-WARN)",
    "severity": "S3",
-   "sources_with_locators": "internal only; skills/hep-ml/assets/inference.py leakage_check (ids_not_in_manifest counted, only scored_training_ids refused by run_external) and skills/hep-ml/references/multivariate-analysis-bdt-nn.md, 'Scores from another tool'; no external source, the statement follows from the manifest being the only record of the training events"
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-ml/assets/inference.py",
+     "locator": "leakage_check",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
+     "locator": "Scores from another tool",
+     "read": "2026-10-22"
+    }
+   ],
+   "gaps": [
+    "internal sources only, below the S3 minimum of a located external source and a second source; the statement follows from the manifest being the only record of the training events (maintainer decision 2026-10-22: recorded as a gap, not reclassified)"
+   ],
+   "note": "internal only; skills/hep-ml/assets/inference.py leakage_check (ids_not_in_manifest counted, only scored_training_ids refused by run_external) and skills/hep-ml/references/multivariate-analysis-bdt-nn.md, 'Scores from another tool'; no external source, the statement follows from the manifest being the only record of the training events"
   },
   {
    "id": "REVIEW-CODE-WARN-NEGW",
    "title": "Negative weights: dropping them from training only is option 3's kind of distortion (positive-weight density instead of the signed one), acceptable only with its effect shown, never for evaluation; train_bdt.py warns under drop and abs-train-signed-eval (VALIDATION REVIEW-CODE-WARN)",
    "severity": "S3",
-   "sources_with_locators": "yes; Andersen, Gütschow, Maier and Prestel, arXiv:2005.09375v1 Sec. 1 p. 3 (the sample's cross section is sigma = sigma_p - sigma_n, so dropping the negative-weight events keeps sigma_p only) and Andersen and Maier, arXiv:2109.07851 Sec. 2 p. 4 (negative-weight counterevents correct the overestimation by the positive weights), both opened 2026-10-22; skills/hep-ml/scripts/train_bdt.py train_ok and the evaluation block (signed weights) checked; maintainer decision 2026-10-22"
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Andersen, Gütschow, Maier and Prestel, arXiv:2005.09375v1",
+     "locator": "Sec. 1, p. 3",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "Andersen and Maier, arXiv:2109.07851",
+     "locator": "Sec. 2, p. 4",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-ml/scripts/train_bdt.py",
+     "locator": "train_ok and the evaluation block",
+     "read": "2026-10-22"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; Andersen, Gütschow, Maier and Prestel, arXiv:2005.09375v1 Sec. 1 p. 3 (the sample's cross section is sigma = sigma_p - sigma_n, so dropping the negative-weight events keeps sigma_p only) and Andersen and Maier, arXiv:2109.07851 Sec. 2 p. 4 (negative-weight counterevents correct the overestimation by the positive weights), both opened 2026-10-22; skills/hep-ml/scripts/train_bdt.py train_ok and the evaluation block (signed weights) checked; maintainer decision 2026-10-22"
   },
   {
    "id": "STATUS-REFUSED-MEANING",
-   "severity": "doc",
    "title": "core/status.py states that refused is a negative verdict (exit 1), names the protected-use guard and permit check exception (exit 3) and the older tools that print refused with exit 2; new code uses rejected for unusable input (T18)",
-   "sources_with_locators": "in-repo contracts, read 2026-10-22: core/status.py RUN_STATUSES; core/protected/guard.py protected_main (exit 3); contracts/permit.py usage (3 when the permit is refused); docs/protected-data-architecture.md; skills/hep-computing/references/engineering-playbook.md (refuses with exit 3); usage text of contracts/comparison/gate.py, core/evidence/query.py, contracts/migrate_statistical_result.py, core/partition/campaign.py, skills/hep-ml/assets/inference.py; fix 14c0ff94"
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "core/status.py",
+     "locator": "RUN_STATUSES",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "internal",
+     "citation": "core/protected/guard.py",
+     "locator": "protected_main",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "internal",
+     "citation": "contracts/permit.py",
+     "locator": "usage",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "internal",
+     "citation": "docs/protected-data-architecture.md",
+     "locator": null,
+     "read": "2026-10-22"
+    }
+   ],
+   "gaps": [],
+   "note": "in-repo contracts, read 2026-10-22: core/status.py RUN_STATUSES; core/protected/guard.py protected_main (exit 3); contracts/permit.py usage (3 when the permit is refused); docs/protected-data-architecture.md; skills/hep-computing/references/engineering-playbook.md (refuses with exit 3); usage text of contracts/comparison/gate.py, core/evidence/query.py, contracts/migrate_statistical_result.py, core/partition/campaign.py, skills/hep-ml/assets/inference.py; fix 14c0ff94"
   },
   {
    "id": "REVIEW-REFS-2",
    "title": "Five more references corrected after the review tuning run (27 adjudicated issues, 3 substantive; VALIDATION REVIEW-REFS-2)",
    "severity": "S3",
-   "sources_with_locators": "mostly; external claims located and opened 2026-10-22 (Combine docs part3/nonstandard and part2/bin-wise-stats; arXiv:1408.6865 p. 18; PDG RPP 2024 sections 34.7 and 35.5; Horne and Baliunas 1986 abstract via OpenAlex), internal ones by file:line (periodicity_scan.py, covariance_fit.py, acceptance_from_generation.py, spectrum_transform.py, contracts/validate.py, pid_separation_power.py runs); single-source items: the Horne-Baliunas white-noise scope (abstract only) and the AC-coupling recovery (a numerical check)"
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Combine documentation",
+     "locator": "part3/nonstandard; part2/bin-wise-stats",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1408.6865",
+     "locator": "p. 18",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2024",
+     "locator": "sections 34.7 and 35.5",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "Horne and Baliunas 1986",
+     "locator": "abstract (via OpenAlex)",
+     "read": "2026-10-22"
+    }
+   ],
+   "gaps": [
+    "single-source items: the Horne-Baliunas white-noise scope (abstract only) and the AC-coupling recovery (a numerical check)"
+   ],
+   "note": "mostly; external claims located and opened 2026-10-22 (Combine docs part3/nonstandard and part2/bin-wise-stats; arXiv:1408.6865 p. 18; PDG RPP 2024 sections 34.7 and 35.5; Horne and Baliunas 1986 abstract via OpenAlex), internal ones by file:line (periodicity_scan.py, covariance_fit.py, acceptance_from_generation.py, spectrum_transform.py, contracts/validate.py, pid_separation_power.py runs); single-source items: the Horne-Baliunas white-noise scope (abstract only) and the AC-coupling recovery (a numerical check)"
   },
   {
    "id": "REVIEW-REFS-3",
    "title": "Five references corrected after the first live review with the 0.23.0 options (42 adjudicated issues; VALIDATION REVIEW-REFS-3)",
    "severity": "S3",
-   "sources_with_locators": "mostly; external claims located and opened 2026-10-22 (arXiv:0901.4118 sects. 3-4, 1608.03953 sects. 4.1 and 7.3, 2212.09379 sect. 8.1, 1206.4071 sect. 6, 1403.2286 sect. 4.4, 1007.1727 sect. 5.1, hep-ex/0201015 Stormer section, PDG RPP 2024 sects. 34.2.3 and 34.2.9, SILSO pages via web.archive.org, CERN Open Data page), internal ones by file:line and script runs (cosmic_ray_flux.py, propagate_scale_distortion.py, tag_and_probe_efficiency.py, pileup_reweight.py, review_measurement_spec.py, residual.py, the AMS-02 evidence index); single-source items: the negative-charge Stormer sign (reasoning, not quoted), the balloon overburden figure, the variance identity for correlated systematics"
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "arXiv:0901.4118",
+     "locator": "sects. 3-4",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1608.03953",
+     "locator": "sects. 4.1 and 7.3",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:2212.09379",
+     "locator": "sect. 8.1",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1206.4071",
+     "locator": "sect. 6",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1403.2286",
+     "locator": "sect. 4.4",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1007.1727",
+     "locator": "sect. 5.1",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "hep-ex/0201015",
+     "locator": "Stormer section",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2024",
+     "locator": "sects. 34.2.3 and 34.2.9",
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "SILSO pages (web.archive.org)",
+     "locator": null,
+     "read": "2026-10-22"
+    },
+    {
+     "kind": "external",
+     "citation": "CERN Open Data page",
+     "locator": null,
+     "read": "2026-10-22"
+    }
+   ],
+   "gaps": [
+    "single-source items: the negative-charge Stormer sign (reasoning, not quoted), the balloon overburden figure, the variance identity for correlated systematics"
+   ],
+   "note": "mostly; external claims located and opened 2026-10-22 (arXiv:0901.4118 sects. 3-4, 1608.03953 sects. 4.1 and 7.3, 2212.09379 sect. 8.1, 1206.4071 sect. 6, 1403.2286 sect. 4.4, 1007.1727 sect. 5.1, hep-ex/0201015 Stormer section, PDG RPP 2024 sects. 34.2.3 and 34.2.9, SILSO pages via web.archive.org, CERN Open Data page), internal ones by file:line and script runs (cosmic_ray_flux.py, propagate_scale_distortion.py, tag_and_probe_efficiency.py, pileup_reweight.py, review_measurement_spec.py, residual.py, the AMS-02 evidence index); single-source items: the negative-charge Stormer sign (reasoning, not quoted), the balloon overburden figure, the variance identity for correlated systematics"
   }
  ],
  "superseded": [

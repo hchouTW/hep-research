@@ -2179,6 +2179,22 @@ worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in
 Limit found while implementing: `result_artifact.py`, the statistical-result writer, wraps the JSON a core/stats CLI
 printed in another process, so its `code_paths` never shows `core/stats/*`; an advisory about core/stats code must
 match on fields the CLI output carries, or say that no field shows it (plan PR-5).
+## SCIFIX-PLAN-B2-B5-B7 (2026-10-22, CI lock venv; branch `scifix/pr-7b-ledger-report` from main `40a21d1a`)
+
+Sci-fix improvement plan v3, the rest of PR-7: B2 (report only), B5, B7.
+
+| Check | Result |
+|---|---|
+| `expected_from` of the 64 independence records (classified by hand from each record's detail) | third-party-definition 29, transcribed-formula 15, exhaustive 15, printed 4, general-result 1 (PERIODICITY-REFIT's size = alpha); DR-WP2-06-CALO's `numpy.linalg.lstsq` record is transcribed-formula (a third-party solver fitting the repository's model) |
+| C3 entries with transcribed formulas only | DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO, DR-WP2-06-MS (the plan expected DR-WP1-02 and DR-WP2-06-MS); `gaps` added, grades unchanged |
+| `tools/scifix_ledger.py report` | 27 entries below their minimum; 18 S1 entries without `review`; 5 S3 entries below their minimum: DR-REFS, ML-REFS, REVIEW-REFS (sources never itemized in the ledger; not transcribed here), REVIEW-CODE-WARN-TAIL and -MANIFEST (internal only) |
+| `documentation_fixes` | `sources_with_locators` text kept as `note`; `sources` itemized where the ledger named them (REVIEW-REFS-2, -3, REVIEW-CODE-WARN-NEGW, STATUS-REFUSED-MEANING and the two internal-only entries) |
+| `tests/tools/test_scifix_ledger.py` (new: expected_from and the transcription report, S3 sources, review format and report) | pass, 21 tests |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock | 25 pass, 0 fail, 2 skipped (CLI host checks); 4855 tests, 4604 pass, 0 failures, 251 skipped |
+
+Not done: no S1 entry is signed off (a person's act); the sources of DR-REFS, ML-REFS and REVIEW-REFS are not
+itemized from their VALIDATION records.
+
 ## SCIFIX-PLAN-B3-B6 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0, mpmath 1.3.0, no pyhf, ArviZ, pdg or torch; E2v: NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, pyhf 0.7.6, PyTorch 2.14.1, no ArviZ or pdg; branch `scifix/pr-7-d-axis`, stacked on `scifix/pr-6-evidence-sources`)
 
 Sci-fix improvement plan v3, PR-7 parts B3 and B6 (F-11, F-14, F-23). Maintainer decisions of 2026-10-22, now in

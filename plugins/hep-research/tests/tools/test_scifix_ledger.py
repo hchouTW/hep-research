@@ -19,6 +19,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
+import scifix_ledger  # noqa: E402
 
 from core.evidence.ledger import check_ledger  # noqa: E402
 from core.evidence.render_index import check_index  # noqa: E402
@@ -438,6 +440,61 @@ class SciFixLedger(unittest.TestCase):
         optional_only = required_gate_backends("jobs:\n  optional-pdg:\n    run: python tools/run_required_backends.py "
                                                "--require pdg==2026.0\n")
         self.assertEqual(optional_only, {})
+
+    def test_expected_from_and_the_transcription_report(self):
+        """Plan B2 (F-08): each independence record says where its expected value comes from; the report lists the C3
+        entries whose every record computes it from a transcribed formula, and each such entry says so in gaps."""
+        for f in self.doc["fixes"]:
+            for rec in f.get("independence", []):
+                with self.subTest(f["id"], test=rec["test"]):
+                    self.assertIn(rec["expected_from"], scifix_ledger.EXPECTED_FROM)
+                    if rec["basis"] == "exhaustive":
+                        self.assertEqual(rec["expected_from"], "exhaustive")
+            if scifix_ledger.transcription_only(f):
+                self.assertTrue(any("transcription rule" in g for g in f["gaps"]), f["id"])
+        rec = lambda e: {"expected_from": e}  # noqa: E731
+        self.assertTrue(scifix_ledger.transcription_only({"correctness": "C3", "independence": [
+            rec("transcribed-formula"), rec("transcribed-formula")]}))
+        for other in ("printed", "third-party-definition", "exhaustive", "general-result", "person"):
+            self.assertFalse(scifix_ledger.transcription_only({"correctness": "C3", "independence": [
+                rec("transcribed-formula"), rec(other)]}), other)
+        self.assertFalse(scifix_ledger.transcription_only({"correctness": "C2", "independence": [
+            rec("transcribed-formula")]}))
+
+    def test_s3_sources_meet_the_minimum_or_state_gaps(self):
+        """Plan B5 (F-16): a documentation fix lists its sources; an S3 entry has a located external source and a
+        second source, or says what is missing in gaps."""
+        for x in self.doc["documentation_fixes"]:
+            with self.subTest(x["id"]):
+                for src in x["sources"]:
+                    self.assertIn(src["kind"], ("external", "internal"))
+                    self.assertTrue(src["citation"])
+                    self.assertLessEqual(set(src), {"kind", "citation", "locator", "read"})
+                if x["severity"] == "S3" and not scifix_ledger.s3_meets_minimum(x):
+                    self.assertTrue(x["gaps"])
+        ok = {"sources": [{"kind": "external", "citation": "a", "locator": "p. 1"}, {"kind": "internal", "citation": "b"}]}
+        self.assertTrue(scifix_ledger.s3_meets_minimum(ok))
+        self.assertFalse(scifix_ledger.s3_meets_minimum({"sources": ok["sources"][:1]}))
+        self.assertFalse(scifix_ledger.s3_meets_minimum({"sources": [dict(ok["sources"][0], locator=None),
+                                                                     ok["sources"][1]]}))
+        self.assertFalse(scifix_ledger.s3_meets_minimum({"sources": [ok["sources"][1], dict(ok["sources"][1],
+                                                                                            citation="c")]}))
+
+    def test_review_sign_off_format(self):
+        """Plan B7 (F-15): an entry's sign-off is review {by, date, scope}, distinct from a record's basis person; the
+        report lists the S1 entries without one."""
+        for f in self.doc["fixes"]:
+            with self.subTest(f["id"]):
+                if "review" in f:
+                    self.assertEqual(set(f["review"]), {"by", "date", "scope"})
+                    self.assertRegex(f["review"]["date"], r"^\d{4}-\d{2}-\d{2}$")
+                    self.assertTrue(f["review"]["by"] and f["review"]["scope"])
+        rep = scifix_ledger.report({"fixes": [
+            {"id": "A", "severity": "S1", "correctness": "C3", "discrimination": "D2"},
+            {"id": "B", "severity": "S1", "correctness": "C3", "discrimination": "D1",
+             "review": {"by": "x", "date": "2026-10-22", "scope": "whole entry"}}]})
+        self.assertEqual(rep["unsigned_s1"], ["A"])
+        self.assertEqual(rep["below_minimum"], [{"id": "B", "severity": "S1", "grade": "C3D1", "minimum": "C3D2"}])
 
     def test_entries_below_their_requirement_state_their_gaps(self):
         for f in self.doc["fixes"]:
