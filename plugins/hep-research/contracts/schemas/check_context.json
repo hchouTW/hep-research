@@ -11,8 +11,12 @@
  "additionalProperties": false,
  "properties": {
   "context_version": {
+   "$comment": "1.1.0 (release R2, DR-2): roots and ratio roots carry no 'required'; a 1.1.0 context selects 1.1.0 or later suites (pre-releases included), a 1.0.0 context 1.0.x suites (contracts/analysis_checks/context.py version_findings)",
    "type": "string",
-   "const": "1.0.0"
+   "enum": [
+    "1.0.0",
+    "1.1.0"
+   ]
   },
   "suite": {
    "type": "object",
@@ -28,7 +32,7 @@
     },
     "version": {
      "type": "string",
-     "pattern": "^\\d+\\.\\d+\\.\\d+$"
+     "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
     }
    }
   },
@@ -267,7 +271,7 @@
      },
      "version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
      }
     }
    }

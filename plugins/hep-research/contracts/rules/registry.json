@@ -2656,6 +2656,273 @@
      ]
     }
    ]
+  },
+  {
+   "v_id": "V77",
+   "scenario": "G3, G17: validation-record outcomes and the repetition exclusion depend on declaration or item order",
+   "expected": "Outcomes do not depend on input order (P5): r-ratio.correlation 1.1.0, r-rep.repetition 1.1.0",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "ratio",
+     "work_packages": [
+      "P2.02"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V78",
+   "scenario": "G2: required: false hides a violation as an unregistered waiver",
+   "expected": "check-context 1.1.0 has no 'required'; deferral only through an exception (DR-2)",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "chain",
+     "work_packages": [
+      "P2.03"
+     ],
+     "host": "check-context 1.1.0 input checks (release R2)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g2_required_false_cannot_hide_a_violation",
+      "tests.contracts.test_analysis_check_r2_formats.Context110.test_freeze_refuses_required_in_a_1_1_0_context"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V79",
+   "scenario": "G4, G16: a factor table chooses its own tolerance; a tolerance is NaN or a string; calibrations have no shape",
+   "expected": "Tolerance from declared significant digits (DR-6, undeclared default 1e-9, sum of |power|); malformed tolerances and calibrations are input-invalid for 1.1.0 contexts",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "chain",
+     "work_packages": [
+      "P2.04"
+     ],
+     "host": "check-context 1.1.0 input checks (release R2): G16 tolerance and calibration shape",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g16_a_nan_tolerance_is_input_invalid",
+      "tests.contracts.test_analysis_check_r2_formats.InputChecks110.test_malformed_factor_tables_are_input_invalid_only_in_1_1_0"
+     ]
+    },
+    {
+     "slice": "P2",
+     "suite": "chain",
+     "work_packages": [
+      "P2.16"
+     ],
+     "host": "r-comp.factor_values: G4 tolerance from declared significant digits (DR-6)",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V80",
+   "scenario": "G12: shared_parameters within one model hides V07",
+   "expected": "Input-invalid for 1.1.0 contexts; the shadow classification is fixed",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "model",
+     "work_packages": [
+      "P2.05"
+     ],
+     "host": "check-context 1.1.0 input checks (release R2)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ModelProbes.test_g12_shared_parameters_within_one_model_do_not_hide_v07",
+      "tests.contracts.test_analysis_check_r2_formats.InputChecks110.test_context_findings_follow_the_version"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V81",
+   "scenario": "G15: one of two bundle coverage contracts is silently ignored",
+   "expected": "Input-invalid for 1.1.0 contexts",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "chain",
+     "work_packages": [
+      "P2.06"
+     ],
+     "host": "check-context 1.1.0 input checks (release R2)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g15_two_bundle_coverage_contracts_for_one_table",
+      "tests.contracts.test_analysis_check_r2_formats.InputChecks110.test_different_bundle_coverage_contracts_for_one_table"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V82",
+   "scenario": "G6: campaign closure does not reach the analysis",
+   "expected": "result binding 1.1.0 campaigns[].inputs: no analysis input is unverified, a digest mismatch is violated (closure_mismatch)",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "run",
+     "work_packages": [
+      "P2.07"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V83",
+   "scenario": "G7: blinding trusts a self-reported status",
+   "expected": "Blinding judged by lineage (DR-7): no data leaf is lineage_no_data, a label only is unverified",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "run",
+     "work_packages": [
+      "P2.08"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V84",
+   "scenario": "G13: whether blinding applies depends only on the spec's flag",
+   "expected": "Joined with the project's blinded list by the spec's artifact_id (DR-9)",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "run",
+     "work_packages": [
+      "P2.09"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V85",
+   "scenario": "G5: a copied observation file bypasses R-AUX",
+   "expected": "Observation identity is source identity plus pointer; without an envelope the canonical digest (DR-3)",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "model",
+     "work_packages": [
+      "P2.10"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V86",
+   "scenario": "G1: writing fewer spec corrections removes checks and the result stays complete",
+   "expected": "r-real.undescribed (DR-8): an applied correction the spec does not describe is reported",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "chain",
+     "work_packages": [
+      "P2.11"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V87",
+   "scenario": "G14: the factor obligation depends on the calibration mapping key",
+   "expected": "A table under the parent or any child key produces the obligation",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "chain",
+     "work_packages": [
+      "P2.12"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V88",
+   "scenario": "G8, A3: a self-declared asserted_by.kind person removes the flag; bundle-supplied coverage contracts are not flagged",
+   "expected": "Both are always flagged in the diagnostic plane (DR-1 split)",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "all",
+     "work_packages": [
+      "P2.13"
+     ],
+     "host": "checker, release R2 or R3",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V89",
+   "scenario": "G22: a root's unit is never checked",
+   "expected": "freeze refuses an empty or placeholder unit (minimal fix); the full unit check is coverage extension",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "chain",
+     "work_packages": [
+      "P2.14"
+     ],
+     "host": "check-context 1.1.0 input checks (release R2)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g22_freeze_refuses_an_empty_or_placeholder_unit",
+      "tests.contracts.test_analysis_check_r2_formats.InputChecks110.test_check_reports_context_findings_as_input_invalid"
+     ]
+    }
+   ]
+  },
+  {
+   "v_id": "V90",
+   "scenario": "A frozen 1.0.0 check context is converted to check-context 1.1.0 (contracts/migrate.py context-1.0.0-to-1.1.0)",
+   "expected": "The conversion completes with the same obligation states on the 1.1.0-dev.1 suites; a deferred root (required: false) is refused for manual completion; required: true is dropped",
+   "parts": [
+    {
+     "slice": "P2",
+     "suite": "all",
+     "work_packages": [
+      "P2.15"
+     ],
+     "host": "contracts/migrate.py",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_analysis_check_r2_formats.V90ContextConversion.test_a_1_0_0_context_converts_to_1_1_0_with_the_same_outcomes",
+      "tests.contracts.test_analysis_check_r2_formats.V90ContextConversion.test_a_deferred_root_is_not_converted",
+      "tests.contracts.test_analysis_check_r2_formats.V90ContextConversion.test_required_true_is_dropped"
+     ]
+    }
+   ]
   }
  ],
  "impact": [

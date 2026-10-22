@@ -59,7 +59,7 @@ class ShippedRegistry(unittest.TestCase):
         self.assertTrue(rep.ok, [f.as_dict() for f in rep.findings])
 
     def test_catalogue_and_first_entries(self):
-        self.assertEqual([c["v_id"] for c in SHIPPED["v_cases"]], [f"V{i:02d}" for i in range(1, 77)])
+        self.assertEqual([c["v_id"] for c in SHIPPED["v_cases"]], [f"V{i:02d}" for i in range(1, 91)])
         statuses = {p["status"] for c in SHIPPED["v_cases"] for p in c["parts"]}
         self.assertLessEqual(statuses, {"not-run", "expected-failure", "required-before-enforcement", "passing"})
         r4 = {r["rule_id"]: r for r in SHIPPED["rules"] if r["rule_id"].startswith("l2.r4.")}
@@ -83,7 +83,7 @@ class ShippedRegistry(unittest.TestCase):
     def test_cli_check_passes(self):
         code, out = cli("check")
         self.assertEqual((code, out["status"]), (0, "pass"))
-        self.assertEqual(out["counts"]["v_cases"], 76)
+        self.assertEqual(out["counts"]["v_cases"], 90)
 
     def test_wired_into_the_static_gate(self):
         sys.path.insert(0, str(ROOT / "tools"))

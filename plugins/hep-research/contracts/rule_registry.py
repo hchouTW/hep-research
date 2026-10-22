@@ -13,7 +13,9 @@ keep outcome_contract "pending", which evaluates as unverified); every rule name
 exist; a V part that is passing or an expected failure names the tests that run it, and each test exists in the
 checkout; every test module of the impact map exists. Registry 1.1.0 (P3, G18): every new or changed rule records the
 source digest of its implementation (contracts/analysis_checks/source_digest.py), the checker implements that
-(rule_id, version), and the digest is the current one: code that changed without a new version fails.
+(rule_id, version), and the digest is the current one: code that changed without a new version fails. Registry 1.2.0
+(release R2): a rule is keyed by (rule_id, version), so a fixed rule is a new entry beside its old version; a retired
+version stays listed, needs no implementation and is not digest-checked (it is reproduced with its own release).
 
 state_for(rule, code): the state a reason code gives under the rule's outcome contract; a pending contract, an unknown
 code or no code at all (an adapter that produced no explicit outcome) is unverified, never satisfied.
@@ -77,9 +79,11 @@ def check(doc, root: Path = ROOT) -> Report:
     nums = sorted({int(v[1:]) for v in vids})
     if nums and nums != list(range(1, nums[-1] + 1)):
         rep.add("error", "$.v_cases", "registry.v_case_gap", "V cases run from V01 without gaps")
-    rids = [r["rule_id"] for r in doc["rules"]]
+    keyed = doc["registry_version"] not in ("1.0.0", "1.1.0")
+    rids = [(r["rule_id"], r["version"]) if keyed else r["rule_id"] for r in doc["rules"]]
     for r in sorted({r for r in rids if rids.count(r) > 1}):
-        rep.add("error", "$.rules", "registry.duplicate_rule", f"rule {r} is listed twice")
+        name = f"{r[0]} version {r[1]}" if keyed else r
+        rep.add("error", "$.rules", "registry.duplicate_rule", f"rule {name} is listed twice")
     for i, rule in enumerate(doc["rules"]):
         where = f"$.rules[{i}]"
         oc = rule["outcome_contract"]
@@ -133,7 +137,7 @@ def _check_sources(doc: dict, rep: Report) -> None:
     from contracts.analysis_checks.source_digest import rule_digests
     current = rule_digests()
     for i, rule in enumerate(doc["rules"]):
-        if rule["kind"] == "legacy":
+        if rule["kind"] == "legacy" or rule["lifecycle"] == "retired":
             continue
         where, key = f"$.rules[{i}]", (rule["rule_id"], rule["version"])
         if key not in current:

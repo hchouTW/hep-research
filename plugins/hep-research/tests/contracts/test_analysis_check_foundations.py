@@ -78,7 +78,8 @@ class V72VersionGuard(Base):
         from contracts.analysis_checks.context import INPUT_CHECKS, input_check_enabled
         self.assertTrue(input_check_enabled("1.0.0", "spec.duplicate_effect_id"))
         self.assertFalse(input_check_enabled("1.0.0", "a.check.added.later"))
-        self.assertEqual(set(INPUT_CHECKS), {"1.0.0"})
+        self.assertEqual(set(INPUT_CHECKS), {"1.0.0", "1.1.0"})  # 1.1.0: release R2 (test_analysis_check_r2_formats)
+        self.assertLessEqual(INPUT_CHECKS["1.0.0"], INPUT_CHECKS["1.1.0"])
 
     def test_registry_records_current_source_digests(self):
         from contracts import rule_registry as rr

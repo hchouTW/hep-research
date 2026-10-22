@@ -67,6 +67,30 @@ class Case:
         return out
 
 
+DEV_SUITE = "1.1.0-dev.1"
+
+
+def context_1_1(c, suite_version: str = DEV_SUITE) -> None:
+    """Variant: the draft context in check-context format 1.1.0 on a 1.1.0 pre-release suite (release R2), as
+    contracts/migrate.py context-1.0.0-to-1.1.0 writes it."""
+    c.context["context_version"] = "1.1.0"
+    c.context["suite"] = dict(c.context["suite"], version=suite_version)
+    if "suites" in c.context:
+        c.context["suites"] = [dict(s, version=suite_version) for s in c.context["suites"]]
+    for key in ("roots", "ratio_roots"):
+        for r in c.context.get(key, []):
+            r.pop("required", None)
+
+
+def both(*variants):
+    """Variant: apply several variants in order."""
+    def v(c):
+        for f in variants:
+            if f:
+                f(c)
+    return v
+
+
 def mapping(effects_to_instances: dict, author=AGENT) -> list[dict]:
     return [{"declaration_id": f"map-{eff}", "type": "instance_mapping", "asserted_by": dict(author),
              "basis": {"rationale": "the spec's corrections apply to every species and period of this analysis"},

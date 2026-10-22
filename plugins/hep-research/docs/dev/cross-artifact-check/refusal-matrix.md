@@ -48,3 +48,16 @@ threshold exists.**
   is only about dependencies. Making it refuse non-envelopes would change documented behaviour and existing tests,
   so the row stays a blocker until a non-author reviewer accepts this rationale (G-ENFORCE step 2) or asks for a
   refusal.
+
+## Phase 2, release R2 formats (2026-10-22)
+
+Measured with the installed 0.25.1 release (`~/.claude/plugins/cache/hep-research-dev/hep-research/0.25.1`) on a
+bundle frozen by the R2 development tree (check-context 1.1.0, suite `counting-chain` 1.1.0-dev.1). **Confirmed:**
+
+| Reader | Result |
+| --- | --- |
+| 0.25.1 `analysis_check.py check` | exit 1, status `invalid`: `check_context.schema.const` (context_version), `check_context.schema.pattern` (the pre-release suite version), `definition.suite_missing`; nothing is evaluated under 1.0.0 semantics |
+| R2 development `analysis_check.py check` | exit 0, status `complete` |
+| `permit.py check-report` (R2) | refuses the report (`permit.report_prerelease_suite`) |
+
+No release blocker: an old reader refuses the new format instead of misreading it.
