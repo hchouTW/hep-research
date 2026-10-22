@@ -1,4 +1,4 @@
-"""Closure-test reference values for task C (task-c-design-search.md appendix A).
+"""Closure-test reference values for task C (geant4-program.md §C Appendix A).
 
 Curvature variance factor A (sigma_k^2 = A sigma^2 / L^4) of a least-squares parabola y = a + b x + k x^2 / 2
 through N equal-weight planes at positions x in [0, L] (L = 1), measurement term only. Exact rational arithmetic.

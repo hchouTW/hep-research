@@ -1,4 +1,4 @@
-"""Operating characteristics of the convergence gate (architecture.md section 5.5).
+"""Operating characteristics of the convergence gate (geant4-program.md §A.8 and §R.6.6).
 
 Recomputes pass and fail probabilities of the intersection-union gate with t quantiles and an estimated se
 (se_hat^2 = se^2 chi2_nu / nu), the same with the se distribution of the two-stage design, the two-stage
