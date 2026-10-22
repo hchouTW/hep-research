@@ -73,6 +73,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from core import trace
 from core.stats import _caps, _poisson, _validate
 from core.stats._linalg import chol_solve, cholesky, golden_min, scan_then_golden
 from core.stats._poisson import MAX_MEAN  # per-draw mean; a draw costs O(mean)
@@ -886,7 +887,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     result["status"] = "ok"
     result.update(_caps.report())
-    print(json.dumps(result, indent=2))
+    print(json.dumps({**result, "trace": trace.provenance()}, indent=2))
     return 0
 
 

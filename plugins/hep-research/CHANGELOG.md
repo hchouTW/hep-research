@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Statistical-results show which core/stats code produced them.** The seven core/stats CLIs add `trace`
+  (`code_paths`, `code_tags`) to their JSON result, and `result_artifact.py`, which wraps that output from another
+  process, joins it to the artifact's `provenance` (entries that are not plugin-relative `.py` paths or tags are
+  dropped). A future advisory about core/stats code can then decide new statistical-results from the trace. Evidence:
+  VALIDATION SCIFIX-TRACE-FORWARD.
 - **Every oracle of the sci-fix ledger runs weekly, with all its backends and no skip allowed.** A new
   `ledger-evidence` job in `statistics-validation` (weekly, on demand, on a release tag) runs
   `run_required_backends.py --from-ledger --no-skips` with pyhf, ArviZ and pdg; locally all 56 nodes pass. TH9-MASSES's

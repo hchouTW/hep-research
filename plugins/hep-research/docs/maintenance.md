@@ -234,8 +234,8 @@ did not exist yet). A group that holds makes the artifact affected; when none ho
 `match` is `[]` (no field can show that the affected code ran; `match_basis` says why), it is possibly affected (no
 trace), named by `no_trace`. Every group needs a discriminating condition: anything but `exists` on a top-level
 extension key that every artifact of a listed type carries. Write conditions from what the affected code writes into
-the artifact; the trace holds only code the writer's process loaded (a core/stats CLI or a training asset runs
-elsewhere). When the affected code writes output that is no artifact, give `applies_to.outputs` (`producer` files and
+the artifact; the trace holds the code the writer's process loaded, plus a core/stats CLI's own trace when
+`result_artifact.py` wraps its output (a training asset runs elsewhere and is not traced). When the affected code writes output that is no artifact, give `applies_to.outputs` (`producer` files and
 `how_to_recognize`); the scan lists it apart, and `artifact_types` may be `[]` when no artifact can show the code ran.
 `affected` lists the releases in range that hold an affected file,
 from `release-manifests/` (a file moved between skill folders is found by its path below the folder); `scan
@@ -253,9 +253,10 @@ on fields every artifact of the type carries, and eight affected scripts write n
 plan F-01, F-02, F-27). An envelope writer adds `**trace.provenance()` (`contracts.trace`, implemented in `core/trace.py`) to `provenance`:
 `code_paths`, the plugin `.py` files loaded when the envelope was written (loaded, not executed; the test suite left
 out), and `code_tags`, the tags that shared functions named by an advisory set with `trace.tag()`, cleared per envelope.
-Code that runs in another process (a core/stats CLI whose output `result_artifact.py` wraps, a training asset, a
-subprocess) is not in the writer's trace; an advisory about such code matches on fields that code writes, or says that
-no field can show it. Artifacts older than 3.5.0 carry no trace.
+Code that runs in another process is not in the writer's own trace. The core/stats CLIs print theirs as `trace`
+(`{code_paths, code_tags}`) in their JSON output, and `result_artifact.py` joins it to the statistical-result it
+writes; a training asset or another subprocess is not traced, so an advisory about such code matches on fields
+that code writes, or says that no field can show it. Artifacts older than 3.5.0 carry no trace.
 
 ## Rerunning comparisons and examples
 

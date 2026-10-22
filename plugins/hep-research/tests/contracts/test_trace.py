@@ -86,5 +86,48 @@ class ProducerSubprocess(unittest.TestCase):
         self.assertEqual(prov["code_tags"], [])
 
 
+class TraceForwarding(unittest.TestCase):
+    """A core/stats CLI prints its own trace; result_artifact.py, which wraps that output in another process, joins it,
+    so a statistical-result shows which core/stats code produced its numbers."""
+    PD = ROOT / "core/stats/poisson_diagnostics.py"
+    RA = ROOT / "skills/hep-statistics/scripts/result_artifact.py"
+
+    def wrap(self, td, cli):
+        (Path(td) / "cli.json").write_text(json.dumps(cli))
+        cp = subprocess.run([sys.executable, str(self.RA), "--cli-output", str(Path(td) / "cli.json"), "--poi", "s",
+                             "--construction", "feldman-cousins", "--test-statistic", "likelihood-ratio-ordering",
+                             "--label", "synthetic", "--artifact-id", "trace-forward", "--out", str(Path(td) / "r.json")],
+                            capture_output=True, text=True, timeout=120)
+        self.assertEqual(cp.returncode, 0, cp.stdout + cp.stderr)
+        return json.loads((Path(td) / "r.json").read_text())
+
+    def test_the_cli_trace_reaches_the_artifact(self):
+        out = subprocess.run([sys.executable, str(self.PD), "fc-interval", "--n", "3", "--b", "1.0"],
+                             capture_output=True, text=True, timeout=120)
+        cli = json.loads(out.stdout)
+        self.assertIn("core/stats/poisson_diagnostics.py", cli["trace"]["code_paths"])
+        with tempfile.TemporaryDirectory() as td:
+            doc = self.wrap(td, cli)
+        paths = doc["provenance"]["code_paths"]
+        self.assertIn("core/stats/poisson_diagnostics.py", paths)
+        self.assertIn("skills/hep-statistics/scripts/result_artifact.py", paths)
+        self.assertEqual(paths, sorted(set(paths), key=lambda p: p.encode("utf-8")))
+        self.assertNotIn("trace", doc["extension"]["results"])
+        self.assertTrue(validate_artifact(doc).ok)
+
+    def test_malformed_cli_trace_entries_are_dropped(self):
+        cli = {"status": "ok", "upper": 4.2, "trace": {"code_paths": ["/etc/x.py", "../out.py", "core/a.txt", 7,
+                                                                      "core/stats/x.py"],
+                                                       "code_tags": ["Bad Tag", "fc-monotone"]}}
+        with tempfile.TemporaryDirectory() as td:
+            prov = self.wrap(td, cli)["provenance"]
+        self.assertIn("core/stats/x.py", prov["code_paths"])
+        self.assertFalse([p for p in prov["code_paths"] if p.startswith(("/", "..")) or not p.endswith(".py")])
+        self.assertEqual(prov["code_tags"], ["fc-monotone"])
+        with tempfile.TemporaryDirectory() as td:
+            prov = self.wrap(td, {"status": "ok", "upper": 4.2, "trace": "not a trace"})["provenance"]
+        self.assertNotIn("core/stats/poisson_diagnostics.py", prov["code_paths"])
+
+
 if __name__ == "__main__":
     unittest.main()

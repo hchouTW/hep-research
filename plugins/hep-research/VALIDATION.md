@@ -2109,6 +2109,15 @@ uniform; AR(1) phi 0.7 n 100 rejects 0.05 +- 0.02, now with the refit). Ledger P
 advisory SFA-2026-038 (introduced 0.14.0, no fixed event yet). Docstring, `time-series-inference.md`, the
 hep-statistics README and the capability matrix state the measured calibration; reference inventory regenerated.
 
+## SCIFIX-TRACE-FORWARD (2026-10-22, CI lock venv; branch `scifix/trace-forwarding` from main)
+
+| Check | Result |
+|---|---|
+| `poisson_diagnostics.py fc-interval --n 3 --b 1.0` output | `trace.code_paths`: core/__init__.py, core/stats/__init__.py, core/stats/_linalg.py, core/stats/_poisson.py, core/stats/poisson_diagnostics.py, core/trace.py |
+| `tests/contracts/test_trace.py::TraceForwarding` (the CLI trace reaches the statistical-result, sorted, valid; malformed entries and a non-object trace are dropped) | pass |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock (before the rebase on main) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4906 tests, 4655 pass, 0 failures, 251 skipped |
+| ruff, mypy on `core/` and `contracts/` | clean |
+
 ## SCIFIX-EVIDENCE-CI (2026-10-22, CI lock venv plus pyhf 0.7.6, ArviZ 0.23.4, pdg 2026.0, SQLAlchemy 2.1.5, typing_extensions 4.16.0; branch `scifix/evidence-ci-pdg` from main `f238ef3e`, 0.24.0)
 
 | Check | Result |

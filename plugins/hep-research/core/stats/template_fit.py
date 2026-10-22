@@ -70,6 +70,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from core import trace
 from core.stats import _caps
 from core.stats._linalg import solve
 from core.protected.guard import guard, protected_main
@@ -792,7 +793,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     result.setdefault("status", "ok")  # the fits set ok or failed; toy studies report failed toys as a count
     result.update(_caps.report())
-    print(json.dumps(result, indent=2))
+    print(json.dumps({**result, "trace": trace.provenance()}, indent=2))
     return 1 if result["status"] == "failed" else 0
 
 

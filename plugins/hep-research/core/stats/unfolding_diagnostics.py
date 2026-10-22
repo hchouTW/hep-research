@@ -87,6 +87,7 @@ import random
 import sys
 from pathlib import Path
 
+from core import trace
 from core.stats import _caps
 from core.stats._linalg import cholesky, jacobi_eigh, matmul, solve, transpose
 from core.stats.statistical_toys import (ToyError, _load_response, _num, _scan_then_golden, _seed, _std, _toys, _unfold,
@@ -1438,7 +1439,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     result["status"] = "ok"
     result.update(_caps.report())
-    print(json.dumps(result, indent=2))
+    print(json.dumps({**result, "trace": trace.provenance()}, indent=2))
     return 0
 
 
