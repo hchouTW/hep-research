@@ -30,6 +30,9 @@
  "SFA-2026-037": {
   "outputs_only": true
  },
+ "SFA-2026-038": {
+  "outputs_only": true
+ },
  "SFA-2026-002": {
   "artifact_type": "ml-artifact",
   "in_range": "0.12.0",

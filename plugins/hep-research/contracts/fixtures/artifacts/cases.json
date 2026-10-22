@@ -513,6 +513,9 @@
   "prediction_v26_truncation_no_method.json": [
    "prediction.truncation_method"
   ],
+  "measurement_v26_efficiency_counted_twice_namespaced.json": [
+   "measurement.efficiency_counted_twice_namespaced"
+  ],
   "ml_v28_framework_version_missing.json": [
    "ml.framework_version_missing"
   ],

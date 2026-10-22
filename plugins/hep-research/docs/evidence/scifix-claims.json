@@ -514,5 +514,62 @@
   "verification_strength": "page",
   "numeric_quotation_allowed": true,
   "last_reviewed": "2026-10-22"
+ },
+ {
+  "id": "scifix:C28",
+  "claim": "With H_n(u) = P(p_n <= u) the distribution function of the bootstrap p-value p_n, a test that rejects H0 whenever H_n(p_n) <= alpha is exact (prepivoting, Beran 1987).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S12"
+  ],
+  "location": "arXiv:2208.02028v1 Sec. 2, p. 8 (H_n defined p. 7)",
+  "scope": {
+   "text": "skills/hep-statistics/scripts/periodicity_scan.py red-noise global p (PERIODICITY-REFIT)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-22"
+ },
+ {
+  "id": "scifix:C29",
+  "claim": "Double bootstrap: the second-level bootstrap p-value is p*_n = P**(T**_n <= T*_n), computed on a further bootstrap sample drawn from the first-level one, and the double bootstrap modified p-value is p~_n = H^_n(p_n) = P*(p*_n <= p_n).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S12"
+  ],
+  "location": "arXiv:2208.02028v1 Sec. 3.2.2, pp. 14-15",
+  "scope": {
+   "text": "skills/hep-statistics/scripts/periodicity_scan.py red-noise global p (PERIODICITY-REFIT)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-22"
+ },
+ {
+  "id": "scifix:C30",
+  "claim": "Theorem 3.2: under Assumptions 1, 2 and 3 the double bootstrap modified p-value p~_n = H^_n(p_n) converges in distribution to U[0,1], whether or not the original bootstrap p-value is asymptotically uniform.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S12"
+  ],
+  "location": "arXiv:2208.02028v1 Sec. 3.2.2, Theorem 3.2, p. 15",
+  "scope": {
+   "text": "skills/hep-statistics/scripts/periodicity_scan.py red-noise global p (PERIODICITY-REFIT)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-22"
  }
 ]

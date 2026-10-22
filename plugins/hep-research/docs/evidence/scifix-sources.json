@@ -192,5 +192,22 @@
   "superseded_by": [],
   "attribution": "J. R. Andersen, A. Maier",
   "notes": "arXiv:2109.07851v2 (16 May 2022) read 2026-10-22 at page level: the abstract page and pp. 1-5 of the PDF (contents, Sec. 1, Sec. 2 with eqs. (2.1)-(2.4)). Eq. (2.2) is in Sec. 2 'Cell Resampling', p. 3; Sec. 2.2 is 'Nearest-Neighbour Search and Locality-Sensitive Hashing' (p. 9, not read), so the earlier citation 'sect. 2.2, eq. 2.2' named the wrong section. The abstract page links the DOI below; the journal volume and page were not checked in this reading."
+ },
+ {
+  "id": "scifix:S12",
+  "title": "Bootstrap Inference in the Presence of Bias",
+  "authors": "G. Cavaliere, S. Gonçalves, M. Ø. Nielsen",
+  "year": 2022,
+  "url": "https://arxiv.org/abs/2208.02028v1",
+  "arxiv_id": "2208.02028v1",
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-22",
+  "publication_date": "2022-08-03",
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. Cavaliere, S. Gonçalves, M. Ø. Nielsen",
+  "notes": "arXiv:2208.02028v1 (3 Aug 2022, econ.EM) read 2026-10-22 at page level for PERIODICITY-REFIT: the abstract page and pp. 1, 7-8 (H_n(u) = P(p_n <= u) and the exact test that rejects when H_n(p_n) <= alpha) and 14-15 (sect. 3.2.2 Double bootstrap, Theorem 3.2). Later versions and a journal reference were not checked in this reading."
  }
 ]

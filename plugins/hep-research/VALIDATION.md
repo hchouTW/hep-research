@@ -2020,6 +2020,95 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## EFFICIENCY-NAMESPACED (2026-10-22, E2): same efficiency counted twice under a namespace
+
+Found after 0.23.0, unfixed until now: a measurement spec listing a bare `efficiency` next to `<ns>:efficiency` (or
+two namespaced `<ns>:efficiency` terms) passed with no finding. The bare-efficiency error needs the other name to end
+in `_efficiency`, and the repeated-category error compares names with the namespace kept, while
+`_correction_classes` folds both into one class. Decision: no contracts major, so a new warning
+`measurement.efficiency_counted_twice_namespaced` (the existing errors unchanged and not doubled by it).
+`correction-chain.md` now describes the behavior (a profile term with another name, such as `<ns>:trigger`, still
+passes unflagged: the validator cannot tell it is an efficiency); reference inventory regenerated.
+
+| Evidence test (file::Class::method) | Kind | Parent `a53af7e0` | Fix |
+|---|---|---|---|
+| `tests/contracts/test_measurement_contract.py::MeasurementRules::test_namespaced_efficiency_next_to_bare_efficiency_warns` | behavioral (warning on 3 pairs, no finding on 2 single-efficiency chains, error unchanged on 3) | fail (3 of 3 warning subtests) | pass |
+| `tests/contracts/test_theory_contract.py` warning-fixture test on the new fixture `warning/measurement_v26_efficiency_counted_twice_namespaced.json` | fixture | fail (no warning) | pass |
+
+Outcome check: every JSON artifact in the plugin with an `artifact_type` (360 files: fixtures, examples, assets,
+profiles), validated plain and strict before and after the change: identical `ok` and identical findings for all 720
+validations, so no shipped artifact gains the new warning. Fixtures regenerated with `make_fixtures.py`: only the new
+warning fixture and its `cases.json` entry change; the verdict snapshot (`gate_verdicts.json`) gains its entry
+(valid, default and strict), no other entry moves.
+
+## PERIODICITY-REFIT (2026-10-22, E2): periodicity_scan.py red-noise null refitted per surrogate (sci-fix, S1)
+
+Found after 0.23.0: the AR(1)/OU surrogates of `periodicity_scan.py` (added in 0.14.0, `2cd78747`) used phi (or
+tau) and the variance estimated once from the observed series, and the docstring called the result conservative.
+Measured first, with a criterion fixed before the run: no-signal toys, 400 per configuration (AR(1) on t = 0..n-1
+with phi 0.3, 0.7, 0.9; OU on sorted uniform times with lag-1 correlation 0.5 and 0.8; n = 50, 100, 200; errors 1;
+grid 1/T to 0.5 in ceil(2.5 n) steps, whole band), 199 surrogates, seeded; rejection fraction r(alpha) for alpha
+0.01, 0.05, 0.1 with binomial errors; anti-conservative beyond errors when r > alpha + 2 sqrt(alpha (1 - alpha) / 400).
+
+Pre-fix method (a), the 0.23.0 `scan()` itself (r +- binomial error; `!` beyond the criterion):
+
+| Configuration | alpha 0.01 | alpha 0.05 | alpha 0.1 |
+|---|---|---|---|
+| AR(1) n 50, phi 0.3 / 0.7 / 0.9 | 0.005 / 0.007 / 0.018 | 0.052 / 0.065 / **0.147 +- 0.018 !** | 0.092 / **0.142 +- 0.017 !** / **0.253 +- 0.022 !** |
+| AR(1) n 100, phi 0.3 / 0.7 / 0.9 | 0.005 / 0.003 / 0.007 | 0.030 / 0.045 / **0.077 +- 0.013 !** | 0.075 / 0.113 / **0.163 +- 0.018 !** |
+| AR(1) n 200, phi 0.3 / 0.7 / 0.9 | 0.013 / 0.010 / 0.010 | 0.043 / 0.043 / 0.060 | 0.072 / 0.098 / 0.107 |
+| OU n 50, 0.5 / 0.8 | 0.000 / 0.005 | 0.015 / 0.045 | 0.050 / 0.117 |
+| OU n 100, 0.5 / 0.8 | 0.005 / 0.005 | 0.015 / 0.033 | 0.050 / 0.095 |
+| OU n 200, 0.5 / 0.8 | 0.003 / 0.005 | 0.020 / 0.035 | 0.035 / 0.083 |
+
+(a) is anti-conservative beyond errors in 5 cells (short, strongly red AR(1) series: the lag-1 estimate is biased low,
+mean 0.80 for phi 0.9 at n = 50, so the surrogates are too white); OU is calibrated or conservative. Variant (b), a
+double parametric bootstrap that refits the null on each outer surrogate (prepivoting, arXiv:2208.02028v1 section
+3.2.2), measured in a separate vectorized implementation on the same toys (199 x 199), removed most of it but not all
+(AR(1) n 50, phi 0.9: 0.072 at 0.05 and 0.142 at 0.1, still beyond the criterion; 4 cells). With the first-order
+bias-corrected lag-1 estimate phi + (1 + 4 phi)/n in both levels (exploration on the six worst configurations) no
+cell exceeded it, but for OU it was conservative (0.025 at 0.05, n = 50), so the fix uses the correction for ar1 only.
+
+Decision: (a) is anti-conservative beyond errors, so the refit is the default (`--null-fit refit`, `--inner-surrogates`
+default 199); `--null-fit once` keeps the 0.14.0-0.23.0 numbers for the same seed (checked on all 4000 shared toys
+and pinned in `test_periodicity_scan.py::NullFitOption`) and carries a `calibration_note`. The default after the fix,
+`scan()` itself on the same toys (400 toys for n = 50 and 100, 200 toys for n = 200; no cell beyond the criterion):
+
+| Configuration | alpha 0.01 | alpha 0.05 | alpha 0.1 |
+|---|---|---|---|
+| AR(1) n 50, phi 0.3 / 0.7 / 0.9 | 0.007 / 0.015 / 0.010 | 0.058 / 0.060 / 0.043 | 0.122 +- 0.016 / 0.098 / 0.117 |
+| AR(1) n 100, phi 0.3 / 0.7 / 0.9 | 0.010 / 0.000 / 0.005 | 0.048 / 0.048 / 0.037 | 0.100 / 0.100 / 0.095 |
+| AR(1) n 200 (200 toys), phi 0.3 / 0.7 / 0.9 | 0.005 / 0.010 / 0.015 | 0.045 / 0.060 / 0.050 | 0.105 / 0.105 / 0.090 |
+| OU n 50, 0.5 / 0.8 | 0.010 / 0.007 | 0.048 / 0.052 | 0.085 / 0.113 |
+| OU n 100, 0.5 / 0.8 | 0.010 / 0.013 | 0.048 / 0.052 | 0.090 / 0.107 |
+| OU n 200 (200 toys), 0.5 / 0.8 | 0.010 / 0.000 | 0.045 / 0.065 | 0.085 / 0.125 +- 0.023 |
+
+Cost: N x (M + 1) surrogate series (new cap 4e6); about 0.2 s for n = 100, N = M = 199 (E2, this machine). The study scripts
+(`calib.py`, `calib_final.py`) ran outside the plugin; the slow tier below reruns its discriminating part.
+
+Evidence (`tests/skills/hep_statistics/test_periodicity_refit_null.py`; parent tree `a53af7e0` adapted by adding only
+this test module, whose `scan()` call passes the inner count only where `scan()` has it):
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series` | analytic (locator: arXiv:2208.02028v1 p. 8, Theorem 3.2 p. 15); negative control | fail: 0.113 > 0.103 at 0.05, 0.207 > 0.173 at 0.1 | pass: 0.047, 0.080; control 0.193 > 0.173 | no | E2, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1 |
+| `test_periodicity_refit_null.py::RefitCalibration::test_size_does_not_depend_on_phi` | invariant (pivotality) | fail: 0.107 > 0.104 | pass: 0.033 | no | E2 |
+| `test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source` | independent implementation (locator: arXiv:2208.02028v1 section 3.2.2, pp. 14-15) | fail: 0.5145 vs 0.8015 | pass: 0.7985 vs 0.8015 | no | E2 |
+| `test_periodicity_refit_null.py::RefitCalibrationSlow::test_ar1_size_at_most_alpha` | analytic; negative control | fail: AR(1) n 50 phi 0.9: 0.110 at 0.05, 0.198 at 0.1 | pass (9 cells) | slow tier, run with HEP_SLOW_TESTS=1 | E2 |
+| `test_periodicity_refit_null.py::RefitCalibrationSlow::test_ou_size_at_most_alpha` | analytic (calibration check, not discriminating: OU was not anti-conservative) | pass | pass | slow tier, run | E2 |
+
+Tolerances were fixed before the first run (3 binomial sigma per cell; 0.05 for the implementation comparison, about 4
+combined Monte Carlo sigma at N = 1999, inner 199). One change after the first fix run: the negative control was
+asserted at alpha 0.05 and 0.1, and at 0.05 it gave 0.093, above alpha but below the 3-sigma bound of 150 toys; it is
+now asserted at 0.1 only (0.193 > 0.173). The checks of the fix itself were not changed. Mutants of `scan()` against
+the three fast tests: M1 default reverted to `once` killed (3 tests), M2 no bias correction killed (3), M3 inner
+surrogates from the data's fit (no refit) killed (independent implementation), M5 correction sign flipped killed
+(independent implementation), M4 prepivot count `<` instead of `<=` survived (a tie rule below the Monte Carlo
+tolerance). Also passing with HEP_SLOW_TESTS=1: `test_periodicity_scan.py::NullCalibrationSlow` (white-noise p
+uniform; AR(1) phi 0.7 n 100 rejects 0.05 +- 0.02, now with the refit). Ledger PERIODICITY-REFIT (C3, D3);
+advisory SFA-2026-038 (introduced 0.14.0, no fixed event yet). Docstring, `time-series-inference.md`, the
+hep-statistics README and the capability matrix state the measured calibration; reference inventory regenerated.
+
 ## SCIFIX-PLAN-A2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-1-identity-runtime-dir` from main `a53af7e0`)
 
 Sci-fix improvement plan v3, PR-1 (A2; findings F-03, F-25). `core/protected/identity.py` gains

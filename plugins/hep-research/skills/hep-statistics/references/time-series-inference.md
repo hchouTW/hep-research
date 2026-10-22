@@ -126,9 +126,15 @@ ordinate with the fitted red-noise spectrum: `2 I(f_j) / S_hat(f_j)` against `ch
 - **Shipped tool.** `<plugin root>/skills/hep-statistics/scripts/periodicity_scan.py` runs a weighted generalized
   Lomb-Scargle periodogram of one series with a band-maximum global p from surrogates under a declared white, AR(1)
   or OU null. Its red-noise surrogates are a constant mean plus a red process with `phi` (or `tau`) from the lag-1
-  autocorrelation and the series' total variance, estimated once and not refitted per surrogate; they have no trend,
-  no measurement term `e ~ N(0, C)` (only the white null adds `N(0, sigma_i^2)`) and no cross-rigidity correlation.
-  Its p-value is therefore not the one against the null above; report it as such, or run the full toys yourself.
+  autocorrelation (for AR(1), with the first-order small-sample correction) and the series' total variance. By
+  default (`--null-fit refit`, since the fix PERIODICITY-REFIT) the null is refitted on every surrogate and the p is
+  a double parametric bootstrap; on no-signal toys (400 per configuration, AR(1) and OU, n = 50 and 100) every
+  rejection fraction at alpha = 0.01, 0.05 and 0.1 lies within two binomial sigma of alpha or below it. With
+  `--null-fit once` (the only method of releases 0.14.0 to 0.23.0) the null is estimated once: on short red series
+  that p is anti-conservative (AR(1), n = 50, phi = 0.9: 0.147 rejected at alpha = 0.05, 0.253 at 0.1). The
+  surrogates have no trend, no measurement term `e ~ N(0, C)` (only the white null adds `N(0, sigma_i^2)`) and no
+  cross-rigidity correlation, so the p-value is not the one against the full null above; report it as such, or run
+  the full toys yourself.
 
 ## Trials across periods and energy bins
 

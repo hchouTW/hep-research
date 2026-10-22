@@ -905,6 +905,10 @@
   "ok": true,
   "strict_ok": true
  },
+ "contracts/fixtures/artifacts/warning/measurement_v26_efficiency_counted_twice_namespaced.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "contracts/fixtures/artifacts/warning/ml_v28_environment_free_text.json": {
   "ok": true,
   "strict_ok": true

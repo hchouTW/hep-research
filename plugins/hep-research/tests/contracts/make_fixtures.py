@@ -714,6 +714,11 @@ ML_V28_UNRESOLVED = {
 }
 for _name, (_fn, _codes) in ML_V28_UNRESOLVED.items():
     UNRESOLVED[f"ml_v28_{_name}.json"] = (ml_v28(_fn), _codes)
+WARNING["measurement_v26_efficiency_counted_twice_namespaced.json"] = (
+    measurement_v26(lambda d, e: e.update(corrections=[{"effect_id": "total-eff", "category": "efficiency", "applied_in": "estimator"},
+                                                       {"effect_id": "profile-eff", "category": "synthetic-ns:efficiency",
+                                                        "applied_in": "estimator"}])),
+    ["measurement.efficiency_counted_twice_namespaced"])
 WARNING["ml_v28_framework_version_missing.json"] = (ml_v28(lambda e: e["environment"].pop("torch_version")),
                                                     ["ml.framework_version_missing"])
 WARNING["ml_v28_weights_not_split.json"] = (ml_v28(lambda e: (e["weights"].pop("training"), e["weights"].pop("evaluation"))),

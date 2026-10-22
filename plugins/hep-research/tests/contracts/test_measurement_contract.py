@@ -102,6 +102,36 @@ class MeasurementRules(unittest.TestCase):
             {"effect_id": "zero", "category": "fakes", "applied_in": "estimator", "value": 0, "exact_zero": True}]
         self.assertEqual(v.validate_artifact(d).findings, [])
 
+    def test_namespaced_efficiency_next_to_bare_efficiency_warns(self):
+        """Found but unfixed after 0.23.0: a bare 'efficiency' next to a namespaced '<ns>:efficiency' (the same
+        efficiency counted twice) passed with no finding, because the repeated-category error compares names with the
+        namespace kept and the bare-efficiency error needs a '_efficiency' suffix. A warning with a stable code, so no
+        artifact changes outcome (no contracts major); the existing errors are unchanged."""
+        pairs = (("efficiency", "synthetic-ns:efficiency"), ("synthetic-ns:efficiency", "efficiency"),
+                 ("synthetic-ns:efficiency", "other-ns:efficiency"))
+        for first, second in pairs:
+            with self.subTest(categories=(first, second)):
+                rep = self._edited(lambda e, a=first, b=second: e.update(corrections=[
+                    {"effect_id": "total-eff", "category": a, "applied_in": "estimator"},
+                    {"effect_id": "profile-eff", "category": b, "applied_in": "estimator"}]))
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertEqual(codes(rep, "warning"), {"measurement.efficiency_counted_twice_namespaced"})
+        # one efficiency term, namespaced or not, next to non-efficiency factors: no finding
+        for cats in (("efficiency", "synthetic-ns:special_factor"), ("synthetic-ns:efficiency", "fakes")):
+            with self.subTest(categories=cats):
+                rep = self._edited(lambda e, cats=cats: e.update(corrections=[
+                    {"effect_id": f"c{i}", "category": c, "applied_in": "estimator"} for i, c in enumerate(cats)]))
+                self.assertEqual(rep.findings, [])
+        # the existing error is unchanged and is not doubled by the warning
+        for cats in (("efficiency", "trigger_efficiency"), ("efficiency", "synthetic-ns:trigger_efficiency"),
+                     ("efficiency", "synthetic-ns:efficiency", "trigger_efficiency")):
+            with self.subTest(categories=cats):
+                rep = self._edited(lambda e, cats=cats: e.update(corrections=[
+                    {"effect_id": f"c{i}", "category": c, "applied_in": "estimator"} for i, c in enumerate(cats)]))
+                self.assertFalse(rep.ok)
+                self.assertIn("measurement.correction_category_repeated", codes(rep))
+                self.assertNotIn("measurement.efficiency_counted_twice_namespaced", codes(rep, "warning"))
+
     def test_unknown_marker_in_unresolved_inputs_is_unresolved(self):
         d = copy.deepcopy(CURRENT)
         d["extension"]["selections"][0]["conditional_denominator"] = "unknown"
