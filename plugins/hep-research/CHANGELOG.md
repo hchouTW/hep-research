@@ -49,6 +49,27 @@ Software checks establish contract consistency only, not physical validity.
   must change an affected file against the release before it, and an `introduced` release that already held one
   states `introduced_basis` (added to SFA-2026-002 and -003); an unknown artifact type is a problem. Scan verdicts
   are unchanged in this step.
+- **Envelope execution trace: `provenance.code_paths` and `code_tags` (contracts 3.5.0, minor; sci-fix improvement
+  plan A1 change 2, maintainer decision 2026-10-22).** Twelve artifact writers add the plugin `.py` files their process
+  had loaded and the tags advisory-named shared functions set (`core/trace.py`, imported as `contracts.trace`; tags cleared per envelope), so a
+  later advisory can tell whether the affected code was loaded for an artifact. Loaded is not executed, and code run
+  in another process (a core/stats CLI wrapped by `result_artifact.py`, a training asset) is not in the trace. No
+  capability: a 3.4 reader ignores both fields; older artifacts carry none. Fixtures, assets, profile artifacts and
+  examples carry the new version string, and the examples' writers their `code_paths`. Evidence: VALIDATION
+  SCIFIX-PLAN-A1-TRACE.
+- **Advisory scan: a missing marker does not show that the affected code ran (sci-fix SCAN-MISSING-MARKER, S2; plan
+  A4).** An extension key holding `unknown`, `not-applicable` or `not-provided` counted as present, so a
+  measurement-spec whose `blinding` is `not-provided` matched an advisory keyed on `blinding`. Markers are now absent;
+  a zero is present. Evidence: VALIDATION SCIFIX-PLAN-A1-TRACE.
+- **Advisory scan: code without artifacts is listed apart, and a release must hold an affected file (sci-fix
+  SCAN-VERDICT-ORDER, S2; plan A5).** `scan` matched every advisory against every artifact of a listed type with a
+  listed key, so a 0.21.0 merge job that only ran `hadd` was reported affected by SFA-2026-036 (S1) and -037, and a
+  release in range whose manifest lacks the affected file was reported affected too. The scan now decides in order:
+  an advisory whose code writes no artifact is listed in `outputs_not_artifacts` (with its outputs and remedy) and
+  matches nothing; then the type, the keys, the range, and whether that release's manifest holds an affected file.
+  `release_basis` `verified` is renamed `digest-consistent` (an artifact's own digest matched; nothing was verified);
+  `release_basis_legacy` keeps the old value for one release. Old artifacts matched through the eleven frozen
+  advisories are still reported as before. Evidence: VALIDATION SCIFIX-SCAN-VERDICT-ORDER.
 - **Sci-fix ledger: structured `changelog` and D-scope gaps (plan C5 and F-23).** Each entry's `changelog` is
   `{"kind": "release" | "audit" | "unreleased", "release", "name", "detail"}`, checked against the CHANGELOG
   sections and the advisories' fixed releases; four stale `Unreleased` values are corrected (three shipped in 0.18.0,

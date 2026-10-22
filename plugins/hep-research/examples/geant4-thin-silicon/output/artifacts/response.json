@@ -1,5 +1,5 @@
 {
- "contract_version": "3.4.0",
+ "contract_version": "3.5.0",
  "artifact_id": "j14-response-mpv",
  "artifact_type": "response",
  "objective": "deposit response to the primary energy loss, 10 GeV mu- in 300 um Si (Geant4, unvalidated)",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.23.0",
-  "contracts": "3.4.0",
+  "contracts": "3.5.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,6 +18,32 @@
  },
  "provenance": {
   "producer_skill": "hep-detector",
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/identity.py",
+   "contracts/protected_use.py",
+   "contracts/response_adapter.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/stats/__init__.py",
+   "core/stats/_linalg.py",
+   "core/stats/validate_covariance.py",
+   "core/stats/validate_response.py",
+   "core/status.py",
+   "core/trace.py",
+   "skills/hep-detector/scripts/build_response.py"
+  ],
+  "code_tags": [],
   "created": "2026-10-21",
   "evidence_ids": []
  },

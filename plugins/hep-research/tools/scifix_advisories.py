@@ -30,8 +30,11 @@ Subcommands (all read-only):
                         an affected path); releases in range older than the first manifest are listed apart
   scan PROJECT_DIR      the project's artifacts (artifacts_dir of hep-research.project.json, default
                         ./hep-research-artifacts/) against the advisories: per artifact the release that made it
-                        (verified when versions.plugin_release's digest equals that release's manifest digest,
-                        else claimed, else unknown) and the advisories that touch it. Shadow mode: a report only,
+                        (digest-consistent when versions.plugin_release's digest equals that release's manifest
+                        digest, else claimed, else unknown) and the advisories that touch it. Verdict order per
+                        advisory: (1) code that writes no artifact is listed apart (outputs_not_artifacts), never
+                        matched; (2) artifact type; (3) extension keys; (4) release in an affected range; (5) that
+                        release's manifest holds an affected path of the same block. Shadow mode: a report only,
                         exit 0 whatever it finds; nothing in the project is written.
 Output: JSON on stdout with "status" (passed, failed, rejected; core/status.py). Exit codes: 0 ok (scan: always,
 shadow mode), 1 check found problems, 2 bad input.
@@ -317,14 +320,17 @@ def affected_releases(adv: dict, manifests: dict[str, dict]) -> dict:
             "first_manifest": first}
 
 
+DIGEST_CONSISTENT = "digest-consistent"  # was "verified" (the artifact's own digest matches; nothing is verified)
+
+
 def _artifact_release(doc: dict, manifests: dict[str, dict]) -> tuple[str | None, str]:
-    """(version, basis): verified (plugin_release digest equals that release's manifest digest), claimed (a version
-    recorded without a matching digest, including unreleased builds), or unknown."""
+    """(version, basis): digest-consistent (plugin_release digest equals that release's manifest digest), claimed (a
+    version recorded without a matching digest, including unreleased builds), or unknown."""
     versions: dict = doc["versions"] if isinstance(doc.get("versions"), dict) else {}
     rel: dict = versions["plugin_release"] if isinstance(versions.get("plugin_release"), dict) else {}
     release, digest = rel.get("release"), rel.get("digest")
     if isinstance(release, str) and release in manifests and digest == manifests[release]["digest"]:
-        return release, "verified"
+        return release, DIGEST_CONSISTENT
     plugin = versions.get("plugin")
     if isinstance(plugin, str) and VERSION.match(plugin):
         basis = "claimed (unreleased build)" if release == "unreleased" else "claimed"
@@ -334,13 +340,38 @@ def _artifact_release(doc: dict, manifests: dict[str, dict]) -> tuple[str | None
     return None, "unknown"
 
 
-def _touches(adv: dict, doc: dict) -> bool:
+def missing_markers(root: Path = ROOT) -> frozenset[str]:
+    """The missing-value markers (contracts/vocab/core.json missing_markers: unknown, not-applicable, not-provided)."""
+    vocab = load_json(root / "contracts" / "vocab" / "core.json")["vocabularies"]["missing_markers"]
+    return frozenset(vocab)
+
+
+def present(value, markers: frozenset[str]) -> bool:
+    """A key's value shows the code wrote something: not absent, null, false, an empty object or list, or a missing
+    marker (a zero is present: `0 == False` no longer hides it)."""
+    if value is None or value is False or value in ({}, []):
+        return False
+    return not (isinstance(value, str) and value in markers)
+
+
+def _touches(adv: dict, doc: dict, markers: frozenset[str] = frozenset()) -> bool:
     applies = adv.get("applies_to") or {}
     if doc.get("artifact_type") not in (applies.get("artifact_types") or []):
         return False
     keys = applies.get("extension_keys") or []
     ext: dict = doc["extension"] if isinstance(doc.get("extension"), dict) else {}
-    return not keys or any(ext.get(k) not in (None, False, {}, []) for k in keys)
+    return not keys or any(present(ext.get(k), markers) for k in keys)
+
+
+def _release_affected(adv: dict, version: str, manifests: dict[str, dict]) -> bool:
+    """Steps 4 and 5: the release is in a range of a block and, when it has a manifest, holds one of that block's
+    paths (a release without a manifest is judged on the range alone)."""
+    for block in adv.get("affected") or []:
+        if not any(in_range(version, r.get("events") or []) for r in block.get("ranges") or []):
+            continue
+        if version not in manifests or any(holds(manifests[version]["paths"], p) for p in block.get("paths") or []):
+            return True
+    return False
 
 
 def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> dict:
@@ -352,6 +383,9 @@ def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> d
         folder = cfg.get("artifacts_dir", DEFAULT_ARTIFACTS_DIR) if isinstance(cfg, dict) else folder
     artifacts_dir = (project / folder).resolve()
     ranges = {adv["id"]: affected_releases(adv, manifests) for adv in advisories}
+    no_artifact = [adv for adv in advisories if writes_no_artifact(adv)]  # step 1
+    markers = missing_markers()
+    matched = [adv for adv in advisories if not writes_no_artifact(adv)]
     findings, unreadable, scanned = [], [], 0
     for path in sorted(artifacts_dir.rglob("*.json")) if artifacts_dir.is_dir() else []:
         try:
@@ -363,27 +397,37 @@ def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> d
             continue  # not an artifact envelope (a sidecar, a table)
         scanned += 1
         version, basis = _artifact_release(doc, manifests)
-        for adv in advisories:
-            if not _touches(adv, doc):
+        for adv in matched:
+            if not _touches(adv, doc, markers):  # steps 2 and 3
                 continue
             if version is None:
                 verdict = "possibly affected (release unknown)"
-            elif any(in_range(version, r.get("events") or []) for b in adv.get("affected") or []
-                     for r in b.get("ranges") or []):
+            elif _release_affected(adv, version, manifests):  # steps 4 and 5
                 # the version only moves at a release: a build after release V claims V, with or without the fix
                 verdict = ("possibly affected (unreleased build: it may hold the fix)" if "unreleased" in basis
                            else "affected")
             else:
                 continue
-            findings.append({"artifact": str(path.relative_to(artifacts_dir)), "artifact_type": doc["artifact_type"],
-                             "release": version, "release_basis": basis, "advisory": adv["id"],
-                             "severity": adv["severity"], "verdict": verdict, "remedy": adv.get("remedy")})
+            finding = {"artifact": str(path.relative_to(artifacts_dir)), "artifact_type": doc["artifact_type"],
+                       "release": version, "release_basis": basis, "advisory": adv["id"],
+                       "severity": adv["severity"], "verdict": verdict, "remedy": adv.get("remedy")}
+            if basis == DIGEST_CONSISTENT:
+                finding["release_basis_legacy"] = "verified"  # the former name, kept for one release
+            findings.append(finding)
+    outputs = [{"advisory": adv["id"], "severity": adv["severity"],
+                "releases_affected": ranges[adv["id"]]["releases"],
+                "outputs": [(b.get("database_specific") or {}).get("outputs") for b in adv.get("affected") or []],
+                "remedy": adv.get("remedy")} for adv in no_artifact]
     return {"status": "passed", "mode": "shadow", "project": str(project), "artifacts_dir": str(artifacts_dir),
             "artifacts_scanned": scanned, "unreadable": unreadable, "findings": findings,
+            "outputs_not_artifacts": outputs,
             "advisories": {a: {"releases_affected": r["releases"]} for a, r in ranges.items()},
             "note": ("shadow mode: a report only, nothing blocks and nothing in the project is written. An artifact "
                      "is listed when its type and extension show the affected code ran for it and its release is in "
-                     "an affected range; results made without an artifact are not seen")}
+                     "an affected range and holds an affected file. outputs_not_artifacts lists advisories whose "
+                     "code writes no artifact: check any output of those scripts made with an affected release; "
+                     "the scan cannot see them. release_basis 'digest-consistent' was 'verified' "
+                     "(release_basis_legacy, kept for one release)")}
 
 
 def main(argv=None) -> int:

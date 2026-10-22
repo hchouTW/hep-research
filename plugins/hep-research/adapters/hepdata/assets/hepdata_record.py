@@ -40,6 +40,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from core.protected.guard import guard, protected_main  # noqa: E402
@@ -187,7 +188,7 @@ def build(opts) -> tuple[dict, dict | None]:
         "contract_version": CONTRACTS_VERSION, "artifact_id": dataset_id.split(":", 1)[1],
         "artifact_type": "dataset-record",
         "objective": f"{opts.status} values of HEPData {opts.record} {opts.table_name}",
-        "provenance": {"producer_skill": "hep-theory", "created": opts.created,
+        "provenance": {"producer_skill": "hep-theory", **trace.provenance(), "created": opts.created,
                        "tool": "adapters/hepdata/assets/hepdata_record.py"},
         "status": [status_label], "bindings": {"experiments": [], "theory": []},
         "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"],

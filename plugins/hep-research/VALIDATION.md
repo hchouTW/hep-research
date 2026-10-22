@@ -2126,6 +2126,45 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-PLAN-A1-TRACE (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; E2 venv for fixtures and examples; branch `scifix/pr-4-execution-trace`, stacked on `scifix/pr-3-scan-order`)
+
+Sci-fix improvement plan v3, PR-4: A1 change 2 (contracts 3.5.0, `contracts/trace.py`, maintainer decision
+2026-10-22; `core/trace.py`, re-exported by `contracts/trace.py`) and A4, sci-fix SCAN-MISSING-MARKER (S2, C2, D2). Fix `01dd65a6`, parent `8e7517da` (PR-3's head) in a detached
+worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in; the worktree was removed after the run.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_missing_markers_and_empty_values_do_not_show_the_code_ran` | exhaustive (14 value classes) | fail, 4 of 14 subtests by assertion (`unknown`, `not-applicable`, `not-provided`, `0`) | pass | no | CI lock |
+
+| Check | Result |
+|---|---|
+| `tests/contracts/test_trace.py` (snapshot without tests/, tags per envelope, schema accepts and refuses, a producer subprocess records its own script and not the CLI it read) | pass, 6 tests |
+| Writers that add the trace | 12: import_published_table, manage_literature, result_artifact, bayes_diagnostics, build_response, mix_period_responses, check_geant4_study, run_workflow, write_ml_artifact, hepdata_record, batch_campaign, g4common; not dragon2_run.py, dragon2_to_prediction.py, geant4_build.py (they import no contracts) |
+| Contracts 3.5.0 | `CONTRACTS_VERSION`, vocab, the two pinned tests; `make_fixtures.py` (E2): 40 valid, 125 invalid, 27 unresolved, 6 warning fixtures; three theory-profile `make_artifacts.py`; three assets |
+| Examples regenerated (E2; `bc-propagation-fit` with the CI lock) | version strings, the hashes that cover them, the writers' `code_paths`, and `check_geant4_study.py`'s own hash; `unfolding-coverage` drifted at 1e-14 and was restored |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock, at `deb21207` (before the rebase on the merged PR-2 and the move of the trace into core) | 23 pass, 2 fail, 2 skipped (CLI host checks); 4814 tests, 4564 pass, 1 failure, 249 skipped. Both failures were the retired-name defect fixed in PR-2 (`test_check_retired_names`, `retired_names`); after the rebase both pass. The rebased head with the trace in core runs in CI |
+
+Limit found while implementing: `result_artifact.py`, the statistical-result writer, wraps the JSON a core/stats CLI
+printed in another process, so its `code_paths` never shows `core/stats/*`; an advisory about core/stats code must
+match on fields the CLI output carries, or say that no field shows it (plan PR-5).
+
+## SCIFIX-SCAN-VERDICT-ORDER (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-3-scan-order`, stacked on `scifix/pr-2-advisory-check`)
+
+Sci-fix improvement plan v3, PR-3 (A5), sci-fix SCAN-VERDICT-ORDER (S2, C2, D2). Fix `e48396a4`, parent `8472cdb5`
+(PR-2's head) in a detached worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in; the
+worktree was removed after the run.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_over_every_combination_of_the_five_steps` | exhaustive (40 cases) | fail, 21 of 40 subtests by assertion | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_order_no_artifact_and_manifest_paths` | behavioral | fail (assertion) | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_shipped_no_artifact_advisories_skip_the_hadd_job` | behavioral | fail (assertion: SFA-2026-036 and -037 affected) | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_release_basis_and_verdicts` | behavioral | fail (assertion: `verified` basis) | pass | no | CI lock |
+
+Reproduction of plan F-01/F-27 (a 0.21.0 `computational-run` that only ran `hadd`, with the 0.21.0 manifest digest):
+main `a53af7e0` reports SFA-2026-036 and SFA-2026-037 `affected`; the fix reports no finding and lists the eight
+advisories without artifacts (SFA-2026-014 to -019, -036, -037) in `outputs_not_artifacts`.
+
 ## SCIFIX-PLAN-P0-CHECK (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-2-advisory-check` from main `a53af7e0`)
 
 Sci-fix improvement plan v3, PR-2 (A0, A3, C5, F-23). Counts on main `a53af7e0` (0.23.0), recomputed because the

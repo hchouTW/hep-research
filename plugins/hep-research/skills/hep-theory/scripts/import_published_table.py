@@ -48,6 +48,7 @@ sys.dont_write_bytecode = True  # importing plugin packages leaves no __pycache_
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
@@ -227,7 +228,7 @@ def build(path: Path, sp: dict, created: str, status: str) -> tuple[dict, dict, 
         "contract_version": CONTRACTS_VERSION, "artifact_id": sp["dataset_id"].split(":", 1)[-1],
         "artifact_type": "dataset-record",
         "objective": f"user-supplied values of a published table ({src['url']})",
-        "provenance": {"producer_skill": "hep-theory", "created": created,
+        "provenance": {"producer_skill": "hep-theory", **trace.provenance(), "created": created,
                        "tool": "skills/hep-theory/scripts/import_published_table.py"},
         "status": [status], "bindings": {"experiments": [], "theory": []},
         "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"],

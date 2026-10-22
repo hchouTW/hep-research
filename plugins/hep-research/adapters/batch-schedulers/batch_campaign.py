@@ -60,6 +60,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(PLUGIN))
 import batch_config  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from core.partition import bundle as bundles  # noqa: E402
 from core.partition import campaign as cp  # noqa: E402
@@ -117,7 +118,7 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
         "artifact_type": "computational-run", "objective": objective,
         "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"], "contracts": CONTRACTS_VERSION,
                      "plugin_release": plugin_release()},
-        "provenance": {"producer_skill": "hep-computing", "created": datetime.date.today().isoformat()},
+        "provenance": {"producer_skill": "hep-computing", **trace.provenance(), "created": datetime.date.today().isoformat()},
         "inputs": [], "outputs": [], "status": status, "unresolved_inputs": [],
         "extension": {
             "input_manifest": [{"path": "manifest.json", "sha256": _sha(cdir / "manifest.json")},
