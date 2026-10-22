@@ -2,25 +2,62 @@
 
 ## 0. About this document
 
+### 0.1 Basic information
+
 | Item | Content |
 | --- | --- |
-| Subject | The cross-artifact analysis check of hep-research 0.21.0 (contracts 3.2.0), hereafter **the checker**, and the components around it |
-| Version | Finalized 2026-10-22 (restructured edition; content identical to the revision made after the second independent review) |
+| Subject | The cross-artifact analysis check of hep-research (hereafter **the checker**) and the components around it |
+| Version | Finalized 2026-10-22; second clean-up edition (same content as before the clean-up; only organisation and wording changed) |
 | Status | **The only valid architecture document.** All other plans and memos are superseded (§16) |
 | Languages | The Chinese version `cross-artifact-check-architecture.zh.md` and this English version have the same content; if they ever differ, the Chinese version prevails |
 | Audience | The maintainer, reviewers, and the agent doing the implementation (for example Claude) |
 | Rule status | Every checker rule stays in **shadow mode**; this document **enables no** gate condition |
-| Measurement baseline | Facts were first measured on 0.21.0 and were all re-measured on 2026-10-22 on **0.24.1** (contracts 3.6.0; `plugin_release()` verifies as 0.24.1). Every analysis-check program file, suite, registry, catalog, coverage contract, relevant schema and `docs/dev/v6.3/` is **byte-identical** to the earlier baseline. F1–F9, the compatibility facts of §8.1, the 205 existing tests, `rule_registry.py check` (23 rules, 71 V cases) and the 10 gap probes give the same results, and a bundle frozen with the earlier version still checks complete on 0.24.1. So the conclusions stand. **Correction:** the baseline this document earlier called "0.23.0" was in fact an unreleased development build after 0.23.0 (`plugin.json` said 0.23.0, but the CHANGELOG had an `Unreleased` section and `plugin_release()` returned `unreleased`). Releases are referred to by the relative labels R1–R3 (§8.2) |
 
-### 0.1 How to read this document
+### 0.2 Measurement baseline
 
-- **Current state:** §1.
-- **Terms:** §2 defines every ID family (G, A, DR, P, V, O, HC, C) and where it comes from.
-- **What to do:** each phase in §9 lists its entry conditions, work, prohibitions and exit conditions.
-- **Whether something is decided:** §7. **Anything marked "open" or "pending confirmation" MUST NOT be implemented as if decided.**
-- **Before implementing anything:** read §15 (agent operating rules).
+| Item | Content |
+| --- | --- |
+| First measured on | hep-research 0.21.0 (contracts 3.2.0) |
+| Current baseline | hep-research **0.24.1** (contracts 3.6.0), fully re-measured on 2026-10-22; `plugin_release()` verifies it as 0.24.1 (a released build) |
+| Checker changes from 0.21.0 to 0.24.1 | **None.** The checker's code, suites, registry, catalog, coverage contracts, relevant schemas and `docs/dev/v6.3/` are byte-identical. The 0.24.x changes concern the independent review's expert role, advisories and sci-fixes, not the checker |
+| Results re-run on 0.24.1 | F1–F9 (§1), the compatibility facts of §8.1, the 205 existing tests, `rule_registry.py check` (23 rules, 71 V cases) and the 10 gap probes are unchanged; a bundle frozen with the earlier version still checks complete on 0.24.1 |
+| Correction | The baseline this document earlier called "0.23.0" was in fact an unreleased development build after 0.23.0 (`plugin.json` said 0.23.0, but the CHANGELOG had an `Unreleased` section and `plugin_release()` returned `unreleased`) |
+| How releases are written | This programme's releases are always referred to by the relative labels R1–R3 (§8.2), never by absolute version numbers |
 
-### 0.2 Conventions
+### 0.3 One-page summary
+
+- **What the checker is:** a cross-artifact consistency check of a frozen analysis (a bundle), producing advisory diagnostics.
+- **Current state:** the rule layer is designed correctly, but it has 22 reproduced gaps (G1–G22), and **no real workflow runs it** (F2, F3).
+- **Core judgement:** obtain evidence of value first (the value gate, §10), then decide whether to fix and extend.
+- **Architecture:** two planes (§5.1; DR-11 open). Diagnostic plane A is built now; assurance plane B is design only.
+- **Route:** Phase 0 (foundations; no rule outcome changes) → Phase 1 (value gate) → decision point (continue, shrink or stop) → Phase 2 (fix the gaps).
+- **Decided:** the adopted texts of DR-1 to DR-8; their post-review revisions are still **pending confirmation**.
+- **Open:** DR-9 to DR-15.
+- **Separate work package WP-R:** rename the code name "v6.3 / v63" to descriptive names. The tool is finished, and on 0.24.1 the full suite gives identical results before and after the rename (§8.3); adoption depends on DR-15.
+- **Next step:** the programme owner decides DR-9, DR-11, DR-12 and DR-13 (the entry conditions of Phase 0).
+
+### 0.4 Where to look
+
+| To find | See |
+| --- | --- |
+| Current state and evidence | §1 |
+| Terms and IDs | §2 |
+| Scope (what is and is not done) | §3 |
+| Normative principles | §4 |
+| Architecture, planes and components | §5 |
+| Gaps | §6 |
+| Whether something is decided | §7. **Anything marked "open" or "pending confirmation" MUST NOT be implemented as if decided** |
+| Versions, compatibility, releases | §8.1, §8.2 |
+| The rename (WP-R) | §8.3 |
+| What to do and when | §9; each phase lists entry conditions → work → prohibitions → exit conditions |
+| Value gate, entry path, spike | §10, §11, §12 |
+| Owners, record convention, retirement | §13 |
+| Risks and open items | §14 |
+| Rules for implementing | §15 (**read before implementing**) |
+| Which documents are valid | §16 |
+| How to reproduce the evidence | Appendix A |
+
+### 0.5 Conventions and evidence levels
 
 | Term | Meaning |
 | --- | --- |
@@ -30,6 +67,10 @@
 | **Confirmed** | Measured or read in code on the 0.21.0 copy and re-checked on 0.24.1, with evidence |
 | **Inferred** | Derived from confirmed facts, not measured directly |
 | **Unresolved** | The answer is not known yet |
+| **Open** | A decision item not yet decided (§7) |
+| **Pending confirmation** | A revision that has been proposed but takes effect only when the programme owner confirms it in a dated section (§7.1) |
+
+**Easily confused labels:** `R1`–`R3` are this programme's releases (§8.2); `RN-1`–`RN-7` are the rename safety rules (§8.3.3); `R-AUX`, `r-real.*` and the like are checker rule names. The three are unrelated.
 
 ---
 
@@ -54,9 +95,11 @@
 
 ## 2. Definitions
 
+### 2.1 Checker concepts
+
 | Term | Definition |
 | --- | --- |
-| analysis-check programme | The plugin's development programme with the internal code name "v6.3" (from 2026-10-16), which built the checker; its records are in `docs/dev/v6.3/` and its tests are `tests/contracts/test_v63_*.py`. This document refers to it by this name |
+| analysis-check programme | The plugin's development programme with the internal code name "v6.3" (from 2026-10-16), which built the checker. Its records are in `docs/dev/v6.3/` and its tests are `tests/contracts/test_v63_*.py`; if DR-15 is adopted they become `docs/dev/cross-artifact-check/` and `test_analysis_check_*` (§8.3). This document calls it the "analysis-check programme" |
 | checker | `contracts/analysis_check.py` and `contracts/analysis_checks/`: cross-artifact checks of a frozen analysis |
 | bundle (v2) | The frozen analysis produced by `freeze`, format `hep-research-analysis-bundle/2`; it holds the items, a check-context and a semantic-lock |
 | check-context | The bundle document that states the analysis intent: roots, recipe instances, bindings, declarations, and the frozen obligation inventory |
@@ -68,17 +111,35 @@
 | snapshot | A content-addressed copy of definitions, so an old subject can be reproduced under its old semantics (D11b) |
 | `lock_differences` / `installed_differences` | The frozen definitions differ from the current ones: the former without a snapshot; the latter recorded while reproducing from a snapshot |
 | version guard | When a rule, the generator or an input check has a different version from the one the suite names, it is not evaluated and gives `rule_not_run` |
+| L1 / L2 | `validate.py` (single artifact) / `recipe_semantics.py` (recipe semantics); both predate the analysis-check programme |
+
+### 2.2 Concepts of this architecture
+
+| Term | Definition |
+| --- | --- |
 | diagnostic plane (A) | The checker as run on the agent side; it produces advisory diagnostics only |
 | assurance plane (B) | Checks in the custodian's formal-use gate; the custodian reruns the check and judges the custody of the inputs |
 | protected input | A file that `core/protected/trusted_input.read_protected()` accepts, i.e. one only the custodian could have written |
-| value gate | The measurement before any extension: how many more errors the checker catches than the existing defences |
-| entry path | A tool that helps produce a v2 bundle (`analysis_check.py draft`); whether to build it is DR-14 |
-| L1 / L2 | `validate.py` (single artifact) / `recipe_semantics.py` (recipe semantics); both predate the analysis-check programme |
-| G / A | Gaps / ancillary issues (§6) |
-| DR | Decision items of this programme (§7) |
-| P | Design principles (§4) |
-| V | Validation cases in the registry; V01–V71 exist, V72–V91 are added by this programme |
-| O, C, HC, D12b, D11b, G-ENFORCE | The plugin's existing open questions, conditions, hard constraints, record convention and decision gates; defined in `docs/dev/v6.3/` and `docs/protected-data-architecture.md` |
+| `plugin_release` | The result of `core/protected/identity.plugin_release()`: the version when the copy matches a release manifest exactly, otherwise `unreleased` |
+| `.in_use/` | The runtime folder the plugin system writes into the root of an installed copy; since 0.24.0 it does not count towards the copy's identity |
+| value gate | The measurement before any extension: how many more errors the checker catches than the existing defences (§10) |
+| entry path | A tool that helps produce a v2 bundle (`analysis_check.py draft`); whether to build it is DR-14 (§11) |
+| phase | A stage of the roadmap: Phases 0, 1 and 2 and coverage extension (§9) |
+| session | The unit of effort estimates: one continuous stretch of implementation work |
+| WP-R | The work package that renames the code-name identifiers (§8.3, per DR-15) |
+
+### 2.3 ID families
+
+| ID | Meaning | Defined in |
+| --- | --- | --- |
+| F1–F10 | Facts about the current state | §1 |
+| P1–P10 | Design principles | §4 |
+| G1–G22 / A1–A6 | Gaps / ancillary issues | §6 |
+| DR-1–DR-15 | Decision items of this programme | §7 |
+| R1–R3 | This programme's releases (relative labels) | §8.2 |
+| RN-1–RN-7 | Rename safety rules | §8.3.3 |
+| V01–V91 | Validation cases in the registry; V01–V71 exist, V72–V91 are added by this programme | `contracts/rules/registry.json`; §6 |
+| O, C, HC, D12b, D11b, G-ENFORCE, T3, S3 | The plugin's existing open questions, conditions, hard constraints, record convention, decision gates, threat classes and execution scopes | `docs/dev/v6.3/` and `docs/protected-data-architecture.md` |
 
 ---
 
@@ -135,7 +196,7 @@
 | Definitions | Installed definitions, or reproduced from a snapshot per D11b | Refuse analyst-supplied snapshots and bundle-supplied definitions, or use an index of released definitions |
 | Role of `check-report` | Cheap refusals: dependency-missing, `lock_differences`, pre-release suite, mismatch with the frozen inventory | Gate logic: V60, V65, V66, custody judgement, comparison with the reviewed report |
 | Trust flags | `declaration_based` is a hint only; G8 and A3 always flagged | P8; the source of the analyst account must be settled |
-| Report format | Report 1.0.0 | Report 1.1.0 (`assessment.inputs`, `basis_summary`); `recheck_record.json`; a `plugin_release` of `unreleased` never counts as a recheck |
+| Report format | Report 1.0.0 | Report 1.1.0 (`assessment.inputs`, `basis_summary`); `recheck_record.json`; a `plugin_release` of `unreleased` never counts as a recheck (§8.1) |
 | Relation to human review | The report is reference material for the review | **MUST** be compared with the report the reviewers accepted |
 | Mutation operators | relabel, rename, copy, copy+perturb, drop, loosen, toggle-optional, reorder, edit-report | unprotect, forge-definition |
 
@@ -266,27 +327,30 @@ Assurance plane B (custodian's formal-use gate; design only)
 
 ### 8.1 Compatibility facts and targets
 
-| Object | Facts in 0.21 (Confirmed) | Target |
+| Object | Facts (Confirmed; measured on 0.21, re-checked on 0.24.1) | Target |
 | --- | --- | --- |
 | SemVer pre-releases | `semver.parse('1.1.0-dev.1')` raises `not a version`; the registry's rule `version` pattern and the context's suite-version pattern are both `^\d+\.\d+\.\d+$` (the `v_cases` pattern `^V\d{2}$` is unrelated to versions) | From R2, `1.1.0-dev.N` is accepted; `check-report` refuses pre-release suites (`permit.report_prerelease_suite`); no purpose policy accepts a pre-release suite |
 | registry schema | `registry_version` enum is only `1.0.0`; rule objects are `additionalProperties: false`; `work_packages` is `^D\d{2}[a-d]?$`; `slice` is an M1–M3/D11b enum; a repeated `rule_id` → `registry.duplicate_rule` | R1: registry 1.1.0 (a rule source-digest field; new phase and work-package values). R2: unique key becomes (rule_id, version); retired versions marked by `lifecycle` |
 | semantic-lock | 1.0.0; pins the whole registry, the whole coverage contract, the whole table, and every effect any operator references (14 for CASE-CHAIN) | **Unchanged.** Drift is absorbed by the default snapshots |
-| check-context | `context_version` is a const; 0.21 refuses 1.1.0 (freeze gives `bundle.context_schema`, check gives input-invalid); an unknown declaration type in 1.0.0 only gives a context finding | R2: 1.1.0 |
-| report | `report_version` is a const; 0.21 treats 1.1.0 as `report_missing`; the top level is `additionalProperties: false`; `assessment` and obligation objects are open | The diagnostic plane stays at 1.0.0 (R1 adds `plugin_release` inside `assessment`); 1.1.0 belongs to the assurance plane |
-| result binding | 0.21 gives `schema.const` and `schema.additional`, input-invalid | R2: 1.1.0 (`campaigns[].inputs`) |
+| check-context | `context_version` is a const; 1.1.0 is refused (freeze gives `bundle.context_schema`, check gives input-invalid); an unknown declaration type in 1.0.0 only gives a context finding | R2: 1.1.0 |
+| report | `report_version` is a const; 1.1.0 is treated as `report_missing`; the top level is `additionalProperties: false`; `assessment` and obligation objects are open | The diagnostic plane stays at 1.0.0 (R1 adds `plugin_release` inside `assessment`); 1.1.0 belongs to the assurance plane |
+| result binding | Gives `schema.const` and `schema.additional`, input-invalid | R2: 1.1.0 (`campaigns[].inputs`) |
 | suites | All four are 1.0.0 | R2: `1.1.0-dev.N`; R3: 1.1.0 stable (counting-chain, ratio-subset, run-lineage, model-card) |
 | effect catalog | The `catalog_version` enum in `effect_catalog.json` is only `1.0.0` | R3: 1.1.0 (`description_required`) |
-| `plugin_release` | Bundle v2 already has the field; a development tree, and any copy with an added, missing or changed file, returns `unreleased`. **Since 0.24.0** an installed release copy returns its own version (measured on 0.24.1); before that, the `.in_use/` folder written by the plugin system made every installed copy return `unreleased` | R1 writes it into the report's `assessment`. Only because of the 0.24.0 fix is the rule "`unreleased` is not a rerun" (§5) workable on installed copies |
+| `plugin_release` | Bundle v2 already has the field; a development tree, and any copy with an added, missing or changed file, returns `unreleased`. **Since 0.24.0** an installed release copy returns its own version (measured on 0.24.1); before that, `.in_use/` made every installed copy return `unreleased` | R1 writes it into the report's `assessment`. Only because of the 0.24.0 fix is the rule "`unreleased` is not a recheck" (§5.1) workable on installed copies |
 
 ### 8.2 Release mapping
 
 | Release | Phase | contracts | Format changes | Do rule outcomes change? |
 | --- | --- | --- | --- | --- |
-| R1 | Phase 0 | +1 minor | registry schema 1.1.0 | **No** |
+| R1 | Phase 0 | +1 minor | registry schema 1.1.0; the WP-R rename (if DR-15 is adopted) | **No** |
 | R2 | Phase 2, first half | +2 minor | SemVer pre-release patterns (semver, registry, context); registry unique key; check-context 1.1.0; calibration shape; result binding 1.1.0 | Yes (only in `1.1.0-dev.N` suites) |
 | R3 | Phase 2, second half | +3 minor | catalog 1.1.0 | Yes (suites 1.1.0 stable) |
 
-**Release labels:** R1 is this programme's first release, i.e. the next minor after the version installed when implementation starts (for 0.24.1, installed on 2026-10-22, that is 0.25.0); R2 and R3 follow. In the contracts column, "+n minor" is relative to the contracts version before R1. Each release with a format change bumps the contracts minor once.
+**Release labels:**
+- R1 is this programme's first release, i.e. the next minor after the version installed when implementation starts. For 0.24.1, installed on 2026-10-22, R1 is 0.25.0.
+- R2 and R3 follow in order.
+- In the contracts column, "+n minor" is relative to the contracts version before R1; each release with a format change bumps the contracts minor once.
 
 **Default-suite policy:**
 - R1: suite 1.0.0 gives the same results as on 0.21.
@@ -295,7 +359,17 @@ Assurance plane B (custodian's formal-use gate; design only)
 
 ### 8.3 Renaming the code-name identifiers (WP-R, per DR-15)
 
-**Mapping:**
+#### 8.3.1 Purpose, status and timing
+
+| Item | Content |
+| --- | --- |
+| Purpose | Replace the meaningless code name "v6.3 / v63" with descriptive names, without changing any behaviour or rewriting any historical record |
+| Status | The tool is finished and verified (§8.3.5); **adoption depends on DR-15 (open)** |
+| Timing | Phase 0 item 11 (§9.1): **MUST** come after item 5 (snapshots on by default) and ship in the **same release** (R1) as item 2 (registry schema 1.1.0) |
+| Why this timing | The rename edits `contracts/rules/registry.json`, whose digest the semantic-lock pins (RN-4) |
+| Tool | `rename_analysis_check_ids.py`; delivered into the plugin's `tools/` |
+
+#### 8.3.2 Mapping
 
 | Old name | New name |
 | --- | --- |
@@ -322,28 +396,52 @@ Assurance plane B (custodian's formal-use gate; design only)
 | `v63_cases`, `v63_runs` (test helpers) | `analysis_check_cases`, `analysis_check_runs` |
 | `tests/core/test_v63_evidence_query` | `tests/core/test_evidence_query` |
 
-**Safety rules (normative):**
+All of these are in `tests/contracts/` unless stated otherwise.
+
+#### 8.3.3 Safety rules (normative)
 
 | # | Rule | Reason |
 | --- | --- | --- |
-| R-1 | Replace only **whole identifiers** from the mapping, never adjacent to a letter, digit or underscore; **MUST NOT** globally replace `v63` or `v6.3` | Confirmed: `test_v63_submission_bundle_digests` is a test method named after validation case **V63**, not the programme code name; a global replace would break it |
-| R-2 | **MUST NOT** modify: release manifests, `CHANGELOG.md`, `VALIDATION.md`, any `docs/dev/**/decision-*.md`, the content of moved records, pinned definitions (`contracts/vocab/effects.json`, `contracts/semantics/**`, `contracts/rules/suites/**`), `contracts/schemas/**` | Records are never rewritten (D12b); editing a pinned definition changes its digest and makes frozen analyses without snapshots unreproducible |
-| R-3 | Records are moved with `git mv` (history kept) and their content is unchanged; a forwarding `README.md` stays at the old path, so every old reference written as `docs/dev/v6.3/<file>` still finds the file (file names are unchanged) | Pinned definitions and historical records hard-code the old path |
-| R-4 | Test IDs in `contracts/rules/registry.json` **MUST** be updated together. Its digest is pinned by semantic-lock 1.0.0, so the rename ships only after snapshots are on by default, in the same release as other registry changes | Confirmed: after the rename, a bundle frozen by the old checker without snapshots gets 13 `semantics_unreproducible`; with snapshots it stays complete |
-| R-5 | The tool must be idempotent: a second run changes nothing | Safe to re-run |
-| R-6 | Acceptance: the tool's `--verify` is ok (no leftover old identifiers, all 107 registry test IDs resolve, the forwarding stub exists, every derived-file check of R-7 passes), and the failure set of the full suite (`tools/run_all_checks.py`) is **identical** before and after. A timing test that fails on one side only and passes on reruns in both trees is recorded as flaky, not as a difference | The rename must not change any behaviour |
-| R-7 | After rewriting content, the committed derived files it affects **MUST** be regenerated: run only those of `tools/reference_inventory.py`, `tools/build_stanzas.py` and `tools/capability_map.py` whose `--check` fails; `--verify` requires all three `--check` runs to pass | Confirmed: `skills/hep-authoring/references/independent-review.md` cites four `docs/dev/v6.3/` paths; rewriting them changes its size, so `docs/reference-inventory.{json,md}` goes stale and three tests fail (`reference_inventory`, the soft budget, and the timeout test, which runs the inventory test internally) |
+| RN-1 | Replace only **whole identifiers** from the mapping, never adjacent to a letter, digit or underscore; **MUST NOT** globally replace `v63` or `v6.3` | Confirmed: `test_v63_submission_bundle_digests` is a test method named after validation case **V63**, not the programme code name; a global replace would break it |
+| RN-2 | **MUST NOT** modify: release manifests, `CHANGELOG.md`, `VALIDATION.md`, any `docs/dev/**/decision-*.md`, the content of moved records, pinned definitions (`contracts/vocab/effects.json`, `contracts/semantics/**`, `contracts/rules/suites/**`), `contracts/schemas/**` | Records are never rewritten (D12b); editing a pinned definition changes its digest and makes frozen analyses without snapshots unreproducible |
+| RN-3 | Records are moved with `git mv` (history kept) and their content is unchanged; a forwarding `README.md` stays at the old path, so every old reference written as `docs/dev/v6.3/<file>` still finds the file (file names are unchanged) | Pinned definitions and historical records hard-code the old path |
+| RN-4 | Test IDs in `contracts/rules/registry.json` **MUST** be updated together. Its digest is pinned by semantic-lock 1.0.0, so the rename ships only after snapshots are on by default, in the same release as other registry changes | Confirmed (0.24.1): after the rename, a bundle frozen by the old checker without snapshots gets 13 `semantics_unreproducible` (exit 3); with snapshots it stays complete |
+| RN-5 | The tool must be idempotent: a second run changes nothing | Safe to re-run |
+| RN-6 | Acceptance: the tool's `--verify` is ok, and the failure set of the full suite (`tools/run_all_checks.py`) is **identical** before and after. A timing test that fails on one side only and passes on reruns in both trees is recorded as flaky, not as a difference | The rename must not change any behaviour |
+| RN-7 | After rewriting content, the committed derived files it affects **MUST** be regenerated: run only those of `tools/reference_inventory.py`, `tools/build_stanzas.py` and `tools/capability_map.py` whose `--check` fails; `--verify` requires all three `--check` runs to pass | Confirmed: `skills/hep-authoring/references/independent-review.md` cites four `docs/dev/v6.3/` paths; rewriting them changes its size, so `docs/reference-inventory.{json,md}` goes stale and three tests fail (`reference_inventory`, the soft budget, and the timeout test, which runs the inventory test internally) |
 
-**Prototype verification (2026-10-22, on throwaway copies of the installed 0.24.1; both are git work trees with the same exclude rules for caches, and the root `.in_use/` removed):**
-- 23 moves (1 directory, 22 test modules); 12 files rewritten, 2 derived files regenerated (`docs/reference-inventory.json`, `.md`), 1 forwarding stub added; git classifies the 17 records as R100 (identical content), and the original directory index is byte-identical;
-- every protected file unchanged;
-- a second run changes nothing (`git status` is empty);
-- `--verify`: no leftovers; all 107 test IDs resolve; all three derived-file checks pass;
-- **Full suite (R-6 met, 0.24.1):** before and after the rename, checks are 24 pass / 2 fail (`unittest`, `ams_optional`) / 1 skip (codex CLI not found), with no status difference; both sides run 4905 unit tests in 408 modules with 16 common failures (environment: sympy missing, LaTeX, external CLIs). **One-sided failures: 0**, and every count is identical. Each full run takes about 32 minutes.
-- **Earlier comparison on the development build after 0.23.0:** the same result (4859 tests, 16 common failures, 0 failing only after the rename). The only one-sided failure was the timing test `test_scaling_check_rejects_a_quadratic_scan` (it failed once, before the rename only, and passed 5 of 5 reruns in each tree, so it was recorded as flaky).
-- **A renamed copy is no longer a released build:** the rename changes files, so the copy's `plugin_release()` returns `unreleased` until the release that carries the rename writes its own manifest. This is expected; the rename ships only in a release (R-4).
-- **What the first comparison caught (fixed):** the first attempt showed 4 extra failures after the rename. Two causes: (1) the tool did not regenerate the reference inventory (now R-7); (2) the prototype's git copy had no ignore rules, so the packaging check counted test caches (3120 files, 48.3 MB). That was a fault of the test setup, not of the rename.
-- **Caution:** the full suite's `ams_optional` check copies the plugin to `/tmp/hep research no ams …` and leaves the copy behind when it times out. Never use such a leftover as the source for a rename; the source must be the clean installed or repository plugin.
+#### 8.3.4 What the tool does
+
+| Item | Content |
+| --- | --- |
+| Modes | `ROOT` (dry run: lists the moves and edits), `ROOT --apply --date YYYY-MM-DD` (applies, then verifies), `ROOT --verify` (audit only) |
+| Exit codes | 0 = ok; 1 = verification failed; 2 = usage error or refused (for example, a target already exists) |
+| Does | 1. Moves per the mapping (`git mv` inside a git work tree); 2. replaces whole identifiers in non-protected text files (RN-1); 3. regenerates stale derived files (RN-7); 4. writes the forwarding `README.md` at the old path; 5. removes `__pycache__` |
+| Does not | Modify any file listed in RN-2; edit a moved record after moving it |
+| `--verify` checks | No leftover old identifiers; every target exists and no source is left behind; the forwarding stub exists and is the only file left in the old directory; all 107 registry test IDs resolve to existing modules; all three derived-file `--check` runs pass |
+| Limits | Standard library only; skips `.git`, `__pycache__`, `.in_use` and `node_modules` |
+
+#### 8.3.5 Verification results (2026-10-22, 0.24.1; Confirmed)
+
+Setup: two throwaway copies of the installed 0.24.1 (before and after the rename), both git work trees with the same exclude rules for caches and the root `.in_use/` removed. The steps are in Appendix A.4.
+
+| Check | Result |
+| --- | --- |
+| Moves | 23 (1 directory, 22 test modules); git classifies the 17 records as R100 (identical content), and the original directory index is byte-identical |
+| Edits | 12 files rewritten; 2 derived files regenerated (`docs/reference-inventory.json`, `.md`); 1 forwarding stub added |
+| Protected files | All unchanged |
+| Idempotence | After a second run, `git status` is empty |
+| `--verify` | ok: no leftovers; all 107 test IDs resolve; all three derived-file checks pass |
+| Full suite (RN-6) | **Met.** Before and after, checks are 24 pass / 2 fail (`unittest`, `ams_optional`) / 1 skip (codex CLI not found); both sides run 4905 unit tests in 408 modules with 16 common failures (environment: sympy missing, LaTeX, external CLIs); **one-sided failures: 0**, and every count is identical; each run takes about 32 minutes |
+| semantic-lock (RN-4) | Frozen on the pre-rename copy, checked on the renamed copy: without a snapshot store, 13 `semantics_unreproducible` (exit 3); with snapshots, complete (exit 0) |
+| `plugin_release` | The renamed copy returns `unreleased` (its files have changed) until the release that carries the rename writes its own manifest. This is expected; the rename ships only in a release (RN-4) |
+
+#### 8.3.6 Lessons from the verification
+
+- **Derived files go stale.** The first comparison showed 4 extra failures after the rename, because the tool did not regenerate the reference inventory. RN-7 was added.
+- **The two test setups must match.** In the first comparison the renamed copy was a git repo with no ignore rules, so the packaging check also counted test caches (3120 files, 48.3 MB). Those extra failures came from the setup, not the rename. Both copies **MUST** use the same exclude rules.
+- **Never use a leftover copy as the source.** The full suite's `ams_optional` check copies the plugin to `/tmp/hep research no ams …` and leaves the copy behind when it times out. The rename source **MUST** be the clean installed or repository plugin.
+- **Check that the version really is a release.** Confirm with `plugin_release()` that the baseline copy is a released build; that is how the earlier "0.23.0" baseline turned out to be a development build (§0.2).
 
 ---
 
@@ -366,13 +464,14 @@ Assurance plane B (custodian's formal-use gate; design only)
   8. Classify G21.
   9. Add probes for G11–G22; mutation-testing skeleton.
   10. Confirm how old releases can be obtained (git tags).
-  11. **Rename the code-name identifiers (WP-R, per DR-15):** use `rename_analysis_check_ids.py` to rename `docs/dev/v6.3/` and `test_v63_*`, `v63_cases`, `v63_runs` to descriptive names (§8.3). This **MUST** come after item 5 (snapshots on by default) and ship in the **same release** as item 2 (registry schema 1.1.0): the rename edits `registry.json`, whose digest the semantic-lock pins.
+  11. **Rename the code-name identifiers (WP-R; only if DR-15 is adopted):** run §8.3 with `rename_analysis_check_ids.py`. It **MUST** come after item 5 and ship in the same release as item 2 (RN-4).
 - **Prohibition:** **no rule outcome may change.**
 - **Exit conditions:**
   - V72–V76 pass;
   - existing tests pass;
   - `run_all_checks.py` is green;
   - suite 1.0.0 gives the same results on R1 as on 0.21;
+  - if item 11 was done: RN-6 is met;
   - the gate record is confirmed by the programme owner.
 
 ### 9.2 Phase 1: evidence (estimate 4–10 sessions)
@@ -475,9 +574,10 @@ O09, forward folding, per-sign ratio factors, eras, cross-section analyses, the 
 
 | Work | Owner |
 | --- | --- |
-| Programme owner; DR-9 to DR-14 decisions; confirming pending revisions; judging the value-gate result; confirming gate records | hchouTW (programme owner named in `decision-enforce.md`) |
+| Programme owner; DR-9 to DR-15 decisions; confirming pending revisions; judging the value-gate result; confirming gate records | hchouTW (programme owner named in `decision-enforce.md`) |
 | Drafting `decision-architecture.md` and `decision-value-gate.md` | The implementer drafts; the programme owner fills in the Decision sections |
 | Running the value gate and its measurement script | The implementer |
+| Running and verifying the WP-R rename | The implementer, per §8.3 and Appendix A.4 |
 | Planting errors | To be named (O04); never a rule author |
 | Assurance-plane design document | The implementer drafts; the custodian reviews (O17) |
 | Non-author reviewer; roles that may accept reports | To be named (O04, O14) |
@@ -501,7 +601,7 @@ O09, forward folding, per-sign ratio factors, eras, cross-section analyses, the 
 - **Trigger:**
   - the value gate decides shrink or stop; or
   - **after the decision point**, two consecutive minor releases pass with no non-test caller and no gate use.
-  
+
   Components assigned to the assurance plane (`check-report`, `custody.py`) are exempt until the assurance-plane design is decided.
 - **Steps:**
   1. Deprecate in one release (CHANGELOG, README, related references).
@@ -534,6 +634,8 @@ This changes the exit conditions in `decision-enforce.md`, so it **MUST** be rec
 | In R2, some suite 1.0.0 rules give `rule_not_run` | Expected | The default-suite policy in §8.2 |
 | Obtaining old releases | Unresolved: m0-baseline records only the 0.11.0 tag in the monorepo | Confirm in Phase 0 |
 | No non-author human review yet | Known | §13.5 |
+| The rename makes frozen bundles without snapshots unreproducible | Confirmed (RN-4) | The rename comes after snapshots are on by default, in the same release as the registry changes |
+| The version installed when implementation starts differs from this document's baseline | Known (on 2026-10-22 alone the plugin moved from 0.21 to 0.24.1) | §15 rule 13: re-run Appendix A.1 and confirm the version before starting |
 
 ### 14.2 Open items
 
@@ -555,7 +657,7 @@ This changes the exit conditions in `decision-enforce.md`, so it **MUST** be rec
 An agent carrying out this programme (including Claude) **MUST** follow these rules:
 
 1. **Check decision status first.** Before any work, check §7. If a relevant DR is "open" or "pending confirmation", only do preparatory work or drafts; **MUST NOT** implement the parts it affects.
-2. **Never rewrite records.** For `docs/dev/v6.3/decision-*.md` and other records, only add dated sections. Decision sections are filled in by the programme owner; an agent **MUST NOT** fill them in.
+2. **Never rewrite records.** For `docs/dev/v6.3/decision-*.md` (after the rename, `docs/dev/cross-artifact-check/decision-*.md`) and other records, only add dated sections. Decision sections are filled in by the programme owner; an agent **MUST NOT** fill them in.
 3. **No rule changes in Phase 0.** No Phase 0 change may alter a suite 1.0.0 rule outcome. Verify by checking that suite 1.0.0 gives the same results on R1 as on 0.21.
 4. **Rule changes require a version bump.** A fix that changes an outcome **MUST** raise that rule's version and be released through a pre-release suite (P3).
 5. **Never auto-write intent.** No tool may generate check-context roots, instances, bindings or declarations automatically (P4, P10).
@@ -565,7 +667,8 @@ An agent carrying out this programme (including Claude) **MUST** follow these ru
 9. **Assurance plane: design only.** Until the preconditions in §5.1 hold, **MUST NOT** implement assurance-plane features.
 10. **Leave protected areas alone.** **MUST NOT** modify `core/partition/`, `core/protected/`, or the permit and attestation schemas.
 11. **Label evidence.** Statements in documents and reports carry Confirmed, Inferred or Unresolved, with their evidence.
-12. **Rename only with the tool.** Code-name renames **MUST** use `rename_analysis_check_ids.py` and follow the safety rules of §8.3; **MUST NOT** be done by hand or by global replacement.
+12. **Rename only with the tool.** Code-name renames **MUST** use `rename_analysis_check_ids.py` and follow RN-1–RN-7 of §8.3.3; **MUST NOT** be done by hand or by global replacement.
+13. **Confirm the baseline before starting.** Before implementation starts, re-run Appendix A.1 on the version installed at that time and confirm with `plugin_release()` that it is a released build; if the results differ from §0.2, update this document (§0.2, §1, §8.1) before implementing.
 
 ---
 
@@ -578,21 +681,27 @@ An agent carrying out this programme (including Claude) **MUST** follow these ru
 | `final/cross-artifact-check-architecture.zh.md` (Chinese) | **Valid** |
 | `final/cross-artifact-check-architecture.en.md` (this document, English) | **Valid**; same content as the Chinese version |
 | `final/test_cross_artifact_check_gap_probes.py` | **Valid**; covers G1–G10 now; Phase 0 adds G11–G22 |
-| `final/rename_analysis_check_ids.py` | **Valid**: the WP-R rename tool (dry run, `--apply`, `--verify`); delivered into the plugin's `tools/` |
+| `final/rename_analysis_check_ids.py` | **Valid**: the WP-R rename tool (§8.3.4); delivered into the plugin's `tools/` |
 | `final/cross-artifact-check-decision-rationale.zh.md` | **Rationale appendix.** The evidence and reasoning can be consulted, but its Decision texts **MUST NOT** be pasted. Refuted statements:<br>• DR-5 "availability only";<br>• DR-1 "automatically facts from S2";<br>• DR-3 bytes digest;<br>• DR-6 1e-12 and plain k;<br>• DR-7 label-only row;<br>• DR-8 root coverage |
-| `archive/plans/cross-artifact-check-architecture-pre-restructure.zh.md` | Superseded (the same content before this restructuring, with the full disposition tables of both reviews) |
+| `archive/plans/cross-artifact-check-architecture-pre-cleanup-2.zh.md`, `.en.md` | Superseded (the same content before this clean-up) |
+| `archive/plans/cross-artifact-check-architecture-pre-restructure.zh.md` | Superseded (the same content before the first restructuring, with the full disposition tables of both reviews) |
 | `archive/plans/cross-artifact-check-plan-v2.zh.md` (v2) | Superseded; its §12 review record is kept |
 | `archive/plans/cross-artifact-check-plan-v3.1.zh.md`, `-en.md` | Superseded; its §11 review record is kept; if DR-11 is rejected, its WP1 and WP6 become the basis again |
 | `archive/plans/cross-artifact-check-architecture-rethink.zh.md` | Superseded; its §9 review record is kept |
 | `archive/evidence/` (`review/`, `review3/`–`review6/`, `probe*.py`, `proto_*.py`, `usage.py`) | Kept as reproduction scripts. Run them from the plugin root with `PYTHONPATH` pointing at the script's folder. `review5/callers.py` takes the root as an argument; `review6/p6_scope.py` must run only in a throwaway copy |
-| `hr/` (plugin copy) | Kept until Phase 0 starts. It is not pristine: it contains the probe tests, and `plugin_release()` returns `unreleased` |
+| `archive/evidence/rename/` (`compare.py`, `lockprobe.py`) | Kept: the WP-R reproduction scripts (Appendix A.4) |
+| `v241/` (`pristine/`, `proto/`, `lockp/`) | Kept until Phase 0 starts: a clean 0.24.1 snapshot, and the verification copies and outputs of §8.3.5 |
+| `rename-proto/` | Kept until Phase 0 starts: the first rename verification, on the development build after 0.23.0 (including the comparison that led to RN-7) |
+| `hr/` (plugin copy) | Kept until Phase 0 starts. A 0.21.0 copy that is not pristine: it contains the probe tests, and `plugin_release()` returns `unreleased` |
 
 ### 16.2 Plugin documents (recommendations; not yet modified)
+
+If DR-15 is adopted, the `docs/dev/v6.3/` paths below become `docs/dev/cross-artifact-check/`.
 
 | Document | Recommendation |
 | --- | --- |
 | `docs/dev/v6.3/README.md` | Index this architecture and the two new decision records |
-| **New** `decision-architecture.md` | State and rationale of DR-1 to DR-14, with one Decision section per DR; replaces the `decision-hardening.md` proposed in v3.1 |
+| **New** `decision-architecture.md` | State and rationale of DR-1 to DR-15, with one Decision section per DR; replaces the `decision-hardening.md` proposed in v3.1 |
 | **New** `decision-value-gate.md` | DR-13's design and pre-registered thresholds; after measuring, the result and the decision |
 | `decision-enforce.md` | Text unchanged; add a dated section: the value gate joins the exit conditions; this document's phases replace the stacked-PR plan |
 | `decision-m2a.md`, `m2a-design.md` | Text unchanged; add dated sections: DR-2 removes `root_not_required`; version guard; P6 |
@@ -620,8 +729,9 @@ An agent carrying out this programme (including Claude) **MUST** follow these ru
 | Architecture rethink v1 → v2 (independent review 3) | Two planes; value gate | The description model is deliberate; the execution bridge is not feasible; the gate was circular |
 | Usage audit | No real workflow runs the checker | — |
 | Final architecture (independent reviews 4 and 5) | One architecture; G20–G22; governance | The entry path must not auto-write intent; Phase 0 changes no rules; P6 aligned with the exit code; G22 reduced to a minimal fix |
-| Code-name rename (WP-R, DR-15) | Rename tool; safety rules R-1–R-7; full suite identical before and after on 0.24.1 | The first comparison caught a stale reference inventory (R-7 added) |
-| Re-check against 0.24.1 | Facts, compatibility, tests and lock results all unchanged | The earlier "0.23.0" baseline was an unreleased development build; since 0.24.0 `plugin_release` returns the version on installed copies |
+| Code-name rename (WP-R, DR-15) | Rename tool; safety rules RN-1–RN-7 | The first comparison caught a stale reference inventory (RN-7 added). On the development build after 0.23.0: 4859 tests, 16 common failures, 0 failing only after the rename; the only one-sided failure was the timing test `test_scaling_check_rejects_a_quadratic_scan`, which passed 5 of 5 reruns in each tree and was recorded as flaky |
+| Re-check against 0.24.1 | Facts, compatibility, tests and lock results all unchanged; the rename's full suite is identical before and after | The earlier "0.23.0" baseline was an unreleased development build; since 0.24.0 `plugin_release` returns the version on installed copies |
+| Second clean-up | Added a one-page summary, a measurement-baseline table and an ID-family table; §8.3 split into six subsections; Appendix A rewritten as steps | The rename safety rules were renamed from R-1–R-7 to RN-1–RN-7 so they cannot be confused with releases R1–R3; no content change |
 
 **Limitation:** all five reviewers were AI agents; the non-author human review required by C15 (O04) is still needed. The full disposition tables are in the review records of the documents under `archive/plans/`.
 
@@ -629,13 +739,34 @@ An agent carrying out this programme (including Claude) **MUST** follow these ru
 
 ## Appendix A: Reproducing the evidence
 
-- **Probe tests:**
-  1. Copy `final/test_cross_artifact_check_gap_probes.py` into the plugin's `tests/contracts/`.
-  2. Run `python3 -m unittest tests.contracts.test_cross_artifact_check_gap_probes -v`.
-  
-  All 10 currently fail, as expected: each probe describes the intended behaviour.
-- **Review scripts:** from the plugin root, run `PYTHONPATH=<script folder> python3 <script>`.
-- **Rename (WP-R):** `python3 rename_analysis_check_ids.py ROOT` (dry run) → `--apply --date YYYY-MM-DD` → `--verify`; run `python3 tools/run_all_checks.py --out DIR` before and after (both in git work trees, with `.git/info/exclude` ignoring `__pycache__/`, `*.pyc`, `.pytest_cache/`, `.hypothesis/`), map the old test IDs to the new names with the tool's rules, and compare the failure sets; rerun any one-sided failure 5 times in each tree. When copying from an installed copy, first remove the root `.in_use/` (the runtime folder written by the plugin system) or add `/.in_use/` to the exclude file.
-- **Baseline:**
-  - `python3 -m unittest discover -s tests/contracts -t . -p 'test_v63_*.py'` (the 205 existing tests pass);
-  - `python3 contracts/rule_registry.py check` (pass; 23 rules, 71 V cases).
+Run every command from the plugin root unless stated otherwise.
+
+### A.1 Baseline (§15 rule 13)
+
+1. `python3 -c "import sys; sys.path.insert(0, '.'); from core.protected import identity; print(identity.plugin_release())"`: must return a released version, not `unreleased`.
+2. `python3 -m unittest discover -s tests/contracts -t . -p 'test_v63_*.py'`: the 205 existing tests pass (after the rename, use `-p 'test_analysis_check_*.py'`).
+3. `python3 contracts/rule_registry.py check`: pass; 23 rules, 71 V cases.
+
+### A.2 Probe tests
+
+1. Copy `final/test_cross_artifact_check_gap_probes.py` into the plugin's `tests/contracts/`.
+2. Run `python3 -m unittest tests.contracts.test_cross_artifact_check_gap_probes -v`.
+
+All 10 currently fail, as expected: each probe describes the intended behaviour.
+
+### A.3 Review scripts
+
+Run `PYTHONPATH=<script folder> python3 <script>`; individual limits are in the `archive/evidence/` row of §16.1.
+
+### A.4 Rename verification (WP-R)
+
+1. **Get a clean source:** the installed or repository plugin; **MUST NOT** be a leftover copy such as `/tmp/hep research no ams …` (§8.3.6).
+2. **Make two copies** (before and after): remove the root `.in_use/` and every `__pycache__`; `git init` each; write `__pycache__/`, `*.pyc`, `.pytest_cache/`, `.hypothesis/`, `.DS_Store` and `/.in_use/` into `.git/info/exclude`; `git add -A` and commit.
+3. **Dry run:** in the "after" copy, run `python3 rename_analysis_check_ids.py .` and confirm 23 moves, every source present and every target absent.
+4. **Apply:** `python3 rename_analysis_check_ids.py . --apply --date YYYY-MM-DD`; the output `status` must be `ok`.
+5. **Idempotence:** commit, then repeat step 4; `git status --porcelain` must be empty.
+6. **Protected files:** in `git diff -M --name-status HEAD~1`, files listed in RN-2 may appear only as R100 (pure moves).
+7. **Full suite:** run `python3 tools/run_all_checks.py --out DIR` once in each copy (about 32 minutes each; run them one after the other, not in parallel, so timing tests are not disturbed).
+8. **Compare:** `python3 archive/evidence/rename/compare.py OUT_BEFORE OUT_AFTER` maps the pre-rename test IDs to the new names with the tool's rules, then compares check statuses, failure sets and counts.
+9. **One-sided failures:** rerun any failure that appears on one side only 5 times in each copy; if all reruns pass in both, record it as flaky (RN-6).
+10. **Lock impact:** `python3 archive/evidence/rename/lockprobe.py BEFORE_TREE AFTER_TREE` (on clean trees exported with `git archive`): expect 13 `semantics_unreproducible` without a snapshot store and complete with snapshots (RN-4).

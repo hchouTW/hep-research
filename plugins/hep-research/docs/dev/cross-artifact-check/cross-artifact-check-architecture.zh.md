@@ -2,25 +2,62 @@
 
 ## 0. 文件說明
 
+### 0.1 基本資訊
+
 | 項目 | 內容 |
 | --- | --- |
-| 對象 | hep-research 0.21.0(contracts 3.2.0)的跨 artifact analysis check(以下簡稱 **checker**),以及與它相關的元件 |
-| 版本 | 2026-10-22 定稿(結構整理版;內容與第二次獨立審查後的修訂版相同) |
+| 對象 | hep-research 的跨 artifact analysis check(以下簡稱 **checker**),以及與它相關的元件 |
+| 版本 | 2026-10-22 定稿;第二次結構整理版(內容與整理前相同,只調整組織與用語) |
 | 地位 | **唯一有效的架構文件。** 其他方案與備忘錄都已取代(§16) |
 | 語言 | 中文版(本文件)與英文版 `cross-artifact-check-architecture.en.md` 內容一致;兩者若有出入,以中文版為準 |
 | 讀者 | maintainer、審查者,以及執行實作的 agent(例如 Claude) |
 | 規則狀態 | checker 的全部規則維持 **shadow mode**;本文件**不啟用**任何 gate 條件 |
-| 量測基準 | 事實最初在 0.21.0 量測,2026-10-22 於 **0.24.1**(contracts 3.6.0;`plugin_release()` 驗證為 0.24.1)全部重新量測:analysis check 的所有程式、suite、registry、catalog、coverage、相關 schema 與 `docs/dev/v6.3/` 都與先前的基準**逐位元相同**;F1–F9、§8.1 的相容性事實、205 個既有測試、`rule_registry.py check`(23 條規則、71 個 V case)與 10 個 gap probe 的結果都不變;以舊版凍結的 bundle 在 0.24.1 上 check 仍為 complete。所以結論不變。**更正:** 本文件先前稱為「0.23.0」的基準,其實是 0.23.0 之後、尚未發布的開發版(`plugin.json` 寫 0.23.0,但 CHANGELOG 有 `Unreleased` 段落,`plugin_release()` 回傳 `unreleased`)。release 一律以相對代號 R1–R3 表示(§8.2) |
 
-### 0.1 怎麼讀這份文件
+### 0.2 量測基準
 
-- **要知道現況:** §1。
-- **要知道術語:** §2。所有 ID(G、A、DR、P、V、O、HC、C)的定義與出處都在那裡。
-- **要知道該做什麼:** §9(路線圖)的每一期都列出「前置條件 → 工作 → 禁止事項 → 結束條件」。
-- **要知道某件事是否已決定:** §7(決策登記)。**標為「待決」或「待確認」的內容,不得當成已決定來實作。**
-- **要實作時:** 先讀 §15(agent 作業規則)。
+| 項目 | 內容 |
+| --- | --- |
+| 首次量測 | hep-research 0.21.0(contracts 3.2.0) |
+| 目前基準 | hep-research **0.24.1**(contracts 3.6.0),2026-10-22 全部重新量測;`plugin_release()` 驗證為 0.24.1(已發布的 release) |
+| 0.21.0 → 0.24.1 之間 checker 的變化 | **沒有。** checker 的程式、suite、registry、catalog、coverage、相關 schema 與 `docs/dev/v6.3/` 都逐位元相同。0.24.x 的變更在 independent review 的 expert 角色、advisory 與 sci-fix,不涉及 checker |
+| 在 0.24.1 上重跑的結果 | F1–F9(§1)、§8.1 的相容性事實、205 個既有測試、`rule_registry.py check`(23 條規則、71 個 V case)、10 個 gap probe 都與先前相同;以舊版凍結的 bundle 在 0.24.1 上 check 仍為 complete |
+| 更正 | 本文件先前稱為「0.23.0」的基準,其實是 0.23.0 之後、尚未發布的開發版(`plugin.json` 寫 0.23.0,但 CHANGELOG 有 `Unreleased` 段落,`plugin_release()` 回傳 `unreleased`) |
+| release 的寫法 | 本計畫的 release 一律以相對代號 R1–R3 表示(§8.2),不寫絕對版本號 |
 
-### 0.2 用語
+### 0.3 一頁摘要
+
+- **checker 是什麼:** 對一個凍結的分析(bundle)做跨 artifact 的一致性檢查,產生 advisory 診斷。
+- **現況:** 規則層的設計是對的,但有 22 個已重現的缺口(G1–G22),而且**沒有任何真實流程在執行它**(F2、F3)。
+- **核心判斷:** 先取得價值的證據(價值閘門,§10),再決定是否修正與擴充。
+- **架構:** 兩個平面(§5.1,DR-11 待決)。診斷平面 A 現在做;保證平面 B 只寫設計。
+- **路線:** 第 0 期(基礎,不改任何規則 outcome)→ 第 1 期(價值閘門)→ 決策點(繼續、縮小或停止)→ 第 2 期(修正缺口)。
+- **已決定:** DR-1 至 DR-8 的原文已採用;它們審查後的修訂仍**待確認**。
+- **待決:** DR-9 至 DR-15。
+- **另外的工作包 WP-R:** 把程式代號「v6.3 / v63」改為描述性名稱。工具已完成,並已在 0.24.1 上驗證改名前後的完整檢查結果完全相同(§8.3);是否採用取決於 DR-15。
+- **下一步:** 計畫負責人決定 DR-9、DR-11、DR-12、DR-13(第 0 期的前置條件)。
+
+### 0.4 依需要找章節
+
+| 想知道 | 看 |
+| --- | --- |
+| 現況與證據 | §1 |
+| 術語與 ID | §2 |
+| 範圍(做什麼、不做什麼) | §3 |
+| 規範性原則 | §4 |
+| 架構、平面與元件 | §5 |
+| 缺口 | §6 |
+| 某件事是否已決定 | §7。**標為「待決」或「待確認」的內容,不得當成已決定來實作** |
+| 版本、相容性、release | §8.1、§8.2 |
+| 改名(WP-R) | §8.3 |
+| 該做什麼、什麼時候做 | §9;每一期都列出「前置條件 → 工作 → 禁止事項 → 結束條件」 |
+| 價值閘門、入口、探針 | §10、§11、§12 |
+| 誰負責、記錄慣例、退場 | §13 |
+| 風險與未決事項 | §14 |
+| 實作時的規則 | §15(**實作前必讀**) |
+| 哪些文件有效 | §16 |
+| 如何重現證據 | 附錄 A |
+
+### 0.5 用語與證據等級
 
 | 用語 | 意思 |
 | --- | --- |
@@ -30,6 +67,10 @@
 | **Confirmed** | 已在 0.21.0 副本中實測或讀碼確認,並在 0.24.1 複核,附有證據 |
 | **Inferred** | 由已確認的事實推得,未直接量測 |
 | **Unresolved** | 尚未知道答案 |
+| **待決** | 尚未決定的決策項目(§7) |
+| **待確認** | 已提出、但要等計畫負責人以有日期的段落確認才生效的修訂(§7.1) |
+
+**容易混淆的代號:** `R1`–`R3` 是本計畫的 release(§8.2);`RN-1`–`RN-7` 是改名的安全規則(§8.3.3);`R-AUX`、`r-real.*` 等是 checker 的規則名稱。三者無關。
 
 ---
 
@@ -54,9 +95,11 @@
 
 ## 2. 名詞定義
 
+### 2.1 checker 的概念
+
 | 術語 | 定義 |
 | --- | --- |
-| 分析檢查計畫 | plugin 內部代號為「v6.3」的開發計畫(2026-10-16 起),建立了 checker;其記錄位於 `docs/dev/v6.3/`,其測試為 `tests/contracts/test_v63_*.py`。本文件以此名稱稱呼它 |
+| 分析檢查計畫 | plugin 內部代號為「v6.3」的開發計畫(2026-10-16 起),建立了 checker。記錄位於 `docs/dev/v6.3/`,測試為 `tests/contracts/test_v63_*.py`;若 DR-15 採用,改名為 `docs/dev/cross-artifact-check/` 與 `test_analysis_check_*`(§8.3)。本文件以「分析檢查計畫」稱呼它 |
 | checker | `contracts/analysis_check.py` 與 `contracts/analysis_checks/`:對一個凍結的分析做跨 artifact 檢查 |
 | bundle(v2) | `freeze` 產生的凍結分析,格式 `hep-research-analysis-bundle/2`;內含 items、check-context、semantic-lock |
 | check-context | bundle 中描述分析意圖的文件:roots、recipe instances、bindings、declarations、凍結的 obligation 清單 |
@@ -68,17 +111,35 @@
 | snapshot | 以內容定址儲存的定義副本,讓舊 subject 能以舊語意重現(D11b) |
 | `lock_differences` / `installed_differences` | 凍結的定義與目前定義不同;前者是沒有 snapshot 時的差異,後者是以 snapshot 重現時記錄的差異 |
 | 版本守衛 | 規則、generator 或輸入檢查的版本與 suite 指定的不同時,不評估而給 `rule_not_run` |
+| L1 / L2 | `validate.py`(單一 artifact)/ `recipe_semantics.py`(recipe 語意);在分析檢查計畫之前就存在 |
+
+### 2.2 本架構的概念
+
+| 術語 | 定義 |
+| --- | --- |
 | 診斷平面(A) | 在 agent 端執行的 checker;只產生 advisory 診斷 |
 | 保證平面(B) | 位於 custodian formal-use gate 的檢查;由 custodian 自己重跑並判斷輸入的保管 |
 | 受保護輸入 | `core/protected/trusted_input.read_protected()` 判定、只可能由 custodian 寫入的檔案 |
-| 價值閘門 | 擴充之前的量測:checker 相對於既有防線,能多抓到多少錯誤 |
-| 入口 | 協助產生 v2 bundle 的工具(`analysis_check.py draft`);是否建立依 DR-14 |
-| L1 / L2 | `validate.py`(單一 artifact)/ `recipe_semantics.py`(recipe 語意);在分析檢查計畫之前就存在 |
-| G / A | 缺口 / 附帶問題(§6) |
-| DR | 本計畫的決策項目(§7) |
-| P | 設計原則(§4) |
-| V | registry 中的驗證案例;V01–V71 已存在,V72–V91 為本計畫新增 |
-| O、C、HC、D12b、D11b、G-ENFORCE | plugin 既有的開放問題、條件、硬性約束、記錄慣例與決策關卡;定義見 `docs/dev/v6.3/` 與 `docs/protected-data-architecture.md` |
+| `plugin_release` | `core/protected/identity.plugin_release()` 的結果:副本與某個 release manifest 完全一致時回傳該版本,否則回傳 `unreleased` |
+| `.in_use/` | plugin 系統在已安裝副本的根目錄寫入的執行期資料夾;0.24.0 起不計入副本的身分 |
+| 價值閘門 | 擴充之前的量測:checker 相對於既有防線,能多抓到多少錯誤(§10) |
+| 入口 | 協助產生 v2 bundle 的工具(`analysis_check.py draft`);是否建立依 DR-14(§11) |
+| 期別 | 路線圖的階段:第 0、1、2 期與覆蓋擴充(§9) |
+| session | 估計工作量的單位:一次連續的實作工作 |
+| WP-R | 程式代號改名的工作包(§8.3,依 DR-15) |
+
+### 2.3 ID 族群
+
+| ID | 意思 | 定義所在 |
+| --- | --- | --- |
+| F1–F10 | 現況事實 | §1 |
+| P1–P10 | 設計原則 | §4 |
+| G1–G22 / A1–A6 | 缺口 / 附帶問題 | §6 |
+| DR-1–DR-15 | 本計畫的決策項目 | §7 |
+| R1–R3 | 本計畫的 release(相對代號) | §8.2 |
+| RN-1–RN-7 | 改名的安全規則 | §8.3.3 |
+| V01–V91 | registry 中的驗證案例;V01–V71 已存在,V72–V91 為本計畫新增 | `contracts/rules/registry.json`;§6 |
+| O、C、HC、D12b、D11b、G-ENFORCE、T3、S3 | plugin 既有的開放問題、條件、硬性約束、記錄慣例、決策關卡、威脅類別與執行 scope | `docs/dev/v6.3/` 與 `docs/protected-data-architecture.md` |
 
 ---
 
@@ -135,7 +196,7 @@
 | 定義 | 已安裝的定義,或依 D11b 由 snapshot 重現 | 拒絕分析者提供的 snapshot 與 bundle 自帶的定義,或使用已發布定義的索引 |
 | `check-report` 的角色 | 便宜的拒絕條件:dependency-missing、`lock_differences`、預發布 suite、與 frozen inventory 不符 | gate 邏輯:V60、V65、V66、保管判斷、與審查報告的比對 |
 | 信任標記 | `declaration_based` 只作提示;G8、A3 一律標記 | P8;分析者帳號的來源需要定案 |
-| 報告格式 | report 1.0.0 | report 1.1.0(`assessment.inputs`、`basis_summary`);`recheck_record.json`;`plugin_release` 為 `unreleased` 時,不得視為已重跑 |
+| 報告格式 | report 1.0.0 | report 1.1.0(`assessment.inputs`、`basis_summary`);`recheck_record.json`;`plugin_release` 為 `unreleased` 時,不得視為已重跑(§8.1) |
 | 與人工審查 | 報告是審查的參考資料 | **必須**與審查者接受的報告比對 |
 | 變異測試運算子 | relabel、rename、copy、copy+perturb、drop、loosen、toggle-optional、reorder、edit-report | unprotect、forge-definition |
 
@@ -266,27 +327,30 @@
 
 ### 8.1 相容性事實與目標
 
-| 物件 | 0.21 的事實(Confirmed) | 目標 |
+| 物件 | 事實(Confirmed;0.21 量測,0.24.1 複核) | 目標 |
 | --- | --- | --- |
 | SemVer 預發布版本 | `semver.parse('1.1.0-dev.1')` 丟出 `not a version`;registry 的 rule `version` pattern 與 context 的 suite version pattern 都是 `^\d+\.\d+\.\d+$`(`v_cases` 的 pattern `^V\d{2}$` 與版本無關) | R2 起接受 `1.1.0-dev.N`;`check-report` 拒絕預發布 suite(`permit.report_prerelease_suite`);任何 purpose policy 都不接受預發布 suite |
 | registry schema | `registry_version` 的 enum 只有 `1.0.0`;rule 物件是 `additionalProperties: false`;`work_packages` 為 `^D\d{2}[a-d]?$`;`slice` 為 M1–M3/D11b 的 enum;同一個 `rule_id` 出現兩次 → `registry.duplicate_rule` | R1:registry 1.1.0(rule 的原始碼 digest 欄位、新的期別與工作包的值)。R2:唯一鍵改為 (rule_id, version);退休的版本以 `lifecycle` 標示 |
 | semantic-lock | 1.0.0;釘選整份 registry、整份 coverage、整份 table,以及被任何 operator 引用的 effect(CASE-CHAIN 有 14 個) | **不變。** 漂移由預設開啟的 snapshot 吸收 |
-| check-context | `context_version` 是 const;0.21 拒絕 1.1.0(freeze 給 `bundle.context_schema`,check 判 input-invalid);未知的 declaration 型別在 1.0.0 只產生 context finding | R2:1.1.0 |
-| report | `report_version` 是 const;0.21 把 1.1.0 判為 `report_missing`;頂層 `additionalProperties: false`;`assessment` 與 obligation 物件是開放的 | 診斷平面維持 1.0.0(R1 在 `assessment` 中加入 `plugin_release`);1.1.0 屬於保證平面 |
-| result binding | 0.21 給 `schema.const` 與 `schema.additional`,判 input-invalid | R2:1.1.0(`campaigns[].inputs`) |
+| check-context | `context_version` 是 const;拒絕 1.1.0(freeze 給 `bundle.context_schema`,check 判 input-invalid);未知的 declaration 型別在 1.0.0 只產生 context finding | R2:1.1.0 |
+| report | `report_version` 是 const;把 1.1.0 判為 `report_missing`;頂層 `additionalProperties: false`;`assessment` 與 obligation 物件是開放的 | 診斷平面維持 1.0.0(R1 在 `assessment` 中加入 `plugin_release`);1.1.0 屬於保證平面 |
+| result binding | 給 `schema.const` 與 `schema.additional`,判 input-invalid | R2:1.1.0(`campaigns[].inputs`) |
 | suites | 四個都是 1.0.0 | R2:`1.1.0-dev.N`;R3:1.1.0 stable(counting-chain、ratio-subset、run-lineage、model-card) |
 | effect catalog | `effect_catalog.json` 的 `catalog_version` enum 只有 `1.0.0` | R3:1.1.0(`description_required`) |
-| `plugin_release` | bundle v2 已有此欄位;dev 樹與任何多出、缺少或改動檔案的副本回傳 `unreleased`。**0.24.0 起**,已安裝的 release 副本回傳自己的版本(0.24.1 實測);在此之前,plugin 系統寫入的 `.in_use/` 讓每個已安裝副本都回傳 `unreleased` | R1 寫入 report 的 `assessment`。因為 0.24.0 的修正,「`unreleased` 不得視為已重跑」(§5)在已安裝的副本上才可行 |
+| `plugin_release` | bundle v2 已有此欄位;dev 樹與任何多出、缺少或改動檔案的副本回傳 `unreleased`。**0.24.0 起**,已安裝的 release 副本回傳自己的版本(0.24.1 實測);在此之前,`.in_use/` 讓每個已安裝副本都回傳 `unreleased` | R1 寫入 report 的 `assessment`。因為 0.24.0 的修正,「`unreleased` 不得視為已重跑」(§5.1)在已安裝的副本上才可行 |
 
 ### 8.2 發布對應
 
 | release | 期別 | contracts | 格式變更 | 規則 outcome 是否改變 |
 | --- | --- | --- | --- | --- |
-| R1 | 第 0 期 | +1 minor | registry schema 1.1.0 | **否** |
+| R1 | 第 0 期 | +1 minor | registry schema 1.1.0;WP-R 改名(若 DR-15 採用) | **否** |
 | R2 | 第 2 期前半 | +2 minor | SemVer 預發布的 pattern(semver、registry、context);registry 唯一鍵;check-context 1.1.0;calibration shape;result binding 1.1.0 | 是(只在 `1.1.0-dev.N` suite 中) |
 | R3 | 第 2 期後半 | +3 minor | catalog 1.1.0 | 是(suite 1.1.0 stable) |
 
-**release 代號:** R1 = 本計畫的第一個 release,也就是開始實作時已安裝版本之後的下一個 minor(以 2026-10-22 已安裝的 0.24.1 而言,是 0.25.0);R2、R3 依序遞增。contracts 欄的「+n minor」相對於 R1 之前的 contracts 版本。每個有格式變更的 release 只升一次 contracts minor。
+**release 代號:**
+- R1 = 本計畫的第一個 release,也就是開始實作時已安裝版本之後的下一個 minor。以 2026-10-22 已安裝的 0.24.1 而言,R1 是 0.25.0。
+- R2、R3 依序遞增。
+- contracts 欄的「+n minor」相對於 R1 之前的 contracts 版本;每個有格式變更的 release 只升一次 contracts minor。
 
 **預設 suite 政策:**
 - R1:suite 1.0.0 的結果與 0.21 相同。
@@ -295,7 +359,17 @@
 
 ### 8.3 程式代號改名(WP-R,依 DR-15)
 
-**對照表:**
+#### 8.3.1 目的、狀態與時機
+
+| 項目 | 內容 |
+| --- | --- |
+| 目的 | 把沒有意義的程式代號「v6.3 / v63」改為描述性名稱,同時不改變任何行為、不改寫任何歷史記錄 |
+| 狀態 | 工具已完成並已驗證(§8.3.5);**是否採用取決於 DR-15(待決)** |
+| 時機 | 第 0 期第 11 項(§9.1):**必須**在第 5 項(snapshot 預設開啟)之後,並與第 2 項(registry schema 1.1.0)在**同一個 release**(R1)發布 |
+| 時機的理由 | 改名會修改 `contracts/rules/registry.json`,而它的 digest 被 semantic-lock 釘選(RN-4) |
+| 工具 | `rename_analysis_check_ids.py`;交付時放入 plugin 的 `tools/` |
+
+#### 8.3.2 對照表
 
 | 舊名稱 | 新名稱 |
 | --- | --- |
@@ -322,28 +396,52 @@
 | `v63_cases`、`v63_runs`(測試輔助模組) | `analysis_check_cases`、`analysis_check_runs` |
 | `tests/core/test_v63_evidence_query` | `tests/core/test_evidence_query` |
 
-**安全規則(規範性):**
+以上都在 `tests/contracts/`,除非另有註明。
+
+#### 8.3.3 安全規則(規範性)
 
 | # | 規則 | 理由 |
 | --- | --- | --- |
-| R-1 | 只替換對照表中的**完整識別字**,前後不得緊接字母、數字或底線;**不得**全域替換 `v63` 或 `v6.3` | Confirmed:`test_v63_submission_bundle_digests` 是以驗證案例 **V63** 命名的測試方法,不是計畫代號;全域替換會把它改壞 |
-| R-2 | **不得**修改:release manifests、`CHANGELOG.md`、`VALIDATION.md`、所有 `docs/dev/**/decision-*.md`、被移動的記錄的內容、釘選的定義(`contracts/vocab/effects.json`、`contracts/semantics/**`、`contracts/rules/suites/**`)、`contracts/schemas/**` | 歷史記錄不得改寫(D12b);改動釘選的定義會改變 digest,讓沒有 snapshot 的已凍結分析無法重現 |
-| R-3 | 記錄以 `git mv` 移動(保留歷史),內容不變;舊路徑留一個轉址 `README.md`,讓所有寫著 `docs/dev/v6.3/<檔名>` 的舊引用仍能找到檔案(檔名不變) | 釘選的定義與歷史記錄中寫死了舊路徑 |
-| R-4 | `contracts/rules/registry.json` 中的測試 ID **必須**一起更新;它的 digest 被 semantic-lock 1.0.0 釘選,所以改名只能在 snapshot 預設開啟之後,並與其他 registry 變更在同一個 release 發布 | Confirmed:改名後,以舊 checker 凍結、沒有 snapshot 的 bundle 得到 13 項 `semantics_unreproducible`;有 snapshot 時仍是 complete |
-| R-5 | 工具必須冪等:第二次執行不得改變任何內容 | 可安全重跑 |
-| R-6 | 驗收:工具的 `--verify` 為 ok(沒有殘留的舊識別字、registry 的 107 個測試 ID 全部能解析、轉址存在、R-7 的衍生檔案檢查全部通過);完整檢查(`tools/run_all_checks.py`)的失敗集合與改名前**完全相同**。只出現在單側、且在兩邊重跑都通過的計時型測試,記為不穩定,不算差異 | 改名不得改變任何行為 |
-| R-7 | 改寫內容之後,**必須**重新產生被改到的已提交衍生檔案:只執行 `tools/reference_inventory.py`、`tools/build_stanzas.py`、`tools/capability_map.py` 中 `--check` 失敗的那幾個;`--verify` 要求三者的 `--check` 全部通過 | Confirmed:`skills/hep-authoring/references/independent-review.md` 引用了 `docs/dev/v6.3/` 的四個路徑,改寫後檔案大小改變,`docs/reference-inventory.{json,md}` 隨即過期,造成 `reference_inventory`、soft-budget 與 timeout 三個測試失敗(timeout 測試在內部執行 inventory 測試) |
+| RN-1 | 只替換對照表中的**完整識別字**,前後不得緊接字母、數字或底線;**不得**全域替換 `v63` 或 `v6.3` | Confirmed:`test_v63_submission_bundle_digests` 是以驗證案例 **V63** 命名的測試方法,不是計畫代號;全域替換會把它改壞 |
+| RN-2 | **不得**修改:release manifests、`CHANGELOG.md`、`VALIDATION.md`、所有 `docs/dev/**/decision-*.md`、被移動的記錄的內容、釘選的定義(`contracts/vocab/effects.json`、`contracts/semantics/**`、`contracts/rules/suites/**`)、`contracts/schemas/**` | 歷史記錄不得改寫(D12b);改動釘選的定義會改變 digest,讓沒有 snapshot 的已凍結分析無法重現 |
+| RN-3 | 記錄以 `git mv` 移動(保留歷史),內容不變;舊路徑留一個轉址 `README.md`,讓所有寫著 `docs/dev/v6.3/<檔名>` 的舊引用仍能找到檔案(檔名不變) | 釘選的定義與歷史記錄中寫死了舊路徑 |
+| RN-4 | `contracts/rules/registry.json` 中的測試 ID **必須**一起更新;它的 digest 被 semantic-lock 1.0.0 釘選,所以改名只能在 snapshot 預設開啟之後,並與其他 registry 變更在同一個 release 發布 | Confirmed(0.24.1):改名後,以舊 checker 凍結、沒有 snapshot 的 bundle 得到 13 項 `semantics_unreproducible`(exit 3);有 snapshot 時仍是 complete |
+| RN-5 | 工具必須冪等:第二次執行不得改變任何內容 | 可安全重跑 |
+| RN-6 | 驗收:工具的 `--verify` 為 ok,而且完整檢查(`tools/run_all_checks.py`)的失敗集合與改名前**完全相同**。只出現在單側、且在兩邊重跑都通過的計時型測試,記為不穩定,不算差異 | 改名不得改變任何行為 |
+| RN-7 | 改寫內容之後,**必須**重新產生被改到的已提交衍生檔案:只執行 `tools/reference_inventory.py`、`tools/build_stanzas.py`、`tools/capability_map.py` 中 `--check` 失敗的那幾個;`--verify` 要求三者的 `--check` 全部通過 | Confirmed:`skills/hep-authoring/references/independent-review.md` 引用了四個 `docs/dev/v6.3/` 路徑;改寫後檔案大小改變,`docs/reference-inventory.{json,md}` 隨即過期,造成 `reference_inventory`、soft-budget 與 timeout 三個測試失敗(timeout 測試在內部執行 inventory 測試) |
 
-**原型驗證(2026-10-22,於已安裝的 0.24.1 的拋棄式副本;兩邊都是 git work tree,以相同的 exclude 規則忽略快取,並移除根目錄的 `.in_use/`):**
-- 移動 23 項(1 個目錄、22 個測試模組);改寫 12 個檔案,重新產生 2 個衍生檔案(`docs/reference-inventory.json`、`.md`),新增 1 個轉址;git 判定 17 份記錄為 R100(內容完全相同),原目錄索引逐位元相同;
-- 受保護的檔案全部未變;
-- 第二次執行沒有任何變更(`git status` 為空);
-- `--verify`:沒有殘留、107 個測試 ID 全部能解析、三個衍生檔案檢查全部通過;
-- **完整檢查(R-6 通過,0.24.1):** 改名前後 check 都是 24 pass / 2 fail(`unittest`、`ams_optional`)/ 1 skip(找不到 codex CLI),沒有任何狀態差異;單元測試兩邊都執行 4905 個、408 個模組,共同失敗 16 個(環境因素:缺 sympy、LaTeX、外部 CLI)。**只在單側出現的失敗:0 個**,所有計數完全相同。每次完整檢查約 32 分鐘。
-- **先前在 0.23.0 之後的開發版上的比較:** 結果相同(4859 個測試、共同失敗 16 個、改名後才失敗的 0 個);唯一的單側失敗是計時型測試 `test_scaling_check_rejects_a_quadratic_scan`(只在改名前失敗一次,兩邊各重跑 5 次全部通過,記為不穩定)。
-- **改名後的副本不再是已發布的 release:** 改名會改動檔案,所以副本的 `plugin_release()` 回傳 `unreleased`,直到改名所屬的 release 產生自己的 manifest 為止。這是預期的;改名只能隨 release 發布(R-4)。
-- **第一次比較抓到的問題(已修正):** 一開始改名後多了 4 個失敗。原因有二:(1) 工具沒有重新產生 reference inventory(已加入 R-7);(2) 原型的 git 副本沒有忽略規則,packaging 檢查把測試快取算進去(3120 個檔案、48.3 MB),這是驗證環境的問題,不是改名造成的。
-- **注意:** 完整檢查中的 `ams_optional` 會把 plugin 複製到 `/tmp/hep research no ams …`,檢查逾時時不會清除。不要把這些殘留的副本當作改名的來源;來源必須是已安裝或 repository 中乾淨的 plugin。
+#### 8.3.4 工具的行為
+
+| 項目 | 內容 |
+| --- | --- |
+| 模式 | `ROOT`(dry-run:列出要移動與修改的檔案)、`ROOT --apply --date YYYY-MM-DD`(執行後自動 verify)、`ROOT --verify`(只稽核) |
+| exit code | 0 = ok;1 = verify 失敗;2 = 用法錯誤或拒絕執行(例如目標已存在) |
+| 會做的事 | 1. 依對照表移動(git work tree 中用 `git mv`);2. 在非受保護的文字檔中替換完整識別字(RN-1);3. 重新產生過期的衍生檔案(RN-7);4. 在舊路徑寫入轉址 `README.md`;5. 刪除 `__pycache__` |
+| 不會做的事 | 修改 RN-2 列出的檔案;移動後再編輯被移動的記錄 |
+| `--verify` 檢查 | 沒有殘留的舊識別字;所有目標都存在、沒有遺留的來源;轉址存在,而且舊目錄只剩轉址;registry 的 107 個測試 ID 都能解析到存在的模組;三個衍生檔案的 `--check` 都通過 |
+| 限制 | 只用標準函式庫;跳過 `.git`、`__pycache__`、`.in_use`、`node_modules` |
+
+#### 8.3.5 驗證結果(2026-10-22,0.24.1;Confirmed)
+
+驗證環境:兩份從已安裝的 0.24.1 複製的拋棄式副本(改名前、改名後),都是 git work tree,以相同的 exclude 規則忽略快取,並移除根目錄的 `.in_use/`。步驟見附錄 A.4。
+
+| 檢查 | 結果 |
+| --- | --- |
+| 移動 | 23 項(1 個目錄、22 個測試模組);git 判定 17 份記錄為 R100(內容完全相同),原目錄索引逐位元相同 |
+| 修改 | 改寫 12 個檔案;重新產生 2 個衍生檔案(`docs/reference-inventory.json`、`.md`);新增 1 個轉址 |
+| 受保護的檔案 | 全部未變 |
+| 冪等 | 第二次執行後 `git status` 為空 |
+| `--verify` | ok:沒有殘留、107 個測試 ID 全部能解析、三個衍生檔案檢查全部通過 |
+| 完整檢查(RN-6) | **通過。** 改名前後 check 都是 24 pass / 2 fail(`unittest`、`ams_optional`)/ 1 skip(找不到 codex CLI);單元測試兩邊都是 4905 個、408 個模組,共同失敗 16 個(環境因素:缺 sympy、LaTeX、外部 CLI);**只在單側出現的失敗:0 個**,所有計數完全相同;每次約 32 分鐘 |
+| semantic-lock(RN-4) | 以改名前的副本凍結、改名後的副本 check:沒有 snapshot store 時 13 項 `semantics_unreproducible`(exit 3);有 snapshot 時 complete(exit 0) |
+| `plugin_release` | 改名後的副本回傳 `unreleased`(檔案已改動),直到改名所屬的 release 產生自己的 manifest 為止。這是預期的;改名只能隨 release 發布(RN-4) |
+
+#### 8.3.6 驗證時學到的注意事項
+
+- **衍生檔案會過期。** 第一次比較,改名後多了 4 個失敗,原因是工具沒有重新產生 reference inventory。已加入 RN-7。
+- **驗證環境要對等。** 第一次比較中,改名後的副本是沒有忽略規則的 git repo,packaging 檢查把測試快取也算進去(3120 個檔案、48.3 MB),多出的失敗是驗證環境造成的,不是改名。兩份副本**必須**用相同的 exclude 規則。
+- **不要用殘留的副本當來源。** 完整檢查中的 `ams_optional` 會把 plugin 複製到 `/tmp/hep research no ams …`,逾時時不會清除。改名的來源**必須**是已安裝或 repository 中乾淨的 plugin。
+- **先確認版本是真的 release。** 以 `plugin_release()` 確認基準副本確實是已發布的 release;先前的「0.23.0」基準就是因此被發現其實是開發版(§0.2)。
 
 ---
 
@@ -357,15 +455,24 @@
   2. 函式層級的原始碼 digest;registry schema 1.1.0;`rule_registry.py check` 在 digest 改變但版本未變時失敗。
   3. checker 身分以執行時載入的模組為準;generator digest 涵蓋 `obligations.py`、`model.py`、`effect_catalog.py`(G10、A1)。
   4. P6:status 與 exit code 一致(G20)。
-  5. snapshot 預設開啟:`<root>/.hep-research/snapshots/`;freeze 把 bundle 路徑寫入 `<root>/.hep-research/bundles.json`;`snapshots gc` 只刪除沒有被索引參照的 digest,預設 dry-run。
+  5. snapshot 預設開啟:
+     - snapshot 寫入 `<root>/.hep-research/snapshots/`;
+     - freeze 把 bundle 路徑寫入 `<root>/.hep-research/bundles.json`;
+     - `snapshots gc` 只刪除沒有被索引參照的 digest,預設 dry-run。
   6. `check-report` 的便宜拒絕條件:dependency-missing、`lock_differences`、預發布 suite、與 frozen inventory 不符(G11、G19 的診斷部分)。
   7. `assessment.plugin_release`。
   8. G21 分類。
   9. 補上 G11–G22 的 probe;變異測試骨架。
   10. 確認舊 release 的取得管道(git tag)。
-  11. **程式代號改名(WP-R,依 DR-15)**:以 `rename_analysis_check_ids.py` 把 `docs/dev/v6.3/` 與 `test_v63_*`、`v63_cases`、`v63_runs` 改為描述性名稱(§8.3)。**必須**在第 5 項(snapshot 預設開啟)之後、並與第 2 項(registry schema 1.1.0)在**同一個 release** 發布:改名會修改 `registry.json`,而它的 digest 被 semantic-lock 釘選。
+  11. **程式代號改名(WP-R,只在 DR-15 採用時):** 以 `rename_analysis_check_ids.py` 執行 §8.3。**必須**在第 5 項之後,並與第 2 項在同一個 release 發布(RN-4)。
 - **禁止事項:** **不得改變任何規則的 outcome。**
-- **結束條件:** V72–V76 通過;既有測試通過;`run_all_checks.py` 全綠;suite 1.0.0 在 R1 上的結果與 0.21 相同;gate record 由計畫負責人確認。
+- **結束條件:**
+  - V72–V76 通過;
+  - 既有測試通過;
+  - `run_all_checks.py` 全綠;
+  - suite 1.0.0 在 R1 上的結果與 0.21 相同;
+  - 若執行了第 11 項:RN-6 通過;
+  - gate record 由計畫負責人確認。
 
 ### 9.2 第 1 期:證據(估計 4–10 sessions)
 
@@ -385,9 +492,19 @@
 
 - **前置條件:** 決策點的決定為「繼續」;DR-1 至 DR-8 的待確認修訂已由計畫負責人確認。
 - **工作:**
-  - R2:SemVer 預發布版本與 registry 唯一鍵;check-context 1.1.0 與 context 轉換(V90);calibration shape;result binding 1.1.0;G2–G8、G12、G13、G15–G17、G22 的修正,以 `1.1.0-dev.N` suite 發布。
-  - R3:G1、G14;catalog 1.1.0;四個 suite 升為 1.1.0 stable;變異測試完整;入口(若 DR-14 通過,2–3 sessions)。
-  - G21 的修正(若第 0 期判定需要,另行決定與估計)。
+  - **R2:**
+    - SemVer 預發布版本與 registry 唯一鍵;
+    - check-context 1.1.0 與 context 轉換(V90);
+    - calibration shape;
+    - result binding 1.1.0;
+    - G2–G8、G12、G13、G15–G17、G22 的修正,以 `1.1.0-dev.N` suite 發布。
+  - **R3:**
+    - G1、G14;
+    - catalog 1.1.0;
+    - 四個 suite 升為 1.1.0 stable;
+    - 變異測試完整;
+    - 入口(若 DR-14 通過,2–3 sessions)。
+  - **G21:** 若第 0 期判定需要修正,另行決定與估計。
 - **結束條件:** V77–V90(以及 V91,若適用)通過;shadow review 中 unclassified 為 0。
 
 ### 9.5 覆蓋擴充(逐項決定與估計)
@@ -417,14 +534,14 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 | 步驟 | 內容 |
 | --- | --- |
 | 1. 對象 | ams-flux-ratio 的 spec 與 response,配上一份**如實描述其 TSVD unfolding** 的手寫 recipe:subtract_background → unfold → correct_efficiency → divide_exposure → divide_bin_width |
-| 2. 定義造成的結果 | 以目前的 coverage,這份 recipe 會因 `trigger_efficiency` 而得到 4 個 `unrealized_correction`(Confirmed:`correct_efficiency` 只涵蓋 `selection_efficiency`,但程式同時除以兩者);改用 `divide_effective_exposure` 則得到 `incomplete`(O09)。**事先登記:** 這類結果列入誤報組的「定義造成」類別;另以一份列入兩個 members 的 bundle 自帶 coverage(會被標記 A3)跑一次作為敏感度分析;兩者都不算偵測 |
+| 2. 定義造成的結果 | 以目前的 coverage,這份 recipe 會因 `trigger_efficiency` 而得到 4 個 `unrealized_correction`(Confirmed:`correct_efficiency` 只涵蓋 `selection_efficiency`,但程式同時除以兩者);改用 `divide_effective_exposure` 則得到 `incomplete`(O09)。**事先登記的處理:**<br>• 這類結果列入誤報組的「定義造成」類別;<br>• 另以一份列入兩個 members 的 bundle 自帶 coverage(會被標記 A3)跑一次,作為敏感度分析;<br>• 兩者都不算偵測 |
 | 3. 錯誤分類 | 事先凍結,依類別而不是依規則;參考 T3、`crflux-review.md` 與已發表的勘誤 |
 | 4. 植入 | 由非作者植入至少 20 個錯誤,每一個同時植入程式碼與描述;植入者不得看到規則。人選優先為 O04 所指的人;若暫時由另一個 agent 擔任,結果標示為「AI 植入」 |
 | 5. 計分 | 逐層計分:closure 測試 → `validate.py` 與 L2 → checker(suite 1.0.0,於 R1 執行)。主要指標是 checker 的**增量偵測** |
 | 6. 誤報組 | 合法的重構,加上第 2 步的「定義造成」類別 |
 | 7. 成本 | 記錄每個手寫 bundle 的欄位數,以及哪些欄位理論上可以自動推導(DR-14 的依據) |
 | 8. 可重現 | 量測腳本放進 repository |
-| 9. 門檻 | 事先登記於 DR-13(`decision-value-gate.md`);量測後不得修改 |
+| 9. 門檻 | 事先登記於 DR-13(`decision-value-gate.md`);量測後**不得**修改 |
 
 **若 DR-13 不被採用:** 計畫停在第 0 期之後,不進入第 2 期。
 
@@ -457,9 +574,10 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 
 | 工作 | 負責人 |
 | --- | --- |
-| 計畫負責人;DR-9 至 DR-14 的決定;待確認修訂的確認;價值閘門結果的判定;gate record 的確認 | hchouTW(`decision-enforce.md` 指定的計畫負責人) |
+| 計畫負責人;DR-9 至 DR-15 的決定;待確認修訂的確認;價值閘門結果的判定;gate record 的確認 | hchouTW(`decision-enforce.md` 指定的計畫負責人) |
 | `decision-architecture.md`、`decision-value-gate.md` 的起草 | 實作者起草;計畫負責人填寫 Decision 段 |
 | 價值閘門的執行與量測腳本 | 實作者 |
+| WP-R 改名的執行與驗證 | 實作者;依 §8.3 與附錄 A.4 |
 | 植入錯誤 | 待指定(O04);不得是規則作者 |
 | 保證平面的設計文件 | 實作者起草;custodian 審閱(O17) |
 | 非作者審查者、可接受報告的角色 | 待指定(O04、O14) |
@@ -480,7 +598,11 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 
 ### 13.4 沒有呼叫者的元件,退場程序
 
-- **觸發條件:** 價值閘門判定縮小或停止;或者**決策點之後**,連續兩個 minor release 沒有任何非測試的呼叫者,也沒有 gate 使用。被指派到保證平面的元件(`check-report`、`custody.py`),在保證平面的設計決定之前不適用。
+- **觸發條件:**
+  - 價值閘門判定縮小或停止;或
+  - **決策點之後**,連續兩個 minor release 沒有任何非測試的呼叫者,也沒有 gate 使用。
+
+  被指派到保證平面的元件(`check-report`、`custody.py`),在保證平面的設計決定之前不適用。
 - **步驟:**
   1. 在一個 release 中標為 deprecated(CHANGELOG、README、相關 reference);
   2. 下一個 minor release 移除程式碼;
@@ -512,6 +634,8 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 | R2 中,suite 1.0.0 的部分規則給 `rule_not_run` | 預期中 | §8.2 的預設 suite 政策 |
 | 舊 release 的取得 | Unresolved:m0-baseline 只記錄了 monorepo 中的 0.11.0 tag | 第 0 期確認 |
 | 非作者的人工審查仍然缺少 | 已知 | §13.5 |
+| 改名讓沒有 snapshot 的已凍結 bundle 無法重現 | Confirmed(RN-4) | 改名排在 snapshot 預設開啟之後,並與 registry 變更同一個 release |
+| 實作開始時已安裝的版本與本文件的基準不同 | 已知(plugin 在 2026-10-22 一天內從 0.21 更新到 0.24.1) | §15 第 13 條:開始前重跑附錄 A.1 並確認版本 |
 
 ### 14.2 未決事項
 
@@ -533,7 +657,7 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 執行本計畫的 agent(包括 Claude)**必須**遵守以下規則:
 
 1. **先查決定狀態。** 開始任何工作前,檢查 §7:相關的 DR 若為「待決」或「待確認」,只能做準備工作或提出草稿,**不得**實作被它影響的部分。
-2. **不改寫記錄。** 對 `docs/dev/v6.3/decision-*.md` 等記錄,只新增有日期的段落;Decision 段由計畫負責人填寫,agent **不得**代填。
+2. **不改寫記錄。** 對 `docs/dev/v6.3/decision-*.md`(改名後為 `docs/dev/cross-artifact-check/decision-*.md`)等記錄,只新增有日期的段落;Decision 段由計畫負責人填寫,agent **不得**代填。
 3. **第 0 期不改規則。** 第 0 期的任何變更,都**不得**改變 suite 1.0.0 的規則 outcome;以「suite 1.0.0 在 R1 與 0.21 上結果相同」驗證。
 4. **規則變更必須升版。** 改變 outcome 的規則修正,**必須**提升該規則的版本,並經由預發布 suite 發布(P3)。
 5. **不自動寫入意圖。** 任何工具**不得**自動產生 check-context 的 roots、instances、bindings、declarations(P4、P10)。
@@ -543,7 +667,8 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 9. **保證平面只寫設計。** 在 §5.1 的前提成立之前,**不得**實作保證平面的功能。
 10. **不改受保護區域。** **不得**修改 `core/partition/`、`core/protected/`,以及 permit 與 attestation 的 schema。
 11. **標明證據等級。** 文件與回報中的陳述,使用 Confirmed、Inferred、Unresolved 標記,並附上證據。
-12. **改名只用工具。** 程式代號改名**必須**使用 `rename_analysis_check_ids.py` 並遵守 §8.3 的安全規則;**不得**手動或以全域替換的方式改名。
+12. **改名只用工具。** 程式代號改名**必須**使用 `rename_analysis_check_ids.py` 並遵守 §8.3.3 的 RN-1–RN-7;**不得**手動或以全域替換的方式改名。
+13. **開始前確認基準。** 實作開始前,在當時已安裝的版本上重跑附錄 A.1,並以 `plugin_release()` 確認它是已發布的 release;結果與 §0.2 不同時,先更新本文件(§0.2、§1、§8.1),再開始實作。
 
 ---
 
@@ -556,21 +681,27 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 | `final/cross-artifact-check-architecture.zh.md`(本文件,中文) | **有效** |
 | `final/cross-artifact-check-architecture.en.md`(英文) | **有效**,與本文件內容一致 |
 | `final/test_cross_artifact_check_gap_probes.py` | **有效**;目前涵蓋 G1–G10,第 0 期補上 G11–G22 |
-| `final/rename_analysis_check_ids.py` | **有效**:WP-R 的改名工具(dry-run、`--apply`、`--verify`);交付時放入 plugin 的 `tools/` |
+| `final/rename_analysis_check_ids.py` | **有效**:WP-R 的改名工具(§8.3.4);交付時放入 plugin 的 `tools/` |
 | `final/cross-artifact-check-decision-rationale.zh.md` | **理由附錄**:證據與推理可參考,但**不得直接貼用其中的 Decision 文字**。已被推翻的說法:DR-5「只需要可用性」、DR-1「S2 以上自動成為事實」、DR-3 用 bytes digest、DR-6 的 1e-12 與單純的 k、DR-7「只有標籤」那一列、DR-8 的 root 覆蓋 |
-| `archive/plans/cross-artifact-check-architecture-pre-restructure.zh.md` | 已取代(本次整理前的同內容版本,含兩次審查的完整處置表) |
+| `archive/plans/cross-artifact-check-architecture-pre-cleanup-2.zh.md`、`.en.md` | 已取代(本次整理前的同內容版本) |
+| `archive/plans/cross-artifact-check-architecture-pre-restructure.zh.md` | 已取代(第一次整理前的同內容版本,含兩次審查的完整處置表) |
 | `archive/plans/cross-artifact-check-plan-v2.zh.md`(v2) | 已取代;保留 §12 的審查記錄 |
 | `archive/plans/cross-artifact-check-plan-v3.1.zh.md`、`-en.md` | 已取代;保留 §11 的審查記錄;若 DR-11 不被採用,其 WP1、WP6 重新成為依據 |
 | `archive/plans/cross-artifact-check-architecture-rethink.zh.md` | 已取代;保留 §9 的審查記錄 |
 | `archive/evidence/`(`review/`、`review3/`–`review6/`、`probe*.py`、`proto_*.py`、`usage.py`) | 保留:重現腳本。執行時從 plugin 根目錄執行,並把 `PYTHONPATH` 指向腳本所在的資料夾;`review5/callers.py` 需要以根目錄為參數;`review6/p6_scope.py` 只能在拋棄式副本中執行 |
-| `hr/`(plugin 副本) | 保留到第 0 期開始;不是乾淨的副本(含 probe 測試;`plugin_release()` 回傳 `unreleased`) |
+| `archive/evidence/rename/`(`compare.py`、`lockprobe.py`) | 保留:WP-R 的重現腳本(附錄 A.4) |
+| `v241/`(`pristine/`、`proto/`、`lockp/`) | 保留到第 0 期開始:0.24.1 的乾淨快照與 §8.3.5 的驗證副本與輸出 |
+| `rename-proto/` | 保留到第 0 期開始:在 0.23.0 之後的開發版上的第一次改名驗證(含抓到 RN-7 的比較) |
+| `hr/`(plugin 副本) | 保留到第 0 期開始;0.21.0 的副本,不是乾淨的副本(含 probe 測試;`plugin_release()` 回傳 `unreleased`) |
 
 ### 16.2 plugin 中的文件(建議;尚未修改)
+
+若 DR-15 採用,下列 `docs/dev/v6.3/` 的路徑改為 `docs/dev/cross-artifact-check/`。
 
 | 文件 | 建議 |
 | --- | --- |
 | `docs/dev/v6.3/README.md` | 新增本架構與兩份新 decision record 的索引 |
-| **新增** `decision-architecture.md` | DR-1 至 DR-14 的現況與理由;每一項一個 Decision 段;取代 v3.1 提議的 `decision-hardening.md` |
+| **新增** `decision-architecture.md` | DR-1 至 DR-15 的現況與理由;每一項一個 Decision 段;取代 v3.1 提議的 `decision-hardening.md` |
 | **新增** `decision-value-gate.md` | DR-13 的設計與事先登記的門檻;量測後記錄結果與決定 |
 | `decision-enforce.md` | 原文不改;新增有日期的段落:結束條件加入價值閘門;以本文件的期別取代原本的 stacked-PR 計畫 |
 | `decision-m2a.md`、`m2a-design.md` | 原文不改;新增有日期的段落:DR-2 移除 `root_not_required`;版本守衛;P6 |
@@ -598,8 +729,9 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 | 架構再思考 v1 → v2(第 3 次獨立審查) | 兩個平面;價值閘門 | 描述模型是刻意的;執行橋不可行;閘門有循環性 |
 | 使用狀況盤點 | checker 沒有被真實流程執行 | — |
 | 最終架構(第 4、5 次獨立審查) | 單一架構;G20–G22;治理 | 入口不得自動寫入意圖;第 0 期不改規則;P6 改為與 exit 一致;G22 降為最小修正 |
-| 程式代號改名(WP-R,DR-15) | 改名工具;安全規則 R-1–R-7;在 0.24.1 完整檢查前後完全相同 | 第一次比較抓到 reference inventory 過期(新增 R-7) |
-| 依 0.24.1 複核 | 事實、相容性、測試與 lock 結果全部不變 | 先前的「0.23.0」基準其實是未發布的開發版;`plugin_release` 自 0.24.0 起在已安裝副本上回傳版本 |
+| 程式代號改名(WP-R,DR-15) | 改名工具;安全規則 RN-1–RN-7 | 第一次比較抓到 reference inventory 過期(新增 RN-7)。在 0.23.0 之後的開發版上的比較:4859 個測試、共同失敗 16 個、改名後才失敗的 0 個;唯一的單側失敗是計時型測試 `test_scaling_check_rejects_a_quadratic_scan`,兩邊各重跑 5 次全部通過,記為不穩定 |
+| 依 0.24.1 複核 | 事實、相容性、測試與 lock 結果全部不變;改名的完整檢查前後完全相同 | 先前的「0.23.0」基準其實是未發布的開發版;`plugin_release` 自 0.24.0 起在已安裝副本上回傳版本 |
+| 第二次結構整理 | 新增一頁摘要、量測基準表、ID 族群表;§8.3 分成六節;附錄 A 改為步驟 | 改名安全規則從 R-1–R-7 改稱 RN-1–RN-7,避免與 release R1–R3 混淆;內容不變 |
 
 **限制:** 五次審查的審查者都是 AI;C15 所要求的非作者人工審查(O04)仍然需要。完整的審查處置表見 `archive/plans/` 中各文件的審查記錄。
 
@@ -607,9 +739,34 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 
 ## 附錄 A:重現證據
 
-- **probe 測試:** 把 `final/test_cross_artifact_check_gap_probes.py` 放到 plugin 的 `tests/contracts/`,然後執行 `python3 -m unittest tests.contracts.test_cross_artifact_check_gap_probes -v`。目前 10 項全部失敗,這是預期的結果:每一項 probe 描述的是「應有的行為」。
-- **審查腳本:** 從 plugin 根目錄執行 `PYTHONPATH=<腳本所在資料夾> python3 <腳本>`。
-- **改名(WP-R):** `python3 rename_analysis_check_ids.py ROOT`(dry-run)→ `--apply --date YYYY-MM-DD` → `--verify`;前後各執行一次 `python3 tools/run_all_checks.py --out DIR`(兩邊都在 git work tree 中,並以 `.git/info/exclude` 忽略 `__pycache__/`、`*.pyc`、`.pytest_cache/`、`.hypothesis/`),把改名前的測試 ID 用工具的對照規則換成新名稱後比較失敗集合;只在單側出現的失敗,在兩邊各重跑 5 次。從已安裝的副本複製時,先移除根目錄的 `.in_use/`(plugin 系統寫入的執行期資料夾),或把 `/.in_use/` 加入 exclude。
-- **基線:**
-  - `python3 -m unittest discover -s tests/contracts -t . -p 'test_v63_*.py'`(205 個既有測試通過);
-  - `python3 contracts/rule_registry.py check`(pass;23 條規則、71 個 V case)。
+所有指令都從 plugin 根目錄執行,除非另有註明。
+
+### A.1 基線(§15 第 13 條)
+
+1. `python3 -c "import sys; sys.path.insert(0, '.'); from core.protected import identity; print(identity.plugin_release())"`:應回傳已發布的版本,而不是 `unreleased`。
+2. `python3 -m unittest discover -s tests/contracts -t . -p 'test_v63_*.py'`:205 個既有測試通過(改名後改用 `-p 'test_analysis_check_*.py'`)。
+3. `python3 contracts/rule_registry.py check`:pass;23 條規則、71 個 V case。
+
+### A.2 probe 測試
+
+1. 把 `final/test_cross_artifact_check_gap_probes.py` 放到 plugin 的 `tests/contracts/`。
+2. 執行 `python3 -m unittest tests.contracts.test_cross_artifact_check_gap_probes -v`。
+
+目前 10 項全部失敗,這是預期的結果:每一項 probe 描述的是「應有的行為」。
+
+### A.3 審查腳本
+
+執行 `PYTHONPATH=<腳本所在資料夾> python3 <腳本>`;個別限制見 §16.1 的 `archive/evidence/` 列。
+
+### A.4 改名驗證(WP-R)
+
+1. **取得乾淨的來源:** 已安裝或 repository 中的 plugin;**不得**使用 `/tmp/hep research no ams …` 之類的殘留副本(§8.3.6)。
+2. **建立兩份副本**(改名前、改名後):移除根目錄的 `.in_use/` 與所有 `__pycache__`;各自 `git init`;在 `.git/info/exclude` 寫入 `__pycache__/`、`*.pyc`、`.pytest_cache/`、`.hypothesis/`、`.DS_Store`、`/.in_use/`;`git add -A` 並 commit。
+3. **dry-run:** 在改名後的副本執行 `python3 rename_analysis_check_ids.py .`,確認 23 項移動、所有來源存在、所有目標不存在。
+4. **執行:** `python3 rename_analysis_check_ids.py . --apply --date YYYY-MM-DD`;輸出的 `status` 必須是 `ok`。
+5. **冪等:** commit 後再執行一次第 4 步,`git status --porcelain` 必須為空。
+6. **受保護的檔案:** `git diff -M --name-status HEAD~1` 中,RN-2 列出的檔案只能以 R100 出現(純移動)。
+7. **完整檢查:** 兩份副本各執行一次 `python3 tools/run_all_checks.py --out DIR`(每次約 32 分鐘;依序執行,不要並行,以免計時型測試受影響)。
+8. **比較:** `python3 archive/evidence/rename/compare.py OUT_BEFORE OUT_AFTER`:把改名前的測試 ID 以工具的對照規則換成新名稱,再比較 check 狀態、失敗集合與計數。
+9. **單側失敗:** 只在一邊出現的失敗,在兩邊各重跑 5 次;兩邊都全部通過時記為不穩定(RN-6)。
+10. **lock 影響:** `python3 archive/evidence/rename/lockprobe.py BEFORE_TREE AFTER_TREE`(需以 `git archive` 匯出的乾淨樹):預期沒有 snapshot 時 13 項 `semantics_unreproducible`,有 snapshot 時 complete(RN-4)。

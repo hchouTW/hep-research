@@ -71,3 +71,9 @@ hchouTW.
 replied "continue; thresholds confirmed, release 0.25.0 after merge": the Phase 0 gate is accepted on the condition
 that the full-suite comparison (VALIDATION CROSS-ARTIFACT-PHASE0) and the required CI jobs pass, and R1 ships as
 0.25.0 after the merge.
+
+## 2026-10-22, label note
+
+The architecture's second clean-up edition renames the rename safety rules R-1 to R-7 to RN-1 to RN-7, so they cannot
+be confused with the releases R1 to R3; content is unchanged. "R-4 of section 8.3" above is RN-4 of section 8.3.3 in
+that edition.
