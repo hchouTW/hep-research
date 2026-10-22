@@ -18,6 +18,11 @@ executables (no Python bindings).
 - C++: `layered_sim` (links Geant4) and the new Geant4-free `simcore` under `adapters/geant4/assets/simcore/`
   (`simspec` spec conversion, `simstat` observables and statistics, `simreco` digitization and reconstruction), C++17
   standard library plus the existing `MiniJson.hh`.
+- Detailed per-event simulation information goes to ROOT files (user decision, 2026-10-22; proposal 5.9), written
+  by `layered_sim` through `G4AnalysisManager` (the g4tools code shipped with Geant4; no ROOT installation). Flat
+  ntuples keyed by `event_id`; the per-event CSV stays as the summary table. Python and `simcore` never read ROOT:
+  the new Geant4-linked `simroot` converts to CSV (`dump`) or gives a content hash (`hash`). ROOT files are not
+  committed; run records keep the file sha256 and the `content_sha256`.
 - Python: the adapter CLIs that build and run the executables and write records; hep-detector's rules, independent
   reference formulas, gate and benchmark decisions and labels; the contracts.
 - One production implementation per quantity; the other language only in tests, as an oracle (proposal principle 11).
@@ -62,7 +67,7 @@ depend on the new architecture. Start from `prototype/phase1-core.patch` and bri
 
 Phase 1 stays in Python on purpose (a minimal sci-fix). Phase 2 then ports the statistics to `simstat` (proposal
 5.8), keeping phase 1's Python estimators in `tests/` as oracles, and adds a required CI job that builds `simcore`.
-Phase 3 adds `simreco` (proposal 6.5); hep-detector gets no new script.
+Phase 2 also adds the per-event ROOT files and `simroot` (proposal 5.9). Phase 3 adds `simreco` (proposal 6.5); hep-detector gets no new script.
 
 Phases 2 and 3 follow sections 5 and 6 of the proposal.
 
@@ -73,6 +78,7 @@ Phases 2 and 3 follow sections 5 and 6 of the proposal.
 - How to confirm the G5 statement that no Geant4 example code was copied.
 - hep-computing's agreement to the optional `simulation` property and the C2 "derived simulation" marker.
 - A new required CI job for `simcore` (needs a C++17 compiler).
+- Where ROOT files are stored and for how long (not in the repository).
 
 ## Independent review
 
