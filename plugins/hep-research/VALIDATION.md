@@ -2020,6 +2020,24 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## SCIFIX-PLAN-A2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-1-identity-runtime-dir` from main `a53af7e0`)
+
+Sci-fix improvement plan v3, PR-1 (A2; findings F-03, F-25). `core/protected/identity.py` gains
+`RUNTIME_ROOT_DIRS = {".in_use"}`, matched at the plugin root only (both the `git ls-files` path and the walk of an
+installed copy); `verify()` adds an `identity.bytecode_unverified` warning when any `.pyc` is present and keeps its
+verdict. Guard semantics are unchanged: identical means the same code.
+
+| Check | Result |
+|---|---|
+| New tests on the parent `identity.py` (`test_identity_and_versions`: root `.in_use/` kept out, git checkout path, bytecode warning; `test_protected_entry_points`: qualified copy with root `.in_use/` accepted, nested `core/.in_use/x.py`, `adapters/demo/assets/json.py`, `contracts/tool_contracts/new.json` refused) | fail (3 failures, 1 error) |
+| Same tests on the fix | pass |
+| The installed 0.23.0 copy in the Claude Code plugin cache (read only; holds `.in_use/`) | parent: `unreleased`; fix: `{"release": "0.23.0", "digest": "3adfaf6f…"}`, `verify` identical with no differences |
+
+| `run_all_checks.py --no-cli --jobs 6`, CI lock, worktree head | 24 pass, 1 fail, 2 skipped (CLI host checks); 4799 tests, 4549 pass, 1 failure, 249 skipped. The failure: `test_subprocess_timeouts` (the new git-checkout test called `git` without `timeout=`); fixed, and that module and `test_identity_and_versions` rerun: pass |
+
+Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
+own assessment.
+
 ## 0.23.0 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.23.0` from main `59002566` (#197 anisotropy CL range, `bdt-backend` gate, 24 triaged plugin

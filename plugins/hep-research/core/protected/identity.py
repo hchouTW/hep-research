@@ -1,7 +1,10 @@
 """Code identity of the installed plugin (AGENTIC-R5 T0.2/T0.3, plan basis §6.6).
 
 The release bundle is the git-listed plugin files or, outside git (an installed copy, a `git archive` export), every
-regular file except caches. Recorded manifests under `release-manifests/` are never part of a bundle, so a release can
+regular file except caches and the runtime folders at the plugin root (RUNTIME_ROOT_DIRS: `.in_use/`, where the
+plugin system records the processes using an installed copy; only at the root, so `core/.in_use/x.py` stays in the
+bundle). Bytecode (`.pyc`, `__pycache__/`) is outside the bundle; verify() warns when any is present, since a planted
+timestamp-based `.pyc` matching its source's mtime and size is loaded instead of the source. Recorded manifests under `release-manifests/` are never part of a bundle, so a release can
 carry its own. For each file: relative POSIX path, full SHA-256, size and mode (100755 when any execute bit is set,
 else 100644); symlinks and other non-regular files are refused; files are sorted by the UTF-8 bytes of their path. The
 digest is the SHA-256 of the canonical UTF-8 JSON (sorted keys, no whitespace) of {"format", "files"}.
@@ -28,6 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FORMAT = "hep-research-code-release-manifest/1"
 RECORDS = "release-manifests/"  # recorded manifests of published releases; never part of a bundle
 CACHE_DIRS = {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+RUNTIME_ROOT_DIRS = {".in_use"}  # written by the plugin system into an installed copy; excluded at the root only
 UNKNOWN = {"release": "unreleased", "digest": "unknown"}
 
 
@@ -52,7 +56,7 @@ def _git_files(root: Path) -> list[str] | None:
 def _walk_files(root: Path) -> list[str]:
     found = []
     for parent, dirs, names in os.walk(root, followlinks=False):
-        dirs[:] = [d for d in dirs if d not in CACHE_DIRS]
+        dirs[:] = [d for d in dirs if d not in CACHE_DIRS and not (Path(parent) == root and d in RUNTIME_ROOT_DIRS)]
         for name in dirs + names:
             if (Path(parent) / name).is_symlink():
                 found.append((Path(parent) / name).relative_to(root).as_posix())
@@ -65,7 +69,8 @@ def bundle_files(root: Path) -> list[str]:
     listed = _git_files(root)
     if listed is None:
         listed = _walk_files(root)
-    keep = {f for f in listed if not f.startswith(RECORDS) and "__pycache__/" not in f and not f.endswith(".pyc")}
+    keep = {f for f in listed if not f.startswith(RECORDS) and "__pycache__/" not in f and not f.endswith(".pyc")
+            and f.split("/", 1)[0] not in RUNTIME_ROOT_DIRS}
     return sorted(keep, key=lambda f: f.encode("utf-8"))
 
 
@@ -113,8 +118,23 @@ def verify(root: Path, recorded: dict) -> dict:
     diffs += [{"path": p, "change": "added"} for p in sorted(new.keys() - old.keys())]
     diffs += [{"path": p, "change": "content" if old[p]["sha256"] != new[p]["sha256"] else "mode"}
               for p in sorted(old.keys() & new.keys()) if old[p] != new[p]]
-    return {"status": "identical" if not diffs else "different", "recorded_digest": recorded["digest"],
-            "digest": now["digest"], "differences": diffs}
+    rep = {"status": "identical" if not diffs else "different", "recorded_digest": recorded["digest"],
+           "digest": now["digest"], "differences": diffs}
+    pyc = bytecode_files(root)
+    if pyc:
+        rep["warnings"] = [{"code": "identity.bytecode_unverified", "count": len(pyc), "paths": pyc[:5],
+                            "message": "bytecode files are outside the identity; a planted timestamp-based .pyc "
+                                       "matching its source is loaded instead of the source"}]
+    return rep
+
+
+def bytecode_files(root: Path) -> list[str]:
+    """Every .pyc under root (outside .git and the runtime root folders), sorted; the identity does not cover them."""
+    found = []
+    for parent, dirs, names in os.walk(root, followlinks=False):
+        dirs[:] = [d for d in dirs if d != ".git" and not (Path(parent) == root and d in RUNTIME_ROOT_DIRS)]
+        found += [(Path(parent) / n).relative_to(root).as_posix() for n in names if n.endswith(".pyc")]
+    return sorted(found, key=lambda f: f.encode("utf-8"))
 
 
 

@@ -304,6 +304,40 @@ class ProtectedEntryPointTests(unittest.TestCase):
         self.pp.write_qualification(policy_sha256="8" * 64)
         self.assertIn("protected.qualification_other_policy", outcome_lib(lambda: project.load_project(self.env.proj))[1])
 
+    def test_qualified_installed_copy_survives_its_runtime_folder(self):
+        """A2 (F-03): the guard compares the real identity of a qualified copy. The plugin system's root `.in_use/`
+        keeps it qualified; any other added file (a nested `.in_use/`, a module beside runnable assets, a globbed
+        data file) makes it another plugin."""
+        from unittest import mock
+
+        from contracts import project
+        from core.protected import identity
+        root = Path(self.tmp.name) / "installed"
+        (root / ".claude-plugin").mkdir(parents=True)
+        (root / ".claude-plugin" / "plugin.json").write_text('{"version": "9.9.9"}')
+        (root / "core.py").write_text("x = 1\n")
+        (root / "release-manifests").mkdir()
+        man = identity.generate(root)
+        (root / "release-manifests" / "9.9.9.json").write_text(json.dumps(man))
+        self.pp.write_qualification(plugin={"release": "9.9.9", "digest": man["digest"]})
+
+        def outcome():
+            identity._plugin_release.cache_clear()
+            with mock.patch("core.protected.guard.plugin_identity", lambda: identity.plugin_release(root)):
+                return outcome_lib(lambda: project.load_project(self.env.proj))
+
+        (root / ".in_use").mkdir()
+        (root / ".in_use" / "72").write_text("")
+        self.assertNotIn("protected.qualification_other_plugin", outcome()[1])
+        for rel in ("core/.in_use/x.py", "adapters/demo/assets/json.py", "contracts/tool_contracts/new.json"):
+            with self.subTest(added=rel):
+                f = root / rel
+                f.parent.mkdir(parents=True, exist_ok=True)
+                f.write_text("x = 1\n")
+                self.assertIn("protected.qualification_other_plugin", outcome()[1])
+                f.unlink()
+        identity._plugin_release.cache_clear()
+
     def test_outside_protected_mode_nothing_changes(self):
         """The same calls in a project without agent_policy never see a protected-use finding."""
         cfg_path = self.pp.project / "hep-research.project.json"
