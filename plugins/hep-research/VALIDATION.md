@@ -2124,6 +2124,65 @@ hep-statistics README and the capability matrix state the measured calibration; 
 |---|---|
 | `run_required_backends.py --from-ledger --require pyhf==0.7.6,arviz==0.23.4,pdg==2026.0 --no-skips` (the new weekly `ledger-evidence` job, run locally) | exit 0; 56 nodes in 25 modules: 56 pass, 0 environment errors, 0 unverified, 0 do not hold, 0 skipped |
 | `tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package` (TH9-MASSES) on parent `84c0a68c` and fix `23910085`, each in a detached worktree with the current test file copied in, CI lock plus pdg 2026.0 | pass on both: `core/constants` exists on the parent and the fix does not change it, so the oracle cannot show the defect; parent record updated (was skip), TH9-MASSES stays D1 |
+## SCIFIX-TRANSCRIPTION-ORACLES (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; Geant4 11.4.3 native build; branch `scifix/transcription-oracles` from main `f238ef3e`)
+
+The transcription report (`tools/scifix_ledger.py report`) listed four C3 entries whose independence records all
+take their expected values from formulas transcribed into the repository: DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO and
+DR-WP2-06-MS. One oracle whose expected value comes from elsewhere was added to each of the first three; none was
+found for DR-WP2-06-MS. Tolerances were fixed in the docstrings before the first run; all three new tests passed on
+their first run on this branch and none was changed afterwards.
+
+**What was read (2026-10-22).** arXiv:1811.04660v2 (scifix:S07), p. 5: eq. (3.1), the Gaisser-Hillas function in
+R = sqrt(lambda/|X0'|), L = sqrt(|X0'| lambda), X0' = X0 - Xmax, and the sentence below it ("a Gaussian with standard
+deviation L, multiplied by a term that distorts it, with the asymmetry governed by R"): claim scifix:C31. PDG RPP
+2024, 40. Statistics (rev. August 2023, G. Cowan), new source scifix:S13, read at page level: sec. 40.2 p. 2
+(consistency, bias) and sec. 40.2.3 (least squares, linear model, eqs. (40.21)-(40.23)): claim scifix:C32. PDG RPP
+2024, 34. Passage of Particles Through Matter (scifix:S01), p. 16: eq. (34.16) and the text below it (no numerical
+accuracy; "for large Z and small x the beta-dependence is not well represented"). Geant4 11.4.3 sources:
+`G4Cerenkov::GetAverageNumberOfPhotons` (Rfact = 369.81/(eV cm), yield proportional to charge^2), the OpNovice2
+example, and TestEm5 `Run::ComputeMscHighland` (13.6 MeV z sqrt(t)(1 + 0.038 ln t)/(beta p c), without z^2/beta^2
+in the logarithm).
+
+**Oracles.**
+
+- DR-WP1-01, `CherenkovChargeTests::test_yield_matches_geant4_cerenkov_for_protons_and_alphas`
+  (independent implementation, basis third-party, `expected_from` third-party-definition). Geant4 11.4.3 OpNovice2,
+  built from the release's example source against the local install; the only change prints the integer total of
+  Cerenkov photons (output only). Box of G4_Galactic (no energy loss, delta rays or hadronic interactions) with a
+  constant RINDEX 1.05 over 2.0-2.5 eV, world G4_AIR without RINDEX, primary from x = -999.95 mm along +x (path
+  199.995 cm), `/gun/momentumAmp`, 2000 events per row, seeds 1101-1601. Totals frozen in the test: p 40 GeV/c
+  6836393, alpha 25183431; 20 GeV/c 6728768, 18180150; 12 GeV/c 6465855, 1616253. The script with N0 = 369.81 x 0.5
+  per cm gives 3419.60 / 12587.20, 3364.23 / 9092.12, 3232.99 / 807.47 against the Geant4 means 3418.20 / 12591.72,
+  3364.38 / 9090.08, 3232.93 / 808.13 (largest offset 1.8 Poisson sigma; tolerance 5 sigma plus 1e-6). On the parent
+  the He4 yield has no z^2 and is 4 times low.
+- DR-WP1-02, `GaisserHillasPropertyTests::test_profile_reaches_the_gaussian_limit_at_large_x_max`
+  (analytic, basis locator S07/C31, `expected_from` general-result). For x_max 1e12 and 1e15, lambda 20, 60, 300
+  (R = 1.4e-7 to 1.7e-5) and t = +-0.5 to +-3: |ln N + t^2/2| <= (2/3)|t|^3 R + 2 eps |t|/R + 1e-12 (the leading
+  distortion t^3 R/3 bounded for |tR| <= 1/2, plus the fix's rounding). The parent's form misses by up to 8e-4.
+- DR-WP2-06-CALO, `ScriptPhysicsOracleTests::test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets`
+  (analytic, basis locator S13/C32, `expected_from` general-result). Term sets (a, b, c) = (0.10, 0.20, 0.0070),
+  (0.05, 0.10, 0.010), (0.15, 0.30, 0.020), 2000 toys each, 2% relative scatter, no per-point errors: real terms in
+  at least 99% of the toys and each mean within 0.003 truth + 5 Monte Carlo sigma. The expected values are the toys'
+  truth; the generator uses the same E9 model as the fit, so a mistranscribed model would cancel here, but the
+  defect (the weighting) does not.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_geant4_cerenkov_for_protons_and_alphas` (DR-WP1-01, `4aebc0be` / `70f7fbcb`) | independent implementation (third-party: Geant4 11.4.3) | fail (assertion, 3 of 3 subtests: He4 201.87 against 808.13 at 12 GeV/c, 2273.03 against 9090.08, 3146.80 against 12591.72) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_reaches_the_gaussian_limit_at_large_x_max` (DR-WP1-02, `70f7fbcb` / `0f3a2e3f`) | analytic (general result, locator S07 eq. (3.1) p. 5) | fail (assertion, 27 of 48 subtests: all 24 at x_max 1e15, 3 at 1e12; up to 7.9e-4 against bounds of 2e-8 to 1e-5) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets` (DR-WP2-06-CALO, `f6a64702` / `6c793363`) | analytic (general result, locator S13 sec. 40.2 p. 2) | fail (assertion: 446 of 2000 toys without a real term for (0.10, 0.20, 0.0070), limit 20; the other two sets pass) | pass | no | CI lock |
+
+Method as in SCIFIX-PLAN-B3-B6: a detached worktree of the source repository per commit (removed after the run), the
+current test file copied in under the test folder and file name of that commit, with the skill folder name mapped
+to the one of that commit (`docs/maintenance.md`), no other change; each node run alone with `python -m unittest`.
+
+**Grades.** DR-WP1-01: C3 kept, the transcription gap closed; D0 -> D1 (the new oracle fails on the parent by
+assertion, the two older oracle nodes still error there, so D2 is out of reach under the D-scope rule). DR-WP1-02:
+C3 D2 kept, gap closed. DR-WP2-06-CALO: C3 D1 kept (the closure oracle still passes on the parent), gap closed.
+DR-WP2-06-MS: C3 D0 unchanged; its gap now says what was searched. No printed crossover, MDR or beta(R) value for a
+stated stack was found; Geant4's TestEm5 Highland value uses the older logarithm without z^2/beta^2, and its
+simulated angle could be compared only with a tolerance on the beta dependence that no located source gives (PDG
+2024 states none), so it was not run as evidence. The maintainer decides between more evidence and a lower grade.
 
 ## SCIFIX-PLAN-A2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-1-identity-runtime-dir` from main `a53af7e0`)
 

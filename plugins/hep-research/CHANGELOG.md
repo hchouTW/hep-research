@@ -16,6 +16,13 @@ Software checks establish contract consistency only, not physical validity.
   PDG cross-check, which no venv had run, passes on both its parent and its fix (it checks the bundled constants, which
   the fix did not change), so it cannot show the defect: the entry stays D1 with that reason. Evidence: VALIDATION
   SCIFIX-EVIDENCE-CI.
+- **Sci-fix evidence: oracles whose expected values do not come from a transcribed formula (no behavior change).**
+  DR-WP1-01 gains a Geant4 11.4.3 G4Cerenkov oracle (proton and alpha photon counts frozen with the version stated),
+  DR-WP1-02 the Gaussian limit of the Gaisser-Hillas profile at large X_max (arXiv:1811.04660v2 eq. (3.1), p. 5), and
+  DR-WP2-06-CALO a toy truth-recovery study over three term sets (PDG RPP 2024 Statistics sec. 40.2); each fails on
+  its entry's parent by assertion and passes on the fix. The transcription gap is closed for the three; DR-WP1-01
+  moves from D0 to D1. DR-WP2-06-MS keeps the gap: no qualifying source was found, and the grade is left to the
+  maintainer. New source scifix:S13 and claims scifix:C31, C32 (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES).
 
 ## 0.24.0 (2026-10-22)
 
