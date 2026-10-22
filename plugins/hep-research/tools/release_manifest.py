@@ -15,10 +15,13 @@ Usage:
   python3 tools/release_manifest.py digest   [--root DIR]                print the digest only
   python3 tools/release_manifest.py verify   --manifest FILE [--root DIR] compare a tree with a recorded manifest
   python3 tools/release_manifest.py check-published [--base REF]          CI immutability rule (C10)
+  python3 tools/release_manifest.py backfill --commit SHA --out FILE      the manifest of a release before 0.5.0
 check-published: every recorded manifest `release-manifests/<version>.json` must match the bundle exported from its
 published tag `hep-research--v<version>` (git archive); a manifest whose tag is not pushed yet (the release commit
 itself) is listed as pending; with --base, the recorded manifest of a published tag may not change or disappear since REF. The working tree (Unreleased) is not checked. Tags without a recorded manifest (releases
-before this tool) are listed as unrecorded.
+before this tool) are listed as unrecorded. A backfilled manifest (a release made before manifests existed: 0.3.0,
+and 0.4.0, which has no tag) carries "backfilled": true, the full release "commit" and the "generator"; it is checked
+against its tag when there is one, else against that commit, and like a published one it may not change.
 Exit codes: 0 ok (verify: identical), 1 verify found differences or a published bundle changed, 2 unreadable input
 or a refused file.
 A matching digest shows the bytes are those recorded; it is not an approval of the code or of any use.
@@ -57,29 +60,40 @@ def check_published(base: str | None = None) -> dict:
     rec_dir = ROOT / RECORDS
     recorded = sorted(rec_dir.glob("*.json")) if rec_dir.is_dir() else []
     tags = set(_git("tag", "--list", TAG_PREFIX + "*", text=True, check=True).stdout.split())
+    backfilled = set()
     for man_path in recorded:
         version = man_path.stem
         tag = TAG_PREFIX + version
-        if tag not in tags:  # recorded in the release commit; the tag is pushed once that commit is on main
+        doc = json.loads(man_path.read_text(encoding="utf-8"))
+        ref = tag
+        if doc.get("backfilled") is True:
+            backfilled.add(man_path.name)
+            if tag not in tags:
+                ref = str(doc.get("commit") or "")
+                if len(ref) != 40:
+                    problems.append(f"{man_path.name}: a backfilled manifest without a tag names its full release commit")
+                    continue
+        elif tag not in tags:  # recorded in the release commit; the tag is pushed once that commit is on main
             pending.append(tag)
             continue
         # the plugin subtree at the archive root; run from the top level, since a subdirectory cwd filters the archive
-        archive = _git("archive", "--format=tar", f"{tag}:{prefix}" if prefix else tag, cwd=top)
+        archive = _git("archive", "--format=tar", f"{ref}:{prefix}" if prefix else ref, cwd=top)
         if archive.returncode != 0:
             problems.append(f"{tag}: git archive failed: {archive.stderr.decode(errors='replace').strip()}")
             continue
         with tempfile.TemporaryDirectory() as td:
             with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as tar:
                 tar.extractall(td, filter="data")
-            rep = verify(Path(td), json.loads(man_path.read_text(encoding="utf-8")))
-        checked.append({"tag": tag, "status": rep["status"], "digest": rep["digest"]})
+            rep = verify(Path(td), doc)
+        checked.append({"tag": tag, "ref": ref, "status": rep["status"], "digest": rep["digest"]})
         if rep["status"] != "identical":
             problems.append(f"{tag}: published bundle differs from its recorded manifest: {rep['differences'][:5]}")
     if base:
         diff = _git("diff", "--name-status", "--no-renames", base, "HEAD", "--", RECORDS, text=True, check=True).stdout
         for line in filter(None, diff.splitlines()):
             status, path = line.split("\t", 1)
-            published = TAG_PREFIX + Path(path).stem in tags  # an unpublished manifest may still be regenerated
+            # an unpublished manifest may still be regenerated; a backfilled one is published
+            published = TAG_PREFIX + Path(path).stem in tags or Path(path).name in backfilled
             if status != "A" and published:
                 problems.append(f"{path}: a recorded release manifest was {'deleted' if status == 'D' else 'changed'}")
     unrecorded = sorted(t for t in tags if not (rec_dir / f"{t[len(TAG_PREFIX):]}.json").exists())
@@ -87,11 +101,32 @@ def check_published(base: str | None = None) -> dict:
             "unrecorded_tags": unrecorded, "problems": problems}
 
 
+def backfill(commit: str) -> dict:
+    """The manifest of the plugin bundle at a release commit made before manifests existed, by today's rules."""
+    import io
+    import tarfile
+    import tempfile
+    full = _git("rev-parse", "--verify", f"{commit}^{{commit}}", text=True, check=True).stdout.strip()
+    prefix = _git("rev-parse", "--show-prefix", text=True, check=True).stdout.strip()
+    top = Path(_git("rev-parse", "--show-toplevel", text=True, check=True).stdout.strip())
+    archive = _git("archive", "--format=tar", f"{full}:{prefix}" if prefix else full, cwd=top, check=True)
+    with tempfile.TemporaryDirectory() as td:
+        with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as tar:
+            tar.extractall(td, filter="data")
+        man = generate(Path(td))
+    current = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))["version"]
+    return {**man, "backfilled": True, "commit": full,
+            "generator": f"tools/release_manifest.py backfill, identity rules of hep-research {current}"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     cp = sub.add_parser("check-published")
     cp.add_argument("--base", help="git ref: recorded manifests may only be added since it")
+    bf = sub.add_parser("backfill")
+    bf.add_argument("--commit", required=True, help="the release commit (git ref)")
+    bf.add_argument("--out", type=Path, required=True)
     for name in ("generate", "digest", "verify"):
         s = sub.add_parser(name)
         s.add_argument("--root", type=Path, default=ROOT, help="plugin root (default: this checkout)")
@@ -105,6 +140,12 @@ def main(argv=None) -> int:
             rep = check_published(args.base)
             print(json.dumps(rep, indent=1))
             return 0 if rep["status"] == "pass" else 1
+        if args.cmd == "backfill":
+            man = backfill(args.commit)
+            args.out.write_text(json.dumps(man, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+            print(json.dumps({"digest": man["digest"], "file_count": man["file_count"], "commit": man["commit"],
+                              "out": str(args.out)}))
+            return 0
         root = args.root.resolve(strict=True)
         if args.cmd == "verify":
             rep = verify(root, json.loads(args.manifest.read_text(encoding="utf-8")))
