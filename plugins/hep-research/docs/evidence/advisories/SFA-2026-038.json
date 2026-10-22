@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-038",
  "severity": "S1",
  "ledger": [
@@ -35,12 +35,13 @@
   "trigger": "a red-noise null (ar1 or ou) on a short series (about 100 points or fewer) with strong autocorrelation (lag-1 about 0.7 or more)"
  },
  "applies_to": {
-  "artifact_types": [
-   "statistical-result"
-  ],
-  "extension_keys": [
-   "significance"
-  ]
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-statistics/scripts/periodicity_scan.py"
+   ],
+   "how_to_recognize": "periodicity_scan.py with --null ar1 or ou: JSON on stdout with best, band, global {p, surrogates, statistic} and null_model {kind, phi | tau, variance}; the fixed code adds global.null_fit, and null_fit once reproduces the old p"
+  }
  },
  "remedy": "rerun periodicity_scan.py with --null ar1 or ou on a release that has the fix (the default --null-fit refit) for any result quoted against red noise; --null-fit once reproduces the old p-value for comparison",
  "references": [

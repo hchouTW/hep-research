@@ -1900,13 +1900,37 @@
      "kind": "analytic",
      "test": "tests/skills/hep_statistics/test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series",
      "basis": "locator",
-     "detail": "under the null a valid p-value is uniform, so P(p <= alpha) = alpha: Cavaliere, Goncalves and Nielsen, 'Bootstrap Inference in the Presence of Bias', arXiv:2208.02028v1, p. 8 ('a test that rejects H0 whenever H_n(p_n) <= alpha is exact', H_n(u) = P(p_n <= u)) and Theorem 3.2, p. 15 (read 2026-10-22); toys are stationary AR(1) series from scipy.signal.lfilter, not from the module; bound alpha + 3 binomial sigma for 150 toys"
+     "detail": "under the null a valid p-value is uniform, so P(p <= alpha) = alpha: Cavaliere, Goncalves and Nielsen, 'Bootstrap Inference in the Presence of Bias', arXiv:2208.02028v1, p. 8 ('a test that rejects H0 whenever H_n(p_n) <= alpha is exact', H_n(u) = P(p_n <= u)) and Theorem 3.2, p. 15 (read 2026-10-22); toys are stationary AR(1) series from scipy.signal.lfilter, not from the module; bound alpha + 3 binomial sigma for 150 toys",
+     "source_id": "scifix:S12",
+     "locator_id": [
+      "scifix:C28",
+      "scifix:C30"
+     ],
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     },
     {
      "kind": "independent-implementation",
      "test": "tests/skills/hep_statistics/test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source",
      "basis": "locator",
-     "detail": "the double bootstrap modified p-value of arXiv:2208.02028v1 section 3.2.2, pp. 14-15 (p*_n = P**(T** <= T*), p~_n = P*(p*_n <= p_n); read 2026-10-22), written in the test for a statistic that rejects when large, with scipy.signal.lfilter surrogates and the power from batched weighted least-squares normal equations (not the module's Zechmeister-Kuerster closed form); one AR(1) series n = 50, phi = 0.9, N = 1999, inner 199: |p_module - p_test| <= 0.05"
+     "detail": "the double bootstrap modified p-value of arXiv:2208.02028v1 section 3.2.2, pp. 14-15 (p*_n = P**(T** <= T*), p~_n = P*(p*_n <= p_n); read 2026-10-22), written in the test for a statistic that rejects when large, with scipy.signal.lfilter surrogates and the power from batched weighted least-squares normal equations (not the module's Zechmeister-Kuerster closed form); one AR(1) series n = 50, phi = 0.9, N = 1999, inner 199: |p_module - p_test| <= 0.05",
+     "source_id": "scifix:S12",
+     "locator_id": [
+      "scifix:C29",
+      "scifix:C30"
+     ],
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     }
     }
    ]
   }
