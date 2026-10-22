@@ -163,27 +163,34 @@ Under `tests/skills/`: `physics_ml/` is now `hep_ml/`, `detector_response/` is `
 `hep_citations/`). A parent record names the path at the fix commit, where its test ran.
 
 **Advisories (shadow mode).** A sci-fix that changed a released number or verdict gets an advisory,
-`docs/evidence/advisories/SFA-YYYY-NNN.json` (format `hep-research-scifix-advisory/1`, provisional), for people who
+`docs/evidence/advisories/SFA-YYYY-NNN.json` (format `hep-research-scifix-advisory/2`, provisional; the scan reads `/1` for one more release), for people who
 hold results made before the fix. It names the ledger entries instead of repeating the evidence, gives the affected
 plugin files and an OSV `SEMVER` range (`introduced`, then `fixed` or `last_affected`; no closing event while the fix
 is unreleased, with `database_specific.fixed_commit`), the scientific impact apart from the range (`observables`,
-`bias`, `trigger`), which artifacts it touches (`applies_to`: artifact types and the extension keys that show the
-affected code ran) and a `remedy`. At the release that ships a fix, add its `fixed` event. `tools/scifix_advisories.py`:
+`bias`, `trigger`), which artifacts it touches (`applies_to`, below) and a `remedy`. At the release that ships a fix, add its `fixed` event. `tools/scifix_advisories.py`:
 `check` validates every advisory against the ledger, the plugin tree and the release manifests
 (`tests/tools/test_scifix_advisories.py` runs it): X.Y.Z versions, no two events at one version, each `fixed` above
 its `introduced`; a `fixed` release changes an affected file against the release before it; an `introduced` release
 that already held an affected file states `database_specific.introduced_basis`; artifact types from the contracts'
-vocabulary; and extension keys that discriminate: at least one, and none required by a listed type's extension schema
-(a key every artifact carries cannot show the affected code ran). When the affected code writes no artifact (a
-script that prints JSON), set `database_specific.no_artifact: true` and `outputs` (the producer and how to recognise
-its output) in every affected block instead; the scan cannot see such results. The advisories that broke the key rule
-before it existed are frozen in `NONDISCRIMINATING_ALLOWED` until their migration; none is added. `affected` lists the releases in range that hold an affected file,
+vocabulary; and match conditions that discriminate. `applies_to.match` is OR over groups, AND within a group, of
+conditions `{path, op, value | values, unknown_before}`: `path` joins envelope keys with `.` and `[*]` expands a list
+(`extension.tools[*].name`); `op` is `exists` (present, not null and not a missing marker), `eq`, `in` or `regex`. A
+condition is undecided when the artifact cannot show it: a trace path (`provenance.code_paths`, `code_tags`) on an
+artifact without that field (written before contracts 3.5.0), or a `contract_version` below `unknown_before` (the field
+did not exist yet). A group that holds makes the artifact affected; when none holds and one is undecided, or when
+`match` is `[]` (no field can show that the affected code ran; `match_basis` says why), it is possibly affected (no
+trace), named by `no_trace`. Every group needs a discriminating condition: anything but `exists` on a top-level
+extension key that every artifact of a listed type carries. Write conditions from what the affected code writes into
+the artifact; the trace holds only code the writer's process loaded (a core/stats CLI or a training asset runs
+elsewhere). When the affected code writes output that is no artifact, give `applies_to.outputs` (`producer` files and
+`how_to_recognize`); the scan lists it apart, and `artifact_types` may be `[]` when no artifact can show the code ran.
+`affected` lists the releases in range that hold an affected file,
 from `release-manifests/` (a file moved between skill folders is found by its path below the folder); `scan
 PROJECT_DIR` reports, read-only, which of a project's artifacts an advisory touches, with the release that made each
 (`digest-consistent`, formerly `verified`, when the `versions.plugin_release` digest equals that release's manifest;
 claimed; or unknown; a build between releases claims the last release, so it is only possibly affected). Per
-advisory the scan decides in order: an advisory whose code writes no artifact is listed apart
-(`outputs_not_artifacts`) and never matched; then the artifact type, the extension keys, the release range, and
+advisory the scan decides in order: `outputs` are listed apart (`outputs_not_artifacts`); then the artifact type,
+the match (affected, or possibly affected (no trace)), the release range, and
 whether that release's manifest holds an affected file; a missing marker (`unknown`, `not-applicable`, `not-provided`) in
 a key is absent, not a sign that the code ran. Shadow mode: the scan exits 0 whatever it finds and blocks nothing.
 

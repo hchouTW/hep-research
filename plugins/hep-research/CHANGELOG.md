@@ -33,6 +33,18 @@ Software checks establish contract consistency only, not physical validity.
   must change an affected file against the release before it, and an `introduced` release that already held one
   states `introduced_basis` (added to SFA-2026-002 and -003); an unknown artifact type is a problem. Scan verdicts
   are unchanged in this step.
+- **Advisories format /2: match what an artifact can show, and say "possibly affected (no trace)" when it cannot
+  (sci-fix ADVISORY-MATCH-V2, S2; plan A1 change 1).** `applies_to.match` replaces `extension_keys`: groups of
+  conditions on any envelope path (`exists`, `eq`, `in`, `regex`; `[*]` expands lists), undecided when the artifact
+  predates the field (`unknown_before`) or the execution trace, and `match: []` with `match_basis` when no field can
+  show the affected code ran. Every group must discriminate; the frozen allowlist is gone. All 31 advisories are
+  rewritten: ten list outputs only (the blinding scanner, the five detector scripts, `anisotropy.py`,
+  `estimate_training_memory.py`), which no artifact can show; six cannot be decided from any field (SFA-2026-004, 006,
+  010: the statistical-result writer wraps a core/stats CLI's output; 023, 025: required ml-artifact keys; 033: required
+  claims), so their artifacts in range are now possibly affected (no trace) instead of affected; the others match on
+  fields the affected code writes (SFA-2026-020 only from contracts 2.5.0, when its fields appeared; 031 on the
+  partition runner's tool name). The number of findings on old artifacts does not drop: what changes is that a
+  finding says what it rests on. The scan still reads `/1` for one release. Evidence: VALIDATION SCIFIX-ADVISORY-V2.
 - **Envelope execution trace: `provenance.code_paths` and `code_tags` (contracts 3.5.0, minor; sci-fix improvement
   plan A1 change 2, maintainer decision 2026-10-22).** Twelve artifact writers add the plugin `.py` files their process
   had loaded and the tags advisory-named shared functions set (`core/trace.py`, imported as `contracts.trace`; tags cleared per envelope), so a

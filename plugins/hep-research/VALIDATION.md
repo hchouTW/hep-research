@@ -2037,6 +2037,38 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-ADVISORY-V2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-5-advisory-v2`, stacked on `scifix/pr-4-execution-trace`)
+
+Sci-fix improvement plan v3, PR-5 (A1 change 1), sci-fix ADVISORY-MATCH-V2 (S2, C2, D2). Fix `cc7357ba`, parent
+`c3d9208a` (PR-4's head) in a detached worktree with the fix commit's `tests/tools/test_scifix_advisories.py` and
+`tests/tools/fixtures/advisory_matrix.json` copied in; the worktree was removed after the run.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/tools/test_scifix_advisories.py::ThreeValuedMatch::test_every_match_of_up_to_two_groups_of_up_to_two_conditions` | exhaustive (156 matches and `[]`) | error (`match_verdict` absent: the /1 scan has no undecided state) | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::AcceptanceMatrix::test_every_advisory_cell_by_cell` | behavioral (31 advisories, hand-written verdicts) | fail by assertion for 11 advisories: SFA-2026-001, 002, 004, 006, 010, 020, 023, 025, 030, 031, 033 | pass | no | CI lock |
+
+The acceptance matrix (`tests/tools/fixtures/advisory_matrix.json`) gives, per advisory, synthetic artifacts in and out
+of range, with and without a trace, positive and negative, and for SFA-2026-020 one written under contracts 2.4.0,
+before its fields existed; every verdict is written by hand from the advisory's `applies_to`. A mutation check (two
+expectations altered) made the matrix test fail for exactly those two advisories. The plan's two `hadd` jobs of F-01
+(0.12.0 and 0.21.0, digest-consistent) get no finding from any shipped advisory.
+
+Migration of the 31 advisories (each read against the code that writes the artifact):
+
+| Class | Advisories | Basis |
+|---|---|---|
+| outputs only (`artifact_types: []`) | 001, 030 (blinding scanner), 014 to 019 (detector scripts), 036 (`anisotropy.py`), 037 (`estimate_training_memory.py`) | the affected code prints a report and writes no artifact, and no artifact writer imports it within the range (checked: the writers' imports) |
+| `match: []`, possibly affected (no trace) | 004, 006, 010 | `result_artifact.py` writes the statistical-result from a core/stats CLI's JSON printed in another process; no field names the code (the listed keys were required, or do not show it) |
+| `match: []` | 023, 025 (ml-artifact), 033 (communication) | the keys were required in every artifact of the type; the affected scripts run apart from the writer |
+| discriminating fields | 002, 020 (`splits.overlap_check.tool` matching `check_split_integrity`, or `splits.manifest`; 020 `unknown_before` 2.5.0, when they appeared), 003, 021 (`calibration`), 005, 009 (`significance`), 007 (`convergence`, `sampler`), 008 (`construction`), 011 (`results`), 022 (`domain_shift`), 024 (`weights`), 032, 034, 035 (`occurrences`), 031 (`tools[*].name` equal to `hep-research core/partition runner`, the name in 0.3.0's `batch_campaign.py`, plus `local_partition.py` outputs) | each top-level key existed in the extension schema at every release tag in the advisory's range (checked against the tags) |
+
+Full gate: `run_all_checks.py --no-cli --jobs 4`, CI lock, branch head: 25 pass, 0 fail, 2 skipped (CLI host
+checks); 4828 tests, 4579 pass, 0 failures, 249 skipped.
+
+Expected effect, as the plan states: findings on old artifacts do not drop. The six `match: []` advisories now say
+"possibly affected (no trace)" where they said "affected"; the outputs-only ones no longer match any artifact.
+
 ## SCIFIX-PLAN-A1-TRACE (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; E2 venv for fixtures and examples; branch `scifix/pr-4-execution-trace`, stacked on `scifix/pr-3-scan-order`)
 
 Sci-fix improvement plan v3, PR-4: A1 change 2 (contracts 3.5.0, `contracts/trace.py`, maintainer decision
