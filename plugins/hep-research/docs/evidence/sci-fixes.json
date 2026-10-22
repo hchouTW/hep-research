@@ -1337,6 +1337,35 @@
    "gaps": [],
    "note": "fix 17a3dad8; parent b45e4037 (main, 0.22.0) with the fix commit's evidence test files copied in (adapted parent tree: only test files added or replaced, no code under test touched); E2 venv, 2026-10-22; VALIDATION TRIAGE-A: both tests error on the parent (TimeoutExpired, FileNotFoundError out of main) and pass on the fix",
    "independence": []
+  },
+  {
+   "id": "SCAN-VERDICT-ORDER",
+   "title": "scifix_advisories.py scan lists advisories whose code writes no artifact apart and reports a release only when its manifest holds an affected file",
+   "changelog": {
+    "kind": "unreleased",
+    "detail": "sci-fix improvement plan PR-3 (A5)"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/tools/test_scifix_advisories.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix e48396a4; parent 8472cdb5 (plan PR-2) in a detached worktree with the fix commit's test file copied in (adapted parent tree: only the test file replaced, no code under test touched); CI lock venv, 2026-10-22; VALIDATION SCIFIX-SCAN-VERDICT-ORDER: on the parent the exhaustive test fails 21 of its 40 cases by assertion (the 20 no-artifact cases, matched or silent instead of listed apart, and the in-range release whose manifest lacks the file, reported affected), and test_release_basis_and_verdicts, test_verdict_order_no_artifact_and_manifest_paths and test_shipped_no_artifact_advisories_skip_the_hadd_job fail; all pass on the fix. The scan is a shadow-mode report and writes nothing into a project; no released result changes, so no advisory (the waiver field comes with plan PR-8)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_over_every_combination_of_the_five_steps",
+     "basis": "exhaustive",
+     "detail": "all 40 combinations of writes-no-artifact x type listed x key present x release (in range and held, in range but absent from its manifest, in range without a manifest, out of range, unknown) against the A5 rule written out in the test"
+    }
+   ]
   }
  ],
  "documentation_fixes": [

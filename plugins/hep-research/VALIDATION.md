@@ -2037,6 +2037,23 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-SCAN-VERDICT-ORDER (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-3-scan-order`, stacked on `scifix/pr-2-advisory-check`)
+
+Sci-fix improvement plan v3, PR-3 (A5), sci-fix SCAN-VERDICT-ORDER (S2, C2, D2). Fix `e48396a4`, parent `8472cdb5`
+(PR-2's head) in a detached worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in; the
+worktree was removed after the run.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_over_every_combination_of_the_five_steps` | exhaustive (40 cases) | fail, 21 of 40 subtests by assertion | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_verdict_order_no_artifact_and_manifest_paths` | behavioral | fail (assertion) | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_shipped_no_artifact_advisories_skip_the_hadd_job` | behavioral | fail (assertion: SFA-2026-036 and -037 affected) | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::ProjectScan::test_release_basis_and_verdicts` | behavioral | fail (assertion: `verified` basis) | pass | no | CI lock |
+
+Reproduction of plan F-01/F-27 (a 0.21.0 `computational-run` that only ran `hadd`, with the 0.21.0 manifest digest):
+main `a53af7e0` reports SFA-2026-036 and SFA-2026-037 `affected`; the fix reports no finding and lists the eight
+advisories without artifacts (SFA-2026-014 to -019, -036, -037) in `outputs_not_artifacts`.
+
 ## SCIFIX-PLAN-P0-CHECK (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-2-advisory-check` from main `a53af7e0`)
 
 Sci-fix improvement plan v3, PR-2 (A0, A3, C5, F-23). Counts on main `a53af7e0` (0.23.0), recomputed because the
