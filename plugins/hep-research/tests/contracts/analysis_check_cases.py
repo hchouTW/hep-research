@@ -67,7 +67,7 @@ class Case:
         return out
 
 
-DEV_SUITE = "1.1.0-dev.3"
+DEV_SUITE = "1.1.0-dev.4"
 
 
 def context_1_1(c, suite_version: str = DEV_SUITE) -> None:

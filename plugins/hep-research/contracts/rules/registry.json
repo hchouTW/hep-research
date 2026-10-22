@@ -1057,9 +1057,59 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); retired in release R2: it removed the declaration flag when the agent-written binding said asserted_by.kind person (G8); version 1.1.0 replaces it, and a suite naming 1.0.0 gives check.rule_not_run (reproduce with release R1)",
+   "source_sha256": "23277ed8da0b066fc5a28d0e4f06006cba560c9eb150ef90fef08dfe1e5844e4"
+  },
+  {
+   "rule_id": "r-run.binding",
+   "version": "1.1.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "changed",
+   "prerequisites": [
+    "result binding",
+    "chain root intent",
+    "semantic lock item"
+   ],
+   "applicability": "the root's result is bound to this analysis bundle and its lock, with the root's unit, scope and binning; the binding is agent-written, so the attribution is a declaration (C12); the attribution stays a declaration whatever asserted_by says (DR-1 split, G8)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.result_bound"
+    ],
+    "violated": [
+     "check.binding_wrong_subject",
+     "check.semantic_drift",
+     "check.result_digest",
+     "check.result_identity"
+    ],
+    "not_applicable": [
+     "check.root_not_required"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.result_unbound"
+    ],
+    "unsupported": [
+     "check.binding_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V20",
+    "V32",
+    "V88"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
-   "source_sha256": "23277ed8da0b066fc5a28d0e4f06006cba560c9eb150ef90fef08dfe1e5844e4"
+   "source_sha256": "7fd6fd1e839136a51ebc719ad3adba345d2b6930391bd59043e1e0fd852765da"
   },
   {
    "rule_id": "r-run.status",
@@ -1210,9 +1260,68 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); retired in release R2: a campaign was campaign-recorded without its inputs reaching the analysis (G6); version 1.1.0 replaces it, and a suite naming 1.0.0 gives check.rule_not_run (reproduce with release R1)",
+   "source_sha256": "d0a6f6cfe21905b736ac73429322d448b7e1a19a16829d653797f30304e35667"
+  },
+  {
+   "rule_id": "r-run.campaign",
+   "version": "1.1.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "changed",
+   "prerequisites": [
+    "campaign computational-run (batch adapter)",
+    "state.json collection records",
+    "execution bundle",
+    "campaigns[].inputs (result binding 1.1.0)"
+   ],
+   "applicability": "a campaign producer is campaign-recorded: collected chunks match the interface record, one common recorded execution bundle that verifies and belongs to the campaign, equal to the binding's; the campaign's inputs (result binding 1.1.0 campaigns[].inputs) match their sources and include an analysis item (G6)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.campaign_recorded"
+    ],
+    "violated": [
+     "check.campaign_mismatch",
+     "check.chunk_digest_conflict",
+     "check.execution_bundle_mismatch",
+     "check.merge_mismatch",
+     "check.closure_mismatch"
+    ],
+    "not_applicable": [
+     "check.no_campaign"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.campaign_uncollected",
+     "check.campaign_orphan",
+     "check.campaign_bundle_unrecorded",
+     "check.campaign_bundle_invalid",
+     "check.campaign_unreadable",
+     "check.campaign_inputs_unbound",
+     "check.campaign_closure_no_analysis"
+    ],
+    "unsupported": [
+     "check.campaign_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V61",
+    "V62",
+    "V63",
+    "V82"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
-   "source_sha256": "d0a6f6cfe21905b736ac73429322d448b7e1a19a16829d653797f30304e35667"
+   "source_sha256": "aa9afcacb6c35cb91a6c861e5d37b3cd9fcdbe3d232ed49a1701a02f0c5ed23c"
   },
   {
    "rule_id": "r-run.blinding",
@@ -1256,9 +1365,62 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); retired in release R2: it permitted a blinded result by its own status label and read only the spec's flag (G7, G13); version 1.1.0 replaces it, and a suite naming 1.0.0 gives check.rule_not_run (reproduce with release R1)",
+   "source_sha256": "df77885848fba7e2d489a573134ff3c2652616b6fd268a2b511f48ee1fdcf6b1"
+  },
+  {
+   "rule_id": "r-run.blinding",
+   "version": "1.1.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "changed",
+   "prerequisites": [
+    "spec blinding",
+    "result status labels",
+    "project blinding.allowed_outputs",
+    "the producing run's lineage",
+    "dataset records with a dataset status"
+   ],
+   "applicability": "a blinded spec's binding cites only asimov or synthetic results, or outputs a prefixed exact allowed_outputs entry names (m2c-proposal.md); blinding applies by the spec's flag or the project's blinded list naming the spec's artifact_id (DR-9, G13); a result is permitted by its run lineage (every data leaf a synthetic or simulated dataset record) or allowed_outputs, never by its own label (DR-7, G7)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.blinding_permitted"
+    ],
+    "violated": [
+     "check.blinded_result_cited"
+    ],
+    "not_applicable": [
+     "check.not_blinded"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.allowed_output_ambiguous",
+     "check.blinding_policy_unknown",
+     "check.blinding_label_only",
+     "check.lineage_no_data",
+     "check.lineage_status_unknown"
+    ],
+    "unsupported": [
+     "check.blinding_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V70",
+    "V83",
+    "V84"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
-   "source_sha256": "df77885848fba7e2d489a573134ff3c2652616b6fd268a2b511f48ee1fdcf6b1"
+   "source_sha256": "3c26672ddc569706a6c455d9f0fa1f58883296eb11eddbadbf37bf9a49e2205b"
   }
  ],
  "v_cases": [
@@ -2986,9 +3148,13 @@
      "work_packages": [
       "P2.07"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "r-run.campaign 1.1.0 and result binding 1.1.0 (release R2, 1.1.0-dev.4)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g6_campaign_closure_reaches_the_analysis",
+      "tests.contracts.test_analysis_check_r2_rules.CampaignClosure.test_campaign_inputs",
+      "tests.contracts.test_analysis_check_r2_rules.CampaignClosure.test_a_verified_closure_without_an_analysis_item_is_unverified"
+     ]
     }
    ]
   },
@@ -3003,9 +3169,13 @@
      "work_packages": [
       "P2.08"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "r-run.blinding 1.1.0 (release R2, 1.1.0-dev.4): lineage, DR-7",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g7_a_self_reported_synthetic_label_is_not_blinding_permission",
+      "tests.contracts.test_analysis_check_r2_rules.BlindingLineage.test_lineage_outcomes",
+      "tests.contracts.test_analysis_check_r2_rules.BlindingLineage.test_an_external_data_entry_has_no_dataset_status"
+     ]
     }
    ]
   },
@@ -3020,9 +3190,12 @@
      "work_packages": [
       "P2.09"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "r-run.blinding 1.1.0 (release R2, 1.1.0-dev.4): project blinded list, DR-9",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g13_project_blinded_list_applies_without_the_spec_flag",
+      "tests.contracts.test_analysis_check_r2_rules.BlindingLineage.test_the_project_list_applies_by_artifact_id_only"
+     ]
     }
    ]
   },
@@ -3091,9 +3264,12 @@
      "work_packages": [
       "P2.13"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "r-run.binding 1.1.0 (G8) and the check-context 1.1.0 bundle-coverage flag (A3), release R2",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g8_a_self_declared_person_keeps_the_declaration_flag",
+      "tests.contracts.test_analysis_check_r2_rules.BundleCoverageFlag.test_outcomes_on_bundle_coverage_are_declaration_based_in_1_1_0"
+     ]
     }
    ]
   },

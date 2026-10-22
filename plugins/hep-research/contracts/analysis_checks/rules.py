@@ -788,8 +788,11 @@ RULES.update(run_rules.RULES)  # run-lineage/v1 (contracts.analysis_checks.runs)
 # 1.1.0 (release R2): r-rep.repetition and r-ratio.correlation read every matching declaration or record (G3, G17).
 # r-comp.factor_values 1.1.0: the tolerance comes from declared significant digits, never the table (G4, DR-6).
 # r-aux.use 1.1.0: an observation is its source identity plus pointer, not its item ID (G5, DR-3).
+# r-run.binding 1.1.0 keeps the declaration flag whatever asserted_by says (G8, DR-1); r-run.blinding 1.1.0 applies the
+# project's blinded list (G13, DR-9) and permits by lineage, not by status label (G7, DR-7); r-run.campaign 1.1.0
+# requires the campaign's inputs (result binding 1.1.0) to reach the analysis (G6).
 VERSIONS = {"r-rep.repetition": "1.1.0", "r-ratio.correlation": "1.1.0", "r-comp.factor_values": "1.1.0",
-            "r-aux.use": "1.1.0"}
+            "r-aux.use": "1.1.0", "r-run.binding": "1.1.0", "r-run.blinding": "1.1.0", "r-run.campaign": "1.1.0"}
 
 # (rule_id, version) -> implementation
 IMPLEMENTED = {(rid, VERSIONS.get(rid, "1.0.0")): fn for rid, fn in RULES.items()}
@@ -814,11 +817,35 @@ def _dispatch(ob: dict, rules: dict | None):
     return None, f"rule {rid!r} version {ver!r} is not implemented by this checker (it implements {have}): never evaluated with another version"
 
 
+class _CoverageReads(Env):
+    """The evaluator's Env: records the tables whose coverage the rule being evaluated reads (A3). Rules name Env, not
+    this class, so their source digests do not change."""
+
+    coverage_read: set[str]
+
+    def coverage_of(self, inst_id: str) -> dict:
+        recipe = self.recipe_of(self.insts.get(inst_id, {}))
+        self.coverage_read.add(str((recipe.get("semantics") or {}).get("table_id")))
+        return super().coverage_of(inst_id)
+
+
+def _bundle_coverage_flag(res: dict, env: _CoverageReads) -> dict:
+    """A3 (DR-1 split, V88), check-context 1.1.0: a satisfied or not-applicable outcome that read a coverage contract
+    the bundle supplied (agent-writable, not the plugin's) is declaration-based; state and reason are unchanged."""
+    bundled = sorted(t for t in env.coverage_read if ((env.view.get("coverage") or {}).get(t) or {}).get("source") == "bundle")
+    if not bundled or res.get("state") not in ("satisfied", "not_applicable"):
+        return res
+    decls = sorted(set(res.get("declarations") or []) | {f"coverage-contract:{t}" for t in bundled})
+    return dict(res, declarations=decls, declaration_based=True)
+
+
 def evaluate(view: dict, obligations: list[dict], rules: dict | None = None) -> list[dict]:
-    env = Env(view)
+    env = _CoverageReads(view)
+    flag_bundle_coverage = (env.ctx.get("context_version") or "1.0.0") != "1.0.0"  # A3 from check-context 1.1.0
     out = []
     for ob in obligations:
         fn, why = _dispatch(ob, rules)
+        env.coverage_read = set()
         if fn is None:
             res = outcome("unverified", "check.rule_not_run", why)
         else:
@@ -826,5 +853,7 @@ def evaluate(view: dict, obligations: list[dict], rules: dict | None = None) -> 
                 res = fn(ob, env)
             except Exception as exc:  # a failing rule is visible and never a pass
                 res = outcome("unverified", "check.rule_not_run", f"the rule failed: {type(exc).__name__}: {exc}")
+        if flag_bundle_coverage:
+            res = _bundle_coverage_flag(res, env)
         out.append(dict(res, obligation_id=ob["obligation_id"], rule_id=ob["rule_id"]))
     return out

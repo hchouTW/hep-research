@@ -97,3 +97,50 @@ The checker never re-decides which attempt is valid: the adopted output is the o
 The fake-scheduler example has no freeze step, so its submissions carry no bundle digest (**Confirmed**). It is not
 changed: the campaign-recorded cases use `LocalExecutor` with a test-side freeze, and the example stays a
 declared-level comparison.
+
+## Phase 2, release R2: DR-1 and DR-7 changes (2026-10-23)
+
+The run-lineage fixes in the suites `1.1.0-dev.4` (DR-1 split, DR-7 and DR-9, adopted in `decision-architecture.md`):
+
+- **G8, `r-run.binding` 1.1.0.** The result binding is agent-writable. Its `asserted_by.kind: "person"` no longer
+  removes the declaration flag: the attribution is always declaration-based (`result-binding`). Whether a person
+  really asserted it is a custody question for the assurance plane (B).
+- **A3, check-context 1.1.0.** A satisfied or not-applicable outcome that read a coverage contract the bundle supplied
+  (the view's `source: bundle`, agent-writable, not the plugin's) carries the declaration
+  `coverage-contract:<table_id>` and is declaration-based; state and reason are unchanged. It is a trust annotation of
+  1.1.0 contexts (like the 1.1.0 input checks), applied by the evaluator from the tables a rule read, so no rule's
+  code or digest changes. 1.0.0 contexts keep their outcomes (P3).
+- **G13, `r-run.blinding` 1.1.0.** Blinding applies when the spec's own flag says so, **or** when the project's
+  blinding block lists the spec's `artifact_id` in `blinded` (DR-9). A path or another ID does not match.
+- **G7, `r-run.blinding` 1.1.0.** A blinded spec's result is judged by the lineage of the run that produced it
+  (DR-7), never by its own status label:
+
+  | Lineage (all runs reached through product sources) | Outcome |
+  | --- | --- |
+  | every data leaf is a frozen `dataset-record` whose dataset status (`extension.status`, vocabulary `dataset_statuses`, kept apart from envelope labels) is `synthetic` or `simulated` | satisfied, `check.blinding_permitted` |
+  | an `allowed_outputs` `path:` or `artifact:` entry names the result | satisfied (a policy declaration), as before |
+  | a data leaf with another dataset status (published, preliminary, user-supplied), not allowed | violated, `check.blinded_result_cited`; without a project blinding block, unverified `check.blinding_policy_unknown` |
+  | no data leaf | unverified, `check.lineage_no_data`: run records are agent-writable, so leaving the data input out must not pass (P4) |
+  | an external-data manifest entry (no dataset status), an unreadable run, an input without a source, a cycle | unverified, `check.lineage_status_unknown` |
+  | no run produced the result (a campaign result, or no producer): a label only | unverified, `check.blinding_label_only` |
+
+  A campaign result is judged through the campaign's listed inputs (below); without them it is label-only.
+- **G6, `r-run.campaign` 1.1.0 and result binding 1.1.0.** A campaign entry lists `inputs`, which take the same
+  `{path, source}` form as a run's. To be campaign-recorded, every listed input must match its source (a frozen
+  item, an external manifest entry, or an upstream run's product), and at least one must be an analysis item. A
+  digest mismatch is violated (`check.closure_mismatch`). No inputs, an input without a matching source, or no
+  analysis item is unverified (`check.campaign_inputs_unbound`, `check.campaign_closure_no_analysis`). These checks
+  come after the existing ones (merge, collection, execution bundle), so violations found there still decide first.
+  A 1.0.0 binding has no `inputs`, so the 1.1.0 rule gives it `check.campaign_inputs_unbound`. An installed 0.25.1
+  refuses a 1.1.0 binding as invalid input (`result_binding.schema.const`, `.additional`, exit 1;
+  `refusal-matrix.md`).
+
+Measured on the Phase 0 comparison set:
+- **On dev.4:** `g8-person` keeps its flag, and `g13-project-list` is now blinded, permitted by its synthetic lineage.
+- **`run-campaign`:** its blinded result is judged through the campaign's inputs. The fixture campaign reads the
+  spec, the recipe and a synthetic dataset record, so it stays satisfied, now by lineage.
+- **On 1.0.0:** `r-run.binding` and `r-run.blinding` give `check.rule_not_run`.
+
+The run fixtures (`tests/contracts/analysis_check_runs.py`) now freeze a dataset record that run A reads, write
+result binding 1.1.0 with the campaign's inputs, and use 1.1.0 contexts.
+

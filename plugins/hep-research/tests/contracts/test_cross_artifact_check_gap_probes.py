@@ -232,21 +232,28 @@ class RunProbes(Probe):
     def blinded_spec(self, c):
         c.doc("spec")["extension"]["blinding"] = {"blinded": True}
 
-    @PHASE2
     def test_g6_campaign_closure_reaches_the_analysis(self):
         # G6 (V82): a campaign whose inputs include no analysis item is not campaign-recorded for the analysis
-        post = runs.run_campaign(self.root())
-        rep = post.check()
-        self.assertEqual(by_rule(rep, "r-run.campaign")[0]["state"], "unverified")
+        # (r-run.campaign 1.1.0 reads result binding 1.1.0 campaigns[].inputs)
+        def worker_only(post, cdir):
+            post.binding["campaigns"][0]["inputs"] = [{"path": "worker/work.py", "source": {"external": {"item": "w", "entry": "x"}}}]
+        rep = runs.run_campaign(self.root(), after=worker_only).check()
+        o = by_rule(rep, "r-run.campaign")[0]
+        self.assertNotEqual(o["state"], "satisfied")  # not campaign-recorded for the analysis
+        self.assertIn(o["reason"], ("check.closure_mismatch", "check.campaign_inputs_unbound", "check.campaign_closure_no_analysis"))
+        rep = runs.run_campaign(self.root()).check()  # inputs reaching the frozen spec, recipe and data
+        self.assertEqual(by_rule(rep, "r-run.campaign")[0]["reason"], "check.campaign_recorded")
 
-    @PHASE2
     def test_g7_a_self_reported_synthetic_label_is_not_blinding_permission(self):
         # G7 (DR-7, V83): a blinded spec's result whose only permission is its own 'synthetic' label is unverified
-        post = runs.run_chain(self.root(), spec_variant=self.blinded_spec)
+        # (r-run.blinding 1.1.0: the lineage decides; with no data leaf, lineage_no_data)
+        post = runs.run_chain(self.root(), spec_variant=self.blinded_spec, with_data=False)
         rep = post.check()
-        self.assertEqual(by_rule(rep, "r-run.blinding")[0]["state"], "unverified")
+        self.assertEqual((by_rule(rep, "r-run.blinding")[0]["state"], by_rule(rep, "r-run.blinding")[0]["reason"]),
+                         ("unverified", "check.lineage_no_data"))
+        rep = runs.run_chain(self.root(), spec_variant=self.blinded_spec).check()  # a synthetic dataset record: permitted
+        self.assertEqual(by_rule(rep, "r-run.blinding")[0]["state"], "satisfied")
 
-    @PHASE2
     def test_g8_a_self_declared_person_keeps_the_declaration_flag(self):
         # G8 (DR-1, V88): asserted_by.kind 'person' written by the agent does not remove the declaration flag
         def person(post):
@@ -258,7 +265,6 @@ class RunProbes(Probe):
     def test_g9_hand_edited_result_binding_section(self):
         pass
 
-    @PHASE2
     def test_g13_project_blinded_list_applies_without_the_spec_flag(self):
         # G13 (DR-9, V84): the project's blinded list names the spec by artifact_id; blinding applies even though the
         # spec's own flag says it is not blinded

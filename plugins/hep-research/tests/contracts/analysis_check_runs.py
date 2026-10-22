@@ -45,11 +45,25 @@ def run_doc(run_id: str, inputs: list[tuple[str, str]], outputs: dict, exit_stat
                           "output_hashes": dict(outputs)}}
 
 
-def with_run_lineage(variant=None):
+def dataset_record(status: str = "synthetic", dataset_id: str = "synthetic-events-p1") -> dict:
+    """The data a run reads, as a frozen dataset record with a dataset status (DR-7: blinding is judged by lineage)."""
+    from contracts import CONTRACTS_VERSION
+    return {"contract_version": CONTRACTS_VERSION, "artifact_id": dataset_id, "artifact_type": "dataset-record",
+            "status": [status] if status in ("synthetic", "simulated") else [], "inputs": [], "outputs": [],
+            "extension": {"dataset_id": f"synthetic:{dataset_id}", "source_evidence_ids": [], "status": status,
+                          "observable": {"name": "synthetic event counts"}, "covariance": {"status": "absent"}}}
+
+
+def with_run_lineage(variant=None, data_status: str = "synthetic"):
+    """Variant: the run-lineage suite and the data the runs read, on check-context 1.1.0 and the newest 1.1.0
+    pre-release suites (release R2: the 1.0.0 run-lineage suite names r-run.binding and r-run.blinding 1.0.0, which
+    this checker no longer runs)."""
     def v(c):
         c.context["suites"] = [dict(RUN_SUITE)]
+        c.add("dataset-record", "events-p1", "data/events-p1.json", dataset_record(data_status))
         if variant:
             variant(c)
+        cases.context_1_1(c)
     return v
 
 
@@ -60,7 +74,7 @@ class Post:
         self.root, self.bundle_path = Path(root), Path(bundle_path)
         self.bundle = json.loads(self.bundle_path.read_text())
         lock = next(i for i in self.bundle["items"] if i["role"] == "semantic-lock")
-        self.binding = {"binding_version": "1.0.0", "kind": "result-binding",
+        self.binding = {"binding_version": "1.1.0", "kind": "result-binding",
                         "analysis_bundle_sha256": self.bundle["bundle_digest"], "semantic_lock_sha256": lock["sha256"],
                         "asserted_by": dict(AGENT), "runs": [], "campaigns": [], "results": []}
 
@@ -118,20 +132,23 @@ def result_artifact(status=("synthetic",), artifact_id: str = "flux-proton-p1-re
             "status": list(status), "extension": {"values": [VALUE, VALUE * 2]}}
 
 
-def run_chain(root: Path, variant=None, spec_variant=None, status=("synthetic",), snapshots=None) -> Post:
-    """RUN-CHAIN: run A reads the frozen spec and recipe and writes an intermediate product; run B reads that product
-    through an explicit product binding and writes the root's result."""
+def run_chain(root: Path, variant=None, spec_variant=None, status=("synthetic",), snapshots=None,
+              data_status: str = "synthetic", with_data: bool = True) -> Post:
+    """RUN-CHAIN: run A reads the frozen spec, recipe and a dataset record (dataset status data_status) and writes an
+    intermediate product; run B reads that product through an explicit product binding and writes the root's result.
+    with_data False: run A records no data input (its lineage has no data leaf)."""
     if snapshots is None:
-        bundle = cases.positive_case(root, with_run_lineage(spec_variant))
+        bundle = cases.positive_case(root, with_run_lineage(spec_variant, data_status))
     else:
         from contracts import analysis_check as ac
-        c = cases.positive_case(root, with_run_lineage(spec_variant), freeze=False)
+        c = cases.positive_case(root, with_run_lineage(spec_variant, data_status), freeze=False)
         c.write()
         bundle = root / "bundle.json"
         bundle.write_text(json.dumps(ac.freeze(c.root, "case-positive", c.items, c.context, snapshots=snapshots)))
     post = Post(root, bundle)
     post.add_run("run-a", [{"path": "spec.json", "source": {"item": "spec"}},
-                           {"path": "recipe.json", "source": {"item": "flux-reduced"}}],
+                           {"path": "recipe.json", "source": {"item": "flux-reduced"}}]
+                 + ([{"path": "data/events-p1.json", "source": {"item": "events-p1"}}] if with_data else []),
                  {"work/counts.json": {"counts": [10, 20, 30]}})
     post.add_run("run-b", [{"path": "work/counts.json", "source": {"product": {"run": "run-a", "output": "work/counts.json"}}}],
                  {"results/flux.json": result_artifact(status)})
@@ -155,6 +172,12 @@ def campaign_artifact(cdir: Path, executor) -> dict:
     import batch_campaign
     return batch_campaign.build_artifact(cdir, {"backend": "local", "limits": {"max_total_jobs": 8}}, executor,
                                          ["synthetic"], "synthetic v6.3 run-lineage campaign")
+
+
+# what the campaign read (result binding 1.1.0, G6): the frozen spec and recipe and the dataset record
+CAMPAIGN_INPUTS = ({"path": "spec.json", "source": {"item": "spec"}},
+                   {"path": "recipe.json", "source": {"item": "flux-reduced"}},
+                   {"path": "data/events-p1.json", "source": {"item": "events-p1"}})
 
 
 def run_campaign(root: Path, records=None, spec_variant=None, after=None) -> Post:
@@ -192,7 +215,7 @@ def run_campaign(root: Path, records=None, spec_variant=None, after=None) -> Pos
     post.write("results/merged.json", merged["merged"])
     post.binding["campaigns"] = [{"campaign_uid": state["campaign_uid"], "dir": "campaign",
                                   "run_ref": "runs/campaign.computational-run.json", "run_sha256": run_sha,
-                                  "execution_bundle_sha256": digest}]
+                                  "execution_bundle_sha256": digest, "inputs": [dict(i) for i in CAMPAIGN_INPUTS]}]
     post.result("results/merged.json", {"campaign": state["campaign_uid"]})
     if after:  # edits of the records after the interface record was written (synthetic tampering cases)
         after(post, cdir)

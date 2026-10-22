@@ -17,7 +17,9 @@ from pathlib import Path, PurePosixPath
 
 from contracts.release_manifest import canonical_sha256
 
-PERMITTED = ("asimov", "synthetic")
+# dataset_statuses (contracts/vocab/core.json) a blinded spec's lineage may reach (DR-7: simulated may be permitted);
+# a result envelope's own status labels (asimov, synthetic) are no evidence (G7) and are not read
+PERMITTED_DATA = ("synthetic", "simulated")
 GLOB = set("*?[]")
 
 
@@ -166,10 +168,10 @@ def r_run_binding(ob: dict, env) -> dict:
         diff.append("binning")
     if diff:
         return outcome("violated", "check.result_identity", f"the result's {diff} differ from the root's", ev)
-    author = b.get("asserted_by") or {}
-    decls = ["result-binding"] if author.get("kind") != "person" else []
+    # 1.1.0 (G8, DR-1): the binding is agent-writable, so its own asserted_by.kind 'person' never removes the flag
     return outcome("satisfied", "check.result_bound",
-                   "bound to this bundle and lock, with the root's identity (the attribution is a declaration, C12)", ev, decls)
+                   "bound to this bundle and lock, with the root's identity (the attribution is a declaration, C12)", ev,
+                   ["result-binding"])
 
 
 # --- r-run.status ---------------------------------------------------------------------------------------------
@@ -298,6 +300,33 @@ def r_run_closure(ob: dict, env) -> dict:
 
 
 # --- r-run.campaign -------------------------------------------------------------------------------------------
+def _campaign_closure(e: Evidence, camp: dict) -> tuple[str, str, str]:
+    """G6 (result binding 1.1.0, V82): a campaign's listed inputs, each matching its source (a frozen item, an external
+    manifest entry or an upstream run's product), with at least one analysis item among them. A digest mismatch is
+    violated; no inputs, an input without a matching source, or no analysis item is unverified."""
+    inputs = camp.get("inputs")
+    if not inputs:
+        return ("unverified", "check.campaign_inputs_unbound",
+                "the binding lists no inputs for the campaign (result binding 1.1.0 campaigns[].inputs): whether it read "
+                "the analysis cannot be judged")
+    known = e.known_bytes()
+    states = []  # one per listed input: the same path may be listed twice with different sources
+    for i in inputs:
+        data = e.read(str(i.get("path")))
+        sha = _sha(data) if data is not None else ""
+        states.append((str(i.get("path")), _input_state(e, "", str(i.get("path")), sha, i.get("source"), known)))
+    bad = sorted({p for p, st in states if st == "mismatch"})
+    if bad:
+        return ("violated", "check.closure_mismatch", f"campaign inputs whose bytes differ from their source: {bad}")
+    loose = sorted({p for p, st in states if st not in ("ok", "reserialized")})
+    if loose:
+        return ("unverified", "check.campaign_inputs_unbound", f"campaign inputs without a matching source: {loose}")
+    if not any("item" in (i.get("source") or {}) for i in inputs):
+        return ("unverified", "check.campaign_closure_no_analysis",
+                "no input of the campaign is an analysis item: its closure does not reach the analysis")
+    return ("satisfied", "", "")
+
+
 def r_run_campaign(ob: dict, env) -> dict:
     from core.partition.bundle import check_campaign, digest_of
     e, rid = _evidence(env), ob["subject"]["root"]
@@ -336,6 +365,9 @@ def r_run_campaign(ob: dict, env) -> dict:
     result = e.json_at(str(res.get("file")))
     if result is None or hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest() != hashes.get("merged"):
         return outcome("violated", "check.merge_mismatch", "the result file is not the campaign's merge (adapter digest kind)", ev)
+    closure = _campaign_closure(e, camp)  # 1.1.0 (G6): the campaign's inputs must reach the analysis
+    if closure[0] == "violated":
+        return outcome(*closure, ev)
     if not chunks or any(cid not in collected for cid in chunks):
         return outcome("unverified", "check.campaign_uncollected", "a merged chunk has no collection record: declared level only", ev)
     owner = {r.get("attempt_id"): r.get("submission") for row in (state.get("chunks") or {}).values()
@@ -354,6 +386,8 @@ def r_run_campaign(ob: dict, env) -> dict:
         return outcome("unverified", "check.campaign_bundle_invalid", "the recorded execution bundle does not verify or belong to the campaign", ev)
     if camp.get("execution_bundle_sha256") != d:
         return outcome("violated", "check.execution_bundle_mismatch", "the binding names another execution bundle than the campaign recorded", ev)
+    if closure[0] == "unverified":
+        return outcome(*closure, ev)
     return outcome("satisfied", "check.campaign_recorded",
                    "campaign-recorded: collected chunks, interface record and one verified execution bundle agree. These records "
                    "are agent-writable: this guards against mistakes and forged chunk files, not a forged state.json", ev,
@@ -361,32 +395,89 @@ def r_run_campaign(ob: dict, env) -> dict:
 
 
 # --- r-run.blinding -------------------------------------------------------------------------------------------
-def _blinded(env) -> bool:
+def _blinded(env, policy) -> bool:
+    """The spec's own flag, or the project's blinded list naming the spec's artifact_id (G13, DR-9)."""
     spec = env.spec if isinstance(env.spec, dict) else {}
     bl = (spec.get("extension") or {}).get("blinding") if isinstance(spec.get("extension"), dict) else None
     bl = bl if isinstance(bl, dict) else spec.get("blinding")
-    return isinstance(bl, dict) and bl.get("blinded") is True
+    listed = policy.get("blinded") if isinstance(policy, dict) else None
+    return (isinstance(bl, dict) and bl.get("blinded") is True) or (
+        isinstance(listed, list) and spec.get("artifact_id") is not None and spec.get("artifact_id") in listed)
+
+
+def _data_leaves(e: Evidence, run_id: str | None, inputs: list | None = None) -> tuple[list[tuple[str, str | None]], bool]:
+    """The data leaves of a run's lineage, or of a campaign's inputs (DR-7), as (where, dataset status or None), and
+    whether a leaf cannot be classified. A frozen dataset-record item is a data leaf with its dataset status; an
+    external-data manifest entry is a data leaf of unknown status; another frozen item (spec, recipe, calibration) is
+    not data; a product of an upstream run is followed; an input without a source cannot be classified."""
+    from contracts.dependencies import _dataset_status
+    order: list[str] = []
+    cycle = False
+    for rid in ([run_id] if run_id else []) + [str((i.get("source") or {}).get("product", {}).get("run"))
+                                               for i in inputs or [] if "product" in (i.get("source") or {})]:
+        sub, c = e.lineage(rid)
+        order += [r for r in sub if r not in order]
+        cycle |= c
+    leaves: list[tuple[str, str | None]] = []
+    unknown = cycle
+    every = list(inputs or [])
+    for rid in order:
+        rec, _, problem = e.run(rid)
+        if problem:
+            unknown = True
+            continue
+        every += (rec or {}).get("inputs", [])
+    for i in every:
+        src = i.get("source") or {}
+        if "item" in src:
+            doc = (e.view.get("items", {}).get(src["item"]) or {}).get("doc")
+            if isinstance(doc, dict) and doc.get("artifact_type") == "dataset-record":
+                leaves.append((f"item:{src['item']}", _dataset_status(doc)))
+        elif "external" in src:
+            leaves.append((f"external:{src['external'].get('item')}/{src['external'].get('entry')}", None))
+        elif "product" not in src:
+            unknown = True
+    return leaves, unknown
 
 
 def r_run_blinding(ob: dict, env) -> dict:
+    """1.1.0 (DR-7, DR-9): blinding applies by the spec's flag or the project's blinded list (G13); a result is
+    permitted by its run lineage, never by its own status label (G7). Every data leaf a dataset record with a
+    permitted dataset status (synthetic, simulated) is satisfied. No data leaf is unverified (lineage_no_data): the
+    run records are agent-writable, so leaving the data input out must not pass (P4). A leaf of unknown status, or a
+    result no run produced (a label only), is unverified. Real data is permitted only by the project's allowed_outputs."""
     e, rid = _evidence(env), ob["subject"]["root"]
     if e.binding is None:
         return outcome(*NOT_EXECUTED)
-    if not _blinded(env):
-        return outcome("not_applicable", "check.not_blinded", "the spec is not blinded")
+    policy = e.view.get("blinding")
+    if not _blinded(env, policy):
+        return outcome("not_applicable", "check.not_blinded", "the spec is not blinded (its flag and the project's blinded list)")
     res = e.result(rid)
     if res is None:
         return outcome("unverified", "check.not_executed", "no result is bound for this root")
     doc = e.json_at(str(res.get("file")))
     status: list = (doc["status"] if isinstance(doc, dict) and isinstance(doc.get("status"), list)
                     else list(res.get("status") or []))
-    ev = [{"file": res.get("file"), "sha256": res.get("sha256"), "status": sorted(status)}]
-    if set(status) & set(PERMITTED) and "observed" not in status:
-        return outcome("satisfied", "check.blinding_permitted", "an asimov or synthetic result", ev)
-    policy = e.view.get("blinding")
+    ev: list[dict] = [{"file": res.get("file"), "sha256": res.get("sha256"), "status": sorted(status)}]
+    prod = res.get("producer") or {}
+    run_id = prod.get("run")
+    camp_inputs = (e.campaigns.get(prod["campaign"]) or {}).get("inputs") if prod.get("campaign") else None
+    lineage = None
+    if run_id or camp_inputs:
+        leaves, unknown = _data_leaves(e, str(run_id) if run_id else None, None if run_id else camp_inputs)
+        ev.append({"run" if run_id else "campaign": run_id or prod.get("campaign"),
+                   "data_leaves": [{"source": w, "dataset_status": st} for w, st in leaves]})
+        real = [w for w, st in leaves if st not in PERMITTED_DATA]
+        if leaves and not real and not unknown:
+            return outcome("satisfied", "check.blinding_permitted",
+                           "every data leaf of the result's lineage is a synthetic or simulated dataset record", ev)
+        lineage = ("real" if [w for w, st in leaves if st is not None and st not in PERMITTED_DATA]
+                   else "unknown" if real or unknown else "no_data")
     if not isinstance(policy, dict):
-        return outcome("unverified", "check.blinding_policy_unknown", "no project blinding block was given", ev)
+        if lineage == "real":
+            return outcome("unverified", "check.blinding_policy_unknown", "no project blinding block was given", ev)
     path = str(PurePosixPath(str(res.get("file"))))
+    policy = policy if isinstance(policy, dict) else {}
     aid = doc.get("artifact_id") if isinstance(doc, dict) else None
     bare = False
     for entry in policy.get("allowed_outputs") or []:
@@ -404,6 +495,15 @@ def r_run_blinding(ob: dict, env) -> dict:
     if bare:
         return outcome("unverified", "check.allowed_output_ambiguous",
                        "only an unprefixed allowed_outputs entry names it; use 'path:' or 'artifact:'", ev)
+    if lineage is None:
+        return outcome("unverified", "check.blinding_label_only",
+                       "no run, and no campaign with listed inputs, produced this result: its status label alone is not evidence", ev)
+    if lineage == "no_data":
+        return outcome("unverified", "check.lineage_no_data",
+                       "the result's lineage records no data input: whether blinded data entered cannot be judged", ev)
+    if lineage == "unknown":
+        return outcome("unverified", "check.lineage_status_unknown",
+                       "a data leaf of the result's lineage has no dataset status, or an input cannot be classified", ev)
     return outcome("violated", "check.blinded_result_cited", "a blinded spec's binding cites a result that is not a permitted derivative", ev)
 
 

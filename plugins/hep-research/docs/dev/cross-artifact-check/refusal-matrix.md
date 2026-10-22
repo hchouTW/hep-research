@@ -61,3 +61,12 @@ bundle frozen by the R2 development tree (check-context 1.1.0, suite `counting-c
 | `permit.py check-report` (R2) | refuses the report (`permit.report_prerelease_suite`) |
 
 No release blocker: an old reader refuses the new format instead of misreading it.
+
+## Phase 2, release R2: result binding 1.1.0 (2026-10-23)
+
+Measured with the installed 0.25.1 release on a campaign case from the R2 development tree: check-context 1.1.0, suites
+`1.1.0-dev.4`, and result binding 1.1.0 with `campaigns[].inputs`. **Confirmed:** `analysis_check.py check --results`
+exits 1 with status `invalid`. The input diagnostics include `result_binding.schema.const` (binding_version) and
+`result_binding.schema.additional` (`inputs`), next to the 1.1.0 context findings already recorded above. Nothing is
+evaluated under 1.0.0 semantics. No release blocker.
+
