@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-016",
  "severity": "S1",
  "ledger": [
@@ -27,9 +27,7 @@
    "database_specific": {
     "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
     "fixed_commit": "0f3a2e3fee0a5f236ab598e1ef5ace9691283258",
-    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)",
-    "no_artifact": true,
-    "outputs": "skills/hep-detector/scripts/xmax_gaisser_hillas.py prints JSON on stdout (n_max, x_max, x0, lambda_g_cm2, profile) and writes no artifact"
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
    }
   }
  ],
@@ -41,14 +39,13 @@
   "trigger": "X_max large compared with lambda (X_max of order 1e6 g/cm^2 and above) or a falling edge beyond X_max + 1e6"
  },
  "applies_to": {
-  "artifact_types": [
-   "response",
-   "computational-run"
-  ],
-  "extension_keys": [
-   "parametrization",
-   "tools"
-  ]
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-detector/scripts/xmax_gaisser_hillas.py"
+   ],
+   "how_to_recognize": "JSON on stdout with n_max, x_max, x0, lambda_g_cm2 and profile"
+  }
  },
  "remedy": "rerun xmax_gaisser_hillas.py with a release that has the fix for profiles with X_max of order 1e6 g/cm^2 or more",
  "references": [

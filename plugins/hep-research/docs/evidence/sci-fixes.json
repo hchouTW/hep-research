@@ -1395,6 +1395,35 @@
      "detail": "every value class a valid extension key can hold (the three markers of contracts/vocab/core.json written out in the test, null, false, empty object and list, object, list, text, a marker-like text in another case, 0, 1.5, true): 14 cases against the A4 rule"
     }
    ]
+  },
+  {
+   "id": "ADVISORY-MATCH-V2",
+   "title": "Advisories format /2: match conditions on what an artifact can show, and possibly affected (no trace) when it cannot",
+   "changelog": {
+    "kind": "unreleased",
+    "detail": "sci-fix improvement plan PR-5 (A1 change 1)"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/tools/test_scifix_advisories.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix cc7357ba; parent c3d9208a (plan PR-4) in a detached worktree with the fix commit's test file and tests/tools/fixtures/advisory_matrix.json copied in (adapted parent tree: only test files added or replaced, no code under test touched); CI lock venv, 2026-10-22; VALIDATION SCIFIX-ADVISORY-V2: on the parent the acceptance matrix fails by assertion for the 11 advisories whose /1 keys could not discriminate (SFA-2026-001, 002, 004, 006, 010, 020, 023, 025, 030, 031, 033: affected where the hand-written verdict is none or possibly affected) and passes for the other 20; the exhaustive three-valued oracle errors on the parent (match_verdict absent: the /1 scan has no undecided state); all pass on the fix. The scan is a shadow-mode report and writes nothing into a project; no released result changes, so no advisory (the waiver field comes with plan PR-8)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/tools/test_scifix_advisories.py::ThreeValuedMatch::test_every_match_of_up_to_two_groups_of_up_to_two_conditions",
+     "basis": "exhaustive",
+     "detail": "all 156 matches of one or two groups of one or two conditions, each true, false or undecided, and match [], against Kleene's three-valued logic written as min over a group and max over groups on false < undecided < true"
+    }
+   ]
   }
  ],
  "documentation_fixes": [

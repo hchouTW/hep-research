@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-021",
  "severity": "S2",
  "ledger": [
@@ -45,9 +45,15 @@
   "artifact_types": [
    "ml-artifact"
   ],
-  "extension_keys": [
-   "calibration"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.calibration",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "rerun calibration.py with a release that has the fix (with --id-col) on disjoint fit and evaluation samples, and validate the artifact again",
  "references": [

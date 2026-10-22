@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-010",
  "severity": "S1",
  "ledger": [
@@ -45,11 +45,9 @@
   "artifact_types": [
    "statistical-result"
   ],
-  "extension_keys": [
-   "uncertainty_breakdown",
-   "goodness_of_fit",
-   "nuisances"
-  ]
+  "match": [],
+  "match_basis": "result_artifact.py writes the statistical-result from the JSON a core/stats CLI printed in another process, and no field names the covariance handling (nuisances is required; uncertainty_breakdown and goodness_of_fit do not show that a covariance was repaired); every listed key is one each such result carries",
+  "no_trace": "possibly-affected"
  },
  "remedy": "rerun with a release that has the fix (0.4.0 or later); an error naming the matrix means the inputs must be corrected, a semi-definite one is now reported under regularization",
  "references": [

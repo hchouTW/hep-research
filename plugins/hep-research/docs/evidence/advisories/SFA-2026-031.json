@@ -1,5 +1,5 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-031",
  "severity": "S2",
  "ledger": [
@@ -44,7 +44,23 @@
  "applies_to": {
   "artifact_types": [
    "computational-run"
-  ]
+  ],
+  "match": [
+   [
+    {
+     "path": "extension.tools[*].name",
+     "op": "eq",
+     "value": "hep-research core/partition runner"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected",
+  "outputs": {
+   "producer": [
+    "skills/hep-computing/scripts/local_partition.py"
+   ],
+   "how_to_recognize": "local_partition.py merge report (JSON on stdout); only batch_campaign.py writes a computational-run, naming the tool 'hep-research core/partition runner'"
+  }
  },
  "remedy": "for a run made with a core/partition campaign in this range: check the scheduler accounting for chunks submitted twice and merge again with a release that has the fix; runs not made with a campaign are not affected (the scan lists every computational-run of the range: the artifact does not record whether a campaign was used)",
  "references": [
