@@ -111,3 +111,22 @@ The adapter (`adapters/pyhf-combine/assets/model_card.py`) confirms the structur
 1. Tests that the adapter refuses Poisson and log-normal constraints.
 2. The pairing contract states the adapter's fixed bounds: [-10, 50] for the POI, [0, 50] for free normalizations.
 3. The pairing contract states the meaning of `gaussian` (on α, `code4`).
+
+## Phase 2, release R2: observation identity (2026-10-23)
+
+G5 (V85) under DR-3, `r-aux.use` 1.1.0 in `model-card` 1.1.0-dev.3. In 1.0.0 an observation was the pair (item ID,
+pointer), so a byte copy of the auxiliary-input file under another item ID counted as a second, independent
+observation. In 1.1.0 the item is replaced by its **source identity**:
+
+- **Artifact envelope** (`contract_version` and `artifact_id`): the `artifact_id`. Two versions of one artifact are one
+  source.
+- **Any other file:** the item's frozen digest. That is the canonical JSON digest for JSON, so reformatting does not
+  change it, and the bytes digest for other files.
+- **Values are never compared** (DR-3). A copy with one key added has another digest and stays a different source. This
+  is a known limitation, not a pass. The probe `test_g5` and `test_analysis_check_r2_rules.ObservationIdentity` cover
+  both directions.
+
+Pointer containment ("same", "overlap", "distinct") is unchanged; it now compares source identities. On the Phase 0
+comparison set, on dev.3 only `g5-copy` changes: both constraints go from satisfied to `violated` (`check.aux_repeated`).
+On 1.0.0, every `r-aux.use` obligation is `check.rule_not_run`.
+

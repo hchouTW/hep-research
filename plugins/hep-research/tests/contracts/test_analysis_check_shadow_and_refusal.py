@@ -117,12 +117,13 @@ class ModelAndRunShadowReview(unittest.TestCase):
             for name, (variant, counts) in model.items():
                 with self.subTest(case=name):
                     root = Path(td) / name
-                    view, diags = ac().load_subject(cases.model_case(root, variant), root)
+                    # the 1.1.0 rules (release R2): the 1.0.0 model suite names r-aux.use 1.0.0, which is not run
+                    view, diags = ac().load_subject(cases.model_case(root, cases.both(variant, cases.context_1_1)), root)
                     review = ac().difference_review(view, ac().evaluate(view, diags))
                     self.assertEqual((review["unclassified"], review["counts"]), (0, counts))
             for name, build in (("run-chain", runs.run_chain), ("run-campaign", runs.run_campaign)):
                 with self.subTest(case=name):
-                    post = build(Path(td) / name)
+                    post = build(Path(td) / name, spec_variant=cases.context_1_1)
                     view, diags = ac().load_subject(post.bundle_path, post.root)
                     rep = ac().evaluate(view, diags, results=json.loads(post.save().read_text()))
                     self.assertEqual(ac().difference_review(view, rep)["unclassified"], 0)

@@ -294,7 +294,9 @@ While release R2 is in development, each suite also exists as `1.1.0-dev.N` for 
 check-context=context-1.0.0-to-1.1.0` converts a frozen context to the newest installed 1.1.0 suite. `check-report`
 refuses every pre-release suite. Rule fixes are new rule versions in these suites; a 1.0.0 suite names the old versions,
 which this release no longer runs (`check.rule_not_run`: `r-rep.repetition` and `r-ratio.correlation` from
-1.1.0-dev.2). Reproduce 1.0.0 results with hep-research 0.25.x.
+1.1.0-dev.2, `r-comp.factor_values` and `r-aux.use` from 1.1.0-dev.3). Reproduce 1.0.0 results with hep-research 0.25.x. From
+1.1.0-dev.3 a factor table's own `tolerance` is not used: the relative tolerance is 1e-9, or Σ|power| · ½·10^(1−d) when
+the table declares `"significant_digits": d` and every value has at most d significant digits.
 
 ```bash
 python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json [--mode model]

@@ -1,0 +1,44 @@
+{
+ "$comment": "Suite run-lineage/v1 (v6.3 M2c): post-execution evidence through a result binding. Obligations are generated from the chain roots before execution and stay unverified (check.not_executed) until a result binding is given. Reads campaign records, execution bundles and computational-runs: input closure, acyclic run dependencies, unique product mapping, status propagation. Not supported: execution monitoring, scheduling, arbitrary step tracing, rebuilding an attempt model. Pre-release 1.1.0-dev.3 (release R2): check-context 1.1.0; the other rules and the generator are 1.0.0. check-report refuses a pre-release suite.",
+ "suite_id": "run-lineage",
+ "version": "1.1.0-dev.3",
+ "mode": "chain",
+ "generator": {
+  "id": "run-lineage-obligations",
+  "version": "1.0.0"
+ },
+ "rules": [
+  {
+   "rule_id": "r-run.binding",
+   "version": "1.0.0",
+   "subject": "run_root"
+  },
+  {
+   "rule_id": "r-run.status",
+   "version": "1.0.0",
+   "subject": "run_root"
+  },
+  {
+   "rule_id": "r-run.closure",
+   "version": "1.0.0",
+   "subject": "run_root"
+  },
+  {
+   "rule_id": "r-run.campaign",
+   "version": "1.0.0",
+   "subject": "run_root"
+  },
+  {
+   "rule_id": "r-run.blinding",
+   "version": "1.0.0",
+   "subject": "run_root"
+  }
+ ],
+ "not_supported": [
+  "execution monitoring",
+  "scheduling",
+  "arbitrary step tracing",
+  "rebuilding an attempt model",
+  "trusted-submitter records (reserved)"
+ ]
+}

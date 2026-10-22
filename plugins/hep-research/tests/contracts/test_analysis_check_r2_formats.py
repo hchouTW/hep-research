@@ -1,8 +1,8 @@
 """Cross-artifact check Phase 2, release R2 formats (architecture sections 8.1 and 9.4): SemVer pre-releases, the
 registry key (rule_id, version) with retired versions, check-context 1.1.0 (DR-2: no 'required') paired with 1.1.0
 pre-release suites, and the context conversion 1.0.0 -> 1.1.0 (V90). The 1.1.0-dev.1 suites list the 1.0.0 rules;
-1.1.0-dev.2 replaces r-rep.repetition and r-ratio.correlation by 1.1.0 (G3, G17), so a 1.0.0 suite gives
-check.rule_not_run for them (section 8.2). On the reference cases the 1.1.0 rules give the 1.0.0 outcomes, which are
+1.1.0-dev.2 replaces r-rep.repetition and r-ratio.correlation by 1.1.0 (G3, G17) and 1.1.0-dev.3 also
+r-comp.factor_values (G4) and r-aux.use (G5), so a 1.0.0 suite gives check.rule_not_run for them (section 8.2). On the reference cases the 1.1.0 rules give the 1.0.0 outcomes, which are
 computed here with cases.r1_rules() in place of release R1."""
 from __future__ import annotations
 
@@ -117,15 +117,20 @@ class Context110(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_dev_suites_exist_for_every_suite_with_the_same_rules(self):
-        # dev.1: the 1.0.0 rules; dev.2: the same rules, the fixed ones at their new version
+        # each pre-release lists the 1.0.0 rules, those fixed by then at 1.1.0: dev.1 none, dev.2 G3/G17, dev.3 also
+        # G4 and G5; the newest (DEV) names exactly the versions this checker implements
         from contracts import analysis_check as ac
         from contracts.analysis_checks.rules import VERSIONS
+        fixed_by = {"1.1.0-dev.1": set(), "1.1.0-dev.2": {"r-rep.repetition", "r-ratio.correlation"},
+                    "1.1.0-dev.3": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use"}}
+        self.assertEqual(fixed_by[DEV], set(VERSIONS))
         for sid in ("counting-chain", "ratio-subset", "model-card", "run-lineage"):
-            old, dev1, dev2 = (ac.load_suite(sid, v) for v in ("1.0.0", "1.1.0-dev.1", "1.1.0-dev.2"))
-            self.assertEqual((dev1["rules"], dev1["generator"], dev1.get("mode")), (old["rules"], old["generator"], old.get("mode")))
-            fixed = [dict(r, version=VERSIONS.get(r["rule_id"], r["version"])) for r in old["rules"]]
-            self.assertEqual((dev2["rules"], dev2["generator"], dev2.get("mode")), (fixed, old["generator"], old.get("mode")))
-        self.assertEqual(DEV, "1.1.0-dev.2")
+            old = ac.load_suite(sid, "1.0.0")
+            for ver, fixed in fixed_by.items():
+                with self.subTest(suite=sid, version=ver):
+                    dev = ac.load_suite(sid, ver)
+                    rules = [dict(r, version="1.1.0") if r["rule_id"] in fixed else r for r in old["rules"]]
+                    self.assertEqual((dev["rules"], dev["generator"], dev.get("mode")), (rules, old["generator"], old.get("mode")))
 
     def test_a_1_1_0_context_on_dev_suites_gives_the_1_0_0_outcomes(self):
         a, b = self.tmp / "a", self.tmp / "b"
@@ -134,7 +139,8 @@ class Context110(unittest.TestCase):
     def test_a_1_0_0_suite_does_not_run_a_fixed_rule(self):
         # section 8.2: the stable 1.0.0 suites name the retired versions; they are not run, never run with new code
         out = states(cases.ratio_case(self.tmp / "a"), self.tmp / "a")
-        fixed = {k: v for k, v in out.items() if k.startswith(("r-rep.repetition:", "r-ratio.correlation:"))}
+        from contracts.analysis_checks.rules import VERSIONS
+        fixed = {k: v for k, v in out.items() if k.split(":")[0] in VERSIONS}
         self.assertTrue(fixed)
         self.assertEqual(set(fixed.values()), {("unverified", "check.rule_not_run")})
         self.assertNotIn(("unverified", "check.rule_not_run"),

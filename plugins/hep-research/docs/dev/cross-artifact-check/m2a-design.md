@@ -197,3 +197,26 @@ Measured on the Phase 0 comparison set (403 obligations, against 0.25.1):
 Tests that need a complete 1.0.0 report for report or permit handling use `cases.r1_rules()`, the current
 implementations keyed by rule_id. These stand in for release R1 and give the same outcomes on the reference cases.
 Rule tests run on 1.1.0 contexts.
+
+## Phase 2, release R2: factor tolerance from declared significant digits (2026-10-23)
+
+G4 (V79, second part) under DR-6, `r-comp.factor_values` 1.1.0 in the suites `1.1.0-dev.3`:
+
+- **Not used: the table's own `tolerance`.** An agent-writable table could set 0.6 and hide 3.0 against 1.0 × 2.0. The field
+  stays valid in the table shape and the outcome says it is ignored.
+- **Default:** 1e-9 when nothing is declared (DR-6 keeps 1e-9; the adopted text's 1e-12 is reversed).
+- **Declared digits:** an optional integer `significant_digits` d (1..17) on the table. If every value of the relation
+  has at most d significant digits (as written, by shortest repr), the tolerance is S · u with u = ½·10^(1−d) and S =
+  Σ|power| over all terms of `parent = Π child^power`, the parent counting 1 (DR-6: Σ|power| replaces k). Rounding
+  each value to d digits changes the value by at most a relative u, so the ratio parent / Π child^power moves by at most
+  a factor (1 − u)^−S, and the rule's measure |parent − prod| / max is at most 1 − (1 − u)^S ≤ S · u. The tolerance
+  is never below 1e-9.
+- **Checking the values' digits.** If a value has more digits than declared, the declaration is false and is not used
+  (the default applies), so declaring fewer digits cannot widen the tolerance.
+- **Evidence.** Each outcome carries `tolerance: {relative, basis}`. `tests/contracts/test_analysis_check_r2_rules.py`
+  tests the bound on 400 random tables (1–3 factors, powers ±1 and ±2, d from 2 to 7) and a real break at four times the
+  tolerance.
+
+Phase 0 comparison set: on dev.3 only `g4-tol` changes from satisfied to violated; on 1.0.0 the 4 `r-comp.factor_values`
+obligations become `rule_not_run`.
+
