@@ -413,25 +413,28 @@ Coordinates: centred on the world, stack axis x, in mm.
 moving along +x bends toward −y; a μ⁻ bends toward +y.
 
 ```
-x:  −1000   −800      −520 −500        …         300  320    500    550           900   ±1200
-     gun    TOF1       │ Si1  Si2  Si3  Si4  Si5  Si6  │     TOF2   calorimeter     world edge
-            10 mm      │◄──── uniform field 0.5 T ẑ (−520 … 320) ────►│  10 mm  50 × Pb 2 / PVT 5 mm
+x:  −1000   −810 … −780   −520 −500        …         300  320    490 … 520   550           900   ±1200
+     gun    TOF1 (2 layers) │ Si1  Si2  Si3  Si4  Si5  Si6  │     TOF2 (2 layers) calorimeter    world edge
+            10 + 10 mm      │◄──── uniform field 0.5 T ẑ (−520 … 320) ────►│  10 + 10 mm  50 × Pb 2 / PVT 5 mm
 ```
 
 | Element | Material | Front face `at_mm` | Thickness | Extent | Transverse (y × z) |
 |---|---|---|---|---|---|
 | World | `G4_Galactic` | — | 2400 | −1200 … 1200 | 1200 × 1200 |
 | Gun | — | x = −1000, y = z = 0 | — | — | — |
-| TOF1 | `G4_PLASTIC_SC_VINYLTOLUENE` | −800 | 10 | −800 … −790 | 300 × 300 |
+| TOF1a, TOF1b | `G4_PLASTIC_SC_VINYLTOLUENE` | −810, −790 | 10 each | −810 … −800, −790 … −780 | 300 × 300 |
 | Field mother | `G4_Galactic` | −520 | 840 | −520 … 320 | 300 × 300 |
 | Si1–Si6 (daughters) | `G4_Si` | −500.15 + 160k | 0.3 | centres −500, −340, −180, −20, 140, 300 | 200 × 200 |
-| TOF2 | PVT | 500 | 10 | 500 … 510 | 400 × 400 |
+| TOF2a, TOF2b | `G4_PLASTIC_SC_VINYLTOLUENE` (same as TOF1) | 490, 510 | 10 each | 490 … 500, 510 … 520 | 400 × 400 |
 | Calorimeter | 50 × (`G4_Pb` 2 + PVT 5) | 550 | 350 | 550 … 900 | 500 × 500 |
+
+**TOF stations.** TOF1 and TOF2 each have two layers; all four layers are the same material (`G4_PLASTIC_SC_VINYLTOLUENE`) and thickness (10 mm), with a 10 mm vacuum gap between the two layers of a station. Each layer is a whole slab, unsegmented and with no paddle direction (a deliberate simplification); the two layers give two independent time measurements and dE/dx samples, and their agreement within a station is a check (6.6).
 
 Checks (the script in Appendix A):
 - Lever arm L = 0.800 m; the front of Si1 and the back of Si6 are 19.85 mm from the mother's faces.
 - The field extends 20 mm beyond the measured region at each end.
-- TOF centre distance D = 1.300 m.
+- The distance between the TOF station centres (midpoints of the two layers: −795 and 505 mm) is D = 1.300 m, as in the single-layer design.
+- The back face of TOF2's second layer (520) is 30 mm from the calorimeter front (550); TOF1's first layer (−810) is downstream of the gun (−1000).
 - The world contains the gun and the back of the calorimeter.
 
 Materials (11.4.3 NIST definitions against PDG): `G4_PLASTIC_SC_VINYLTOLUENE` is 1.032 g/cm³ with I = 64.7 eV, as in
@@ -444,7 +447,7 @@ PDG; `G4_Si` is 2.33 g/cm³ (PDG 2.329).
 | B | 0.5 T | The rigidity where the scattering and measurement terms are equal is about 16–22 GV (μ), independent of B. 0.5 T gives one decade each in 1–10 GV and 100–1000 GV |
 | Si layers | 6 | N = 4 leaves one degree of freedom in the bending plane; N = 8 improves the MDR by only about 8 % |
 | MDR | about 1172 GV | σ_R/R = 1 from the measurement term alone. The reference is the exact least-squares fit of `tracker_resolution.py` (constant 0.2998). `mdr_intrinsic_only_gv` of `multiple_scattering.py` has the same definition but is still computed with the Gluckstern approximation (about 1131 GV at N = 6); since 0.21.0 it also reports `intrinsic_coefficient` (including the exact coefficient used here) and warns below N = 10 |
-| TOF | σβ/β ≈ 3.3 % (100 ps, β = 1) | D = 1.3 m |
+| TOF | two layers per station; σβ/β ≈ 2.3 % (100 ps per layer, independent layers, β = 1; 3.3 % with one layer per station) | D = 1.3 m; the station time is the mean of its two layers, σ_station = σ_layer / √2 |
 | Calorimeter | 18.4 X₀, 0.886 λ_I, 50 cm wide | 0.89 λ_I suffices for e/p separation by shower shape, not for hadron energy |
 
 **Multiple-scattering term.** The design estimate here uses the Highland formula with the log term on the total
@@ -465,7 +468,8 @@ convention; comparisons must state the difference.
 |---|---|
 | Does not leave the side of the field mother before x = 320 (\|y\| ≤ 150 mm) | 0.364 GV |
 | Reaches Si6 (\|y\| ≤ 100 mm) | 0.511 GV |
-| Reaches TOF2 (\|y\| ≤ 200 mm) | 0.391 GV |
+| Reaches TOF2's first layer (x = 490, \|y\| ≤ 200 mm) | 0.385 GV |
+| Crosses both TOF2 layers (x = 520, \|y\| ≤ 200 mm) | 0.404 GV |
 | Calorimeter front, shower axis within 250 − 2 R_M,eff | 0.490 GV |
 | Calorimeter back, same | 0.745 GV |
 
@@ -473,16 +477,17 @@ The overall threshold is 0.75 GV; 0.51 GV if only tracking and TOF are required.
 side of the field region and continues straight in the field-free world.
 
 Electrons: the shower axis is 82 mm and 127 mm off axis at the calorimeter front and back at 1 GeV, 16 mm and 25 mm at
-5 GeV. Bremsstrahlung photons from the 6.6 % X₀ upstream are not bent, so the shower axis is not the straight-line
-extrapolation; the 79 mm margin covers this. Electron shower checks start at 1 GeV.
+5 GeV. Bremsstrahlung photons from the 11.3 % X₀ upstream (83 % of it in the four TOF layers) are not bent, so the shower axis is not the straight-line extrapolation; the 79 mm margin is a geometric estimate, and with twice the upstream material of the single-layer design the shower checks must confirm it with the actual transverse energy distribution. Electron shower checks start at 1 GeV.
 
-**Upstream energy loss** (integrated Bethe, 1 cm PVT):
+**Upstream energy loss** (integrated Bethe, TOF1's two layers, 2 cm PVT in total):
 
-| Proton rigidity | Kinetic energy | TOF1 loss | Δp/p | Change of β between the TOF mid-planes |
+| Proton rigidity | Kinetic energy | TOF1 loss (two layers) | Δp/p | Change of β between the TOF station centres |
 |---|---|---|---|---|
-| 0.6 GV | 175 MeV | 5.06 MeV | 1.58 % | 1.55 % |
-| 1 GV | 433 MeV | 2.99 MeV | 0.41 % | 0.26 % |
-| 2 GV | 1271 MeV | 2.17 MeV | 0.12 % | 0.03 % |
+| 0.6 GV | 175 MeV | 10.23 MeV | 3.20 % | 2.87 % |
+| 1 GV | 433 MeV | 6.00 MeV | 0.82 % | 0.46 % |
+| 2 GV | 1271 MeV | 4.34 MeV | 0.24 % | 0.05 % |
+
+At 0.6 GV, β changes by 2.87 % between the stations, more than the TOF resolution (2.3 %): TOF measures the mean β along the path, so β comparisons at low rigidity need a β model with energy loss, or are restricted to 2 GV and above. TOF1 is upstream of the first Si plane and changes only the incoming direction and momentum, not the curvature resolution; the true rigidity comes from the Si plane crossings and is not affected by the thicker TOF1.
 
 **J14 cannot be reused.** J15's Si planes differ from J14 in material (`G4_Si` against `Si_study`), physics settings
 and cuts, and J15 records only the entry point, so J14's observable E_in − E_exit cannot be formed.
@@ -519,10 +524,10 @@ sees only its own copy.
 |---|---|
 | Mixtures | already supported in 0.21.0 (`materials[].components`); nothing to add for J15, where PVT and Pb are NIST materials |
 | Plane-crossing scorer | on the primary's (track ID 1) **first** entry into a tracker or TOF plane (pre-step status `fGeomBoundary` and the volume is the plane), record the pre-step position, direction, kinetic energy, global time and PDG code; one "recorded" flag per plane. A gun inside a plane never shows `fGeomBoundary`; the fields are left missing |
-| Output | per-event CSV; per-layer calorimeter columns can be switched off; the column map is generated automatically |
+| Output | per-event CSV; plane-crossing records for 10 planes (6 Si, 4 TOF layers); per-layer calorimeter columns can be switched off; the column map is generated automatically |
 
 **Deliberate simplifications:** uniform field with sharp edges, no magnet material, silicon as whole planes (no
-strips, no charge sharing, no δ-ray centroid shifts), unsegmented TOF, no optical photons, no trigger or readout
+strips, no charge sharing, no δ-ray centroid shifts), unsegmented TOF layers (no paddles, no direction), no optical photons, no trigger or readout
 electronics. The J15 README lists each one.
 
 ### 6.5 Digitization and reconstruction
@@ -533,10 +538,10 @@ circle fit and β, and nothing else.
 | Step | Content |
 |---|---|
 | Silicon | Gaussian smearing of the crossing points: ε = 10 µm in the bending direction (y), 30 µm in the non-bending direction (z); the fit uses the same x as the scorer (the entry face) |
-| TOF | Gaussian time smearing σ_t = 100 ps |
+| TOF | independent Gaussian time smearing σ_t = 100 ps per layer; station time = mean of the two layers (each first moved to the station centre along the fitted track); the per-layer dE/dx and the time difference of the two layers of a station are also reported |
 | Track | circle fit in x–y with a multiple-scattering covariance (without it χ²/dof is in the thousands at 1 GV); straight-line fit in x–z; outputs R, χ², degrees of freedom; nominal B |
 | True rigidity | the mean of C·B / p_T,i over the six plane-crossing records (C = 0.2998), with the transverse momentum |
-| β | path length includes the straight segments TOF1→Si1 and Si6→TOF2 and the 3D dip angle; at low β, the change of β between the TOF planes is reported |
+| β | path length between the station centres, including the straight segments TOF1→Si1 and Si6→TOF2 and the 3D dip angle; at low β, the change of β between the stations is reported |
 | Calorimeter | total active deposit divided by the **electron** sampling fraction, obtained from a 10 GeV electron sample with the `calibration` role; e/mip is also reported |
 | Random numbers | counter hash, separate from Geant4's stream |
 
@@ -557,6 +562,7 @@ Reconstructed result tables (for example rigidity resolution against rigidity) a
 | fitter unit test | test (not a benchmark) | toy truth (R ≥ 300 GV) against `tracker_resolution.py` | — | — |
 | one-off scattering comparison | sanity | the analytic term of `multiple_scattering.py` (no log, by its convention); optionally `toy_spectrometer.py` (needs NumPy) | μ and p, 1–10 GV, with β | — |
 | `tof-beta` | **verification** (bookkeeping) | kinematics along the true track | — | a scorer test flag injects a time offset; there is no Geant4-side physical control, and the documentation says so |
+| `tof-layer-consistency` | **verification** (bookkeeping) | time difference of the two layers of a station against the inter-layer path length / βc (66.7 ps at β = 1 and normal incidence) | residual mean 0; width √2 σ_t (141 ps at 100 ps) | a test flag injects a time offset into one layer's scorer |
 | `sampling-fraction` | sanity | ratio of ionization dE/dx from the PDG muon energy-loss tables (Groom et al., obtained through hep-citations) at the run momentum | μ⁻ at 1 GeV; statistic Σ PVT deposit / Σ (PVT + Pb) deposit; plausibility band ±10 % (a reviewer's Bethe estimate is about 0.271); seeds distinct from the `calibration` sample | PVT density ± δ |
 | shower containment | sanity | PDG gamma profile with the mixture's effective critical energy of about 10.2 MeV | electrons 1–100 GeV | — |
 | `longitudinal-profile` (0.21.0) | not applicable | its reference is the published ALICE FoCal-E measurement and holds only for that stack; J15's calorimeter differs and is embedded | — | — |
@@ -571,7 +577,7 @@ material.
 - Tracks: charged geantinos (massless, β = 1) at 0.6, 1, 10, 100 and 1000 GV.
 - Directions: normal incidence; **50 mrad in the bending plane, opposite to the bend** (+y for a positive charge);
   ±50 mrad in the non-bending plane.
-- Checked in Appendix A: with these directions every track reaches every Si plane and TOF2 and stays inside the field
+- Checked in Appendix A: with these directions every track reaches every Si plane and both TOF2 layers and stays inside the field
   mother. With the bend instead, 0.6 GV and 1 GV miss Si6.
 - Reference: the analytic helix; if a track leaves the field region, the reference becomes piecewise straight and only
   the planes the analytic track reaches are compared.
@@ -581,7 +587,7 @@ material.
 | delta intersection | 1e-3, 1e-4, 1e-5, 1e-6 mm | at the nominal value (1e-5), in-plane distance √(Δy² + Δz²) ≤ 0.5 µm (ε/20) at every plane; the finest two settings differ by ≤ 0.2 µm; 1e-3 mm is expected to fail |
 | maximum step | 100, 30, 10, 3 mm | same |
 | delta one step and epsilon | nominal and 1/10 | no change expected; checked once |
-| TOF2 path time | — | \|Δt\| ≤ 1 ps (about 0.3 mm of path); tests the path length only |
+| TOF2 path time (both layers) | — | \|Δt\| ≤ 1 ps (about 0.3 mm of path); tests the path length only |
 
 **Calorimeter production cut:**
 - Grid: 0.1, 0.3, 0.7, 1.0 mm.
@@ -644,7 +650,7 @@ against the probe's effective settings.
   probe match the spec.
 - [ ] The deterministic field checks of 6.7 pass at the nominal settings; delta intersection 1e-3 mm fails as
   expected.
-- [ ] `field-propagation`, `field-propagation-muon`, `tof-beta` and `sampling-fraction` run; each negative control is
+- [ ] `field-propagation`, `field-propagation-muon`, `tof-beta`, `tof-layer-consistency` and `sampling-fraction` run; each negative control is
   caught per 6.6, or the absence of a control is stated.
 - [ ] The fitter unit test passes against `tracker_resolution.py`.
 - [ ] Contract tests of the isolation rule: a missing configuration, `embedded`, and a grade that disagrees with the
@@ -873,7 +879,7 @@ form by an exact rational least-squares computation).
 **Geometry**
 - Si centres: −500, −340, −180, −20, 140, 300 mm; L = 0.800 m.
 - Field region: −520 … 320 mm; margins of 19.85 mm at both ends.
-- TOF centre distance D = 1.300 m; world ±1200 mm.
+- TOF1 layers −810 … −800 and −790 … −780; TOF2 layers 490 … 500 and 510 … 520; station-centre distance D = 1.300 m; world ±1200 mm.
 
 **Tracking**
 - A_N = 720 (N−1)³ / [(N−2) N (N+1)(N+2)]: A₄ = 81.0, A₆ = 66.96, A₈ = 57.17 (N equally spaced points including both
@@ -891,21 +897,21 @@ form by an exact rational least-squares computation).
 
 **Field-check grid** (50 mrad opposite to the bend, positive charge):
 
-| Rigidity | Max \|y\| in the field | y at Si1 … Si6 (mm) | y at TOF2 |
+| Rigidity | Max \|y\| in the field | y at Si1 … Si6 (mm) | y at the two TOF2 layers |
 |---|---|---|---|
-| 0.6 GV | 29.0 | 25.0, 29.0, 26.6, 17.8, 2.5, −19.3 | −51.6 |
-| 1 GV | 32.4 | 25.0, 30.6, 32.4, 30.3, 24.4, 14.6 | −0.6 |
-| 10 GV | 60.7 | 25.0 … 60.0 | 67.5 |
-| 1000 GV | 66.0 | 25.0 … 65.0 | 75.0 |
+| 0.6 GV | 29.0 | 25.0, 29.0, 26.6, 17.8, 2.5, −19.3 | −50.0, −53.2 |
+| 1 GV | 32.4 | 25.0, 30.6, 32.4, 30.3, 24.4, 14.6 | 0.2, −1.4 |
+| 10 GV | 60.7 | 25.0 … 60.0 | 67.1, 67.9 |
+| 1000 GV | 66.0 | 25.0 … 65.0 | 74.5, 75.5 |
 
 With the bend (−50 mrad): at 0.6 GV y = −151 mm at Si6, at 1 GV −116 mm; both miss Si6.
 
-**TOF**: σβ/β = √2 σ_t c / D; 2.6 %, 3.3 % and 4.9 % for 80, 100 and 150 ps.
+**TOF**: with two independent layers per station, σ_station = σ_layer / √2 and σβ/β = √2 σ_station c / D = σ_layer c / D; 1.8 %, 2.3 % and 3.5 % for 80, 100 and 150 ps per layer (2.6 %, 3.3 % and 4.9 % with one layer per station). The flight time between the two layers of a station is 66.7 ps at β = 1, and the layer-pair time difference has resolution √2 σ_layer (141 ps at 100 ps).
 
 **Calorimeter**: 18.41 X₀, 0.886 λ_I, 35 cm; effective Molière radius 3.95 cm; the minimum-ionization loss ratio 0.284
 is only a ratio of dE/dx_min, **not** a reference value.
 
-**Material in front of the calorimeter**: 6.62 % X₀ (71 % from TOF), 2.93 % λ_I.
+**Material in front of the calorimeter**: 11.32 % X₀ (four TOF layers 9.40 %, i.e. 83 %; Si 1.92 %), 5.46 % λ_I; TOF1, upstream of the tracker, holds 4.70 % X₀.
 
 **Statistics**
 - Probability of meeting the target: judged on the true SE, P(χ²₁₅ ≥ 15/f): 0.641 at f = 1.2, 0.90 at f = 1.755.
@@ -952,4 +958,5 @@ is only a ratio of dE/dx_min, **not** a reference value.
 | v5 | three phases | two reviews: field direction, field-check grid, MPV estimator, F-distribution factor (0.74 corrected to 0.64), self-declared grades, isolation loophole, seed index, several plugin facts |
 | final | three phases; every review finding handled | — |
 | final (0.21.0 baseline) | re-checked against 0.21.0: contract versions shifted, `longitudinal-profile`, mixtures, simulated dataset-record, journey check | see section 12 |
-| **final (main `9f08796` baseline)** | **second deep check: a delta review and a phase-1 prototype; versions as C1 and C2; isolation rule moved to phase 1; target and kind of `longitudinal-profile`; sci-fix split; seeds and exit codes; D10** | see section 13 |
+| final (main `9f08796` baseline) | second deep check: a delta review and a phase-1 prototype; versions as C1 and C2; isolation rule moved to phase 1; target and kind of `longitudinal-profile`; sci-fix split; seeds and exit codes; D10 | see section 13 |
+| **J15 revision (2026-10-22)** | **TOF1 and TOF2 become two layers each, all four of the same material; TOF resolution, upstream energy loss, material budget, acceptance and the field-check grid recomputed; new `tof-layer-consistency`** | numbers recomputed with `j15_design_estimates.py` |

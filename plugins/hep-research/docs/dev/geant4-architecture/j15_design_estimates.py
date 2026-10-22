@@ -18,11 +18,19 @@ B, EPS, N = 0.5, 10e-6, 6
 # ---------------- geometry (mm) ----------------
 FIELD = (-520.0, 320.0)
 SI_C = [-500.0 + 160.0 * k for k in range(N)]
-TOF1, TOF2, CAL = (-800.0, 10.0), (500.0, 10.0), (550.0, 350.0)
+# each TOF station: two layers of the same material (G4_PLASTIC_SC_VINYLTOLUENE), 10 mm each, 10 mm apart
+TOF_LAYER_MM, TOF_GAP_MM = 10.0, 10.0
+TOF1 = [(-810.0, TOF_LAYER_MM), (-790.0, TOF_LAYER_MM)]   # (front face, thickness)
+TOF2 = [(490.0, TOF_LAYER_MM), (510.0, TOF_LAYER_MM)]
+CAL = (550.0, 350.0)
 HALF = dict(si=100.0, field=150.0, tof2=200.0, cal=250.0)
 WORLD = 1200.0
 L = (SI_C[-1] - SI_C[0]) / 1000.0
-D = ((TOF2[0] + 5) - (TOF1[0] + 5)) / 1000.0
+def station_centre(st):
+    return (st[0][0] + st[-1][0] + st[-1][1]) / 2
+
+
+D = (station_centre(TOF2) - station_centre(TOF1)) / 1000.0
 
 
 def exact_A(n):
@@ -40,7 +48,7 @@ def closed_A(n):
 
 
 def arc_y(x_mm, rig_gv, angle_rad=0.0, sign=-1):
-    """Same as track_y, written plainly: y(x) for a circle of radius R entered at angle a0 (rad from +x, in x-y)."""
+    """y(x) for a circle of radius R entered at angle a0 (rad from +x, in x-y)."""
     R = rig_gv / (C_GEV * B) * 1000.0
     y = math.tan(angle_rad) * (min(x_mm, FIELD[0]) + 1000.0)
     if x_mm <= FIELD[0]:
@@ -86,7 +94,9 @@ def beta(T, m):
 
 def main():
     print("== geometry ==")
-    print(f"Si centres {SI_C} mm; L = {L:.3f} m; TOF centre distance D = {D:.3f} m")
+    print(f"Si centres {SI_C} mm; L = {L:.3f} m")
+    print(f"TOF1 layers {TOF1}, TOF2 layers {TOF2} (front face, thickness mm); station centres "
+          f"{station_centre(TOF1):.0f} / {station_centre(TOF2):.0f} mm; D = {D:.3f} m")
     print(f"margins to field mother: {SI_C[0] - 0.15 - FIELD[0]:.2f} / {FIELD[1] - SI_C[-1] - 0.15:.2f} mm; "
           f"world +-{WORLD:.0f} mm contains gun -1000 and calo end {CAL[0] + CAL[1]:.0f}")
 
@@ -117,7 +127,11 @@ def main():
         return hi
     print(f"  stays inside field mother (|y|<=150 to x=320): {rmin(lambda r: max_abs_y_in_field(r, 0) <= HALF['field']):.3f} GV")
     print(f"  hits Si6 (|y|<=100):  {rmin(lambda r: abs(arc_y(SI_C[-1], r)) <= HALF['si']):.3f} GV")
-    print(f"  hits TOF2 (|y|<=200): {rmin(lambda r: abs(arc_y(TOF2[0], r)) <= HALF['tof2']):.3f} GV")
+    print(f"  hits TOF2 first layer (|y|<=200 at x={TOF2[0][0]:.0f}): "
+          f"{rmin(lambda r: abs(arc_y(TOF2[0][0], r)) <= HALF['tof2']):.3f} GV")
+    xb = TOF2[1][0] + TOF2[1][1]
+    print(f"  hits both TOF2 layers (|y|<=200 at x={xb:.0f}): "
+          f"{rmin(lambda r: abs(arc_y(xb, r)) <= HALF['tof2']):.3f} GV")
     rm = 39.5
     print(f"  calo front axis within 250-2R_M: {rmin(lambda r: abs(arc_y(CAL[0], r)) <= HALF['cal'] - 2 * rm):.3f} GV")
     print(f"  calo rear  axis within 250-2R_M: {rmin(lambda r: abs(arc_y(CAL[0] + CAL[1], r)) <= HALF['cal'] - 2 * rm):.3f} GV")
@@ -126,25 +140,43 @@ def main():
     for R in (0.6, 1, 10, 100, 1000):
         ys = [arc_y(s, R, +0.05) for s in SI_C]
         print(f"  {R:>6} GV: max|y| in field {max_abs_y_in_field(R, +0.05):6.1f} mm; Si1..Si6 y = "
-              + ", ".join(f"{v:6.1f}" for v in ys) + f"; TOF2 y = {arc_y(TOF2[0], R, +0.05):6.1f} mm")
+              + ", ".join(f"{v:6.1f}" for v in ys) + f"; TOF2 layers y = {arc_y(TOF2[0][0], R, +0.05):6.1f}, "
+              f"{arc_y(TOF2[1][0], R, +0.05):6.1f} mm")
     print("  (all |y| within Si 100 mm, field 150 mm and TOF2 200 mm => every grid track reaches every plane)")
     print("  for comparison, WITH the bend (-50 mrad start toward -y):")
     for R in (0.6, 1):
-        print(f"  {R:>6} GV: Si6 y = {arc_y(SI_C[-1], R, -0.05):6.1f} mm; TOF2 y = {arc_y(TOF2[0], R, -0.05):6.1f} mm")
+        print(f"  {R:>6} GV: Si6 y = {arc_y(SI_C[-1], R, -0.05):6.1f} mm; TOF2 first layer y = {arc_y(TOF2[0][0], R, -0.05):6.1f} mm")
 
     print("\n== proton energy loss and beta change ==")
     for R in (0.6, 1, 2):
         T0 = math.hypot(R, MP) - MP
-        T1 = lose(T0, MP, PVT, 1.0)
+        tof_cm = 2 * TOF_LAYER_MM / 10                       # both layers of a station
+        T1 = lose(T0, MP, PVT, tof_cm)
         dp = (math.hypot(T0 + MP, 0) ** 2 - MP ** 2) ** 0.5 - ((T1 + MP) ** 2 - MP ** 2) ** 0.5
-        Ta = lose(T0, MP, PVT, 0.5)                          # mid TOF1
-        Tb = lose(lose(T1, MP, SI, N * 0.03), MP, PVT, 0.5)  # mid TOF2
-        print(f"  {R} GV: T={1000 * T0:.0f} MeV, TOF1 loss {1000 * (T0 - T1):.2f} MeV, dp/p {100 * dp / R:.2f} %, "
+        Ta = lose(T0, MP, PVT, tof_cm / 2)                   # TOF1 station centre (after its first layer)
+        Tb = lose(lose(T1, MP, SI, N * 0.03), MP, PVT, tof_cm / 2)  # TOF2 station centre
+        print(f"  {R} GV: T={1000 * T0:.0f} MeV, TOF1 loss (2 layers) {1000 * (T0 - T1):.2f} MeV, dp/p {100 * dp / R:.2f} %, "
               f"beta mid-TOF1 -> mid-TOF2 change {100 * (beta(Ta, MP) - beta(Tb, MP)) / beta(Ta, MP):.2f} %")
 
     print("\n== TOF ==")
+    print("  per-layer resolution sigma_t; station time = mean of its two layers (independent layers assumed)")
     for st in (0.08, 0.10, 0.15):
-        print(f"  sigma_t {1000 * st:.0f} ps -> sigma_beta/beta (beta=1) {100 * math.sqrt(2) * st * C_GEV / D:.2f} %")
+        s_station = st / math.sqrt(2)
+        print(f"  sigma_t {1000 * st:.0f} ps per layer: station {1000 * s_station:.1f} ps -> sigma_beta/beta (beta=1) "
+              f"{100 * math.sqrt(2) * s_station * C_GEV / D:.2f} % (one layer per station: "
+              f"{100 * math.sqrt(2) * st * C_GEV / D:.2f} %); layer-pair difference {1000 * math.sqrt(2) * st:.0f} ps")
+    dx = (TOF1[1][0] + TOF1[1][1] / 2) - (TOF1[0][0] + TOF1[0][1] / 2)
+    print(f"  flight time between the two layers of a station (beta=1): {dx / 1000 / C_GEV * 1000:.1f} ps")
+
+    print("\n== material in front of the calorimeter ==")
+    n_tof = len(TOF1) + len(TOF2)
+    x_tof = n_tof * TOF_LAYER_MM / 10 / PVT['X0']
+    x_si = N * 0.03 / SI['X0']
+    l_tof = n_tof * TOF_LAYER_MM / 10 / PVT['lam']
+    l_si = N * 0.03 / SI['lam']
+    print(f"  {n_tof} TOF layers: {100 * x_tof:.2f} % X0, {100 * l_tof:.2f} % lambda_I; Si: {100 * x_si:.2f} % X0, {100 * l_si:.2f} % lambda_I")
+    print(f"  total {100 * (x_tof + x_si):.2f} % X0 (TOF {100 * x_tof / (x_tof + x_si):.0f} %), {100 * (l_tof + l_si):.2f} % lambda_I")
+    print(f"  TOF1 alone (upstream of the tracker): {100 * 2 * TOF_LAYER_MM / 10 / PVT['X0']:.2f} % X0")
 
     print("\n== calorimeter ==")
     tp, ts, n = 0.2, 0.5, 50
