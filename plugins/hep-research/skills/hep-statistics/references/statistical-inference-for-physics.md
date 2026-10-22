@@ -97,8 +97,10 @@ Other checks:
   See `../../hep-citations/references/reading-papers.md`'s look-elsewhere-effect check for where this surfaces
   during a first read.
 - **Upper limits and exclusion**: identify the test statistic and confidence
-  construction (e.g. CLs [Junk 1999; Read 2002], the Feldman-Cousins unified
-  ordering [Feldman & Cousins 1998], or a plain Neyman construction), whether the limit is
+  construction (e.g. CLs [Junk 1999; Read 2002], a modified exclusion criterion
+  that is conservative and over-covers rather than giving exact coverage, the
+  Feldman-Cousins unified ordering [Feldman & Cousins 1998], or a plain Neyman
+  construction), whether the limit is
   observed or expected (with its uncertainty band), and whether nuisance
   parameters are profiled or fixed at the limit-setting point.
 - **Coverage**: a stated confidence level is a coverage property of the
@@ -108,8 +110,8 @@ Other checks:
 - **Multiple testing**: when several hypotheses or channels are tested, check
   for a stated correction (Bonferroni, Holm, false-discovery-rate) or an
   explicit argument for why none is needed (e.g. a single pre-registered
-  channel). A HEP discovery claim uses a familywise global p-value (look-elsewhere: Gross and Vitells,
-  arXiv:1005.1891; toys or upcrossings); a false-discovery rate controls a different error and does not
+  channel). A HEP discovery claim uses a familywise global p-value (look-elsewhere [Gross & Vitells 2010]:
+  toys or upcrossings); a false-discovery rate controls a different error and does not
   replace it.
 
 ## Bayesian inference
@@ -147,8 +149,10 @@ table.
 - **Correlated uncertainties**: when the same systematic source affects
   multiple bins, channels, or measurements, check that the correlation is
   actually modeled (a shared nuisance parameter, an off-diagonal covariance
-  term) rather than treated as independent per bin, which understates the true
-  uncertainty on any derived quantity.
+  term) rather than treated as independent per bin, which misstates the
+  uncertainty on a derived quantity: for a positive correlation it understates
+  a sum or integral and overstates a difference, ratio or shape quantity, where
+  the correlated parts cancel (Var(a-b) = Var(a) + Var(b) - 2Cov(a,b)).
 - **Normalization vs. shape**: a systematic that only rescales a distribution
   behaves very differently in a fit from one that changes its shape — check
   which is claimed and whether the fit setup matches.

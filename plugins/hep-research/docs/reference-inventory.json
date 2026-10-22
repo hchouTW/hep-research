@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 351752,
+   "bytes": 352047,
    "uncited": 0
   },
   "hep-citations": {
@@ -20,12 +20,12 @@
   },
   "hep-detector": {
    "references": 38,
-   "bytes": 495733,
+   "bytes": 498220,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 13,
-   "bytes": 119074,
+   "bytes": 119524,
    "uncited": 0
   },
   "hep-ml": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 187674,
+   "bytes": 187953,
    "uncited": 0
   },
   "hep-theory": {
@@ -405,8 +405,8 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 12903,
-   "lines": 168,
+   "bytes": 13198,
+   "lines": 171,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
@@ -1665,8 +1665,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 19001,
-   "lines": 269,
+   "bytes": 19860,
+   "lines": 278,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1784,7 +1784,6 @@
     "skills/hep-detector/references/extensive-air-showers.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
-    "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-measurement/assets/cosmic-ray-spectrum.example.json",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/scripts/cr_spectrum_powerlaw_fit.py",
@@ -2379,8 +2378,8 @@
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
    "owner": "hep-detector",
-   "bytes": 19693,
-   "lines": 264,
+   "bytes": 20910,
+   "lines": 273,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -2459,8 +2458,8 @@
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
    "owner": "hep-detector",
-   "bytes": 15668,
-   "lines": 232,
+   "bytes": 16079,
+   "lines": 236,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2484,8 +2483,8 @@
   {
    "path": "skills/hep-measurement/references/analysis-design.md",
    "owner": "hep-measurement",
-   "bytes": 13106,
-   "lines": 129,
+   "bytes": 13556,
+   "lines": 135,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -3187,6 +3186,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
+    "skills/hep-measurement/references/analysis-design.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-ml/README.md",
     "skills/hep-ml/SKILL.md",
@@ -3741,8 +3741,8 @@
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
    "owner": "hep-statistics",
-   "bytes": 12847,
-   "lines": 227,
+   "bytes": 13126,
+   "lines": 231,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",

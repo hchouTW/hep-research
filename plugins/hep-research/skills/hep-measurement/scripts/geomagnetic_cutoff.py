@@ -20,8 +20,9 @@ the corresponding minimum kinetic energy per nucleon for a given (Z, A).
 Usage notes / assumptions: standard library only. This is the *vertical* cutoff for an
 idealized dipole - it does not capture off-vertical arrival directions (the cutoff is
 east-west asymmetric: for positive particles lower from the west and higher from the
-east than the vertical value), the real non-dipolar field's "penumbra" of
-partially forbidden trajectories, or backscattered/re-entrant particles below cutoff.
+east than the vertical value), the "penumbra" of partially forbidden trajectories (present
+even for a pure dipole, since the formula ignores the shadow of the solid Earth, and reshaped
+by the real non-dipolar field), or backscattered/re-entrant particles below cutoff.
 A rigorous cutoff for a specific orbit, epoch, and arrival direction requires particle
 backtracing through a full geomagnetic field model (e.g. IGRF) and is not something
 this formula replaces - see the docstring caveat repeated in the reference file.
