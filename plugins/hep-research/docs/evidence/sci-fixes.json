@@ -1220,7 +1220,7 @@
    "discrimination": "D1",
    "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "D scope: the PDG cross-check PdgPackageTests::test_bundled_masses_equal_the_package skips without pdg (not in the CI lock or E2 venvs), so it has no parent record; it reads core/constants, which the fix does not change: D1 (VALIDATION SCIFIX-PLAN-B3-B6)"
+    "D scope: the PDG cross-check PdgPackageTests::test_bundled_masses_equal_the_package passes on the parent and the fix (run with pdg 2026.0, 2026-10-22): it checks core/constants, which the fix does not change, so it cannot show the defect; D1 (VALIDATION SCIFIX-EVIDENCE-CI)"
    ],
    "note": "expected values computed from closed forms in the test since 2026-10-18; binding energies of d, 3He, 4He from the CODATA 2022 masses against AME2020 mass excesses (a second evaluation), property tests over species and momenta, the pre-fix 10 eV table as negative control (VALIDATION SCIFIX-ORACLES-BATCH2 2026-10-20); the PDG cross-check (pdg 2026.0, 2026 edition) runs in the required CI job pdg-cross-check, where a skip naming pdg fails (VALIDATION SCIFIX-GAPS-CLOSED 2026-10-20)",
    "independence": [
@@ -1273,12 +1273,12 @@
    "parent_records": [
     {
      "test": "tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package",
-     "parent": "skip",
-     "fix": "skip",
+     "parent": "pass",
+     "fix": "pass",
      "failure": null,
-     "env": "ci-lock",
+     "env": "ci-lock + pdg 2026.0",
      "adapted_parent": false,
-     "validation": "SCIFIX-PLAN-B3-B6",
+     "validation": "SCIFIX-EVIDENCE-CI",
      "requires": {
       "core": [],
       "backend": [

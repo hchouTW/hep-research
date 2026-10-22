@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Every oracle of the sci-fix ledger runs weekly, with all its backends and no skip allowed.** A new
+  `ledger-evidence` job in `statistics-validation` (weekly, on demand, on a release tag) runs
+  `run_required_backends.py --from-ledger --no-skips` with pyhf, ArviZ and pdg; locally all 56 nodes pass. TH9-MASSES's
+  PDG cross-check, which no venv had run, passes on both its parent and its fix (it checks the bundled constants, which
+  the fix did not change), so it cannot show the defect: the entry stays D1 with that reason. Evidence: VALIDATION
+  SCIFIX-EVIDENCE-CI.
+
 ## 0.24.0 (2026-10-22)
 
 - **Independent review: an optional expert slot in round 1, a per-review configuration file, and reviewer identity
