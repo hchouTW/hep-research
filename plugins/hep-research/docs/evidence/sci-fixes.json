@@ -1366,6 +1366,35 @@
      "detail": "all 40 combinations of writes-no-artifact x type listed x key present x release (in range and held, in range but absent from its manifest, in range without a manifest, out of range, unknown) against the A5 rule written out in the test"
     }
    ]
+  },
+  {
+   "id": "SCAN-MISSING-MARKER",
+   "title": "scifix_advisories.py scan treats a missing marker (unknown, not-applicable, not-provided) as absent, not as a sign the affected code ran",
+   "changelog": {
+    "kind": "unreleased",
+    "detail": "sci-fix improvement plan PR-4 (A4)"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/tools/test_scifix_advisories.py"
+   ],
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "fix 01dd65a6; parent 8e7517da (plan PR-3) in a detached worktree with the fix commit's test file copied in (adapted parent tree: only the test file replaced, no code under test touched); CI lock venv, 2026-10-22; VALIDATION SCIFIX-PLAN-A1-TRACE: on the parent the exhaustive value test fails 4 of its 14 cases by assertion (the three missing markers and a zero were read as present, so a measurement-spec whose blinding is not-provided was affected); it passes on the fix. The scan is a shadow-mode report and writes nothing into a project; no released result changes, so no advisory (the waiver field comes with plan PR-8)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/tools/test_scifix_advisories.py::ProjectScan::test_missing_markers_and_empty_values_do_not_show_the_code_ran",
+     "basis": "exhaustive",
+     "detail": "every value class a valid extension key can hold (the three markers of contracts/vocab/core.json written out in the test, null, false, empty object and list, object, list, text, a marker-like text in another case, 0, 1.5, true): 14 cases against the A4 rule"
+    }
+   ]
   }
  ],
  "documentation_fixes": [

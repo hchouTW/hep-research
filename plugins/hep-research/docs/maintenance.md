@@ -184,9 +184,18 @@ PROJECT_DIR` reports, read-only, which of a project's artifacts an advisory touc
 claimed; or unknown; a build between releases claims the last release, so it is only possibly affected). Per
 advisory the scan decides in order: an advisory whose code writes no artifact is listed apart
 (`outputs_not_artifacts`) and never matched; then the artifact type, the extension keys, the release range, and
-whether that release's manifest holds an affected file. Shadow mode: the scan exits 0 whatever it finds and blocks nothing. No
-`provenance.producer` field is added to the envelope: `versions.plugin_release` already identifies the code, and the
-artifact type and extension keys show which code path ran.
+whether that release's manifest holds an affected file; a missing marker (`unknown`, `not-applicable`, `not-provided`) in
+a key is absent, not a sign that the code ran. Shadow mode: the scan exits 0 whatever it finds and blocks nothing.
+
+**Execution trace (contracts 3.5.0; maintainer decision 2026-10-22, revising "no `provenance.producer` field").**
+Its premise, that the artifact type and extension keys show which code path ran, did not hold: eleven advisories keyed
+on fields every artifact of the type carries, and eight affected scripts write no artifact at all (sci-fix improvement
+plan F-01, F-02, F-27). An envelope writer adds `**trace.provenance()` (`contracts.trace`, implemented in `core/trace.py`) to `provenance`:
+`code_paths`, the plugin `.py` files loaded when the envelope was written (loaded, not executed; the test suite left
+out), and `code_tags`, the tags that shared functions named by an advisory set with `trace.tag()`, cleared per envelope.
+Code that runs in another process (a core/stats CLI whose output `result_artifact.py` wraps, a training asset, a
+subprocess) is not in the writer's trace; an advisory about such code matches on fields that code writes, or says that
+no field can show it. Artifacts older than 3.5.0 carry no trace.
 
 ## Rerunning comparisons and examples
 
