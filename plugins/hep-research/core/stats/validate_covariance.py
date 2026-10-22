@@ -47,6 +47,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from core import trace
 from core.stats import _linalg
 
 DEFAULT_TOL = {"symmetry": 1e-8, "psd": 1e-8, "correlation": 1e-8,
@@ -300,7 +301,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"label": LABEL, "status": "unreadable", "error": str(exc)}, indent=2))
         return 2
     result = validate_covariance(doc, demo_clip=args.demo_psd_clip)
-    print(json.dumps({"label": LABEL, **result}, indent=2))
+    print(json.dumps({"label": LABEL, **result, "trace": trace.provenance()}, indent=2))
     if result["status"] == "fail" or (args.strict and result["status"] == "warn"):
         return 1
     return 0
