@@ -59,3 +59,42 @@ hchouTW. The error planter is to be named (O04), never a rule author.
 **2026-10-22, maintainer instruction in the session ("thresholds confirmed").** The thresholds above are confirmed
 as written, before any measurement: Pass I ≥ 0.25 N and F ≤ 1; Shrink 0.10 N ≤ I < 0.25 N, or I ≥ 0.25 N with F = 2;
 Stop I < 0.10 N or F ≥ 3; AI-planted results alone support at most Shrink. They do not change after measuring.
+
+## 2026-10-22, measurement details fixed before planting (implementer)
+
+Written and committed before any error was planted or measured. The thresholds above are unchanged. Harness:
+`evals/cross-artifact-value-gate/` at the repository root (`measure.py`, `taxonomy.md`, `planter-brief.md`,
+`subject/`).
+
+- **Planter (O04).** The maintainer named an AI agent as the planter ("use an AI agent as the planter", 2026-10-22).
+  It is a fresh agent that did not write the rules and works from a kit holding only `run.py`, its reference
+  output, the subject descriptions, the operator table and the taxonomy; it is told not to read anything else. Every
+  result is labelled **AI-planted**, so under the confirmed thresholds this measurement can support at most
+  **Shrink**.
+- **Subject.** `examples/ams-flux-ratio/run.py` (the code, which also writes the spec, responses and dataset
+  records) plus hand-written `subject/recipe.json` (subtract_background → unfold → correct_efficiency →
+  divide_exposure → divide_bin_width) and `subject/context.json`: four flux roots, two He/p ratio roots over the
+  species axis, suites counting-chain and ratio-subset 1.0.0, four `response_used_by` bindings, instance mappings
+  for the spec corrections; no calibration items and no validation records.
+- **Baseline (Confirmed, R1 = 0.25.0).** Layer 1 and layer 2 pass. The checker reports `inconsistent`: 58
+  satisfied, 4 violated, 8 not applicable, 12 unverified, 2 unsupported. The 4 violated are the definition-induced
+  `unrealized_correction` of `trigger_efficiency` (protocol step 2) and 4 of the unverified are the matching
+  `stage_unlocated`; the other 8 unverified and the 2 unsupported are ratio obligations with no bound factor. All
+  of them are in the baseline and never count. In the sensitivity arm (bundle-supplied coverage with both
+  efficiency members, A3) the baseline is `incomplete` with 0 violated.
+- **Layers.** (1) the case's `run.py`, run from a shadow plugin root, flags when it crashes or exits non-zero (a
+  pre-declared closure or self-check criterion failed); 400 toys, seed 20261002 (the example's defaults).
+  (2) `contracts/validate.py --strict` on the produced artifacts with experiment:ams-02 bound, and
+  `contracts/recipe_semantics.py` (L2) on the recipe; flags when either is not ok. (3) the checker: freeze, then
+  check.
+- **Checker flag.** Freeze refused, invalid input, an obligation that becomes violated, or an obligation that becomes
+  unverified or unsupported (from satisfied, not applicable or absent) whose obligation id names an id the planter
+  listed in `key.json` `affected`. The match is mechanical (whole-identifier match); nobody adjudicates by hand.
+  Obligations that disappear are not flags.
+- **Incremental detection (I).** A checker flag on an error that layers 1 and 2 did not flag.
+- **False positive (F).** A refactor on which the checker reports a new violated obligation or refuses the bundle.
+  Alarms of layers 1 and 2 on refactors are reported but are not F.
+- **Validity.** A case whose change does not match its key is still scored as planted; no case is dropped or
+  re-planted after measuring.
+- **Sensitivity arm** (protocol step 2): reported beside the main arm, never decides the gate.
+- **Deviation.** Published errata were not consulted for the taxonomy (protocol step 3; **Unresolved**).
