@@ -26,7 +26,8 @@
    ],
    "database_specific": {
     "fixed_commit": "21a4a5b9a0752b8c39c2a6e8a03d9bca6d182a55",
-    "introduced_commit": "f7846755e9b47180fb6276250e2cb46617366fac"
+    "introduced_commit": "f7846755e9b47180fb6276250e2cb46617366fac",
+    "introduced_basis": "the './'-only name normalisation came with the ML-CALIBRATION fix (f7846755, SFA-2026-021) in 0.10.0; earlier releases held contracts/validate.py without that rule and are covered by SFA-2026-021"
    }
   }
  ],

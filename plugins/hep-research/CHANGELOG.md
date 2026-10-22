@@ -21,6 +21,25 @@ Software checks establish contract consistency only, not physical validity.
   a module beside runnable assets, a globbed data file). `identity.verify()` also warns
   (`identity.bytecode_unverified`) when `.pyc` files are present, since bytecode is outside the identity; the guard's
   docstring states that limit. Evidence: VALIDATION SCIFIX-PLAN-A2.
+- **Advisory check: discriminating keys, stricter ranges, and advisories for code that writes no artifact
+  (sci-fix improvement plan A0 and A3; F-01, F-02, F-04, F-05, F-07, F-27).** `scifix_advisories.py check` now
+  rejects an advisory whose extension keys cannot show the affected code ran (a key that a listed type's extension
+  schema requires, so every artifact carries it, or no key at all): SFA-2026-036 and -037 keyed on `tools`, which
+  every `computational-run` has, so a merge job that only ran `hadd` was reported affected. The eleven older
+  advisories with such keys are frozen in `NONDISCRIMINATING_ALLOWED` until their migration; none is added. The eight
+  advisories whose affected scripts print JSON and write no artifact (SFA-2026-014 to -019, -036, -037) now say so
+  (`database_specific.no_artifact`, `outputs`). Ranges: an inverted range (`fixed` at or below its `introduced`), two
+  events at one version and a malformed version are problems (a malformed version raised before); a `fixed` release
+  must change an affected file against the release before it, and an `introduced` release that already held one
+  states `introduced_basis` (added to SFA-2026-002 and -003); an unknown artifact type is a problem. Scan verdicts
+  are unchanged in this step.
+- **Sci-fix ledger: structured `changelog` and D-scope gaps (plan C5 and F-23).** Each entry's `changelog` is
+  `{"kind": "release" | "audit" | "unreleased", "release", "name", "detail"}`, checked against the CHANGELOG
+  sections and the advisories' fixed releases; four stale `Unreleased` values are corrected (three shipped in 0.18.0,
+  ANISO-WEIGHTED-COV in 0.22.0) and the triage entries point to 0.23.0, and the audit names gain their release
+  (0.10.0). Seven entries graded D2 whose later oracle tests were never run on the parent (FC-MONOTONE, POISSON-SF,
+  COV-NOREPAIR, POISSON-500, ROBUST-MALFORMED, BLINDING-SCANNER, ROBUST-CAMPAIGN) state it in `gaps`; their grades
+  are unchanged until the D-scope rule. Evidence: VALIDATION SCIFIX-PLAN-P0-CHECK.
 
 ## 0.23.0 (2026-10-22)
 

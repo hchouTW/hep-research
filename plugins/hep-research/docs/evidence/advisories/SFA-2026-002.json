@@ -27,7 +27,8 @@
    ],
    "database_specific": {
     "fixed_commit": "6344738ed8d397e554e1089175bba1c654889548",
-    "introduced_commit": "811f02b626af71d6273798f7a44cdf4e26a6925d"
+    "introduced_commit": "811f02b626af71d6273798f7a44cdf4e26a6925d",
+    "introduced_basis": "the int() key rule over text IDs came with the ML-SPLITS fix (811f02b6, SFA-2026-020) in 0.10.0; earlier releases held these files without that rule and are covered by SFA-2026-020"
    }
   }
  ],

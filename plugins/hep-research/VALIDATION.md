@@ -2037,6 +2037,26 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-PLAN-P0-CHECK (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-2-advisory-check` from main `a53af7e0`)
+
+Sci-fix improvement plan v3, PR-2 (A0, A3, C5, F-23). Counts on main `a53af7e0` (0.23.0), recomputed because the
+plan was written on 0.22.0: 31 advisories, 39 ledger entries, 8 documentation fixes, 59 independence records.
+
+| Check | Result |
+|---|---|
+| Parent `check` on the shipped advisories | 0 problems (accepts all) |
+| New `check` on the shipped advisories before the data changes | 10 problems: SFA-2026-014 to -019, -036, -037 key on `tools` (required by `ext_computational_run`); SFA-2026-002 and -003 introduced at 0.10.0 although 0.9.0 holds an affected path |
+| The 8 scripts named by those advisories write an artifact? | no: each prints JSON (or text) on stdout; `no_artifact` and `outputs` added |
+| `introduced_basis` of SFA-2026-002 and -003 | verified in git: `canonical_key` with `int()` was added by 811f02b6 (the ML-SPLITS fix, SFA-2026-020); the `./`-only sample-name rule by f7846755 (the ML-CALIBRATION fix, SFA-2026-021) |
+| Advisories still keyed non-discriminatingly (frozen allowlist) | 11: SFA-2026-001, 002, 004, 006, 010, 020, 023, 025, 030, 031 (no key), 033 |
+| New `check` after the data changes | 0 problems |
+| New tests (`StricterCheck`, 8 tests; `test_changelog_names_the_release_that_shipped_the_fix`) on the parent tool and ledger | fail (6 failures, 2 errors; the changelog test fails on the string values) |
+| Same on the change | pass; `test_scifix_advisories` 15 tests, `test_scifix_ledger` 5 tests |
+| `changelog` migration | only the `changelog` field changed in the 39 entries; releases: 0.4.0 (7), 0.6.11 (4), 0.6.13, 0.10.0 (15, three audits), 0.14.0, 0.18.0 (3, were `Unreleased`), 0.22.0 (ANISO-WEIGHTED-COV, was `Unreleased`), 0.23.0 (7 triage and anisotropy entries) |
+
+| `run_all_checks.py --no-cli --jobs 4`, CI lock, worktree head | 23 pass, 2 fail, 2 skipped (CLI host checks); 4804 tests, 4554 pass, 1 failure, 249 skipped. Both failures were one defect: the audit names first written into `changelog` spelled two retired skill names (`check_retired_names.py`); renamed to `audit DR-WP1 to DR-WP4` and `ML audit (ML-C, ML-K, ML-R items)`, then `check_retired_names.py` and the three affected test modules rerun: pass |
+
+Scan verdicts are unchanged by this step (the separate listing of advisories without artifacts is plan PR-3).
 
 ## 0.23.0 release check (2026-10-22, E2 and the CI lock)
 

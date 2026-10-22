@@ -2,6 +2,7 @@
 names existing evidence tests, and states its gaps whenever it is below the requirement for its severity. The ledger
 records evidence; it never authorizes anything, and a fix below its requirement is reported, not refused."""
 import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -74,6 +75,41 @@ class SciFixLedger(unittest.TestCase):
                 self.assertGreaterEqual(len(qualified), need, (f["correctness"], qualified))
                 if f["correctness"] == "C4":
                     self.assertTrue({"exhaustive", "symbolic"} & qualified, qualified)
+
+    def test_changelog_names_the_release_that_shipped_the_fix(self):
+        """C5 (plan F-19): the release is a CHANGELOG section and the fixed release of every advisory naming the entry;
+        an unreleased entry's advisory range is open, and without an advisory the CHANGELOG still has `Unreleased`."""
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        sections = set(re.findall(r"^## (\d+\.\d+\.\d+) \(", changelog, re.M))
+        unreleased_open = re.search(r"^## Unreleased$", changelog, re.M) is not None
+        fixed: dict[str, set] = {}
+        open_ranges: dict[str, bool] = {}
+        for path in sorted((ROOT / "docs" / "evidence" / "advisories").glob("SFA-*.json")):
+            adv = json.loads(path.read_text(encoding="utf-8"))
+            for ref in adv["ledger"]:
+                for block in adv["affected"]:
+                    for rng in block["ranges"]:
+                        closing = [e["fixed"] for e in rng["events"] if "fixed" in e]
+                        fixed.setdefault(ref, set()).update(closing)
+                        if not any("fixed" in e or "last_affected" in e for e in rng["events"]):
+                            open_ranges[ref] = True
+        for f in self.doc["fixes"]:
+            with self.subTest(f["id"]):
+                cl = f["changelog"]
+                self.assertIn(cl["kind"], ("release", "audit", "unreleased"))
+                self.assertLessEqual(set(cl), {"kind", "release", "name", "detail"})
+                if cl["kind"] == "unreleased":
+                    self.assertNotIn("release", cl)
+                    if f["id"] in fixed or f["id"] in open_ranges:
+                        self.assertTrue(open_ranges.get(f["id"]), "an advisory with a fixed release names it")
+                    else:
+                        self.assertTrue(unreleased_open, "no Unreleased section left in CHANGELOG.md")
+                    continue
+                self.assertIn(cl["release"], sections)
+                if cl["kind"] == "audit":
+                    self.assertTrue(cl.get("name"))
+                if f["id"] in fixed:
+                    self.assertIn(cl["release"], fixed[f["id"]], "the advisory's fixed release")
 
     def test_entries_below_their_requirement_state_their_gaps(self):
         for f in self.doc["fixes"]:
