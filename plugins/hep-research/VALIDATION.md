@@ -2554,6 +2554,23 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## 0.24.1 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.24.1` from main `a183b6ba` (#216 weekly ledger-evidence job and TH9-MASSES PDG record; #217
+core/stats trace forwarding; #218 oracles not from transcribed formulas for DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO,
+DR-WP2-06-MS kept C3 by maintainer decision; main CI green on all three). Patch release, contracts 3.6.0 unchanged; no
+ledger entry or advisory changes release (none is unreleased). The ams02-research companion (requires hep-research
+`>=0.11.0`) needs no change.
+
+What changed: version 0.24.1 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.24.1`. Examples regenerated (E2; `bc-propagation-fit`
+with the CI lock): only version strings and the hashes that cover them change. Reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4909 tests in 408 modules, 4775 pass, 0 failures, 134 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4909 tests, 4658 pass, 0 failures, 251 skipped |
+
 ## 0.24.0 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.24.0` from main `d0a9f799` (#201 REVIEW-REFS-3; #202-#205 and #207-#212 the sci-fix
