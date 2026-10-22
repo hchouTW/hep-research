@@ -117,6 +117,10 @@ Evidence is graded on two axes, reported separately and never combined (vocabula
 Minimum: S1 C3 and D2 (C4 where the domain is finite or a closed form exists); S2 C2 and D2; S3 a located source
 and a second source; S4 C1 and D2.
 
+The ledger and the advisories have JSON schemas in `docs/evidence/schemas/` (structure only, the keywords
+`contracts/schema.py` implements, no `$ref`; `tests/tools/test_scifix_schemas.py`); cross-file rules stay in the
+ledger test and `tools/scifix_advisories.py check`. They are not artifact contracts and do not move `CONTRACTS_VERSION`.
+
 Transcription rule (maintainer decision 2026-10-22; reported by `tools/scifix_ledger.py report`, not yet enforced):
 a C3 grade needs at least one independence record whose expected value is not computed from a formula transcribed
 into the repository. Each record states `expected_from`: `printed` (a value printed in a source), `third-party-definition`

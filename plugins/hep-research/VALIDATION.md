@@ -2127,6 +2127,21 @@ verdict. Guard semantics are unchanged: identical means the same code.
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
 ## SCIFIX-PLAN-C3-C4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-9-scan-surface` from main `168ede40`)
+## SCIFIX-PLAN-C1-C2-C6 (2026-10-22, CI lock venv; branch `scifix/pr-8-governance` from main `bc8ac2e6`)
+
+Sci-fix improvement plan v3, PR-8 (C1, C2, C6).
+
+| Check | Result |
+|---|---|
+| Regression warning on the shipped advisories before `regression_of` | 2: SFA-2026-002 introduced by `811f02b6` (the fix of SFA-2026-020), SFA-2026-003 by `f7846755` (the fix of SFA-2026-021); recorded, then 0 warnings |
+| S1 and S2 entries without an advisory | 7, each with `advisory_waiver`: CLS-LOGINTERP (example script only, commit `6e7274c3`), CLI-MISSING-INPUT-EXIT2, ADAPTER-MISSING-DEPENDENCY, PYHF-REJECTED-STATUS (status of input that produced no result; 0.23.0 release check), SCAN-VERDICT-ORDER, SCAN-MISSING-MARKER, ADVISORY-MATCH-V2 (shadow-mode report) |
+| Missing advisory numbers | SFA-2026-012, -013, -026 to -029: no commit ever held or mentioned them (`git log --all`); README, no tombstones |
+| `published` | the UTC time of the commit that added each advisory (SFA-2026-001 to -003 2026-10-20T09:43:20Z; -004 to -035 2026-10-20T14:31:42Z; -036 2026-10-21T20:26:57Z; -037 2026-10-22T00:37:17Z; -038 2026-10-22T01:47:39Z) |
+| Schemas | the ledger and all 32 advisories validate; broken copies are refused (11 cases); only implemented keywords, no `$ref` |
+| New tests (`test_scifix_advisories`: timestamps, regression warning; `test_scifix_ledger`: waivers, regression_of; `test_scifix_schemas`) | pass |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock (before the rebase on main) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4863 tests, 4612 pass, 0 failures, 251 skipped |
+
+## SCIFIX-PLAN-C3-C4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-9-scan-surface`, stacked on `scifix/pr-5-advisory-v2`)
 
 Sci-fix improvement plan v3, PR-9 parts C3 and C4.
 
