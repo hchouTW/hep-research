@@ -25,6 +25,25 @@ Software checks establish contract consistency only, not physical validity.
   counts in the private `filter_ids.json` and the report. Contracts 3.6.0: the config field, the record role and the
   optional `round_started` key (fixtures, templates and example artifacts carry the new version string only).
   Evidence: VALIDATION REVIEW-EXPERT-SLOT.
+- **Advisories: OSV timestamps, waivers, regression links; schemas for the ledger and the advisories (sci-fix
+  improvement plan C1, C2, C6; F-13, F-17, F-18, F-22).** Advisories carry OSV `published` (first commit, UTC) and
+  `modified`. `scifix_advisories.py check` warns, never fails, when an advisory was introduced by another advisory's
+  fix commit, until the ledger records the link: CANONICAL-KEY-ZERO-FRACTION is a regression of ML-SPLITS,
+  SAMPLE-NAME-DOT-SEGMENTS of ML-CALIBRATION (`regression_of`). Every S1 and S2 entry is named by an advisory or states
+  an `advisory_waiver` (seven do: CLS-LOGINTERP, the three triage status fixes, the three scan fixes).
+  `docs/evidence/advisories/README.md` records that SFA-2026-012, -013 and -026 to -029 were never published.
+  `docs/evidence/schemas/` holds JSON schemas of the ledger and of format /2 advisories, checked in the tests. The
+  normalisation rule of C1 (a property or exhaustive test, and the callers listed in the PR) is in
+  `docs/maintenance.md`. Evidence: VALIDATION SCIFIX-PLAN-C1-C2-C6.
+
+- **Sci-fix ledger report: transcription rule, structured S3 sources, per-entry sign-off (sci-fix improvement plan
+  B2, B5, B7; F-08, F-15, F-16).** `tools/scifix_ledger.py report` lists, read-only: entries below their severity's
+  minimum (27), C3 entries whose oracles all compute their expected value from a formula transcribed into the
+  repository (DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO, DR-WP2-06-MS; each now says so in `gaps`, grades unchanged until
+  the maintainer decides), S1 entries without a sign-off (18: none is signed yet), and S3 entries below their minimum
+  (5). Every independence record states `expected_from`; documentation fixes list `sources` (the three whose ledger
+  text never itemized them, and the two internal-only warning fixes, state the gap). Evidence: VALIDATION
+  SCIFIX-PLAN-B2-B5-B7.
 - **Validator: the same efficiency under two namespaces now warns.** A measurement spec listing a bare `efficiency`
   next to `<ns>:efficiency` (or `<ns>:efficiency` next to `<other-ns>:efficiency`) counted the efficiency twice and
   passed with no finding. It now gets the warning `measurement.efficiency_counted_twice_namespaced`; the existing
@@ -69,6 +88,16 @@ Software checks establish contract consistency only, not physical validity.
   must change an affected file against the release before it, and an `introduced` release that already held one
   states `introduced_basis` (added to SFA-2026-002 and -003); an unknown artifact type is a problem. Scan verdicts
   are unchanged in this step.
+- **Release manifests of 0.3.0 and 0.4.0, backfilled (sci-fix improvement plan C4, F-20).** `release_manifest.py
+  backfill --commit SHA` records a release made before manifests existed, by today's identity rules, marked
+  `backfilled` with its full commit and the generator; `check-published` checks it against its tag, or its commit when
+  the release was never tagged (0.4.0, `9870a35a`), and treats it as published. The advisories whose range ends
+  before 0.5.0 (SFA-2026-008 to -011, -030, -031) now resolve against the 0.3.0 manifest, and `check` confirms that
+  0.4.0 changed their files.
+- **hep-computing: run the advisory scan when work resumes on an older project (plan C3, F-21).** A rule in the
+  skill's reference index (`engineering-playbook.md`): when a project's artifacts predate the newest fixed release of
+  an advisory, or an advisory is still open, run `tools/scifix_advisories.py scan` and report its three classes
+  (affected, possibly affected, output that is no artifact) with each remedy; read-only, no recomputation.
 - **Advisories format /2: match what an artifact can show, and say "possibly affected (no trace)" when it cannot
   (sci-fix ADVISORY-MATCH-V2, S2; plan A1 change 1).** `applies_to.match` replaces `extension_keys`: groups of
   conditions on any envelope path (`exists`, `eq`, `in`, `regex`; `[*]` expands lists), undecided when the artifact
@@ -121,6 +150,17 @@ Software checks establish contract consistency only, not physical validity.
   16 not in its `MODULES`) one by one and classifies each failure: a missing core dependency is an environment error,
   a missing backend is unverified, anything else means the evidence does not hold; with `--no-skips` an unverified
   or skipped node fails too. Evidence: VALIDATION SCIFIX-PLAN-B1-B4.
+- **Sci-fix ledger: the D axis is data, and D2 covers every oracle (plan B3 and B6; F-11, F-14, F-23; maintainer
+  decision 2026-10-22).** Each entry records its commits (parent, fix, follow-ups; full hashes), its per-test parent
+  records (outcome on the parent and the fix, failure kind, environment, adaptation, VALIDATION section, what the test
+  needs) and its mutants; `evidence_tests` lists the test nodes used. D2 now needs a parent failure of every oracle
+  node named by the entry's independence records (at most D1 when only other regression tests have one), D3 also a
+  killed revert mutant, and the ledger test recomputes both. The oracle nodes without a record were run on their
+  parent and fix commits in detached worktrees: many test functions, arguments or outputs that are new in the fix,
+  so they cannot reach the parent's code, and some pass on the parent. 22 grades fall (13 S1 and 9 S2 entries now
+  D1 or D0, each with a `gaps` line); none rises. ML-SMALL is split into ML-SMALL-C10, -C24, -C25 and -C26 (K13
+  corrected a test and left the ledger; the old id stays in `superseded`), and SFA-2026-025 names the four. No code
+  changes; no released number changes. Evidence: VALIDATION SCIFIX-PLAN-B3-B6.
 
 ## 0.23.0 (2026-10-22)
 

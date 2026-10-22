@@ -158,7 +158,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cpp-balanced-design-guidelines.md` | hep-computing | 6.6 | yes | 4 | hep-ml | 8eefac0f 2026-10-13 |
 | `crash-and-memory-debugging.md` | hep-computing | 8.2 | yes | 7 | - | 9257d7b5 2026-10-15 |
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f4372374 2026-10-13 |
-| `engineering-playbook.md` | hep-computing | 10.7 | yes | 4 | - | 338f8d78 2026-10-19 |
+| `engineering-playbook.md` | hep-computing | 11.5 | yes | 4 | - | 338f8d78 2026-10-19 |
 | `environments-and-containers.md` | hep-computing | 4.0 | yes | 6 | - | efa283c7 2026-10-13 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e6 2026-10-09 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | f4372374 2026-10-13 |

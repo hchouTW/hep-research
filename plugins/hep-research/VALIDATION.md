@@ -2126,9 +2126,41 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-PLAN-C3-C4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-9-scan-surface` from main `168ede40`)
+## SCIFIX-PLAN-C1-C2-C6 (2026-10-22, CI lock venv; branch `scifix/pr-8-governance` from main `bc8ac2e6`)
+
+Sci-fix improvement plan v3, PR-8 (C1, C2, C6).
+
+| Check | Result |
+|---|---|
+| Regression warning on the shipped advisories before `regression_of` | 2: SFA-2026-002 introduced by `811f02b6` (the fix of SFA-2026-020), SFA-2026-003 by `f7846755` (the fix of SFA-2026-021); recorded, then 0 warnings |
+| S1 and S2 entries without an advisory | 7, each with `advisory_waiver`: CLS-LOGINTERP (example script only, commit `6e7274c3`), CLI-MISSING-INPUT-EXIT2, ADAPTER-MISSING-DEPENDENCY, PYHF-REJECTED-STATUS (status of input that produced no result; 0.23.0 release check), SCAN-VERDICT-ORDER, SCAN-MISSING-MARKER, ADVISORY-MATCH-V2 (shadow-mode report) |
+| Missing advisory numbers | SFA-2026-012, -013, -026 to -029: no commit ever held or mentioned them (`git log --all`); README, no tombstones |
+| `published` | the UTC time of the commit that added each advisory (SFA-2026-001 to -003 2026-10-20T09:43:20Z; -004 to -035 2026-10-20T14:31:42Z; -036 2026-10-21T20:26:57Z; -037 2026-10-22T00:37:17Z; -038 2026-10-22T01:47:39Z) |
+| Schemas | the ledger and all 32 advisories validate; broken copies are refused (11 cases); only implemented keywords, no `$ref` |
+| New tests (`test_scifix_advisories`: timestamps, regression warning; `test_scifix_ledger`: waivers, regression_of; `test_scifix_schemas`) | pass |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock (before the rebase on main) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4863 tests, 4612 pass, 0 failures, 251 skipped |
+
+## SCIFIX-PLAN-C3-C4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-9-scan-surface`, stacked on `scifix/pr-5-advisory-v2`)
+
+Sci-fix improvement plan v3, PR-9 parts C3 and C4.
+
+| Check | Result |
+|---|---|
+| `release_manifest.py backfill --commit hep-research--v0.3.0` | 955 files, digest `d75dbfdd1d3091df…`, commit `351029c0bfdd…` (the root import) |
+| `release_manifest.py backfill --commit 9870a35a` (0.4.0, never tagged: the merge of PR #6, whose `plugin.json` says 0.4.0) | 1013 files, digest `a755680f6011b12f…`, commit `9870a35ab49e…` |
+| `check-published` on the branch | pass; both backfilled manifests identical to their tag or commit; no pending tags; no unrecorded tags left |
+| `scifix_advisories.py check` with the two manifests | 0 problems; the fixed-release rule now also checks 0.4.0 against 0.3.0 for SFA-2026-008 to -011, -030, -031 (all changed) |
+| `tests/tools/test_release_manifest.py` (new: backfill from an untagged commit, checked against it, its record may not change, a short commit is refused) | pass, 10 tests |
+| C3: `check_routing_static.py`, `check_ownership.py`, `measure_entrypoints.py` after the reference-index rule | pass; reference inventory regenerated |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock, after the rebase on main `168ede40` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4856 tests, 4605 pass, 0 failures, 251 skipped |
+
+Not run: live routing for the C3 rule (maintainer decision 2026-10-22: the reference-index option, no paid run). The
+rule sits in a reference, not in the SKILL.md body, so it triggers only when the reference is read.
+
 ## SCIFIX-ADVISORY-V2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-5-advisory-v2`, stacked on `scifix/pr-4-execution-trace`)
 
-Sci-fix improvement plan v3, PR-5 (A1 change 1), sci-fix ADVISORY-MATCH-V2 (S2, C2, D2). Fix `cc7357ba`, parent
+Sci-fix improvement plan v3, PR-5 (A1 change 1), sci-fix ADVISORY-MATCH-V2 (S2, C2, D2). Fix `5cb720b8`, parent
 `c3d9208a` (PR-4's head) in a detached worktree with the fix commit's `tests/tools/test_scifix_advisories.py` and
 `tests/tools/fixtures/advisory_matrix.json` copied in; the worktree was removed after the run.
 
@@ -2179,6 +2211,175 @@ worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in
 Limit found while implementing: `result_artifact.py`, the statistical-result writer, wraps the JSON a core/stats CLI
 printed in another process, so its `code_paths` never shows `core/stats/*`; an advisory about core/stats code must
 match on fields the CLI output carries, or say that no field shows it (plan PR-5).
+## SCIFIX-PLAN-B2-B5-B7 (2026-10-22, CI lock venv; branch `scifix/pr-7b-ledger-report` from main `40a21d1a`)
+
+Sci-fix improvement plan v3, the rest of PR-7: B2 (report only), B5, B7.
+
+| Check | Result |
+|---|---|
+| `expected_from` of the 64 independence records (classified by hand from each record's detail) | third-party-definition 29, transcribed-formula 15, exhaustive 15, printed 4, general-result 1 (PERIODICITY-REFIT's size = alpha); DR-WP2-06-CALO's `numpy.linalg.lstsq` record is transcribed-formula (a third-party solver fitting the repository's model) |
+| C3 entries with transcribed formulas only | DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO, DR-WP2-06-MS (the plan expected DR-WP1-02 and DR-WP2-06-MS); `gaps` added, grades unchanged |
+| `tools/scifix_ledger.py report` | 27 entries below their minimum; 18 S1 entries without `review`; 5 S3 entries below their minimum: DR-REFS, ML-REFS, REVIEW-REFS (sources never itemized in the ledger; not transcribed here), REVIEW-CODE-WARN-TAIL and -MANIFEST (internal only) |
+| `documentation_fixes` | `sources_with_locators` text kept as `note`; `sources` itemized where the ledger named them (REVIEW-REFS-2, -3, REVIEW-CODE-WARN-NEGW, STATUS-REFUSED-MEANING and the two internal-only entries) |
+| `tests/tools/test_scifix_ledger.py` (new: expected_from and the transcription report, S3 sources, review format and report) | pass, 21 tests |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock | 25 pass, 0 fail, 2 skipped (CLI host checks); 4855 tests, 4604 pass, 0 failures, 251 skipped |
+
+Not done: no S1 entry is signed off (a person's act); the sources of DR-REFS, ML-REFS and REVIEW-REFS are not
+itemized from their VALIDATION records.
+
+## SCIFIX-PLAN-B3-B6 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0, mpmath 1.3.0, no pyhf, ArviZ, pdg or torch; E2v: NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, pyhf 0.7.6, PyTorch 2.14.1, no ArviZ or pdg; branch `scifix/pr-7-d-axis`, stacked on `scifix/pr-6-evidence-sources`)
+
+Sci-fix improvement plan v3, PR-7 parts B3 and B6 (F-11, F-14, F-23). Maintainer decisions of 2026-10-22, now in
+`docs/maintenance.md`: D2 needs a parent record (fails on the parent, passes on the fix) for every oracle node named
+by the entry's `independence` records, at most D1 when only other regression tests have one (the D-scope rule); D3
+also needs a killed `revert` mutant.
+
+**B3, the D axis as data.** Each ledger entry now has `commits` (parent, fix, follow_up; 40-hex, resolved with
+`git rev-parse` in the source repository from the short hashes in its note, its VALIDATION section or its
+advisory's `fixed_commit`; where none names the parent it is the fix's first parent, and the ANISO-CL-RANGE fix
+`1853e619` is the commit whose message names the entry), `parent_records` (133: 87 transcribed from the sections
+they name, 46 from the reruns below; each with `requires`, found by hiding one package at a time as in
+SCIFIX-PLAN-B1-B4, or copied from the node's independence record) and `mutants` (46, transcribed). Rows
+transcribed: every parent failure the sections record by assertion or by an exception they name as the defect
+itself; rows whose parent failure was an import error or a function, argument or output key new in the fix are
+left out unless the node is an oracle (then recorded as `error`); the core/stats guide tests (a module list) are
+left out. A failure on the parent is `error` when the test could not reach the parent's code. `evidence_tests` is
+now the list of nodes used (independence and parent-record nodes); files without a recorded node
+(`test_properties.py`, `test_published_tables.py`, `test_constant_literals.py` and others) left the lists.
+`tests/tools/test_scifix_ledger.py` recomputes D2 and D3 from the records.
+
+**Reruns.** Every oracle node without a parent record was run on its parent and fix commit: a detached worktree of
+the source repository per commit (`git worktree add --detach`, removed after the run), the current test file (and
+its fixtures or test helpers) copied in, skill and test folder names mapped to those of the commit where they
+differ (`docs/maintenance.md`), each node run alone with `python -m unittest`. Adaptations, all within the
+adapted-parent rule: F01-F03 add `core/stats/fit_diagnostics.py` and `tail_estimation.py` from the fix (new modules);
+ROBUST-CAMPAIGN guards the import of `SubmitAmbiguous`, `SubmitRefused` (added after the fix). For F02 and F03 the
+adapted run is not a valid record: the added modules hold the oracles' code under test, so the unadapted run
+(import error) is recorded. Where an entry then had no valid parent failure at all, the fix commit's own changed
+test files were run on its parent the same way (the SCIFIX-PARENT-RECORDS method; 5 fix commits).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_crossing_at_zero_events_is_ln_20_for_any_background` (CLS-LOGINTERP, `90388aa0` / `99a18fd8`) | symbolic | error (AttributeError: `_crossing` is new in the fix) | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson` (F01, `1d42271a` / `9f1ee4a9`) | independent implementation, symbolic | fail (assertion: ln L at mu = -1 is 0.0, not below -1e300; adapted, adds new modules) | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_clopper_pearson_against_scipy` (F02) | independent implementation | error (import: `tail_estimation` is new in the fix); adapted: pass, the added module is the code under test | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_extreme_exact_tail_in_log_space` (F02) | independent implementation | error (as above); adapted: pass | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedance_bound_solves_the_binomial_equation_symbolically` (F02) | symbolic | error (as above); adapted: pass | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T04AnalyticOracle::test_converged_fits_match_a_third_party_minimum` (F03) | independent implementation | error (as above; `newton_fit` in the new `fit_diagnostics`); adapted: pass | pass | no | CI lock |
+| `tests/skills/hep_statistics/test_bayes_diagnostics.py::Diagnostics::test_ar1_bulk_ess` (BAYES-T24, `bb0774f0` / `d161b3b7`) | analytic | pass | pass | no | CI lock |
+| `tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope` (FC-MONOTONE, `b3734189` / `04338bbf`) | independent implementation | error (TypeError: `fc_interval`'s `monotone` argument is new in the fix) | pass | no | CI lock |
+| `tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips` (FC-MONOTONE, current test; confirms SCIFIX-PARENT-RECORDS) | published | fail (assertion: 1.08 != 1.26 at (0.9, 0, 2.0)) | pass | no | CI lock |
+| `tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails` (POISSON-SF, `04338bbf` / `a2adc126`) | independent implementation, symbolic | error (AttributeError: `poisson_sf` is new in the fix) | pass | no | CI lock |
+| `tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale` (COV-NOREPAIR, `a2adc126` / `6a81109c`) | independent implementation | error (import: `core.stats._linalg` is new in the fix and is the code under test) | pass | no | CI lock |
+| `tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3` (COV-NOREPAIR) | exhaustive | error (as above) | pass | no | CI lock |
+| `tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs` (POISSON-500, `6a81109c` / `b7b7825a`) | independent implementation, symbolic | fail (assertion, 5 subtests: upper end 0.799 of the SciPy root) | pass | no | CI lock |
+| `tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package` (TH9-MASSES, `84c0a68c` / `23910085`) | published | skip (pdg not installed) | skip | yes | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::SpeciesMassPropertyTests::test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not` (TH9-MASSES) | published | fail (assertion: d binding residual 5.7 eV against 1.42 eV, the pre-fix table) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared` (TH9-MASSES) | analytic | fail (assertion: 68.07557497 against 68.07557493, tolerance 1e-9) | pass | no | CI lock |
+| same test (DR-WP1-01, `4aebc0be` / `70f7fbcb`) | analytic | error (KeyError: the CLI has no `charge` output on the parent) | fail (assertion: the same 4e-8 offset; it passes from TH9's fix `23910085` on) | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength` (DR-WP1-01) | independent implementation | error (import: `core.constants`, added after the fix) | error (same) | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form` (DR-WP1-02, `70f7fbcb` / `0f3a2e3f`) | analytic, independent implementation | fail (assertion, 73 subtests: ratio 1.000003 against a 1e-10 tolerance) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq` (DR-WP2-06-CALO, `f6a64702` / `6c793363`) | independent implementation | fail (assertion: the fitted squared terms differ from weighted lstsq at rtol 1e-10) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance` (DR-WP2-06-CALO) | analytic | pass | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy` (DR-WP2-06-PID) | published, analytic | fail (assertion: 2.0506 against 2.0390, I = 75 eV) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms` (DR-WP2-06-MS) | analytic, independent implementation | error (TypeError, 45 subtests: `summarize`'s `mass_gev` argument is new in the fix) | pass | no | CI lock |
+| `tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding` (BLINDING-SCANNER, `d7148901` / `b6334c04`) | independent implementation | error (AttributeError: `_significant_digits`, added later) | fail (assertion, 420 subtests: the test reads the later rounding-zeros rule) | no | CI lock |
+| `tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form` (ROBUST-CAMPAIGN, `f5070718` / `f7b677c9`) | independent implementation | pass (import guarded) | pass (import guarded) | no | CI lock |
+| `tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages` (RC-A2, `2b439e74` / `ffd7804e`) | independent implementation | error (import: `communication_lib.numbers`, added later) | fail (assertion: the test reads the later tokenizer) | no | CI lock |
+| same test (RC-A3, `ffd7804e` / `dc97a00c`) | independent implementation | fail (assertion) | pass | no | CI lock |
+| `tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_classification_exhaustively_against_integer_arithmetic` (RC-A5, `111585dd` / `7e0ee239`) | exhaustive | error (import: `_rounds_somehow` is new in the fix) | pass | no | CI lock |
+| `tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_rounding_rules_exhaustively_against_integer_arithmetic` (RC-A6) | exhaustive | error (TypeError: the parent's `_round` returns None for the rule form `decimals:n:mode`, new in the fix) | pass | no | CI lock |
+| `tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_numeric_forms_of_an_integer_are_one_group_exhaustively` (ML-SPLITS, `2b439e74` / `811f02b6`) | exhaustive | error (import: `canonical_key` is new in the fix; the test calls it) | pass | no | CI lock |
+| `tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_event_id_check_is_exhaustively_right_over_all_subset_pairs` (ML-CALIBRATION, `811f02b6` / `f7846755`) | exhaustive | pass | pass | no | CI lock |
+| `tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_validator_names_one_sample_under_every_spelling_of_its_path` (ML-CALIBRATION) | independent implementation | fail (assertion, 5725 subtests) | pass | no | CI lock |
+| `tests/skills/hep_ml/test_domain_shift_report.py::ShiftCarriedByNuisance::test_fit_against_pyhf` (ML-K05, `879e0733` / `7b32b109`) | independent implementation | error (TypeError: `shape_model`'s `b_up` argument is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank` (ML-DOMAIN, `50d3e922` / `7011baaf`) | analytic | error (AttributeError: `DomainModel` is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_false_positive_interval_is_the_beta_quantile_clopper_pearson` (ML-DOMAIN) | independent implementation | error (KeyError: `false_positive_rate_interval_68` is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_against_pyhf` (ML-NEGWEIGHTS, `153307a6` / `ef5d068f`) | analytic | pass | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2` (ML-NEGWEIGHTS) | independent implementation | error (AttributeError: `cell_resample` is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_student_t_quantile_against_scipy_and_the_published_table` (ML-SMALL-C10, `f5cc59a7` / `fd637dcc`) | independent implementation | error (AttributeError: `student_t_quantile` is new in the fix) | pass | no | CI lock |
+
+**Fix commits' own test files on their parents** (paths as at the fix commit, mapped to today's; only the rows
+that decide a record are listed; the rest pass on both or need code new in the fix):
+
+| Fix commit | Result |
+|---|---|
+| `70f7fbcb` (DR-WP1-01) | no valid parent failure: the z^2 test (KeyError `charge`), the `mass:charge` species syntax and `--rigidity` are all new in the fix; 1 test passes on both |
+| `ffd7804e` (RC-A2) | `test_communication_audit.py::ManuscriptOccurrences::test_value_not_in_passage_is_an_error_compared_as_a_number` fails by assertion on the parent, passes on the fix; `test_review_fixes2.py` does not import on the parent; 21 pass on both |
+| `7e0ee239` (RC-A5, RC-A6) | `ReviewFixes2Rounding::test_no_rule_accepts_only_a_rounding_of_the_source` (RC-A5) and `::test_default_rounding_is_half_up_and_half_even_is_opt_in` (RC-A6) fail by assertion on the parent, pass on the fix; two tests raise InvalidOperation (RC-A15, not a ledger entry), one needs `_rounds_somehow`; 16 pass on both |
+| `7b32b109` (ML-K05) | `tests/contracts/test_ml_mutation_probe.py::MutationProbe` `test_legacy_artifacts_keep_their_outcome_and_strict_reports`, `test_report_silent_count`, `test_rows_reach_their_level_natively` fail by assertion on the parent (row M25, the domain-shift record), pass on the fix; 2 pass on both (E2v) |
+| `7011baaf` (ML-DOMAIN) | `DomainModelTests::test_cli_groups_and_categorical`, `TrainingAndInferenceTests::test_inference_flags_the_broken_constraint_and_scores_no_non_finite_row` and `test_training_pipeline.py::TrainClassifierPipelineTests::test_inference_flags_and_rejects_out_of_domain` fail by assertion on the parent, pass on the fix; 9 need `DomainModel` or other code new in the fix; 19 pass on both (E2v) |
+
+**Grade changes (axis D), recomputed from the records:**
+
+| Entry | Severity | D before | D now | Reason |
+|---|---|---|---|---|
+| CLS-LOGINTERP | S1 | D2 | D1 | symbolic oracle (n = 0, ln 20) errors on the parent |
+| F02 | S1 | D2 | D1 | its three oracles test `tail_estimation`, new in the fix |
+| F03 | S2 | D2 | D1 | its oracle tests `newton_fit`, new in the fix |
+| BAYES-T24 | S1 | D3 | D1 | the analytic AR(1) oracle passes on the parent |
+| FC-MONOTONE | S1 | D2 | D1 | the envelope oracle errors on the parent (`monotone` argument new) |
+| POISSON-SF | S1 | D2 | D1 | the oracle errors on the parent (`poisson_sf` new) |
+| COV-NOREPAIR | S1 | D2 | D1 | both oracles import `_linalg`, new in the fix |
+| TH9-MASSES | S1 | D2 | D1 | the PDG oracle skips without pdg (no record) |
+| DR-WP1-01 | S1 | D2 | D0 | no test reaches the parent's code (no charge input before the fix) |
+| DR-WP2-06-CALO | S1 | D3 | D1 | the closure oracle passes on the parent |
+| DR-WP2-06-MS | S1 | D3 | D0 | the oracle errors on the parent (`mass_gev` argument new); no other record |
+| BLINDING-SCANNER | S2 | D2 | D1 | the rendering oracle errors on the parent and fails on the fix |
+| ROBUST-CAMPAIGN | S2 | D2 | D1 | the closed-form oracle passes on the parent |
+| RC-A2 | S2 | D2 | D1 | the oracle errors on the parent and fails on the fix |
+| RC-A5 | S2 | D2 | D1 | the exhaustive oracle errors on the parent |
+| RC-A6 | S2 | D2 | D1 | the exhaustive oracle errors on the parent (rule form new) |
+| ML-SPLITS | S2 | D2 | D1 | the exhaustive oracle calls `canonical_key`, new in the fix |
+| ML-CALIBRATION | S2 | D2 | D1 | the event-id oracle passes on the parent |
+| ML-K05 | S2 | D2 | D1 | the oracle errors on the parent (`b_up` argument new) |
+| ML-DOMAIN | S1 | D3 | D1 | both oracles error on the parent; no revert mutant recorded |
+| ML-NEGWEIGHTS | S1 | D3 | D1 | the Asimov oracle passes on the parent, the eq. 2.2 oracle errors; no revert mutant recorded |
+| ANISO-WEIGHTED-COV | S1 | D3 | D1 | three of five oracles test `harmonic_covariance` or `AnisotropicNull`, new in the fix |
+| ML-SMALL (C2, D2) | S2 | D2 | split | ML-SMALL-C10 C2 D1 (t-quantile oracle errors on the parent); -C24 C1 D0 (its only record errors: the `n_baseline` output is new); -C25 C1 D2; -C26 C1 D2 |
+
+Unchanged: F01, POISSON-500, DR-WP1-02, DR-WP2-06-PID, RC-A3 (D2, every oracle fails on the parent by assertion);
+BLINDING-ROUNDING-ZEROS, CANONICAL-KEY-ZERO-FRACTION, SAMPLE-NAME-DOT-SEGMENTS (D3, revert killed); the entries
+without oracle nodes or with recorded oracles (ROBUST-MALFORMED, ANISO-CL-RANGE, the six triage entries, the two scan
+entries) D2. None was raised. The ledger now has 44 entries: D3 3, D2 17, D1 21, D0 3; 24 are below their
+severity's minimum on axis D (S1 13, S2 11), each with a `gaps` line. The F-23 note of ROBUST-MALFORMED is
+withdrawn: it has no oracle node, and its regression tests' records hold.
+
+**B6, one fix per entry.** ML-SMALL is a tombstone in the new top-level `superseded` list. Its four code fixes
+(CHANGELOG 0.10.0 ML audit, "Small corrections"; the `### ML-SMALL` subsection of SCIFIX-PARENT-RECORDS; commit
+`fd637dcc`) are entries of their own: C10 the small-seed comparison (`compare_model_runs.py`; follow-up `db40e842`,
+after `fd637dcc` over-corrected), C24 the sculpting baseline, C25 the constant training feature, C26 `model_hash`.
+K13 corrected a test, not code, and left the ledger (the tombstone says so). SFA-2026-025 names the four entries;
+`scifix_advisories.py check`: 31 advisories, 0 problems.
+
+**Not converted** (in `gaps`): mutants that VALIDATION records only as a count (F03 5, BLINDING-SCANNER 9,
+ROBUST-CAMPAIGN 3, RC-A2 7, RC-A5 4, ML-SPLITS 4, ML-CALIBRATION 5, ML-K05 5, the former ML-SMALL 4); the
+functions of the mutants of BAYES-T24, DR-WP2-06-CALO and -MS, ML-DOMAIN and ML-NEGWEIGHTS (the file is the
+advisory's; `killed_by` names the class or module VALIDATION names); the parent record of
+`FeldmanCousinsTests::test_full_published_tables`, a test no longer present under that name.
+
+| Check | Result |
+|---|---|
+| `tests/tools/test_scifix_ledger.py` (18 tests; 8 new in `StructuredDiscrimination`, each rule with a synthetic ledger that obeys it and ones that break it) | pass |
+| Same with `sci-fixes.json` and SFA-2026-025 reverted to the branch's parent | fail: 45 failures, 16 errors (subtests) |
+| Same with the new records but the old D grades | fail: 3 (the D2 rule on every lowered entry; the D3 rule on ML-DOMAIN and ML-NEGWEIGHTS) |
+| `tools/scifix_advisories.py check` | 31 advisories, 0 problems |
+| `tools/check_retired_names.py` | ok |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock | 25 pass, 0 fail, 2 skipped (CLI host checks); 4834 tests, 4585 pass, 0 failures, 249 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+The first gate run failed only the README size statement (31.0 MB said, 34.5 MB measured, just beyond the 10%
+margin with this change); the statement now says about 2400 files, 34.5 MB.
+
+Added at the rebase onto main after #206: PERIODICITY-REFIT (S1, D3 unchanged) gains `commits` (parent `a53af7e0`
+as its record states, fix `573f093a`), three parent records (the three fast oracle and invariant tests fail by
+assertion on the parent, E2) and four killed mutants (M1, the revert of the default, among them), transcribed from
+VALIDATION PERIODICITY-REFIT; M4 survived and stays in its gaps.
+
+Added at the rebase onto main (after PR-5 merged): ADVISORY-MATCH-V2 (S2) D2 → D1. Its exhaustive oracle
+errors on the parent (`match_verdict` is new in the fix), which the D-scope rule does not count; the acceptance matrix
+fails there by assertion but is behavioral. Fix `5cb720b8` (PR-5 rebased before merging; was `cc7357ba`), parent `c3d9208a`.
+
 ## SCIFIX-PLAN-B1-B4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0, mpmath 1.3.0, no pyhf, ArviZ, pdg or torch; E2: NumPy 2.5.3, SciPy 1.18.1, pyhf 0.7.6, PyTorch 2.14.1, no ArviZ or pdg; branch `scifix/pr-6-evidence-sources`, stacked on `scifix/pr-4-execution-trace`)
 
 Sci-fix improvement plan v3, PR-6 (B1, B4; F-10, F-12). Counts recomputed on the branch: 40 ledger entries, 60

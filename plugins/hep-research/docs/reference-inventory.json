@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 35,
-   "bytes": 297676,
+   "bytes": 298463,
    "uncited": 0
   },
   "hep-detector": {
@@ -1308,8 +1308,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 10710,
-   "lines": 148,
+   "bytes": 11497,
+   "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
     "core/status.py",

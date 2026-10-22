@@ -1,6 +1,8 @@
 {
  "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-036",
+ "published": "2026-10-21T20:26:57Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S1",
  "ledger": [
   "ANISO-WEIGHTED-COV"

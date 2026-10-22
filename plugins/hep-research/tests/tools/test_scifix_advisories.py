@@ -21,7 +21,8 @@ def manifest(paths, digest="d" * 64):
     return {"digest": digest, "paths": set(paths)}
 
 
-ADVISORY = {"format": sa.FORMAT, "id": "SFA-2026-901", "severity": "S2", "ledger": ["BLINDING-ROUNDING-ZEROS"],
+ADVISORY = {"format": sa.FORMAT, "id": "SFA-2026-901", "published": "2026-10-20T00:00:00Z",
+            "modified": "2026-10-21T00:00:00Z", "severity": "S2", "ledger": ["BLINDING-ROUNDING-ZEROS"],
             "summary": "synthetic", "_file": "SFA-2026-901.json",
             "affected": [{"paths": ["skills/hep-ml/scripts/tool.py"],
                           "ranges": [{"type": "SEMVER", "events": [{"introduced": "0.2.0"}, {"fixed": "0.4.0"}]}]}],
@@ -217,6 +218,34 @@ class StricterCheck(unittest.TestCase):
         # the file is new in the introduced release: nothing to explain
         self.assertNotIn("introduced_basis", self.problems(events, {"0.2.0": manifest(["core/other.py"]),
                                                                     "0.3.0": manifest(["contracts/validate.py"])}))
+
+    def test_published_and_modified(self):
+        """Plan C2: OSV timestamps, UTC, modified not before published."""
+        self.assertIn("UTC timestamps", self.problems(lambda a: a.pop("published")))
+        self.assertIn("UTC timestamps", self.problems(lambda a: a.update(modified="2026-10-21")))
+        self.assertIn("UTC timestamps", self.problems(lambda a: a.update(modified="2026-10-21T00:00:00+08:00")))
+        self.assertIn("is before published", self.problems(lambda a: a.update(modified="2026-10-19T23:59:59Z")))
+
+    def test_regression_of_another_fix_is_a_warning_until_recorded(self):
+        """Plan C1: an advisory introduced by the commit that fixed another advisory's defect is flagged as a probable
+        regression (a warning, never a problem) until its ledger entry records that entry in regression_of."""
+        fix_a, fix_b = "a" * 40, "b" * 40
+        first = copy.deepcopy(self.good)
+        first.update(id="SFA-2026-901", ledger=["ML-SPLITS"])
+        first["affected"][0]["database_specific"] = {"fixed_commit": fix_a}
+        second = copy.deepcopy(self.good)
+        second.update(id="SFA-2026-902", ledger=["CANONICAL-KEY-ZERO-FRACTION"])
+        second["affected"][0]["database_specific"] = {"fixed_commit": fix_b, "introduced_commit": fix_a}
+        ledger = copy.deepcopy(self.ledger)
+        for f in ledger["fixes"]:
+            f.pop("regression_of", None)
+        got = sa.regression_warnings([first, second], ledger)
+        self.assertEqual(len(got), 1)
+        self.assertIn("SFA-2026-902: introduced by aaaaaaaa, the fix of SFA-2026-901", got[0])
+        self.assertIn("record ML-SPLITS in regression_of of CANONICAL-KEY-ZERO-FRACTION", got[0])
+        next(f for f in ledger["fixes"] if f["id"] == "CANONICAL-KEY-ZERO-FRACTION")["regression_of"] = ["ML-SPLITS"]
+        self.assertEqual(sa.regression_warnings([first, second], ledger), [])
+        self.assertEqual(sa.regression_warnings(sa.load_advisories(), self.ledger), [])  # the shipped ones: recorded
 
     def test_every_shipped_advisory_is_format_2(self):
         """F-27: the /1 allowlist is gone; every advisory is written as /2 and checked with no exception."""

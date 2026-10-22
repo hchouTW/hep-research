@@ -1,9 +1,14 @@
 {
  "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-025",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S2",
  "ledger": [
-  "ML-SMALL"
+  "ML-SMALL-C10",
+  "ML-SMALL-C24",
+  "ML-SMALL-C25",
+  "ML-SMALL-C26"
  ],
  "summary": "Small ML corrections with a measurable effect: the small-seed model comparison declared false improvements, the mass-sculpting baseline used one draw, a constant training feature was divided by 1e-12, and the model hash covered the checkpoint file instead of the weights.",
  "affected": [
