@@ -2253,6 +2253,31 @@ plan was written on 0.22.0: 31 advisories, 39 ledger entries, 8 documentation fi
 
 Scan verdicts are unchanged by this step (the separate listing of advisories without artifacts is plan PR-3).
 
+## REVIEW-EXPERT-SLOT (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `feat/review-config-expert` from main `f016edce`, unreleased)
+
+Three changes to the independent review, contracts 3.6.0 (spec sections 5.1, 5.2, 5.3, 6.10, 7.6, A8). `start
+--own-config` gives a review its own configuration file (`reviews/<id>/review-config.json`, recorded in
+`round_started` as `config_file`), so concurrent reviews can use different settings; no schema change. The filter
+packet's free text (`correction`, `description`, `fix`) has the raising slot's id, its record identity and the model
+names replaced by `[redacted]`, with counts in the private `filter_ids.json` and the report. `start --expert-model M`
+adds one expert slot to round 1 (role `expert` in `review_record`, config `expert`, receipt code
+`finding_without_verdict`): whole document, no canaries, at most two attempts, never escalated, findings handled like
+any other. Synthetic data only; no live agent run.
+
+| Check | Result |
+|---|---|
+| New tests: `tests/contracts/test_review_expert_contract.py` (18), `tests/skills/hep_authoring/test_review_expert_slot.py` (23) | 41 pass. Covered: an end-to-end review with `--own-config`, the expert slot and the filter (expert rejected once with `finding_without_verdict`, then accepted; the filter over the expert's and a lens's findings; the expert finding changed and confirmed by the design lens in round 2; no expert slot in round 2; close, `check` exit 0); the expert packet's files, scope, units and instructions (no other slot id, no canary, valid example); scrubbed filter packet (slot ids, identities and model names in any case gone, a lowercase look-alike kept, `value` and `unit_texts` untouched, counts 3/2/2 in `filter_ids.json` and the report); receipt codes `finding_without_verdict`, `basis_missing`, `finding_shape`, `verdict_without_finding`, `self_citation`, `read_outside_packet` (the delivered document and a copy elsewhere in the project), `prior_conversation`, `same_identity`, `schema_invalid` (skim, wrong role); an empty expert record accepted; exhaustion after two attempts not escalated; returned-empty through row 5; `check --record-only --role expert`; an expert-only dispatch (start, dispatch and receive only the expert slot); a conflict item between an expert and a lens verdict with lenses including `expert` and its arbiter dispatched; own-config: shared file unchanged, concurrent reviews with different settings, the shared-file refusal naming only shared-config reviews, own config without a shared file, observe and `repair config_changed` on the own file, `check` `artifacts_changed` on an edited own file; the spec 6.10 and 7.6 text against the code; fold, snapshot (kind `expert`), attempt limit, transitions, carry-forward to the design lens (and to dispose without one), an exhaustive decide test over two review slots and the expert slot; fixtures in `contracts/fixtures/review/` (2 valid, 6 invalid expert records); unchanged behaviour without the options |
+| Unchanged without the options | the P1 end-to-end review (`run_e2e`): review and private directories byte-identical to main `f016edce` (174 files, sha256 per file), checked after every step and on the final tree; reviewer and arbiter instruction files keep their role row (the `expert` role is not offered to them) |
+| `run_all_checks.py --no-cli --jobs 6`, E2 (NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4885 tests in 407 modules, 4751 pass, 0 failures, 134 skipped |
+| Same with the CI lock (NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4885 tests, 4659 pass, 0 failures, 226 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| Contracts 3.6.0 bump | fixtures (`make_fixtures.py`), templates, theory-profile artifacts and examples regenerated (E2; `bc-propagation-fit` with the CI lock): version strings and the hashes that cover them only; `unfolding-coverage` drifted at 1e-14 and was restored |
+| Packaging | the README size statement moved from 31.0 to 34.5 MB (about 2400 files): main was already 34.4 MB, at the edge of the 10% margin, and this branch's files crossed it |
+
+Both gate runs were on the final tree except this section and the CHANGELOG entry. Not run: a live agent review with
+the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
+describes it without recommending it. Skipped tests are unverified, not passed.
+
 ## 0.23.0 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.23.0` from main `59002566` (#197 anisotropy CL range, `bdt-backend` gate, 24 triaged plugin

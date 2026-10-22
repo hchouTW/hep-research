@@ -414,7 +414,7 @@
     "tests/skills/hep_authoring/test_review_pilot_fixes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c90b601b 2026-10-22"
+   "last_commit": "cdcfe6f0 2026-10-22"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
