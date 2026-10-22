@@ -1,0 +1,15 @@
+{
+ "kind": "error",
+ "category": "C10",
+ "planter": "ai",
+ "summary": "The period-1 trigger-efficiency estimate is used for both periods in the per-period fluxes, although the trigger efficiency differs by period (0.93 vs 0.90).",
+ "code_change": "run_analysis: trig_hat = sim['trig_hat'][first period] taken before the loop and passed for every period.",
+ "description_change": "context.json: rationale of map-trigger_efficiency now says one period-1 estimate serves every period; spec systematics trigger_efficiency 'shared by species and periods'.",
+ "affected": [
+  "trigger_efficiency",
+  "proton-p2",
+  "helium-p2",
+  "flux-proton-p2",
+  "flux-helium-p2"
+ ]
+}

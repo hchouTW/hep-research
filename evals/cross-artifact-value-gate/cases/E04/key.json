@@ -1,0 +1,16 @@
+{
+ "kind": "error",
+ "category": "C02",
+ "planter": "ai",
+ "summary": "The period-averaged flux sums counts corrected for the selection efficiency only, dropping the trigger efficiency on the belief that it is common to both periods, although it differs per period (0.93 vs 0.90) and never cancels in a flux.",
+ "code_change": "run_analysis: the average numerator becomes sum(unfolded) / sel_hat instead of sum(unfolded / (trig_hat[p] * sel_hat)).",
+ "description_change": "context.json: rationale of map-trigger_efficiency says the period average uses selection-corrected counts only.",
+ "affected": [
+  "trigger_efficiency",
+  "efficiency",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2"
+ ]
+}

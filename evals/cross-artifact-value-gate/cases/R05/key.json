@@ -1,0 +1,13 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "Rationale texts of the four instance-mapping declarations and the analyse() docstring are reworded; the meaning and the code path are unchanged.",
+ "code_change": "analyse() docstring rewritten.",
+ "description_change": "context.json: basis.rationale of every declaration reworded.",
+ "affected": [
+  "trigger_efficiency",
+  "selection_efficiency",
+  "acceptance",
+  "rigidity_migration"
+ ]
+}

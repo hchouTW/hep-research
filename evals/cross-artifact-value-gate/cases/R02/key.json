@@ -1,0 +1,11 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "The flux and its Jacobian are computed from one reciprocal of the denominator; the acceptance note is reworded with the same meaning.",
+ "code_change": "analyse(): inv = 1/denom; flux = u * inv; jac = diag(inv).",
+ "description_change": "measurement spec: acceptance correction notes reworded (acceptance once, as a factor of the exposure).",
+ "affected": [
+  "acceptance",
+  "exposure"
+ ]
+}

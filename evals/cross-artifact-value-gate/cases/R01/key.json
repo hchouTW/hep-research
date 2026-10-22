@@ -1,0 +1,10 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "The constant WIDTH is renamed BIN_WIDTH and the recipe step 'bin-width' is renamed 'divide-bin-width'; same values, same operator.",
+ "code_change": "WIDTH -> BIN_WIDTH everywhere.",
+ "description_change": "recipe.json: step_id bin-width -> divide-bin-width.",
+ "affected": [
+  "bin-width"
+ ]
+}

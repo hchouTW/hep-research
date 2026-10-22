@@ -1,0 +1,18 @@
+{
+ "kind": "error",
+ "category": "C03",
+ "planter": "ai",
+ "summary": "The charge-tail background, estimated in reco rigidity bins, is subtracted from the unfolded (truth-bin) helium counts instead of from the reco counts before unfolding, so the background is never migrated consistently.",
+ "code_change": "analyse(): the unfolding input is n (not n - bkg) and bkg is subtracted from u after unfold().",
+ "description_change": "recipe.json: step 'background' moved after 'unfold'; spec background estimator text now says B_k is subtracted from the unfolded helium counts.",
+ "affected": [
+  "background",
+  "unfold",
+  "helium-p1",
+  "helium-p2",
+  "flux-helium-p1",
+  "flux-helium-p2",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

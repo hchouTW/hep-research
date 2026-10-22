@@ -1,0 +1,17 @@
+{
+ "kind": "error",
+ "category": "C08",
+ "planter": "ai",
+ "summary": "The charge-sideband transfer factor is inverted (sideband over window instead of window over sideband), so the subtracted Z=1 background in the helium window is wrong by the square of the true factor.",
+ "code_change": "TF_SR = tail_fraction(*SIDEBAND) / tail_fraction(*HE_WINDOW).",
+ "description_change": "measurement spec: background estimator text now says TF = tail fraction in the sideband / in the window.",
+ "affected": [
+  "background",
+  "helium-p1",
+  "helium-p2",
+  "flux-helium-p1",
+  "flux-helium-p2",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

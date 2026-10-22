@@ -1,0 +1,18 @@
+{
+ "kind": "error",
+ "category": "C10",
+ "planter": "ai",
+ "summary": "The selection efficiency is corrected for protons only, on the belief that the helium acceptance model contains it; it does not, so the helium flux (and He/p) is low by the helium selection efficiency.",
+ "code_change": "run_analysis passes eff_sel_hat = 1.0 for helium (the period average still divides by it).",
+ "description_change": "context.json: map-selection_efficiency now lists proton-p1 and proton-p2 only, with a rationale about the helium acceptance model.",
+ "affected": [
+  "selection_efficiency",
+  "efficiency",
+  "helium-p1",
+  "helium-p2",
+  "flux-helium-p1",
+  "flux-helium-p2",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

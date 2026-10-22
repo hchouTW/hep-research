@@ -1,0 +1,13 @@
+{
+ "kind": "error",
+ "category": "C09",
+ "planter": "ai",
+ "summary": "The trigger-efficiency term, one per-period estimate shared by both species, is propagated as independent in the numerator and denominator of the ratio instead of cancelling, overstating the ratio uncertainty.",
+ "code_change": "ratio_block(): the trigger blocks of both species are added to the relative covariance.",
+ "description_change": "measurement spec: ratio cancellation trigger_efficiency now treatment 'independent', correlation model 'trigger efficiency estimated per species'.",
+ "affected": [
+  "trigger_efficiency",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

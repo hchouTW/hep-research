@@ -1,0 +1,13 @@
+{
+ "kind": "error",
+ "category": "C09",
+ "planter": "ai",
+ "summary": "The selection efficiency is treated as cancelling in the He/p ratio ('same selection for both species'), but it is measured from separate per-species control samples, so its uncertainty is dropped from the ratio covariance.",
+ "code_change": "ratio_block(): the selection blocks of numerator and denominator are left out of the relative covariance.",
+ "description_change": "measurement spec: ratio cancellation selection_efficiency now treatment 'cancels', correlation model 'same selection algorithm applied to both species'.",
+ "affected": [
+  "selection_efficiency",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "kind": "error",
+ "category": "C12",
+ "planter": "ai",
+ "summary": "The trigger-efficiency uncertainty is computed with the selection control-sample size (5000) instead of the unbiased-trigger sample (1000), understating it by sqrt(5).",
+ "code_change": "run_analysis: st = sqrt(eps (1 - eps) / N_CTRL_SELECTION).",
+ "description_change": "measurement spec: systematic trigger_efficiency source now 'control sample (5000 unbiased-trigger events per period)'.",
+ "affected": [
+  "trigger_efficiency",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

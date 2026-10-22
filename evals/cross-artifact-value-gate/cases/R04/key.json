@@ -1,0 +1,13 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "Recipe instance ids are renamed consistently (proton-p1 -> proton-period1, ...) in roots, instances, bindings and declarations; in the code the per-cell loop variable is renamed. Nothing changes in the computation.",
+ "code_change": "run_analysis: local w renamed cell.",
+ "description_change": "context.json: instance ids renamed everywhere they appear.",
+ "affected": [
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2"
+ ]
+}

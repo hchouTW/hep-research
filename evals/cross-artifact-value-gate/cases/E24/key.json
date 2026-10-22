@@ -1,0 +1,14 @@
+{
+ "kind": "error",
+ "category": "C11",
+ "planter": "ai",
+ "summary": "The dataset records are extended to 100 GV, so the blinded 60-100 GV He/p value (built from the filled expectation and the open proton count) is released.",
+ "code_change": "artifacts(): pub_edges runs to PUBLISHED.stop + 2 and the record values to PUBLISHED.stop + 1.",
+ "description_change": "dataset records: objective now '2-100 GV' and observable/data edges extend to 100 GV; spec blinding unchanged.",
+ "affected": [
+  "ratio-p1",
+  "ratio-p2",
+  "helium-p1",
+  "helium-p2"
+ ]
+}
