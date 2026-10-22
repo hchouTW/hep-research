@@ -340,13 +340,27 @@ def _artifact_release(doc: dict, manifests: dict[str, dict]) -> tuple[str | None
     return None, "unknown"
 
 
-def _touches(adv: dict, doc: dict) -> bool:
+def missing_markers(root: Path = ROOT) -> frozenset[str]:
+    """The missing-value markers (contracts/vocab/core.json missing_markers: unknown, not-applicable, not-provided)."""
+    vocab = load_json(root / "contracts" / "vocab" / "core.json")["vocabularies"]["missing_markers"]
+    return frozenset(vocab)
+
+
+def present(value, markers: frozenset[str]) -> bool:
+    """A key's value shows the code wrote something: not absent, null, false, an empty object or list, or a missing
+    marker (a zero is present: `0 == False` no longer hides it)."""
+    if value is None or value is False or value in ({}, []):
+        return False
+    return not (isinstance(value, str) and value in markers)
+
+
+def _touches(adv: dict, doc: dict, markers: frozenset[str] = frozenset()) -> bool:
     applies = adv.get("applies_to") or {}
     if doc.get("artifact_type") not in (applies.get("artifact_types") or []):
         return False
     keys = applies.get("extension_keys") or []
     ext: dict = doc["extension"] if isinstance(doc.get("extension"), dict) else {}
-    return not keys or any(ext.get(k) not in (None, False, {}, []) for k in keys)
+    return not keys or any(present(ext.get(k), markers) for k in keys)
 
 
 def _release_affected(adv: dict, version: str, manifests: dict[str, dict]) -> bool:
@@ -370,6 +384,7 @@ def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> d
     artifacts_dir = (project / folder).resolve()
     ranges = {adv["id"]: affected_releases(adv, manifests) for adv in advisories}
     no_artifact = [adv for adv in advisories if writes_no_artifact(adv)]  # step 1
+    markers = missing_markers()
     matched = [adv for adv in advisories if not writes_no_artifact(adv)]
     findings, unreadable, scanned = [], [], 0
     for path in sorted(artifacts_dir.rglob("*.json")) if artifacts_dir.is_dir() else []:
@@ -383,7 +398,7 @@ def scan(project: Path, advisories: list[dict], manifests: dict[str, dict]) -> d
         scanned += 1
         version, basis = _artifact_release(doc, manifests)
         for adv in matched:
-            if not _touches(adv, doc):  # steps 2 and 3
+            if not _touches(adv, doc, markers):  # steps 2 and 3
                 continue
             if version is None:
                 verdict = "possibly affected (release unknown)"

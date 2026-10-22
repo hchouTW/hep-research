@@ -326,6 +326,28 @@ class ProjectScan(unittest.TestCase):
                     want = ["affected"]
                 self.assertEqual(verdicts, want)
 
+    def test_missing_markers_and_empty_values_do_not_show_the_code_ran(self):
+        """Exhaustive oracle (sci-fix SCAN-MISSING-MARKER, plan A4/F-06): every value class a valid extension key can
+        hold. A missing marker (contracts/vocab/core.json: unknown, not-applicable, not-provided; written out here),
+        null, false and an empty object or list mean the key says nothing; any other value is present. A
+        measurement-spec may record blinding as a marker (its schema: anyOf object or missing marker)."""
+        values = {"unknown": False, "not-applicable": False, "not-provided": False, None: False, False: False,
+                  "{}": False, "[]": False, "object": True, "list": True, "text": True, "Unknown": True, "0": True,
+                  "1.5": True, "true": True}
+        concrete = {"{}": {}, "[]": [], "object": {"method": "x"}, "list": ["a"], "text": "hidden-box",
+                    "0": 0, "1.5": 1.5, "true": True}
+        adv = copy.deepcopy(ADVISORY)
+        adv["applies_to"] = {"artifact_types": ["measurement-spec"], "extension_keys": ["blinding"]}
+        for label, touched in values.items():
+            with self.subTest(value=label):
+                for f in self.art.iterdir():
+                    f.unlink()
+                value = concrete.get(label, label)
+                self.artifact("spec.json", {"plugin": "0.3.0"}, artifact_type="measurement-spec",
+                              extension={"blinding": value})
+                rep = sa.scan(self.project, [adv], self.manifests)
+                self.assertEqual([f["verdict"] for f in rep["findings"]], ["affected"] if touched else [])
+
     def test_default_artifacts_dir_and_cli_exit_codes(self):
         (self.project / sa.CONFIG_NAME).unlink()
         (self.project / "hep-research-artifacts").mkdir()
