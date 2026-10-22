@@ -98,3 +98,46 @@ Written and committed before any error was planted or measured. The thresholds a
   re-planted after measuring.
 - **Sensitivity arm** (protocol step 2): reported beside the main arm, never decides the gate.
 - **Deviation.** Published errata were not consulted for the taxonomy (protocol step 3; **Unresolved**).
+
+## 2026-10-22, measurement result (implementer)
+
+Run of `evals/cross-artifact-value-gate/measure.py --sensitivity` on R1 (0.25.0, main ce66dd83 plus the harness),
+cases committed in fc4cfa20 before measuring; results in `evals/cross-artifact-value-gate/results/`. **AI-planted**:
+28 errors (every category C01–C12, two or three each) and 11 refactors.
+
+| Arm | N | R | I | F | Flagged by layer 1 | Layer 2 only | Checker (any) | Missed by every layer |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| main | 28 | 11 | **0** | 0 (mechanical count 1, see below) | 23 | 0 | 6 | E12, E13, E24, E25, E27 |
+| sensitivity | 28 | 11 | 0 | 0 | 23 | 0 | 6 | the same five |
+
+- **Confirmed.** I = 0 < 0.10 N = 2.8, so under the confirmed thresholds the outcome is **Stop**, whatever F is. The
+  AI-planted cap limits only Pass, so it does not apply.
+- **Confirmed.** The checker flagged 6 errors (E01, E02, E11, E18, E19, E21). The closure tests of `run.py` flagged
+  all six, and `validate.py --strict` or L2 flagged three of them (E01, E02, E18). Against layer 2 alone, the checker
+  adds three errors (E11 incompatible ratio operands, E19 and E21 ratio cancellation and correlation claims).
+- **Confirmed; F counting.** R04 renames the instance ids consistently. The checker then reports the four
+  definition-induced `unrealized_correction` results of `trigger_efficiency` under the new ids, and the mechanical
+  comparison (by obligation id) counts them as new. They are the baseline's definition-induced results, which the
+  confirmed threshold text excludes from F, and the sensitivity arm (where they do not exist) gives F = 0. F = 0 or 1
+  does not change the outcome.
+- **Confirmed.** E18 crashes `run.py` (the planter's double subtraction reads the masked helium count); it is scored
+  as planted, as fixed before measuring.
+- **Confirmed; what the checker misses.** A response of the wrong species or period bound to an instance (E14, E15);
+  a declaration that narrows a correction to the proton instances, which turns the helium obligations into
+  `not_applicable` (E22, the P4 pattern); units, edges and blinding text in the spec that differ from the code
+  (E10, E13, E24, E25).
+- **Inferred; validity.** The subject's closure tests are stronger than in a real analysis: the simulation and the
+  truth live in the same file and the planter changed the analysis side only, so 23 of 28 errors broke Asimov or toy
+  closure. A subject whose simulation shares the analyst's mistakes would leave more for the later layers. This
+  bears on how far the result generalizes; it does not change the pre-registered outcome.
+- **Cost (protocol step 7).** The subject has 152 hand-written leaf fields (recipe 18, context 134) plus about 30 in
+  the item list. About 17 plus the item list are derivable without writing intent (versions, suites, scope axes,
+  recipe header); about 44 only through a run-record bridge (bindings 16, instance structure 28, the spike's
+  question); about 91 are intent that P4 and P10 forbid deriving (roots 28, declarations 40, ratio roots 12, recipe
+  steps 10, `not_applied` 1).
+
+**Recommendation (Inferred; the owner decides at the decision point, section 9.3):** **Stop** as section 13.3 defines
+it: freeze the checker code; keep `--check-bundle` but mark it experimental; mark the manual freeze and check
+instructions in the skill references and the README experimental; no new suites; keep the Phase 0 results. The
+optional spike and the entry path (DR-14) lose their purpose under Stop. If the owner wants the validity point above
+tested, that is a new measurement with its own pre-registered design, not a rerun of this one.
