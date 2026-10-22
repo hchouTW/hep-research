@@ -414,7 +414,7 @@
     "tests/skills/hep_authoring/test_review_pilot_fixes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cdcfe6f0 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -1693,7 +1693,7 @@
     "tests/skills/hep_detector/test_adding_layer_d6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c90b601b 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -1769,7 +1769,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "28f7d9c7 2026-10-21"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2047,7 +2047,7 @@
     "skills/hep-detector/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2090,7 +2090,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "7013f194 2026-10-21"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2281,7 +2281,7 @@
     "skills/hep-detector/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
@@ -2352,7 +2352,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "894eec20 2026-10-19"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -2479,7 +2479,7 @@
     "skills/hep-detector/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c90b601b 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/analysis-design.md",
@@ -2510,7 +2510,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "c90b601b 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/analysis-validation.md",
@@ -3566,7 +3566,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "14eeda45 2026-10-15"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/combinations.md",
@@ -3721,7 +3721,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "1857c829 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -3765,7 +3765,7 @@
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "c90b601b 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
@@ -3810,7 +3810,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "573f093a 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",

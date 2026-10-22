@@ -2479,6 +2479,24 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## 0.24.0 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.24.0` from main `d0a9f799` (#201 REVIEW-REFS-3; #202-#205 and #207-#212 the sci-fix
+improvement plan, contracts 3.5.0, advisory format /2; #206 PERIODICITY-REFIT and the namespaced-efficiency warning;
+#213 expert slot, per-review configuration and filter-packet scrub, contracts 3.6.0; #214 REVIEW-REFS-4). Minor
+release. The ams02-research companion (requires hep-research `>=0.11.0`, profile contracts `>=2.0`) needs no change.
+
+What changed: version 0.24.0 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.24.0`; the four unreleased ledger entries
+(SCAN-VERDICT-ORDER, SCAN-MISSING-MARKER, ADVISORY-MATCH-V2, PERIODICITY-REFIT) record release 0.24.0; advisory
+SFA-2026-038 (PERIODICITY-REFIT) gets its `fixed` event 0.24.0. Examples regenerated (E2; `bc-propagation-fit` with
+the CI lock): only version strings and the hashes that cover them change (`unfolding-coverage` left as committed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4904 tests in 408 modules, 4770 pass, 0 failures, 134 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4904 tests, 4678 pass, 0 failures, 226 skipped |
+
 ## 0.23.0 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.23.0` from main `59002566` (#197 anisotropy CL range, `bdt-backend` gate, 24 triaged plugin
