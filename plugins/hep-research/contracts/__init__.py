@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.6.0"
+CONTRACTS_VERSION = "3.7.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -133,6 +133,13 @@ CONTRACTS_VERSION = "3.6.0"
 # like every review file they live under <project>/reviews/, never in an artifacts_dir, and no artifact type,
 # vocabulary term or envelope field changes; a 3.5 driver refuses a configuration with expert as config_out_of_range
 # and a record with role expert as schema_invalid instead of misreading either.
+# 3.7.0 (cross-artifact check architecture Phase 0, release R1; docs/dev/cross-artifact-check/decision-phase0.md)
+# moves the rule registry to registry_version 1.1.0: each new or changed rule records source_sha256, the
+# function-level source digest of its implementation, and contracts/rule_registry.py fails when the code changes
+# without a new rule version; V-case parts gain the slices P0-P2 and work packages P<phase>.<nn> and WP-R. The
+# analysis check dispatches rules by (rule_id, version) and names its plugin_release in the report's assessment. No
+# artifact type, vocabulary term, envelope field or capability changes: the registry, the check report and the
+# bundle live outside an artifacts_dir, and a 3.6 reader refuses a 1.1.0 registry (schema enum) instead of misreading it.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

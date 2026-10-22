@@ -1,12 +1,12 @@
 {
- "contract_version": "3.6.0",
+ "contract_version": "3.7.0",
  "bindings": {
   "experiments": [],
   "theory": []
  },
  "versions": {
-  "plugin": "0.24.1",
-  "contracts": "3.6.0",
+  "plugin": "0.25.0",
+  "contracts": "3.7.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

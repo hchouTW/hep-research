@@ -2578,6 +2578,26 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## 0.25.0 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.25.0` from main `0414f783` (#220 cross-artifact check Phase 0, release R1: version guard,
+rule source digests and registry 1.1.0, P6, default snapshots, cheap check-report refusals, the code-name rename;
+main CI green). Minor release, contracts 3.7.0 (registry 1.1.0; no artifact type, vocabulary term, envelope field or
+capability change); no ledger entry or advisory changes release (none is unreleased). The ams02-research companion
+(requires hep-research `>=0.11.0`) needs no change.
+
+What changed: version 0.25.0 in both manifests, `pyproject.toml`, the README, the assets and the theory-profile
+scripts (profile artifacts regenerated); contracts 3.7.0 in `contracts/__init__.py` (with its comment),
+`contracts/vocab/core.json`, the two pinned tests, the templates and the fixtures (`make_fixtures.py`, E2); CHANGELOG
+`Unreleased` is `0.25.0`. Examples regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings and
+the hashes that cover them change; `unfolding-coverage` drifted at 1e-14 and was restored. Reference inventory
+regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4955 tests in 410 modules, 4819 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4955 tests, 4727 pass, 0 failures, 228 skipped |
+
 ## 0.24.1 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.24.1` from main `a183b6ba` (#216 weekly ledger-evidence job and TH9-MASSES PDG record; #217

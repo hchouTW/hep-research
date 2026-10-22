@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.25.0 (2026-10-22)
 
 Phase 0 of the cross-artifact check architecture (`docs/dev/cross-artifact-check/`, release R1): foundations of the
 opt-in analysis check. No rule outcome changes: the same 403 obligations over 22 cases give the same state and
