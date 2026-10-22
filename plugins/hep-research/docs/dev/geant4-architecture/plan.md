@@ -3,7 +3,10 @@
 > 文件類型：計畫（給執行的 agent、審查者與維護者）。狀態：待使用者與維護者核准
 > 日期：2026-10-23
 > 語言：繁體中文原文；英文版 [`plan.en.md`](plan.en.md) 內容相同。兩者不一致時以中文為準，並同時修正英文
-> 權威範圍：**階段的順序、編號、版本代號、介面擁有權、閘門與待決事項以本文件為準**；工作項的內容與驗收以各任務規格為準；[`architecture.md`](architecture.md) 只說明設計理由
+> 權威範圍：**階段的順序、編號、版本代號、介面擁有權、閘門、待決事項與執行環境以本文件為準**；工作項的內容與驗收以各任務規格為準；[`architecture.md`](architecture.md) 只說明設計理由
+> 執行環境：**每個階段都在自己的 isolated git worktree 中執行**，不在主要 checkout 中修改任何檔案（§10）
+
+**給執行的 agent：** 依序讀 §0（階段一覽）、§10（在 isolated worktree 中執行）、§6（閘門）、§4（介面擁有權），再讀負責階段所屬任務規格的 §0 任務卡。開始寫任何程式之前，先依 §10.2 建立並確認 worktree。
 
 ---
 
@@ -174,7 +177,7 @@ A1 ──▶ A2 ──▶ B1 ──▶ B2 ──▶ B3 ────────�
 
 | 文件 | 內容 | 權威範圍 |
 |---|---|---|
-| `plan.md`（本文件） | 評估、原則、階段、介面擁有權、命名、閘門、待決事項、風險 | 順序、編號、版本代號、擁有權、閘門、待決事項 |
+| `plan.md`（本文件） | 評估、原則、階段、介面擁有權、命名、閘門、待決事項、風險、執行環境 | 順序、編號、版本代號、擁有權、閘門、待決事項、執行環境（isolated worktree） |
 | `task-a-core.md` | A1、A2 的工作項與驗收 | 這兩個階段的內容與驗收 |
 | `task-b-j15.md` | J15 的設計；B1、B2、B3 的工作項與驗收 | 這三個階段的內容與驗收；J15 的數值 |
 | `task-c-design-search.md` | 自動化設計的設計；C1、C2、C3 的工作項與驗收 | 這三個階段的內容與驗收 |
@@ -186,8 +189,61 @@ A1 ──▶ A2 ──▶ B1 ──▶ B2 ──▶ B3 ────────�
 
 ---
 
-## 10. 版本歷程
+## 10. 執行環境：isolated worktree
+
+### 10.1 原則
+
+- **每個階段在自己的 isolated git worktree 中執行**：一個階段、一個 worktree、一個分支。
+- 主要 checkout（repo 根目錄的工作區）與其他 worktree 中的檔案一律不修改。
+- 理由：
+  - 可以平行的階段（例如 C1 與 A2、B1）與平行的 agent 不會互相覆寫；
+  - 建置目錄、Geant4 輸出與暫存檔彼此隔離；
+  - 一個階段失敗時可以整個丟棄，不影響其他工作；
+  - 每個階段的變更就是一個分支的 diff，審查與合併的範圍清楚。
+
+### 10.2 建立與確認
+
+| 項目 | 規定 |
+|---|---|
+| 位置 | `.claude/worktrees/geant4-<階段>`，階段名小寫，例如 `.claude/worktrees/geant4-a1` |
+| 分支 | `geant4-<階段>`，例如 `geant4-a1` |
+| 基底 | 已包含全部前提階段（§0 的「前提」欄）的最新 `main`；例如 B2 以 B1 合併後的 `main` 為基底 |
+| 規格的來源 | 本資料夾核准後合併到 `main`，worktree 中就有規格。核准前，規格只在分支 `worktree-geant4-architecture` 上，以 `git show worktree-geant4-architecture:plugins/hep-research/docs/dev/geant4-architecture/<檔名>` 讀取，不把該分支合併進階段分支 |
+| 在 Claude Code 中 | 工作階段本身以 `EnterWorktree` 進入 worktree；把工作委派給 subagent 時，Agent 工具使用 `isolation: "worktree"` |
+| 在其他環境 | `git fetch origin && git worktree add .claude/worktrees/geant4-a1 -b geant4-a1 origin/main` |
+| 開始前確認 | `git rev-parse --show-toplevel` 是該 worktree 的路徑、`git branch --show-current` 是該階段的分支、`git status` 乾淨；三項結果寫入該階段的工作紀錄（VALIDATION 條目的環境欄） |
+
+### 10.3 在 worktree 中的規則
+
+1. 所有編輯、建置、測試、Geant4 執行與規格修正都在該階段的 worktree 中進行；不 `cd` 到主要 checkout 或其他 worktree。
+2. 指令使用 worktree 內清楚的絕對路徑或相對路徑；避免以執行時才計算的變數組出 git 的參數，讓工具與審查者都能確認指令留在 worktree 內。
+3. **`git stash` 是所有 worktree 共用的。** 不使用裸的 `git stash` 或 `git stash pop`；需要暫存時用暫時的 WIP commit。
+4. 建置目錄、E2 的輸出、ROOT 檔與 trial 的結果放在該 worktree 內不提交的目錄（例如 `build/`、`work/`，由 `.gitignore` 排除），或該 worktree 專屬的暫存目錄；不同 worktree 不共用建置目錄。Geant4 本身的安裝（E2）可以由多個 worktree 唯讀共用。
+5. 只在該階段的分支提交；commit 附規定的 trailer；推送到同名的遠端分支。未經維護者核准不推送 `main`、不開 pull request。
+6. 合併前在 worktree 中執行任務 A §8 的檢查，並確認閘門（§6）。
+7. 實作中發現規格需要修正時，在同一個 worktree 中同時修改中英兩版並記入版本歷程；影響其他階段時同時更新本文件。
+8. 獨立審查與其他 subagent 以 `isolation: "worktree"` 執行；審查只讀不寫，沒有變更的 worktree 結束後自動清除。
+
+### 10.4 可以平行的階段
+
+| 同時進行 | 條件 | 注意 |
+|---|---|---|
+| C1 與 A2、B1、B2、B3 | A1 已合併 | C1 只動 `adapters/detector-design/` 與它的文件，衝突少 |
+| B3 與 C2 | B2 與 C1 已合併 | 兩者都可能修改 `geant4-study-protocol.md` 與 journey 文件；後合併者在新的 `main` 上 rebase 並重跑檢查 |
+
+每個平行的階段各用自己的 worktree 與分支；同一個階段不由兩個 agent 同時在不同 worktree 中實作。
+
+### 10.5 結束
+
+- **合併後：** `git worktree remove .claude/worktrees/geant4-<階段>`，刪除本地分支；下一個階段從新的 `main` 建立新的 worktree。
+- **放棄：** 移除該 worktree 與分支；不在主要 checkout 中做任何清理。
+- **本資料夾本身** 在分支 `worktree-geant4-architecture` 與 worktree `.claude/worktrees/geant4-architecture` 中撰寫；之後的文件修改也在那裡進行，直到它合併到 `main`。
+
+---
+
+## 11. 版本歷程
 
 | 版本 | 內容 |
 |---|---|
-| **2026-10-23（本版）** | **初版：整合評估（P1–P9）、規劃原則、八個階段（B 拆為 B1–B3、C 為 C1–C3）、介面擁有權、命名（契約版本改記 CV1–CV3）、閘門、合併的待決事項與風險** |
+| 2026-10-23 | 初版：整合評估（P1–P9）、規劃原則、八個階段（B 拆為 B1–B3、C 為 C1–C3）、介面擁有權、命名（契約版本改記 CV1–CV3）、閘門、合併的待決事項與風險 |
+| **2026-10-23（本版）** | **加入 §10「執行環境：isolated worktree」（建立、確認、規則、平行階段、結束）與給 agent 的讀法** |

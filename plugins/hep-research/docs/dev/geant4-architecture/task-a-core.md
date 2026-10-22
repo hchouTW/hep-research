@@ -3,6 +3,7 @@
 > 文件類型：實作規格（給執行的 agent 與審查者）。狀態：待使用者與維護者核准
 > 計畫：[`plan.md`](plan.md)（階段順序、編號、介面擁有權、閘門、待決事項）。理由：[`architecture.md`](architecture.md)。本文件是 A1、A2 的可執行規格；與其他文件不一致時，內容與驗收以本文件為準並回報
 > 順序：A1 → A2；之後是任務 B（[`task-b-j15.md`](task-b-j15.md)）與任務 C（[`task-c-design-search.md`](task-c-design-search.md)）
+> 執行環境：**每個階段在自己的 isolated git worktree 中執行**（分支 `geant4-<階段>`，例如 `geant4-a1`；計畫 §10）；開始寫程式前先建立並確認 worktree，不修改主要 checkout
 > 基準：hep-research `main` 的 `9f08796`（0.23.0 加未發布的變更），contracts 3.5.0，adapter geant4 0.1.0，Geant4 11.4.3
 > 日期：2026-10-23
 > 語言：繁體中文原文；英文版 [`task-a-core.en.md`](task-a-core.en.md) 內容相同。兩者不一致時以中文為準，並同時修正英文
@@ -34,6 +35,8 @@
 2. **共用程式在 `core/`。** adapter 只能 import `core` 與 `contracts`；統計、判定、種子雜湊與 summary 讀取從第一天起就在 `core/`，hep-detector 的腳本只是呼叫層。
 3. **重現 = 判定相同。** 不追求逐位元相同的統計量（§4.3）。
 4. **`layered_sim` 凍結。** A2 只加選用欄位與檔案；新的幾何功能在任務 B 的 `element_sim`。
+
+**第一步：** 依計畫 §10.2 為本階段建立 isolated worktree（`.claude/worktrees/geant4-<階段>`，分支 `geant4-<階段>`，基底為已含前提階段的最新 `main`），並確認 `git rev-parse --show-toplevel`、`git branch --show-current` 與 `git status`。以下所有步驟都在這個 worktree 中進行。
 
 **開始前必做：**
 1. 確認 `main` 是否已超過 `9f08796`。若是，讀新的 CHANGELOG，重做附錄 C 的核對，並更新本文件（中英兩版）。
@@ -116,7 +119,7 @@
 7. **execution trace。** 新的紀錄寫入者呼叫 `trace.provenance()`；新的共用函式呼叫 `trace.tag()`；呼叫 C++ 執行檔時記錄執行檔與原始碼的 sha256、版本、子命令。
 8. **大小與路徑。** 單檔 ≤ 2 MiB（`check_packaging.py` 掃描所有文字檔）；寫出的路徑經 `tilde()`；plugin README 的大小聲明需在實際值的 10 % 內。
 9. **入口預算。** hep-detector quick load ≤ 25,600 bytes（目前 24,669），description ≤ 1,024 字元（`measure_entrypoints.py` 回報 1,016）。本任務不修改 `skills/hep-detector/SKILL.md` 與 description。
-10. **流程。** A1 依 sci-fix 流程；A2 依 adapter 變更流程；兩者都依 release 步驟。只在分支 `worktree-geant4-architecture` 工作；未經維護者核准不推送 `main`、不開 pull request。
+10. **流程。** A1 依 sci-fix 流程；A2 依 adapter 變更流程；兩者都依 release 步驟。每個階段在自己的 isolated worktree 與分支（`geant4-a1`、`geant4-a2`）中工作（計畫 §10）；未經維護者核准不推送 `main`、不開 pull request。
 11. **契約版本。** 新規則以 `strict or _at_least(contract_version, CV1)` 閘控，不設 warning 分支。
 12. **J14 的離線重播** 永遠可以執行，且不需要 Geant4 與編譯器。
 13. **不改既有輸出。** A2 只新增檔案與選用欄位；J14 既有 spec 的 CSV 必須和 A2 前逐位元相同（同一主機）。
@@ -585,6 +588,8 @@ computational-run schema 的擁有者是 hep-computing。CV2 屬任務 B（B2）
 
 ## 11. 建議的執行步驟
 
+每個階段開始時依計畫 §10.2 建立並確認該階段的 isolated worktree，所有步驟都在其中進行；合併後依計畫 §10.5 移除。
+
 **A1**
 1. 開始前檢查（§0）；套用 `prototype/phase1-core.patch`，補齊 A1.1–A1.3 缺少的部分。
 2. 先修 D10（A1.12），之後一律以 `python3 -m unittest discover -s tests/contracts -t .` 整體執行。
@@ -666,3 +671,4 @@ computational-run schema 的擁有者是 hep-computing。CV2 屬任務 B（B2）
 | 2026-10-22 | 語言分工、逐事件 ROOT 檔、任務拆分、整理為實作規格；參考實際實驗重新設計（`architecture.md`）；依新架構改寫 |
 | 2026-10-23 | 獨立審查後修正（兩階段操作特性重算、H 的定義、caught 定義、`GeneratePrimaries` 開頭重設種子等）；依自動化設計重新審視（統計移到 `core/`） |
 | **2026-10-23（本版）** | **依計畫（`plan.md`）重新整理：A1 回到最小的 sci-fix（`change`、`threshold`、`order`、配對比較、search 角色、`values` 移到 B2、C2）；契約版本改記 CV1；種子雜湊放在 `core/simulation/seeds.py`；節的編號與任務 B、C 一致（§2 前提與提供的介面、§8 檢查、§10 待決與風險）** |
+| 2026-10-23 | 加入 isolated worktree 的執行規定：檔頭、§0 的第一步、§11 的開頭（計畫 §10） |

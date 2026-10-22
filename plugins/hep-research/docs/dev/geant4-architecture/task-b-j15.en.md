@@ -3,6 +3,7 @@
 > Document type: implementation spec (for the implementing agent and reviewers). Status: awaiting the user's and the maintainer's approval
 > Plan: [`plan.en.md`](plan.en.md) (stage order, numbering, interface ownership, gates, open decisions). Rationale: [`architecture.en.md`](architecture.en.md). This document is the executable spec of B1, B2 and B3; where it disagrees with other documents, this document wins on content and acceptance, and the disagreement is reported
 > Order: B1 after A2; B2 after B1; B3 after B2. Task C's C2 waits only for B2, C3 for B3
+> Execution environment: **every stage runs in its own isolated git worktree** (branch `geant4-<stage>`, e.g. `geant4-a1`; plan §10); create and confirm the worktree before writing any code, and never change the main checkout
 > Baseline: at writing, the same as task A (hep-research `main` at `9f08796`, contracts 3.5.0, Geant4 11.4.3); must be rechecked before starting (§0)
 > Date: 2026-10-23
 > Language: English translation of the Traditional Chinese original [`task-b-j15.md`](task-b-j15.md), with the same content. If they disagree, the Chinese wins and the English is corrected at the same time
@@ -34,6 +35,8 @@
 3. **Infrastructure separated from the physics study.** B2 does only `simreco` and the contracts, so task C's C2 does not wait for the J15 study (plan P3).
 4. **J15 is a verification carrier.** Every result in the full detector is `unvalidated`; only an optional benchmark run in an isolated slab shows the upgrade path for a new material (B3.2).
 5. **No new scripts in hep-detector.** Reconstruction is in C++ in `simreco`, its interface in the adapter; quick load and description unchanged.
+
+**First step:** create the isolated worktree for this stage per plan §10.2 (`.claude/worktrees/geant4-<stage>`, branch `geant4-<stage>`, based on the latest `main` that contains the prerequisite stages), and confirm `git rev-parse --show-toplevel`, `git branch --show-current` and `git status`. Every following step happens in this worktree.
 
 **Before starting:**
 1. Confirm that A2 is merged and that the interfaces listed in §2 exist.
@@ -544,6 +547,8 @@ For other items not done or deferred, see task A §9.
 
 ## 11. Suggested order of work
 
+At the start of each stage, create and confirm that stage's isolated worktree per plan §10.2 and do every step in it; remove it per plan §10.5 after merging.
+
 **B1**
 1. Pre-start checks (§0); the one-day `G4RootAnalysisReader` trial (gate G-B1a).
 2. `element_sim`'s spec, schema, `check-spec` and geometry (B1.1, B1.6); two-backend consistency with a slab configuration identical to J14.
@@ -623,3 +628,4 @@ If the direction is the same as the bending (−50 mrad): y at Si6 is −151 mm 
 | 2026-10-22 | TOF1 and TOF2 with two layers each; digitization and reconstruction moved to C++; per-event ROOT files; split out as task B; rewritten for the new architecture (`element_sim` replacing spec/2; B1, B2; PAMELA and AMS-02 comparison and TOF sensitivity) |
 | 2026-10-23 | Fixes after independent review (B1.6 compares only shared observables, calorimeter leakage, table entries, surrogate and regression rules, total-momentum rigidity, CLI and `SIM_SOURCES`, portable random numbers, explicit stepper construction, etc.) |
 | **2026-10-23 (this version)** | **Reorganized per the plan (`plan.md`): B2 split into B2 (reconstruction and contracts) and B3 (J15 study), so that task C's C2 waits only for B2; deterministic field check moved to B1.7; new `geant4_run.py check-spec` (B1.6, for task C to use as a subprocess); the decision engine's `change` and the regression role added in B2; contract version written CV2; section numbering aligned with tasks A and C** |
+| 2026-10-23 | Added the isolated-worktree execution rule: header, the first step of §0, the start of §11 (plan §10) |

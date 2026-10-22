@@ -3,6 +3,7 @@
 > Document type: design and implementation spec (for the implementing agent and reviewers). Status: proposal, awaiting the user's and the maintainer's approval
 > Plan: [`plan.en.md`](plan.en.md) (stage order, numbering, interface ownership, gates, open decisions). Rationale: [`architecture.en.md`](architecture.en.md). This document is the executable spec of C1, C2 and C3; where it disagrees with other documents, this document wins on content and acceptance, and the disagreement is reported
 > Order: C1 after A1 (may run in parallel with A2 and B); C2 after B2 and C1; C3 after B3 and C2
+> Execution environment: **every stage runs in its own isolated git worktree** (branch `geant4-<stage>`, e.g. `geant4-a1`; plan §10); create and confirm the worktree before writing any code, and never change the main checkout
 > Date: 2026-10-23
 > Language: English translation of the Traditional Chinese original [`task-c-design-search.md`](task-c-design-search.md), with the same content. If they disagree, the Chinese wins and the English is corrected at the same time
 > In one sentence: the user writes down the physics requirements; Claude freely chooses and combines detector structure types from a component catalogue, an optimizer searches on multi-fidelity simulation, and independent confirmation runs report the best designs meeting the requirements and their trade-offs
@@ -34,6 +35,8 @@
 4. **Search and confirmation are separate.** Search-stage values suffer from the "winner's curse", are used only for ranking and are never reported as results; reported performance comes only from pre-declared confirmation runs with independent seeds (§4.7).
 5. **The result is a proposal, not a validation.** Searched designs are always labelled `unvalidated`; the record states "simulation-optimized design", with the search size, confirmation runs and robustness.
 6. **The statistical additions task C needs are added by task C itself** (plan principle R1), located in `core/` so that hep-detector and the adapter share them (C2.1).
+
+**First step:** create the isolated worktree for this stage per plan §10.2 (`.claude/worktrees/geant4-<stage>`, branch `geant4-<stage>`, based on the latest `main` that contains the prerequisite stages), and confirm `git rev-parse --show-toplevel`, `git branch --show-current` and `git status`. Every following step happens in this worktree.
 
 **Before starting:** read plan §0–§6; read task A §1, §3, §4 and A1.4–A1.9; for C2 also task B §4, B1.1, B1.6, B2.1, B2.4. Check the facts this document quotes with the method of task A appendix C.
 
@@ -441,6 +444,8 @@ Ax/BoTorch (qNEHVI), used only in S2, limited to ≤ 4 objectives and ≤ 20 con
 
 ## 11. Suggested order of work
 
+At the start of each stage, create and confirm that stage's isolated worktree per plan §10.2 and do every step in it; remove it per plan §10.5 after merging.
+
 **C1 (after A1 is merged; may run in parallel with A2 and B)**
 1. Pre-start checks; schemas (C1.1) and catalogue (C1.2).
 2. Realization and validity (C1.3); F0 (C1.4), checked against the existing tools.
@@ -490,3 +495,4 @@ J15's MDR of 1172 GV becomes about 1389 GV with the best 1/32-grid configuration
 |---|---|
 | 2026-10-23 | First proposal: three roles, requirements spec, component catalogue and design grammar, F0/F1/F2 multi-fidelity, search separated from confirmation, contracts, C1/C2, J16; later updated to use the shared `core/` modules after the re-examination of task A |
 | **2026-10-23 (this version)** | **Reorganized per the plan (`plan.md`): three stages (C1 after A1, C2 after B2 and C1, C3 after B3 and C2); the `threshold`, `order`, paired comparison, `values`, search roles and seed_group that task C needs are added to `core/` and the contracts by C2.1 itself; realizations validated with `geant4_run.py check-spec`; contract version written CV3; J16 and MOBO moved to C3; section numbering aligned with tasks A and B** |
+| 2026-10-23 | Added the isolated-worktree execution rule: header, the first step of §0, the start of §11 (plan §10) |

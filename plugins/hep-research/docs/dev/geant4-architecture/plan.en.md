@@ -3,7 +3,10 @@
 > Document type: plan (for the implementing agent, reviewers and the maintainer). Status: awaiting the user's and the maintainer's approval
 > Date: 2026-10-23
 > Language: English translation of the Traditional Chinese original [`plan.md`](plan.md), with the same content. If they disagree, the Chinese wins and the English is corrected at the same time
-> Authority: **the order of stages, numbering, version placeholders, interface ownership, gates and open decisions are set by this document**; the content and acceptance of work items are set by each task spec; [`architecture.en.md`](architecture.en.md) only explains the design rationale
+> Authority: **the order of stages, numbering, version placeholders, interface ownership, gates, open decisions and the execution environment are set by this document**; the content and acceptance of work items are set by each task spec; [`architecture.en.md`](architecture.en.md) only explains the design rationale
+> Execution environment: **every stage runs in its own isolated git worktree**, and no file in the main checkout is changed (§10)
+
+**For the implementing agent:** read §0 (stages at a glance), §10 (running in an isolated worktree), §6 (gates) and §4 (interface ownership) in that order, then the §0 task card of the task spec your stage belongs to. Before writing any code, create and confirm the worktree per §10.2.
 
 ---
 
@@ -174,7 +177,7 @@ Cross-adapter calls always go through subprocesses and JSON files (layering rule
 
 | Document | Content | Authority |
 |---|---|---|
-| `plan.md` (this document) | Evaluation, principles, stages, interface ownership, naming, gates, open decisions, risks | Order, numbering, version placeholders, ownership, gates, open decisions |
+| `plan.md` (this document) | Evaluation, principles, stages, interface ownership, naming, gates, open decisions, risks, execution environment | Order, numbering, version placeholders, ownership, gates, open decisions, execution environment (isolated worktree) |
 | `task-a-core.md` | Work items and acceptance of A1, A2 | Content and acceptance of these two stages |
 | `task-b-j15.md` | J15 design; work items and acceptance of B1, B2, B3 | Content and acceptance of these three stages; J15's numbers |
 | `task-c-design-search.md` | Design of automated design search; work items and acceptance of C1, C2, C3 | Content and acceptance of these three stages |
@@ -186,8 +189,61 @@ Every spec has the same structure: §0 task card, §1 terms and files, §2 prere
 
 ---
 
-## 10. Version history
+## 10. Execution environment: isolated worktree
+
+### 10.1 Principle
+
+- **Every stage runs in its own isolated git worktree**: one stage, one worktree, one branch.
+- Files in the main checkout (the working tree at the repository root) and in other worktrees are never changed.
+- Reasons:
+  - stages that can run in parallel (e.g. C1 with A2 and B1) and parallel agents do not overwrite each other;
+  - build directories, Geant4 output and temporary files are isolated from each other;
+  - a failed stage can be discarded as a whole without affecting other work;
+  - each stage's change is exactly the diff of one branch, so review and merge scope are clear.
+
+### 10.2 Creating and confirming
+
+| Item | Rule |
+|---|---|
+| Location | `.claude/worktrees/geant4-<stage>`, stage name in lower case, e.g. `.claude/worktrees/geant4-a1` |
+| Branch | `geant4-<stage>`, e.g. `geant4-a1` |
+| Base | The latest `main` that already contains all prerequisite stages (the "Prerequisite" column of §0); e.g. B2 is based on `main` after B1 is merged |
+| Source of the specs | Once approved, this folder is merged to `main` and the worktree contains the specs. Before approval the specs exist only on branch `worktree-geant4-architecture`; read them with `git show worktree-geant4-architecture:plugins/hep-research/docs/dev/geant4-architecture/<file>`, and do not merge that branch into a stage branch |
+| In Claude Code | The session itself enters the worktree with `EnterWorktree`; when delegating work to a subagent, the Agent tool uses `isolation: "worktree"` |
+| Elsewhere | `git fetch origin && git worktree add .claude/worktrees/geant4-a1 -b geant4-a1 origin/main` |
+| Confirm before starting | `git rev-parse --show-toplevel` is the worktree's path, `git branch --show-current` is the stage's branch, `git status` is clean; the three results go into the stage's work record (the environment field of the VALIDATION entry) |
+
+### 10.3 Rules inside the worktree
+
+1. All editing, building, testing, Geant4 runs and spec corrections happen in the stage's worktree; never `cd` into the main checkout or another worktree.
+2. Commands use clear absolute or relative paths inside the worktree; avoid composing git arguments from variables computed at run time, so that tools and reviewers can confirm a command stays inside the worktree.
+3. **`git stash` is shared by all worktrees.** Do not use bare `git stash` or `git stash pop`; use a temporary WIP commit to set work aside.
+4. Build directories, E2 output, ROOT files and trial results go in directories of that worktree that are not committed (e.g. `build/`, `work/`, excluded by `.gitignore`), or in a temporary directory owned by that worktree; different worktrees do not share build directories. The Geant4 installation itself (E2) may be shared read-only by several worktrees.
+5. Commit only on the stage's branch; commits carry the required trailers; push to the remote branch of the same name. Do not push to `main` or open a pull request without the maintainer's approval.
+6. Before merging, run the checks of task A §8 in the worktree and confirm the gates (§6).
+7. If the specs need correcting during implementation, change both languages in the same worktree and record it in the version history; if other stages are affected, update this document too.
+8. Independent reviews and other subagents run with `isolation: "worktree"`; reviews read and do not write, and worktrees without changes are cleaned up automatically when they finish.
+
+### 10.4 Stages that can run in parallel
+
+| Running together | Condition | Note |
+|---|---|---|
+| C1 with A2, B1, B2, B3 | A1 merged | C1 touches only `adapters/detector-design/` and its docs, so conflicts are few |
+| B3 with C2 | B2 and C1 merged | Both may change `geant4-study-protocol.md` and the journey docs; whichever merges later rebases on the new `main` and reruns the checks |
+
+Each parallel stage uses its own worktree and branch; one stage is never implemented by two agents in different worktrees at the same time.
+
+### 10.5 Finishing
+
+- **After merging:** `git worktree remove .claude/worktrees/geant4-<stage>` and delete the local branch; the next stage creates a new worktree from the new `main`.
+- **Abandoning:** remove the worktree and the branch; do no cleanup in the main checkout.
+- **This folder itself** is written on branch `worktree-geant4-architecture` in worktree `.claude/worktrees/geant4-architecture`; later document changes happen there too, until it is merged to `main`.
+
+---
+
+## 11. Version history
 
 | Version | Content |
 |---|---|
-| **2026-10-23 (this version)** | **First version: consolidated evaluation (P1–P9), planning principles, eight stages (B split into B1–B3, C as C1–C3), interface ownership, naming (contract versions written CV1–CV3), gates, merged open decisions and risks** |
+| 2026-10-23 | First version: consolidated evaluation (P1–P9), planning principles, eight stages (B split into B1–B3, C as C1–C3), interface ownership, naming (contract versions written CV1–CV3), gates, merged open decisions and risks |
+| **2026-10-23 (this version)** | **Added §10 "Execution environment: isolated worktree" (creating, confirming, rules, parallel stages, finishing) and a reading guide for agents** |

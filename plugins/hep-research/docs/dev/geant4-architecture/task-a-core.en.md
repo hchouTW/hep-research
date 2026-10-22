@@ -3,6 +3,7 @@
 > Document type: implementation spec (for the implementing agent and reviewers). Status: awaiting the user's and the maintainer's approval
 > Plan: [`plan.en.md`](plan.en.md) (stage order, numbering, interface ownership, gates, open decisions). Rationale: [`architecture.en.md`](architecture.en.md). This document is the executable spec of A1 and A2; where it disagrees with other documents, its content and acceptance win and the disagreement is reported
 > Order: A1 → A2; then task B ([`task-b-j15.en.md`](task-b-j15.en.md)) and task C ([`task-c-design-search.en.md`](task-c-design-search.en.md))
+> Execution environment: **every stage runs in its own isolated git worktree** (branch `geant4-<stage>`, e.g. `geant4-a1`; plan §10); create and confirm the worktree before writing any code, and never change the main checkout
 > Baseline: hep-research `main` at `9f08796` (0.23.0 plus unreleased changes), contracts 3.5.0, adapter geant4 0.1.0, Geant4 11.4.3
 > Date: 2026-10-23
 > Language: English translation of the Traditional Chinese original [`task-a-core.md`](task-a-core.md), with the same content. If they disagree, the Chinese wins and the English is corrected at the same time
@@ -34,6 +35,8 @@
 2. **Shared code lives in `core/`.** Adapters can import only `core` and `contracts`; statistics, decisions, the seed hash and summary reading are in `core/` from day one, and hep-detector's scripts are only callers.
 3. **Reproducibility = same decisions.** No bit-identical statistics (§4.3).
 4. **`layered_sim` is frozen.** A2 only adds optional fields and files; new geometry features go into task B's `element_sim`.
+
+**First step:** create the isolated worktree for this stage per plan §10.2 (`.claude/worktrees/geant4-<stage>`, branch `geant4-<stage>`, based on the latest `main` that contains the prerequisite stages), and confirm `git rev-parse --show-toplevel`, `git branch --show-current` and `git status`. Every following step happens in this worktree.
 
 **Before starting:**
 1. Check whether `main` has moved past `9f08796`. If so, read the new CHANGELOG, redo the checks of appendix C, and update this document (both languages).
@@ -116,7 +119,7 @@ Breaking any of these blocks the merge.
 7. **Execution trace.** New record writers call `trace.provenance()`; new shared functions call `trace.tag()`; calls to C++ executables record the sha256 of the executable and its sources, the version and the subcommand.
 8. **Size and paths.** Each file ≤ 2 MiB (`check_packaging.py` scans all text files); written paths go through `tilde()`; size claims in the plugin README must be within 10 % of the actual value.
 9. **Entry budget.** hep-detector quick load ≤ 25,600 bytes (now 24,669), description ≤ 1,024 characters (`measure_entrypoints.py` reports 1,016). This task does not change `skills/hep-detector/SKILL.md` or the description.
-10. **Process.** A1 follows the sci-fix process; A2 the adapter-change process; both follow the release steps. Work only on branch `worktree-geant4-architecture`; do not push to `main` or open a pull request without the maintainer's approval.
+10. **Process.** A1 follows the sci-fix process; A2 the adapter-change process; both follow the release steps. Each stage works in its own isolated worktree and branch (`geant4-a1`, `geant4-a2`) (plan §10); do not push to `main` or open a pull request without the maintainer's approval.
 11. **Contract versions.** New rules are gated with `strict or _at_least(contract_version, CV1)`, with no warning branch.
 12. **The offline replay of J14** always runs, without Geant4 or a compiler.
 13. **No change to existing outputs.** A2 only adds files and optional fields; J14's existing specs must produce a CSV bit-identical to the pre-A2 one (same host).
@@ -585,6 +588,8 @@ Every stage of tasks B and C runs these checks as well.
 
 ## 11. Suggested order of work
 
+At the start of each stage, create and confirm that stage's isolated worktree per plan §10.2 and do every step in it; remove it per plan §10.5 after merging.
+
 **A1**
 1. Pre-start checks (§0); apply `prototype/phase1-core.patch` and complete what A1.1–A1.3 lack.
 2. Fix D10 first (A1.12); from then on always run `python3 -m unittest discover -s tests/contracts -t .` as a whole.
@@ -666,3 +671,4 @@ The experiments and frameworks the design refers to (ATLAS, CMS, ALICE, Key4hep,
 | 2026-10-22 | Language split, per-event ROOT files, task split, organized as an implementation spec; redesign referencing real experiments (`architecture.md`); rewritten for the new architecture |
 | 2026-10-23 | Fixes after independent review (two-stage operating characteristics recomputed, definition of H, caught definition, reseeding at the start of `GeneratePrimaries`, etc.); re-examined for automated design (statistics moved to `core/`) |
 | **2026-10-23 (this version)** | **Reorganized per the plan (`plan.md`): A1 back to a minimal sci-fix (`change`, `threshold`, `order`, paired comparisons, search roles and `values` moved to B2 and C2); contract version written CV1; the seed hash in `core/simulation/seeds.py`; section numbering consistent with tasks B and C (§2 prerequisites and provided interfaces, §8 checks, §10 open decisions and risks)** |
+| 2026-10-23 | Added the isolated-worktree execution rule: header, the first step of §0, the start of §11 (plan §10) |

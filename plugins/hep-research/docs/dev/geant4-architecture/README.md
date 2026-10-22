@@ -5,9 +5,16 @@ fixes and boundary artifacts (task A), a second simulation backend with reconstr
 spectrometer (task B), and automated detector design search (task C). It lives on the branch
 `worktree-geant4-architecture`, based on `main` at `9f08796` (0.23.0 plus unreleased changes, contracts 3.5.0).
 
-**If you are an agent starting work here:** read `plan.md` §0–§6 (stages, dependencies, interface ownership, naming,
-gates), then the task card (§0) of the task you are working on. Read `architecture.md` only for the reasons behind a
-rule.
+**If you are an agent starting work here:** read `plan.md` §0 (stages), §10 (execution in an isolated worktree), §6
+(gates) and §4 (interface ownership), then the task card (§0) of the task you are working on. Read `architecture.md`
+only for the reasons behind a rule.
+
+**Run every stage in its own isolated git worktree** (`plan.md` §10): worktree `.claude/worktrees/geant4-<stage>` on
+branch `geant4-<stage>`, created from the latest `main` that contains the prerequisite stages (in Claude Code:
+`EnterWorktree`, or `isolation: "worktree"` for subagents). Confirm the top-level path, branch and a clean status before
+writing code; never change files in the main checkout or another worktree; never use bare `git stash` (the stash is
+shared by all worktrees). These documents themselves are edited in worktree `.claude/worktrees/geant4-architecture` on
+branch `worktree-geant4-architecture`.
 
 **Current state (2026-10-23):** everything here awaits the user's and the maintainer's approval; do not start
 implementation before that. The specs were rewritten on 2026-10-23 from `plan.md`, after an overall evaluation of the
@@ -17,7 +24,7 @@ earlier plan (`plan.md` §1).
 
 | Document | Decides |
 |---|---|
-| `plan.md` | Stage order and dependencies, IDs and version placeholders (CV1–CV3), interface ownership, gates, the merged list of open decisions, cross-task risks |
+| `plan.md` | Stage order and dependencies, IDs and version placeholders (CV1–CV3), interface ownership, gates, the merged list of open decisions, cross-task risks, the execution environment (isolated worktree per stage, §10) |
 | `task-a-core.md`, `task-b-j15.md`, `task-c-design-search.md` | Work items and acceptance of their stages; the J15 numbers (task B) |
 | `architecture.md` | Design rationale, reference experiments, superseded designs; where it disagrees with a spec, the spec wins and the disagreement is reported |
 
@@ -78,7 +85,8 @@ document; "task A §3", "plan §4", "architecture §6" are sections of other doc
 
 ## Working rules
 
-1. Work only on this branch, inside the worktree. Do not push to `main` or open a pull request without the
+1. Documentation changes: only on branch `worktree-geant4-architecture`, inside its worktree. Implementation: one
+   isolated worktree and branch per stage (`plan.md` §10). Do not push to `main` or open a pull request without the
    maintainer's approval.
 2. Contract versions are written CV1–CV3; fix the numbers only at merge time.
 3. Follow `docs/maintenance.md`: the sci-fix process for A1, the adapter-change steps for A2, B1, B2, C1–C3, and the

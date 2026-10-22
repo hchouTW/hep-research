@@ -3,6 +3,7 @@
 > 文件類型：實作規格（給執行的 agent 與審查者）。狀態：待使用者與維護者核准
 > 計畫：[`plan.md`](plan.md)（階段順序、編號、介面擁有權、閘門、待決事項）。理由：[`architecture.md`](architecture.md)。本文件是 B1、B2、B3 的可執行規格；與其他文件不一致時，內容與驗收以本文件為準並回報
 > 順序：B1 在 A2 之後；B2 在 B1 之後；B3 在 B2 之後。任務 C 的 C2 只等 B2，C3 等 B3
+> 執行環境：**每個階段在自己的 isolated git worktree 中執行**（分支 `geant4-<階段>`，例如 `geant4-a1`；計畫 §10）；開始寫程式前先建立並確認 worktree，不修改主要 checkout
 > 基準：撰寫時同任務 A（hep-research `main` 的 `9f08796`，contracts 3.5.0，Geant4 11.4.3）；開始前必須重新核對（§0）
 > 日期：2026-10-23
 > 語言：繁體中文原文；英文版 [`task-b-j15.en.md`](task-b-j15.en.md) 內容相同。兩者不一致時以中文為準，並同時修正英文
@@ -34,6 +35,8 @@
 3. **基礎設施與物理研究分開。** B2 只做 `simreco` 與契約，讓任務 C 的 C2 不必等 J15 研究（計畫 P3）。
 4. **J15 是 verification 的載體。** 完整探測器中的所有結果都是 `unvalidated`；只有在孤立平板中執行的選用 benchmark 示範新材料的升級路徑（B3.2）。
 5. **hep-detector 不新增腳本。** 重建在 C++ 的 `simreco`，介面在 adapter；quick load 與 description 不變。
+
+**第一步：** 依計畫 §10.2 為本階段建立 isolated worktree（`.claude/worktrees/geant4-<階段>`，分支 `geant4-<階段>`，基底為已含前提階段的最新 `main`），並確認 `git rev-parse --show-toplevel`、`git branch --show-current` 與 `git status`。以下所有步驟都在這個 worktree 中進行。
 
 **開始前必做：**
 1. 確認 A2 已合併，§2 列的介面都存在。
@@ -544,6 +547,8 @@ J15 的 README 以這張表說明 J15 的合理性，並強調 J15 是合成幾�
 
 ## 11. 建議的執行步驟
 
+每個階段開始時依計畫 §10.2 建立並確認該階段的 isolated worktree，所有步驟都在其中進行；合併後依計畫 §10.5 移除。
+
 **B1**
 1. 開始前檢查（§0）；`G4RootAnalysisReader` 的一天試作（閘門 G-B1a）。
 2. `element_sim` 的 spec、schema、`check-spec` 與幾何（B1.1、B1.6）；以 J14 相同的平板配置做兩個後端的一致性。
@@ -623,3 +628,4 @@ J15 的 README 以這張表說明 J15 的合理性，並強調 J15 是合成幾�
 | 2026-10-22 | TOF1、TOF2 各兩層；數位化與重建改為 C++；逐事件 ROOT 檔；拆分為任務 B；依新架構改寫（`element_sim` 取代 spec/2；B1、B2；PAMELA、AMS-02 對照與 TOF 敏感度） |
 | 2026-10-23 | 獨立審查後修正（B1.6 只比共同觀測量、量能器漏失、表條目、surrogate 與 regression 規則、總動量剛度、CLI 與 `SIM_SOURCES`、可攜的亂數、stepper 明確建立等） |
 | **2026-10-23（本版）** | **依計畫（`plan.md`）重新整理：B2 拆為 B2（重建與契約）與 B3（J15 研究），讓任務 C 的 C2 只等 B2；確定性場檢查移到 B1.7；新增 `geant4_run.py check-spec`（B1.6，供任務 C 以子行程使用）；判定引擎的 `change` 與 regression 角色在 B2 加入；契約版本改記 CV2；節的編號與任務 A、C 一致** |
+| 2026-10-23 | 加入 isolated worktree 的執行規定：檔頭、§0 的第一步、§11 的開頭（計畫 §10） |
