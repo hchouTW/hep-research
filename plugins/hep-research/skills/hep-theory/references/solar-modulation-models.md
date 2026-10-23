@@ -6,8 +6,7 @@ validity, drift limits, polarity-era segmentation, sourced reversal dates) is in
 propagation](cosmic-ray-propagation.md), "Force-field solar modulation"; the code is the hep-measurement force-field
 script named there. No drift or numerical heliospheric model ships in the plugin. Experiment time bins and periods come
 from the bound experiment profile or a dataset record. Part of [cosmic-ray phenomenology](cosmic-ray-phenomenology.md).
-Sources were read on 2026-10-20 through a summarizing fetch and are not verified (list and rule at the end of that
-page).
+Sources were read in full text on 2026-10-23 (list at the end of that page).
 
 ## Models
 
@@ -16,23 +15,24 @@ In order of cost:
 | Model | What changes | Source |
 |---|---|---|
 | Energy-dependent force field | phi(T) = phi_L below T_L = 0.125 GeV, phi_H above T_H = 4.65 GeV, a smooth cubic step between | Corti et al. 2016, Sec. 3, Eq. 7 (T_L and T_H fixed, not fitted) |
-| Empirically modified force field | potential adjusted for protons from a few hundred MeV to tens of GeV; the plain phi depends on energy range and cycle phase | Gieseler, Heber and Herbst 2017, abstract |
+| Empirically modified force field | potential adjusted for protons from a few hundred MeV to tens of GeV; the plain phi depends on the LIS, the energy range and the solar magnetic epoch | Gieseler, Heber and Herbst 2017, abstract |
 | Analytic charge-sign and rigidity dependence | Phi(R,t) = phi0 B/4nT + phi1 H(-qA) (B/4nT) (1 + (R/R0)^2)/(beta (R/R0)^3) (alpha/(pi/2))^4, B the field at Earth, alpha the tilt angle, H the step function | Cholis, Hooper and Linden 2016, Eq. 12 (best fit phi0 = 0.35 GV, phi1 = 3.9 GV, R0 = 0.5 GV) |
-| Extended force field with drifts | semi-analytic, two scale factors tied to moving averages of tilt angle and field strength; validated against a numerical code | Kuhlen and Mertsch 2019, abstract and model section |
+| Extended force field with drifts | semi-analytic, two scale factors tied to moving averages of tilt angle and field strength; validated against a numerical code | Kuhlen and Mertsch 2019, abstract, Eq. 5 and the correlation paragraph after "Validation" |
 | Numerical transport | Parker equation: convection, drifts, diffusion, adiabatic energy change (Potgieter 2013, Sec. 4.1, Eq. 5); HelMod: 2D Monte Carlo with symmetric and antisymmetric diffusion tensor | Potgieter 2013; Della Torre et al. (arXiv:1612.08445), abstract |
 
-- **phi depends on the LIS.** The force field is tied to the shape of the assumed local interstellar spectrum, LIS
-  estimates differ by up to a factor 2 at low energy, and potentials from different LIS choices map onto each other
-  only by approximate linear conversions (Usoskin et al. 2005, Sec. 2 and App. A). Never mix phi values
-  from different LIS, and never use a published phi series with another LIS without converting.
+- **phi depends on the LIS.** The force-field potential has no absolute meaning: it depends on the assumed local
+  interstellar spectrum (Usoskin et al. 2017, Sec. 6.3; Gieseler, Heber and Herbst 2017, abstract). The 2011 and 2017
+  series, which differ in LIS, yield function and calibration, are related tightly but slightly nonlinearly (Usoskin
+  et al. 2017, Sec. 6.3, Fig. 10). Never
+  mix phi values from different LIS, and never use a published phi series with another LIS without converting.
 - **phi series are recalibrated.** A neutron-monitor reconstruction from 1951 was recalibrated with a new yield
   function and a new LIS (the Vos and Potgieter 2015 form, as used there) against satellite proton spectra of
   2006-2010 in 47 intervals; its values are not to be
   compared directly with older series (Usoskin et al. 2017, abstract and Sec. 6.3). A published phi carries its LIS
   and its series version.
 - **Time dependence and lag.** Time-dependent models take heliospheric inputs (tilt angle, field magnitude, sunspot
-  number). The flux lags solar activity: 8.1 +- 1.2 months (plus +-0.8 months systematic) in one global proton fit,
-  2000-2012, an A < 0 period (Tomassetti et al. 2017, abstract and Sec. 2). Cholis et al. average B and alpha over
+  number). The flux lags solar activity: 8.1 +- 1.2 months (a +-0.8-month systematic is included in that error) in one global proton
+  fit, 2000-2012, an A < 0 period (Tomassetti et al. 2017, abstract and Sec. 3). Cholis et al. average B and alpha over
   the 3 months before each data period for qA > 0 and over 3-12 months for qA < 0, depending on B and alpha (Sec. IV).
   Treat the lag or window as a model parameter with its period of validity, not a constant.
 - **Tilt-angle inputs.** The Wilcox Solar Observatory gives tilt angles every 10 days from two reconstructions,

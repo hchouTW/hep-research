@@ -3142,6 +3142,32 @@ scikit-learn 1.9.1.
 | touched modules (tail_extrapolation, train_bdt, train_bdt_extensions, write_ml_artifact) | E2: 56 run, OK, 25 skipped; CI venv: 56 run, OK, 1 skipped |
 | `run_all_checks.py --no-cli --jobs 6`, E2, at `33bd6464` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4515 tests in 383 modules, 4384 pass, 0 failures, 131 skipped; profile tests all pass |
 
+## TH13-SOURCES (2026-10-23; branch `fix/th13-source-verification` from main `1c82b194`)
+
+The Th13 pages (`cosmic-ray-phenomenology.md`, `solar-modulation-models.md`, `cosmic-ray-new-physics.md`) had been
+written from a summarizing fetch (2026-10-20), which hep-citations counts as a search snippet. Every cited source was
+re-read in full text on 2026-10-23: 49 arXiv PDFs at the versions cited (export.arxiv.org, generic User-Agent), the
+PoS(ICRC2025)234 PDF, the WDC Kp/Ap format description and the Caltech ACE Bartels table; Usoskin et al. 2005 (JGR,
+paywalled) was not opened. Five independent read-only agents checked every attribution, locator, number and paper
+characterization against the texts (about 165 statements); each correction below was rechecked against its quoted
+passage before the edit. Severity S3 (guidance), ledger `documentation_fixes` TH13-SOURCES.
+
+| Page | Statements | Corrected |
+|---|---|---|
+| phenomenology, propagation codes | 25 | GALPROP 90 equations are the framework up to v56, v57 adds data (Porter et al. 2022, Sec. 2, abstract); w taken as 1, only V_A^2/w enters (SM98 Sec. 2); DRAGON2 D_pp prefactor and beta^eta form found (App. C.9 Eq. C.27, App. C.8 Eq. C.23), removed from the "not verified" list; SM98 locator Sec. 3.2 |
+| phenomenology, cross sections | 53 | opt12 has null Fe to Li and undershoots Fe to Be, B (Maurin et al. 2022, Sec. 3.2.2, Table 1); opt12 is Korsmeier and Cuoco's default, not GALPROP's; the 3% is the Si-to-Fe progenitor change; "can reach" 20-50%; Evoli et al. 2019 claim is in Sec. V (the abstract reads the other way); Korsmeier and Cuoco A for Li, Be, B profiled, not flat priors; source-term uncertainty "up to" +-20%; Orusa et al. cross section is p + p to e+-, AAfrag 2021 version |
+| phenomenology, fits and metadata | 5 + 49 rows | Cuoco et al. 2019 significance without vs with correlations; first authors M.-J. Zhao, Y.-C. Ding; S. Della Torre (not Boschini) first author of arXiv:1612.08445; D'Angelo, Oliva, Masi order |
+| solar modulation | 29 | Gieseler et al.: phi depends on LIS, energy range and magnetic epoch (not cycle phase); Tomassetti et al.: the +-0.8-month systematic is inside the +-1.2 and the fit is in Sec. 3; the LIS-dependence claim now rests on Usoskin et al. 2017 Sec. 6.3 (the unopened 2005 paper's "factor 2" and "linear conversion" dropped); Bartels epoch and 2426 = 2011-05-15 confirmed (270 Caltech rows, 0 mismatches) |
+| new physics | 32 | L scaling in Calore et al. Sec. 4; BIG to QUAINT shift (Sec. 5.1) vs shape (Sec. 5.2); Cuoco et al. 2017 Delta chi^2 = 25 without systematics; Cuoco et al. 2019: fell to 3 sigma with updated cross sections, correlations matter more; Di Mauro et al. 2016 "comparable or stronger"; Hooper et al. 2009 "could plausibly"; Profumo et al. 2018 radially dependent diffusion (not two-zone); Manconi et al. 1 sigma band of simulated populations |
+
+Not changed: journal references not printed in the PDFs and not found in citing papers (Evoli et al. 2020, Maurin et
+al. 2022, Orusa et al. 2022, Tomassetti et al. 2017, Ding et al. 2021) are listed as not confirmed; the instrument name
+in one collaboration title stays replaced (layering rule). The source texts stay outside the repository.
+A separate read-only agent then checked the whole diff against the source texts: one overstatement (the Usoskin et
+al. 2017 series comparison: three causes, not the LIS alone), one locator (Delta chi^2 = 25 is in the letter's main
+text) and five precision points (DRAGON2's Alfvenic option, 15-21 times, list locators, versions, "slightly") were
+fixed before the commit.
+
 ## REVIEW-REFS-4 (2026-10-22; branch `fix/review-refs-4` from main `c2fc9f5c`)
 
 Five references were the documents of review batch 1 (`--models sonnet,haiku --lens-model design=sonnet

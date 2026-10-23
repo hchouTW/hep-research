@@ -40,7 +40,7 @@
   },
   "hep-theory": {
    "references": 21,
-   "bytes": 156593,
+   "bytes": 157932,
    "uncited": 0
   }
  },
@@ -2638,7 +2638,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "73b525a2 2026-10-21"
+   "last_commit": "cf16c262 2026-10-23"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -3577,7 +3577,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "a73d421e 2026-10-17"
+   "last_commit": "cf16c262 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -3602,7 +3602,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "73b525a2 2026-10-21"
+   "last_commit": "cf16c262 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3860,8 +3860,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-new-physics.md",
    "owner": "hep-theory",
-   "bytes": 6884,
-   "lines": 92,
+   "bytes": 7303,
+   "lines": 95,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/README.md",
@@ -3875,8 +3875,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 22490,
-   "lines": 273,
+   "bytes": 23300,
+   "lines": 279,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/README.md",
@@ -4168,7 +4168,7 @@
   {
    "path": "skills/hep-theory/references/solar-modulation-models.md",
    "owner": "hep-theory",
-   "bytes": 5732,
+   "bytes": 5842,
    "lines": 68,
    "linked_from_skill_md": false,
    "cited_by": [
