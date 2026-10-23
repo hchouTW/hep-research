@@ -14,6 +14,8 @@
    "type": "object", "required": ["quantity", "tolerance_relative"], "additionalProperties": false, "properties": {
    "quantity": {"$ref": "#/$defs/fom"},
    "tolerance_relative": {"type": "number", "minimum": 0},
+   "pareto_axes": {"$comment": "M4, CHN-06: the figures of merit of a Pareto front among the candidates that survive screening; given only when the basis holds",
+    "type": "array", "minItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/fom"}},
    "note": {"type": "string"}}}
  },
  "$defs": {

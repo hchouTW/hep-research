@@ -162,6 +162,7 @@
   "probe_screened_out": true,
   "equal_mass_basis_checked": true,
   "no_ranking_claimed": true,
+  "no_pareto_claimed": true,
   "gate_flags_shown": true
  },
  "note": "verdicts derived by contracts/design.py; F1 analysis can exclude but not approve a candidate"

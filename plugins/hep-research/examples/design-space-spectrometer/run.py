@@ -131,6 +131,7 @@ def spec() -> dict:
             "constraints": [{"id": f"{NS}:CON-MASS-001", "type": "mass", "hardness": "hard", "quantity": "mass-budget",
                              "comparator": "<=", "target": 3000.0, "unit": "kg", "denominator": {}}],
             "comparison_basis": {"quantity": "mass-budget", "tolerance_relative": 0.05,
+                                 "pareto_axes": ["expected-precision", "mass-budget"],
                                  "note": "candidates are compared at equal mass"}}
 
 
@@ -209,6 +210,8 @@ def criteria(rows: dict, full: dict) -> dict:
         "equal_mass_basis_checked": full["comparison_basis"]["declared"] and len(full["comparison_basis"]["pairs"]) == 1
         and full["comparison_basis"]["holds"] and bool(full["comparison_basis"]["pairs"][0]["shared_items"]),
         "no_ranking_claimed": full["ranking"]["status"] == "refused" and "CHN-06" in full["ranking"]["reason"],
+        # M4 (CHN-06, RPT-07): no expected-precision evaluation exists yet, so the Pareto front is refused, never drawn
+        "no_pareto_claimed": full["pareto"]["status"] == "refused" and any("CHN-06" in r for r in full["pareto"]["reasons"]),
         "gate_flags_shown": full["gate_flags"] == ["gate.H1_missing", "gate.H2_missing", "gate.H3_missing"],
     }
 

@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "design-spec.v1.json",
-   "sha256": "f1f265793b6356fa267a65afa90cb671b5116c2e3024931a50cf54feebfc4011",
+   "sha256": "f9c3152e94a775549bbfdccf2714f6eda1f7dea08ae4e5e450484d53827919a9",
    "artifact_type": "design-spec",
    "artifact_id": "ams-like-v1-spec-v1",
    "status": [
@@ -926,6 +926,17 @@
    },
    "ranking": {
     "status": "refused",
+    "reason": "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
+   },
+   "pareto": {
+    "status": "refused",
+    "axes": [
+     "expected-precision",
+     "mass-budget"
+    ],
     "reason": "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)",
     "reasons": [
      "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)"

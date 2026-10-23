@@ -115,6 +115,19 @@ Higher fidelity, each through `evaluate_design.py`:
 - The report ranks candidates on expected precision only when the comparison basis holds and every candidate that
   survives screening has a non-optimistic expected-precision evaluation with the same fidelity vector and
   denominator; otherwise it states every reason the ranking is refused. A ranking is never a global optimum.
+- Pareto front (M4): declare the axes in `comparison_basis.pareto_axes` (expected-precision and, for example,
+  mass-budget). The report gives the non-dominated candidates among those that survive screening under the same gates
+  as the ranking; a candidate is dominated only by one no worse on every axis and better on one beyond the combined
+  1-sigma uncertainties. Not a global optimum.
+
+Design space (M4). `scan --candidate C --figure-of-merit F --denominator ... --vary SID.parameters.NAME=V1,V2,...
+--id SCAN-...` runs the operation over a grid (the candidate's own values included) in a scratch copy and stores every
+point in one `runs/SCAN-*.computational-run.json` (`scan_summary`) with the local elasticities d ln F / d ln parameter
+at the candidate's own values. It writes no evaluation: a point takes part in no aggregation, supports no verdict and
+is exempt from the orphan-run rule (an evaluation that names a scan summary as its run is
+`design.scan_point_not_expanded`). Bring a point into comparison with `expand --scan <run> --point K --candidate-id N`
+(a candidate derived from the scanned one) and evaluate it with `run` like any candidate. Operations with required
+upstreams are not scanned: scan their upstream figure of merit.
 
 Reruns. Evaluations bind the candidate by the parameters they read (`binding: parameters`, `parameter_digest`): a
 change to another parameter leaves them current, a change to a parameter they read makes them stale (and everything
@@ -170,6 +183,7 @@ pass). Codes the report uses:
 | `evidence.stale`, `evidence.unresolved`, `evidence.invalid` | an input changed, is unbound or invalid | rerun with a new evaluation id |
 | `evidence.conflict`, `evidence.excluded_adverse`, `evidence.orphan_run` | contradicting evidence, unfavorable evidence excluded, a run without its evaluation | inspect the contracts and validity domains |
 | `capability.unavailable` | no evaluator at that fidelity | record it; never estimate a number |
+| `design.scan_point_not_expanded` (error) | an evaluation that names a scan summary as its run | `expand` the point and evaluate the new candidate |
 | `design.contract_mismatch` (error) | an evaluation, run, output, config file, geometry or study that does not match its contract or candidate | regenerate it with `evaluate_design.py`; never edit it |
 
 The adequacy table is an initial default until physics review: every pass is reported as provisional.
@@ -187,5 +201,6 @@ The adequacy table is an initial default until physics review: every pass is rep
 Example: `examples/design-space-spectrometer` designs an AMS-like space spectrometer (public facts from the
 `experiment:ams-02` profile ledger) with three candidates at F1: the probe with a too-short lever arm fails the
 resolution requirement, the two reasonable candidates are inconclusive on resolution and charge confusion, and the
-equal-mass basis holds for the two that survive screening.
+equal-mass basis holds for the two that survive screening; ranking and Pareto front are refused until expected-precision
+evaluations exist.
 <!-- /example -->

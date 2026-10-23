@@ -34,11 +34,19 @@ Subcommands:
 - f5 (M3, FID-01, FID-06, FID-07): an F5 evaluation from a user-supplied dataset-record's design_measurement, bound
   to the dataset by hash and to the candidate by the digest of the measured configuration's parameters; it decides only
   after a human measurement-acceptance record approves the dataset and covers the candidate.
+- scan (M4, OQ-18, AGG-08): the figure of merit of one candidate over a grid of parameter values (--vary
+  SID.parameters.NAME=V1,V2,..., repeatable), each point run exactly as run would in a scratch copy, stored as one
+  summary computational-run (runs/SCAN-*.computational-run.json, scan_summary: the points and the local elasticities at
+  the candidate's own values). No evaluation is written, the run is exempt from the orphan-run rule, and a point
+  supports no verdict. Operations with required upstreams are not scanned.
+- expand (M4): one scan point as a candidate derived from the scanned one (overrides of the scanned parameters), to be
+  evaluated with run like any candidate; only expanded points enter comparison.
 - plan: the suggested next evaluations, per requirement and candidate, from the derived state (RES-04): missing
   evaluations, missing evidence for compliance, stale evaluations, missing gates. Suggestions only.
 - report: the design report, a communication artifact derived by contracts/design.py (producer_skill hep-detector):
   gate flags first, the compliance matrix with used and skipped evaluations, maturity, missing evidence, proposed
-  dispositions, orphan runs, screening, the comparison basis and ranking refusal (RPT-01..RPT-10), plus a Markdown
+  dispositions, orphan runs, screening, the comparison basis, ranking and Pareto front or their refusal
+  (RPT-01..RPT-10), plus a Markdown
   rendering. --omit EVALUATION hides an evaluation from the rendering only: it stays in the aggregation and is listed
   as omitted (AGG-06, AGG-07). Verdicts are never written by hand.
 Decision records live outside the artifacts_dir (--decisions). This script does not import adapters/geant4. The
@@ -59,6 +67,9 @@ Usage:
       --study REL --id SIM-ID [--label-spec S --label-benchmarks B --label-convergence C [--label-project-root R]]
       [--status LABEL]
   evaluate_design.py f5 --artifacts DIR --candidate ID --dataset REL --id MEAS-ID
+  evaluate_design.py scan --artifacts DIR --candidate ID --figure-of-merit FOM [--denominator K=V ...] [--fidelity F1]
+      --vary SID.parameters.NAME=V1,V2,... [--vary ...] --id SCAN-ID [--max-points N] [--status LABEL]
+  evaluate_design.py expand --artifacts DIR --scan REL --point K --candidate-id NAME
   evaluate_design.py plan --artifacts DIR [--decisions DIR]
   evaluate_design.py report --artifacts DIR [--decisions DIR] [--omit EVALUATION ...] [--name NAME]
 """
@@ -571,6 +582,192 @@ def f5(args) -> dict:
     return out
 
 
+def parse_vary(proj: design.Project, cid: str, specs: list[str]) -> list[tuple[str, float, list[float]]]:
+    """--vary SID.parameters.NAME=V1,V2,...: a numeric parameter of the merged candidate and the values to scan; the
+    candidate's own value is always one of the points (the base of the sensitivities)."""
+    subs = proj.effective(cid) or {}
+    out = []
+    for spec in specs:
+        ref, sep, vals = spec.partition("=")
+        sid, _, name = ref.partition(".parameters.")
+        par = ((subs.get(sid) or {}).get("parameters") or {}).get(name) if name else None
+        if not sep or par is None:
+            raise UsageError(f"--vary {spec!r}: use SID.parameters.NAME=V1,V2,... with a parameter of {cid}")
+        if isinstance(par.get("value"), bool) or not isinstance(par.get("value"), (int, float)):
+            raise UsageError(f"--vary {ref}: only a numeric parameter can be scanned")
+        try:
+            values = [float(v) for v in vals.split(",") if v.strip()]
+        except ValueError:
+            raise UsageError(f"--vary {spec!r}: the values are numbers") from None
+        base = float(par["value"])
+        out.append((ref, base, sorted(set(values) | {base})))
+    if len({r for r, _, _ in out}) != len(out):
+        raise UsageError("--vary names a parameter twice")
+    return out
+
+
+def set_parameters(doc: dict, values: dict, proj: design.Project, cid: str, source: str) -> dict:
+    """The candidate document with the scanned parameters set: in overrides for a variant, else in its subsystems."""
+    doc = json.loads(json.dumps(doc))
+    ext = doc["extension"]
+    subs = proj.effective(cid) or {}
+    for ref, v in values.items():
+        sid, _, name = ref.partition(".parameters.")
+        par = dict(subs[sid]["parameters"][name], value=v, source=source, status="proposal")
+        if ext.get("derived_from"):
+            ext.setdefault("overrides", {}).setdefault(sid, {}).setdefault("parameters", {})[name] = par
+        else:
+            ext["subsystems"][sid]["parameters"][name] = par
+    return doc
+
+
+def sensitivities(points: list[dict], axes: list[tuple[str, float, list[float]]]) -> list[dict]:
+    """Local elasticities d ln(value) / d ln(parameter) at the candidate's own point, along each scanned axis with the
+    other parameters at their own values: central difference from the two neighbours, one-sided at an end."""
+    out = []
+    base = {r: b for r, b, _ in axes}
+    for ref, b, _ in axes:
+        line = sorted((p for p in points if p.get("value") is not None
+                       and all(p["parameters"][o] == base[o] for o in base if o != ref)),
+                      key=lambda p: p["parameters"][ref])
+        idx = next((i for i, p in enumerate(line) if p["parameters"][ref] == b), None)
+        if idx is None or len(line) < 2 or b == 0 or line[idx]["value"] == 0:
+            out.append({"parameter": ref, "base_value": b, "elasticity": None,
+                        "reason": "needs the base point, a neighbour and non-zero base values"})
+            continue
+        lo, hi = line[max(idx - 1, 0)], line[min(idx + 1, len(line) - 1)]
+        dp = (hi["parameters"][ref] - lo["parameters"][ref]) / b
+        dv = (hi["value"] - lo["value"]) / line[idx]["value"]
+        out.append({"parameter": ref, "base_value": b, "elasticity": dv / dp,
+                    "points": [lo["index"], hi["index"]],
+                    "difference": "central" if 0 < idx < len(line) - 1 else "one-sided"})
+    return out
+
+
+def scan(args) -> dict:
+    """M4 (OQ-18, AGG-08, RSK-04): the figure of merit of one candidate over a grid of parameter values, run point by
+    point in a scratch copy of the artifacts_dir exactly as run would, and stored as one summary computational-run.
+    No evaluation file is written: a point takes part in no aggregation and supports no verdict until it is expanded
+    (expand) and evaluated like any candidate."""
+    import itertools
+    import shutil
+    import tempfile
+    proj = load_project(args)
+    cpath = proj.candidates.get(args.candidate)
+    if cpath is None or proj.candidate_chain(args.candidate) is None:
+        raise UsageError(f"no design-candidate {args.candidate!r} (with its bases) in the artifacts_dir")
+    if not re.match(r"^SCAN-[A-Za-z0-9][A-Za-z0-9._-]*$", args.id):
+        raise UsageError(f"--id {args.id!r}: a scan id is SCAN- followed by letters, digits, '.', '_' or '-'")
+    run_rel = f"runs/{args.id}.computational-run.json"
+    if (proj.root / run_rel).exists():
+        raise UsageError(f"{run_rel} exists: choose another --id")
+    hit = choose_operation(proj, args.figure_of_merit, args.fidelity, args.tool)
+    if hit is None:
+        raise UsageError(f"no operation computes {args.figure_of_merit} at {args.fidelity}: nothing to scan")
+    if hit[2].get("required_upstreams"):
+        raise UsageError(f"{args.figure_of_merit} needs upstream evaluations ({', '.join(hit[2]['required_upstreams'])}); "
+                         "a scan reruns only operations without upstreams: scan the upstream figure of merit instead")
+    axes = parse_vary(proj, args.candidate, args.vary)
+    grid = list(itertools.product(*[vals for _, _, vals in axes]))
+    if len(grid) > args.max_points:
+        raise UsageError(f"{len(grid)} points exceed --max-points {args.max_points}")
+    crel = proj.rel(cpath)
+    cdoc = json.loads(cpath.read_text(encoding="utf-8"))
+    points = []
+    with tempfile.TemporaryDirectory() as tmp:
+        work = Path(tmp) / "artifacts"
+        shutil.copytree(proj.root, work, ignore=shutil.ignore_patterns("reports"))
+        for k, combo in enumerate(grid):
+            values = {ref: v for (ref, _, _), v in zip(axes, combo)}
+            (work / crel).write_text(json.dumps(set_parameters(cdoc, values, proj, args.candidate,
+                                                               f"scan {args.id} point {k}"), indent=1) + "\n",
+                                     encoding="utf-8")
+            ns = argparse.Namespace(artifacts=work, candidate=args.candidate, requirement=None,
+                                    figure_of_merit=args.figure_of_merit, denominator=args.denominator,
+                                    fidelity=args.fidelity, tool=args.tool, upstream=None, input_artifact=None,
+                                    id=f"CALC-scan-point-{k}", replace=False, status=args.status)
+            try:
+                res = run_evaluation(ns)
+            except UsageError as exc:
+                res = {"status": "failed", "error": str(exc)}
+            point = {"index": k, "parameters": values}
+            if res.get("status") == "ok":
+                ev = json.loads((work / res["evaluation"]).read_text(encoding="utf-8"))["extension"]
+                point.update(value=ev.get("value"), unit=ev.get("unit"), bound=ev.get("bound"),
+                             in_domain=(ev.get("validity") or {}).get("in_domain"))
+                if ev.get("uncertainty"):
+                    point["uncertainty"] = ev["uncertainty"]
+                for f in res.get("files", []):
+                    (work / f).unlink(missing_ok=True)
+            else:
+                point.update(value=None, error=res.get("error"))
+            points.append(point)
+    w = Writer(proj)
+    chain_rels = [proj.rel(p) for p in proj.candidate_chain(args.candidate)]
+    inputs = [w.input_ref(r) for r in chain_rels]
+    script = "skills/hep-detector/scripts/evaluate_design.py"
+    argv = ["python3", script, "scan", "--candidate", args.candidate, "--figure-of-merit", args.figure_of_merit,
+            "--fidelity", args.fidelity, *[x for d in args.denominator or [] for x in ("--denominator", d)],
+            *[x for v in args.vary for x in ("--vary", v)], "--id", args.id]
+    summary = {"candidate": args.candidate, "figure_of_merit": args.figure_of_merit, "fidelity": args.fidelity,
+               "denominator": {k: parse_value(v) for k, _, v in (d.partition("=") for d in args.denominator or [])},
+               "tool": f"{hit[0]['tool_id']}:{hit[1]['operation_id']}", "parameters": [r for r, _, _ in axes],
+               "points": points, "sensitivity": sensitivities(points, axes),
+               "note": "scan points are not evaluations: they take part in no aggregation and support no verdict "
+                       "(AGG-08); expand a point into a candidate to evaluate and compare it"}
+    ext = {"input_manifest": [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels],
+           "tools": [{"name": "evaluate_design.scan", "version": plugin_version()}], "commands": [" ".join(argv)],
+           "environment": {"python": platform.python_version(), "platform": platform.platform(terse=True)},
+           "seeds": {}, "tolerances": {}, "exit_status": 0, "output_hashes": {}, "argv": argv,
+           "script_sha256": {script: sha256(PLUGIN / script)}, "scan_summary": summary}
+    ns_id = args.candidate.split(":", 1)[0]
+    w.json(run_rel, envelope("computational-run", f"{ns_id}-{args.id}", ext, inputs, [], statuses(inputs, args.status)))
+    return {"status": "ok", "exit": 0, "scan": run_rel, "points": len(points),
+            "failed_points": sum(1 for p in points if p.get("value") is None),
+            "sensitivity": summary["sensitivity"], "note": summary["note"]}
+
+
+def expand(args) -> dict:
+    """M4: one scan point as a candidate derived from the scanned one (derived_from, overrides of the scanned
+    parameters); evaluate it with run like any candidate to bring it into comparison."""
+    proj = load_project(args)
+    run = proj.docs.get(proj.resolve(args.scan))
+    summary = ((run or {}).get("extension") or {}).get("scan_summary")
+    if not summary:
+        raise UsageError(f"--scan {args.scan} is not a scan summary in the artifacts_dir")
+    point = next((p for p in summary["points"] if p.get("index") == args.point), None)
+    if point is None:
+        raise UsageError(f"--point {args.point}: the scan has points 0..{len(summary['points']) - 1}")
+    base = summary["candidate"]
+    if proj.candidates.get(base) is None:
+        raise UsageError(f"the scanned candidate {base} is no longer in the artifacts_dir")
+    ns, short = base.split(":", 1)[0], args.candidate_id
+    if not re.match(r"^[A-Za-z0-9][A-Za-z0-9._-]*$", short):
+        raise UsageError(f"--candidate-id {short!r}: letters, digits, '.', '_' or '-'")
+    rel = f"candidates/{short}.json"
+    subs = proj.effective(base) or {}
+    overrides: dict = {}
+    for ref, v in point["parameters"].items():
+        sid, _, name = ref.partition(".parameters.")
+        par = dict(subs[sid]["parameters"][name], value=v, source=f"{args.scan} point {args.point}", status="proposal")
+        overrides.setdefault(sid, {}).setdefault("parameters", {})[name] = par
+    w = Writer(proj)
+    inputs = [dict(w.input_ref(proj.rel(proj.candidates[base])), binding="parameters"), w.input_ref(args.scan)]
+    ext = {"candidate_id": f"{ns}:{short}", "design_id": proj.docs[proj.candidates[base]]["extension"]["design_id"],
+           "description": f"point {args.point} of {args.scan} ({', '.join(f'{k}={v}' for k, v in point['parameters'].items())})",
+           "derived_from": base, "overrides": overrides}
+    w.json(rel, envelope("design-candidate", f"{ns}-{short}", ext, inputs, [], statuses(inputs, "unvalidated")))
+    from contracts.validate import validate_artifact
+    rep = validate_artifact(json.loads((proj.root / rel).read_text(encoding="utf-8")))
+    if not rep.ok:
+        w.undo()
+        return {"status": "failed", "exit": 1, "error": "the candidate fails contract validation",
+                "findings": [f.as_dict() for f in rep.errors]}
+    return {"status": "ok", "exit": 0, "candidate": f"{ns}:{short}", "file": rel,
+            "next": f"evaluate_design.py run --candidate {ns}:{short} --figure-of-merit {summary['figure_of_merit']}"
+                    f" --fidelity {summary['fidelity']} (and every other evaluation the comparison needs)"}
+
+
 def plan(args) -> dict:
     """RES-04: suggestions for the next evaluations from the derived state."""
     full = design.derive(args.artifacts, args.decisions)
@@ -679,6 +876,14 @@ def render(full: dict, omitted: list[str]) -> str:
                      + f"; {rank['note']}")
     else:
         lines.append(f"- ranking: {rank.get('status')}: {'; '.join(rank.get('reasons') or [rank.get('reason')])}")
+    par = full.get("pareto", {})
+    if par.get("status") == "computed":
+        lines.append(f"- Pareto front on {', '.join(par['axes'])}: "
+                     + ", ".join("/".join(c) for c in par["front"])
+                     + "".join(f"; {'/'.join(x['candidates'])} dominated by {'/'.join(x['by'])}" for x in par["dominated"])
+                     + f"; {par['note']}")
+    elif par.get("status") == "refused":
+        lines.append(f"- Pareto front on {', '.join(par['axes'])}: refused: {'; '.join(par['reasons'])}")
     return "\n".join(lines) + "\n"
 
 
@@ -780,6 +985,22 @@ def main(argv=None) -> int:
     p.add_argument("--candidate", required=True)
     p.add_argument("--dataset", required=True, help="the dataset-record with extension.design_measurement")
     p.add_argument("--id", required=True)
+    p = sub.add_parser("scan", help="a figure of merit over a parameter grid, stored as one summary run (M4, AGG-08)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--candidate", required=True)
+    p.add_argument("--figure-of-merit", dest="figure_of_merit", required=True)
+    p.add_argument("--denominator", action="append", help="KEY=VALUE (repeatable)")
+    p.add_argument("--fidelity", default="F1", choices=design.FIDELITIES[1:4])
+    p.add_argument("--tool", help="TOOL:OPERATION when several operations compute the figure of merit")
+    p.add_argument("--vary", action="append", required=True, help="SID.parameters.NAME=V1,V2,... (repeatable: a grid)")
+    p.add_argument("--max-points", dest="max_points", type=int, default=200)
+    p.add_argument("--id", required=True, help="SCAN-... (file runs/<id>.computational-run.json)")
+    p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
+    p = sub.add_parser("expand", help="one scan point as a derived candidate, to evaluate and compare (M4)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--scan", required=True, help="the scan summary run (runs/SCAN-....computational-run.json)")
+    p.add_argument("--point", type=int, required=True)
+    p.add_argument("--candidate-id", dest="candidate_id", required=True, help="name of the new candidate (no namespace)")
     for name in ("plan", "report"):
         p = sub.add_parser(name)
         p.add_argument("--artifacts", type=Path, required=True)
@@ -811,6 +1032,10 @@ def main(argv=None) -> int:
         elif args.command == "response":
             args.input_artifact = None
             out = response(args)
+        elif args.command == "scan":
+            out = scan(args)
+        elif args.command == "expand":
+            out = expand(args)
         elif args.command == "plan":
             out = plan(args)
         else:
