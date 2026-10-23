@@ -1,0 +1,22 @@
+{
+ "label": "Inputs of the stored predictions of theory:tmd-gaussian-lo. The collinear values f_q(x), D_q(z), the Sivers normalization N_q(x) and the Drell-Yan widths are SYNTHETIC test inputs. The SIDIS widths <k_perp^2> = 0.25 GeV^2, <p_perp^2> = 0.20 GeV^2 (Anselmino et al. Eq. 47) and M'^2 = 0.36 GeV^2 (their Table I) are fitted values of that paper, quoted here only as ILLUSTRATIVE benchmark settings, not as current determinations.",
+ "illustrative": true,
+ "x": 0.1,
+ "z": 0.4,
+ "flavours": [
+  {"name": "u", "charge": "2/3", "f": 0.6, "D": 0.5},
+  {"name": "d", "charge": "-1/3", "f": 0.35, "D": 0.2},
+  {"name": "ubar", "charge": "-2/3", "f": 0.1, "D": 0.2},
+  {"name": "dbar", "charge": "1/3", "f": 0.12, "D": 0.5}
+ ],
+ "kperp2_gev2": 0.25,
+ "pperp2_gev2": 0.20,
+ "widths_source": "Anselmino et al., hep-ph/0501196v2, Eq. (47), page 9 (illustrative)",
+ "PhT_gev": [0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0],
+ "cahn": {"y": 0.5, "Q_gev": 2.0, "phi_h": 0.0},
+ "sivers": {"N": {"u": 0.3, "d": -0.3, "ubar": 0.0, "dbar": 0.0}, "Mprime2_gev2": 0.36,
+            "Mprime2_source": "Anselmino et al., hep-ph/0501196v2, Table I, page 14 (illustrative)",
+            "k_gev": [0.1, 0.3, 0.5, 0.8]},
+ "drell_yan": {"k1perp2_gev2": 0.25, "k2perp2_gev2": 0.30, "qT_gev": [0.0, 0.25, 0.5, 1.0, 1.5]},
+ "relative_tolerance": 1e-8
+}

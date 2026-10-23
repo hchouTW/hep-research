@@ -3,6 +3,18 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- hep-theory, hadron structure phase 5 (Th18, SIDIS and TMDs): `skills/hep-theory/references/sidis-and-tmd.md` (Trento
+  conventions, SIDIS structure functions, collinear SIDIS at LO, TMD factorization rules, Gaussian ansatz, Sivers sign
+  change, Drell-Yan q_T) and `references/fragmentation-functions.md` (sum rule, flavour assumptions, sets, spin and TMD
+  FFs); sources read in full text 2026-10-23. New scripts `skills/hep-theory/scripts/sidis_kinematics.py` and
+  `skills/hep-theory/scripts/tmd_gaussian.py`; `sum_rules.py ff-momentum`. Capability `sidis-and-tmd` (Th18); routing
+  set Th18 (3 cases).
+- Theory-domain profile `theory:tmd-gaussian-lo` (Gaussian-ansatz SIDIS F_UU,T and Cahn term, Sivers asymmetry with
+  the SIDIS -> Drell-Yan sign change as a cited rule, Drell-Yan q_T shape; benchmark Anselmino et al. Eqs. 38-39 and
+  64-67), registered in `profiles/registry.json`.
+
 ## 0.33.0 (2026-10-23)
 
 Minor release, contracts 3.10.0 (unchanged). It adds the fourth module of hep-theory's hadron-structure plan:

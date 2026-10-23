@@ -1,0 +1,96 @@
+{
+ "id": "theory:tmd-gaussian-lo",
+ "kind": "theory-domain",
+ "version": "0.1.0",
+ "scope": "Gaussian-ansatz TMD distribution and fragmentation functions at leading order without evolution: SIDIS F_UU,T(x, z, P_hT) with <P_T^2> = <p_perp^2> + z^2 <k_perp^2> in the conventions of Anselmino et al. and of Bacchetta et al. (z^2-normalized D_1), its collinear integral, the Cahn cos(phi_h) term at O(k/Q), the Sivers asymmetry A_UT^sin(phi_h - phi_S) in the Gaussian Sivers model (Anselmino et al. Eqs. 64-67, re-derived in SymPy and checked against Bacchetta et al. Eq. 4.11 with the Trento relation), the Drell-Yan q_T shape with <q_T^2> = <k1^2> + <k2^2>, and the SIDIS -> Drell-Yan Sivers sign change (Trento Eq. 14, cited). Physics status heuristic-argument: the Gaussian ansatz with constant widths is a model.",
+ "exclusions": [
+  "TMD evolution, the soft factor, b-space formalisms and matching to collinear factorization at large P_hT",
+  "Fits of widths or Sivers parameters; the paper's fitted values are used only as illustrative settings",
+  "A Drell-Yan Sivers asymmetry formula (only the sign of the Sivers function is propagated)",
+  "Collins, Boer-Mulders and other azimuthal modulations; flavour- or x-dependent widths",
+  "Any experiment, detector, data or blinding field; no comparison with measurements"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=3.10,<4.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-computing",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/tmd-gaussian-lo.md",
+  "derivation": "derivations/derivation-record.md",
+  "theory_spec": "derivations/theory-spec.json",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "tmdg"
+ ],
+ "vocabulary_extensions": {
+  "quantity_types": [
+   "tmdg:structure-function"
+  ],
+  "levels": [
+   "tmdg:leading-power-tmd"
+  ],
+  "conventions": [
+   "tmdg:gaussian_ansatz",
+   "tmdg:fragmentation_normalization"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "tmdg",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "sidis-unpolarized-and-cahn",
+   "status": "tested-in-declared-environment",
+   "scope": "SymPy: Gaussian convolution gives F_UU,T with <P_T^2> = <p_perp^2> + z^2 <k_perp^2> in both conventions (Bacchetta z^2-normalized D_1 with <p_perp^2> = z^2 <k_T^2>), its d^2P_hT integral is x sum e^2 f D, and Eq. 32-33 reproduce the Cahn term of Eq. 38 (also from Bacchetta Eq. 4.20 with Eqs. 2.9, 2.11). Published closed form Eqs. 38-39 against 2D quadrature of the profile's transcription of the same integrands at 4 points (relative tolerance 1e-7; same route as the paper, checks algebra and transcription, not physics); consistency check against skills/hep-theory/scripts/tmd_gaussian.py sidis (same author). Within the Gaussian model (heuristic-argument)",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_benchmark.py",
+    "tests/test_prediction.py",
+    "tests/test_artifacts.py"
+   ]
+  },
+  {
+   "name": "sivers-asymmetry",
+   "status": "tested-in-declared-environment",
+   "scope": "SymPy: Eq. 58 with Eqs. 63 and 68 reproduces Eqs. 64-67, and Bacchetta Eq. 4.11 with Trento Eq. 4 gives the same asymmetry; published closed form Eqs. 64-67 against 2D quadrature of the profile's transcription at 4 points (relative tolerance 1e-7; same route, checks algebra and transcription, not physics). Within the Gaussian Sivers model (heuristic-argument)",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_benchmark.py"
+   ]
+  },
+  {
+   "name": "drell-yan-qt-shape",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "derived here (no source line): two Gaussian TMD PDFs convolve to a unit-normalized q_T Gaussian of width <k1^2> + <k2^2>; SymPy, quadrature and the shipped tmd_gaussian.py dy on synthetic widths",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_prediction.py",
+    "tests/test_missing_dependency.py"
+   ]
+  },
+  {
+   "name": "sivers-sign-change",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "f_1T^perp,DY = -f_1T^perp,SIDIS (Trento Eq. 14, cited, not derived) applied to the Gaussian Sivers function on synthetic N_q; Trento Eq. 4 round trip; the Drell-Yan prediction carries the opposite sign by construction (a declaration); consistency check against tmd_gaussian.py sivers",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_prediction.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  }
+ ]
+}

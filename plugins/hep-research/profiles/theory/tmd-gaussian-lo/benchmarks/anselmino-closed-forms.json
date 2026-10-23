@@ -1,0 +1,29 @@
+{
+ "label": "Published closed forms (read): the O(k_perp/Q) SIDIS cross section with the Cahn cos(phi_h) term, Eqs. (38)-(39), and the Sivers asymmetry, Eqs. (64)-(67), of Anselmino et al., hep-ph/0501196v2. The profile's numerical quadrature of the k_perp integrals (Eq. 32 with Eqs. 33-35; Eq. 58 with Eqs. 63 and 68) is compared with them. Closed-form benchmark, not data.",
+ "illustrative": true,
+ "source": {
+  "citation": "M. Anselmino, M. Boglione, U. D'Alesio, A. Kotzinian, F. Murgia and A. Prokudin, The role of Cahn and Sivers effects in deep inelastic scattering, arXiv:hep-ph/0501196v2 (23 May 2005)",
+  "ledger": "tmdg:S01",
+  "claims": ["tmdg:C02", "tmdg:C03", "tmdg:C04"],
+  "location": "Eqs. (38)-(39), page 7; Eqs. (63)-(67), pages 12-13 (checked on the rendered PDF pages)",
+  "date_read": "2026-10-23",
+  "read_level": "full text of the arXiv v2 PDF; Eqs. (38), (63)-(67) checked on the rendered pages"
+ },
+ "printed": {
+  "eq38": "d5sigma/(dx_B dQ^2 dz_h d^2P_T) ~ sum_q (2 pi alpha^2 e_q^2/Q^4) f_q(x_B) D_q^h(z_h) [1 + (1-y)^2 - 4 (2-y) sqrt(1-y) <k_perp^2> z_h P_T cos(phi_h)/(<P_T^2> Q)] exp(-P_T^2/<P_T^2>)/(pi <P_T^2>)",
+  "eq39": "<P_T^2> = <p_perp^2> + z_h^2 <k_perp^2>",
+  "eq64": "A_UT^sin(phi_h - phi_S)(x_B, z_h, P_T) ~ Delta sigma_Siv / sigma_0",
+  "eq65": "Delta sigma_Siv = (2 pi alpha^2/(x_B y^2 s)) (1 + (1-y)^2) sum_q e_q^2 2 N_q(x_B) f_q(x_B) D_q^h(z_h) z_h P_T sqrt(2e) <k^2>hat^2 / (M' <P_T^2>hat^2 <k_perp^2>) exp(-P_T^2/<P_T^2>hat)",
+  "eq66": "sigma_0 = 2 pi (2 pi alpha^2/(x_B y^2 s)) (1 + (1-y)^2) sum_q e_q^2 f_q(x_B) D_q^h(z_h) exp(-P_T^2/<P_T^2>)/(pi <P_T^2>)",
+  "eq67": "<k^2>hat = M'^2 <k_perp^2>/(M'^2 + <k_perp^2>), <P_T^2>hat = <p_perp^2> + z_h^2 <k^2>hat"
+ },
+ "points": [
+  {"z": 0.2, "PhT_gev": 0.3}, {"z": 0.4, "PhT_gev": 0.5}, {"z": 0.6, "PhT_gev": 0.8}, {"z": 0.8, "PhT_gev": 1.0}
+ ],
+ "settings": {"kperp2_gev2": 0.25, "pperp2_gev2": 0.20, "Mprime2_gev2": 0.36, "y": 0.5, "Q_gev": 2.0,
+              "N_single_flavour": 0.3,
+              "note": "widths from Eq. (47) and M'^2 from Table I, used as illustrative settings; N is a SYNTHETIC single-flavour value (f, D and e_q^2 cancel in the single-flavour ratios)"},
+ "illustrative_reason": "the published closed forms are evaluated at the paper's fitted widths (Eq. 47, Table I) used as illustrative settings and a SYNTHETIC N; the formulas, not these numbers, are the benchmark",
+ "independence": "the closed forms come from the paper's analytic d^2k_perp integration; the profile integrates its own transcription of the same paper's integrands numerically. That follows the same route as the paper, so it checks algebra and transcription, not physics",
+ "relative_tolerance": 1e-7
+}

@@ -4317,6 +4317,43 @@
    "set": "Th17"
   },
   {
+   "id": "th18-sivers-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Predict the Sivers asymmetry at COMPASS kinematics in a Gaussian TMD model and state the azimuthal-angle conventions and the sign change relative to Drell-Yan.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "TMDs",
+    "conventions"
+   ],
+   "set": "Th18"
+  },
+  {
+   "id": "th18-qt-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How should I predict the Drell-Yan distribution at q_T -> 0, and which TMD prescriptions count as model alternatives?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "Drell-Yan",
+    "model alternatives"
+   ],
+   "set": "Th18"
+  },
+  {
+   "id": "th18-pht-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Reconstruct the hadron transverse momentum relative to the virtual photon in my SIDIS events and give its resolution.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "reconstruction",
+    "resolution"
+   ],
+   "not": "hep-theory",
+   "set": "Th18"
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",

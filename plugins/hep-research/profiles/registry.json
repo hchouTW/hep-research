@@ -68,15 +68,22 @@
    "id": "theory:dis-parton-model",
    "kind": "theory-domain",
    "version": "0.1.0",
-   "scope": "LO parton-model F_2 and O(alpha_s) F_L (Altarelli-Martinelli form); SYNTHETIC toys only, no published F_L",
+   "scope": "LO F_2, O(alpha_s) F_L; synthetic only",
    "path": "theory/dis-parton-model"
   },
   {
    "id": "theory:drell-yan-lo",
    "kind": "theory-domain",
    "version": "0.1.0",
-   "scope": "LO Drell-Yan d2sigma/dM dy (photon) and O(alpha_s) lambda, nu, Lam-Tung; published closed-form benchmark",
+   "scope": "LO Drell-Yan; lambda, nu, Lam-Tung",
    "path": "theory/drell-yan-lo"
+  },
+  {
+   "id": "theory:tmd-gaussian-lo",
+   "kind": "theory-domain",
+   "version": "0.1.0",
+   "scope": "Gaussian TMDs at LO: SIDIS, Sivers, DY q_T",
+   "path": "theory/tmd-gaussian-lo"
   },
   {
    "id": "reference:detector-atlas",

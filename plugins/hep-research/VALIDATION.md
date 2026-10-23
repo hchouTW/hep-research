@@ -2578,6 +2578,31 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## HADRON-PHASE5 (2026-10-23; branch `feat/hadron-phase5-tmd`)
+
+Hadron-structure plan, phase 5 (Th18 SIDIS and TMDs, fragmentation functions, profile `theory:tmd-gaussian-lo`),
+macOS (Darwin 25.5.0), the interpreter from `find_python.py` (a miniconda Python 3.13.2: SymPy 1.14.0, SciPy 1.17.1,
+NumPy 2.4.4); constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: Trento conventions arXiv:hep-ph/0410050v2 (Phys. Rev. D 70 (2004) 117504);
+Bacchetta et al. arXiv:hep-ph/0611265v2 (JHEP 02 (2007) 093); Anselmino et al. arXiv:hep-ph/0501196v2 (Phys. Rev. D
+71 (2005) 074006); Collins arXiv:hep-ph/0204004v3 (Phys. Lett. B 536 (2002) 43); PDG 2026 Fragmentation Functions
+(revised August 2023). Journal references confirmed at arXiv.
+
+| Check | Result |
+|---|---|
+| `test_sidis_kinematics.py` (invariants and Trento phi_h against events built from an explicit right-handed basis, boost along the beam, mirror reflection, spin flip, classification, rejections incl. spacelike vectors) | pass |
+| `test_tmd_gaussian.py` (F_UU,T against a direct numerical Eq. 4.1 convolution with Bacchetta's D(z, k_T^2) normalization, d^2 P_hT integral, Drell-Yan width and normalization, Sivers sign, rejections) | pass |
+| `test_sum_rules.py` FF momentum rule (Beta-function toys; malformed hadron columns rejected) | pass |
+| `theory:tmd-gaussian-lo` 0.1.0: `python3 -m unittest discover -s tests -t tests` in the profile (SymPy: Anselmino Eqs. 34-39 and the Cahn term Eq. 38, Bacchetta's convolution convention giving the same F_UU,T, the Sivers asymmetry Eqs. 58, 63-68; the Anselmino and Trento azimuths shown to coincide; the Drell-Yan q_T convolution derived here) | 37 run, 37 pass; `sidis-unpolarized-and-cahn` and `sivers-asymmetry` `tested-in-declared-environment` in the environment above; the benchmark (Anselmino Eqs. 38-39, 64-67 against the profile's own quadrature at 4 points, 1e-7) follows the paper's route and checks algebra and transcription, not physics; the Drell-Yan sign change is a cited rule (Trento Eq. 14) |
+| `run_all_checks.py --part static`, `check_layering.py`, `check_wiring.py` | pass |
+
+Independent reviews (read-only agents with the sources): pages and scripts, no wrong formula; fixed a dropped malformed
+FF column, spacelike vectors accepted, the multiplicity's gamma -> 0 assumption, the hadron sum in Eq. 2.18, |q_T|
+labelling, the Boer-Mulders sign change (now cited from Bacchetta et al. Sec. 3.3), FF notation. Profile: physics
+correct; the frame mapping was closed, independence wording, benchmark label and conventions keys corrected, a
+circular sign "check" turned into a declaration. Not run: live routing for the 3 Th18 cases (paid; pending).
+
 ## HADRON-PHASE4 (2026-10-23; branch `feat/hadron-phase4-pol`)
 
 Hadron-structure plan, phase 4 (Th17 polarized DIS and the first two theory-domain profiles), macOS (Darwin 25.5.0)
