@@ -1,0 +1,120 @@
+{
+ "meta": {
+  "run_id": "t2-qv-branch-r4",
+  "date": "2026-10-23",
+  "cli": "claude",
+  "cli_version": "2.1.309",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "aec8191124c8487bffdcd305ad33be5a6f8a13db",
+  "plugin_dirty": false,
+  "cases_file_sha256": "ebfbb6dcab39b936e0a4717933f5e0f11665c5744af5187a42ee537d03505569",
+  "selected": 1,
+  "completed": 1,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 0.5,
+  "reused_cases": 0,
+  "spent_usd": 0.0923,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 1,
+   "strict_pass": 1,
+   "lenient_pass": 1
+  },
+  "by_lang": {
+   "en": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_expected_primary": {
+   "hep-theory": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "outcomes": {
+   "pass": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.0923,
+   "per_case": 0.0923,
+   "per_turn": 0.0132
+  }
+ },
+ "cases": [
+  {
+   "id": "th-a-qvalue-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 1
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.309",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.092276,
+   "n_turns": 7,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/t2-qv-branch-r4/raw/, not committed)"
+}

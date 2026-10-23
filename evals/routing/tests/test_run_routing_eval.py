@@ -201,3 +201,16 @@ class SessionDirTests(unittest.TestCase):
         self.assertNotIn("/", d.name)
         A.cli = "codex"
         self.assertIsNone(rre.session_dir(A, Path("/tmp")))
+
+
+class CodexCommandTests(unittest.TestCase):
+    def test_every_turn_skips_the_git_repo_check(self):
+        """The throwaway case folder is not a git repository: codex refuses a turn without the skip, and the resumed
+        later turns of a multi-turn case failed that way (t19-turns-2, 2026-10-23)."""
+        class A:
+            model = "m"
+        first = rre.codex_cmd("codex", "p", A, Path("/tmp/case"))
+        later = rre.codex_cmd("codex", "q", A, Path("/tmp/case"), session="s1")
+        self.assertIn("--skip-git-repo-check", first)
+        self.assertEqual(later[:4], ["codex", "exec", "resume", "s1"])
+        self.assertIn("--skip-git-repo-check", later)
