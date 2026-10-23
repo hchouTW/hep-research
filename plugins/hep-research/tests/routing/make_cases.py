@@ -435,6 +435,11 @@ C = [
  ("th14-hadmodels-1", "en", "out-of-v1", "Compute the proton's Sivers function in the chiral quark soliton model and give me its x dependence.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
  ("th14-quarkonium-1", "en", "out-of-v1", "Give the NRQCD prediction for J/psi production in p-Pb collisions including nuclear absorption.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
  ("th14-jetsdis-1", "en", "out-of-v1", "Compute dijet cross sections in resolved-photon photoproduction at an electron-ion collider.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+    # Th15: Drell-Yan (drell_yan_lo.py)
+ ("th15-dy-1", "en", "direct", "Give the LO Drell-Yan cross section d2sigma/dM dx_F for p p at 120 GeV beam energy on a fixed target, with the x_F definition and rapidity frame stated.", "hep-theory", ["Drell-Yan", "cross sections"], None, None, {"set": "Th15"}),
+ ("th15-pd-1", "en", "direct", "Predict the pd/pp Drell-Yan cross-section ratio at E906 kinematics and say how it depends on dbar/ubar.", "hep-theory", ["Drell-Yan"], None, None, {"set": "Th15"}),
+ ("th15-frames-1", "zh-Hant", "direct", "請把 Collins-Soper 座標系的 lambda、mu、nu 轉到 helicity 座標系，並檢查 Lam-Tung 關係與不隨座標系改變的組合。", "hep-theory", [], None, None, {"set": "Th15"}),
+ ("th15-qt-1", "en", "direct", "I need the O(alpha_s) Drell-Yan q_T distribution at q_T of order M, with the scale envelope as theory uncertainty.", "hep-theory", ["Drell-Yan", "theory uncertainties"], None, None, {"set": "Th15"}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),

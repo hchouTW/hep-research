@@ -2578,6 +2578,30 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## HADRON-PHASE2 (2026-10-23; branch `feat/hadron-phase2-dy`)
+
+Hadron-structure plan, phase 2 (Th15, Drell-Yan), macOS 26.5 arm64, Python 3.13, constructed inputs only (software
+checks; no physical validity). Sources read in full text 2026-10-23: PDG 2026 "Cross-Section Formulae" (Eqs. 51.2,
+51.3, 51.25, 51.40; it has no explicit Drell-Yan formula), Peng et al. arXiv:1511.08932v3 (Eqs. 1-7), Aad et al.
+arXiv:1606.00689v1 (Sec. 1, Eqs. 1-5), Faccioli et al. arXiv:1006.2738v1 (Eqs. 18-22, 25-31) and arXiv:1005.2601v1
+(Eq. 8); journal references confirmed at arXiv, first author of 1606.00689 at INSPIRE-HEP. Derived here and marked so:
+the LO cross section from Eq. 51.3, the colour average and Eq. 51.40; the x_F definitions and Jacobians; the lab shift;
+the lepton-swap behaviour; the exact non-negativity condition of the angular distribution.
+
+| Check | Result |
+|---|---|
+| `test_drell_yan_lo.py` (hand value; normalization against PDG's 86.8 nb / s within 2e-3, independent of the code's constant; Jacobians and x_F against four-vectors; round trips; fixed-target lab shift; y symmetry; LO scaling; closed-form y integral within 1e-6; pd/pp response to dbar/ubar; 13 refusals and rejections) | pass |
+| `test_dy_angular_frames.py` (rotation angle against boosted axes; Eq. 21 against a direct numerical rotation, 1e-9; HX -> CS sign end to end on boosted axes; invariants and round trip; Lam-Tung frame independence; allowed domain against a 300-point sphere scan) | pass |
+
+Independent review (a read-only agent; both PDFs, an independent derivation and an end-to-end frame check): no wrong
+formula or number. Fixed before the commit, each with a test that failed first: the allowed-domain check used only the
+Eq. 22 bounds and accepted distributions negative on part of the sphere (now also W >= 0 through the eigenvalues of
+I + M; the scan showed that neither condition implies the other); two point specifications, beams with no
+centre-of-mass frame (an uncaught division by zero) and a resonance window with LO > HI were accepted. Page fixes: Peng
+et al. apply non-coplanarity to the collider data only; the lepton swap flips A_7 as well; mu(-y) = -mu(y) only for
+symmetric beams; at q_T = 0 and y < 0 the HX axis is antiparallel to the CS axis; Peng et al. Eq. 7 cited for the
+A_i relations. Not run: live routing for the 4 Th15 cases (paid; pending approval).
+
 ## HADRON-PHASE1 (2026-10-23; branch `feat/hadron-phase1-dis` from main `4ff6ee6a`)
 
 Hadron-structure plan, phase 1 (Th14, unpolarized inclusive DIS), macOS 26.5 arm64, Python 3.13 (miniconda), on

@@ -39,8 +39,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 23,
-   "bytes": 177314,
+   "references": 24,
+   "bytes": 188339,
    "uncited": 0
   }
  },
@@ -3837,6 +3837,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
@@ -3978,6 +3979,19 @@
    "last_commit": "bb6cb81e 2026-10-23"
   },
   {
+   "path": "skills/hep-theory/references/drell-yan.md",
+   "owner": "hep-theory",
+   "bytes": 10756,
+   "lines": 150,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/scripts/drell_yan_lo.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "06176895 2026-10-23"
+  },
+  {
    "path": "skills/hep-theory/references/event-generation.md",
    "owner": "hep-theory",
    "bytes": 9791,
@@ -3998,7 +4012,7 @@
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
    "owner": "hep-theory",
-   "bytes": 4455,
+   "bytes": 4724,
    "lines": 64,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4006,10 +4020,11 @@
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-kinematics.md",
     "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bb6cb81e 2026-10-23"
+   "last_commit": "06176895 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4020,6 +4035,7 @@
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
@@ -4141,6 +4157,7 @@
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/pdf_uncertainty.py"
