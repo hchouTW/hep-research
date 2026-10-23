@@ -2705,6 +2705,22 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## 0.34.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.34.0` from main `9f627aaf` (main CI green). It ships #259: hep-theory hadron structure
+phase 5 (Th18 SIDIS and TMDs, fragmentation functions; profile `theory:tmd-gaussian-lo`; VALIDATION HADRON-PHASE5).
+Minor release with no contract change (contracts 3.10.0). The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.34.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.34.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5077 tests in 423 modules, 4941 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5077 tests, 4849 pass, 0 failures, 228 skipped |
+
 ## 0.33.0 release check (2026-10-23, E2 and the CI lock)
 
 Release branch `release/0.33.0` from main `10d02330` (main CI green). It ships #257: hep-theory hadron structure
