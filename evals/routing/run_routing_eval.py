@@ -242,7 +242,8 @@ def claude_cmd(cli_path, prompt, args, session=None):
 
 def codex_cmd(cli_path, prompt, args, cwd, session=None):
     if session:
-        return [cli_path, "exec", "resume", session, "--json", "-m", args.model, prompt]
+        # a later turn runs in the same throwaway (non-git) folder, so it needs the same repo-check skip as turn 1
+        return [cli_path, "exec", "resume", session, "--json", "--skip-git-repo-check", "-m", args.model, prompt]
     return [cli_path, "exec", "--json", "--skip-git-repo-check", "--sandbox", "read-only", "-m", args.model, "-C", str(cwd), prompt]
 
 
