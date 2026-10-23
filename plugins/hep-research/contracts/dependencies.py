@@ -8,6 +8,9 @@ project root) and checks, recursively through the sources' own inputs:
     never opened) and the file exists and is a JSON artifact;
   - the declared artifact_type, artifact_id and version (the source's contract_version) match the source;
   - sha256 is 64 hex digits and equals the file's digest (no hash: unresolved, a substitution cannot be detected);
+    an input marked "binding": "parameters" (contracts 3.11.0, TRC-06) still needs its hash, its file and a valid
+    source, but a changed file is only a warning: the consumer is bound by the digest of the parameters it read,
+    which contracts/design.py compares;
   - the sticky statuses the source really carries are declared on the input and carried by the consumer;
   - the source validates: its errors are dependency.source_invalid, and its unresolved findings (a domain-shift check
     that failed, a split check that was not run, ...) are dependency.source_unresolved, so a chain is never more
@@ -138,6 +141,10 @@ class _Checker:
             digest = hashlib.sha256(data).hexdigest()
             if sha is None:
                 self.add("unresolved", where, "dependency.no_hash", f"{ref!r} has no sha256: a substituted source cannot be detected")
+            elif HEX64.match(str(sha)) and sha != digest and inp.get("binding") == "parameters":
+                # TRC-06: bound by the digest of the parameters read; contracts/design.py compares that digest
+                self.add("warning", where, "dependency.parameters_bound_file_changed",
+                         f"{ref!r} changed (sha256 {digest}); the input is bound by its parameters, not the whole file")
             elif HEX64.match(str(sha)) and sha != digest:
                 self.add("error", where, "dependency.hash_mismatch", f"{ref!r} has sha256 {digest}, the input declares {sha}")
             ev = self.revoked.get(digest) or self.revoked.get("ref:" + src.relative_to(self.root).as_posix())

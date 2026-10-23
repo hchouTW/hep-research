@@ -176,7 +176,8 @@ class Builder:
         if derived_from:
             ext["derived_from"] = f"{NS}:{derived_from}"
             ext["overrides"] = overrides or {}
-            inputs.append(self.inp(f"candidates/{derived_from}.json"))
+            # a variant binds its base by the parameters it inherits (TRC-06): a base change is judged per evaluation
+            inputs.append(dict(self.inp(f"candidates/{derived_from}.json"), binding="parameters"))
         return self.write(f"candidates/{name}.json", self.envelope("design-candidate", f"{NS}-{name}", ext,
                                                                    inputs=inputs, status=status))
 

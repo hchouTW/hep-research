@@ -23,11 +23,12 @@
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
     "synthetic"
-   ]
+   ],
+   "binding": "parameters"
   },
   {
    "ref": "runs/CALC-MASS-L.computational-run.json",
-   "sha256": "8d5d8b3881283e1011b4ed1c2aef092857abea076cddd41221ac3a5e320b8c07",
+   "sha256": "d58e10d9891a94f377b378d237ad2efbee751f24c70e953b0803a40243299202",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-MASS-L-run",
    "status": [
@@ -55,6 +56,7 @@
    "budgets.mass.DES-TRK-001",
    "subsystems"
   ],
+  "parameter_digest": "f572a18ed2985936c78fece2050646f8051429fd702b29691f008ca507a984cc",
   "validity": {
    "assumptions": [],
    "in_domain": true

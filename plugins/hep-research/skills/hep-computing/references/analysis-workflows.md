@@ -21,10 +21,15 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
 - `<plugin root>/skills/hep-computing/scripts/run_workflow.py`: a standard-library runner for a workflow JSON (steps
   with `needs`, `inputs`, `outputs`, `argv`, optional `stdout` and `seeds`). It runs the steps in a topological
   order, refuses cycles and missing inputs, and writes `runs/<step>.computational-run.json` per step with the
-  command's placeholders kept, so the record does not depend on where it ran.
+  command's placeholders kept, so the record does not depend on where it ran. Each record names the argument list,
+  the SHA-256 of every script in it, the plugin release and the Python and NumPy versions; `--incremental` skips a
+  step whose previous record matches on all of them and on its inputs and outputs (never when the release digest is
+  unknown, as in a development checkout). A step may declare `parameter_digest` (a command printing the digest of the
+  design parameters it reads, e.g. `evaluate_design.py run --digest-only`) that replaces the candidate files in the
+  skip key, so a design chain reruns only where a parameter it reads changed.
 - `<plugin root>/skills/hep-computing/assets/workflow/`: a SYNTHETIC example DAG (`workflow.json`: generate events,
   histogram them chunk by chunk, report) and a `Snakefile` with the same rules. Snakemake adds incremental reruns
-  (only steps whose inputs changed), cluster profiles and DAG plots; the runner is the dependency-free reference the
+  (only steps whose inputs changed), cluster profiles and DAG plots; the runner (with `--incremental`) is the dependency-free reference the
   tests use. Keep the two in step: the tests check that the Snakefile has one rule per step with the same outputs.
 - Other engines (Make, Nextflow, Luigi, law, coffea processors) fit the same pattern; what matters is declared files
   and a run record per step, not the engine.

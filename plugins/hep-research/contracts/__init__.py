@@ -172,6 +172,11 @@ CONTRACTS_VERSION = "3.11.0"
 # Detector design M1 extends the unreleased 3.11.0 (OQ-03): the tool contract 1.1.0 design block also has an
 # uncertainty location and the expressions budget, object, zip, config (a generated config file) and span; no
 # artifact field changes.
+# Detector design M2 extends it again (OQ-03): the envelope inputs[].binding ("parameters", TRC-06), the
+# computational-run parameter_digest (INC-02), the evaluation model_envelope (FID-05), the design-block keys
+# upstream_directions and the expression input_artifact, and the geometry mapping table
+# (contracts/rules/design_geometry.json, contracts/schemas/design_geometry.json). A 3.10 reader refuses the binding
+# value (schema enum) instead of reading a parameter-bound input as a stale hash.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

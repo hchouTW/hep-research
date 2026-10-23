@@ -1,0 +1,86 @@
+{
+ "$comment": "Design geometry mapping table (detector system design spec ART-33..ART-35, contracts 3.11.0): the candidate parameters a Geant4 study geometry reads (each field an expression of the tool contract design block, tool_contract.json $defs/expr), and the figures of merit a study record can deliver with their denominators. Read by evaluate_design.py geometry (which writes the geometry file and the digest of the parameters read) and by contracts/design.py (which recomputes that digest, ART-35). Kept in contracts/rules/ (OQ-08, the spec's alternative location): it describes no command-line tool, and every file in contracts/tool_contracts/ is checked against a tool's --help.",
+ "type": "object",
+ "required": [
+  "mapping_version",
+  "geometry",
+  "fields",
+  "figures_of_merit"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "$comment": {
+   "type": "string"
+  },
+  "mapping_version": {
+   "type": "string",
+   "enum": [
+    "1.0.0"
+   ]
+  },
+  "geometry": {
+   "type": "string",
+   "minLength": 1
+  },
+  "fields": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "field",
+     "from"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "field": {
+      "type": "string",
+      "minLength": 1
+     },
+     "from": {
+      "$ref": "tool_contract.json#/$defs/expr"
+     }
+    }
+   }
+  },
+  "figures_of_merit": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "better",
+     "unit",
+     "denominator"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "better": {
+      "type": "string",
+      "enum": [
+       "smaller",
+       "larger"
+      ]
+     },
+     "unit": {
+      "type": "string",
+      "minLength": 1
+     },
+     "denominator": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string",
+       "enum": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     "tail_sensitive": {
+      "$comment": "FID-03: resolution, confusion rate and rejection stay optimistic unless the study simulated every tail source",
+      "type": "boolean"
+     }
+    }
+   }
+  }
+ }
+}

@@ -3560,7 +3560,11 @@
     "skills/hep-detector/scripts/design_estimates.py",
     "examples/design-space-spectrometer/**",
     "tests/skills/hep_detector/test_evaluate_design.py",
-    "tests/examples/test_design_space_spectrometer.py"
+    "tests/examples/test_design_space_spectrometer.py",
+    "contracts/rules/design_geometry.json",
+    "contracts/schemas/design_geometry.json",
+    "skills/hep-computing/scripts/run_workflow.py",
+    "tests/skills/hep_detector/test_design_m2.py"
    ],
    "checks": [
     "tests.contracts.test_design_verdicts",
@@ -3572,7 +3576,9 @@
     "part:static",
     "tests.skills.hep_detector.test_evaluate_design",
     "tests.examples.test_design_space_spectrometer",
-    "tests.skills.test_cli_robustness"
+    "tests.skills.test_cli_robustness",
+    "tests.skills.hep_detector.test_design_m2",
+    "tests.skills.hep_computing.test_workflow_c6"
    ],
    "not_available": [],
    "full": false

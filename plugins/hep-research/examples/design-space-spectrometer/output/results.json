@@ -148,7 +148,7 @@
   "holds": true,
   "reason": null
  },
- "ranking": "not-provided",
+ "ranking": "refused",
  "gate_flags": [
   "gate.H1_missing",
   "gate.H2_missing",

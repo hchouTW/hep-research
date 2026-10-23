@@ -31,6 +31,7 @@
       "ref": {"type": "string"}, "artifact_type": {"type": "string"}, "sha256": {"type": "string"},
       "artifact_id": {"type": "string"}, "version": {"$ref": "common.json#/$defs/version", "$comment": "the source's contract_version"},
       "external": {"type": "boolean", "$comment": "not materialized in the project (e.g. a HEPData record): contracts/dependencies.py reports it unresolved"},
+      "binding": {"type": "string", "enum": ["parameters"], "$comment": "3.11.0 (detector design M2, ART-73, TRC-06): the input is bound by the digest of the parameters read (the consumer's parameter_digest, checked by contracts/design.py); a whole-file hash change is a warning, not stale"},
       "status": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}}}}},
     "outputs": {"type": "array", "items": {"type": "object", "required": ["ref"]}},
     "status": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}, "minItems": 1},

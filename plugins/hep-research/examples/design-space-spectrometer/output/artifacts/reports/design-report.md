@@ -36,4 +36,4 @@ The adequacy table is an initial default until physics review: every pass is pro
 - ams-like-v1:cand-P: screened out (ams-like-v1:REQ-TRK-001 fails; ams-like-v1:REQ-CC-001 fails)
 - ams-like-v1:cand-S: not screened out
 - comparison basis: holds
-- ranking: not-provided: candidate ranking is not part of the first release (OQ-04); it uses only non-optimistic evaluations with the same fidelity vector and denominator (CHN-06)
+- ranking: refused: ams-like-v1:cand-L has no non-optimistic, current expected-precision evaluation (CHN-06)

@@ -94,6 +94,15 @@ evaluation; each listed candidate needs a screening-level or unavailable evaluat
 
 Goal: the evidence each driving requirement needs for compliance.
 
+Higher fidelity, each through `evaluate_design.py`:
+
+| Fidelity | Command | What it is |
+|---|---|---|
+| F2 | `run --fidelity F2` | `toy_spectrometer.py` resolution (config generated from the candidate; an estimate); in-field acceptance toy (`design_estimates.py infield-acceptance`: exact helices through offset apertures, seeded) |
+| F3 | `response --upstream <core evaluation>` | resolution core with the candidate's alignment term and declared tail, and a parametrized `response` (forward folding) bound to it; assembled from an F1 core it stays optimistic |
+| F3 | `run --figure-of-merit expected-precision --fidelity F3 --upstream <resolution> --upstream <charge confusion> --input-artifact <statistical-result>` | the expected precision written back from the hep-statistics Asimov fit (status asimov, `results.expected_relative_uncertainty`); its bound and fidelity vector follow the whole chain |
+| F4 | `geometry --figure-of-merit F --denominator ... --id G`, then the Geant4 study, then `f4 --study <record> --id SIM-...` | the geometry file of the study is generated from the candidate (`contracts/rules/design_geometry.json`) and sets `geometry_ref`; only a record re-issued `validated-in-scope` by `check_geant4_study.py label --upgrade` (`f4 --label-spec ...`) counts as F4; without alignment, calibration non-uniformity, noise and digitization and pattern recognition simulated a resolution or confusion rate stays optimistic; the physics-list spread is a model envelope whose ends are compared separately |
+
 - The adequacy table gives per figure of merit the compliance fidelity (resolution F3; charge confusion F4 with tails
   validated by data; PID rejection F4; acceptance F2 in-field) and the upstreams compliance needs. An F1 result can
   exclude a candidate but never approve a physics requirement.
@@ -101,6 +110,18 @@ Goal: the evidence each driving requirement needs for compliance.
   measurement-spec -> Asimov statistical-result (hep-statistics); a chain built on optimistic F1 inputs can only
   exclude.
 - Every inconclusive driving requirement gets a proposed disposition in the report (accept risk or next study).
+- The report ranks candidates on expected precision only when the comparison basis holds and every candidate that
+  survives screening has a non-optimistic expected-precision evaluation with the same fidelity vector and
+  denominator; otherwise it states why the ranking is refused. A ranking is never a global optimum.
+
+Reruns. Evaluations bind the candidate by the parameters they read (`binding: parameters`, `parameter_digest`): a
+change to another parameter leaves them current, a change to a parameter they read makes them stale (and everything
+downstream of them). Rerun a stale one with `--replace` (a current one is never replaced). For a whole chain use
+`hep-computing/scripts/run_workflow.py --incremental` with one step per evaluation: give each step a
+`parameter_digest` command (the same `evaluate_design.py` call with `--digest-only`) that replaces the candidate
+file in its skip key, and a step id different from the evaluation id (run_workflow writes
+`runs/<step id>.computational-run.json`). A step is skipped only when argv, scripts, plugin release digest,
+environment and inputs are unchanged; never when the release digest is unknown.
 
 ## D4 Review
 
@@ -126,6 +147,7 @@ pass). Codes the report uses:
 | `evidence.stale`, `evidence.unresolved`, `evidence.invalid` | an input changed, is unbound or invalid | rerun with a new evaluation id |
 | `evidence.conflict`, `evidence.excluded_adverse`, `evidence.orphan_run` | contradicting evidence, unfavorable evidence excluded, a run without its evaluation | inspect the contracts and validity domains |
 | `capability.unavailable` | no evaluator at that fidelity | record it; never estimate a number |
+| `design.contract_mismatch` (error) | an evaluation, run, output, config file, geometry or study that does not match its contract or candidate | regenerate it with `evaluate_design.py`; never edit it |
 
 The adequacy table is an initial default until physics review: every pass is reported as provisional.
 

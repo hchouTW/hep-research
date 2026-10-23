@@ -23,11 +23,12 @@
    "artifact_id": "ams-like-v1-cand-P",
    "status": [
     "synthetic"
-   ]
+   ],
+   "binding": "parameters"
   },
   {
    "ref": "runs/CALC-CC-P.computational-run.json",
-   "sha256": "1a50c9a65d0c018fad52ba7c7aa0911a6c26f3756e77afe1de54cd471dca7b77",
+   "sha256": "3189b666d1504d4e9b13351f787461e5f85a45931f7a2a6b7aa11c9e3c0e7c43",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-CC-P-run",
    "status": [
@@ -36,7 +37,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "882f0463f9e24ff9cadfc1b181a26fd46b25837a2218246491796e27d76aae1e",
+   "sha256": "73e9045eb34cca6b0f8960b25cf2aa206ebbe95c4c5fe936a3720699a72fa67b",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-P",
    "status": [
@@ -65,6 +66,7 @@
   "unit": "1",
   "run_ref": "runs/CALC-CC-P.computational-run.json",
   "parameter_refs": [],
+  "parameter_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
   "validity": {
    "assumptions": [
     "Gaussian curvature core only",

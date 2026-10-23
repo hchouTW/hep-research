@@ -30,6 +30,7 @@ MISSING_FILE_ARGS = {
                                                       "--lag-days", "0", "--min-coverage", "0.5"],
     "skills/hep-detector/scripts/charge_confusion_rate.py": ["template", "--input", M],
     "skills/hep-detector/scripts/evaluate_design.py": ["report", "--artifacts", M],
+    "skills/hep-detector/scripts/design_estimates.py": ["precision-from-result", "--result", M],
     "skills/hep-detector/scripts/species_response.py": ["assemble", "--manifest", M],
     "skills/hep-detector/scripts/survival_feeddown.py": ["compute", "--layers", M, "--species", M, "--xs", M],
     "skills/hep-detector/scripts/detector_atlas.py": ["audit", M],
@@ -173,7 +174,6 @@ MISSING_FILE_ARGS = {
 }
 NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-detector/scripts/cherenkov_angle.py": "numbers on the command line",
-    "skills/hep-detector/scripts/design_estimates.py": "numbers on the command line",
     "skills/hep-detector/scripts/frontend_response.py": "numbers on the command line",
     "skills/hep-detector/scripts/pid_separation_power.py": "numbers on the command line",
     "skills/hep-detector/scripts/tracker_resolution.py": "numbers on the command line",

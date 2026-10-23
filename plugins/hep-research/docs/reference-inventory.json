@@ -15,12 +15,12 @@
   },
   "hep-computing": {
    "references": 35,
-   "bytes": 298640,
+   "bytes": 299243,
    "uncited": 0
   },
   "hep-detector": {
    "references": 39,
-   "bytes": 516005,
+   "bytes": 518888,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1151,8 +1151,8 @@
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 3469,
-   "lines": 51,
+   "bytes": 4072,
+   "lines": 56,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1864,7 +1864,7 @@
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cbcf6c34 2026-10-17"
+   "last_commit": "97c6b0b5 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/detector-glossary.md",
@@ -2414,8 +2414,8 @@
   {
    "path": "skills/hep-detector/references/system-design-workflow.md",
    "owner": "hep-detector",
-   "bytes": 10288,
-   "lines": 147,
+   "bytes": 13171,
+   "lines": 169,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-design-principles.md",
@@ -2423,7 +2423,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "97c6b0b5 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",

@@ -23,7 +23,8 @@
    "artifact_id": "ams-like-v1-cand-P",
    "status": [
     "synthetic"
-   ]
+   ],
+   "binding": "parameters"
   }
  ],
  "outputs": [
@@ -77,7 +78,7 @@
    "synthetic"
   ],
   "script_sha256": {
-   "skills/hep-detector/scripts/design_estimates.py": "501716532378a98e156f8abd88581f38c688871a8983f6bc70b42c2bcd18a889"
+   "skills/hep-detector/scripts/design_estimates.py": "74357bcb3e35ac1791d7262b6533f4ff194bc27bbc86f0fde2e3495cd4612092"
   }
  }
 }

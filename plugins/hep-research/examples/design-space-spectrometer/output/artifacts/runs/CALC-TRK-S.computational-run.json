@@ -23,7 +23,8 @@
    "artifact_id": "ams-like-v1-cand-S",
    "status": [
     "synthetic"
-   ]
+   ],
+   "binding": "parameters"
   }
  ],
  "outputs": [

@@ -60,6 +60,8 @@ from contracts.validate import STICKY_STATUSES, validate_artifact  # noqa: E402
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_DIR = PLUGIN_ROOT / "contracts" / "tool_contracts"
 ADEQUACY_FILE = PLUGIN_ROOT / "contracts" / "rules" / "design_adequacy.json"
+GEOMETRY_FILE = PLUGIN_ROOT / "contracts" / "rules" / "design_geometry.json"
+TAIL_SOURCES = ("alignment", "calibration-non-uniformity", "noise-digitization", "pattern-recognition")
 FIDELITIES = ("F0", "F1", "F2", "F3", "F4", "F5")
 RANK = {f: i for i, f in enumerate(FIDELITIES)}
 DESIGN_TYPES = ("design-spec", "design-candidate", "design-evaluation")
@@ -404,6 +406,26 @@ class Project:
             return None
         return canonical_sha256({sid: s.get("parameters", {}) for sid, s in subs.items()})
 
+    def parameter_objects(self, cid: str, refs) -> dict:
+        """TRC-05: the complete objects the parameter_refs name in the merged candidate (value, unit, source and status
+        of a parameter; the subsystem list; a budget item); a missing one is None."""
+        subs = self.effective(cid) or {}
+        budgets = self.effective_budgets(cid)
+        out: dict = {}
+        for ref in sorted(set(refs)):
+            if ref == "subsystems":
+                out[ref] = sorted(subs)
+            elif ref.startswith("budgets."):
+                _, q, sid = (ref.split(".", 2) + ["", ""])[:3]
+                out[ref] = (budgets.get(q) or {}).get(sid)
+            else:
+                sid, _, rest = ref.partition(".parameters.")
+                out[ref] = ((subs.get(sid) or {}).get("parameters") or {}).get(rest) if rest else None
+        return out
+
+    def parameter_digest(self, cid: str, refs) -> str:
+        return canonical_sha256(self.parameter_objects(cid, refs))
+
     def species(self, name: str) -> dict | None:
         table = self.adequacy.get("species", {})
         return table.get(name) if isinstance(table.get(name), dict) else None
@@ -418,6 +440,10 @@ ROW2_CODES = {"dependency.hash_mismatch"}
 ROW3_CODES = {"dependency.no_hash", "dependency.external_unresolved", "dependency.source_unresolved"}
 
 
+def _input_index(ev: Evaluation, ref: str) -> int:
+    return next((k for k, i in enumerate(ev.doc.get("inputs") or []) if isinstance(i, dict) and i.get("ref") == ref), -1)
+
+
 def dependency_rows(proj: Project, ev: Evaluation) -> None:
     """Rows 2-4 from contracts/dependencies.py over the evaluation's whole input closure (a hash mismatch anywhere in
     the chain is stale, so staleness propagates down the chain, TRC-09)."""
@@ -425,6 +451,10 @@ def dependency_rows(proj: Project, ev: Evaluation) -> None:
     rep = validate_dependencies(ev.path, proj.root)
     for f in rep["findings"]:
         msg = f"{f['path']}: {f['code']}"
+        if (f["code"] == "dependency.source_invalid" and ev.ext.get("study_ref")
+                and f["path"].endswith(":$.inputs[" + str(_input_index(ev, ev.ext["study_ref"])) + "]")
+                and all(c.startswith("geant4.") for c in f["message"].rsplit(": ", 1)[-1].split(", "))):
+            continue  # ART-31: a study record that fails only the upgrade rules is below screening (row 8)
         if f["code"] in ROW2_CODES:
             ev.stale.append(msg)
         elif f["code"] in ROW3_CODES or f["severity"] == "unresolved":
@@ -552,17 +582,25 @@ class Evaluator:
             return self.up[e["upstream"]]
         if "const" in e:
             return e["const"]
+        if "input_artifact" in e:
+            refs = [i["ref"] for i in self.ev.doc.get("inputs") or [] if isinstance(i, dict)
+                    and self.proj.docs.get(self.proj.resolve(str(i.get("ref"))), {}).get("artifact_type") == e["input_artifact"]]
+            if len(refs) != 1:
+                raise ExprError(f"{len(refs)} bound inputs of type {e['input_artifact']!r} (the mapping needs exactly one)")
+            return refs[0]
         if "list" in e:
             return [x for a in e["list"] for x in flat(self(a))]
         if "object" in e:
             return {k: self(v) for k, v in e["object"].items()}
-        if "zip" in e:
+        if "zip" in e:  # lists of one common length into objects; scalars and constants repeat whole
             cols = {k: self(v) for k, v in e["zip"].items()}
-            lengths = {len(v) for v in cols.values() if isinstance(v, list)}
+            whole = {k for k, v in e["zip"].items() if "const" in v}
+            lengths = {len(v) for k, v in cols.items() if isinstance(v, list) and k not in whole}
             if len(lengths) != 1:
                 raise ExprError("zip needs lists of one common length")
             size = lengths.pop()
-            return [{k: (v[i] if isinstance(v, list) else v) for k, v in cols.items()} for i in range(size)]
+            return [{k: (v[i] if isinstance(v, list) and k not in whole else v) for k, v in cols.items()}
+                    for i in range(size)]
         if "span" in e:
             vals = [x for x in flat(self(e["span"])) if isinstance(x, (int, float)) and not isinstance(x, bool)]
             if len(vals) < 2:
@@ -689,6 +727,11 @@ def prepare(proj: Project, ev: Evaluation, fd: dict) -> Prepared:
             for u in ups_by_fom.get(uf, [])[:1]:
                 directions.append((u.bound, m.get("direction", "order-preserving")))
                 feeds.append((u, m.get("direction", "order-preserving")))
+    fed = {u.fom for u, _ in feeds}
+    for fom, direction in (fd.get("upstream_directions") or {}).items():  # read through another artifact (CHN-04)
+        for u in ups_by_fom.get(fom, [])[:1]:
+            if fom not in fed:
+                directions.append((u.bound, direction))
     pre_case = combine_bounds("estimate", directions)
     cl = rules.get("coverage_cl", proj.adequacy.get("default_coverage_cl", 0.95))
     n_est = sum(1 for u, _ in feeds if u.bound == "estimate")
@@ -905,31 +948,97 @@ def config_problems(proj: Project, name: str, val: ConfigValue, tokens: list[str
     return out
 
 
+def geometry_fields(proj: Project, cid: str, mapping: dict | None = None) -> tuple[dict, list[str], str]:
+    """ART-34, ART-35: the geometry fields the mapping table reads from the merged candidate, the parameters read and
+    their digest (TRC-05)."""
+    mapping = mapping or load_json(GEOMETRY_FILE)
+    ev = Evaluation(Path("."), ".", {"extension": {"candidate": cid, "denominator": {}}})
+    evaluator = Evaluator(proj, ev, proj.effective(cid) or {}, {})
+    fields = {f["field"]: evaluator(f["from"]) for f in mapping["fields"]}
+    refs = sorted(evaluator.refs)
+    return fields, refs, proj.parameter_digest(cid, refs)
+
+
+def candidate_geometry_ref(proj: Project, cid: str) -> str | None:
+    for p in proj.candidate_chain(cid) or []:
+        ref = proj.docs[p]["extension"].get("geometry_ref")
+        if ref:
+            return ref
+    return None
+
+
 def check_f4(proj: Project, ev: Evaluation) -> None:
-    """ART-30, ART-31, ART-36, FID-03 (the geometry digest of ART-35 and the value check of ART-32 arrive with M2):
-    only a study record that passes the 3.1.0 upgrade rules with validated-in-scope counts as F4; its observable must
-    be this figure of merit; its bound is optimistic unless it simulated every tail source."""
+    """ART-30..ART-36, FID-03, FID-05: only a study record that passes the 3.1.0 upgrade rules with validated-in-scope
+    counts as F4 (else below screening, row 8); the record must have used this candidate's geometry file, whose
+    parameter digest matches the current candidate (a changed candidate: stale; otherwise a mismatch: a study of
+    another layout cannot stand in); its observable must be this figure of merit (else domain.mismatch); value,
+    statistical uncertainty and model envelope are the record's; the bound is optimistic for a tail-sensitive figure of
+    merit unless the study simulated every tail source."""
     ext = ev.ext
     study_ref = ext.get("study_ref")
     study = proj.docs.get(proj.resolve(study_ref)) if study_ref else None
+    ev.bound = ext.get("bound", "estimate")
     if study is None or study.get("artifact_type") != "computational-run":
         ev.f4_unqualified = True
-        ev.bound = ext.get("bound", "estimate")
         return
     sext = study.get("extension") or {}
     rep = validate_artifact(study)
     if "validated-in-scope" not in (study.get("status") or []) or not rep.ok or "study" not in sext:
-        ev.f4_unqualified = True
-    block = sext.get("study") or {}
-    observables = block.get("observables") or ([block["observable"]] if block.get("observable") else [])
-    if ev.fom not in observables:
-        ev.domain.append(f"the study's observables {observables} do not include {ev.fom} (ART-36)")
+        ev.f4_unqualified = True  # ART-31: not reissued, or not passing the upgrade rules
+    block: dict = sext["study"] if isinstance(sext.get("study"), dict) else {}
+    try:
+        mapping = load_json(GEOMETRY_FILE)
+    except (OSError, ValueError) as exc:
+        ev.err("design.contract_unreadable", f"geometry mapping: {exc}")
+        return
+    cid = ext.get("candidate", "")
+    gref = candidate_geometry_ref(proj, cid)
+    if not gref:
+        ev.err("design.binding_incomplete", "an F4 evaluation's candidate names its geometry in geometry_ref (ART-30)")
+    else:
+        gpath = proj.resolve(gref)
+        try:
+            gdata = gpath.read_bytes()
+            geometry = json.loads(gdata.decode("utf-8"))
+        except (OSError, ValueError, UnicodeDecodeError) as exc:
+            ev.err("design.contract_mismatch", f"geometry {gref!r} is not readable JSON: {exc}")
+            geometry = None
+        if geometry is not None:
+            manifest = {m.get("path"): m.get("sha256") for m in sext.get("input_manifest") or [] if isinstance(m, dict)}
+            if manifest.get(gref) != hashlib.sha256(gdata).hexdigest():
+                ev.err("design.contract_mismatch", f"the study record did not use {gref} (input_manifest): a study of "
+                       "another layout cannot stand in (ART-35)")
+            try:
+                _, _, now = geometry_fields(proj, cid, mapping)
+            except ExprError as exc:
+                now = f"unresolved: {exc}"
+            if geometry.get("parameter_digest") != now:
+                changed = any(i.get("sha256") != proj.sha.get(proj.resolve(i["ref"])) for i in ev.doc.get("inputs") or []
+                              if isinstance(i, dict) and proj.docs.get(proj.resolve(str(i.get("ref"))), {}).get(
+                                  "artifact_type") == "design-candidate")
+                if changed:
+                    ev.stale.append("a geometry parameter changed since the study (ART-35)")
+                else:
+                    ev.err("design.contract_mismatch", "the geometry's parameter digest does not match the candidate (ART-35)")
+            if geometry.get("figure_of_merit") != ev.fom:
+                ev.domain.append(f"the study geometry was generated for {geometry.get('figure_of_merit')}, not {ev.fom} (ART-36)")
+    fom_map = mapping["figures_of_merit"].get(ev.fom)
+    result = (block.get("results") or {}).get(ev.fom) if isinstance(block.get("results"), dict) else None
+    if fom_map is None or not isinstance(result, dict):
+        ev.domain.append(f"the study's observables do not include {ev.fom} (ART-36)")
+        return
+    if not isinstance(result.get("value"), (int, float)) or not close(result["value"], ext.get("value")):
+        ev.err("design.contract_mismatch", f"value {ext.get('value')!r}, the study record has {result.get('value')!r} (ART-32)")
+    stat = result.get("statistical_uncertainty")
+    want_unc = ({"minus": float(stat), "plus": float(stat), "coverage": 0.6827, "interval": "central",
+                 "distribution": "gaussian"} if isinstance(stat, (int, float)) else None)
+    if want_unc is not None and not same(want_unc, ext.get("uncertainty")):
+        ev.err("design.contract_mismatch", "uncertainty differs from the study's statistical error (FID-01 F4)")
+    env = result.get("model_envelope")
+    if (env is not None or "model_envelope" in ext) and not same(env, ext.get("model_envelope")):
+        ev.err("design.contract_mismatch", "model_envelope differs from the study record (FID-05)")
     tails = set(block.get("tail_sources_simulated") or [])
-    needed = {"alignment", "calibration-non-uniformity", "noise-digitization", "pattern-recognition"}
-    rules = proj.fom_rules(ev.fom) or {}
-    tail_fom = rules.get("kind") == "performance" and (ev.fom.endswith("resolution-core") or "confusion" in ev.fom
-                                                       or "rejection" in ev.fom)
-    ev.bound = "optimistic" if tail_fom and not needed <= tails else "estimate"
+    ev.bound = "optimistic" if fom_map.get("tail_sensitive") and not set(TAIL_SOURCES) <= tails else "estimate"
     if ext.get("bound") != ev.bound:
         ev.err("design.contract_mismatch", f"F4 bound {ext.get('bound')!r}; the study's simulated tail sources give "
                f"{ev.bound!r} (FID-03)")
@@ -987,6 +1096,7 @@ def analyze_evaluations(proj: Project) -> None:
             if ext.get(key) and proj.resolve(ext[key]) not in bound_refs:
                 ev.err("design.binding_incomplete", f"inputs do not bind {key} {ext[key]!r}")
         dependency_rows(proj, ev)
+        parameter_binding(proj, ev, bound_refs)
         check_contract(proj, ev)
         ev.statuses = {s for s in ev.doc.get("status") or [] if s in STICKY_STATUSES}
         own = (ev.fom, ev.fidelity, ev.eid)
@@ -999,6 +1109,26 @@ def analyze_evaluations(proj: Project) -> None:
 
     for ev in list(proj.evals.values()):
         visit(ev)
+
+
+def parameter_binding(proj: Project, ev: Evaluation, bound_refs: dict) -> None:
+    """TRC-04..TRC-08 (M2): an evaluation whose candidate inputs carry binding "parameters" is stale only when the
+    digest of the parameters it read (parameter_refs) differs in the current merged candidate; when no candidate file
+    changed, a different digest is a contract mismatch (the recorded digest does not describe the parameters)."""
+    ext = ev.ext
+    cands = [(p, inp) for p, inp in bound_refs.items() if proj.docs.get(p, {}).get("artifact_type") == "design-candidate"]
+    if not any(inp.get("binding") == "parameters" for _, inp in cands):
+        return
+    if "parameter_digest" not in ext or "parameter_refs" not in ext:
+        ev.err("design.binding_incomplete", "a parameter-bound evaluation records parameter_refs and parameter_digest")
+        return
+    now = proj.parameter_digest(ext.get("candidate", ""), ext["parameter_refs"])
+    if now == ext["parameter_digest"]:
+        return
+    if any(inp.get("sha256") != proj.sha.get(p) for p, inp in cands):
+        ev.stale.append("a parameter it read changed in the candidate (parameter_digest)")
+    else:
+        ev.err("design.contract_mismatch", "parameter_digest does not match the parameters it names (TRC-05)")
 
 
 def compatible(up: Evaluation, ev: Evaluation) -> bool:
@@ -1111,6 +1241,12 @@ def estimate_state(proj: Project, ev: Evaluation, side: Side) -> tuple[bool, str
         minimum = max(minimum, proj.adequacy.get("f5_min_relative_uncertainty", 0.0))
     if v != 0 and min(sigma_equivalent(unc, "minus"), sigma_equivalent(unc, "plus")) < minimum * abs(v) * (1 - 1e-12):
         return False, "within"
+    env = ev.ext.get("model_envelope")
+    if isinstance(env, list) and len(env) == 2 and env[0] != env[1]:  # FID-05: each end of the envelope on its own
+        states = [estimate_state(proj, _with_value(ev, x), side)[1] for x in env]
+        if states[0] == states[1] and states[0] in ("compliant", "noncompliant"):
+            return True, states[0]
+        return True, "within"
     ok = meets(v, side)
     # the one-sided bound toward the target: from a compliant value toward the non-compliant side and back
     toward = ("plus" if side.comparator == "<=" else "minus") if ok else ("minus" if side.comparator == "<=" else "plus")
@@ -1123,6 +1259,11 @@ def estimate_state(proj: Project, ev: Evaluation, side: Side) -> tuple[bool, str
         return True, "compliant" if clear else "within"
     clear = edge > side.target if side.comparator == "<=" else edge < side.target
     return True, "noncompliant" if clear else "within"
+
+
+def _with_value(ev: Evaluation, value: float) -> Evaluation:
+    ext = {k: v for k, v in ev.ext.items() if k != "model_envelope"}
+    return Evaluation(ev.path, ev.rel, dict(ev.doc, extension=dict(ext, value=value)))
 
 
 @dataclass
@@ -1290,8 +1431,10 @@ def missing_evidence(proj: Project, req: dict, agg: dict) -> list[str]:
     if not any(RANK[e.fidelity] >= RANK[need] for e in evs):
         out.append(f"{req['quantity']} at {need} or above (compliance threshold)")
     for e in evs:
-        for fom, fid, c in chain_threshold_states(proj, e, mf)[2]:
-            if fom != req["quantity"]:
+        for fom, fid, _ in e.vector[1:]:  # upstream entries; the evaluation's own is above
+            rules_u = proj.fom_rules(fom) or {}
+            c = rules_u.get("compliance", "F5")
+            if RANK[fid] < RANK[c]:
                 out.append(f"{fom} at {c} or above (in the chain of {e.eid}, now {fid})")
     for group in rules.get("compliance_upstreams", []):
         if not any(u.fom in group for e in evs for u in e.upstreams):
@@ -1612,10 +1755,7 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
         "unavailable": sorted(e.eid for e in proj.evals.values() if e.ext.get("unavailable")),
         "stale_evaluations": stale,
         "comparison_basis": basis,
-        "ranking": ({"status": "refused", "reason": f"comparison_basis does not hold: {basis.get('reason')} (ART-15, RPT-07)"}
-                    if not basis["holds"] else
-                    {"status": "not-provided", "reason": "candidate ranking is not part of the first release (OQ-04); it "
-                     "uses only non-optimistic evaluations with the same fidelity vector and denominator (CHN-06)"}),
+        "ranking": ranking(proj, {d: c for d, c in groups.items() if not set(c) & screened}, basis),
         "evaluations": [{"evaluation": e.eid, "file": e.rel, "figure_of_merit": e.fom, "fidelity": e.fidelity,
                          "bound_derived": e.bound, "contract": e.contract,
                          "fidelity_vector": [{"figure_of_merit": f, "fidelity": x, "evaluation": i} for f, x, i in e.vector],
@@ -1623,6 +1763,38 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
         "errors": proj.errors,
     })
     return out
+
+
+def ranking(proj: Project, groups: dict, basis: dict) -> dict:
+    """CHN-00, CHN-06, RPT-07: candidates are ranked on expected measurement precision only when the comparison basis
+    holds and every candidate that survives screening has a usable expected-precision evaluation (not stale, no error,
+    not an optimistic bound) with the same fidelity vector and the same denominator; otherwise the ranking is refused
+    with the reason. A ranking is an ordering of these candidates, never a claim of a global optimum."""
+    fom = "expected-precision"
+    if not basis.get("holds"):
+        return {"status": "refused", "reason": f"comparison_basis does not hold: {basis.get('reason')} (ART-15, RPT-07)"}
+    if len(groups) < 2:
+        return {"status": "refused", "reason": "fewer than two candidates survive screening"}
+    picks = {}
+    for d, cids in groups.items():
+        usable = [e for e in proj.evals.values() if e.fom == fom and e.effective == d and not e.errors and not e.stale
+                  and not e.invalid and not e.unresolved and e.bound in ("estimate", "conservative")
+                  and e.ext.get("value") is not None]
+        if not usable:
+            return {"status": "refused", "reason": f"{', '.join(cids)} has no non-optimistic, current {fom} evaluation (CHN-06)"}
+        picks[d] = max(usable, key=lambda e: lowest(e.vector))
+    vectors = {tuple(sorted((f, x) for f, x, _ in e.vector)) for e in picks.values()}
+    dens = {json.dumps(e.ext.get("denominator"), sort_keys=True) for e in picks.values()}
+    if len(vectors) != 1:
+        return {"status": "refused", "reason": "the expected-precision evaluations have different fidelity vectors (CHN-06)"}
+    if len(dens) != 1:
+        return {"status": "refused", "reason": "the expected-precision evaluations have different denominators (CHN-06)"}
+    order = sorted(picks.items(), key=lambda kv: kv[1].ext["value"])
+    return {"status": "ranked", "figure_of_merit": fom, "fidelity_vector": [list(v) for v in sorted(vectors.pop())],
+            "order": [{"candidates": groups[d], "evaluation": e.eid, "value": e.ext["value"],
+                       "uncertainty": e.ext.get("uncertainty"), "bound": e.bound} for d, e in order],
+            "note": "an ordering of these candidates on expected precision (smaller is better); differences within the "
+                    "uncertainties are not decided, and no global optimum is claimed"}
 
 
 def status_summary(full: dict) -> dict:

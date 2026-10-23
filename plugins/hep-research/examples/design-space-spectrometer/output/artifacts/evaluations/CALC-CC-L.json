@@ -23,11 +23,12 @@
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
     "synthetic"
-   ]
+   ],
+   "binding": "parameters"
   },
   {
    "ref": "runs/CALC-CC-L.computational-run.json",
-   "sha256": "964fde75c1633b2da5c15d781505d5c88da07791a65f42b32b1ebb2b83e13290",
+   "sha256": "6089af9dba6cc178d9fc8ce46c0f6dcc02ee155a82560f43d79d0b58011b8dad",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-CC-L-run",
    "status": [
@@ -36,7 +37,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-L.json",
-   "sha256": "40c44b25ba0a15e01330e7fe056474cfcdf1276079c0861153cb681e12bb7740",
+   "sha256": "1e0088e49ea761278cc68d74b4640fd5b511c05e6e73c07b53bdbc373a1d2deb",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-L",
    "status": [
@@ -65,6 +66,7 @@
   "unit": "1",
   "run_ref": "runs/CALC-CC-L.computational-run.json",
   "parameter_refs": [],
+  "parameter_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
   "validity": {
    "assumptions": [
     "Gaussian curvature core only",
