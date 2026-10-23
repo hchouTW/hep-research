@@ -32,7 +32,13 @@ Contracts 3.11.0 (minor; no capability added).
   is open (interpretation: H4 follows H1-H3), charge-confusion compliance also needs a rigidity-scale-offset
   evaluation (adequacy row; the missing-for-compliance list names each required upstream with its own compliance
   fidelity, F5 for the offset), decision records are named relative to the decisions folder's parent (no host path
-  in a report), and the rendering states the baseline state and "orphan runs: none".
+  in a report), the basis names the F1 evaluations it uses (chosen by id) and how their uncertainty is formed, an
+  unqualified F4 study or a stale or mismatched evaluation no longer counts toward the compliance threshold, and the
+  rendering states the baseline state, that the H4 actor kind is self-declared (advisory, LIM-01), that screening
+  comes from the verdicts, and "orphan runs: none". The reviews closed after three rounds with the maintainer's
+  decision to close the escalated findings; follow-ups for the spec owner: a quantitative check of the
+  rigidity-scale-offset evaluation against the assumed curvature offset, dispositions for derived requirements, the
+  subsystem scope of hard constraints, and whether Example A should model a field length per candidate.
 - Detector system design, milestone M2 (fidelity and sensitivity): parameter-level invalidation (envelope
   `inputs[].binding: "parameters"`, `contracts/dependencies.py` warns instead of stale, `contracts/design.py` compares
   `parameter_digest`: an evaluation goes stale only when a parameter it read changes; a forged digest is a contract
