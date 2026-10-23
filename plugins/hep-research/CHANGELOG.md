@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Sources (Th13): the three cosmic-ray pages' sources, first read through a summarizing fetch, were re-read in full text
+(49 arXiv PDFs at the cited versions, the ICRC proceedings, the two Bartels sources) and every attribution, locator and
+number was checked; about 30 statements were corrected (wrong locators, overstated or misread findings, author
+initials and order) and the pages now carry the read level "full text, 2026-10-23" (VALIDATION TH13-SOURCES, ledger
+`documentation_fixes` TH13-SOURCES). The DRAGON2 D_pp prefactor and beta^eta form, previously "not read", are now cited
+(App. C.8-C.9); the "factor 2" LIS claim from an unopened 2005 paper was dropped.
+
 Routing (T2): the hep-theory description names "cosmic-ray propagation and solar modulation" (1,020 of 1,024
 characters; room made by dropping three phrases no routing case pins: "importing", "truncation", "and its global
 analyses"). A new English case `th13-mod-2` (solar modulation) and the trigger term "cosmic-ray propagation" on

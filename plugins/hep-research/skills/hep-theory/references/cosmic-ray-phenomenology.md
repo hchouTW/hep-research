@@ -9,10 +9,9 @@ interpretations, and how to state them without overclaiming, in [cosmic-ray new 
 Conventions of nuclear cross sections are in [nuclear cross sections](nuclear-cross-sections.md); halo, J factor and
 annihilation conventions in [dark matter](dark-matter-phenomenology.md).
 
-Status: guidance (Th13), sources not yet verified (see "Sources read"); the only executable piece is
+Status: guidance (Th13), sources read in full text on 2026-10-23 (see "Sources read"); the only executable piece is
 `bartels_rotation.py`. Running a propagation code in
-a global fit stays outside v1; choosing which model explains an excess stays limited-support. Unless a line says
-otherwise a source was read at abstract level; see "Sources read". Experiment facts (bins, periods, published numbers)
+a global fit stays outside v1; choosing which model explains an excess stays limited-support. Experiment facts (bins, periods, published numbers)
 come from the bound experiment profile or a dataset record, never from this page.
 
 ## Contents
@@ -30,8 +29,9 @@ come from the bound experiment profile or a dataset record, never from this page
 
 - *GALPROP.* Numerical solution on a grid in (R, z, p), cylindrically symmetric in the original version, with free
   escape at the halo boundary and a Crank-Nicholson scheme with operator splitting (Strong and Moskalenko 1998, Sec. 2
-  and App. B). Release v57 solves about 90 coupled transport equations in 3D or 4D and ships updated cross-section and
-  gas data (Porter et al. 2022, abstract and Sec. 2).
+  and App. B). The framework solves about 90 coupled time-dependent transport equations in 3D or 4D (Porter et al.
+  2022, Sec. 2, the features up to v56); release v57 ships updated cross sections and interstellar-medium (gas)
+  datasets (abstract).
 - *DRAGON2.* Numerical solver whose diffusion may depend on position, momentum and direction (a diffusion tensor along
   and across the regular field), with advection, reacceleration and losses, checked against analytic solutions (Evoli
   et al. 2017, abstract, Eqs. 2.1-2.2). One build runs in the plugin through the optional adapter; see the tool status
@@ -57,9 +57,12 @@ Alfven speed V_A (reacceleration); convective speed V_c and its gradient; halo h
 breaks; the modulation parameters of the data periods.
 
 - **Reacceleration ties momentum diffusion to spatial diffusion:** D_pp D_xx = 4 p^2 V_A^2 / (3 delta (4 - delta^2)
-  (4 - delta) w), w the ratio of wave to magnetic energy density, set to 1 so that only V_A^2 / w matters (Strong and
-  Moskalenko 1998, Sec. 2, Eq. 1, after Seo and Ptuskin 1994). GALPROP v57 cites the same relation without writing it
-  (Porter et al. 2022, Sec. 2); the DRAGON2 prefactor was not read. A V_A from one code is comparable with another's
+  (4 - delta) w), w the ratio of wave to magnetic energy density, taken as 1; only V_A^2 / w enters (Strong and Moskalenko
+  1998, Sec. 2, Eq. 1, after Seo and Ptuskin 1994). GALPROP v57 cites the same relation without writing it
+  (Porter et al. 2022, Sec. 2); DRAGON2's Alfvenic option uses the same prefactor with the direction-averaged spatial
+  coefficient and w (the turbulence level) about 1 (Evoli et al. 2017, App. C.9, Eq. C.27; a magnetosonic option is
+  Eq. C.28), and its one-zone form of D, which the other forms build on, carries beta^eta: D0 beta^eta
+  (rho/rho0)^delta (App. C.8, Eq. C.23). A V_A from one code is comparable with another's
   only when both use this relation and the same w.
 
 - Above about 5 GV convection and reacceleration are degenerate and poorly constrained one by one (Korsmeier and
@@ -72,7 +75,7 @@ breaks; the modulation parameters of the data periods.
   (convection plus reacceleration) (Genolini et al. 2019, abstract). Above about 10 GV the abstract gives delta in
   0.43-0.53 and K10 in 0.26-0.36 kpc^2/Myr at 1 sigma, and a high-rigidity break of typical size 0.2.
 - **Halo height L** comes from radioactive clocks and Be/B; it is limited by production cross sections. Quoted values:
-  4 to 12 kpc from 10Be/9Be in reacceleration models (Strong and Moskalenko 1998, Sec. 3); L = 5 (+3/-2) kpc at 68% CL
+  4 to 12 kpc from 10Be/9Be in reacceleration models (Strong and Moskalenko 1998, Sec. 3.2); L = 5 (+3/-2) kpc at 68% CL
   from precision space-borne Be/B (Weinrich et al. 2020b, abstract); about 5 kpc or more with nominal cross
   sections, weakened when their uncertainties are allowed (Evoli et al. 2020, abstract); L at least about 3 kpc from
   Be (Korsmeier and Cuoco 2021, abstract). Quote L with the data, model family and cross-section treatment it came
@@ -97,35 +100,36 @@ semi-empirical sets renormalized to the available nuclear data (conventions and 
   |---|---|---|
   | Webber family (WKS93, WKS98, S01, W03; WNEW code) | semi-empirical formulas fitted to data | W03 has no Li production (Maurin et al. 2022, Sec. 2.3) |
   | Silberberg-Tsao (YIELDX, TS00) | semi-empirical systematics | DRAGON2 takes Li from it (Evoli et al. 2018, Sec. 5) |
-  | GALPROP opt12 / opt22 | fits to data on top of WNEW 1998 / YIELDX 2000 | opt12 has no Fe to LiBeB, opt22 includes it (Maurin et al. 2022, Sec. 2.3); opt12 (kopt = 12) is GALPROP's default (Korsmeier and Cuoco 2021, Sec. IV) |
+  | GALPROP opt12 / opt22 | fits to data on top of WNEW 1998 / YIELDX 2000 | opt12 has null Fe to Li and undershoots most Fe to Be, B data by about 15-21 times, opt22 is about in line (Maurin et al. 2022, Sec. 3.2.2, Table 1); opt12 (kopt = 12) is the default of Korsmeier and Cuoco 2021 (Sec. IV) |
   | DRAGON2 | Webber tables; missing channels from WNEWTR renormalized to data at 0.1-100 GeV/n | three generations of intermediate-lived parents, GALPROP five (Evoli et al. 2018, Sec. 5) |
   | OPT12, OPT22, OPT12up22 | GALPROP sets renormalized to data (smoothed data/model spline, threshold fit, constant above 1.5 GeV/n) | Maurin et al. 2022, Sec. 3 |
 
-  Size of the differences at 10 GV with progenitors up to Fe: opt12 against the others moves the ratios by 3% or less,
-  S01 and W03 raise Be/B by about 5%, opt22 raises Li/C by about 15%, Be/C 10%, B/C 5%; among the renormalized sets
+  Adding progenitors from Si up to Fe moves the ratios by 3% or less with opt12; S01 and W03 behave alike but raise
+  Be/B by about 5%; opt22 raises Li/C by about 15%, Be/C 10%, B/C 5%; among the renormalized sets
   the spread is about 6% for Be and 10-20% for Li, and B/C moves by 4% or less (Maurin et al. 2022, Secs. 2.3, 3.3).
   Most of the Li spread comes from Fe and from reactions never measured. Inelastic sets (Tripathi99, CROSEC) agree
   above about 2 GeV/n and differ by up to about 20% below (Evoli et al. 2018, Sec. 3). Helium-target cross sections
   are scaled from hydrogen ones (Ferrando et al. 1988 scaling in both papers).
-- **What matters most.** Cross-section uncertainties are often 20-50% or more against 1-3% data precision; 12C + H and
+- **What matters most.** Cross-section uncertainties can reach 20-50% or more against 1-3% data precision; 12C + H and
   16O + H give about half of LiBeB production and about ten more reactions bring it to 80%; ghost nuclei give up to
   about 25% for some isotopes (Genolini et al. 2018, abstract and Secs. IV, VII). Starting the network at Mg captures
   about 90% of the LiBeB source at 10 GeV/n, and intermediate-lived nuclei give about 35% of the B source (Evoli et
   al. 2018, Sec. 5).
 - Calculation uncertainties from cross sections exceed the quoted errors of current precision ratio data (Evoli,
-  Aloisio and Blasi 2019, abstract, which also gives a new parametrization with branching-ratio uncertainties).
+  Aloisio and Blasi 2019, Sec. V; the abstract gives a new parametrization with branching-ratio uncertainties).
 - Renormalizing several parametrizations to nuclear data gave three equally plausible sets; against the initial sets,
   Li production rose by about 20-50%, Be by about 5-15%, B was mostly unchanged; Fe fragmentation gives up to 10% of Li
   and Be, and Ne, Mg, Si and Fe reactions about 20% of Li and B with almost no nuclear data (Maurin et al. 2022,
   abstract). A "primary Li" or a transport anomaly inferred from Li must first survive this.
 - **Nuisance scheme ("normalization, slope, shape").** Inelastic reactions get a normalization and an energy-scale
   nuisance; production reactions a normalization and a low-energy slope below a threshold; priors centred at 1 with
-  widths of about 5% (inelastic) and 10% (production); a proxy reaction standing for a fraction x of a species'
+  widths of about 5% (inelastic) and 10% (production) in the text (Table B.1 lists production means 0.85-1.10 and
+  wider widths); a proxy reaction standing for a fraction x of a species'
   production enters as N_eff = 1 + x (N_proxy - 1) (Weinrich et al. 2020a, App. B and Sec. 5.2, Eq. 11;
-  scheme from Derome et al. 2019). Post-fit shifts were about 5-15%.
+  scheme from Derome et al. 2019). Post-fit shifts were about 5-15% (abstract).
 - **Other schemes in use.** One normalization A and one slope delta per product element below 5 GeV/n,
-  sigma = sigma_default A (T/A)^delta, ten parameters for Li-N with flat priors (A in [0.1, 10] for Li, Be, B; delta
-  in [-0.3, 0.3]); a fitted A sat at its prior edge (Korsmeier and Cuoco 2021, Sec. IV Eq. 10, Table II, Sec. VII).
+  sigma = sigma_default A (T/A)^delta, ten parameters for Li-N (delta in [-0.3, 0.3]; A for C, N in [0.5, 1.5]; A for
+  Li, Be, B profiled in [0.1, 10]); A for C sat at its 0.5 edge (Korsmeier and Cuoco 2021, Eq. 10, Table II, Sec. VII).
   Or the sets themselves as model alternatives (Maurin et al. 2022). Report the scheme, the priors and any parameter
   at a prior edge; never fix the cross sections and quote the transport errors as complete.
 - Data-driven production cross sections are appearing at preprint status (Zhao et al., arXiv:2402.04659 and
@@ -136,12 +140,12 @@ semi-empirical sets renormalized to the available nuclear data (conventions and 
 **Antiprotons.** The source-term conventions (channels, antineutrons, hyperons, rescaling to nuclei) are in the first
 propagation page. Uncertainty objects in use:
 
-- an analytic parametrization fitted to new fixed-target pp and pHe data, about +-20% on the source term, dominated
-  by pp (Korsmeier, Donato and Di Mauro 2018, abstract);
+- an analytic parametrization fitted to new fixed-target pp and pHe data, up to about +-20% on the source term (slightly more below 5 GeV),
+  dominated by pp (Korsmeier, Donato and Di Mauro 2018, abstract);
 - a Monte Carlo alternative, AAfrag: QGSJET-II-04m tabulated for pp, pA, Ap and AA with hadronization retuned to
   recent accelerator data (Kachelriess, Moskalenko and Ostapchenko 2019, abstract);
 - newer work at preliminary or preprint status only: a 2025 proceedings quotes about 10-15% current uncertainty
-  (D'Angelo, Masi and Oliva, PoS ICRC2025 234, abstract page), and an NLO collinear-QCD preprint finds an antineutron
+  on the production cross sections (D'Angelo, Oliva and Masi, PoS ICRC2025 234, abstract page), and an NLO collinear-QCD preprint finds an antineutron
   excess of a few percent (Boglione et al., arXiv:2605.04150, abstract). Label them so; no newer peer-reviewed source
   determination was found on 2026-10-20.
 - Parametrization choice is a `model-alternative`; a fitted set's own error enters with its covariance. When the data
@@ -151,10 +155,10 @@ propagation page. Uncertainty objects in use:
   ([nuclear cross sections](nuclear-cross-sections.md), "Uncertainty and correlations"), otherwise keep them apart.
 
 **Secondary positrons and electrons.** Analytic pi and K production cross sections fitted to collider data, with
-hyperon channels and heavier nuclei from p + C data, give the total e+- production cross section with about 5-7%
-uncertainty over the energy range of current space-borne data (Orusa et al. 2022, abstract). Against the older Kamae
+hyperon channels and heavier nuclei from p + C data, give the p + p to e+- cross section with about 5-7%
+uncertainty at the energies of current space-borne positron data (Orusa et al. 2022, abstract). Against the older Kamae
 et al. 2006 parametrization the positron source term differs by about 20% above 5 GeV (Kamae smaller) and is larger
-in Kamae below 1 GeV; AAfrag agrees within about 10% for positrons at 1-100 GeV but is 30-40% higher for electrons
+in Kamae below 1 GeV; AAfrag (the 2021 version) agrees within about 10% for positrons at 1-100 GeV but is 30-40% higher for electrons
 and is valid only for proton energies of at least 3.1 GeV (Orusa et al. 2022, Secs. VI-VII). Lepton losses: first
 propagation page.
 
@@ -181,8 +185,8 @@ source and its correlation across species, periods and charge signs:
 | New physics (if any) | mass, channel, cross section; halo profile | none; see below |
 
 - Data covariance (correlated systematics across rigidity) is a measurement input; without it a fit to a percent-level
-  ratio is not credible (Derome et al. 2019; Cuoco et al. 2019 found the dark-matter significance moved from about
-  3 sigma to above 5 sigma between correlation models, abstract).
+  ratio is not credible (Derome et al. 2019; Cuoco et al. 2019 found the dark-matter significance at about 3 sigma
+  without data correlations and, with some benchmark correlation models, above 5 sigma, abstract).
 - **How the blocks travel.** The theory spec lists every block's parameters in `parameters` with their reference
   conventions, and the transport degeneracies in `degenerate_directions` (first propagation page, "What to report").
   In each `prediction`, a cross-section nuisance is an uncertainty component of kind `parametric` with `correlation`
@@ -202,20 +206,22 @@ Code and version; geometry, terms kept and the diffusion form with its reference
 nuisance scheme; LIS and modulation model per period and sign, inputs, averaging window and lag; data and covariance;
 degenerate directions. For new physics, the list in [cosmic-ray new physics](cosmic-ray-new-physics.md).
 
-## Sources read (2026-10-20; through a summarizing fetch, not verified)
+## Sources read (full text, 2026-10-23)
 
-Every page below, abstract or named sections, was read through a fetch tool that returns a model-written summary of the
-page. Under hep-citations' rule (`skills/hep-citations/references/citation-verification.md`, step 2) such a summary
-counts as a search snippet, not as having checked the source: each attribution, section, equation and number on this
-page and on [solar modulation models](solar-modulation-models.md) and
-[cosmic-ray new physics](cosmic-ray-new-physics.md) is unverified until re-read in the primary source, and is not to be
-quoted into a paper before that. The location named after each entry is where the summary placed the content.
+First read on 2026-10-20 through a summarizing fetch (a search snippet under hep-citations' rule,
+`skills/hep-citations/references/citation-verification.md`, step 2). On 2026-10-23 every entry was re-read in full text
+(arXiv PDF at the version listed, else the current one; the two Bartels sources and the proceedings from their own pages), and each
+attribution, section, equation and number on this page, [solar modulation models](solar-modulation-models.md) and
+[cosmic-ray new physics](cosmic-ray-new-physics.md) was checked against it and corrected where it differed (VALIDATION
+TH13-SOURCES). Usoskin et al. 2005 (JGR) was not opened and nothing rests on it. Journal references not printed in the
+PDF were matched to citing papers' reference lists, except Evoli et al. 2020, Maurin et al. 2022, Orusa et al. 2022,
+Tomassetti et al. 2017 and Ding et al. 2021 (not confirmed).
 
 - A.W. Strong, I.V. Moskalenko, arXiv:astro-ph/9807150v2 (DOI 10.1086/306470); abstract, Secs. 2-3 (Eq. 1),
   App. A-B.
 - T.A. Porter, G. Johannesson, I.V. Moskalenko, arXiv:2112.12745v2 (ApJS, DOI 10.3847/1538-4365/ac80f6); abstract,
   Secs. 2, 4, Tables 1-2.
-- C. Evoli et al., arXiv:1607.07886v2 (JCAP 02 (2017) 015); abstract, Secs. 2, 5.
+- C. Evoli et al., arXiv:1607.07886v2 (JCAP 02 (2017) 015); abstract, Secs. 2, 5, App. C.8-C.9.
 - D. Maurin, arXiv:1807.02968v2 (Comput. Phys. Commun., DOI 10.1016/j.cpc.2019.106942).
 - Y. Genolini et al., arXiv:1904.08917v2 (PRD 99 (2019) 123028).
 - N. Weinrich et al. 2020a, arXiv:2002.11406v1 (A&A, DOI 10.1051/0004-6361/202037875); abstract, Secs. 2, 5.2, App. B.
@@ -223,18 +229,18 @@ quoted into a paper before that. The location named after each entry is where th
 - C. Evoli, G. Morlino, P. Blasi, R. Aloisio, arXiv:1910.04113v2 (PRD 101 (2020) 023013).
 - C. Evoli, R. Aloisio, P. Blasi, arXiv:1904.10220v2 (PRD 99 (2019) 103023).
 - M. Korsmeier, A. Cuoco, arXiv:1607.06093v3 (PRD 94 (2016) 123019); arXiv:2103.09824v2 (PRD 103 (2021) 103016),
-  Secs. II, IV (Eq. 10), V (Table II), VII.
+  Secs. II, IV (Eq. 10), VII, Table II.
 - D. Maurin et al., arXiv:2203.00522v2 (A&A, DOI 10.1051/0004-6361/202243446); abstract, Secs. 2.3, 3, 5.
 - C. Evoli, D. Gaggero, A. Vittino, M. Di Mauro, D. Grasso, M.N. Mazziotta, arXiv:1711.09616v2 (JCAP, DOI
   10.1088/1475-7516/2018/07/006); Secs. 3, 5.
 - Y. Genolini, D. Maurin, I.V. Moskalenko, M. Unger, arXiv:1803.04686v1 (PRC 98 (2018) 034611); abstract, Secs. II,
   IV-VII, App. A.
-- Q. Zhao et al., arXiv:2402.04659v1 and arXiv:2502.05514v1 (preprints).
+- M.-J. Zhao et al., arXiv:2402.04659v1 and arXiv:2502.05514v1 (preprints).
 - L. Derome et al., arXiv:1904.08210v3 (A&A, DOI 10.1051/0004-6361/201935717).
-- M. Korsmeier, F. Donato, M. Di Mauro, arXiv:1802.03030 (PRD 97 (2018) 103019).
+- M. Korsmeier, F. Donato, M. Di Mauro, arXiv:1802.03030v2 (PRD 97 (2018) 103019).
 - M. Kachelriess, I.V. Moskalenko, S. Ostapchenko, arXiv:1904.05129v2 (Comput. Phys. Commun., DOI
   10.1016/j.cpc.2019.08.001).
-- F. D'Angelo, N. Masi, A. Oliva, PoS(ICRC2025)234 (proceedings page); M. Boglione et al., arXiv:2605.04150v1
+- F. D'Angelo, A. Oliva, N. Masi, PoS(ICRC2025)234 (proceedings page); M. Boglione et al., arXiv:2605.04150v1
   (preprint).
 - L. Orusa, M. Di Mauro, F. Donato, M. Korsmeier, arXiv:2203.13143v2 (PRD 105 (2022) 123021); abstract, Secs. I,
   VI-VII.
@@ -244,9 +250,9 @@ quoted into a paper before that. The location named after each entry is where th
 - M. Kuhlen, P. Mertsch, arXiv:1909.01154v2 (PRL 123 (2019) 251104); abstract and model section.
 - M.S. Potgieter, arXiv:1306.4421 (Living Rev. Solar Phys., DOI 10.12942/lrsp-2013-3); abstract, Secs. 2.2.1,
   4.1-4.4.
-- M.J. Boschini, S. Della Torre et al., HelMod: arXiv:1612.08445, arXiv:1903.07501, arXiv:1704.06337.
+- HelMod: S. Della Torre et al., arXiv:1612.08445; M.J. Boschini et al., arXiv:1903.07501, arXiv:1704.06337.
 - N. Tomassetti et al., arXiv:1707.06916 (ApJL 849 (2017) L32); abstract, Secs. 1-3.
-- I.G. Usoskin et al., JGR 110 (2005) A12108, DOI 10.1029/2005JA011250; Sec. 2, App. A; and arXiv:1705.07197 (DOI
+- I.G. Usoskin et al., JGR 110 (2005) A12108, DOI 10.1029/2005JA011250 (not opened); and arXiv:1705.07197 (DOI
   10.1002/2016JA023819), abstract, Secs. 2, 6.3.
 - Bartels rotations: WDC Kp/Ap format description, https://ftp.space.dtu.dk/WDC/indices/kp-ap/wdc/wdc_fmt.txt;
   Caltech ACE Science Center table, https://izw1.caltech.edu/ACE/ASC/DATA/bartels/Bartels2008-2027.pdf.
@@ -254,7 +260,7 @@ quoted into a paper before that. The location named after each entry is where th
   (PRR 2 (2020) 043017); A. Cuoco, J. Heisig, L. Klamt, M. Korsmeier, M. Kramer, arXiv:1903.01472v2 (PRD 99 (2019)
   103014).
 - A. Cuoco, M. Kramer, M. Korsmeier, arXiv:1610.03071 (PRL 118 (2017) 191102); M.-Y. Cui et al., arXiv:1610.03840v2
-  (PRL 118 (2017) 191101); F. Calore et al., arXiv:2202.03076 (SciPost Phys. 12 (2022) 163), Secs. 3, 5.1-5.4.
+  (PRL 118 (2017) 191101); F. Calore et al., arXiv:2202.03076 (SciPost Phys. 12 (2022) 163), Secs. 3, 4, 5.1-5.4.
 - M. Cirelli et al., arXiv:1012.4515v4 (JCAP 03 (2011) 051); S. Balan et al., arXiv:2303.07362v1.
 - D. Hooper, P. Blasi, P.D. Serpico, arXiv:0810.1527 (JCAP 01 (2009) 025); HAWC Collaboration, arXiv:1711.06223
   (Science, DOI 10.1126/science.aan4880); D. Hooper, I. Cholis, T. Linden, K. Fang, arXiv:1702.08436 (PRD 96 (2017)
@@ -263,10 +269,10 @@ quoted into a paper before that. The location named after each entry is where th
   arXiv:2001.09985 (PRD 102 (2020) 023015); L. Orusa et al., arXiv:2107.06300 (JCAP, DOI
   10.1088/1475-7516/2021/12/014).
 - "Searching for Dark Matter Annihilation from Milky Way Dwarf Spheroidal Galaxies with Six Years of [satellite]
-  Data" (collaboration paper), arXiv:1503.02641 (PRL 115 (2015) 231301); M. Di Mauro, F. Donato, N. Fornengo,
-  A. Vittino, arXiv:1507.07001 (JCAP 05 (2016) 031); Y.-Z. Ding et al., arXiv:2104.14881 (JCAP, DOI
+  Data" (collaboration paper; the instrument name in the title is replaced here, per the plugin's no-experiment-names
+  rule for skill text), arXiv:1503.02641 (PRL 115 (2015) 231301); M. Di Mauro, F. Donato, N. Fornengo,
+  A. Vittino, arXiv:1507.07001 (JCAP 05 (2016) 031); Y.-C. Ding et al., arXiv:2104.14881 (JCAP, DOI
   10.1088/1475-7516/2021/09/005).
 
-Not verified and therefore not used: the DRAGON2 general beta^eta form of D and its D_pp prefactor (Appendix C not
-read), the Planck 2018 annihilation limit, a numerical diffusion coefficient from the HAWC abstract, and what the
+Not verified and therefore not used: the Planck 2018 annihilation limit, a numerical diffusion coefficient from the HAWC abstract, and what the
 Wilcox "L" and "R" tilt models assume (only their names and use were read).

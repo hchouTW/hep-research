@@ -102,7 +102,8 @@ class GlobalFitsAndNewPhysics(unittest.TestCase):
         example = text[text.index("<!-- example"):text.index("<!-- /example -->")]
         self.assertIn("4.5 sigma", example)  # the excess is reported together with its later reassessment
         self.assertIn("below 1 sigma", example)
-        for phrase in ("Halo height", "Transport family", "dipole anisotropy", "two-zone"):
+        # Profumo et al. 2018 vary the diffusion radially; "two-zone" was a summary's wording (VALIDATION TH13-SOURCES)
+        for phrase in ("Halo height", "Transport family", "dipole anisotropy", "radially dependent diffusion"):
             self.assertIn(phrase, text)
 
 

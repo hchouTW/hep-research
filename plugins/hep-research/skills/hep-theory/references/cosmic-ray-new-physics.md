@@ -2,8 +2,8 @@
 
 Purpose: what enters a dark-matter or pulsar contribution to cosmic-ray antiprotons and positrons, how much each input
 moves the answer, and what must hold before an interpretation is stated. Part of [cosmic-ray
-phenomenology](cosmic-ray-phenomenology.md), whose "Sources read" lists every paper cited here (read 2026-10-20 through
-a summarizing fetch; not verified, see the rule there). Scope: the predictions and their uncertainties are in v1;
+phenomenology](cosmic-ray-phenomenology.md), whose "Sources read" lists every paper cited here (read in full text
+on 2026-10-23). Scope: the predictions and their uncertainties are in v1;
 deciding which model explains an excess is outside v1 (limited support), the significance of a signal is hep-statistics,
 and whether a published result supports a claim is hep-citations. Experiment numbers come from the bound profile, never
 from here.
@@ -15,14 +15,14 @@ itself (PPPC 4 DM ID provides all three in numerical form and estimates the yiel
 generators; Cirelli et al. 2011, abstract), plus modulation. Each one is a model alternative of the signal:
 
 - **Halo height.** The dark-matter antiproton flux scales almost linearly with L, which is uncertain by about a factor
-  2 (Calore et al. 2022, Sec. 5.2); a bound or a fitted cross section inherits that factor unless L is fitted jointly
+  2 (Calore et al. 2022, Sec. 4); a bound or a fitted cross section inherits that factor unless L is fitted jointly
   ([cosmic-ray phenomenology](cosmic-ray-phenomenology.md), halo height).
 - **Halo profile and local density.** Across cored, NFW and contracted profiles the bound moves by less than a factor
   2, and a 30% uncertainty on the local density gives about 70% on the annihilation signal (Calore et al. 2022,
   Sec. 5.2). Conventions in [dark matter](dark-matter-phenomenology.md).
-- **Transport family.** Switching from one benchmark family to another (QUAINT against BIG or SLIM) moves a fitted
-  excess by about 14% in mass and almost a factor 3 in cross section, and changes the shape of a bound, not only its
-  normalization (Calore et al. 2022, Secs. 5.1-5.2).
+- **Transport family.** Switching the benchmark family from BIG to QUAINT moves the best-fit point by about 14% in
+  mass and almost a factor 3 in cross section (Calore et al. 2022, Sec. 5.1); against BIG and SLIM, QUAINT changes the
+  shape of a bound, not only its normalization (Sec. 5.2).
 - **Modulation.** That study used the force field with one potential for antiprotons and nuclei (no charge-sign
   dependence, Sec. 3); an earlier excess claim named better production cross sections and solar modulation as what a
   confirmation would need (Cuoco, Kramer and Korsmeier 2017, abstract). For opposite-sign ratios use the drift-aware
@@ -35,11 +35,12 @@ One published antiproton excess and its reassessment is the reference case:
 (AMS-02 antiproton data.)
 
 - joint fits reported a preference for a dark-matter mass near 80 GeV at about 4.5 sigma (Cuoco, Kramer and Korsmeier
-  2017, abstract) and at 20-80 GeV (Cui et al. 2017, abstract), both noting compatibility with the Galactic-centre
-  gamma-ray excess;
-- with cross-section uncertainties from a covariance the significance stayed near 3 sigma, while benchmark data
-  correlation models moved it above 5 sigma (Cuoco et al. 2019, abstract): the data covariance, not the signal model,
-  set the answer;
+  2017, abstract; main text: formally Delta chi^2 = 25 for two extra parameters, without systematic errors) and at 20-80 GeV
+  (Cui et al. 2017, abstract), both noting compatibility with the Galactic-centre gamma-ray excess;
+- with an updated production cross section the significance fell to about 3 sigma, and cross-section uncertainties
+  (as a covariance) changed it little; benchmark models of data correlations raised it, in some cases above 5 sigma
+  (Cuoco et al. 2019, abstract and conclusions): the treatment of data correlations mattered much more than the
+  cross-section uncertainties;
 - with propagation and cross-section errors and a data correlation matrix the data are consistent with a secondary
   origin (Boudaud et al. 2020, abstract); with all systematics, including detector-absorption cross sections, the
   global significance is below 1 sigma and no mass from 10 GeV to 10 TeV is preferred (Heisig et al. 2020, abstract);
@@ -52,21 +53,23 @@ One published antiproton excess and its reassessment is the reference case:
 Sommerfeld-enhanced s-wave annihilation fitted to the positron excess faces severe constraints from dwarf-galaxy gamma
 rays and the CMB (Ding et al. 2021, abstract, which proposes p-wave annihilation to evade them); combined dwarf limits
 fall below the thermal cross section for masses below about 100 GeV in quark and tau channels (dwarf-galaxy gamma-ray
-search 2015, abstract). Lepton data can constrain dark matter in some channels more strongly than other indirect probes
-(Di Mauro et al. 2016, abstract). The excess is defined against a secondary positron prediction whose production cross
-section alone carries 5-8% on the source term and whose older parametrization differs by about 20% (Orusa et al. 2022,
+search 2015, abstract). Lepton data can, in some cases, constrain dark matter as strongly as or more strongly than
+other indirect probes (Di Mauro et al. 2016, abstract). The excess is defined against a secondary positron prediction whose production cross
+section alone carries 5-8% on the source term and whose older parametrization (Kamae, p+p, above 5 GeV) differs by about 20% (Orusa et al. 2022,
 abstract and Sec. VI; [cosmic-ray phenomenology](cosmic-ray-phenomenology.md), secondary positrons): state the secondary
 model before the excess. Lepton energy losses: [cosmic-ray propagation](cosmic-ray-propagation.md).
 
 ## Pulsars
 
-Nearby pulsars can produce the observed positron spectrum, and a nearby source would leave a small dipole anisotropy in
+Pulsars (the Galactic population of mature pulsars plus the nearest ones, such as Geminga and B0656+14) could
+plausibly produce the positron signal, and a nearby source would leave a small dipole anisotropy in
 the lepton arrival directions that could separate it from dark matter (Hooper, Blasi and Serpico 2009, abstract). The
 TeV halos around Geminga and PSR B0656+14 were read both ways: slow diffusion near the sources makes them unlikely to
 explain the excess (HAWC 2017, abstract) or makes pulsars very likely its origin (Hooper et al. 2017, abstract); the
-exclusion depends on assuming uniform diffusion, and a two-zone model reverses it (Profumo et al. 2018, abstract).
+exclusion depends on assuming homogeneous diffusion, and with a radially dependent diffusion coefficient the two
+pulsars can match the observed high-energy positron flux (Profumo et al. 2018, abstract).
 Geminga alone gives at most 20% of the positrons at the highest measured energies (Di Mauro, Manconi and Donato 2019,
-abstract); the pulsar-population band spans at least an order of magnitude (Manconi et al. 2020, abstract) and fits are
+abstract); the 1 sigma band of simulated pulsar populations spans at least an order of magnitude (Manconi et al. 2020, abstract) and fits are
 often carried by a few bright sources (Orusa et al. 2021, abstract).
 
 Antideuterons and antihelium are not covered here; their production by coalescence (conventions and B_A, p0) is in

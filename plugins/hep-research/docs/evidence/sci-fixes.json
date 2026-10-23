@@ -5377,6 +5377,42 @@
     "single-source items: the Shielding-family ParticleHP use (plugin rule table, Geant4 source not fetched), the 1% and 5% angle bias figures (computed, not quoted)"
    ],
    "note": "mostly; external claims located and opened 2026-10-22 (PDG RPP 2024 sect. 34.2.3 and eq. 34.12, arXiv:0801.1604 Eq. 6, arXiv:1206.4071 sect. 6), internal ones by file:line and script runs (check_geant4_study.py, contracts/validate.py, contracts/dependencies.py, geant4_run.py, mix_period_responses.py, species_response.py, response_adapter.py, li_ma_significance.py, pid_separation_power.py, geant4_benchmarks.py, pyhf code1/code4) and by calculation (least-squares residual covariance, TOF difference, t_max variance, Z_A); single-source items: the Shielding-family ParticleHP use, the angle bias figures"
+  },
+  {
+   "id": "TH13-SOURCES",
+   "title": "Th13 cosmic-ray pages re-read in full text; 30 statements corrected (VALIDATION TH13-SOURCES)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "arXiv:2203.00522v2",
+     "locator": "Sec. 3.2.2, Table 1",
+     "read": "2026-10-23"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1903.01472v2",
+     "locator": "abstract and conclusions",
+     "read": "2026-10-23"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1607.07886v2",
+     "locator": "App. C.8 Eq. C.23, App. C.9 Eq. C.27",
+     "read": "2026-10-23"
+    },
+    {
+     "kind": "external",
+     "citation": "arXiv:1707.06916",
+     "locator": "abstract and Sec. 3",
+     "read": "2026-10-23"
+    }
+   ],
+   "gaps": [
+    "Usoskin et al. 2005 (JGR) not opened; nothing rests on it now",
+    "five journal references not confirmed (not in the PDFs or citing papers)"
+   ],
+   "note": "yes for every arXiv source (full text at the cited version, 2026-10-23) and the Bartels and ICRC sources; each correction rechecked against its quoted passage"
   }
  ],
  "superseded": [
