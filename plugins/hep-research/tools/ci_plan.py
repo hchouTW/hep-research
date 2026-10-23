@@ -16,6 +16,10 @@ each path must run. The plan is the full run, all modules and both parts, when:
 Otherwise the plan lists the impact map's test modules (a deleted test module is dropped, and recorded) and its parts,
 plus, for a changed test helper (a .py file under tests/ that is not a test module), every test module that imports it
 by name; a helper no test module imports is the full run (its users cannot be bounded).
+The AMS-optionality check is selected like the units: ams_optional_modules lists the selected modules that are in its
+suites (tools/check_ams_optional.py all_modules), and the part ams-optional is selected when that list is not empty;
+it runs only those modules. When the impact map names the part (part:ams-optional), or the plan is full, it lists
+every module of those suites.
 Skipping is never silent: tools/run_all_checks.py --plan writes a record for every part, selected or not, and
 tools/reconcile_check_runs.py --plan recomputes the plan and fails when a run used another one.
 The plan carries plan_sha256 over its content, so runs and the gate can name the plan they used.
@@ -39,10 +43,10 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parents[1]
 PLUGIN = PurePosixPath("plugins/hep-research")
-PLAN_VERSION = "1.0.0"
+PLAN_VERSION = "1.1.0"  # 1.1.0: ams_optional_modules
 PARTS = ("static", "ams-optional")
 # CI tooling: a change to how checks are selected, run or reconciled runs everything
-FULL_PATTERNS = ("tools/ci_plan.py", "tools/run_all_checks.py", "tools/reconcile_check_runs.py",
+FULL_PATTERNS = ("tools/ci_plan.py", "tools/run_all_checks.py", "tools/reconcile_check_runs.py", "tools/check_ams_optional.py",
                  "tools/module_timings.json", "tools/optional_modules.json", "tools/optional_selection.py",
                  "requirements-ci.lock", "pyproject.toml", "tests/tools/test_ci_plan.py")
 
@@ -52,6 +56,14 @@ def _runner():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+def ams_modules() -> list[str]:
+    """The test modules the AMS-optionality check reruns (tools/check_ams_optional.py)."""
+    spec = importlib.util.spec_from_file_location("check_ams_optional", ROOT / "tools" / "check_ams_optional.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.all_modules(ROOT)
 
 
 def digest(plan: dict) -> str:
@@ -67,7 +79,7 @@ def _finish(plan: dict) -> dict:
 def full_plan(reasons: list[str], changed: list[str] | None = None, modules: list[str] | None = None) -> dict:
     every = modules if modules is not None else _runner().test_modules()
     return _finish({"plan_version": PLAN_VERSION, "full": True, "reasons": list(reasons), "changed": sorted(changed or []),
-                    "modules": sorted(every), "parts": list(PARTS), "dropped": []})
+                    "modules": sorted(every), "parts": list(PARTS), "ams_optional_modules": ams_modules(), "dropped": []})
 
 
 def helper_importers(rel: str, every: list[str], root: Path = ROOT) -> list[str]:
@@ -113,9 +125,11 @@ def plan_for(changed: list[str], every: list[str], registry: dict, root: Path = 
         users |= set(found)
     known = set(every)
     modules = sorted(m for m in set(imp["modules"]) | users if m in known)
-    parts = [p for p in PARTS if p in imp["parts"]]
+    suites = ams_modules()
+    ams = suites if "ams-optional" in imp["parts"] else sorted(set(modules) & set(suites))
+    parts = [p for p in PARTS if p in imp["parts"] or (p == "ams-optional" and ams)]
     return _finish({"plan_version": PLAN_VERSION, "full": False, "reasons": [f"impact groups: {imp['groups']}"],
-                    "changed": sorted(changed), "modules": modules, "parts": parts,
+                    "changed": sorted(changed), "modules": modules, "parts": parts, "ams_optional_modules": ams,
                     "dropped": sorted(set(imp["modules"]) - known)})
 
 

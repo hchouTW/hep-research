@@ -342,11 +342,13 @@ def _ci_plan():
     return mod
 
 
-def planned_scripts(part: str, py: str, jobs: int, no_cli: bool) -> list[tuple[str, list[str]]]:
-    """The check scripts a run of this part executes, in order (profile suites and host checks are added by main)."""
+def planned_scripts(part: str, py: str, jobs: int, no_cli: bool, plan: Path | None = None) -> list[tuple[str, list[str]]]:
+    """The check scripts a run of this part executes, in order (profile suites and host checks are added by main). With
+    a CI plan, the AMS-optionality check runs only the modules the plan selects for it."""
     out = []
     if part in ("all", "checks", "ams-optional"):
-        out.append(("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(jobs)]))
+        out.append(("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(jobs)]
+                    + (["--plan", str(plan.resolve())] if plan else [])))
     if part in ("all", "checks", "static"):
         for name, args in STATIC_SCRIPTS:
             out.append((name, [py, *args] + (["--no-cli"] if name == "measure_entrypoints" and no_cli else [])))
@@ -421,7 +423,7 @@ def main(argv=None) -> int:
     run_part = selection is None or selection["selected"]
     static = opts.part in ("all", "checks", "static") and run_part
     checks = units + (run_profile_tests() if static else [])
-    for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli) if run_part else []:
+    for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli, opts.plan) if run_part else []:
         checks.append(run_script(name, cmd, timeout=max(t, AMS_OPTIONAL_TIMEOUT) if name == "ams_optional" else t))
     if static:
         checks += [host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
