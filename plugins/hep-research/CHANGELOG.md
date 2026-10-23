@@ -3,7 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.29.0 (2026-10-23)
+
+Minor release, contracts 3.9.0 (unchanged). It adds hep-theory's cosmic-ray phenomenology (Th13) with every source read
+in full text, and architecture step 1: a wiring lint that keeps each skill's hand-kept lists in step.
+
+**Before you upgrade:**
+- **Removed:** `skills/hep-measurement/references/data-pipelines.md`, a pointer since 0.7.0; its content is in
+  hep-computing's `analysis-data-pipelines.md`.
+- **New static check `wiring`** (`tools/check_wiring.py`): a reference page not reachable from its skill's Resources
+  table, entry routing part or a registered hub, a wrong README count or a misfiled CLI script now fails
+  `run_all_checks.py --part static`. Adding a topic: `docs/maintenance.md`, "Adding a topic".
+- **Routing:** the hep-theory description names cosmic-ray propagation and solar modulation (live routing on the 82
+  cases that involve hep-theory: Claude 76/82, no regression against main; Codex 79/82).
+- **CI:** the AMS-optionality job runs only the plan's modules in its suites (CI plan 1.1.0).
+- **Budgets:** Resources tables may be 1.5-3 KB; the SKILL.md test limit is the budget's 12,288 B.
 
 Sources (Th13): the three cosmic-ray pages' sources, first read through a summarizing fetch, were re-read in full text
 (49 arXiv PDFs at the cited versions, the ICRC proceedings, the two Bartels sources) and every attribution, locator and
