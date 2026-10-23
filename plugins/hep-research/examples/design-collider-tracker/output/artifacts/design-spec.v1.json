@@ -1,0 +1,232 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "collider-tracker-v1-spec-v1",
+ "artifact_type": "design-spec",
+ "objective": "SYNTHETIC design study (illustrative collider; not CMS or any real detector)",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "design_id": "collider-tracker-v1",
+  "spec_version": 1,
+  "objectives": [
+   {
+    "id": "collider-tracker-v1:PHY-001",
+    "description": "SYNTHETIC: dilepton resonance search at a collider",
+    "observable": "dimuon and dielectron invariant mass",
+    "range": "100 GeV to 1 TeV",
+    "precision_goal": "dimuon mass resolution below 2.5% at 200 GeV (legs near 100 GeV: sigma_m/m ~ (sigma_p/p)/sqrt(2) for equal legs)"
+   }
+  ],
+  "requirements": [
+   {
+    "id": "collider-tracker-v1:REQ-TRK-001",
+    "parents": [
+     "collider-tracker-v1:PHY-001"
+    ],
+    "quantity": "momentum-resolution-core",
+    "comparator": "<=",
+    "target": 0.03,
+    "unit": "1",
+    "denominator": {
+     "rigidity_GV": {
+      "value": 100.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "muon",
+      "tolerance": 0.0
+     }
+    },
+    "kind": "driving",
+    "allocation": "collider-tracker-v1:ALC-TRK-001"
+   },
+   {
+    "id": "collider-tracker-v1:REQ-ECAL-001",
+    "parents": [
+     "collider-tracker-v1:PHY-001"
+    ],
+    "quantity": "calorimeter-energy-resolution",
+    "comparator": "<=",
+    "target": 0.02,
+    "unit": "1",
+    "denominator": {
+     "energy_GeV": {
+      "value": 50.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "electron",
+      "tolerance": 0.0
+     }
+    },
+    "kind": "driving",
+    "allocation": "collider-tracker-v1:ALC-ECAL-001"
+   },
+   {
+    "id": "collider-tracker-v1:REQ-HCAL-001",
+    "parents": [
+     "collider-tracker-v1:PHY-001"
+    ],
+    "quantity": "hadronic-energy-resolution",
+    "comparator": "<=",
+    "target": 0.15,
+    "unit": "1",
+    "denominator": {
+     "energy_GeV": {
+      "value": 100.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "pion",
+      "tolerance": 0.0
+     }
+    },
+    "kind": "derived"
+   },
+   {
+    "id": "collider-tracker-v1:REQ-TRG-001",
+    "parents": [
+     "collider-tracker-v1:PHY-001"
+    ],
+    "quantity": "trigger-efficiency",
+    "comparator": ">=",
+    "target": 0.95,
+    "unit": "1",
+    "denominator": {
+     "species": {
+      "value": "muon",
+      "tolerance": 0.0
+     },
+     "transverse_momentum_GeV": {
+      "value": 25.0,
+      "tolerance": 0.0
+     }
+    },
+    "kind": "derived"
+   },
+   {
+    "id": "collider-tracker-v1:REQ-PU-001",
+    "parents": [
+     "collider-tracker-v1:PHY-001"
+    ],
+    "quantity": "pileup-robustness",
+    "comparator": "<=",
+    "target": 0.05,
+    "unit": "1",
+    "denominator": {
+     "mean_pileup": {
+      "value": 50.0,
+      "tolerance": 0.0
+     }
+    },
+    "kind": "derived"
+   },
+   {
+    "id": "collider-tracker-v1:REQ-CONT-001",
+    "parents": [
+     "collider-tracker-v1:PHY-001"
+    ],
+    "quantity": "shower-containment",
+    "comparator": ">=",
+    "target": 0.95,
+    "unit": "1",
+    "denominator": {
+     "energy_GeV": {
+      "value": 50.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "electron",
+      "tolerance": 0.0
+     }
+    },
+    "kind": "derived"
+   }
+  ],
+  "allocations": [
+   {
+    "id": "collider-tracker-v1:ALC-TRK-001",
+    "requirement": "collider-tracker-v1:REQ-TRK-001",
+    "rule": "quadrature",
+    "independent": true,
+    "items": [
+     {
+      "name": "intrinsic",
+      "value": 0.02
+     },
+     {
+      "name": "scattering",
+      "value": 0.015
+     },
+     {
+      "name": "alignment",
+      "value": 0.01
+     }
+    ],
+    "margin": 0.003
+   },
+   {
+    "id": "collider-tracker-v1:ALC-ECAL-001",
+    "requirement": "collider-tracker-v1:REQ-ECAL-001",
+    "rule": "quadrature",
+    "independent": true,
+    "items": [
+     {
+      "name": "stochastic",
+      "value": 0.012
+     },
+     {
+      "name": "constant",
+      "value": 0.01
+     },
+     {
+      "name": "leakage",
+      "value": 0.008
+     }
+    ],
+    "margin": 0.002
+   }
+  ],
+  "constraints": [
+   {
+    "id": "collider-tracker-v1:CON-MASS-001",
+    "type": "mass",
+    "hardness": "hard",
+    "quantity": "mass-budget",
+    "comparator": "<=",
+    "target": 25000.0,
+    "unit": "kg",
+    "denominator": {}
+   }
+  ],
+  "comparison_basis": {
+   "quantity": "mass-budget",
+   "tolerance_relative": 0.05,
+   "note": "candidates are compared at equal mass"
+  }
+ }
+}

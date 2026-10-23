@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 39,
-   "bytes": 518888,
+   "bytes": 520727,
    "uncited": 0
   },
   "hep-measurement": {
@@ -411,9 +411,12 @@
    "cited_by": [
     "skills/hep-authoring/README.md",
     "skills/hep-authoring/SKILL.md",
+    "skills/hep-detector/references/system-design-workflow.md",
     "tests/skills/hep_authoring/test_review_pilot_fixes.py"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-detector"
+   ],
    "last_commit": "cecc4dcb 2026-10-22"
   },
   {
@@ -1161,7 +1164,7 @@
     "tests/skills/hep_computing/test_workflow_c6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8ab97cb 2026-10-23"
+   "last_commit": "ed88037e 2026-10-24"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -2414,8 +2417,8 @@
   {
    "path": "skills/hep-detector/references/system-design-workflow.md",
    "owner": "hep-detector",
-   "bytes": 13171,
-   "lines": 169,
+   "bytes": 15010,
+   "lines": 189,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-design-principles.md",
@@ -2423,7 +2426,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "97c6b0b5 2026-10-24"
+   "last_commit": "ed88037e 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",

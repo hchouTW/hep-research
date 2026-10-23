@@ -14,7 +14,8 @@ check_decision(decision, exposure) verifies the binding against the current reco
 edited history does) and refuses a decision that predates entries it claims to have seen, or postdates entries it
 leaves out ('seen' understated). Given base_dir (the CLI passes the decision record's folder, or --artifacts-root), it
 also opens each artifacts[].ref (relative refs resolve against base_dir, absolute ones are used as they are) and
-compares its file SHA-256 with artifacts[].sha256: a different hash is lineage.artifact_mismatch, a ref that is not a
+compares its file SHA-256 with artifacts[].sha256 (except an entry of a 1.1.0 measurement-acceptance record bound by
+binding "parameters", whose parameter_digest contracts/design.py compares, DEC-06): a different hash is lineage.artifact_mismatch, a ref that is not a
 readable file lineage.artifact_missing or lineage.artifact_unreadable, all errors (as a missing exposure record is).
 Without base_dir (an in-memory record with no location) artifacts are not opened.
 
@@ -160,7 +161,7 @@ def check_artifacts(dec: dict, base_dir: Path, rep: Report) -> None:
         except OSError as exc:
             rep.add("error", f"{where}.ref", "lineage.artifact_unreadable", f"cannot read {path}: {exc}")
             continue
-        if actual != art["sha256"]:
+        if actual != art["sha256"] and art.get("binding") != "parameters":  # DEC-06: digest checked by design.py
             rep.add("error", f"{where}.sha256", "lineage.artifact_mismatch",
                     f"{art['ref']}: file SHA-256 {actual} differs from the record")
 
@@ -240,6 +241,11 @@ def check_version_use(dec: dict, rep: Report) -> None:
         rep.add("error", "$.seen", "lineage.not_applicable_not_design", "only design records may mark seen not-applicable")
     if not design and "dispositions" in dec:
         rep.add("error", "$.dispositions", "lineage.dispositions_not_design", "only design records carry dispositions")
+    bound = [a for a in dec["artifacts"] if "binding" in a or "parameter_digest" in a]
+    if bound and (dec["category"] != "measurement-acceptance" or dec["record_version"] != "1.1.0"
+                  or any(a.get("binding") != "parameters" or "parameter_digest" not in a for a in bound)):
+        rep.add("error", "$.artifacts", "lineage.binding_not_allowed",
+                "only a 1.1.0 measurement-acceptance record binds candidates by binding 'parameters' with a parameter_digest")
     if design and not dec["artifacts"]:
         rep.add("error", "$.artifacts", "lineage.design_no_artifacts", "a design record lists at least one artifact")
 

@@ -31,6 +31,8 @@ Operations:
   upstream evaluation), an alignment curvature term a (1/GV) and a declared tail: effective core
   s = sqrt(core^2 + (a R)^2), a tail of fraction f and width w s, and the RMS sqrt((1 - f) s^2 + f (w s)^2), all in
   sigma(1/R) x R (relative). The tail is an assumption the candidate declares, never fitted here.
+- material-sum (F1, CHN-14): the material along the track, x/X0 = sum of the given contributions (measuring layers,
+  passive material, the services each subsystem adds), with a declared relative uncertainty; an arithmetic sum.
 - precision-from-result (F3): the expected relative precision written back from a hep-statistics statistical-result
   on an Asimov dataset (status asimov; extension.results.expected_relative_uncertainty); the result is read, never
   computed here.
@@ -45,6 +47,7 @@ Usage:
   design_estimates.py response-assembly --core C --rigidity R --alignment-per-gv A --tail-fraction F
       --tail-width-factor W [--status LABEL]
   design_estimates.py precision-from-result --result FILE [--status LABEL]
+  design_estimates.py material-sum --x-over-x0 X ... [--relative-uncertainty U] [--status LABEL]
 """
 from __future__ import annotations
 
@@ -269,6 +272,14 @@ def precision_from_result(path: Path) -> dict:
                     "measurement (LIM-06)"}
 
 
+def material_sum(parts: list[float], rel: float) -> dict:
+    parts = _finite(parts, "--x-over-x0")
+    rel = _finite([rel], "--relative-uncertainty")[0]
+    total = math.fsum(parts)
+    return {"x_over_x0": total, "uncertainty": rel * total, "n_contributions": len(parts),
+            "uncertainty_meaning": "one standard deviation, the declared relative uncertainty of the material description"}
+
+
 def pid_rejection(separation: float, efficiency: float, convention: str) -> dict:
     if not math.isfinite(separation) or separation < 0:
         raise InputError("--separation must be finite and >= 0")
@@ -318,6 +329,10 @@ def main(argv=None) -> int:
     p.add_argument("--tail-fraction", dest="tail_fraction", type=float, required=True)
     p.add_argument("--tail-width-factor", dest="tail_width_factor", type=float, required=True)
     add_status_argument(p)
+    p = sub.add_parser("material-sum", help="material along the track from all contributions (CHN-14)")
+    p.add_argument("--x-over-x0", dest="x_over_x0", type=float, nargs="+", required=True)
+    p.add_argument("--relative-uncertainty", dest="relative_uncertainty", type=float, default=0.1)
+    add_status_argument(p)
     p = sub.add_parser("precision-from-result", help="expected precision from an Asimov statistical-result")
     p.add_argument("--result", type=Path, required=True)
     add_status_argument(p)
@@ -335,6 +350,8 @@ def main(argv=None) -> int:
         elif args.command == "response-assembly":
             result = response_assembly(args.core, args.rigidity, args.alignment_per_gv, args.tail_fraction,
                                        args.tail_width_factor)
+        elif args.command == "material-sum":
+            result = material_sum(args.x_over_x0, args.relative_uncertainty)
         elif args.command == "precision-from-result":
             result = precision_from_result(args.result)
         else:

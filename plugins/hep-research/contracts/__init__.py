@@ -177,6 +177,9 @@ CONTRACTS_VERSION = "3.11.0"
 # upstream_directions and the expression input_artifact, and the geometry mapping table
 # (contracts/rules/design_geometry.json, contracts/schemas/design_geometry.json). A 3.10 reader refuses the binding
 # value (schema enum) instead of reading a parameter-bound input as a stale hash.
+# Detector design M3 extends it again (OQ-03): the dataset-record optional design_measurement (F5), decision record
+# 1.1.0 artifacts[] binding "parameters" with parameter_digest (measurement-acceptance only, DEC-06), and the
+# expression parameters_all (CHN-14).
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

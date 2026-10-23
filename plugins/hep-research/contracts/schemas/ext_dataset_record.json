@@ -1,15 +1,129 @@
-{"$comment": "Owner: contracts layer. Stands alone; may reference an experiment profile by id without loading it (J6). Values only with provenance.",
+{
+ "$comment": "Owner: contracts layer. Stands alone; may reference an experiment profile by id without loading it (J6). Values only with provenance.",
  "type": "object",
- "required": ["dataset_id", "source_evidence_ids", "observable", "covariance", "status"],
+ "required": [
+  "dataset_id",
+  "source_evidence_ids",
+  "observable",
+  "covariance",
+  "status"
+ ],
  "properties": {
-  "dataset_id": {"$ref": "common.json#/$defs/namespaced_id"},
-  "source_evidence_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}},
-  "observable": {"$ref": "common.json#/$defs/observable_spec"},
-  "data": {"$ref": "common.json#/$defs/binned_data"},
-  "covariance": {"type": "object", "required": ["status"], "properties": {
-     "status": {"type": "string", "enum": ["present", "absent", "partial"]}, "ref": {"type": "string"}, "note": {"type": "string"}}},
-  "period": {"anyOf": [{"type": "object"}, {"$ref": "common.json#/$defs/missing"}]},
-  "conditions": {"type": "string"},
-  "status": {"type": "string", "x-vocab": "dataset_statuses"},
-  "experiment_profile": {"$ref": "common.json#/$defs/profile_id"}
- }}
+  "dataset_id": {
+   "$ref": "common.json#/$defs/namespaced_id"
+  },
+  "source_evidence_ids": {
+   "type": "array",
+   "items": {
+    "$ref": "common.json#/$defs/namespaced_id"
+   }
+  },
+  "observable": {
+   "$ref": "common.json#/$defs/observable_spec"
+  },
+  "data": {
+   "$ref": "common.json#/$defs/binned_data"
+  },
+  "covariance": {
+   "type": "object",
+   "required": [
+    "status"
+   ],
+   "properties": {
+    "status": {
+     "type": "string",
+     "enum": [
+      "present",
+      "absent",
+      "partial"
+     ]
+    },
+    "ref": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  },
+  "period": {
+   "anyOf": [
+    {
+     "type": "object"
+    },
+    {
+     "$ref": "common.json#/$defs/missing"
+    }
+   ]
+  },
+  "conditions": {
+   "type": "string"
+  },
+  "status": {
+   "type": "string",
+   "x-vocab": "dataset_statuses"
+  },
+  "experiment_profile": {
+   "$ref": "common.json#/$defs/profile_id"
+  },
+  "design_measurement": {
+   "$comment": "3.11.0 (detector design M3, FID-01 F5, FID-07): a prototype or test-beam measurement of a design figure of merit, with the configuration (the prototype's subsystem parameters) it was measured in; read by evaluate_design.py f5 and contracts/design.py",
+   "type": "object",
+   "required": [
+    "figure_of_merit",
+    "denominator",
+    "value",
+    "uncertainty",
+    "configuration"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "figure_of_merit": {
+     "type": "string",
+     "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+    },
+    "denominator": {
+     "type": "object",
+     "additionalProperties": {
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "value": {
+     "type": "number"
+    },
+    "uncertainty": {
+     "$ref": "ext_design_evaluation.json#/properties/uncertainty"
+    },
+    "configuration": {
+     "$comment": "parameter path (<DES-id>.parameters.<name>) -> {value, unit} at measurement time",
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "value",
+       "unit"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "value": {
+        "type": [
+         "number",
+         "string",
+         "array",
+         "boolean"
+        ]
+       },
+       "unit": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

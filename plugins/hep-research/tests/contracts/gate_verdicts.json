@@ -1056,6 +1056,146 @@
   "ok": true,
   "strict_ok": true
  },
+ "examples/design-collider-tracker/output/artifacts/candidates/cand-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/candidates/cand-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/candidates/cand-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/design-spec.v1.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-ECAL-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-ECAL-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-ECAL-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-MASS-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-MASS-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-MASS-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-TRK-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-TRK-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/CALC-TRK-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-CONT-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-CONT-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-CONT-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-HCAL-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-HCAL-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-HCAL-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-PU-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-PU-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-PU-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-TRG-A.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-TRG-B.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/evaluations/EST-TRG-P.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/reports/design-report.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-ECAL-A.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-ECAL-B.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-ECAL-P.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-MASS-A.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-MASS-B.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-MASS-P.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-TRK-A.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-TRK-B.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-collider-tracker/output/artifacts/runs/CALC-TRK-P.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "examples/design-space-spectrometer/output/artifacts/candidates/cand-L.json": {
   "ok": true,
   "strict_ok": true

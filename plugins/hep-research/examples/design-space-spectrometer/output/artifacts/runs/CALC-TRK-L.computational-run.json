@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-L.json",
-   "sha256": "5e957ba494a46a13f3c302743803462be235b8b2c56f21130f8d05e3147be990",
+   "sha256": "deaf4ce6686de6e6dfc96c26ef8a86fbefee4d9b01212d42d34234cd9e170de1",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
@@ -40,7 +40,7 @@
   "input_manifest": [
    {
     "path": "candidates/cand-L.json",
-    "sha256": "5e957ba494a46a13f3c302743803462be235b8b2c56f21130f8d05e3147be990"
+    "sha256": "deaf4ce6686de6e6dfc96c26ef8a86fbefee4d9b01212d42d34234cd9e170de1"
    }
   ],
   "tools": [

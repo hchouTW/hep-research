@@ -1,0 +1,76 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "collider-tracker-v1-CALC-TRK-A",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-A.json",
+   "sha256": "a0f1301341fd7e61a7d4f790a6ca1b8fee52470a9de3122fa0690c5d86643c4a",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-A",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-TRK-A.computational-run.json",
+   "sha256": "3fa554ebe066bcefd913c203395c4ad562b5602c633b8dc946d5541e3ce1ba54",
+   "artifact_type": "computational-run",
+   "artifact_id": "collider-tracker-v1-CALC-TRK-A-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "collider-tracker-v1:CALC-TRK-A",
+  "candidate": "collider-tracker-v1:cand-A",
+  "figure_of_merit": "momentum-resolution-core",
+  "denominator": {
+   "rigidity_GV": 100.0,
+   "species": "muon"
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 0.014096342606950083,
+  "unit": "1",
+  "run_ref": "runs/CALC-TRK-A.computational-run.json",
+  "parameter_refs": [
+   "DES-MAG-001.parameters.field_T",
+   "DES-TRK-001.parameters.layer_positions_m",
+   "DES-TRK-001.parameters.layer_x_over_x0",
+   "DES-TRK-001.parameters.passive_x_over_x0",
+   "DES-TRK-001.parameters.point_resolution_um"
+  ],
+  "parameter_digest": "1bebf5b42bd8a63c7c87716e7a09b4cd7044ecda909e3c68c4604a3cfc623ba6",
+  "validity": {
+   "assumptions": [
+    "uniform field over the lever arm",
+    "lambda = 0 (p = p_T), normal incidence",
+    "Gaussian point errors",
+    "no misalignment",
+    "material spread uniformly along the track"
+   ],
+   "in_domain": true
+  }
+ }
+}

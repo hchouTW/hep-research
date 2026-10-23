@@ -98,8 +98,8 @@ def spec_ext(version: int = 1, resolution_target: float = 0.6, confusion_target:
              "allocation": f"{NS}:ALC-CC-001", "verification": {"method": "simulation validated with data"}}],
         "allocations": [
             {"id": f"{NS}:ALC-TRK-001", "requirement": f"{NS}:REQ-TRK-001", "rule": "quadrature", "independent": True,
-             "items": [{"name": "intrinsic", "value": 0.5}, {"name": "scattering", "value": 0.05},
-                       {"name": "alignment", "value": 0.3}], "margin": 0.1},
+             "items": [{"name": "intrinsic", "value": 0.4}, {"name": "scattering", "value": 0.05},
+                       {"name": "alignment", "value": 0.25}], "margin": 0.1},
             {"id": f"{NS}:ALC-CC-001", "requirement": f"{NS}:REQ-CC-001", "rule": "linear",
              "items": [{"name": "core", "value": 0.01}, {"name": "tails", "value": 0.03}], "margin": 0.01}],
         "constraints": [{"id": f"{NS}:CON-MASS-001", "type": "mass", "hardness": "hard", "quantity": "mass-budget",

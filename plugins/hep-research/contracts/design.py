@@ -319,6 +319,7 @@ class Project:
         self.candidates: dict[str, Path] = {}
         self.evals: dict[Path, Evaluation] = {}
         self.runs: list[Path] = []
+        self.records: list[dict] = []
         self._scan()
 
     # -- loading
@@ -566,6 +567,18 @@ class Evaluator:
             return self.param(e["parameter"])
         if "budget" in e:
             return self.budget(e["budget"])
+        if "parameters_all" in e:  # CHN-14: one parameter over every subsystem that declares it (coupling)
+            spec, out = e["parameters_all"], []
+            for sid in sorted(self.subs):
+                par = (self.subs[sid].get("parameters") or {}).get(spec["name"])
+                if isinstance(par, dict):
+                    if par.get("unit") != spec["unit"]:
+                        raise ExprError(f"{sid}.parameters.{spec['name']} is in {par.get('unit')!r}, the contract reads "
+                                        f"{spec['unit']!r}")
+                    self.refs.add(f"{sid}.parameters.{spec['name']}")
+                    out += flat(par["value"])
+            self.refs.add("subsystems")  # a new subsystem may bring the parameter
+            return out
         if "denominator" in e:
             if e["denominator"] not in den:
                 raise ExprError(f"the denominator has no {e['denominator']!r}")
@@ -825,14 +838,15 @@ def check_contract(proj: Project, ev: Evaluation) -> None:
     if "value" not in ext:
         ev.err("design.malformed", "every evaluation except an unavailable one and F0 carries a value")
         return
+    if ev.stale:  # ART-61: a stale evaluation is not compared with its contract, study or dataset
+        ev.bound = ext.get("bound", "estimate")
+        ev.unreviewed = fid == "F5"
+        return
     if fid == "F4":
         check_f4(proj, ev)
         return
     if fid == "F5":
         check_f5(proj, ev)
-        return
-    if ev.stale:  # ART-61: a stale evaluation is not compared with its contract
-        ev.bound = ext.get("bound", "estimate")
         return
     run_ref = ext.get("run_ref")
     if not run_ref:
@@ -1045,16 +1059,64 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
 
 
 def check_f5(proj: Project, ev: Evaluation) -> None:
-    """FID-01, FID-06: F5 is an estimate from a user-supplied dataset-record; it decides only after a
-    measurement-acceptance record approves the dataset (M3), until then evidence.unreviewed."""
+    """FID-01, FID-06, FID-07, DEC-06: F5 is an estimate from a user-supplied dataset-record whose design_measurement
+    gives the figure of merit, denominator, value, uncertainty and the configuration it was measured in. The value and
+    uncertainty are the dataset's (else a contract mismatch); a configuration that differs from the candidate's
+    parameters is domain.mismatch (a measurement of another layout cannot stand in); the evaluation decides only when
+    a valid human measurement-acceptance record approves the dataset as it is now and covers this candidate through
+    the digest of its measurement-configuration parameters; until then evidence.unreviewed."""
     ev.bound = "estimate"
     if ev.ext.get("bound") != "estimate":
         ev.err("design.contract_mismatch", "an F5 evaluation is an estimate")
     ref = ev.ext.get("dataset_ref")
-    ds = proj.docs.get(proj.resolve(ref)) if ref else None
+    ds_path = proj.resolve(ref) if ref else None
+    ds = proj.docs.get(ds_path) if ds_path else None
+    ev.unreviewed = True
     if ds is None or ds.get("artifact_type") != "dataset-record":
         ev.err("design.contract_mismatch", "an F5 evaluation names its dataset-record in dataset_ref")
-    ev.unreviewed = True
+        return
+    dm = (ds.get("extension") or {}).get("design_measurement")
+    if not isinstance(dm, dict):
+        ev.err("design.contract_mismatch", "the dataset-record has no design_measurement")
+        return
+    if dm.get("figure_of_merit") != ev.fom:
+        ev.domain.append(f"the dataset measures {dm.get('figure_of_merit')}, not {ev.fom}")
+    if not close(dm.get("value"), ev.ext.get("value")) or not same(dm.get("uncertainty"), ev.ext.get("uncertainty")):
+        ev.err("design.contract_mismatch", "value or uncertainty differ from the dataset's design_measurement")
+    if not same(dm.get("denominator"), ev.ext.get("denominator")):
+        ev.err("design.contract_mismatch", "denominator differs from the dataset's design_measurement")
+    cid = ev.ext.get("candidate", "")
+    config = dm.get("configuration") or {}
+    current = proj.parameter_objects(cid, config)
+    for pref, want in sorted(config.items()):
+        have = current.get(pref)
+        if not isinstance(have, dict) or have.get("unit") != want.get("unit") or not same(have.get("value"), want.get("value")):
+            ev.domain.append(f"measured with {pref} = {want.get('value')} {want.get('unit')}; the candidate has "
+                             f"{(have or {}).get('value')} {(have or {}).get('unit')} (FID-07)")
+    digest = proj.parameter_digest(cid, config)
+    ds_sha = proj.sha.get(ds_path) if ds_path else None
+    for rec in proj.records:
+        if rec["category"] != "measurement-acceptance" or not rec["_valid"]:
+            continue
+        arts = {proj.resolve(a["ref"]): a for a in rec.get("artifacts", [])}
+        cand_ok = any(proj.docs.get(p, {}).get("artifact_type") == "design-candidate"
+                      and proj.docs[p]["extension"].get("candidate_id") in
+                      {proj.docs[c]["extension"]["candidate_id"] for c in (proj.candidate_chain(cid) or [])}
+                      and a.get("binding") == "parameters" and a.get("parameter_digest") == digest
+                      for p, a in arts.items())
+        if ds_path in arts and arts[ds_path].get("sha256") == ds_sha and cand_ok:
+            ev.unreviewed = False
+            return
+
+
+def check_calibration(proj: Project) -> None:
+    """CHN-16: every subsystem's calibration names at least one control sample."""
+    for cid, p in proj.candidates.items():
+        for sid, sub in (proj.effective(cid) or {}).items():
+            cal = sub.get("calibration")
+            if not isinstance(cal, dict) or not cal.get("method") or not cal.get("control_samples"):
+                proj.error("design.calibration_incomplete", proj.rel(p),
+                           f"{cid} {sid}: a calibration method and at least one control sample (CHN-16)")
 
 
 # ---------------------------------------------------------------- the evaluation pipeline
@@ -1416,18 +1478,27 @@ def aggregate(proj: Project, req: dict, effective: str, orphans: dict) -> dict:
             "_deciding": deciding, "_used": used}
 
 
-def missing_evidence(proj: Project, req: dict, agg: dict) -> list[str]:
+def missing_evidence(proj: Project, req: dict, agg: dict, effective: str | None = None) -> list[str]:
     """What compliance still needs (RPT-03, M0 acceptance): the compliance fidelity of each figure of merit in the
     chains, the adequacy table's 'with' upstreams and the requirement's own upstreams."""
     if agg["result"] == "pass":
         return []
+    if agg["result"] == "fail" and "bound.excludes" in agg["codes"]:
+        # an optimistic bound already misses the target: higher fidelity only adds effects that make it worse
+        return ["none: excluded by an optimistic bound; change the candidate or the requirement"]
     rules = proj.fom_rules(req["quantity"]) or {}
     need = rules.get("compliance", "F5")
     mf = (req.get("verification") or {}).get("min_fidelity")
     if mf and RANK[mf] > RANK[need]:
         need = mf
     out: list[str] = []
-    evs = [r["_e"] for r in agg["_used"]] or [e for e in proj.evals.values() if e.fom == req["quantity"]]
+    # the evaluations of this effective candidate only: another candidate's evidence never clears this row
+    evs = [r["_e"] for r in agg["_used"]] or [e for e in proj.evals.values() if e.fom == req["quantity"]
+                                              and e.effective == effective]
+    evs = [e for e in evs if not e.ext.get("unavailable")]  # an unavailable record has no fidelity to count
+
+    def present(e, foms) -> bool:  # the same test as the verdict rules (FID-11): compatible, not unavailable
+        return any(u.fom in foms and compatible(u, e) and not u.ext.get("unavailable") for u in e.upstreams)
     if not any(RANK[e.fidelity] >= RANK[need] for e in evs):
         out.append(f"{req['quantity']} at {need} or above (compliance threshold)")
     for e in evs:
@@ -1437,10 +1508,10 @@ def missing_evidence(proj: Project, req: dict, agg: dict) -> list[str]:
             if RANK[fid] < RANK[c]:
                 out.append(f"{fom} at {c} or above (in the chain of {e.eid}, now {fid})")
     for group in rules.get("compliance_upstreams", []):
-        if not any(u.fom in group for e in evs for u in e.upstreams):
+        if not any(present(e, set(group)) for e in evs):
             out.append(f"{' or '.join(group)} (required for compliance, ADQ-02)")
     for r in (req.get("verification") or {}).get("required_upstreams", []):
-        if not any(u.fom == r for e in evs for u in e.upstreams):
+        if not any(present(e, {r}) for e in evs):
             out.append(f"{r} (required by the requirement's verification)")
     return sorted(dict.fromkeys(out))
 
@@ -1487,6 +1558,14 @@ def check_spec(proj: Project, spec_path: Path) -> None:
         if a["rule"] == "quadrature" and not a.get("independent") and not a.get("correlation"):
             proj.error("design.allocation_dependence", where,
                        f"{a['id']}: a quadrature allocation needs independent items or a correlation matrix (ART-12)")
+        req = next((r for r in ext.get("requirements", []) if r["id"] == a["requirement"]), None)
+        if req is not None and req["comparator"] == "<=" and isinstance(req["target"], (int, float)):
+            vals = [i["value"] for i in a["items"]]
+            total = math.fsum(vals) if a["rule"] == "linear" else math.sqrt(math.fsum(v * v for v in vals))
+            if total + a["margin"] > req["target"] * (1 + 1e-12):  # ART-12: the allocation closes on its target
+                proj.error("design.allocation_not_closed", where,
+                           f"{a['id']}: the items combine ({a['rule']}) to {total:.6g}; with the margin {a['margin']:g} "
+                           f"that exceeds the target {req['target']:g} of {req['id']}")
         if a.get("correlation"):
             n = len(a["items"])
             c = a["correlation"]
@@ -1670,16 +1749,18 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
     proj = Project(artifacts, decisions, Registry(contract_dirs) if contract_dirs else None, adequacy)
     for prob in proj.registry.problems:
         proj.error("design.contract_unreadable", "$contracts", prob)
-    analyze_evaluations(proj)
-    for e in proj.evals.values():
-        for code, msg in e.errors:
-            proj.error(code, e.rel, msg)
-    check_budgets(proj)
     designs = {proj.docs[p]["extension"]["design_id"] for p in proj.specs}
     if len(designs) > 1:
         proj.error("design.several_designs", ".", f"one artifacts_dir holds one design; found {sorted(designs)}")
     design_id = sorted(designs)[0] if designs else None
     records = load_records(proj, design_id) if design_id else []
+    proj.records = records  # measurement-acceptance approvals are read by check_f5 (FID-06)
+    analyze_evaluations(proj)
+    for e in proj.evals.values():
+        for code, msg in e.errors:
+            proj.error(code, e.rel, msg)
+    check_budgets(proj)
+    check_calibration(proj)
     current, change_flags = current_spec(proj, records)
     out: dict = {"design_id": design_id, "note": NOTE,
                  "adequacy": {"version": proj.adequacy.get("adequacy_version"), "state": proj.adequacy.get("state"),
@@ -1709,7 +1790,7 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
                        "provisional": agg["result"] == "pass" and not proj.adequacy.get("frozen"),
                        "missing_evaluations": agg["missing_evaluations"], "used": agg["used"],
                        "skipped": agg["skipped"], "conflict_inspect": agg["conflict_inspect"],
-                       "maturity": agg["maturity"], "missing_evidence": missing_evidence(proj, req, agg)}
+                       "maturity": agg["maturity"], "missing_evidence": missing_evidence(proj, req, agg, d)}
                 if kind == "requirements" and req["kind"] == "driving" and agg["result"] == "inconclusive":
                     row["proposed_disposition"] = ("accept-risk" if agg["codes"] == ["capability.unavailable"]
                                                    else "next-study")  # RPT-05
@@ -1762,6 +1843,13 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
                          "stale": e.stale, "errors": [c for c, _ in e.errors]} for e in proj.evals.values()],
         "errors": proj.errors,
     })
+    review = review_axis(proj, records, out)
+    if review["reviewed"]:
+        for item in out["requirements"] + out["constraints"]:
+            for m in item["matrix"]:
+                m["maturity"]["review_axis"] = "reviewed"
+    out["review"] = review
+    out["baseline"] = "baselined" if review["reviewed"] else "draft"
     return out
 
 
@@ -1775,14 +1863,18 @@ def ranking(proj: Project, groups: dict, basis: dict) -> dict:
         return {"status": "refused", "reason": f"comparison_basis does not hold: {basis.get('reason')} (ART-15, RPT-07)"}
     if len(groups) < 2:
         return {"status": "refused", "reason": "fewer than two candidates survive screening"}
-    picks = {}
+    picks, lacking = {}, []
     for d, cids in groups.items():
         usable = [e for e in proj.evals.values() if e.fom == fom and e.effective == d and not e.errors and not e.stale
                   and not e.invalid and not e.unresolved and e.bound in ("estimate", "conservative")
                   and e.ext.get("value") is not None]
         if not usable:
-            return {"status": "refused", "reason": f"{', '.join(cids)} has no non-optimistic, current {fom} evaluation (CHN-06)"}
+            lacking += cids
+            continue
         picks[d] = max(usable, key=lambda e: lowest(e.vector))
+    if lacking:
+        return {"status": "refused",
+                "reason": f"{', '.join(sorted(lacking))} have no non-optimistic, current {fom} evaluation (CHN-06)"}
     vectors = {tuple(sorted((f, x) for f, x, _ in e.vector)) for e in picks.values()}
     dens = {json.dumps(e.ext.get("denominator"), sort_keys=True) for e in picks.values()}
     if len(vectors) != 1:
@@ -1795,6 +1887,61 @@ def ranking(proj: Project, groups: dict, basis: dict) -> dict:
                        "uncertainty": e.ext.get("uncertainty"), "bound": e.bound} for d, e in order],
             "note": "an ordering of these candidates on expected precision (smaller is better); differences within the "
                     "uncertainties are not decided, and no global optimum is claimed"}
+
+
+def report_payload(full: dict) -> dict:
+    """The derivation as the design report stores it (evaluate_design.py report): everything but the per-evaluation
+    list."""
+    return {k: v for k, v in full.items() if k != "evaluations"}
+
+
+def payload_digest(payload: dict, exclusions) -> str:
+    """MAT-05: the canonical hash of a report payload without the excluded keys (at any depth): the fields the H4
+    approval itself sets, and the rendering choices."""
+    def strip(v):
+        if isinstance(v, dict):
+            return {k: strip(x) for k, x in v.items() if k not in exclusions}
+        if isinstance(v, list):
+            return [strip(x) for x in v]
+        return v
+    return canonical_sha256(strip(payload))
+
+
+def review_axis(proj: Project, records: list[dict], full: dict) -> dict:
+    """MAT-04..MAT-08, DEC-12, DEC-13, DEC-20: only a design-baseline (H4) record sets the review axis, and only when
+    the actor is human and every hash matches, artifacts[] is exactly the derived design report and the evaluations it
+    used, the report equals the one recomputed now (MAT-05 exclusions), and dispositions[] covers every inconclusive
+    driving requirement. The axis is advisory: the actor is self-declared (LIM-01)."""
+    excl = set((proj.adequacy.get("hash_exclusions") or {}).get("fields", []))
+    now = payload_digest(report_payload(full), excl)
+    used = {proj.resolve(r["file"]) for item in full.get("requirements", []) + full.get("constraints", [])
+            for m in item["matrix"] for r in m["used"]}
+    open_driving = {item["id"] for item in full.get("requirements", []) if item["kind"] == "driving"
+                    and any(m["result"] == "inconclusive" for m in item["matrix"])}
+    out = []
+    reviewed_by = None
+    for r in (x for x in records if x["category"] == "design-baseline"):
+        reasons = []
+        if not r["_valid"]:
+            reasons.append("not a valid human record (actor, schema or a changed hash): " + ", ".join(r["_findings"]))
+        reports = [p for p in r["_paths"] if proj.docs.get(p, {}).get("artifact_type") == "communication"
+                   and "design_report" in (proj.docs[p].get("extension") or {})]
+        evals = {p for p in r["_paths"] if proj.docs.get(p, {}).get("artifact_type") == "design-evaluation"}
+        others = set(r["_paths"]) - set(reports) - evals
+        if len(reports) != 1:
+            reasons.append("artifacts[] lists exactly one derived design report")
+        elif payload_digest(proj.docs[reports[0]]["extension"]["design_report"], excl) != now:
+            reasons.append("the approved report differs from the one recomputed now (MAT-04 e)")
+        if evals != used or others:
+            reasons.append("artifacts[] is not exactly the report and the evaluations it used (MAT-04 c)")
+        missing = sorted(open_driving - {d["requirement"] for d in r.get("dispositions") or []})
+        if missing:
+            reasons.append(f"no disposition for the inconclusive driving requirement(s) {missing} (DEC-13)")
+        out.append({"file": r["_file"], "sets_review_axis": not reasons, "reasons": reasons})
+        if not reasons:
+            reviewed_by = r["_file"]
+    return {"reviewed": reviewed_by is not None, "record": reviewed_by, "records": out,
+            "note": "advisory: the actor is self-declared; formal approval is a trusted gate outside the agent (LIM-01)"}
 
 
 def status_summary(full: dict) -> dict:

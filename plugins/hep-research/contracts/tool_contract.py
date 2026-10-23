@@ -212,6 +212,8 @@ def expr_refs(expr) -> tuple[list[dict], list[str]]:
             continue
         if "parameter" in e:
             params.append(e["parameter"])
+        elif "parameters_all" in e:
+            params.append(e["parameters_all"])
         elif "upstream" in e:
             ups.append(e["upstream"])
         for k in EXPR_KEYS:

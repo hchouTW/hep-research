@@ -103,7 +103,7 @@
     "items": [
      {
       "name": "intrinsic",
-      "value": 0.5
+      "value": 0.4
      },
      {
       "name": "scattering",
@@ -111,7 +111,7 @@
      },
      {
       "name": "alignment",
-      "value": 0.3
+      "value": 0.25
      }
     ],
     "margin": 0.1

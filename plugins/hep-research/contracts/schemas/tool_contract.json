@@ -609,6 +609,33 @@
        "minLength": 1
       }
      }
+    },
+    {
+     "type": "object",
+     "required": [
+      "parameters_all"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "parameters_all": {
+       "$comment": "CHN-14: the values of one parameter over every subsystem that declares it (sorted by subsystem id), e.g. the services material each subsystem adds to the tracker",
+       "type": "object",
+       "required": [
+        "name",
+        "unit"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "name": {
+         "type": "string",
+         "minLength": 1
+        },
+        "unit": {
+         "$ref": "#/$defs/unit"
+        }
+       }
+      }
+     }
     }
    ]
   },

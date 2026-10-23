@@ -127,9 +127,29 @@ environment and inputs are unchanged; never when the release digest is unknown.
 
 - The compliance matrix, the risk table and the maturity per requirement come from `evaluate_design.py report`; no
   verdict is written by hand.
-- Independent review of the derived report: hep-authoring.
+- Independent review of the derived report: hep-authoring (`references/independent-review.md`); a closed agent review
+  is advisory input to the human reviewer, not a review record by a reviewer other than the author.
 - Gate H4 (`design-baseline`): a human approves the report, the evaluations it covers and one disposition per
-  inconclusive driving requirement. An infeasible design is an allowed outcome; return to D1 or stop.
+  inconclusive driving requirement (`dispositions[]`: `accept-risk` or `next-study`, with a note). Only such a record
+  sets the review axis, and only while the report it lists still equals the one recomputed now and no hash changed;
+  the report then says `baseline: baselined`. The axis is advisory: the actor is self-declared, and formal approval
+  is a trusted gate outside the agent. An infeasible design is an allowed outcome; return to D1 or stop.
+- Measurements (F5): a prototype or test-beam dataset-record carries a `design_measurement` (figure of merit,
+  denominator, value, uncertainty, and the configuration it was measured in). `evaluate_design.py f5 --dataset ...`
+  writes the evaluation; it decides only after a human `measurement-acceptance` record lists the dataset and binds the
+  candidate by the digest of those configuration parameters (`binding: parameters`, `parameter_digest`); a measured
+  configuration that differs from the candidate is `domain.mismatch`.
+
+## Engineering couplings and calibration
+
+- Couplings between subsystems are evaluations whose parameters span them: `run --figure-of-merit material-budget`
+  sums the measuring layers, passive material and every subsystem's `services_x_over_x0`, so a change to another
+  subsystem's services makes it stale and a change elsewhere does not.
+- Every subsystem declares its in-situ calibration (method and at least one control sample;
+  `design.calibration_incomplete` otherwise). The rigidity-scale and alignment residuals a calibration leaves enter the
+  expected precision as nuisances: `propagate_scale_distortion.py` turns a scale or offset into binned yield shifts,
+  up/down variations and covariance blocks for the measurement-spec, and the hep-statistics Asimov fit gives their
+  effect.
 
 ## Verdicts and reason codes
 

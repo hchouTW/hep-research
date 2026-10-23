@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-S.json",
-   "sha256": "b905e0aec2af7f6eac6864d1102387aea07bc3302ff7575d60e5984b1c658b1b",
+   "sha256": "986d901023e55afce13296ae9226c3a4f952b50040f0c66181422b207c16dd68",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-S",
    "status": [
@@ -40,7 +40,7 @@
   "input_manifest": [
    {
     "path": "candidates/cand-S.json",
-    "sha256": "b905e0aec2af7f6eac6864d1102387aea07bc3302ff7575d60e5984b1c658b1b"
+    "sha256": "986d901023e55afce13296ae9226c3a4f952b50040f0c66181422b207c16dd68"
    }
   ],
   "tools": [
@@ -50,7 +50,7 @@
    }
   ],
   "commands": [
-   "python3 skills/hep-detector/scripts/design_estimates.py budget-sum --estimates 2000.0 400.0 --uncertainties 40.0 8.0 --rule linear --status synthetic"
+   "python3 skills/hep-detector/scripts/design_estimates.py budget-sum --estimates 2000.0 400.0 --uncertainties 100.0 20.0 --rule linear --status synthetic"
   ],
   "environment": {
    "python": "3.13.2",
@@ -60,7 +60,7 @@
   "tolerances": {},
   "exit_status": 0,
   "output_hashes": {
-   "outputs/CALC-MASS-S.json": "f1104d37b5e713eb931bf800244b0a38bb831f4202ea8d16e77a5b369226ff1f"
+   "outputs/CALC-MASS-S.json": "cdabb46cee7fa70fa5f678433a7bec1e4ffd13162c872a9ec907399228efc254"
   },
   "argv": [
    "python3",
@@ -70,15 +70,15 @@
    "2000.0",
    "400.0",
    "--uncertainties",
-   "40.0",
-   "8.0",
+   "100.0",
+   "20.0",
    "--rule",
    "linear",
    "--status",
    "synthetic"
   ],
   "script_sha256": {
-   "skills/hep-detector/scripts/design_estimates.py": "74357bcb3e35ac1791d7262b6533f4ff194bc27bbc86f0fde2e3495cd4612092"
+   "skills/hep-detector/scripts/design_estimates.py": "a38665c9dab73d6138fb938b849e662411a021fd3cdffacfa3b73f2b880a84ab"
   }
  }
 }

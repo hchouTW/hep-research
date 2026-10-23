@@ -45,7 +45,7 @@
    ],
    "provisional": false,
    "missing_evidence": [
-    "momentum-resolution-core at F3 or above (compliance threshold)"
+    "none: excluded by an optimistic bound; change the candidate or the requirement"
    ],
    "status_axis": [
     "synthetic"
@@ -86,9 +86,7 @@
    ],
    "provisional": false,
    "missing_evidence": [
-    "charge-confusion-data-validation (required for compliance, ADQ-02)",
-    "charge-confusion-rate at F4 or above (compliance threshold)",
-    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-P, now F1)"
+    "none: excluded by an optimistic bound; change the candidate or the requirement"
    ],
    "status_axis": [
     "synthetic"
@@ -145,8 +143,8 @@
  },
  "comparison_basis": {
   "declared": true,
-  "holds": true,
-  "reason": null
+  "holds": false,
+  "reason": "a difference with its uncertainty exceeds the tolerance"
  },
  "ranking": "refused",
  "gate_flags": [

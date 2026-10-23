@@ -6,17 +6,17 @@ Derived by contracts/design.py from `design-spec.v1.json` (spec version 1); no v
 
 The adequacy table is an initial default until physics review: every pass is provisional.
 
-| Requirement | Candidates | Result | Reason codes | Lowest fidelity | Status | Missing for compliance |
-|---|---|---|---|---|---|---|
-| ams-like-v1:REQ-TRK-001 | ams-like-v1:cand-L | inconclusive | bound.direction | undetermined | synthetic | momentum-resolution-core at F3 or above (compliance threshold) |
-| ams-like-v1:REQ-TRK-001 | ams-like-v1:cand-P | fail | bound.excludes | F1 | synthetic | momentum-resolution-core at F3 or above (compliance threshold) |
-| ams-like-v1:REQ-TRK-001 | ams-like-v1:cand-S | inconclusive | bound.direction | undetermined | synthetic | momentum-resolution-core at F3 or above (compliance threshold) |
-| ams-like-v1:REQ-CC-001 | ams-like-v1:cand-L | inconclusive | bound.direction | undetermined | synthetic | charge-confusion-data-validation (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1) |
-| ams-like-v1:REQ-CC-001 | ams-like-v1:cand-P | fail | bound.excludes | F1 | synthetic | charge-confusion-data-validation (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-P, now F1) |
-| ams-like-v1:REQ-CC-001 | ams-like-v1:cand-S | inconclusive | bound.direction | undetermined | synthetic | charge-confusion-data-validation (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1) |
-| ams-like-v1:CON-MASS-001 | ams-like-v1:cand-L | pass (provisional) | estimate.decides | F1 | synthetic | - |
-| ams-like-v1:CON-MASS-001 | ams-like-v1:cand-P | pass (provisional) | estimate.decides | F1 | synthetic | - |
-| ams-like-v1:CON-MASS-001 | ams-like-v1:cand-S | pass (provisional) | estimate.decides | F1 | synthetic | - |
+| Requirement | Candidates | Result | Reason codes | Lowest fidelity (deciding evaluations) | Status | Missing for compliance | Proposed disposition |
+|---|---|---|---|---|---|---|---|
+| ams-like-v1:REQ-TRK-001 (driving) | ams-like-v1:cand-L | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | momentum-resolution-core at F3 or above (compliance threshold) | next-study |
+| ams-like-v1:REQ-TRK-001 (driving) | ams-like-v1:cand-P | fail | bound.excludes | F1 | synthetic | none: excluded by an optimistic bound; change the candidate or the requirement | - |
+| ams-like-v1:REQ-TRK-001 (driving) | ams-like-v1:cand-S | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | momentum-resolution-core at F3 or above (compliance threshold) | next-study |
+| ams-like-v1:REQ-CC-001 (driving) | ams-like-v1:cand-L | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | charge-confusion-data-validation (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1) | next-study |
+| ams-like-v1:REQ-CC-001 (driving) | ams-like-v1:cand-P | fail | bound.excludes | F1 | synthetic | none: excluded by an optimistic bound; change the candidate or the requirement | - |
+| ams-like-v1:REQ-CC-001 (driving) | ams-like-v1:cand-S | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | charge-confusion-data-validation (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1) | next-study |
+| ams-like-v1:CON-MASS-001 (hard) | ams-like-v1:cand-L | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
+| ams-like-v1:CON-MASS-001 (hard) | ams-like-v1:cand-P | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
+| ams-like-v1:CON-MASS-001 (hard) | ams-like-v1:cand-S | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
 
 ## Evaluations used and skipped
 
@@ -35,5 +35,5 @@ The adequacy table is an initial default until physics review: every pass is pro
 - ams-like-v1:cand-L: not screened out
 - ams-like-v1:cand-P: screened out (ams-like-v1:REQ-TRK-001 fails; ams-like-v1:REQ-CC-001 fails)
 - ams-like-v1:cand-S: not screened out
-- comparison basis: holds
-- ranking: refused: ams-like-v1:cand-L has no non-optimistic, current expected-precision evaluation (CHN-06)
+- comparison basis: does not hold (a difference with its uncertainty exceeds the tolerance)
+- ranking: refused: comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)

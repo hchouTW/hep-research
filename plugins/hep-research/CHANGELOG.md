@@ -7,6 +7,23 @@ Software checks establish contract consistency only, not physical validity.
 
 Contracts 3.11.0 (minor; no capability added).
 
+- Detector system design, milestone M3 (engineering and review): the review axis (only a valid human design-baseline
+  H4 record sets it: exact artifacts = the derived report and the evaluations it used, the report equal to the one
+  recomputed now apart from the frozen MAT-05 exclusions, a disposition for every inconclusive driving requirement;
+  the report says `baseline: draft` or `baselined`); F5 measurements (`evaluate_design.py f5` from a dataset-record's
+  new optional `design_measurement`; decided only after a human `measurement-acceptance` record approves the dataset
+  as it is and binds the candidate by the digest of the measured configuration, decision record artifacts may carry
+  `binding: parameters` with a `parameter_digest`; a configuration that differs from the candidate is
+  domain.mismatch); stale evaluations are no longer compared with their study or dataset (ART-61); budget coupling
+  between subsystems (expression `parameters_all`, `design_estimates.py material-sum`, figure of merit
+  `material-budget`; CHN-14); calibratability (`design.calibration_incomplete` without a control sample; CHN-16); the
+  calorimeter design contract (`calorimeter_resolution` evaluate, optimistic; tool contract 1.1.0) and adequacy rows
+  recorded as unavailable (hadronic energy resolution, trigger efficiency, pileup robustness). Example B
+  `examples/design-collider-tracker` (synthetic-collider profile; tracking and ECAL only; the rest
+  capability.unavailable, listed in the report and in an agent-prepared H3 record that a human must sign). Both
+  examples' derived reports went through the hep-authoring independent review (agent review: advisory, not a review
+  record by a reviewer other than the author in the sense of O04/O14). Open item OQ-15 is now complete (review axis,
+  dispositions and F5 approval).
 - Detector system design, milestone M2 (fidelity and sensitivity): parameter-level invalidation (envelope
   `inputs[].binding: "parameters"`, `contracts/dependencies.py` warns instead of stale, `contracts/design.py` compares
   `parameter_digest`: an evaluation goes stale only when a parameter it read changes; a forged digest is a contract

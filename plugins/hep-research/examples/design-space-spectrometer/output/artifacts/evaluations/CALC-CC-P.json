@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "9b862a1c20c3c783619d85dad287a7d039a3b698f6f61b5c7b03c5f0f56dcac9",
+   "sha256": "5b130a95ee9b303ff0277c4329ae457252a6ce42625e43b542a0ee42d77eb96f",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-P",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-CC-P.computational-run.json",
-   "sha256": "3189b666d1504d4e9b13351f787461e5f85a45931f7a2a6b7aa11c9e3c0e7c43",
+   "sha256": "3e3c2f9c9e91c02a1c9aebf4a15a1499beb1fa514d99950a47ad1972e192dd0a",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-CC-P-run",
    "status": [
@@ -37,7 +37,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "73e9045eb34cca6b0f8960b25cf2aa206ebbe95c4c5fe936a3720699a72fa67b",
+   "sha256": "705899a75f9a35a38524616af28898972cf9738894c2e13078979918b8714482",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-P",
    "status": [

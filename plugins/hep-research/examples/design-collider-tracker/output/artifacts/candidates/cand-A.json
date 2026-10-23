@@ -1,0 +1,280 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "collider-tracker-v1-cand-A",
+ "artifact_type": "design-candidate",
+ "objective": "SYNTHETIC design study (illustrative collider; not CMS or any real detector)",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "candidate_id": "collider-tracker-v1:cand-A",
+  "design_id": "collider-tracker-v1",
+  "description": "13 layers over 1.0 m in 3.8 T, fine-sampling ECAL",
+  "subsystems": {
+   "DES-TRK-001": {
+    "role": "tracking",
+    "technology": "silicon pixel and strip barrel",
+    "parameters": {
+     "layer_positions_m": {
+      "value": [
+       0.1,
+       0.183333,
+       0.266667,
+       0.35,
+       0.433333,
+       0.516667,
+       0.6,
+       0.683333,
+       0.766667,
+       0.85,
+       0.933333,
+       1.016667,
+       1.1
+      ],
+      "unit": "m",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "point_resolution_um": {
+      "value": 20.0,
+      "unit": "um",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "layer_x_over_x0": {
+      "value": [
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02
+      ],
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "passive_x_over_x0": {
+      "value": 0.1,
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-MAG-001"
+    ],
+    "calibration": {
+     "method": "track-based alignment",
+     "control_samples": [
+      "Z -> mu mu",
+      "cosmic-ray muons"
+     ]
+    }
+   },
+   "DES-MAG-001": {
+    "role": "bending",
+    "technology": "superconducting solenoid",
+    "parameters": {
+     "field_T": {
+      "value": 3.8,
+      "unit": "T",
+      "source": "example proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "field map with Hall and NMR probes",
+     "control_samples": [
+      "field map"
+     ]
+    }
+   },
+   "DES-ECAL-001": {
+    "role": "calorimetry-em",
+    "technology": "lead-tungstate crystals",
+    "parameters": {
+     "stochastic_term": {
+      "value": 0.03,
+      "unit": "GeV^0.5",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "noise_term_GeV": {
+      "value": 0.12,
+      "unit": "GeV",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "constant_term": {
+      "value": 0.003,
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "intercalibration with isolated electrons",
+     "control_samples": [
+      "Z -> e e",
+      "W -> e nu"
+     ]
+    }
+   }
+  },
+  "budgets": {
+   "mass": {
+    "DES-TRK-001": {
+     "allocation": 1650.0,
+     "estimate": 1500.0,
+     "uncertainty": 75.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 13200.0,
+     "estimate": 12000.0,
+     "uncertainty": 600.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 9900.0,
+     "estimate": 9000.0,
+     "uncertainty": 450.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    }
+   },
+   "power": {
+    "DES-TRK-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "channel_count": {
+    "DES-TRK-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "data_rate": {
+    "DES-TRK-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   }
+  }
+ }
+}

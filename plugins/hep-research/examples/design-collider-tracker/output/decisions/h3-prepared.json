@@ -1,0 +1,57 @@
+{
+ "record_version": "1.1.0",
+ "decision_id": "collider-tracker-v1-h3-prepared",
+ "analysis": "collider-tracker-v1",
+ "decision": "PREPARED by the agent for human approval: cand-A and cand-B enter convergence; cand-P is screened out; hadronic resolution, trigger efficiency, pileup robustness and shower containment have no evaluator (capability.unavailable) and need F4 studies",
+ "category": "architecture-selection",
+ "actor": {
+  "kind": "agent",
+  "id": "example-run"
+ },
+ "time": "2026-10-24T00:00:00Z",
+ "seen": {
+  "state": "not-applicable"
+ },
+ "artifacts": [
+  {
+   "ref": "candidates/cand-A.json",
+   "sha256": "a0f1301341fd7e61a7d4f790a6ca1b8fee52470a9de3122fa0690c5d86643c4a"
+  },
+  {
+   "ref": "candidates/cand-B.json",
+   "sha256": "285a1e9edac2e7e6556b4c0e6691979a1e503a912080b18f2addafa5058e043c"
+  },
+  {
+   "ref": "evaluations/EST-HCAL-A.json",
+   "sha256": "2d3c3b4941c63b01c9cef6943317660c330cb6c90170458bb2e40a1e0330e925"
+  },
+  {
+   "ref": "evaluations/EST-TRG-A.json",
+   "sha256": "9deb8fdccaa76729b759e0c2abc7f9f3b67770a46a5355ec3f0c660681e11828"
+  },
+  {
+   "ref": "evaluations/EST-PU-A.json",
+   "sha256": "73d98c1046270eb0b024fb2cfc31c8c6d7c9cca672eb805d18d8f72bdabe0775"
+  },
+  {
+   "ref": "evaluations/EST-CONT-A.json",
+   "sha256": "4693cd0bde000c9d934e863e86efe5f494d8418093fcd2852afa33131da63be9"
+  },
+  {
+   "ref": "evaluations/EST-HCAL-B.json",
+   "sha256": "8c43a754a8739028563f8fff11b6bcae817201e6ac9850206a9db3e20733e81d"
+  },
+  {
+   "ref": "evaluations/EST-TRG-B.json",
+   "sha256": "9592a331b9e3b0ee49a87ffe0890fd193818f8ec13963fede0e633587824c546"
+  },
+  {
+   "ref": "evaluations/EST-PU-B.json",
+   "sha256": "e5de30f467030b96d3f1321fe96747f599614f4feb68cb963a18bbfdc6614e6b"
+  },
+  {
+   "ref": "evaluations/EST-CONT-B.json",
+   "sha256": "3274294f373cff58a829bc0e94e1ef1e81a45c0d64087b891efd2c81ccfb8eef"
+  }
+ ]
+}
