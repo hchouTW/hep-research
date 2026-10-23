@@ -4024,7 +4024,7 @@
     "skills/hep-theory/references/sidis-and-tmd.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "bd9d753e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
@@ -4045,7 +4045,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9648218d 2026-10-23"
+   "last_commit": "bd9d753e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4273,7 +4273,7 @@
     "skills/hep-theory/scripts/tmd_gaussian.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "bd9d753e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/smeft-and-eft.md",
