@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- hep-theory, hadron structure phase 3 (Th16, nuclear targets): `skills/hep-theory/references/nuclear-parton-effects.md`
+  (per-nucleon conventions, isospin combination, isoscalar and deuteron corrections, the conventions of EPPS21,
+  nNNPDF3.0, nCTEQ15 and nCTEQ15HQ, member-by-member nuclear ratios, nuclear effects by x region, non-nPDF effects;
+  sources read in full text 2026-10-23), an nPDF section in `pdfs-and-lhapdf.md`, and
+  `skills/hep-theory/scripts/nuclear_combination.py` (`combine`, `ratio`, `convert`). Capability
+  `nuclear-parton-effects` (Th16); routing set Th16 (3 cases).
+
 ## 0.31.0 (2026-10-23)
 
 Minor release, contracts 3.10.0 (unchanged). It adds the second module of hep-theory's hadron-structure plan:

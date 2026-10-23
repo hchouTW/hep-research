@@ -15,7 +15,7 @@ no page yet: say so and apply the general discipline of hep-theory.
 | A | Unpolarized inclusive DIS (NC, CC, neutrino) | [DIS structure functions](dis-structure-functions.md) (Th14) | LO structure functions and cross sections from user-supplied parton values (`structure_functions_lo.py`); sum-rule integrals (`sum_rules.py`) | coefficient functions beyond LO, heavy-quark schemes, target-mass corrections, higher twist |
 | B | Polarized DIS (g_1, g_2, sum rules) | planned | - | - |
 | C | Drell-Yan (cross sections, x_F, rapidity frames, angular coefficients) | [Drell-Yan](drell-yan.md) (Th15) | LO d2sigma/dM dy and dM dx_F (photon exchange), conversions between (M, y), (M, x_F), (x_1, x_2), (tau, y), CS <-> HX rotation with invariants, Lam-Tung combination (`drell_yan_lo.py`) | NLO, threshold resummation, Z exchange (refused by the script) |
-| D | Nuclear effects and nuclear PDFs | planned | - | - |
+| D | Nuclear effects and nuclear PDFs | [nuclear targets](nuclear-parton-effects.md) (Th16) | bound-nucleon (isospin) combination, per-nucleon <-> per-nucleus conversions, member-by-member nuclear ratios with the set's rule (`nuclear_combination.py`) | mechanism models (shadowing, EMC effect, energy loss), deuteron corrections, Coulomb corrections |
 | E | SIDIS, fragmentation functions, TMDs, Drell-Yan q_T resummation | planned | - | - |
 | F | Small-x physics and saturation (dipole picture) | planned | - | - |
 | G | Global PDF / nPDF / FF fits (theory inputs; statistics in hep-statistics) | planned | - | - |

@@ -2578,6 +2578,27 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## HADRON-PHASE3 (2026-10-23; branch `feat/hadron-phase3-nuclear`)
+
+Hadron-structure plan, phase 3 (Th16, nuclear targets), macOS 26.5 arm64, Python 3.13, constructed inputs only
+(software checks; no physical validity). Sources read in full text 2026-10-23: PDG 2026 Structure Functions Sec. 18.3;
+Klasen and Paukkunen arXiv:2311.00450; EPPS21 arXiv:2112.12462v2; nNNPDF3.0 arXiv:2201.12363v2; nCTEQ15
+arXiv:1509.00792; nCTEQ15HQ arXiv:2204.09982 (the plan named arXiv:2105.09873, a different nCTEQ paper; PDG's
+reference [134] gives 2204.09982). Authors and journal references confirmed at arXiv.
+
+| Check | Result |
+|---|---|
+| `test_nuclear_combination.py` (free-proton limit, isoscalar symmetry, factor A and a lead value, x conversion; member-by-member ratio against a hand value and against divided bands on a correlated toy; replica headline by prescription; refusals for different sets, mixed error types or CL, baseline mismatch, unpaired members, replica over external proton, average-nucleon grids; rejections) | pass |
+
+Independent review (a read-only agent with all six sources): no wrong formula. Fixed before the commit, each code fix
+with a test that failed first: an average-nucleon grid could be combined again (now refused; the input declares
+`grid_kind`); a replica set could be paired with an external proton set (refused); the replica headline was the mean
+and standard deviation where nNNPDF3.0 prescribes the median and central 68% interval (the prescription is now an
+input); `convert` accepted x_A > 1, M_A < M_N and negative values, `ratio` negative denominators. Page fixes: the
+nNNPDF3.0 baseline is an NNPDF3.1-methodology variant, not NNPDF4.0; EPPS21's proton pairing (Eq. 40) spelled out;
+sets have no support above x_N = 1; isoscalar-corrected data need theory at Z = A/2; nCTEQ15HQ states no tolerance;
+locators corrected. Not run: live routing for the 3 Th16 cases (paid; pending approval).
+
 ## HADRON-PHASE2 (2026-10-23; branch `feat/hadron-phase2-dy`)
 
 Hadron-structure plan, phase 2 (Th15, Drell-Yan), macOS 26.5 arm64, Python 3.13, constructed inputs only (software

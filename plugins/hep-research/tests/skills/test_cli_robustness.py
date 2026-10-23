@@ -103,6 +103,7 @@ MISSING_FILE_ARGS = {
         "--target-normalization", "per-nucleon", "--target-mass-treatment", "neglected",
         "--heavy-quark-scheme", "ZM-VFNS", "--partons", M],
     "skills/hep-theory/scripts/sum_rules.py": ["--table", M, "--rule", "momentum"],
+    "skills/hep-theory/scripts/nuclear_combination.py": ["ratio", "--input", M],
     "skills/hep-theory/scripts/drell_yan_lo.py": ["xsec", "--sqrt-s", "38.8", "--rapidity-frame", "cm", "--M", "5",
                                                   "--y", "0", "--alpha", "0.0073", "--alpha-label", "a",
                                                   "--bosons", "gamma", "--partons", M],

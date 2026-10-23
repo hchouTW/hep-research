@@ -65,7 +65,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |
 | propagation-global-fits | Global cosmic-ray propagation fits that run a propagation code | hep-statistics | none | no |  | out-of-v1-1 |
 | dark-matter-excess-interpretation | Interpreting an excess with a dark-matter model (which model explains a signal) | hep-theory | none | no |  | wp11-bound-dm-1, wp11-bound-dm-2 |
-| heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1, th14-heavyion-1 |
+| heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1, th14-heavyion-1, th16-qgp-1 |
 | nuclear-structure | Nuclear-structure calculations (shell model, density functionals) | hep-theory | none | no |  | th-nucstruct-1 |
 | relic-density-solvers | Full relic-density Boltzmann solvers | hep-theory | none | no |  | th-relic-1 |
 | hadron-models | Model calculations of PDFs, TMDs and GPDs (quark models, chiral quark soliton, AdS/QCD) | hep-theory | none | no |  | th14-hadmodels-1 |
@@ -75,4 +75,5 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | dark-matter-phenomenology | Dark-matter phenomenology conventions: spin-independent recoil rates in the standard halo model, form factors, J and D factors, flux prefactors, relic-density conventions (no Boltzmann solver) | hep-theory | tool | yes | Th5 |  |
 | dis-structure-functions | Unpolarized inclusive DIS structure functions and cross sections (LO from user-supplied parton values, sum-rule integrals; beyond LO as rules) | hep-theory | tool | yes | Th14 |  |
 | drell-yan | Drell-Yan cross sections (LO, photon exchange), x_F and rapidity-frame conversions, angular coefficients and frames, Lam-Tung combination | hep-theory | tool | yes | Th15 |  |
+| nuclear-parton-effects | Nuclear targets: per-nucleon conventions, isospin combination, nuclear PDF sets and baselines, member-by-member nuclear ratios; mechanism models as rules | hep-theory | tool | yes | Th16 |  |
 <!-- /capability-map -->

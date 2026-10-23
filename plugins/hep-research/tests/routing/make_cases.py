@@ -440,6 +440,10 @@ C = [
  ("th15-pd-1", "en", "direct", "Predict the pd/pp Drell-Yan cross-section ratio at E906 kinematics and say how it depends on dbar/ubar.", "hep-theory", ["Drell-Yan"], None, None, {"set": "Th15"}),
  ("th15-frames-1", "zh-Hant", "direct", "請把 Collins-Soper 座標系的 lambda、mu、nu 轉到 helicity 座標系，並檢查 Lam-Tung 關係與不隨座標系改變的組合。", "hep-theory", [], None, None, {"set": "Th15"}),
  ("th15-qt-1", "en", "direct", "I need the O(alpha_s) Drell-Yan q_T distribution at q_T of order M, with the scale envelope as theory uncertainty.", "hep-theory", ["Drell-Yan", "theory uncertainties"], None, None, {"set": "Th15"}),
+    # Th16: nuclear targets (nuclear_combination.py)
+ ("th16-npdf-1", "en", "direct", "Apply the nPDF correction to my p-Pb Drell-Yan prediction and give the nuclear ratio with its uncertainty from the nPDF set's own error members.", "hep-theory", ["nPDFs", "Drell-Yan"], None, None, {"set": "Th16"}),
+ ("th16-pernucleon-1", "zh-Hant", "direct", "鉛靶的 F_2 要用每核子還是每原子核來寫？x 可以大於 1 嗎？請說明慣例。", "hep-theory", [], None, None, {"set": "Th16"}),
+ ("th16-qgp-1", "en", "out-of-v1", "Compute the jet quenching parameter of the quark-gluon plasma in Pb-Pb collisions.", "hep-theory", [], None, None, {"set": "Th16", "limited_support": True}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),
