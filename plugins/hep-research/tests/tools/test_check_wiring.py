@@ -3,6 +3,7 @@ small synthetic plugin, an unlinked page is a new gap (exit 1) until it is linke
 (R1 reachability with hubs and pointer pages, R2 CLI dictionary, R3 README counts, R4 CHANGELOG) finds what it
 should."""
 import contextlib
+import hashlib
 import io
 import json
 import subprocess
@@ -14,6 +15,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from tools import check_wiring as cw  # noqa: E402
+
+# The known gaps when the lint came in (0.28.0 + Th13, after the B4a fixes), as the first 12 hex digits of the
+# SHA-256 of each key (hashed so that this file does not count as citing the pages). The known-gaps file may only
+# lose entries: a new gap is fixed, never listed. Shrink this baseline with the file; never add to it.
+BASELINE_GAPS = {
+    "14fb707b539c",
+    "21acb8095231",
+    "2cdb16ca6a10",
+    "2fcb8b2e3145",
+    "3a6c8e4dcebe",
+    "48672cdcaa10",
+    "4d07b949fdbe",
+    "51362bd36aa2",
+    "55f400a8a324",
+    "61c0117e004e",
+    "6443da68f956",
+    "89919072da48",
+    "b9f5ee00d934",
+    "bdf9e4edee3f",
+    "be78eb14877d",
+    "d4207363aae1",
+    "d7e8b2a2da54",
+    "f0e2caf725de",
+    "f13e5b167549",
+}
 
 TABLE = "## Resources\n\n| Request | Read or run |\n|---|---|\n| Entry | [entry](references/entry.md) |\n"
 
@@ -31,6 +57,11 @@ class CommittedTree(unittest.TestCase):
         self.assertEqual(doc["new_gaps"], [], "a new wiring gap: fix it (docs/maintenance.md, Adding a topic)")
         self.assertEqual(code, 0)
         self.assertEqual(doc["known_gaps_stale"], [], "delete fixed gaps from tools/wiring_known_gaps.json")
+
+    def test_known_gaps_only_shrink(self):
+        gaps = json.loads(cw.KNOWN_GAPS.read_text(encoding="utf-8"))["gaps"]
+        added = [g for g in gaps if hashlib.sha256(g.encode()).hexdigest()[:12] not in BASELINE_GAPS]
+        self.assertEqual(added, [], "fix a new gap instead of listing it")
 
     def test_every_hub_and_readme_row_names_a_real_skill(self):
         gaps = json.loads(cw.KNOWN_GAPS.read_text(encoding="utf-8"))
@@ -153,6 +184,17 @@ class SyntheticPlugin(unittest.TestCase):
         self.assertEqual(self.check("--since", "no-such-rev")[0], 2)
 
 
+    def test_names_in_fenced_code_do_not_route(self):
+        self.page("hub.md", "# Hub\n\n```\nsee `deep.md`\n```\n")
+        self.page("deep.md", "# Deep\n")
+        self.gaps.update(readme_counts={}, hubs={"demo": ["references/hub.md"]})
+        self.assertEqual(self.check()[1]["new_gaps"], ["R1:skills/demo/references/deep.md"])
+
+    def test_skill_without_resources_is_bad_input(self):
+        (self.skill / "SKILL.md").write_text("# Demo\n", encoding="utf-8")
+        self.assertEqual(self.check()[0], 2)
+
+
 class CliDictionary(unittest.TestCase):
     def test_list_reason_and_file_reading_script_are_found(self):
         with tempfile.TemporaryDirectory() as td:
@@ -168,6 +210,11 @@ class CliDictionary(unittest.TestCase):
                                encoding="utf-8")
             self.assertEqual(cw.reads_file_argument(reader), ["--table"])
             self.assertEqual(cw.reads_file_argument(numbers), [])
+            writer = root / "skills" / "demo" / "scripts" / "writer.py"
+            writer.write_text("import argparse, pathlib\np = argparse.ArgumentParser()\n"
+                              "p.add_argument('--table', help='table file to write')\n"
+                              "pathlib.Path(p.parse_args().table).open('w')\n", encoding="utf-8")
+            self.assertEqual(cw.reads_file_argument(writer), [])
             found = cw.check_cli(root, None, {}, {"skills/demo/scripts/reader.py": "numbers on the command line",
                                                   "skills/demo/scripts/numbers.py": ["--x", "1"]})
             self.assertEqual([f["key"] for f in found], ["R2:reason:skills/demo/scripts/numbers.py",

@@ -83,7 +83,8 @@ def targets(text: str, base: Path, skill_dir: Path) -> set[Path]:
     """Reference pages of this skill that text links (Markdown link) or names in back-ticks; base = the text's folder."""
     pages = {p.name: p for p in (skill_dir / "references").rglob("*.md")}
     out = set()
-    plain = re.sub(r"`[^`\n]*`", "", FENCE.sub("", text))
+    text = FENCE.sub("", text)  # names and links inside fenced code do not route
+    plain = re.sub(r"`[^`\n]*`", "", text)
     for target in LINK.findall(plain):
         if not re.match(r"^[a-z]+:", target):
             out.add((base / target.partition("#")[0]).resolve())
@@ -161,9 +162,10 @@ def reads_file_argument(script: Path) -> list[str]:
         func = node.func
         name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
         if name == "open":
-            mode = next((a.value for a in node.args[1:2] if isinstance(a, ast.Constant)), None)
+            pos = node.args[0:1] if isinstance(func, ast.Attribute) else node.args[1:2]  # Path.open(mode) vs open(f, mode)
+            mode = next((a.value for a in pos if isinstance(a, ast.Constant)), None)
             mode = next((k.value.value for k in node.keywords if k.arg == "mode" and isinstance(k.value, ast.Constant)), mode)
-            reads |= mode is None or ("r" in str(mode) and "+" not in str(mode))
+            reads |= mode is None or "r" in str(mode)
         elif name in READ_CALLS or (name == "load" and isinstance(func, ast.Attribute)
                                     and ast.unparse(func.value) in LOAD_MODULES):
             reads = True
@@ -234,22 +236,23 @@ def check_changelog(root: Path, since: str, skill: str | None) -> list[dict]:
                                           ".").splitlines()]
     added += git(root, "ls-files", "--others", "--exclude-standard", "--", ".").splitlines()
     added = [p for p in added if fnmatch.fnmatch(p, "skills/*/references/*.md")
-             or any(fnmatch.fnmatch(p, g) for g in SCRIPT_GLOBS)]
+             or (any(fnmatch.fnmatch(p, g) for g in SCRIPT_GLOBS) and len(Path(p).parts) == 4)]
     if skill:
         added = [p for p in added if p.startswith(f"skills/{skill}/")]
     log = (root / "CHANGELOG.md").read_text(encoding="utf-8")
     unreleased = log.split("## Unreleased", 1)[1].split("\n## ", 1)[0] if "## Unreleased" in log else ""
     out = [finding("R4", f"R4:changelog:{p}", "added since --since but not named under '## Unreleased' in CHANGELOG.md")
-           for p in added if Path(p).name not in unreleased]
+           for p in added if not re.search(rf"(?<![\w.-]){re.escape(Path(p).name)}", unreleased)]
     try:
         before = {c["id"] for c in json.loads(git(root, "show", f"{since}:./docs/capability-map.json"))["capabilities"]}
     except ValueError:
         before = set()
     now = {c["id"] for c in json.loads((root / "docs" / "capability-map.json").read_text(encoding="utf-8"))["capabilities"]}
     rows_added = [line for line in git(root, "diff", since, "--", "docs/capability-matrix.md").splitlines()
-                  if line.startswith("+|")]
-    if now - before and not rows_added:
-        out += [finding("R4", f"R4:matrix:{cid}", "new capability id without an added docs/capability-matrix.md row")
+                  if line.startswith("+|") and not re.fullmatch(r"\+[|\s:-]+", line)]
+    if len(rows_added) < len(now - before):
+        out += [finding("R4", f"R4:matrix:{cid}", "new capability ids outnumber the rows added to "
+                           "docs/capability-matrix.md")
                 for cid in sorted(now - before)]
     return out
 
@@ -276,7 +279,8 @@ def main(argv=None) -> int:
     ap.add_argument("--known-gaps", type=Path, default=KNOWN_GAPS, help="known gaps, hubs, pointers and README count "
                     "patterns (default tools/wiring_known_gaps.json)")
     ap.add_argument("--skill", metavar="NAME", help="check one skill only (R1, R3; R2 and R4 limited to its files)")
-    ap.add_argument("--root", type=Path, default=ROOT, help="plugin root (default: this checkout)")
+    ap.add_argument("--root", type=Path, default=ROOT, help="plugin root (default: this checkout); R2 still reads the CLI "
+                    "dictionaries of this checkout")
     opts = ap.parse_args(argv)
     root = opts.root.resolve()
     try:
@@ -284,7 +288,7 @@ def main(argv=None) -> int:
         if opts.skill and not (root / "skills" / opts.skill / "SKILL.md").is_file():
             raise ValueError(f"no skill {opts.skill}")
         findings = check(root, gaps, opts.skill, opts.since)
-    except (OSError, ValueError, KeyError) as exc:
+    except (OSError, ValueError, KeyError, IndexError, SyntaxError) as exc:  # IndexError: SKILL.md without Resources
         print(json.dumps({"status": "error", "error": str(exc)}))
         return 2
     known = set(gaps.get("gaps", []))
