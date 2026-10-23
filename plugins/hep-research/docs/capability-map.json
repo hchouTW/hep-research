@@ -612,6 +612,16 @@
    "items": [
     "Th17"
    ]
+  },
+  {
+   "id": "sidis-and-tmd",
+   "capability": "SIDIS kinematics and Trento conventions, fragmentation functions, TMD factorization rules, Gaussian-ansatz TMD shapes, Sivers sign change, Drell-Yan q_T",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th18"
+   ]
   }
  ]
 }

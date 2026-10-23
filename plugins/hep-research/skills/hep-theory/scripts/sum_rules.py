@@ -13,6 +13,8 @@ Rules (--rule), with the integrand built from the table:
                 Dd, Ddbar, Ds, Dsbar, optionally Dc, Dcbar, Db, Dbbar; neutron by isospin)
   bjorken-lo    int_0^1 (g_1^p - g_1^n) dx = (1/6) int [(Du + Dubar) - (Dd + Ddbar)] dx (LO; QCD corrections not
                 included: the coefficient series is in Kuhn, Chen, Leader, arXiv:0812.3535, Eq. 89)
+  ff-momentum   sum_h int_0^1 z D_i^h(z) dz for one parton i, hadron columns "h:<hadron>" on the grid "x" (= z); 1 when
+                every hadron is included (PDG 2026 "Fragmentation Functions", Eq. 19.3), a bound otherwise
   ellis-jaffe:p|n  the g_1 moment and, from --gA and --a8, the Ellis-Jaffe value Gamma_1 = +-gA/12 + 5 a8/36 (Delta s = 0
                 and SU(3) symmetry assumed: heuristic-argument), from their Eq. 43
 adler-lo and gls-lo are the LO quark-parton forms built from PDG 2026 "Structure Functions" Eq. (18.19) (read
@@ -70,6 +72,11 @@ def load_table(path: str) -> tuple[list[float], dict, str]:
     if any(not 0 < v <= 1 for v in xs) or any(b <= a for a, b in zip(xs, xs[1:])):
         raise RuleError("x must be strictly increasing in (0, 1]")
     cols = {}
+    for k in doc:
+        if k.startswith("h:"):
+            if not isinstance(doc[k], list) or len(doc[k]) != len(xs):
+                raise RuleError(f"hadron column {k} must be a list as long as x")
+            cols[k] = [_num(k, v) for v in doc[k]]
     for f in ALL + POL:
         if f in doc:
             col = doc[f]
@@ -112,6 +119,12 @@ def integrand(rule: str, xs: list[float], cols: dict, rep: str) -> tuple[list[fl
         need("u", "ubar", "d", "dbar", "s", "sbar", "c", "cbar")
         return [sum(f(q, i) - f(q + "bar", i) for q in ("u", "d", "s", "c")) for i in range(n)], \
             "(F_3^{W+} + F_3^{W-}) / 2 = sum_{q=u,d,s,c} (q - qbar) (LO)"
+    if rule == "ff-momentum":
+        hadrons = sorted(k for k in cols if k.startswith("h:"))
+        if not hadrons:
+            raise RuleError('ff-momentum needs hadron columns "h:<hadron>" holding D_i^h(z) ("f") or z D_i^h(z) ("xf") of one parton i')
+        return [xs[i] * sum(f(h, i) for h in hadrons) for i in range(n)], \
+            f"z sum_h D_i^h(z) over {', '.join(h[2:] for h in hadrons)} (PDG 2026 Fragmentation Functions Eq. 19.3)"
     if rule in ("g1-moment:p", "g1-moment:n", "bjorken-lo") or rule.startswith("ellis-jaffe:"):
         need("Du", "Dubar", "Dd", "Ddbar", "Ds", "Dsbar")
         def plus(q, i):
@@ -185,7 +198,7 @@ class JsonArgumentParser(argparse.ArgumentParser):
 def main(argv=None) -> int:
     ap = JsonArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--table", required=True, help="JSON table of f(x) or x f(x)")
-    ap.add_argument("--rule", required=True, help="momentum | number:<q> | adler-lo | gls-lo | g1-moment:p|n | bjorken-lo | ellis-jaffe:p|n")
+    ap.add_argument("--rule", required=True, help="momentum | number:<q> | adler-lo | gls-lo | g1-moment:p|n | bjorken-lo | ellis-jaffe:p|n | ff-momentum")
     ap.add_argument("--expected", type=float, help="value to check the total against (the user's, with its source)")
     ap.add_argument("--tolerance", type=float, help="absolute tolerance of the check")
     ap.add_argument("--gA", type=float, help="ellis-jaffe: g_A (= a_3) with its source")

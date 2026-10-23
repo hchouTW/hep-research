@@ -1,0 +1,74 @@
+[
+ {
+  "id": "tmdg:S01",
+  "title": "The role of Cahn and Sivers effects in Deep Inelastic Scattering",
+  "authors": "M. Anselmino, M. Boglione, U. D'Alesio, A. Kotzinian, F. Murgia and A. Prokudin",
+  "year": 2005,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "hep-ph/0501196"
+   ],
+   "inspire_record_id": null,
+   "url": "https://arxiv.org/abs/hep-ph/0501196v2"
+  },
+  "tier": 2,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-23",
+  "publication_date": "2005-05-23 (arXiv v2)",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Anselmino et al.",
+  "notes": "Read in full on 2026-10-23 from the arXiv v2 PDF and its text extraction; Eqs. (38)-(39) (page 7) and (63)-(67) (pages 12-13) checked on the rendered pages. Used: Eqs. (29), (32)-(39), (47), (48)-(50), (58), (63)-(68), Table I. Eq. (47) and Table I are fits to data and are used only as illustrative settings. No journal reference appears on the arXiv copy read, so the publication status was not checked. Journal reference Phys. Rev. D 71 (2005) 074006 confirmed at arXiv (journal_ref field) on 2026-10-23."
+ },
+ {
+  "id": "tmdg:S02",
+  "title": "Semi-inclusive deep inelastic scattering at small transverse momentum",
+  "authors": "A. Bacchetta, M. Diehl, K. Goeke, A. Metz, P.J. Mulders and M. Schlegel",
+  "year": 2007,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "hep-ph/0611265"
+   ],
+   "inspire_record_id": null,
+   "url": "https://arxiv.org/abs/hep-ph/0611265v2"
+  },
+  "tier": 2,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-23",
+  "publication_date": "2007-02-26 (arXiv v2)",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Bacchetta et al.",
+  "notes": "Read on 2026-10-23 from the arXiv v2 PDF and its text extraction (page numbers below are PDF pages): Eqs. (2.2)-(2.3) p. 4, (2.7)-(2.13) p. 5, (2.14)-(2.15) p. 6, (3.40)-(3.41) p. 14, (4.1)-(4.11) pp. 18-19, (4.20) p. 20, (4.21) p. 21. No journal reference on the copy read. Journal reference JHEP 02 (2007) 093 confirmed at arXiv (journal_ref field) on 2026-10-23."
+ },
+ {
+  "id": "tmdg:S03",
+  "title": "Single-spin asymmetries: the Trento conventions",
+  "authors": "A. Bacchetta, U. D'Alesio, M. Diehl and C.A. Miller",
+  "year": 2004,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "hep-ph/0410050"
+   ],
+   "inspire_record_id": null,
+   "url": "https://arxiv.org/abs/hep-ph/0410050v2"
+  },
+  "tier": 2,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-23",
+  "publication_date": "2004-12-07 (arXiv v2)",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Bacchetta, D'Alesio, Diehl and Miller",
+  "notes": "Read on 2026-10-23 from the arXiv v2 PDF and its text extraction: Eqs. (2)-(4) pp. 1-2, Eq. (14) p. 3. No journal reference on the copy read. Journal reference Phys. Rev. D 70 (2004) 117504 confirmed at arXiv (journal_ref field) on 2026-10-23."
+ }
+]

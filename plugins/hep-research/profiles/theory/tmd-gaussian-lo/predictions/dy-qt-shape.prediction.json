@@ -1,0 +1,147 @@
+{
+ "contract_version": "3.10.0",
+ "artifact_id": "tmdg-prediction-dy-qt-shape",
+ "artifact_type": "prediction",
+ "objective": "Normalized Drell-Yan q_T shape from two Gaussian TMD PDFs (synthetic widths)",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:tmd-gaussian-lo",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.30.0",
+  "contracts": "3.10.0",
+  "profiles": {
+   "theory:tmd-gaussian-lo": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-23",
+  "evidence_ids": [
+   "tmdg:C01",
+   "tmdg:C02",
+   "tmdg:C03",
+   "tmdg:C04",
+   "tmdg:C05",
+   "tmdg:C06",
+   "tmdg:C07",
+   "tmdg:C08"
+  ]
+ },
+ "inputs": [
+  {
+   "ref": "derivations/theory-spec.json",
+   "artifact_type": "theory-spec",
+   "artifact_id": "tmdg-theory-spec-gaussian-tmd-lo",
+   "status": [
+    "synthetic",
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "Drell-Yan h1 h2 -> l+ l- X: normalized q_T shape (1/sigma) d sigma/d^2q_T",
+   "variables": [
+    {
+     "name": "qT",
+     "unit": "GeV",
+     "points": [
+      0.0,
+      0.25,
+      0.5,
+      1.0,
+      1.5
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "leading-power TMD region, no cuts",
+    "fiducial": false
+   },
+   "level": "parton",
+   "normalization": {
+    "kind": "shape-only",
+    "value": "not-applicable",
+    "convention": "normalized to unit integral over d^2q_T"
+   },
+   "bin_semantics": "point",
+   "unit": "GeV^-2",
+   "conventions": {
+    "unit_system": "natural-HEP: transverse momenta in GeV, Gaussian widths <k_perp^2>, <p_perp^2>, M'^2 in GeV^2; F_UU,T and the q_T shape per GeV^2; asymmetries dimensionless",
+    "frame": "SIDIS: gamma* - nucleon frame (Trento conventions): virtual photon along +z, nucleon P = P0(1, 0, 0, -1), incoming lepton l = E(1, sin theta, 0, cos theta) with a positive x component, lepton plane = x-z plane (Anselmino et al. p. 2); any frame reached from the target rest frame by a boost along q-hat; Drell-Yan: hadronic centre-of-mass frame for q_T",
+    "angle_definition": "phi_h, phi_S: azimuths of P_hT and S_T about the photon axis, measured from the lepton plane; phi: azimuth of the quark k_perp",
+    "azimuth_convention": "Trento conventions (Trento Eq. 16; Bacchetta et al. Eq. 2.3) for phi_h and phi_S. Anselmino et al. use the same angles: with l_x > 0, P_T = P_T(cos phi_h, sin phi_h, 0) and S_T = |S_T|(cos phi_S, sin phi_S, 0) (pp. 2, 6, 11), Trento Eq. 16 gives cos phi_h and sin phi_h unchanged (mapping in derivations/derivation-record.md, step 5)",
+    "exchanged_bosons": "photon only (one-photon exchange in SIDIS; virtual photon in Drell-Yan)",
+    "mass_approximation": "massless partons; target and hadron masses neglected (gamma = 2Mx/Q -> 0 in Bacchetta et al. Eqs. 2.8-2.11)",
+    "tmdg:gaussian_ansatz": "f_q(x, k) = f_q(x) exp(-k^2/<k_perp^2>)/(pi <k_perp^2>), D_q(z, p) = D_q(z) exp(-p^2/<p_perp^2>)/(pi <p_perp^2>), p = hadron transverse momentum relative to the fragmenting quark, P_hT = z k + p at O(k/Q) (Anselmino et al. Eqs. 29, 34-35); constant, flavour-independent widths",
+    "tmdg:fragmentation_normalization": "Anselmino: int d^2p D(z, p) = D(z) (Eq. 37). Bacchetta: D_1(z) = z^2 int d^2k_T D_1(z, k_T^2), k_T the quark relative to the hadron, hadron relative to quark = -z k_T (Eq. 3.41), so <p_perp^2> = z^2 <k_T^2>"
+   },
+   "validity_range": {
+    "qT": [
+     0.0,
+     1.5
+    ]
+   }
+  },
+  "theory_spec_ref": "derivations/theory-spec.json",
+  "derivation_status": "heuristic-argument",
+  "representation": "symbolic",
+  "parameter_point": {
+   "k1perp2_gev2": 0.25,
+   "k2perp2_gev2": 0.3
+  },
+  "expression": "exp(-q_T^2/<q_T^2>)/(pi <q_T^2>), <q_T^2> = <k1perp^2> + <k2perp^2> (derived here)",
+  "point_values": {
+   "qT2_width_gev2": 0.55,
+   "rows": [
+    {
+     "qT_gev": 0.0,
+     "shape_per_gev2": 0.578745247606892,
+     "shape_quadrature": 0.5787452476068923
+    },
+    {
+     "qT_gev": 0.25,
+     "shape_per_gev2": 0.5165778639525977,
+     "shape_quadrature": 0.5165778639525977
+    },
+    {
+     "qT_gev": 0.5,
+     "shape_per_gev2": 0.36735068594470544,
+     "shape_quadrature": 0.3673506859447055
+    },
+    {
+     "qT_gev": 1.0,
+     "shape_per_gev2": 0.09394228231014078,
+     "shape_quadrature": 0.09394228231014078
+    },
+    {
+     "qT_gev": 1.5,
+     "shape_per_gev2": 0.009678948825445682,
+     "shape_quadrature": 0.009678948825445684
+    }
+   ],
+   "checks": {
+    "dy_shape_closed_form_equals_quadrature": true,
+    "dy_shape_unit_normalized": true
+   }
+  },
+  "uncertainties": [],
+  "allowed_transformations": [
+   "multiply by the LO collinear cross section for an absolute q_T spectrum",
+   "never compare with data: widths are synthetic"
+  ]
+ }
+}

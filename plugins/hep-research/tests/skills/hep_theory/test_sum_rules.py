@@ -172,5 +172,25 @@ class PolarizedSumRules(unittest.TestCase):
         self.assertEqual(code, 2)
 
 
+class FragmentationSumRule(unittest.TestCase):
+    def test_ff_momentum(self):
+        # toy FFs of one parton: z D_h = N_h z^a (1-z)^b, int z D dz = N_h B(a+1, b+1); the three hadrons sum to 1
+        zs = [1e-6 ** (1 - i / 399) for i in range(400)]
+        forms = {"h:pi+": (0.5, 1.2, 1.5), "h:pi-": (0.3, 1.2, 2.5), "h:K+": (0.2, 1.5, 2.0)}
+        t = {"representation": "xf", "x": zs}
+        for h, (frac, a, b) in forms.items():
+            n = frac / beta(a + 1, b + 1)
+            t[h] = [n * z ** a * (1 - z) ** b for z in zs]
+        code, out = run(t, "--rule", "ff-momentum", "--expected", "1", "--tolerance", "5e-4")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(out["checks"][0]["result"], "pass")
+        code, _ = run({"representation": "xf", "x": zs, "u": [0.1] * 400}, "--rule", "ff-momentum")
+        self.assertEqual(code, 2)  # no hadron columns
+        # review: a malformed hadron column is rejected, not dropped
+        for bad in (t["h:pi-"][:-1], "text"):
+            code, _ = run(dict(t, **{"h:pi-": bad}), "--rule", "ff-momentum")
+            self.assertEqual(code, 2, bad)
+
+
 if __name__ == "__main__":
     unittest.main()

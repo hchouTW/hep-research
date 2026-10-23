@@ -97,7 +97,8 @@
   "profiles/theory/heliospheric-modulation/profile.json",
   "profiles/theory/higgs-bb-width/profile.json",
   "profiles/theory/qcd-r-ratio/profile.json",
-  "profiles/theory/qed-benchmark/profile.json"
+  "profiles/theory/qed-benchmark/profile.json",
+  "profiles/theory/tmd-gaussian-lo/profile.json"
  ],
  "foreign_profile_files_read": [],
  "pass": true,

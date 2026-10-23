@@ -447,6 +447,10 @@ C = [
     # Th17: polarized DIS (sum_rules.py polarized rules)
  ("th17-bjorken-1", "en", "direct", "Evaluate the Bjorken sum rule with its alpha_s corrections at Q^2 = 5 GeV^2 and compare it with my integral of g_1^p - g_1^n; which approximations and validity domain apply?", "hep-theory", ["approximations and validity domains"], None, None, {"set": "Th17"}),
  ("th17-scheme-1", "zh-Hant", "direct", "AB 與 MS-bar 方案的 Delta Sigma 可以直接比較嗎？請說明極化 DIS 的因子化方案慣例。", "hep-theory", [], None, None, {"set": "Th17"}),
+    # Th18: SIDIS and TMDs (sidis_kinematics.py, tmd_gaussian.py)
+ ("th18-sivers-1", "en", "direct", "Predict the Sivers asymmetry at COMPASS kinematics in a Gaussian TMD model and state the azimuthal-angle conventions and the sign change relative to Drell-Yan.", "hep-theory", ["TMDs", "conventions"], None, None, {"set": "Th18"}),
+ ("th18-qt-1", "en", "direct", "How should I predict the Drell-Yan distribution at q_T -> 0, and which TMD prescriptions count as model alternatives?", "hep-theory", ["Drell-Yan", "model alternatives"], None, None, {"set": "Th18"}),
+ ("th18-pht-1", "en", "neighboring", "Reconstruct the hadron transverse momentum relative to the virtual photon in my SIDIS events and give its resolution.", "hep-detector", ["reconstruction", "resolution"], "hep-theory", None, {"set": "Th18"}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),

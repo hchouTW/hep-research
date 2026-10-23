@@ -15,7 +15,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 12 | 119 | 0 |
 | hep-ml | 42 | 194 | 0 |
 | hep-statistics | 13 | 190 | 0 |
-| hep-theory | 26 | 209 | 0 |
+| hep-theory | 28 | 222 | 0 |
 
 ## Overlapping pairs
 
@@ -50,6 +50,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **evaluation**: `evaluation-metrics.md`, `evaluation-strategy.md`
 - **event**: `event-reconstruction.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
 - **figure**: `diagram-figure-style.md`, `figures-and-tables.md`
+- **function**: `dis-structure-functions.md`, `fragmentation-functions.md`
 - **guideline**: `bash-balanced-design-guidelines.md`, `cpp-balanced-design-guidelines.md`, `python-balanced-design-guidelines.md`, `root-balanced-design-guidelines.md`
 - **imaging**: `cherenkov-imaging-variants-and-photosensors.md`, `imaging-atmospheric-cherenkov.md`
 - **inference**: `inference-recipes.md`, `ml-assisted-inference.md`, `statistical-inference-for-physics.md`, `time-series-inference.md`
@@ -298,9 +299,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 6.1 | yes | 6 | - | f046cc69 2026-10-23 |
 | `dis-structure-functions.md` | hep-theory | 13.1 | no | 8 | - | 9648218d 2026-10-23 |
-| `drell-yan.md` | hep-theory | 10.9 | no | 3 | - | 9648218d 2026-10-23 |
+| `drell-yan.md` | hep-theory | 10.9 | no | 4 | - | 9648218d 2026-10-23 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
-| `hadron-structure-essentials.md` | hep-theory | 5.5 | yes | 8 | - | 9648218d 2026-10-23 |
+| `fragmentation-functions.md` | hep-theory | 3.9 | no | 2 | - | untracked |
+| `hadron-structure-essentials.md` | hep-theory | 6.0 | yes | 10 | - | 9648218d 2026-10-23 |
 | `higher-order-predictions.md` | hep-theory | 4.4 | yes | 5 | - | bb6cb81e 2026-10-23 |
 | `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 5 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
@@ -309,10 +311,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `nuclear-parton-effects.md` | hep-theory | 11.1 | no | 7 | - | f046cc69 2026-10-23 |
 | `nuclear-physics-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 87421c11 2026-10-17 |
 | `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | c0b6b6d8 2026-10-17 |
-| `pdfs-and-lhapdf.md` | hep-theory | 6.5 | yes | 7 | - | f046cc69 2026-10-23 |
+| `pdfs-and-lhapdf.md` | hep-theory | 6.5 | yes | 8 | - | f046cc69 2026-10-23 |
 | `polarized-dis.md` | hep-theory | 7.6 | no | 1 | - | 9648218d 2026-10-23 |
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | 9257d7b5 2026-10-15 |
 | `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 4 | - | 6c22fd52 2026-10-13 |
 | `selection-rules.md` | hep-theory | 7.7 | yes | 3 | - | 195e4d1e 2026-10-13 |
+| `sidis-and-tmd.md` | hep-theory | 9.2 | no | 4 | - | untracked |
 | `smeft-and-eft.md` | hep-theory | 3.4 | yes | 3 | - | fa29fcf3 2026-10-13 |
 | `solar-modulation-models.md` | hep-theory | 6.4 | no | 6 | - | e70b1a84 2026-10-23 |
