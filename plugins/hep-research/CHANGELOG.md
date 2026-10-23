@@ -3,7 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.35.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the sixth module of hep-theory's hadron-structure plan: small-x
+physics and saturation (Th19), and exclusive processes, GPDs and diffractive DIS (Th20).
+
+**Before you upgrade:** nothing to migrate. `dipole_lo.py` needs SciPy (core stack); `exclusive_kinematics.py angles`
+rejects an off-shell recoil.
 
 - hep-theory, hadron structure phase 6 (Th19 small x, Th20 exclusive processes and GPDs):
   `skills/hep-theory/references/small-x-and-saturation.md` (dipole factorization, GBW model, BK/JIMWLK and running
