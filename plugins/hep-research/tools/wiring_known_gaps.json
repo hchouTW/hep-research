@@ -1,0 +1,167 @@
+{
+ "_doc": "Known gaps of tools/check_wiring.py, its registered hub pages, pointer pages with their removal release and the README count patterns. 'gaps' only shrinks: a finding not listed is a new gap (exit 1); delete an entry once its gap is fixed. A hub is a page that routes within one topic and is itself one step from SKILL.md; pages it links count as reachable. Maintenance file: no paper titles.",
+ "hubs": {
+  "hep-authoring": [
+   "references/academic-papers-guide.md",
+   "references/academic-diagrams-guide.md"
+  ],
+  "hep-computing": [
+   "references/agile-development-guide.md",
+   "references/task-authoring-guide.md",
+   "references/batch-scheduling.md"
+  ],
+  "hep-detector": [
+   "references/detector-simulation.md"
+  ],
+  "hep-ml": [
+   "references/deep-learning-guide.md"
+  ],
+  "hep-theory": [
+   "references/cosmic-ray-propagation.md"
+  ]
+ },
+ "pointers": {
+  "skills/hep-measurement/references/data-pipelines.md": {
+   "pointer_since": "0.7.0",
+   "remove_in": "0.29.0",
+   "moved_to": "skills/hep-computing/references/analysis-data-pipelines.md"
+  }
+ },
+ "readme_counts": {
+  "hep-authoring": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-citations": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-computing": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py",
+     "scripts/*.sh",
+     "scripts/*.C"
+    ]
+   }
+  ],
+  "hep-detector": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-measurement": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-ml": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-statistics": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-theory": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ]
+ },
+ "gaps": [
+  "R1:skills/hep-authoring/references/artifact-packaging-for-release.md",
+  "R1:skills/hep-authoring/references/code-review-report.md",
+  "R1:skills/hep-authoring/references/code-to-methodology-synthesis.md",
+  "R1:skills/hep-authoring/references/collaboration-results-lifecycle.md",
+  "R1:skills/hep-authoring/references/conflict-of-interest-and-ethics-statements.md",
+  "R1:skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
+  "R1:skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
+  "R1:skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+  "R1:skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
+  "R1:skills/hep-authoring/references/manuscript-consistency-auditing.md",
+  "R1:skills/hep-authoring/references/multi-venue-reformatting.md",
+  "R1:skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
+  "R1:skills/hep-authoring/references/preprint-to-journal-reconciliation.md",
+  "R1:skills/hep-authoring/references/preregistration-and-registered-reports.md",
+  "R1:skills/hep-authoring/references/reproducibility-auditing.md",
+  "R1:skills/hep-authoring/references/supplementary-material-planning.md",
+  "R1:skills/hep-authoring/references/thesis-by-publication-assembly.md",
+  "R2:reads-file:skills/hep-measurement/scripts/solar_modulation_force_field.py",
+  "R2:reads-file:skills/hep-ml/scripts/estimate_training_memory.py"
+ ]
+}

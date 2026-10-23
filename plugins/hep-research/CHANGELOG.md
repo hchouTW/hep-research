@@ -34,6 +34,29 @@ helper script; no propagation code is run and no fit to real data is tested.
   (`cosmic-ray-propagation` gains Th13) and matrix row; five routing cases (set Th13); tests `test_bartels_rotation.py`,
   `test_cosmic_ray_phenomenology_th13.py` and the CLI-robustness inventory entry.
 
+Maintenance (architecture step 1): a wiring lint for adding a topic. No schema, contracts, file moves or description
+changes.
+
+- **`tools/check_wiring.py`** (static check `wiring`): every reference page one step from its skill's Resources table
+  or entry routing part, or two steps through a registered hub page (R1; a "(moved)" pointer page is exempt until
+  its recorded removal release); `NO_INPUT_FILE` reasons are strings and name no script that reads a file argument
+  (R2); README counts match their files (R3); with `--since REV`, added pages and scripts are named under
+  Unreleased and a new capability id has a matrix row (R4). Report mode: exit 1 only on a gap not listed in
+  **`tools/wiring_known_gaps.json`** (hubs, pointer releases, README count patterns and the existing gaps; it only
+  shrinks). Tests in `tests/tools/test_check_wiring.py`; checklist "Adding a topic" in `docs/maintenance.md`.
+  `tools/reference_inventory.py` does not count the known-gaps file as citing the pages it lists.
+- Routing fixes that add no SKILL.md or entry-reference bytes (B4a): hub pages registered (hep-theory
+  `cosmic-ray-propagation.md`, so the two Th13 pages it links are reachable; hep-ml `deep-learning-guide.md`;
+  hep-computing `agile-development-guide.md`, `task-authoring-guide.md`, `batch-scheduling.md`; hep-detector
+  `detector-simulation.md`; hep-authoring `academic-papers-guide.md`, `academic-diagrams-guide.md`), and README counts
+  corrected (hep-computing 35 references and 18 helpers, hep-ml 42, hep-statistics 13 references). The 17 hep-authoring
+  pages reached only through its reference index stay known gaps until that index is one step away (a Resources or
+  entry-reference change, pending the budget decisions).
+- CLI dictionary (R2): `tag_and_probe_efficiency.py` reads `--probes` and `--bins` files, so it moves from
+  `NO_INPUT_FILE` to `MISSING_FILE_ARGS` (it already refuses a missing file with a JSON status, exit 2).
+  `solar_modulation_force_field.py` (`--lis-table`) and `estimate_training_memory.py` (a plan file) stay known gaps:
+  they answer a missing file with text, not the JSON status the CLI contract asks of a listed script.
+
 ## 0.28.0 (2026-10-23)
 
 Minor release, contracts 3.9.0. It completes the cross-artifact check's Shrink by removing the suites that 0.27.0

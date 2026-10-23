@@ -323,6 +323,7 @@ STATIC_SCRIPTS = [  # (name, command after the interpreter): the static checks o
     ("ownership", ["tools/check_ownership.py"]),
     ("retired_names", ["tools/check_retired_names.py"]),
     ("reference_inventory", ["tools/reference_inventory.py", "--check"]),
+    ("wiring", ["tools/check_wiring.py"]),
     ("packaging_scan", ["tools/check_packaging.py"]),
     ("host_neutral", ["tools/check_host_neutral.py"]),
     ("instruction_text", ["tools/check_instruction_text.py"]),
