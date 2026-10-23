@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.8.0"
+CONTRACTS_VERSION = "3.9.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -147,6 +147,12 @@ CONTRACTS_VERSION = "3.8.0"
 # vocabulary response_corrections gains cutoff_transmission, survival and fragmentation_feeddown (catalog effects it
 # lacked). No artifact type, envelope field or capability changes. A 3.7 reader refuses a 1.1.0 check context, a 1.1.0
 # result binding and a 1.2.0 registry as invalid input instead of misreading them (refusal-matrix.md).
+# 3.9.0 (cross-artifact check value gate Shrink, architecture section 13.4; docs/dev/cross-artifact-check/
+# decision-value-gate.md and refusal-matrix.md) removes sidecar formats: the result binding
+# (contracts/schemas/result_binding.json), the model-card pairing contract (contracts/semantics/model_pairings.json and
+# its schema), model-only analysis bundles (mode "model") and the model-card and run-lineage suites. Readers refuse
+# them with the reason (bundle.removed, definition.suite_removed, permit.report_post_execution_removed). No artifact
+# type, vocabulary term, envelope field or capability changes; check reports are pre-execution only.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

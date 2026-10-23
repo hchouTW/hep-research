@@ -1,12 +1,12 @@
 {
- "contract_version": "3.8.0",
+ "contract_version": "3.9.0",
  "bindings": {
   "experiments": [],
   "theory": []
  },
  "versions": {
-  "plugin": "0.27.0",
-  "contracts": "3.8.0",
+  "plugin": "0.28.0",
+  "contracts": "3.9.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -47,7 +47,7 @@
  "inputs": [
   {
    "ref": "signal_strength.json",
-   "sha256": "e4d5dcb00f6bd4ead42f1639d59a2c8ba16af49cfe81b9abc893e551081f3fd1",
+   "sha256": "f24fe4c961301b066db27678b6a0249efa2b4170410584d127af27bfba70a829",
    "role": "statistical-result"
   }
  ],

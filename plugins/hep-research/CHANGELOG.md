@@ -3,7 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.28.0 (2026-10-23)
+
+Minor release, contracts 3.9.0. It completes the cross-artifact check's Shrink by removing the suites that 0.27.0
+deprecated.
+
+**Before you upgrade:**
+- **Removed:** `model-card` and `run-lineage`, model-only bundles (`--mode model`) and result bindings (`--results`,
+  `--project`).
+- **Refusals:** a context, bundle, CLI option or report that uses them is refused with the reason. Reproduce such
+  reports with 0.27.x.
+- **Remaining:** the check runs `counting-chain` (frozen) and `ratio-subset`, and stays experimental and advisory.
 
 - **Cross-artifact check: `model-card` and `run-lineage` removed (value gate Shrink, architecture section 13.4).**
   - **Removed:**
