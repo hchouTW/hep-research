@@ -160,8 +160,6 @@
   "R1:skills/hep-authoring/references/preregistration-and-registered-reports.md",
   "R1:skills/hep-authoring/references/reproducibility-auditing.md",
   "R1:skills/hep-authoring/references/supplementary-material-planning.md",
-  "R1:skills/hep-authoring/references/thesis-by-publication-assembly.md",
-  "R2:reads-file:skills/hep-measurement/scripts/solar_modulation_force_field.py",
-  "R2:reads-file:skills/hep-ml/scripts/estimate_training_memory.py"
+  "R1:skills/hep-authoring/references/thesis-by-publication-assembly.md"
  ]
 }

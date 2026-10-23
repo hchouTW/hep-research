@@ -22,8 +22,6 @@ from tools import check_wiring as cw  # noqa: E402
 BASELINE_GAPS = {
     "14fb707b539c",
     "21acb8095231",
-    "2cdb16ca6a10",
-    "2fcb8b2e3145",
     "3a6c8e4dcebe",
     "48672cdcaa10",
     "4d07b949fdbe",

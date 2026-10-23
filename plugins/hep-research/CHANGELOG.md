@@ -52,10 +52,12 @@ changes.
   corrected (hep-computing 35 references and 18 helpers, hep-ml 42, hep-statistics 13 references). The 17 hep-authoring
   pages reached only through its reference index stay known gaps until that index is one step away (a Resources or
   entry-reference change, pending the budget decisions).
-- CLI dictionary (R2): `tag_and_probe_efficiency.py` reads `--probes` and `--bins` files, so it moves from
-  `NO_INPUT_FILE` to `MISSING_FILE_ARGS` (it already refuses a missing file with a JSON status, exit 2).
-  `solar_modulation_force_field.py` (`--lis-table`) and `estimate_training_memory.py` (a plan file) stay known gaps:
-  they answer a missing file with text, not the JSON status the CLI contract asks of a listed script.
+- CLI dictionary (R2): three scripts that read a file named by an argument move from `NO_INPUT_FILE` to
+  `MISSING_FILE_ARGS`, so a missing file is tested: `tag_and_probe_efficiency.py` (`--probes`, `--bins`; it already
+  refused with a JSON status), `estimate_training_memory.py` (a plan file; JSON status `rejected` with `--json`) and
+  `solar_modulation_force_field.py` (`--lis-table`), which now prints every invalid-input error as a JSON object with
+  status `failed` and `error_kind` `invalid-input` on stdout (usage still on stderr, exit 2); its CLI-contract case
+  gains a malformed-table check.
 
 ## 0.28.0 (2026-10-23)
 
