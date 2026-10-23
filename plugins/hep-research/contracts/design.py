@@ -1947,6 +1947,8 @@ def pareto(proj: Project, spec: dict, groups: dict, basis: dict) -> dict:
     if not axes:
         return {"status": "not-requested", "reason": "comparison_basis.pareto_axes is not declared"}
     reasons = []
+    if len(set(axes)) != len(axes):
+        reasons.append("pareto_axes names a figure of merit twice")
     if "expected-precision" not in axes:
         reasons.append("pareto_axes does not include expected-precision: candidates are compared on expected "
                        "measurement precision (CHN-00)")
