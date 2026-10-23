@@ -456,6 +456,11 @@ C = [
  ("th19-dipole-1", "zh-Hant", "direct", "請用 GBW dipole 模型算 x = 1e-3、Q^2 = 10 GeV^2 的 F_2 與 F_L，並說明參數來源與 x 變數的慣例。", "hep-theory", [], None, None, {"set": "Th19"}),
  ("th20-dvcs-1", "en", "direct", "Compute t_min and the skewness for my DVCS beam-spin asymmetry bins and convert the azimuthal angle between the BMK and Trento conventions.", "hep-theory", ["GPDs", "conventions"], None, None, {"set": "Th20"}),
  ("th20-extract-1", "en", "neighboring", "Fit Compton form factors to my DVCS asymmetries with a likelihood and give intervals on them.", "hep-statistics", ["likelihoods"], "hep-theory", None, {"set": "Th20"}),
+    # S12-S13: PDF reweighting, profiling and global fits (pdf_reweighting.py, hessian_profiling.py)
+ ("s12-reweight-1", "en", "direct", "Reweight the NNPDF replicas for dbar/ubar with the pd/pp Drell-Yan ratio and tell me the effective number of replicas left.", "hep-statistics", ["PDF reweighting"], None, None, {"set": "S12"}),
+ ("s12-profile-1", "en", "direct", "Do a Hessian profiling of EPPS21 with my new p-Pb data and report the penalty term and the reduced gluon uncertainty.", "hep-statistics", ["profiling"], None, None, {"set": "S12"}),
+ ("s13-fit-1", "en", "direct", "Run a global PDF fit from scratch with my DIS and Drell-Yan data and give me the PDF uncertainty bands.", "hep-statistics", ["PDF fits"], None, None, {"set": "S13"}),
+ ("s13-inputs-1", "zh-Hant", "neighboring", "全域 PDF 擬合要用哪些理論設定：階數、重夸克方案、運動學截斷與 alpha_s 要怎麼一致地寫進規格？", "hep-theory", [], "hep-statistics", None, {"set": "S13"}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),

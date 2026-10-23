@@ -116,6 +116,9 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `combine_measurements.py` (needs NumPy): GLS combination once the combination plan accepts the inputs (example: `skills/hep-statistics/assets/combine.example.json`); `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples agree, shared blocks subtracted, said when undeclared; `build_covariance.py`: a `[Proposal]` covariance from declared correlation models and a length scan. Both import NumPy (and SciPy) at run time.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
 - `result_artifact.py`: a `statistical-result` artifact from a tool's output, with its status label.
+- `pdf_reweighting.py`: Bayesian reweighting of a PDF replica set (NNPDF and Giele-Keller weights, N_eff);
+  `hessian_profiling.py`: linear Hessian profiling of a Hessian set with new data; [PDF fits](pdf-fit-statistics.md).
+  NumPy at run time.
 - `roofit_fit_check.py` (needs PyROOT): fit status (status 0, covQual 3, EDM below `--edm-max`), `weighted`, `toys` (pulls), `crosscheck` (against core/stats); [RooFit and RooStats](roofit-and-roostats-methods.md).
 - `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure (M5 scaling
   classes) and the reach; outputs are labeled `projection` and fail the publication gate.

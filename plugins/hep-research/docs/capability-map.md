@@ -80,4 +80,6 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | sidis-and-tmd | SIDIS kinematics and Trento conventions, fragmentation functions, TMD factorization rules, Gaussian-ansatz TMD shapes, Sivers sign change, Drell-Yan q_T | hep-theory | tool | yes | Th18 |  |
 | small-x-saturation | Small-x physics: dipole picture with LO photon wave functions, GBW saturation model, BK/JIMWLK and BFKL conventions as rules | hep-theory | tool | yes | Th19 |  |
 | exclusive-and-gpd | Exclusive processes and GPDs (DVCS kinematics, azimuthal conventions, GPD properties and sum rules) and diffractive DIS kinematics; GPD extraction outside the tool | hep-theory | tool | yes | Th20 |  |
+| pdf-reweighting-and-profiling | Bayesian reweighting of PDF/nPDF/FF replica sets and linear Hessian profiling of published sets with new data; t0 chi2 for multiplicative uncertainties | hep-statistics | tool | yes | S12 |  |
+| global-pdf-fits | Specification and review of global PDF/nPDF/FF fits (theory inputs, chi2 forms, tolerances, closure tests); executing a full fit needs external software | hep-statistics | documentation | yes | S13 |  |
 <!-- /capability-map -->

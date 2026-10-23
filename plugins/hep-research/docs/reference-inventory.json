@@ -34,13 +34,13 @@
    "uncited": 0
   },
   "hep-statistics": {
-   "references": 13,
-   "bytes": 190161,
+   "references": 14,
+   "bytes": 198146,
    "uncited": 0
   },
   "hep-theory": {
-   "references": 30,
-   "bytes": 236444,
+   "references": 31,
+   "bytes": 241720,
    "uncited": 0
   }
  },
@@ -3582,8 +3582,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14217,
-   "lines": 142,
+   "bytes": 14463,
+   "lines": 145,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3698,6 +3698,25 @@
     "hep-measurement"
    ],
    "last_commit": "d8ab97cb 2026-10-23"
+  },
+  {
+   "path": "skills/hep-statistics/references/pdf-fit-statistics.md",
+   "owner": "hep-statistics",
+   "bytes": 7739,
+   "lines": 121,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/scripts/hessian_profiling.py",
+    "skills/hep-statistics/scripts/pdf_reweighting.py",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-theory"
+   ],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -3970,6 +3989,7 @@
    "cited_by": [
     "skills/hep-theory/references/dis-kinematics.md",
     "skills/hep-theory/references/exclusive-and-gpd.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/higher-order-predictions.md",
     "skills/hep-theory/references/nuclear-parton-effects.md",
@@ -4035,6 +4055,7 @@
    "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/sidis-and-tmd.md"
    ],
@@ -4042,9 +4063,24 @@
    "last_commit": "bd9d753e 2026-10-23"
   },
   {
+   "path": "skills/hep-theory/references/global-fits-theory-inputs.md",
+   "owner": "hep-theory",
+   "bytes": 4947,
+   "lines": 76,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-statistics/references/pdf-fit-statistics.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-statistics"
+   ],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
    "owner": "hep-theory",
-   "bytes": 6456,
+   "bytes": 6785,
    "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4055,6 +4091,7 @@
     "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/exclusive-and-gpd.md",
     "skills/hep-theory/references/fragmentation-functions.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
     "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/references/polarized-dis.md",
     "skills/hep-theory/references/sidis-and-tmd.md",
@@ -4074,6 +4111,7 @@
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-structure-functions.md",
     "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
@@ -4163,16 +4201,20 @@
    "lines": 146,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-statistics/references/pdf-fit-statistics.md",
     "skills/hep-theory/references/dis-kinematics.md",
     "skills/hep-theory/references/dis-structure-functions.md",
     "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/pdfs-and-lhapdf.md",
     "skills/hep-theory/references/polarized-dis.md",
     "skills/hep-theory/references/small-x-and-saturation.md",
     "skills/hep-theory/scripts/nuclear_combination.py"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-statistics"
+   ],
    "last_commit": "f046cc69 2026-10-23"
   },
   {
@@ -4562,7 +4604,9 @@
   ],
   "statistic": [
    "skills/hep-authoring/references/diagrams-statistics.md",
-   "skills/hep-authoring/references/statistics-and-ml-papers.md"
+   "skills/hep-authoring/references/statistics-and-ml-papers.md",
+   "skills/hep-statistics/references/astroparticle-statistics.md",
+   "skills/hep-statistics/references/pdf-fit-statistics.md"
   ],
   "statistical": [
    "skills/hep-statistics/references/statistical-inference-for-physics.md",

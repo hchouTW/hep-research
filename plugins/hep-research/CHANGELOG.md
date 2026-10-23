@@ -18,6 +18,15 @@ rejects an off-shell recoil.
   `skills/hep-theory/scripts/dipole_lo.py` (SciPy, core stack) and `skills/hep-theory/scripts/exclusive_kinematics.py`;
   `sum_rules.py` GPD rules (`gpd-integral:<F>`, `gpd-ji`). Capabilities `small-x-saturation` (Th19) and
   `exclusive-and-gpd` (Th20); routing cases (4).
+- hep-statistics and hep-theory, hadron structure phase 7 (S12, S13, global fits):
+  `skills/hep-statistics/references/pdf-fit-statistics.md` (chi2 and multiplicative uncertainties, tolerances, Hessian
+  and replica uncertainties, reweighting, profiling, impact studies, review checklist) and
+  `skills/hep-theory/references/global-fits-theory-inputs.md`; new scripts
+  `skills/hep-statistics/scripts/pdf_reweighting.py` and `skills/hep-statistics/scripts/hessian_profiling.py`;
+  `covariance_fit.py` gains the `t0` multiplicative mode (fixed prior prediction, optional iterations). Capabilities
+  `pdf-reweighting-and-profiling` (S12, tool) and `global-pdf-fits` (S13, documentation: no fit is executed). The
+  hep-statistics description names PDF reweighting/profiling and PDF fits; "asymptotics" and "(saying if no shipped
+  tool covers it)" were trimmed (unpinned). Live routing pending approval. Routing set S12-S13 (4 cases).
 
 ## 0.34.0 (2026-10-23)
 

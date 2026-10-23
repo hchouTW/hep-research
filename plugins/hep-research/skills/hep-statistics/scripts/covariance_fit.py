@@ -17,13 +17,22 @@ What it enforces:
   -0.043 +- 0.007, "model" by -0.039 +- 0.007 (a common normalization is not an additive Gaussian error, so the
   Gaussian likelihood with C(theta) is misspecified), "nuisance" by -0.002 +- 0.007: use "nuisance" for a common
   normalization; "model" is the right likelihood only when the covariance truly is Gaussian with a theta dependence.
+  "t0" (Ball et al., arXiv:0912.2276v2, Sec. 6; read 2026-10-23) scales the multiplicative part with a FIXED prior
+  prediction t0 ("t0_prediction", one value per point), so the covariance does not move with the fit (unlike "model",
+  which uses the fitted prediction and its ln det); "t0_iterations" k refits k times with t0 set to the previous fit's
+  prediction (their Sec. 6.3). Ball et al. show that the nuisance ("penalty trick") form is unbiased for one experiment
+  but biased when several experiments with different normalizations are combined, and that the iterated t0 form is
+  unbiased in both cases (their Secs. 4 and 6). With one common normalization and a constant model the t0 central
+  value does not depend on t0 (only its error does; their Eqs. 81-82); with separate normalizations it does and the
+  iteration converges to a self-consistent t0 (tests/skills/hep_statistics/test_covariance_fit.py).
 
 Units: rescaling y by a and C by a^2 leaves the parameters of a scale-covariant model (rescaled), chi2 and dof unchanged.
 
 Input (fit): {"y": [...], "cov": [[...]] (additive part), "x": [...] (abscissa, for the models),
   "model": "constant" | "line" | "exponential-normalized" (p_i = exp(-b x_i) / sum_k exp(-b x_k), parameter b),
   "constraints": [[a_1, ..., a_n], ...] (optional rows: a . y = const), "start": [...],
-  "multiplicative": {"relative_cov": [[...]], "mode": "data" | "model" | "nuisance"} (optional)}
+  "multiplicative": {"relative_cov": [[...]], "mode": "data" | "model" | "nuisance" | "t0", "t0_prediction": [...]
+  and "t0_iterations": k for t0} (optional)}
 
   "model_options": {"smoothness": s} for smoothly-broken-power-law, {"plugin": {"path", "function", "n_params"}} for
   plugin (a Python file defining function(theta, x) -> n predictions; it runs with your permissions, so only with
@@ -273,10 +282,10 @@ def _verdict(fun, x):
     return hess, edm
 
 
-def _cov_at(cov_add, rel, mode, y, pred, f_scale=None):
+def _cov_at(cov_add, rel, mode, y, pred, f_scale=None, t0=None):
     if rel is None:
         return cov_add
-    base = y if mode == "data" else pred
+    base = y if mode == "data" else (t0 if mode == "t0" else pred)
     return cov_add + rel * np.outer(base, base)
 
 
@@ -320,9 +329,35 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
     if multiplicative:
         rel = _relative_cov(multiplicative["relative_cov"], n)
         mode = multiplicative.get("mode")
-        if mode not in ("data", "model", "nuisance"):
-            raise CovFitError("multiplicative.mode must be data, model or nuisance (no default)")
-    q, info = subspace(cov if rel is None or mode == "nuisance" else cov + rel * np.outer(y, y), constraints)
+        if mode not in ("data", "model", "nuisance", "t0"):
+            raise CovFitError("multiplicative.mode must be data, model, nuisance or t0 (no default)")
+        if mode == "t0" and any(k.startswith("_") for k in multiplicative) and not getattr(fit, "_inner", False):
+            raise CovFitError("multiplicative keys starting with '_' are internal")
+        if mode == "t0" and not getattr(fit, "_inner", False):
+            t0 = multiplicative.get("t0_prediction")
+            iters = multiplicative.get("t0_iterations")
+            if t0 is None or iters is None:
+                raise CovFitError("t0 mode needs t0_prediction (a fixed prior prediction per point) and t0_iterations")
+            t0 = np.asarray(t0, dtype=float)
+            if t0.shape != (n,) or not np.all(np.isfinite(t0)) or isinstance(iters, bool) or not isinstance(iters, int) \
+                    or iters < 0:
+                raise CovFitError("t0_prediction must hold n finite values and t0_iterations an integer >= 0")
+            sub = dict(multiplicative, t0_iterations=0)
+            res = None
+            fit._inner = True
+            try:
+                for _ in range(iters + 1):
+                    res = fit(y, cov, model, x, constraints, start, dict(sub, t0_prediction=t0.tolist()), logdet,
+                              model_options, allow_plugin, base_dir)
+                    t0 = np.asarray(model_fn(model, x, model_options, allow_plugin, base_dir)[0](np.asarray(res["theta"])))
+            finally:
+                fit._inner = False
+            res["t0_iterations"] = iters
+            return res
+    t0v = np.asarray(multiplicative["t0_prediction"], dtype=float) if mode == "t0" else None
+    q, info = subspace(cov if rel is None or mode == "nuisance" else cov + rel * np.outer(y if t0v is None else t0v,
+                                                                                         y if t0v is None else t0v),
+                       constraints)
     if start is None and model in ("broken-power-law", "smoothly-broken-power-law"):
         raise CovFitInputError("a broken power law needs start [ln A, gamma1, gamma2, ln x_b] (or use break-scan)")
     th0 = np.asarray(start if start is not None else ([float(np.mean(y))] + [0.0] * (npar - 1)), dtype=float)
@@ -347,7 +382,7 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
     else:
         def m2ll(th):
             pred = f(th)
-            c = _cov_at(cov, rel, mode, y, pred)
+            c = _cov_at(cov, rel, mode, y, pred, t0=t0v)
             r = q.T @ (y - pred)
             cr = q.T @ c @ q
             val = float(r @ np.linalg.solve(cr, r))
@@ -358,7 +393,7 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
         theta = res.x
         hess, edm = _verdict(m2ll, theta)
         pred = f(theta)
-        c = _cov_at(cov, rel, mode, y, pred)
+        c = _cov_at(cov, rel, mode, y, pred, t0=t0v)
         r = q.T @ (y - pred)
         cr = q.T @ c @ q
         chi2 = float(r @ np.linalg.solve(cr, r))

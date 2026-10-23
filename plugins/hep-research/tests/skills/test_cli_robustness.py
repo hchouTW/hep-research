@@ -92,6 +92,8 @@ MISSING_FILE_ARGS = {
     "skills/hep-statistics/scripts/result_artifact.py": ["--cli-output", M, "--poi", "mu", "--construction", "asymptotic",
                                                          "--test-statistic", "q", "--label", "synthetic", "--artifact-id",
                                                          "x", "--out", OUT],
+    "skills/hep-statistics/scripts/pdf_reweighting.py": [M, "--weights", "nnpdf", "--min-replicas", "2"],
+    "skills/hep-statistics/scripts/hessian_profiling.py": [M],
     "skills/hep-statistics/scripts/look_elsewhere.py": ["brute", "--input", M, "--seed", "1"],
     "skills/hep-statistics/scripts/sensitivity_and_gof.py": ["gof", "--input", M, "--seed", "1"],
     "skills/hep-theory/scripts/eft_truncation.py": [M],
