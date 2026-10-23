@@ -47,7 +47,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | recasting | Recasting a published analysis with a parametrized response | hep-theory | tool | yes |  |  |
 | physical-data | Physical constants and particle and nuclear data with source and edition | hep-theory | tool | yes | Th9 |  |
 | relativistic-kinematics | Relativistic kinematics: two-body decays, boosts, invariant mass, Mandelstam variables, thresholds | hep-theory | tool | yes | Th7 |  |
-| cosmic-ray-propagation | Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation | hep-theory | tool | yes | Th1, Th2, Th3, Th6, Th11 |  |
+| cosmic-ray-propagation | Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation; codes, cross-section nuisances, global-fit structure and new-physics interpretation guidance | hep-theory | tool | yes | Th1, Th2, Th3, Th6, Th11, Th13 |  |
 | nuclear-physics-entry | Nuclear cross-section conventions, nuclear decays and Q-values | hep-theory | tool | yes | Th1, Th12 |  |
 | partition-and-batch | Local partition, batch campaigns, resubmission and duplicate-safe merges | hep-computing | tool | yes | C1 |  |
 | root-and-columnar-io | ROOT, PyROOT, uproot/awkward and columnar data tools | hep-computing | tool | yes | C4, C5, C7 |  |
