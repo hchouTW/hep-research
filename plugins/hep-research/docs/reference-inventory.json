@@ -4026,7 +4026,7 @@
     "skills/hep-theory/scripts/exclusive_kinematics.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "2414de9a 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/fragmentation-functions.md",
@@ -4062,7 +4062,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bd9d753e 2026-10-23"
+   "last_commit": "2414de9a 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4306,7 +4306,7 @@
     "skills/hep-theory/scripts/dipole_lo.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "2414de9a 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/smeft-and-eft.md",
