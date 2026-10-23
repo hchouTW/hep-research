@@ -76,4 +76,5 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | dis-structure-functions | Unpolarized inclusive DIS structure functions and cross sections (LO from user-supplied parton values, sum-rule integrals; beyond LO as rules) | hep-theory | tool | yes | Th14 |  |
 | drell-yan | Drell-Yan cross sections (LO, photon exchange), x_F and rapidity-frame conversions, angular coefficients and frames, Lam-Tung combination | hep-theory | tool | yes | Th15 |  |
 | nuclear-parton-effects | Nuclear targets: per-nucleon conventions, isospin combination, nuclear PDF sets and baselines, member-by-member nuclear ratios; mechanism models as rules | hep-theory | tool | yes | Th16 |  |
+| polarized-dis | Polarized DIS: g_1, g_2, asymmetries and depolarization factors, first-moment sum rules, factorization-scheme dependence of Delta Sigma | hep-theory | tool | yes | Th17 |  |
 <!-- /capability-map -->

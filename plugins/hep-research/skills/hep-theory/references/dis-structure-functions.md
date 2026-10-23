@@ -105,8 +105,9 @@ isospin). Status `analytic-derivation` within the parton model; the model itself
 - The PDF set's order, the evolution order and the coefficient-function order are one choice
   ([PDFs](pdfs-and-lhapdf.md)); mixing them is an assumption to state. Central scale mu_R = mu_F = Q with the
   envelope of [higher orders](higher-order-predictions.md).
-- The O(alpha_s) F_L is implemented only in a theory-domain profile (planned, phase 4 of the hadron-structure plan);
-  its formula is not given here until its source is read.
+- The O(alpha_s) F_L is implemented only in a theory-domain profile for the DIS parton model (listed in
+  `<plugin root>/profiles/registry.json`): the Altarelli-Martinelli form derived from the Moch, Vermaseren,
+  Vogt coefficient functions, synthetic-only (no published F_L benchmark read).
 - QED radiative corrections: predictions are Born level by default. Comparing with radiatively corrected data is a
   transformation declared in `contracts/comparison/gate.py`, not a silent correction.
 
@@ -189,6 +190,6 @@ These are software checks on constructed inputs; they do not establish physical 
 - I. Schienbein et al., "A Review of Target Mass Corrections", arXiv:0709.1775v2 (J. Phys. G 35 (2008) 053101):
   Eq. (3), Sec. 2.2 (Eqs. 17-26), Sec. 4, Appendix A (Eqs. A.5-A.9).
 
-Not verified and therefore not used: the O(alpha_s) F_L (Altarelli-Martinelli) formula; QCD corrections to the Adler
+Not verified and therefore not used here: the O(alpha_s) F_L formula (read for the profile, see its evidence); QCD corrections to the Adler
 and GLS sum rules; the original Georgi-Politzer paper (its result is taken from the review above, which reproduces
 it).

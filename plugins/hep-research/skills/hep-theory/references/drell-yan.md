@@ -103,8 +103,8 @@ and q g -> gamma* q channels (spin-1/2 quarks and spin-1 gluon) and can be viola
 status `perturbative-argument`, order stated. It is frame independent (Faccioli, Lourenco, Seixas). Peng et al. describe the q_T dependence of lambda and nu and the violation at colliders as non-coplanarity of the
 quark axis and the hadron plane, and only propose extending this to fixed-target data; for the large violations in
 pion-induced data they cite non-perturbative explanations, including Boer's TMD (Boer-Mulders) interpretation, which
-belongs to the SIDIS/TMD module (planned). The O(alpha_s)
-derivation of the relation is planned in a theory-domain profile (phase 4).
+belongs to the SIDIS/TMD module (planned). The O(alpha_s) derivation of the relation (from Peng et al.'s quark-axis representation with the axis in the hadron
+plane) and the lambda, nu of the q qbar and q g channels are in a theory-domain profile for LO Drell-Yan (listed in `<plugin root>/profiles/registry.json`).
 
 ## Beyond LO (rules)
 

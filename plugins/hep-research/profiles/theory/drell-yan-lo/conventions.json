@@ -1,0 +1,22 @@
+{
+ "unit_system": "natural-HEP: M, sqrt(s) in GeV; d2sigma/dM dy in GeV^-3, or in nb/GeV through 4 pi alpha^2/3 = 86.8 nb GeV^2 [dylo:C01]; lambda, mu, nu, A_n dimensionless",
+ "hbar_c_one": true,
+ "metric_signature": "not-applicable (no amplitude is computed; the partonic cross section is taken from PDG Eq. 51.3)",
+ "coupling_normalization": "alpha = e^2/(4 pi) (QED); alpha_s enters only as the order O(alpha_s) of the gamma* g and gamma* q channels: lambda and nu at that order do not depend on the value of alpha_s",
+ "renormalization_scheme": "not-applicable (LO cross section; the O(alpha_s) angular coefficients are ratios with no scheme-dependent input at this order)",
+ "scales": "not-applicable (no scale-dependent quantity is evaluated)",
+ "energy_variable": "dilepton mass M (Q in Peng et al.), hadronic s, tau = M^2/s; qT/Q for the angular coefficients",
+ "frame": "Collins-Soper frame: dilepton rest frame, z axis bisecting the two hadron momenta, x axis in the hadron plane (Peng et al. Fig. 1) [dylo:C03]",
+ "angle_definition": "theta, phi: polar and azimuthal angles of the negative lepton in the Collins-Soper frame; theta1, phi1: those of the quark axis z'; theta0: angle between the negative lepton and z' [dylo:C03, C04]",
+ "spin_treatment": "unpolarized hadrons; spin-averaged partons, summed lepton spins",
+ "mass_approximation": "massless quarks and leptons",
+ "exchanged_bosons": "photon only: a = 0 in Peng et al. Eq. 2 for all numbers (Z exchange and gamma-Z interference excluded)",
+ "em_coupling": "alpha of PDG Eq. 51.3; whether alpha(0) or a running alpha is meant is not stated in the passage read; no numerical alpha is used (results in units of 4 pi alpha^2/3)",
+ "factorization_scheme": "not-applicable (LO parton model, PDG Eq. 51.40; no coefficient functions)",
+ "rapidity_frame": "hadronic centre-of-mass frame, +z along hadron 1; y = (1/2) ln(x1/x2), x1 = (M/sqrt(s)) e^y from hadron 1",
+ "xF_definition": "not-applicable (xF is not used)",
+ "azimuth_convention": "Collins-Soper phi of the negative lepton measured from the hadron plane (Peng et al. Fig. 1)",
+ "log_accuracy": "not-applicable (fixed order, no qT resummation)",
+ "dylo:angular_distribution": "d sigma/d Omega propto 1 + lambda cos^2 theta + mu sin 2theta cos phi + (nu/2) sin^2 theta cos 2phi (Peng et al. Eq. 1, note nu/2) [dylo:C03]",
+ "dylo:channel_mixture": "q g fraction f = angle-integrated cross-section fraction of the q g channel in the same (qT, Q) bin (an event fraction only with full angular acceptance); A_i^mix = sum_c f_c A_i^c exactly, equivalently lambda_mix = sum f_c lambda_c/(3 + lambda_c) / sum f_c/(3 + lambda_c) (derived in derive.py); a linear average of lambda or nu is wrong"
+}

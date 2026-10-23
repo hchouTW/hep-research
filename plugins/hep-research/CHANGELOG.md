@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- hep-theory, hadron structure phase 4 (Th17, polarized DIS): `skills/hep-theory/references/polarized-dis.md` (g_1, g_2,
+  asymmetries and depolarization factors, Bjorken, Ellis-Jaffe, Burkhardt-Cottingham and ELT sum rules, MS-bar/AB/JET
+  schemes of Delta Sigma; sources read in full text 2026-10-23) and polarized rules in `sum_rules.py` (`g1-moment:p|n`,
+  `bjorken-lo`, `ellis-jaffe:p|n`). Capability `polarized-dis` (Th17); routing set Th17 (2 cases).
+- Theory-domain profiles `theory:dis-parton-model` (LO F_2 and the O(alpha_s) F_L derived in SymPy from the Moch,
+  Vermaseren, Vogt coefficient functions; synthetic only) and `theory:drell-yan-lo` (LO cross section; O(alpha_s)
+  angular coefficients and the Lam-Tung relation from Peng et al.'s quark-axis representation; benchmark Peng et al.
+  Eq. 10), registered in `profiles/registry.json`.
+
 ## 0.32.0 (2026-10-23)
 
 Minor release, contracts 3.10.0 (unchanged). It adds the third module of hep-theory's hadron-structure plan: nuclear

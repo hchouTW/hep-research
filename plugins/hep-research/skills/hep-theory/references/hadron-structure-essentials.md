@@ -13,13 +13,16 @@ no page yet: say so and apply the general discipline of hep-theory.
 | Module | Topic | Page | Computed by the plugin | Rules only |
 |---|---|---|---|---|
 | A | Unpolarized inclusive DIS (NC, CC, neutrino) | [DIS structure functions](dis-structure-functions.md) (Th14) | LO structure functions and cross sections from user-supplied parton values (`structure_functions_lo.py`); sum-rule integrals (`sum_rules.py`) | coefficient functions beyond LO, heavy-quark schemes, target-mass corrections, higher twist |
-| B | Polarized DIS (g_1, g_2, sum rules) | planned | - | - |
+| B | Polarized DIS (g_1, g_2, sum rules) | [polarized DIS](polarized-dis.md) (Th17) | LO g_1 first moments, the Bjorken integral at LO and the Ellis-Jaffe reference value from tabulated helicity densities (`sum_rules.py`) | asymmetries and depolarization factors (formulas), g_2 twist-3, scheme conversion of Delta Sigma, higher orders |
 | C | Drell-Yan (cross sections, x_F, rapidity frames, angular coefficients) | [Drell-Yan](drell-yan.md) (Th15) | LO d2sigma/dM dy and dM dx_F (photon exchange), conversions between (M, y), (M, x_F), (x_1, x_2), (tau, y), CS <-> HX rotation with invariants, Lam-Tung combination (`drell_yan_lo.py`) | NLO, threshold resummation, Z exchange (refused by the script) |
 | D | Nuclear effects and nuclear PDFs | [nuclear targets](nuclear-parton-effects.md) (Th16) | bound-nucleon (isospin) combination, per-nucleon <-> per-nucleus conversions, member-by-member nuclear ratios with the set's rule (`nuclear_combination.py`) | mechanism models (shadowing, EMC effect, energy loss), deuteron corrections, Coulomb corrections |
 | E | SIDIS, fragmentation functions, TMDs, Drell-Yan q_T resummation | planned | - | - |
 | F | Small-x physics and saturation (dipole picture) | planned | - | - |
 | G | Global PDF / nPDF / FF fits (theory inputs; statistics in hep-statistics) | planned | - | - |
 | H | Exclusive processes, GPDs, diffractive DIS | planned | - | - |
+
+Theory-domain profiles (in `<plugin root>/profiles/registry.json`): the DIS parton model (LO F_2 and O(alpha_s) F_L,
+synthetic only) and LO Drell-Yan (O(alpha_s) angular coefficients and Lam-Tung, with a published benchmark).
 
 Kinematic invariants of DIS: [DIS kinematics](dis-kinematics.md). PDF sets, members and their uncertainty:
 [PDFs](pdfs-and-lhapdf.md). Orders, scales and envelopes: [higher orders](higher-order-predictions.md).

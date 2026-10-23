@@ -1,0 +1,58 @@
+[
+ {
+  "id": "dispm:C01",
+  "claim": "In the naive quark-parton model, for neutral-current ep -> eX, F_2^gamma = x sum_q e_q^2 (q + qbar), with q(x, Q^2) the number density of quarks of a given flavour carrying momentum fraction x",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["dispm:S01"],
+  "location": "Sec. 18.2.1 'Structure functions in the quark parton model', Eq. (18.18), first entry of the [F_2^gamma, F_2^gammaZ, F_2^Z] line, page 5",
+  "scope": {"text": "leading order (no QCD corrections); photon exchange for the F_2^gamma entry"},
+  "limitations": "the same equation also gives the gamma-Z and Z entries, which this profile does not use",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-23"
+ },
+ {
+  "id": "dispm:C02",
+  "claim": "For Q^2 >> M^2, F_i = sum_a C_ia (x) f_a + O(M^2/Q^2), with C (x) f = int_x^1 dy/y C(y) f(x/y); the coefficient functions are power series in alpha_s and mu is typically the scale of the probe Q",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["dispm:S01"],
+  "location": "Sec. 18.2.2, Eqs. (18.21) and (18.22) and the sentences after them, page 7",
+  "scope": {"text": "factorization theorem for DIS structure functions, leading twist"},
+  "limitations": "the review gives the factorization schematically; the F_L coefficient functions come from dispm:C03, C04",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-23"
+ },
+ {
+  "id": "dispm:C03",
+  "claim": "Disregarding power corrections, x^-1 F_L = C_L,ns (x) q_ns + <e^2> (C_L,q (x) q_s + C_L,g (x) g), where q_i and g are number distributions, q_s = sum_{i=1}^{n_f} (q_i + qbar_i), q_ns is the corresponding non-singlet combination, <e^2> is the average squared charge (= 5/18 for even n_f), <e^k> = n_f^-1 sum_i e_i^k, and (x) is the Mellin convolution; F_L = F_2 - 2 x F_1",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["dispm:S02", "dispm:S01"],
+  "location": "Moch, Vermaseren and Vogt Eq. (1) and the paragraph after it (printed page 1), definition of <e^k> below Eq. (11) (printed page 3); F_L = F_2 - 2xF_1 also PDG Eq. (18.17), page 4",
+  "scope": {"text": "massless perturbative QCD, electromagnetic DIS (photon exchange), n_f effectively massless flavours"},
+  "limitations": "q_ns is not written out in the paper; the profile identifies it as sum (e_i^2 - <e^2>)(q_i + qbar_i), which reproduces LO F_2 (dispm:C01) and is checked as flavour-traceless in derive.py",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-23"
+ },
+ {
+  "id": "dispm:C04",
+  "claim": "C_L,a(alpha_s, x) = sum_{n>=1} (alpha_s/(4 pi))^n c_L,a^(n)(x), the superscript giving the order in alpha_s; renormalization and factorization scales identified with Q^2; results beyond LO in MS-bar; the scheme-independent LO coefficient functions are c_L,ns^(1) = 4 C_F x, c_L,ps^(1) = 0, c_L,g^(1) = 8 n_f x (1 - x), with C_F = 4/3 and c_L,q = c_L,ns + c_L,ps",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["dispm:S02"],
+  "location": "Eqs. (2) and (3) and the surrounding text, printed pages 1-2",
+  "scope": {"text": "O(alpha_s) coefficient functions of F_L, mu_R = mu_F = Q"},
+  "limitations": "only the n = 1 coefficients are used; the paper's NLO and NNLO parametrizations are outside this profile",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-23"
+ }
+]

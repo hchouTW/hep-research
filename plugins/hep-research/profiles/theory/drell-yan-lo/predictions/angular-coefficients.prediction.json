@@ -1,0 +1,617 @@
+{
+ "contract_version": "3.10.0",
+ "artifact_id": "dylo-prediction-angular-coefficients",
+ "artifact_type": "prediction",
+ "objective": "lambda, nu and 1 - lambda - 2 nu versus qT/Q at O(alpha_s) for the q qbar and q g channels and their mixtures (no data)",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:drell-yan-lo",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.32.0",
+  "contracts": "3.10.0",
+  "profiles": {
+   "theory:drell-yan-lo": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-23",
+  "evidence_ids": [
+   "dylo:C01",
+   "dylo:C02",
+   "dylo:C03",
+   "dylo:C04",
+   "dylo:C05",
+   "dylo:C06",
+   "dylo:C07"
+  ]
+ },
+ "inputs": [
+  {
+   "ref": "derivations/theory-spec.json",
+   "artifact_type": "theory-spec",
+   "artifact_id": "dylo-theory-spec-lo-and-lam-tung",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "observable": {
+   "quantity": "dylo:angular-coefficient",
+   "process": "lepton-pair production in hadron-hadron collisions via a virtual photon, O(alpha_s) channels q qbar -> gamma* g and q g -> gamma* q",
+   "species": [
+    {
+     "name": "negative lepton"
+    }
+   ],
+   "variables": [
+    {
+     "name": "qT_over_Q",
+     "unit": "1",
+     "points": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.5,
+      0.75,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "lepton angular distribution in the Collins-Soper frame, integrated over the dilepton rapidity and mass at fixed qT/Q; no lepton cuts",
+    "fiducial": false
+   },
+   "level": "parton",
+   "frame": "Collins-Soper",
+   "normalization": {
+    "kind": "shape-only",
+    "value": "not-applicable",
+    "convention": "lambda, mu, nu are coefficients of the normalized angular distribution (Peng et al. Eq. 1)"
+   },
+   "bin_semantics": "point",
+   "unit": "1",
+   "conventions": {
+    "frame": "Collins-Soper frame: dilepton rest frame, z axis bisecting the two hadron momenta, x axis in the hadron plane (Peng et al. Fig. 1) [dylo:C03]",
+    "angle_definition": "theta, phi: polar and azimuthal angles of the negative lepton in the Collins-Soper frame; theta1, phi1: those of the quark axis z'; theta0: angle between the negative lepton and z' [dylo:C03, C04]",
+    "exchanged_bosons": "photon only: a = 0 in Peng et al. Eq. 2 for all numbers (Z exchange and gamma-Z interference excluded)",
+    "azimuth_convention": "Collins-Soper phi of the negative lepton measured from the hadron plane (Peng et al. Fig. 1)",
+    "mass_approximation": "massless quarks and leptons",
+    "spin_treatment": "unpolarized hadrons; spin-averaged partons, summed lepton spins",
+    "dylo:angular_distribution": "d sigma/d Omega propto 1 + lambda cos^2 theta + mu sin 2theta cos phi + (nu/2) sin^2 theta cos 2phi (Peng et al. Eq. 1, note nu/2) [dylo:C03]",
+    "dylo:channel_mixture": "q g fraction f = angle-integrated cross-section fraction of the q g channel in the same (qT, Q) bin (an event fraction only with full angular acceptance); A_i^mix = sum_c f_c A_i^c exactly, equivalently lambda_mix = sum f_c lambda_c/(3 + lambda_c) / sum f_c/(3 + lambda_c) (derived in derive.py); a linear average of lambda or nu is wrong"
+   },
+   "validity_range": {
+    "qT_over_Q": [
+     0.0,
+     3.0
+    ]
+   }
+  },
+  "theory_spec_ref": "derivations/theory-spec.json",
+  "derivation_status": "perturbative-argument",
+  "parameter_point": {
+   "qg_fractions": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+   ],
+   "mixing_rule": "A0, A2 averaged with angle-integrated cross-section fractions (exact)",
+   "note": "the q g fraction f is a free parameter of the prediction, not fitted to data"
+  },
+  "representation": "symbolic",
+  "expression": "r = qT/Q; A0(qqbar) = r^2/(1 + r^2), A0(qg) = 5 r^2/(1 + 5 r^2); A0(f) = f A0(qg) + (1 - f) A0(qqbar); A2 = A0 (phi1 = 0 at O(alpha_s)); lambda = (2 - 3 A0)/(2 + A0); nu = 2 A2/(2 + A0); 1 - lambda - 2 nu = 4 (A0 - A2)/(2 + A0) = 0. Per channel: lambda = (2 - r^2)/(2 + 3 r^2), nu = 2 r^2/(2 + 3 r^2) (q qbar); lambda = (2 - 5 r^2)/(2 + 15 r^2), nu = 10 r^2/(2 + 15 r^2) (q g)",
+  "point_values": {
+   "about": "the expression evaluated at the grid points; channels and mixtures (q g fraction)",
+   "channels": {
+    "qqbar": [
+     {
+      "qT_over_Q": 0.0,
+      "A0": 0.0,
+      "A2": 0.0,
+      "lambda": 1.0,
+      "nu": 0.0,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.1,
+      "A0": 0.009900990099009903,
+      "A2": 0.009900990099009903,
+      "lambda": 0.9802955665024631,
+      "nu": 0.009852216748768475,
+      "lam_tung": -2.7755575615628914e-17
+     },
+     {
+      "qT_over_Q": 0.2,
+      "A0": 0.03846153846153847,
+      "A2": 0.03846153846153847,
+      "lambda": 0.9245283018867925,
+      "nu": 0.037735849056603786,
+      "lam_tung": -4.163336342344337e-17
+     },
+     {
+      "qT_over_Q": 0.3,
+      "A0": 0.08256880733944953,
+      "A2": 0.08256880733944953,
+      "lambda": 0.8414096916299558,
+      "nu": 0.079295154185022,
+      "lam_tung": 1.6653345369377348e-16
+     },
+     {
+      "qT_over_Q": 0.5,
+      "A0": 0.2,
+      "A2": 0.2,
+      "lambda": 0.6363636363636362,
+      "nu": 0.18181818181818182,
+      "lam_tung": 1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.75,
+      "A0": 0.36,
+      "A2": 0.36,
+      "lambda": 0.3898305084745763,
+      "nu": 0.3050847457627119,
+      "lam_tung": -1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 1.0,
+      "A0": 0.5,
+      "A2": 0.5,
+      "lambda": 0.2,
+      "nu": 0.4,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.5,
+      "A0": 0.6923076923076923,
+      "A2": 0.6923076923076923,
+      "lambda": -0.028571428571428466,
+      "nu": 0.5142857142857142,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 2.0,
+      "A0": 0.8,
+      "A2": 0.8,
+      "lambda": -0.142857142857143,
+      "nu": 0.5714285714285715,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 3.0,
+      "A0": 0.9,
+      "A2": 0.9,
+      "lambda": -0.24137931034482765,
+      "nu": 0.6206896551724138,
+      "lam_tung": 0.0
+     }
+    ],
+    "qg": [
+     {
+      "qT_over_Q": 0.0,
+      "A0": 0.0,
+      "A2": 0.0,
+      "lambda": 1.0,
+      "nu": 0.0,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.1,
+      "A0": 0.047619047619047616,
+      "A2": 0.047619047619047616,
+      "lambda": 0.9069767441860466,
+      "nu": 0.046511627906976744,
+      "lam_tung": -5.551115123125783e-17
+     },
+     {
+      "qT_over_Q": 0.2,
+      "A0": 0.16666666666666669,
+      "A2": 0.16666666666666669,
+      "lambda": 0.6923076923076924,
+      "nu": 0.15384615384615388,
+      "lam_tung": -1.6653345369377348e-16
+     },
+     {
+      "qT_over_Q": 0.3,
+      "A0": 0.31034482758620685,
+      "A2": 0.31034482758620685,
+      "lambda": 0.46268656716417916,
+      "nu": 0.2686567164179104,
+      "lam_tung": 1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.5,
+      "A0": 0.5555555555555556,
+      "A2": 0.5555555555555556,
+      "lambda": 0.13043478260869562,
+      "nu": 0.4347826086956522,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.75,
+      "A0": 0.7377049180327869,
+      "A2": 0.7377049180327869,
+      "lambda": -0.07784431137724551,
+      "nu": 0.5389221556886228,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.0,
+      "A0": 0.8333333333333334,
+      "A2": 0.8333333333333334,
+      "lambda": -0.1764705882352941,
+      "nu": 0.5882352941176471,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.5,
+      "A0": 0.9183673469387755,
+      "A2": 0.9183673469387755,
+      "lambda": -0.2587412587412588,
+      "nu": 0.6293706293706294,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 2.0,
+      "A0": 0.9523809523809523,
+      "A2": 0.9523809523809523,
+      "lambda": -0.29032258064516114,
+      "nu": 0.6451612903225806,
+      "lam_tung": -2.220446049250313e-16
+     },
+     {
+      "qT_over_Q": 3.0,
+      "A0": 0.9782608695652174,
+      "A2": 0.9782608695652174,
+      "lambda": -0.3138686131386862,
+      "nu": 0.6569343065693432,
+      "lam_tung": 0.0
+     }
+    ]
+   },
+   "mixtures_by_qg_fraction": {
+    "0.0": [
+     {
+      "qT_over_Q": 0.0,
+      "lambda": 1.0,
+      "nu": 0.0,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.1,
+      "lambda": 0.9802955665024631,
+      "nu": 0.009852216748768475,
+      "lam_tung": -2.7755575615628914e-17
+     },
+     {
+      "qT_over_Q": 0.2,
+      "lambda": 0.9245283018867925,
+      "nu": 0.037735849056603786,
+      "lam_tung": -4.163336342344337e-17
+     },
+     {
+      "qT_over_Q": 0.3,
+      "lambda": 0.8414096916299558,
+      "nu": 0.079295154185022,
+      "lam_tung": 1.6653345369377348e-16
+     },
+     {
+      "qT_over_Q": 0.5,
+      "lambda": 0.6363636363636362,
+      "nu": 0.18181818181818182,
+      "lam_tung": 1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.75,
+      "lambda": 0.3898305084745763,
+      "nu": 0.3050847457627119,
+      "lam_tung": -1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 1.0,
+      "lambda": 0.2,
+      "nu": 0.4,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.5,
+      "lambda": -0.028571428571428466,
+      "nu": 0.5142857142857142,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 2.0,
+      "lambda": -0.142857142857143,
+      "nu": 0.5714285714285715,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 3.0,
+      "lambda": -0.24137931034482765,
+      "nu": 0.6206896551724138,
+      "lam_tung": 0.0
+     }
+    ],
+    "0.25": [
+     {
+      "qT_over_Q": 0.0,
+      "lambda": 1.0,
+      "nu": 0.0,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.1,
+      "lambda": 0.9617090824188652,
+      "nu": 0.019145458790567355,
+      "lam_tung": 7.632783294297951e-17
+     },
+     {
+      "qT_over_Q": 0.2,
+      "lambda": 0.8637770897832816,
+      "nu": 0.06811145510835914,
+      "lam_tung": 1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.3,
+      "lambda": 0.739169007836759,
+      "nu": 0.13041549608162056,
+      "lam_tung": -1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.5,
+      "lambda": 0.49514563106796117,
+      "nu": 0.25242718446601947,
+      "lam_tung": -1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.75,
+      "lambda": 0.2594175794816991,
+      "nu": 0.37029121025915046,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.0,
+      "lambda": 0.0967741935483871,
+      "nu": 0.45161290322580644,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.5,
+      "lambda": -0.08966304968589359,
+      "nu": 0.5448315248429468,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 2.0,
+      "lambda": -0.1812080536912753,
+      "nu": 0.5906040268456376,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 3.0,
+      "lambda": -0.2598659717051377,
+      "nu": 0.6299329858525688,
+      "lam_tung": 0.0
+     }
+    ],
+    "0.5": [
+     {
+      "qT_over_Q": 0.0,
+      "lambda": 1.0,
+      "nu": 0.0,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.1,
+      "lambda": 0.9432953753195445,
+      "nu": 0.02835231234022775,
+      "lam_tung": -4.85722573273506e-17
+     },
+     {
+      "qT_over_Q": 0.2,
+      "lambda": 0.8048780487804877,
+      "nu": 0.0975609756097561,
+      "lam_tung": 5.551115123125783e-17
+     },
+     {
+      "qT_over_Q": 0.3,
+      "lambda": 0.6422295837534208,
+      "nu": 0.17888520812328965,
+      "lam_tung": -5.551115123125783e-17
+     },
+     {
+      "qT_over_Q": 0.5,
+      "lambda": 0.36448598130841126,
+      "nu": 0.3177570093457944,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.75,
+      "lambda": 0.13866735271417543,
+      "nu": 0.4306663236429123,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.0,
+      "lambda": 0.0,
+      "nu": 0.5,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.5,
+      "lambda": -0.1482932288752099,
+      "nu": 0.574146614437605,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 2.0,
+      "lambda": -0.2185430463576159,
+      "nu": 0.609271523178808,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 3.0,
+      "lambda": -0.27810650887573973,
+      "nu": 0.6390532544378699,
+      "lam_tung": 0.0
+     }
+    ],
+    "0.75": [
+     {
+      "qT_over_Q": 0.0,
+      "lambda": 1.0,
+      "nu": 0.0,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.1,
+      "lambda": 0.9250520471894517,
+      "nu": 0.03747397640527411,
+      "lam_tung": 1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.2,
+      "lambda": 0.7477477477477478,
+      "nu": 0.12612612612612611,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.3,
+      "lambda": 0.5501895268847397,
+      "nu": 0.22490523655763017,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.5,
+      "lambda": 0.24324324324324326,
+      "nu": 0.37837837837837834,
+      "lam_tung": 1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.75,
+      "lambda": 0.02654428181592664,
+      "nu": 0.4867278590920367,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.0,
+      "lambda": -0.09090909090909091,
+      "nu": 0.5454545454545454,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.5,
+      "lambda": -0.20460778935820076,
+      "nu": 0.6023038946791004,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 2.0,
+      "lambda": -0.2549019607843136,
+      "nu": 0.6274509803921567,
+      "lam_tung": 2.220446049250313e-16
+     },
+     {
+      "qT_over_Q": 3.0,
+      "lambda": -0.29610580455547386,
+      "nu": 0.6480529022777369,
+      "lam_tung": 0.0
+     }
+    ],
+    "1.0": [
+     {
+      "qT_over_Q": 0.0,
+      "lambda": 1.0,
+      "nu": 0.0,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.1,
+      "lambda": 0.9069767441860466,
+      "nu": 0.046511627906976744,
+      "lam_tung": -5.551115123125783e-17
+     },
+     {
+      "qT_over_Q": 0.2,
+      "lambda": 0.6923076923076924,
+      "nu": 0.15384615384615388,
+      "lam_tung": -1.6653345369377348e-16
+     },
+     {
+      "qT_over_Q": 0.3,
+      "lambda": 0.46268656716417916,
+      "nu": 0.2686567164179104,
+      "lam_tung": 1.1102230246251565e-16
+     },
+     {
+      "qT_over_Q": 0.5,
+      "lambda": 0.13043478260869562,
+      "nu": 0.4347826086956522,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 0.75,
+      "lambda": -0.07784431137724551,
+      "nu": 0.5389221556886228,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.0,
+      "lambda": -0.1764705882352941,
+      "nu": 0.5882352941176471,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 1.5,
+      "lambda": -0.2587412587412588,
+      "nu": 0.6293706293706294,
+      "lam_tung": 0.0
+     },
+     {
+      "qT_over_Q": 2.0,
+      "lambda": -0.29032258064516114,
+      "nu": 0.6451612903225806,
+      "lam_tung": -2.220446049250313e-16
+     },
+     {
+      "qT_over_Q": 3.0,
+      "lambda": -0.3138686131386862,
+      "nu": 0.6569343065693432,
+      "lam_tung": 0.0
+     }
+    ]
+   },
+   "checks": {
+    "lam_tung_zero_in_each_channel_and_mixture": true,
+    "lambda_1_nu_0_at_qT_0": true,
+    "lambda_within_minus_one_third_and_one": true,
+    "qg_lambda_falls_faster_than_qqbar": true,
+    "published_eq10_reproduced": true,
+    "lo_cross_section_jacobian_numerical": true
+   }
+  },
+  "uncertainties": [],
+  "allowed_transformations": [
+   "re-evaluation at other qT/Q values or q g fractions (predict.py --config)",
+   "a comparison with data needs a stated q g fraction (or a fit of it, in hep-statistics) and must allow Lam-Tung violation beyond O(alpha_s)"
+  ]
+ }
+}
