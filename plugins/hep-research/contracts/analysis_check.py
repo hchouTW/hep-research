@@ -17,10 +17,14 @@ Snapshots are on by default (D11b): freeze stores the pinned definitions in <roo
 records the bundle in <root>/.hep-research/bundles.json; check reproduces a drifted subject from that store when it
 exists. 'snapshots gc' lists (dry run) or deletes (--apply) only snapshots no indexed bundle references.
 
+Removed in 0.28.0 (value gate Shrink, docs/dev/cross-artifact-check/decision-value-gate.md): the model-card and
+run-lineage suites, model-only bundles (--mode model), result bindings (--results) and the project blinding block
+(--project). A context or bundle that names them is refused with that reason; reproduce such reports with 0.27.x.
+
 Usage: python3 contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json --context CONTEXT.json --out FILE
-                                            [--snapshots DIR | --no-snapshots] [--mode chain|model]
+                                            [--snapshots DIR | --no-snapshots]
        python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT] [--snapshots DIR]
-                                            [--exceptions FILE] [--results BINDING] [--project DIR]
+                                            [--exceptions FILE]
        python3 contracts/analysis_check.py summary REPORT [--cursor N] [--max-bytes N]
        python3 contracts/analysis_check.py snapshots gc --root DIR [--apply]
 Exit codes of check: 0 inputs valid and the suite complete and consistent; 1 a violation, or invalid schema,
@@ -53,14 +57,15 @@ from core.protected.identity import plugin_release  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FORMAT2 = "hep-research-analysis-bundle/2"
 ROLES2 = ("measurement-spec", "recipe", "semantics-table", "calibration", "tool-contract", "environment-lock", "review",
-          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record", "model-card")
+          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record")
 MODE_ROLES = {"chain": {"exactly_one": ("measurement-spec", "environment-lock", "context", "semantic-lock"),
-                       "at_least_one": ("recipe",)},
-              # model-only diagnostics (O13): a model and a root intent; nothing is fabricated to fill a chain's roles
-              "model": {"exactly_one": ("context", "semantic-lock"), "at_least_one": ("model-card",)}}
+                       "at_least_one": ("recipe",)}}
+# Removed in 0.28.0 (value gate Shrink, decision-value-gate.md; architecture section 13.4): refused with this reason
+REMOVED_SUITES = ("model-card", "run-lineage")
+REMOVED = ("removed in hep-research 0.28.0 (cross-artifact check Shrink: model-card, run-lineage, model-only bundles "
+           "and result bindings); reproduce it with 0.27.x")
 SUITE_DIR = ROOT / "contracts" / "rules" / "suites"
 COVERAGE_DIR = ROOT / "contracts" / "semantics" / "coverage"
-PAIRINGS = ROOT / "contracts" / "semantics" / "model_pairings.json"
 REGISTRY = ROOT / "contracts" / "rules" / "registry.json"
 CONTEXT_REF, LOCK_REF = "check-context.json", "semantic-lock.json"
 CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__init__.py",
@@ -68,10 +73,9 @@ CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__ini
                  "contracts/analysis_checks/context.py", "contracts/analysis_checks/obligations.py",
                  "contracts/analysis_checks/lock.py", "contracts/analysis_checks/rules.py",
                  "contracts/analysis_checks/outcomes.py", "contracts/analysis_checks/readers.py",
-                 "contracts/analysis_checks/model.py", "contracts/analysis_checks/runs.py",
                  "contracts/effect_catalog.py", "contracts/recipe_semantics.py")
-# the code the obligation generator runs: the generator itself, the model-card subjects and the catalog it resolves
-GENERATOR_FILES = ("contracts/analysis_checks/obligations.py", "contracts/analysis_checks/model.py", "contracts/effect_catalog.py")
+# the code the obligation generator runs: the generator itself and the catalog it resolves
+GENERATOR_FILES = ("contracts/analysis_checks/obligations.py", "contracts/effect_catalog.py")
 STATE_DIR = ".hep-research"
 
 
@@ -163,17 +167,11 @@ def _view(items: dict, context: dict) -> tuple[dict, list[dict]]:
             diags.append({"kind": "dependency-missing", "code": "definition.coverage_missing",
                           "message": f"no operator coverage contract for table '{tid}'"})
     view = {"items": items, "context": context, "tables": tables, "coverage": coverage, "catalog": load_catalog()}
-    if any(it.get("role") == "model-card" for it in items.values()):
-        try:
-            view["pairings"] = json.loads(PAIRINGS.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            diags.append({"kind": "dependency-missing", "code": "definition.pairings_missing",
-                          "message": "the model-card pairing contract is not installed"})
     return view, diags
 
 
 JSON_ROLES = ("measurement-spec", "recipe", "semantics-table", "response", "dataset-record", "context", "semantic-lock",
-              "coverage-contract", "validation-record", "model-card")
+              "coverage-contract", "validation-record")
 SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json",
           "validation-record": "validation_record.json"}
 
@@ -196,12 +194,6 @@ def shape_diagnostics(items: dict, context_version="1.0.0") -> list[dict]:
         if role in JSON_ROLES and not isinstance(doc, dict) and on("item.not_an_object"):
             diags.append({"kind": "input-invalid", "code": "item.not_an_object", "message": f"{iid}: a {role} is a JSON object"})
             it["doc"] = None
-        elif role == "model-card" and on("item.schema"):
-            from contracts.analysis_checks.model import card_shape
-            problems = card_shape(doc)
-            if problems:
-                diags.append({"kind": "input-invalid", "code": "item.schema:model-card", "message": f"{iid}: " + "; ".join(problems[:5])})
-                it["doc"] = None
         elif role in SHAPES and on("item.schema"):
             res = validate(doc, SHAPES[role])
             if not res.ok:
@@ -423,6 +415,12 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
         snapshots = default_snapshot_store(root)
     if not isinstance(items, list) or not items:
         raise BundleRefused("bundle.no_items", "a bundle needs its items")
+    if mode != "chain" or any(isinstance(it, dict) and it.get("role") == "model-card" for it in items):
+        raise BundleRefused("bundle.removed", f"model-only bundles and model-card items were {REMOVED}")
+    if isinstance(context, dict):
+        gone = sorted({str(x.get("id")) for x in context_suites(context) if isinstance(x, dict) and x.get("id") in REMOVED_SUITES})
+        if gone:
+            raise BundleRefused("bundle.removed", f"suites {gone} were {REMOVED}")
     for it in items:
         if not (isinstance(it, dict) and it.get("role") in ROLES2 and it.get("role") not in ("context", "semantic-lock")
                 and isinstance(it.get("id"), str) and isinstance(it.get("ref"), str)):
@@ -491,6 +489,8 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
 
 def _roles_ok(roles: list, mode: str) -> None:
     need = MODE_ROLES.get(mode)
+    if mode == "model":
+        raise BundleRefused("bundle.removed", f"mode 'model' was {REMOVED}")
     if need is None:
         raise BundleRefused("bundle.mode", f"mode {mode!r} is not supported")
     for r in need["exactly_one"]:
@@ -573,6 +573,10 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
             diags.append({"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"})
     view["suite"], view["suites"] = None, []
     for k, s in enumerate(context_suites(context) if isinstance(context, dict) else []):
+        if s.get("id") in REMOVED_SUITES:
+            diags.append({"kind": "dependency-missing", "code": "definition.suite_removed",
+                          "message": f"suite {s.get('id')!r} was {REMOVED}"})
+            continue
         try:
             loaded = load_suite(str(s.get("id")), str(s.get("version")))
         except (OSError, ValueError):
@@ -621,13 +625,6 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
             if f.severity in ("error", "warning"):
                 out.append({"entry": "contracts/validate.py", "item": spec_id, **f.as_dict(), "maps_to": map_legacy(f.as_dict())})
     for iid, it in sorted(view["items"].items()):
-        if it.get("role") == "model-card" and isinstance(it.get("doc"), dict):
-            from contracts.schema import Report
-            from contracts.validate import check_model_card
-            rep = Report()
-            check_model_card(it["doc"], "frequentist", rep, "$")
-            for f in rep.findings:
-                out.append({"entry": "contracts/validate.py", "item": iid, **f.as_dict(), "maps_to": map_legacy(f.as_dict())})
         if it.get("role") == "recipe" and isinstance(it.get("doc"), dict):
             res = check_recipe(it["doc"], view.get("tables", {}), [], None)
             for f in res["findings"]:
@@ -636,18 +633,12 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
 
 
 def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=None, settings: dict | None = None,
-             rules: dict | None = None, snapshots=None, exceptions: list | None = None, now: str | None = None,
-             results: dict | None = None, blinding: dict | None = None) -> dict:
-    """results: a result binding (contracts/schemas/result_binding.json) for a post-execution assessment (run-lineage/v1,
-    M2c); blinding: the project's blinding block, for the allowed_outputs matching rule (m2c-proposal.md)."""
+             rules: dict | None = None, snapshots=None, exceptions: list | None = None, now: str | None = None) -> dict:
+    """A pre-execution assessment: result bindings (run-lineage) were removed in 0.28.0."""
     from contracts.analysis_checks.lock import compare, rebuild
     from contracts.analysis_checks.outcomes import formal_view, summarize
     from contracts.analysis_checks.rules import evaluate as run_rules
-    if results is not None:
-        rb = validate(results, "result_binding.json")
-        diags = list(diags) + [{"kind": "input-invalid", "code": f"result_binding.{f.code}", "message": f"{f.path}: {f.message}"}
-                               for f in rb.errors]
-    view = dict(view, results=results, blinding=blinding)
+
     lock_diff = compare(view.get("lock") or {}, current_lock(view)) if view.get("suite") else []
     installed_diff, source = list(lock_diff), "installed"
     missing: list[str] = []
@@ -660,8 +651,6 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
         if defs is not None and not missing:
             view = dict(view, coverage=defs["coverage"], catalog=defs["catalog"], suites=defs["suites"],
                         suite=defs["suites"][0] if defs["suites"] else None)
-            if defs.get("pairings") is not None:
-                view["pairings"] = defs["pairings"]
             locked_registry = next((d["digest"] for d in (view.get("lock") or {}).get("definitions", [])
                                     if d["kind"] == "rule-registry"), None)
             lock_diff = compare(view.get("lock") or {}, build_lock(view.get("suite") or {}, generator_code_digest() or "",
@@ -715,13 +704,8 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
                          for d in (view.get("context") or {}).get("declarations", []) if d.get("declaration_id") in decl_ids],
         "context_findings": view.get("context_findings", []),
         "legacy_findings": legacy_findings(view, vocab) if view.get("items") else [],
-        "execution_evidence_level": evidence_levels(view, outcomes, results),
-        "phase": "post-execution" if results is not None else "pre-execution",
-        "result_binding": None if results is None else {
-            "sha256": canonical_sha256(results),
-            "results": [{"root": r.get("root"), "sha256": r.get("sha256")} for r in results.get("results", []) if isinstance(r, dict)],
-            "execution_bundles": sorted({str(c["execution_bundle_sha256"]) for c in results.get("campaigns", [])
-                                         if isinstance(c, dict) and c.get("execution_bundle_sha256")})},
+        "execution_evidence_level": "not checked: run lineage was removed in 0.28.0 (pre-execution report)",
+        "phase": "pre-execution",
         "validation_status": sorted(set(((view.get("items", {}).get((view.get("context") or {}).get("spec")) or {})
                                           .get("doc") or {}).get("status") or [])),
         "scope_delta": scope_delta(previous, bundle.get("bundle_digest"), obligations) if previous else None,
@@ -735,24 +719,6 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     return report
 
 
-def evidence_levels(view: dict, outcomes: list[dict], results: dict | None):
-    """The execution evidence level behind each root's conclusions (C9): a string before execution or without the
-    run-lineage suite; after execution, per root, declared or campaign-recorded (trusted-submitter is reserved)."""
-    selected = any((s or {}).get("suite_id") == "run-lineage" for s in view.get("suites") or [])
-    if results is None or not selected:
-        return ("not checked: run lineage needs a result binding (pre-execution)" if selected else
-                "not checked: the selected suites have no run lineage (run-lineage/v1, M2c)")
-    levels = {}
-    for o in outcomes:
-        if o["rule_id"] == "r-run.campaign":
-            root = o["obligation_id"].split(":", 1)[1]
-            levels[root] = o.get("level") or "declared"
-    return levels
-
-
-# model cards (model-card/v1): the legacy card rule and the new rule that decides the same question
-MODEL_AGREEMENT = {"stats.duplicate_auxiliary": "r-aux.use", "stats.model_unconstrained_parameter": "r-model.pairing",
-                   "stats.model_poi_mismatch": "r-model.pairing"}
 L2_REPEAT_ERRORS = {"semantics.repeated_correction"}
 L2_REPEAT_CONSERVATIVE = {"semantics.repeat_undetermined", "semantics.repeat_distinct_instance"}
 
@@ -766,15 +732,7 @@ def difference_review(view: dict, report: dict) -> dict:
     finding and the new repetition outcome on the same recipe's instances say the same: violated with violated,
     undetermined with unverified), new-decides (an undetermined L2 repetition that the new suite decides as violated
     from data flow), new-only (a new violation with no legacy error on the items it rests on: a cross-artifact
-    finding). For model cards, a legacy check_model_card error and a new violation of the rule that decides the same
-    question (MODEL_AGREEMENT) on the same model 'agree'; other legacy card findings are artifact-local."""
-    model_of = {m.get("item"): m.get("model_id") for m in (view.get("context") or {}).get("models", []) if isinstance(m, dict)}
-    violated_on: dict[tuple, bool] = {}
-    for o in report.get("obligations", []):
-        if o["state"] == "violated":
-            for e in o.get("evidence", []):
-                if "model" in e:
-                    violated_on[(o["rule_id"], e["model"])] = True
+    finding)."""
     insts_of: dict[str, set] = {}
     for i in (view.get("context") or {}).get("recipe_instances", []):
         insts_of.setdefault(i.get("recipe"), set()).add(i.get("instance_id"))
@@ -788,8 +746,7 @@ def difference_review(view: dict, report: dict) -> dict:
     for f in report.get("legacy_findings", []):
         code, cls = f.get("code"), "unclassified"
         if f.get("entry") == "contracts/validate.py":
-            rule = MODEL_AGREEMENT.get(code)
-            cls = "agrees" if rule and violated_on.get((rule, model_of.get(f.get("item")))) else "artifact-local"
+            cls = "artifact-local"
         elif f.get("entry") == "contracts/recipe_semantics.py":
             states = set().union(*(rep_state.get(i, set()) for i in insts_of.get(f.get("item"), ())))
             if code in L2_REPEAT_ERRORS:
@@ -806,11 +763,6 @@ def difference_review(view: dict, report: dict) -> dict:
             continue
         recipes = {r for r, insts in insts_of.items() for e in o.get("evidence", []) if e.get("instance") in insts}
         cls = "agrees" if o["rule_id"] == "r-rep.repetition" and recipes & legacy_items else "new-only"
-        models = {e["model"] for e in o.get("evidence", []) if "model" in e}
-        legacy_model = {model_of.get(f.get("item")) for f in report.get("legacy_findings", [])
-                        if MODEL_AGREEMENT.get(f.get("code")) == o["rule_id"]}
-        if models & legacy_model:
-            cls = "agrees"
         rows.append({"side": "new", "obligation_id": o["obligation_id"], "code": o["reason"], "class": cls})
     counts: dict[str, int] = {}
     for r in rows:
@@ -882,11 +834,6 @@ NEXT_STEPS = {
     "check.semantics_unreproducible": "re-freeze against the current definitions (a new subject) or restore them",
     "check.rule_not_run": "use a checker that implements this rule",
     "check.input_invalid": "fix the input diagnostics first",
-    "check.aux_unbound": "bind the constraint's auxiliary measurement to its observation (an observes binding: item and pointer)",
-    "check.aux_repeat_unknown": "bind every other constraint of the evaluation to its observation",
-    "check.aux_overlap_unknown": "bind each constraint to a component pointer that does not contain another",
-    "check.model_root_incomplete": "name an evaluation of the context and the card's POI",
-    "check.share_unbound": "name members that exist in the evaluation's model cards",
 }
 
 
@@ -924,22 +871,6 @@ def _vocab(project):
     return Vocabulary.with_profiles(proj.profiles)
 
 
-# Suites deprecated by the value gate's Shrink decision (docs/dev/cross-artifact-check/decision-value-gate.md,
-# 2026-10-23): removed in the minor release after the one that deprecates them (architecture section 13.4)
-DEPRECATED_SUITES = {"model-card": "the model-card suite (and --mode model)", "run-lineage": "the run-lineage suite (and --results)"}
-
-
-def deprecation_notice(context: dict) -> str | None:
-    """A note for stderr when a context selects a deprecated suite; the report and stdout are unchanged."""
-    ctx = context if isinstance(context, dict) else {}
-    ids = [(ctx.get("suite") or {}).get("id")] + [(x or {}).get("id") for x in ctx.get("suites") or [] if isinstance(x, dict)]
-    hit = [DEPRECATED_SUITES[i] for i in dict.fromkeys(ids) if i in DEPRECATED_SUITES]
-    if not hit:
-        return None
-    return (f"deprecated: {', '.join(hit)} of the cross-artifact check will be removed in the next minor release "
-            "(value gate Shrink, 2026-10-23); reproduce such reports with hep-research 0.26.x")
-
-
 def main(argv=None) -> int:
     import argparse
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -954,7 +885,7 @@ def main(argv=None) -> int:
     f.add_argument("--snapshots", type=Path, help="store the pinned definitions content-addressed here (D11b; default "
                    "<root>/.hep-research/snapshots)")
     f.add_argument("--no-snapshots", action="store_true", help="store no snapshots")
-    f.add_argument("--mode", choices=sorted(MODE_ROLES), default="chain", help="bundle mode (model: model-only diagnostics)")
+    f.add_argument("--mode", default="chain", help=argparse.SUPPRESS)  # 'model' was removed in 0.28.0: refused with the reason
     c = sub.add_parser("check")
     c.add_argument("bundle", type=Path)
     c.add_argument("--root", type=Path, required=True)
@@ -964,8 +895,8 @@ def main(argv=None) -> int:
     c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since "
                    "freezing (default <root>/.hep-research/snapshots when it exists)")
     c.add_argument("--exceptions", type=Path, help="scoped exceptions (JSON list): judged and listed, never change a state")
-    c.add_argument("--results", type=Path, help="a result binding: assess after execution (run-lineage/v1)")
-    c.add_argument("--project", type=Path, help="project folder or config whose blinding block applies (allowed_outputs)")
+    c.add_argument("--results", type=Path, help=argparse.SUPPRESS)  # removed in 0.28.0: refused with the reason
+    c.add_argument("--project", type=Path, help=argparse.SUPPRESS)  # removed in 0.28.0: refused with the reason
     s = sub.add_parser("summary")
     s.add_argument("report", type=Path)
     s.add_argument("--cursor", type=int, default=0)
@@ -998,9 +929,6 @@ def main(argv=None) -> int:
                 return 1
             args.out.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
             record_bundle(args.root, args.out, doc)
-            note = deprecation_notice(context)
-            if note:
-                print(note, file=sys.stderr)
             print(json.dumps({"status": "frozen", "bundle_digest": doc["bundle_digest"], "out": str(args.out)}, indent=1))
             return 0
         if args.cmd == "snapshots":
@@ -1024,17 +952,9 @@ def main(argv=None) -> int:
         exceptions = json.loads(args.exceptions.read_text(encoding="utf-8")) if args.exceptions else None
         if exceptions is not None and not isinstance(exceptions, list):
             raise UsageError(f"{args.exceptions} is not a JSON list of exceptions")
-        results = json.loads(args.results.read_text(encoding="utf-8")) if args.results else None
-        if results is not None and not isinstance(results, dict):
-            raise UsageError(f"{args.results} is not a result binding")
-        blinding = None
-        if args.project is not None:
-            cfg_path = args.project / "hep-research.project.json" if args.project.is_dir() else args.project
-            blinding = (json.loads(cfg_path.read_text(encoding="utf-8")) or {}).get("blinding") or {"blinded": [], "allowed_outputs": []}
+        if args.results is not None or args.project is not None:
+            raise UsageError(f"--results and --project (result bindings, run lineage) were {REMOVED}")
         view, diags = load_subject(args.bundle, args.root)
-        note = deprecation_notice(view.get("context") or {})
-        if note:
-            print(note, file=sys.stderr)
         if args.out is not None:
             refs = {(Path(args.root).resolve() / it.get("ref", "")).resolve() for it in view["bundle"].get("items", [])
                     if isinstance(it, dict)}
@@ -1050,8 +970,7 @@ def main(argv=None) -> int:
     store = args.snapshots
     if store is None and default_snapshot_store(args.root).is_dir():
         store = default_snapshot_store(args.root)
-    report = evaluate(view, diags, previous, vocab, snapshots=store, exceptions=exceptions,
-                      results=results, blinding=blinding)
+    report = evaluate(view, diags, previous, vocab, snapshots=store, exceptions=exceptions)
     if args.out is not None:
         args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=1))

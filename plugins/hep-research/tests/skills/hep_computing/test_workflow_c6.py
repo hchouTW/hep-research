@@ -105,7 +105,7 @@ class Snakefile(unittest.TestCase):
 class Reference(unittest.TestCase):
     def test_reference(self):
         text = (PLUGIN / "skills" / "hep-computing" / "references" / "analysis-workflows.md").read_text(encoding="utf-8")
-        for term in ("DAG", "computational-run", "run-lineage/v1", "local_partition.py", "Snakefile", "run_workflow.py"):
+        for term in ("DAG", "computational-run", "local_partition.py", "Snakefile", "run_workflow.py"):
             with self.subTest(term=term):
                 self.assertIn(term, text)
 

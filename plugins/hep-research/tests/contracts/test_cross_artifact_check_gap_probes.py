@@ -16,7 +16,6 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
 import analysis_check_cases as cases  # noqa: E402
-import analysis_check_runs as runs  # noqa: E402
 
 PHASE2 = unittest.expectedFailure  # scheduled for Phase 2 (R2/R3); the fix flips the probe
 
@@ -191,90 +190,6 @@ class RatioProbes(Probe):
             rep = report(cases.ratio_case(r, cases.both(cases.context_1_1, two(*ids))), r)
             states.append(by_rule(rep, "r-ratio.correlation")[0]["state"])
         self.assertEqual(states, ["violated", "violated"])
-
-
-class ModelProbes(Probe):
-    def model(self, variant):
-        r = self.root()
-        return report(cases.model_case(r, variant), r)
-
-    def test_g5_a_copied_observation_file_is_the_same_observation(self):
-        # G5 (DR-3, V85): a byte copy of the auxiliary-input file bound under a second aux_id is the same observation
-        # (r-aux.use 1.1.0, a 1.1.0 context: source identity plus pointer, not the item ID)
-        def copy_file(c):
-            card = c.doc("card-sr-cr")
-            card["samples"][2]["modifiers"][1] = {"type": "constrained-normalization", "parameter": "lumi_cr"}
-            card["constraints"].append({"parameter": "lumi_cr", "kind": "auxiliary-measurement", "aux_id": "lumi-copy",
-                                        "form": "gaussian", "width": 0.02})
-            c.add("calibration", "aux-copy", "aux/inputs-copy.json", copy.deepcopy(cases.OBS))
-            c.context["bindings"].append(cases.observes("obs-copy", "sr-cr", "lumi-copy", item="aux-copy"))
-        rep = self.model(cases.both(copy_file, cases.context_1_1))
-        self.assertEqual(next(o for o in rep["obligations"] if o["obligation_id"] == "r-aux.use:fit#sr-cr/lumi-copy")["state"],
-                         "violated")
-
-    def test_g12_shared_parameters_within_one_model_do_not_hide_v07(self):
-        # G12 (V80): sharing two parameters of one model merges two constraint terms and hides a repeated observation
-        def hide(c):
-            card = c.doc("card-sr-cr")
-            card["samples"][2]["modifiers"][1] = {"type": "constrained-normalization", "parameter": "lumi_cr"}
-            card["constraints"].append({"parameter": "lumi_cr", "kind": "auxiliary-measurement", "aux_id": "lumi-copy",
-                                        "form": "gaussian", "width": 0.02})
-            c.context["bindings"].append(cases.observes("obs-copy", "sr-cr", "lumi-copy"))
-            c.context["evaluations"][0]["shared_parameters"] = [
-                {"parameter_id": "lumi", "members": [{"model": "sr-cr", "parameter": "lumi"},
-                                                     {"model": "sr-cr", "parameter": "lumi_cr"}]}]
-        from contracts.analysis_bundle import BundleRefused
-        with self.assertRaises(BundleRefused) as cm:  # 1.1.0: input-invalid, refused at freeze
-            self.model(cases.both(hide, cases.context_1_1))
-        self.assertEqual(cm.exception.code, "bundle.context_input")
-
-
-class RunProbes(Probe):
-    def blinded_spec(self, c):
-        c.doc("spec")["extension"]["blinding"] = {"blinded": True}
-
-    def test_g6_campaign_closure_reaches_the_analysis(self):
-        # G6 (V82): a campaign whose inputs include no analysis item is not campaign-recorded for the analysis
-        # (r-run.campaign 1.1.0 reads result binding 1.1.0 campaigns[].inputs)
-        def worker_only(post, cdir):
-            post.binding["campaigns"][0]["inputs"] = [{"path": "worker/work.py", "source": {"external": {"item": "w", "entry": "x"}}}]
-        rep = runs.run_campaign(self.root(), after=worker_only).check()
-        o = by_rule(rep, "r-run.campaign")[0]
-        self.assertNotEqual(o["state"], "satisfied")  # not campaign-recorded for the analysis
-        self.assertIn(o["reason"], ("check.closure_mismatch", "check.campaign_inputs_unbound", "check.campaign_closure_no_analysis"))
-        rep = runs.run_campaign(self.root()).check()  # inputs reaching the frozen spec, recipe and data
-        self.assertEqual(by_rule(rep, "r-run.campaign")[0]["reason"], "check.campaign_recorded")
-
-    def test_g7_a_self_reported_synthetic_label_is_not_blinding_permission(self):
-        # G7 (DR-7, V83): a blinded spec's result whose only permission is its own 'synthetic' label is unverified
-        # (r-run.blinding 1.1.0: the lineage decides; with no data leaf, lineage_no_data)
-        post = runs.run_chain(self.root(), spec_variant=self.blinded_spec, with_data=False)
-        rep = post.check()
-        self.assertEqual((by_rule(rep, "r-run.blinding")[0]["state"], by_rule(rep, "r-run.blinding")[0]["reason"]),
-                         ("unverified", "check.lineage_no_data"))
-        rep = runs.run_chain(self.root(), spec_variant=self.blinded_spec).check()  # a synthetic dataset record: permitted
-        self.assertEqual(by_rule(rep, "r-run.blinding")[0]["state"], "satisfied")
-
-    def test_g8_a_self_declared_person_keeps_the_declaration_flag(self):
-        # G8 (DR-1, V88): asserted_by.kind 'person' written by the agent does not remove the declaration flag
-        def person(post):
-            post.binding["asserted_by"] = {"kind": "person", "id": "someone"}
-        rep = runs.run_chain(self.root(), person).check()
-        self.assertTrue(by_rule(rep, "r-run.binding")[0]["declaration_based"])
-
-    @unittest.skip("G9 is an assurance-plane gap (section 5.1): design only until its preconditions hold")
-    def test_g9_hand_edited_result_binding_section(self):
-        pass
-
-    def test_g13_project_blinded_list_applies_without_the_spec_flag(self):
-        # G13 (DR-9, V84): the project's blinded list names the spec by artifact_id; blinding applies even though the
-        # spec's own flag says it is not blinded
-        def unblinded(c):
-            c.doc("spec")["extension"]["blinding"] = {"blinded": False}
-        post = runs.run_chain(self.root(), spec_variant=unblinded, status=("observed",))
-        spec_id = json.loads((post.root / "spec.json").read_text())["artifact_id"]
-        rep = post.check(project={"blinded": [spec_id], "allowed_outputs": []})
-        self.assertNotEqual(by_rule(rep, "r-run.blinding")[0]["state"], "not_applicable")
 
 
 class Phase0Probes(Probe):

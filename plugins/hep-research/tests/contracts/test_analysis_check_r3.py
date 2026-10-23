@@ -136,32 +136,74 @@ class CatalogVersion(unittest.TestCase):
 
 
 
-class ShrinkDeprecation(unittest.TestCase):
-    """The value gate's Shrink decision (2026-10-23): model-card and run-lineage are deprecated; the check CLI says so
-    on stderr and changes neither stdout nor the report; counting-chain and ratio-subset say nothing."""
+class ShrinkRemoval(unittest.TestCase):
+    """0.28.0 removes model-card and run-lineage (value gate Shrink, architecture section 13.4, steps 2 and 3): every
+    way into them is refused with the reason, never read with other code or dropped silently."""
 
-    def check_cli(self, bundle: Path, root: Path):
+    def cli(self, *args):
         import subprocess
-        return subprocess.run([sys.executable, str(ROOT / "contracts" / "analysis_check.py"), "check", str(bundle),
-                               "--root", str(root)], capture_output=True, text=True, timeout=300)
+        return subprocess.run([sys.executable, str(ROOT / "contracts" / "analysis_check.py"), *map(str, args)],
+                              capture_output=True, text=True, timeout=300)
 
-    def test_notice_for_deprecated_suites_only(self):
-        import json
-        for builder, deprecated in ((cases.model_case, True), (cases.ratio_case, False)):
-            with self.subTest(case=builder.__name__):
-                root = Path(tempfile.mkdtemp()) / "c"
-                res = self.check_cli(builder(root, cases.context_1_1), root)
-                self.assertEqual("deprecated:" in res.stderr, deprecated, res.stderr[-500:])
-                self.assertIn("obligations", json.loads(res.stdout))
+    def test_freeze_refuses_model_bundles_and_removed_suites(self):
+        from contracts import analysis_check as ac
+        from contracts.analysis_bundle import BundleRefused
+        model = cases.model_case(Path(tempfile.mkdtemp()) / "m", freeze=False)
+        model.write()
+        with self.assertRaises(BundleRefused) as cm:
+            ac.freeze(model.root, "m", model.items, model.context, mode="model")
+        self.assertEqual(cm.exception.code, "bundle.removed")
+        for sid in ac.REMOVED_SUITES:
+            with self.subTest(suite=sid), self.assertRaises(BundleRefused) as cm:
+                cases.positive_case(Path(tempfile.mkdtemp()) / "p",
+                                    lambda c, sid=sid: c.context.setdefault("suites", []).append({"id": sid, "version": "1.0.0"}))
+            self.assertEqual(cm.exception.code, "bundle.removed")
+            self.assertIn("0.27.x", str(cm.exception))
 
-    def test_deprecated_rules_are_registered_as_deprecated(self):
+    def test_check_names_a_removed_suite_in_a_frozen_bundle(self):
         import json
+        from contracts import analysis_check as ac
+        root = Path(tempfile.mkdtemp()) / "c"
+        bundle = cases.ratio_case(root, cases.context_1_1)
+        ctx_path = root / ac.CONTEXT_REF
+        ctx = json.loads(ctx_path.read_text())
+        ctx["suites"].append({"id": "run-lineage", "version": "1.1.0"})  # as a 0.27 bundle could name it
+        ctx_path.write_text(json.dumps(ctx))
+        _, diags = ac.load_subject(bundle, root)
+        self.assertIn("definition.suite_removed", [d["code"] for d in diags])
+
+    def test_check_reports_a_frozen_model_only_bundle_as_removed(self):
+        import json
+        from contracts import analysis_check as ac
+        root = Path(tempfile.mkdtemp()) / "m"
+        bundle = cases.positive_case(root, cases.context_1_1)
+        doc = json.loads(bundle.read_text())
+        doc["mode"] = "model"  # as a 0.27 model-only bundle carries it
+        bundle.write_text(json.dumps(doc))
+        _, diags = ac.load_subject(bundle, root)
+        self.assertIn("bundle.removed", [d["code"] for d in diags])
+
+    def test_cli_refuses_results_and_project(self):
+        import json
+        root = Path(tempfile.mkdtemp()) / "c"
+        bundle = cases.ratio_case(root, cases.context_1_1)
+        for flag in ("--results", "--project"):
+            with self.subTest(flag=flag):
+                res = self.cli("check", bundle, "--root", root, flag, root)
+                self.assertEqual(res.returncode, 2)
+                self.assertIn("0.28.0", json.loads(res.stdout)["error"])
+
+    def test_removed_rules_are_retired_and_unimplemented(self):
+        import json
+        from contracts.analysis_checks.rules import IMPLEMENTED
         reg = json.loads((ROOT / "contracts" / "rules" / "registry.json").read_text())
-        live = [r for r in reg["rules"] if r["lifecycle"] != "retired" and r["kind"] != "legacy"]
-        for r in live:
-            gone = any(x.startswith(("model-card", "run-lineage")) for x in r["suites"])
-            with self.subTest(rule=f"{r['rule_id']}@{r['version']}"):
-                self.assertEqual(r["lifecycle"] == "deprecated", gone)
+        for r in reg["rules"]:
+            if r["kind"] != "legacy" and any(x.startswith(("model-card", "run-lineage")) for x in r["suites"]):
+                with self.subTest(rule=f"{r['rule_id']}@{r['version']}"):
+                    self.assertEqual(r["lifecycle"], "retired")
+                    self.assertNotIn((r["rule_id"], r["version"]), IMPLEMENTED)
+        self.assertFalse(list((ROOT / "contracts" / "rules" / "suites").glob("model-card-*.json")))
+        self.assertFalse(list((ROOT / "contracts" / "rules" / "suites").glob("run-lineage-*.json")))
 
 
 if __name__ == "__main__":

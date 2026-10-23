@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-detector | 38 | 505 | 0 |
 | hep-measurement | 13 | 120 | 0 |
 | hep-ml | 42 | 194 | 0 |
-| hep-statistics | 13 | 190 | 0 |
+| hep-statistics | 13 | 189 | 0 |
 | hep-theory | 18 | 121 | 0 |
 
 ## Overlapping pairs
@@ -147,8 +147,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `systematic-review-screening.md` | hep-citations | 3.1 | yes | 3 | - | ebb58136 2026-10-19 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
-| `analysis-data-pipelines.md` | hep-computing | 11.7 | yes | 9 | hep-measurement | 123602ac 2026-10-23 |
-| `analysis-workflows.md` | hep-computing | 3.7 | yes | 4 | - | 123602ac 2026-10-23 |
+| `analysis-data-pipelines.md` | hep-computing | 11.5 | yes | 9 | hep-measurement | 123602ac 2026-10-23 |
+| `analysis-workflows.md` | hep-computing | 3.5 | yes | 4 | - | 123602ac 2026-10-23 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
 | `batch-scheduling.md` | hep-computing | 30.4 | yes | 14 | - | 9257d7b5 2026-10-15 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4b 2026-10-10 |
@@ -280,11 +280,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
-| `nuisance-modeling.md` | hep-statistics | 20.8 | yes | 9 | hep-measurement | 7d992293 2026-10-22 |
+| `nuisance-modeling.md` | hep-statistics | 20.5 | yes | 9 | hep-measurement | 7d992293 2026-10-22 |
 | `roofit-and-roostats-methods.md` | hep-statistics | 7.6 | yes | 6 | - | 09237aee 2026-10-17 |
 | `statistical-inference-for-physics.md` | hep-statistics | 13.3 | yes | 11 | hep-authoring, hep-citations, hep-computing, hep-theory | e03c0396 2026-10-22 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | - | 578c12ff 2026-10-13 |
-| `time-series-inference.md` | hep-statistics | 21.4 | yes | 16 | hep-detector, hep-measurement | 123602ac 2026-10-23 |
+| `time-series-inference.md` | hep-statistics | 20.9 | yes | 16 | hep-detector, hep-measurement | 123602ac 2026-10-23 |
 | `unfolding.md` | hep-statistics | 7.9 | yes | 27 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
 | `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |

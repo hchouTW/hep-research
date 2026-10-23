@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 35,
-   "bytes": 298874,
+   "bytes": 298545,
    "uncited": 0
   },
   "hep-detector": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 190359,
+   "bytes": 189490,
    "uncited": 0
   },
   "hep-theory": {
@@ -1127,8 +1127,8 @@
   {
    "path": "skills/hep-computing/references/analysis-data-pipelines.md",
    "owner": "hep-computing",
-   "bytes": 11682,
-   "lines": 150,
+   "bytes": 11548,
+   "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1149,8 +1149,8 @@
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 3722,
-   "lines": 53,
+   "bytes": 3469,
+   "lines": 51,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1423,7 +1423,7 @@
   {
    "path": "skills/hep-computing/references/preservation-checklist.md",
    "owner": "hep-computing",
-   "bytes": 4688,
+   "bytes": 4746,
    "lines": 74,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3704,8 +3704,8 @@
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 20821,
-   "lines": 254,
+   "bytes": 20488,
+   "lines": 252,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
@@ -3785,8 +3785,8 @@
   {
    "path": "skills/hep-statistics/references/time-series-inference.md",
    "owner": "hep-statistics",
-   "bytes": 21414,
-   "lines": 257,
+   "bytes": 20878,
+   "lines": 252,
    "linked_from_skill_md": true,
    "cited_by": [
     "examples/multi-era-fit/run.py",

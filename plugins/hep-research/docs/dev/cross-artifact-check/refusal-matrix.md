@@ -70,3 +70,20 @@ exits 1 with status `invalid`. The input diagnostics include `result_binding.sch
 `result_binding.schema.additional` (`inputs`), next to the 1.1.0 context findings already recorded above. Nothing is
 evaluated under 1.0.0 semantics. No release blocker.
 
+## 0.28.0: model-card and run-lineage removed (2026-10-23)
+
+Architecture section 13.4, step 3 (the value gate's Shrink decision, `decision-value-gate.md`): readers refuse the
+removed formats with the reason, never read them with other code and never drop them silently.
+
+| Input to 0.28.0 | Result | Test |
+| --- | --- | --- |
+| `freeze` of a model-only bundle (`mode: model`) or with a `model-card` item | refused, `bundle.removed` | `test_analysis_check_r3.ShrinkRemoval` |
+| `freeze` of a context that selects `model-card` or `run-lineage` | refused, `bundle.removed` | `test_analysis_check_r3.ShrinkRemoval`, `test_analysis_check_ratio_rules` |
+| `check` of a frozen bundle whose context names a removed suite | dependency-missing `definition.suite_removed` (incomplete, exit 3) | `test_analysis_check_r3.ShrinkRemoval` |
+| `check` of a frozen model-only bundle | input invalid: verify reports `bundle.removed` for its mode | `test_analysis_check_r3.ShrinkRemoval` |
+| `check --results` or `--project` | usage error (exit 2) with the reason | `test_analysis_check_r3.ShrinkRemoval` |
+| `permit.py check-report` with a post-execution report (result binding, per-root evidence levels) | refused, `permit.report_post_execution_removed` | `test_analysis_check_report_permit` |
+| `permit.py check-report` with a model-only bundle | refused, `permit.report_model_only` | (unchanged) |
+
+Every refusal names 0.27.x as the release that still reads the format.
+

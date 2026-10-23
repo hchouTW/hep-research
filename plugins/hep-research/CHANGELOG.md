@@ -3,6 +3,25 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Cross-artifact check: `model-card` and `run-lineage` removed (value gate Shrink, architecture section 13.4).**
+  - **Removed:**
+    - `contracts/analysis_checks/model.py` and `runs.py`, and their suites (every version);
+    - the model-card pairing contract and the result-binding schema;
+    - model-only bundles (`--mode model`), `check --results` and `--project`;
+    - the permit's post-execution checks.
+  - **Reports:** they are now always pre-execution.
+  - **Readers refuse the removed formats** with the reason, and every refusal names 0.27.x as the release that still
+    reads them (`docs/dev/cross-artifact-check/refusal-matrix.md`):
+    - `bundle.removed` at freeze;
+    - `definition.suite_removed` at check;
+    - a usage error for `--results` and `--project`;
+    - `permit.report_post_execution_removed` for a post-execution report.
+  - **Registry:** the 9 rule versions are retired. Their V-case parts are `not-run` with the removal recorded.
+  - **Docs:** the skill references no longer teach them. Preservation now asks for the run and merge records.
+  - **Kept:** `counting-chain` (frozen), `ratio-subset`, `custody.py`, and the separate pyhf SR/CR model-card adapter.
+
 ## 0.27.0 (2026-10-23)
 
 Minor release; contracts unchanged (3.8.0). It deprecates two suites of the experimental cross-artifact analysis check

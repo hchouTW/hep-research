@@ -32,15 +32,9 @@ PREREQUISITES = {
     "ratio_cancellation": ["spec ratio cancellation claim", "factor instance per side (calibration binding, selector)",
                            "factor power per side (coverage contract)"],
     "ratio_correlation": ["spec ratio correlation claim", "validation record or sourced correlation declaration"],
-    "model_root": ["model root intent", "evaluation", "model card POI"],
-    "model_parameter": ["model card", "pairing contract"],
-    "aux_constraint": ["model card constraint", "evaluation", "observes binding (item and pointer)"],
-    "shared_parameter": ["evaluation with several models", "shared_parameters members", "model cards"],
 }
-PREREQUISITES["run_root"] = ["chain root intent", "result binding (after execution)", "computational-runs or campaign records"]
-MODEL_KINDS = ("model_root", "model_parameter", "aux_constraint", "shared_parameter")
 GENERATORS = {("counting-chain-obligations", "1.0.0"), ("counting-chain-obligations", "1.1.0"),
-              ("ratio-subset-obligations", "1.0.0"), ("model-card-obligations", "1.0.0"), ("run-lineage-obligations", "1.0.0")}
+              ("ratio-subset-obligations", "1.0.0")}  # model-card and run-lineage generators removed in 0.28.0
 
 
 def generator_supported(suite: dict) -> bool:
@@ -109,14 +103,11 @@ def applied_effects(view: dict, inst: dict) -> set[str]:
 
 
 def _subjects(kind: str, view: dict, structural: bool, generator_version: str = "1.0.0") -> list[tuple[str, dict]]:
-    if kind in MODEL_KINDS:
-        from contracts.analysis_checks.model import subjects
-        return subjects(kind, view)
     ctx = view["context"]
     insts = {i["instance_id"]: i for i in ctx.get("recipe_instances", []) if isinstance(i, dict) and "instance_id" in i}
     roots = [r for r in ctx.get("roots", []) if isinstance(r, dict) and "root_id" in r]
     comps = (view.get("catalog") or {}).get("compositions", [])
-    if kind in ("root", "run_root"):
+    if kind == "root":
         return [(r["root_id"], {"root": r["root_id"]}) for r in roots]
     if kind == "correction":
         return [(c["effect_id"], {"correction": c["effect_id"]}) for c in corrections(view)]

@@ -276,23 +276,21 @@ silently.
 
 The skills and the old entry points never call this check; you run it when you want it.
 `contracts/analysis_check.py` freezes an analysis into a bundle with:
-- a context: roots, recipe instances or models, and typed bindings;
+- a context: roots, recipe instances and typed bindings;
 - a semantic lock.
 
-It then checks a machine-generated list of obligations against five suites:
+It then checks a machine-generated list of obligations against two suites:
 
 | Suite | Checks |
 |---|---|
 | `counting-chain/1.1.0` | correction chains: listed effect members, realization, every applied correction described in the spec, stage, repetition, factor composition and values, response use |
 | `ratio-subset/1.1.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
-| `model-card/1.1.0` (deprecated) | model cards: the supported modifier–constraint pairings, one observation per constraint term within an evaluation (by source identity), cross-model sharing |
-| `run-lineage/1.1.0` (deprecated) | after execution, through a result binding: input closure, run status, the campaign evidence level and its inputs, blinding judged by lineage |
 | (custody) | `contracts/custody.py`: an inventory of where each profile comes from; a missing custody value is never read as public |
 
-**Deprecated:** `model-card` and `run-lineage` (with `--mode model` and `--results`) are removed in the next
-minor release. The value gate's Shrink decision keeps `counting-chain` (frozen: no new rules) and `ratio-subset`
-(`docs/dev/cross-artifact-check/decision-value-gate.md`). The check CLI prints a deprecation note on stderr when a
-context selects them. Reproduce such reports with 0.26.x.
+**Removed in 0.28.0:** the `model-card` and `run-lineage` suites, model-only bundles (`--mode model`) and result
+bindings (`--results`, `--project`), after the value gate's Shrink decision. That decision keeps `counting-chain`
+(frozen: no new rules) and `ratio-subset` (`docs/dev/cross-artifact-check/decision-value-gate.md`). A context or
+bundle that names them is refused with that reason. Reproduce such reports with 0.27.x.
 
 The 1.1.0 suites are the default. They need check contexts in format 1.1.0 (no `required` on roots); a 1.0.0 context
 selects only 1.0.x suites. `contracts/migrate.py --convert check-context=context-1.0.0-to-1.1.0` converts a frozen
@@ -301,13 +299,12 @@ which this release no longer runs (`check.rule_not_run`). Reproduce 1.0.0 result
 - **Factor tables:** a factor table's own `tolerance` is not used. The relative tolerance is 1e-9, or
   Σ|power| · ½·10^(1−d) when the table declares `"significant_digits": d` and every value has at most d significant
   digits.
-- **Result bindings:** a result binding with campaign `inputs` is format 1.1.0.
 - **Pre-release suites:** the `1.1.0-dev.N` suites remain installed for bundles frozen during development, and
   `check-report` refuses them.
 
 ```bash
-python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json [--mode model]
-python3 contracts/analysis_check.py check bundle.json --root <project> [--results result-binding.json] [--project <project>]
+python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json
+python3 contracts/analysis_check.py check bundle.json --root <project>
 python3 contracts/analysis_check.py summary report.json      # a bounded summary for the agent
 python3 contracts/analysis_check.py snapshots gc --root <project> [--apply]   # dry run unless --apply
 ```

@@ -245,20 +245,6 @@ def verify(permit_path, ctx: Context, *, scope: str = "formal-use", purpose: str
 REPORT_SCHEMA = "check_report.json"
 
 
-EVIDENCE_LEVELS = {"declared": 0, "campaign-recorded": 1}  # trusted-submitter is reserved (C9): no reader, never shown
-
-
-def _levels_follow(rep_doc: dict) -> bool:
-    """A post-execution report's per-root evidence levels must follow from its r-run.campaign outcomes (a raised
-    level is a hand edit)."""
-    levels = rep_doc.get("execution_evidence_level")
-    if not isinstance(levels, dict):
-        return True
-    derived = {o["obligation_id"].split(":", 1)[1]: (o.get("level") if o.get("state") == "satisfied" else None) or "declared"
-               for o in rep_doc.get("obligations", []) if o.get("rule_id") == "r-run.campaign"}
-    return levels == derived
-
-
 def _reasons_follow(rep_doc: dict) -> bool:
     """Each obligation's state must be the one its reason code gives under its rule version's outcome contract in the
     rule registry (an aggregator code is unverified for every rule), so a state edited by hand without a fitting code
@@ -329,10 +315,9 @@ def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, pur
     be about the permit's analysis bundle, internally consistent (a hand-edited pass fails), from the suites and the
     checker the custodian's purpose policy names, complete and without a violation. Declaration-based outcomes count
     because the accepted review lists the report. With pre-execution reports only (no result binding yet), the policy
-    must say it accepts them. After execution, the results the report's binding cites must be in the permit's
-    artifacts, its execution bundle must be the permit's, and every root must reach the policy's min_evidence_level
-    (declared or campaign-recorded; O15). A model-only bundle is diagnostics only (O13). Returns refusals; it never
-    reports a use as allowed (the custodian's gate decides)."""
+    must say it accepts them. Post-execution reports (a result binding, run lineage) and model-only bundles were removed
+    in 0.28.0 (cross-artifact check Shrink): such a report or bundle is refused with that reason. Returns refusals; it
+    never reports a use as allowed (the custodian's gate decides)."""
     from contracts.analysis_checks.outcomes import formal_view, summarize
     from contracts.attestation import evaluate
     now = now or datetime.datetime.now(datetime.UTC)
@@ -344,7 +329,7 @@ def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, pur
                            "the permit binds another analysis bundle than the one checked"))
     if isinstance(bundle, dict) and bundle.get("mode") == "model":
         refusals.append(_r("permit.report_model_only", "$bundle.mode",
-                           "a model-only bundle is diagnostics only (O13): no formal use without a recipe-scoped subject"))
+                           "model-only bundles were removed in 0.28.0 (cross-artifact check Shrink); none is ever formal evidence"))
     scope = ((att.get("subject") or {}).get("scope") or {}) if isinstance(att, dict) else {}
     recipe_sha = (scope.get("recipe") or {}).get("sha256")
     recipe = None
@@ -390,7 +375,7 @@ def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, pur
                       and {k: s[k] for k in ("coverage", "consistency", "counts")}
                       == {k: rep_doc[k] for k in ("coverage", "consistency", "counts")}
                       and formal_view(rep_doc["obligations"], rep_doc["input_validity"] == "valid") == rep_doc["formal_use_view"]
-                      and _levels_follow(rep_doc) and _reasons_follow(rep_doc))
+                      and _reasons_follow(rep_doc))
         if not consistent:
             refusals.append(_r("permit.report_inconsistent", where,
                                "the report's summary or assessment does not follow from its obligations (edited?)"))
@@ -406,24 +391,10 @@ def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, pur
             refusals.append(_r("permit.report_incomplete", where, "the report is not complete on valid inputs"))
         elif rep_doc["consistency"] != "consistent":
             refusals.append(_r("permit.report_violation", where, "the report establishes a violation"))
-        binding = rep_doc.get("result_binding")
-        if isinstance(binding, dict) and permit is not None:  # post-execution part (V60, m2c-design.md)
-            subject = permit.get("subject") or {}
-            unlisted = [r.get("sha256") for r in binding.get("results", []) if r.get("sha256") not in (subject.get("artifacts") or [])]
-            if unlisted:
-                refusals.append(_r("permit.report_result_unlisted", where,
-                                   f"{len(unlisted)} result file(s) the report's binding cites are not in the permit's artifacts"))
-            eb = subject.get("execution_bundle_sha256")
-            if eb and any(x != eb for x in binding.get("execution_bundles", [])):
-                refusals.append(_r("permit.report_execution_bundle_mismatch", where,
-                                   "the result binding's execution bundle is not the permit's"))
-        floor = rules.get("min_evidence_level")
-        levels = rep_doc.get("execution_evidence_level")
-        if floor in EVIDENCE_LEVELS and isinstance(levels, dict):
-            low = sorted(r for r, lv in levels.items() if EVIDENCE_LEVELS.get(lv, -1) < EVIDENCE_LEVELS[floor])
-            if low:
-                refusals.append(_r("permit.report_evidence_level", where,
-                                   f"root(s) {low[:5]} are below the policy's evidence level {floor!r}"))
+        if isinstance(rep_doc.get("result_binding"), dict) or isinstance(rep_doc.get("execution_evidence_level"), dict):
+            refusals.append(_r("permit.report_post_execution_removed", where,
+                               "a post-execution report (result binding, run lineage): removed in 0.28.0 (cross-artifact "
+                               "check Shrink); re-check before execution, or judge it with 0.27.x"))
         if "not checked" in str(rep_doc.get("execution_evidence_level")) and not rules.get("accept_pre_execution_only"):
             refusals.append(_r("permit.report_pre_execution_only", where,
                                "a pre-execution report: run lineage was not checked, and the policy does not accept that"))

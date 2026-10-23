@@ -190,8 +190,8 @@ class V75CheapRefusals(Base):
 
 
 class V76MutationSkeleton(Base):
-    """Full mutation testing (release R3): every draft operator keeps its invariant on the chain, reduced, ratio and
-    model cases, on the 1.0.0 suites and the 1.1.0 suites; edit-report is refused by the permit's report check
+    """Full mutation testing (release R3): every draft operator keeps its invariant on the chain, reduced and ratio
+    cases (the model case went with model-card in 0.28.0), on the 1.0.0 suites and the 1.1.0 suites; edit-report is refused by the permit's report check
     (test_analysis_check_report_permit)."""
 
     def keep_invariants(self, builder, variant=None):
@@ -216,7 +216,7 @@ class V76MutationSkeleton(Base):
     def test_operators_keep_their_invariants_on_every_case_with_the_1_1_0_rules(self):
         if not cases.HAVE_AMS:
             self.skipTest("the public AMS example artifacts are not installed")
-        for builder in (cases.positive_case, cases.ratio_case, cases.model_case):
+        for builder in (cases.positive_case, cases.ratio_case):
             self.keep_invariants(builder, cases.context_1_1)
 
     def test_every_operator_is_implemented(self):

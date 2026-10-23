@@ -37,13 +37,11 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   and the merge, and its output is the merged file with its merge record.
 - Chunked reductions inside a step follow [columnar and large-scale data](columnar-and-large-scale-data.md).
 
-## Results the analysis check can bind
+## Tying results to their runs
 
-- The outputs that become published results are bound to the runs that made them with a result binding
-  (`<plugin root>/contracts/schemas/result_binding.json`); the advisory, experimental and deprecated suite `run-lineage/v1` (removed in the next minor release) of the analysis check
-  (`<plugin root>/contracts/analysis_check.py`, shadow mode) reads those bindings, the run records and the merge
-  records to show that a result descends from a complete merge of the declared inputs.
-- Keep run records and bindings with the frozen bundle (see the [preservation checklist](preservation-checklist.md)).
+- Keep each published result's producing run records (computational-run: inputs with digests, output hashes) and the
+  merge record of a partitioned run with the frozen bundle (see the [preservation checklist](preservation-checklist.md)).
+  No tool checks the chain from result to runs any more: the analysis check's run-lineage suite was removed in 0.28.0.
 
 ## Checks
 
