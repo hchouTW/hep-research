@@ -100,7 +100,7 @@ semi-empirical sets renormalized to the available nuclear data (conventions and 
   |---|---|---|
   | Webber family (WKS93, WKS98, S01, W03; WNEW code) | semi-empirical formulas fitted to data | W03 has no Li production (Maurin et al. 2022, Sec. 2.3) |
   | Silberberg-Tsao (YIELDX, TS00) | semi-empirical systematics | DRAGON2 takes Li from it (Evoli et al. 2018, Sec. 5) |
-  | GALPROP opt12 / opt22 | fits to data on top of WNEW 1998 / YIELDX 2000 | opt12 has null Fe to Li and undershoots most Fe to Be, B data by about 15-21 times, opt22 is about in line (Maurin et al. 2022, Sec. 3.2.2, Table 1); opt12 (kopt = 12) is the default of Korsmeier and Cuoco 2021 (Sec. IV) |
+  | GALPROP opt12 / opt22 | fits to data on top of WNEW 1998 / YIELDX 2000 (Maurin et al. 2022, Sec. 2.3; Genolini et al. 2018, Sec. II.B, names WKS93 and TS98) | opt12 has null Fe to Li and undershoots most Fe to Be, B data by about 15-21 times, opt22 is about in line (Maurin et al. 2022, Sec. 3.2.2, Table 1); opt12 (kopt = 12) is the default of Korsmeier and Cuoco 2021 (Sec. IV) |
   | DRAGON2 | Webber tables; missing channels from WNEWTR renormalized to data at 0.1-100 GeV/n | three generations of intermediate-lived parents, GALPROP five (Evoli et al. 2018, Sec. 5) |
   | OPT12, OPT22, OPT12up22 | GALPROP sets renormalized to data (smoothed data/model spline, threshold fit, constant above 1.5 GeV/n) | Maurin et al. 2022, Sec. 3 |
 
@@ -147,7 +147,7 @@ propagation page. Uncertainty objects in use:
 - newer work at preliminary or preprint status only: a 2025 proceedings quotes about 10-15% current uncertainty
   on the production cross sections (D'Angelo, Oliva and Masi, PoS ICRC2025 234, abstract page), and an NLO collinear-QCD preprint finds an antineutron
   excess of a few percent (Boglione et al., arXiv:2605.04150, abstract). Label them so; no newer peer-reviewed source
-  determination was found on 2026-10-20.
+  determination was found on 2026-10-23 (INSPIRE-HEP and arXiv title and abstract searches, since 2025).
 - Parametrization choice is a `model-alternative`; a fitted set's own error enters with its covariance. When the data
   are corrected with nuclear cross sections in the detector, that correction can dominate the antiproton systematics
   near 10-20 GV (Heisig, Korsmeier and Winkler 2020, abstract). It is correlated with the interpretation only when
@@ -158,7 +158,7 @@ propagation page. Uncertainty objects in use:
 hyperon channels and heavier nuclei from p + C data, give the p + p to e+- cross section with about 5-7%
 uncertainty at the energies of current space-borne positron data (Orusa et al. 2022, abstract). Against the older Kamae
 et al. 2006 parametrization the positron source term differs by about 20% above 5 GeV (Kamae smaller) and is larger
-in Kamae below 1 GeV; AAfrag (the 2021 version) agrees within about 10% for positrons at 1-100 GeV but is 30-40% higher for electrons
+in Kamae below 1 GeV; AAfrag (the 2021 version: Koldobskiy et al. 2021, aafragpy) agrees within about 10% for positrons at 1-100 GeV but is 30-40% higher for electrons
 and is valid only for proton energies of at least 3.1 GeV (Orusa et al. 2022, Secs. VI-VII). Lepton losses: first
 propagation page.
 
@@ -224,7 +224,8 @@ confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
 - D. Maurin, arXiv:1807.02968v2 (Comput. Phys. Commun., DOI 10.1016/j.cpc.2019.106942).
 - Y. Genolini et al., arXiv:1904.08917v2 (PRD 99 (2019) 123028).
 - N. Weinrich et al. 2020a, arXiv:2002.11406v1 (A&A, DOI 10.1051/0004-6361/202037875); abstract, Secs. 2, 5.2, App. B.
-- N. Weinrich et al. 2020b, arXiv:2004.00441v2 (A&A, DOI 10.1051/0004-6361/202038064).
+- N. Weinrich et al. 2020b, arXiv:2004.00441v2 (A&A, DOI 10.1051/0004-6361/202038064). Maurin et al. 2022 label
+  these two the other way round (2020a = A&A 639, A74); cite by identifier when both appear.
 - C. Evoli, G. Morlino, P. Blasi, R. Aloisio, arXiv:1910.04113v2 (PRD 101 (2020) 023013).
 - C. Evoli, R. Aloisio, P. Blasi, arXiv:1904.10220v2 (PRD 99 (2019) 103023).
 - M. Korsmeier, A. Cuoco, arXiv:1607.06093v3 (PRD 94 (2016) 123019); arXiv:2103.09824v2 (PRD 103 (2021) 103016),
@@ -238,7 +239,7 @@ confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
 - L. Derome et al., arXiv:1904.08210v3 (A&A, DOI 10.1051/0004-6361/201935717).
 - M. Korsmeier, F. Donato, M. Di Mauro, arXiv:1802.03030v2 (PRD 97 (2018) 103019).
 - M. Kachelriess, I.V. Moskalenko, S. Ostapchenko, arXiv:1904.05129v2 (Comput. Phys. Commun., DOI
-  10.1016/j.cpc.2019.08.001).
+  10.1016/j.cpc.2019.08.001); S. Koldobskiy et al., arXiv:2110.00496v2 (PRD 104 (2021) 123027), abstract.
 - F. D'Angelo, A. Oliva, N. Masi, PoS(ICRC2025)234 (proceedings page); M. Boglione et al., arXiv:2605.04150v1
   (preprint).
 - L. Orusa, M. Di Mauro, F. Donato, M. Korsmeier, arXiv:2203.13143v2 (PRD 105 (2022) 123021); abstract, Secs. I,
@@ -254,7 +255,8 @@ confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
 - I.G. Usoskin et al., JGR 110 (2005) A12108, DOI 10.1029/2005JA011250 (not opened); and arXiv:1705.07197 (DOI
   10.1002/2016JA023819), abstract, Secs. 2, 6.3.
 - Bartels rotations: WDC Kp/Ap format description, https://ftp.space.dtu.dk/WDC/indices/kp-ap/wdc/wdc_fmt.txt;
-  Caltech ACE Science Center table, https://izw1.caltech.edu/ACE/ASC/DATA/bartels/Bartels2008-2027.pdf.
+  Caltech ACE Science Center table, https://izw1.caltech.edu/ACE/ASC/DATA/bartels/Bartels2008-2027.pdf. Tilt
+  angles: Wilcox Solar Observatory, http://wso.stanford.edu/Tilts.html (read 2026-10-23; updated 2025-10-23).
 - M. Boudaud et al., arXiv:1906.07119 (PRR 2 (2020) 023022); J. Heisig, M. Korsmeier, M.W. Winkler, arXiv:2005.04237v2
   (PRR 2 (2020) 043017); A. Cuoco, J. Heisig, L. Klamt, M. Korsmeier, M. Kramer, arXiv:1903.01472v2 (PRD 99 (2019)
   103014).
@@ -273,5 +275,4 @@ confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
   A. Vittino, arXiv:1507.07001 (JCAP 05 (2016) 031); Y.-C. Ding et al., arXiv:2104.14881 (JCAP 09 (2021) 005, DOI
   10.1088/1475-7516/2021/09/005).
 
-Not verified and therefore not used: the Planck 2018 annihilation limit, a numerical diffusion coefficient from the HAWC abstract, and what the
-Wilcox "L" and "R" tilt models assume (only their names and use were read).
+Not verified and therefore not used: the Planck 2018 annihilation limit (the paper was not read).

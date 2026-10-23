@@ -37,7 +37,11 @@ In order of cost:
   Treat the lag or window as a model parameter with its period of validity, not a constant.
 - **Tilt-angle inputs.** The Wilcox Solar Observatory gives tilt angles every 10 days from two reconstructions,
   "model L" (classic) and "model R"; one study takes a smoothed model R as default and the L-R difference as a
-  systematic (Tomassetti et al. 2017, Sec. 2). State which model and smoothing were used.
+  systematic (Tomassetti et al. 2017, Sec. 2). Both are potential-field models of the photospheric field: L with a
+  line-of-sight boundary and a polar-field correction, R with a radial boundary and a higher source surface (3.25),
+  which gives a flatter current sheet and usually lower tilts; the observatory calls L probably the better estimate,
+  and values above 70 degrees are lower limits (WSO tilt-angle page, read 2026-10-23). State which model and smoothing
+  were used.
 - **Charge sign.** A > 0 denotes the epochs when the solar polar field points outward in the northern hemisphere,
   A < 0 inward (Potgieter 2013, Sec. 2.2.1; Cholis et al. 2016, Sec. II). In the Cholis et al. form the drift term
   acts only for qA < 0; Kuhlen and Mertsch state that for qA > 0 particles arrive mostly from polar, for qA < 0 from

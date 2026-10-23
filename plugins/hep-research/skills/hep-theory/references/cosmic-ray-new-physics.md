@@ -64,8 +64,9 @@ model before the excess. Lepton energy losses: [cosmic-ray propagation](cosmic-r
 Pulsars (the Galactic population of mature pulsars plus the nearest ones, such as Geminga and B0656+14) could
 plausibly produce the positron signal, and a nearby source would leave a small dipole anisotropy in
 the lepton arrival directions that could separate it from dark matter (Hooper, Blasi and Serpico 2009, abstract). The
-TeV halos around Geminga and PSR B0656+14 were read both ways: slow diffusion near the sources makes them unlikely to
-explain the excess (HAWC 2017, abstract) or makes pulsars very likely its origin (Hooper et al. 2017, abstract); the
+TeV halos around Geminga and PSR B0656+14 were read both ways: slow diffusion near the sources (D = (4.5 +- 1.2) x 10^27 cm^2/s
+for 100 TeV electrons, about 100 times below earlier models) makes them unlikely to explain the excess (HAWC 2017,
+abstract, Table 1) or makes pulsars very likely its origin (Hooper et al. 2017, abstract); the
 exclusion depends on assuming homogeneous diffusion, and with a radially dependent diffusion coefficient the two
 pulsars can match the observed high-energy positron flux (Profumo et al. 2018, abstract).
 Geminga alone gives at most 20% of the positrons at the highest measured energies (Di Mauro, Manconi and Donato 2019,
