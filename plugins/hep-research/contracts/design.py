@@ -1640,7 +1640,7 @@ def orphan_runs(proj: Project) -> tuple[list[dict], dict]:
 def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
     """ART-15: the basis holds only if every pair of effective candidates that are not screened out differs by less
     than the tolerance after adding the propagated uncertainty at the coverage CL, from their F1 budget evaluations of
-    the basis quantity."""
+    the basis quantity. Budget items the two candidates share unchanged cancel in the difference and its uncertainty."""
     basis = spec["extension"].get("comparison_basis")
     if not basis:
         return {"declared": False, "holds": False, "reason": "comparison_basis is not declared"}
@@ -1656,17 +1656,31 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
                     "reason": f"no F1 {q} evaluation with an uncertainty for {groups[d]}"}
         e = evs[0]
         u = e.ext["uncertainty"]
-        vals[d] = (e.ext["value"], max(sigma_equivalent(u, "minus"), sigma_equivalent(u, "plus")))
+        refs = [r for r in e.ext.get("parameter_refs", []) if r.startswith("budgets.")]
+        items = proj.parameter_objects(e.ext.get("candidate", ""), refs) if refs else {}
+        vals[d] = (e.ext["value"], max(sigma_equivalent(u, "minus"), sigma_equivalent(u, "plus")),
+                   items if items and all(isinstance(x, dict) for x in items.values()) else None)
     pairs = []
     holds = True
     k = z_one_sided(cl)
     for a, b in itertools.combinations(sorted(vals), 2):
-        (va, sa), (vb, sb) = vals[a], vals[b]
+        (va, sa, ia), (vb, sb, ib) = vals[a], vals[b]
         ref = (abs(va) + abs(vb)) / 2 or 1.0
-        diff, sig = abs(va - vb), math.hypot(sa, sb)
+        diff, sig, shared = abs(va - vb), math.hypot(sa, sb), []
+        if ia is not None and ib is not None:
+            # ART-15: a budget item both candidates carry unchanged (same estimate, uncertainty, unit, basis and
+            # source) is the same object and cancels in the difference; the other items of each candidate add
+            # linearly, as in budget-sum, and the two candidates add in quadrature.
+            same = ("estimate", "uncertainty", "unit", "basis", "source")
+            shared = sorted(r for r in ia if isinstance(ib.get(r), dict)
+                            and all(ia[r].get(f) == ib[r].get(f) for f in same))
+            own_a = sum(float(ia[r].get("uncertainty") or 0.0) for r in ia if r not in shared)
+            own_b = sum(float(ib[r].get("uncertainty") or 0.0) for r in ib if r not in shared)
+            sig = math.hypot(own_a, own_b)
         ok = diff + k * sig <= basis["tolerance_relative"] * ref
         holds &= ok
         pairs.append({"candidates": [groups[a], groups[b]], "difference": diff, "uncertainty_one_sided": k * sig,
+                      "shared_items": [r.split(".", 2)[2] for r in shared],
                       "tolerance": basis["tolerance_relative"] * ref, "holds": ok})
     return {"declared": True, "holds": holds and bool(pairs), "quantity": q, "coverage_cl": cl, "pairs": pairs,
             "reason": None if holds and pairs else ("fewer than two candidates" if not pairs else
@@ -1824,6 +1838,15 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
                          "screened_out_reasons": reasons, "at_risk": sorted(set(at_risk))})
     flags, gates = gate_flags(proj, records, current, screened, verdict_rows)
     flags = flags + change_flags
+    for item in rows_out["requirements"]:  # RPT-05: dispositions are proposed for candidates entering convergence only
+        for m in item["matrix"]:
+            if set(m["candidates"]) & screened:
+                m["screened_out"] = True
+                m.pop("proposed_disposition", None)
+                if m["result"] == "inconclusive":
+                    m["disposition_note"] = "none: the candidate is screened out"
+            elif item["kind"] != "driving" and m["result"] == "inconclusive":
+                m["disposition_note"] = "none required: derived requirement (RPT-05, MAT-04 d)"
     basis = comparison_basis(proj, spec, {d: c for d, c in groups.items() if not set(c) & screened})  # CHN-11 first
     stale = sorted(e.eid for e in proj.evals.values() if e.stale)
     out.update({
@@ -1857,12 +1880,13 @@ def ranking(proj: Project, groups: dict, basis: dict) -> dict:
     """CHN-00, CHN-06, RPT-07: candidates are ranked on expected measurement precision only when the comparison basis
     holds and every candidate that survives screening has a usable expected-precision evaluation (not stale, no error,
     not an optimistic bound) with the same fidelity vector and the same denominator; otherwise the ranking is refused
-    with the reason. A ranking is an ordering of these candidates, never a claim of a global optimum."""
+    with every reason that applies. A ranking is an ordering of these candidates, never a claim of a global optimum."""
     fom = "expected-precision"
+    reasons = []
     if not basis.get("holds"):
-        return {"status": "refused", "reason": f"comparison_basis does not hold: {basis.get('reason')} (ART-15, RPT-07)"}
+        reasons.append(f"comparison_basis does not hold: {basis.get('reason')} (ART-15, RPT-07)")
     if len(groups) < 2:
-        return {"status": "refused", "reason": "fewer than two candidates survive screening"}
+        reasons.append("fewer than two candidates survive screening")
     picks, lacking = {}, []
     for d, cids in groups.items():
         usable = [e for e in proj.evals.values() if e.fom == fom and e.effective == d and not e.errors and not e.stale
@@ -1873,8 +1897,9 @@ def ranking(proj: Project, groups: dict, basis: dict) -> dict:
             continue
         picks[d] = max(usable, key=lambda e: lowest(e.vector))
     if lacking:
-        return {"status": "refused",
-                "reason": f"{', '.join(sorted(lacking))} have no non-optimistic, current {fom} evaluation (CHN-06)"}
+        reasons.append(f"{', '.join(sorted(lacking))} have no non-optimistic, current {fom} evaluation (CHN-06)")
+    if reasons:
+        return {"status": "refused", "reason": "; ".join(reasons), "reasons": reasons}
     vectors = {tuple(sorted((f, x) for f, x, _ in e.vector)) for e in picks.values()}
     dens = {json.dumps(e.ext.get("denominator"), sort_keys=True) for e in picks.values()}
     if len(vectors) != 1:
@@ -1917,7 +1942,7 @@ def review_axis(proj: Project, records: list[dict], full: dict) -> dict:
     used = {proj.resolve(r["file"]) for item in full.get("requirements", []) + full.get("constraints", [])
             for m in item["matrix"] for r in m["used"]}
     open_driving = {item["id"] for item in full.get("requirements", []) if item["kind"] == "driving"
-                    and any(m["result"] == "inconclusive" for m in item["matrix"])}
+                    and any(m["result"] == "inconclusive" and not m.get("screened_out") for m in item["matrix"])}
     out = []
     reviewed_by = None
     for r in (x for x in records if x["category"] == "design-baseline"):

@@ -249,8 +249,21 @@ class Report(Project):
                                      "synthetic")[0], 0)
         d = derive(self.b)  # 20% estimate-basis uncertainties: the difference plus its uncertainty exceeds 5%
         self.assertEqual((d["comparison_basis"]["holds"], d["ranking"]["status"]), (False, "refused"))
+        pair = d["comparison_basis"]["pairs"][0]
+        self.assertEqual(pair["shared_items"], ["DES-MAG-001"])  # ART-15: the shared magnet cancels
+        self.assertAlmostEqual(pair["uncertainty_one_sided"], design.z_one_sided(0.95) * math.hypot(80.0, 76.0))
+        self.assertEqual(len(d["ranking"]["reasons"]), 2)  # RPT-07: every reason, also CHN-06
+        self.assertIn("CHN-06", d["ranking"]["reasons"][1])
         rc, out = self.ev("report", "--name", "r1")
         self.assertIn("ranking: refused", (self.b.art / out["rendering"]).read_text())
+        for c in ("cand-A", "cand-B"):  # identical tracker items too: nothing is left to differ
+            edit(self.b, f"candidates/{c}.json", lambda doc: doc["extension"]["budgets"]["mass"]["DES-TRK-001"]
+                 .update(estimate=390.0, uncertainty=78.0))
+            self.assertEqual(self.ev("budget", "--candidate", f"{NS}:{c}", "--quantity", "mass", "--status",
+                                     "synthetic", "--replace")[0], 0)
+        basis = derive(self.b)["comparison_basis"]
+        self.assertTrue(basis["holds"], basis)
+        self.assertEqual((basis["pairs"][0]["difference"], basis["pairs"][0]["uncertainty_one_sided"]), (0.0, 0.0))
 
     def test_plan(self):
         rc, out = self.ev("plan")

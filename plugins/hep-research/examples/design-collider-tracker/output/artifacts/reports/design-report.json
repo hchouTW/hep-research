@@ -551,7 +551,8 @@
        },
        "missing_evidence": [
         "none: excluded by an optimistic bound; change the candidate or the requirement"
-       ]
+       ],
+       "screened_out": true
       }
      ]
     },
@@ -732,7 +733,8 @@
         "calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02)",
         "calorimeter-energy-resolution at F4 or above (compliance threshold)"
        ],
-       "proposed_disposition": "next-study"
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
       }
      ]
     },
@@ -788,7 +790,8 @@
        },
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -834,7 +837,8 @@
        },
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -880,7 +884,9 @@
        },
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
-       ]
+       ],
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
       }
      ]
     },
@@ -936,7 +942,8 @@
        },
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -982,7 +989,8 @@
        },
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1028,7 +1036,9 @@
        },
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
-       ]
+       ],
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
       }
      ]
     },
@@ -1084,7 +1094,8 @@
        },
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -1130,7 +1141,8 @@
        },
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1176,7 +1188,9 @@
        },
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
-       ]
+       ],
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
       }
      ]
     },
@@ -1232,7 +1246,8 @@
        },
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -1278,7 +1293,8 @@
        },
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
-       ]
+       ],
+       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1324,7 +1340,9 @@
        },
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
-       ]
+       ],
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
       }
      ]
     }
@@ -1551,7 +1569,7 @@
    "stale_evaluations": [],
    "comparison_basis": {
     "declared": true,
-    "holds": false,
+    "holds": true,
     "quantity": "mass-budget",
     "coverage_cl": 0.95,
     "pairs": [
@@ -1565,16 +1583,23 @@
        ]
       ],
       "difference": 20.0,
-      "uncertainty_one_sided": 2615.7264710838163,
+      "uncertainty_one_sided": 173.3038888309006,
+      "shared_items": [
+       "DES-ECAL-001",
+       "DES-MAG-001"
+      ],
       "tolerance": 1124.5,
-      "holds": false
+      "holds": true
      }
     ],
-    "reason": "a difference with its uncertainty exceeds the tolerance"
+    "reason": null
    },
    "ranking": {
     "status": "refused",
-    "reason": "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)"
+    "reason": "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
    },
    "errors": [],
    "review": {

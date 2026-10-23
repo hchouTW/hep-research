@@ -47,6 +47,22 @@ class DesignColliderTracker(unittest.TestCase):
             self.assertIn(code, json.dumps(self.r["unavailable"]) + md)
         self.assertIn("capability.unavailable", md)
 
+    def test_dispositions_only_for_candidates_entering_convergence(self):
+        """RPT-05, MAT-04 (d): a screened-out candidate gets no proposed disposition and a derived requirement says why
+        it has none; the shared magnet and ECAL items cancel in the equal-mass basis (ART-15)."""
+        md = (self.out / "artifacts" / "reports" / "design-report.md").read_text(encoding="utf-8")
+        ecal_p = next(x for x in md.splitlines() if "REQ-ECAL-001" in x and "cand-P" in x and x.startswith("|"))
+        self.assertTrue(ecal_p.endswith("| none: the candidate is screened out |"), ecal_p)
+        self.assertNotIn("next-study", ecal_p)
+        derived = [x for x in md.splitlines() if x.startswith("|") and "(derived)" in x and "inconclusive" in x]
+        self.assertTrue(derived)
+        for x in derived:
+            note = "none: the candidate is screened out" if "cand-P" in x else \
+                "none required: derived requirement (RPT-05, MAT-04 d)"
+            self.assertTrue(x.endswith(f"| {note} |"), x)
+        self.assertIn("shared items cancel: DES-ECAL-001, DES-MAG-001: holds", md)
+        self.assertIn("- orphan runs: none", md)
+
     def test_the_h3_record_is_prepared_not_approved(self):
         rec = json.loads((self.out / "decisions" / "h3-prepared.json").read_text(encoding="utf-8"))
         self.assertEqual(rec["actor"]["kind"], "agent")

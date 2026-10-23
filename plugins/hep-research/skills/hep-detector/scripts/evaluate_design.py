@@ -621,7 +621,9 @@ def render(full: dict, omitted: list[str]) -> str:
     lines = [f"# Design report: {full.get('design_id')}", "",
              f"Derived by contracts/design.py from `{full.get('current_spec')}` (spec version {full.get('spec_version')}); "
              "no verdict is hand-written.", ""]
-    lines += [f"**Gate flags:** {', '.join(full.get('gate_flags') or ['none'])}", ""]
+    lines += [f"**Gate flags:** {', '.join(full.get('gate_flags') or ['none'])} (H1-H3).",
+              "**H4 (design-baseline):** taken by a human over this report and the evaluations it used; until a valid "
+              "H4 record exists the design is a draft and no requirement is reviewed (MAT-04).", ""]
     if full.get("adequacy", {}).get("provisional_pass"):
         lines += ["The adequacy table is an initial default until physics review: every pass is provisional.", ""]
     lines += ["| Requirement | Candidates | Result | Reason codes | Lowest fidelity (deciding evaluations) | Status | "
@@ -632,7 +634,7 @@ def render(full: dict, omitted: list[str]) -> str:
                          f"{' (provisional)' if m['provisional'] else ''} | {', '.join(m['codes']) or '-'} | "
                          f"{fidelity_cell(m)} | "
                          f"{', '.join(m['maturity']['status_axis']) or '-'} | {'; '.join(m['missing_evidence']) or '-'} | "
-                         f"{m.get('proposed_disposition') or '-'} |")
+                         f"{m.get('proposed_disposition') or m.get('disposition_note') or '-'} |")
     lines += ["", "## Evaluations used and skipped", ""]
     for item in full.get("requirements", []) + full.get("constraints", []):
         for m in item["matrix"]:
@@ -646,14 +648,28 @@ def render(full: dict, omitted: list[str]) -> str:
         lines += ["", f"Omitted from this rendering on request (still aggregated): {', '.join(omitted)}"]
     lines += ["", "## Screening, orphan runs, comparison", ""]
     for c in full.get("candidates", []):
-        lines.append(f"- {', '.join(c['candidates'])}: {'screened out (' + '; '.join(c['screened_out_reasons']) + ')' if c['screened_out'] else 'not screened out'}"
+        lines.append(f"- {', '.join(c['candidates'])}: {'screened out (' + '; '.join(c['screened_out_reasons']) + ')' if c['screened_out'] else 'not excluded by screening (no driving requirement or hard constraint fails)'}"
                      f"{'; at risk: ' + '; '.join(c['at_risk']) if c['at_risk'] else ''}")
     for o in full.get("orphan_runs", []):
         lines.append(f"- orphan run {o['run']} ({', '.join(o['figures_of_merit'])})")
+    if not full.get("orphan_runs"):
+        lines.append("- orphan runs: none")
     basis = full.get("comparison_basis", {})
     lines.append(f"- comparison basis: {'holds' if basis.get('holds') else 'does not hold'}"
                  f"{' (' + basis['reason'] + ')' if basis.get('reason') else ''}")
-    lines.append(f"- ranking: {full.get('ranking', {}).get('status')}: {full.get('ranking', {}).get('reason')}")
+    for pr in basis.get("pairs", []):
+        shared = f"; shared items cancel: {', '.join(pr['shared_items'])}" if pr.get("shared_items") else ""
+        lines.append(f"  - {'/'.join(pr['candidates'][0])} vs {'/'.join(pr['candidates'][1])}: difference "
+                     f"{pr['difference']:.6g} + one-sided uncertainty {pr['uncertainty_one_sided']:.6g} against "
+                     f"tolerance {pr['tolerance']:.6g} ({basis.get('quantity')}){shared}: "
+                     f"{'holds' if pr['holds'] else 'does not hold'}")
+    rank = full.get("ranking", {})
+    if rank.get("status") == "ranked":
+        lines.append(f"- ranking on {rank['figure_of_merit']}: "
+                     + ", ".join(f"{'/'.join(o['candidates'])} ({o['value']:.6g})" for o in rank["order"])
+                     + f"; {rank['note']}")
+    else:
+        lines.append(f"- ranking: {rank.get('status')}: {'; '.join(rank.get('reasons') or [rank.get('reason')])}")
     return "\n".join(lines) + "\n"
 
 

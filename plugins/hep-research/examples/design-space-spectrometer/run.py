@@ -20,8 +20,8 @@ Chain (all through skills/hep-detector/scripts/evaluate_design.py, verdicts only
 Acceptance (M1): the same verdicts as the M0 fixtures (the probe fails resolution with bound.excludes; the two
 reasonable candidates are inconclusive on resolution and charge confusion with bound.direction, with the missing F3,
 F4 and data-validation evidence listed); the equal-mass basis is checked between the two candidates that survive
-screening (with catalog masses and their 5% uncertainties it does not hold, so the report refuses to rank); no verdict
-is hand-written.
+screening (the shared magnet item cancels, so it holds; the report still refuses to rank, for lack of expected-precision
+evaluations); no verdict is hand-written.
 
 Usage (from the plugin root): python3 examples/design-space-spectrometer/run.py [--out DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Standard library only.
@@ -203,11 +203,12 @@ def criteria(rows: dict, full: dict) -> dict:
                                        and any("data-validation" in e for e in cc(c)["missing_evidence"])
                                        for c in ("cand-S", "cand-L")),
         "probe_screened_out": [c["candidates"] for c in full["candidates"] if c["screened_out"]] == [[f"{NS}:cand-P"]],
-        # catalog masses with 5% uncertainties: the 5 kg difference plus its one-sided 95% uncertainty exceeds the 5%
-        # tolerance, so the equal-mass basis does not hold and the report refuses to rank (ART-15, RPT-07)
+        # catalog masses with 5% uncertainties: the shared magnet item cancels, so the 5 kg difference plus the one-sided
+        # 95% uncertainty of the tracker items stays inside the 5% tolerance (ART-15); no expected-precision evaluation
+        # exists, so the ranking is still refused (CHN-06)
         "equal_mass_basis_checked": full["comparison_basis"]["declared"] and len(full["comparison_basis"]["pairs"]) == 1
-        and not full["comparison_basis"]["holds"],
-        "no_ranking_claimed": full["ranking"]["status"] == "refused" and "comparison_basis" in full["ranking"]["reason"],
+        and full["comparison_basis"]["holds"] and bool(full["comparison_basis"]["pairs"][0]["shared_items"]),
+        "no_ranking_claimed": full["ranking"]["status"] == "refused" and "CHN-06" in full["ranking"]["reason"],
         "gate_flags_shown": full["gate_flags"] == ["gate.H1_missing", "gate.H2_missing", "gate.H3_missing"],
     }
 

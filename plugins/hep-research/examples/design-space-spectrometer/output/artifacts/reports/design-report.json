@@ -394,7 +394,8 @@
        },
        "missing_evidence": [
         "none: excluded by an optimistic bound; change the candidate or the requirement"
-       ]
+       ],
+       "screened_out": true
       },
       {
        "effective_candidate": "a2820642576cce42bb41d99bb88017f8dbb48e0cd25d70f2c2562acc92e9dd21",
@@ -526,7 +527,8 @@
        "missing_evidence": [
         "charge-confusion-data-validation (required for compliance, ADQ-02)",
         "charge-confusion-rate at F4 or above (compliance threshold)",
-        "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1)"
+        "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1)",
+        "rigidity-scale-offset (required for compliance, ADQ-02)"
        ],
        "proposed_disposition": "next-study"
       },
@@ -609,7 +611,8 @@
        },
        "missing_evidence": [
         "none: excluded by an optimistic bound; change the candidate or the requirement"
-       ]
+       ],
+       "screened_out": true
       },
       {
        "effective_candidate": "a2820642576cce42bb41d99bb88017f8dbb48e0cd25d70f2c2562acc92e9dd21",
@@ -675,7 +678,8 @@
        "missing_evidence": [
         "charge-confusion-data-validation (required for compliance, ADQ-02)",
         "charge-confusion-rate at F4 or above (compliance threshold)",
-        "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1)"
+        "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1)",
+        "rigidity-scale-offset (required for compliance, ADQ-02)"
        ],
        "proposed_disposition": "next-study"
       }
@@ -891,7 +895,7 @@
    "stale_evaluations": [],
    "comparison_basis": {
     "declared": true,
-    "holds": false,
+    "holds": true,
     "quantity": "mass-budget",
     "coverage_cl": 0.95,
     "pairs": [
@@ -905,16 +909,22 @@
        ]
       ],
       "difference": 5.0,
-      "uncertainty_one_sided": 278.84424206040484,
+      "uncertainty_one_sided": 46.233628726298946,
+      "shared_items": [
+       "DES-MAG-001"
+      ],
       "tolerance": 119.875,
-      "holds": false
+      "holds": true
      }
     ],
-    "reason": "a difference with its uncertainty exceeds the tolerance"
+    "reason": null
    },
    "ranking": {
     "status": "refused",
-    "reason": "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)"
+    "reason": "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
    },
    "errors": [],
    "review": {

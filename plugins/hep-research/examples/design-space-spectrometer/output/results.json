@@ -73,7 +73,8 @@
    "missing_evidence": [
     "charge-confusion-data-validation (required for compliance, ADQ-02)",
     "charge-confusion-rate at F4 or above (compliance threshold)",
-    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1)"
+    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1)",
+    "rigidity-scale-offset (required for compliance, ADQ-02)"
    ],
    "status_axis": [
     "synthetic"
@@ -101,7 +102,8 @@
    "missing_evidence": [
     "charge-confusion-data-validation (required for compliance, ADQ-02)",
     "charge-confusion-rate at F4 or above (compliance threshold)",
-    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1)"
+    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1)",
+    "rigidity-scale-offset (required for compliance, ADQ-02)"
    ],
    "status_axis": [
     "synthetic"
@@ -143,8 +145,8 @@
  },
  "comparison_basis": {
   "declared": true,
-  "holds": false,
-  "reason": "a difference with its uncertainty exceeds the tolerance"
+  "holds": true,
+  "reason": null
  },
  "ranking": "refused",
  "gate_flags": [

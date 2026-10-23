@@ -55,7 +55,8 @@ Goal: driving requirements a design can be checked against.
   merit; `contracts/design.py` refuses a requirement whose denominator lacks a field the adequacy table needs.
 - Each driving requirement has an allocation (budget items, `quadrature` with `independent: true` or a correlation
   matrix, else `linear`) and a margin.
-- Declare `comparison_basis` (for example equal mass within 5%): without it no comparison or ranking is given.
+- Declare `comparison_basis` (for example equal mass within 5%): without it no comparison or ranking is given. Budget
+  items two candidates carry unchanged cancel in the difference and its uncertainty.
 - Gate H2 (`requirements-baseline`).
 
 ## D2 Exploration loop
@@ -109,10 +110,11 @@ Higher fidelity, each through `evaluate_design.py`:
 - Candidates are finally compared on expected measurement precision through the forward chain response ->
   measurement-spec -> Asimov statistical-result (hep-statistics); a chain built on optimistic F1 inputs can only
   exclude.
-- Every inconclusive driving requirement gets a proposed disposition in the report (accept risk or next study).
+- Every inconclusive driving requirement of a candidate that survives screening gets a proposed disposition in the
+  report (accept risk or next study); a screened-out candidate and a derived requirement show why they have none.
 - The report ranks candidates on expected precision only when the comparison basis holds and every candidate that
   survives screening has a non-optimistic expected-precision evaluation with the same fidelity vector and
-  denominator; otherwise it states why the ranking is refused. A ranking is never a global optimum.
+  denominator; otherwise it states every reason the ranking is refused. A ranking is never a global optimum.
 
 Reruns. Evaluations bind the candidate by the parameters they read (`binding: parameters`, `parameter_digest`): a
 change to another parameter leaves them current, a change to a parameter they read makes them stale (and everything

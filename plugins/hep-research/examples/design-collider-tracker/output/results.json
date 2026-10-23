@@ -224,8 +224,8 @@
  ],
  "comparison_basis": {
   "declared": true,
-  "holds": false,
-  "reason": "a difference with its uncertainty exceeds the tolerance"
+  "holds": true,
+  "reason": null
  },
  "ranking": "refused",
  "pass": {

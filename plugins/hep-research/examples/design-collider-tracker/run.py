@@ -16,8 +16,8 @@ Chain: design-spec and candidates -> evaluate_design.py run (resolution, ECAL, t
 budget (mass) -> the prepared H3 record -> evaluate_design.py report. Verdicts only from contracts/design.py.
 Acceptance criteria: the probe fails resolution (bound.excludes); the two reasonable candidates are inconclusive on
 resolution and ECAL resolution (bound.direction); the four unavailable quantities are inconclusive with
-capability.unavailable and listed; the equal-mass basis is checked between the two that survive screening (with catalog
-masses and their 5% uncertainties it does not hold, so the report refuses to rank).
+capability.unavailable and listed; the equal-mass basis is checked between the two that survive screening (the shared
+magnet and ECAL items cancel, so it holds; the report still refuses to rank, for lack of expected-precision evaluations).
 
 Usage (from the plugin root): python3 examples/design-collider-tracker/run.py [--out DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Standard library only.
@@ -207,8 +207,8 @@ def criteria(full: dict) -> dict:
         "unavailable_in_h3_record": any(r["category"] == "architecture-selection" for r in full["gates"])
         and "gate.H3_missing" in full["gate_flags"],
         "equal_mass_basis_checked": full["comparison_basis"]["declared"] and len(full["comparison_basis"]["pairs"]) == 1
-        and not full["comparison_basis"]["holds"],
-        "no_ranking_claimed": full["ranking"]["status"] == "refused" and "comparison_basis" in full["ranking"]["reason"],
+        and full["comparison_basis"]["holds"] and bool(full["comparison_basis"]["pairs"][0]["shared_items"]),
+        "no_ranking_claimed": full["ranking"]["status"] == "refused" and "CHN-06" in full["ranking"]["reason"],
     }
 
 

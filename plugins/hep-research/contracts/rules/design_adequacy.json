@@ -140,9 +140,12 @@
    "compliance_upstreams": [
     [
      "charge-confusion-data-validation"
+    ],
+    [
+     "rigidity-scale-offset"
     ]
    ],
-   "rationale": "far from the MDR the rate is set by tails from large-angle scattering, nuclear interactions, wrong hit association and secondaries; compliance needs F4 with tails validated by data (at least two routes)",
+   "rationale": "far from the MDR the rate is set by tails from large-angle scattering, nuclear interactions, wrong hit association and secondaries; compliance needs F4 with tails validated by data (at least two routes); near the MDR a curvature offset shifts the rate of one charge sign, so a zero offset in the denominator needs a rigidity-scale-offset evaluation (ADQ-07) to stand on",
    "source": [
     "spec",
     "charge-confusion"

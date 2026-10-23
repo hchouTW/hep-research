@@ -2,7 +2,8 @@
 
 Derived by contracts/design.py from `design-spec.v1.json` (spec version 1); no verdict is hand-written.
 
-**Gate flags:** gate.H1_missing, gate.H2_missing, gate.H3_missing
+**Gate flags:** gate.H1_missing, gate.H2_missing, gate.H3_missing (H1-H3).
+**H4 (design-baseline):** taken by a human over this report and the evaluations it used; until a valid H4 record exists the design is a draft and no requirement is reviewed (MAT-04).
 
 The adequacy table is an initial default until physics review: every pass is provisional.
 
@@ -13,19 +14,19 @@ The adequacy table is an initial default until physics review: every pass is pro
 | collider-tracker-v1:REQ-TRK-001 (driving) | collider-tracker-v1:cand-P | fail | bound.excludes | F1 | synthetic | none: excluded by an optimistic bound; change the candidate or the requirement | - |
 | collider-tracker-v1:REQ-ECAL-001 (driving) | collider-tracker-v1:cand-A | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02); calorimeter-energy-resolution at F4 or above (compliance threshold) | next-study |
 | collider-tracker-v1:REQ-ECAL-001 (driving) | collider-tracker-v1:cand-B | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02); calorimeter-energy-resolution at F4 or above (compliance threshold) | next-study |
-| collider-tracker-v1:REQ-ECAL-001 (driving) | collider-tracker-v1:cand-P | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02); calorimeter-energy-resolution at F4 or above (compliance threshold) | next-study |
-| collider-tracker-v1:REQ-HCAL-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | hadronic-energy-resolution at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-HCAL-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | hadronic-energy-resolution at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-HCAL-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | hadronic-energy-resolution at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-TRG-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | trigger-efficiency at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-TRG-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | trigger-efficiency at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-TRG-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | trigger-efficiency at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-PU-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | pileup-robustness at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-PU-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | pileup-robustness at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-PU-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | pileup-robustness at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-CONT-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | shower-containment at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-CONT-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | shower-containment at F4 or above (compliance threshold) | - |
-| collider-tracker-v1:REQ-CONT-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | shower-containment at F4 or above (compliance threshold) | - |
+| collider-tracker-v1:REQ-ECAL-001 (driving) | collider-tracker-v1:cand-P | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02); calorimeter-energy-resolution at F4 or above (compliance threshold) | none: the candidate is screened out |
+| collider-tracker-v1:REQ-HCAL-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | hadronic-energy-resolution at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-HCAL-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | hadronic-energy-resolution at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-HCAL-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | hadronic-energy-resolution at F4 or above (compliance threshold) | none: the candidate is screened out |
+| collider-tracker-v1:REQ-TRG-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | trigger-efficiency at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-TRG-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | trigger-efficiency at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-TRG-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | trigger-efficiency at F4 or above (compliance threshold) | none: the candidate is screened out |
+| collider-tracker-v1:REQ-PU-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | pileup-robustness at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-PU-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | pileup-robustness at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-PU-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | pileup-robustness at F4 or above (compliance threshold) | none: the candidate is screened out |
+| collider-tracker-v1:REQ-CONT-001 (derived) | collider-tracker-v1:cand-A | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | shower-containment at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-CONT-001 (derived) | collider-tracker-v1:cand-B | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | shower-containment at F4 or above (compliance threshold) | none required: derived requirement (RPT-05, MAT-04 d) |
+| collider-tracker-v1:REQ-CONT-001 (derived) | collider-tracker-v1:cand-P | inconclusive | capability.unavailable | undetermined (no evaluation used) | synthetic | shower-containment at F4 or above (compliance threshold) | none: the candidate is screened out |
 | collider-tracker-v1:CON-MASS-001 (hard) | collider-tracker-v1:cand-A | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
 | collider-tracker-v1:CON-MASS-001 (hard) | collider-tracker-v1:cand-B | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
 | collider-tracker-v1:CON-MASS-001 (hard) | collider-tracker-v1:cand-P | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
@@ -56,8 +57,10 @@ The adequacy table is an initial default until physics review: every pass is pro
 
 ## Screening, orphan runs, comparison
 
-- collider-tracker-v1:cand-A: not screened out
-- collider-tracker-v1:cand-B: not screened out
+- collider-tracker-v1:cand-A: not excluded by screening (no driving requirement or hard constraint fails)
+- collider-tracker-v1:cand-B: not excluded by screening (no driving requirement or hard constraint fails)
 - collider-tracker-v1:cand-P: screened out (collider-tracker-v1:REQ-TRK-001 fails)
-- comparison basis: does not hold (a difference with its uncertainty exceeds the tolerance)
-- ranking: refused: comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)
+- orphan runs: none
+- comparison basis: holds
+  - collider-tracker-v1:cand-B vs collider-tracker-v1:cand-A: difference 20 + one-sided uncertainty 173.304 against tolerance 1124.5 (mass-budget); shared items cancel: DES-ECAL-001, DES-MAG-001: holds
+- ranking: refused: collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)
