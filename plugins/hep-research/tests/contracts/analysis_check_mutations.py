@@ -6,15 +6,18 @@ must keep on the mutant compared with the original:
   same     the obligation states are identical (reorder, rename of IDs mapped back)
   no-gain  the status never improves, and no obligation is removed (P4: removing or loosening agent-writable input)
 
+  refused  (edit-report) a hand-edited report is refused by the permit's report check
+
 Operators of the diagnostic plane listed in the architecture: relabel, rename, copy, copy+perturb, drop, loosen,
-toggle-optional, reorder, edit-report. This skeleton implements reorder, rename, drop and loosen; the others are
-named in PENDING and land with the Phase 2 fixes (full mutation testing, R3). Synthetic and public content only."""
+toggle-optional, reorder, edit-report. All nine are implemented (full mutation testing, release R3; the skeleton of
+Phase 0 had the first four). edit-report acts on a finished report (edit_report), the others on a draft case before
+freezing. Synthetic and public content only."""
 from __future__ import annotations
 
 import copy
 
 STATUS_RANK = {"complete": 3, "incomplete": 2, "inconsistent": 1, "invalid": 0}
-PENDING = ("relabel", "copy", "copy+perturb", "toggle-optional", "edit-report")
+PENDING: tuple[str, ...] = ()
 
 
 def reorder(c) -> None:
@@ -38,12 +41,97 @@ def drop_declarations(c) -> None:
 
 def loosen_scopes(c) -> None:
     """Drop the spec corrections' target scopes (agent-writable description): never a gain (P4)."""
-    for corr in (c.doc("spec").get("extension") or {}).get("corrections", []):
+    for corr in _spec_corrections(c):
         corr.pop("target_scope", None)
 
 
+def relabel(c) -> None:
+    """Set every artifact's status labels to 'synthetic': a label is no evidence (DR-7), so nothing may change."""
+    for ref, doc in c.files.items():
+        if isinstance(doc, dict) and isinstance(doc.get("status"), list):
+            doc["status"] = ["synthetic"]
+
+
+EVIDENCE_ROLES = ("validation-record", "calibration")
+
+
+def _copy_id(item_id: str) -> str:
+    return f"{item_id}-copy"
+
+
+def copy_evidence(c) -> None:
+    """Bind a byte copy of each validation record and auxiliary input in place of the original (a new item ID and
+    file, the same content): a copy is the same source (DR-3), so nothing may change."""
+    import copy as _copy
+    for it in [i for i in c.items if i["role"] in EVIDENCE_ROLES]:
+        doc = _copy.deepcopy(c.files[it["ref"]])
+        new_id, new_ref = _copy_id(it["id"]), it["ref"].replace(".json", "-copy.json")
+        c.remove(it["id"])
+        c.add(it["role"], new_id, new_ref, doc)
+        _rebind(c.context, it["id"], new_id)
+
+
+def _rebind(node, old: str, new: str):
+    """Replace every reference to an item ID in the draft context (bindings, calibrations, mappings), never an ID of
+    another object."""
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if v == old and k not in ("declaration_id", "binding_id", "instance_id", "root_id"):
+                node[k] = new
+            else:
+                _rebind(v, old, new)
+    elif isinstance(node, list):
+        for x in node:
+            _rebind(x, old, new)
+
+
+def copy_perturb(c) -> None:
+    """Add, next to each validation record, a copy whose claim disagrees: contradicting evidence never gains (P4)."""
+    import copy as _copy
+    for it in [i for i in c.items if i["role"] == "validation-record"]:
+        doc = _copy.deepcopy(c.files[it["ref"]])
+        claim = doc.get("claim") or {}
+        claim["relation"] = "fully_correlated" if claim.get("relation") != "fully_correlated" else "independent"
+        c.add(it["role"], _copy_id(it["id"]) + "-perturbed", it["ref"].replace(".json", "-perturbed.json"), doc)
+
+
+OPTIONAL_CORRECTION_FIELDS = ("application_id", "variation_id", "factor_of")
+
+
+def toggle_optional(c) -> None:
+    """Remove the optional fields of the spec corrections (agent-writable description): never a gain (P4)."""
+    for corr in _spec_corrections(c):
+        for k in OPTIONAL_CORRECTION_FIELDS:
+            corr.pop(k, None)
+
+
+def edit_report(report: dict) -> dict:
+    """A hand edit of a finished report: every obligation that is not satisfied or not applicable is set to satisfied,
+    and the summary recomputed so the report looks complete and consistent. The permit's report check must refuse it."""
+    import copy as _copy
+    from contracts.analysis_checks.outcomes import formal_view, summarize
+    out = _copy.deepcopy(report)
+    for o in out["obligations"]:
+        if o["state"] not in ("satisfied", "not_applicable"):
+            o.update(state="satisfied", reason="check.edited")
+    s = summarize(out["obligations"], True)
+    out.update(coverage=s["coverage"], consistency=s["consistency"], counts=s["counts"], status="complete",
+               formal_use_view=formal_view(out["obligations"], True))
+    return out
+
+
+def _spec_corrections(c) -> list[dict]:
+    """The spec's corrections, or none for a case without a measurement spec (a model case)."""
+    spec = next((c.files[i["ref"]] for i in c.items if i["role"] == "measurement-spec"), None)
+    ext = spec.get("extension") if isinstance(spec, dict) else None
+    return ext.get("corrections", []) if isinstance(ext, dict) else []
+
+
 OPERATORS = {"reorder": (reorder, "same"), "rename": (rename_declarations, "same"),
-             "drop": (drop_declarations, "no-gain"), "loosen": (loosen_scopes, "no-gain")}
+             "drop": (drop_declarations, "no-gain"), "loosen": (loosen_scopes, "no-gain"),
+             "relabel": (relabel, "same"), "copy": (copy_evidence, "same"), "copy+perturb": (copy_perturb, "no-gain"),
+             "toggle-optional": (toggle_optional, "no-gain")}
+REPORT_OPERATORS = {"edit-report": (edit_report, "refused")}
 
 
 def states(rep: dict) -> dict:

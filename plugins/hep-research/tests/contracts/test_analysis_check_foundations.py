@@ -190,24 +190,40 @@ class V75CheapRefusals(Base):
 
 
 class V76MutationSkeleton(Base):
-    def test_operators_keep_their_invariants_on_the_chain_case(self):
-        if not cases.HAVE_AMS:
-            self.skipTest("the public AMS example artifacts are not installed")
-        base = cases.chain_case(self.root(), freeze=False)
+    """Full mutation testing (release R3): every draft operator keeps its invariant on the chain, reduced, ratio and
+    model cases, on the 1.0.0 suites and the 1.1.0 suites; edit-report is refused by the permit's report check
+    (test_analysis_check_report_permit)."""
+
+    def keep_invariants(self, builder, variant=None):
+        base = builder(self.root(), variant, freeze=False)
         original_root = self.root()
         orig = copy.deepcopy(base)
         orig.root = original_root
         original = report(orig.freeze(), original_root)
         for name, (_, invariant) in sorted(mutations.OPERATORS.items()):
-            with self.subTest(operator=name):
+            with self.subTest(case=builder.__name__, context="1.1.0" if variant else "1.0.0", operator=name):
                 m = mutations.mutate(base, name)
                 m.root = self.root()
                 mutant = report(m.freeze(), m.root)
                 self.assertEqual(mutations.violations(original, mutant, invariant), [])
 
-    def test_pending_operators_are_named(self):
-        self.assertEqual(set(mutations.PENDING) & set(mutations.OPERATORS), set())
-        self.assertEqual(len(mutations.PENDING) + len(mutations.OPERATORS), 9)
+    def test_operators_keep_their_invariants_on_the_chain_case(self):
+        if not cases.HAVE_AMS:
+            self.skipTest("the public AMS example artifacts are not installed")
+        self.keep_invariants(cases.chain_case)
+        self.keep_invariants(cases.chain_case, cases.context_1_1)
+
+    def test_operators_keep_their_invariants_on_every_case_with_the_1_1_0_rules(self):
+        if not cases.HAVE_AMS:
+            self.skipTest("the public AMS example artifacts are not installed")
+        for builder in (cases.positive_case, cases.ratio_case, cases.model_case):
+            self.keep_invariants(builder, cases.context_1_1)
+
+    def test_every_operator_is_implemented(self):
+        self.assertEqual(mutations.PENDING, ())
+        names = set(mutations.OPERATORS) | set(mutations.REPORT_OPERATORS)
+        self.assertEqual(names, {"relabel", "rename", "copy", "copy+perturb", "drop", "loosen", "toggle-optional",
+                                 "reorder", "edit-report"})
 
 
 class DefaultSnapshots(Base):
