@@ -16,7 +16,12 @@ Contracts 3.12.0 (minor; no capability added).
   |measured - assumed| + z sigma stays within the offset tolerance the requirement assumes (ADQ-02 value check);
   Example A states in its comparison basis note that the magnet is the same in every candidate (the outer planes sit
   outside it), so its mass is shared. Both examples now declare the constraint scope and Example B the covering driving
-  requirement of its four derived requirements. `tests/skills/hep_detector/test_design_followups.py`.
+  requirement of its four derived requirements. CHN-16 automated: `evaluate_design.py calibration` propagates a
+  candidate's calibration residual (rigidity scale or curvature offset parameter) through
+  `propagate_scale_distortion.py` into yield shifts, up/down variations and covariance blocks (its run records the
+  residual's parameter digest for incremental reruns) and writes a new measurement-spec version carrying them as a
+  shape systematic for the Asimov fit; a subsystem without a calibration control sample is refused.
+  `tests/skills/hep_detector/test_design_followups.py`.
 
 ## 0.37.0 (2026-10-24)
 

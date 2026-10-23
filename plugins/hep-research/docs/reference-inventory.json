@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 39,
-   "bytes": 523313,
+   "bytes": 523712,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2417,8 +2417,8 @@
   {
    "path": "skills/hep-detector/references/system-design-workflow.md",
    "owner": "hep-detector",
-   "bytes": 17596,
-   "lines": 214,
+   "bytes": 17995,
+   "lines": 217,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-design-principles.md",
@@ -2426,7 +2426,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8583574 2026-10-24"
+   "last_commit": "39c64c62 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",

@@ -169,9 +169,12 @@ environment and inputs are unchanged; never when the release digest is unknown.
   subsystem's services makes it stale and a change elsewhere does not.
 - Every subsystem declares its in-situ calibration (method and at least one control sample;
   `design.calibration_incomplete` otherwise). The rigidity-scale and alignment residuals a calibration leaves enter the
-  expected precision as nuisances: `propagate_scale_distortion.py` turns a scale or offset into binned yield shifts,
-  up/down variations and covariance blocks for the measurement-spec, and the hep-statistics Asimov fit gives their
-  effect.
+  expected precision as nuisances: `evaluate_design.py calibration --candidate C --residual SID.parameters.NAME
+  --mode scale|inverse-offset --model <spectrum model> --id CAL-... --measurement-spec <spec> --out-spec <new spec>`
+  runs `propagate_scale_distortion.py` on the candidate's residual (binned yield shifts, up/down variations and
+  covariance blocks; its run records the residual's parameter digest, so `run_workflow.py --incremental` reruns it
+  only when the residual changes) and writes a new measurement-spec version with that shape systematic; the
+  hep-statistics Asimov fit then gives its effect on the expected precision.
 
 ## Verdicts and reason codes
 

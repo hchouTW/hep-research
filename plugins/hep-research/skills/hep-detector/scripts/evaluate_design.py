@@ -34,6 +34,12 @@ Subcommands:
 - f5 (M3, FID-01, FID-06, FID-07): an F5 evaluation from a user-supplied dataset-record's design_measurement, bound
   to the dataset by hash and to the candidate by the digest of the measured configuration's parameters; it decides only
   after a human measurement-acceptance record approves the dataset and covers the candidate.
+- calibration (CHN-16): a candidate's calibration residual (--residual SID.parameters.NAME, --mode scale or
+  inverse-offset) through propagate_scale_distortion.py response over a spectrum model (--model) into binned yield
+  shifts, up/down variations and covariance blocks (outputs/CAL-*.json and its computational-run with argv, script hash
+  and the residual's parameter_digest); with --measurement-spec and --out-spec, a new measurement-spec version carries
+  them as a shape systematic for the hep-statistics Asimov fit. A subsystem without a calibration control sample is
+  refused.
 - scan (M4, OQ-18, AGG-08): the figure of merit of one candidate over a grid of parameter values (--vary
   SID.parameters.NAME=V1,V2,..., repeatable), each point run exactly as run would in a scratch copy, stored as one
   summary computational-run (runs/SCAN-*.computational-run.json, scan_summary: the points and the local elasticities at
@@ -67,6 +73,8 @@ Usage:
       --study REL --id SIM-ID [--label-spec S --label-benchmarks B --label-convergence C [--label-project-root R]]
       [--status LABEL]
   evaluate_design.py f5 --artifacts DIR --candidate ID --dataset REL --id MEAS-ID
+  evaluate_design.py calibration --artifacts DIR --candidate ID --residual SID.parameters.NAME --mode MODE --model REL
+      --id CAL-ID [--measurement-spec REL --out-spec REL] [--status LABEL]
   evaluate_design.py scan --artifacts DIR --candidate ID --figure-of-merit FOM [--denominator K=V ...] [--fidelity F1]
       --vary SID.parameters.NAME=V1,V2,... [--vary ...] --id SCAN-ID [--max-points N] [--status LABEL]
   evaluate_design.py expand --artifacts DIR --scan REL --point K --candidate-id NAME
@@ -644,6 +652,105 @@ def sensitivities(points: list[dict], axes: list[tuple[str, float, list[float]]]
     return out
 
 
+def calibration(args) -> dict:
+    """CHN-16: a candidate's calibration residual (a numeric parameter: the rigidity scale s, or the curvature offset
+    delta in 1/unit) propagated by propagate_scale_distortion.py response over a spectrum model into binned yield
+    shifts, up/down variations and covariance blocks (outputs/<id>.json and its computational-run, which records argv,
+    the script hash and the digest of the residual parameter, so a change of the residual makes the step rerun with
+    run_workflow.py --incremental). With --measurement-spec, a new version of that measurement-spec carries the
+    variations as a shape systematic bound to the output, for the hep-statistics Asimov fit of the expected precision."""
+    proj = load_project(args)
+    if proj.candidates.get(args.candidate) is None or proj.candidate_chain(args.candidate) is None:
+        raise UsageError(f"no design-candidate {args.candidate!r} (with its bases) in the artifacts_dir")
+    if not re.match(r"^CAL-[A-Za-z0-9][A-Za-z0-9._-]*$", args.id):
+        raise UsageError(f"--id {args.id!r}: a calibration step id is CAL- followed by letters, digits, '.', '_' or '-'")
+    sid, _, name = args.residual.partition(".parameters.")
+    par = (((proj.effective(args.candidate) or {}).get(sid) or {}).get("parameters") or {}).get(name) if name else None
+    if par is None or isinstance(par.get("value"), bool) or not isinstance(par.get("value"), (int, float)):
+        raise UsageError(f"--residual {args.residual}: a numeric parameter SID.parameters.NAME of {args.candidate}")
+    calib = ((proj.effective(args.candidate) or {}).get(sid) or {}).get("calibration") or {}
+    if not calib.get("control_samples"):
+        raise UsageError(f"{sid} has no calibration control sample (CHN-16): a residual without a calibration is not "
+                         "propagated")
+    model = proj.root / args.model
+    if not model.is_file():
+        raise UsageError(f"--model {args.model} is not a file in the artifacts_dir")
+    for rel in (f"outputs/{args.id}.json", f"runs/{args.id}.computational-run.json"):
+        if (proj.root / rel).exists():
+            raise UsageError(f"{rel} exists: choose another --id")
+    script = "skills/hep-detector/scripts/propagate_scale_distortion.py"
+    flag = "--scale" if args.mode == "scale" else "--delta"
+    tool_args = ["response", args.model, "--mode", args.mode, flag, token(float(par["value"])), "--status", args.status]
+    proc = subprocess.run([sys.executable, "-B", str(PLUGIN / script), *tool_args], capture_output=True,
+                          cwd=str(proj.root), timeout=TOOL_TIMEOUT_S)
+    try:
+        output = json.loads(proc.stdout.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        output = None
+    if proc.returncode != 0 or not isinstance(output, dict) or output.get("status") != "ok":
+        return {"status": "failed", "exit": 1, "error": f"{script} exited {proc.returncode}", "tool_output": output,
+                "stderr": proc.stderr.decode("utf-8", "replace")[-2000:]}
+    w = Writer(proj)
+    out_rel = w.write(f"outputs/{args.id}.json", proc.stdout)
+    chain_rels = [proj.rel(p) for p in proj.candidate_chain(args.candidate)]
+    inputs = [dict(w.input_ref(r), binding="parameters") for r in chain_rels]
+    model_in = {"ref": args.model, "sha256": sha256(model)}
+    argv = ["python3", script, *tool_args]
+    digest = proj.parameter_digest(args.candidate, [args.residual])
+    run_ext = {"input_manifest": [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels] + [
+                   {"path": args.model, "sha256": model_in["sha256"]}],
+               "tools": [{"name": "propagate_scale_distortion", "version": plugin_version()}],
+               "commands": [" ".join(argv)],
+               "environment": {"python": platform.python_version(), "platform": platform.platform(terse=True)},
+               "seeds": {}, "tolerances": {}, "exit_status": 0, "output_hashes": {out_rel: sha256(proj.root / out_rel)},
+               "argv": argv, "script_sha256": {script: sha256(PLUGIN / script)}, "parameter_digest": digest}
+    ns = args.candidate.split(":", 1)[0]
+    run_rel = w.json(f"runs/{args.id}.computational-run.json",
+                     envelope("computational-run", f"{ns}-{args.id}-run", run_ext, inputs + [model_in],
+                              [{"ref": out_rel}], statuses(inputs, args.status)))
+    result = {"status": "ok", "exit": 0, "output": out_rel, "run": run_rel, "residual": args.residual,
+              "residual_value": par["value"], "mode": args.mode, "parameter_digest": digest,
+              "max_relative_shift": {n: max((abs(v) for v in c.get("relative_shift_up", []) + c.get(
+                  "relative_shift_down", []) if v is not None), default=None)
+                  for n, c in (output.get("components") or {}).items()},
+              "warnings": output.get("warnings", [])}
+    if args.measurement_spec:
+        base_path = proj.root / args.measurement_spec
+        try:
+            base = json.loads(base_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            w.undo()
+            raise UsageError(f"--measurement-spec {args.measurement_spec} is not a readable JSON file") from None
+        if base.get("artifact_type") != "measurement-spec":
+            w.undo()
+            raise UsageError(f"--measurement-spec {args.measurement_spec} is not a measurement-spec")
+        if not args.out_spec or (proj.root / args.out_spec).exists():
+            w.undo()
+            raise UsageError("--out-spec names a new file in the artifacts_dir for the measurement-spec version")
+        spec = json.loads(json.dumps(base))
+        entry = {"name": f"{args.candidate} calibration residual {args.residual} ({args.mode})",
+                 "source": f"design candidate {args.candidate}, {sid} calibration ({calib.get('method', 'unstated')})",
+                 "effect": "shape",
+                 "applied_via": f"up/down variations and covariance block of {out_rel} (propagate_scale_distortion.py)"}
+        spec["extension"]["systematics"] = [x for x in spec["extension"].get("systematics", [])
+                                            if x.get("name") != entry["name"]] + [entry]
+        spec["artifact_id"] = f"{base['artifact_id']}-{args.id.lower()}"
+        spec["inputs"] = list(base.get("inputs") or []) + [w.input_ref(args.measurement_spec), w.input_ref(run_rel),
+                                                          {"ref": out_rel, "sha256": sha256(proj.root / out_rel)}]
+        spec["provenance"] = dict(base.get("provenance") or {}, created=created())
+        spec_rel = w.json(args.out_spec, spec)
+        from contracts.validate import validate_artifact
+        rep = validate_artifact(json.loads((proj.root / spec_rel).read_text(encoding="utf-8")))
+        if not rep.ok:
+            w.undo()
+            return {"status": "failed", "exit": 1, "error": "the measurement-spec version fails contract validation",
+                    "findings": [f.as_dict() for f in rep.errors]}
+        result["measurement_spec"] = spec_rel
+        result["next"] = ("run the hep-statistics Asimov fit on this measurement-spec, then evaluate_design.py run "
+                          "--figure-of-merit expected-precision --input-artifact <statistical-result> (CHN-03, CHN-04)")
+    return result
+
+
 def scan(args) -> dict:
     """M4 (OQ-18, AGG-08, RSK-04): the figure of merit of one candidate over a grid of parameter values, run point by
     point in a scratch copy of the artifacts_dir exactly as run would, and stored as one summary computational-run.
@@ -997,6 +1104,17 @@ def main(argv=None) -> int:
     p.add_argument("--candidate", required=True)
     p.add_argument("--dataset", required=True, help="the dataset-record with extension.design_measurement")
     p.add_argument("--id", required=True)
+    p = sub.add_parser("calibration", help="a calibration residual into yield shifts and the measurement-spec (CHN-16)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--candidate", required=True)
+    p.add_argument("--residual", required=True, help="SID.parameters.NAME: the residual scale s or curvature offset")
+    p.add_argument("--mode", required=True, choices=("scale", "inverse-offset"))
+    p.add_argument("--model", required=True, help="spectrum model JSON in the artifacts_dir (propagate_scale_distortion "
+                   "response input)")
+    p.add_argument("--id", required=True, help="CAL-... (outputs/<id>.json, runs/<id>.computational-run.json)")
+    p.add_argument("--measurement-spec", dest="measurement_spec", help="measurement-spec to version with the systematic")
+    p.add_argument("--out-spec", dest="out_spec", help="file of the new measurement-spec version")
+    p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
     p = sub.add_parser("scan", help="a figure of merit over a parameter grid, stored as one summary run (M4, AGG-08)")
     p.add_argument("--artifacts", type=Path, required=True)
     p.add_argument("--candidate", required=True)
@@ -1044,6 +1162,8 @@ def main(argv=None) -> int:
         elif args.command == "response":
             args.input_artifact = None
             out = response(args)
+        elif args.command == "calibration":
+            out = calibration(args)
         elif args.command == "scan":
             out = scan(args)
         elif args.command == "expand":

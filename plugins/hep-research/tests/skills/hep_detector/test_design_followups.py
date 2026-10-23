@@ -132,5 +132,81 @@ class OffsetValueCheck(Base):
         self.assertEqual([c["upstream"] for c in rules["upstream_value_checks"]], ["rigidity-scale-offset"])
 
 
+class Calibration(Base):
+    """CHN-16: the candidate's curvature-offset residual through propagate_scale_distortion.py into yield shifts and a
+    new measurement-spec version."""
+
+    MODEL = {"variable": "rigidity", "unit": "GV", "edges": [100.0, 200.0, 400.0, 800.0],
+             "components": [{"name": "proton", "charge_sign": 1, "spectrum": {"kind": "power-law", "index": 2.7, "norm": 1.0}},
+                            {"name": "antiproton", "charge_sign": -1,
+                             "spectrum": {"kind": "power-law", "index": 2.7, "norm": 1e-4}}],
+             "ratio": {"numerator": "antiproton", "denominator": "proton"}}
+
+    def setUp(self):
+        super().setUp()
+        edit(self.b, "candidates/cand-A.json", lambda d: d["extension"]["subsystems"]["DES-TRK-001"]["parameters"]
+             .update(curvature_offset_residual_per_GV={"value": 1e-5, "unit": "1/GV", "source": "alignment goal",
+                                                       "status": "proposal"}))
+        self.b.write("models/spectrum.json", self.MODEL)
+        self.b.write("specs/measurement.json",
+                     __import__("json").loads((PLUGIN / "contracts/fixtures/artifacts/valid/measurement_ratio.json")
+                                              .read_text(encoding="utf-8")))
+
+    def cal(self, *extra, sid="CAL-A-OFF"):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = EV.main(["calibration", "--candidate", f"{NS}:cand-A", "--residual",
+                            "DES-TRK-001.parameters.curvature_offset_residual_per_GV", "--mode", "inverse-offset",
+                            "--model", "models/spectrum.json", "--id", sid, *extra, "--artifacts", str(self.b.art)])
+        return code, __import__("json").loads(buf.getvalue())
+
+    def test_shifts_and_measurement_spec_version(self):
+        code, out = self.cal("--measurement-spec", "specs/measurement.json", "--out-spec", "specs/measurement.v2.json")
+        self.assertEqual(code, 0, out)
+        res = self.b.read(out["output"])
+        comps = res["components"]
+        # first order (2 - gamma) q x delta: negative for the positive charge, positive for the negative one
+        self.assertTrue(all(v < 0 for v in comps["proton"]["relative_shift_up"]))
+        self.assertTrue(all(v > 0 for v in comps["antiproton"]["relative_shift_up"]))
+        g, lo, hi = 2.7, 100.0, 200.0  # spectrum-weighted mean rigidity of the first bin
+        x_eff = ((lo ** (2 - g) - hi ** (2 - g)) / (g - 2)) / ((lo ** (1 - g) - hi ** (1 - g)) / (g - 1))
+        first = (2 - g) * x_eff * 1e-5
+        self.assertAlmostEqual(comps["proton"]["relative_shift_up"][0], first, delta=abs(first) * 0.01)
+        run = self.b.read(out["run"])["extension"]
+        self.assertEqual(run["parameter_digest"], design.Project(self.b.art).parameter_digest(
+            f"{NS}:cand-A", ["DES-TRK-001.parameters.curvature_offset_residual_per_GV"]))
+        self.assertIn("propagate_scale_distortion.py", run["argv"][1])
+        spec = self.b.read(out["measurement_spec"])
+        entry = spec["extension"]["systematics"][-1]
+        self.assertEqual(entry["effect"], "shape")
+        self.assertIn(out["output"], entry["applied_via"])
+        self.assertIn(out["output"], {i["ref"] for i in spec["inputs"]})
+        from contracts.validate import validate_artifact
+        self.assertTrue(validate_artifact(spec).ok)
+
+    def test_digest_follows_the_residual_only(self):
+        """INC-02: the step reruns when the residual changes, not when another parameter does."""
+        code, out = self.cal()
+        self.assertEqual(code, 0, out)
+        proj = lambda: design.Project(self.b.art)  # noqa: E731
+        ref = ["DES-TRK-001.parameters.curvature_offset_residual_per_GV"]
+        edit(self.b, "candidates/cand-A.json", lambda d: d["extension"]["subsystems"]["DES-MAG-001"]["parameters"]
+             ["field_T"].update(value=0.6))
+        self.assertEqual(proj().parameter_digest(f"{NS}:cand-A", ref), out["parameter_digest"])
+        edit(self.b, "candidates/cand-A.json", lambda d: d["extension"]["subsystems"]["DES-TRK-001"]["parameters"]
+             ["curvature_offset_residual_per_GV"].update(value=2e-5))
+        self.assertNotEqual(proj().parameter_digest(f"{NS}:cand-A", ref), out["parameter_digest"])
+
+    def test_refusals(self):
+        edit(self.b, "candidates/cand-A.json", lambda d: d["extension"]["subsystems"]["DES-TRK-001"]["calibration"]
+             .update(control_samples=[]))
+        code, out = self.cal()
+        self.assertEqual(code, 2, out)
+        self.assertIn("CHN-16", out["error"])
+        self.setUp()
+        code, out = self.cal("--measurement-spec", "specs/measurement.json")
+        self.assertEqual(code, 2, out)  # a new version needs --out-spec
+
+
 if __name__ == "__main__":
     unittest.main()
