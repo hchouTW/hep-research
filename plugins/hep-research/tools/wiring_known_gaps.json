@@ -1,0 +1,207 @@
+{
+ "_doc": "Known gaps of tools/check_wiring.py, its registered hub pages, pointer pages with their removal release and the README count patterns. 'gaps' only shrinks: a finding not listed is a new gap (exit 1); delete an entry once its gap is fixed. A hub is a page that routes within one topic and is itself one step from SKILL.md; pages it links count as reachable. Maintenance file: no paper titles.",
+ "hubs": {},
+ "pointers": {
+  "skills/hep-measurement/references/data-pipelines.md": {
+   "pointer_since": "0.7.0",
+   "remove_in": "0.29.0",
+   "moved_to": "skills/hep-computing/references/analysis-data-pipelines.md"
+  }
+ },
+ "readme_counts": {
+  "hep-authoring": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-citations": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-computing": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py",
+     "scripts/*.sh",
+     "scripts/*.C"
+    ]
+   }
+  ],
+  "hep-detector": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-measurement": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-ml": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-statistics": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-theory": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ]
+ },
+ "gaps": [
+  "R1:skills/hep-authoring/references/artifact-packaging-for-release.md",
+  "R1:skills/hep-authoring/references/code-review-report.md",
+  "R1:skills/hep-authoring/references/code-to-methodology-synthesis.md",
+  "R1:skills/hep-authoring/references/collaboration-results-lifecycle.md",
+  "R1:skills/hep-authoring/references/conflict-of-interest-and-ethics-statements.md",
+  "R1:skills/hep-authoring/references/diagram-captions.md",
+  "R1:skills/hep-authoring/references/diagram-figure-style.md",
+  "R1:skills/hep-authoring/references/diagrams-computer-science.md",
+  "R1:skills/hep-authoring/references/diagrams-hep.md",
+  "R1:skills/hep-authoring/references/diagrams-statistics.md",
+  "R1:skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
+  "R1:skills/hep-authoring/references/general-diagram-principles.md",
+  "R1:skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
+  "R1:skills/hep-authoring/references/graphviz-patterns.md",
+  "R1:skills/hep-authoring/references/latex-mechanics-and-tooling.md",
+  "R1:skills/hep-authoring/references/legends-panels-and-export.md",
+  "R1:skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
+  "R1:skills/hep-authoring/references/manuscript-consistency-auditing.md",
+  "R1:skills/hep-authoring/references/mermaid-patterns.md",
+  "R1:skills/hep-authoring/references/multi-venue-reformatting.md",
+  "R1:skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
+  "R1:skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
+  "R1:skills/hep-authoring/references/plantuml-patterns.md",
+  "R1:skills/hep-authoring/references/preprint-to-journal-reconciliation.md",
+  "R1:skills/hep-authoring/references/preregistration-and-registered-reports.md",
+  "R1:skills/hep-authoring/references/reproducibility-auditing.md",
+  "R1:skills/hep-authoring/references/supplementary-material-planning.md",
+  "R1:skills/hep-authoring/references/thesis-by-publication-assembly.md",
+  "R1:skills/hep-authoring/references/tikz-patterns.md",
+  "R1:skills/hep-computing/references/acceptance-criteria.md",
+  "R1:skills/hep-computing/references/bash-balanced-design-guidelines.md",
+  "R1:skills/hep-computing/references/batch-site-cern-htcondor.md",
+  "R1:skills/hep-computing/references/batch-site-nstccore-slurm.md",
+  "R1:skills/hep-computing/references/cpp-balanced-design-guidelines.md",
+  "R1:skills/hep-computing/references/design-and-estimation.md",
+  "R1:skills/hep-computing/references/host-notes.md",
+  "R1:skills/hep-computing/references/implementation-discipline.md",
+  "R1:skills/hep-computing/references/loop-engineering.md",
+  "R1:skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
+  "R1:skills/hep-computing/references/python-balanced-design-guidelines.md",
+  "R1:skills/hep-computing/references/risk-and-quality.md",
+  "R1:skills/hep-computing/references/software-architecture.md",
+  "R1:skills/hep-computing/references/status-updates-and-completion.md",
+  "R1:skills/hep-computing/references/task-quality-checklist.md",
+  "R1:skills/hep-detector/references/geant4-study-protocol.md",
+  "R1:skills/hep-ml/references/architecture-selection.md",
+  "R1:skills/hep-ml/references/checkpointing.md",
+  "R1:skills/hep-ml/references/custom-autograd-and-hooks.md",
+  "R1:skills/hep-ml/references/data-loading.md",
+  "R1:skills/hep-ml/references/data-strategy.md",
+  "R1:skills/hep-ml/references/debugging-pytorch.md",
+  "R1:skills/hep-ml/references/distributed-training.md",
+  "R1:skills/hep-ml/references/efficient-finetuning.md",
+  "R1:skills/hep-ml/references/evaluation-metrics.md",
+  "R1:skills/hep-ml/references/evaluation-strategy.md",
+  "R1:skills/hep-ml/references/export-and-deployment.md",
+  "R1:skills/hep-ml/references/geometric-and-equivariant-learning.md",
+  "R1:skills/hep-ml/references/mixed-precision.md",
+  "R1:skills/hep-ml/references/monitoring-and-lifecycle.md",
+  "R1:skills/hep-ml/references/optimization-and-training-dynamics.md",
+  "R1:skills/hep-ml/references/parallelism-strategy.md",
+  "R1:skills/hep-ml/references/performance-memory.md",
+  "R1:skills/hep-ml/references/reproducibility.md",
+  "R1:skills/hep-ml/references/sequence-models.md",
+  "R1:skills/hep-ml/references/serving-architecture.md",
+  "R1:skills/hep-ml/references/tensor-shapes.md",
+  "R1:skills/hep-ml/references/training-loop.md",
+  "R1:skills/hep-ml/references/transfer-learning.md",
+  "R1:skills/hep-ml/references/transformer-architectures.md",
+  "R1:skills/hep-theory/references/cosmic-ray-new-physics.md",
+  "R1:skills/hep-theory/references/solar-modulation-models.md",
+  "R2:reads-file:skills/hep-detector/scripts/tag_and_probe_efficiency.py",
+  "R2:reads-file:skills/hep-measurement/scripts/solar_modulation_force_field.py",
+  "R2:reads-file:skills/hep-ml/scripts/estimate_training_memory.py",
+  "R3:hep-computing:references/",
+  "R3:hep-computing:scripts/",
+  "R3:hep-ml:references/",
+  "R3:hep-statistics:references/"
+ ]
+}
