@@ -1,0 +1,3579 @@
+{
+ "status": "ok",
+ "suite_version": "1.1.0",
+ "rebase_from": "<the 0.25.1 example run.py>",
+ "rebased": {
+  "E01": {
+   "path": "<out>/value-gate-rebased/E01/run.py",
+   "inserted_lines": 11
+  },
+  "E02": {
+   "path": "<out>/value-gate-rebased/E02/run.py",
+   "inserted_lines": 11
+  },
+  "E03": {
+   "path": "<out>/value-gate-rebased/E03/run.py",
+   "inserted_lines": 11
+  },
+  "E04": {
+   "path": "<out>/value-gate-rebased/E04/run.py",
+   "inserted_lines": 11
+  },
+  "E05": {
+   "path": "<out>/value-gate-rebased/E05/run.py",
+   "inserted_lines": 11
+  },
+  "E06": {
+   "path": "<out>/value-gate-rebased/E06/run.py",
+   "inserted_lines": 11
+  },
+  "E07": {
+   "path": "<out>/value-gate-rebased/E07/run.py",
+   "inserted_lines": 11
+  },
+  "E08": {
+   "path": "<out>/value-gate-rebased/E08/run.py",
+   "inserted_lines": 11
+  },
+  "E09": {
+   "path": "<out>/value-gate-rebased/E09/run.py",
+   "inserted_lines": 11
+  },
+  "E10": {
+   "path": "<out>/value-gate-rebased/E10/run.py",
+   "inserted_lines": 11
+  },
+  "E11": {
+   "path": "<out>/value-gate-rebased/E11/run.py",
+   "inserted_lines": 11
+  },
+  "E12": {
+   "path": "<out>/value-gate-rebased/E12/run.py",
+   "inserted_lines": 11
+  },
+  "E13": {
+   "path": "<out>/value-gate-rebased/E13/run.py",
+   "inserted_lines": 11
+  },
+  "E14": {
+   "path": "<out>/value-gate-rebased/E14/run.py",
+   "inserted_lines": 11
+  },
+  "E15": {
+   "path": "<out>/value-gate-rebased/E15/run.py",
+   "inserted_lines": 11
+  },
+  "E16": {
+   "path": "<out>/value-gate-rebased/E16/run.py",
+   "inserted_lines": 11
+  },
+  "E17": {
+   "path": "<out>/value-gate-rebased/E17/run.py",
+   "inserted_lines": 11
+  },
+  "E18": {
+   "path": "<out>/value-gate-rebased/E18/run.py",
+   "inserted_lines": 11
+  },
+  "E19": {
+   "path": "<out>/value-gate-rebased/E19/run.py",
+   "inserted_lines": 11
+  },
+  "E20": {
+   "path": "<out>/value-gate-rebased/E20/run.py",
+   "inserted_lines": 11
+  },
+  "E21": {
+   "path": "<out>/value-gate-rebased/E21/run.py",
+   "inserted_lines": 11
+  },
+  "E22": {
+   "path": "<out>/value-gate-rebased/E22/run.py",
+   "inserted_lines": 11
+  },
+  "E23": {
+   "path": "<out>/value-gate-rebased/E23/run.py",
+   "inserted_lines": 11
+  },
+  "E24": {
+   "path": "<out>/value-gate-rebased/E24/run.py",
+   "inserted_lines": 11
+  },
+  "E25": {
+   "path": "<out>/value-gate-rebased/E25/run.py",
+   "inserted_lines": 11
+  },
+  "E26": {
+   "path": "<out>/value-gate-rebased/E26/run.py",
+   "inserted_lines": 11
+  },
+  "E27": {
+   "path": "<out>/value-gate-rebased/E27/run.py",
+   "inserted_lines": 11
+  },
+  "E28": {
+   "path": "<out>/value-gate-rebased/E28/run.py",
+   "inserted_lines": 11
+  },
+  "R01": {
+   "path": "<out>/value-gate-rebased/R01/run.py",
+   "inserted_lines": 11
+  },
+  "R02": {
+   "path": "<out>/value-gate-rebased/R02/run.py",
+   "inserted_lines": 11
+  },
+  "R03": {
+   "path": "<out>/value-gate-rebased/R03/run.py",
+   "inserted_lines": 11
+  },
+  "R04": {
+   "path": "<out>/value-gate-rebased/R04/run.py",
+   "inserted_lines": 11
+  },
+  "R05": {
+   "path": "<out>/value-gate-rebased/R05/run.py",
+   "inserted_lines": 11
+  },
+  "R06": {
+   "path": "<out>/value-gate-rebased/R06/run.py",
+   "inserted_lines": 11
+  },
+  "R07": {
+   "path": "<out>/value-gate-rebased/R07/run.py",
+   "inserted_lines": 11
+  },
+  "R08": {
+   "path": "<out>/value-gate-rebased/R08/run.py",
+   "inserted_lines": 11
+  },
+  "R09": {
+   "path": "<out>/value-gate-rebased/R09/run.py",
+   "inserted_lines": 11
+  },
+  "R10": {
+   "path": "<out>/value-gate-rebased/R10/run.py",
+   "inserted_lines": 11
+  },
+  "R11": {
+   "path": "<out>/value-gate-rebased/R11/run.py",
+   "inserted_lines": 11
+  }
+ },
+ "baseline": {
+  "id": "baseline",
+  "kind": "baseline",
+  "category": null,
+  "layer1": {
+   "flag": false,
+   "exit": 0,
+   "failed_criteria": [],
+   "crashed": false,
+   "artifacts": "<out>/work/baseline/run-out/artifacts"
+  },
+  "layer2": {
+   "validate": {
+    "exit": 0,
+    "codes": [
+     "response.mc_stat_missing",
+     "response.numeric_unchecked"
+    ]
+   },
+   "l2": {
+    "exit": 0,
+    "codes": []
+   },
+   "flag": false
+  },
+  "layer3": {
+   "status": "inconsistent",
+   "exit": 1,
+   "input_validity": "valid",
+   "counts": {
+    "satisfied": 117,
+    "violated": 8,
+    "not_applicable": 13,
+    "unverified": 16,
+    "unsupported": 2
+   },
+   "report": "<out>/work/baseline/checker/report.json"
+  },
+  "sensitivity": {
+   "status": "inconsistent",
+   "exit": 1,
+   "input_validity": "valid",
+   "counts": {
+    "satisfied": 129,
+    "violated": 4,
+    "not_applicable": 13,
+    "unverified": 12,
+    "unsupported": 2
+   },
+   "report": "<out>/work/baseline/checker-sens/report.json"
+  }
+ },
+ "cases": [
+  {
+   "id": "E01",
+   "kind": "error",
+   "category": "C01",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E01/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 1,
+     "codes": [
+      "semantics.repeated_correction"
+     ]
+    },
+    "flag": true
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 105,
+     "violated": 12,
+     "not_applicable": 13,
+     "unverified": 24,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E01/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p1#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p2#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p1#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p2#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      }
+     ],
+     "new_violated": 4
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 109,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 28,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E01/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.ambiguous_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p1#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p2#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p1#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p2#efficiency",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.repeated_application"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      }
+     ],
+     "new_violated": 4
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E02",
+   "kind": "error",
+   "category": "C01",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "contracts",
+     "response_checks",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E02/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 1,
+     "codes": [
+      "response.double_counted",
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 1,
+     "codes": [
+      "semantics.repeated_correction"
+     ]
+    },
+    "flag": true
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 113,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 24,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E02/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p1#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p2#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p1#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p2#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 125,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E02/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p1#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-helium-p2#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p1#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-rep.repetition:flux-proton-p2#efficiency",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E03",
+   "kind": "error",
+   "category": "C02",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E03/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E03/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p1#livetime",
+       "from": null,
+       "to": "unsupported",
+       "reason": "check.factor_undefined"
+      },
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p2#livetime",
+       "from": null,
+       "to": "unsupported",
+       "reason": "check.factor_undefined"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E03/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p1#livetime",
+       "from": null,
+       "to": "unsupported",
+       "reason": "check.factor_undefined"
+      },
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p2#livetime",
+       "from": null,
+       "to": "unsupported",
+       "reason": "check.factor_undefined"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E04",
+   "kind": "error",
+   "category": "C02",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E04/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E04/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E04/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E05",
+   "kind": "error",
+   "category": "C03",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E05/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 1,
+     "codes": [
+      "semantics.order"
+     ]
+    },
+    "flag": true
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E05/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E05/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E06",
+   "kind": "error",
+   "category": "C03",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E06/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 1,
+     "codes": [
+      "semantics.order"
+     ]
+    },
+    "flag": true
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E06/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E06/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E07",
+   "kind": "error",
+   "category": "C04",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E07/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E07/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E07/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E08",
+   "kind": "error",
+   "category": "C04",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E08/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E08/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E08/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E09",
+   "kind": "error",
+   "category": "C04",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E09/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E09/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E09/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E10",
+   "kind": "error",
+   "category": "C05",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E10/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E10/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E10/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E11",
+   "kind": "error",
+   "category": "C05",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E11/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 115,
+     "violated": 10,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E11/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.operands:ratio-p1",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.ratio_operands_incompatible"
+      },
+      {
+       "obligation_id": "r-ratio.operands:ratio-p2",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.ratio_operands_incompatible"
+      }
+     ],
+     "new_violated": 2
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 127,
+     "violated": 6,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E11/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.operands:ratio-p1",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.ratio_operands_incompatible"
+      },
+      {
+       "obligation_id": "r-ratio.operands:ratio-p2",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.ratio_operands_incompatible"
+      }
+     ],
+     "new_violated": 2
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E12",
+   "kind": "error",
+   "category": "C06",
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/E12/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E12/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E12/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E13",
+   "kind": "error",
+   "category": "C06",
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/E13/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E13/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E13/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E14",
+   "kind": "error",
+   "category": "C07",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E14/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E14/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E14/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E15",
+   "kind": "error",
+   "category": "C07",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E15/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E15/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E15/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E16",
+   "kind": "error",
+   "category": "C07",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E16/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E16/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E16/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E17",
+   "kind": "error",
+   "category": "C08",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "background_asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E17/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E17/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E17/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E18",
+   "kind": "error",
+   "category": "C08",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [],
+    "crashed": true,
+    "artifacts": "<out>/work/E18/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "artifacts_dir.empty"
+     ]
+    },
+    "l2": {
+     "exit": 1,
+     "codes": [
+      "semantics.repeated_correction"
+     ]
+    },
+    "flag": true
+   },
+   "layer3": {
+    "status": "refused",
+    "refusal": "bundle.bad_json: an item is not readable JSON: bundle.missing: 'artifacts/measurement_spec.json' does not exist",
+    "report": null,
+    "judgement": {
+     "flag": true,
+     "why": "refused",
+     "changes": []
+    }
+   },
+   "sensitivity": {
+    "status": "refused",
+    "refusal": "bundle.bad_json: an item is not readable JSON: bundle.missing: 'artifacts/measurement_spec.json' does not exist",
+    "report": null,
+    "judgement": {
+     "flag": true,
+     "why": "refused",
+     "changes": []
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E19",
+   "kind": "error",
+   "category": "C09",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "ratio_reference_agreement",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E19/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "measurement.cancellation_unverified",
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E19/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p1#selection_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.cancellation_unbound"
+      },
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p2#selection_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.cancellation_unbound"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E19/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p1#selection_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.cancellation_unbound"
+      },
+      {
+       "obligation_id": "r-ratio.cancellation:ratio-p2#selection_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.cancellation_unbound"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E20",
+   "kind": "error",
+   "category": "C09",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "ratio_reference_agreement"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E20/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E20/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E20/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E21",
+   "kind": "error",
+   "category": "C09",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "ratio_reference_agreement",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E21/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E21/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.correlation:ratio-p1#trigger_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.correlation_unsupported_claim"
+      },
+      {
+       "obligation_id": "r-ratio.correlation:ratio-p2#trigger_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.correlation_unsupported_claim"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E21/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-ratio.correlation:ratio-p1#trigger_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.correlation_unsupported_claim"
+      },
+      {
+       "obligation_id": "r-ratio.correlation:ratio-p2#trigger_efficiency",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.correlation_unsupported_claim"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E22",
+   "kind": "error",
+   "category": "C10",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull",
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E22/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 111,
+     "violated": 10,
+     "not_applicable": 17,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E22/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-real.undescribed:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      }
+     ],
+     "new_violated": 2
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 123,
+     "violated": 6,
+     "not_applicable": 17,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E22/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-real.undescribed:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      }
+     ],
+     "new_violated": 2
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E23",
+   "kind": "error",
+   "category": "C10",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "asimov_closure",
+     "toy_mean_pull"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E23/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E23/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E23/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E24",
+   "kind": "error",
+   "category": "C11",
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/E24/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E24/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E24/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E25",
+   "kind": "error",
+   "category": "C11",
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/E25/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E25/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E25/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E26",
+   "kind": "error",
+   "category": "C12",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "covariance_checks",
+     "ratio_reference_agreement"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E26/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E26/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E26/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E27",
+   "kind": "error",
+   "category": "C12",
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/E27/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E27/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E27/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "E28",
+   "kind": "error",
+   "category": "C12",
+   "layer1": {
+    "flag": true,
+    "exit": 1,
+    "failed_criteria": [
+     "toy_pull_width"
+    ],
+    "crashed": false,
+    "artifacts": "<out>/work/E28/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E28/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/E28/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R01",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R01/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R01/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R01/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R02",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R02/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R02/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R02/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R03",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R03/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "incomplete",
+    "exit": 3,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 0,
+     "not_applicable": 13,
+     "unverified": 24,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R03/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "incomplete",
+    "exit": 3,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 0,
+     "not_applicable": 13,
+     "unverified": 24,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R03/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new unverified naming the defect",
+     "changes": [
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.coverage_undefined"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:selection_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@helium-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@helium-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@proton-p1",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@proton-p2",
+       "from": "satisfied",
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      }
+     ],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R04",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R04/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 81,
+     "violated": 16,
+     "not_applicable": 45,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R04/checker/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@helium-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.unrealized_correction"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@helium-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.unrealized_correction"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@proton-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.unrealized_correction"
+      },
+      {
+       "obligation_id": "r-real.description:trigger_efficiency@proton-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.unrealized_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@helium-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@helium-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@proton-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@proton-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@helium-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@helium-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@proton-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@proton-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@helium-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@helium-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@proton-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@proton-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@helium-period1",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@helium-period2",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@proton-period1",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      },
+      {
+       "obligation_id": "r-stage.position:trigger_efficiency@proton-period2",
+       "from": null,
+       "to": "unverified",
+       "reason": "check.stage_unlocated"
+      }
+     ],
+     "new_violated": 16
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 93,
+     "violated": 12,
+     "not_applicable": 45,
+     "unverified": 8,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R04/checker-sens/report.json",
+    "judgement": {
+     "flag": true,
+     "why": "new violated",
+     "changes": [
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@helium-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@helium-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@proton-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:cutoff_transmission@proton-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@helium-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@helium-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@proton-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:fragmentation_feeddown@proton-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@helium-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@helium-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@proton-period1",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      },
+      {
+       "obligation_id": "r-real.undescribed:livetime@proton-period2",
+       "from": null,
+       "to": "violated",
+       "reason": "check.undescribed_correction"
+      }
+     ],
+     "new_violated": 12
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R05",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R05/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R05/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R05/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R06",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R06/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R06/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R06/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R07",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R07/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R07/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R07/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R08",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R08/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R08/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R08/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R09",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R09/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R09/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R09/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R10",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R10/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R10/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R10/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  },
+  {
+   "id": "R11",
+   "kind": "refactor",
+   "category": null,
+   "layer1": {
+    "flag": false,
+    "exit": 0,
+    "failed_criteria": [],
+    "crashed": false,
+    "artifacts": "<out>/work/R11/run-out/artifacts"
+   },
+   "layer2": {
+    "validate": {
+     "exit": 0,
+     "codes": [
+      "response.mc_stat_missing",
+      "response.numeric_unchecked"
+     ]
+    },
+    "l2": {
+     "exit": 0,
+     "codes": []
+    },
+    "flag": false
+   },
+   "layer3": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 117,
+     "violated": 8,
+     "not_applicable": 13,
+     "unverified": 16,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R11/checker/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "sensitivity": {
+    "status": "inconsistent",
+    "exit": 1,
+    "input_validity": "valid",
+    "counts": {
+     "satisfied": 129,
+     "violated": 4,
+     "not_applicable": 13,
+     "unverified": 12,
+     "unsupported": 2
+    },
+    "report": "<out>/work/R11/checker-sens/report.json",
+    "judgement": {
+     "flag": false,
+     "why": "",
+     "changes": [],
+     "new_violated": 0
+    }
+   },
+   "planter": "ai"
+  }
+ ],
+ "summary": {
+  "main": {
+   "N": 28,
+   "R": 11,
+   "I": 0,
+   "F": 1,
+   "incremental": [],
+   "false_positive_refactors": [
+    "R04"
+   ],
+   "layer1": 23,
+   "layer2_only": 0,
+   "checker_any": 7,
+   "missed_by_all": [
+    "E12",
+    "E13",
+    "E24",
+    "E25",
+    "E27"
+   ],
+   "refactor_layer1_alarms": [],
+   "refactor_layer2_alarms": [],
+   "outcome": "Stop"
+  },
+  "thresholds": "Pass I >= 0.25 N and F <= 1; Shrink 0.10 N <= I < 0.25 N, or I >= 0.25 N with F = 2; Stop I < 0.10 N or F >= 3",
+  "planter": "AI-planted",
+  "sensitivity": {
+   "N": 28,
+   "R": 11,
+   "I": 0,
+   "F": 1,
+   "incremental": [],
+   "false_positive_refactors": [
+    "R04"
+   ],
+   "layer1": 23,
+   "layer2_only": 0,
+   "checker_any": 7,
+   "missed_by_all": [
+    "E12",
+    "E13",
+    "E24",
+    "E25",
+    "E27"
+   ],
+   "refactor_layer1_alarms": [],
+   "refactor_layer2_alarms": [],
+   "outcome": "Stop"
+  }
+ }
+}

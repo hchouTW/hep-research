@@ -167,3 +167,52 @@ the implementer's option, not the maintainer's words.
   Phase 2 delivers.
 - The experimental labels of 0.25.1 stay until Phase 2 releases its fixes; the code freeze of the Stop decision is
   lifted for Phase 2 work only.
+
+## 2026-10-23, re-measurement on 0.26.0 (implementer; a measurement, not a decision)
+
+The maintainer asked to re-run the value gate after Phase 2 shipped in 0.26.0. Same 39 pre-registered cases (28
+AI-planted errors, 11 refactors), same layers, scoring and thresholds; nothing was re-planted. Harness changes,
+opt-in (`evals/cross-artifact-value-gate/measure.py`; the Phase 1 defaults and `results/` are unchanged):
+
+- `--suite-version 1.1.0`: every context is converted as `migrate.py context-1.0.0-to-1.1.0` does, so the checker runs
+  the stable 1.1.0 suites (all R2 and R3 fixes).
+- `--rebase-from <0.25.1 run.py>`: 0.26.0 changed the subject (`examples/ams-flux-ratio/run.py` now describes the
+  corrections its recipe applies; one block of 11 inserted lines). Each case's `run.py`, a full copy of the 0.25.1
+  example with the planted edit, gets the same block at the same place. **Confirmed for all 39 cases:** each rebased
+  case differs from the 0.26.0 example exactly as the original case differed from the 0.25.1 example.
+- **Inferred, and stated:** with `--rebase-from`, every context also maps the four corrections the 0.26.0 spec added
+  (livetime, cutoff transmission, survival, fragmentation feed-down) to the instances, as the subject's acceptance
+  mapping does. The subject description must describe the current subject. Without it, those obligations are
+  `applicability_unbound` and the new G1 rule cannot judge them. No mapping a case planted is changed.
+
+Results: `evals/cross-artifact-value-gate/results-0.26.0/`.
+
+| Arm | N | R | I | F (mechanical) | layer 1 | layer 2 only | checker, any flag | outcome by the thresholds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| main | 28 | 11 | 0 | 1 (R04) | 23 | 0 | 7 | Stop |
+| sensitivity | 28 | 11 | 0 | 1 (R04) | 23 | 0 | 7 | Stop |
+
+**Confirmed, against the Phase 1 result** (`results/`):
+- **E22 is the only change.** It is category C10, the P4 pattern Phase 1 listed as missed: a declaration narrows
+  `selection_efficiency` to the proton instances, which under 1.0.0 turned the helium obligations into
+  `not_applicable`. Under 1.1.0 the helium steps still apply selection efficiency and no correction describes it for
+  them, so `r-real.undescribed` (the G1 fix) reports it violated. Layer 1 (closure) flags it too, so it is not an
+  incremental detection. Every other case has the same layer flags as in Phase 1.
+- **R04 is the same as in Phase 1.** Renaming the instance IDs re-keys the baseline's definition-induced
+  `trigger_efficiency` violations. The Phase 1 record counts it as F = 0 under the confirmed text; the same reading
+  applies here.
+- **Still missed by every layer:** E12 and E13 (C06, binning or range differing between code and spec), E24 and E25
+  (C11, a blinded value released by the code), and E27 (C12, a correlation model of an uncertainty). The checker's
+  suites do not describe these:
+  - binning is compared only between a ratio's operands;
+  - blinding is judged on bound results, which this pre-execution subject has none of;
+  - uncertainty correlations are not checked.
+- **Definition-induced baseline results** (never counted):
+  - the 4 `trigger_efficiency` unrealized corrections of Phase 1;
+  - 4 `survival` unrealized corrections. The 0.26.0 example spec describes survival because the plugin's shared
+    recipe applies it, but the harness's hand-written recipe uses `divide_exposure`, which does not.
+
+Reading: Phase 2 fixed what the gap probes found, but on this AI-planted set the checker still catches no error the
+closure tests and contract checks miss. The planted errors it does flag (E01, E02, E11, E18, E19, E21 and now E22) are all
+caught by layer 1 as well. An AI-planted measurement can support at most Shrink. This section changes no decision: the gate stays not
+passed, every rule stays in shadow mode, and the experimental label is the maintainer's call.

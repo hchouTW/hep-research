@@ -20,7 +20,14 @@ when layer 3 reports a new violated obligation. Definition-induced results are i
 --sensitivity repeats layer 3 with a bundle-supplied coverage contract whose correct_efficiency covers both
 efficiency members (flagged by A3); it is reported separately and never decides the gate.
 
+Re-measurement on a later release (0.26.0): --suite-version 1.1.0 converts every context as contracts/migrate.py
+context-1.0.0-to-1.1.0 does (no 'required', suites at that version), and --rebase-from OLD_RUN_PY carries each
+case's run.py edit onto the current example run.py (the example's change since OLD_RUN_PY, the run.py the cases were
+planted on, must be one block of inserted lines; it is inserted into each case at the same place), so a case differs
+from the baseline only by its planted change.
+
 Usage: python3 evals/cross-artifact-value-gate/measure.py --cases DIR --out DIR [--only ID ...] [--sensitivity]
+                                                          [--suite-version V] [--rebase-from OLD_RUN_PY]
 Exit 0 measured, 2 bad input. Output: <out>/results.json and <out>/results.md; work files in <out>/work/.
 The checker's outputs are advisory diagnostics (HC-05); this script measures them and authorizes nothing.
 """
@@ -62,8 +69,81 @@ def run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str]:
         return 124, f"timeout after {TIMEOUT}s"
 
 
+SUITE_VERSION = "1.0.0"
+REBASE_FROM: Path | None = None
+REBASED: dict[str, dict] = {}
+
+
 def case_file(case: Path | None, name: str) -> Path:
+    if case is not None and name == "run.py" and REBASE_FROM is not None and (case / name).is_file():
+        return rebased_run(case)
     return case / name if case is not None and (case / name).is_file() else (EXAMPLE if name == "run.py" else SUBJECT / name)
+
+
+ANCHOR = '{"effect_id": "rigidity_migration", "category": "migration", "applied_in": "response_matrix"}],'
+
+
+def rebased_run(case: Path) -> Path:
+    """The case's run.py with the example's change since REBASE_FROM applied to it. That change must be a pure
+    insertion of lines before ANCHOR (0.26.0: the corrections the recipe applies); the block is inserted before the
+    case's ANCHOR line, which every case has once, so the planted edit is kept as written. Anything else is refused."""
+    if case.name not in REBASED:
+        assert REBASE_FROM is not None
+        old, new = REBASE_FROM.read_text().splitlines(keepends=True), EXAMPLE.read_text().splitlines(keepends=True)
+        k = next(i for i, line in enumerate(new) if ANCHOR in line)
+        start = next(i for i in range(k) if new[i] != old[i]) if new[:k] != old[:k] else k
+        block = new[start:k]
+        if old != new[:start] + new[k:]:
+            raise SystemExit("--rebase-from: the example's change is not one insertion before the migration entry")
+        lines = (case / "run.py").read_text().splitlines(keepends=True)
+        hits = [i for i, line in enumerate(lines) if ANCHOR in line]
+        if len(hits) != 1:
+            raise SystemExit(f"{case.name}: the migration entry is not in run.py exactly once")
+        out = Path(os.environ.get("VALUE_GATE_REBASE_DIR", "/tmp")) / "value-gate-rebased" / case.name / "run.py"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text("".join(lines[:hits[0]] + block + lines[hits[0]:]), encoding="utf-8")
+        REBASED[case.name] = {"path": str(out), "inserted_lines": len(block)}
+    return Path(REBASED[case.name]["path"])
+
+
+# Corrections the 0.26.0 example spec added (--rebase-from); the subject description maps them like the others
+REBASE_CORRECTIONS = ("livetime", "cutoff_transmission", "survival", "fragmentation_feeddown")
+
+
+def map_added_corrections(context: dict) -> dict:
+    """With --rebase-from, describe the corrections the current example spec added: one instance_mapping declaration
+    each, to the same instances as the subject's acceptance mapping. A mapping the context already has, or a case's
+    planted edit, is never changed."""
+    if REBASE_FROM is None:
+        return context
+    out = copy.deepcopy(context)
+    decls = out.setdefault("declarations", [])
+    have = {(d.get("content") or {}).get("correction") for d in decls if d.get("type") == "instance_mapping"}
+    template = next((d for d in load(SUBJECT / "context.json").get("declarations", [])
+                     if d.get("type") == "instance_mapping" and (d.get("content") or {}).get("correction") == "acceptance"), None)
+    for eff in REBASE_CORRECTIONS:
+        if eff not in have and template is not None:
+            d = copy.deepcopy(template)
+            d["declaration_id"] = f"{template['declaration_id']}-{eff}"
+            d["content"] = dict(d["content"], correction=eff)
+            decls.append(d)
+    return out
+
+
+def to_suite_version(context: dict) -> dict:
+    """A 1.0.0 context in format 1.1.0 at SUITE_VERSION, as contracts/migrate.py context-1.0.0-to-1.1.0 writes it."""
+    context = map_added_corrections(context)
+    if SUITE_VERSION == "1.0.0":
+        return context
+    out = copy.deepcopy(context)
+    out["context_version"] = "1.1.0"
+    for key in ("roots", "ratio_roots"):
+        for r in out.get(key) or []:
+            r.pop("required", None)
+    out["suite"] = dict(out["suite"], version=SUITE_VERSION)
+    if "suites" in out:
+        out["suites"] = [dict(x, version=SUITE_VERSION) for x in out["suites"]]
+    return out
 
 
 def shadow_root(work: Path, run_py: Path) -> Path:
@@ -148,7 +228,7 @@ def layer3(case, work: Path, artifacts: Path, sensitivity: bool) -> dict:
     (project / "recipes").mkdir()
     (project / "tables").mkdir()
     recipe = load(case_file(case, "recipe.json"))
-    context = load(case_file(case, "context.json"))
+    context = to_suite_version(load(case_file(case, "context.json")))
     shutil.copy2(TABLE, project / "tables" / "differential_flux.json")
     (project / "environment.lock").write_text("synthetic environment lock for the value-gate subject\n", encoding="utf-8")
     items = [{"role": "measurement-spec", "id": "spec", "ref": "artifacts/measurement_spec.json"},
@@ -295,7 +375,12 @@ def main(argv=None) -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--sensitivity", action="store_true")
+    ap.add_argument("--suite-version", default="1.0.0")
+    ap.add_argument("--rebase-from", type=Path)
     a = ap.parse_args(argv)
+    global SUITE_VERSION, REBASE_FROM
+    SUITE_VERSION, REBASE_FROM = a.suite_version, a.rebase_from
+    os.environ["VALUE_GATE_REBASE_DIR"] = str(a.out.resolve())
     if not a.cases.is_dir():
         print(json.dumps({"status": "usage", "error": f"no cases folder {a.cases}"}))
         return 2
@@ -313,7 +398,8 @@ def main(argv=None) -> int:
         rows.append(row)
     for r in [base] + rows:
         r.pop("_l3"), r.pop("_l3s")
-    res = {"status": "ok", "baseline": base, "cases": rows, "summary": summarise(rows, a.sensitivity)}
+    res = {"status": "ok", "suite_version": SUITE_VERSION, "rebase_from": str(REBASE_FROM) if REBASE_FROM else None,
+           "rebased": REBASED, "baseline": base, "cases": rows, "summary": summarise(rows, a.sensitivity)}
     (a.out / "results.json").write_text(json.dumps(res, indent=1, default=str), encoding="utf-8")
     write_md(a.out / "results.md", res)
     print(json.dumps({"status": "ok", "summary": res["summary"]}, indent=1))
