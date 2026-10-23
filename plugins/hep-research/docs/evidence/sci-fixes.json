@@ -5409,10 +5409,9 @@
     }
    ],
    "gaps": [
-    "Usoskin et al. 2005 (JGR) not opened; nothing rests on it now",
-    "five journal references not confirmed (not in the PDFs or citing papers)"
+    "Usoskin et al. 2005 (JGR) not opened; nothing rests on it now"
    ],
-   "note": "yes for every arXiv source (full text at the cited version, 2026-10-23) and the Bartels and ICRC sources; each correction rechecked against its quoted passage"
+   "note": "yes for every arXiv source (full text at the cited version, 2026-10-23) and the Bartels and ICRC sources; each correction rechecked against its quoted passage; journal references and all 16 DOIs confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23)"
   }
  ],
  "superseded": [

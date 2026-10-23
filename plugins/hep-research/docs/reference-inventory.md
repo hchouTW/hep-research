@@ -290,8 +290,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `unfolding.md` | hep-statistics | 7.9 | yes | 27 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
 | `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |
-| `cosmic-ray-new-physics.md` | hep-theory | 7.3 | no | 4 | - | 930ba0b2 2026-10-23 |
-| `cosmic-ray-phenomenology.md` | hep-theory | 23.3 | yes | 6 | - | 930ba0b2 2026-10-23 |
+| `cosmic-ray-new-physics.md` | hep-theory | 7.3 | no | 4 | - | 56fc5943 2026-10-23 |
+| `cosmic-ray-phenomenology.md` | hep-theory | 23.2 | yes | 6 | - | 56fc5943 2026-10-23 |
 | `cosmic-ray-propagation.md` | hep-theory | 21.1 | yes | 23 | hep-detector | 930ba0b2 2026-10-23 |
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
@@ -308,4 +308,4 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 4 | - | 6c22fd52 2026-10-13 |
 | `selection-rules.md` | hep-theory | 7.7 | yes | 3 | - | 195e4d1e 2026-10-13 |
 | `smeft-and-eft.md` | hep-theory | 3.4 | yes | 3 | - | fa29fcf3 2026-10-13 |
-| `solar-modulation-models.md` | hep-theory | 5.8 | no | 6 | - | 930ba0b2 2026-10-23 |
+| `solar-modulation-models.md` | hep-theory | 5.8 | no | 6 | - | 56fc5943 2026-10-23 |

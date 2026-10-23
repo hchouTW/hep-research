@@ -40,7 +40,7 @@
   },
   "hep-theory": {
    "references": 21,
-   "bytes": 157932,
+   "bytes": 157836,
    "uncited": 0
   }
  },
@@ -3870,13 +3870,13 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "930ba0b2 2026-10-23"
+   "last_commit": "56fc5943 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 23300,
-   "lines": 279,
+   "bytes": 23204,
+   "lines": 278,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/README.md",
@@ -3887,7 +3887,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "930ba0b2 2026-10-23"
+   "last_commit": "56fc5943 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
@@ -4180,7 +4180,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "930ba0b2 2026-10-23"
+   "last_commit": "56fc5943 2026-10-23"
   }
  ],
  "overlap_pairs": [],
