@@ -2609,6 +2609,29 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## 0.30.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.30.0` from main `ea8d15ad` (main CI green). It ships #251: hep-theory hadron structure
+phase 1 (Th14, unpolarized inclusive DIS: `hadron-structure-essentials.md`, `dis-structure-functions.md`,
+`structure_functions_lo.py`, `sum_rules.py`; VALIDATION HADRON-PHASE1). Minor release with contracts 3.10.0 (additive:
+13 core convention keys and the `conditional_convention_keys` vocabulary). The ams02-research companion (requires
+hep-research `>=0.11.0`, profile contracts `>=2.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.30.0:** both manifests, `pyproject.toml`, the README, three assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **Contracts 3.10.0:** `CONTRACTS_VERSION` with its history comment, `contracts/vocab/core.json`, the two pinned
+  tests, the fixtures (contract version only).
+- **CHANGELOG:** `Unreleased` is now `0.30.0`, with an upgrade summary.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change; `unfolding-coverage` drifted at 1e-14 and was restored.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 26 pass, 0 fail, 2 skipped (CLI host checks); 5034 tests in 418 modules, 4898 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 26 pass, 0 fail, 2 skipped; 5034 tests, 4806 pass, 0 failures, 228 skipped |
+
 ## 0.29.0 release check (2026-10-23, E2 and the CI lock)
 
 Release branch `release/0.29.0` from main `eba95d89` (main CI green). It ships #240-#249: hep-theory Th13 (cosmic-ray

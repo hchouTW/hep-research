@@ -296,11 +296,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cosmic-ray-phenomenology.md` | hep-theory | 23.8 | yes | 6 | - | e70b1a84 2026-10-23 |
 | `cosmic-ray-propagation.md` | hep-theory | 21.1 | yes | 23 | hep-detector | 930ba0b2 2026-10-23 |
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
-| `dis-kinematics.md` | hep-theory | 6.0 | yes | 6 | - | 9257d7b5 2026-10-15 |
-| `dis-structure-functions.md` | hep-theory | 13.0 | no | 6 | - | untracked |
+| `dis-kinematics.md` | hep-theory | 6.0 | yes | 6 | - | bb6cb81e 2026-10-23 |
+| `dis-structure-functions.md` | hep-theory | 13.0 | no | 6 | - | bb6cb81e 2026-10-23 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
-| `hadron-structure-essentials.md` | hep-theory | 4.5 | yes | 5 | - | untracked |
-| `higher-order-predictions.md` | hep-theory | 4.4 | yes | 4 | - | 351029c0 2026-10-07 |
+| `hadron-structure-essentials.md` | hep-theory | 4.5 | yes | 5 | - | bb6cb81e 2026-10-23 |
+| `higher-order-predictions.md` | hep-theory | 4.4 | yes | 4 | - | bb6cb81e 2026-10-23 |
 | `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 5 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
 | `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 5 | hep-measurement | 69f359f5 2026-10-17 |

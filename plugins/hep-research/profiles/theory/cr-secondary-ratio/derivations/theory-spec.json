@@ -1,5 +1,5 @@
 {
- "contract_version": "3.9.0",
+ "contract_version": "3.10.0",
  "artifact_id": "crsr-theory-spec-thin-disc-1d",
  "artifact_type": "theory-spec",
  "objective": "Theory spec of the B/C ratio in the 1D thin-disc diffusion model of theory:cr-secondary-ratio (equivalent weighted slab), with its degenerate direction D0/L",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.29.0",
-  "contracts": "3.9.0",
+  "plugin": "0.30.0",
+  "contracts": "3.10.0",
   "profiles": {
    "theory:cr-secondary-ratio": "0.1.0"
   }
