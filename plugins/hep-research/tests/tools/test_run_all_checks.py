@@ -168,6 +168,7 @@ class AmsOptionalSuiteTests(unittest.TestCase):
         self.assertEqual((row["status"], row["exit_code"]), ("fail", 1))
         self.assertIn("m2: AssertionError", row["tail"])
         self.assertEqual(mod.merge_suite("s", [])["status"], "fail", "a suite with no modules is not a pass")
+        self.assertEqual(mod.merge_suite("s", [], selected=False)["status"], "skip")  # the CI plan selected none of it
 
 
 

@@ -16,7 +16,8 @@ listed part, all of the same commit (and of --sha when given). It fails when:
 Equal test counts are never taken as evidence: modules and checks are compared by name.
 With --plan FILE (a pull request's CI plan, tools/ci_plan.py; CI recomputes it here rather than trusting the plan job's
 copy) the shards must partition the modules the plan selects, every run must name this plan's digest, a selected part
-must have run its checks and an unselected part must have a record that says it was not selected (and ran nothing).
+must have run its checks and an unselected part must have a record that says it was not selected (and ran nothing); the
+AMS-optionality check must have run exactly the plan's ams_optional_modules.
 Exit 0 when everything reconciles, 1 when anything is missing or failed, 2 on bad usage. Prints a JSON report.
 """
 from __future__ import annotations
@@ -72,6 +73,13 @@ def reconcile(runs: list[dict], pythons: list[str], shards: int, parts: list[str
             part = doc.get("part")
             if part in parts and bool(sel.get("selected")) != (part in plan["parts"]):
                 problems.append(f"{doc['_file']}: part {part} selection {sel.get('selected')!r} disagrees with the plan")
+            ams = next((c for c in doc.get("checks") or [] if c.get("name") == "ams_optional"), None)
+            if ams is not None:
+                detail = ams.get("detail") if isinstance(ams.get("detail"), dict) else {}
+                ran, want = sorted(detail.get("modules_run") or []), sorted(plan.get("ams_optional_modules") or [])
+                if ran != want:
+                    problems.append(f"{doc['_file']}: AMS-optionality modules differ from the CI plan "
+                                    f"(not run {sorted(set(want) - set(ran))}, unplanned {sorted(set(ran) - set(want))})")
     wanted = [(py, f"units {k}/{shards}") for py in pythons for k in range(1, shards + 1)] + \
              [(py, part) for py in pythons for part in parts]
     by_key: dict[tuple[str, str], list[dict]] = {}

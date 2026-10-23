@@ -42,17 +42,23 @@ has a timeout (`tests/tools/test_subprocess_timeouts.py`).
   run).
 - **When it is the full run.** Any change the map cannot bound runs everything:
   - a file outside `plugins/hep-research/` (workflows, root `evals/`);
-  - CI tooling (the runner, the reconciler, `ci_plan.py`, module timings, the lock, `pyproject.toml`);
+  - CI tooling (the runner, the reconciler, `ci_plan.py`, `check_ams_optional.py`, module timings, the lock,
+    `pyproject.toml`);
   - a path no impact group covers, or a group marked `full`;
   - an unreadable diff.
 
   Pushes to main, the weekly and manual runs are always full, so a gap in the map is caught on main within the day.
 - **What each job does with it.** Each checks job runs `run_all_checks.py --plan`:
   - the units shards split only the selected modules;
+  - the AMS-optionality job runs only the selected modules that are in its suites (`ams_optional_modules` in the
+    plan; the part is selected when there is at least one), plus its few-second fixed steps (registry without the
+    AMS-02 profile, Paths B and C, two profile suites); when an impact group names `part:ams-optional` (profile
+    changes) or the plan is full, it runs all of its suites;
   - a part the plan does not select skips installing the pinned set and writes a record that says so (`selection`).
 - **What the gate checks.** `checks-complete` recomputes the plan itself and passes it to
   `reconcile_check_runs.py --plan`. Every record must name that plan's digest, the shards must cover exactly the
-  selected modules, and every part, selected or not, must have its record.
+  selected modules, the AMS-optionality run must have run exactly its planned modules, and every part, selected or
+  not, must have its record.
 - **Making selection work for more changes.** Extend the impact groups. A path they do not cover keeps the full run,
   which is the safe default.
 

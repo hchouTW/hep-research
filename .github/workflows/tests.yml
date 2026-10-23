@@ -8,7 +8,8 @@
 #              parallel jobs: the test modules in three shards balanced by tools/module_timings.json, the profile
 #              suites with the static checks, and the AMS-optionality check (run_all_checks.py --part / --shard);
 #              every module is in one shard. Each job writes failures and timings to the job summary. On a pull request
-#              each job runs what the plan selects; a job with nothing selected skips installing and still writes its record.
+#              each job runs what the plan selects (the AMS-optionality job: the selected modules of its suites); a job
+#              with nothing selected skips installing and still writes its record.
 #   checks-complete  reconciles the check-run records of all checks jobs (tools/reconcile_check_runs.py): every
 #              expected run present once, of this commit, passing, and the shards partition the selected modules (it
 #              recomputes the plan rather than trusting the plan job's copy; every run must name that plan); it

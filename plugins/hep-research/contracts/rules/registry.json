@@ -3329,6 +3329,7 @@
     "tests.contracts.test_communication_project",
     "tests.contracts.test_analysis_check_baseline_gaps",
     "part:static",
+    "part:ams-optional",
     "tests.contracts.test_analysis_check_profile_loading",
     "tests.contracts.test_companion_validation_cli",
     "tests.skills.hep_measurement.test_review_procedure",

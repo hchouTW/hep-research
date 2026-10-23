@@ -29,6 +29,7 @@ PLAN = _load("ci_plan")
 REC = _load("reconcile_check_runs")
 REGISTRY = json.loads((ROOT / "contracts" / "rules" / "registry.json").read_text(encoding="utf-8"))
 EVERY = PLAN._runner().test_modules()
+AMS = PLAN.ams_modules()
 P = "plugins/hep-research/"
 
 
@@ -42,7 +43,19 @@ class Planning(unittest.TestCase):
         self.assertFalse(p["full"], p["reasons"])
         self.assertIn("tests.contracts.test_analysis_check_chain_rules", p["modules"])
         self.assertLess(len(p["modules"]), len(EVERY))
-        self.assertEqual(p["parts"], ["static"])
+        self.assertEqual(p["parts"], ["static", "ams-optional"])  # its contracts modules are in the AMS suites
+
+    def test_the_ams_optional_check_runs_only_the_selected_modules_of_its_suites(self):
+        p = plan(P + "contracts/analysis_checks/rules.py")
+        self.assertEqual(p["ams_optional_modules"], sorted(set(p["modules"]) & set(AMS)))
+        self.assertTrue(0 < len(p["ams_optional_modules"]) < len(AMS))
+        none = plan(P + "CHANGELOG.md")                                  # no selected module is in its suites
+        self.assertEqual((none["ams_optional_modules"], none["parts"]), ([], ["static"]))
+        named = plan(P + "profiles/registry.json")                       # the impact map names the part: all of it
+        self.assertEqual((named["ams_optional_modules"], "ams-optional" in named["parts"]), (AMS, True))
+        self.assertEqual(plan(P + "tools/check_ams_optional.py")["ams_optional_modules"], AMS)  # CI tooling: full
+        self.assertIn("tests.core.test_constants", AMS)
+        self.assertIn("tests.examples.test_qed_prediction", AMS)
 
     def test_a_changed_test_module_selects_itself(self):
         p = plan(P + "tests/contracts/test_analysis_check_r2_rules.py")
@@ -59,6 +72,7 @@ class Planning(unittest.TestCase):
                 p = plan(*paths)
                 self.assertTrue(p["full"])
                 self.assertEqual((sorted(p["modules"]), p["parts"]), (sorted(EVERY), ["static", "ams-optional"]))
+                self.assertEqual(p["ams_optional_modules"], AMS)
                 self.assertTrue(any(reason.strip() in r for r in p["reasons"]), p["reasons"])
 
     def test_a_changed_test_helper_selects_every_module_that_imports_it(self):
@@ -106,7 +120,8 @@ class Planning(unittest.TestCase):
     def test_selects(self):
         p = plan(P + "contracts/analysis_checks/rules.py", P + "CHANGELOG.md")
         self.assertTrue(PLAN.selects(p, "static"))
-        self.assertFalse(PLAN.selects(p, "ams-optional"))
+        self.assertTrue(PLAN.selects(p, "ams-optional"))
+        self.assertFalse(PLAN.selects(plan(P + "CHANGELOG.md"), "ams-optional"))
         self.assertTrue(any(PLAN.selects(p, "units", (k, 3)) for k in (1, 2, 3)))
         empty = PLAN._finish(dict(p, modules=[], parts=[]))
         self.assertFalse(any(PLAN.selects(empty, "units", (k, 3)) for k in (1, 2, 3)))
@@ -115,7 +130,7 @@ class Planning(unittest.TestCase):
 class RunnerRecord(unittest.TestCase):
     def test_an_unselected_part_runs_nothing_and_still_writes_its_record(self):
         runner = _load("run_all_checks")
-        p = plan(P + "contracts/analysis_checks/rules.py", P + "CHANGELOG.md")
+        p = plan(P + "CHANGELOG.md")
         with tempfile.TemporaryDirectory() as td:
             f = Path(td) / "plan.json"
             f.write_text(json.dumps(p))
@@ -132,15 +147,44 @@ class RunnerRecord(unittest.TestCase):
             f.write_text(json.dumps(dict(plan(P + "contracts/analysis_checks/rules.py"), parts=["static", "ams-optional"])))
             self.assertEqual(runner.main(["--no-cli", "--part", "ams-optional", "--plan", str(f)]), 2)
 
+    def test_the_ams_optional_command_carries_the_plan(self):
+        runner = _load("run_all_checks")
+        f = Path("ci-plan") / "plan.json"
+        (name, cmd), = runner.planned_scripts("ams-optional", "py", 4, True, f)
+        self.assertEqual((name, cmd[-2:]), ("ams_optional", ["--plan", str(f.resolve())]))
+        self.assertNotIn("--plan", runner.planned_scripts("ams-optional", "py", 4, True)[0][1])
+
+    def test_check_ams_optional_runs_only_the_planned_modules(self):
+        ams = _load("check_ams_optional")
+        p = PLAN._finish(dict(plan(P + "CHANGELOG.md"), ams_optional_modules=["tests.core.test_constants"],
+                              parts=["static", "ams-optional"]))
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "plan.json"
+            f.write_text(json.dumps(p))
+            import contextlib
+            import io
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = ams.main(["--jobs", "2", "--plan", str(f)])
+        doc = json.loads(buf.getvalue())
+        self.assertEqual(code, 0, doc)
+        self.assertEqual(doc["modules_run"], ["tests.core.test_constants"])
+        self.assertEqual(doc["selection"], {"plan_sha256": p["plan_sha256"], "full": False})
+        rows = {c["name"]: c for c in doc["checks"]}
+        self.assertEqual((rows["tests_core"]["status"], rows["tests_core"]["modules"]), ("pass", 1))
+        self.assertEqual(rows["tests_contracts"]["status"], "skip")
+        for fixed in ("ams_profile_absent", "registry", "path_b", "path_c"):  # always run
+            self.assertEqual(rows[fixed]["status"], "pass", rows[fixed])
+
 
 SHA = "a" * 40
 MODULES = ["tests.a", "tests.b", "tests.c", "tests.d", "tests.e"]
 CHECKS = {"static": ["check_layering"], "ams-optional": ["ams_optional"]}
 
 
-def ci_plan(modules, parts):
-    return PLAN._finish({"plan_version": "1.0.0", "full": False, "reasons": [], "changed": [], "modules": modules,
-                         "parts": parts, "dropped": []})
+def ci_plan(modules, parts, ams=()):
+    return PLAN._finish({"plan_version": PLAN.PLAN_VERSION, "full": False, "reasons": [], "changed": [], "modules": modules,
+                         "parts": parts, "ams_optional_modules": list(ams), "dropped": []})
 
 
 def runs_for(pl, shards=(["tests.a"], ["tests.c"])):
@@ -157,6 +201,8 @@ def runs_for(pl, shards=(["tests.a"], ["tests.c"])):
         out.append({"environment": {"python": "3.13.4"}, "git_commit": SHA, "part": part,
                     "selection": dict(sel, selected=chosen),
                     "checks": [{"name": n, "status": "pass"} for n in CHECKS[part]] if chosen else []})
+        if chosen and part == "ams-optional":
+            out[-1]["checks"][0]["detail"] = {"modules_run": list(pl["ams_optional_modules"])}
     for i, r in enumerate(out):
         r["_file"] = f"run{i}.json"
     return out
@@ -209,6 +255,14 @@ class GateWithPlan(unittest.TestCase):
         runs = runs_for(self.pl)
         runs[0]["checks"][0]["plan"]["selected_modules"] = ["tests.a"]
         self.assertFails(runs, "selected modules differ from the CI plan")
+
+    def test_the_ams_optional_run_must_match_the_plans_modules(self):
+        pl = ci_plan(["tests.a", "tests.c"], ["static", "ams-optional"], ams=["tests.c"])
+        runs = runs_for(pl)
+        self.assertTrue(gate(runs, pl)["ok"], gate(runs, pl)["problems"])
+        next(r for r in runs if r["part"] == "ams-optional")["checks"][0]["detail"]["modules_run"] = []
+        problems = " ".join(gate(runs, pl)["problems"])
+        self.assertIn("AMS-optionality modules differ from the CI plan (not run ['tests.c']", problems)
 
     def test_a_full_plan_is_the_old_gate(self):
         full = PLAN._finish(dict(ci_plan(MODULES, ["static", "ams-optional"]), full=True))

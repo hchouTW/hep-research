@@ -5,6 +5,14 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+CI: the AMS-optionality job is selected like the units shards. A pull request's plan (`tools/ci_plan.py`, plan 1.1.0)
+lists `ams_optional_modules`, the selected test modules that are in that check's suites; the part runs when the list is
+not empty, and `tools/check_ams_optional.py --plan` reruns only those modules (its fixed steps, a few seconds, always
+run; an unselected suite is reported as skipped). Before, a bounded pull request never ran this check at all, even
+when it changed modules in its suites, and a full one ran all of it. Profile changes name `part:ams-optional` in the
+impact map, so they run every suite, and so do full plans and changes to `check_ams_optional.py` (now CI tooling). The
+gate (`tools/reconcile_check_runs.py --plan`) fails an AMS-optionality run that did not run exactly the planned modules.
+
 Theory (Th13): cosmic-ray propagation and astroparticle phenomenology in hep-theory. Guidance on three pages and one
 helper script; no propagation code is run and no fit to real data is tested.
 
