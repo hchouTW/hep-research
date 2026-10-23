@@ -40,3 +40,4 @@ The adequacy table is an initial default until physics review: every pass is pro
 - comparison basis on mass-budget at 95% one-sided CL: holds
   - ams-like-v1:cand-L vs ams-like-v1:cand-S (ams-like-v1:CALC-MASS-L vs ams-like-v1:CALC-MASS-S; 1-sigma budget-row uncertainties, linear within a candidate, in quadrature across the pair): difference 5 + one-sided uncertainty 46.2336 against tolerance 119.875 (mass-budget); cancelled as the same subsystem with the same budget row in both: DES-MAG-001: holds
 - ranking: refused: ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)
+- Pareto front on expected-precision, mass-budget: refused: ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)

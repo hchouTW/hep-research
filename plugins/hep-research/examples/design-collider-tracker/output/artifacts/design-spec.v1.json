@@ -226,6 +226,10 @@
   "comparison_basis": {
    "quantity": "mass-budget",
    "tolerance_relative": 0.05,
+   "pareto_axes": [
+    "expected-precision",
+    "mass-budget"
+   ],
    "note": "candidates are compared at equal mass"
   }
  }

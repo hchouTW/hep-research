@@ -7,6 +7,18 @@ Software checks establish contract consistency only, not physical validity.
 
 Contracts 3.11.0 (minor; no capability added).
 
+- Detector system design, milestone M4 (design space): `evaluate_design.py scan` (OQ-18: a subcommand of
+  evaluate_design.py) runs a figure of merit of one candidate over a parameter grid in a scratch copy and stores every
+  point in one summary computational-run (`scan_summary`, new optional field of the computational-run extension) with
+  the local elasticities at the candidate's own values; it writes no evaluation, is exempt from the orphan-run rule,
+  and an evaluation that names a scan summary as its run is `design.scan_point_not_expanded` (AGG-08: unexpanded points
+  support no verdict). `evaluate_design.py expand` turns one point into a candidate derived from the scanned one, to be
+  evaluated and compared like any candidate (RSK-04: only points that enter comparison are expanded). Pareto front
+  (`comparison_basis.pareto_axes`, new optional field of the design-spec extension; must include expected-precision,
+  CHN-00): computed only when the basis holds and every surviving candidate has a non-optimistic evaluation per axis
+  with the same fidelity vector and denominator (CHN-06, RPT-07); a candidate is dominated only beyond the combined
+  1-sigma uncertainties; refused with every reason otherwise; never a global optimum. Both examples declare the axes and
+  show the refusal (no expected-precision evaluations yet). `tests/skills/hep_detector/test_design_m4.py`.
 - Detector system design, milestone M3 (engineering and review): the review axis (only a valid human design-baseline
   H4 record sets it: exact artifacts = the derived report and the evaluations it used, the report equal to the one
   recomputed now apart from the frozen MAT-05 exclusions, a disposition for every inconclusive driving requirement;

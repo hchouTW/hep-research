@@ -235,7 +235,8 @@
   "unavailable_listed": true,
   "unavailable_in_h3_record": true,
   "equal_mass_basis_checked": true,
-  "no_ranking_claimed": true
+  "no_ranking_claimed": true,
+  "no_pareto_claimed": true
  },
  "note": "verdicts derived by contracts/design.py; F1 analysis can exclude but not approve; quantities without an evaluator are recorded, never estimated"
 }

@@ -110,6 +110,55 @@
     "type": "string",
     "pattern": "^[0-9a-f]{64}$"
    }
+  },
+  "scan_summary": {
+   "$comment": "3.11.0 (detector design M4, AGG-08, OQ-18): written only by evaluate_design.py scan: the points of a parameter scan of one candidate and figure of merit (parameters, value, uncertainty, bound per point) and the local sensitivities; exempt from the orphan-run rule; a point is not an evaluation and supports no verdict until it is expanded into a candidate and evaluated",
+   "type": "object",
+   "required": [
+    "candidate",
+    "figure_of_merit",
+    "fidelity",
+    "parameters",
+    "points"
+   ],
+   "properties": {
+    "candidate": {
+     "type": "string"
+    },
+    "figure_of_merit": {
+     "type": "string"
+    },
+    "fidelity": {
+     "type": "string"
+    },
+    "denominator": {
+     "type": "object"
+    },
+    "tool": {
+     "type": "string"
+    },
+    "parameters": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "points": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "sensitivity": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "note": {
+     "type": "string"
+    }
+   }
   }
  }
 }

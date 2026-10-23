@@ -858,6 +858,10 @@ def check_contract(proj: Project, ev: Evaluation) -> None:
         ev.err("design.contract_mismatch", f"run_ref {run_ref!r} is not a computational-run in the artifacts_dir")
         return
     rext = run.get("extension") or {}
+    if rext.get("scan_summary"):  # AGG-08 (M4): a scan point is not an evaluation until it is expanded
+        ev.err("design.scan_point_not_expanded", f"{run_ref} is a scan summary: expand the point into a candidate "
+               "(evaluate_design.py expand) and evaluate that candidate")
+        return
     argv = rext.get("argv")
     if not isinstance(argv, list) or not argv:
         ev.err("design.contract_mismatch", f"{run_ref} records no argv (ART-70)")
@@ -1876,6 +1880,7 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
         "stale_evaluations": stale,
         "comparison_basis": basis,
         "ranking": ranking(proj, {d: c for d, c in groups.items() if not set(c) & screened}, basis),
+        "pareto": pareto(proj, spec, {d: c for d, c in groups.items() if not set(c) & screened}, basis),
         "evaluations": [{"evaluation": e.eid, "file": e.rel, "figure_of_merit": e.fom, "fidelity": e.fidelity,
                          "bound_derived": e.bound, "contract": e.contract,
                          "fidelity_vector": [{"figure_of_merit": f, "fidelity": x, "evaluation": i} for f, x, i in e.vector],
@@ -1928,6 +1933,73 @@ def ranking(proj: Project, groups: dict, basis: dict) -> dict:
                        "uncertainty": e.ext.get("uncertainty"), "bound": e.bound} for d, e in order],
             "note": "an ordering of these candidates on expected precision (smaller is better); differences within the "
                     "uncertainties are not decided, and no global optimum is claimed"}
+
+
+def pareto(proj: Project, spec: dict, groups: dict, basis: dict) -> dict:
+    """CHN-06, RPT-07 (M4): the Pareto front over the figures of merit in comparison_basis.pareto_axes, among the
+    candidates that survive screening, only when the comparison basis holds and every candidate has, per axis, a usable
+    evaluation (not stale, no error, not an optimistic bound) with the same fidelity vector and the same denominator as
+    the others. A candidate is dominated only when another is no worse on every axis and better on at least one by more
+    than the two 1-sigma uncertainties combined, so differences within the uncertainties never remove a candidate. The
+    front is a set of non-dominated candidates among these, never a global optimum; otherwise it is refused with every
+    reason."""
+    axes = list((spec["extension"].get("comparison_basis") or {}).get("pareto_axes") or [])
+    if not axes:
+        return {"status": "not-requested", "reason": "comparison_basis.pareto_axes is not declared"}
+    reasons = []
+    if len(set(axes)) != len(axes):
+        reasons.append("pareto_axes names a figure of merit twice")
+    if "expected-precision" not in axes:
+        reasons.append("pareto_axes does not include expected-precision: candidates are compared on expected "
+                       "measurement precision (CHN-00)")
+    if not basis.get("holds"):
+        reasons.append(f"comparison_basis does not hold: {basis.get('reason')} (ART-15, RPT-07)")
+    if len(groups) < 2:
+        reasons.append("fewer than two candidates survive screening")
+    picks: dict = {}
+    for fom in axes:
+        lacking, per = [], {}
+        for d, cids in groups.items():
+            usable = sorted((e for e in proj.evals.values() if e.fom == fom and e.effective == d and not e.errors
+                             and not e.stale and not e.invalid and not e.unresolved
+                             and e.bound in ("estimate", "conservative") and e.ext.get("value") is not None),
+                            key=lambda e: e.eid)
+            if not usable:
+                lacking += cids
+                continue
+            per[d] = max(usable, key=lambda e: lowest(e.vector))
+        if lacking:
+            reasons.append(f"{', '.join(sorted(lacking))} have no non-optimistic, current {fom} evaluation (CHN-06)")
+            continue
+        if len({tuple(sorted((f, x) for f, x, _ in e.vector)) for e in per.values()}) != 1:
+            reasons.append(f"the {fom} evaluations have different fidelity vectors (CHN-06)")
+        if len({json.dumps(e.ext.get("denominator"), sort_keys=True) for e in per.values()}) != 1:
+            reasons.append(f"the {fom} evaluations have different denominators (CHN-06)")
+        picks[fom] = per
+    if reasons:
+        return {"status": "refused", "axes": axes, "reason": "; ".join(reasons), "reasons": reasons}
+
+    def sig(e) -> float:
+        u = e.ext.get("uncertainty")
+        return max(sigma_equivalent(u, "minus"), sigma_equivalent(u, "plus")) if u else 0.0
+
+    def better(fom, a, b) -> tuple[bool, bool]:  # (a no worse than b, a better than b beyond the uncertainties)
+        ea, eb = picks[fom][a], picks[fom][b]
+        diff = eb.ext["value"] - ea.ext["value"] if ea.better == "smaller" else ea.ext["value"] - eb.ext["value"]
+        return diff >= 0, diff > math.hypot(sig(ea), sig(eb))
+
+    dominated = {}
+    for b in groups:
+        for a in groups:
+            if a != b and all(better(f, a, b)[0] for f in axes) and any(better(f, a, b)[1] for f in axes):
+                dominated[b] = a
+                break
+    return {"status": "computed", "axes": axes,
+            "front": [groups[d] for d in groups if d not in dominated],
+            "dominated": [{"candidates": groups[b], "by": groups[a]} for b, a in dominated.items()],
+            "evaluations": {f: {"/".join(groups[d]): picks[f][d].eid for d in groups} for f in axes},
+            "note": "non-dominated candidates among these only (dominance needs a difference beyond the combined 1-sigma "
+                    "uncertainties); no global optimum is claimed"}
 
 
 def report_payload(full: dict) -> dict:

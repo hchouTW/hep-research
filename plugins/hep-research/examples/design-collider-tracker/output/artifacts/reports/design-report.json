@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "design-spec.v1.json",
-   "sha256": "6f6e3b9f5f06e74f331fe0476d58f2160c6d0d96e3bffaf17b55f077cafbb977",
+   "sha256": "204d8e6928c289bca856016ee6826bf06a0bf1b4f121cf21d3fe1b225e64e2cf",
    "artifact_type": "design-spec",
    "artifact_id": "collider-tracker-v1-spec-v1",
    "status": [
@@ -1598,6 +1598,18 @@
    },
    "ranking": {
     "status": "refused",
+    "reason": "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07); collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)",
+     "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
+   },
+   "pareto": {
+    "status": "refused",
+    "axes": [
+     "expected-precision",
+     "mass-budget"
+    ],
     "reason": "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07); collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)",
     "reasons": [
      "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)",
