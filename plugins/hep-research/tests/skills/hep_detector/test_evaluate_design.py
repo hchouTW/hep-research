@@ -94,7 +94,9 @@ class PassThrough(Project):
                           "--upstream", "evaluations/CALC-TRK-A2.json", "--status", "synthetic")
         self.assertEqual(rc, 0, out)
         ext, _ = self.assert_passthrough(out["evaluation"], "charge-confusion-rate")
-        self.assertEqual(ext["value"], self.b.read("evaluations/CALC-CC-A.json")["extension"]["value"])
+        # the fixture was generated on another platform: libm may differ in the last digit
+        self.assertTrue(math.isclose(ext["value"], self.b.read("evaluations/CALC-CC-A.json")["extension"]["value"],
+                                     rel_tol=1e-12))
 
     def test_below_crossover_estimate_passes_through(self):
         rc, out = self.ev("run", "--candidate", f"{NS}:cand-A", "--figure-of-merit", "momentum-resolution-core",
