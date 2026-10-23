@@ -3,7 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.34.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the fifth module of hep-theory's hadron-structure plan: SIDIS,
+fragmentation functions and TMDs (Th18), with a Gaussian-ansatz TMD theory profile.
+
+**Before you upgrade:** nothing to migrate. `profiles/registry.json` lists one more theory profile and is close to its
+3072-byte budget.
 
 - hep-theory, hadron structure phase 5 (Th18, SIDIS and TMDs): `skills/hep-theory/references/sidis-and-tmd.md` (Trento
   conventions, SIDIS structure functions, collinear SIDIS at LO, TMD factorization rules, Gaussian ansatz, Sivers sign
