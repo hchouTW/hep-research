@@ -266,3 +266,45 @@ the suites `1.1.0-dev.5`.
 - On 1.0.0: the example's added corrections give satisfied description obligations. The earlier `rule_not_run`
   changes are unchanged.
 
+## Phase 2, release R3: stable 1.1.0 suites and full mutation testing (2026-10-23)
+
+**Stable suites.**
+- `counting-chain`, `ratio-subset`, `model-card` and `run-lineage` exist as 1.1.0, with the content of `1.1.0-dev.5`
+  under the release version. From R3 they are the default (architecture section 8.2).
+- `check-report` accepts them; it still refuses the `1.1.0-dev.N` pre-releases, which stay installed for bundles
+  frozen during development.
+- The conversion `context-1.0.0-to-1.1.0` now chooses 1.1.0, the newest installed.
+- The report and permit tests use the real 1.1.0 checker instead of the R1 rules double.
+
+**Full mutation testing (V76).** All nine operators of the diagnostic plane are implemented in
+`tests/contracts/analysis_check_mutations.py`:
+
+| Operator | Edit | Invariant |
+| --- | --- | --- |
+| reorder | every context list and the item list reversed | same states (P5) |
+| rename | every declaration ID renamed | same states |
+| relabel | every artifact's status labels set to `synthetic` | same states (labels are no evidence, DR-7) |
+| copy | each validation record and calibration replaced by a byte copy under a new ID, references rebound | same states (a copy is the same source, DR-3) |
+| copy+perturb | a contradicting copy of each validation record added | no gain (P4) |
+| drop | every declaration removed | no gain (P4) |
+| loosen | the corrections' target scopes removed | no gain (P4) |
+| toggle-optional | the corrections' `application_id`, `variation_id` and `factor_of` removed | no gain (P4) |
+| edit-report | a finished report's failing states set to satisfied, the summary recomputed | refused by the report check |
+
+The draft operators run on the chain case (1.0.0 and 1.1.0 rules) and on the reduced, ratio and model cases (1.1.0
+rules). All invariants hold.
+
+**What edit-report exposed.** The permit's report check accepted such an edit: it verified that the summary follows
+from the obligations, and the edit recomputes the summary. The check now also requires each obligation's state to be
+the one its reason code gives under its rule version's outcome contract (`_reasons_follow`, `permit.py`; aggregator
+codes are unverified for every rule). Every reference report passes it: the chain, reduced, ratio and model cases on
+both rule sets, and both run cases.
+
+An edit that also picks each rule's valid satisfied code still passes. Refusing it needs the report to be re-judged,
+which the DR-1 split assigns to the assurance plane (B, design only, like G9). A skipped test names it.
+
+**Phase 2 exit conditions** (architecture section 9.4):
+- V77 to V90 pass (100 of 100 V parts).
+- The shadow review has zero unclassified differences.
+- V91 is not registered: DR-14 depends on a value gate that did not pass.
+

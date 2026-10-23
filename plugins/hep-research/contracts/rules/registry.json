@@ -3055,7 +3055,7 @@
   {
    "v_id": "V76",
    "scenario": "Mutation operators of the diagnostic plane applied to a frozen case",
-   "expected": "Skeleton: reorder and rename keep every state; drop and loosen never improve the status or remove obligations (P4, P5); remaining operators named for Phase 2",
+   "expected": "Skeleton: reorder and rename keep every state; drop and loosen never improve the status or remove obligations (P4, P5); remaining operators named for Phase 2; R3: all nine operators (relabel, rename, copy, copy+perturb, drop, loosen, toggle-optional, reorder, edit-report) keep their invariants, edit-report is refused by the report check",
    "parts": [
     {
      "slice": "P0",
@@ -3063,11 +3063,13 @@
      "work_packages": [
       "P0.09"
      ],
-     "host": "checker core",
+     "host": "full mutation testing (release R3): nine operators on the chain, reduced, ratio and model cases; edit-report refused by the report check",
      "status": "passing",
      "tests": [
       "tests.contracts.test_analysis_check_foundations.V76MutationSkeleton.test_operators_keep_their_invariants_on_the_chain_case",
-      "tests.contracts.test_analysis_check_foundations.V76MutationSkeleton.test_pending_operators_are_named"
+      "tests.contracts.test_analysis_check_foundations.V76MutationSkeleton.test_operators_keep_their_invariants_on_every_case_with_the_1_1_0_rules",
+      "tests.contracts.test_analysis_check_foundations.V76MutationSkeleton.test_every_operator_is_implemented",
+      "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_v76_edit_report_is_refused"
      ]
     }
    ]

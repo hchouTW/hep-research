@@ -72,3 +72,14 @@ One row per reviewer and item. A review by the implementer counts as `self-revie
 | implementer (Claude Code session) | none (author) | 2026-10-16 | Post-execution permit check | self-reviewed | C15: public and synthetic diagnostics only (`decision-enforce.md`) |
 | implementer (Claude Code session) | none (author) | 2026-10-16 | Custody inventory | self-reviewed | C15: public and synthetic diagnostics only (`decision-enforce.md`) |
 | implementer (Claude Code session) | none (author) | 2026-10-16 | `dependencies.py`, result binding row | self-reviewed | C15: public and synthetic diagnostics only (`decision-enforce.md`) |
+
+## Adversarial review: probes and mutation tests (2026-10-23)
+
+Run by the implementer (Claude Code session); not an independent review.
+- **Probes:** all gap probes pass (`tests/contracts/test_cross_artifact_check_gap_probes.py`). The only skips are G9
+  (assurance plane) and G21 (classified separately).
+- **Mutation tests:** all nine operators keep their invariants (`V76MutationSkeleton`).
+- **Gap closed:** edit-report found the permit accepting a hand-edited report; that is closed for edits without fitting
+  reason codes.
+- **Remaining gap:** an edit with valid reason codes needs re-judging (plane B).
+

@@ -20,7 +20,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import analysis_check_cases as cases  # noqa: E402
 
-DEV = cases.DEV_SUITE
+DEV = "1.1.0-dev.5"  # the last pre-release (release R2/R3 development); SUITE_1_1 is the stable 1.1.0
+STABLE = cases.SUITE_1_1
 
 
 to_1_1 = cases.context_1_1
@@ -128,7 +129,8 @@ class Context110(unittest.TestCase):
                                     "r-run.binding", "r-run.blinding", "r-run.campaign"},
                     "1.1.0-dev.5": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use",
                                     "r-run.binding", "r-run.blinding", "r-run.campaign"}}
-        self.assertEqual(fixed_by[DEV], {r for r, v in VERSIONS.items() if v == "1.1.0"})
+        fixed_by[STABLE] = fixed_by[DEV]  # the stable suites are the last pre-release under its release version
+        self.assertEqual(fixed_by[STABLE], {r for r, v in VERSIONS.items() if v == "1.1.0"})
         for sid in ("counting-chain", "ratio-subset", "model-card", "run-lineage"):
             old = ac.load_suite(sid, "1.0.0")
             for ver, fixed in fixed_by.items():
@@ -136,7 +138,7 @@ class Context110(unittest.TestCase):
                     dev = ac.load_suite(sid, ver)
                     rules = [dict(r, version="1.1.0") if r["rule_id"] in fixed else r for r in old["rules"]]
                     gen = old["generator"]
-                    if ver == "1.1.0-dev.5" and sid == "counting-chain":  # release R3: the new rule and generator (G1, G14)
+                    if ver in ("1.1.0-dev.5", STABLE) and sid == "counting-chain":  # release R3: the new rule and generator (G1, G14)
                         k = next(i for i, r in enumerate(rules) if r["rule_id"] == "r-real.description")
                         rules.insert(k + 1, {"rule_id": "r-real.undescribed", "version": "1.0.0", "subject": "applied_effect"})
                         gen = dict(gen, version="1.1.0")
@@ -193,14 +195,17 @@ class Context110(unittest.TestCase):
                                            "roots": [{"root_id": "a", "required": False}]}), [])
 
     def test_check_report_refuses_a_dev_suite_report(self):
+        # a pre-release suite is refused; the stable 1.1.0 suite (release R3) is not
         from contracts import analysis_check as ac
         from contracts import permit
-        r = self.tmp / "p"
-        bundle = cases.positive_case(r, to_1_1)
-        view, diags = ac.load_subject(bundle, r)
-        rep = ac.evaluate(view, diags)
-        codes = [f["code"] for f in permit.cheap_refusals(rep, json.loads(bundle.read_text()), r, "$")]
-        self.assertIn("permit.report_prerelease_suite", codes)
+        for version, refused in ((DEV, True), (STABLE, False)):
+            with self.subTest(suite=version):
+                r = self.tmp / f"p-{version}"
+                bundle = cases.positive_case(r, lambda c, v=version: to_1_1(c, v))
+                view, diags = ac.load_subject(bundle, r)
+                rep = ac.evaluate(view, diags)
+                codes = [f["code"] for f in permit.cheap_refusals(rep, json.loads(bundle.read_text()), r, "$")]
+                self.assertEqual("permit.report_prerelease_suite" in codes, refused, codes)
 
 
 class InputChecks110(unittest.TestCase):
@@ -309,7 +314,7 @@ class V90ContextConversion(unittest.TestCase):
         ctx_ref = next(i["ref"] for i in new["items"] if i["role"] == "context")
         ctx = json.loads((dst / ctx_ref).read_text())
         self.assertEqual(ctx["context_version"], "1.1.0")
-        self.assertEqual({s["version"] for s in [ctx["suite"]] + ctx.get("suites", [])}, {DEV})
+        self.assertEqual({s["version"] for s in [ctx["suite"]] + ctx.get("suites", [])}, {STABLE})  # newest installed
         new, old = states(Path(res["bundle"]), dst), states(bundle, src, cases.r1_rules())
         self.assertEqual({k: v for k, v in new.items() if k in old}, old)
         self.assertEqual({k.split(":")[0] for k in set(new) - set(old)}, {"r-real.undescribed"})

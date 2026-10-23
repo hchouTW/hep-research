@@ -1,0 +1,65 @@
+{
+ "$comment": "Suite counting-chain/v1 (v6.3 M2a): linear recipes, bounded cross-instance links, listed members, realization, stage, response use and factor composition. Each rule names the subject kind the obligation generator iterates; the generator's version is part of the suite, and the lock records both. Version 1.1.0 (release R3, stable; the default suite from R3): check-context 1.1.0; the R2 and R3 rule fixes and, for counting-chain, r-real.undescribed on generator 1.1.0 (see contracts/rules/registry.json). The 1.0.0 suite names rule versions this checker no longer runs (check.rule_not_run); reproduce 1.0.0 results with release R1.",
+ "suite_id": "counting-chain",
+ "version": "1.1.0",
+ "mode": "chain",
+ "generator": {
+  "id": "counting-chain-obligations",
+  "version": "1.1.0"
+ },
+ "rules": [
+  {
+   "rule_id": "r-inv.root",
+   "version": "1.0.0",
+   "subject": "root"
+  },
+  {
+   "rule_id": "r-map.classification",
+   "version": "1.0.0",
+   "subject": "correction"
+  },
+  {
+   "rule_id": "r-real.description",
+   "version": "1.0.0",
+   "subject": "correction_instance"
+  },
+  {
+   "rule_id": "r-real.undescribed",
+   "version": "1.0.0",
+   "subject": "applied_effect"
+  },
+  {
+   "rule_id": "r-stage.position",
+   "version": "1.0.0",
+   "subject": "correction_instance"
+  },
+  {
+   "rule_id": "r-rep.repetition",
+   "version": "1.1.0",
+   "subject": "root_effect"
+  },
+  {
+   "rule_id": "r-comp.composition",
+   "version": "1.0.0",
+   "subject": "root_composition"
+  },
+  {
+   "rule_id": "r-comp.factor_values",
+   "version": "1.1.0",
+   "subject": "instance_factor"
+  },
+  {
+   "rule_id": "r-resp.response_use",
+   "version": "1.0.0",
+   "subject": "instance"
+  }
+ ],
+ "not_supported": [
+  "unmodelled merges",
+  "arbitrary operator equivalence",
+  "symbolic algebra",
+  "forward folding",
+  "ratio roots (ratio-subset/v1)",
+  "model roots (model-card/v1)"
+ ]
+}

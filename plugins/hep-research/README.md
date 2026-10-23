@@ -283,23 +283,22 @@ It then checks a machine-generated list of obligations against five suites:
 
 | Suite | Checks |
 |---|---|
-| `counting-chain/1.0.0` | correction chains: listed effect members, realization, stage, repetition, factor composition, response use |
-| `ratio-subset/1.0.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
-| `model-card/1.0.0` | model cards: the supported modifier–constraint pairings, one observation per constraint term within an evaluation, cross-model sharing |
-| `run-lineage/1.0.0` | after execution, through a result binding: input closure, run status, the campaign evidence level, blinding-permitted outputs |
+| `counting-chain/1.1.0` | correction chains: listed effect members, realization, every applied correction described in the spec, stage, repetition, factor composition and values, response use |
+| `ratio-subset/1.1.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
+| `model-card/1.1.0` | model cards: the supported modifier–constraint pairings, one observation per constraint term within an evaluation (by source identity), cross-model sharing |
+| `run-lineage/1.1.0` | after execution, through a result binding: input closure, run status, the campaign evidence level and its inputs, blinding judged by lineage |
 | (custody) | `contracts/custody.py`: an inventory of where each profile comes from; a missing custody value is never read as public |
 
-While release R2 is in development, each suite also exists as `1.1.0-dev.N` for check contexts in format 1.1.0 (no
-`required` on roots; a 1.0.0 context selects only 1.0.x suites). `contracts/migrate.py --convert
-check-context=context-1.0.0-to-1.1.0` converts a frozen context to the newest installed 1.1.0 suite. `check-report`
-refuses every pre-release suite. Rule fixes are new rule versions in these suites; a 1.0.0 suite names the old versions,
-which this release no longer runs (`check.rule_not_run`: `r-rep.repetition` and `r-ratio.correlation` from
-1.1.0-dev.2, `r-comp.factor_values` and `r-aux.use` from 1.1.0-dev.3, `r-run.binding`, `r-run.blinding` and
-`r-run.campaign` from 1.1.0-dev.4). A result binding with campaign `inputs` is format 1.1.0. From 1.1.0-dev.5 the counting-chain
-suite also runs `r-real.undescribed` (each correction a step applies is described in the spec) on the effect catalog
-1.1.0. Reproduce 1.0.0 results with hep-research 0.25.x. From
-1.1.0-dev.3 a factor table's own `tolerance` is not used: the relative tolerance is 1e-9, or Σ|power| · ½·10^(1−d) when
-the table declares `"significant_digits": d` and every value has at most d significant digits.
+The 1.1.0 suites are the default. They need check contexts in format 1.1.0 (no `required` on roots); a 1.0.0 context
+selects only 1.0.x suites. `contracts/migrate.py --convert check-context=context-1.0.0-to-1.1.0` converts a frozen
+context to the newest installed 1.1.0 suite. Each fix is a new rule version, and the 1.0.0 suites name the old ones,
+which this release no longer runs (`check.rule_not_run`). Reproduce 1.0.0 results with hep-research 0.25.x.
+- **Factor tables:** a factor table's own `tolerance` is not used. The relative tolerance is 1e-9, or
+  Σ|power| · ½·10^(1−d) when the table declares `"significant_digits": d` and every value has at most d significant
+  digits.
+- **Result bindings:** a result binding with campaign `inputs` is format 1.1.0.
+- **Pre-release suites:** the `1.1.0-dev.N` suites remain installed for bundles frozen during development, and
+  `check-report` refuses them.
 
 ```bash
 python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json [--mode model]

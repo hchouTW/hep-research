@@ -41,13 +41,13 @@ class ReportCheck(unittest.TestCase):
         self.td = tempfile.TemporaryDirectory()
         self.addCleanup(self.td.cleanup)
         self.root = Path(self.td.name) / "c"
-        bundle_path = cases.ratio_case(self.root)
+        bundle_path = cases.ratio_case(self.root, cases.context_1_1)  # the stable 1.1.0 suites (release R3)
         self.bundle = json.loads(bundle_path.read_text())
         view, diags = ac().load_subject(bundle_path, self.root)
-        self.report = ac().evaluate(view, diags, rules=cases.r1_rules())  # a complete 1.0.0 report, as release R1 writes it
+        self.report = ac().evaluate(view, diags)
         self.recipe = json.loads((self.root / "recipe.json").read_text())
         self.policy = {"policy_version": "1.0.0", "purposes": {"formal-analysis": {
-            "suites": [{"id": "counting-chain", "version": "1.0.0"}, {"id": "ratio-subset", "version": "1.0.0"}],
+            "suites": [{"id": "counting-chain", "version": cases.SUITE_1_1}, {"id": "ratio-subset", "version": cases.SUITE_1_1}],
             "checker_digests": [self.report["assessment"]["checker"]], "accept_pre_execution_only": True}}}
         self.permit = {"subject": {"analysis_bundle_sha256": self.bundle["bundle_digest"], "analysis_bundle_ref": "bundle.json",
                                    "artifacts": ["0" * 64]}}
@@ -83,6 +83,32 @@ class ReportCheck(unittest.TestCase):
         self.assertTrue(any(o["declaration_based"] for o in self.report["obligations"]))
         self.assertEqual(self.report["formal_use_view"]["coverage"]["value"], "partial")
         self.assertEqual(self.check(self.attest()), [])
+
+    def test_v76_edit_report_is_refused(self):
+        # full mutation testing, edit-report: a report whose failing states were edited to satisfied, with the summary
+        # recomputed, no longer follows from its reason codes
+        import analysis_check_mutations as mutations
+
+        def drop(c):
+            c.doc("spec")["extension"]["corrections"] = [x for x in c.doc("spec")["extension"]["corrections"]
+                                                         if x["category"] != "livetime"]
+        r = self.root.parent / "edited"
+        bundle_path = cases.ratio_case(r, cases.both(drop, cases.context_1_1))
+        view, diags = ac().load_subject(bundle_path, r)
+        rep = ac().evaluate(view, diags)
+        self.assertNotEqual(rep["consistency"], "consistent")
+        edited = mutations.edit_report(rep)
+        self.assertEqual((edited["status"], edited["consistency"]), ("complete", "consistent"))
+        self.bundle, self.root = json.loads(bundle_path.read_text()), r
+        self.permit = dict(self.permit, subject=dict(self.permit["subject"], analysis_bundle_sha256=self.bundle["bundle_digest"]))
+        self.policy["purposes"]["formal-analysis"]["checker_digests"] = [rep["assessment"]["checker"]]
+        self.assertIn("permit.report_inconsistent", codes(self.check(self.attest(edited))))
+        self.assertNotIn("permit.report_inconsistent", codes(self.check(self.attest(rep))))
+
+    @unittest.skip("plane B (DR-1 split): an edit that also picks each rule's valid satisfied code passes the report "
+                   "check; only re-judging the report (the assurance plane, design only) can refuse it")
+    def test_edit_with_valid_codes_needs_re_judging(self):
+        pass
 
     def test_v66_no_accepted_review(self):
         self.assertIn("permit.report_unreviewed", codes(self.check(self.attest(conclusion="rejected"))))

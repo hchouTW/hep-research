@@ -5,6 +5,20 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-artifact check, release R3: stable 1.1.0 suites, the new default.**
+  - **Suites:** `counting-chain`, `ratio-subset`, `model-card` and `run-lineage` 1.1.0 carry every R2 and R3 rule fix.
+    `check-report` accepts them and refuses the `1.1.0-dev.N` pre-releases.
+  - **Conversion:** `migrate.py context-1.0.0-to-1.1.0` now moves a context to 1.1.0.
+  - **1.0.0 suites:** they still give `check.rule_not_run` for every fixed rule. Reproduce 1.0.0 results with
+    hep-research 0.25.x.
+- **Cross-artifact check: full mutation testing (V76), and the report check refuses hand-edited states.**
+  - **Operators:** all nine mutation operators (relabel, rename, copy, copy+perturb, drop, loosen, toggle-optional,
+    reorder, edit-report) run on the chain, reduced, ratio and model cases. Every invariant holds.
+  - **Report check:** edit-report showed that `permit.py` accepted a report whose failing states were edited to
+    satisfied with a recomputed summary. The report check now also requires each obligation's state to match its
+    reason code under the rule's outcome contract (`permit.report_inconsistent`).
+  - **Remaining gap:** an edit that also uses valid reason codes needs the report to be re-judged (the assurance plane,
+    design only).
 - **Cross-artifact check, release R3: a correction a step applies must be in the spec (G1, DR-8, V86), and the factor
   obligation no longer depends on the mapping key (G14, V87).** The new rule `r-real.undescribed` runs on generator
   `counting-chain-obligations` 1.1.0 and the effect catalog 1.1.0, in the suites `1.1.0-dev.5`.

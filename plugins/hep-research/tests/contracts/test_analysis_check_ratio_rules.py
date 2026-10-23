@@ -48,7 +48,7 @@ class Ratio(unittest.TestCase):
     def test_positive_ratio_case(self):
         rep = self.run_case()
         self.assertEqual((rep["status"], rep["consistency"]), ("complete", "consistent"))
-        self.assertIn({"id": "ratio-subset", "version": cases.DEV_SUITE}, rep["assessment"]["suites"])
+        self.assertIn({"id": "ratio-subset", "version": cases.SUITE_1_1}, rep["assessment"]["suites"])
         self.assertEqual(get(rep, "r-ratio.operands:ratio-p1")["reason"], "check.ratio_operands_compatible")
 
     def test_v44_factors(self):
@@ -105,7 +105,7 @@ class Ratio(unittest.TestCase):
 
     def test_v28_free_text_ratio(self):
         def ratio_suite(c):
-            c.context["suites"] = [{"id": "ratio-subset", "version": cases.DEV_SUITE}]
+            c.context["suites"] = [{"id": "ratio-subset", "version": cases.SUITE_1_1}]
         rep = self.run_case(cases.chain_case, ratio_suite)
         o = get(rep, "r-ratio.operands:spec")
         self.assertEqual((o["state"], o["reason"]), ("unverified", "check.ratio_operands_unbound"))
@@ -125,7 +125,7 @@ class Ratio(unittest.TestCase):
     def test_model_suite_needs_a_model_bundle(self):
         # model-card/v1 exists (M2b model part), but it checks model bundles only: a chain bundle selecting it is refused
         def model_suite(c):
-            c.context["suites"] = [{"id": "model-card", "version": cases.DEV_SUITE}]
+            c.context["suites"] = [{"id": "model-card", "version": cases.SUITE_1_1}]
         with self.assertRaises(Exception) as ctx:
             self.run_case(cases.positive_case, model_suite)
         self.assertEqual(getattr(ctx.exception, "code", None), "bundle.suite_mode")

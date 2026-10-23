@@ -67,11 +67,11 @@ class Case:
         return out
 
 
-DEV_SUITE = "1.1.0-dev.5"
+SUITE_1_1 = "1.1.0"  # the stable 1.1.0 suites (release R3); pre-releases 1.1.0-dev.1 to dev.5 came before
 
 
-def context_1_1(c, suite_version: str = DEV_SUITE) -> None:
-    """Variant: the draft context in check-context format 1.1.0 on a 1.1.0 pre-release suite (release R2), as
+def context_1_1(c, suite_version: str = SUITE_1_1) -> None:
+    """Variant: the draft context in check-context format 1.1.0 on the 1.1.0 suites (release R3), as
     contracts/migrate.py context-1.0.0-to-1.1.0 writes it."""
     c.context["context_version"] = "1.1.0"
     c.context["suite"] = dict(c.context["suite"], version=suite_version)

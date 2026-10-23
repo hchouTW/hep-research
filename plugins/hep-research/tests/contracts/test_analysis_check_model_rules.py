@@ -50,7 +50,7 @@ class ModelCase(unittest.TestCase):
         # V06: a shared parameter acts on several channels with one auxiliary observation: satisfied
         rep = self.run_case()
         self.assertEqual((rep["status"], rep["consistency"]), ("complete", "consistent"), states(rep))
-        self.assertIn({"id": "model-card", "version": cases.DEV_SUITE}, rep["assessment"]["suites"])
+        self.assertIn({"id": "model-card", "version": cases.SUITE_1_1}, rep["assessment"]["suites"])
         self.assertEqual(sorted(states(rep)), ["r-aux.use:fit#sr-cr/lumi-2026", "r-model.pairing:sr-cr#lumi",
                                                "r-model.pairing:sr-cr#mu", "r-model.pairing:sr-cr#mu_b",
                                                "r-model.root:mu-fit"])

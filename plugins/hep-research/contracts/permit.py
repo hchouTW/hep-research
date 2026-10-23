@@ -259,6 +259,25 @@ def _levels_follow(rep_doc: dict) -> bool:
     return levels == derived
 
 
+def _reasons_follow(rep_doc: dict) -> bool:
+    """Each obligation's state must be the one its reason code gives under its rule version's outcome contract in the
+    rule registry (an aggregator code is unverified for every rule), so a state edited by hand without a fitting code
+    is inconsistent (full mutation testing, edit-report, release R3). An edit that also picks a valid code is not
+    caught here: re-judging a report is the assurance plane's (B, DR-1 split)."""
+    from contracts.rule_registry import REGISTRY, state_for
+    try:
+        reg = {(r["rule_id"], r["version"]): r for r in json.loads(REGISTRY.read_text(encoding="utf-8"))["rules"]}
+    except (OSError, ValueError, KeyError):
+        return False
+    versions = {r.get("rule_id"): r.get("version") for r in (rep_doc.get("assessment") or {}).get("rules") or []
+                if isinstance(r, dict)}
+    for o in rep_doc.get("obligations", []):
+        rule = reg.get((o.get("rule_id"), versions.get(o.get("rule_id"))))
+        if rule is not None and o.get("state") != state_for(rule, o.get("reason")):
+            return False
+    return True
+
+
 def _frozen_inventory(bundle: dict, root: Path) -> dict | None:
     """The obligation inventory frozen in the bundle's check-context, or None when it cannot be read."""
     for it in (bundle or {}).get("items", []):
@@ -371,7 +390,7 @@ def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, pur
                       and {k: s[k] for k in ("coverage", "consistency", "counts")}
                       == {k: rep_doc[k] for k in ("coverage", "consistency", "counts")}
                       and formal_view(rep_doc["obligations"], rep_doc["input_validity"] == "valid") == rep_doc["formal_use_view"]
-                      and _levels_follow(rep_doc))
+                      and _levels_follow(rep_doc) and _reasons_follow(rep_doc))
         if not consistent:
             refusals.append(_r("permit.report_inconsistent", where,
                                "the report's summary or assessment does not follow from its obligations (edited?)"))
