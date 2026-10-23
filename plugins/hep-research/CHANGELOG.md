@@ -3,7 +3,31 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.26.0 (2026-10-23)
+
+Minor release, contracts 3.8.0: the cross-artifact analysis check's Phase 2 (releases R2 and R3 together) and
+selective pull-request CI. The check stays experimental and in shadow mode; reports are advisory.
+
+**Before you upgrade**
+- **The stable 1.1.0 suites are now the default.**
+- **1.0.0 suites:** they give `check.rule_not_run` for every fixed rule:
+  - `r-rep.repetition`, `r-ratio.correlation` and `r-comp.factor_values`;
+  - `r-aux.use`;
+  - `r-run.binding`, `r-run.blinding` and `r-run.campaign`.
+
+  So a 1.0.0 counting-chain, ratio-subset, model-card or run-lineage check is `incomplete`. **Reproduce 1.0.0 results
+  with hep-research 0.25.x.**
+- **Converting frozen work:** convert a frozen 1.0.0 context with
+  `contracts/migrate.py --convert check-context=context-1.0.0-to-1.1.0`. A context with `required: false` is refused
+  and needs manual completion.
+- **Bundles frozen with 0.25.x:** they show lock differences (rule registry, effect catalog) and are reproduced from
+  their snapshots (`--snapshots`).
+- **Spec vocabulary:** `response_corrections` gains `cutoff_transmission`, `survival` and `fragmentation_feeddown`
+  (additive). Under the 1.1.0 rules every correction a recipe step applies must be described in the spec (only
+  `bin_width` is exempt).
+- **AMS-02 example:** the flux-ratio example spec now describes the corrections its recipe applies.
+- **Older readers:** a 0.25.x reader refuses check-context 1.1.0, result binding 1.1.0 and registry 1.2.0 as invalid
+  input.
 
 - **Cross-artifact check, release R3: stable 1.1.0 suites, the new default.**
   - **Suites:** `counting-chain`, `ratio-subset`, `model-card` and `run-lineage` 1.1.0 carry every R2 and R3 rule fix.

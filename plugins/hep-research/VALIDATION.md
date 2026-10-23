@@ -2578,6 +2578,38 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## 0.26.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.26.0` from main `8f03228b` (main CI green). It ships:
+- #225: the value-gate decision changed to Continue;
+- #226 to #228: R2 formats, the 1.1.0 input checks, and the rule fixes G3, G17, G4 and G5;
+- #229 and #230: selective pull-request CI;
+- #231: the run-lineage fixes G6, G7, G8, G13 and A3;
+- #232 and #233: R3, with G1 under the broad scope, G14, catalog 1.1.0, the stable 1.1.0 suites, full mutation
+  testing and the report-check fix.
+
+Minor release, contracts 3.8.0:
+- check-context 1.1.0, result binding 1.1.0, registry 1.2.0 and catalog 1.1.0;
+- three terms added to the `response_corrections` vocabulary;
+- no artifact type, envelope field or capability change.
+
+The ams02-research companion (requires hep-research `>=0.11.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.26.0:** both manifests, `pyproject.toml`, the README, the assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **Contracts 3.8.0:** `contracts/__init__.py` (with its comment), `contracts/vocab/core.json`, the two pinned tests,
+  the templates, and the fixtures (`make_fixtures.py`, E2; only the version pairs change).
+- **CHANGELOG:** `Unreleased` is now `0.26.0`, with a "Before you upgrade" summary.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change. `unfolding-coverage` drifted at 1e-14 and was restored; `stats-benchmarks` has no generator.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 5024 tests in 414 modules, 4887 pass, 0 failures, 137 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 5024 tests, 4795 pass, 0 failures, 229 skipped |
+
 ## 0.25.1 release check (2026-10-22, E2 and the CI lock)
 
 Release branch `release/0.25.1` from main `ed1f19d9` (#222 architecture clean-up edition; #223 value gate of the
