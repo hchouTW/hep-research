@@ -622,6 +622,26 @@
    "items": [
     "Th18"
    ]
+  },
+  {
+   "id": "small-x-saturation",
+   "capability": "Small-x physics: dipole picture with LO photon wave functions, GBW saturation model, BK/JIMWLK and BFKL conventions as rules",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th19"
+   ]
+  },
+  {
+   "id": "exclusive-and-gpd",
+   "capability": "Exclusive processes and GPDs (DVCS kinematics, azimuthal conventions, GPD properties and sum rules) and diffractive DIS kinematics; GPD extraction outside the tool",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th20"
+   ]
   }
  ]
 }

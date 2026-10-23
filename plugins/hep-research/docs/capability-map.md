@@ -78,4 +78,6 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | nuclear-parton-effects | Nuclear targets: per-nucleon conventions, isospin combination, nuclear PDF sets and baselines, member-by-member nuclear ratios; mechanism models as rules | hep-theory | tool | yes | Th16 |  |
 | polarized-dis | Polarized DIS: g_1, g_2, asymmetries and depolarization factors, first-moment sum rules, factorization-scheme dependence of Delta Sigma | hep-theory | tool | yes | Th17 |  |
 | sidis-and-tmd | SIDIS kinematics and Trento conventions, fragmentation functions, TMD factorization rules, Gaussian-ansatz TMD shapes, Sivers sign change, Drell-Yan q_T | hep-theory | tool | yes | Th18 |  |
+| small-x-saturation | Small-x physics: dipole picture with LO photon wave functions, GBW saturation model, BK/JIMWLK and BFKL conventions as rules | hep-theory | tool | yes | Th19 |  |
+| exclusive-and-gpd | Exclusive processes and GPDs (DVCS kinematics, azimuthal conventions, GPD properties and sum rules) and diffractive DIS kinematics; GPD extraction outside the tool | hep-theory | tool | yes | Th20 |  |
 <!-- /capability-map -->

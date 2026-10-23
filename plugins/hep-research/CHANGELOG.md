@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- hep-theory, hadron structure phase 6 (Th19 small x, Th20 exclusive processes and GPDs):
+  `skills/hep-theory/references/small-x-and-saturation.md` (dipole factorization, GBW model, BK/JIMWLK and running
+  coupling as rules, nuclei, status labels) and `references/exclusive-and-gpd.md` (DVCS kinematics, BMK and Trento
+  azimuths, GPD properties and sum rules, diffractive DIS); sources read in full text 2026-10-23. New scripts
+  `skills/hep-theory/scripts/dipole_lo.py` (SciPy, core stack) and `skills/hep-theory/scripts/exclusive_kinematics.py`;
+  `sum_rules.py` GPD rules (`gpd-integral:<F>`, `gpd-ji`). Capabilities `small-x-saturation` (Th19) and
+  `exclusive-and-gpd` (Th20); routing cases (4).
+
 ## 0.34.0 (2026-10-23)
 
 Minor release, contracts 3.10.0 (unchanged). It adds the fifth module of hep-theory's hadron-structure plan: SIDIS,

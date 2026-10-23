@@ -15,6 +15,12 @@ Rules (--rule), with the integrand built from the table:
                 included: the coefficient series is in Kuhn, Chen, Leader, arXiv:0812.3535, Eq. 89)
   ff-momentum   sum_h int_0^1 z D_i^h(z) dz for one parton i, hadron columns "h:<hadron>" on the grid "x" (= z); 1 when
                 every hadron is included (PDG 2026 "Fragmentation Functions", Eq. 19.3), a bound otherwise
+  gpd-integral:<F>  int_-1^1 F(x, xi, t) dx for F in H, E, Ht, Et, from columns "F+" (F(x) at x > 0) and "F-"
+                (F(-x), the value at -x, stored at the same positive grid point x; with "xf" the columns hold x F(x) and
+                x F(-x), both with the positive x) at one (xi, t) given as "xi" and "t" in the table: the form factors
+                F_1, F_2, G_A, G_P (Ji, hep-ph/9603249v1, Eq. 18). The power-law extrapolation below the first grid
+                point has no basis in the ERBL region |x| < xi: tabulate down to x = 0 there.
+  gpd-ji        (1/2) int_-1^1 x [H + E] dx = J^q (PDG 2026 Eq. 18.41; Ji, Eqs. 13 and 19)
   ellis-jaffe:p|n  the g_1 moment and, from --gA and --a8, the Ellis-Jaffe value Gamma_1 = +-gA/12 + 5 a8/36 (Delta s = 0
                 and SU(3) symmetry assumed: heuristic-argument), from their Eq. 43
 adler-lo and gls-lo are the LO quark-parton forms built from PDG 2026 "Structure Functions" Eq. (18.19) (read
@@ -52,6 +58,7 @@ from core.status import add_status_argument, exit_code  # noqa: E402
 QUARKS = ("d", "u", "s", "c", "b")
 ALL = QUARKS + tuple(q + "bar" for q in QUARKS) + ("g",)
 POL = tuple("D" + f for f in ALL)  # helicity densities Delta q, Delta qbar, Delta g
+GPD = tuple(n + s for n in ("H", "E", "Ht", "Et") for s in ("+", "-"))  # GPD at x (+) and at -x (-), x > 0
 SOURCE_LO = "LO quark-parton form from PDG 2026 'Structure Functions' Eq. (18.19), read 2026-10-23 (derived here)"
 
 
@@ -77,7 +84,7 @@ def load_table(path: str) -> tuple[list[float], dict, str]:
             if not isinstance(doc[k], list) or len(doc[k]) != len(xs):
                 raise RuleError(f"hadron column {k} must be a list as long as x")
             cols[k] = [_num(k, v) for v in doc[k]]
-    for f in ALL + POL:
+    for f in ALL + POL + GPD:
         if f in doc:
             col = doc[f]
             if not isinstance(col, list) or len(col) != len(xs):
@@ -119,6 +126,17 @@ def integrand(rule: str, xs: list[float], cols: dict, rep: str) -> tuple[list[fl
         need("u", "ubar", "d", "dbar", "s", "sbar", "c", "cbar")
         return [sum(f(q, i) - f(q + "bar", i) for q in ("u", "d", "s", "c")) for i in range(n)], \
             "(F_3^{W+} + F_3^{W-}) / 2 = sum_{q=u,d,s,c} (q - qbar) (LO)"
+    if rule.startswith("gpd-integral:"):
+        name = rule.split(":", 1)[1]
+        if name not in ("H", "E", "Ht", "Et"):
+            raise RuleError("gpd-integral:<F> takes F in H, E, Ht, Et")
+        need(name + "+", name + "-")
+        return [f(name + "+", i) + f(name + "-", i) for i in range(n)], \
+            f"{name}(x) + {name}(-x): int_-1^1 {name} dx (Ji, Eq. 18: F_1, F_2, G_A, G_P for H, E, Ht, Et)"
+    if rule == "gpd-ji":
+        need("H+", "H-", "E+", "E-")
+        return [0.5 * xs[i] * ((f("H+", i) + f("E+", i)) - (f("H-", i) + f("E-", i))) for i in range(n)], \
+            "(1/2) x [(H + E)(x) - (H + E)(-x)]: (1/2) int_-1^1 x (H + E) dx = J (PDG Eq. 18.41; Ji, Eqs. 13, 19)"
     if rule == "ff-momentum":
         hadrons = sorted(k for k in cols if k.startswith("h:"))
         if not hadrons:
@@ -198,7 +216,7 @@ class JsonArgumentParser(argparse.ArgumentParser):
 def main(argv=None) -> int:
     ap = JsonArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--table", required=True, help="JSON table of f(x) or x f(x)")
-    ap.add_argument("--rule", required=True, help="momentum | number:<q> | adler-lo | gls-lo | g1-moment:p|n | bjorken-lo | ellis-jaffe:p|n | ff-momentum")
+    ap.add_argument("--rule", required=True, help="momentum | number:<q> | adler-lo | gls-lo | g1-moment:p|n | bjorken-lo | ellis-jaffe:p|n | ff-momentum | gpd-integral:<F> | gpd-ji")
     ap.add_argument("--expected", type=float, help="value to check the total against (the user's, with its source)")
     ap.add_argument("--tolerance", type=float, help="absolute tolerance of the check")
     ap.add_argument("--gA", type=float, help="ellis-jaffe: g_A (= a_3) with its source")
