@@ -3,7 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.32.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the third module of hep-theory's hadron-structure plan: nuclear
+targets and nuclear PDFs (Th16).
+
+**Before you upgrade:** nothing to migrate. `nuclear_combination.py combine` requires `"grid_kind": "bound-proton"` in
+its parton file and refuses average-nucleon grids; `ratio` refuses a replica set over an external proton set and needs
+the set's `prescription` for replica sets.
 
 - hep-theory, hadron structure phase 3 (Th16, nuclear targets): `skills/hep-theory/references/nuclear-parton-effects.md`
   (per-nucleon conventions, isospin combination, isoscalar and deuteron corrections, the conventions of EPPS21,

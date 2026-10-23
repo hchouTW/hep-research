@@ -3959,7 +3959,7 @@
     "tests/skills/hep_theory/test_dis_kinematics.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c41d9c0 2026-10-23"
+   "last_commit": "f046cc69 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/dis-structure-functions.md",
@@ -3977,7 +3977,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c41d9c0 2026-10-23"
+   "last_commit": "f046cc69 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/drell-yan.md",
@@ -3991,7 +3991,7 @@
     "skills/hep-theory/scripts/drell_yan_lo.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c41d9c0 2026-10-23"
+   "last_commit": "f046cc69 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -4027,7 +4027,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c41d9c0 2026-10-23"
+   "last_commit": "f046cc69 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4136,7 +4136,7 @@
     "skills/hep-theory/scripts/nuclear_combination.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c41d9c0 2026-10-23"
+   "last_commit": "f046cc69 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/nuclear-physics-essentials.md",
@@ -4184,7 +4184,7 @@
     "skills/hep-theory/scripts/pdf_uncertainty.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c41d9c0 2026-10-23"
+   "last_commit": "f046cc69 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/recasting-toolchain.md",

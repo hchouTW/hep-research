@@ -296,20 +296,20 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cosmic-ray-phenomenology.md` | hep-theory | 23.8 | yes | 6 | - | e70b1a84 2026-10-23 |
 | `cosmic-ray-propagation.md` | hep-theory | 21.1 | yes | 23 | hep-detector | 930ba0b2 2026-10-23 |
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
-| `dis-kinematics.md` | hep-theory | 6.1 | yes | 6 | - | 6c41d9c0 2026-10-23 |
-| `dis-structure-functions.md` | hep-theory | 13.0 | no | 7 | - | 6c41d9c0 2026-10-23 |
-| `drell-yan.md` | hep-theory | 10.8 | no | 3 | - | 6c41d9c0 2026-10-23 |
+| `dis-kinematics.md` | hep-theory | 6.1 | yes | 6 | - | f046cc69 2026-10-23 |
+| `dis-structure-functions.md` | hep-theory | 13.0 | no | 7 | - | f046cc69 2026-10-23 |
+| `drell-yan.md` | hep-theory | 10.8 | no | 3 | - | f046cc69 2026-10-23 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
-| `hadron-structure-essentials.md` | hep-theory | 5.0 | yes | 7 | - | 6c41d9c0 2026-10-23 |
+| `hadron-structure-essentials.md` | hep-theory | 5.0 | yes | 7 | - | f046cc69 2026-10-23 |
 | `higher-order-predictions.md` | hep-theory | 4.4 | yes | 5 | - | bb6cb81e 2026-10-23 |
 | `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 5 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
 | `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 5 | hep-measurement | 69f359f5 2026-10-17 |
 | `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 5 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
-| `nuclear-parton-effects.md` | hep-theory | 11.1 | no | 6 | - | 6c41d9c0 2026-10-23 |
+| `nuclear-parton-effects.md` | hep-theory | 11.1 | no | 6 | - | f046cc69 2026-10-23 |
 | `nuclear-physics-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 87421c11 2026-10-17 |
 | `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | c0b6b6d8 2026-10-17 |
-| `pdfs-and-lhapdf.md` | hep-theory | 6.5 | yes | 7 | - | 6c41d9c0 2026-10-23 |
+| `pdfs-and-lhapdf.md` | hep-theory | 6.5 | yes | 7 | - | f046cc69 2026-10-23 |
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | 9257d7b5 2026-10-15 |
 | `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 4 | - | 6c22fd52 2026-10-13 |
 | `selection-rules.md` | hep-theory | 7.7 | yes | 3 | - | 195e4d1e 2026-10-13 |
