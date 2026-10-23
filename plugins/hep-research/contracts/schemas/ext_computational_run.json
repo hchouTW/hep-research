@@ -89,6 +89,22 @@
   },
   "study": {
    "type": "object"
+  },
+  "argv": {
+   "$comment": "3.11.0 (ART-70): the argument array actually executed, interpreter first; written by evaluate_design.py (M1) and run_workflow.py (M2); contracts/design.py finds the tool contract from the script in it",
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "string"
+   }
+  },
+  "script_sha256": {
+   "$comment": "3.11.0 (ART-70): SHA-256 of each script file named in argv, keyed by the path as it appears in argv",
+   "type": "object",
+   "additionalProperties": {
+    "type": "string",
+    "pattern": "^[0-9a-f]{64}$"
+   }
   }
  }
 }

@@ -75,6 +75,8 @@ EXTENSION_SCHEMAS = {
     "ml-artifact": "ext_ml_artifact.json", "computational-run": "ext_computational_run.json",
     "communication": "ext_communication.json", "dataset-record": "ext_dataset_record.json",
     "literature-record": "ext_literature_record.json",
+    "design-spec": "ext_design_spec.json", "design-candidate": "ext_design_candidate.json",
+    "design-evaluation": "ext_design_evaluation.json",
 }
 # Statuses that must survive every handoff: a consumer of such an input carries the label.
 STICKY_STATUSES = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]

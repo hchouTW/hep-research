@@ -1,5 +1,5 @@
 {
- "contract_version": "3.10.0",
+ "contract_version": "3.11.0",
  "bindings": {
   "experiments": [],
   "theory": [
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.36.0",
-  "contracts": "3.10.0",
+  "contracts": "3.11.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

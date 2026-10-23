@@ -1,5 +1,5 @@
 {
- "contract_version": "3.10.0",
+ "contract_version": "3.11.0",
  "artifact_id": "synthetic-e4-selected-mass",
  "artifact_type": "dataset-record",
  "objective": "SYNTHETIC selected mass spectrum (score > 0)",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.36.0",
-  "contracts": "3.10.0",
+  "contracts": "3.11.0",
   "profiles": {}
  },
  "provenance": {

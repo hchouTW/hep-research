@@ -1,0 +1,312 @@
+{
+ "contract_version": "1.1.0",
+ "tool_id": "tracker-resolution",
+ "entry": "skills/hep-detector/scripts/tracker_resolution.py",
+ "operations": [
+  {
+   "operation_id": "momentum",
+   "summary": "Momentum resolution of a stated tracker layout: the exact weighted least-squares curvature error (compared with Gluckstern), the PDG scattering term, their quadrature sum at each p_T and the MDR; a design estimate, not a track fit",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--positions-m",
+      "input": "positions_m"
+     },
+     {
+      "flag": "--point-resolution-um",
+      "input": "point_resolution_um"
+     },
+     {
+      "flag": "--field-tesla",
+      "input": "field_tesla"
+     },
+     {
+      "flag": "--x-over-x0",
+      "input": "x_over_x0"
+     },
+     {
+      "flag": "--charge",
+      "input": "charge"
+     },
+     {
+      "flag": "--beta",
+      "input": "beta"
+     },
+     {
+      "flag": "--mass-gev",
+      "input": "mass_gev"
+     },
+     {
+      "flag": "--pt",
+      "input": "pt"
+     },
+     {
+      "flag": "--lever-arm-m",
+      "input": "lever_arm_m"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "positions_m",
+     "kind": "length",
+     "unit": "m",
+     "required": true,
+     "constraint": "layer positions along the track, at least three"
+    },
+    {
+     "name": "point_resolution_um",
+     "kind": "length",
+     "unit": "um",
+     "required": true,
+     "constraint": "one point resolution for all layers or one per layer, > 0"
+    },
+    {
+     "name": "field_tesla",
+     "kind": "magnetic-field",
+     "unit": "T",
+     "required": true,
+     "constraint": "uniform field over the lever arm, > 0"
+    },
+    {
+     "name": "x_over_x0",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "total material along the track in radiation lengths, >= 0"
+    },
+    {
+     "name": "charge",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "charge number z of the particle, > 0"
+    },
+    {
+     "name": "beta",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "velocity beta in (0, 1]; excludes --mass-gev"
+    },
+    {
+     "name": "mass_gev",
+     "kind": "mass",
+     "unit": "GeV",
+     "required": false,
+     "constraint": "mass for beta at each p_T; excludes --beta"
+    },
+    {
+     "name": "pt",
+     "kind": "momentum",
+     "unit": "GeV",
+     "required": true,
+     "constraint": "transverse momenta to evaluate, > 0"
+    },
+    {
+     "name": "lever_arm_m",
+     "kind": "length",
+     "unit": "m",
+     "required": false,
+     "constraint": "lever arm; default the span of the positions (reported)"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "points[].total_relative",
+     "kind": "relative-resolution",
+     "unit": "1"
+    },
+    {
+     "name": "points[].intrinsic_relative",
+     "kind": "relative-resolution",
+     "unit": "1"
+    },
+    {
+     "name": "points[].scattering_relative",
+     "kind": "relative-resolution",
+     "unit": "1"
+    },
+    {
+     "name": "mdr_intrinsic_gev",
+     "kind": "momentum",
+     "unit": "GeV"
+    },
+    {
+     "name": "status_label",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"rejected\", ...} with the error"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "momentum-resolution-core",
+      "better": "smaller",
+      "unit": "1",
+      "bound": [
+       {
+        "when": [
+         {
+          "output_ge": [
+           "points.0.intrinsic_relative",
+           "points.0.scattering_relative"
+          ],
+          "note": "above the crossover rigidity (measurement-dominated): ideal point errors, uniform field, no misalignment, no energy loss or interactions, no pattern-recognition failures, so the core can only be worse"
+         }
+        ],
+        "bound": "optimistic"
+       },
+       {
+        "bound": "estimate",
+        "note": "below the crossover rigidity (scattering-dominated): the PDG 0.016 GeV form without the Highland log term can be 20% to 50% above the best fit, so it is neither bound (ART-48, FID-04)"
+       }
+      ],
+      "denominator": {
+       "rigidity_GV": "number",
+       "species": "string"
+      },
+      "value": {
+       "path": "points.0.total_relative"
+      },
+      "operation_args": [
+       "momentum"
+      ],
+      "inputs": [
+       {
+        "input": "positions_m",
+        "from": {
+         "parameter": {
+          "role": "tracking",
+          "name": "layer_positions_m",
+          "unit": "m"
+         }
+        }
+       },
+       {
+        "input": "point_resolution_um",
+        "from": {
+         "parameter": {
+          "role": "tracking",
+          "name": "point_resolution_um",
+          "unit": "um"
+         }
+        }
+       },
+       {
+        "input": "field_tesla",
+        "from": {
+         "parameter": {
+          "role": "bending",
+          "name": "field_T",
+          "unit": "T"
+         }
+        }
+       },
+       {
+        "input": "x_over_x0",
+        "from": {
+         "sum": [
+          {
+           "parameter": {
+            "role": "tracking",
+            "name": "layer_x_over_x0",
+            "unit": "1"
+           }
+          },
+          {
+           "parameter": {
+            "role": "tracking",
+            "name": "passive_x_over_x0",
+            "unit": "1"
+           }
+          }
+         ]
+        }
+       },
+       {
+        "input": "charge",
+        "from": {
+         "species": "charge_number"
+        }
+       },
+       {
+        "input": "mass_gev",
+        "from": {
+         "species": "mass_GeV"
+        }
+       },
+       {
+        "input": "pt",
+        "from": {
+         "product": [
+          {
+           "denominator": "rigidity_GV"
+          },
+          {
+           "species": "charge_number"
+          }
+         ]
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "validity": [
+       {
+        "input": "x_over_x0",
+        "min": 0
+       },
+       {
+        "input": "field_tesla",
+        "min": 0
+       }
+      ],
+      "required_upstreams": [],
+      "assumptions": [
+       "uniform field over the lever arm",
+       "lambda = 0 (p = p_T), normal incidence",
+       "Gaussian point errors",
+       "no misalignment",
+       "material spread uniformly along the track"
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

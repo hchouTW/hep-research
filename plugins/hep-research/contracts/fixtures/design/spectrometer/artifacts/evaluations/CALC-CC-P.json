@@ -1,0 +1,69 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "spectrometer-demo-CALC-CC-P",
+ "artifact_type": "design-evaluation",
+ "objective": "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "9e646ddd28f11d2f0cd493c85a16530130c268f7dded51c27f1e6b715f07cef8",
+   "artifact_type": "design-candidate",
+   "artifact_id": "spectrometer-demo-cand-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "runs/CALC-CC-P.computational-run.json",
+   "sha256": "553228a4a0d097f3e4cb880a6b562387cb09c5e967e04ceeb9e1b40ac6d7f131",
+   "artifact_type": "computational-run",
+   "artifact_id": "spectrometer-demo-CALC-CC-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-P.json",
+   "sha256": "c359dca7fe4409ba693ec8437dfda970f8b11304c84b36eae9e63bf2d5602362",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "spectrometer-demo-CALC-TRK-P",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "spectrometer-demo:CALC-CC-P",
+  "candidate": "spectrometer-demo:cand-P",
+  "figure_of_merit": "charge-confusion-rate",
+  "denominator": {
+   "rigidity_GV": 1000.0,
+   "species": "proton",
+   "charge_sign": "positive",
+   "curvature_offset_per_GV": 0.0
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 0.43733789386608135,
+  "unit": "1",
+  "run_ref": "runs/CALC-CC-P.computational-run.json",
+  "parameter_refs": []
+ }
+}

@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.10.0"
+CONTRACTS_VERSION = "3.11.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -160,6 +160,15 @@ CONTRACTS_VERSION = "3.10.0"
 # (theory.conventions_incomplete) skips them; the module that names a key requires it. Additive: a 3.9 reader warns on
 # the new keys and its comparison gate treats them as not comparable. No artifact type, envelope field or capability
 # changes.
+# 3.11.0 (detector system design spec, M0; docs/architecture.md section 4) adds the artifact types design-spec,
+# design-candidate and design-evaluation (contracts/schemas/ext_design_*.json; verdicts derived only by
+# contracts/design.py with the adequacy table contracts/rules/design_adequacy.json), the core vocabulary subsystem_roles,
+# the optional computational-run fields argv and script_sha256, tool contract 1.1.0 (positional arguments, config-file
+# fields and the per-operation design block; contract_version 1.0.0 or 1.1.0) and decision record 1.1.0 (the six design
+# categories, the seen marker 'not-applicable' and dispositions[], design categories only; record_version 1.0.0 or
+# 1.1.0; contracts/lineage.py). No capability is added (the 2.13.0 literature-record precedent): a 3.10 reader refuses
+# the new types, roles, run fields, sidecar versions and categories through the schema enums and additionalProperties
+# instead of misreading them, and every 3.10 artifact, 1.0.0 tool contract and 1.0.0 decision record keeps its outcome.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

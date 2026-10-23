@@ -1,0 +1,173 @@
+{
+ "$comment": "Design adequacy table (detector system design spec ADQ-01..ADQ-07, contracts 3.11.0): per figure of merit, the nature of the F1 result, the screening and compliance fidelity thresholds, the minimum relative uncertainty of an estimate, the one-sided coverage CL of rows 16 and 17 and of bound combination, the upstreams compliance needs ('with' conditions), the denominator fields it must declare and whether it is a counting quantity (exact intervals). Read only by contracts/design.py. Initial default [Proposal]: frozen only after physics review by a reviewer the maintainer names (OQ-05); until then every pass is reported as provisional. The minimum-uncertainty numbers are placeholders chosen for this initial default, not reviewed values.",
+ "adequacy_version": "1.0.0",
+ "state": "initial-default",
+ "frozen": false,
+ "reviewer": null,
+ "default_coverage_cl": 0.95,
+ "hash_exclusions": {
+  "$comment": "MAT-05: fields removed before the canonical content hash of a recomputed compliance report is compared with the one an H4 record approved; frozen with this table's version",
+  "version": "1.0.0",
+  "fields": ["provenance.created", "extension.review_axis"]
+ },
+ "budget_min_relative_uncertainty": {"measurement": 0.02, "catalog": 0.05, "estimate": 0.2},
+ "f5_min_relative_uncertainty": 0.05,
+ "species": {
+  "$comment": "charge number and mass (GeV) of the species a denominator may name; masses from PDG RPP 2024 (proton, electron, muon) and the alpha-particle and deuteron masses of CODATA 2018",
+  "proton": {"charge": 1, "mass_GeV": 0.93827208816},
+  "antiproton": {"charge": -1, "mass_GeV": 0.93827208816},
+  "electron": {"charge": -1, "mass_GeV": 0.00051099895},
+  "positron": {"charge": 1, "mass_GeV": 0.00051099895},
+  "muon": {"charge": -1, "mass_GeV": 0.1056583755},
+  "deuteron": {"charge": 1, "mass_GeV": 1.87561294257},
+  "helium-4": {"charge": 2, "mass_GeV": 3.7273794066}
+ },
+ "sources": {
+  "detector-design-principles": "skills/hep-detector/references/detector-design-principles.md (fidelity ladder analytic -> toy -> Geant4 -> test beam)",
+  "charge-confusion": "skills/hep-detector/references/charge-confusion.md (the Gaussian core is only a lower bound; far from MDR tails dominate)",
+  "tracking-and-vertexing": "skills/hep-detector/references/tracking-and-vertexing.md (PDG fit form of the scattering term; Gluckstern)",
+  "spec": "detector system design spec 1.0 (2026-10-23), section 6.3 ADQ-05"
+ },
+ "figures_of_merit": {
+  "momentum-resolution-core": {
+   "kind": "performance",
+   "f1_nature": "optimistic only above the crossover rigidity (measurement-dominated: ideal Gaussian point errors, uniform field, no alignment errors, no energy loss or nuclear interactions, no pattern-recognition failures); an estimate below it (PDG 0.016 GeV coefficient, uniform material, no Highland log term: about 20% to 50% above the best fit)",
+   "screening": "F1", "compliance": "F3",
+   "min_relative_uncertainty": 0.2, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": ["rigidity_GV", "species"],
+   "compliance_upstreams": [],
+   "rationale": "tracker_resolution.py is a design estimate, not a track fit; compliance needs F3 with response tails, alignment and material terms as declared inputs",
+   "source": ["spec", "tracking-and-vertexing"]
+  },
+  "maximum-detectable-rigidity": {
+   "kind": "performance",
+   "f1_nature": "optimistic for the exact fit (in the high-rigidity regime F1 agrees with the best fit); with Gluckstern (N < 10) the intrinsic term is too large and the MDR too low, so that operation is an estimate with the Gluckstern bias in its uncertainty",
+   "screening": "F1", "compliance": "F3",
+   "min_relative_uncertainty": 0.1, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": ["species", "mdr_definition"],
+   "compliance_upstreams": [],
+   "rationale": "by definition the core resolution; the denominator declares the definition (intrinsic term only, or total resolution reaching 100%)",
+   "source": ["spec", "tracking-and-vertexing"]
+  },
+  "charge-confusion-rate": {
+   "kind": "performance",
+   "f1_nature": "optimistic: Gaussian core only, assuming the upstream curvature resolution is itself a lower bound (not below the crossover rigidity) and no curvature offset; rigidity ranges where these fail are outside the contract's validity domain",
+   "screening": "F1", "compliance": "F4",
+   "min_relative_uncertainty": 0.3, "coverage_cl": 0.95, "counting": true,
+   "denominator_required": ["rigidity_GV", "species", "charge_sign", "curvature_offset_per_GV"],
+   "compliance_upstreams": [["charge-confusion-data-validation"]],
+   "rationale": "far from the MDR the rate is set by tails from large-angle scattering, nuclear interactions, wrong hit association and secondaries; compliance needs F4 with tails validated by data (at least two routes)",
+   "source": ["spec", "charge-confusion"]
+  },
+  "charge-confusion-data-validation": {
+   "kind": "validation",
+   "f1_nature": "no F1 tool: a data-driven check of the simulated tails (control samples or test beam)",
+   "screening": "F4", "compliance": "F4",
+   "min_relative_uncertainty": 0.3, "coverage_cl": 0.95, "counting": true,
+   "denominator_required": ["rigidity_GV", "species", "charge_sign"],
+   "compliance_upstreams": [],
+   "rationale": "the 'with tails validated by data' condition of the charge-confusion row as a required upstream (ADQ-02)",
+   "source": ["spec"]
+  },
+  "calorimeter-energy-resolution": {
+   "kind": "performance",
+   "f1_nature": "evaluate with design coefficients is optimistic (the constant term excludes leakage, intercalibration and non-uniformity); a fit to measured points is an estimate; the three-term formula describes only the core",
+   "screening": "F1", "compliance": "F4",
+   "min_relative_uncertainty": 0.1, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": ["energy_GeV", "species"],
+   "compliance_upstreams": [["calorimeter-calibration-plan", "calorimeter-constant-term-measurement"]],
+   "rationale": "leakage and non-linearity need simulation; the constant term comes from intercalibration and non-uniformity, which Geant4 does not include automatically",
+   "source": ["spec"]
+  },
+  "shower-containment": {
+   "kind": "performance",
+   "f1_nature": "no F1 or F2 tool (capability.unavailable below F4)",
+   "screening": "F4", "compliance": "F4",
+   "min_relative_uncertainty": 0.1, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": ["energy_GeV", "species"],
+   "compliance_upstreams": [],
+   "rationale": "toy_spectrometer.py does not simulate calorimeters",
+   "source": ["spec"]
+  },
+  "pid-separation-power": {
+   "kind": "performance",
+   "f1_nature": "optimistic: TOF uses only the timing resolution (no momentum, path-length or start-time errors); dE/dx omits the density effect for beta gamma > 4",
+   "screening": "F1", "compliance": "F3",
+   "min_relative_uncertainty": 0.1, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": ["momentum_GeV", "species", "separation_convention"],
+   "compliance_upstreams": [],
+   "rationale": "needs the number of samples and correlations; single and quadrature conventions differ by sqrt(2)",
+   "source": ["spec"]
+  },
+  "pid-rejection": {
+   "kind": "performance",
+   "f1_nature": "optimistic: real responses have heavier tails than a Gaussian, and multiplying rejections as if independent overestimates them",
+   "screening": "F1", "compliance": "F4",
+   "min_relative_uncertainty": 0.3, "coverage_cl": 0.95, "counting": true,
+   "denominator_required": ["momentum_GeV", "species", "working_point_efficiency", "separation_convention"],
+   "compliance_upstreams": [],
+   "rationale": "rejection is set by tails; an optimistic value that misses a >= target is enough to judge non-compliance",
+   "source": ["spec"]
+  },
+  "geometric-acceptance": {
+   "kind": "performance",
+   "f1_nature": "optimistic at low rigidity in the straight-line limit, only for apertures on one straight axis",
+   "screening": "F1", "compliance": "F2",
+   "min_relative_uncertainty": 0.05, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": ["rigidity_GV", "species", "charge_sign"],
+   "compliance_upstreams": [],
+   "rationale": "spectrometer acceptance depends on rigidity, charge sign and source spectrum; compliance needs in-field tracking (F2)",
+   "source": ["spec"]
+  },
+  "mass-budget": {
+   "kind": "budget", "budget_quantity": "mass",
+   "f1_nature": "estimate with per-item uncertainty (an arithmetic sum)",
+   "screening": "F1", "compliance": "F1",
+   "min_relative_uncertainty": 0.0, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": [],
+   "compliance_upstreams": [],
+   "rationale": "not a physics performance prediction; engineering review belongs to the review axis",
+   "source": ["spec"]
+  },
+  "power-budget": {
+   "kind": "budget", "budget_quantity": "power",
+   "f1_nature": "estimate with per-item uncertainty (an arithmetic sum)",
+   "screening": "F1", "compliance": "F1",
+   "min_relative_uncertainty": 0.0, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": [],
+   "compliance_upstreams": [],
+   "rationale": "not a physics performance prediction; engineering review belongs to the review axis",
+   "source": ["spec"]
+  },
+  "channel-count-budget": {
+   "kind": "budget", "budget_quantity": "channel_count",
+   "f1_nature": "estimate with per-item uncertainty (an arithmetic sum)",
+   "screening": "F1", "compliance": "F1",
+   "min_relative_uncertainty": 0.0, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": [],
+   "compliance_upstreams": [],
+   "rationale": "not a physics performance prediction; engineering review belongs to the review axis",
+   "source": ["spec"]
+  },
+  "data-rate-budget": {
+   "kind": "budget", "budget_quantity": "data_rate",
+   "f1_nature": "estimate with per-item uncertainty (an arithmetic sum)",
+   "screening": "F1", "compliance": "F1",
+   "min_relative_uncertainty": 0.0, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": [],
+   "compliance_upstreams": [],
+   "rationale": "not a physics performance prediction; engineering review belongs to the review axis",
+   "source": ["spec"]
+  },
+  "expected-precision": {
+   "kind": "performance",
+   "f1_nature": "combined along the chain (CMB-*); a chain assembled from F1 charge confusion is optimistic and can only exclude",
+   "screening": "F1", "compliance": "F3",
+   "min_relative_uncertainty": 0.05, "coverage_cl": 0.95, "counting": false,
+   "denominator_required": [],
+   "compliance_upstreams": [],
+   "rationale": "every input in the chain reaches its own compliance threshold (F4 plus data validation for charge confusion); required upstreams are declared by the tool contract",
+   "source": ["spec"]
+  }
+ }
+}

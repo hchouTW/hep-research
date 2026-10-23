@@ -1,0 +1,73 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "spectrometer-demo-CALC-TRK-P",
+ "artifact_type": "design-evaluation",
+ "objective": "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "9e646ddd28f11d2f0cd493c85a16530130c268f7dded51c27f1e6b715f07cef8",
+   "artifact_type": "design-candidate",
+   "artifact_id": "spectrometer-demo-cand-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "runs/CALC-TRK-P.computational-run.json",
+   "sha256": "217c183bcf85db9b5d0217b6f351626146fdeb6f5400c0ccb88225fe7dde6736",
+   "artifact_type": "computational-run",
+   "artifact_id": "spectrometer-demo-CALC-TRK-P",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "spectrometer-demo:CALC-TRK-P",
+  "candidate": "spectrometer-demo:cand-P",
+  "figure_of_merit": "momentum-resolution-core",
+  "denominator": {
+   "rigidity_GV": 1000.0,
+   "species": "proton"
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 6.340265698518221,
+  "unit": "1",
+  "run_ref": "runs/CALC-TRK-P.computational-run.json",
+  "parameter_refs": [
+   "DES-MAG-001.parameters.field_T",
+   "DES-TRK-001.parameters.layer_positions_m",
+   "DES-TRK-001.parameters.layer_x_over_x0",
+   "DES-TRK-001.parameters.passive_x_over_x0",
+   "DES-TRK-001.parameters.point_resolution_um"
+  ],
+  "validity": {
+   "assumptions": [
+    "uniform field",
+    "lambda = 0",
+    "Gaussian point errors",
+    "no misalignment"
+   ],
+   "in_domain": true
+  }
+ }
+}

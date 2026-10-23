@@ -1,5 +1,5 @@
 {
- "contracts_version": "3.10.0",
+ "contracts_version": "3.11.0",
  "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
  "vocabularies": {
   "levels": {
@@ -199,6 +199,21 @@
    "roc-auc": "Area under the ROC curve (an ML metric; not downstream evidence)",
    "accuracy": "Classification accuracy (an ML metric; not downstream evidence)",
    "loss": "Training or validation loss (an ML metric; not downstream evidence)"
+  },
+  "subsystem_roles": {
+   "tracking": "Position-sensitive layers that measure a trajectory",
+   "bending": "Magnet that bends charged tracks (field, bending power)",
+   "calorimetry-em": "Electromagnetic calorimeter",
+   "calorimetry-had": "Hadronic calorimeter",
+   "tof": "Time-of-flight system",
+   "rich": "Ring-imaging Cherenkov detector",
+   "trd": "Transition-radiation detector",
+   "dedx": "Specific-ionization (dE/dx) measurement",
+   "muon": "Muon system",
+   "trigger": "Trigger system",
+   "veto": "Anticoincidence or veto counter",
+   "active-target": "Active target or detection medium",
+   "shielding": "Passive shielding"
   }
  }
 }

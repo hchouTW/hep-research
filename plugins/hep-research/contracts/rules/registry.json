@@ -3543,6 +3543,31 @@
    ],
    "not_available": [],
    "full": false
+  },
+  {
+   "id": "detector-design",
+   "change": "detector system design verdicts, adequacy table, design fixtures, tool contracts, decision lineage",
+   "patterns": [
+    "contracts/design.py",
+    "contracts/rules/design_adequacy.json",
+    "contracts/fixtures/design/**",
+    "contracts/tool_contract.py",
+    "contracts/tool_contracts/**",
+    "contracts/lineage.py",
+    "tests/contracts/design_fixtures.py",
+    "tests/contracts/test_design_*.py"
+   ],
+   "checks": [
+    "tests.contracts.test_design_verdicts",
+    "tests.contracts.test_design_aggregation",
+    "tests.contracts.test_design_contracts",
+    "tests.contracts.test_tool_contract",
+    "tests.contracts.test_lineage",
+    "tests.contracts.test_contracts",
+    "part:static"
+   ],
+   "not_available": [],
+   "full": false
   }
  ]
 }
