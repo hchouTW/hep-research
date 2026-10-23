@@ -40,7 +40,7 @@
   },
   "hep-theory": {
    "references": 21,
-   "bytes": 158700,
+   "bytes": 159506,
    "uncited": 0
   }
  },
@@ -3860,8 +3860,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-new-physics.md",
    "owner": "hep-theory",
-   "bytes": 7406,
-   "lines": 96,
+   "bytes": 7764,
+   "lines": 99,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/README.md",
@@ -3870,13 +3870,13 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "56fc5943 2026-10-23"
+   "last_commit": "d52d456c 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 23575,
-   "lines": 279,
+   "bytes": 23808,
+   "lines": 283,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/README.md",
@@ -3887,7 +3887,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "872f5de4 2026-10-23"
+   "last_commit": "d52d456c 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
@@ -4168,8 +4168,8 @@
   {
    "path": "skills/hep-theory/references/solar-modulation-models.md",
    "owner": "hep-theory",
-   "bytes": 6232,
-   "lines": 72,
+   "bytes": 6447,
+   "lines": 74,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/README.md",
@@ -4180,7 +4180,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "56fc5943 2026-10-23"
+   "last_commit": "d52d456c 2026-10-23"
   }
  ],
  "overlap_pairs": [],

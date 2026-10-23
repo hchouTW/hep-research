@@ -14,7 +14,9 @@ initials and order) and the pages now carry the read level "full text, 2026-10-2
 sources list were then confirmed at arXiv, INSPIRE-HEP and Crossref. Closed afterwards: the HAWC diffusion
 coefficient (Table 1) and the Wilcox L and R tilt-model assumptions (the observatory's page) are now cited, the
 antiproton "no newer determination" search is refreshed (2026-10-23), the 2021 AAfrag comparison is cited, and the
-opt12/opt22 origin and Weinrich label differences between papers are noted; only the Planck 2018 limit stays unread.
+opt12/opt22 origin and Weinrich label differences between papers are noted. The Planck 2018 annihilation bound
+(Sect. 7.9, Eq. 89c) is cited on the new-physics page, and Usoskin et al. 2005 (read from the authors' copy) again
+supports the LIS factor-2 and linear-conversion statements (App. A, Eq. A4); no listed source remains unread.
 
 Routing (T2): the hep-theory description names "cosmic-ray propagation and solar modulation" (1,020 of 1,024
 characters; room made by dropping three phrases no routing case pins: "importing", "truncation", "and its global

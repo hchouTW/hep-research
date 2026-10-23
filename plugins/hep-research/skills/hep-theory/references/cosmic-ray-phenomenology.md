@@ -213,7 +213,7 @@ First read on 2026-10-20 through a summarizing fetch (a search snippet under hep
 (arXiv PDF at the version listed, else the current one; the two Bartels sources and the proceedings from their own pages), and each
 attribution, section, equation and number on this page, [solar modulation models](solar-modulation-models.md) and
 [cosmic-ray new physics](cosmic-ray-new-physics.md) was checked against it and corrected where it differed (VALIDATION
-TH13-SOURCES). Usoskin et al. 2005 (JGR) was not opened and nothing rests on it. Journal references and DOIs were
+TH13-SOURCES); Usoskin et al. 2005 from the authors' institutional copy. Journal references and DOIs were
 confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
 
 - A.W. Strong, I.V. Moskalenko, arXiv:astro-ph/9807150v2 (DOI 10.1086/306470); abstract, Secs. 2-3 (Eq. 1),
@@ -252,7 +252,8 @@ confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
   4.1-4.4.
 - HelMod: S. Della Torre et al., arXiv:1612.08445; M.J. Boschini et al., arXiv:1903.07501, arXiv:1704.06337.
 - N. Tomassetti et al., arXiv:1707.06916 (ApJL 849 (2017) L32); abstract, Secs. 1-3.
-- I.G. Usoskin et al., JGR 110 (2005) A12108, DOI 10.1029/2005JA011250 (not opened); and arXiv:1705.07197 (DOI
+- I.G. Usoskin et al., JGR 110 (2005) A12108, DOI 10.1029/2005JA011250 (copy at
+  https://cosmicrays.oulu.fi/phi/2005JA011250.pdf), App. A, Fig. A1, Eq. A4; and arXiv:1705.07197 (DOI
   10.1002/2016JA023819), abstract, Secs. 2, 6.3.
 - Bartels rotations: WDC Kp/Ap format description, https://ftp.space.dtu.dk/WDC/indices/kp-ap/wdc/wdc_fmt.txt;
   Caltech ACE Science Center table, https://izw1.caltech.edu/ACE/ASC/DATA/bartels/Bartels2008-2027.pdf. Tilt
@@ -275,4 +276,7 @@ confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
   A. Vittino, arXiv:1507.07001 (JCAP 05 (2016) 031); Y.-C. Ding et al., arXiv:2104.14881 (JCAP 09 (2021) 005, DOI
   10.1088/1475-7516/2021/09/005).
 
-Not verified and therefore not used: the Planck 2018 annihilation limit (the paper was not read).
+- Planck Collaboration, Planck 2018 results VI, arXiv:1807.06209v4 (A&A 641 (2020) A6); Sect. 7.9, Eqs. 88-89, Fig. 46.
+
+Not verified and therefore not used: none at present (the last items, the Planck limit and Usoskin et al. 2005, were
+read in full on 2026-10-23).

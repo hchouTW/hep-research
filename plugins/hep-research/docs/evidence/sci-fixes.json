@@ -5408,10 +5408,8 @@
      "read": "2026-10-23"
     }
    ],
-   "gaps": [
-    "Usoskin et al. 2005 (JGR) not opened; nothing rests on it now"
-   ],
-   "note": "yes for every arXiv source (full text at the cited version, 2026-10-23) and the Bartels and ICRC sources; each correction rechecked against its quoted passage; journal references and all 16 DOIs confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23)"
+   "gaps": [],
+   "note": "yes for every arXiv source (full text at the cited version, 2026-10-23) and the Bartels and ICRC sources; each correction rechecked against its quoted passage; journal references and all 16 DOIs confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23); Usoskin et al. 2005 read from the authors' institutional copy and the Planck 2018 limit (arXiv:1807.06209v4 Sect. 7.9) read, 2026-10-23"
   }
  ],
  "superseded": [

@@ -21,7 +21,9 @@ In order of cost:
 | Numerical transport | Parker equation: convection, drifts, diffusion, adiabatic energy change (Potgieter 2013, Sec. 4.1, Eq. 5); HelMod: 2D Monte Carlo with symmetric and antisymmetric diffusion tensor | Potgieter 2013; Della Torre et al. (arXiv:1612.08445), abstract |
 
 - **phi depends on the LIS.** The force-field potential has no absolute meaning: it depends on the assumed local
-  interstellar spectrum (Usoskin et al. 2017, Sec. 6.3; Gieseler, Heber and Herbst 2017, abstract). The 2011 and 2017
+  interstellar spectrum (Usoskin et al. 2017, Sec. 6.3; Gieseler, Heber and Herbst 2017, abstract). LIS models differ
+  by up to a factor 2 at low energy, and phi from one LIS converts to another only approximately and linearly, e.g.
+  phi_WH03 = 0.97 phi_0 - 110 MV (Usoskin et al. 2005, App. A, Fig. A1, Eq. A4). The 2011 and 2017
   series, which differ in LIS, yield function and calibration, are related tightly but slightly nonlinearly (Usoskin
   et al. 2017, Sec. 6.3, Fig. 10). Never
   mix phi values from different LIS, and never use a published phi series with another LIS without converting.

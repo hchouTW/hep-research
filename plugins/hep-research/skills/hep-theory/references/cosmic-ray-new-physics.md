@@ -51,7 +51,10 @@ One published antiproton excess and its reassessment is the reference case:
 ## Dark matter to positrons
 
 Sommerfeld-enhanced s-wave annihilation fitted to the positron excess faces severe constraints from dwarf-galaxy gamma
-rays and the CMB (Ding et al. 2021, abstract, which proposes p-wave annihilation to evade them); combined dwarf limits
+rays and the CMB (Ding et al. 2021, abstract, which proposes p-wave annihilation to evade them). The CMB bound is
+p_ann = f_eff <sigma v>/m_chi < 3.2 x 10^-28 cm^3 s^-1 GeV^-1 at 95% for s-wave annihilation, f_eff the fraction of
+the energy deposited around z ~ 600 (temperature, polarization, lensing and BAO; Planck 2018 VI, Sect. 7.9, Eqs.
+88-89c), and the positron-fraction regions for annihilation into muons are in strong tension with it (Fig. 46); combined dwarf limits
 fall below the thermal cross section for masses below about 100 GeV in quark and tau channels (dwarf-galaxy gamma-ray
 search 2015, abstract). Lepton data can, in some cases, constrain dark matter as strongly as or more strongly than
 other indirect probes (Di Mauro et al. 2016, abstract). The excess is defined against a secondary positron prediction whose production cross
