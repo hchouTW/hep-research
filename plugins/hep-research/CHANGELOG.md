@@ -7,6 +7,28 @@ Software checks establish contract consistency only, not physical validity.
 
 Contracts 3.11.0 (minor; no capability added).
 
+- Detector system design, milestone M1 (analytic MVP, F1 end to end):
+  `skills/hep-detector/scripts/evaluate_design.py` (`run`: one design-evaluation from the tool contract that computes
+  the figure of merit at the requested fidelity, its inputs recomputed from the candidate, denominator and upstream
+  evaluations by `contracts/design.py`, the output, computational-run with `argv`, `script_sha256`,
+  `versions.plugin_release` and generated config files, and a `capability.unavailable` evaluation when no evaluator
+  exists; `budget`; `plan`; `report`: the design report as a `communication` artifact with a Markdown rendering,
+  derived by design.py, `--omit` hides an evaluation from the rendering only) and
+  `skills/hep-detector/scripts/design_estimates.py` (`budget-sum`, `straight-line-acceptance` of coaxial apertures,
+  `pid-rejection` from a separation power and a working-point efficiency). Design contracts (tool contract 1.1.0) for
+  `multiple_scattering` (Gluckstern MDR as an estimate with a 12% relative uncertainty; positional stack file
+  generated from the candidate), `cherenkov_angle` and `pid_separation_power` (TOF; separation power, optimistic),
+  `design_estimates` and the exact-fit MDR of `tracker_resolution` (optimistic). The tool contract design block gains
+  the expressions `budget`, `object`, `zip`, `config`, `span` and species constants by `of`, and an `uncertainty`
+  location; `contracts/design.py` checks generated config files against the run's input_manifest (ART-72) and the
+  uncertainty against the contract, and checks the comparison basis only among candidates not screened out.
+  Reference `skills/hep-detector/references/system-design-workflow.md` (usage levels L0-L2, stages D0-D4, verdict
+  codes), linked from `detector-design-principles.md` (registered as a hub). Example A
+  `examples/design-space-spectrometer` (AMS-like, public facts from the `experiment:ams-02` ledger: ams02:C93, C94,
+  C112, C175): the M0 verdicts reproduced through evaluate_design.py, equal-mass basis checked, ranking not given.
+  Routing set DSD (4 cases); capability `detector-design` extended (items DSD-M0, DSD-M1; OQ-17). Open items: OQ-01
+  (entry under hep-detector with a hub link), OQ-04 (no candidate ranking in the first release), OQ-17, OQ-20 (public
+  profile only).
 - Detector system design, milestone M0 (verdict rules first; spec 1.0 of the Detector System Design Architecture v2):
   three artifact types `design-spec`, `design-candidate` and `design-evaluation`
   (`contracts/schemas/ext_design_*.json`) and the core vocabulary `subsystem_roles`; `contracts/design.py` derives

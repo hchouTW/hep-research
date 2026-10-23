@@ -1,0 +1,168 @@
+{
+ "label": "SYNTHETIC design study (AMS-like; not the AMS-02 detector)",
+ "design_id": "ams-like-v1",
+ "evaluations": {
+  "cand-S": {
+   "resolution": 0.4394251686829922,
+   "resolution_bound": "optimistic",
+   "charge_confusion": 0.011431975894302972,
+   "charge_confusion_bound": "optimistic",
+   "mass_kg": 2400.0
+  },
+  "cand-L": {
+   "resolution": 0.22924454800949662,
+   "resolution_bound": "optimistic",
+   "charge_confusion": 6.4394109427811344e-06,
+   "charge_confusion_bound": "optimistic",
+   "mass_kg": 2395.0
+  },
+  "cand-P": {
+   "resolution": 5.663090414912533,
+   "resolution_bound": "optimistic",
+   "charge_confusion": 0.4299183552283904,
+   "charge_confusion_bound": "optimistic",
+   "mass_kg": 2150.0
+  }
+ },
+ "verdicts": {
+  "REQ-TRK-001 cand-L": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "provisional": false,
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "REQ-TRK-001 cand-P": {
+   "result": "fail",
+   "codes": [
+    "bound.excludes"
+   ],
+   "provisional": false,
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "REQ-TRK-001 cand-S": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "provisional": false,
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "REQ-CC-001 cand-L": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "provisional": false,
+   "missing_evidence": [
+    "charge-confusion-data-validation (required for compliance, ADQ-02)",
+    "charge-confusion-rate at F4 or above (compliance threshold)",
+    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1)"
+   ],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "REQ-CC-001 cand-P": {
+   "result": "fail",
+   "codes": [
+    "bound.excludes"
+   ],
+   "provisional": false,
+   "missing_evidence": [
+    "charge-confusion-data-validation (required for compliance, ADQ-02)",
+    "charge-confusion-rate at F4 or above (compliance threshold)",
+    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-P, now F1)"
+   ],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "REQ-CC-001 cand-S": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "provisional": false,
+   "missing_evidence": [
+    "charge-confusion-data-validation (required for compliance, ADQ-02)",
+    "charge-confusion-rate at F4 or above (compliance threshold)",
+    "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1)"
+   ],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "CON-MASS-001 cand-L": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "provisional": true,
+   "missing_evidence": [],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "CON-MASS-001 cand-P": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "provisional": true,
+   "missing_evidence": [],
+   "status_axis": [
+    "synthetic"
+   ]
+  },
+  "CON-MASS-001 cand-S": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "provisional": true,
+   "missing_evidence": [],
+   "status_axis": [
+    "synthetic"
+   ]
+  }
+ },
+ "comparison_basis": {
+  "declared": true,
+  "holds": true,
+  "reason": null
+ },
+ "ranking": "not-provided",
+ "gate_flags": [
+  "gate.H1_missing",
+  "gate.H2_missing",
+  "gate.H3_missing"
+ ],
+ "pass": {
+  "no_design_errors": true,
+  "probe_fails_resolution": true,
+  "reasonable_inconclusive": true,
+  "missing_evidence_listed": true,
+  "probe_screened_out": true,
+  "equal_mass_basis_checked": true,
+  "no_ranking_claimed": true,
+  "gate_flags_shown": true
+ },
+ "note": "verdicts derived by contracts/design.py; F1 analysis can exclude but not approve a candidate"
+}

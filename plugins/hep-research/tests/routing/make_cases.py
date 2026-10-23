@@ -577,6 +577,11 @@ C = [
  ("g4-crash-1", "en", "neighboring", "My Geant4 SteppingAction crashes, help me debug it; I suspect crashes and memory leaks in my user code.", "hep-computing", ["crashes and memory leaks"], "hep-detector", None, {"set": "GEANT4"}),
  ("g4-crash-2", "zh-Hant", "neighboring", "我的 Geant4 SteppingAction 一直當掉，請幫我除錯（crashes and memory leaks）。", "hep-computing", ["crashes and memory leaks"], "hep-detector", None, {"set": "GEANT4"}),
  ("j14", "en", "journey", "Run a detector simulation (Geant4) study of energy loss in thin silicon: build and run it reproducibly, check convergence, benchmark it against independent references, and write it up with citations.", "hep-detector", ["detector simulation (Geant4)"], None, "J14", {"set": "GEANT4", "chain": ["hep-detector", "hep-computing", "hep-detector", "hep-citations", "hep-authoring"], "note": "for a comparison with published data, hep-statistics comes before hep-citations"}),
+ # detector system design spec M1 (DSD): the design loop routes to hep-detector; physics goals and the forward chain neighbour it
+ ("dsd-direct-1", "en", "direct", "Compare three spectrometer layouts against my momentum-resolution and charge-confusion requirements at 1 TV and tell me which ones are excluded and what evidence is still missing.", "hep-detector", ["design principles and trade-offs"], None, None, {"set": "DSD"}),
+ ("dsd-direct-2", "zh-Hant", "direct", "請為這個磁譜儀設計建立需求、候選方案與評估，並由程式推導每個需求是否符合（design principles and trade-offs）。", "hep-detector", ["design principles and trade-offs"], None, None, {"set": "DSD"}),
+ ("dsd-neighbor-1", "en", "neighboring", "Define the physics goals and the precision we need on the antiproton-to-proton ratio before we choose a detector layout.", "hep-measurement", ["observable definition"], "hep-detector", None, {"set": "DSD"}),
+ ("dsd-neighbor-2", "zh-Hant", "neighboring", "用 Asimov 資料估計這兩個偵測器方案的預期測量精度（expected precision），nuisance 參數要怎麼放？", "hep-statistics", ["toys and Asimov datasets"], "hep-detector", None, {"set": "DSD"}),
  ("j13", "en", "journey", "Find what AMS-02 published on B/C, compare it with my propagation model, check the compatibility, and write it up.", "hep-citations", ["what a named experiment published"], None, "J13", {"set": "SPLIT", "profiles": ["experiment:ams-02"], "chain": ["hep-citations", "hep-theory", "hep-statistics", "hep-authoring"]}),
 ]
 

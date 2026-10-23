@@ -1,0 +1,70 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "ams-like-v1-CALC-MASS-P",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "9b862a1c20c3c783619d85dad287a7d039a3b698f6f61b5c7b03c5f0f56dcac9",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "runs/CALC-MASS-P.computational-run.json",
+   "sha256": "1dbba736c9a1696f3f125b31200dc1c8083afab49860da7cdb455f653f25d56a",
+   "artifact_type": "computational-run",
+   "artifact_id": "ams-like-v1-CALC-MASS-P-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "ams-like-v1:CALC-MASS-P",
+  "candidate": "ams-like-v1:cand-P",
+  "figure_of_merit": "mass-budget",
+  "denominator": {},
+  "bound": "estimate",
+  "fidelity": "F1",
+  "value": 2150.0,
+  "unit": "kg",
+  "run_ref": "runs/CALC-MASS-P.computational-run.json",
+  "parameter_refs": [
+   "budgets.mass.DES-MAG-001",
+   "budgets.mass.DES-TRK-001",
+   "subsystems"
+  ],
+  "validity": {
+   "assumptions": [],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 43.0,
+   "plus": 43.0,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

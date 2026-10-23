@@ -343,7 +343,7 @@
    ]
   },
   "expr": {
-   "$comment": "how design.py recomputes an input (ART-41, ART-61): a candidate parameter found by subsystem role, a denominator field, a species constant (design_adequacy.json species), the value of a required upstream evaluation, a constant, or a sum, product, quotient or list of these",
+   "$comment": "how design.py recomputes an input (ART-41, ART-61): a candidate parameter found by subsystem role, the budget items of a quantity over the subsystems, a denominator field, a species constant (design_adequacy.json species; 'of' names the denominator field), the value of a required upstream evaluation, a constant, a sum, product, quotient or list, an object or a zip of lists into objects, or a config file (ART-72: written as JSON, its path is the argv token)",
    "anyOf": [
     {
      "type": "object",
@@ -401,8 +401,14 @@
        "enum": [
         "charge",
         "charge_number",
-        "mass_GeV"
+        "mass_GeV",
+        "tool_name"
        ]
+      },
+      "of": {
+       "$comment": "the denominator field naming the species (default species)",
+       "type": "string",
+       "minLength": 1
       }
      }
     },
@@ -429,7 +435,8 @@
        "type": [
         "number",
         "string",
-        "array"
+        "array",
+        "boolean"
        ]
       }
      }
@@ -495,6 +502,95 @@
        "items": {
         "$ref": "#/$defs/expr"
        }
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "budget"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "budget": {
+       "type": "object",
+       "required": [
+        "quantity",
+        "field"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "quantity": {
+         "type": "string",
+         "enum": [
+          "mass",
+          "power",
+          "channel_count",
+          "data_rate"
+         ]
+        },
+        "field": {
+         "type": "string",
+         "enum": [
+          "estimate",
+          "uncertainty"
+         ]
+        }
+       }
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "object"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "object": {
+       "type": "object",
+       "additionalProperties": {
+        "$ref": "#/$defs/expr"
+       }
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "zip"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "zip": {
+       "type": "object",
+       "additionalProperties": {
+        "$ref": "#/$defs/expr"
+       }
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "config"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "config": {
+       "$ref": "#/$defs/expr"
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "span"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "span": {
+       "$ref": "#/$defs/expr"
       }
      }
     }
@@ -768,6 +864,45 @@
     },
     "note": {
      "type": "string"
+    },
+    "uncertainty": {
+     "$comment": "the uncertainty of the value: absolute at a path of the output, or relative to the value, with its coverage (FID-12)",
+     "type": "object",
+     "required": [
+      "coverage",
+      "interval",
+      "distribution"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "path": {
+       "type": "string",
+       "minLength": 1
+      },
+      "relative": {
+       "type": "number",
+       "minimum": 0
+      },
+      "coverage": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "interval": {
+       "type": "string",
+       "enum": [
+        "central",
+        "one-sided"
+       ]
+      },
+      "distribution": {
+       "type": "string",
+       "enum": [
+        "gaussian",
+        "non-gaussian",
+        "exact"
+       ]
+      }
+     }
     }
    }
   },

@@ -481,6 +481,12 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
             ('check_geant4_study.py', 'summarize', '--record', self.write('rec.json', '{}'), '--csv', 'no.csv',
              '--slab', 'Si', '--out', self.tmp / 'o.json'),
             ('geant4_benchmarks.py', 'run', '--config', self.write('bad_cfg.json', json.dumps({'schema': 'x'}))),
+            ('design_estimates.py', 'pid-rejection', '--separation', 'inf', '--efficiency', '0.9', '--convention', 'single'),
+            ('design_estimates.py', 'straight-line-acceptance', '--z-m', '0', '1e308', '--radius-m', '1e-308', '1e308',
+             '--lateral-offset-m', '0', '0'),
+            ('design_estimates.py', 'budget-sum', '--estimates', 'nan', '--uncertainties', '1'),
+            ('evaluate_design.py', 'report', '--artifacts', self.write('not_a_dir.json', '{}')),
+            ('evaluate_design.py', 'run', '--artifacts', self.tmp, '--candidate', 'x:y', '--figure-of-merit', 'nope'),
             ('geant4_benchmarks.py', 'reference', '--study-spec', ASSETS / 'geant4-study-spec.example.json',
              '--material', 'Si_study', '--particle', 'mu-', '--energy-mev', '1e308', '--thickness-mm', '1e308'),
         ]

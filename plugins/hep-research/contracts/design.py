@@ -493,6 +493,10 @@ def tokens_match(expected, tokens: list[str]) -> bool:
     return True
 
 
+class ConfigValue(dict):
+    """The content of a config-file input (ART-41, ART-72): written to a file whose path is the argv token."""
+
+
 class Evaluator:
     """Recomputes contract inputs for one evaluation (ART-41, ART-61)."""
 
@@ -513,18 +517,34 @@ class Evaluator:
         self.refs.add(f"{sid}.parameters.{spec['name']}")
         return par["value"]
 
+    def budget(self, spec: dict) -> list:
+        """The budget items of a quantity over the subsystems, sorted by subsystem id; the subsystem list itself is a
+        parameter read (CHN-10), and a row without estimate and uncertainty is skipped (row 6 reports it)."""
+        rows = self.proj.effective_budgets(self.ev.ext.get("candidate", "")).get(spec["quantity"], {})
+        self.refs.add("subsystems")
+        out = []
+        for sid in sorted(self.subs):
+            item = rows.get(sid)
+            if isinstance(item, dict) and "estimate" in item and "uncertainty" in item:
+                self.refs.add(f"budgets.{spec['quantity']}.{sid}")
+                out.append(item[spec["field"]])
+        return out
+
     def __call__(self, e: dict):
         den = self.ev.ext.get("denominator") or {}
         if "parameter" in e:
             return self.param(e["parameter"])
+        if "budget" in e:
+            return self.budget(e["budget"])
         if "denominator" in e:
             if e["denominator"] not in den:
                 raise ExprError(f"the denominator has no {e['denominator']!r}")
             return den[e["denominator"]]
         if "species" in e:
-            sp = self.proj.species(str(den.get("species")))
-            if sp is None:
-                raise ExprError(f"species {den.get('species')!r} is not in the adequacy table")
+            name = den.get(e.get("of", "species"))
+            sp = self.proj.species(str(name))
+            if sp is None or (e["species"] != "charge_number" and e["species"] not in sp):
+                raise ExprError(f"species {name!r} has no {e['species']!r} in the adequacy table")
             return abs(sp["charge"]) if e["species"] == "charge_number" else sp[e["species"]]
         if "upstream" in e:
             if e["upstream"] not in self.up:
@@ -534,6 +554,25 @@ class Evaluator:
             return e["const"]
         if "list" in e:
             return [x for a in e["list"] for x in flat(self(a))]
+        if "object" in e:
+            return {k: self(v) for k, v in e["object"].items()}
+        if "zip" in e:
+            cols = {k: self(v) for k, v in e["zip"].items()}
+            lengths = {len(v) for v in cols.values() if isinstance(v, list)}
+            if len(lengths) != 1:
+                raise ExprError("zip needs lists of one common length")
+            size = lengths.pop()
+            return [{k: (v[i] if isinstance(v, list) else v) for k, v in cols.items()} for i in range(size)]
+        if "span" in e:
+            vals = [x for x in flat(self(e["span"])) if isinstance(x, (int, float)) and not isinstance(x, bool)]
+            if len(vals) < 2:
+                raise ExprError("span needs at least two numbers")
+            return max(vals) - min(vals)
+        if "config" in e:
+            val = self(e["config"])
+            if not isinstance(val, dict):
+                raise ExprError("a config file holds a JSON object")
+            return ConfigValue(val)
         args = [self(a) for a in (e.get("sum") or e.get("product") or e.get("quotient") or [])]
         nums = [flat(a) for a in args]
         if any(not all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in n) for n in nums):
@@ -541,14 +580,23 @@ class Evaluator:
         if "sum" in e:
             return math.fsum(x for n in nums for x in n)
         out = nums[0] if len(nums[0]) > 1 else nums[0][0]
-        for n in nums[1:]:
-            if len(n) != 1:
+        for arg in nums[1:]:
+            if len(arg) != 1:
                 raise ExprError("product and quotient take scalars after the first argument")
-            if "quotient" in e and n[0] == 0:
+            if "quotient" in e and arg[0] == 0:
                 raise ExprError("division by zero")
             op = (lambda a, b: a * b) if "product" in e else (lambda a, b: a / b)
-            out = [op(x, n[0]) for x in out] if isinstance(out, list) else op(out, n[0])
+            out = [op(x, arg[0]) for x in out] if isinstance(out, list) else op(out, arg[0])
         return out
+
+
+def same(a, b) -> bool:
+    """Deep equality with numbers compared by close()."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        return set(a) == set(b) and all(same(a[k], b[k]) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(same(x, y) for x, y in zip(a, b))
+    return close(a, b)
 
 
 def condition_holds(c: dict, inputs: dict, den: dict, output, up_bounds: dict) -> bool | None:
@@ -607,6 +655,106 @@ def moved_upstream_value(up: Evaluation, direction: str, case: str, n_estimates:
     if hw is None:
         raise ExprError(f"upstream estimate {up.eid} has no uncertainty convertible to the one-sided {level:.4g} level")
     return v - hw if smaller else v + hw
+
+
+@dataclass
+class Prepared:
+    """What a contract operation's design block gives for one evaluation before and after its tool runs: the inputs
+    recomputed from the candidate, the denominator and the upstream evaluations (ART-41, ART-61), the parameters read,
+    the upstream (bound, direction) pairs, and problems (errors and invalid-input reasons)."""
+    expected: dict
+    refs: set
+    directions: list
+    up_bounds: dict
+    errors: list
+    invalid: list
+
+
+def prepare(proj: Project, ev: Evaluation, fd: dict) -> Prepared:
+    """Recompute the inputs of design block fd for evaluation ev (shared by contracts/design.py and evaluate_design.py,
+    so an evaluation is written with exactly the inputs the verdict rules recompute; T-58)."""
+    from contracts.tool_contract import expr_refs
+    rules = proj.fom_rules(fd["id"]) or {}
+    errors: list[str] = []
+    invalid: list[str] = []
+    ups_by_fom: dict[str, list[Evaluation]] = {}
+    for u in ev.upstreams:
+        ups_by_fom.setdefault(u.fom, []).append(u)
+    for f, us in ups_by_fom.items():
+        if len(us) > 1:  # which one fed the input would be the agent's choice
+            errors.append(f"{len(us)} upstream evaluations of {f} among the inputs; bind one")
+    directions, feeds = [], []
+    for m in fd["inputs"]:
+        for uf in expr_refs(m["from"])[1]:
+            for u in ups_by_fom.get(uf, [])[:1]:
+                directions.append((u.bound, m.get("direction", "order-preserving")))
+                feeds.append((u, m.get("direction", "order-preserving")))
+    pre_case = combine_bounds("estimate", directions)
+    cl = rules.get("coverage_cl", proj.adequacy.get("default_coverage_cl", 0.95))
+    n_est = sum(1 for u, _ in feeds if u.bound == "estimate")
+    upstream_values = {}
+    try:
+        for u, d in feeds:
+            urules = proj.fom_rules(u.fom) or {}
+            upstream_values[u.fom] = moved_upstream_value(u, d, pre_case, n_est, cl, bool(urules.get("counting")))
+    except ExprError as exc:
+        invalid.append(str(exc))
+        upstream_values = {u.fom: u.ext.get("value") for u, _ in feeds}
+    evaluator = Evaluator(proj, ev, proj.effective(ev.ext.get("candidate", "")) or {}, upstream_values)
+    expected: dict[str, Any] = {}
+    for m in fd["inputs"]:
+        try:
+            expected[m["input"]] = evaluator(m["from"])
+        except ExprError as exc:
+            if "no upstream evaluation" in str(exc):
+                continue  # a missing required upstream is chain.incomplete (row 5), not a contract error
+            errors.append(f"input {m['input']}: {exc}")
+    return Prepared(expected, evaluator.refs, directions, {u.fom: u.bound for u in ev.upstreams}, errors, invalid)
+
+
+def own_bound(fd: dict, prep: Prepared, den: dict, output) -> tuple[str, str | None]:
+    """(the operation's bound: the first piece whose conditions hold, ART-40; a problem when a condition cannot be
+    evaluated)."""
+    pieces = fd["bound"] if isinstance(fd["bound"], list) else [{"bound": fd["bound"]}]
+    for piece in pieces:
+        held = [condition_holds(c, prep.expected, den, output, prep.up_bounds) for c in piece.get("when", [])]
+        if any(h is None for h in held):
+            return piece["bound"], "a bound condition of the contract cannot be evaluated for this run"
+        if all(held):
+            return piece["bound"], None
+    return "estimate", None
+
+
+def validity_reasons(fd: dict, prep: Prepared, den: dict, output) -> list[str]:
+    """FID-10: the contract's validity conditions that do not hold (row 7)."""
+    out = []
+    for c in fd.get("validity", []):
+        if condition_holds(c, prep.expected, den, output, prep.up_bounds) is False:
+            out.append(c.get("note") or f"outside the contract's validity domain: {json.dumps(c, sort_keys=True)}")
+    return out
+
+
+def output_value(fd: dict, den: dict, output):
+    """(value, path) at the contract's value location (ART-32, ART-60 c)."""
+    loc = fd["value"]
+    path = loc.get("path") or loc.get("paths", {}).get(str(den.get(loc.get("by_denominator"))))
+    v = lookup(output, path) if path and output is not None else None
+    return (v if isinstance(v, (int, float)) and not isinstance(v, bool) else None), path
+
+
+def output_uncertainty(fd: dict, output, value) -> dict | None:
+    """The uncertainty the contract declares for the operation's value (absolute at a path, or relative), or None."""
+    spec = fd.get("uncertainty")
+    if not spec or value is None:
+        return None
+    if "relative" in spec:
+        hw = abs(value) * spec["relative"]
+    else:
+        hw = lookup(output, spec["path"])
+        if not isinstance(hw, (int, float)):
+            return None
+    return {"minus": float(hw), "plus": float(hw), "coverage": spec["coverage"], "interval": spec["interval"],
+            "distribution": spec["distribution"]}
 
 
 def check_contract(proj: Project, ev: Evaluation) -> None:
@@ -696,65 +844,18 @@ def check_contract(proj: Project, ev: Evaluation) -> None:
         else:
             if hashlib.sha256(data).hexdigest() not in hashes.values():
                 ev.err("design.contract_mismatch", f"output {outs[0]!r} does not match the run's output_hashes")
-    # upstream evaluations and the composite bound (CMB-01..CMB-08)
-    ups_by_fom: dict[str, list[Evaluation]] = {}
-    for u in ev.upstreams:
-        ups_by_fom.setdefault(u.fom, []).append(u)
-    for f, us in ups_by_fom.items():
-        if len(us) > 1:  # which one fed the input would be the agent's choice
-            ev.err("design.contract_mismatch", f"{len(us)} upstream evaluations of {f} among the inputs; bind one")
-    directions = []
-    upstream_feeds = []
-    for m in fd["inputs"]:
-        from contracts.tool_contract import expr_refs
-        _, ufoms = expr_refs(m["from"])
-        for uf in ufoms:
-            for u in ups_by_fom.get(uf, [])[:1]:
-                directions.append((u.bound, m.get("direction", "order-preserving")))
-                upstream_feeds.append((u, m.get("direction", "order-preserving")))
-    # own bound: the first piece whose conditions hold (ART-40); conditions on inputs use the recomputed inputs
-    subs = proj.effective(ext["candidate"]) or {}
-    up_bounds = {u.fom: u.bound for u in ev.upstreams}
-    pre_case = combine_bounds("estimate", directions)
-    cl = rules.get("coverage_cl", proj.adequacy.get("default_coverage_cl", 0.95))
-    n_est = sum(1 for u, _ in upstream_feeds if u.bound == "estimate")
-    try:
-        upstream_values = {}
-        for u, d in upstream_feeds:
-            urules = proj.fom_rules(u.fom) or {}
-            upstream_values[u.fom] = moved_upstream_value(u, d, pre_case, n_est, cl, bool(urules.get("counting")))
-    except ExprError as exc:
-        ev.invalid.append(str(exc))
-        upstream_values = {u.fom: u.ext.get("value") for u, _ in upstream_feeds}
-    evaluator = Evaluator(proj, ev, subs, upstream_values)
-    expected: dict[str, Any] = {}
-    for m in fd["inputs"]:
-        try:
-            expected[m["input"]] = evaluator(m["from"])
-        except ExprError as exc:
-            if "no upstream evaluation" in str(exc):
-                continue  # a missing required upstream is chain.incomplete (row 5), not a contract error
-            ev.err("design.contract_mismatch", f"input {m['input']}: {exc}")
-    pieces = fd["bound"] if isinstance(fd["bound"], list) else [{"bound": fd["bound"]}]
-    own = None
-    for piece in pieces:
-        held = [condition_holds(c, expected, den, output, up_bounds) for c in piece.get("when", [])]
-        if all(h is True for h in held):
-            own = piece["bound"]
-            break
-        if any(h is None for h in held):
-            ev.err("design.contract_mismatch", "a bound condition of the contract cannot be evaluated for this run")
-            own = piece["bound"]
-            break
-    ev.bound = combine_bounds(own or "estimate", directions)
+    prep = prepare(proj, ev, fd)
+    for msg in prep.errors:
+        ev.err("design.contract_mismatch", msg)
+    ev.invalid += prep.invalid
+    own, problem = own_bound(fd, prep, den, output)
+    if problem:
+        ev.err("design.contract_mismatch", problem)
+    ev.bound = combine_bounds(own, prep.directions)
     if ev.bound != "mixed" and ext.get("bound") != ev.bound:  # ART-60 (a); composite: derived (CMB-*)
         ev.err("design.contract_mismatch", f"bound {ext.get('bound')!r}, the contract and chain give {ev.bound!r}")
-    # validity domain (FID-10): conditions false -> row 7
-    for c in fd.get("validity", []):
-        h = condition_holds(c, expected, den, output, up_bounds)
-        if h is False:
-            ev.domain.append(c.get("note") or f"outside the contract's validity domain: {json.dumps(c, sort_keys=True)}")
-    # argv inputs (ART-61) and parameter_refs (ART-60 b, TRC-08)
+    ev.domain += validity_reasons(fd, prep, den, output)
+    # argv inputs (ART-61), config files (ART-72) and parameter_refs (ART-60 b, TRC-08)
     options = {o["flag"]: o["input"] for o in op["invocation"]["options"]}
     positionals = {f"#{p['position']}": p["input"] for p in op["invocation"].get("positionals", [])}
     _, got, problems = parse_argv(argv, fd.get("operation_args", []), options, len(positionals))
@@ -762,23 +863,46 @@ def check_contract(proj: Project, ev: Evaluation) -> None:
     for p in problems:
         ev.err("design.contract_mismatch", p)
     free = set(fd.get("free_inputs", []))
-    for name in sorted(set(got) - set(expected) - free - {m["input"] for m in fd["inputs"]}):
+    for name in sorted(set(got) - set(prep.expected) - free - {m["input"] for m in fd["inputs"]}):
         ev.err("design.contract_mismatch", f"argv passes input {name!r}, which the contract's mapping does not set")
-    for name, val in expected.items():
+    manifest = {i.get("path"): i.get("sha256") for i in rext.get("input_manifest") or [] if isinstance(i, dict)}
+    for name, val in prep.expected.items():
         if name not in got:
             ev.err("design.contract_mismatch", f"argv lacks input {name!r}")
+        elif isinstance(val, ConfigValue):
+            ev.errors += [("design.contract_mismatch", m) for m in config_problems(proj, name, val, got[name], manifest)]
         elif not tokens_match(val, got[name]):
             ev.err("design.contract_mismatch", f"argv input {name!r} is {got[name]}, recomputed {val!r}")
-    if set(ext.get("parameter_refs") or []) != evaluator.refs:
+    if set(ext.get("parameter_refs") or []) != prep.refs:
         ev.err("design.contract_mismatch",
                f"parameter_refs {sorted(ext.get('parameter_refs') or [])} differ from the parameters the contract reads "
-               f"{sorted(evaluator.refs)}")
+               f"{sorted(prep.refs)}")
     if output is not None:
-        loc = fd["value"]
-        path = loc.get("path") or loc.get("paths", {}).get(str(den.get(loc.get("by_denominator"))))
-        got_v = lookup(output, path) if path else None
-        if not isinstance(got_v, (int, float)) or not close(got_v, ext["value"]):
+        got_v, path = output_value(fd, den, output)
+        if got_v is None or not close(got_v, ext["value"]):
             ev.err("design.contract_mismatch", f"value {ext['value']!r}, the output file has {got_v!r} at {path!r}")
+        unc = output_uncertainty(fd, output, got_v)
+        if unc is not None and not same(unc, ext.get("uncertainty")):
+            ev.err("design.contract_mismatch", f"uncertainty {ext.get('uncertainty')!r}, the contract gives {unc!r}")
+
+
+def config_problems(proj: Project, name: str, val: ConfigValue, tokens: list[str], manifest: dict) -> list[str]:
+    """ART-72: a config-file input is one path whose file is in the run's input_manifest with its hash and holds the
+    content recomputed from the candidate."""
+    if len(tokens) != 1:
+        return [f"config input {name!r} takes one path"]
+    p = proj.resolve(tokens[0])
+    try:
+        data = p.read_bytes()
+        doc = json.loads(data.decode("utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError) as exc:
+        return [f"config file {tokens[0]!r} of input {name!r} is not readable JSON: {exc}"]
+    out = []
+    if manifest.get(tokens[0]) != hashlib.sha256(data).hexdigest():
+        out.append(f"config file {tokens[0]!r} is not in the run's input_manifest with its sha256 (ART-72)")
+    if not same(doc, dict(val)):
+        out.append(f"config file {tokens[0]!r} differs from the content recomputed from the candidate")
+    return out
 
 
 def check_f4(proj: Project, ev: Evaluation) -> None:
@@ -1292,8 +1416,9 @@ def orphan_runs(proj: Project) -> tuple[list[dict], dict]:
 
 
 def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
-    """ART-15: the basis holds only if every pair of effective candidates differs by less than the tolerance after
-    adding the propagated uncertainty at the coverage CL, from their F1 budget evaluations of the basis quantity."""
+    """ART-15: the basis holds only if every pair of effective candidates that are not screened out differs by less
+    than the tolerance after adding the propagated uncertainty at the coverage CL, from their F1 budget evaluations of
+    the basis quantity."""
     basis = spec["extension"].get("comparison_basis")
     if not basis:
         return {"declared": False, "holds": False, "reason": "comparison_basis is not declared"}
@@ -1475,7 +1600,7 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
                          "screened_out_reasons": reasons, "at_risk": sorted(set(at_risk))})
     flags, gates = gate_flags(proj, records, current, screened, verdict_rows)
     flags = flags + change_flags
-    basis = comparison_basis(proj, spec, {d: c for d, c in groups.items()})
+    basis = comparison_basis(proj, spec, {d: c for d, c in groups.items() if not set(c) & screened})  # CHN-11 first
     stale = sorted(e.eid for e in proj.evals.values() if e.stale)
     out.update({
         "status": "error" if proj.errors else "ok",

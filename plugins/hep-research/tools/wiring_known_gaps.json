@@ -12,7 +12,8 @@
    "references/batch-scheduling.md"
   ],
   "hep-detector": [
-   "references/detector-simulation.md"
+   "references/detector-simulation.md",
+   "references/detector-design-principles.md"
   ],
   "hep-ml": [
    "references/deep-learning-guide.md"

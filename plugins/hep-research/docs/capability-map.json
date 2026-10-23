@@ -151,14 +151,16 @@
   },
   {
    "id": "detector-design",
-   "capability": "Detector design principles and a sourced detector atlas",
+   "capability": "Detector design principles, a sourced detector atlas, and the system design loop (derived verdicts)",
    "owner": "hep-detector",
    "state": "tool",
    "v1": true,
    "items": [
     "D6",
     "D13",
-    "D14"
+    "D14",
+    "DSD-M0",
+    "DSD-M1"
    ]
   },
   {

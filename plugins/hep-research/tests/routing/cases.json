@@ -5325,6 +5325,52 @@
    "note": "for a comparison with published data, hep-statistics comes before hep-citations"
   },
   {
+   "id": "dsd-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compare three spectrometer layouts against my momentum-resolution and charge-confusion requirements at 1 TV and tell me which ones are excluded and what evidence is still missing.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ],
+   "set": "DSD"
+  },
+  {
+   "id": "dsd-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請為這個磁譜儀設計建立需求、候選方案與評估，並由程式推導每個需求是否符合（design principles and trade-offs）。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ],
+   "set": "DSD"
+  },
+  {
+   "id": "dsd-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Define the physics goals and the precision we need on the antiproton-to-proton ratio before we choose a detector layout.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "observable definition"
+   ],
+   "not": "hep-detector",
+   "set": "DSD"
+  },
+  {
+   "id": "dsd-neighbor-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "用 Asimov 資料估計這兩個偵測器方案的預期測量精度（expected precision），nuisance 參數要怎麼放？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "toys and Asimov datasets"
+   ],
+   "not": "hep-detector",
+   "set": "DSD"
+  },
+  {
    "id": "j13",
    "lang": "en",
    "kind": "journey",
