@@ -1,0 +1,88 @@
+{
+ "$comment": "Initial mapping for layered spectrometer geometries (contracts 3.11.0, ART-33). Value, statistical uncertainty and model envelope are read from the study record at extension.study.results.<figure of merit>.{value, statistical_uncertainty, model_envelope} (ART-32).",
+ "mapping_version": "1.0.0",
+ "geometry": "layered-spectrometer",
+ "fields": [
+  {
+   "field": "layer_positions_m",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "layer_positions_m",
+     "unit": "m"
+    }
+   }
+  },
+  {
+   "field": "layer_x_over_x0",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "layer_x_over_x0",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "passive_x_over_x0",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "passive_x_over_x0",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "point_resolution_um",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "point_resolution_um",
+     "unit": "um"
+    }
+   }
+  },
+  {
+   "field": "field_T",
+   "from": {
+    "parameter": {
+     "role": "bending",
+     "name": "field_T",
+     "unit": "T"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "momentum-resolution-core": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "rigidity_GV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": true
+  },
+  "charge-confusion-rate": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "rigidity_GV": "number",
+    "species": "string",
+    "charge_sign": "string",
+    "curvature_offset_per_GV": "number"
+   },
+   "tail_sensitive": true
+  },
+  "shower-containment": {
+   "better": "larger",
+   "unit": "1",
+   "denominator": {
+    "energy_GeV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": false
+  }
+ }
+}

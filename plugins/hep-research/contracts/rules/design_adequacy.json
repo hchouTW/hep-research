@@ -1,5 +1,5 @@
 {
- "$comment": "Design adequacy table (detector system design spec ADQ-01..ADQ-07, contracts 3.11.0): per figure of merit, the nature of the F1 result, the screening and compliance fidelity thresholds, the minimum relative uncertainty of an estimate, the one-sided coverage CL of rows 16 and 17 and of bound combination, the upstreams compliance needs ('with' conditions), the denominator fields it must declare and whether it is a counting quantity (exact intervals). Read only by contracts/design.py. Initial default [Proposal]: frozen only after physics review by a reviewer the maintainer names (OQ-05); until then every pass is reported as provisional. The minimum-uncertainty numbers are placeholders chosen for this initial default, not reviewed values.",
+ "$comment": "Design adequacy table (detector system design spec ADQ-01..ADQ-07, contracts 3.11.0): per figure of merit, the nature of the F1 result, the screening and compliance fidelity thresholds, the minimum relative uncertainty of an estimate, the one-sided coverage CL of rows 16 and 17 and of bound combination, the upstreams compliance needs ('with' conditions), the denominator fields it must declare and whether it is a counting quantity (exact intervals). Read only by contracts/design.py. Initial default [Proposal]: frozen only after physics review by a reviewer the maintainer names (OQ-05); until then every pass is reported as provisional. The minimum-uncertainty numbers are placeholders chosen for this initial default, not reviewed values. The four ADQ-07 rows (survival-probability with its data validation, tracking-selection-efficiency, rigidity-scale-offset, low-rigidity-bias) join with M2 (OQ-09).",
  "adequacy_version": "1.0.0",
  "state": "initial-default",
  "frozen": false,
@@ -20,51 +20,60 @@
  },
  "f5_min_relative_uncertainty": 0.05,
  "species": {
-  "$comment": "charge number and mass (GeV) of the species a denominator may name; masses from PDG RPP 2024 (proton, electron, muon, charged pion and kaon) and the alpha-particle and deuteron masses of CODATA 2018; tool_name is the species name the plugin's PID tools read",
+  "$comment": "charge number and mass (GeV) of the species a denominator may name; masses from PDG RPP 2024 (proton, electron, muon, charged pion and kaon) and the alpha-particle and deuteron masses of CODATA 2018; tool_name is the species name the plugin's PID tools read; mass_number is A (0 for leptons and mesons)",
   "proton": {
    "charge": 1,
    "mass_GeV": 0.93827208816,
-   "tool_name": "p"
+   "tool_name": "p",
+   "mass_number": 1
   },
   "antiproton": {
    "charge": -1,
    "mass_GeV": 0.93827208816,
-   "tool_name": "p"
+   "tool_name": "p",
+   "mass_number": 1
   },
   "electron": {
    "charge": -1,
    "mass_GeV": 0.00051099895,
-   "tool_name": "e"
+   "tool_name": "e",
+   "mass_number": 0
   },
   "positron": {
    "charge": 1,
    "mass_GeV": 0.00051099895,
-   "tool_name": "e"
+   "tool_name": "e",
+   "mass_number": 0
   },
   "muon": {
    "charge": -1,
    "mass_GeV": 0.1056583755,
-   "tool_name": "mu"
+   "tool_name": "mu",
+   "mass_number": 0
   },
   "deuteron": {
    "charge": 1,
    "mass_GeV": 1.87561294257,
-   "tool_name": "d"
+   "tool_name": "d",
+   "mass_number": 2
   },
   "helium-4": {
    "charge": 2,
    "mass_GeV": 3.7273794066,
-   "tool_name": "He4"
+   "tool_name": "He4",
+   "mass_number": 4
   },
   "pion": {
    "charge": 1,
    "mass_GeV": 0.13957039,
-   "tool_name": "pi"
+   "tool_name": "pi",
+   "mass_number": 0
   },
   "kaon": {
    "charge": 1,
    "mass_GeV": 0.493677,
-   "tool_name": "K"
+   "tool_name": "K",
+   "mass_number": 0
   }
  },
  "sources": {
@@ -241,7 +250,7 @@
    "f1_nature": "optimistic at low rigidity in the straight-line limit, only for apertures on one straight axis",
    "screening": "F1",
    "compliance": "F2",
-   "min_relative_uncertainty": 0.05,
+   "min_relative_uncertainty": 0.01,
    "coverage_cl": 0.95,
    "counting": false,
    "denominator_required": [
@@ -330,6 +339,100 @@
    "denominator_required": [],
    "compliance_upstreams": [],
    "rationale": "every input in the chain reaches its own compliance threshold (F4 plus data validation for charge confusion); required upstreams are declared by the tool contract",
+   "source": [
+    "spec"
+   ]
+  },
+  "survival-probability": {
+   "kind": "performance",
+   "f1_nature": "estimate dominated by the inelastic cross-section uncertainty (survival_feeddown.py); the material map is counted separately",
+   "screening": "F1",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.01,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "rigidity_GV",
+    "species"
+   ],
+   "compliance_upstreams": [
+    [
+     "survival-data-validation"
+    ]
+   ],
+   "rationale": "nuclear-interaction survival and fragmentation feed-down (ADQ-07); compliance needs simulation with the material map and a data check of the survival",
+   "source": [
+    "spec"
+   ]
+  },
+  "survival-data-validation": {
+   "kind": "validation",
+   "f1_nature": "no F1 tool: survival measured with the instrument's own data (e.g. interacting versus non-interacting samples)",
+   "screening": "F4",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.01,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "rigidity_GV",
+    "species"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "the data condition of the survival row (ADQ-02)",
+   "source": [
+    "spec"
+   ]
+  },
+  "tracking-selection-efficiency": {
+   "kind": "performance",
+   "f1_nature": "no F1 tool (capability.unavailable below F4): pattern recognition and nuclear-interaction losses need simulation and data",
+   "screening": "F4",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.01,
+   "coverage_cl": 0.95,
+   "counting": true,
+   "denominator_required": [
+    "rigidity_GV",
+    "species"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "tracking and selection efficiency including pattern recognition and interaction losses (ADQ-07)",
+   "source": [
+    "spec"
+   ]
+  },
+  "rigidity-scale-offset": {
+   "kind": "performance",
+   "f1_nature": "no F1 tool: the curvature offset from weak alignment modes and field-map residuals is measured in flight; propagate_scale_distortion.py turns it into nuisances of the expected-precision chain",
+   "screening": "F3",
+   "compliance": "F5",
+   "min_relative_uncertainty": 0.1,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "rigidity_GV",
+    "species"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "rigidity scale and curvature offset (ADQ-07); a design can only plan the calibration that measures it",
+   "source": [
+    "spec"
+   ]
+  },
+  "low-rigidity-bias": {
+   "kind": "performance",
+   "f1_nature": "rigidity bias from energy loss and the mass hypothesis at low rigidity; no shipped F1 tool",
+   "screening": "F2",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.1,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "rigidity_GV",
+    "species"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "ADQ-07",
    "source": [
     "spec"
    ]

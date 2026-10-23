@@ -27,7 +27,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-L.json",
-   "sha256": "e930f7a572524d98c88328a6d2bf402225658be264b3ab122c3d3e19c2059a79",
+   "sha256": "19356d0e90549d9b944f19f7e499667ab0009a442b7077e34dad3d7edd1af518",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-CC-L",
    "status": [
@@ -36,7 +36,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-P.json",
-   "sha256": "842cbd202e3b55c8a32c20f05fcf5a9c3ff10938dbb16240d9a8a21ededc1eef",
+   "sha256": "4a87b4dafd60d4d2c49df11b349410816a889a7b1a38b6dc3de481920508d307",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-CC-P",
    "status": [
@@ -45,7 +45,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-S.json",
-   "sha256": "58f1400b08c8757093aac5cd6aea338b273226cce3e2d202d95f245b07524064",
+   "sha256": "ef2c7bb5f6ac5a189c72b1513c469a618518877567c999103d5573711f342993",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-CC-S",
    "status": [
@@ -54,7 +54,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-L.json",
-   "sha256": "aeab98b364f007282fdda4d4efee7ed1de1323cf276174a1754a2b46195a8fa5",
+   "sha256": "88afab153c450f831c49faf7f88a4641d7a7a62294a921562edb217c6994d7c2",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-MASS-L",
    "status": [
@@ -63,7 +63,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-P.json",
-   "sha256": "7a7da2c88c5191ea7b0829dd149d8beea8b94471fdc7a0cff983a78039ee88c2",
+   "sha256": "8cce3c3ccb09e9055ac7be28b6d4bf3f8c7de50f16033909e3817b37731a9c4b",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-MASS-P",
    "status": [
@@ -72,7 +72,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-S.json",
-   "sha256": "2879d36a34e47e22a02910da48f58de68983455da29ecadb6080250bab39c908",
+   "sha256": "e61bc9186c8162cd769c515b7cd233e2f54b61de1b46b1bac35bd59e9c127a38",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-MASS-S",
    "status": [
@@ -81,7 +81,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-L.json",
-   "sha256": "40c44b25ba0a15e01330e7fe056474cfcdf1276079c0861153cb681e12bb7740",
+   "sha256": "1e0088e49ea761278cc68d74b4640fd5b511c05e6e73c07b53bdbc373a1d2deb",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-L",
    "status": [
@@ -90,7 +90,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "882f0463f9e24ff9cadfc1b181a26fd46b25837a2218246491796e27d76aae1e",
+   "sha256": "73e9045eb34cca6b0f8960b25cf2aa206ebbe95c4c5fe936a3720699a72fa67b",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-P",
    "status": [
@@ -99,7 +99,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-S.json",
-   "sha256": "b30dc129fd8cc5ce6c1a2eb956aa47c67570dde6800f9a796c49041481c97604",
+   "sha256": "871194c167b2c3c46a95f0aa7d9cc64ddc112207a5f4b2b2a965c315ea2b2459",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-S",
    "status": [
@@ -915,8 +915,8 @@
     "reason": null
    },
    "ranking": {
-    "status": "not-provided",
-    "reason": "candidate ranking is not part of the first release (OQ-04); it uses only non-optimistic evaluations with the same fidelity vector and denominator (CHN-06)"
+    "status": "refused",
+    "reason": "ams-like-v1:cand-L has no non-optimistic, current expected-precision evaluation (CHN-06)"
    },
    "errors": [],
    "omitted_from_rendering": []

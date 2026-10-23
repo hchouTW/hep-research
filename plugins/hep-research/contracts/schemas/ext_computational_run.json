@@ -98,6 +98,11 @@
     "type": "string"
    }
   },
+  "parameter_digest": {
+   "$comment": "3.11.0 (detector design M2, INC-02): the digest of the design parameters the step reads (evaluate_design.py run --digest-only), written by run_workflow.py; the incremental skip key compares it instead of the candidate files' hashes",
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
   "script_sha256": {
    "$comment": "3.11.0 (ART-70): SHA-256 of each script file named in argv, keyed by the path as it appears in argv",
    "type": "object",

@@ -7,6 +7,29 @@ Software checks establish contract consistency only, not physical validity.
 
 Contracts 3.11.0 (minor; no capability added).
 
+- Detector system design, milestone M2 (fidelity and sensitivity): parameter-level invalidation (envelope
+  `inputs[].binding: "parameters"`, `contracts/dependencies.py` warns instead of stale, `contracts/design.py` compares
+  `parameter_digest`: an evaluation goes stale only when a parameter it read changes; a forged digest is a contract
+  mismatch); `evaluate_design.py` writes parameter-bound evaluations, `run --replace` (stale only), `--digest-only`,
+  `--input-artifact`, and new subcommands `response` (F3 response assembly and a parametrized `response` artifact for
+  forward folding), `geometry` (the Geant4 study geometry from the mapping table `contracts/rules/design_geometry.json`)
+  and `f4` (an F4 evaluation from a study record, optionally re-issued by `check_geant4_study.py label --upgrade`).
+  `design_estimates.py` gains `infield-acceptance` (F2 seeded helix Monte Carlo through offset apertures),
+  `response-assembly` (F3) and `precision-from-result` (F3 expected-precision write-back from an Asimov
+  statistical-result); a design contract for `toy_spectrometer.py` resolution (F2). design.py: F4 checks (upgraded
+  study record, geometry digest, observable, value from the record, tail sources, model envelope compared end by
+  end), the CHN-06 ranking on expected precision (refused unless the basis holds and the chains are non-optimistic
+  with one fidelity vector and denominator), the missing-evidence list now names lower-fidelity entries of the same
+  figure of merit. `run_workflow.py` records `argv`, `script_sha256`, `versions.plugin_release`, the NumPy version and
+  an optional `parameter_digest`, and `--incremental` skips unchanged steps (never with an unknown release digest).
+  Adequacy table: the four ADQ-07 rows (survival probability with its data validation, tracking and selection
+  efficiency, rigidity scale and offset, low-rigidity bias; OQ-09); the acceptance minimum uncertainty 1% (OQ-05,
+  provisional). Open items: OQ-03 (the binding field, the run's parameter_digest, the design-block keys
+  `upstream_directions` and `input_artifact`, and the evaluation's `model_envelope` extend the unreleased 3.11.0),
+  OQ-08 (the geometry mapping lives in `contracts/rules/`, the spec's alternative location, because it describes no
+  command-line tool and every file in `contracts/tool_contracts/` is checked against a tool's `--help`), OQ-09, OQ-11
+  (composites declare their own uncertainty). Physics note: two apertures in a uniform field have a charge-symmetric
+  acceptance (Liouville and time reversal); a dog-leg needs at least three.
 - Detector system design, milestone M1 (analytic MVP, F1 end to end):
   `skills/hep-detector/scripts/evaluate_design.py` (`run`: one design-evaluation from the tool contract that computes
   the figure of merit at the requested fidelity, its inputs recomputed from the candidate, denominator and upstream

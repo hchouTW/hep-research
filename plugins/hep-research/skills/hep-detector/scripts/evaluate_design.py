@@ -16,8 +16,21 @@ Subcommands:
   versions.plugin_release, config files in input_manifest) and the evaluation (evaluations/) are written. fidelity,
   bound, parameter_refs, value and uncertainty are taken from the contract and the output, never from the caller.
   With no operation for that figure of merit and fidelity it writes a capability.unavailable evaluation (no value).
-  The new evaluation is checked by contracts/design.py; on a design error nothing is kept.
+  The new evaluation is checked by contracts/design.py; on a design error nothing is kept. Candidate files are bound
+  with binding "parameters" and the evaluation records parameter_digest (M2, TRC-04..TRC-08): it goes stale only when
+  a parameter it read changes. --replace replaces an evaluation of the same id that design.py finds stale (with its
+  run and output); --digest-only prints the parameters it would read and their digest without running (INC-02);
+  --input-artifact binds another artifact the operation reads (the statistical-result of the expected-precision
+  write-back, CHN-04).
 - budget: run for the budget figure of merit of --quantity (mass, power, channel_count, data_rate) (CHN-10).
+- response (M2, CHN-01): the F3 response-assembly evaluation of the resolution core (an upstream core evaluation,
+  the candidate's alignment term and declared tail) and a parametrized response artifact (responses/, intended_use
+  forward_folding) bound to it, for the measurement-spec and the Asimov fit of hep-statistics.
+- geometry (M2, ART-33..ART-35): the geometry file of a Geant4 study generated from the candidate with the mapping
+  table contracts/rules/design_geometry.json (the fields, the parameters read and their digest); sets the candidate's
+  geometry_ref. f4 (ART-31, ART-32): an F4 evaluation from a study record (re-issued first by check_geant4_study.py
+  label --upgrade with --label-spec/--label-benchmarks/--label-convergence); value, statistical uncertainty and model
+  envelope from the record; bound optimistic for resolution and confusion unless every tail source was simulated.
 - plan: the suggested next evaluations, per requirement and candidate, from the derived state (RES-04): missing
   evaluations, missing evidence for compliance, stale evaluations, missing gates. Suggestions only.
 - report: the design report, a communication artifact derived by contracts/design.py (producer_skill hep-detector):
@@ -33,8 +46,15 @@ Exit codes: 0 ok; 1 the tool failed, gave no value, or the evaluation has a desi
 input or a missing file (JSON with error on stdout).
 Usage:
   evaluate_design.py run --artifacts DIR --candidate ID (--requirement ID | --figure-of-merit FOM [--denominator K=V ...])
-      [--fidelity F1] [--tool TOOL:OP] [--upstream REL ...] [--id EVAL-ID] [--status LABEL]
+      [--fidelity F1] [--tool TOOL:OP] [--upstream REL ...] [--input-artifact REL ...] [--id EVAL-ID] [--replace]
+      [--digest-only] [--status LABEL]
   evaluate_design.py budget --artifacts DIR --candidate ID --quantity Q [--id EVAL-ID] [--status LABEL]
+  evaluate_design.py response --artifacts DIR --candidate ID (--requirement ID | --denominator K=V ...) [--upstream REL]
+      [--id EVAL-ID] [--replace] [--status LABEL]
+  evaluate_design.py geometry --artifacts DIR --candidate ID --figure-of-merit FOM --denominator K=V ... --id STUDY-ID
+  evaluate_design.py f4 --artifacts DIR --candidate ID (--requirement ID | --figure-of-merit FOM --denominator K=V ...)
+      --study REL --id SIM-ID [--label-spec S --label-benchmarks B --label-convergence C [--label-project-root R]]
+      [--status LABEL]
   evaluate_design.py plan --artifacts DIR [--decisions DIR]
   evaluate_design.py report --artifacts DIR [--decisions DIR] [--omit EVALUATION ...] [--name NAME]
 """
@@ -46,6 +66,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -194,7 +215,29 @@ def pick_upstreams(proj: design.Project, ev: design.Evaluation, fd: dict, given:
     return out
 
 
-def run_evaluation(args) -> dict:
+def remove_stale(proj: design.Project, eid: str) -> list[str]:
+    """--replace: an existing evaluation of this id may be replaced only when contracts/design.py finds it stale; its
+    run, output and config files go with it."""
+    rel = f"evaluations/{eid}.json"
+    ev = proj.evals.get(proj.resolve(rel))
+    if ev is None:
+        return []
+    if not ev.stale:
+        raise UsageError(f"{rel} is not stale: only a stale evaluation is replaced (--replace)")
+    gone = [rel]
+    run_ref = ev.ext.get("run_ref")
+    if run_ref:
+        run = proj.docs.get(proj.resolve(run_ref)) or {}
+        gone += [o.get("ref") for o in run.get("outputs") or [] if isinstance(o, dict) and o.get("ref")]
+        gone += [m["path"] for m in (run.get("extension") or {}).get("input_manifest", [])
+                 if isinstance(m, dict) and str(m.get("path", "")).startswith(f"configs/{eid}.")]
+        gone.append(run_ref)
+    for r in gone:
+        (proj.root / r).unlink(missing_ok=True)
+    return gone
+
+
+def run_evaluation(args, digest_only: bool = False) -> dict:
     proj = load_project(args)
     cpath = proj.candidates.get(args.candidate)
     if cpath is None:
@@ -224,25 +267,47 @@ def run_evaluation(args) -> dict:
     short = args.candidate.split(":", 1)[1]
     hit = choose_operation(proj, fom, args.fidelity, args.tool)
     eid = args.id or f"{'EST' if hit is None else ('CALC' if args.fidelity == 'F1' else 'SIM')}-{fom}-{short}-{args.fidelity}"
+    if not re.match(r"^(CALC|SIM|MEAS|EST)-[A-Za-z0-9][A-Za-z0-9._-]*$", eid):
+        raise UsageError(f"--id {eid!r}: an evaluation id is CALC-, SIM-, MEAS- or EST- followed by letters, digits, '.', '_' "
+                         "or '-' (ART-06)")
+    replaced: list[str] = []
+    if getattr(args, "replace", False) and not digest_only:
+        replaced = remove_stale(proj, eid)
+        if replaced:
+            proj = load_project(args)
     w = Writer(proj)
     chain_rels = [proj.rel(p) for p in chain]
-    base_inputs = [w.input_ref(r) for r in chain_rels]
+    # TRC-06 (M2): candidate files are bound by the digest of the parameters read
+    base_inputs = [dict(w.input_ref(r), binding="parameters") for r in chain_rels]
+    extra_rels = list(getattr(args, "input_artifact", None) or [])
+    for r in extra_rels:
+        if not (proj.root / r).is_file():
+            raise UsageError(f"--input-artifact {r} is not a file in the artifacts_dir")
+    extra_inputs = [w.input_ref(r) for r in extra_rels]
     ext: dict = {"evaluation_id": f"{ns}:{eid}", "candidate": args.candidate, "figure_of_merit": fom,
                  "denominator": den, "bound": "estimate", "fidelity": args.fidelity}
     if hit is None:  # ART-50, ART-63: no evaluator at this fidelity
-        ext["unavailable"] = True
+        if digest_only:
+            return {"status": "ok", "exit": 0, "evaluation": f"evaluations/{eid}.json", "capability": "unavailable",
+                    "parameter_refs": [], "parameter_digest": proj.parameter_digest(args.candidate, [])}
+        ext.update(unavailable=True, parameter_refs=[], parameter_digest=proj.parameter_digest(args.candidate, []))
         rel = w.json(f"evaluations/{eid}.json", envelope("design-evaluation", f"{ns}-{eid}", ext, base_inputs, [],
                                                           statuses(base_inputs, args.status)))
         return finish(w, rel, {"capability": "unavailable"})
     contract, op, fd = hit
     ev = design.Evaluation(proj.root / f"evaluations/{eid}.json", f"evaluations/{eid}.json",
-                           {"extension": dict(ext, unit=fd["unit"])})
+                           {"extension": dict(ext, unit=fd["unit"]), "inputs": extra_inputs})
     ev.effective = proj.effective_digest(args.candidate)
     ev.upstreams = pick_upstreams(proj, ev, fd, args.upstream or [])
     prep = design.prepare(proj, ev, fd)
     if prep.errors or prep.invalid:
         raise UsageError("; ".join(prep.errors + prep.invalid))
     missing = [r for r in fd.get("required_upstreams", []) if r not in {u.fom for u in ev.upstreams}]
+    if digest_only:  # INC-02: the skip key of a workflow step that runs this evaluation
+        return {"status": "ok", "exit": 0, "evaluation": f"evaluations/{eid}.json",
+                "tool": f"{contract['tool_id']}:{op['operation_id']}", "parameter_refs": sorted(prep.refs),
+                "parameter_digest": proj.parameter_digest(args.candidate, prep.refs),
+                "upstreams": [{"ref": u.rel, "sha256": proj.sha[u.path]} for u in ev.upstreams]}
     # argv: interpreter, script, operation arguments, positionals, then options in the contract's order
     args_out: list[str] = list(fd.get("operation_args", []))
     manifest = [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels]
@@ -283,7 +348,7 @@ def run_evaluation(args) -> dict:
                 "tool_output": output}
     out_rel = w.write(f"outputs/{eid}.json", proc.stdout)
     up_rels = [u.rel for u in ev.upstreams]
-    run_inputs = base_inputs + [w.input_ref(r) for r in up_rels]
+    run_inputs = base_inputs + [w.input_ref(r) for r in up_rels] + extra_inputs
     run_ext = {"input_manifest": manifest, "tools": [{"name": contract["tool_id"], "version": plugin_version()}],
                "commands": [" ".join(argv)],
                "environment": {"python": platform.python_version(), "platform": platform.platform(terse=True)},
@@ -297,16 +362,17 @@ def run_evaluation(args) -> dict:
     bound = design.combine_bounds(own, prep.directions)
     domain = design.validity_reasons(fd, prep, den, output)
     ext.update(value=value, unit=fd["unit"], bound=bound if bound != "mixed" else "estimate", run_ref=run_rel,
-               parameter_refs=sorted(prep.refs),
+               parameter_refs=sorted(prep.refs), parameter_digest=proj.parameter_digest(args.candidate, prep.refs),
                validity={"assumptions": list(fd.get("assumptions", [])), "in_domain": not domain},
                fidelity=op["design"]["fidelity"])
     unc = design.output_uncertainty(fd, output, value)
     if unc is not None:
         ext["uncertainty"] = unc
-    ev_inputs = base_inputs + [w.input_ref(run_rel)] + [w.input_ref(r) for r in up_rels]
+    ev_inputs = base_inputs + [w.input_ref(run_rel)] + [w.input_ref(r) for r in up_rels] + extra_inputs
     rel = w.json(f"evaluations/{eid}.json", envelope("design-evaluation", f"{ns}-{eid}", ext, ev_inputs, [],
                                                       statuses(ev_inputs, args.status)))
     notes = {"tool": f"{contract['tool_id']}:{op['operation_id']}", "value": value, "bound": ext["bound"],
+             "replaced": replaced,
              "fidelity": ext["fidelity"], "outside_validity_domain": domain, "missing_upstreams": missing}
     if bound == "mixed":
         notes["bound_note"] = "the chain mixes optimistic and conservative bounds (bound.mixed, row 9)"
@@ -326,6 +392,142 @@ def finish(w: Writer, rel: str, notes: dict) -> dict:
                 "design_errors": errors}
     return {"status": "ok", "exit": 0, "evaluation": rel, "files": [w.proj.rel(p) for p in w.written], **notes,
             "note": "verdicts come from contracts/design.py (evaluate_design.py report), never from this output"}
+
+
+def response(args) -> dict:
+    """CHN-01 (M2): the F3 response-assembly evaluation of the resolution core, and a parametrized response artifact
+    (form parametrized, intended_use forward_folding) bound to it, for hep-measurement and hep-statistics; the tail is
+    the candidate's declared assumption and the response inherits the evaluation's bound."""
+    args.fidelity, args.tool, args.figure_of_merit = "F3", "design-estimates:response-assembly", "momentum-resolution-core"
+    args.digest_only = False
+    out = run_evaluation(args)
+    if out.get("status") != "ok":
+        return out
+    proj = design.Project(args.artifacts, None)
+    ev_rel = out["evaluation"]
+    ev = json.loads((proj.root / ev_rel).read_text(encoding="utf-8"))
+    ext = ev["extension"]
+    run = json.loads((proj.root / ext["run_ref"]).read_text(encoding="utf-8"))
+    out_ref = run["outputs"][0]["ref"]
+    r = ext["denominator"].get("rigidity_GV")
+    w = Writer(proj)
+    inputs = [w.input_ref(ev_rel)]
+    rext = {"form": "parametrized", "truth_axis": "not-applicable", "reco_axis": "not-applicable",
+            "orientation": "rows_reco_cols_truth", "normalization": "unnormalized", "inefficiency": "outside_matrix",
+            "acceptance": "outside_matrix", "includes": ["migration"], "intended_use": "forward_folding",
+            "parametrization": {"variables": ["rigidity"], "function_ref": out_ref,
+                                "validity_range": {"rigidity": [r, r]}},
+            "conditions": f"design candidate {ext['candidate']} (evaluation {ext['evaluation_id']}); the tail fraction "
+                          "and width are declared assumptions of the candidate, not measured",
+            "provenance": f"assembled by design_estimates.py response-assembly from {ext['evaluation_id']}; bound "
+                          f"{ext['bound']} (inherited from its chain); charge flip and rigidity migration are counted "
+                          "once, inside the response (CHN-01)"}
+    eid = ext["evaluation_id"].split(":", 1)[1]
+    rel = w.json(f"responses/{eid}.response.json",
+                 envelope("response", f"{ext['evaluation_id'].replace(':', '-')}-response", rext, inputs,
+                          [{"ref": out_ref}], statuses(inputs, "unvalidated")))
+    from contracts.validate import validate_artifact
+    rep = validate_artifact(json.loads((proj.root / rel).read_text(encoding="utf-8")))
+    if not rep.ok:
+        w.undo()
+        return {"status": "failed", "exit": 1, "error": "the response fails contract validation", "evaluation": ev_rel,
+                "findings": [f.as_dict() for f in rep.errors]}
+    out["response"] = rel
+    return out
+
+
+def geometry(args) -> dict:
+    """ART-33, ART-34 (M2): the geometry file of a Geant4 study generated from the candidate with the mapping table
+    (contracts/rules/design_geometry.json): the fields read, the parameters read and their digest, the figure of merit
+    the study is for; the candidate's geometry_ref is set to it (ART-30). Like check_geant4_study.py it only reads and
+    writes files; the study itself runs with the Geant4 adapter."""
+    proj = load_project(args)
+    if args.candidate not in proj.candidates:
+        raise UsageError(f"no design-candidate {args.candidate!r} in the artifacts_dir")
+    mapping = design.load_json(design.GEOMETRY_FILE)
+    if args.figure_of_merit not in mapping["figures_of_merit"]:
+        raise UsageError(f"the geometry mapping gives no {args.figure_of_merit!r} (it has "
+                         f"{', '.join(sorted(mapping['figures_of_merit']))})")
+    try:
+        fields, refs, digest = design.geometry_fields(proj, args.candidate, mapping)
+    except design.ExprError as exc:
+        raise UsageError(f"geometry: {exc}") from exc
+    den = dict((kv.partition("=")[0], parse_value(kv.partition("=")[2])) for kv in args.denominator or [])
+    want = set(mapping["figures_of_merit"][args.figure_of_merit]["denominator"])
+    if set(den) != want:
+        raise UsageError(f"--denominator needs exactly {sorted(want)}")
+    rel = f"studies/{args.id}.geometry.json"
+    w = Writer(proj)
+    w.json(rel, {"schema": "design-geometry/1", "mapping_version": mapping["mapping_version"],
+                 "geometry": mapping["geometry"], "candidate": args.candidate, "figure_of_merit": args.figure_of_merit,
+                 "denominator": den, "fields": fields, "parameter_refs": refs, "parameter_digest": digest,
+                 "note": "generated by evaluate_design.py geometry; the Geant4 study must list this file in its "
+                         "input_manifest and report results.<figure of merit> (value, statistical_uncertainty, "
+                         "model_envelope) and tail_sources_simulated in its study block"})
+    cpath = proj.candidates[args.candidate]
+    cand = json.loads(cpath.read_text(encoding="utf-8"))
+    cand["extension"]["geometry_ref"] = rel
+    cpath.write_text(json.dumps(cand, indent=1) + "\n", encoding="utf-8")
+    return {"status": "ok", "exit": 0, "geometry": rel, "candidate": proj.rel(cpath), "parameter_refs": refs,
+            "parameter_digest": digest, "note": "the candidate's geometry_ref now names this file (ART-30)"}
+
+
+def f4(args) -> dict:
+    """ART-31, ART-32 (M2): an F4 evaluation from a Geant4 study record in the artifacts_dir; with --label-spec,
+    --label-benchmarks and --label-convergence the record is first re-issued by check_geant4_study.py label
+    --upgrade. Value, statistical uncertainty and model envelope are the record's; the bound follows FID-03."""
+    proj = load_project(args)
+    if args.label_spec:
+        cmd = [sys.executable, "-B", str(PLUGIN / "skills/hep-detector/scripts/check_geant4_study.py"), "label",
+               "--spec", args.label_spec, "--benchmarks", args.label_benchmarks, "--convergence", args.label_convergence,
+               "--project-root", str(args.label_project_root or proj.root), "--upgrade", "--write", str(proj.root / args.study)]
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=TOOL_TIMEOUT_S)
+        if p.returncode != 0:
+            return {"status": "failed", "exit": 1, "error": "check_geant4_study.py label --upgrade refused the study",
+                    "label_output": p.stdout[-3000:]}
+        proj = load_project(args)
+    study_path = proj.resolve(args.study)
+    study = proj.docs.get(study_path)
+    if study is None or study.get("artifact_type") != "computational-run":
+        raise UsageError(f"--study {args.study} is not a computational-run in the artifacts_dir")
+    chain = proj.candidate_chain(args.candidate)
+    if chain is None:
+        raise UsageError(f"no design-candidate {args.candidate!r} (or a base) in the artifacts_dir")
+    if args.requirement:
+        spec = current_spec(proj, None)["extension"]
+        req = next((r for r in spec["requirements"] + spec["constraints"]
+                    if r["id"] == args.requirement or r["id"].endswith(":" + args.requirement)), None)
+        if req is None:
+            raise UsageError(f"no requirement {args.requirement!r} in the current design-spec")
+        fom, den = req["quantity"], {k: v["value"] for k, v in req["denominator"].items()}
+    else:
+        fom = args.figure_of_merit
+        den = dict((kv.partition("=")[0], parse_value(kv.partition("=")[2])) for kv in args.denominator or [])
+    block = (study.get("extension") or {}).get("study") or {}
+    result = (block.get("results") or {}).get(fom)
+    if not isinstance(result, dict) or not isinstance(result.get("value"), (int, float)):
+        raise UsageError(f"the study record reports no results.{fom}.value (ART-36)")
+    mapping = design.load_json(design.GEOMETRY_FILE)
+    fom_map = mapping["figures_of_merit"].get(fom) or {}
+    tails = set(block.get("tail_sources_simulated") or [])
+    bound = "optimistic" if fom_map.get("tail_sensitive") and not set(design.TAIL_SOURCES) <= tails else "estimate"
+    _, refs, digest = design.geometry_fields(proj, args.candidate, mapping)
+    ns, eid = args.candidate.split(":", 1)[0], args.id
+    if not re.match(r"^SIM-[A-Za-z0-9][A-Za-z0-9._-]*$", eid):
+        raise UsageError("--id of an F4 evaluation is SIM- followed by letters, digits, '.', '_' or '-'")
+    w = Writer(proj)
+    inputs = [dict(w.input_ref(proj.rel(p)), binding="parameters") for p in chain] + [w.input_ref(proj.rel(study_path))]
+    ext = {"evaluation_id": f"{ns}:{eid}", "candidate": args.candidate, "figure_of_merit": fom, "denominator": den,
+           "value": result["value"], "unit": fom_map.get("unit", "1"), "bound": bound, "fidelity": "F4",
+           "study_ref": proj.rel(study_path), "parameter_refs": refs, "parameter_digest": digest}
+    if isinstance(result.get("statistical_uncertainty"), (int, float)):
+        s = float(result["statistical_uncertainty"])
+        ext["uncertainty"] = {"minus": s, "plus": s, "coverage": 0.6827, "interval": "central", "distribution": "gaussian"}
+    if isinstance(result.get("model_envelope"), list):
+        ext["model_envelope"] = result["model_envelope"]
+    rel = w.json(f"evaluations/{eid}.json", envelope("design-evaluation", f"{ns}-{eid}", ext, inputs, [],
+                                                      statuses(inputs, args.status)))
+    return finish(w, rel, {"value": ext["value"], "bound": bound, "fidelity": "F4"})
 
 
 def plan(args) -> dict:
@@ -455,12 +657,47 @@ def main(argv=None) -> int:
     p.add_argument("--tool", help="TOOL:OPERATION when several operations compute the figure of merit")
     p.add_argument("--upstream", action="append", help="upstream evaluation file (repeatable)")
     p.add_argument("--id", help="evaluation id suffix (default from the figure of merit and candidate)")
+    p.add_argument("--input-artifact", dest="input_artifact", action="append",
+                   help="another artifact the operation reads (e.g. a statistical-result), bound as an input")
+    p.add_argument("--replace", action="store_true", help="replace an evaluation of this id that is stale")
     p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
+    p.add_argument("--digest-only", dest="digest_only", action="store_true",
+                   help="print the parameters the evaluation would read and their digest; run nothing (INC-02)")
     p = sub.add_parser("budget", help="budget sum of one quantity (CHN-10)")
     p.add_argument("--artifacts", type=Path, required=True)
     p.add_argument("--candidate", required=True)
     p.add_argument("--quantity", required=True, choices=tuple(BUDGET_FOMS))
     p.add_argument("--id")
+    p.add_argument("--replace", action="store_true", help="replace an evaluation of this id that is stale")
+    p.add_argument("--digest-only", dest="digest_only", action="store_true")
+    p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
+    p = sub.add_parser("response", help="F3 response assembly and a parametrized response artifact (CHN-01)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--candidate", required=True)
+    p.add_argument("--requirement")
+    p.add_argument("--denominator", action="append", help="KEY=VALUE (repeatable)")
+    p.add_argument("--upstream", action="append", help="the core resolution evaluation")
+    p.add_argument("--id")
+    p.add_argument("--replace", action="store_true")
+    p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
+    p = sub.add_parser("geometry", help="the geometry file of a Geant4 study from the candidate (ART-33, ART-34)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--candidate", required=True)
+    p.add_argument("--figure-of-merit", dest="figure_of_merit", required=True)
+    p.add_argument("--denominator", action="append", help="KEY=VALUE (repeatable)")
+    p.add_argument("--id", required=True, help="study id (file studies/<id>.geometry.json)")
+    p = sub.add_parser("f4", help="an F4 evaluation from a Geant4 study record (ART-31, ART-32)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--candidate", required=True)
+    p.add_argument("--requirement")
+    p.add_argument("--figure-of-merit", dest="figure_of_merit")
+    p.add_argument("--denominator", action="append", help="KEY=VALUE (repeatable)")
+    p.add_argument("--study", required=True, help="the study record (a computational-run) in the artifacts_dir")
+    p.add_argument("--id", required=True)
+    p.add_argument("--label-spec", dest="label_spec")
+    p.add_argument("--label-benchmarks", dest="label_benchmarks")
+    p.add_argument("--label-convergence", dest="label_convergence")
+    p.add_argument("--label-project-root", dest="label_project_root")
     p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
     for name in ("plan", "report"):
         p = sub.add_parser(name)
@@ -478,9 +715,19 @@ def main(argv=None) -> int:
         if args.command == "budget":
             args.requirement, args.figure_of_merit = None, BUDGET_FOMS[args.quantity]
             args.denominator, args.fidelity, args.tool, args.upstream = [], "F1", None, None
-            out = run_evaluation(args)
+            args.input_artifact = None
+            out = run_evaluation(args, args.digest_only)
         elif args.command == "run":
-            out = run_evaluation(args)
+            out = run_evaluation(args, args.digest_only)
+        elif args.command == "geometry":
+            out = geometry(args)
+        elif args.command == "f4":
+            if args.label_spec and not (args.label_benchmarks and args.label_convergence):
+                raise UsageError("--label-spec needs --label-benchmarks and --label-convergence")
+            out = f4(args)
+        elif args.command == "response":
+            args.input_artifact = None
+            out = response(args)
         elif args.command == "plan":
             out = plan(args)
         else:

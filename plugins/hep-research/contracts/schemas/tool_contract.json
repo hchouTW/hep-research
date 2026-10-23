@@ -402,6 +402,7 @@
         "charge",
         "charge_number",
         "mass_GeV",
+        "mass_number",
         "tool_name"
        ]
       },
@@ -436,7 +437,8 @@
         "number",
         "string",
         "array",
-        "boolean"
+        "boolean",
+        "object"
        ]
       }
      }
@@ -591,6 +593,20 @@
      "properties": {
       "span": {
        "$ref": "#/$defs/expr"
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "input_artifact"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "input_artifact": {
+       "$comment": "the path of the one input artifact of this type the evaluation binds (e.g. statistical-result)",
+       "type": "string",
+       "minLength": 1
       }
      }
     }
@@ -902,6 +918,13 @@
         "exact"
        ]
       }
+     }
+    },
+    "upstream_directions": {
+     "$comment": "CMB-01: the combination direction of a required upstream that the operation reads through another artifact rather than an argument (e.g. through a statistical-result)",
+     "type": "object",
+     "additionalProperties": {
+      "$ref": "#/$defs/direction"
      }
     }
    }

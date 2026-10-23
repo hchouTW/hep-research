@@ -189,8 +189,10 @@ class PassThrough(Project):
 class Records(Project):
     def test_unavailable_and_mismatch(self):
         """ART-50, ART-63: with no evaluator at that fidelity an unavailable evaluation is written."""
-        rc, out = self.ev("run", "--candidate", f"{NS}:cand-A", "--figure-of-merit", "momentum-resolution-core",
-                          "--denominator", "rigidity_GV=1000", "--denominator", "species=proton", "--fidelity", "F3")
+        rc, out = self.ev("run", "--candidate", f"{NS}:cand-A", "--figure-of-merit", "pid-rejection",
+                          "--denominator", "momentum_GeV=2", "--denominator", "species=proton",
+                          "--denominator", "background_species=positron", "--denominator", "working_point_efficiency=0.9",
+                          "--denominator", "separation_convention=single", "--fidelity", "F3")
         self.assertEqual((rc, out["capability"]), (0, "unavailable"), out)
         doc = self.b.read(out["evaluation"])["extension"]
         self.assertTrue(doc["unavailable"])
@@ -200,7 +202,7 @@ class Records(Project):
         edit(self.b, "candidates/cand-A.json", lambda d: d["extension"]["subsystems"]["DES-MAG-001"]["parameters"]
              .pop("field_T"))
         before = sorted(p.relative_to(self.b.art) for p in self.b.art.rglob("*"))
-        rc, out = self.ev("run", "--candidate", f"{NS}:cand-A", "--requirement", "REQ-TRK-001", "--id", "X")
+        rc, out = self.ev("run", "--candidate", f"{NS}:cand-A", "--requirement", "REQ-TRK-001", "--id", "CALC-X")
         self.assertEqual(rc, 2, out)
         self.assertIn("field_T", out["error"])
         self.assertEqual(sorted(p.relative_to(self.b.art) for p in self.b.art.rglob("*")), before)

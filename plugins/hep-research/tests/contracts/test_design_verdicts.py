@@ -86,7 +86,7 @@ def case_t54_each_row_from_factors():
 def case_t01_unavailable_takes_precedence_over_stale(b):
     """RUL-01, RUL-02, RUL-00a: an unavailable evaluation with a stale input is capability.unavailable."""
     b.evaluation("EST-ACC-A", "cand-A", "geometric-acceptance", {"rigidity_GV": 1000.0, "species": "proton",
-                 "charge_sign": "positive"}, None, "estimate", fidelity="F2", unavailable=True)
+                 "charge_sign": "positive"}, None, "estimate", fidelity="F3", unavailable=True)
     edit(b, "candidates/cand-A.json", lambda d: d["extension"].update(description="changed"))
     spec = b.read("design-spec.v1.json")
     spec["extension"]["requirements"].append(
@@ -131,11 +131,11 @@ def case_t23_unavailable_declared_but_contract_exists(b):
 
 def case_t50_f0_and_unavailable_not_compared_with_contract(b):
     """ART-63, RUL-01, RUL-08: an F0 estimate is not checked against the F1 contract and falls under row 8; an
-    unavailable evaluation (no contract at F2) falls under row 1."""
+    unavailable evaluation (no contract at F4) falls under row 1."""
     b.evaluation("EST-TRK-A0", "cand-A", RES, {"rigidity_GV": 1000.0, "species": "proton"}, 0.4, "estimate",
                  fidelity="F0", derivation="heuristic-argument", uncertainty=gauss(0.2))
     b.evaluation("EST-TRK-A2", "cand-A", RES, {"rigidity_GV": 1000.0, "species": "proton"}, None, "estimate",
-                 fidelity="F2", unavailable=True)
+                 fidelity="F4", unavailable=True)
     d = derive(b)
     assert not error_codes(d, "EST-TRK-A")
     assert entry(d, "REQ-TRK-001", "cand-A", "EST-TRK-A0")["row"] == 8

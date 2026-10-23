@@ -23,11 +23,12 @@
    "artifact_id": "ams-like-v1-cand-S",
    "status": [
     "synthetic"
-   ]
+   ],
+   "binding": "parameters"
   },
   {
    "ref": "evaluations/CALC-TRK-S.json",
-   "sha256": "b30dc129fd8cc5ce6c1a2eb956aa47c67570dde6800f9a796c49041481c97604",
+   "sha256": "871194c167b2c3c46a95f0aa7d9cc64ddc112207a5f4b2b2a965c315ea2b2459",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-S",
    "status": [

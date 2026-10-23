@@ -251,6 +251,9 @@ def check_design(op: dict, where: str, rep: Report) -> None:
             for u in sorted(set(ups) - required):
                 rep.add("error", f"{fw}.inputs.{m['input']}", "tool.design_upstream_undeclared",
                         f"upstream '{u}' is not in required_upstreams")
+        for u in sorted(set(fom.get("upstream_directions") or {}) - required):
+            rep.add("error", f"{fw}.upstream_directions", "tool.design_upstream_undeclared",
+                    f"upstream '{u}' is not in required_upstreams")
         unc = fom.get("uncertainty")
         if unc is not None and ("path" in unc) == ("relative" in unc):
             rep.add("error", f"{fw}.uncertainty", "tool.design_uncertainty", "give exactly one of path and relative")

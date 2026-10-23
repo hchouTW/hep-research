@@ -23,11 +23,12 @@
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
     "synthetic"
-   ]
+   ],
+   "binding": "parameters"
   },
   {
    "ref": "runs/CALC-TRK-L.computational-run.json",
-   "sha256": "2a68d9da7db33db51f063bf89a3ff3b306972e292c94b5eb9c5aaa6e167bdb11",
+   "sha256": "0b801f5f90aa9945be5b8d27e96ea0678a4034eaf2c949ccee3c69ed64af10e4",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-TRK-L-run",
    "status": [
@@ -60,6 +61,7 @@
    "DES-TRK-001.parameters.passive_x_over_x0",
    "DES-TRK-001.parameters.point_resolution_um"
   ],
+  "parameter_digest": "9da74b0afe37589e2509a31591f135f379666712630ee58d652ab3d9a296042d",
   "validity": {
    "assumptions": [
     "uniform field over the lever arm",
