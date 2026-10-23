@@ -110,8 +110,14 @@ Higher fidelity, each through `evaluate_design.py`:
 - Candidates are finally compared on expected measurement precision through the forward chain response ->
   measurement-spec -> Asimov statistical-result (hep-statistics); a chain built on optimistic F1 inputs can only
   exclude.
-- Every inconclusive driving requirement of a candidate that survives screening gets a proposed disposition in the
-  report (accept risk or next study); a screened-out candidate and a derived requirement show why they have none.
+- Every inconclusive requirement of a candidate that survives screening gets a proposed disposition in the report
+  (accept risk or next study); a derived requirement names in `covered_by` the driving requirement whose H4
+  disposition covers it, and a screened-out candidate shows why it has none.
+- A hard constraint lists the subsystems it covers (`subsystems`); a candidate that lacks one cannot pass it
+  (`chain.incomplete`, the subsystem listed as missing), and the report shows the scope.
+- Charge-confusion compliance needs a rigidity-scale-offset evaluation whose measured offset covers the offset the
+  requirement assumes: |measured - assumed| + z sigma within the assumed tolerance (an exactly zero assumed offset can
+  never be covered: declare a realistic tolerance).
 - The report ranks candidates on expected precision only when the comparison basis holds and every candidate that
   survives screening has a non-optimistic expected-precision evaluation with the same fidelity vector and
   denominator; otherwise it states every reason the ranking is refused. A ranking is never a global optimum.
@@ -183,6 +189,7 @@ pass). Codes the report uses:
 | `evidence.stale`, `evidence.unresolved`, `evidence.invalid` | an input changed, is unbound or invalid | rerun with a new evaluation id |
 | `evidence.conflict`, `evidence.excluded_adverse`, `evidence.orphan_run` | contradicting evidence, unfavorable evidence excluded, a run without its evaluation | inspect the contracts and validity domains |
 | `capability.unavailable` | no evaluator at that fidelity | record it; never estimate a number |
+| `design.derived_uncovered`, `design.constraint_scope_missing` (error) | a derived requirement without a driving `covered_by`; a hard constraint without `subsystems` | complete the design-spec (a new version) |
 | `design.scan_point_not_expanded` (error) | an evaluation that names a scan summary as its run | `expand` the point and evaluate the new candidate |
 | `design.contract_mismatch` (error) | an evaluation, run, output, config file, geometry or study that does not match its contract or candidate | regenerate it with `evaluate_design.py`; never edit it |
 

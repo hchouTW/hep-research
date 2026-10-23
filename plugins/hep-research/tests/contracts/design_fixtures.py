@@ -103,7 +103,8 @@ def spec_ext(version: int = 1, resolution_target: float = 0.6, confusion_target:
             {"id": f"{NS}:ALC-CC-001", "requirement": f"{NS}:REQ-CC-001", "rule": "linear",
              "items": [{"name": "core", "value": 0.01}, {"name": "tails", "value": 0.03}], "margin": 0.01}],
         "constraints": [{"id": f"{NS}:CON-MASS-001", "type": "mass", "hardness": "hard", "quantity": "mass-budget",
-                         "comparator": "<=", "target": 7500.0, "unit": "kg", "denominator": {}}],
+                         "comparator": "<=", "target": 7500.0, "unit": "kg", "denominator": {},
+                         "subsystems": ["DES-TRK-001", "DES-MAG-001"]}],
         "comparison_basis": {"quantity": "mass-budget", "tolerance_relative": 0.05,
                              "note": "candidates are compared at equal mass"}}
 
@@ -151,8 +152,8 @@ class Builder:
     def envelope(atype, aid, ext, producer="hep-detector", inputs=(), outputs=(), status=("synthetic",)) -> dict:
         sticky = {s for i in inputs for s in i.get("status", [])}  # a consumer carries its inputs' sticky statuses
         status = list(dict.fromkeys(list(status) + sorted(sticky - set(status))))
-        return {"contract_version": "3.11.0", "artifact_id": aid, "artifact_type": atype, "objective": SYN,
-                "versions": {"plugin": "0.36.0", "contracts": "3.11.0",
+        return {"contract_version": "3.12.0", "artifact_id": aid, "artifact_type": atype, "objective": SYN,
+                "versions": {"plugin": "0.36.0", "contracts": "3.12.0",
                              "plugin_release": {"release": "unreleased", "digest": "unknown"}},
                 "provenance": {"producer_skill": producer, "created": CREATED},
                 "inputs": list(inputs), "outputs": list(outputs), "status": list(status), "unresolved_inputs": [],

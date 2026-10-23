@@ -129,10 +129,17 @@ def spec() -> dict:
                  "items": [{"name": "Gaussian core", "value": 0.02}, {"name": "non-Gaussian tails", "value": 0.025}],
                  "margin": 0.005}],
             "constraints": [{"id": f"{NS}:CON-MASS-001", "type": "mass", "hardness": "hard", "quantity": "mass-budget",
-                             "comparator": "<=", "target": 3000.0, "unit": "kg", "denominator": {}}],
+                             "comparator": "<=", "target": 3000.0, "unit": "kg", "denominator": {},
+                             # the study's scope is the spectrometer core: tracker and magnet (TRD, TOF, RICH and
+                             # ECAL are outside this synthetic study)
+                             "subsystems": ["DES-TRK-001", "DES-MAG-001"]}],
             "comparison_basis": {"quantity": "mass-budget", "tolerance_relative": 0.05,
                                  "pareto_axes": ["expected-precision", "mass-budget"],
-                                 "note": "candidates are compared at equal mass"}}
+                                 "note": "candidates are compared at equal mass; the magnet is the same 0.14 T "
+                                         "permanent magnet in every candidate (the outer tracker planes sit outside "
+                                         "it, as in the AMS-02 layout), so its catalog mass is shared and cancels; "
+                                         "the uniform-field resolution model belongs to the optimistic F1 bound, not "
+                                         "to the magnet's mass"}}
 
 
 CANDIDATES = {"cand-S": ("short lever arm (2.0 m), many layers", 9, 2.0, "example proposal", 400.0),

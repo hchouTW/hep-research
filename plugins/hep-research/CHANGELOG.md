@@ -3,6 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 3.12.0 (minor; no capability added).
+
+- Detector system design, follow-ups of the M3 reviews (decided by the maintainer): a derived requirement names in
+  `covered_by` the driving requirement whose H4 disposition covers it (`design.derived_uncovered` otherwise; its
+  inconclusive rows open that driving requirement at H4 and the report proposes the disposition "under" it); a hard
+  constraint lists the subsystems it covers (`subsystems`, `design.constraint_scope_missing` otherwise; a candidate
+  lacking one cannot pass it: `chain.incomplete` with the subsystem listed; the report shows the scope); adequacy table
+  1.1.0 `upstream_value_checks`: a rigidity-scale-offset upstream counts for charge-confusion compliance only when
+  |measured - assumed| + z sigma stays within the offset tolerance the requirement assumes (ADQ-02 value check);
+  Example A states in its comparison basis note that the magnet is the same in every candidate (the outer planes sit
+  outside it), so its mass is shared. Both examples now declare the constraint scope and Example B the covering driving
+  requirement of its four derived requirements. `tests/skills/hep_detector/test_design_followups.py`.
+
 ## 0.37.0 (2026-10-24)
 
 Minor release, contracts 3.11.0. It ships the detector system design loop of hep-detector (spec v2, milestones M0-M4,

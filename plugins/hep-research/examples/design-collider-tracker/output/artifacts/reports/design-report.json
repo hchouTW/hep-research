@@ -1,11 +1,11 @@
 {
- "contract_version": "3.11.0",
+ "contract_version": "3.12.0",
  "artifact_id": "collider-tracker-v1-design-report",
  "artifact_type": "communication",
  "objective": "detector system design: communication written by evaluate_design.py",
  "versions": {
   "plugin": "0.37.0",
-  "contracts": "3.11.0",
+  "contracts": "3.12.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "design-spec.v1.json",
-   "sha256": "33b6d50acdfa4326cea3166e892dfef99f7d503d246e62cc417a4cb339c26740",
+   "sha256": "1c7a1a1401108b349224cbf5958cb4359a8ccfdac6daae8ceda8cc1cb2cacfbd",
    "artifact_type": "design-spec",
    "artifact_id": "collider-tracker-v1-spec-v1",
    "status": [
@@ -27,7 +27,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-A.json",
-   "sha256": "81b5cc374c6779ba5e1b3c2aac9b1c5734ab3675a0f0a5d61f682e7dbeb2fbfd",
+   "sha256": "f9378eea29caf9977bd51fd9e30510492f53e34d7bac9aa189b2fe25159dde9f",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-A",
    "status": [
@@ -36,7 +36,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-B.json",
-   "sha256": "899b462fec1e41c77b0845dae95e58333efe71d5575b534c10f336a4a0683c20",
+   "sha256": "9c8d986ac1f3156c1076cfc34f2e5b2f7cb218717209b2328447d42c697d160d",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-B",
    "status": [
@@ -45,7 +45,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-P.json",
-   "sha256": "d6537df52d58568553d0cb33151b7d62b551fea3e602eae0a43dd651bda4d441",
+   "sha256": "bf7ad4d41bb729e026c9037bd6fd9908a6d5877862f01fcaa8f45796e86295de",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-P",
    "status": [
@@ -54,7 +54,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-A.json",
-   "sha256": "7a85956501e2b84a6410a7f6d68ae1ce1893a8d4308667798fa5cc8b3a0ccecc",
+   "sha256": "ec54444b46aa1492fcceb77602a4353f8c1530eed1bf3782d037187c970fdfa8",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-A",
    "status": [
@@ -63,7 +63,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-B.json",
-   "sha256": "a174e11fa911cd38adba5e010508efd85a54f93c7f5137f60b631d2e6ce1729b",
+   "sha256": "0bfb9031d26b84084e82721a18e5619ab9c6c045df858c8fc9a94f0fe5947899",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-B",
    "status": [
@@ -72,7 +72,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-P.json",
-   "sha256": "5efc5ea10fe1ab5005637665d5448525622e167d752baf4a2e3b23ffc10edb22",
+   "sha256": "b69a0fc78c81f7dee813674191db93c0aa5d0046c6a14d4c00211efae195943f",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-P",
    "status": [
@@ -81,7 +81,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-A.json",
-   "sha256": "7cf6057d1823102b9b3393403bc877d61920ec74cf93b3782676a6a407f77010",
+   "sha256": "644a0a8a9988ef0725c7cec09fa26938094d285b1a1ea7e20db0c232e0835c74",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-A",
    "status": [
@@ -90,7 +90,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-B.json",
-   "sha256": "9393792373bfe3ea27f218be49204ccf96c9559fd546ce57fecc39741f9b2c25",
+   "sha256": "7a0cf8ba55be264225e5ae46fbfcb9de30b26941c9487ec5fc4233474341654d",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-B",
    "status": [
@@ -99,7 +99,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "36dd3678e30c0585fc09ebd87f61dfd6e2e73e221c1101f559bf46f7931f93dc",
+   "sha256": "4ea2d1c498105f32669d322d9cb0e5be0df8aea2fa97728d64b3e7ff93c5065c",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-P",
    "status": [
@@ -297,7 +297,7 @@
    "design_id": "collider-tracker-v1",
    "note": "derived by contracts/design.py from the artifacts; verdicts guard against oversight and shortcuts, not deliberate forgery (LIM-02), and authorize nothing",
    "adequacy": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "state": "initial-default",
     "frozen": false,
     "provisional_pass": true
@@ -745,6 +745,7 @@
      "comparator": "<=",
      "target": 0.15,
      "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-ECAL-001",
      "matrix": [
       {
        "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
@@ -791,7 +792,8 @@
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -838,7 +840,8 @@
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -885,6 +888,7 @@
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
        ],
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001",
        "screened_out": true,
        "disposition_note": "none: the candidate is screened out"
       }
@@ -897,6 +901,7 @@
      "comparator": ">=",
      "target": 0.95,
      "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-TRK-001",
      "matrix": [
       {
        "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
@@ -943,7 +948,8 @@
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -990,7 +996,8 @@
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1037,6 +1044,7 @@
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
        ],
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001",
        "screened_out": true,
        "disposition_note": "none: the candidate is screened out"
       }
@@ -1049,6 +1057,7 @@
      "comparator": "<=",
      "target": 0.05,
      "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-TRK-001",
      "matrix": [
       {
        "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
@@ -1095,7 +1104,8 @@
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -1142,7 +1152,8 @@
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1189,6 +1200,7 @@
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
        ],
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001",
        "screened_out": true,
        "disposition_note": "none: the candidate is screened out"
       }
@@ -1201,6 +1213,7 @@
      "comparator": ">=",
      "target": 0.95,
      "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-ECAL-001",
      "matrix": [
       {
        "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
@@ -1247,7 +1260,8 @@
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -1294,7 +1308,8 @@
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1341,6 +1356,7 @@
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
        ],
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001",
        "screened_out": true,
        "disposition_note": "none: the candidate is screened out"
       }
@@ -1355,6 +1371,11 @@
      "comparator": "<=",
      "target": 25000.0,
      "unit": "kg",
+     "subsystems": [
+      "DES-TRK-001",
+      "DES-MAG-001",
+      "DES-ECAL-001"
+     ],
      "matrix": [
       {
        "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
@@ -1594,6 +1615,7 @@
       "holds": false
      }
     ],
+    "note": "candidates are compared at equal mass",
     "reason": "a difference with its uncertainty exceeds the tolerance"
    },
    "ranking": {

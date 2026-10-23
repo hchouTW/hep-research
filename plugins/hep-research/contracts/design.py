@@ -1332,6 +1332,31 @@ def _with_value(ev: Evaluation, value: float) -> Evaluation:
     return Evaluation(ev.path, ev.rel, dict(ev.doc, extension=dict(ext, value=value)))
 
 
+def upstream_value_failures(proj: Project, ev: Evaluation, req: dict) -> list[str]:
+    """ADQ-02 value checks (adequacy 1.1.0, contracts 3.12.0): a compliance upstream that measures a quantity the
+    requirement's denominator assumes (the curvature offset of charge confusion) counts only when its one-sided
+    interval at the row's coverage CL stays within the assumed value and tolerance: |measured - assumed| + z sigma <=
+    tolerance. An absent upstream is reported by the presence check, not here."""
+    rules = proj.fom_rules(ev.fom) or {}
+    out = []
+    k = z_one_sided(rules.get("coverage_cl", proj.adequacy.get("default_coverage_cl", 0.95)))
+    for chk in rules.get("upstream_value_checks", []):
+        ups = [u for u in ev.upstreams if u.fom == chk["upstream"] and compatible(u, ev) and not u.ext.get("unavailable")
+               and u.ext.get("value") is not None]
+        assumed = (req.get("denominator") or {}).get(chk["denominator"])
+        if not ups or not isinstance(assumed, dict) or not isinstance(assumed.get("value"), (int, float)):
+            continue
+
+        def covers(u) -> bool:
+            unc = u.ext.get("uncertainty")
+            sig = max(sigma_equivalent(unc, "minus"), sigma_equivalent(unc, "plus")) if unc else 0.0
+            return abs(u.ext["value"] - assumed["value"]) + k * sig <= float(assumed.get("tolerance", 0.0)) * (1 + 1e-12)
+        if not any(covers(u) for u in ups):
+            out.append(f"{chk['upstream']} within {chk['denominator']} = {assumed['value']:g} +- "
+                       f"{float(assumed.get('tolerance', 0.0)):g} at {k:.3g} sigma (ADQ-02 value check)")
+    return out
+
+
 @dataclass
 class Verdict:
     row: int
@@ -1355,7 +1380,7 @@ def evaluate(proj: Project, ev: Evaluation, req: dict) -> Verdict:
         r for r in (req.get("verification") or {}).get("required_upstreams", [])
         if r not in {u.fom for u in ev.upstreams if compatible(u, ev) and not u.ext.get("unavailable")}]
     if not below_c:  # ADQ-02: the 'with' conditions are required upstreams once the chain reaches compliance
-        chain_missing += ev.compliance_missing
+        chain_missing += ev.compliance_missing + upstream_value_failures(proj, ev, req)
     reasons += [f"missing upstream {m}" for m in chain_missing] + ev.budget_missing + ev.domain + den_bad
     results = []
     for side in sides(req):
@@ -1513,6 +1538,10 @@ def missing_evidence(proj: Project, req: dict, agg: dict, effective: str | None 
             c = rules_u.get("compliance", "F5")
             if RANK[fid] < RANK[c]:
                 out.append(f"{fom} at {c} or above (in the chain of {e.eid}, now {fid})")
+    value_fails = [upstream_value_failures(proj, e, req) for e in evs
+                   if any(present(e, {c["upstream"]}) for c in rules.get("upstream_value_checks", []))]
+    if value_fails and all(value_fails):  # no evaluation has an upstream that covers the assumed value
+        out += [f"{m} (required for compliance)" for m in value_fails[0]]
     for group in rules.get("compliance_upstreams", []):
         if not any(present(e, set(group)) for e in evs):
             alts = [f"{g} at {(proj.fom_rules(g) or {}).get('compliance', 'F5')} or above" for g in group]
@@ -1578,6 +1607,16 @@ def check_spec(proj: Project, spec_path: Path) -> None:
             c = a["correlation"]
             if len(c) != n or any(len(row) != n for row in c):
                 proj.error("design.allocation_dependence", where, f"{a['id']}: the correlation matrix is not {n} x {n}")
+    driving = {r["id"] for r in ext.get("requirements", []) if r["kind"] == "driving"}
+    for r in ext.get("requirements", []):  # MAT-04 (d), 3.12.0: a derived requirement is covered by a driving one
+        if r["kind"] == "derived" and r.get("covered_by") not in driving:
+            proj.error("design.derived_uncovered", where,
+                       f"{r['id']}: a derived requirement names in covered_by the driving requirement whose H4 "
+                       "disposition covers it")
+    for c in ext.get("constraints", []):  # 3.12.0: a hard constraint states the subsystems it covers
+        if c["hardness"] == "hard" and not c.get("subsystems"):
+            proj.error("design.constraint_scope_missing", where,
+                       f"{c['id']}: a hard constraint lists the subsystems it covers (subsystems)")
     for kind in ("requirements", "constraints"):
         for r in ext.get(kind, []):
             if r["comparator"] == "range" and not (isinstance(r["target"], list) and len(r["target"]) == 2
@@ -1701,6 +1740,7 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
                       "shared_items": [r.split(".", 2)[2] for r in shared],
                       "tolerance": basis["tolerance_relative"] * ref, "holds": ok})
     return {"declared": True, "holds": holds and bool(pairs), "quantity": q, "coverage_cl": cl, "pairs": pairs,
+            **({"note": basis["note"]} if basis.get("note") else {}),
             "reason": None if holds and pairs else ("fewer than two candidates" if not pairs else
                                                     "a difference with its uncertainty exceeds the tolerance")}
 
@@ -1825,16 +1865,27 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
                        "missing_evaluations": agg["missing_evaluations"], "used": agg["used"],
                        "skipped": agg["skipped"], "conflict_inspect": agg["conflict_inspect"],
                        "maturity": agg["maturity"], "missing_evidence": missing_evidence(proj, req, agg, d)}
-                if kind == "requirements" and req["kind"] == "driving" and agg["result"] == "inconclusive":
+                if kind == "constraints" and req.get("subsystems"):  # 3.12.0: the constraint's subsystem scope
+                    lacking = sorted(set(req["subsystems"]) - set(proj.effective(cids[0]) or {}))
+                    if lacking:
+                        row["scope_missing"] = lacking
+                        row["missing_evidence"] = row["missing_evidence"] + [
+                            f"{sid} (in the scope of {req['id']}, not defined by the candidate)" for sid in lacking]
+                        if row["result"] == "pass":  # a partial sum cannot pass it
+                            row.update(result="inconclusive", provisional=False,
+                                       codes=sorted(set(row["codes"]) | {"chain.incomplete"}))
+                if kind == "requirements" and agg["result"] == "inconclusive":
                     row["proposed_disposition"] = ("accept-risk" if agg["codes"] == ["capability.unavailable"]
                                                    else "next-study")  # RPT-05
+                    if req["kind"] == "derived":  # MAT-04 (d), 3.12.0: approved under the driving requirement
+                        row["disposition_under"] = req.get("covered_by")
                 per.append(row)
                 for cid in cids:
                     verdict_rows[(req["id"], cid)] = any(r["row"] >= 9 for r in agg["used"]) or any(
                         r.get("code") == "capability.unavailable" for r in agg["skipped"])
             items.append({"id": req["id"], "kind": req.get("kind", req.get("hardness")), "quantity": req["quantity"],
                           "comparator": req["comparator"], "target": req["target"], "unit": req["unit"],
-                          "matrix": per})
+                          **{k: req[k] for k in ("covered_by", "subsystems") if k in req}, "matrix": per})
         rows_out[kind] = items
     # screening (CHN-11, CHN-12)
     screened, cand_out = set(), []
@@ -1865,8 +1916,6 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
                 m.pop("proposed_disposition", None)
                 if m["result"] == "inconclusive":
                     m["disposition_note"] = "none: the candidate is screened out"
-            elif item["kind"] != "driving" and m["result"] == "inconclusive":
-                m["disposition_note"] = "none required at H4: derived requirement (RPT-05, MAT-04 d)"
     basis = comparison_basis(proj, spec, {d: c for d, c in groups.items() if not set(c) & screened})  # CHN-11 first
     stale = sorted(e.eid for e in proj.evals.values() if e.stale)
     out.update({
@@ -2030,8 +2079,11 @@ def review_axis(proj: Project, records: list[dict], full: dict) -> dict:
     now = payload_digest(report_payload(full), excl)
     used = {proj.resolve(r["file"]) for item in full.get("requirements", []) + full.get("constraints", [])
             for m in item["matrix"] for r in m["used"]}
-    open_driving = {item["id"] for item in full.get("requirements", []) if item["kind"] == "driving"
-                    and any(m["result"] == "inconclusive" and not m.get("screened_out") for m in item["matrix"])}
+    # a derived requirement's inconclusive rows open the driving requirement that covers it (3.12.0, MAT-04 d)
+    open_driving = {item["id"] if item["kind"] == "driving" else item.get("covered_by")
+                    for item in full.get("requirements", [])
+                    if any(m["result"] == "inconclusive" and not m.get("screened_out") for m in item["matrix"])}
+    open_driving.discard(None)
     open_gates = sorted(f for f in full.get("gate_flags", []) if f.startswith("gate."))
     out = []
     reviewed_by = None

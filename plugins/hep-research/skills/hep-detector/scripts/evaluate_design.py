@@ -814,6 +814,15 @@ def fidelity_cell(m: dict) -> str:
     return f"undetermined (participating down to {min(fids)})" if fids else "undetermined (no evaluation used)"
 
 
+def disposition_cell(m: dict) -> str:
+    """RPT-05: the proposed disposition; for a derived requirement, approved at H4 under the driving requirement that
+    covers it (MAT-04 d)."""
+    if m.get("proposed_disposition"):
+        under = f" (under {m['disposition_under']})" if m.get("disposition_under") else ""
+        return m["proposed_disposition"] + under
+    return m.get("disposition_note") or "-"
+
+
 def render(full: dict, omitted: list[str]) -> str:
     lines = [f"# Design report: {full.get('design_id')}", "",
              f"Derived by contracts/design.py from `{full.get('current_spec')}` (spec version {full.get('spec_version')}); "
@@ -830,11 +839,13 @@ def render(full: dict, omitted: list[str]) -> str:
               "Missing for compliance | Proposed disposition |", "|---|---|---|---|---|---|---|---|"]
     for item in full.get("requirements", []) + full.get("constraints", []):
         for m in item["matrix"]:
-            lines.append(f"| {item['id']} ({item['kind']}) | {', '.join(m['candidates'])} | {m['result']}"
+            kind = item["kind"] + (f", under {item['covered_by']}" if item.get("covered_by") else "") + (
+                f"; scope {', '.join(item['subsystems'])}" if item.get("subsystems") else "")
+            lines.append(f"| {item['id']} ({kind}) | {', '.join(m['candidates'])} | {m['result']}"
                          f"{' (provisional)' if m['provisional'] else ''} | {', '.join(m['codes']) or '-'} | "
                          f"{fidelity_cell(m)} | "
                          f"{', '.join(m['maturity']['status_axis']) or '-'} | {'; '.join(m['missing_evidence']) or '-'} | "
-                         f"{m.get('proposed_disposition') or m.get('disposition_note') or '-'} |")
+                         f"{disposition_cell(m)} |")
     lines += ["", "## Evaluations used and skipped", ""]
     for item in full.get("requirements", []) + full.get("constraints", []):
         for m in item["matrix"]:
@@ -858,7 +869,8 @@ def render(full: dict, omitted: list[str]) -> str:
     cl = f" at {basis['coverage_cl']:.0%} one-sided CL" if basis.get("coverage_cl") else ""
     lines.append(f"- comparison basis{' on ' + basis['quantity'] if basis.get('quantity') else ''}{cl}: "
                  f"{'holds' if basis.get('holds') else 'does not hold'}"
-                 f"{' (' + basis['reason'] + ')' if basis.get('reason') else ''}")
+                 f"{' (' + basis['reason'] + ')' if basis.get('reason') else ''}"
+                 f"{'; basis note: ' + basis['note'] if basis.get('note') else ''}")
     for pr in basis.get("pairs", []):
         shared = (f"; cancelled as the same subsystem with the same budget row in both: {', '.join(pr['shared_items'])}"
                   if pr.get("shared_items") else "; no item is the same subsystem with the same budget row in both")
