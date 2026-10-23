@@ -24,6 +24,8 @@ import argparse
 import json
 import math
 import sys
+
+sys.dont_write_bytecode = True  # importing siblings or core leaves no __pycache__ (F-10)
 from fractions import Fraction
 from pathlib import Path
 

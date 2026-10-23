@@ -31,6 +31,8 @@ import argparse
 import json
 import platform
 import sys
+
+sys.dont_write_bytecode = True  # importing siblings or core leaves no __pycache__ (F-10)
 from pathlib import Path
 
 try:

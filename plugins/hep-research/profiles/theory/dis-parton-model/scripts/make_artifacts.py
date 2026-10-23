@@ -16,6 +16,8 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+
+sys.dont_write_bytecode = True  # importing siblings or core leaves no __pycache__ (F-10)
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
