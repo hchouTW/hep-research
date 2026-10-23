@@ -51,7 +51,10 @@ One published antiproton excess and its reassessment is the reference case:
 ## Dark matter to positrons
 
 Sommerfeld-enhanced s-wave annihilation fitted to the positron excess faces severe constraints from dwarf-galaxy gamma
-rays and the CMB (Ding et al. 2021, abstract, which proposes p-wave annihilation to evade them); combined dwarf limits
+rays and the CMB (Ding et al. 2021, abstract, which proposes p-wave annihilation to evade them). The CMB bound is
+p_ann = f_eff <sigma v>/m_chi < 3.2 x 10^-28 cm^3 s^-1 GeV^-1 at 95% for s-wave annihilation, f_eff the fraction of
+the energy deposited around z ~ 600 (temperature, polarization, lensing and BAO; Planck 2018 VI, Sect. 7.9, Eqs.
+88-89c), and the positron-fraction regions for annihilation into muons are in strong tension with it (Fig. 46); combined dwarf limits
 fall below the thermal cross section for masses below about 100 GeV in quark and tau channels (dwarf-galaxy gamma-ray
 search 2015, abstract). Lepton data can, in some cases, constrain dark matter as strongly as or more strongly than
 other indirect probes (Di Mauro et al. 2016, abstract). The excess is defined against a secondary positron prediction whose production cross
@@ -64,8 +67,9 @@ model before the excess. Lepton energy losses: [cosmic-ray propagation](cosmic-r
 Pulsars (the Galactic population of mature pulsars plus the nearest ones, such as Geminga and B0656+14) could
 plausibly produce the positron signal, and a nearby source would leave a small dipole anisotropy in
 the lepton arrival directions that could separate it from dark matter (Hooper, Blasi and Serpico 2009, abstract). The
-TeV halos around Geminga and PSR B0656+14 were read both ways: slow diffusion near the sources makes them unlikely to
-explain the excess (HAWC 2017, abstract) or makes pulsars very likely its origin (Hooper et al. 2017, abstract); the
+TeV halos around Geminga and PSR B0656+14 were read both ways: slow diffusion near the sources (D = (4.5 +- 1.2) x 10^27 cm^2/s
+for 100 TeV electrons, about 100 times below earlier models) makes them unlikely to explain the excess (HAWC 2017,
+abstract, Table 1) or makes pulsars very likely its origin (Hooper et al. 2017, abstract); the
 exclusion depends on assuming homogeneous diffusion, and with a radially dependent diffusion coefficient the two
 pulsars can match the observed high-energy positron flux (Profumo et al. 2018, abstract).
 Geminga alone gives at most 20% of the positrons at the highest measured energies (Di Mauro, Manconi and Donato 2019,

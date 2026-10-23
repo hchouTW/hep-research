@@ -3170,6 +3170,17 @@ A separate read-only agent then checked the whole diff against the source texts:
 al. 2017 series comparison: three causes, not the LIS alone), one locator (Delta chi^2 = 25 is in the letter's main
 text) and five precision points (DRAGON2's Alfvenic option, 15-21 times, list locators, versions, "slightly") were
 fixed before the commit.
+Follow-ups the same day: the HAWC D100 = (4.5 +- 1.2) x 10^27 cm^2/s (arXiv:1711.06223, Table 1 and text, joint fit);
+the Wilcox L and R model assumptions from http://wso.stanford.edu/Tilts.html (page updated 2025-10-23); the antiproton
+source-term search rerun at INSPIRE-HEP (title queries, date after 2025-06) and the arXiv API (abstract query, newest
+first): nothing peer-reviewed after the cited work (a p-He measurement conference paper, 2025, is data, not a source
+determination); AAfrag 2021 = Koldobskiy et al., arXiv:2110.00496v2 (PRD 104 (2021) 123027, INSPIRE); Genolini et al.
+2018 Sec. II.B ties opt12/opt22 to WKS93/TS98 where Maurin et al. 2022 Sec. 2.3 names WNEW 1998/YIELDX 2000; Maurin
+et al. 2022's reference list labels the Weinrich 2020 papers the other way round. Last two items: Usoskin et al.
+2005 read from the authors' institutional copy (https://cosmicrays.oulu.fi/phi/2005JA011250.pdf; App. A: LIS models
+differ by a factor of 2 at low energy, Fig. A1; linear phi conversions "only an approximation", Eq. A4), and its claim
+restored with those locators; the Planck 2018 limit read in arXiv:1807.06209v4 (Sect. 7.9: p_ann < 3.2e-28 cm^3 s^-1
+GeV^-1, 95%, TT,TE,EE+lowE+lensing+BAO, Eq. 89c; Fig. 46) and cited. No listed source remains unread.
 
 ## REVIEW-REFS-4 (2026-10-22; branch `fix/review-refs-4` from main `c2fc9f5c`)
 

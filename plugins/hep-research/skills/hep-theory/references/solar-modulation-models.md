@@ -21,7 +21,9 @@ In order of cost:
 | Numerical transport | Parker equation: convection, drifts, diffusion, adiabatic energy change (Potgieter 2013, Sec. 4.1, Eq. 5); HelMod: 2D Monte Carlo with symmetric and antisymmetric diffusion tensor | Potgieter 2013; Della Torre et al. (arXiv:1612.08445), abstract |
 
 - **phi depends on the LIS.** The force-field potential has no absolute meaning: it depends on the assumed local
-  interstellar spectrum (Usoskin et al. 2017, Sec. 6.3; Gieseler, Heber and Herbst 2017, abstract). The 2011 and 2017
+  interstellar spectrum (Usoskin et al. 2017, Sec. 6.3; Gieseler, Heber and Herbst 2017, abstract). LIS models differ
+  by up to a factor 2 at low energy, and phi from one LIS converts to another only approximately and linearly, e.g.
+  phi_WH03 = 0.97 phi_0 - 110 MV (Usoskin et al. 2005, App. A, Fig. A1, Eq. A4). The 2011 and 2017
   series, which differ in LIS, yield function and calibration, are related tightly but slightly nonlinearly (Usoskin
   et al. 2017, Sec. 6.3, Fig. 10). Never
   mix phi values from different LIS, and never use a published phi series with another LIS without converting.
@@ -37,7 +39,11 @@ In order of cost:
   Treat the lag or window as a model parameter with its period of validity, not a constant.
 - **Tilt-angle inputs.** The Wilcox Solar Observatory gives tilt angles every 10 days from two reconstructions,
   "model L" (classic) and "model R"; one study takes a smoothed model R as default and the L-R difference as a
-  systematic (Tomassetti et al. 2017, Sec. 2). State which model and smoothing were used.
+  systematic (Tomassetti et al. 2017, Sec. 2). Both are potential-field models of the photospheric field: L with a
+  line-of-sight boundary and a polar-field correction, R with a radial boundary and a higher source surface (3.25),
+  which gives a flatter current sheet and usually lower tilts; the observatory calls L probably the better estimate,
+  and values above 70 degrees are lower limits (WSO tilt-angle page, read 2026-10-23). State which model and smoothing
+  were used.
 - **Charge sign.** A > 0 denotes the epochs when the solar polar field points outward in the northern hemisphere,
   A < 0 inward (Potgieter 2013, Sec. 2.2.1; Cholis et al. 2016, Sec. II). In the Cholis et al. form the drift term
   acts only for qA < 0; Kuhlen and Mertsch state that for qA > 0 particles arrive mostly from polar, for qA < 0 from

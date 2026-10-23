@@ -11,7 +11,12 @@ number was checked; about 30 statements were corrected (wrong locators, overstat
 initials and order) and the pages now carry the read level "full text, 2026-10-23" (VALIDATION TH13-SOURCES, ledger
 `documentation_fixes` TH13-SOURCES). The DRAGON2 D_pp prefactor and beta^eta form, previously "not read", are now cited
 (App. C.8-C.9); the "factor 2" LIS claim from an unopened 2005 paper was dropped. Journal references and all 16 DOIs on the
-sources list were then confirmed at arXiv, INSPIRE-HEP and Crossref.
+sources list were then confirmed at arXiv, INSPIRE-HEP and Crossref. Closed afterwards: the HAWC diffusion
+coefficient (Table 1) and the Wilcox L and R tilt-model assumptions (the observatory's page) are now cited, the
+antiproton "no newer determination" search is refreshed (2026-10-23), the 2021 AAfrag comparison is cited, and the
+opt12/opt22 origin and Weinrich label differences between papers are noted. The Planck 2018 annihilation bound
+(Sect. 7.9, Eq. 89c) is cited on the new-physics page, and Usoskin et al. 2005 (read from the authors' copy) again
+supports the LIS factor-2 and linear-conversion statements (App. A, Eq. A4); no listed source remains unread.
 
 Routing (T2): the hep-theory description names "cosmic-ray propagation and solar modulation" (1,020 of 1,024
 characters; room made by dropping three phrases no routing case pins: "importing", "truncation", "and its global
