@@ -1,0 +1,596 @@
+{
+ "contract_version": "1.1.0",
+ "tool_id": "design-estimates",
+ "entry": "skills/hep-detector/scripts/design_estimates.py",
+ "operations": [
+  {
+   "operation_id": "budget-sum",
+   "summary": "Sum of per-subsystem budget items with the linear (default) or quadrature sum of their uncertainties",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--estimates",
+      "input": "estimates"
+     },
+     {
+      "flag": "--uncertainties",
+      "input": "uncertainties"
+     },
+     {
+      "flag": "--rule",
+      "input": "rule"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "estimates",
+     "kind": "parameter",
+     "unit": "{u}",
+     "required": true,
+     "constraint": "one estimate per item, >= 0"
+    },
+    {
+     "name": "uncertainties",
+     "kind": "parameter",
+     "unit": "{u}",
+     "required": true,
+     "constraint": "one standard deviation per item, >= 0"
+    },
+    {
+     "name": "rule",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "linear (default) or quadrature (items declared independent)",
+     "default": "linear"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "total",
+     "kind": "parameter",
+     "unit": "{u}"
+    },
+    {
+     "name": "uncertainty",
+     "kind": "parameter",
+     "unit": "{u}"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"rejected\", ...} with the error"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "mass-budget",
+      "better": "smaller",
+      "unit": "kg",
+      "bound": "estimate",
+      "denominator": {},
+      "value": {
+       "path": "total"
+      },
+      "uncertainty": {
+       "path": "uncertainty",
+       "coverage": 0.6827,
+       "interval": "central",
+       "distribution": "gaussian"
+      },
+      "operation_args": [
+       "budget-sum"
+      ],
+      "inputs": [
+       {
+        "input": "estimates",
+        "from": {
+         "budget": {
+          "quantity": "mass",
+          "field": "estimate"
+         }
+        }
+       },
+       {
+        "input": "uncertainties",
+        "from": {
+         "budget": {
+          "quantity": "mass",
+          "field": "uncertainty"
+         }
+        }
+       },
+       {
+        "input": "rule",
+        "from": {
+         "const": "linear"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "note": "CHN-10: the linear sum of item uncertainties (conservative for correlated items); an F1 estimate, never more (CHN-15)"
+     },
+     {
+      "id": "power-budget",
+      "better": "smaller",
+      "unit": "W",
+      "bound": "estimate",
+      "denominator": {},
+      "value": {
+       "path": "total"
+      },
+      "uncertainty": {
+       "path": "uncertainty",
+       "coverage": 0.6827,
+       "interval": "central",
+       "distribution": "gaussian"
+      },
+      "operation_args": [
+       "budget-sum"
+      ],
+      "inputs": [
+       {
+        "input": "estimates",
+        "from": {
+         "budget": {
+          "quantity": "power",
+          "field": "estimate"
+         }
+        }
+       },
+       {
+        "input": "uncertainties",
+        "from": {
+         "budget": {
+          "quantity": "power",
+          "field": "uncertainty"
+         }
+        }
+       },
+       {
+        "input": "rule",
+        "from": {
+         "const": "linear"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "note": "CHN-10: the linear sum of item uncertainties (conservative for correlated items); an F1 estimate, never more (CHN-15)"
+     },
+     {
+      "id": "channel-count-budget",
+      "better": "smaller",
+      "unit": "1",
+      "bound": "estimate",
+      "denominator": {},
+      "value": {
+       "path": "total"
+      },
+      "uncertainty": {
+       "path": "uncertainty",
+       "coverage": 0.6827,
+       "interval": "central",
+       "distribution": "gaussian"
+      },
+      "operation_args": [
+       "budget-sum"
+      ],
+      "inputs": [
+       {
+        "input": "estimates",
+        "from": {
+         "budget": {
+          "quantity": "channel_count",
+          "field": "estimate"
+         }
+        }
+       },
+       {
+        "input": "uncertainties",
+        "from": {
+         "budget": {
+          "quantity": "channel_count",
+          "field": "uncertainty"
+         }
+        }
+       },
+       {
+        "input": "rule",
+        "from": {
+         "const": "linear"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "note": "CHN-10: the linear sum of item uncertainties (conservative for correlated items); an F1 estimate, never more (CHN-15)"
+     },
+     {
+      "id": "data-rate-budget",
+      "better": "smaller",
+      "unit": "Mbit/s",
+      "bound": "estimate",
+      "denominator": {},
+      "value": {
+       "path": "total"
+      },
+      "uncertainty": {
+       "path": "uncertainty",
+       "coverage": 0.6827,
+       "interval": "central",
+       "distribution": "gaussian"
+      },
+      "operation_args": [
+       "budget-sum"
+      ],
+      "inputs": [
+       {
+        "input": "estimates",
+        "from": {
+         "budget": {
+          "quantity": "data_rate",
+          "field": "estimate"
+         }
+        }
+       },
+       {
+        "input": "uncertainties",
+        "from": {
+         "budget": {
+          "quantity": "data_rate",
+          "field": "uncertainty"
+         }
+        }
+       },
+       {
+        "input": "rule",
+        "from": {
+         "const": "linear"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "note": "CHN-10: the linear sum of item uncertainties (conservative for correlated items); an F1 estimate, never more (CHN-15)"
+     }
+    ]
+   }
+  },
+  {
+   "operation_id": "straight-line-acceptance",
+   "summary": "Geometric acceptance of coaxial circular apertures for an isotropic flux in the straight-line limit (Sullivan's form for two apertures)",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--z-m",
+      "input": "z_m"
+     },
+     {
+      "flag": "--radius-m",
+      "input": "radius_m"
+     },
+     {
+      "flag": "--lateral-offset-m",
+      "input": "lateral_offset_m"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "z_m",
+     "kind": "length",
+     "unit": "m",
+     "required": true,
+     "constraint": "aperture positions along the axis, distinct"
+    },
+    {
+     "name": "radius_m",
+     "kind": "length",
+     "unit": "m",
+     "required": true,
+     "constraint": "aperture radii, > 0"
+    },
+    {
+     "name": "lateral_offset_m",
+     "kind": "length",
+     "unit": "m",
+     "required": true,
+     "constraint": "lateral aperture offsets; zero for apertures on one straight axis"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "acceptance_m2sr",
+     "kind": "acceptance",
+     "unit": "m2 sr"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"rejected\", ...} with the error"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "geometric-acceptance",
+      "better": "larger",
+      "unit": "m2 sr",
+      "bound": "optimistic",
+      "denominator": {
+       "rigidity_GV": "number",
+       "species": "string",
+       "charge_sign": "string"
+      },
+      "value": {
+       "path": "acceptance_m2sr"
+      },
+      "operation_args": [
+       "straight-line-acceptance"
+      ],
+      "inputs": [
+       {
+        "input": "z_m",
+        "from": {
+         "parameter": {
+          "role": "tracking",
+          "name": "layer_positions_m",
+          "unit": "m"
+         }
+        }
+       },
+       {
+        "input": "radius_m",
+        "from": {
+         "parameter": {
+          "role": "tracking",
+          "name": "layer_aperture_radius_m",
+          "unit": "m"
+         }
+        }
+       },
+       {
+        "input": "lateral_offset_m",
+        "from": {
+         "parameter": {
+          "role": "tracking",
+          "name": "layer_lateral_offset_m",
+          "unit": "m"
+         }
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "validity": [
+       {
+        "input": "lateral_offset_m",
+        "min": 0,
+        "max": 0,
+        "note": "apertures on one straight axis: with lateral offsets (dog-leg) bending can raise one charge sign's acceptance, so the straight-line value is not an upper bound (ART-48)"
+       }
+      ],
+      "required_upstreams": [],
+      "assumptions": [
+       "straight-line limit: no bending, no nuclear interactions, full detection efficiency",
+       "isotropic flux",
+       "circular coaxial apertures"
+      ],
+      "note": "an upper bound at every rigidity for coaxial apertures; loose at low rigidity, where bending removes tracks (F2 in-field tracking for compliance)"
+     }
+    ]
+   }
+  },
+  {
+   "operation_id": "pid-rejection",
+   "summary": "Background rejection of a Gaussian discriminant from a separation power and a signal working-point efficiency (an upper bound)",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--separation",
+      "input": "separation"
+     },
+     {
+      "flag": "--efficiency",
+      "input": "efficiency"
+     },
+     {
+      "flag": "--convention",
+      "input": "convention"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "separation",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "separation power in sigma, >= 0"
+    },
+    {
+     "name": "efficiency",
+     "kind": "efficiency",
+     "unit": "1",
+     "required": true,
+     "constraint": "signal working-point efficiency in (0, 1)"
+    },
+    {
+     "name": "convention",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "single or quadrature"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "rejection",
+     "kind": "rejection",
+     "unit": "1"
+    },
+    {
+     "name": "misidentification",
+     "kind": "probability",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"rejected\", ...} with the error"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "pid-rejection",
+      "better": "larger",
+      "unit": "1",
+      "bound": "optimistic",
+      "denominator": {
+       "momentum_GeV": "number",
+       "species": "string",
+       "background_species": "string",
+       "working_point_efficiency": "number",
+       "separation_convention": "string"
+      },
+      "value": {
+       "path": "rejection"
+      },
+      "operation_args": [
+       "pid-rejection"
+      ],
+      "inputs": [
+       {
+        "input": "separation",
+        "from": {
+         "upstream": "pid-separation-power"
+        },
+        "direction": "order-preserving"
+       },
+       {
+        "input": "efficiency",
+        "from": {
+         "denominator": "working_point_efficiency"
+        }
+       },
+       {
+        "input": "convention",
+        "from": {
+         "denominator": "separation_convention"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [
+       "pid-separation-power"
+      ],
+      "assumptions": [
+       "Gaussian responses of unit width",
+       "one subsystem (rejections of several are not multiplied)"
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

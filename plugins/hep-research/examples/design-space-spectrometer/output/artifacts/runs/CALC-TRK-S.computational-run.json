@@ -1,0 +1,97 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "ams-like-v1-CALC-TRK-S-run",
+ "artifact_type": "computational-run",
+ "objective": "detector system design: computational-run written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-S.json",
+   "sha256": "b905e0aec2af7f6eac6864d1102387aea07bc3302ff7575d60e5984b1c658b1b",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-S",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "outputs/CALC-TRK-S.json"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "candidates/cand-S.json",
+    "sha256": "b905e0aec2af7f6eac6864d1102387aea07bc3302ff7575d60e5984b1c658b1b"
+   }
+  ],
+  "tools": [
+   {
+    "name": "tracker-resolution",
+    "version": "0.36.0"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-detector/scripts/tracker_resolution.py momentum --positions-m 0.0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0 --point-resolution-um 10.0 --field-tesla 0.14 --x-over-x0 0.12 --charge 1 --mass-gev 0.93827208816 --pt 1000.0 --status synthetic"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "platform": "macOS-26.5"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "outputs/CALC-TRK-S.json": "85e9a0cd40cf75b40c46f76ec0f89d355834b0c042c0a6d67a6204da751e212d"
+  },
+  "argv": [
+   "python3",
+   "skills/hep-detector/scripts/tracker_resolution.py",
+   "momentum",
+   "--positions-m",
+   "0.0",
+   "0.25",
+   "0.5",
+   "0.75",
+   "1.0",
+   "1.25",
+   "1.5",
+   "1.75",
+   "2.0",
+   "--point-resolution-um",
+   "10.0",
+   "--field-tesla",
+   "0.14",
+   "--x-over-x0",
+   "0.12",
+   "--charge",
+   "1",
+   "--mass-gev",
+   "0.93827208816",
+   "--pt",
+   "1000.0",
+   "--status",
+   "synthetic"
+  ],
+  "script_sha256": {
+   "skills/hep-detector/scripts/tracker_resolution.py": "767043e87f2c00903246bce1627ec40cd7d9bf0a2fdac100e756a9d09bd56fbc"
+  }
+ }
+}

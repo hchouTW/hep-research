@@ -1,0 +1,278 @@
+{
+ "contract_version": "1.1.0",
+ "tool_id": "cherenkov-angle",
+ "entry": "skills/hep-detector/scripts/cherenkov_angle.py",
+ "operations": [
+  {
+   "operation_id": "kinematics",
+   "summary": "RICH kinematics: thresholds, Cherenkov angles, photon yield, per-track resolution and the separation in sigma of two species at one momentum",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--index",
+      "input": "index"
+     },
+     {
+      "flag": "--species",
+      "input": "species"
+     },
+     {
+      "flag": "--momentum",
+      "input": "momentum"
+     },
+     {
+      "flag": "--rigidity",
+      "input": "rigidity"
+     },
+     {
+      "flag": "--radiator-length",
+      "input": "radiator_length"
+     },
+     {
+      "flag": "--figure-of-merit",
+      "input": "figure_of_merit"
+     },
+     {
+      "flag": "--single-photon-resolution",
+      "input": "single_photon_resolution"
+     },
+     {
+      "flag": "--track-resolution",
+      "input": "track_resolution"
+     },
+     {
+      "flag": "--convention",
+      "input": "convention"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "index",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "refractive index, > 1"
+    },
+    {
+     "name": "species",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "two species names, masses or mass:charge"
+    },
+    {
+     "name": "momentum",
+     "kind": "momentum",
+     "unit": "GeV/c",
+     "required": false,
+     "constraint": "momentum; excludes --rigidity",
+     "default": 10.0
+    },
+    {
+     "name": "rigidity",
+     "kind": "rigidity",
+     "unit": "GV",
+     "required": false,
+     "constraint": "rigidity; excludes --momentum"
+    },
+    {
+     "name": "radiator_length",
+     "kind": "length",
+     "unit": "cm",
+     "required": false,
+     "constraint": "radiator thickness",
+     "default": 2.0
+    },
+    {
+     "name": "figure_of_merit",
+     "kind": "parameter",
+     "unit": "1/cm",
+     "required": false,
+     "constraint": "N0 folding in detection efficiency",
+     "default": 100.0
+    },
+    {
+     "name": "single_photon_resolution",
+     "kind": "angle",
+     "unit": "mrad",
+     "required": false,
+     "constraint": "single-photon angular resolution",
+     "default": 5.0
+    },
+    {
+     "name": "track_resolution",
+     "kind": "angle",
+     "unit": "mrad",
+     "required": false,
+     "constraint": "per-track term that does not shrink with N",
+     "default": 0.0
+    },
+    {
+     "name": "convention",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "single or quadrature",
+     "default": "single"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "n_sigma",
+     "kind": "separation",
+     "unit": "1"
+    },
+    {
+     "name": "angle_difference_mrad",
+     "kind": "angle",
+     "unit": "mrad"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the computation failed (JSON with ok false)"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "invalid input (JSON with error_kind invalid-input)"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "pid-separation-power",
+      "better": "larger",
+      "unit": "1",
+      "bound": "optimistic",
+      "denominator": {
+       "momentum_GeV": "number",
+       "species": "string",
+       "background_species": "string",
+       "separation_convention": "string"
+      },
+      "value": {
+       "path": "n_sigma"
+      },
+      "inputs": [
+       {
+        "input": "index",
+        "from": {
+         "parameter": {
+          "role": "rich",
+          "name": "refractive_index",
+          "unit": "1"
+         }
+        }
+       },
+       {
+        "input": "species",
+        "from": {
+         "list": [
+          {
+           "species": "tool_name"
+          },
+          {
+           "species": "tool_name",
+           "of": "background_species"
+          }
+         ]
+        }
+       },
+       {
+        "input": "momentum",
+        "from": {
+         "denominator": "momentum_GeV"
+        }
+       },
+       {
+        "input": "radiator_length",
+        "from": {
+         "parameter": {
+          "role": "rich",
+          "name": "radiator_length_cm",
+          "unit": "cm"
+         }
+        }
+       },
+       {
+        "input": "figure_of_merit",
+        "from": {
+         "parameter": {
+          "role": "rich",
+          "name": "n0_per_cm",
+          "unit": "1/cm"
+         }
+        }
+       },
+       {
+        "input": "single_photon_resolution",
+        "from": {
+         "parameter": {
+          "role": "rich",
+          "name": "single_photon_resolution_mrad",
+          "unit": "mrad"
+         }
+        }
+       },
+       {
+        "input": "track_resolution",
+        "from": {
+         "parameter": {
+          "role": "rich",
+          "name": "track_resolution_mrad",
+          "unit": "mrad"
+         }
+        }
+       },
+       {
+        "input": "convention",
+        "from": {
+         "denominator": "separation_convention"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "assumptions": [
+       "one refractive index (chromatic dispersion only through the single-photon resolution)",
+       "Gaussian angular core (both species above the few-photon regime)"
+      ],
+      "note": "optimistic: the Gaussian core of the ring angle; ring-finding, background photons and tails are not included"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "status": "ok",
+ "status_label": "synthetic",
+ "inputs": {
+  "command": "budget-sum",
+  "estimates": [
+   2000.0,
+   150.0
+  ],
+  "uncertainties": [
+   40.0,
+   3.0
+  ],
+  "rule": "linear",
+  "status": "synthetic"
+ },
+ "label": "[General method]",
+ "warnings": [],
+ "n_items": 2,
+ "total": 2150.0,
+ "uncertainty": 43.0,
+ "rule": "linear",
+ "uncertainty_meaning": "one standard deviation; linear sum of the item uncertainties"
+}

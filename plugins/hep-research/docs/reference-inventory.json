@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 38,
-   "bytes": 505457,
+   "references": 39,
+   "bytes": 516005,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1853,12 +1853,13 @@
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
    "owner": "hep-detector",
-   "bytes": 5448,
-   "lines": 71,
+   "bytes": 5708,
+   "lines": 75,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
     "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/references/system-design-workflow.md",
     "skills/hep-detector/scripts/detector_atlas.py",
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
@@ -2409,6 +2410,20 @@
     "hep-statistics"
    ],
    "last_commit": "c90b601b 2026-10-22"
+  },
+  {
+   "path": "skills/hep-detector/references/system-design-workflow.md",
+   "owner": "hep-detector",
+   "bytes": 10288,
+   "lines": 147,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-design-principles.md",
+    "skills/hep-detector/scripts/design_estimates.py",
+    "skills/hep-detector/scripts/evaluate_design.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
@@ -4631,7 +4646,8 @@
   ],
   "system": [
    "skills/hep-detector/references/detector-systems-overview.md",
-   "skills/hep-detector/references/muon-systems.md"
+   "skills/hep-detector/references/muon-systems.md",
+   "skills/hep-detector/references/system-design-workflow.md"
   ],
   "task": [
    "skills/hep-computing/references/task-authoring-guide.md",

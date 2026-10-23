@@ -114,8 +114,9 @@ def usage_positionals(help_text: str, skip: tuple[str, ...] = ()) -> list[str] |
 
 
 def subcommands(help_text: str) -> set[str]:
-    """The subcommand choices '{a,b,...}' of an argparse usage line (empty when there are none)."""
-    first = help_text.splitlines()[0] if help_text else ""
+    """The subcommand choices '{a,b,...}' of an argparse usage block, wrapped lines included (empty when none)."""
+    lines = help_text.splitlines() if help_text else []
+    first = " ".join(lines[:next((i for i, line in enumerate(lines) if not line.strip()), len(lines))])  # the usage block
     m = re.search(r"\{([a-z0-9_,-]+)\}", first)
     return set(m.group(1).split(",")) if m else set()
 
@@ -215,6 +216,11 @@ def expr_refs(expr) -> tuple[list[dict], list[str]]:
             ups.append(e["upstream"])
         for k in EXPR_KEYS:
             stack.extend(e.get(k, []))
+        for k in ("object", "zip"):
+            stack.extend((e.get(k) or {}).values())
+        for k in ("config", "span"):
+            if k in e:
+                stack.append(e[k])
     return params, ups
 
 
@@ -245,6 +251,9 @@ def check_design(op: dict, where: str, rep: Report) -> None:
             for u in sorted(set(ups) - required):
                 rep.add("error", f"{fw}.inputs.{m['input']}", "tool.design_upstream_undeclared",
                         f"upstream '{u}' is not in required_upstreams")
+        unc = fom.get("uncertainty")
+        if unc is not None and ("path" in unc) == ("relative" in unc):
+            rep.add("error", f"{fw}.uncertainty", "tool.design_uncertainty", "give exactly one of path and relative")
         pieces = fom["bound"] if isinstance(fom["bound"], list) else []
         if pieces and "when" in pieces[-1]:
             rep.add("error", f"{fw}.bound", "tool.design_bound_open", "the last bound piece has no conditions (otherwise)")

@@ -169,6 +169,9 @@ CONTRACTS_VERSION = "3.11.0"
 # 1.1.0; contracts/lineage.py). No capability is added (the 2.13.0 literature-record precedent): a 3.10 reader refuses
 # the new types, roles, run fields, sidecar versions and categories through the schema enums and additionalProperties
 # instead of misreading them, and every 3.10 artifact, 1.0.0 tool contract and 1.0.0 decision record keeps its outcome.
+# Detector design M1 extends the unreleased 3.11.0 (OQ-03): the tool contract 1.1.0 design block also has an
+# uncertainty location and the expressions budget, object, zip, config (a generated config file) and span; no
+# artifact field changes.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

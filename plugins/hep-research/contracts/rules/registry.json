@@ -3555,7 +3555,12 @@
     "contracts/tool_contracts/**",
     "contracts/lineage.py",
     "tests/contracts/design_fixtures.py",
-    "tests/contracts/test_design_*.py"
+    "tests/contracts/test_design_*.py",
+    "skills/hep-detector/scripts/evaluate_design.py",
+    "skills/hep-detector/scripts/design_estimates.py",
+    "examples/design-space-spectrometer/**",
+    "tests/skills/hep_detector/test_evaluate_design.py",
+    "tests/examples/test_design_space_spectrometer.py"
    ],
    "checks": [
     "tests.contracts.test_design_verdicts",
@@ -3564,7 +3569,10 @@
     "tests.contracts.test_tool_contract",
     "tests.contracts.test_lineage",
     "tests.contracts.test_contracts",
-    "part:static"
+    "part:static",
+    "tests.skills.hep_detector.test_evaluate_design",
+    "tests.examples.test_design_space_spectrometer",
+    "tests.skills.test_cli_robustness"
    ],
    "not_available": [],
    "full": false
