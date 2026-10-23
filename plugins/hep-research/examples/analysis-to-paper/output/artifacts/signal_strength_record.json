@@ -5,7 +5,7 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.36.0",
+  "plugin": "0.37.0",
   "contracts": "3.11.0",
   "plugin_release": {
    "release": "unreleased",
@@ -47,7 +47,7 @@
  "inputs": [
   {
    "ref": "signal_strength.json",
-   "sha256": "c3d0730bf23c0b53af7c32ea70d8d3cf6943baddfd64a2167b9a49c8ee033ca2",
+   "sha256": "0a543f9f8db564e3cab61d0f6fa2441a3e91938b5c989c442c421d65b88b9522",
    "role": "statistical-result"
   }
  ],

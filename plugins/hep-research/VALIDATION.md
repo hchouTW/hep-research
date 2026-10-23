@@ -2756,6 +2756,22 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## 0.37.0 release check (2026-10-24, E2 and the CI lock)
+
+Release branch `release/0.37.0` from main `6aaef412` (main CI green). It ships #265-#269: the hep-detector system
+design loop (detector system design spec v2, milestones M0-M4; contracts 3.11.0). The ams02-research companion needs
+no change (it requires hep-research >=0.11.0).
+
+What changed in the release branch: version 0.37.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.37.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5234 tests in 436 modules, 5098 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5234 tests, 5006 pass, 0 failures, 228 skipped |
+
 ## 0.36.0 release check (2026-10-24, E2 and the CI lock)
 
 Release branch `release/0.36.0` from main `01b66bc2` (main CI green). It ships #263: hadron structure phase 7
