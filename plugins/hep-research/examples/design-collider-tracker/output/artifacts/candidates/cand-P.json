@@ -165,9 +165,9 @@
      "fidelity": "F1"
     },
     "DES-ECAL-001": {
-     "allocation": 9900.0,
-     "estimate": 9000.0,
-     "uncertainty": 450.0,
+     "allocation": 7700.0,
+     "estimate": 7000.0,
+     "uncertainty": 350.0,
      "unit": "kg",
      "basis": "catalog",
      "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",

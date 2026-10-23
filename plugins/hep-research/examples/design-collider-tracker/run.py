@@ -16,8 +16,9 @@ Chain: design-spec and candidates -> evaluate_design.py run (resolution, ECAL, t
 budget (mass) -> the prepared H3 record -> evaluate_design.py report. Verdicts only from contracts/design.py.
 Acceptance criteria: the probe fails resolution (bound.excludes); the two reasonable candidates are inconclusive on
 resolution and ECAL resolution (bound.direction); the four unavailable quantities are inconclusive with
-capability.unavailable and listed; the equal-mass basis is checked between the two that survive screening (the shared
-magnet and ECAL items cancel, so it holds; the report still refuses to rank, for lack of expected-precision evaluations).
+capability.unavailable and listed; the equal-mass basis is checked between the two that survive screening (the 2.0 T
+solenoid and the coarser ECAL are lighter, no item is shared, so it does not hold; the report refuses to rank for that and
+for lack of expected-precision evaluations).
 
 Usage (from the plugin root): python3 examples/design-collider-tracker/run.py [--out DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Standard library only.
@@ -62,7 +63,7 @@ def row(estimate, sigma, unit, basis="estimate", source="example engineering est
             "basis": basis, "source": source, "fidelity": "F1"}
 
 
-def candidate(n_layers, lever, field, ecal, trk_mass):
+def candidate(n_layers, lever, field, ecal, trk_mass, mag_mass, ecal_mass):
     pos = [round(0.1 + i * lever / (n_layers - 1), 6) for i in range(n_layers)]
     catalog = "SYNTHETIC example: catalog masses of comparable components (not weighed)"
     subs = {
@@ -82,16 +83,20 @@ def candidate(n_layers, lever, field, ecal, trk_mass):
                          "interfaces": ["DES-TRK-001"], "calibration": calib("intercalibration with isolated electrons",
                                                                               ["Z -> e e", "W -> e nu"])}}
     budgets = {"mass": {"DES-TRK-001": row(trk_mass, 0.05 * trk_mass, "kg", "catalog", catalog),
-                        "DES-MAG-001": row(12000.0, 600.0, "kg", "catalog", catalog),
-                        "DES-ECAL-001": row(9000.0, 450.0, "kg", "catalog", catalog)}}
+                        "DES-MAG-001": row(mag_mass, 0.05 * mag_mass, "kg", "catalog", catalog),
+                        "DES-ECAL-001": row(ecal_mass, 0.05 * ecal_mass, "kg", "catalog", catalog)}}
     for q, unit in (("power", "W"), ("channel_count", "1"), ("data_rate", "Mbit/s")):
         budgets[q] = {sid: row(100.0, 20.0, unit) for sid in subs}
     return subs, budgets
 
 
-CANDIDATES = {"cand-A": ("13 layers over 1.0 m in 3.8 T, fine-sampling ECAL", 13, 1.0, 3.8, (0.03, 0.12, 0.003), 1500.0),
-              "cand-B": ("10 layers over 1.0 m in 2.0 T, coarser ECAL", 10, 1.0, 2.0, (0.05, 0.20, 0.005), 1480.0),
-              "cand-P": ("probe: 6 layers over 0.4 m in 3.8 T", 6, 0.4, 3.8, (0.05, 0.20, 0.005), 700.0)}
+# the 2.0 T solenoid and the coarser ECAL are lighter catalog items than the 3.8 T solenoid and the fine ECAL
+CANDIDATES = {"cand-A": ("13 layers over 1.0 m in 3.8 T, fine-sampling ECAL", 13, 1.0, 3.8, (0.03, 0.12, 0.003), 1500.0,
+                         12000.0, 9000.0),
+              "cand-B": ("10 layers over 1.0 m in 2.0 T, coarser ECAL", 10, 1.0, 2.0, (0.05, 0.20, 0.005), 1480.0,
+                         9000.0, 7000.0),
+              "cand-P": ("probe: 6 layers over 0.4 m in 3.8 T", 6, 0.4, 3.8, (0.05, 0.20, 0.005), 700.0,
+                         12000.0, 7000.0)}
 
 
 def den(v, tol=0.0):
@@ -159,8 +164,8 @@ def build(out: Path) -> dict:
         d.mkdir(parents=True)
     (art / "design-spec.v1.json").write_text(json.dumps(envelope("design-spec", f"{NS}-spec-v1", spec()), indent=1) + "\n")
     (art / "candidates").mkdir()
-    for name, (desc, n, lever, field, ecal, mass) in CANDIDATES.items():
-        subs, budgets = candidate(n, lever, field, ecal, mass)
+    for name, (desc, n, lever, field, ecal, mass, mag_mass, ecal_mass) in CANDIDATES.items():
+        subs, budgets = candidate(n, lever, field, ecal, mass, mag_mass, ecal_mass)
         ext = {"candidate_id": f"{NS}:{name}", "design_id": NS, "description": desc, "subsystems": subs, "budgets": budgets}
         (art / "candidates" / f"{name}.json").write_text(json.dumps(envelope("design-candidate", f"{NS}-{name}", ext),
                                                                     indent=1) + "\n")
@@ -207,8 +212,8 @@ def criteria(full: dict) -> dict:
         "unavailable_in_h3_record": any(r["category"] == "architecture-selection" for r in full["gates"])
         and "gate.H3_missing" in full["gate_flags"],
         "equal_mass_basis_checked": full["comparison_basis"]["declared"] and len(full["comparison_basis"]["pairs"]) == 1
-        and full["comparison_basis"]["holds"] and bool(full["comparison_basis"]["pairs"][0]["shared_items"]),
-        "no_ranking_claimed": full["ranking"]["status"] == "refused" and "CHN-06" in full["ranking"]["reason"],
+        and not full["comparison_basis"]["holds"] and full["comparison_basis"]["pairs"][0]["shared_items"] == [],
+        "no_ranking_claimed": full["ranking"]["status"] == "refused" and len(full["ranking"]["reasons"]) == 2,
     }
 
 

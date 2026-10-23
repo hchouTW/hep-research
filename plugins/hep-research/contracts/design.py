@@ -1509,7 +1509,8 @@ def missing_evidence(proj: Project, req: dict, agg: dict, effective: str | None 
                 out.append(f"{fom} at {c} or above (in the chain of {e.eid}, now {fid})")
     for group in rules.get("compliance_upstreams", []):
         if not any(present(e, set(group)) for e in evs):
-            out.append(f"{' or '.join(group)} (required for compliance, ADQ-02)")
+            alts = [f"{g} at {(proj.fom_rules(g) or {}).get('compliance', 'F5')} or above" for g in group]
+            out.append(f"{' or '.join(alts)} (required for compliance, ADQ-02)")
     for r in (req.get("verification") or {}).get("required_upstreams", []):
         if not any(present(e, {r}) for e in evs):
             out.append(f"{r} (required by the requirement's verification)")
@@ -1647,7 +1648,7 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
     q = basis["quantity"]
     rules = proj.fom_rules(q) or {}
     cl = rules.get("coverage_cl", proj.adequacy.get("default_coverage_cl", 0.95))
-    vals = {}
+    vals, cids = {}, {}
     for d in groups:
         evs = [e for e in proj.evals.values() if e.fom == q and e.effective == d and e.fidelity == "F1"
                and not e.errors and not e.stale and e.ext.get("value") is not None and e.ext.get("uncertainty")]
@@ -1660,6 +1661,7 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
         items = proj.parameter_objects(e.ext.get("candidate", ""), refs) if refs else {}
         vals[d] = (e.ext["value"], max(sigma_equivalent(u, "minus"), sigma_equivalent(u, "plus")),
                    items if items and all(isinstance(x, dict) for x in items.values()) else None)
+        cids[d] = e.ext.get("candidate", "")
     pairs = []
     holds = True
     k = z_one_sided(cl)
@@ -1668,12 +1670,16 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
         ref = (abs(va) + abs(vb)) / 2 or 1.0
         diff, sig, shared = abs(va - vb), math.hypot(sa, sb), []
         if ia is not None and ib is not None:
-            # ART-15: a budget item both candidates carry unchanged (same estimate, uncertainty, unit, basis and
-            # source) is the same object and cancels in the difference; the other items of each candidate add
+            # ART-15: a budget item cancels in the difference only when both candidates carry the same subsystem
+            # (identical merged definition) with the same budget row (estimate, uncertainty, unit, basis, source):
+            # equal numbers on different hardware are not the same object. The other items of each candidate add
             # linearly, as in budget-sum, and the two candidates add in quadrature.
             same = ("estimate", "uncertainty", "unit", "basis", "source")
+            subs_a, subs_b = proj.effective(cids[a]) or {}, proj.effective(cids[b]) or {}
             shared = sorted(r for r in ia if isinstance(ib.get(r), dict)
-                            and all(ia[r].get(f) == ib[r].get(f) for f in same))
+                            and all(ia[r].get(f) == ib[r].get(f) for f in same)
+                            and r.split(".", 2)[2] in subs_a
+                            and subs_a[r.split(".", 2)[2]] == subs_b.get(r.split(".", 2)[2]))
             own_a = sum(float(ia[r].get("uncertainty") or 0.0) for r in ia if r not in shared)
             own_b = sum(float(ib[r].get("uncertainty") or 0.0) for r in ib if r not in shared)
             sig = math.hypot(own_a, own_b)
@@ -1705,7 +1711,9 @@ def load_records(proj: Project, design_id: str) -> list[dict]:
         if not isinstance(rec, dict) or rec.get("category") not in DESIGN_CATEGORIES or rec.get("analysis") != design_id:
             continue
         rep = check_decision(rec, None, proj.root)
-        rec = dict(rec, _file=str(p), _valid=rep.ok and (rec.get("actor") or {}).get("kind") == "human",  # DEC-05
+        # the record's name relative to the decisions folder's parent: no host path in the derived report
+        rel = str(p.relative_to(proj.decisions_dir.parent))
+        rec = dict(rec, _file=rel, _valid=rep.ok and (rec.get("actor") or {}).get("kind") == "human",  # DEC-05
                    _findings=sorted({f.code for f in rep.findings if f.severity == "error"}),
                    _paths=[proj.resolve(a["ref"]) for a in rec.get("artifacts", [])])
         out.append(rec)
@@ -1846,7 +1854,7 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
                 if m["result"] == "inconclusive":
                     m["disposition_note"] = "none: the candidate is screened out"
             elif item["kind"] != "driving" and m["result"] == "inconclusive":
-                m["disposition_note"] = "none required: derived requirement (RPT-05, MAT-04 d)"
+                m["disposition_note"] = "none required at H4: derived requirement (RPT-05, MAT-04 d)"
     basis = comparison_basis(proj, spec, {d: c for d, c in groups.items() if not set(c) & screened})  # CHN-11 first
     stale = sorted(e.eid for e in proj.evals.values() if e.stale)
     out.update({
@@ -1936,17 +1944,21 @@ def review_axis(proj: Project, records: list[dict], full: dict) -> dict:
     """MAT-04..MAT-08, DEC-12, DEC-13, DEC-20: only a design-baseline (H4) record sets the review axis, and only when
     the actor is human and every hash matches, artifacts[] is exactly the derived design report and the evaluations it
     used, the report equals the one recomputed now (MAT-05 exclusions), and dispositions[] covers every inconclusive
-    driving requirement. The axis is advisory: the actor is self-declared (LIM-01)."""
+    driving requirement of a candidate that survives screening; in addition (an interpretation: H4 follows H1-H3 in
+    the phase order) no earlier gate flag is open. The axis is advisory: the actor is self-declared (LIM-01)."""
     excl = set((proj.adequacy.get("hash_exclusions") or {}).get("fields", []))
     now = payload_digest(report_payload(full), excl)
     used = {proj.resolve(r["file"]) for item in full.get("requirements", []) + full.get("constraints", [])
             for m in item["matrix"] for r in m["used"]}
     open_driving = {item["id"] for item in full.get("requirements", []) if item["kind"] == "driving"
                     and any(m["result"] == "inconclusive" and not m.get("screened_out") for m in item["matrix"])}
+    open_gates = sorted(f for f in full.get("gate_flags", []) if f.startswith("gate."))
     out = []
     reviewed_by = None
     for r in (x for x in records if x["category"] == "design-baseline"):
         reasons = []
+        if open_gates:
+            reasons.append(f"earlier gates still open: {', '.join(open_gates)} (H4 follows H1-H3)")
         if not r["_valid"]:
             reasons.append("not a valid human record (actor, schema or a changed hash): " + ", ".join(r["_findings"]))
         reports = [p for p in r["_paths"] if proj.docs.get(p, {}).get("artifact_type") == "communication"

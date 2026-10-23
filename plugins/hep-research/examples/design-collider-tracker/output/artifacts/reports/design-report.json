@@ -36,7 +36,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-B.json",
-   "sha256": "be4e17080c3929a5231876204a3beb02ad978cbc1792e89ea4426e06e2460e23",
+   "sha256": "87b8e39ea7454294ef26ef7556f4aeaaccfd7c105cef885cda5d7ff4355d8b6d",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-B",
    "status": [
@@ -45,7 +45,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-P.json",
-   "sha256": "d3ec113c6cd17e5da692fae5b061c23eaba1268527c93b01921890207f1e5693",
+   "sha256": "737dfc09551e2869855938654f9782abb453e91355e8acdbaa1334b218d8ee4b",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-P",
    "status": [
@@ -63,7 +63,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-B.json",
-   "sha256": "c6a16f2aa0a329b6fb983a80a4cd46bcfc2b9d0b468ea36abd06e6b864285d12",
+   "sha256": "e3bab35afff843cae4c095037b1719df35b36ccffa0a75b665bb3c150b8159b2",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-B",
    "status": [
@@ -72,7 +72,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-P.json",
-   "sha256": "358123e7f01926b12500c2394ae11f1736442e0accaefbf655521b863516aafd",
+   "sha256": "ca09d46f8305bc9a4a3bdffa28722eb3f39b1926a7c5cf2c26206d5efc73599d",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-P",
    "status": [
@@ -90,7 +90,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-B.json",
-   "sha256": "47e356bfb2986c105a9cd291e688bf4d8aa9a07e268e1dfd50cee22bf05a898e",
+   "sha256": "2ec8be7833e0677c7383653733e499d72d35326c6d987b8d17957a8cbb554530",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-B",
    "status": [
@@ -99,7 +99,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "6c7cc5d3ac91743c20ed4e6238bb3427e6ad6201b135bdc3844616b8637d80eb",
+   "sha256": "edaf592488f49ad01146b4e2110a90b2fb648ac42ab448211d154576113cda5c",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-P",
    "status": [
@@ -328,7 +328,7 @@
      "clear": false,
      "records": [
       {
-       "file": "/Users/hchou/hep-research-wt-m3/plugins/hep-research/examples/design-collider-tracker/output/decisions/h3-prepared.json",
+       "file": "decisions/h3-prepared.json",
        "valid": false,
        "findings": []
       }
@@ -616,7 +616,7 @@
         ]
        },
        "missing_evidence": [
-        "calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02)",
+        "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
         "calorimeter-energy-resolution at F4 or above (compliance threshold)"
        ],
        "proposed_disposition": "next-study"
@@ -673,7 +673,7 @@
         ]
        },
        "missing_evidence": [
-        "calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02)",
+        "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
         "calorimeter-energy-resolution at F4 or above (compliance threshold)"
        ],
        "proposed_disposition": "next-study"
@@ -730,7 +730,7 @@
         ]
        },
        "missing_evidence": [
-        "calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02)",
+        "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
         "calorimeter-energy-resolution at F4 or above (compliance threshold)"
        ],
        "screened_out": true,
@@ -791,7 +791,7 @@
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -838,7 +838,7 @@
        "missing_evidence": [
         "hadronic-energy-resolution at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -943,7 +943,7 @@
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -990,7 +990,7 @@
        "missing_evidence": [
         "trigger-efficiency at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1095,7 +1095,7 @@
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -1142,7 +1142,7 @@
        "missing_evidence": [
         "pileup-robustness at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1247,7 +1247,7 @@
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
@@ -1294,7 +1294,7 @@
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"
        ],
-       "disposition_note": "none required: derived requirement (RPT-05, MAT-04 d)"
+       "disposition_note": "none required at H4: derived requirement (RPT-05, MAT-04 d)"
       },
       {
        "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
@@ -1569,7 +1569,7 @@
    "stale_evaluations": [],
    "comparison_basis": {
     "declared": true,
-    "holds": true,
+    "holds": false,
     "quantity": "mass-budget",
     "coverage_cl": 0.95,
     "pairs": [
@@ -1582,22 +1582,20 @@
         "collider-tracker-v1:cand-A"
        ]
       ],
-      "difference": 20.0,
-      "uncertainty_one_sided": 173.3038888309006,
-      "shared_items": [
-       "DES-ECAL-001",
-       "DES-MAG-001"
-      ],
-      "tolerance": 1124.5,
-      "holds": true
+      "difference": 5020.0,
+      "uncertainty_one_sided": 2343.267621427414,
+      "shared_items": [],
+      "tolerance": 999.5,
+      "holds": false
      }
     ],
-    "reason": null
+    "reason": "a difference with its uncertainty exceeds the tolerance"
    },
    "ranking": {
     "status": "refused",
-    "reason": "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reason": "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07); collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)",
     "reasons": [
+     "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)",
      "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)"
     ]
    },

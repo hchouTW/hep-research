@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "105b83040f0719fa1f1e51cb95cae32237c3ddb420427b64cc051d273cedd55c",
+   "sha256": "d193d87190deee707cde0374f66ae1b93278606a2721416dc85ab60caea37d00",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-P",
    "status": [
@@ -40,7 +40,7 @@
   "input_manifest": [
    {
     "path": "candidates/cand-P.json",
-    "sha256": "105b83040f0719fa1f1e51cb95cae32237c3ddb420427b64cc051d273cedd55c"
+    "sha256": "d193d87190deee707cde0374f66ae1b93278606a2721416dc85ab60caea37d00"
    }
   ],
   "tools": [
@@ -50,7 +50,7 @@
    }
   ],
   "commands": [
-   "python3 skills/hep-detector/scripts/design_estimates.py budget-sum --estimates 9000.0 12000.0 700.0 --uncertainties 450.0 600.0 35.0 --rule linear --status synthetic"
+   "python3 skills/hep-detector/scripts/design_estimates.py budget-sum --estimates 7000.0 12000.0 700.0 --uncertainties 350.0 600.0 35.0 --rule linear --status synthetic"
   ],
   "environment": {
    "python": "3.13.2",
@@ -60,18 +60,18 @@
   "tolerances": {},
   "exit_status": 0,
   "output_hashes": {
-   "outputs/CALC-MASS-P.json": "a2dedd02f1b2b4cfc8fbe969e25f12c15b900bff6d6c9a94e4a31f38ca92c865"
+   "outputs/CALC-MASS-P.json": "e166ab60ca08504eee86cfa1e6598c178c2780a851150518849e6d1c2ddb7bc4"
   },
   "argv": [
    "python3",
    "skills/hep-detector/scripts/design_estimates.py",
    "budget-sum",
    "--estimates",
-   "9000.0",
+   "7000.0",
    "12000.0",
    "700.0",
    "--uncertainties",
-   "450.0",
+   "350.0",
    "600.0",
    "35.0",
    "--rule",

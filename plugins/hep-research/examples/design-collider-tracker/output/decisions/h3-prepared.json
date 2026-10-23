@@ -19,7 +19,7 @@
   },
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "285a1e9edac2e7e6556b4c0e6691979a1e503a912080b18f2addafa5058e043c"
+   "sha256": "f967596450fa1071605ba1812b159ec3d55e5b0b9345ba483fc299e2aef4354d"
   },
   {
    "ref": "evaluations/EST-HCAL-A.json",
@@ -39,19 +39,19 @@
   },
   {
    "ref": "evaluations/EST-HCAL-B.json",
-   "sha256": "8c43a754a8739028563f8fff11b6bcae817201e6ac9850206a9db3e20733e81d"
+   "sha256": "19aa892e58c1aa0bad6d3da63c73c3e009d3b6a5d551d092233203249dce3af9"
   },
   {
    "ref": "evaluations/EST-TRG-B.json",
-   "sha256": "9592a331b9e3b0ee49a87ffe0890fd193818f8ec13963fede0e633587824c546"
+   "sha256": "1f80a6ce75f6d0f9176c1228ed4d5981376e5f218b4e84a7a6acc996a41c3612"
   },
   {
    "ref": "evaluations/EST-PU-B.json",
-   "sha256": "e5de30f467030b96d3f1321fe96747f599614f4feb68cb963a18bbfdc6614e6b"
+   "sha256": "093f7a8e1829c901e1c9081e59db5908411b86899a48d950130afabd2d8ab9e9"
   },
   {
    "ref": "evaluations/EST-CONT-B.json",
-   "sha256": "3274294f373cff58a829bc0e94e1ef1e81a45c0d64087b891efd2c81ccfb8eef"
+   "sha256": "1fd956e61cbb8a1d395b849aab86c6a8baeddb7e1d0666dfe298276f330288f3"
   }
  ]
 }

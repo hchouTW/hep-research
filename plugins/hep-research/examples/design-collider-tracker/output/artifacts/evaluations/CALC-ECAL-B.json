@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "285a1e9edac2e7e6556b4c0e6691979a1e503a912080b18f2addafa5058e043c",
+   "sha256": "f967596450fa1071605ba1812b159ec3d55e5b0b9345ba483fc299e2aef4354d",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-B",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-ECAL-B.computational-run.json",
-   "sha256": "a21625108e99c0b9b54425af860c2887b9ed1d38d28f65134f4a6ecf6b306536",
+   "sha256": "359b8f095f73c164b8cae1e7ade9071a173d9827137969012043c434ad5f692a",
    "artifact_type": "computational-run",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-B-run",
    "status": [

@@ -525,10 +525,10 @@
         ]
        },
        "missing_evidence": [
-        "charge-confusion-data-validation (required for compliance, ADQ-02)",
+        "charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02)",
         "charge-confusion-rate at F4 or above (compliance threshold)",
         "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1)",
-        "rigidity-scale-offset (required for compliance, ADQ-02)"
+        "rigidity-scale-offset at F5 or above (required for compliance, ADQ-02)"
        ],
        "proposed_disposition": "next-study"
       },
@@ -676,10 +676,10 @@
         ]
        },
        "missing_evidence": [
-        "charge-confusion-data-validation (required for compliance, ADQ-02)",
+        "charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02)",
         "charge-confusion-rate at F4 or above (compliance threshold)",
         "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1)",
-        "rigidity-scale-offset (required for compliance, ADQ-02)"
+        "rigidity-scale-offset at F5 or above (required for compliance, ADQ-02)"
        ],
        "proposed_disposition": "next-study"
       }

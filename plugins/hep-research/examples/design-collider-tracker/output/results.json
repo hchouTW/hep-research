@@ -49,7 +49,7 @@
     "bound.direction"
    ],
    "missing_evidence": [
-    "calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02)",
+    "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
     "calorimeter-energy-resolution at F4 or above (compliance threshold)"
    ]
   },
@@ -59,7 +59,7 @@
     "bound.direction"
    ],
    "missing_evidence": [
-    "calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02)",
+    "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
     "calorimeter-energy-resolution at F4 or above (compliance threshold)"
    ]
   },
@@ -69,7 +69,7 @@
     "bound.direction"
    ],
    "missing_evidence": [
-    "calorimeter-calibration-plan or calorimeter-constant-term-measurement (required for compliance, ADQ-02)",
+    "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
     "calorimeter-energy-resolution at F4 or above (compliance threshold)"
    ]
   },
@@ -224,8 +224,8 @@
  ],
  "comparison_basis": {
   "declared": true,
-  "holds": true,
-  "reason": null
+  "holds": false,
+  "reason": "a difference with its uncertainty exceeds the tolerance"
  },
  "ranking": "refused",
  "pass": {

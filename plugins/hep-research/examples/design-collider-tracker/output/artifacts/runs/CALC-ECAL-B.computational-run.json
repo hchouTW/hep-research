@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "285a1e9edac2e7e6556b4c0e6691979a1e503a912080b18f2addafa5058e043c",
+   "sha256": "f967596450fa1071605ba1812b159ec3d55e5b0b9345ba483fc299e2aef4354d",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-B",
    "status": [
@@ -40,7 +40,7 @@
   "input_manifest": [
    {
     "path": "candidates/cand-B.json",
-    "sha256": "285a1e9edac2e7e6556b4c0e6691979a1e503a912080b18f2addafa5058e043c"
+    "sha256": "f967596450fa1071605ba1812b159ec3d55e5b0b9345ba483fc299e2aef4354d"
    }
   ],
   "tools": [

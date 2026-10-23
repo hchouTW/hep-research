@@ -621,9 +621,11 @@ def render(full: dict, omitted: list[str]) -> str:
     lines = [f"# Design report: {full.get('design_id')}", "",
              f"Derived by contracts/design.py from `{full.get('current_spec')}` (spec version {full.get('spec_version')}); "
              "no verdict is hand-written.", ""]
-    lines += [f"**Gate flags:** {', '.join(full.get('gate_flags') or ['none'])} (H1-H3).",
-              "**H4 (design-baseline):** taken by a human over this report and the evaluations it used; until a valid "
-              "H4 record exists the design is a draft and no requirement is reviewed (MAT-04).", ""]
+    lines += [f"**Gate flags:** {', '.join(full.get('gate_flags') or ['none'])}.",
+              f"**Baseline:** {full.get('baseline', 'draft')}. Only a valid human H4 (design-baseline) record sets it, "
+              "taken after the gates above are clear, over this report, the evaluations it used and one disposition per "
+              "inconclusive driving requirement of a candidate that survives screening; until then no requirement is "
+              "reviewed (MAT-04).", ""]
     if full.get("adequacy", {}).get("provisional_pass"):
         lines += ["The adequacy table is an initial default until physics review: every pass is provisional.", ""]
     lines += ["| Requirement | Candidates | Result | Reason codes | Lowest fidelity (deciding evaluations) | Status | "
@@ -655,10 +657,13 @@ def render(full: dict, omitted: list[str]) -> str:
     if not full.get("orphan_runs"):
         lines.append("- orphan runs: none")
     basis = full.get("comparison_basis", {})
-    lines.append(f"- comparison basis: {'holds' if basis.get('holds') else 'does not hold'}"
+    cl = f" at {basis['coverage_cl']:.0%} one-sided CL" if basis.get("coverage_cl") else ""
+    lines.append(f"- comparison basis{' on ' + basis['quantity'] if basis.get('quantity') else ''}{cl}: "
+                 f"{'holds' if basis.get('holds') else 'does not hold'}"
                  f"{' (' + basis['reason'] + ')' if basis.get('reason') else ''}")
     for pr in basis.get("pairs", []):
-        shared = f"; shared items cancel: {', '.join(pr['shared_items'])}" if pr.get("shared_items") else ""
+        shared = (f"; cancelled as the same subsystem with the same budget row in both: {', '.join(pr['shared_items'])}"
+                  if pr.get("shared_items") else "; no item is the same subsystem with the same budget row in both")
         lines.append(f"  - {'/'.join(pr['candidates'][0])} vs {'/'.join(pr['candidates'][1])}: difference "
                      f"{pr['difference']:.6g} + one-sided uncertainty {pr['uncertainty_one_sided']:.6g} against "
                      f"tolerance {pr['tolerance']:.6g} ({basis.get('quantity')}){shared}: "

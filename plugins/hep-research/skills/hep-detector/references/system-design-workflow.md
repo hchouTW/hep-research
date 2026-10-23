@@ -55,8 +55,8 @@ Goal: driving requirements a design can be checked against.
   merit; `contracts/design.py` refuses a requirement whose denominator lacks a field the adequacy table needs.
 - Each driving requirement has an allocation (budget items, `quadrature` with `independent: true` or a correlation
   matrix, else `linear`) and a margin.
-- Declare `comparison_basis` (for example equal mass within 5%): without it no comparison or ranking is given. Budget
-  items two candidates carry unchanged cancel in the difference and its uncertainty.
+- Declare `comparison_basis` (for example equal mass within 5%): without it no comparison or ranking is given. A budget
+  item cancels in the difference only when both candidates carry the same subsystem with the same budget row.
 - Gate H2 (`requirements-baseline`).
 
 ## D2 Exploration loop
@@ -131,9 +131,10 @@ environment and inputs are unchanged; never when the release digest is unknown.
   verdict is written by hand.
 - Independent review of the derived report: hep-authoring (`references/independent-review.md`); a closed agent review
   is advisory input to the human reviewer, not a review record by a reviewer other than the author.
-- Gate H4 (`design-baseline`): a human approves the report, the evaluations it covers and one disposition per
-  inconclusive driving requirement (`dispositions[]`: `accept-risk` or `next-study`, with a note). Only such a record
-  sets the review axis, and only while the report it lists still equals the one recomputed now and no hash changed;
+- Gate H4 (`design-baseline`), after H1-H3 are clear: a human approves the report, the evaluations it covers and one
+  disposition per inconclusive driving requirement of a candidate that survives screening (`dispositions[]`:
+  `accept-risk` or `next-study`, with a note). Only such a record sets the review axis, and only while no earlier gate
+  flag is open, the report it lists still equals the one recomputed now and no hash changed;
   the report then says `baseline: baselined`. The axis is advisory: the actor is self-declared, and formal approval
   is a trusted gate outside the agent. An infeasible design is an allowed outcome; return to D1 or stop.
 - Measurements (F5): a prototype or test-beam dataset-record carries a `design_measurement` (figure of merit,

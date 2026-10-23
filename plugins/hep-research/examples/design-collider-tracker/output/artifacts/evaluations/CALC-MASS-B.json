@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "285a1e9edac2e7e6556b4c0e6691979a1e503a912080b18f2addafa5058e043c",
+   "sha256": "f967596450fa1071605ba1812b159ec3d55e5b0b9345ba483fc299e2aef4354d",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-B",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-MASS-B.computational-run.json",
-   "sha256": "f6f2f026c7b1c02a27fa9d96e522528e67a09afee12e631afcc35a783ea3f6a6",
+   "sha256": "6973b0d6269423bf310eb9f6cd1b903c18c1e9ee50fc05f861b282741660dc99",
    "artifact_type": "computational-run",
    "artifact_id": "collider-tracker-v1-CALC-MASS-B-run",
    "status": [
@@ -48,7 +48,7 @@
   "denominator": {},
   "bound": "estimate",
   "fidelity": "F1",
-  "value": 22480.0,
+  "value": 17480.0,
   "unit": "kg",
   "run_ref": "runs/CALC-MASS-B.computational-run.json",
   "parameter_refs": [
@@ -57,14 +57,14 @@
    "budgets.mass.DES-TRK-001",
    "subsystems"
   ],
-  "parameter_digest": "783cf85c7ceb7bb94771b04555f3f3d045c32f859f5c608a78867e1aeed84f74",
+  "parameter_digest": "9f8034b95ab8119d3f1da055d37be69c03bddfd1647f09e063b703a428f7faca",
   "validity": {
    "assumptions": [],
    "in_domain": true
   },
   "uncertainty": {
-   "minus": 1124.0,
-   "plus": 1124.0,
+   "minus": 874.0,
+   "plus": 874.0,
    "coverage": 0.6827,
    "interval": "central",
    "distribution": "gaussian"

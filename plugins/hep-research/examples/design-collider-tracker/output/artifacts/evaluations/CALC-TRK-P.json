@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "105b83040f0719fa1f1e51cb95cae32237c3ddb420427b64cc051d273cedd55c",
+   "sha256": "d193d87190deee707cde0374f66ae1b93278606a2721416dc85ab60caea37d00",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-P",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-TRK-P.computational-run.json",
-   "sha256": "533fef2deb01641ccef3774a395c0a715b6c465fd12b0227a9660a29ecb96b1e",
+   "sha256": "a49e149b80fa9b1d7396919f790d47a4b99a10c1e86b990cde56d7ea2579b0ae",
    "artifact_type": "computational-run",
    "artifact_id": "collider-tracker-v1-CALC-TRK-P-run",
    "status": [

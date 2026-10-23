@@ -49,7 +49,7 @@ class DesignColliderTracker(unittest.TestCase):
 
     def test_dispositions_only_for_candidates_entering_convergence(self):
         """RPT-05, MAT-04 (d): a screened-out candidate gets no proposed disposition and a derived requirement says why
-        it has none; the shared magnet and ECAL items cancel in the equal-mass basis (ART-15)."""
+        it has none; different magnet and ECAL hardware does not cancel in the equal-mass basis (ART-15)."""
         md = (self.out / "artifacts" / "reports" / "design-report.md").read_text(encoding="utf-8")
         ecal_p = next(x for x in md.splitlines() if "REQ-ECAL-001" in x and "cand-P" in x and x.startswith("|"))
         self.assertTrue(ecal_p.endswith("| none: the candidate is screened out |"), ecal_p)
@@ -58,9 +58,10 @@ class DesignColliderTracker(unittest.TestCase):
         self.assertTrue(derived)
         for x in derived:
             note = "none: the candidate is screened out" if "cand-P" in x else \
-                "none required: derived requirement (RPT-05, MAT-04 d)"
+                "none required at H4: derived requirement (RPT-05, MAT-04 d)"
             self.assertTrue(x.endswith(f"| {note} |"), x)
-        self.assertIn("shared items cancel: DES-ECAL-001, DES-MAG-001: holds", md)
+        self.assertIn("no item is the same subsystem with the same budget row", md)  # ART-15: different hardware
+        self.assertIn("comparison basis on mass-budget at 95% one-sided CL: does not hold", md)
         self.assertIn("- orphan runs: none", md)
 
     def test_the_h3_record_is_prepared_not_approved(self):

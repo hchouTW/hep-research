@@ -121,7 +121,16 @@ class F5(Base):
 
 
 class Gates(Base):
-    def baseline(self, name="h4", actor="human", drop_eval=False, dispositions=True, report="design-report"):
+    def gates(self):
+        for name, cat, arts in (("h1", "design-scope", ["design-spec.v1.json"]),
+                                ("h2", "requirements-baseline", ["design-spec.v1.json"]),
+                                ("h3", "architecture-selection", ["candidates/cand-A.json", "candidates/cand-B.json"])):
+            decision(self.b, name, cat, arts)
+
+    def baseline(self, name="h4", actor="human", drop_eval=False, dispositions=True, report="design-report",
+                 gates=True):
+        if gates:
+            self.gates()
         code, out = ev(self.b, "report", "--decisions", self.b.dec, "--name", report)
         self.assertEqual(code, 0, out)
         full = design.derive(self.b.art, self.b.dec)
@@ -144,8 +153,10 @@ class Gates(Base):
 
     def test_t40_invalid_h4_never_sets_it(self):
         """MAT-04, DEC-20: an agent actor, artifacts[] that is not the report's set, missing dispositions, or a hash
-        that changed after approval."""
-        cases = {"agent": dict(actor="agent"), "artifacts": dict(drop_eval=True), "dispositions": dict(dispositions=False)}
+        that changed after approval; also (interpretation, H4 follows H1-H3) a record taken while an earlier gate is
+        open."""
+        cases = {"agent": dict(actor="agent"), "artifacts": dict(drop_eval=True), "dispositions": dict(dispositions=False),
+                 "gates-open": dict(gates=False)}
         for label, kw in cases.items():
             with self.subTest(case=label):
                 b = copy_fixture(self.root / f"q-{label}")
