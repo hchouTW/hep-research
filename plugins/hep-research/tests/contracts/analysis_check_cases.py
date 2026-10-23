@@ -272,7 +272,7 @@ def ratio_case(root: Path, variant=None, freeze: bool = True):
     return c.freeze("case-ratio") if freeze else c
 
 
-# --- CASE-MODEL, MODEL-USAGE, MODEL-SHARING (M2b model part, model-card/v1; synthetic only) ----------------------
+# --- CASE-MODEL (model-card/v1, removed in 0.28.0): kept as a draft that freeze must refuse; synthetic only ---------
 MODEL_SUITE = {"id": "model-card", "version": "1.0.0"}
 OBS = {"luminosity": {"value": 1.0, "relative_uncertainty": 0.02},
        "trigger": {"value": 0.97, "relative_uncertainty": 0.01}}
@@ -315,27 +315,3 @@ def model_case(root: Path, variant=None, freeze: bool = True):
     if variant:
         variant(c)
     return c.freeze("case-model") if freeze else c
-
-
-def two_models(c, joint: bool, width_b: float = 0.02, shared=None) -> None:
-    """MODEL-USAGE / MODEL-SHARING: two alternative cards alt-a and alt-b using the same luminosity observation, either
-    as two separate evaluations or as one joint evaluation (optionally sharing parameters)."""
-    c.remove("card-sr-cr")
-    c.add("model-card", "card-a", "models/a.card.json", sr_cr_card())
-    c.add("model-card", "card-b", "models/b.card.json", sr_cr_card(width=width_b))
-    c.context["models"] = [{"model_id": "alt-a", "item": "card-a"}, {"model_id": "alt-b", "item": "card-b"}]
-    c.context["bindings"] = [observes("obs-a", "alt-a", "lumi-2026"), observes("obs-b", "alt-b", "lumi-2026")]
-    if joint:
-        ev = {"evaluation_id": "joint", "models": ["alt-a", "alt-b"]}
-        if shared is not None:
-            ev["shared_parameters"] = shared
-        c.context["evaluations"] = [ev]
-        c.context["model_roots"] = [{"root_id": "mu-joint", "evaluation": "joint", "poi": {"model": "alt-a", "parameter": "mu"}}]
-    else:
-        c.context["evaluations"] = [{"evaluation_id": "fit-a", "models": ["alt-a"]}, {"evaluation_id": "fit-b", "models": ["alt-b"]}]
-        c.context["model_roots"] = [{"root_id": "mu-a", "evaluation": "fit-a", "poi": {"model": "alt-a", "parameter": "mu"}},
-                                    {"root_id": "mu-b", "evaluation": "fit-b", "poi": {"model": "alt-b", "parameter": "mu"}}]
-
-
-def shared_lumi(param_b: str = "lumi") -> list[dict]:
-    return [{"parameter_id": "lumi", "members": [{"model": "alt-a", "parameter": "lumi"}, {"model": "alt-b", "parameter": param_b}]}]

@@ -16,8 +16,6 @@ from contracts.analysis_checks.obligations import corrections as spec_correction
 from contracts.analysis_checks.scope import compare_scopes
 from contracts.effect_catalog import classify
 from contracts.validate import NORMALIZATION_CORRECTIONS
-from contracts.analysis_checks import model as model_rules  # noqa: E402  (model imports this module lazily)
-from contracts.analysis_checks import runs as run_rules  # noqa: E402  (runs imports this module lazily)
 
 
 def outcome(state: str, reason: str, message: str = "", evidence=(), declarations=(), **extra) -> dict:
@@ -835,19 +833,14 @@ RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
          "r-ratio.operands": r_ratio_operands, "r-ratio.cancellation": r_ratio_cancellation,
          "r-ratio.correlation": r_ratio_correlation}
 
-RULES.update(model_rules.RULES)  # model-card/v1 (contracts.analysis_checks.model)
-RULES.update(run_rules.RULES)  # run-lineage/v1 (contracts.analysis_checks.runs)
 
 # The version each implementation is (P3). A fixed rule is a new version and its old code is gone: an obligation of a
 # suite that names the old version stays unverified (check.rule_not_run) and is reproduced with the release that has it.
 # 1.1.0 (release R2): r-rep.repetition and r-ratio.correlation read every matching declaration or record (G3, G17).
 # r-comp.factor_values 1.1.0: the tolerance comes from declared significant digits, never the table (G4, DR-6).
-# r-aux.use 1.1.0: an observation is its source identity plus pointer, not its item ID (G5, DR-3).
-# r-run.binding 1.1.0 keeps the declaration flag whatever asserted_by says (G8, DR-1); r-run.blinding 1.1.0 applies the
-# project's blinded list (G13, DR-9) and permits by lineage, not by status label (G7, DR-7); r-run.campaign 1.1.0
-# requires the campaign's inputs (result binding 1.1.0) to reach the analysis (G6).
-VERSIONS = {"r-rep.repetition": "1.1.0", "r-ratio.correlation": "1.1.0", "r-comp.factor_values": "1.1.0",
-            "r-aux.use": "1.1.0", "r-run.binding": "1.1.0", "r-run.blinding": "1.1.0", "r-run.campaign": "1.1.0"}
+# The model-card (r-model.*, r-aux.use, r-share.*) and run-lineage (r-run.*) rules were removed in 0.28.0 (value gate
+# Shrink, docs/dev/cross-artifact-check/decision-value-gate.md); their versions stay listed as retired in the registry.
+VERSIONS = {"r-rep.repetition": "1.1.0", "r-ratio.correlation": "1.1.0", "r-comp.factor_values": "1.1.0"}
 
 # (rule_id, version) -> implementation
 IMPLEMENTED = {(rid, VERSIONS.get(rid, "1.0.0")): fn for rid, fn in RULES.items()}

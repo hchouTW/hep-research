@@ -120,18 +120,16 @@ class Context110(unittest.TestCase):
 
     def test_dev_suites_exist_for_every_suite_with_the_same_rules(self):
         # each pre-release lists the 1.0.0 rules, those fixed by then at 1.1.0: dev.1 none, dev.2 G3/G17, dev.3 also
-        # G4 and G5; the newest (DEV) names exactly the versions this checker implements
+        # G4; the newest (DEV) names exactly the versions this checker implements. model-card and run-lineage went in
+        # 0.28.0 (value gate Shrink), with their rule fixes (G5-G8, G13)
         from contracts import analysis_check as ac
         from contracts.analysis_checks.rules import VERSIONS
+        three = {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values"}
         fixed_by = {"1.1.0-dev.1": set(), "1.1.0-dev.2": {"r-rep.repetition", "r-ratio.correlation"},
-                    "1.1.0-dev.3": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use"},
-                    "1.1.0-dev.4": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use",
-                                    "r-run.binding", "r-run.blinding", "r-run.campaign"},
-                    "1.1.0-dev.5": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use",
-                                    "r-run.binding", "r-run.blinding", "r-run.campaign"}}
+                    "1.1.0-dev.3": three, "1.1.0-dev.4": three, "1.1.0-dev.5": three}
         fixed_by[STABLE] = fixed_by[DEV]  # the stable suites are the last pre-release under its release version
         self.assertEqual(fixed_by[STABLE], {r for r, v in VERSIONS.items() if v == "1.1.0"})
-        for sid in ("counting-chain", "ratio-subset", "model-card", "run-lineage"):
+        for sid in ("counting-chain", "ratio-subset"):
             old = ac.load_suite(sid, "1.0.0")
             for ver, fixed in fixed_by.items():
                 with self.subTest(suite=sid, version=ver):

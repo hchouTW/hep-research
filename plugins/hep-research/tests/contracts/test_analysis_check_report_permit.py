@@ -110,6 +110,15 @@ class ReportCheck(unittest.TestCase):
     def test_edit_with_valid_codes_needs_re_judging(self):
         pass
 
+    def test_a_post_execution_report_is_refused(self):
+        # result bindings and run lineage were removed in 0.28.0: a 0.27-era post-execution report is refused with that
+        # reason, never judged with code that no longer exists
+        post = copy.deepcopy(self.report)
+        post.update(phase="post-execution", result_binding={"sha256": "0" * 64, "results": [], "execution_bundles": []},
+                    execution_evidence_level={"flux-proton-p1": "declared"})
+        self.assertIn("permit.report_post_execution_removed", codes(self.check(self.attest(post))))
+        self.assertNotIn("permit.report_post_execution_removed", codes(self.check(self.attest())))
+
     def test_v66_no_accepted_review(self):
         self.assertIn("permit.report_unreviewed", codes(self.check(self.attest(conclusion="rejected"))))
         self.assertIn("permit.report_missing", codes(self.check(self.attest(include_report=False))))

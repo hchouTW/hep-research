@@ -69,8 +69,6 @@ class Planning(unittest.TestCase):
                   "tests.contracts.test_analysis_check_shadow_and_refusal", "tests.contracts.test_cross_artifact_check_gap_probes"):
             self.assertIn(m, importers)
         self.assertLessEqual(set(importers), set(p["modules"]))
-        self.assertTrue(set(PLAN.helper_importers("tests/contracts/analysis_check_runs.py", EVERY)) <=
-                        set(plan(P + "tests/contracts/analysis_check_runs.py")["modules"]))
 
     def test_a_helper_no_test_module_imports_is_the_full_run(self):
         with tempfile.TemporaryDirectory() as td:

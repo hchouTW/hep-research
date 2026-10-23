@@ -144,3 +144,9 @@ Measured on the Phase 0 comparison set:
 The run fixtures (`tests/contracts/analysis_check_runs.py`) now freeze a dataset record that run A reads, write
 result binding 1.1.0 with the campaign's inputs, and use 1.1.0 contexts.
 
+## 0.28.0: removed (2026-10-23)
+
+The run-lineage suite, the result binding (`contracts/schemas/result_binding.json`), `check --results` and `--project`,
+and the permit's post-execution checks were removed in 0.28.0 after the value gate's Shrink decision
+(`decision-value-gate.md`); readers refuse them (`refusal-matrix.md`). Reports are pre-execution only. This record is
+kept unchanged above as the design that 0.27.x implements.

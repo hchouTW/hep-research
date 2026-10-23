@@ -216,11 +216,6 @@ responses, acceptances and collection times, and one spectrum is fitted to all o
   them, use parametrized forward folding: fold `Phi(theta)` through each era's response
   (hep-detector, response and forward folding) and fit `theta` with `covariance_fit.py fit --allow-plugin` and a
   plug-in model, or with the pyhf adapter (one channel per era).
-- **Model-card diagnostic (opt-in, experimental, deprecated: removed in the next minor release).** When the joint fit is described by model cards, freeze them with
-  `python3 <plugin root>/contracts/analysis_check.py freeze ... --mode model` and run `check`: the model-card suite
-  reports whether each auxiliary measurement is used once (`r-aux.use`) and whether parameters shared across eras are
-  declared as shared (`r-share.parameters`). The rules run in shadow mode: the report is a diagnostic and never
-  changes a fit's status.
 - **Report.** The per-era and joint results, the split-consistency p-values, the era-nuisance scheme, and the joint
   fit's parameter covariance; closure on synthetic eras before data.
 

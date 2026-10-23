@@ -130,3 +130,9 @@ Pointer containment ("same", "overlap", "distinct") is unchanged; it now compare
 comparison set, on dev.3 only `g5-copy` changes: both constraints go from satisfied to `violated` (`check.aux_repeated`).
 On 1.0.0, every `r-aux.use` obligation is `check.rule_not_run`.
 
+## 0.28.0: removed (2026-10-23)
+
+The model-card suite, model-only bundles, the pairing contract (`contracts/semantics/model_pairings.json`) and the
+rules described here were removed in 0.28.0 after the value gate's Shrink decision (`decision-value-gate.md`); readers
+refuse them (`refusal-matrix.md`). This record is kept unchanged above as the design that 0.27.x implements. The pyhf
+SR/CR model-card adapter (`adapters/pyhf-combine`) is a separate feature and stays.

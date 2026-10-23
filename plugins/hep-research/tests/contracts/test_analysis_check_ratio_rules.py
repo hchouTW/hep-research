@@ -122,13 +122,14 @@ class Ratio(unittest.TestCase):
         o = get(self.run_case(variant=same_species), "r-ratio.operands:ratio-p1")
         self.assertEqual((o["state"], o["reason"]), ("violated", "check.ratio_operands_incompatible"))
 
-    def test_model_suite_needs_a_model_bundle(self):
-        # model-card/v1 exists (M2b model part), but it checks model bundles only: a chain bundle selecting it is refused
+    def test_a_removed_suite_is_refused(self):
+        # model-card was removed in 0.28.0 (value gate Shrink): a context that selects it is refused with that reason
         def model_suite(c):
             c.context["suites"] = [{"id": "model-card", "version": cases.SUITE_1_1}]
         with self.assertRaises(Exception) as ctx:
             self.run_case(cases.positive_case, model_suite)
-        self.assertEqual(getattr(ctx.exception, "code", None), "bundle.suite_mode")
+        self.assertEqual(getattr(ctx.exception, "code", None), "bundle.removed")
+        self.assertIn("0.28.0", str(ctx.exception))
 
 
 if __name__ == "__main__":

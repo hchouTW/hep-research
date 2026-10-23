@@ -52,8 +52,8 @@ Only when the analysis uses the experimental cross-artifact check (`<plugin root
 
 - [ ] Every quoted number comes from an artifact (statistical-result, dataset-record) whose sha256 is recorded, and
       the paper's numbers are rendered from those artifacts, not retyped.
-- [ ] Result bindings (`<plugin root>/contracts/schemas/result_binding.json`) tie each published result to the runs
-      and the complete merge that produced it.
+- [ ] Each published result is tied to the computational-run records that produced it (inputs with digests, output
+      hashes) and, for a partitioned run, to its complete merge record; keep them with the frozen bundle.
 
 ## 6. Products that can be re-folded
 

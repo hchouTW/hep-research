@@ -848,8 +848,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "7a979880e8e1fe5061ca7ff509c954ddac35647f6282f4c2d5fc39a7c590af2b"
   },
   {
@@ -897,8 +897,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "0451c7998692102f9cd8909cac02339d653d4cf9ec9067043a11eb04b5d3cf12"
   },
   {
@@ -1010,8 +1010,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "afcb53c6f7df0a9ecab5b81c12d2b90fd9609db3d8c50d4cbe488b8a27aeea62"
   },
   {
@@ -1056,8 +1056,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "782876ac68c9474aa3ec43f83373650057bf7ffc6d58ef371a18e8caaeaf2fd5"
   },
   {
@@ -1155,8 +1155,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "7fd6fd1e839136a51ebc719ad3adba345d2b6930391bd59043e1e0fd852765da"
   },
   {
@@ -1203,8 +1203,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "d934f43a3d87df5b4a94b2e67709cc8b49a8fa48e73f0e30c49480941bf8229e"
   },
   {
@@ -1254,8 +1254,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "f7c0c17bd394c094607741cdc1052f7786a1ac290a57bfc3a1c86090c679403d"
   },
   {
@@ -1367,8 +1367,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "aa9afcacb6c35cb91a6c861e5d37b3cd9fcdbe3d232ed49a1701a02f0c5ed23c"
   },
   {
@@ -1466,8 +1466,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "deprecated",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
+   "lifecycle": "retired",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release; retired 2026-10-23 when 0.28.0 removed the model-card and run-lineage suites (value gate Shrink); reproduce with 0.27.x",
    "source_sha256": "3c26672ddc569706a6c455d9f0fa1f58883296eb11eddbadbf37bf9a49e2205b"
   }
  ],
@@ -1581,12 +1581,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v06_positive_shared_parameter",
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v06_consistent_with_the_adapter"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -1601,12 +1598,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL variant",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v07_two_aux_ids_one_observation",
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v07_same_aux_id_twice"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -1621,11 +1615,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL variant",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v08_two_components_of_one_file"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -1692,11 +1684,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v11_missing_observation_binding"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -1781,11 +1771,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v15_renaming_and_reordering"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -1851,11 +1839,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL variant",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v18_unsupported_pairings"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -1890,11 +1876,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "CASE-CHAIN post-execution",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v20_results_after_execution"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -1980,11 +1964,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v24_masking_a_binding"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2011,11 +1993,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v25_waiver_not_counted"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2150,11 +2130,9 @@
      "work_packages": [
       "D10"
      ],
-     "host": "gate integration",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v32_lock_drift"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2169,11 +2147,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "CASE-CHAIN post-execution",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v33_input_neither_frozen_nor_produced"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2280,11 +2256,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "CASE-CHAIN post-execution",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v38_json_inside_the_bundle"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2447,11 +2421,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "MODEL-USAGE",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v46_alternative_models_versus_joint"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2466,11 +2438,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "MODEL-SHARING",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelCase.test_v47_cross_model_sharing"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2580,11 +2550,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "RUN-CHAIN",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v53_v56_positive_declared_level"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2599,12 +2567,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "RUN-STATUS",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v54_failed_run_and_retries",
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_failure_propagates_downstream"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2619,11 +2584,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "RUN-LINEAGE",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v55_ambiguous_producer_cycle_and_role"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2638,11 +2601,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "RUN-EVIDENCE",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunChain.test_v53_v56_positive_declared_level"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2733,8 +2694,7 @@
      "status": "passing",
      "tests": [
       "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_v60_wrong_bindings",
-      "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_incomplete_or_violated",
-      "tests.contracts.test_analysis_check_run_lineage.PostExecutionPermit.test_v60_post_execution_bindings"
+      "tests.contracts.test_analysis_check_report_permit.ReportCheck.test_incomplete_or_violated"
      ]
     }
    ]
@@ -2750,11 +2710,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "CASE-CHAIN campaign (fake schedulers)",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunCampaign.test_v61_only_the_collected_output_is_adopted"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2769,11 +2727,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "RUN-CAMPAIGN",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunCampaign.test_v62_digest_conflict_uncollected_and_orphan"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2788,11 +2744,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "RUN-CAMPAIGN",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.RunCampaign.test_v63_submission_bundle_digests"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2819,11 +2773,9 @@
      "work_packages": [
       "D07"
      ],
-     "host": "CASE-MODEL",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_model_rules.ModelVParts.test_v64_declaration_based_binding"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -2937,11 +2889,9 @@
      "work_packages": [
       "D05d"
      ],
-     "host": "CASE-CHAIN blinded variant",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_analysis_check_run_lineage.Blinding.test_v70"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -3161,7 +3111,6 @@
      "host": "check-context 1.1.0 input checks (release R2)",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_cross_artifact_check_gap_probes.ModelProbes.test_g12_shared_parameters_within_one_model_do_not_hide_v07",
       "tests.contracts.test_analysis_check_r2_formats.InputChecks110.test_context_findings_follow_the_version"
      ]
     }
@@ -3198,13 +3147,9 @@
      "work_packages": [
       "P2.07"
      ],
-     "host": "r-run.campaign 1.1.0 and result binding 1.1.0 (release R2, 1.1.0-dev.4)",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g6_campaign_closure_reaches_the_analysis",
-      "tests.contracts.test_analysis_check_r2_rules.CampaignClosure.test_campaign_inputs",
-      "tests.contracts.test_analysis_check_r2_rules.CampaignClosure.test_a_verified_closure_without_an_analysis_item_is_unverified"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -3219,13 +3164,9 @@
      "work_packages": [
       "P2.08"
      ],
-     "host": "r-run.blinding 1.1.0 (release R2, 1.1.0-dev.4): lineage, DR-7",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g7_a_self_reported_synthetic_label_is_not_blinding_permission",
-      "tests.contracts.test_analysis_check_r2_rules.BlindingLineage.test_lineage_outcomes",
-      "tests.contracts.test_analysis_check_r2_rules.BlindingLineage.test_an_external_data_entry_has_no_dataset_status"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -3240,12 +3181,9 @@
      "work_packages": [
       "P2.09"
      ],
-     "host": "r-run.blinding 1.1.0 (release R2, 1.1.0-dev.4): project blinded list, DR-9",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g13_project_blinded_list_applies_without_the_spec_flag",
-      "tests.contracts.test_analysis_check_r2_rules.BlindingLineage.test_the_project_list_applies_by_artifact_id_only"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -3260,12 +3198,9 @@
      "work_packages": [
       "P2.10"
      ],
-     "host": "r-aux.use 1.1.0 (release R2, 1.1.0-dev.3)",
-     "status": "passing",
-     "tests": [
-      "tests.contracts.test_cross_artifact_check_gap_probes.ModelProbes.test_g5_a_copied_observation_file_is_the_same_observation",
-      "tests.contracts.test_analysis_check_r2_rules.ObservationIdentity.test_envelopes_compare_by_artifact_id_and_other_files_by_digest"
-     ]
+     "host": "removed in 0.28.0 with the model-card and run-lineage suites (value gate Shrink, decision-value-gate.md); reproduce with 0.27.x",
+     "status": "not-run",
+     "tests": []
     }
    ]
   },
@@ -3323,7 +3258,6 @@
      "host": "r-run.binding 1.1.0 (G8) and the check-context 1.1.0 bundle-coverage flag (A3), release R2",
      "status": "passing",
      "tests": [
-      "tests.contracts.test_cross_artifact_check_gap_probes.RunProbes.test_g8_a_self_declared_person_keeps_the_declaration_flag",
       "tests.contracts.test_analysis_check_r2_rules.BundleCoverageFlag.test_outcomes_on_bundle_coverage_are_declaration_based_in_1_1_0"
      ]
     }
@@ -3444,8 +3378,7 @@
     "contracts/migrate.py",
     "contracts/resolve.py",
     "contracts/rules/suites/**",
-    "tests/contracts/analysis_check_cases.py",
-    "tests/contracts/analysis_check_runs.py"
+    "tests/contracts/analysis_check_cases.py"
    ],
    "checks": [
     "tests.contracts.test_analysis_check_identity_and_instances",
@@ -3456,9 +3389,7 @@
     "tests.contracts.test_analysis_check_coverage_reader",
     "tests.contracts.test_analysis_check_snapshots",
     "tests.contracts.test_analysis_check_review_integration",
-    "tests.contracts.test_analysis_check_review_fixes",
-    "tests.contracts.test_analysis_check_model_rules",
-    "tests.contracts.test_analysis_check_run_lineage"
+    "tests.contracts.test_analysis_check_review_fixes"
    ],
    "not_available": [],
    "full": false
