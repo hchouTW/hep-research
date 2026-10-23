@@ -45,6 +45,13 @@ changes.
   **`tools/wiring_known_gaps.json`** (hubs, pointer releases, README count patterns and the existing gaps; it only
   shrinks). Tests in `tests/tools/test_check_wiring.py`; checklist "Adding a topic" in `docs/maintenance.md`.
   `tools/reference_inventory.py` does not count the known-gaps file as citing the pages it lists.
+- Routing fixes that add no SKILL.md or entry-reference bytes (B4a): hub pages registered (hep-theory
+  `cosmic-ray-propagation.md`, so the two Th13 pages it links are reachable; hep-ml `deep-learning-guide.md`;
+  hep-computing `agile-development-guide.md`, `task-authoring-guide.md`, `batch-scheduling.md`; hep-detector
+  `detector-simulation.md`; hep-authoring `academic-papers-guide.md`, `academic-diagrams-guide.md`), and README counts
+  corrected (hep-computing 35 references and 18 helpers, hep-ml 42, hep-statistics 13 references). The 17 hep-authoring
+  pages reached only through its reference index stay known gaps until that index is one step away (a Resources or
+  entry-reference change, pending the budget decisions).
 
 ## 0.28.0 (2026-10-23)
 
