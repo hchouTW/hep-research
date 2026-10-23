@@ -22,9 +22,10 @@ branch `worktree-geant4-architecture`, based on `main` at `9f08796` (0.23.0 plus
 
 1. Open `geant4-program.md` and read "How to use this document" at the top, then §P.0, §P.10, §P.6 and §P.4.
 2. **Run every stage in its own isolated git worktree** (§P.10): worktree `.claude/worktrees/geant4-<stage>` on branch
-   `geant4-<stage>`, created from the latest `main` that contains the prerequisite stages (in Claude Code:
-   `EnterWorktree`, or `isolation: "worktree"` for subagents). Confirm the top-level path, branch and a clean status
-   before writing code; never change files in the main checkout or another worktree; never use bare `git stash`.
+   `worktree-geant4-<stage>`, created from the latest `origin/main` that contains the prerequisite stages (in Claude
+   Code: `EnterWorktree` with name `geant4-<stage>`, or `isolation: "worktree"` for subagents). Confirm the top-level
+   path, branch, a clean status and that each prerequisite's merge commit is an ancestor of `HEAD` before writing code;
+   never change files in the main checkout or another worktree; never use bare `git stash`.
 3. Read the task card of your stage's part (§A.0, §B.0 or §C.0) and follow its work items and acceptance checklist.
 
 ## Working rules for this folder
