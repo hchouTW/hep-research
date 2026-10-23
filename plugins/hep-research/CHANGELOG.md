@@ -23,6 +23,11 @@ Budget decisions D1-D3 and the last routing gaps of architecture step 1 (B4b):
 - hep-authoring: the papers guide's "Reference files" section is now "Reference index" (same bytes), so the entry
   routing part names the reference index (2,377 -> 2,512 B), and the index is a registered hub. The 17 hep-authoring
   pages it routes to are reachable; `tools/wiring_known_gaps.json` lists no gap.
+- D1: the Resources table limit (B-02, `tests/skills/test_routing_tables.py`) is 1.5-3 KB, up from 2.5 KB; B-03
+  (SKILL.md plus entry reference, 25,600 B) stays the binding budget.
+- D2: one SKILL.md size limit: the routing-table test reads `skill_bytes_target` (12,288 B) from
+  `tools/measure_entrypoints.py` instead of its own 11,264 B, and honours `tools/budget_exceptions.json` waivers up to
+  the 16,384 B hard limit; `docs/maintenance.md` says so.
 
 Theory (Th13): cosmic-ray propagation and astroparticle phenomenology in hep-theory. Guidance on three pages and one
 helper script; no propagation code is run and no fit to real data is tested.
