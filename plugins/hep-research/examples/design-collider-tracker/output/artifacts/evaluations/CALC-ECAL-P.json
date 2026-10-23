@@ -1,0 +1,71 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "collider-tracker-v1-CALC-ECAL-P",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "d193d87190deee707cde0374f66ae1b93278606a2721416dc85ab60caea37d00",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-P",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-ECAL-P.computational-run.json",
+   "sha256": "a5d2c89f9ffae99ae44ca4f2f14bccd3bcff003dc491c35d0c2b21be13749a7f",
+   "artifact_type": "computational-run",
+   "artifact_id": "collider-tracker-v1-CALC-ECAL-P-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "collider-tracker-v1:CALC-ECAL-P",
+  "candidate": "collider-tracker-v1:cand-P",
+  "figure_of_merit": "calorimeter-energy-resolution",
+  "denominator": {
+   "energy_GeV": 50.0,
+   "species": "electron"
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 0.009539392014169458,
+  "unit": "1",
+  "run_ref": "runs/CALC-ECAL-P.computational-run.json",
+  "parameter_refs": [
+   "DES-ECAL-001.parameters.constant_term",
+   "DES-ECAL-001.parameters.noise_term_GeV",
+   "DES-ECAL-001.parameters.stochastic_term"
+  ],
+  "parameter_digest": "710823aa4b26dbc679e48f276d39056023dd9a7de8efdc07a457366b5d3f155a",
+  "validity": {
+   "assumptions": [
+    "three-term core a/sqrt(E) (+) b/E (+) c with design coefficients",
+    "no leakage, intercalibration or non-uniformity in c"
+   ],
+   "in_domain": true
+  }
+ }
+}

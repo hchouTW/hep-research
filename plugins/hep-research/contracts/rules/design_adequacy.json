@@ -6,11 +6,13 @@
  "reviewer": null,
  "default_coverage_cl": 0.95,
  "hash_exclusions": {
-  "$comment": "MAT-05: fields removed before the canonical content hash of a recomputed compliance report is compared with the one an H4 record approved; frozen with this table's version",
+  "$comment": "MAT-05: keys (at any depth) removed before the canonical content hash of a recomputed design report is compared with the one an H4 record approved: the review-axis fields this approval sets, the baseline state, and the rendering's omissions; frozen with this table's version (the report's provenance.created is outside the compared payload)",
   "version": "1.0.0",
   "fields": [
-   "provenance.created",
-   "extension.review_axis"
+   "review_axis",
+   "review",
+   "baseline",
+   "omitted_from_rendering"
   ]
  },
  "budget_min_relative_uncertainty": {
@@ -138,9 +140,12 @@
    "compliance_upstreams": [
     [
      "charge-confusion-data-validation"
+    ],
+    [
+     "rigidity-scale-offset"
     ]
    ],
-   "rationale": "far from the MDR the rate is set by tails from large-angle scattering, nuclear interactions, wrong hit association and secondaries; compliance needs F4 with tails validated by data (at least two routes)",
+   "rationale": "far from the MDR the rate is set by tails from large-angle scattering, nuclear interactions, wrong hit association and secondaries; compliance needs F4 with tails validated by data (at least two routes); near the MDR a curvature offset shifts the rate of one charge sign, so a zero offset in the denominator needs a rigidity-scale-offset evaluation (ADQ-07) to stand on",
    "source": [
     "spec",
     "charge-confusion"
@@ -433,6 +438,110 @@
    ],
    "compliance_upstreams": [],
    "rationale": "ADQ-07",
+   "source": [
+    "spec"
+   ]
+  },
+  "material-budget": {
+   "kind": "performance",
+   "f1_nature": "estimate: the sum of the declared material along the track (measuring layers, passive material and the services other subsystems add)",
+   "screening": "F1",
+   "compliance": "F1",
+   "min_relative_uncertainty": 0.05,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [],
+   "compliance_upstreams": [],
+   "rationale": "CHN-14: coupling between subsystems as an evaluation whose parameter_refs connect them",
+   "source": [
+    "spec"
+   ]
+  },
+  "hadronic-energy-resolution": {
+   "kind": "performance",
+   "f1_nature": "hadronic calorimeter energy resolution: no F1 tool for hadron showers (capability.unavailable below F4)",
+   "screening": "F4",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.05,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "energy_GeV",
+    "species"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "listed so a design records it as capability.unavailable instead of estimating a number (PRN-07, EXB-02)",
+   "source": [
+    "spec"
+   ]
+  },
+  "trigger-efficiency": {
+   "kind": "performance",
+   "f1_nature": "trigger efficiency for the signal: no design tool (capability.unavailable below F4)",
+   "screening": "F4",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.05,
+   "coverage_cl": 0.95,
+   "counting": true,
+   "denominator_required": [
+    "species",
+    "transverse_momentum_GeV"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "listed so a design records it as capability.unavailable instead of estimating a number (PRN-07, EXB-02)",
+   "source": [
+    "spec"
+   ]
+  },
+  "pileup-robustness": {
+   "kind": "performance",
+   "f1_nature": "performance degradation under pileup: no design tool (capability.unavailable below F4)",
+   "screening": "F4",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.05,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "mean_pileup"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "listed so a design records it as capability.unavailable instead of estimating a number (PRN-07, EXB-02)",
+   "source": [
+    "spec"
+   ]
+  },
+  "calorimeter-calibration-plan": {
+   "kind": "validation",
+   "f1_nature": "a calibration plan for the constant term (intercalibration and non-uniformity) with the samples it uses; reviewed at F4; no F1 tool",
+   "screening": "F4",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.05,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "energy_GeV",
+    "species"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "the 'with' condition of the calorimeter energy-resolution row (ADQ-02) as figures of merit with thresholds",
+   "source": [
+    "spec"
+   ]
+  },
+  "calorimeter-constant-term-measurement": {
+   "kind": "validation",
+   "f1_nature": "the constant term measured with prototype or in-situ data; no F1 tool",
+   "screening": "F4",
+   "compliance": "F4",
+   "min_relative_uncertainty": 0.05,
+   "coverage_cl": 0.95,
+   "counting": false,
+   "denominator_required": [
+    "energy_GeV",
+    "species"
+   ],
+   "compliance_upstreams": [],
+   "rationale": "the 'with' condition of the calorimeter energy-resolution row (ADQ-02) as figures of merit with thresholds",
    "source": [
     "spec"
    ]

@@ -249,8 +249,27 @@ class Report(Project):
                                      "synthetic")[0], 0)
         d = derive(self.b)  # 20% estimate-basis uncertainties: the difference plus its uncertainty exceeds 5%
         self.assertEqual((d["comparison_basis"]["holds"], d["ranking"]["status"]), (False, "refused"))
+        pair = d["comparison_basis"]["pairs"][0]
+        self.assertEqual(pair["shared_items"], ["DES-MAG-001"])  # ART-15: the shared magnet cancels
+        self.assertAlmostEqual(pair["uncertainty_one_sided"], design.z_one_sided(0.95) * math.hypot(80.0, 76.0))
+        self.assertEqual(len(d["ranking"]["reasons"]), 2)  # RPT-07: every reason, also CHN-06
+        self.assertIn("CHN-06", d["ranking"]["reasons"][1])
         rc, out = self.ev("report", "--name", "r1")
         self.assertIn("ranking: refused", (self.b.art / out["rendering"]).read_text())
+        for c in ("cand-A", "cand-B"):  # equal, well-known tracker masses: the trackers differ, so they do not cancel
+            edit(self.b, f"candidates/{c}.json", lambda doc: doc["extension"]["budgets"]["mass"]["DES-TRK-001"]
+                 .update(estimate=390.0, uncertainty=1.0))
+            self.assertEqual(self.ev("budget", "--candidate", f"{NS}:{c}", "--quantity", "mass", "--status",
+                                     "synthetic", "--replace")[0], 0)
+        basis = derive(self.b)["comparison_basis"]
+        self.assertTrue(basis["holds"], basis)
+        self.assertEqual(basis["pairs"][0]["shared_items"], ["DES-MAG-001"])
+        self.assertAlmostEqual(basis["pairs"][0]["uncertainty_one_sided"], design.z_one_sided(0.95) * math.sqrt(2.0))
+        edit(self.b, "candidates/cand-B.json", lambda doc: doc["extension"]["subsystems"]["DES-MAG-001"]["parameters"]
+             ["field_T"].update(value=0.4))  # another magnet with the same budget row: it no longer cancels (the
+        # budget evaluation binds the budget rows only and stays current; the basis reads the subsystems now)
+        basis = derive(self.b)["comparison_basis"]
+        self.assertEqual((basis["holds"], basis["pairs"][0]["shared_items"]), (False, []))
 
     def test_plan(self):
         rc, out = self.ev("plan")

@@ -8,8 +8,8 @@
    400.0
   ],
   "uncertainties": [
-   40.0,
-   8.0
+   100.0,
+   20.0
   ],
   "rule": "linear",
   "status": "synthetic"
@@ -18,7 +18,7 @@
  "warnings": [],
  "n_items": 2,
  "total": 2400.0,
- "uncertainty": 48.0,
+ "uncertainty": 120.0,
  "rule": "linear",
  "uncertainty_meaning": "one standard deviation; linear sum of the item uncertainties"
 }

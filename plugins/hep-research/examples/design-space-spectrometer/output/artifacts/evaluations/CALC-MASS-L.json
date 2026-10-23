@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-L.json",
-   "sha256": "5e957ba494a46a13f3c302743803462be235b8b2c56f21130f8d05e3147be990",
+   "sha256": "deaf4ce6686de6e6dfc96c26ef8a86fbefee4d9b01212d42d34234cd9e170de1",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-MASS-L.computational-run.json",
-   "sha256": "d58e10d9891a94f377b378d237ad2efbee751f24c70e953b0803a40243299202",
+   "sha256": "4ec8638b3f361c7758c80083041982d1dbf929ef8bf672b71ba276acbfb30fa5",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-MASS-L-run",
    "status": [
@@ -56,14 +56,14 @@
    "budgets.mass.DES-TRK-001",
    "subsystems"
   ],
-  "parameter_digest": "f572a18ed2985936c78fece2050646f8051429fd702b29691f008ca507a984cc",
+  "parameter_digest": "2d2cfd4e59391a6bffbd9e36b2b9095617a1eb7719c364f61878a6234ae6d0bb",
   "validity": {
    "assumptions": [],
    "in_domain": true
   },
   "uncertainty": {
-   "minus": 47.9,
-   "plus": 47.9,
+   "minus": 119.75,
+   "plus": 119.75,
    "coverage": 0.6827,
    "interval": "central",
    "distribution": "gaussian"

@@ -1,0 +1,266 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "collider-tracker-v1-cand-P",
+ "artifact_type": "design-candidate",
+ "objective": "SYNTHETIC design study (illustrative collider; not CMS or any real detector)",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "candidate_id": "collider-tracker-v1:cand-P",
+  "design_id": "collider-tracker-v1",
+  "description": "probe: 6 layers over 0.4 m in 3.8 T",
+  "subsystems": {
+   "DES-TRK-001": {
+    "role": "tracking",
+    "technology": "silicon pixel and strip barrel",
+    "parameters": {
+     "layer_positions_m": {
+      "value": [
+       0.1,
+       0.18,
+       0.26,
+       0.34,
+       0.42,
+       0.5
+      ],
+      "unit": "m",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "point_resolution_um": {
+      "value": 20.0,
+      "unit": "um",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "layer_x_over_x0": {
+      "value": [
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02,
+       0.02
+      ],
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "passive_x_over_x0": {
+      "value": 0.1,
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-MAG-001"
+    ],
+    "calibration": {
+     "method": "track-based alignment",
+     "control_samples": [
+      "Z -> mu mu",
+      "cosmic-ray muons"
+     ]
+    }
+   },
+   "DES-MAG-001": {
+    "role": "bending",
+    "technology": "superconducting solenoid",
+    "parameters": {
+     "field_T": {
+      "value": 3.8,
+      "unit": "T",
+      "source": "example proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "field map with Hall and NMR probes",
+     "control_samples": [
+      "field map"
+     ]
+    }
+   },
+   "DES-ECAL-001": {
+    "role": "calorimetry-em",
+    "technology": "lead-tungstate crystals",
+    "parameters": {
+     "stochastic_term": {
+      "value": 0.05,
+      "unit": "GeV^0.5",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "noise_term_GeV": {
+      "value": 0.2,
+      "unit": "GeV",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "constant_term": {
+      "value": 0.005,
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "intercalibration with isolated electrons",
+     "control_samples": [
+      "Z -> e e",
+      "W -> e nu"
+     ]
+    }
+   }
+  },
+  "budgets": {
+   "mass": {
+    "DES-TRK-001": {
+     "allocation": 770.0,
+     "estimate": 700.0,
+     "uncertainty": 35.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 13200.0,
+     "estimate": 12000.0,
+     "uncertainty": 600.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 7700.0,
+     "estimate": 7000.0,
+     "uncertainty": 350.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    }
+   },
+   "power": {
+    "DES-TRK-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "channel_count": {
+    "DES-TRK-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "data_rate": {
+    "DES-TRK-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-ECAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 20.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   }
+  }
+ }
+}

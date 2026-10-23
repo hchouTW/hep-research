@@ -55,7 +55,8 @@ Goal: driving requirements a design can be checked against.
   merit; `contracts/design.py` refuses a requirement whose denominator lacks a field the adequacy table needs.
 - Each driving requirement has an allocation (budget items, `quadrature` with `independent: true` or a correlation
   matrix, else `linear`) and a margin.
-- Declare `comparison_basis` (for example equal mass within 5%): without it no comparison or ranking is given.
+- Declare `comparison_basis` (for example equal mass within 5%): without it no comparison or ranking is given. A budget
+  item cancels in the difference only when both candidates carry the same subsystem with the same budget row.
 - Gate H2 (`requirements-baseline`).
 
 ## D2 Exploration loop
@@ -109,10 +110,11 @@ Higher fidelity, each through `evaluate_design.py`:
 - Candidates are finally compared on expected measurement precision through the forward chain response ->
   measurement-spec -> Asimov statistical-result (hep-statistics); a chain built on optimistic F1 inputs can only
   exclude.
-- Every inconclusive driving requirement gets a proposed disposition in the report (accept risk or next study).
+- Every inconclusive driving requirement of a candidate that survives screening gets a proposed disposition in the
+  report (accept risk or next study); a screened-out candidate and a derived requirement show why they have none.
 - The report ranks candidates on expected precision only when the comparison basis holds and every candidate that
   survives screening has a non-optimistic expected-precision evaluation with the same fidelity vector and
-  denominator; otherwise it states why the ranking is refused. A ranking is never a global optimum.
+  denominator; otherwise it states every reason the ranking is refused. A ranking is never a global optimum.
 
 Reruns. Evaluations bind the candidate by the parameters they read (`binding: parameters`, `parameter_digest`): a
 change to another parameter leaves them current, a change to a parameter they read makes them stale (and everything
@@ -127,9 +129,30 @@ environment and inputs are unchanged; never when the release digest is unknown.
 
 - The compliance matrix, the risk table and the maturity per requirement come from `evaluate_design.py report`; no
   verdict is written by hand.
-- Independent review of the derived report: hep-authoring.
-- Gate H4 (`design-baseline`): a human approves the report, the evaluations it covers and one disposition per
-  inconclusive driving requirement. An infeasible design is an allowed outcome; return to D1 or stop.
+- Independent review of the derived report: hep-authoring (`references/independent-review.md`); a closed agent review
+  is advisory input to the human reviewer, not a review record by a reviewer other than the author.
+- Gate H4 (`design-baseline`), after H1-H3 are clear: a human approves the report, the evaluations it covers and one
+  disposition per inconclusive driving requirement of a candidate that survives screening (`dispositions[]`:
+  `accept-risk` or `next-study`, with a note). Only such a record sets the review axis, and only while no earlier gate
+  flag is open, the report it lists still equals the one recomputed now and no hash changed;
+  the report then says `baseline: baselined`. The axis is advisory: the actor is self-declared, and formal approval
+  is a trusted gate outside the agent. An infeasible design is an allowed outcome; return to D1 or stop.
+- Measurements (F5): a prototype or test-beam dataset-record carries a `design_measurement` (figure of merit,
+  denominator, value, uncertainty, and the configuration it was measured in). `evaluate_design.py f5 --dataset ...`
+  writes the evaluation; it decides only after a human `measurement-acceptance` record lists the dataset and binds the
+  candidate by the digest of those configuration parameters (`binding: parameters`, `parameter_digest`); a measured
+  configuration that differs from the candidate is `domain.mismatch`.
+
+## Engineering couplings and calibration
+
+- Couplings between subsystems are evaluations whose parameters span them: `run --figure-of-merit material-budget`
+  sums the measuring layers, passive material and every subsystem's `services_x_over_x0`, so a change to another
+  subsystem's services makes it stale and a change elsewhere does not.
+- Every subsystem declares its in-situ calibration (method and at least one control sample;
+  `design.calibration_incomplete` otherwise). The rigidity-scale and alignment residuals a calibration leaves enter the
+  expected precision as nuisances: `propagate_scale_distortion.py` turns a scale or offset into binned yield shifts,
+  up/down variations and covariance blocks for the measurement-spec, and the hep-statistics Asimov fit gives their
+  effect.
 
 ## Verdicts and reason codes
 

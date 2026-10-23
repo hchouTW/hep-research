@@ -154,8 +154,8 @@ def case_t57_tracker_below_crossover_is_not_a_bound():
 def case_t59_contract_versions():
     """ART-43: 1.0.0 contracts still validate; a 1.1.0 contract with a design block validates; a 1.0.0 contract that
     uses a 1.1.0 feature is refused."""
-    calo = json.loads((CONTRACTS / "calorimeter_resolution.json").read_text())
-    assert calo["contract_version"] == "1.0.0" and check(calo)["status"] == "pass"
+    old = json.loads((CONTRACTS / "tag_and_probe_efficiency.json").read_text())
+    assert old["contract_version"] == "1.0.0" and check(old)["status"] == "pass"
     fake = dict(fake_contract("syn-x", "momentum-resolution-core", "estimate"),
                 entry="skills/hep-detector/scripts/tracker_resolution.py")  # an existing file; help not compared
     assert check(fake, help_check=False)["status"] == "pass", check(fake, help_check=False)["findings"]

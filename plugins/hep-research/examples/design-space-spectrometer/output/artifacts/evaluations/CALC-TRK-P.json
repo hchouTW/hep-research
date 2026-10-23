@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "9b862a1c20c3c783619d85dad287a7d039a3b698f6f61b5c7b03c5f0f56dcac9",
+   "sha256": "5b130a95ee9b303ff0277c4329ae457252a6ce42625e43b542a0ee42d77eb96f",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-P",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-TRK-P.computational-run.json",
-   "sha256": "2def6eadb8fb31de56e20a9a6325cca843377b7520f47d3942d4548591318910",
+   "sha256": "339ce98cfc3a636d50338a6559563d8c059f3a4e47e1969011610c86c6d31a6c",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-TRK-P-run",
    "status": [

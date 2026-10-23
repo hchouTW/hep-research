@@ -7,6 +7,38 @@ Software checks establish contract consistency only, not physical validity.
 
 Contracts 3.11.0 (minor; no capability added).
 
+- Detector system design, milestone M3 (engineering and review): the review axis (only a valid human design-baseline
+  H4 record sets it: exact artifacts = the derived report and the evaluations it used, the report equal to the one
+  recomputed now apart from the frozen MAT-05 exclusions, a disposition for every inconclusive driving requirement;
+  the derivation says `baseline: draft` or `baselined`); F5 measurements (`evaluate_design.py f5` from a dataset-record's
+  new optional `design_measurement`; decided only after a human `measurement-acceptance` record approves the dataset
+  as it is and binds the candidate by the digest of the measured configuration, decision record artifacts may carry
+  `binding: parameters` with a `parameter_digest`; a configuration that differs from the candidate is
+  domain.mismatch); stale evaluations are no longer compared with their study or dataset (ART-61); budget coupling
+  between subsystems (expression `parameters_all`, `design_estimates.py material-sum`, figure of merit
+  `material-budget`; CHN-14); calibratability (`design.calibration_incomplete` without a control sample; CHN-16); the
+  calorimeter design contract (`calorimeter_resolution` evaluate, optimistic; tool contract 1.1.0) and adequacy rows
+  recorded as unavailable (hadronic energy resolution, trigger efficiency, pileup robustness). Example B
+  `examples/design-collider-tracker` (synthetic-collider profile; tracking and ECAL only; the rest
+  capability.unavailable, listed in the report and in an agent-prepared H3 record that a human must sign). Both
+  examples' derived reports went through the hep-authoring independent review (agent review: advisory, not a review
+  record by a reviewer other than the author in the sense of O04/O14). Open item OQ-15 is now complete (review axis,
+  dispositions and F5 approval). From that review: a budget item cancels in the comparison basis only when both
+  candidates carry the same subsystem (identical merged definition) with the same budget row (ART-15; Example A's
+  shared magnet cancels and its equal-mass basis holds; Example B's lighter 2.0 T solenoid and coarser ECAL now carry
+  their own masses and its basis does not hold), a refused ranking lists every reason (RPT-07), dispositions are
+  proposed only for candidates that survive screening (a screened-out candidate and a derived requirement say why they
+  have none; H4 asks dispositions for those candidates only), H4 sets the review axis only when no earlier gate flag
+  is open (interpretation: H4 follows H1-H3), charge-confusion compliance also needs a rigidity-scale-offset
+  evaluation (adequacy row; the missing-for-compliance list names each required upstream with its own compliance
+  fidelity, F5 for the offset), decision records are named relative to the decisions folder's parent (no host path
+  in a report), the basis names the F1 evaluations it uses (chosen by id) and how their uncertainty is formed, an
+  unqualified F4 study or a stale or mismatched evaluation no longer counts toward the compliance threshold, and the
+  rendering states the baseline state, that the H4 actor kind is self-declared (advisory, LIM-01), that screening
+  comes from the verdicts, and "orphan runs: none". The reviews closed after three rounds with the maintainer's
+  decision to close the escalated findings; follow-ups for the spec owner: a quantitative check of the
+  rigidity-scale-offset evaluation against the assumed curvature offset, dispositions for derived requirements, the
+  subsystem scope of hard constraints, and whether Example A should model a field length per candidate.
 - Detector system design, milestone M2 (fidelity and sensitivity): parameter-level invalidation (envelope
   `inputs[].binding: "parameters"`, `contracts/dependencies.py` warns instead of stale, `contracts/design.py` compares
   `parameter_digest`: an evaluation goes stale only when a parameter it read changes; a forged digest is a contract

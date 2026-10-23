@@ -23,7 +23,9 @@
     "type": "object", "required": ["state"], "additionalProperties": false, "properties": {
     "state": {"type": "string", "const": "not-applicable"}}}]},
   "artifacts": {"type": "array", "items": {"type": "object", "required": ["ref", "sha256"], "additionalProperties": false,
-   "properties": {"ref": {"type": "string", "minLength": 1}, "sha256": {"$ref": "revocation_event.json#/$defs/sha256"}}}},
+   "properties": {"ref": {"type": "string", "minLength": 1}, "sha256": {"$ref": "revocation_event.json#/$defs/sha256"},
+    "binding": {"$comment": "1.1.0, measurement-acceptance only (DEC-06): a candidate bound by the digest of the measurement-configuration parameters, not by its file hash", "type": "string", "enum": ["parameters"]},
+    "parameter_digest": {"$ref": "revocation_event.json#/$defs/sha256"}}}},
   "dispositions": {"$comment": "1.1.0, design categories only (DEC-13): one entry per inconclusive driving requirement of a design-baseline record",
    "type": "array", "items": {"type": "object", "required": ["requirement", "disposition", "note"], "additionalProperties": false,
    "properties": {"requirement": {"type": "string", "minLength": 1},

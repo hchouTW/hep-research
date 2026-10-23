@@ -19,8 +19,9 @@ Chain (all through skills/hep-detector/scripts/evaluate_design.py, verdicts only
 3. the design report (communication) with the compliance matrix.
 Acceptance (M1): the same verdicts as the M0 fixtures (the probe fails resolution with bound.excludes; the two
 reasonable candidates are inconclusive on resolution and charge confusion with bound.direction, with the missing F3,
-F4 and data-validation evidence listed); the equal-mass basis is checked (it holds for the two candidates that survive
-screening; the probe is screened out); no verdict is hand-written.
+F4 and data-validation evidence listed); the equal-mass basis is checked between the two candidates that survive
+screening (the shared magnet item cancels, so it holds; the report still refuses to rank, for lack of expected-precision
+evaluations); no verdict is hand-written.
 
 Usage (from the plugin root): python3 examples/design-space-spectrometer/run.py [--out DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Standard library only.
@@ -83,9 +84,9 @@ def row(estimate, sigma, unit, basis="estimate", source="example engineering est
 
 
 def budgets(trk_mass: float, n_layers: int) -> dict:
-    weighed = "SYNTHETIC example: assumed weighed prototype components"
-    return {"mass": {"DES-TRK-001": row(trk_mass, 0.02 * trk_mass, "kg", "measurement", weighed),
-                     "DES-MAG-001": row(2000.0, 40.0, "kg", "measurement", weighed)},
+    catalog = "SYNTHETIC example: catalog masses of comparable components (not weighed)"
+    return {"mass": {"DES-TRK-001": row(trk_mass, 0.05 * trk_mass, "kg", "catalog", catalog),
+                     "DES-MAG-001": row(2000.0, 100.0, "kg", "catalog", catalog)},
             "power": {"DES-TRK-001": row(25.0 * n_layers, 5.0 * n_layers, "W"), "DES-MAG-001": row(0.0, 0.0, "W")},
             "channel_count": {"DES-TRK-001": row(20000.0 * n_layers, 4000.0 * n_layers, "1"),
                               "DES-MAG-001": row(0.0, 0.0, "1")},
@@ -122,7 +123,7 @@ def spec() -> dict:
                  "allocation": f"{NS}:ALC-CC-001", "verification": {"method": "simulation validated with data"}}],
             "allocations": [
                 {"id": f"{NS}:ALC-TRK-001", "requirement": f"{NS}:REQ-TRK-001", "rule": "quadrature", "independent": True,
-                 "items": [{"name": "intrinsic", "value": 0.4}, {"name": "scattering", "value": 0.1},
+                 "items": [{"name": "intrinsic", "value": 0.35}, {"name": "scattering", "value": 0.1},
                            {"name": "alignment", "value": 0.25}], "margin": 0.05},
                 {"id": f"{NS}:ALC-CC-001", "requirement": f"{NS}:REQ-CC-001", "rule": "linear",
                  "items": [{"name": "Gaussian core", "value": 0.02}, {"name": "non-Gaussian tails", "value": 0.025}],
@@ -202,9 +203,12 @@ def criteria(rows: dict, full: dict) -> dict:
                                        and any("data-validation" in e for e in cc(c)["missing_evidence"])
                                        for c in ("cand-S", "cand-L")),
         "probe_screened_out": [c["candidates"] for c in full["candidates"] if c["screened_out"]] == [[f"{NS}:cand-P"]],
-        "equal_mass_basis_checked": full["comparison_basis"]["declared"] and full["comparison_basis"]["holds"]
-        and len(full["comparison_basis"]["pairs"]) == 1,
-        "no_ranking_claimed": full["ranking"]["status"] in ("not-provided", "refused"),
+        # catalog masses with 5% uncertainties: the shared magnet item cancels, so the 5 kg difference plus the one-sided
+        # 95% uncertainty of the tracker items stays inside the 5% tolerance (ART-15); no expected-precision evaluation
+        # exists, so the ranking is still refused (CHN-06)
+        "equal_mass_basis_checked": full["comparison_basis"]["declared"] and len(full["comparison_basis"]["pairs"]) == 1
+        and full["comparison_basis"]["holds"] and bool(full["comparison_basis"]["pairs"][0]["shared_items"]),
+        "no_ranking_claimed": full["ranking"]["status"] == "refused" and "CHN-06" in full["ranking"]["reason"],
         "gate_flags_shown": full["gate_flags"] == ["gate.H1_missing", "gate.H2_missing", "gate.H3_missing"],
     }
 

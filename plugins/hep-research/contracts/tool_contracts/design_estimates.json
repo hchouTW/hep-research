@@ -1167,6 +1167,147 @@
      }
     ]
    }
+  },
+  {
+   "operation_id": "material-sum",
+   "summary": "Material along the track: the sum of the measuring layers, passive material and every subsystem's services",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--x-over-x0",
+      "input": "x_over_x0"
+     },
+     {
+      "flag": "--relative-uncertainty",
+      "input": "relative_uncertainty"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "x_over_x0",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "contributions in radiation lengths, >= 0"
+    },
+    {
+     "name": "relative_uncertainty",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": ">= 0",
+     "default": 0.1
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "x_over_x0",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "uncertainty",
+     "kind": "parameter",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "material-budget",
+      "better": "smaller",
+      "unit": "1",
+      "bound": "estimate",
+      "denominator": {},
+      "value": {
+       "path": "x_over_x0"
+      },
+      "uncertainty": {
+       "path": "uncertainty",
+       "coverage": 0.6827,
+       "interval": "central",
+       "distribution": "gaussian"
+      },
+      "operation_args": [
+       "material-sum"
+      ],
+      "inputs": [
+       {
+        "input": "x_over_x0",
+        "from": {
+         "list": [
+          {
+           "parameter": {
+            "role": "tracking",
+            "name": "layer_x_over_x0",
+            "unit": "1"
+           }
+          },
+          {
+           "parameter": {
+            "role": "tracking",
+            "name": "passive_x_over_x0",
+            "unit": "1"
+           }
+          },
+          {
+           "parameters_all": {
+            "name": "services_x_over_x0",
+            "unit": "1"
+           }
+          }
+         ]
+        }
+       },
+       {
+        "input": "relative_uncertainty",
+        "from": {
+         "const": 0.1
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "note": "CHN-14: the services of other subsystems (cooling, cables, supports) enter through parameters_all, so the evaluation's parameter_refs connect the subsystems: a change to their services makes it stale, a change elsewhere does not"
+     }
+    ]
+   }
   }
  ]
 }

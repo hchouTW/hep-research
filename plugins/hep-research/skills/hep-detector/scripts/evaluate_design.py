@@ -31,6 +31,9 @@ Subcommands:
   geometry_ref. f4 (ART-31, ART-32): an F4 evaluation from a study record (re-issued first by check_geant4_study.py
   label --upgrade with --label-spec/--label-benchmarks/--label-convergence); value, statistical uncertainty and model
   envelope from the record; bound optimistic for resolution and confusion unless every tail source was simulated.
+- f5 (M3, FID-01, FID-06, FID-07): an F5 evaluation from a user-supplied dataset-record's design_measurement, bound
+  to the dataset by hash and to the candidate by the digest of the measured configuration's parameters; it decides only
+  after a human measurement-acceptance record approves the dataset and covers the candidate.
 - plan: the suggested next evaluations, per requirement and candidate, from the derived state (RES-04): missing
   evaluations, missing evidence for compliance, stale evaluations, missing gates. Suggestions only.
 - report: the design report, a communication artifact derived by contracts/design.py (producer_skill hep-detector):
@@ -55,6 +58,7 @@ Usage:
   evaluate_design.py f4 --artifacts DIR --candidate ID (--requirement ID | --figure-of-merit FOM --denominator K=V ...)
       --study REL --id SIM-ID [--label-spec S --label-benchmarks B --label-convergence C [--label-project-root R]]
       [--status LABEL]
+  evaluate_design.py f5 --artifacts DIR --candidate ID --dataset REL --id MEAS-ID
   evaluate_design.py plan --artifacts DIR [--decisions DIR]
   evaluate_design.py report --artifacts DIR [--decisions DIR] [--omit EVALUATION ...] [--name NAME]
 """
@@ -530,6 +534,43 @@ def f4(args) -> dict:
     return finish(w, rel, {"value": ext["value"], "bound": bound, "fidelity": "F4"})
 
 
+def f5(args) -> dict:
+    """FID-01 F5 (M3): an F5 evaluation from a user-supplied dataset-record's design_measurement (value, uncertainty,
+    denominator, the configuration it was measured in). It is bound to the dataset by hash and to the candidate by the
+    digest of the configuration parameters; it decides only after a human measurement-acceptance record approves the
+    dataset (FID-06), and a configuration that differs from the candidate's is domain.mismatch (FID-07)."""
+    proj = load_project(args)
+    ds_path = proj.resolve(args.dataset)
+    ds = proj.docs.get(ds_path)
+    if ds is None or ds.get("artifact_type") != "dataset-record":
+        raise UsageError(f"--dataset {args.dataset} is not a dataset-record in the artifacts_dir")
+    dm = (ds.get("extension") or {}).get("design_measurement")
+    if not isinstance(dm, dict):
+        raise UsageError("the dataset-record has no extension.design_measurement")
+    chain = proj.candidate_chain(args.candidate)
+    if chain is None:
+        raise UsageError(f"no design-candidate {args.candidate!r} (or a base) in the artifacts_dir")
+    if not re.match(r"^MEAS-[A-Za-z0-9][A-Za-z0-9._-]*$", args.id):
+        raise UsageError("--id of an F5 evaluation is MEAS- followed by letters, digits, '.', '_' or '-'")
+    ns = args.candidate.split(":", 1)[0]
+    refs = sorted(dm["configuration"])
+    w = Writer(proj)
+    inputs = [dict(w.input_ref(proj.rel(p)), binding="parameters") for p in chain] + [w.input_ref(proj.rel(ds_path))]
+    rules = proj.fom_rules(dm["figure_of_merit"]) or {}
+    design_unit = (proj.registry.fom_design(dm["figure_of_merit"]) or {}).get("unit", "1")
+    ext = {"evaluation_id": f"{ns}:{args.id}", "candidate": args.candidate, "figure_of_merit": dm["figure_of_merit"],
+           "denominator": dm["denominator"], "value": dm["value"], "unit": design_unit, "bound": "estimate",
+           "fidelity": "F5", "uncertainty": dm["uncertainty"], "dataset_ref": proj.rel(ds_path),
+           "parameter_refs": refs, "parameter_digest": proj.parameter_digest(args.candidate, refs)}
+    rel = w.json(f"evaluations/{args.id}.json", envelope("design-evaluation", f"{ns}-{args.id}", ext, inputs, [],
+                                                          statuses(inputs, "user-supplied")))
+    out = finish(w, rel, {"value": dm["value"], "fidelity": "F5", "known_figure_of_merit": bool(rules)})
+    if out.get("status") == "ok":
+        out["note"] = ("decides only after a human measurement-acceptance record approves the dataset and covers the "
+                       "candidate by the digest of its configuration parameters (FID-06, DEC-06)")
+    return out
+
+
 def plan(args) -> dict:
     """RES-04: suggestions for the next evaluations from the derived state."""
     full = design.derive(args.artifacts, args.decisions)
@@ -567,21 +608,36 @@ def plan(args) -> dict:
             "note": "suggestions only; the program, not the plan, decides compliance"}
 
 
+def fidelity_cell(m: dict) -> str:
+    """MAT-02, MAT-03: the lowest chain fidelity of the deciding evaluations; with none deciding, 'undetermined' and the
+    lowest fidelity among the participating ones."""
+    if m["maturity"]["lowest_chain_fidelity"]:
+        return m["maturity"]["lowest_chain_fidelity"]
+    fids = [x["fidelity"] for p in m["maturity"]["participating"] for x in p["fidelity_vector"]]
+    return f"undetermined (participating down to {min(fids)})" if fids else "undetermined (no evaluation used)"
+
+
 def render(full: dict, omitted: list[str]) -> str:
     lines = [f"# Design report: {full.get('design_id')}", "",
              f"Derived by contracts/design.py from `{full.get('current_spec')}` (spec version {full.get('spec_version')}); "
              "no verdict is hand-written.", ""]
-    lines += [f"**Gate flags:** {', '.join(full.get('gate_flags') or ['none'])}", ""]
+    lines += [f"**Gate flags (open review gates):** {', '.join(full.get('gate_flags') or ['none'])}.",
+              f"**Baseline:** {full.get('baseline', 'draft')}. Only a valid human H4 (design-baseline) record sets it, "
+              "taken after the gates above are clear, over this report, the evaluations it used and one disposition per "
+              "inconclusive driving requirement of a candidate that survives screening; until then no requirement is "
+              "reviewed (MAT-04). The record's actor kind is self-declared, so the review axis is advisory (LIM-01).",
+              ""]
     if full.get("adequacy", {}).get("provisional_pass"):
         lines += ["The adequacy table is an initial default until physics review: every pass is provisional.", ""]
-    lines += ["| Requirement | Candidates | Result | Reason codes | Lowest fidelity | Status | Missing for compliance |",
-              "|---|---|---|---|---|---|---|"]
+    lines += ["| Requirement | Candidates | Result | Reason codes | Lowest fidelity (deciding evaluations) | Status | "
+              "Missing for compliance | Proposed disposition |", "|---|---|---|---|---|---|---|---|"]
     for item in full.get("requirements", []) + full.get("constraints", []):
         for m in item["matrix"]:
-            lines.append(f"| {item['id']} | {', '.join(m['candidates'])} | {m['result']}"
+            lines.append(f"| {item['id']} ({item['kind']}) | {', '.join(m['candidates'])} | {m['result']}"
                          f"{' (provisional)' if m['provisional'] else ''} | {', '.join(m['codes']) or '-'} | "
-                         f"{m['maturity']['lowest_chain_fidelity'] or 'undetermined'} | "
-                         f"{', '.join(m['maturity']['status_axis']) or '-'} | {'; '.join(m['missing_evidence']) or '-'} |")
+                         f"{fidelity_cell(m)} | "
+                         f"{', '.join(m['maturity']['status_axis']) or '-'} | {'; '.join(m['missing_evidence']) or '-'} | "
+                         f"{m.get('proposed_disposition') or m.get('disposition_note') or '-'} |")
     lines += ["", "## Evaluations used and skipped", ""]
     for item in full.get("requirements", []) + full.get("constraints", []):
         for m in item["matrix"]:
@@ -595,14 +651,34 @@ def render(full: dict, omitted: list[str]) -> str:
         lines += ["", f"Omitted from this rendering on request (still aggregated): {', '.join(omitted)}"]
     lines += ["", "## Screening, orphan runs, comparison", ""]
     for c in full.get("candidates", []):
-        lines.append(f"- {', '.join(c['candidates'])}: {'screened out (' + '; '.join(c['screened_out_reasons']) + ')' if c['screened_out'] else 'not screened out'}"
+        lines.append(f"- {', '.join(c['candidates'])}: {'screened out by the verdicts above, not by a review decision (' + '; '.join(c['screened_out_reasons']) + ')' if c['screened_out'] else 'not excluded by screening (no driving requirement or hard constraint fails)'}"
                      f"{'; at risk: ' + '; '.join(c['at_risk']) if c['at_risk'] else ''}")
     for o in full.get("orphan_runs", []):
         lines.append(f"- orphan run {o['run']} ({', '.join(o['figures_of_merit'])})")
+    if not full.get("orphan_runs"):
+        lines.append("- orphan runs: none")
     basis = full.get("comparison_basis", {})
-    lines.append(f"- comparison basis: {'holds' if basis.get('holds') else 'does not hold'}"
+    cl = f" at {basis['coverage_cl']:.0%} one-sided CL" if basis.get("coverage_cl") else ""
+    lines.append(f"- comparison basis{' on ' + basis['quantity'] if basis.get('quantity') else ''}{cl}: "
+                 f"{'holds' if basis.get('holds') else 'does not hold'}"
                  f"{' (' + basis['reason'] + ')' if basis.get('reason') else ''}")
-    lines.append(f"- ranking: {full.get('ranking', {}).get('status')}: {full.get('ranking', {}).get('reason')}")
+    for pr in basis.get("pairs", []):
+        shared = (f"; cancelled as the same subsystem with the same budget row in both: {', '.join(pr['shared_items'])}"
+                  if pr.get("shared_items") else "; no item is the same subsystem with the same budget row in both")
+        how = ("1-sigma budget-row uncertainties, linear within a candidate, in quadrature across the pair"
+               if pr.get("item_level") else "the evaluations' total uncertainties in quadrature")
+        lines.append(f"  - {'/'.join(pr['candidates'][0])} vs {'/'.join(pr['candidates'][1])} "
+                     f"({' vs '.join(pr.get('evaluations', []))}; {how}): difference "
+                     f"{pr['difference']:.6g} + one-sided uncertainty {pr['uncertainty_one_sided']:.6g} against "
+                     f"tolerance {pr['tolerance']:.6g} ({basis.get('quantity')}){shared}: "
+                     f"{'holds' if pr['holds'] else 'does not hold'}")
+    rank = full.get("ranking", {})
+    if rank.get("status") == "ranked":
+        lines.append(f"- ranking on {rank['figure_of_merit']}: "
+                     + ", ".join(f"{'/'.join(o['candidates'])} ({o['value']:.6g})" for o in rank["order"])
+                     + f"; {rank['note']}")
+    else:
+        lines.append(f"- ranking: {rank.get('status')}: {'; '.join(rank.get('reasons') or [rank.get('reason')])}")
     return "\n".join(lines) + "\n"
 
 
@@ -627,7 +703,7 @@ def report(args) -> dict:
     if (proj.root / md_rel).exists() or (proj.root / f"reports/{name}.json").exists():
         raise UsageError(f"reports/{name} exists: choose another --name")
     w.write(md_rel, render(full, args.omit or []).encode("utf-8"))
-    slim = {k: v for k, v in full.items() if k not in ("evaluations",)}
+    slim = design.report_payload(full)
     ext = {"claims": claims, "sources_read": [], "limitations": [
         "derived by contracts/design.py; verdicts guard against oversight, not deliberate forgery (LIM-02)",
         "the review axis is advisory: only a valid human design-baseline record sets it (LIM-01)"],
@@ -699,6 +775,11 @@ def main(argv=None) -> int:
     p.add_argument("--label-convergence", dest="label_convergence")
     p.add_argument("--label-project-root", dest="label_project_root")
     p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
+    p = sub.add_parser("f5", help="an F5 evaluation from a user-supplied dataset-record (FID-06, FID-07)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--candidate", required=True)
+    p.add_argument("--dataset", required=True, help="the dataset-record with extension.design_measurement")
+    p.add_argument("--id", required=True)
     for name in ("plan", "report"):
         p = sub.add_parser(name)
         p.add_argument("--artifacts", type=Path, required=True)
@@ -719,6 +800,8 @@ def main(argv=None) -> int:
             out = run_evaluation(args, args.digest_only)
         elif args.command == "run":
             out = run_evaluation(args, args.digest_only)
+        elif args.command == "f5":
+            out = f5(args)
         elif args.command == "geometry":
             out = geometry(args)
         elif args.command == "f4":

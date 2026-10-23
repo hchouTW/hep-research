@@ -1,0 +1,49 @@
+{
+ "contract_version": "3.11.0",
+ "artifact_id": "collider-tracker-v1-EST-TRG-P",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.11.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "d193d87190deee707cde0374f66ae1b93278606a2721416dc85ab60caea37d00",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-P",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "collider-tracker-v1:EST-TRG-P",
+  "candidate": "collider-tracker-v1:cand-P",
+  "figure_of_merit": "trigger-efficiency",
+  "denominator": {
+   "species": "muon",
+   "transverse_momentum_GeV": 25.0
+  },
+  "bound": "estimate",
+  "fidelity": "F1",
+  "unavailable": true,
+  "parameter_refs": [],
+  "parameter_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+ }
+}

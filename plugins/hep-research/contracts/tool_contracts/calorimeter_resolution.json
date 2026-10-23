@@ -1,5 +1,5 @@
 {
- "contract_version": "1.0.0",
+ "contract_version": "1.1.0",
  "tool_id": "calorimeter-resolution",
  "entry": "skills/hep-detector/scripts/calorimeter_resolution.py",
  "operations": [
@@ -141,6 +141,77 @@
     "writes_files": false,
     "network": false,
     "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "calorimeter-energy-resolution",
+      "better": "smaller",
+      "unit": "1",
+      "bound": "optimistic",
+      "denominator": {
+       "energy_GeV": "number",
+       "species": "string"
+      },
+      "value": {
+       "path": "relative_resolution"
+      },
+      "inputs": [
+       {
+        "input": "evaluate",
+        "from": {
+         "const": true
+        }
+       },
+       {
+        "input": "stochastic",
+        "from": {
+         "parameter": {
+          "role": "calorimetry-em",
+          "name": "stochastic_term",
+          "unit": "GeV^0.5"
+         }
+        }
+       },
+       {
+        "input": "noise",
+        "from": {
+         "parameter": {
+          "role": "calorimetry-em",
+          "name": "noise_term_GeV",
+          "unit": "GeV"
+         }
+        }
+       },
+       {
+        "input": "constant",
+        "from": {
+         "parameter": {
+          "role": "calorimetry-em",
+          "name": "constant_term",
+          "unit": "1"
+         }
+        }
+       },
+       {
+        "input": "energy",
+        "from": {
+         "denominator": "energy_GeV"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "assumptions": [
+       "three-term core a/sqrt(E) (+) b/E (+) c with design coefficients",
+       "no leakage, intercalibration or non-uniformity in c"
+      ],
+      "note": "ADQ-05: --evaluate with design coefficients is optimistic (the constant term excludes leakage, intercalibration and non-uniformity; the low-side leakage tail is not in the formula); --fit on measured points is not mapped for design evaluations"
+     }
+    ]
    }
   }
  ]

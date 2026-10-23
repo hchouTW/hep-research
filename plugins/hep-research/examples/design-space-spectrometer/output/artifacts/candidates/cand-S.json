@@ -119,19 +119,19 @@
     "DES-TRK-001": {
      "allocation": 440.0,
      "estimate": 400.0,
-     "uncertainty": 8.0,
+     "uncertainty": 20.0,
      "unit": "kg",
-     "basis": "measurement",
-     "source": "SYNTHETIC example: assumed weighed prototype components",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
      "fidelity": "F1"
     },
     "DES-MAG-001": {
      "allocation": 2200.0,
      "estimate": 2000.0,
-     "uncertainty": 40.0,
+     "uncertainty": 100.0,
      "unit": "kg",
-     "basis": "measurement",
-     "source": "SYNTHETIC example: assumed weighed prototype components",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
      "fidelity": "F1"
     }
    },
