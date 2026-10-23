@@ -1,5 +1,5 @@
 {
- "contract_version": "3.11.0",
+ "contract_version": "3.12.0",
  "artifact_id": "synthetic-j9-signal-strength",
  "artifact_type": "statistical-result",
  "required_capabilities": [
@@ -17,7 +17,7 @@
  },
  "versions": {
   "plugin": "0.37.0",
-  "contracts": "3.11.0",
+  "contracts": "3.12.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -36,8 +36,8 @@
    "ref": "artifacts/ml_artifact.json",
    "artifact_type": "ml-artifact",
    "artifact_id": "synthetic-j9-classifier",
-   "sha256": "b648defb72b95c0379d666327b68e1653ccc4bcd924afecef68b4748924af1e0",
-   "version": "3.11.0",
+   "sha256": "0a5f6c4c3bc26d2b2149896ae689031431690cbac380ed8ca707cf8eda4dc77c",
+   "version": "3.12.0",
    "status": [
     "synthetic"
    ]

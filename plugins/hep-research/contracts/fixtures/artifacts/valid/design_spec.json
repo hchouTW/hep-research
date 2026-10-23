@@ -1,5 +1,5 @@
 {
- "contract_version": "3.11.0",
+ "contract_version": "3.12.0",
  "artifact_id": "fixture-synthetic-design-spec",
  "artifact_type": "design-spec",
  "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.36.0",
-  "contracts": "3.11.0",
+  "contracts": "3.12.0",
   "profiles": {}
  },
  "provenance": {
@@ -105,7 +105,7 @@
     "items": [
      {
       "name": "intrinsic",
-      "value": 0.5
+      "value": 0.4
      },
      {
       "name": "scattering",
@@ -113,7 +113,7 @@
      },
      {
       "name": "alignment",
-      "value": 0.3
+      "value": 0.25
      }
     ],
     "margin": 0.1
@@ -144,7 +144,11 @@
     "comparator": "<=",
     "target": 7500.0,
     "unit": "kg",
-    "denominator": {}
+    "denominator": {},
+    "subsystems": [
+     "DES-TRK-001",
+     "DES-MAG-001"
+    ]
    }
   ],
   "comparison_basis": {

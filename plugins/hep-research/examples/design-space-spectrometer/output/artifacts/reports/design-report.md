@@ -15,9 +15,9 @@ The adequacy table is an initial default until physics review: every pass is pro
 | ams-like-v1:REQ-CC-001 (driving) | ams-like-v1:cand-L | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1); rigidity-scale-offset at F5 or above (required for compliance, ADQ-02) | next-study |
 | ams-like-v1:REQ-CC-001 (driving) | ams-like-v1:cand-P | fail | bound.excludes | F1 | synthetic | none: excluded by an optimistic bound; change the candidate or the requirement | - |
 | ams-like-v1:REQ-CC-001 (driving) | ams-like-v1:cand-S | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1); rigidity-scale-offset at F5 or above (required for compliance, ADQ-02) | next-study |
-| ams-like-v1:CON-MASS-001 (hard) | ams-like-v1:cand-L | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
-| ams-like-v1:CON-MASS-001 (hard) | ams-like-v1:cand-P | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
-| ams-like-v1:CON-MASS-001 (hard) | ams-like-v1:cand-S | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
+| ams-like-v1:CON-MASS-001 (hard; scope DES-TRK-001, DES-MAG-001) | ams-like-v1:cand-L | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
+| ams-like-v1:CON-MASS-001 (hard; scope DES-TRK-001, DES-MAG-001) | ams-like-v1:cand-P | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
+| ams-like-v1:CON-MASS-001 (hard; scope DES-TRK-001, DES-MAG-001) | ams-like-v1:cand-S | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
 
 ## Evaluations used and skipped
 
@@ -37,7 +37,7 @@ The adequacy table is an initial default until physics review: every pass is pro
 - ams-like-v1:cand-P: screened out by the verdicts above, not by a review decision (ams-like-v1:REQ-TRK-001 fails; ams-like-v1:REQ-CC-001 fails)
 - ams-like-v1:cand-S: not excluded by screening (no driving requirement or hard constraint fails)
 - orphan runs: none
-- comparison basis on mass-budget at 95% one-sided CL: holds
+- comparison basis on mass-budget at 95% one-sided CL: holds; basis note: candidates are compared at equal mass; the magnet is the same 0.14 T permanent magnet in every candidate (the outer tracker planes sit outside it, as in the AMS-02 layout), so its catalog mass is shared and cancels; the uniform-field resolution model belongs to the optimistic F1 bound, not to the magnet's mass
   - ams-like-v1:cand-L vs ams-like-v1:cand-S (ams-like-v1:CALC-MASS-L vs ams-like-v1:CALC-MASS-S; 1-sigma budget-row uncertainties, linear within a candidate, in quadrature across the pair): difference 5 + one-sided uncertainty 46.2336 against tolerance 119.875 (mass-budget); cancelled as the same subsystem with the same budget row in both: DES-MAG-001: holds
 - ranking: refused: ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)
 - Pareto front on expected-precision, mass-budget: refused: ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)

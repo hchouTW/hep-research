@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.11.0"
+CONTRACTS_VERSION = "3.12.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -182,6 +182,10 @@ CONTRACTS_VERSION = "3.11.0"
 # expression parameters_all (CHN-14).
 # Detector design M4 extends it once more (OQ-03): the computational-run optional scan_summary (OQ-18, AGG-08) and the
 # design-spec comparison_basis.pareto_axes (CHN-06, RPT-07).
+# 3.12.0 (minor; detector design follow-ups of the M3 reviews): design-spec requirements[].covered_by (a derived
+# requirement names the driving one whose H4 disposition covers it, MAT-04 d) and constraints[].subsystems (the scope a
+# hard constraint covers; a candidate lacking one cannot pass it); adequacy table 1.1.0 upstream_value_checks (the
+# measured curvature offset must cover the offset a charge-confusion requirement assumes, ADQ-02).
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

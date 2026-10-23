@@ -1,11 +1,11 @@
 {
- "contract_version": "3.11.0",
+ "contract_version": "3.12.0",
  "artifact_id": "ams-like-v1-spec-v1",
  "artifact_type": "design-spec",
  "objective": "SYNTHETIC design study (AMS-like; not the AMS-02 detector)",
  "versions": {
   "plugin": "0.37.0",
-  "contracts": "3.11.0"
+  "contracts": "3.12.0"
  },
  "bindings": {
   "experiments": [],
@@ -148,7 +148,11 @@
     "comparator": "<=",
     "target": 3000.0,
     "unit": "kg",
-    "denominator": {}
+    "denominator": {},
+    "subsystems": [
+     "DES-TRK-001",
+     "DES-MAG-001"
+    ]
    }
   ],
   "comparison_basis": {
@@ -158,7 +162,7 @@
     "expected-precision",
     "mass-budget"
    ],
-   "note": "candidates are compared at equal mass"
+   "note": "candidates are compared at equal mass; the magnet is the same 0.14 T permanent magnet in every candidate (the outer tracker planes sit outside it, as in the AMS-02 layout), so its catalog mass is shared and cancels; the uniform-field resolution model belongs to the optimistic F1 bound, not to the magnet's mass"
   }
  }
 }

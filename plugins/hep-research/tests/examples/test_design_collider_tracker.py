@@ -48,17 +48,18 @@ class DesignColliderTracker(unittest.TestCase):
         self.assertIn("capability.unavailable", md)
 
     def test_dispositions_only_for_candidates_entering_convergence(self):
-        """RPT-05, MAT-04 (d): a screened-out candidate gets no proposed disposition and a derived requirement says why
-        it has none; different magnet and ECAL hardware does not cancel in the equal-mass basis (ART-15)."""
+        """RPT-05, MAT-04 (d): a screened-out candidate gets no proposed disposition and a derived requirement's is
+        approved under the driving requirement that covers it; different magnet and ECAL hardware does not cancel in
+        the equal-mass basis (ART-15)."""
         md = (self.out / "artifacts" / "reports" / "design-report.md").read_text(encoding="utf-8")
         ecal_p = next(x for x in md.splitlines() if "REQ-ECAL-001" in x and "cand-P" in x and x.startswith("|"))
         self.assertTrue(ecal_p.endswith("| none: the candidate is screened out |"), ecal_p)
         self.assertNotIn("next-study", ecal_p)
-        derived = [x for x in md.splitlines() if x.startswith("|") and "(derived)" in x and "inconclusive" in x]
-        self.assertTrue(derived)
-        for x in derived:
-            note = "none: the candidate is screened out" if "cand-P" in x else \
-                "none required at H4: derived requirement (RPT-05, MAT-04 d)"
+        derived = [x for x in md.splitlines() if x.startswith("|") and "(derived, under " in x and "inconclusive" in x]
+        self.assertEqual(len(derived), 12)  # four derived requirements x three candidates
+        for x in derived:  # MAT-04 d (3.12.0): approved at H4 under the driving requirement that covers it
+            parent = x.split("(derived, under ", 1)[1].split(")", 1)[0]
+            note = "none: the candidate is screened out" if "cand-P" in x else f"accept-risk (under {parent})"
             self.assertTrue(x.endswith(f"| {note} |"), x)
         self.assertIn("no item is the same subsystem with the same budget row", md)  # ART-15: different hardware
         self.assertIn("comparison basis on mass-budget at 95% one-sided CL: does not hold", md)

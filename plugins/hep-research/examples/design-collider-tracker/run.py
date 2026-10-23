@@ -111,13 +111,16 @@ def spec() -> dict:
                      {"rigidity_GV": den(100.0), "species": den("muon")}, "driving"), allocation=f"{NS}:ALC-TRK-001"),
             dict(req("REQ-ECAL-001", "calorimeter-energy-resolution", "<=", 0.02, "1",
                      {"energy_GeV": den(50.0), "species": den("electron")}, "driving"), allocation=f"{NS}:ALC-ECAL-001"),
-            req("REQ-HCAL-001", "hadronic-energy-resolution", "<=", 0.15, "1",
-                {"energy_GeV": den(100.0), "species": den("pion")}, "derived"),
-            req("REQ-TRG-001", "trigger-efficiency", ">=", 0.95, "1",
-                {"species": den("muon"), "transverse_momentum_GeV": den(25.0)}, "derived"),
-            req("REQ-PU-001", "pileup-robustness", "<=", 0.05, "1", {"mean_pileup": den(50.0)}, "derived"),
-            req("REQ-CONT-001", "shower-containment", ">=", 0.95, "1",
-                {"energy_GeV": den(50.0), "species": den("electron")}, "derived")]
+            # derived requirements are approved at H4 under the driving requirement that covers them (MAT-04 d)
+            dict(req("REQ-HCAL-001", "hadronic-energy-resolution", "<=", 0.15, "1",
+                     {"energy_GeV": den(100.0), "species": den("pion")}, "derived"), covered_by=f"{NS}:REQ-ECAL-001"),
+            dict(req("REQ-TRG-001", "trigger-efficiency", ">=", 0.95, "1",
+                     {"species": den("muon"), "transverse_momentum_GeV": den(25.0)}, "derived"),
+                 covered_by=f"{NS}:REQ-TRK-001"),
+            dict(req("REQ-PU-001", "pileup-robustness", "<=", 0.05, "1", {"mean_pileup": den(50.0)}, "derived"),
+                 covered_by=f"{NS}:REQ-TRK-001"),
+            dict(req("REQ-CONT-001", "shower-containment", ">=", 0.95, "1",
+                     {"energy_GeV": den(50.0), "species": den("electron")}, "derived"), covered_by=f"{NS}:REQ-ECAL-001")]
     return {"design_id": NS, "spec_version": 1,
             "objectives": [{"id": f"{NS}:PHY-001", "description": "SYNTHETIC: dilepton resonance search at a collider",
                             "observable": "dimuon and dielectron invariant mass", "range": "100 GeV to 1 TeV",
@@ -132,7 +135,8 @@ def spec() -> dict:
                  "items": [{"name": "stochastic", "value": 0.012}, {"name": "constant", "value": 0.01},
                            {"name": "leakage", "value": 0.008}], "margin": 0.002}],
             "constraints": [{"id": f"{NS}:CON-MASS-001", "type": "mass", "hardness": "hard", "quantity": "mass-budget",
-                             "comparator": "<=", "target": 25000.0, "unit": "kg", "denominator": {}}],
+                             "comparator": "<=", "target": 25000.0, "unit": "kg", "denominator": {},
+                             "subsystems": ["DES-TRK-001", "DES-MAG-001", "DES-ECAL-001"]}],
             "comparison_basis": {"quantity": "mass-budget", "tolerance_relative": 0.05,
                                  "pareto_axes": ["expected-precision", "mass-budget"],
                                  "note": "candidates are compared at equal mass"}}

@@ -1,11 +1,11 @@
 {
- "contract_version": "3.11.0",
+ "contract_version": "3.12.0",
  "artifact_id": "spectrometer-demo-spec-v1",
  "artifact_type": "design-spec",
  "objective": "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers",
  "versions": {
   "plugin": "0.36.0",
-  "contracts": "3.11.0",
+  "contracts": "3.12.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -142,7 +142,11 @@
     "comparator": "<=",
     "target": 7500.0,
     "unit": "kg",
-    "denominator": {}
+    "denominator": {},
+    "subsystems": [
+     "DES-TRK-001",
+     "DES-MAG-001"
+    ]
    }
   ],
   "comparison_basis": {

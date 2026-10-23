@@ -1,11 +1,11 @@
 {
- "contract_version": "3.11.0",
+ "contract_version": "3.12.0",
  "artifact_id": "collider-tracker-v1-spec-v1",
  "artifact_type": "design-spec",
  "objective": "SYNTHETIC design study (illustrative collider; not CMS or any real detector)",
  "versions": {
   "plugin": "0.37.0",
-  "contracts": "3.11.0",
+  "contracts": "3.12.0",
   "profiles": {
    "experiment:synthetic-collider": "1.0.0"
   }
@@ -105,7 +105,8 @@
       "tolerance": 0.0
      }
     },
-    "kind": "derived"
+    "kind": "derived",
+    "covered_by": "collider-tracker-v1:REQ-ECAL-001"
    },
    {
     "id": "collider-tracker-v1:REQ-TRG-001",
@@ -126,7 +127,8 @@
       "tolerance": 0.0
      }
     },
-    "kind": "derived"
+    "kind": "derived",
+    "covered_by": "collider-tracker-v1:REQ-TRK-001"
    },
    {
     "id": "collider-tracker-v1:REQ-PU-001",
@@ -143,7 +145,8 @@
       "tolerance": 0.0
      }
     },
-    "kind": "derived"
+    "kind": "derived",
+    "covered_by": "collider-tracker-v1:REQ-TRK-001"
    },
    {
     "id": "collider-tracker-v1:REQ-CONT-001",
@@ -164,7 +167,8 @@
       "tolerance": 0.0
      }
     },
-    "kind": "derived"
+    "kind": "derived",
+    "covered_by": "collider-tracker-v1:REQ-ECAL-001"
    }
   ],
   "allocations": [
@@ -220,7 +224,12 @@
     "comparator": "<=",
     "target": 25000.0,
     "unit": "kg",
-    "denominator": {}
+    "denominator": {},
+    "subsystems": [
+     "DES-TRK-001",
+     "DES-MAG-001",
+     "DES-ECAL-001"
+    ]
    }
   ],
   "comparison_basis": {
