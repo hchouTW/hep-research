@@ -1,5 +1,5 @@
 {
- "$comment": "Result binding (v6.3 M2c, run-lineage/v1): written after execution, never inside the analysis bundle and never naming its own digest. It binds the analysis bundle and semantic lock used, the computational-runs (explicit input sources) and campaigns, and per root the result file, its producer, identity and status labels. Agent-written: the attribution it states is a declaration (C12). It carries digests and labels, never result values.",
+ "$comment": "Result binding (v6.3 M2c, run-lineage/v1): written after execution, never inside the analysis bundle and never naming its own digest. It binds the analysis bundle and semantic lock used, the computational-runs (explicit input sources) and campaigns, and per root the result file, its producer, identity and status labels. Agent-written: the attribution it states is a declaration (C12). It carries digests and labels, never result values. 1.1.0 (release R2, G6): each campaign lists its inputs with their sources, so its closure reaches the analysis.",
  "type": "object",
  "required": [
   "binding_version",
@@ -14,7 +14,11 @@
  "additionalProperties": false,
  "properties": {
   "binding_version": {
-   "const": "1.0.0"
+   "$comment": "1.1.0 (release R2, G6): campaigns[].inputs, the campaign's input sources like a run's",
+   "enum": [
+    "1.0.0",
+    "1.1.0"
+   ]
   },
   "kind": {
    "const": "result-binding"
@@ -178,6 +182,10 @@
         "type": "null"
        }
       ]
+     },
+     "inputs": {
+      "$comment": "binding 1.1.0 (G6): the files the campaign read, with their sources (the same form as a run's inputs)",
+      "$ref": "#/properties/runs/items/properties/inputs"
      }
     }
    }

@@ -256,10 +256,13 @@ def blinded(c):
 
 
 class Blinding(Base):
-    """V70: a blinded spec's binding cites only permitted derivatives; reports carry no result values."""
+    """V70: a blinded spec's binding cites only permitted derivatives; reports carry no result values. r-run.blinding
+    1.1.0 (DR-7) judges by lineage: an 'observed' result here reads a real (published) dataset record, a synthetic one a
+    synthetic record; the result's own status label is not read."""
 
-    def check(self, status, allowed=None):
-        post = runs.run_chain(self.root(), spec_variant=blinded, status=status)
+    def check(self, status, allowed=None, data_status=None):
+        data_status = data_status or ("published" if "observed" in status else "synthetic")
+        post = runs.run_chain(self.root(), spec_variant=blinded, status=status, data_status=data_status)
         project = None if allowed is None else {"blinded": ["flux"], "allowed_outputs": allowed}
         rep = post.check(project=project)
         from contracts import analysis_check as ac
@@ -279,6 +282,11 @@ class Blinding(Base):
                          ("unverified", "check.allowed_output_ambiguous"))
         self.assertEqual(run_state(self.check(("observed",), None), "r-run.blinding"),
                          ("unverified", "check.blinding_policy_unknown"))
+        # the label is not evidence either way: the lineage decides (G7)
+        self.assertEqual(run_state(self.check(("synthetic",), [], data_status="published"), "r-run.blinding"),
+                         ("violated", "check.blinded_result_cited"))
+        self.assertEqual(run_state(self.check(("observed",), [], data_status="simulated"), "r-run.blinding"),
+                         ("satisfied", "check.blinding_permitted"))
 
 
 class PostExecutionPermit(Base):

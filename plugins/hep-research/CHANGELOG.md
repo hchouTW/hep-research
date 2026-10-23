@@ -64,6 +64,29 @@ Software checks establish contract consistency only, not physical validity.
   file). A copy bound under a second aux_id is therefore `check.aux_repeated`. Values are never compared, so a copy with
   one key added is still a different source (a known limitation). The rule ships in `1.1.0-dev.3` (the model-card suite);
   the 1.0.0 suite gives `check.rule_not_run` for it.
+- **Cross-artifact check: blinding by lineage and the project's blinded list; declarations stay flagged (G7, G13, G8,
+  A3; DR-7, DR-9, DR-1; V83, V84, V88).**
+  - **G13, `r-run.blinding` 1.1.0:** blinding applies when the spec's flag says so or when the project's `blinded`
+    list names the spec's `artifact_id`.
+  - **G7, `r-run.blinding` 1.1.0:** a blinded result is permitted by the lineage of the run that produced it, never
+    by its own status label. Every data leaf must be a dataset record with dataset status `synthetic` or
+    `simulated`; otherwise the project's `allowed_outputs` must name the result.
+    - No data leaf gives `check.lineage_no_data`.
+    - A leaf without a dataset status gives `check.lineage_status_unknown`.
+    - A result no run produced, including a campaign result until G6, gives `check.blinding_label_only`.
+    - All three are unverified.
+  - **G8, `r-run.binding` 1.1.0:** the binding's own `asserted_by.kind: person` no longer removes the declaration
+    flag.
+  - **A3, check-context 1.1.0:** an outcome that read a coverage contract supplied by the bundle is
+    declaration-based (`coverage-contract:<table_id>`).
+  - **G6, `r-run.campaign` 1.1.0 and result binding 1.1.0 (V82):** each campaign in the binding lists its `inputs`
+    with their sources. It is campaign-recorded only when every input matches its source and at least one is an
+    analysis item.
+    - A digest mismatch gives `check.closure_mismatch` (violated).
+    - Missing inputs or no analysis item is unverified.
+    - Campaign results are judged for blinding through these inputs.
+    - An installed 0.25.1 refuses a 1.1.0 binding as invalid input.
+  - **Suites:** these rules ship in `1.1.0-dev.4`. The 1.0.0 suites give `check.rule_not_run` for the three run rules.
 
 ## 0.25.1 (2026-10-22)
 

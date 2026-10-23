@@ -2,7 +2,8 @@
 registry key (rule_id, version) with retired versions, check-context 1.1.0 (DR-2: no 'required') paired with 1.1.0
 pre-release suites, and the context conversion 1.0.0 -> 1.1.0 (V90). The 1.1.0-dev.1 suites list the 1.0.0 rules;
 1.1.0-dev.2 replaces r-rep.repetition and r-ratio.correlation by 1.1.0 (G3, G17) and 1.1.0-dev.3 also
-r-comp.factor_values (G4) and r-aux.use (G5), so a 1.0.0 suite gives check.rule_not_run for them (section 8.2). On the reference cases the 1.1.0 rules give the 1.0.0 outcomes, which are
+r-comp.factor_values (G4) and r-aux.use (G5), 1.1.0-dev.4 r-run.binding (G8), r-run.blinding (G7, G13) and r-run.campaign (G6),
+so a 1.0.0 suite gives check.rule_not_run for them (section 8.2). On the reference cases the 1.1.0 rules give the 1.0.0 outcomes, which are
 computed here with cases.r1_rules() in place of release R1."""
 from __future__ import annotations
 
@@ -122,7 +123,9 @@ class Context110(unittest.TestCase):
         from contracts import analysis_check as ac
         from contracts.analysis_checks.rules import VERSIONS
         fixed_by = {"1.1.0-dev.1": set(), "1.1.0-dev.2": {"r-rep.repetition", "r-ratio.correlation"},
-                    "1.1.0-dev.3": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use"}}
+                    "1.1.0-dev.3": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use"},
+                    "1.1.0-dev.4": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use",
+                                    "r-run.binding", "r-run.blinding", "r-run.campaign"}}
         self.assertEqual(fixed_by[DEV], set(VERSIONS))
         for sid in ("counting-chain", "ratio-subset", "model-card", "run-lineage"):
             old = ac.load_suite(sid, "1.0.0")
