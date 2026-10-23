@@ -13,7 +13,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.32.0",
+  "plugin": "0.33.0",
   "contracts": "3.10.0",
   "profiles": {
    "theory:cr-secondary-antiprotons": "0.1.0"

@@ -3978,7 +3978,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4771f0c4 2026-10-23"
+   "last_commit": "9648218d 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/drell-yan.md",
@@ -3992,7 +3992,7 @@
     "skills/hep-theory/scripts/drell_yan_lo.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4771f0c4 2026-10-23"
+   "last_commit": "9648218d 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -4029,7 +4029,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4771f0c4 2026-10-23"
+   "last_commit": "9648218d 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4199,7 +4199,7 @@
     "skills/hep-theory/references/hadron-structure-essentials.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4771f0c4 2026-10-23"
+   "last_commit": "9648218d 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/recasting-toolchain.md",
