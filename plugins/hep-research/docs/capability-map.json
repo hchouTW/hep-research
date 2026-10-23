@@ -642,6 +642,27 @@
    "items": [
     "Th20"
    ]
+  },
+  {
+   "id": "pdf-reweighting-and-profiling",
+   "capability": "Bayesian reweighting of PDF/nPDF/FF replica sets and linear Hessian profiling of published sets with new data; t0 chi2 for multiplicative uncertainties",
+   "owner": "hep-statistics",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "S12"
+   ]
+  },
+  {
+   "id": "global-pdf-fits",
+   "capability": "Specification and review of global PDF/nPDF/FF fits (theory inputs, chi2 forms, tolerances, closure tests); executing a full fit needs external software",
+   "owner": "hep-statistics",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "S13"
+   ],
+   "note": "documentation until a software plan ships an executable fit"
   }
  ]
 }

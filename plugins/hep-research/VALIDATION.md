@@ -2578,6 +2578,31 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## HADRON-PHASE7 (2026-10-23; branch `feat/hadron-phase7-fits`)
+
+Hadron-structure plan, phase 7 (S12 PDF reweighting and profiling, S13 global fits), macOS, Python 3.13 with NumPy and
+SciPy; constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: Ball et al. arXiv:1012.0836v4 (Nucl. Phys. B 849 (2011) 112; errata B 854, 855),
+arXiv:1108.1758v2 (Nucl. Phys. B 855 (2012) 608), arXiv:0912.2276v2 (JHEP 05 (2010) 075); Giele and Keller
+arXiv:hep-ph/9803393v1 (Phys. Rev. D 58 (1998) 094023); Watt and Thorne arXiv:1205.4024v2 (JHEP 08 (2012) 052);
+Paukkunen and Zurita arXiv:1402.6623v3 (JHEP 12 (2014) 100); PDG 2026 Structure Functions Sec. 18.3. Journal references
+confirmed at INSPIRE-HEP.
+
+| Check | Result |
+|---|---|
+| `test_pdf_reweighting.py` (NNPDF and Giele-Keller weights and N_eff against hand values, Kish ESS, movement toward a synthetic truth, low-N_eff warning, Hessian-generated replicas only with GK weights and chi2/Delta chi^2, a one-point zero-chi2 case, refusals) | pass |
+| `test_hessian_profiling.py` (w_min, profiled central value and uncertainty against the exact stacked weighted least squares on a linear toy; the no-information limit; dynamic tolerance withholds the verdict; refusals incl. an odd eigenvector-member count) | pass |
+| `test_covariance_fit.py` t0 (GLS oracle for value and error; the central value's independence of t0 for one common normalization; iteration to a self-consistent t0 for separate normalizations; guards) | pass |
+| `run_all_checks.py --part static`, `check_layering.py`, `check_wiring.py`, `check_routing_static.py` (453 cases) | pass |
+
+Independent review (a read-only agent with the sources): no wrong formula. Fixed with tests that failed first: a
+dynamic tolerance gave wrong profiled uncertainties and a misleading verdict; Hessian-generated replicas were reweighted
+without the chi2/Delta chi^2 rescaling (Paukkunen and Zurita, Eq. 5.2); the t0 tests could not tell whether t0 was used
+or iterated (with one common normalization the central value does not depend on t0); an NNPDF weight could be NaN. The
+hep-statistics description now names PDF reweighting/profiling and PDF fits. Not run: live routing for the 4 S12-S13
+cases and the description change (paid; pending approval).
+
 ## HADRON-PHASE6 (2026-10-23; branch `feat/hadron-phase6-smallx-gpd`)
 
 Hadron-structure plan, phase 6 (Th19 small x and saturation, Th20 exclusive processes and GPDs), macOS, Python 3.13

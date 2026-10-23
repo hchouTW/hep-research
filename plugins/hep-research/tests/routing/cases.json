@@ -4399,6 +4399,49 @@
    "set": "Th20"
   },
   {
+   "id": "s12-reweight-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Reweight the NNPDF replicas for dbar/ubar with the pd/pp Drell-Yan ratio and tell me the effective number of replicas left.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "PDF reweighting"
+   ],
+   "set": "S12"
+  },
+  {
+   "id": "s12-profile-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Do a Hessian profiling of EPPS21 with my new p-Pb data and report the penalty term and the reduced gluon uncertainty.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "profiling"
+   ],
+   "set": "S12"
+  },
+  {
+   "id": "s13-fit-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run a global PDF fit from scratch with my DIS and Drell-Yan data and give me the PDF uncertainty bands.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "PDF fits"
+   ],
+   "set": "S13"
+  },
+  {
+   "id": "s13-inputs-1",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "全域 PDF 擬合要用哪些理論設定：階數、重夸克方案、運動學截斷與 alpha_s 要怎麼一致地寫進規格？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "not": "hep-statistics",
+   "set": "S13"
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",
