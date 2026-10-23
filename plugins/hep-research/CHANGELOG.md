@@ -3,7 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.33.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the fourth module of hep-theory's hadron-structure plan:
+polarized DIS (Th17), and the first two hadron-structure theory-domain profiles (DIS parton model with the O(alpha_s)
+F_L; LO Drell-Yan with the O(alpha_s) angular coefficients and Lam-Tung).
+
+**Before you upgrade:** nothing to migrate. `profiles/registry.json` lists two more theory profiles.
 
 - hep-theory, hadron structure phase 4 (Th17, polarized DIS): `skills/hep-theory/references/polarized-dis.md` (g_1, g_2,
   asymmetries and depolarization factors, Bjorken, Ellis-Jaffe, Burkhardt-Cottingham and ELT sum rules, MS-bar/AB/JET
