@@ -493,7 +493,8 @@
    "state": "none",
    "v1": false,
    "cases": [
-    "th-heavyion-1"
+    "th-heavyion-1",
+    "th14-heavyion-1"
    ]
   },
   {
@@ -517,6 +518,39 @@
    ]
   },
   {
+   "id": "hadron-models",
+   "capability": "Model calculations of PDFs, TMDs and GPDs (quark models, chiral quark soliton, AdS/QCD)",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th14-hadmodels-1"
+   ],
+   "note": "results may be cited inputs with source and status, as alternative-model objects"
+  },
+  {
+   "id": "quarkonium-production",
+   "capability": "Quarkonium production and absorption (NRQCD, J/psi in pA and eA)",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th14-quarkonium-1"
+   ],
+   "note": "only its distinction from Drell-Yan is stated"
+  },
+  {
+   "id": "jets-in-dis",
+   "capability": "Jets and jet substructure in lepton-hadron scattering, resolved-photon photoproduction",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th14-jetsdis-1"
+   ],
+   "note": "jet-algorithm conventions and selections go to hep-measurement"
+  },
+  {
    "id": "neutrino-oscillations",
    "capability": "Neutrino-oscillation probabilities, including matter effects",
    "owner": "hep-theory",
@@ -537,6 +571,16 @@
     "Th5"
    ],
    "note": "in v1 since Th5 (batch D); halo and cross-section inputs from the user"
+  },
+  {
+   "id": "dis-structure-functions",
+   "capability": "Unpolarized inclusive DIS structure functions and cross sections (LO from user-supplied parton values, sum-rule integrals; beyond LO as rules)",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th14"
+   ]
   }
  ]
 }

@@ -426,6 +426,15 @@ C = [
  ("th13-dm-1", "en", "direct", "Give me the predicted dark-matter annihilation contribution to the cosmic antiproton flux, with propagation-model and halo-profile model alternatives as theory uncertainties.", "hep-theory", ["theory uncertainties", "model alternatives"], None, None, {"set": "Th13"}),
  ("th13-mod-2", "en", "direct", "Which solar modulation model should predict the positron-to-electron ratio across the last polarity reversal, and where does the force-field approximation break down?", "hep-theory", ["solar modulation"], None, None, {"set": "Th13"}),
  ("th13-fit-1", "en", "neighboring", "Profile the cross-section nuisance parameters in my propagation fit to Li, Be and B ratios and give the interval on delta.", "hep-statistics", ["nuisance parameters"], "hep-theory", None, {"set": "Th13"}),
+    # Th14: hadron structure, unpolarized inclusive DIS (structure_functions_lo.py, sum_rules.py); out-of-v1 neighbours
+ ("th14-sigmar-1", "en", "direct", "Compute the DIS neutral-current reduced cross section sigma_r for e- p at HERA kinematics from my parton values, with the gamma-Z conventions written out.", "hep-theory", ["DIS", "conventions"], None, None, {"set": "Th14"}),
+ ("th14-cc-1", "zh-Hant", "direct", "請用我給的部分子分布值算 e+ p 帶電流的 F_2 與 xF_3，並說明電子極化怎麼進入截面。", "hep-theory", [], None, None, {"set": "Th14"}),
+ ("th14-sumrule-1", "en", "direct", "Check that my tabulated PDFs satisfy the momentum and valence-number sum rules at Q^2 = 10 GeV^2, with the small-x extrapolation shown separately.", "hep-theory", ["PDFs"], None, None, {"set": "Th14"}),
+ ("th14-reco-1", "en", "neighboring", "Reconstruct x and Q^2 with the electron method in my DIS events and give the resolution in each bin.", "hep-detector", ["reconstruction", "resolution"], "hep-theory", None, {"set": "Th14"}),
+ ("th14-heavyion-1", "en", "out-of-v1", "Predict J/psi suppression in Pb-Pb collisions from the quark-gluon plasma melting picture.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+ ("th14-hadmodels-1", "en", "out-of-v1", "Compute the proton's Sivers function in the chiral quark soliton model and give me its x dependence.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+ ("th14-quarkonium-1", "en", "out-of-v1", "Give the NRQCD prediction for J/psi production in p-Pb collisions including nuclear absorption.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+ ("th14-jetsdis-1", "en", "out-of-v1", "Compute dijet cross sections in resolved-photon photoproduction at an electron-ion collider.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),

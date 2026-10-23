@@ -18,7 +18,8 @@
    "references/deep-learning-guide.md"
   ],
   "hep-theory": [
-   "references/cosmic-ray-propagation.md"
+   "references/cosmic-ray-propagation.md",
+   "references/hadron-structure-essentials.md"
   ]
  },
  "pointers": {},

@@ -4137,6 +4137,91 @@
    "set": "Th13"
   },
   {
+   "id": "th14-sigmar-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the DIS neutral-current reduced cross section sigma_r for e- p at HERA kinematics from my parton values, with the gamma-Z conventions written out.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "DIS",
+    "conventions"
+   ],
+   "set": "Th14"
+  },
+  {
+   "id": "th14-cc-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用我給的部分子分布值算 e+ p 帶電流的 F_2 與 xF_3，並說明電子極化怎麼進入截面。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14"
+  },
+  {
+   "id": "th14-sumrule-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check that my tabulated PDFs satisfy the momentum and valence-number sum rules at Q^2 = 10 GeV^2, with the small-x extrapolation shown separately.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "PDFs"
+   ],
+   "set": "Th14"
+  },
+  {
+   "id": "th14-reco-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Reconstruct x and Q^2 with the electron method in my DIS events and give the resolution in each bin.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "reconstruction",
+    "resolution"
+   ],
+   "not": "hep-theory",
+   "set": "Th14"
+  },
+  {
+   "id": "th14-heavyion-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Predict J/psi suppression in Pb-Pb collisions from the quark-gluon plasma melting picture.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
+   "id": "th14-hadmodels-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute the proton's Sivers function in the chiral quark soliton model and give me its x dependence.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
+   "id": "th14-quarkonium-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Give the NRQCD prediction for J/psi production in p-Pb collisions including nuclear absorption.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
+   "id": "th14-jetsdis-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute dijet cross sections in resolved-photon photoproduction at an electron-ion collider.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",

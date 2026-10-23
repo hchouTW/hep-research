@@ -1,6 +1,6 @@
 ---
 name: hep-theory
-description: "Use when the deliverable is a theoretical or phenomenological result in particle, nuclear, astroparticle physics: conventions (units, constants, couplings, schemes, scales), derivations, amplitudes, cross sections, decay rates and widths, neutrino oscillations, nuclear decays, cosmic-ray propagation and solar modulation, whether a process or Feynman diagram is allowed (selection rules), approximations and validity domains, theory uncertainties (scale envelopes, PDFs, model alternatives), event-generation physics, SMEFT conventions, consistency checks, predictions for comparing a model with an experiment's published data (its HEPData, CSV or FITS table), and recasting a published analysis. Load it first even for a quick derivation, cross section or recast, and for topics outside v1 (lattice QCD, EFT global fits), saying what it cannot cover. Not for: measurement design (hep-measurement), detector response (hep-detector), fits and limits (hep-statistics), code (hep-computing), manuscripts (hep-authoring)."
+description: "Use when the deliverable is a theoretical or phenomenological result in particle, nuclear, astroparticle physics: conventions (constants, schemes), derivations, amplitudes, cross sections, decay rates and widths, hadron structure (DIS, Drell-Yan, nPDFs, TMDs, small-x, GPDs), neutrino oscillations, nuclear decays, cosmic-ray propagation and solar modulation, whether a process or Feynman diagram is allowed (selection rules), approximations and validity domains, theory uncertainties (scale envelopes, PDFs, model alternatives), event-generation physics, SMEFT conventions, consistency checks, predictions for comparing a model with an experiment's published data, and recasting a published analysis. Load it first even for a quick derivation, cross section or recast, and for topics outside v1 (lattice QCD, EFT global fits), saying what it cannot cover. Not for: measurement design (hep-measurement), detector response (hep-detector), fits and limits (hep-statistics), code (hep-computing), manuscripts (hep-authoring)."
 ---
 
 # hep-theory: models, derivations, predictions
@@ -52,6 +52,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 | Event generation (ME, shower, matching), weights | [generation](references/event-generation.md); `event_weights.py` |
 | Recasting (MadGraph, Rivet, Delphes, SModelS) | [recasting](references/recasting-toolchain.md) (documented, not run) |
 | DIS invariants, Jacobians, frames | [DIS](references/dis-kinematics.md); `dis_kinematics.py` |
+| Hadron structure: DIS, Drell-Yan, nuclear PDFs, SIDIS/TMD, small-x, GPDs | [hadron structure](references/hadron-structure-essentials.md); `structure_functions_lo.py`, `sum_rules.py` |
 | Constants (CODATA), masses, lifetimes, nuclides, units, Q values | `physical_data.py` |
 | Two-body decays, boosts, Mandelstam, thresholds, Dalitz, rapidity | `kinematics.py`; [widths](references/amplitudes-and-widths.md) |
 | Neutrino oscillations (vacuum, constant density) | [oscillations](references/neutrino-oscillations.md); `neutrino_oscillation.py` |
