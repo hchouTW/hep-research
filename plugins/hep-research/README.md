@@ -285,9 +285,14 @@ It then checks a machine-generated list of obligations against five suites:
 |---|---|
 | `counting-chain/1.1.0` | correction chains: listed effect members, realization, every applied correction described in the spec, stage, repetition, factor composition and values, response use |
 | `ratio-subset/1.1.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
-| `model-card/1.1.0` | model cards: the supported modifier–constraint pairings, one observation per constraint term within an evaluation (by source identity), cross-model sharing |
-| `run-lineage/1.1.0` | after execution, through a result binding: input closure, run status, the campaign evidence level and its inputs, blinding judged by lineage |
+| `model-card/1.1.0` (deprecated) | model cards: the supported modifier–constraint pairings, one observation per constraint term within an evaluation (by source identity), cross-model sharing |
+| `run-lineage/1.1.0` (deprecated) | after execution, through a result binding: input closure, run status, the campaign evidence level and its inputs, blinding judged by lineage |
 | (custody) | `contracts/custody.py`: an inventory of where each profile comes from; a missing custody value is never read as public |
+
+**Deprecated:** `model-card` and `run-lineage` (with `--mode model` and `--results`) are removed in the next
+minor release. The value gate's Shrink decision keeps `counting-chain` (frozen: no new rules) and `ratio-subset`
+(`docs/dev/cross-artifact-check/decision-value-gate.md`). The check CLI prints a deprecation note on stderr when a
+context selects them. Reproduce such reports with 0.26.x.
 
 The 1.1.0 suites are the default. They need check contexts in format 1.1.0 (no `required` on roots); a 1.0.0 context
 selects only 1.0.x suites. `contracts/migrate.py --convert check-context=context-1.0.0-to-1.1.0` converts a frozen

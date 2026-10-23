@@ -216,3 +216,28 @@ Reading: Phase 2 fixed what the gap probes found, but on this AI-planted set the
 closure tests and contract checks miss. The planted errors it does flag (E01, E02, E11, E18, E19, E21 and now E22) are all
 caught by layer 1 as well. An AI-planted measurement can support at most Shrink. This section changes no decision: the gate stays not
 passed, every rule stays in shadow mode, and the experimental label is the maintainer's call.
+
+## Decision changed to Shrink (2026-10-23, maintainer instruction in the session)
+
+After the 0.26.0 re-measurement (section above: I = 0 of 28, Stop by the thresholds), the implementer listed four
+options. The maintainer first chose "shrink it to the parts that add value over the other checks (ratio operands and
+correlation claims add over the contract checks)". Asked which suites that keeps, the maintainer asked for the
+implementer's best suggestion and then answered **"go with your recommendation"**.
+
+The recommendation adopted is the architecture's Shrink (section 13.3):
+- **Keep `counting-chain` and `ratio-subset`.**
+  - The ratio rules stand on the chain's roots, instances, coverage and catalog, so dropping only the chain rules
+    saves little code.
+  - The chain rules' detections were all also caught by closure, but on a subject whose closure is unusually strong
+    (the measurement-result section's validity note). That evidence is too weak to retire them.
+- **Freeze `counting-chain`:** no new rules, fixes only.
+- **Retire `model-card` and `run-lineage` by section 13.4.**
+  - Why: no planted error reached them, they hold the most separate machinery, and they have no non-test callers.
+  - When: deprecated in the next release, code removed in the minor after; readers then refuse the old formats.
+  - Frozen bundles are reproduced with 0.26.x.
+- **`custody.py` stays.** Section 13.3 lists it for retirement, but section 13.4 exempts assurance-plane components
+  until the assurance-plane design is decided. The exemption is applied, and the conflict is recorded here rather
+  than resolved silently.
+
+This again departs from the outcome the pre-registered thresholds give (Stop). The measurements stay as recorded, the
+gate is **not passed**, every rule stays in shadow mode, and the experimental label stays.

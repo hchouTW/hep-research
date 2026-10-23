@@ -3,6 +3,22 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Cross-artifact check shrunk: `model-card` and `run-lineage` are deprecated (value gate Shrink).**
+  - **Measurement:** the value gate, re-measured on 0.26.0, still found no error the checker catches that the
+    closure tests and contract checks miss (I = 0 of 28, AI-planted; `docs/dev/cross-artifact-check/
+    decision-value-gate.md`).
+  - **Decision:** the maintainer chose the architecture's Shrink.
+    - `counting-chain` is kept but frozen (no new rules).
+    - `ratio-subset` is kept.
+    - `model-card` and `run-lineage` (with `--mode model`, `--results` and the result binding) are deprecated now and
+      removed in the next minor release.
+  - **Notice:** the check CLI prints a deprecation note on stderr when a context selects them; reports are unchanged.
+    The registry marks their rules `deprecated`.
+  - **Reproducing reports:** reproduce such reports with 0.26.x.
+  - **Unchanged:** `custody.py` stays under the assurance-plane exemption. Every rule stays in shadow mode, and the
+    check stays experimental.
 ## 0.26.0 (2026-10-23)
 
 Minor release, contracts 3.8.0: the cross-artifact analysis check's Phase 2 (releases R2 and R3 together) and

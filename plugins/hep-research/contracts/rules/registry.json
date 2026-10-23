@@ -848,8 +848,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "7a979880e8e1fe5061ca7ff509c954ddac35647f6282f4c2d5fc39a7c590af2b"
   },
   {
@@ -897,8 +897,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "0451c7998692102f9cd8909cac02339d653d4cf9ec9067043a11eb04b5d3cf12"
   },
   {
@@ -1010,8 +1010,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "afcb53c6f7df0a9ecab5b81c12d2b90fd9609db3d8c50d4cbe488b8a27aeea62"
   },
   {
@@ -1056,8 +1056,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "782876ac68c9474aa3ec43f83373650057bf7ffc6d58ef371a18e8caaeaf2fd5"
   },
   {
@@ -1155,8 +1155,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "7fd6fd1e839136a51ebc719ad3adba345d2b6930391bd59043e1e0fd852765da"
   },
   {
@@ -1203,8 +1203,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "d934f43a3d87df5b4a94b2e67709cc8b49a8fa48e73f0e30c49480941bf8229e"
   },
   {
@@ -1254,8 +1254,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "f7c0c17bd394c094607741cdc1052f7786a1ac290a57bfc3a1c86090c679403d"
   },
   {
@@ -1367,8 +1367,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "aa9afcacb6c35cb91a6c861e5d37b3cd9fcdbe3d232ed49a1701a02f0c5ed23c"
   },
   {
@@ -1466,8 +1466,8 @@
    "accepted_applicability_facts": [],
    "owner": "hep-computing",
    "review_status": "unreviewed",
-   "lifecycle": "shadow",
-   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)",
+   "lifecycle": "deprecated",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed); deprecated 2026-10-23 (value gate Shrink, decision-value-gate.md): the model-card and run-lineage suites are removed in the minor after their deprecation release",
    "source_sha256": "3c26672ddc569706a6c455d9f0fa1f58883296eb11eddbadbf37bf9a49e2205b"
   }
  ],
