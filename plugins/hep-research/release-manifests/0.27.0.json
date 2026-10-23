@@ -5,7 +5,7 @@
  "hash_algorithm": "sha256",
  "path_order": "UTF-8 bytes, ascending",
  "file_count": 2399,
- "digest": "297731d690fbe16aedd64ba4e2213f886129bc9f2e12d93eb6d1e202819c42b4",
+ "digest": "a0605af0c683d2e93016f8db886c5ea0cf9702d76a24f4cf721d34970eec32ac",
  "files": [
   {
    "path": ".claude-plugin/plugin.json",
@@ -39,7 +39,7 @@
   },
   {
    "path": "README.md",
-   "sha256": "f26781cdef289516e84bc7184d0b8cb3d13ade74f9b59dc26b7d8efb9f8aca8d",
+   "sha256": "8f2ef7e6fe31898692fa9b7a160a7ac15383fca8c6727f6d1cc9d43d8bf97bbe",
    "size": 25873,
    "mode": "100644"
   },
