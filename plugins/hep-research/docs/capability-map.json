@@ -494,7 +494,8 @@
    "v1": false,
    "cases": [
     "th-heavyion-1",
-    "th14-heavyion-1"
+    "th14-heavyion-1",
+    "th16-qgp-1"
    ]
   },
   {
@@ -590,6 +591,16 @@
    "v1": true,
    "items": [
     "Th15"
+   ]
+  },
+  {
+   "id": "nuclear-parton-effects",
+   "capability": "Nuclear targets: per-nucleon conventions, isospin combination, nuclear PDF sets and baselines, member-by-member nuclear ratios; mechanism models as rules",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th16"
    ]
   }
  ]

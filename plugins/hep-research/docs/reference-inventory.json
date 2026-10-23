@@ -39,8 +39,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 24,
-   "bytes": 188339,
+   "references": 25,
+   "bytes": 200278,
    "uncited": 0
   }
  },
@@ -3947,8 +3947,8 @@
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
    "owner": "hep-theory",
-   "bytes": 6002,
-   "lines": 78,
+   "bytes": 6128,
+   "lines": 79,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/eic/modules/placement-inventory.md",
@@ -3959,37 +3959,39 @@
     "tests/skills/hep_theory/test_dis_kinematics.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bb6cb81e 2026-10-23"
+   "last_commit": "6c41d9c0 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/dis-structure-functions.md",
    "owner": "hep-theory",
-   "bytes": 12959,
-   "lines": 194,
+   "bytes": 12972,
+   "lines": 195,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/references/dis-kinematics.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/higher-order-predictions.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/scripts/structure_functions_lo.py",
     "skills/hep-theory/scripts/sum_rules.py",
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bb6cb81e 2026-10-23"
+   "last_commit": "6c41d9c0 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/drell-yan.md",
    "owner": "hep-theory",
-   "bytes": 10756,
+   "bytes": 10767,
    "lines": 150,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/scripts/drell_yan_lo.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1c8f21ef 2026-10-23"
+   "last_commit": "6c41d9c0 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -4012,7 +4014,7 @@
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
    "owner": "hep-theory",
-   "bytes": 4724,
+   "bytes": 5018,
    "lines": 64,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4021,10 +4023,11 @@
     "skills/hep-theory/references/dis-kinematics.md",
     "skills/hep-theory/references/dis-structure-functions.md",
     "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1c8f21ef 2026-10-23"
+   "last_commit": "6c41d9c0 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4119,6 +4122,23 @@
    "last_commit": "151889fb 2026-10-17"
   },
   {
+   "path": "skills/hep-theory/references/nuclear-parton-effects.md",
+   "owner": "hep-theory",
+   "bytes": 11054,
+   "lines": 146,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/pdfs-and-lhapdf.md",
+    "skills/hep-theory/scripts/nuclear_combination.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "6c41d9c0 2026-10-23"
+  },
+  {
    "path": "skills/hep-theory/references/nuclear-physics-essentials.md",
    "owner": "hep-theory",
    "bytes": 4570,
@@ -4151,19 +4171,20 @@
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",
    "owner": "hep-theory",
-   "bytes": 6047,
-   "lines": 80,
+   "bytes": 6488,
+   "lines": 87,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-structure-functions.md",
     "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/pdf_uncertainty.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6164b848 2026-10-13"
+   "last_commit": "6c41d9c0 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/recasting-toolchain.md",
@@ -4391,6 +4412,7 @@
   ],
   "nuclear": [
    "skills/hep-theory/references/nuclear-cross-sections.md",
+   "skills/hep-theory/references/nuclear-parton-effects.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md"
   ],
   "numerical": [

@@ -146,7 +146,8 @@ isospin). Status `analytic-derivation` within the parton model; the model itself
   likely larger in xF_3 than in F_2. The validity domain is lower bounds on Q^2 and W^2 that the user writes in the
   theory-spec; the scripts ship no threshold and only classify against the bounds they are given.
 - Nuclear targets: the per-nucleon isospin combination is the only nuclear step `structure_functions_lo.py` takes;
-  nuclear PDFs and effects are the nuclear-effects module (planned).
+  nuclear PDFs and effects are in
+  [nuclear targets](nuclear-parton-effects.md).
 
 ## Sum rules
 

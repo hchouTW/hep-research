@@ -116,7 +116,7 @@ derivation of the relation is planned in a theory-domain profile (phase 4).
   planned). Intrinsic-k_T models are alternative-model objects.
 - Meson beams: pion and kaon PDFs are user inputs or special-purpose sets with fewer data and a different uncertainty
   structure; state them in the theory-spec.
-- Nuclear targets: nuclear PDFs and effects are the nuclear-effects module (planned); a ratio sigma(pA)/sigma(pd) at
+- Nuclear targets: nuclear PDFs and effects are in [nuclear targets](nuclear-parton-effects.md); a ratio sigma(pA)/sigma(pd) at
   forward x_F mainly probes target antiquarks at x_2.
 
 ## Script

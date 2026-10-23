@@ -4266,6 +4266,37 @@
    "set": "Th15"
   },
   {
+   "id": "th16-npdf-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Apply the nPDF correction to my p-Pb Drell-Yan prediction and give the nuclear ratio with its uncertainty from the nPDF set's own error members.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nPDFs",
+    "Drell-Yan"
+   ],
+   "set": "Th16"
+  },
+  {
+   "id": "th16-pernucleon-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "鉛靶的 F_2 要用每核子還是每原子核來寫？x 可以大於 1 嗎？請說明慣例。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th16"
+  },
+  {
+   "id": "th16-qgp-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute the jet quenching parameter of the quark-gluon plasma in Pb-Pb collisions.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th16",
+   "limited_support": true
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",
