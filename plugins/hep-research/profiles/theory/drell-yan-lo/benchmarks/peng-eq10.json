@@ -1,0 +1,25 @@
+{
+ "label": "Published closed form (read): lambda and nu of the q qbar -> gamma* g and q g -> gamma* q channels at O(alpha_s), Eq. (10) of Peng, Chang, McClellan and Teryaev, arXiv:1511.08932v3. A closed-form benchmark, not data.",
+ "illustrative": false,
+ "source": {
+  "citation": "J.-C. Peng, W.-C. Chang, R. E. McClellan and O. Teryaev, Interpretation of Angular Distributions of Z-boson Production at Colliders, arXiv:1511.08932v3 [hep-ph] (17 May 2016)",
+  "ledger": "dylo:S02",
+  "claims": ["dylo:C05", "dylo:C07"],
+  "location": "Eq. (10), page 3 (two-column text, right after 'Using Eq. 7, Eq. 8 and Eq. 9 imply'); the channel labels (q qbar) and (qG) are printed next to each line",
+  "date_read": "2026-10-23",
+  "read_level": "full text of the arXiv v3 PDF (text extraction, equations checked against the extracted text)"
+ },
+ "printed": {
+  "qqbar": {"lambda": "(2Q^2 - qT^2)/(2Q^2 + 3qT^2)", "nu": "2qT^2/(2Q^2 + 3qT^2)"},
+  "qg": {"lambda": "(2Q^2 - 5qT^2)/(2Q^2 + 15qT^2)", "nu": "10qT^2/(2Q^2 + 15qT^2)"}
+ },
+ "rational_form": {
+  "about": "each quantity as (n0 + n1 r^2)/(d0 + d1 r^2) with r = qT/Q, transcribed from the printed lines above: [n0, n1, d0, d1]",
+  "qqbar": {"lambda": [2, -1, 2, 3], "nu": [0, 2, 2, 3]},
+  "qg": {"lambda": [2, -5, 2, 15], "nu": [0, 10, 2, 15]}
+ },
+ "independence": "Peng et al. obtain Eq. (10) from their Eqs. (7)-(9), the same route as the profile; agreement checks the profile's algebra and transcription, not the physics of Eqs. (8)-(9). Eq. (9) is an approximation (Peng et al.: the exact value depends on the parton distributions).",
+ "qT_over_Q": [0.0, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0],
+ "relative_tolerance": 1e-12,
+ "absolute_tolerance": 1e-14
+}

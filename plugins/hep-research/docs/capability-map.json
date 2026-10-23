@@ -602,6 +602,16 @@
    "items": [
     "Th16"
    ]
+  },
+  {
+   "id": "polarized-dis",
+   "capability": "Polarized DIS: g_1, g_2, asymmetries and depolarization factors, first-moment sum rules, factorization-scheme dependence of Delta Sigma",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th17"
+   ]
   }
  ]
 }

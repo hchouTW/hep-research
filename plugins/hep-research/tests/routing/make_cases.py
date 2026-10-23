@@ -444,6 +444,9 @@ C = [
  ("th16-npdf-1", "en", "direct", "Apply the nPDF correction to my p-Pb Drell-Yan prediction and give the nuclear ratio with its uncertainty from the nPDF set's own error members.", "hep-theory", ["nPDFs", "Drell-Yan"], None, None, {"set": "Th16"}),
  ("th16-pernucleon-1", "zh-Hant", "direct", "鉛靶的 F_2 要用每核子還是每原子核來寫？x 可以大於 1 嗎？請說明慣例。", "hep-theory", [], None, None, {"set": "Th16"}),
  ("th16-qgp-1", "en", "out-of-v1", "Compute the jet quenching parameter of the quark-gluon plasma in Pb-Pb collisions.", "hep-theory", [], None, None, {"set": "Th16", "limited_support": True}),
+    # Th17: polarized DIS (sum_rules.py polarized rules)
+ ("th17-bjorken-1", "en", "direct", "Evaluate the Bjorken sum rule with its alpha_s corrections at Q^2 = 5 GeV^2 and compare it with my integral of g_1^p - g_1^n; which approximations and validity domain apply?", "hep-theory", ["approximations and validity domains"], None, None, {"set": "Th17"}),
+ ("th17-scheme-1", "zh-Hant", "direct", "AB 與 MS-bar 方案的 Delta Sigma 可以直接比較嗎？請說明極化 DIS 的因子化方案慣例。", "hep-theory", [], None, None, {"set": "Th17"}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),

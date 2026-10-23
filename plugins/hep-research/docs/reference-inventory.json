@@ -39,8 +39,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 25,
-   "bytes": 200278,
+   "references": 26,
+   "bytes": 208658,
    "uncited": 0
   }
  },
@@ -3964,25 +3964,26 @@
   {
    "path": "skills/hep-theory/references/dis-structure-functions.md",
    "owner": "hep-theory",
-   "bytes": 12972,
-   "lines": 195,
+   "bytes": 13112,
+   "lines": 196,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/references/dis-kinematics.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/higher-order-predictions.md",
     "skills/hep-theory/references/nuclear-parton-effects.md",
+    "skills/hep-theory/references/polarized-dis.md",
     "skills/hep-theory/scripts/structure_functions_lo.py",
     "skills/hep-theory/scripts/sum_rules.py",
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f046cc69 2026-10-23"
+   "last_commit": "4771f0c4 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/drell-yan.md",
    "owner": "hep-theory",
-   "bytes": 10767,
+   "bytes": 10949,
    "lines": 150,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3991,7 +3992,7 @@
     "skills/hep-theory/scripts/drell_yan_lo.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f046cc69 2026-10-23"
+   "last_commit": "4771f0c4 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -4014,8 +4015,8 @@
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
    "owner": "hep-theory",
-   "bytes": 5018,
-   "lines": 64,
+   "bytes": 5522,
+   "lines": 67,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/README.md",
@@ -4024,10 +4025,11 @@
     "skills/hep-theory/references/dis-structure-functions.md",
     "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/nuclear-parton-effects.md",
+    "skills/hep-theory/references/polarized-dis.md",
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f046cc69 2026-10-23"
+   "last_commit": "4771f0c4 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4133,6 +4135,7 @@
     "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/pdfs-and-lhapdf.md",
+    "skills/hep-theory/references/polarized-dis.md",
     "skills/hep-theory/scripts/nuclear_combination.py"
    ],
    "cited_by_other_skills": [],
@@ -4185,6 +4188,18 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "f046cc69 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/polarized-dis.md",
+   "owner": "hep-theory",
+   "bytes": 7554,
+   "lines": 120,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/hadron-structure-essentials.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "4771f0c4 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/recasting-toolchain.md",
@@ -4339,7 +4354,8 @@
   ],
   "dis": [
    "skills/hep-theory/references/dis-kinematics.md",
-   "skills/hep-theory/references/dis-structure-functions.md"
+   "skills/hep-theory/references/dis-structure-functions.md",
+   "skills/hep-theory/references/polarized-dis.md"
   ],
   "engineering": [
    "skills/hep-computing/references/engineering-playbook.md",

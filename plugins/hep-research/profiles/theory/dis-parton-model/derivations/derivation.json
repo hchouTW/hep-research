@@ -1,0 +1,136 @@
+{
+ "label": "theory:dis-parton-model O(alpha_s) F_L (SymPy 1.14.0)",
+ "status": "perturbative-argument",
+ "order": "F_L at O(alpha_s^1) (its leading order), F_2 at O(alpha_s^0); mu_R = mu_F = Q",
+ "environment": {
+  "python": "3.13.2",
+  "sympy": "1.14.0",
+  "interpreter": "from skills/hep-computing/scripts/find_python.py"
+ },
+ "assumptions": [
+  "photon exchange only; massless quarks, n_f active flavours; target mass neglected (O(M^2/Q^2))",
+  "x^-1 F_L = C_L,ns (x) q_ns + <e^2> (C_L,q (x) q_s + C_L,g (x) g), MVV Eq. 1, power corrections dropped",
+  "c_L,ns^(1) = 4 C_F x, c_L,ps^(1) = 0, c_L,g^(1) = 8 n_f x (1 - x), expansion in alpha_s/(4 pi), MVV Eqs. 2-3",
+  "q_ns = sum (e_i^2 - <e^2>)(q_i + qbar_i): identified so that LO F_2 is PDG Eq. 18.18 (not spelled out in MVV)",
+  "toy densities and alpha_s values SYNTHETIC; densities not evolved in Q^2"
+ ],
+ "results": {
+  "altarelli_martinelli": "F_L(x) = (alpha_s/(4 pi)) x^2 int_x^1 dz/z^3 [ (16/3) F_2(z) + 8 sum_q e_q^2 (1 - x/z) z g(z) ]",
+  "integrand_sympy": "a_s*x**2*(8*Sigma_e2*z*(-x/z + 1)*g(z) + 16*F2(z)/3)/z**3",
+  "e2_average_by_nf": {
+   "3": "2/9",
+   "4": "5/18",
+   "5": "11/45",
+   "6": "5/18"
+  },
+  "toy_closed_form_vs_quadrature": [
+   {
+    "x": 0.001,
+    "FL_over_alpha_s_closed_form": 1.412172228908802,
+    "FL_over_alpha_s_quadrature": 1.4121722289088015,
+    "relative_difference": 3.3306690738754696e-16
+   },
+   {
+    "x": 0.01,
+    "FL_over_alpha_s_closed_form": 0.8164687435355004,
+    "FL_over_alpha_s_quadrature": 0.8164687435354998,
+    "relative_difference": 6.661338147750939e-16
+   },
+   {
+    "x": 0.05,
+    "FL_over_alpha_s_closed_form": 0.4041079719719035,
+    "FL_over_alpha_s_quadrature": 0.4041079719719035,
+    "relative_difference": 0.0
+   },
+   {
+    "x": 0.1,
+    "FL_over_alpha_s_closed_form": 0.22609633880617258,
+    "FL_over_alpha_s_quadrature": 0.2260963388061726,
+    "relative_difference": 2.220446049250313e-16
+   },
+   {
+    "x": 0.3,
+    "FL_over_alpha_s_closed_form": 0.036940831623069985,
+    "FL_over_alpha_s_quadrature": 0.036940831623070006,
+    "relative_difference": 6.661338147750939e-16
+   },
+   {
+    "x": 0.6,
+    "FL_over_alpha_s_closed_form": 0.0026189743867470164,
+    "FL_over_alpha_s_quadrature": 0.002618974386747016,
+    "relative_difference": 1.1102230246251565e-16
+   }
+  ],
+  "toy_gauss_legendre_relative_error": {
+   "nodes": [
+    4,
+    8,
+    16,
+    32,
+    64,
+    128
+   ],
+   "by_x": {
+    "0.001": [
+     0.17635612866028127,
+     0.00017642087754432545,
+     4.884981308350689e-15,
+     2.4424906541753444e-15,
+     2.220446049250313e-16,
+     3.9968028886505635e-15
+    ],
+    "0.01": [
+     0.06005783011679755,
+     3.266862699025097e-06,
+     7.771561172376096e-16,
+     6.661338147750939e-16,
+     0.0,
+     1.4432899320127035e-15
+    ],
+    "0.05": [
+     0.012950888972884655,
+     2.7840494132291838e-08,
+     0.0,
+     4.440892098500626e-16,
+     0.0,
+     9.992007221626409e-16
+    ],
+    "0.1": [
+     0.004655634312111134,
+     1.3522734043647233e-09,
+     3.3306690738754696e-16,
+     4.440892098500626e-16,
+     6.661338147750939e-16,
+     6.661338147750939e-16
+    ],
+    "0.3": [
+     0.0003062461320477716,
+     9.64117674584486e-13,
+     2.220446049250313e-16,
+     1.7763568394002505e-15,
+     0.0,
+     4.884981308350689e-15
+    ],
+    "0.6": [
+     5.069022740666895e-06,
+     2.220446049250313e-16,
+     0.0,
+     2.220446049250313e-15,
+     2.220446049250313e-16,
+     9.547918011776346e-15
+    ]
+   }
+  }
+ },
+ "checks": {
+  "change_of_variables_z_equals_x_over_y": true,
+  "ns_plus_singlet_equals_charge_weighted_sum": true,
+  "q_ns_flavour_traceless": true,
+  "e2_average_is_5_over_18_for_even_nf": true,
+  "coefficient_route_equals_altarelli_martinelli_integrand": true,
+  "FL_nonnegative_for_nonnegative_densities": true,
+  "FL_linear_in_alpha_s_and_zero_at_alpha_s_0": true,
+  "toy_quadrature_matches_closed_form": true,
+  "toy_gauss_legendre_converges": true
+ }
+}

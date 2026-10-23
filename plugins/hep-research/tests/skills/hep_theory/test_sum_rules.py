@@ -112,5 +112,65 @@ class SumRules(unittest.TestCase):
         self.assertEqual(code, 2)
 
 
+def polarized_table(n=400, xmin=1e-7):
+    """Toy helicity densities x Dq = N x^a (1-x)^b with Beta-function first moments."""
+    xs = [xmin ** (1 - i / (n - 1)) for i in range(n)]
+    forms = {"Du": (0.9, 0.7, 3), "Dd": (-0.4, 0.7, 4), "Ds": (-0.02, 1.0, 7),
+             "Dubar": (0.01, 1.0, 7), "Ddbar": (-0.015, 1.0, 7), "Dsbar": (-0.02, 1.0, 7)}
+    t = {"representation": "xf", "x": xs}
+    moments = {}
+    for k, (amp, a, b) in forms.items():
+        t[k] = [amp * x ** a * (1 - x) ** b for x in xs]
+        moments[k] = amp * beta(a, b + 1)
+    return t, moments
+
+
+class PolarizedSumRules(unittest.TestCase):
+    def test_g1_moments_and_bjorken(self):
+        t, m = polarized_table()
+        up, dn, st = m["Du"] + m["Dubar"], m["Dd"] + m["Ddbar"], m["Ds"] + m["Dsbar"]
+        gp = 0.5 * (4 / 9 * up + 1 / 9 * dn + 1 / 9 * st)
+        gn = 0.5 * (4 / 9 * dn + 1 / 9 * up + 1 / 9 * st)  # isospin: Du <-> Dd for the neutron
+        for rule, value in (("g1-moment:p", gp), ("g1-moment:n", gn), ("bjorken-lo", (up - dn) / 6)):
+            code, out = run(t, "--rule", rule, "--expected", repr(value), "--tolerance", "5e-4")
+            self.assertEqual(code, 0, (rule, out))
+            self.assertEqual(out["checks"][0]["result"], "pass", (rule, out["checks"]))
+
+    def test_ellis_jaffe_reference(self):
+        t, m = polarized_table()
+        ga, a8 = 1.27, 0.585  # inputs of the test (their source is the user's); EJ: Gamma_1^p = gA/12 + 5 a8/36
+        code, out = run(t, "--rule", "ellis-jaffe:p", "--gA", str(ga), "--a8", str(a8))
+        self.assertEqual(code, 0, out)
+        self.assertAlmostEqual(out["outputs"]["ellis_jaffe_prediction"], ga / 12 + 5 * a8 / 36, places=12)
+        self.assertIn("heuristic-argument", out["outputs"]["ellis_jaffe_status"])
+        code, _ = run(t, "--rule", "ellis-jaffe:p")
+        self.assertEqual(code, 2)  # gA and a8 are required inputs
+
+    def test_eq43_anchor_neutron_ellis_jaffe_and_charm(self):
+        t, m = polarized_table()
+        a3 = (m["Du"] + m["Dubar"]) - (m["Dd"] + m["Ddbar"])
+        a8 = (m["Du"] + m["Dubar"]) + (m["Dd"] + m["Ddbar"]) - 2 * (m["Ds"] + m["Dsbar"])
+        a0 = (m["Du"] + m["Dubar"]) + (m["Dd"] + m["Ddbar"]) + (m["Ds"] + m["Dsbar"])
+        gp = (0.75 * a3 + 0.25 * a8 + a0) / 9  # Kuhn, Chen, Leader Eq. 43, independent of the code's e_q^2 sum
+        code, out = run(t, "--rule", "g1-moment:p", "--expected", repr(gp), "--tolerance", "5e-4")
+        self.assertEqual(out["checks"][0]["result"], "pass", out["checks"])
+        _, out = run(t, "--rule", "ellis-jaffe:n", "--gA", "1.27", "--a8", "0.585")
+        self.assertAlmostEqual(out["outputs"]["ellis_jaffe_prediction"], -1.27 / 12 + 5 * 0.585 / 36, places=12)
+        # review: a charm helicity column enters g_1 with e_c^2 = 4/9 instead of being ignored
+        tc = dict(t, Dc=[0.01 * x ** 0.5 for x in t["x"]], Dcbar=[0.0] * len(t["x"]))
+        _, base = run(t, "--rule", "g1-moment:p")
+        _, withc = run(tc, "--rule", "g1-moment:p")
+        diff = withc["outputs"]["integral_in_range"] - base["outputs"]["integral_in_range"]
+        self.assertAlmostEqual(diff, 0.5 * 4 / 9 * 0.01 * 2 * (1 - 1e-7 ** 0.5), delta=2e-5)  # columns hold x Dc
+        # review: --gA/--a8 with another rule are rejected, not ignored
+        code, _ = run(t, "--rule", "bjorken-lo", "--gA", "1.27")
+        self.assertEqual(code, 2)
+
+    def test_unpolarized_rule_on_polarized_table_rejected(self):
+        t, _ = polarized_table(n=20)
+        code, _ = run(t, "--rule", "momentum")
+        self.assertEqual(code, 2)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -65,6 +65,20 @@
    "path": "theory/heliospheric-modulation"
   },
   {
+   "id": "theory:dis-parton-model",
+   "kind": "theory-domain",
+   "version": "0.1.0",
+   "scope": "LO parton-model F_2 and O(alpha_s) F_L (Altarelli-Martinelli form); SYNTHETIC toys only, no published F_L",
+   "path": "theory/dis-parton-model"
+  },
+  {
+   "id": "theory:drell-yan-lo",
+   "kind": "theory-domain",
+   "version": "0.1.0",
+   "scope": "LO Drell-Yan d2sigma/dM dy (photon) and O(alpha_s) lambda, nu, Lam-Tung; published closed-form benchmark",
+   "path": "theory/drell-yan-lo"
+  },
+  {
    "id": "reference:detector-atlas",
    "kind": "reference",
    "version": "0.1.0",

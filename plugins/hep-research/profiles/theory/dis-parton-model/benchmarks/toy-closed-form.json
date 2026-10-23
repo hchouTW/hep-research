@@ -1,0 +1,28 @@
+{
+ "label": "ANALYTIC closed-form check on SYNTHETIC toy inputs for theory:dis-parton-model. Not a published benchmark: no published F_L value was read for this profile. The toy densities and alpha_s values are invented test inputs, not fits and not a statement about any nucleon.",
+ "illustrative": true,
+ "kind": "analytic-closed-form",
+ "flavours": [
+  {"name": "u", "charge": "2/3",
+   "quark": [["2", "-1/2", 3], ["1/5", "-6/5", 7]],
+   "antiquark": [["1/5", "-6/5", 7]]},
+  {"name": "d", "charge": "-1/3",
+   "quark": [["1", "-1/2", 4], ["1/5", "-6/5", 7]],
+   "antiquark": [["1/5", "-6/5", 7]]},
+  {"name": "s", "charge": "-1/3",
+   "quark": [["1/10", "-6/5", 7]],
+   "antiquark": [["1/10", "-6/5", 7]]},
+  {"name": "c", "charge": "2/3",
+   "quark": [["1/20", "-6/5", 7]],
+   "antiquark": [["1/20", "-6/5", 7]]}
+ ],
+ "gluon": [["3", "-6/5", 5]],
+ "density_form": "number density f(x) = sum_k N_k x^a_k (1 - x)^b_k, entries [N_k, a_k, b_k]; b_k integer so the closed form is exact",
+ "C_F": "4/3",
+ "x_points": [0.001, 0.01, 0.05, 0.1, 0.3, 0.6],
+ "q2_points_gev2": [10.0, 100.0],
+ "alpha_s_at_q2": [0.25, 0.18],
+ "alpha_s_note": "TOY alpha_s values attached to the Q^2 labels; not run from any reference value. The toy densities are not evolved, so Q^2 enters only through these numbers.",
+ "relative_tolerance": 1e-10,
+ "gauss_legendre_nodes": [4, 8, 16, 32, 64, 128]
+}

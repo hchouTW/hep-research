@@ -1,0 +1,38 @@
+[
+ {
+  "id": "dispm:S01",
+  "title": "Structure Functions (Review of Particle Physics, section 18)",
+  "authors": "E.C. Aschenauer, R.S. Thorne and R. Yoshida (revised August 2025); in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+  "year": 2026,
+  "identifiers": {"dois": [], "arxiv_ids": [], "inspire_record_id": null,
+                  "url": "https://pdg.lbl.gov/2026/reviews/rpp2026-rev-structure-functions.pdf"},
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-23",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Read on 2026-10-23 from a downloaded copy of the 2026 PDF (page footer '1st June, 2026') and its text extraction: Sec. 18.1 (kinematic invariants, x and Q^2), Eq. (18.17) F_L = F_2 - 2xF_1 (page 4), Sec. 18.2.1 Eq. (18.18) quark-parton-model structure functions (page 5), Eqs. (18.21)-(18.22) factorization and convolution (page 7). The F_L data figure (Fig. 18.15) was not used: no value is read off a figure."
+ },
+ {
+  "id": "dispm:S02",
+  "title": "The Longitudinal Structure Function at the Third Order",
+  "authors": "S. Moch, J.A.M. Vermaseren and A. Vogt",
+  "year": 2005,
+  "identifiers": {"dois": ["10.1016/j.physletb.2004.11.063"], "arxiv_ids": ["hep-ph/0411112"], "inspire_record_id": null,
+                  "url": "https://arxiv.org/abs/hep-ph/0411112"},
+  "tier": 2,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-23",
+  "publication_date": "2004-11 (arXiv v2, 9 Nov 2004); Phys. Lett. B 606 (2005) 123",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Moch, Vermaseren and Vogt",
+  "notes": "Read on 2026-10-23 in full from the arXiv v2 PDF and its text extraction; Eq. (1) checked on the rendered PDF page (printed page 1): the bracket is <e^2> (C_L,q (x) q_s + C_L,g (x) g), so <e^2> multiplies the gluon term as well. Used: Eqs. (1)-(3) and the definition <e^k> = n_f^-1 sum e_i^k below Eq. (11). The NLO and NNLO coefficient functions (Eqs. 4-10) are not used. Journal reference and DOI confirmed at INSPIRE-HEP on 2026-10-23."
+ }
+]

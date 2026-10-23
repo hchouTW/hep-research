@@ -4297,6 +4297,26 @@
    "limited_support": true
   },
   {
+   "id": "th17-bjorken-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Evaluate the Bjorken sum rule with its alpha_s corrections at Q^2 = 5 GeV^2 and compare it with my integral of g_1^p - g_1^n; which approximations and validity domain apply?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ],
+   "set": "Th17"
+  },
+  {
+   "id": "th17-scheme-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "AB 與 MS-bar 方案的 Delta Sigma 可以直接比較嗎？請說明極化 DIS 的因子化方案慣例。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th17"
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",

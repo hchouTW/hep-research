@@ -9,6 +9,12 @@ Rules (--rule), with the integrand built from the table:
   number:<q>    int_0^1 (q - qbar) dx for q in d, u, s, c, b  (proton: u 2, d 1, s c b 0 by its quantum numbers)
   adler-lo      int_0^1 (F_2^{W-} - F_2^{W+}) / x dx = 2 int [(u - ubar) - (d - dbar) - (s - sbar) + (c - cbar)] dx
   gls-lo        (1/2) int_0^1 (F_3^{W+} + F_3^{W-}) dx = int sum_{q=u,d,s,c} (q - qbar) dx
+  g1-moment:p|n int_0^1 g_1 dx with g_1 = (1/2) sum_q e_q^2 (Dq + Dqbar) at LO, q = u, d, s (polarized columns Du, Dubar,
+                Dd, Ddbar, Ds, Dsbar, optionally Dc, Dcbar, Db, Dbbar; neutron by isospin)
+  bjorken-lo    int_0^1 (g_1^p - g_1^n) dx = (1/6) int [(Du + Dubar) - (Dd + Ddbar)] dx (LO; QCD corrections not
+                included: the coefficient series is in Kuhn, Chen, Leader, arXiv:0812.3535, Eq. 89)
+  ellis-jaffe:p|n  the g_1 moment and, from --gA and --a8, the Ellis-Jaffe value Gamma_1 = +-gA/12 + 5 a8/36 (Delta s = 0
+                and SU(3) symmetry assumed: heuristic-argument), from their Eq. 43
 adler-lo and gls-lo are the LO quark-parton forms built from PDG 2026 "Structure Functions" Eq. (18.19) (read
 2026-10-23; derived here, analytic-derivation at LO); for a proton they give 2 and 3. QCD corrections to them are not
 included and not stated. The script reports integrals; it ships no expected value: pass --expected (and --tolerance)
@@ -20,7 +26,8 @@ above x_n < 1 as h ~ (1 - x)^q through the last two (integral h(x_n) (1 - x_n) /
 reported as separate objects and added only in "total_with_extrapolation"; their form is an assumption, not a result,
 and the convergence estimate does not cover them.
 Input JSON (--table FILE): {"representation": "xf" | "f", "x": [...], "<flavour>": [...], ...} with flavours from
-d u s c b dbar ubar sbar cbar bbar g; "xf" means the columns hold x f(x).
+d u s c b dbar ubar sbar cbar bbar g (helicity densities: the same names with a D prefix); "xf" means the columns hold
+x f(x).
 Output JSON: status, status_label, inputs, rule, integrand, outputs (tabulated_range, integral_in_range,
 convergence_estimate, below_xmin, above_xmax, total_with_extrapolation), checks.
 Exit codes (core/status.py): 0 ok; 1 failed (the total lies outside --expected +/- --tolerance); 3 incomplete (a check
@@ -42,6 +49,7 @@ from core.status import add_status_argument, exit_code  # noqa: E402
 
 QUARKS = ("d", "u", "s", "c", "b")
 ALL = QUARKS + tuple(q + "bar" for q in QUARKS) + ("g",)
+POL = tuple("D" + f for f in ALL)  # helicity densities Delta q, Delta qbar, Delta g
 SOURCE_LO = "LO quark-parton form from PDG 2026 'Structure Functions' Eq. (18.19), read 2026-10-23 (derived here)"
 
 
@@ -62,7 +70,7 @@ def load_table(path: str) -> tuple[list[float], dict, str]:
     if any(not 0 < v <= 1 for v in xs) or any(b <= a for a, b in zip(xs, xs[1:])):
         raise RuleError("x must be strictly increasing in (0, 1]")
     cols = {}
-    for f in ALL:
+    for f in ALL + POL:
         if f in doc:
             col = doc[f]
             if not isinstance(col, list) or len(col) != len(xs):
@@ -104,6 +112,24 @@ def integrand(rule: str, xs: list[float], cols: dict, rep: str) -> tuple[list[fl
         need("u", "ubar", "d", "dbar", "s", "sbar", "c", "cbar")
         return [sum(f(q, i) - f(q + "bar", i) for q in ("u", "d", "s", "c")) for i in range(n)], \
             "(F_3^{W+} + F_3^{W-}) / 2 = sum_{q=u,d,s,c} (q - qbar) (LO)"
+    if rule in ("g1-moment:p", "g1-moment:n", "bjorken-lo") or rule.startswith("ellis-jaffe:"):
+        need("Du", "Dubar", "Dd", "Ddbar", "Ds", "Dsbar")
+        def plus(q, i):
+            if "D" + q not in cols and "D" + q + "bar" not in cols:
+                return 0.0  # optional heavy flavours (c, b) absent: taken as zero, stated in the integrand text
+            need("D" + q, "D" + q + "bar")
+            return f("D" + q, i) + f("D" + q + "bar", i)
+        def g1(i, target):
+            up, dn = (plus("u", i), plus("d", i)) if target == "p" else (plus("d", i), plus("u", i))
+            return 0.5 * (4 / 9 * (up + plus("c", i)) + 1 / 9 * (dn + plus("s", i) + plus("b", i)))
+        if rule == "bjorken-lo":
+            return [g1(i, "p") - g1(i, "n") for i in range(n)], \
+                "g_1^p - g_1^n = (1/6)[(Du + Dubar) - (Dd + Ddbar)] (LO)"
+        target = rule.split(":", 1)[1]
+        if target not in ("p", "n"):
+            raise RuleError("the target is p or n")
+        return [g1(i, target) for i in range(n)], \
+            f"g_1^{target} = (1/2) sum_q e_q^2 (Dq + Dqbar), q = u, d, s and c, b if given (LO; neutron by isospin)"
     raise RuleError(f"unknown rule {rule!r}")
 
 
@@ -159,9 +185,11 @@ class JsonArgumentParser(argparse.ArgumentParser):
 def main(argv=None) -> int:
     ap = JsonArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--table", required=True, help="JSON table of f(x) or x f(x)")
-    ap.add_argument("--rule", required=True, help="momentum | number:<q> | adler-lo | gls-lo")
+    ap.add_argument("--rule", required=True, help="momentum | number:<q> | adler-lo | gls-lo | g1-moment:p|n | bjorken-lo | ellis-jaffe:p|n")
     ap.add_argument("--expected", type=float, help="value to check the total against (the user's, with its source)")
     ap.add_argument("--tolerance", type=float, help="absolute tolerance of the check")
+    ap.add_argument("--gA", type=float, help="ellis-jaffe: g_A (= a_3) with its source")
+    ap.add_argument("--a8", type=float, help="ellis-jaffe: a_8 from hyperon beta decays, with its source")
     ap.add_argument("--check-on", choices=("in_range", "with_extrapolation"), default="with_extrapolation")
     add_status_argument(ap)
     a = ap.parse_args(argv)
@@ -175,6 +203,16 @@ def main(argv=None) -> int:
         xs, cols, rep = load_table(a.table)
         h, desc = integrand(a.rule, xs, cols, rep)
         out = integrate(xs, h)
+        if not a.rule.startswith("ellis-jaffe:") and (a.gA is not None or a.a8 is not None):
+            raise RuleError("--gA and --a8 belong to the ellis-jaffe rules")
+        if a.rule.startswith("ellis-jaffe:"):
+            if a.gA is None or a.a8 is None or not (math.isfinite(a.gA) and math.isfinite(a.a8)):
+                raise RuleError("ellis-jaffe needs --gA and --a8 (inputs with their source)")
+            sign = 1.0 if a.rule.endswith(":p") else -1.0
+            # Gamma_1 = (1/9)(+-3/4 a3 + a8/4 + a0) (Kuhn, Chen, Leader Eq. 43, neutron by isospin) with a0 = a8 (Ds = 0)
+            out["ellis_jaffe_prediction"] = sign * a.gA / 12.0 + 5.0 * a.a8 / 36.0
+            out["ellis_jaffe_status"] = ("heuristic-argument: assumes Delta s + Delta sbar = 0 and SU(3) flavour symmetry "
+                                         "for a8; contradicted by the measured Gamma_1^p (Kuhn, Chen, Leader, Sec. 2.1, Eqs. 47-49)")
     except RuleError as exc:
         print(json.dumps({"status": "rejected", **base, "reason": str(exc)}, indent=1))
         return exit_code("rejected")

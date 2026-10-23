@@ -1,0 +1,14 @@
+{
+ "label": "SYNTHETIC toy inputs for the numerical check of the LO Drell-Yan Jacobian (theory:drell-yan-lo). The densities are invented Beta forms, not fits; both hadrons use the same toy set; the numbers are not a statement about any hadron or collision.",
+ "illustrative": true,
+ "sqrt_s_gev": 20.0,
+ "mass_window_gev": [4.0, 5.0],
+ "rapidity_window": [-0.5, 0.75],
+ "flavours": [
+  {"name": "u", "charge": "2/3", "quark": [["2", "-1/2", 3], ["1/5", "-6/5", 7]], "antiquark": [["1/5", "-6/5", 7]]},
+  {"name": "d", "charge": "-1/3", "quark": [["1", "-1/2", 4], ["1/5", "-6/5", 7]], "antiquark": [["1/5", "-6/5", 7]]}
+ ],
+ "density_form": "number density f(x) = sum_k N_k x^a_k (1 - x)^b_k, entries [N_k, a_k, b_k]",
+ "units": "integrated cross sections in units of (4 pi alpha^2 / 3) GeV^-2 (no value of alpha is used); multiply by 86.8 nb GeV^2 (PDG Eq. 51.3) for nb",
+ "relative_tolerance": 1e-8
+}

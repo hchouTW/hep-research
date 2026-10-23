@@ -2578,6 +2578,32 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## HADRON-PHASE4 (2026-10-23; branch `feat/hadron-phase4-pol`)
+
+Hadron-structure plan, phase 4 (Th17 polarized DIS and the first two theory-domain profiles), macOS (Darwin 25.5.0)
+arm64, interpreter from `find_python.py` (a miniconda Python 3.13.2, SymPy 1.14.0, SciPy
+1.17.1, NumPy 2.4.4); constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: PDG 2026 Structure Functions Eqs. 18.6, 18.13-18.22; Kuhn, Chen, Leader
+arXiv:0812.3535v1 (Secs. 1.1, 2.1, 2.2, 3.1); Moch, Vermaseren, Vogt arXiv:hep-ph/0411112 (Eqs. 1-3; Phys. Lett. B 606
+(2005) 123, DOI confirmed at INSPIRE-HEP); Peng et al. arXiv:1511.08932v3 (Eqs. 1-10; Phys. Lett. B 758 (2016) 384,
+confirmed at INSPIRE-HEP); PDG 2026 Cross-Section Formulae Eqs. 51.3, 51.40.
+
+| Check | Result |
+|---|---|
+| `test_sum_rules.py`, polarized rules (g_1 moments of p and n, Bjorken at LO, Ellis-Jaffe values for p and n, an independent anchor through Kuhn-Chen-Leader Eq. 43 from a_3, a_8, a_0, charm helicity columns, rejections) | pass (11 tests in the file) |
+| `theory:dis-parton-model` 0.1.0: `python3 -m unittest discover -s tests -t tests` in the profile (SymPy change of variables from the Moch-Vermaseren-Vogt coefficient functions to the Altarelli-Martinelli form, negative tests for a wrong C_F and a dropped <e^2>, gluon-only and quark-only hand values pinning 8 sum e_q^2 and 16/3, quadrature against the exact closed form within 1e-10 with a 4-128 node convergence study) | 35 run, 35 pass; capabilities `demonstrated-on-synthetic-data` (no published F_L benchmark read) |
+| `theory:drell-yan-lo` 0.1.0: same command in the profile (LO cross section in SymPy and against the shipped `drell_yan_lo.py xsec` to 1e-12; Peng Eq. 4 into Eq. 2 reproduces Eq. 5; Eqs. 6-7; Lam-Tung for phi_1 = 0; channel mixing derived as the cross-section-fraction average of A_i; benchmark Peng Eq. 10, 2 channels x 7 q_T/Q x lambda, nu, relative 1e-12) | 40 run, 40 pass; capabilities `angular-coefficients-and-lam-tung` and `published-closed-form-benchmark` `tested-in-declared-environment` in the environment above; the LO cross section `demonstrated-on-synthetic-data` |
+| `run_all_checks.py --part static` (profile tests included as `profile-tests:theory:*`), `check_layering.py`, `check_wiring.py` | pass |
+
+The benchmark follows the paper's own route (Eqs. 8-9 into the A_i relations), so it checks the algebra and the
+transcription, not the physics of Eqs. 8-9. Independent reviews (read-only agents with the sources): polarized page and
+rules, no wrong formula; fixed section citations, the unsourced a_8 = 3F - D (now "not verified"), charm columns that
+were ignored, `--gA`/`--a8` accepted with other rules. Profiles: the channel-mixing "alternative" (a linear average of
+lambda, nu stored as a model uncertainty) was wrong and is removed, the A-average now derived; the Lam-Tung sign is
+stated within the quark-axis representation; two hard-coded "checks" became declarations; an independent LO
+normalization and a quark-only F_L hand value added. Not run: live routing for the 2 Th17 cases (paid; pending).
+
 ## HADRON-PHASE3 (2026-10-23; branch `feat/hadron-phase3-nuclear`)
 
 Hadron-structure plan, phase 3 (Th16, nuclear targets), macOS 26.5 arm64, Python 3.13, constructed inputs only
