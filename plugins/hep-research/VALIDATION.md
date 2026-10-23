@@ -2578,6 +2578,37 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## HADRON-PHASE1 (2026-10-23; branch `feat/hadron-phase1-dis` from main `4ff6ee6a`)
+
+Hadron-structure plan, phase 1 (Th14, unpolarized inclusive DIS), macOS 26.5 arm64, Python 3.13 (miniconda), on
+constructed inputs only: these are software checks and establish no physical validity.
+
+Sources read in full text 2026-10-23: PDG 2026 "Structure Functions" review (pages 1-16, Eqs. 18.1-18.25) and
+Schienbein et al., arXiv:0709.1775v2 (Eq. 3, Sec. 2.2, Sec. 4, App. A). Derived here and marked so on the page: the
+polarization dependence through lambda -> P_e (NC) and eta^CC = 2 (1 +/- P_e) eta_W (CC), d2sigma/dx dQ^2 =
+(y / Q^2) d2sigma/dx dy, the Adler and GLS LO integrands from Eq. 18.19, the boson-gluon-fusion threshold.
+
+| Check | Result |
+|---|---|
+| `test_structure_functions_lo.py` (photon hand value, charge symmetry with antiquarks, e+/e- xF_3 sign, polarized NC through charge times P_e, photon limit of gamma-Z, CC normalization against the parton form G_F^2/(2 pi x) prop^2 x[(ubar+cbar)+(1-y)^2(d+s)], CC polarization scaling, nucleus limits, 13 rejections; relative 1e-12) | pass |
+| `test_sum_rules.py` (momentum, number, Adler, GLS on Beta-function toys within 5e-4; exact power-law extrapolation; divergence and an un-runnable check reported as incomplete; violation exit 1) | pass |
+| `test_hadron_structure_th14.py` (conditional convention keys skipped by `theory.conventions_incomplete`, page format) | pass |
+| `run_all_checks.py --no-cli --jobs 6` | 5033 tests, 4843 pass, 187 skipped; the 3 failures and the `reference_inventory` fail were the stale inventory, regenerated and rerun (pass) |
+| `run_all_checks.py --part static`, `check_wiring.py --since 4ff6ee6a`, `check_routing_static.py` (433 cases), ruff 0.16.10 and mypy 2.4.0 on core and contracts | pass |
+
+Independent review (a read-only agent that did not write the material, checking against both source PDFs and an
+independent recalculation): no wrong formula, sign, normalization, coupling or W assignment. Fixed before the commit
+with a test that failed first: a requested sum-rule check that could not run exited 0 (now incomplete, exit 3);
+G_F, M_Z, M_W <= 0 and sin^2 theta_W outside (0, 1) were accepted (now rejected); the page did not say that the TMC
+review defines F_L^TMC = r^2 F_2^TMC - 2x F_1^TMC. Wording fixed: GM-VFNS variant names are not in the PDG text;
+"at large Q^2" restored; the Kretzer-Reno attribution of Eq. 23; the hadronic threshold marked as derived. Deferred:
+`--s` silently overrides beam energies; negative parton values are accepted without a warning.
+
+Contracts: the 13 new keys are core `convention_keys` and also `conditional_convention_keys`, which
+`theory.conventions_incomplete` skips, so existing theory-specs gain no warning. Not run: the live routing run for the
+description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
+`tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
+
 ## 0.29.0 release check (2026-10-23, E2 and the CI lock)
 
 Release branch `release/0.29.0` from main `eba95d89` (main CI green). It ships #240-#249: hep-theory Th13 (cosmic-ray

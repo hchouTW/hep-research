@@ -91,7 +91,7 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 - hep-measurement: measurement-design, cosmic-ray-flux, systematic-scaling, collection-time, spectral-transform, acceptance-from-generation
 - hep-detector: response-folding, resolution-efficiency, fast-spectrometer-simulation, scale-distortion, response-construction, species-migration, multisample-pid, stability-monitoring, detector-design, geomagnetic-backtracing, full-detector-simulation
 - hep-statistics: fits-and-limits, covariance-and-combinations, unfolding, bayesian, time-series, split-consistency, roofit-status
-- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology
+- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology, dis-structure-functions
 - hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring
 - hep-ml: ml-training, bdt-pipeline, ml-eras
 - hep-citations: literature-verification
@@ -107,6 +107,9 @@ Outside v1 (the closest owner answers with the limited-support notice):
 - Heavy-ion physics (quark-gluon plasma, collective flow) (heavy-ions) → hep-theory
 - Nuclear-structure calculations (shell model, density functionals) (nuclear-structure) → hep-theory
 - Full relic-density Boltzmann solvers (relic-density-solvers) → hep-theory
+- Model calculations of PDFs, TMDs and GPDs (quark models, chiral quark soliton, AdS/QCD) (hadron-models) → hep-theory
+- Quarkonium production and absorption (NRQCD, J/psi in pA and eA) (quarkonium-production) → hep-theory
+- Jets and jet substructure in lepton-hadron scattering, resolved-photon photoproduction (jets-in-dis) → hep-theory
 <!-- /v1-scope -->
 
 ## Handoff chains (must terminate)

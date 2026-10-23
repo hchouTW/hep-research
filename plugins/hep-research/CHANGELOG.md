@@ -3,6 +3,29 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- hep-theory, hadron structure phase 1 (Th14, unpolarized inclusive DIS): new entry page
+  `skills/hep-theory/references/hadron-structure-essentials.md` (registered hub; modules B-H marked planned) and
+  `skills/hep-theory/references/dis-structure-functions.md` (NC photon, gamma-Z and Z, CC, neutrino; LO quark-parton
+  model; heavy-quark schemes and thresholds, Georgi-Politzer target-mass corrections and higher twist as rules); sources
+  read in full text 2026-10-23 (PDG 2026 Structure Functions review, Schienbein et al. 2008). New scripts
+  `skills/hep-theory/scripts/structure_functions_lo.py` (LO F_2, xF_3, sigma_r and d2sigma/dx dy, dx dQ^2 from
+  user-supplied parton values; every electroweak, sign and target convention an input; exit 2 on unusable input) and
+  `skills/hep-theory/scripts/sum_rules.py` (momentum, number, Adler and GLS LO integrals with a convergence estimate and
+  the extrapolations outside the table reported separately). Tests on constructed inputs only; they do not establish
+  physical validity.
+- Contracts vocabulary: 13 new core convention keys (`target_normalization`, `exchanged_bosons`, `electroweak_scheme`,
+  `em_coupling`, `structure_function_signs`, `heavy_quark_scheme`, `factorization_scheme`, `target_mass_treatment`,
+  `polarization_convention`, `xF_definition`, `rapidity_frame`, `azimuth_convention`, `log_accuracy`); additive, the
+  contracts version moves to 3.10.0 at release. **Before you upgrade:** an older reader warns on these keys and its
+  comparison gate treats them as not comparable.
+- Capability map: `dis-structure-functions` (Th14, tool, in v1); out-of-v1 notices `hadron-models`,
+  `quarkonium-production`, `jets-in-dis` with routing cases. Routing: the hep-theory description names hadron
+  structure (DIS, Drell-Yan, nPDFs, TMDs, small-x, GPDs); "units", "couplings", "scales" and the "(its HEPData, CSV or
+  FITS table)" parenthesis were trimmed (unpinned phrases). Static routing check passes; the live routing run is
+  pending the maintainer's approval (paid calls). Routing set Th14 (8 cases).
+
 ## 0.29.0 (2026-10-23)
 
 Minor release, contracts 3.9.0 (unchanged). It adds hep-theory's cosmic-ray phenomenology (Th13) with every source read

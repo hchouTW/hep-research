@@ -39,8 +39,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 21,
-   "bytes": 159506,
+   "references": 23,
+   "bytes": 177314,
    "uncited": 0
   }
  },
@@ -3946,17 +3946,36 @@
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
    "owner": "hep-theory",
-   "bytes": 5886,
-   "lines": 77,
+   "bytes": 6002,
+   "lines": 78,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/eic/modules/placement-inventory.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/scripts/dis_kinematics.py",
     "tests/skills/hep_theory/test_dis_kinematics.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
+  },
+  {
+   "path": "skills/hep-theory/references/dis-structure-functions.md",
+   "owner": "hep-theory",
+   "bytes": 12959,
+   "lines": 194,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/higher-order-predictions.md",
+    "skills/hep-theory/scripts/structure_functions_lo.py",
+    "skills/hep-theory/scripts/sum_rules.py",
+    "tests/skills/hep_theory/test_hadron_structure_th14.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -3977,13 +3996,31 @@
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
+   "path": "skills/hep-theory/references/hadron-structure-essentials.md",
+   "owner": "hep-theory",
+   "bytes": 4455,
+   "lines": 64,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "tests/skills/hep_theory/test_hadron_structure_th14.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
    "owner": "hep-theory",
-   "bytes": 4153,
-   "lines": 68,
+   "bytes": 4431,
+   "lines": 70,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
@@ -4103,6 +4140,8 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/pdf_uncertainty.py"
    ],
@@ -4260,6 +4299,10 @@
    "skills/hep-detector/references/ground-based-detection-arrays.md",
    "skills/hep-detector/references/space-based-direct-detection.md"
   ],
+  "dis": [
+   "skills/hep-theory/references/dis-kinematics.md",
+   "skills/hep-theory/references/dis-structure-functions.md"
+  ],
   "engineering": [
    "skills/hep-computing/references/engineering-playbook.md",
    "skills/hep-computing/references/loop-engineering.md",
@@ -4267,6 +4310,7 @@
   ],
   "essential": [
    "skills/hep-theory/references/astroparticle-essentials.md",
+   "skills/hep-theory/references/hadron-structure-essentials.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md",
    "skills/hep-theory/references/particle-physics-essentials.md"
   ],
@@ -4404,6 +4448,10 @@
    "skills/hep-ml/references/data-strategy.md",
    "skills/hep-ml/references/evaluation-strategy.md",
    "skills/hep-ml/references/parallelism-strategy.md"
+  ],
+  "structure": [
+   "skills/hep-theory/references/dis-structure-functions.md",
+   "skills/hep-theory/references/hadron-structure-essentials.md"
   ],
   "style": [
    "skills/hep-authoring/references/diagram-figure-style.md",

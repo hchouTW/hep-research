@@ -97,6 +97,12 @@ MISSING_FILE_ARGS = {
     "skills/hep-theory/scripts/eft_truncation.py": [M],
     "skills/hep-theory/scripts/event_weights.py": [M],
     "skills/hep-theory/scripts/pdf_uncertainty.py": [M],
+    "skills/hep-theory/scripts/structure_functions_lo.py": [
+        "--x", "0.1", "--Q2", "10", "--s", "1000", "--M", "0.938", "--lepton", "e-", "--polarization", "0",
+        "--bosons", "gamma", "--sf-signs", "pdg", "--alpha", "0.0073", "--alpha-label", "a", "--target", "p",
+        "--target-normalization", "per-nucleon", "--target-mass-treatment", "neglected",
+        "--heavy-quark-scheme", "ZM-VFNS", "--partons", M],
+    "skills/hep-theory/scripts/sum_rules.py": ["--table", M, "--rule", "momentum"],
     "skills/hep-theory/scripts/physical_data.py": ["nuclide", "4He", "--ame", M],
     "skills/hep-theory/scripts/import_published_table.py": ["--table", M, "--spec", M, "--out", M],
     "skills/hep-theory/scripts/coalescence.py": ["yield", "--spectrum", M, "--mass-number", "2", "--b-a", "0.004"],

@@ -1169,7 +1169,8 @@ def _term_ok(vocab: Vocabulary, name: str, term) -> bool:
 def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report) -> None:
     conv: Any = ext.get("conventions") if isinstance(ext.get("conventions"), dict) else {}
     listed = set(ext.get("inapplicable") or [])
-    core_keys = sorted(vocab.core("convention_keys"))
+    # conditional keys (contracts 3.10.0) are required only by the module that names them, not by every derivation
+    core_keys = sorted(vocab.core("convention_keys") - vocab.core("conditional_convention_keys"))
     absent = [k for k in core_keys if k not in listed and (conv.get(k) is None or (isinstance(conv.get(k), str)
                                                                                   and not conv[k].strip()))]
     if absent:
