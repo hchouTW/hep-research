@@ -3,6 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- hep-theory, hadron structure phase 2 (Th15, Drell-Yan): `skills/hep-theory/references/drell-yan.md` (LO cross
+  section derived from PDG 2026 cross-section formulae; x_F definitions and rapidity frames; angular coefficients,
+  Collins-Soper and helicity frames, frame-invariant combinations, Lam-Tung; NLO and resummation as rules; sources read
+  in full text 2026-10-23) and `skills/hep-theory/scripts/drell_yan_lo.py` (`xsec` for photon exchange, Z exchange
+  refused; `convert`, `frames`, `lam-tung`, `coefficients`). Capability `drell-yan` (Th15); routing set Th15 (4 cases).
+
 ## 0.30.0 (2026-10-23)
 
 Minor release, contracts 3.10.0. It adds the first module of hep-theory's hadron-structure plan: unpolarized inclusive

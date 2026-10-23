@@ -91,7 +91,7 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 - hep-measurement: measurement-design, cosmic-ray-flux, systematic-scaling, collection-time, spectral-transform, acceptance-from-generation
 - hep-detector: response-folding, resolution-efficiency, fast-spectrometer-simulation, scale-distortion, response-construction, species-migration, multisample-pid, stability-monitoring, detector-design, geomagnetic-backtracing, full-detector-simulation
 - hep-statistics: fits-and-limits, covariance-and-combinations, unfolding, bayesian, time-series, split-consistency, roofit-status
-- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology, dis-structure-functions
+- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology, dis-structure-functions, drell-yan
 - hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring
 - hep-ml: ml-training, bdt-pipeline, ml-eras
 - hep-citations: literature-verification

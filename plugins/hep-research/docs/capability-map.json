@@ -581,6 +581,16 @@
    "items": [
     "Th14"
    ]
+  },
+  {
+   "id": "drell-yan",
+   "capability": "Drell-Yan cross sections (LO, photon exchange), x_F and rapidity-frame conversions, angular coefficients and frames, Lam-Tung combination",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th15"
+   ]
   }
  ]
 }

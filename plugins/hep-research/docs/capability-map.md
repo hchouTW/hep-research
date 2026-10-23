@@ -74,4 +74,5 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | tool | yes | Th4 |  |
 | dark-matter-phenomenology | Dark-matter phenomenology conventions: spin-independent recoil rates in the standard halo model, form factors, J and D factors, flux prefactors, relic-density conventions (no Boltzmann solver) | hep-theory | tool | yes | Th5 |  |
 | dis-structure-functions | Unpolarized inclusive DIS structure functions and cross sections (LO from user-supplied parton values, sum-rule integrals; beyond LO as rules) | hep-theory | tool | yes | Th14 |  |
+| drell-yan | Drell-Yan cross sections (LO, photon exchange), x_F and rapidity-frame conversions, angular coefficients and frames, Lam-Tung combination | hep-theory | tool | yes | Th15 |  |
 <!-- /capability-map -->
