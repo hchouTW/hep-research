@@ -1,0 +1,147 @@
+{
+ "meta": {
+  "run_id": "t2-codex-probe-20261023",
+  "date": "2026-10-23",
+  "cli": "codex",
+  "cli_version": [],
+  "model": "gpt-6.1-sol",
+  "models_reported": [],
+  "isolation": "config-dir",
+  "plugin_commit": "aec8191124c8487bffdcd305ad33be5a6f8a13db",
+  "plugin_dirty": false,
+  "cases_file_sha256": "ebfbb6dcab39b936e0a4717933f5e0f11665c5744af5187a42ee537d03505569",
+  "selected": 2,
+  "completed": 2,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 2.0,
+  "reused_cases": 0,
+  "spent_usd": 0.0,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 2,
+   "strict_pass": 2,
+   "lenient_pass": 2
+  },
+  "by_lang": {
+   "en": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "by_expected_primary": {
+   "hep-theory": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "by_set": {
+   "Th13": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "outcomes": {
+   "pass": 2
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.0,
+   "per_case": 0.0,
+   "per_turn": 0.0
+  }
+ },
+ "cases": [
+  {
+   "id": "th13-codes-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th13-mod-2",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/t2-codex-probe-20261023/raw/, not committed)"
+}

@@ -1,0 +1,120 @@
+{
+ "meta": {
+  "run_id": "t2-codex-turns-rerun-20261023",
+  "date": "2026-10-23",
+  "cli": "codex",
+  "cli_version": [],
+  "model": "gpt-6.1-sol",
+  "models_reported": [],
+  "isolation": "config-dir",
+  "plugin_commit": "61d522ab36edd8914122221085a45b7f9bbc5227",
+  "plugin_dirty": false,
+  "cases_file_sha256": "ebfbb6dcab39b936e0a4717933f5e0f11665c5744af5187a42ee537d03505569",
+  "selected": 1,
+  "completed": 1,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 1.0,
+  "reused_cases": 0,
+  "spent_usd": 0.0,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 1,
+   "strict_pass": 0,
+   "lenient_pass": 0
+  },
+  "by_lang": {
+   "en": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_kind": {
+   "multi-turn": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_expected_primary": {
+   "hep-theory": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_set": {
+   "T19": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "outcomes": {
+   "error": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.0,
+   "per_case": 0.0,
+   "per_turn": 0.0
+  }
+ },
+ "cases": [
+  {
+   "id": "t19-turns-2",
+   "lang": "en",
+   "kind": "multi-turn",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "error",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": -1
+    },
+    {
+     "expected": "hep-statistics",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "error",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": -1
+    }
+   ],
+   "outcome": "error",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 0,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/t2-codex-turns-rerun-20261023/raw/, not committed)"
+}
