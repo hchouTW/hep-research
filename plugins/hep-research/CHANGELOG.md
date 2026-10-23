@@ -3,7 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.27.0 (2026-10-23)
+
+Minor release; contracts unchanged (3.8.0). It deprecates two suites of the experimental cross-artifact analysis check
+after the value gate's Shrink decision.
+- **Deprecated:** `model-card` and `run-lineage`, together with `--mode model`, `--results` and the result binding.
+  They are removed in 0.28.0, so reproduce such reports with 0.26.x or 0.27.x.
+- **Kept:** `counting-chain` (frozen) and `ratio-subset`.
 
 - **Cross-artifact check shrunk: `model-card` and `run-lineage` are deprecated (value gate Shrink).**
   - **Measurement:** the value gate, re-measured on 0.26.0, still found no error the checker catches that the
