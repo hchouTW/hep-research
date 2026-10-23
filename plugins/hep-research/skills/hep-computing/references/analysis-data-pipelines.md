@@ -1,7 +1,7 @@
 # Analysis data pipelines: ROOT, columnar processing and analysis code
 
-Code-level companion of the hep-measurement skill (moved here from `skills/hep-measurement/references/data-pipelines.md`
-and the code sections of its guide). The physics rules these pipelines implement (stable event keys, duplicate
+Code-level companion of the hep-measurement skill (moved here from its former data-pipelines reference, removed in
+0.29.0, and the code sections of its guide). The physics rules these pipelines implement (stable event keys, duplicate
 removal across streams, signed weights, the normalization denominator) are stated in
 [hep-measurement analysis design](../../hep-measurement/references/analysis-design.md) and
 [weights and normalization](../../hep-measurement/references/weights-normalization.md); this file covers interfaces,

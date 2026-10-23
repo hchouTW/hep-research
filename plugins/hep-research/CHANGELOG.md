@@ -13,6 +13,11 @@ when it changed modules in its suites, and a full one ran all of it. Profile cha
 impact map, so they run every suite, and so do full plans and changes to `check_ams_optional.py` (now CI tooling). The
 gate (`tools/reconcile_check_runs.py --plan`) fails an AMS-optionality run that did not run exactly the planned modules.
 
+Removed: `skills/hep-measurement/references/data-pipelines.md`, a "(moved)" pointer since 0.7.0 (its removal release
+0.29.0 was recorded in `tools/wiring_known_gaps.json`). The three hep-computing links to it now point to
+`analysis-data-pipelines.md` (where the material moved) or, for the physics rules, to hep-measurement's
+`analysis-design.md` and `weights-normalization.md`; the hep-measurement README counts twelve references.
+
 Theory (Th13): cosmic-ray propagation and astroparticle phenomenology in hep-theory. Guidance on three pages and one
 helper script; no propagation code is run and no fit to real data is tested.
 

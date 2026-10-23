@@ -20,7 +20,7 @@ class ReachabilityTests(unittest.TestCase):
     def test_every_reference_is_routed_from_the_guide(self):
         guide = text('hep-measurement-guide.md')
         for path in sorted(REFS.glob('*.md')):
-            if path.name in ('hep-measurement-guide.md', 'data-pipelines.md'):
+            if path.name == 'hep-measurement-guide.md':
                 continue
             with self.subTest(ref=path.name):
                 self.assertIn(f']({path.name}', guide)

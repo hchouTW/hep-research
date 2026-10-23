@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 35,
-   "bytes": 298545,
+   "bytes": 298640,
    "uncited": 0
   },
   "hep-detector": {
@@ -24,8 +24,8 @@
    "uncited": 0
   },
   "hep-measurement": {
-   "references": 13,
-   "bytes": 120431,
+   "references": 12,
+   "bytes": 120008,
    "uncited": 0
   },
   "hep-ml": {
@@ -1129,17 +1129,17 @@
   {
    "path": "skills/hep-computing/references/analysis-data-pipelines.md",
    "owner": "hep-computing",
-   "bytes": 11548,
+   "bytes": 11550,
    "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/assets/time_slice_reduction.py",
     "skills/hep-computing/references/columnar-and-large-scale-data.md",
+    "skills/hep-computing/references/python-hep-coding-patterns.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/analysis-design.md",
     "skills/hep-measurement/references/correction-chain.md",
-    "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/weights-normalization.md"
    ],
@@ -1471,7 +1471,7 @@
   {
    "path": "skills/hep-computing/references/python-hep-coding-patterns.md",
    "owner": "hep-computing",
-   "bytes": 6578,
+   "bytes": 6548,
    "lines": 124,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1503,8 +1503,8 @@
   {
    "path": "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 37160,
-   "lines": 726,
+   "bytes": 37283,
+   "lines": 727,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -2500,7 +2500,6 @@
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
-    "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/histograms-efficiencies.md",
     "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
@@ -2617,31 +2616,6 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "3c10ac23 2026-10-22"
-  },
-  {
-   "path": "skills/hep-measurement/references/data-pipelines.md",
-   "owner": "hep-measurement",
-   "bytes": 423,
-   "lines": 5,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-computing/SKILL.md",
-    "skills/hep-computing/assets/time_slice_reduction.py",
-    "skills/hep-computing/references/analysis-data-pipelines.md",
-    "skills/hep-computing/references/columnar-and-large-scale-data.md",
-    "skills/hep-computing/references/python-hep-coding-patterns.md",
-    "skills/hep-computing/references/root-balanced-design-guidelines.md",
-    "skills/hep-measurement/README.md",
-    "skills/hep-measurement/references/analysis-design.md",
-    "skills/hep-measurement/references/correction-chain.md",
-    "skills/hep-measurement/references/hep-measurement-guide.md",
-    "skills/hep-measurement/references/weights-normalization.md",
-    "tests/skills/hep_measurement/test_method_references.py"
-   ],
-   "cited_by_other_skills": [
-    "hep-computing"
-   ],
-   "last_commit": "9257d7b5 2026-10-15"
   },
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
@@ -2810,11 +2784,11 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/references/analysis-data-pipelines.md",
+    "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
     "skills/hep-detector/references/triggers-luminosity-pileup.md",
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/references/analysis-design.md",
-    "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
@@ -3896,7 +3870,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "930ba0b2 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
@@ -3913,7 +3887,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "930ba0b2 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
@@ -3949,7 +3923,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "930ba0b2 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/dark-matter-phenomenology.md",
@@ -4206,7 +4180,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "930ba0b2 2026-10-23"
   }
  ],
  "overlap_pairs": [],
