@@ -3,7 +3,20 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.30.0 (2026-10-23)
+
+Minor release, contracts 3.10.0. It adds the first module of hep-theory's hadron-structure plan: unpolarized inclusive
+DIS (Th14), with an entry page for the hadron-structure modules that follow.
+
+**Before you upgrade:**
+- **Contracts 3.10.0 (additive):** 13 new core convention keys for hadron-structure predictions, also listed in the new
+  core vocabulary `conditional_convention_keys`; the theory-spec completeness warning skips them. A 3.9 reader warns
+  on the new keys and its comparison gate treats them as not comparable.
+- **Routing:** the hep-theory description names hadron structure (DIS, Drell-Yan, nPDFs, TMDs, small-x, GPDs) and no
+  longer lists "units", "couplings", "scales" or "(its HEPData, CSV or FITS table)". Static routing passes; the live
+  routing run is pending the maintainer's approval.
+- **New out-of-v1 notices:** model calculations of PDFs, TMDs and GPDs (`hadron-models`), quarkonium production
+  (`quarkonium-production`), jets in lepton-hadron scattering (`jets-in-dis`).
 
 - hep-theory, hadron structure phase 1 (Th14, unpolarized inclusive DIS): new entry page
   `skills/hep-theory/references/hadron-structure-essentials.md` (registered hub; modules B-H marked planned) and

@@ -1,5 +1,5 @@
 {
- "contract_version": "3.9.0",
+ "contract_version": "3.10.0",
  "artifact_id": "crpb-prediction-source-term-benchmark",
  "artifact_type": "prediction",
  "objective": "Secondary antiproton source term at the ILLUSTRATIVE benchmark point (toy cross sections; not a statement about the Galaxy)",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.29.0",
-  "contracts": "3.9.0",
+  "plugin": "0.30.0",
+  "contracts": "3.10.0",
   "profiles": {
    "theory:cr-secondary-antiprotons": "0.1.0"
   }

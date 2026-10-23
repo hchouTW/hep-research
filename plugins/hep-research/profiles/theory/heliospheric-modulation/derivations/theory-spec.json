@@ -1,5 +1,5 @@
 {
- "contract_version": "3.9.0",
+ "contract_version": "3.10.0",
  "artifact_id": "helmod-theory-spec-force-field",
  "artifact_type": "theory-spec",
  "objective": "Theory spec of force-field solar modulation in theory:heliospheric-modulation, with its validity range, its limits and the power-law closed-form benchmark",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.29.0",
-  "contracts": "3.9.0",
+  "plugin": "0.30.0",
+  "contracts": "3.10.0",
   "profiles": {
    "theory:heliospheric-modulation": "0.1.0"
   }

@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.9.0"
+CONTRACTS_VERSION = "3.10.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -153,6 +153,13 @@ CONTRACTS_VERSION = "3.9.0"
 # its schema), model-only analysis bundles (mode "model") and the model-card and run-lineage suites. Readers refuse
 # them with the reason (bundle.removed, definition.suite_removed, permit.report_post_execution_removed). No artifact
 # type, vocabulary term, envelope field or capability changes; check reports are pre-execution only.
+# 3.10.0 (hadron structure, hep-theory Th14) adds 13 core convention keys (target_normalization, exchanged_bosons,
+# electroweak_scheme, em_coupling, structure_function_signs, heavy_quark_scheme, factorization_scheme,
+# target_mass_treatment, polarization_convention, xF_definition, rapidity_frame, azimuth_convention, log_accuracy) and
+# the core vocabulary conditional_convention_keys listing them: the theory-spec completeness warning
+# (theory.conventions_incomplete) skips them; the module that names a key requires it. Additive: a 3.9 reader warns on
+# the new keys and its comparison gate treats them as not comparable. No artifact type, envelope field or capability
+# changes.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

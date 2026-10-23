@@ -3958,7 +3958,7 @@
     "tests/skills/hep_theory/test_dis_kinematics.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "bb6cb81e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/dis-structure-functions.md",
@@ -3975,7 +3975,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "bb6cb81e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -4009,7 +4009,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "bb6cb81e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -4024,7 +4024,7 @@
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c0 2026-10-07"
+   "last_commit": "bb6cb81e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/light-nuclei-coalescence.md",
