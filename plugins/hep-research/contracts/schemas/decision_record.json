@@ -1,23 +1,34 @@
-{"$comment": "Decision record (task P3.1, C12, T4.3): one analysis decision, who made it (a person or an agent), what had been seen when it was made, which artifacts it produced and which recipe it chose. 'seen' binds a prefix of the analysis's exposure record (through_seq entries and the canonical SHA-256 of exactly those entries), so the binding survives later appends and an edited history is detected. A decision record authorizes nothing; it is lineage.",
+{"$comment": "Decision record (task P3.1, C12, T4.3): one analysis decision, who made it (a person or an agent), what had been seen when it was made, which artifacts it produced and which recipe it chose. 'seen' binds a prefix of the analysis's exposure record (through_seq entries and the canonical SHA-256 of exactly those entries), so the binding survives later appends and an edited history is detected. A decision record authorizes nothing; it is lineage. 1.1.0 (contracts 3.11.0, detector system design spec DEC-03..DEC-20) adds the six design categories, the 'not-applicable' seen marker and dispositions[], all only for design categories (contracts/lineage.py checks that, at least one artifact for a design category, and the input closure of a not-applicable marker); 1.0.0 records keep their meaning.",
  "type": "object",
  "required": ["record_version", "decision_id", "analysis", "decision", "category", "actor", "time", "seen", "artifacts"],
  "additionalProperties": false,
  "properties": {
-  "record_version": {"type": "string", "const": "1.0.0"},
+  "record_version": {"type": "string", "enum": ["1.0.0", "1.1.0"]},
   "decision_id": {"type": "string", "minLength": 1},
-  "analysis": {"type": "string", "minLength": 1},
+  "analysis": {"$comment": "for a design record, the design_id of the design-spec (DEC-17)", "type": "string", "minLength": 1},
   "decision": {"type": "string", "minLength": 1},
   "category": {"type": "string", "enum": ["recipe-selection", "selection", "binning", "calibration", "correction",
-                                           "systematic", "background-model", "fit-model", "unblinding-request", "other"]},
+                                           "systematic", "background-model", "fit-model", "unblinding-request", "other",
+                                           "design-scope", "requirements-baseline", "architecture-selection",
+                                           "design-baseline", "requirement-change", "measurement-acceptance"]},
   "actor": {"type": "object", "required": ["kind", "id"], "additionalProperties": false, "properties": {
    "kind": {"type": "string", "enum": ["human", "agent"]},
    "id": {"type": "string", "minLength": 1}}},
   "time": {"$ref": "revocation_event.json#/$defs/timestamp"},
-  "seen": {"type": "object", "required": ["through_seq", "entries_sha256"], "additionalProperties": false, "properties": {
-   "through_seq": {"$comment": "number of exposure-record entries that existed when the decision was made", "type": "integer", "minimum": 0},
-   "entries_sha256": {"$comment": "canonical SHA-256 of those entries (a JSON list)", "$ref": "revocation_event.json#/$defs/sha256"}}},
+  "seen": {"anyOf": [
+   {"type": "object", "required": ["through_seq", "entries_sha256"], "additionalProperties": false, "properties": {
+    "through_seq": {"$comment": "number of exposure-record entries that existed when the decision was made", "type": "integer", "minimum": 0},
+    "entries_sha256": {"$comment": "canonical SHA-256 of those entries (a JSON list)", "$ref": "revocation_event.json#/$defs/sha256"}}},
+   {"$comment": "1.1.0, design categories only (DEC-14): no blinding exposure applies; refused when the input closure holds experimental, observed, external or protected data (DEC-15)",
+    "type": "object", "required": ["state"], "additionalProperties": false, "properties": {
+    "state": {"type": "string", "const": "not-applicable"}}}]},
   "artifacts": {"type": "array", "items": {"type": "object", "required": ["ref", "sha256"], "additionalProperties": false,
    "properties": {"ref": {"type": "string", "minLength": 1}, "sha256": {"$ref": "revocation_event.json#/$defs/sha256"}}}},
+  "dispositions": {"$comment": "1.1.0, design categories only (DEC-13): one entry per inconclusive driving requirement of a design-baseline record",
+   "type": "array", "items": {"type": "object", "required": ["requirement", "disposition", "note"], "additionalProperties": false,
+   "properties": {"requirement": {"type": "string", "minLength": 1},
+                  "disposition": {"type": "string", "enum": ["accept-risk", "next-study"]},
+                  "note": {"type": "string", "minLength": 1}}}},
   "recipe_sha256": {"$comment": "canonical SHA-256 of the recipe the decision chose or ran under, when there is one",
    "$ref": "revocation_event.json#/$defs/sha256"},
   "supersedes": {"type": "string", "minLength": 1}}}

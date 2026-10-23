@@ -7,7 +7,7 @@
     "artifact_id": {"$ref": "common.json#/$defs/nonempty"},
     "artifact_type": {"type": "string", "enum": ["measurement-spec", "response", "theory-spec", "prediction", "comparison-spec",
                                                   "statistical-result", "ml-artifact", "computational-run", "communication", "dataset-record",
-                                                  "literature-record"]},
+                                                  "literature-record", "design-spec", "design-candidate", "design-evaluation"]},
     "objective": {"$ref": "common.json#/$defs/nonempty"},
     "bindings": {"type": "object", "additionalProperties": false, "properties": {
       "experiments": {"type": "array", "items": {"$ref": "common.json#/$defs/binding"}},

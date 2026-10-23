@@ -43,6 +43,38 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/design_candidate_no_calibration.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/design_candidate_screened_out_written.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/design_candidate_unknown_role.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/design_evaluation_bound_mixed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/design_evaluation_fidelity_f6.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/design_evaluation_verdict_written.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/design_spec_denominator_no_tolerance.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/design_spec_requirement_no_denominator.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/envelope_missing_status.json": {
   "ok": false,
   "strict_ok": false
@@ -759,6 +791,18 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/dataset_simulated.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/design_candidate.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/design_evaluation.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/design_spec.json": {
   "ok": true,
   "strict_ok": true
  },

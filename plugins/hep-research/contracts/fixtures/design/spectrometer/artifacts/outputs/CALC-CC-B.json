@@ -1,0 +1,32 @@
+{
+ "status": "ok",
+ "status_label": "synthetic",
+ "inputs": {
+  "command": "gaussian-core",
+  "edges": [
+   "1000.0",
+   "2000.0"
+  ],
+  "sigma_inv_r": [
+   "6.418847344265906e-05"
+  ],
+  "status": "synthetic"
+ },
+ "defaults_used": [],
+ "warnings": [],
+ "label": "[General method]",
+ "bins": [
+  {
+   "bin": [
+    1000.0,
+    2000.0
+   ],
+   "sigma_inv_r": 6.418847344265906e-05,
+   "lower_bound_at_low_edge": 5.046649269738452e-55,
+   "lower_bound_at_high_edge": 3.362132837309918e-15
+  }
+ ],
+ "estimate": null,
+ "label_kind": "Gaussian-core reference: a lower bound, not an estimate",
+ "note": "non-Gaussian tails (scattering, mismatched hits, interactions) dominate real confusion; measure it with the template or control mode"
+}

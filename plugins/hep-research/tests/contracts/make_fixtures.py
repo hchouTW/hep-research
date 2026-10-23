@@ -552,6 +552,51 @@ bad["statres_v26_model_sha256_malformed.json"] = (statres_v26(likelihood={"form"
 
 
 # Valid (no error) but not usable as a final result: the validator reports these codes as `unresolved`.
+
+# contracts 3.11.0, detector system design (ART-05): one valid and several invalid fixtures per design type
+def design(atype, mutate=None):
+    """A design-spec, design-candidate or design-evaluation at the current contract version; `mutate` edits the
+    extension in place to make one defect."""
+    from contracts import CONTRACTS_VERSION
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from design_fixtures import NS, budgets, magnet_subsystem, spec_ext, tracker_subsystem
+    if atype == "design-spec":
+        ext = spec_ext(1)
+    elif atype == "design-candidate":
+        ext = {"candidate_id": f"{NS}:cand-A", "design_id": NS, "description": "SYNTHETIC structural fixture",
+               "subsystems": {"DES-TRK-001": tracker_subsystem(9, 1.0), "DES-MAG-001": magnet_subsystem()},
+               "budgets": budgets(400.0, 9)}
+    else:
+        ext = {"evaluation_id": f"{NS}:CALC-TRK-A", "candidate": f"{NS}:cand-A", "figure_of_merit": "momentum-resolution-core",
+               "denominator": {"rigidity_GV": 1000.0, "species": "proton"}, "value": 0.49, "unit": "1",
+               "bound": "optimistic", "fidelity": "F1", "run_ref": "runs/CALC-TRK-A.computational-run.json",
+               "parameter_refs": ["DES-MAG-001.parameters.field_T", "DES-TRK-001.parameters.layer_positions_m"],
+               "validity": {"assumptions": ["uniform field"], "in_domain": True}}
+    d = envelope(atype, ext, "hep-detector", status=("synthetic",))
+    d.update(contract_version=CONTRACTS_VERSION, versions={"plugin": "0.36.0", "contracts": CONTRACTS_VERSION, "profiles": {}})
+    if mutate:
+        mutate(d["extension"])
+    return d
+
+
+VALID["design_spec.json"] = design("design-spec")
+VALID["design_candidate.json"] = design("design-candidate")
+VALID["design_evaluation.json"] = design("design-evaluation")
+bad["design_spec_requirement_no_denominator.json"] = (design("design-spec", lambda e: e["requirements"][0].pop("denominator")),
+                                                      ["schema.required"])
+bad["design_spec_denominator_no_tolerance.json"] = (
+    design("design-spec", lambda e: e["requirements"][0]["denominator"]["rigidity_GV"].pop("tolerance")), ["schema.required"])
+bad["design_candidate_no_calibration.json"] = (design("design-candidate", lambda e: e["subsystems"]["DES-TRK-001"].pop("calibration")),
+                                               ["schema.required"])
+bad["design_candidate_screened_out_written.json"] = (design("design-candidate", lambda e: e.update(screened_out=True)),
+                                                     ["schema.additional"])
+bad["design_candidate_unknown_role.json"] = (design("design-candidate", lambda e: e["subsystems"]["DES-MAG-001"].update(role="magnet")),
+                                             ["vocab.unknown_term"])
+bad["design_evaluation_bound_mixed.json"] = (design("design-evaluation", lambda e: e.update(bound="mixed")), ["schema.enum"])
+bad["design_evaluation_fidelity_f6.json"] = (design("design-evaluation", lambda e: e.update(fidelity="F6")), ["schema.enum"])
+bad["design_evaluation_verdict_written.json"] = (design("design-evaluation", lambda e: e.update(verdict="pass")),
+                                                 ["schema.additional"])
+
 UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", significance=dict(SCAN)), ["stats.lee_missing"])}
 d = communication_rich(); d["extension"]["claims"][0]["text"] = "The ratio establishes a deviation (synthetic fixture)."; d["extension"]["claims"][0]["assessment"]["currency"] = "stale"
 d["extension"]["claims"][1]["evidence"] = []; del d["extension"]["claims"][1]["assessment"]; d["extension"]["claims"][1]["unresolved_inputs"] = ["the illustration artifact is not yet written"]

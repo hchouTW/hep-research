@@ -1727,6 +1727,7 @@
    "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/rules/design_adequacy.json",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -1856,6 +1857,7 @@
    "lines": 71,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/rules/design_adequacy.json",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/scripts/detector_atlas.py",
     "skills/hep-detector/scripts/tracker_resolution.py"
@@ -2433,6 +2435,7 @@
    "lines": 245,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/rules/design_adequacy.json",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
