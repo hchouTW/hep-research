@@ -15,7 +15,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-measurement | 13 | 120 | 0 |
 | hep-ml | 42 | 194 | 0 |
 | hep-statistics | 13 | 189 | 0 |
-| hep-theory | 18 | 121 | 0 |
+| hep-theory | 21 | 157 | 0 |
 
 ## Overlapping pairs
 
@@ -40,6 +40,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **code**: `code-review-report.md`, `code-to-methodology-synthesis.md`
 - **consistency**: `logical-consistency-and-argument-uniformity.md`, `manuscript-consistency-auditing.md`
 - **core**: `core-stats-commands.md`, `core-stats-guide.md`
+- **cosmic**: `cosmic-ray-new-physics.md`, `cosmic-ray-phenomenology.md`, `cosmic-ray-propagation.md`
 - **debugging**: `crash-and-memory-debugging.md`, `root-debugging.md`
 - **deployment**: `export-and-deployment.md`, `ml-analysis-validation-and-deployment.md`
 - **detection**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
@@ -60,10 +61,12 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **nuclear**: `nuclear-cross-sections.md`, `nuclear-physics-essentials.md`
 - **numerical**: `numerical-and-computational-methods.md`, `symbolic-and-numerical-computation.md`
 - **performance**: `performance-metrics-and-residual-diagnostics.md`, `reconstruction-performance-and-truth-matching.md`
-- **physic**: `nuclear-physics-essentials.md`, `particle-physics-essentials.md`
+- **phenomenology**: `cosmic-ray-phenomenology.md`, `dark-matter-phenomenology.md`
+- **physic**: `cosmic-ray-new-physics.md`, `nuclear-physics-essentials.md`, `particle-physics-essentials.md`
 - **principle**: `detector-design-principles.md`, `detector-principles-bibliography.md`, `detector-principles-summary.md`
 - **python**: `python-balanced-design-guidelines.md`, `python-hep-coding-patterns.md`
 - **quality**: `risk-and-quality.md`, `task-quality-checklist.md`
+- **ray**: `cosmic-ray-new-physics.md`, `cosmic-ray-phenomenology.md`, `cosmic-ray-propagation.md`
 - **reconstruction**: `event-reconstruction.md`, `reconstruction-performance-and-truth-matching.md`
 - **report**: `code-review-report.md`, `preregistration-and-registered-reports.md`
 - **root**: `root-balanced-design-guidelines.md`, `root-debugging.md`, `root-usage-patterns.md`
@@ -135,7 +138,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `thesis-by-publication-assembly.md` | hep-authoring | 4.0 | no | 2 | - | ebb58136 2026-10-19 |
 | `tikz-patterns.md` | hep-authoring | 5.9 | no | 8 | - | ebb58136 2026-10-19 |
 | `citation-databases.md` | hep-citations | 7.5 | yes | 6 | hep-authoring | ebb58136 2026-10-19 |
-| `citation-verification.md` | hep-citations | 6.6 | yes | 12 | hep-authoring | ebb58136 2026-10-19 |
+| `citation-verification.md` | hep-citations | 6.6 | yes | 13 | hep-authoring, hep-theory | ebb58136 2026-10-19 |
 | `claim-evidence-mapping.md` | hep-citations | 5.3 | yes | 10 | hep-authoring, hep-statistics, hep-theory | ebb58136 2026-10-19 |
 | `interpreting-scientific-graphics.md` | hep-citations | 8.5 | yes | 7 | hep-authoring | ebb58136 2026-10-19 |
 | `literature-discovery-and-search.md` | hep-citations | 5.2 | yes | 2 | - | ebb58136 2026-10-19 |
@@ -288,15 +291,17 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `unfolding.md` | hep-statistics | 7.9 | yes | 27 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 2 | - | 83ae4f6b 2026-10-13 |
 | `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |
-| `cosmic-ray-propagation.md` | hep-theory | 20.7 | yes | 19 | hep-detector | 32450b32 2026-10-22 |
-| `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 5 | - | 98460703 2026-10-17 |
+| `cosmic-ray-new-physics.md` | hep-theory | 6.9 | no | 4 | - | untracked |
+| `cosmic-ray-phenomenology.md` | hep-theory | 22.5 | yes | 6 | - | untracked |
+| `cosmic-ray-propagation.md` | hep-theory | 21.1 | yes | 23 | hep-detector | 32450b32 2026-10-22 |
+| `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 2 | - | 351029c0 2026-10-07 |
-| `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 4 | - | 7321e6dc 2026-10-17 |
+| `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 5 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
 | `neutrino-oscillations.md` | hep-theory | 4.6 | yes | 5 | hep-measurement | 69f359f5 2026-10-17 |
-| `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 4 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
+| `nuclear-cross-sections.md` | hep-theory | 7.8 | yes | 5 | hep-detector, hep-measurement | 151889fb 2026-10-17 |
 | `nuclear-physics-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 87421c11 2026-10-17 |
 | `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | c0b6b6d8 2026-10-17 |
 | `pdfs-and-lhapdf.md` | hep-theory | 6.0 | yes | 3 | - | 6164b848 2026-10-13 |
@@ -304,3 +309,4 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 4 | - | 6c22fd52 2026-10-13 |
 | `selection-rules.md` | hep-theory | 7.7 | yes | 3 | - | 195e4d1e 2026-10-13 |
 | `smeft-and-eft.md` | hep-theory | 3.4 | yes | 3 | - | fa29fcf3 2026-10-13 |
+| `solar-modulation-models.md` | hep-theory | 5.7 | no | 6 | - | untracked |

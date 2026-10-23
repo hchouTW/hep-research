@@ -11,7 +11,11 @@ optional DRAGON2 adapter drives an external build; see Tool coverage below): a g
 species, reacceleration, convection, a code's own nuclear network) gets the "no validated domain profile" notice, and
 this reference is used to state assumptions, degeneracies and what the data can and cannot decide. Statistical
 work on a fit (likelihood, nuisance parameters, correlated data) belongs to hep-statistics; measured fluxes come from
-dataset records, never from memory.
+dataset records, never from memory. Code parameter conventions, production cross-section sets and their nuisance
+schemes and the nuisance structure of a global fit are in [cosmic-ray phenomenology](cosmic-ray-phenomenology.md);
+modulation beyond the force field (with Bartels-rotation alignment) in
+[solar modulation models](solar-modulation-models.md); dark-matter and pulsar interpretations in
+[cosmic-ray new physics](cosmic-ray-new-physics.md).
 
 ## Kinematics and units
 

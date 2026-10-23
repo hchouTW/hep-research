@@ -419,6 +419,12 @@ C = [
     # batch C, Th12: nuclear-physics entry (decay_chain.py)
  ("c-th-chain-1", "en", "direct", "How long until 226Ra and its daughters reach secular equilibrium, and what are the activities after 30 days?", "hep-theory", ["nuclear decays"], None, None, {}),
  ("c-th-chain-2", "zh-Hant", "direct", "β+ 衰變的 Q 值為什麼要扣掉兩個電子質量？用原子質量怎麼算？", "hep-theory", ["nuclear decays"], None, None, {}),
+    # Th13: cosmic-ray phenomenology (codes, cross sections, modulation, global-fit structure, new-physics claims)
+ ("th13-codes-1", "en", "direct", "GALPROP quotes D0 at 4 GV and a USINE fit quotes K0 at 1 GV in kpc^2/Myr; put both diffusion coefficients in one set of conventions before I compare the transport parameters.", "hep-theory", ["conventions"], None, None, {"set": "Th13"}),
+ ("th13-xs-1", "zh-Hant", "direct", "B/C 預測用的二次產生截面有好幾套參數化，差異多大？截面不確定度要怎麼當成 model alternatives 帶進理論預測？", "hep-theory", ["model alternatives"], None, None, {"set": "Th13"}),
+ ("th13-mod-1", "zh-Hant", "direct", "請把電荷符號依賴的太陽調制模型預測對齊到逐 Bartels rotation 的通量時間分箱，並說明這個近似的適用範圍。", "hep-theory", ["approximations and validity domains"], None, None, {"set": "Th13"}),
+ ("th13-dm-1", "en", "direct", "Give me the predicted dark-matter annihilation contribution to the cosmic antiproton flux, with propagation-model and halo-profile model alternatives as theory uncertainties.", "hep-theory", ["theory uncertainties", "model alternatives"], None, None, {"set": "Th13"}),
+ ("th13-fit-1", "en", "neighboring", "Profile the cross-section nuisance parameters in my propagation fit to Li, Be and B ratios and give the interval on delta.", "hep-statistics", ["nuisance parameters"], "hep-theory", None, {"set": "Th13"}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),

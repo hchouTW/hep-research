@@ -3,6 +3,37 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Theory (Th13): cosmic-ray propagation and astroparticle phenomenology in hep-theory. Guidance on three pages and one
+helper script; no propagation code is run and no fit to real data is tested.
+
+- **`skills/hep-theory/references/cosmic-ray-phenomenology.md`**, the second propagation page: GALPROP, DRAGON2 and
+  USINE and their diffusion-coefficient conventions (reference rigidity, beta^eta, units) and the reacceleration
+  relation D_pp D_xx; transport degeneracies, benchmark families and halo-height determinations; the production
+  cross-section sets (Webber family, Silberberg-Tsao, GALPROP opt12/opt22, the DRAGON2 recipe, renormalized OPT sets)
+  with the sizes of their differences, the nuisance schemes in use (normalization-slope-shape with Gaussian priors,
+  per-element normalization and slope with flat priors, sets as model alternatives), antiproton and secondary e+-
+  production alternatives; the nuisance blocks hep-theory supplies to a global fit and how they travel in the
+  theory-spec and prediction artifacts (statistics stay in hep-statistics). Sources: about 50, read 2026-10-20
+  through a summarizing fetch, so under hep-citations' rule they are unverified (snippet level) until re-read in the
+  primary source; the pages say so, and the unverified items are listed.
+- **`references/solar-modulation-models.md`**: energy-dependent, empirically modified, charge-sign and drift
+  (extended force-field) and numerical models; LIS dependence and recalibration of phi series; heliospheric inputs
+  (tilt-angle models, averaging window, lag); polarity definition; aligning a model with monthly or Bartels-rotation
+  data.
+- **`references/cosmic-ray-new-physics.md`**: dark matter to antiprotons (how L, halo profile, local density,
+  transport family and modulation move a signal; the reassessed antiproton excess as an example block) and to
+  positrons, pulsars, and the checks before stating an interpretation. Interpreting an excess with a dark-matter
+  model and global fits that run a propagation code stay outside v1.
+- **`skills/hep-theory/scripts/bartels_rotation.py`**: dates to Bartels rotation numbers and back (27-day rotations from
+  1832-02-08, WDC Kp/Ap format description; rotation 2426 = 2011-05-15 checked against the Caltech ACE table), and
+  rotation averages of a daily heliospheric input with a declared lag and minimum coverage (exit 3 below it); dates
+  must be YYYY-MM-DD (timestamps refused), a byte-order mark is accepted.
+- Wiring: hep-theory Resources row and README; pointers from `cosmic-ray-propagation.md`; capability map
+  (`cosmic-ray-propagation` gains Th13) and matrix row; five routing cases (set Th13); tests `test_bartels_rotation.py`,
+  `test_cosmic_ray_phenomenology_th13.py` and the CLI-robustness inventory entry.
+
 ## 0.28.0 (2026-10-23)
 
 Minor release, contracts 3.9.0. It completes the cross-artifact check's Shrink by removing the suites that 0.27.0

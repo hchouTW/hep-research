@@ -4068,6 +4068,63 @@
    ]
   },
   {
+   "id": "th13-codes-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "GALPROP quotes D0 at 4 GV and a USINE fit quotes K0 at 1 GV in kpc^2/Myr; put both diffusion coefficients in one set of conventions before I compare the transport parameters.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-xs-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "B/C 預測用的二次產生截面有好幾套參數化，差異多大？截面不確定度要怎麼當成 model alternatives 帶進理論預測？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "model alternatives"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-mod-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請把電荷符號依賴的太陽調制模型預測對齊到逐 Bartels rotation 的通量時間分箱，並說明這個近似的適用範圍。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-dm-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give me the predicted dark-matter annihilation contribution to the cosmic antiproton flux, with propagation-model and halo-profile model alternatives as theory uncertainties.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "theory uncertainties",
+    "model alternatives"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-fit-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Profile the cross-section nuisance parameters in my propagation fit to Li, Be and B ratios and give the interval on delta.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ],
+   "not": "hep-theory",
+   "set": "Th13"
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",

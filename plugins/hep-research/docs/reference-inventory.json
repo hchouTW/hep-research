@@ -39,8 +39,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 18,
-   "bytes": 121074,
+   "references": 21,
+   "bytes": 156593,
    "uncited": 0
   }
  },
@@ -906,10 +906,12 @@
     "skills/hep-citations/references/literature-guide.md",
     "skills/hep-citations/references/literature-lookup-recipes.md",
     "skills/hep-citations/references/literature-review.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [
-    "hep-authoring"
+    "hep-authoring",
+    "hep-theory"
    ],
    "last_commit": "ebb58136 2026-10-19"
   },
@@ -3882,10 +3884,42 @@
    "last_commit": "4cedacd8 2026-10-17"
   },
   {
+   "path": "skills/hep-theory/references/cosmic-ray-new-physics.md",
+   "owner": "hep-theory",
+   "bytes": 6884,
+   "lines": 92,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+    "skills/hep-theory/references/cosmic-ray-propagation.md",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "owner": "hep-theory",
+   "bytes": 22490,
+   "lines": 273,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-propagation.md",
+    "skills/hep-theory/references/solar-modulation-models.md",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 20712,
-   "lines": 236,
+   "bytes": 21125,
+   "lines": 240,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",
@@ -3901,11 +3935,15 @@
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/astroparticle-essentials.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "skills/hep-theory/references/dark-matter-phenomenology.md",
     "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/references/nuclear-cross-sections.md",
+    "skills/hep-theory/references/solar-modulation-models.md",
     "skills/hep-theory/scripts/lepton_energy_losses.py",
     "tests/skills/hep_theory/test_charge_sign_modulation_th3.py",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py",
     "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
@@ -3922,6 +3960,8 @@
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/astroparticle-essentials.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/scripts/dm_direct_rate.py",
     "tests/skills/hep_theory/test_dark_matter_phenomenology.py"
@@ -3984,6 +4024,7 @@
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/astroparticle-essentials.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
     "skills/hep-theory/scripts/coalescence.py",
     "tests/skills/hep_theory/test_light_nuclei_coalescence.py"
    ],
@@ -4041,6 +4082,7 @@
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-measurement/references/correction-chain.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
    ],
    "cited_by_other_skills": [
@@ -4148,6 +4190,23 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "fa29fcf3 2026-10-13"
+  },
+  {
+   "path": "skills/hep-theory/references/solar-modulation-models.md",
+   "owner": "hep-theory",
+   "bytes": 5732,
+   "lines": 68,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+    "skills/hep-theory/references/cosmic-ray-propagation.md",
+    "skills/hep-theory/scripts/bartels_rotation.py",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   }
  ],
  "overlap_pairs": [],
@@ -4209,6 +4268,11 @@
   "core": [
    "skills/hep-statistics/references/core-stats-commands.md",
    "skills/hep-statistics/references/core-stats-guide.md"
+  ],
+  "cosmic": [
+   "skills/hep-theory/references/cosmic-ray-new-physics.md",
+   "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "skills/hep-theory/references/cosmic-ray-propagation.md"
   ],
   "debugging": [
    "skills/hep-computing/references/crash-and-memory-debugging.md",
@@ -4302,7 +4366,12 @@
    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
   ],
+  "phenomenology": [
+   "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "skills/hep-theory/references/dark-matter-phenomenology.md"
+  ],
   "physic": [
+   "skills/hep-theory/references/cosmic-ray-new-physics.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md",
    "skills/hep-theory/references/particle-physics-essentials.md"
   ],
@@ -4318,6 +4387,11 @@
   "quality": [
    "skills/hep-computing/references/risk-and-quality.md",
    "skills/hep-computing/references/task-quality-checklist.md"
+  ],
+  "ray": [
+   "skills/hep-theory/references/cosmic-ray-new-physics.md",
+   "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "skills/hep-theory/references/cosmic-ray-propagation.md"
   ],
   "reconstruction": [
    "skills/hep-detector/references/event-reconstruction.md",

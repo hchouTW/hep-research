@@ -25,6 +25,9 @@ M = "/nonexistent/hep-research-cli-check/input.json"
 OUT = "/nonexistent/hep-research-cli-check/out"
 
 MISSING_FILE_ARGS = {
+    "skills/hep-theory/scripts/bartels_rotation.py": ["average", "--series", M, "--date-column", "date",
+                                                      "--value-column", "v", "--rotation", "2426",
+                                                      "--lag-days", "0", "--min-coverage", "0.5"],
     "skills/hep-detector/scripts/charge_confusion_rate.py": ["template", "--input", M],
     "skills/hep-detector/scripts/species_response.py": ["assemble", "--manifest", M],
     "skills/hep-detector/scripts/survival_feeddown.py": ["compute", "--layers", M, "--species", M, "--xs", M],
