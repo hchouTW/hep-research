@@ -2756,6 +2756,23 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## 0.38.0 release check (2026-10-24, E2 and the CI lock)
+
+Release branch `release/0.38.0` from main `38cbff8e` (main CI green). It ships #271: the maintainer's decisions on the
+four spec questions of the M3 reviews (derived requirements `covered_by`, hard-constraint `subsystems`, the ADQ-02
+offset value check, Example A's basis note) and the CHN-16 automation (`evaluate_design.py calibration`); contracts
+3.12.0, adequacy table 1.1.0. The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.38.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.38.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5244 tests in 437 modules, 5108 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5244 tests, 5016 pass, 0 failures, 228 skipped |
+
 ## 0.37.0 release check (2026-10-24, E2 and the CI lock)
 
 Release branch `release/0.37.0` from main `6aaef412` (main CI green). It ships #265-#269: the hep-detector system
