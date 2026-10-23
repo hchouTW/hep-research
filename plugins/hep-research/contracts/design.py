@@ -1499,7 +1499,9 @@ def missing_evidence(proj: Project, req: dict, agg: dict, effective: str | None 
 
     def present(e, foms) -> bool:  # the same test as the verdict rules (FID-11): compatible, not unavailable
         return any(u.fom in foms and compatible(u, e) and not u.ext.get("unavailable") for u in e.upstreams)
-    if not any(RANK[e.fidelity] >= RANK[need] for e in evs):
+    # ART-31, ART-60: an unqualified F4 study, a stale or a contract-mismatched evaluation does not count as having
+    # reached the threshold
+    if not any(RANK[e.fidelity] >= RANK[need] for e in evs if not (e.f4_unqualified or e.stale or e.errors)):
         out.append(f"{req['quantity']} at {need} or above (compliance threshold)")
     for e in evs:
         for fom, fid, _ in e.vector[1:]:  # upstream entries; the evaluation's own is above
@@ -1648,10 +1650,11 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
     q = basis["quantity"]
     rules = proj.fom_rules(q) or {}
     cl = rules.get("coverage_cl", proj.adequacy.get("default_coverage_cl", 0.95))
-    vals, cids = {}, {}
+    vals, cids, used_eval = {}, {}, {}
     for d in groups:
-        evs = [e for e in proj.evals.values() if e.fom == q and e.effective == d and e.fidelity == "F1"
-               and not e.errors and not e.stale and e.ext.get("value") is not None and e.ext.get("uncertainty")]
+        evs = sorted((e for e in proj.evals.values() if e.fom == q and e.effective == d and e.fidelity == "F1"
+                      and not e.errors and not e.stale and e.ext.get("value") is not None and e.ext.get("uncertainty")),
+                     key=lambda e: e.eid)  # deterministic: the first by evaluation id, named in the pair
         if not evs:
             return {"declared": True, "holds": False, "quantity": q,
                     "reason": f"no F1 {q} evaluation with an uncertainty for {groups[d]}"}
@@ -1659,8 +1662,11 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
         u = e.ext["uncertainty"]
         refs = [r for r in e.ext.get("parameter_refs", []) if r.startswith("budgets.")]
         items = proj.parameter_objects(e.ext.get("candidate", ""), refs) if refs else {}
+        # item-level cancellation needs every item with its uncertainty; otherwise the totals are used, uncancelled
         vals[d] = (e.ext["value"], max(sigma_equivalent(u, "minus"), sigma_equivalent(u, "plus")),
-                   items if items and all(isinstance(x, dict) for x in items.values()) else None)
+                   items if items and all(isinstance(x, dict) and x.get("uncertainty") is not None
+                                          for x in items.values()) else None)
+        used_eval[d] = e.eid
         cids[d] = e.ext.get("candidate", "")
     pairs = []
     holds = True
@@ -1685,7 +1691,9 @@ def comparison_basis(proj: Project, spec: dict, groups: dict) -> dict:
             sig = math.hypot(own_a, own_b)
         ok = diff + k * sig <= basis["tolerance_relative"] * ref
         holds &= ok
-        pairs.append({"candidates": [groups[a], groups[b]], "difference": diff, "uncertainty_one_sided": k * sig,
+        pairs.append({"candidates": [groups[a], groups[b]], "evaluations": [used_eval[a], used_eval[b]],
+                      "difference": diff, "uncertainty_one_sided": k * sig,
+                      "item_level": ia is not None and ib is not None,
                       "shared_items": [r.split(".", 2)[2] for r in shared],
                       "tolerance": basis["tolerance_relative"] * ref, "holds": ok})
     return {"declared": True, "holds": holds and bool(pairs), "quantity": q, "coverage_cl": cl, "pairs": pairs,

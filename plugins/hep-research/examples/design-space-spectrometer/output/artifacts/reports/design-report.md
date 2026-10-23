@@ -2,8 +2,8 @@
 
 Derived by contracts/design.py from `design-spec.v1.json` (spec version 1); no verdict is hand-written.
 
-**Gate flags:** gate.H1_missing, gate.H2_missing, gate.H3_missing.
-**Baseline:** draft. Only a valid human H4 (design-baseline) record sets it, taken after the gates above are clear, over this report, the evaluations it used and one disposition per inconclusive driving requirement of a candidate that survives screening; until then no requirement is reviewed (MAT-04).
+**Gate flags (open review gates):** gate.H1_missing, gate.H2_missing, gate.H3_missing.
+**Baseline:** draft. Only a valid human H4 (design-baseline) record sets it, taken after the gates above are clear, over this report, the evaluations it used and one disposition per inconclusive driving requirement of a candidate that survives screening; until then no requirement is reviewed (MAT-04). The record's actor kind is self-declared, so the review axis is advisory (LIM-01).
 
 The adequacy table is an initial default until physics review: every pass is provisional.
 
@@ -34,9 +34,9 @@ The adequacy table is an initial default until physics review: every pass is pro
 ## Screening, orphan runs, comparison
 
 - ams-like-v1:cand-L: not excluded by screening (no driving requirement or hard constraint fails)
-- ams-like-v1:cand-P: screened out (ams-like-v1:REQ-TRK-001 fails; ams-like-v1:REQ-CC-001 fails)
+- ams-like-v1:cand-P: screened out by the verdicts above, not by a review decision (ams-like-v1:REQ-TRK-001 fails; ams-like-v1:REQ-CC-001 fails)
 - ams-like-v1:cand-S: not excluded by screening (no driving requirement or hard constraint fails)
 - orphan runs: none
 - comparison basis on mass-budget at 95% one-sided CL: holds
-  - ams-like-v1:cand-L vs ams-like-v1:cand-S: difference 5 + one-sided uncertainty 46.2336 against tolerance 119.875 (mass-budget); cancelled as the same subsystem with the same budget row in both: DES-MAG-001: holds
+  - ams-like-v1:cand-L vs ams-like-v1:cand-S (ams-like-v1:CALC-MASS-L vs ams-like-v1:CALC-MASS-S; 1-sigma budget-row uncertainties, linear within a candidate, in quadrature across the pair): difference 5 + one-sided uncertainty 46.2336 against tolerance 119.875 (mass-budget); cancelled as the same subsystem with the same budget row in both: DES-MAG-001: holds
 - ranking: refused: ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)

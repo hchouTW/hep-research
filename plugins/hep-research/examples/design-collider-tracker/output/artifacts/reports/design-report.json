@@ -1582,8 +1582,13 @@
         "collider-tracker-v1:cand-A"
        ]
       ],
+      "evaluations": [
+       "collider-tracker-v1:CALC-MASS-B",
+       "collider-tracker-v1:CALC-MASS-A"
+      ],
       "difference": 5020.0,
       "uncertainty_one_sided": 2343.267621427414,
+      "item_level": true,
       "shared_items": [],
       "tolerance": 999.5,
       "holds": false

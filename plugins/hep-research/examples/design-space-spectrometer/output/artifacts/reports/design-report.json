@@ -908,8 +908,13 @@
         "ams-like-v1:cand-S"
        ]
       ],
+      "evaluations": [
+       "ams-like-v1:CALC-MASS-L",
+       "ams-like-v1:CALC-MASS-S"
+      ],
       "difference": 5.0,
       "uncertainty_one_sided": 46.233628726298946,
+      "item_level": true,
       "shared_items": [
        "DES-MAG-001"
       ],

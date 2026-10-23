@@ -2,8 +2,8 @@
 
 Derived by contracts/design.py from `design-spec.v1.json` (spec version 1); no verdict is hand-written.
 
-**Gate flags:** gate.H1_missing, gate.H2_missing, gate.H3_missing.
-**Baseline:** draft. Only a valid human H4 (design-baseline) record sets it, taken after the gates above are clear, over this report, the evaluations it used and one disposition per inconclusive driving requirement of a candidate that survives screening; until then no requirement is reviewed (MAT-04).
+**Gate flags (open review gates):** gate.H1_missing, gate.H2_missing, gate.H3_missing.
+**Baseline:** draft. Only a valid human H4 (design-baseline) record sets it, taken after the gates above are clear, over this report, the evaluations it used and one disposition per inconclusive driving requirement of a candidate that survives screening; until then no requirement is reviewed (MAT-04). The record's actor kind is self-declared, so the review axis is advisory (LIM-01).
 
 The adequacy table is an initial default until physics review: every pass is provisional.
 
@@ -59,8 +59,8 @@ The adequacy table is an initial default until physics review: every pass is pro
 
 - collider-tracker-v1:cand-A: not excluded by screening (no driving requirement or hard constraint fails)
 - collider-tracker-v1:cand-B: not excluded by screening (no driving requirement or hard constraint fails)
-- collider-tracker-v1:cand-P: screened out (collider-tracker-v1:REQ-TRK-001 fails)
+- collider-tracker-v1:cand-P: screened out by the verdicts above, not by a review decision (collider-tracker-v1:REQ-TRK-001 fails)
 - orphan runs: none
 - comparison basis on mass-budget at 95% one-sided CL: does not hold (a difference with its uncertainty exceeds the tolerance)
-  - collider-tracker-v1:cand-B vs collider-tracker-v1:cand-A: difference 5020 + one-sided uncertainty 2343.27 against tolerance 999.5 (mass-budget); no item is the same subsystem with the same budget row in both: does not hold
+  - collider-tracker-v1:cand-B vs collider-tracker-v1:cand-A (collider-tracker-v1:CALC-MASS-B vs collider-tracker-v1:CALC-MASS-A; 1-sigma budget-row uncertainties, linear within a candidate, in quadrature across the pair): difference 5020 + one-sided uncertainty 2343.27 against tolerance 999.5 (mass-budget); no item is the same subsystem with the same budget row in both: does not hold
 - ranking: refused: comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07); collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)

@@ -621,11 +621,12 @@ def render(full: dict, omitted: list[str]) -> str:
     lines = [f"# Design report: {full.get('design_id')}", "",
              f"Derived by contracts/design.py from `{full.get('current_spec')}` (spec version {full.get('spec_version')}); "
              "no verdict is hand-written.", ""]
-    lines += [f"**Gate flags:** {', '.join(full.get('gate_flags') or ['none'])}.",
+    lines += [f"**Gate flags (open review gates):** {', '.join(full.get('gate_flags') or ['none'])}.",
               f"**Baseline:** {full.get('baseline', 'draft')}. Only a valid human H4 (design-baseline) record sets it, "
               "taken after the gates above are clear, over this report, the evaluations it used and one disposition per "
               "inconclusive driving requirement of a candidate that survives screening; until then no requirement is "
-              "reviewed (MAT-04).", ""]
+              "reviewed (MAT-04). The record's actor kind is self-declared, so the review axis is advisory (LIM-01).",
+              ""]
     if full.get("adequacy", {}).get("provisional_pass"):
         lines += ["The adequacy table is an initial default until physics review: every pass is provisional.", ""]
     lines += ["| Requirement | Candidates | Result | Reason codes | Lowest fidelity (deciding evaluations) | Status | "
@@ -650,7 +651,7 @@ def render(full: dict, omitted: list[str]) -> str:
         lines += ["", f"Omitted from this rendering on request (still aggregated): {', '.join(omitted)}"]
     lines += ["", "## Screening, orphan runs, comparison", ""]
     for c in full.get("candidates", []):
-        lines.append(f"- {', '.join(c['candidates'])}: {'screened out (' + '; '.join(c['screened_out_reasons']) + ')' if c['screened_out'] else 'not excluded by screening (no driving requirement or hard constraint fails)'}"
+        lines.append(f"- {', '.join(c['candidates'])}: {'screened out by the verdicts above, not by a review decision (' + '; '.join(c['screened_out_reasons']) + ')' if c['screened_out'] else 'not excluded by screening (no driving requirement or hard constraint fails)'}"
                      f"{'; at risk: ' + '; '.join(c['at_risk']) if c['at_risk'] else ''}")
     for o in full.get("orphan_runs", []):
         lines.append(f"- orphan run {o['run']} ({', '.join(o['figures_of_merit'])})")
@@ -664,7 +665,10 @@ def render(full: dict, omitted: list[str]) -> str:
     for pr in basis.get("pairs", []):
         shared = (f"; cancelled as the same subsystem with the same budget row in both: {', '.join(pr['shared_items'])}"
                   if pr.get("shared_items") else "; no item is the same subsystem with the same budget row in both")
-        lines.append(f"  - {'/'.join(pr['candidates'][0])} vs {'/'.join(pr['candidates'][1])}: difference "
+        how = ("1-sigma budget-row uncertainties, linear within a candidate, in quadrature across the pair"
+               if pr.get("item_level") else "the evaluations' total uncertainties in quadrature")
+        lines.append(f"  - {'/'.join(pr['candidates'][0])} vs {'/'.join(pr['candidates'][1])} "
+                     f"({' vs '.join(pr.get('evaluations', []))}; {how}): difference "
                      f"{pr['difference']:.6g} + one-sided uncertainty {pr['uncertainty_one_sided']:.6g} against "
                      f"tolerance {pr['tolerance']:.6g} ({basis.get('quantity')}){shared}: "
                      f"{'holds' if pr['holds'] else 'does not hold'}")
