@@ -15,6 +15,7 @@ from contracts.analysis_checks.instances import build_view
 from contracts.analysis_checks.obligations import corrections as spec_corrections
 from contracts.analysis_checks.scope import compare_scopes
 from contracts.effect_catalog import classify
+from contracts.validate import NORMALIZATION_CORRECTIONS
 from contracts.analysis_checks import model as model_rules  # noqa: E402  (model imports this module lazily)
 from contracts.analysis_checks import runs as run_rules  # noqa: E402  (runs imports this module lazily)
 
@@ -294,6 +295,60 @@ def _key_for(env: Env, step: dict, category: str) -> dict:
     if cls in effects:
         return effects[cls]
     return next(iter(effects.values()), {}) if len(effects) == 1 else {}
+
+
+def r_real_undescribed(ob: dict, env: Env) -> dict:
+    """R-REAL, the other direction (G1, DR-8): an effect a step applies is described by the spec. background is
+    described only by a non-empty backgrounds block (no_backgrounds_reason with an applied background contradicts it);
+    a normalization effect (exposure, luminosity, livetime) by the observable's normalization kind, as the
+    measurement contract has it (validate.NORMALIZATION_CORRECTIONS: a correction next to it would count it twice);
+    another effect by a spec correction of exactly that category (a class name describes no member) that applies to
+    the instance. Effects the catalog marks description_required false (bin_width) are not judged."""
+    eff, inst_id = ob["subject"]["effect"], ob["subject"]["instance"]
+    view = env.views.get(inst_id) or {}
+    ops = {o.get("operator_id"): o for o in env.coverage_of(inst_id).get("operators", [])}
+    steps = [s.get("step_id") for s in view.get("steps", [])
+             if eff in set((ops.get(s.get("operator")) or {}).get("covers", []))
+             | {m for cc in ((ops.get(s.get("operator")) or {}).get("class_coverage") or {}).values() for m in (cc or {}).get("members") or []}]
+    ev = [{"instance": inst_id, "step": st} for st in steps]
+    entry = next((e for e in env.catalog.get("effects", []) if e.get("effect_id") == eff), None)
+    if entry is None:
+        return outcome("unsupported", "check.unknown_effect", f"{eff!r} is not a catalog effect", ev)
+    if "description_required" not in entry:
+        return outcome("unverified", "check.catalog_incomplete",
+                       "the catalog does not say whether this effect needs a description (catalog 1.1.0)", ev)
+    if entry["description_required"] is not True:
+        return outcome("not_applicable", "check.description_not_required", f"the catalog needs no spec description of {eff!r}", ev)
+    ext = (env.spec.get("extension") or {}) if isinstance(env.spec, dict) else {}
+    spec = env.ctx.get("spec")
+    if eff == "background":
+        if isinstance(ext.get("backgrounds"), list) and ext["backgrounds"]:
+            return outcome("satisfied", "check.effect_described", "the spec's backgrounds block describes it",
+                           ev + [{"item": spec, "pointer": "/extension/backgrounds"}])
+        if ext.get("no_backgrounds_reason"):
+            return outcome("violated", "check.description_contradicted",
+                           f"steps {steps} subtract a background the spec says it has none of (no_backgrounds_reason)", ev)
+        return outcome("violated", "check.undescribed_correction",
+                       f"steps {steps} subtract a background that no backgrounds block describes", ev)
+    norm = ((ext.get("observable") or {}).get("normalization") or {}) if isinstance(ext.get("observable"), dict) else {}
+    if eff in NORMALIZATION_CORRECTIONS and isinstance(norm, dict) and norm.get("kind") == NORMALIZATION_CORRECTIONS[eff]:
+        return outcome("satisfied", "check.effect_described", f"the observable's {norm.get('kind')!r} normalization describes it",
+                       ev + [{"item": spec, "pointer": "/extension/observable/normalization"}])
+    unbound, decls = False, []
+    for c in env.corrections.values():
+        if str(c.get("category")) != eff:
+            continue
+        app, d = applicability(env, c, inst_id)
+        if app == "yes":
+            return outcome("satisfied", "check.effect_described", f"spec correction {c['effect_id']!r} describes it",
+                           ev + correction_evidence(env, c["effect_id"]), d)
+        unbound |= app == "unbound"
+        decls += d
+    if unbound:
+        return outcome("unverified", "check.applicability_unbound",
+                       f"a spec correction of {eff!r} is bound to no instance (no target_scope or instance_mapping)", ev)
+    return outcome("violated", "check.undescribed_correction",
+                   f"steps {steps} apply {eff!r}, which no spec correction describes for this instance", ev, decls)
 
 
 # --- R-STAGE ----------------------------------------------------------------------------------------------------
@@ -774,7 +829,7 @@ def r_ratio_correlation(ob: dict, env: Env) -> dict:
 
 
 RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
-         "r-real.description": r_real_description, "r-stage.position": r_stage_position,
+         "r-real.description": r_real_description, "r-real.undescribed": r_real_undescribed, "r-stage.position": r_stage_position,
          "r-rep.repetition": r_rep_repetition, "r-comp.composition": r_comp_composition,
          "r-comp.factor_values": r_comp_factor_values, "r-resp.response_use": r_resp_response_use,
          "r-ratio.operands": r_ratio_operands, "r-ratio.cancellation": r_ratio_cancellation,

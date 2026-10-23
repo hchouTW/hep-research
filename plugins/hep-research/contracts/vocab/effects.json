@@ -1,7 +1,7 @@
 {
- "catalog_version": "1.0.0",
+ "catalog_version": "1.1.0",
  "owner": "core",
- "$comment": "Effect catalog (v6.3 D04, C8): which class an effect belongs to and how a parent factor is composed under stated conditions. Classification is not coverage: which members an operator handles is in the operator coverage contracts (contracts/semantics/coverage/). The legacy '<x>_efficiency' pattern and validate.IMPLIED_CORRECTIONS stay as legacy adapters; this catalog never replaces them for old entry points.",
+ "$comment": "Effect catalog (v6.3 D04, C8): which class an effect belongs to and how a parent factor is composed under stated conditions. Classification is not coverage: which members an operator handles is in the operator coverage contracts (contracts/semantics/coverage/). The legacy '<x>_efficiency' pattern and validate.IMPLIED_CORRECTIONS stay as legacy adapters; this catalog never replaces them for old entry points. Catalog 1.1.0 (release R3, DR-8): description_required says whether a recipe step that applies the effect needs a spec description (r-real.undescribed); every effect but bin_width does (maintainer decision 2026-10-23, decision-architecture.md).",
  "classes": [
   {
    "class_id": "efficiency",
@@ -19,87 +19,104 @@
   {
    "effect_id": "background",
    "class": null,
-   "definition": "the estimated background (possibly zero) subtracted from selected counts"
+   "definition": "the estimated background (possibly zero) subtracted from selected counts",
+   "description_required": true
   },
   {
    "effect_id": "migration",
    "class": null,
-   "definition": "Bin-to-bin migration between truth and reco (the matrix itself)"
+   "definition": "Bin-to-bin migration between truth and reco (the matrix itself)",
+   "description_required": true
   },
   {
    "effect_id": "efficiency",
    "class": "efficiency",
-   "definition": "legacy bare term: the inefficiency of the whole selection; keeps its legacy meaning and is never split into members automatically"
+   "definition": "legacy bare term: the inefficiency of the whole selection; keeps its legacy meaning and is never split into members automatically",
+   "description_required": true
   },
   {
    "effect_id": "trigger_efficiency",
    "class": "efficiency",
-   "definition": "Trigger efficiency (efficiency class)"
+   "definition": "Trigger efficiency (efficiency class)",
+   "description_required": true
   },
   {
    "effect_id": "reconstruction_efficiency",
    "class": "efficiency",
-   "definition": "Reconstruction or tracking efficiency (efficiency class)"
+   "definition": "Reconstruction or tracking efficiency (efficiency class)",
+   "description_required": true
   },
   {
    "effect_id": "selection_efficiency",
    "class": "efficiency",
-   "definition": "Offline selection efficiency (efficiency class)"
+   "definition": "Offline selection efficiency (efficiency class)",
+   "description_required": true
   },
   {
    "effect_id": "identification_efficiency",
    "class": "efficiency",
-   "definition": "Particle identification efficiency (efficiency class)"
+   "definition": "Particle identification efficiency (efficiency class)",
+   "description_required": true
   },
   {
    "effect_id": "acceptance",
    "class": null,
-   "definition": "Geometric or kinematic acceptance"
+   "definition": "Geometric or kinematic acceptance",
+   "description_required": true
   },
   {
    "effect_id": "fiducial",
    "class": null,
-   "definition": "Out-of-fiducial truth events (truth outside the declared phase space)"
+   "definition": "Out-of-fiducial truth events (truth outside the declared phase space)",
+   "description_required": true
   },
   {
    "effect_id": "fakes",
    "class": null,
-   "definition": "Reco events with no matching truth event (background-like, applied in reco space)"
+   "definition": "Reco events with no matching truth event (background-like, applied in reco space)",
+   "description_required": true
   },
   {
    "effect_id": "exposure",
    "class": null,
-   "definition": "Exposure (acceptance x live time) normalization"
+   "definition": "Exposure (acceptance x live time) normalization",
+   "description_required": true
   },
   {
    "effect_id": "luminosity",
    "class": null,
-   "definition": "Integrated luminosity normalization"
+   "definition": "Integrated luminosity normalization",
+   "description_required": true
   },
   {
    "effect_id": "livetime",
    "class": null,
-   "definition": "Detector live time"
+   "definition": "Detector live time",
+   "description_required": true
   },
   {
    "effect_id": "cutoff_transmission",
    "class": null,
-   "definition": "Cutoff transmission: per bin of the variable, the fraction of the live time in which that bin lies above the declared geomagnetic (or other) cutoff threshold, with its safety factor"
+   "definition": "Cutoff transmission: per bin of the variable, the fraction of the live time in which that bin lies above the declared geomagnetic (or other) cutoff threshold, with its safety factor",
+   "description_required": true
   },
   {
    "effect_id": "bin_width",
    "class": null,
-   "definition": "division by the bin width of the variable the result is differential in"
+   "definition": "division by the bin width of the variable the result is differential in",
+   "description_required": false
   },
   {
    "effect_id": "survival",
    "class": null,
-   "definition": "Survival of a species through the material above the measuring layers: the probability P = exp(-sum x/lambda) that it crosses without an inelastic interaction; the flux divides by P"
+   "definition": "Survival of a species through the material above the measuring layers: the probability P = exp(-sum x/lambda) that it crosses without an inelastic interaction; the flux divides by P",
+   "description_required": true
   },
   {
    "effect_id": "fragmentation_feeddown",
    "class": null,
-   "definition": "Fragmentation feed-down: events of a lighter species produced by heavier species fragmenting in the material above the measuring layers, subtracted like a background"
+   "definition": "Fragmentation feed-down: events of a lighter species produced by heavier species fragmenting in the material above the measuring layers, subtracted like a background",
+   "description_required": true
   }
  ],
  "compositions": [

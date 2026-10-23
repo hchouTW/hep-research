@@ -63,3 +63,17 @@ adopt its recommendations, the same way. Adopted:
 - DR-15: adopt, as Phase 0 item 11.
 
 The maintainer may change any of these with a new dated section; this section is not rewritten.
+
+## Decision: DR-8 scope of `description_required` (2026-10-23)
+
+**Maintainer instruction in the session.** For G1 (`r-real.undescribed`, catalog 1.1.0) the implementer offered three
+scopes and recommended the narrow one. The maintainer chose **"Broad, update the example"**:
+
+- every catalog effect requires a spec description when a recipe step applies it, except `bin_width`;
+- the AMS-02 flux-ratio example spec (`examples/ams-flux-ratio/run.py`) gains descriptions for the corrections its
+  recipe applies but its spec does not describe, and its artifacts are regenerated.
+
+The DR-8 text above still applies: only a non-empty `backgrounds` block describes `background`;
+`no_backgrounds_reason` with an applied background is `description_contradicted`; class matches are limited to the
+members the spec lists. Root coverage stays out (DR-10). This section is not rewritten; a change is a new dated
+section.

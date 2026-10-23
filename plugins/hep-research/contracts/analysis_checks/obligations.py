@@ -7,7 +7,12 @@ effect IDs (never file names or list positions), the items are sorted, and the d
 generator, suite and items: the same subject under the same suite version regenerates byte-identically.
 
 Generator guard (P3): GENERATORS lists the generator (id, version) pairs this code implements; a suite naming another
-one is refused at freeze and its frozen inventory is not regenerated at check (dependency-missing)."""
+one is refused at freeze and its frozen inventory is not regenerated at check (dependency-missing).
+
+counting-chain-obligations 1.1.0 (release R3) adds the subject kind applied_effect (each effect a step of an instance
+applies: its operator's covers, plus the members of a class coverage that lists them; G1, DR-8) and builds the factor
+obligation from a factor table bound under the composition's parent or any child key (G14). Version 1.0.0 is
+unchanged."""
 from __future__ import annotations
 
 from contracts.release_manifest import canonical_sha256
@@ -20,6 +25,8 @@ PREREQUISITES = {
     "root_effect": ["instance views on the root's path", "input_of bindings", "coverage contract"],
     "root_composition": ["instance views on the root's path", "catalog composition", "coverage contract"],
     "instance_factor": ["factor table bound to the instance", "catalog composition"],
+    "applied_effect": ["instance view", "coverage contract (covers, listed class members)", "spec corrections and backgrounds",
+                       "catalog description_required (catalog 1.1.0)"],
     "instance": ["instance view", "spec migration corrections", "response items", "response_used_by bindings"],
     "ratio_root": ["ratio root operands (chain roots)", "their binning and scopes"],
     "ratio_cancellation": ["spec ratio cancellation claim", "factor instance per side (calibration binding, selector)",
@@ -32,8 +39,8 @@ PREREQUISITES = {
 }
 PREREQUISITES["run_root"] = ["chain root intent", "result binding (after execution)", "computational-runs or campaign records"]
 MODEL_KINDS = ("model_root", "model_parameter", "aux_constraint", "shared_parameter")
-GENERATORS = {("counting-chain-obligations", "1.0.0"), ("ratio-subset-obligations", "1.0.0"),
-              ("model-card-obligations", "1.0.0"), ("run-lineage-obligations", "1.0.0")}
+GENERATORS = {("counting-chain-obligations", "1.0.0"), ("counting-chain-obligations", "1.1.0"),
+              ("ratio-subset-obligations", "1.0.0"), ("model-card-obligations", "1.0.0"), ("run-lineage-obligations", "1.0.0")}
 
 
 def generator_supported(suite: dict) -> bool:
@@ -84,7 +91,24 @@ def instance_effects(view: dict, inst: dict) -> set[str]:
     return {e for s in recipe.get("steps", []) for e in ops.get(s.get("operator"), {}).get("applies", [])}
 
 
-def _subjects(kind: str, view: dict, structural: bool) -> list[tuple[str, dict]]:
+def applied_effects(view: dict, inst: dict) -> set[str]:
+    """Effects a recipe instance's steps apply by its coverage contract: covers, plus the members of a class coverage
+    that lists them. A class coverage with undefined members applies no member here (DR-8: class matches are limited
+    to the members the spec lists, which r-real.description judges)."""
+    recipe = (view.get("items", {}).get(inst.get("recipe")) or {}).get("doc") or {}
+    tid = (recipe.get("semantics") or {}).get("table_id")
+    cov = ((view.get("coverage", {}).get(tid) or {}).get("doc")) or {}
+    ops = {o["operator_id"]: o for o in cov.get("operators", []) if isinstance(o, dict) and "operator_id" in o}
+    out: set[str] = set()
+    for s in recipe.get("steps", []):
+        op = ops.get(s.get("operator")) or {}
+        out |= set(op.get("covers", []))
+        for cc in (op.get("class_coverage") or {}).values():
+            out |= set((cc or {}).get("members") or [])
+    return out
+
+
+def _subjects(kind: str, view: dict, structural: bool, generator_version: str = "1.0.0") -> list[tuple[str, dict]]:
     if kind in MODEL_KINDS:
         from contracts.analysis_checks.model import subjects
         return subjects(kind, view)
@@ -101,6 +125,8 @@ def _subjects(kind: str, view: dict, structural: bool) -> list[tuple[str, dict]]
                 for c in corrections(view) for i in sorted(insts)]
     if kind == "instance":
         return [(i, {"instance": i}) for i in sorted(insts)]
+    if kind == "applied_effect":
+        return [(f"{e}@{i}", {"effect": e, "instance": i}) for i in sorted(insts) for e in sorted(applied_effects(view, insts[i]))]
     if kind in ("ratio_root", "ratio_cancellation", "ratio_correlation"):
         rr = sorted(r["root_id"] for r in ctx.get("ratio_roots", []) if isinstance(r, dict) and "root_id" in r)
         if not spec_ratio(view):
@@ -126,12 +152,17 @@ def _subjects(kind: str, view: dict, structural: bool) -> list[tuple[str, dict]]
         for i in sorted(insts):
             cals = insts[i].get("calibrations") or {}
             for parent in sorted({c["parent"] for c in comps}):
-                item = cals.get(parent)
-                doc = (view.get("items", {}).get(item) or {}).get("doc")
-                if isinstance(doc, dict) and "factor_table_version" in doc:
-                    for c in factor_compositions([c for c in comps if c["parent"] == parent], doc):
-                        out.append((f"{i}#{c['composition_id']}", {"instance": i, "composition": c["composition_id"],
-                                                                   "factor_table": item}))
+                family = [c for c in comps if c["parent"] == parent]
+                # 1.0.0: the table bound under the parent key; 1.1.0 (G14): under the parent or any child key
+                keys = [parent] if generator_version == "1.0.0" else \
+                    [parent] + sorted({ch["effect"] for c in family for ch in c["children"]})
+                items = sorted({str(cals[k]) for k in keys if cals.get(k)})
+                for item in items:
+                    doc = (view.get("items", {}).get(item) or {}).get("doc")
+                    if isinstance(doc, dict) and "factor_table_version" in doc:
+                        for c in factor_compositions(family, doc):
+                            key = f"{i}#{c['composition_id']}" + (f"@{item}" if len(items) > 1 else "")
+                            out.append((key, {"instance": i, "composition": c["composition_id"], "factor_table": item}))
     return out
 
 
@@ -167,7 +198,7 @@ def _covered_on_path(view: dict, insts: list[dict]) -> set[str]:
 def generate(suite: dict, view: dict) -> dict:
     items = []
     for rule in suite.get("rules", []):
-        for key, subject in _subjects(rule.get("subject", ""), view, True):
+        for key, subject in _subjects(rule.get("subject", ""), view, True, str((suite.get("generator") or {}).get("version"))):
             items.append({"obligation_id": f"{rule['rule_id']}:{key}", "rule_id": rule["rule_id"],
                           "rule_version": rule["version"], "subject": subject,
                           "prerequisites": PREREQUISITES.get(rule.get("subject", ""), [])})

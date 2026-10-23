@@ -240,6 +240,53 @@
    "source_sha256": "0ace67c53ce93c2760e4e94d06d2411aedfc2490ec3a17adb1ca53e1a064b84e"
   },
   {
+   "rule_id": "r-real.undescribed",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "instance view",
+    "coverage contract (covers, listed class members)",
+    "spec corrections and backgrounds block",
+    "catalog 1.1.0 description_required"
+   ],
+   "applicability": "R-REAL (G1, DR-8): every effect a step applies is described by the spec: background by a non-empty backgrounds block, any other effect by a spec correction of exactly that category that applies to the instance; effects the catalog marks description_required false are not judged",
+   "outcome_contract": {
+    "satisfied": [
+     "check.effect_described"
+    ],
+    "violated": [
+     "check.undescribed_correction",
+     "check.description_contradicted"
+    ],
+    "not_applicable": [
+     "check.description_not_required"
+    ],
+    "unverified": [
+     "check.applicability_unbound",
+     "check.catalog_incomplete"
+    ],
+    "unsupported": [
+     "check.unknown_effect"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V86"
+   ],
+   "waivable": true,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "source_sha256": "556f2428d9ea6830c5292a040b241945c3d3c89e304a0a822e12159e216d942b",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
    "rule_id": "r-stage.position",
    "version": "1.0.0",
    "layer": "L3",
@@ -520,7 +567,8 @@
    "native_from": null,
    "v_cases": [
     "V69",
-    "V79"
+    "V79",
+    "V87"
    ],
    "waivable": true,
    "accepted_applicability_facts": [],
@@ -3230,9 +3278,12 @@
      "work_packages": [
       "P2.11"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "r-real.undescribed 1.0.0, generator 1.1.0, catalog 1.1.0 (release R3, 1.1.0-dev.5)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g1_fewer_spec_corrections_do_not_complete",
+      "tests.contracts.test_analysis_check_r3.Undescribed.test_outcomes"
+     ]
     }
    ]
   },
@@ -3247,9 +3298,12 @@
      "work_packages": [
       "P2.12"
      ],
-     "host": "checker, release R2 or R3",
-     "status": "not-run",
-     "tests": []
+     "host": "counting-chain-obligations 1.1.0 (release R3, 1.1.0-dev.5)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_cross_artifact_check_gap_probes.ChainProbes.test_g14_factor_obligation_does_not_depend_on_the_mapping_key",
+      "tests.contracts.test_analysis_check_r3.FactorKeys.test_parent_or_child_key"
+     ]
     }
    ]
   },
