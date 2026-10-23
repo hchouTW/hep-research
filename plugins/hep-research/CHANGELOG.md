@@ -3,7 +3,25 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.37.0 (2026-10-24)
+
+Minor release, contracts 3.11.0. It ships the detector system design loop of hep-detector (spec v2, milestones M0-M4,
+#265-#269): design-spec, design-candidate and design-evaluation artifacts; verdicts, maturity, staleness, screening,
+comparison basis, ranking and Pareto front derived by `contracts/design.py`, never written by hand; evaluations at
+F1-F5 run from tool contracts by `skills/hep-detector/scripts/evaluate_design.py`; review gates H1-H4.
+
+**Before you upgrade:**
+- **Contracts 3.11.0:** three new artifact types (design-spec, design-candidate, design-evaluation); envelope
+  `inputs[].binding: "parameters"` (a 3.10 reader refuses it rather than misreading a parameter-bound input as a stale
+  hash); decision record 1.1.0 (design categories, `{"state": "not-applicable"}`, `dispositions[]`); tool contract
+  1.1.0 design blocks; new optional fields on computational-run (`argv`, `script_sha256`, `parameter_digest`,
+  `scan_summary`) and dataset-record (`design_measurement`).
+- The design adequacy table (`contracts/rules/design_adequacy.json`) is an initial default until physics review: every
+  pass is reported as provisional.
+- The review axis is advisory: only a valid human design-baseline (H4) record sets it, and the actor kind is
+  self-declared.
+- Routing: no skill description changed; the routing contract and the static case set name the system design
+  workflow under hep-detector (static routing passes; no live routing run for this release).
 
 Contracts 3.11.0 (minor; no capability added).
 
