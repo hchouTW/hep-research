@@ -4354,6 +4354,51 @@
    "set": "Th18"
   },
   {
+   "id": "th19-sat-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Predict the saturation signal in e Au scattering at the EIC with a dipole model, and treat nPDF shadowing as a model alternative.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "small-x",
+    "model alternatives"
+   ],
+   "set": "Th19"
+  },
+  {
+   "id": "th19-dipole-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用 GBW dipole 模型算 x = 1e-3、Q^2 = 10 GeV^2 的 F_2 與 F_L，並說明參數來源與 x 變數的慣例。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th19"
+  },
+  {
+   "id": "th20-dvcs-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute t_min and the skewness for my DVCS beam-spin asymmetry bins and convert the azimuthal angle between the BMK and Trento conventions.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "GPDs",
+    "conventions"
+   ],
+   "set": "Th20"
+  },
+  {
+   "id": "th20-extract-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit Compton form factors to my DVCS asymmetries with a likelihood and give intervals on them.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "likelihoods"
+   ],
+   "not": "hep-theory",
+   "set": "Th20"
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",

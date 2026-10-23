@@ -192,5 +192,30 @@ class FragmentationSumRule(unittest.TestCase):
             self.assertEqual(code, 2, bad)
 
 
+class GPDRules(unittest.TestCase):
+    def table(self):
+        # toy GPD at t = 0: H(x) = q(x) for x > 0, H(-x) = -qbar(x) (PDG Eq. 18.36), E(x) = e(x) on both sides
+        xs = [1e-6 ** (1 - i / 399) for i in range(400)]
+        q = lambda x: 2.0 / beta(0.5, 4) * x ** -0.5 * (1 - x) ** 3       # int q = 2
+        qb = lambda x: 0.1 * (1 - x) ** 7                                 # int qbar = 0.1/8
+        e = lambda x: 1.6 / beta(0.6, 5) * x ** -0.4 * (1 - x) ** 4      # int e = 1.6
+        return {"representation": "f", "x": xs, "H+": [q(x) for x in xs], "H-": [-qb(x) for x in xs],
+                "E+": [e(x) for x in xs], "E-": [0.0 for x in xs]}
+
+    def test_form_factor_and_ji(self):
+        t = self.table()
+        # int_{-1}^{1} H dx = int q - int qbar = number of q - qbar = F_1(0) (Ji Eq. 18 with Eq. 17)
+        code, out = run(t, "--rule", "gpd-integral:H", "--expected", repr(2.0 - 0.1 / 8), "--tolerance", "5e-4")
+        self.assertEqual(out["checks"][0]["result"], "pass", out)
+        code, out = run(t, "--rule", "gpd-integral:E", "--expected", "1.6", "--tolerance", "5e-4")
+        self.assertEqual(out["checks"][0]["result"], "pass", out)
+        # J = (1/2) int_{-1}^{1} x (H + E): x H(-x) at negative x contributes (-x)(-qbar) = +x qbar
+        jq = 0.5 * (2.0 * beta(1.5, 4) / beta(0.5, 4) + 0.1 * beta(2, 8) + 1.6 * beta(1.6, 5) / beta(0.6, 5))
+        code, out = run(t, "--rule", "gpd-ji", "--expected", repr(jq), "--tolerance", "5e-4")
+        self.assertEqual(out["checks"][0]["result"], "pass", out)
+        code, _ = run({k: v for k, v in t.items() if k != "E-"}, "--rule", "gpd-ji")
+        self.assertEqual(code, 2)
+
+
 if __name__ == "__main__":
     unittest.main()

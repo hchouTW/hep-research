@@ -451,6 +451,11 @@ C = [
  ("th18-sivers-1", "en", "direct", "Predict the Sivers asymmetry at COMPASS kinematics in a Gaussian TMD model and state the azimuthal-angle conventions and the sign change relative to Drell-Yan.", "hep-theory", ["TMDs", "conventions"], None, None, {"set": "Th18"}),
  ("th18-qt-1", "en", "direct", "How should I predict the Drell-Yan distribution at q_T -> 0, and which TMD prescriptions count as model alternatives?", "hep-theory", ["Drell-Yan", "model alternatives"], None, None, {"set": "Th18"}),
  ("th18-pht-1", "en", "neighboring", "Reconstruct the hadron transverse momentum relative to the virtual photon in my SIDIS events and give its resolution.", "hep-detector", ["reconstruction", "resolution"], "hep-theory", None, {"set": "Th18"}),
+    # Th19-Th20: small x and saturation (dipole_lo.py); exclusive processes and GPDs (exclusive_kinematics.py)
+ ("th19-sat-1", "en", "direct", "Predict the saturation signal in e Au scattering at the EIC with a dipole model, and treat nPDF shadowing as a model alternative.", "hep-theory", ["small-x", "model alternatives"], None, None, {"set": "Th19"}),
+ ("th19-dipole-1", "zh-Hant", "direct", "請用 GBW dipole 模型算 x = 1e-3、Q^2 = 10 GeV^2 的 F_2 與 F_L，並說明參數來源與 x 變數的慣例。", "hep-theory", [], None, None, {"set": "Th19"}),
+ ("th20-dvcs-1", "en", "direct", "Compute t_min and the skewness for my DVCS beam-spin asymmetry bins and convert the azimuthal angle between the BMK and Trento conventions.", "hep-theory", ["GPDs", "conventions"], None, None, {"set": "Th20"}),
+ ("th20-extract-1", "en", "neighboring", "Fit Compton form factors to my DVCS asymmetries with a likelihood and give intervals on them.", "hep-statistics", ["likelihoods"], "hep-theory", None, {"set": "Th20"}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),

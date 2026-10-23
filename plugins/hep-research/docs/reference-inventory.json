@@ -39,8 +39,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 28,
-   "bytes": 222156,
+   "references": 30,
+   "bytes": 236444,
    "uncited": 0
   }
  },
@@ -3969,10 +3969,12 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/exclusive-and-gpd.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/higher-order-predictions.md",
     "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/references/polarized-dis.md",
+    "skills/hep-theory/references/small-x-and-saturation.md",
     "skills/hep-theory/scripts/structure_functions_lo.py",
     "skills/hep-theory/scripts/sum_rules.py",
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
@@ -4014,6 +4016,19 @@
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
+   "path": "skills/hep-theory/references/exclusive-and-gpd.md",
+   "owner": "hep-theory",
+   "bytes": 6936,
+   "lines": 102,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/scripts/exclusive_kinematics.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-theory/references/fragmentation-functions.md",
    "owner": "hep-theory",
    "bytes": 3877,
@@ -4029,7 +4044,7 @@
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
    "owner": "hep-theory",
-   "bytes": 5978,
+   "bytes": 6456,
    "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4038,10 +4053,12 @@
     "skills/hep-theory/references/dis-kinematics.md",
     "skills/hep-theory/references/dis-structure-functions.md",
     "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/exclusive-and-gpd.md",
     "skills/hep-theory/references/fragmentation-functions.md",
     "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/references/polarized-dis.md",
     "skills/hep-theory/references/sidis-and-tmd.md",
+    "skills/hep-theory/references/small-x-and-saturation.md",
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
@@ -4152,6 +4169,7 @@
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/pdfs-and-lhapdf.md",
     "skills/hep-theory/references/polarized-dis.md",
+    "skills/hep-theory/references/small-x-and-saturation.md",
     "skills/hep-theory/scripts/nuclear_combination.py"
    ],
    "cited_by_other_skills": [],
@@ -4267,6 +4285,7 @@
    "lines": 152,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-theory/references/exclusive-and-gpd.md",
     "skills/hep-theory/references/fragmentation-functions.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/scripts/sidis_kinematics.py",
@@ -4274,6 +4293,20 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "bd9d753e 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/small-x-and-saturation.md",
+   "owner": "hep-theory",
+   "bytes": 6874,
+   "lines": 112,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/exclusive-and-gpd.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/scripts/dipole_lo.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-theory/references/smeft-and-eft.md",

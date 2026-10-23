@@ -2578,6 +2578,32 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## HADRON-PHASE6 (2026-10-23; branch `feat/hadron-phase6-smallx-gpd`)
+
+Hadron-structure plan, phase 6 (Th19 small x and saturation, Th20 exclusive processes and GPDs), macOS, Python 3.13
+with SciPy (core stack); constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: Golec-Biernat and Wusthoff arXiv:hep-ph/9807513v1 (Phys. Rev. D 59 (1998)
+014017); Kowalski and Teaney arXiv:hep-ph/0304189 (Phys. Rev. D 68 (2003) 114005); Albacete and Kovchegov
+arXiv:0704.0612 (Phys. Rev. D 75 (2007) 125021); Belitsky, Mueller, Kirchner arXiv:hep-ph/0112108 (Nucl. Phys. B 629
+(2002) 323); Ji arXiv:hep-ph/9603249v1 (Phys. Rev. Lett. 78 (1997) 610); Collins arXiv:hep-ph/9709499v2 (Phys. Rev. D
+57 (1998) 3051); PDG 2026 Structure Functions Secs. 18.2.2, 18.5, 18.6.1. Journal references from arXiv.
+
+| Check | Result |
+|---|---|
+| `test_dipole_lo.py` (K_0, K_1 against their integral representation to 1e-10; sigma_hat small- and large-r limits; sigma_L against its analytic colour-transparency limit for m = 0, 2e-3, which pins the 6 alpha/4 pi^2 prefactor and the d^2 r measure; the mass-modified x as GBW Eq. 21; positivity and convergence; alpha cancels in F_2; refusals of a fit's x-variable mismatch and x above the declared limit; rejections) | pass |
+| `test_exclusive_kinematics.py` (t_min against four-vector arithmetic with the photon along q; both xi forms; phi_BMK and phi_Trento on constructed events and phi_Trento = pi - phi_BMK; beta x_P = x; rejections incl. an off-shell recoil) | pass |
+| `test_sum_rules.py` GPD rules (form-factor and Ji integrals of a forward toy built from PDG Eq. 18.36, Beta-function values) | pass |
+| `run_all_checks.py --part static`, `check_layering.py`, `check_wiring.py` | pass |
+
+Independent review (a read-only agent with the sources): no wrong formula; it rederived phi_Trento = pi - phi_BMK and
+reproduced F_L/F_2 = 0.194 at Q^2 = 10 GeV^2 with the GBW no-charm parameters. Fixed: BMK section citations (Sec. 4);
+the normalization test above (the earlier dipole tests could not catch a prefactor error); a crash on a charge such as
+2/0 and duplicate flavours; an off-shell recoil accepted; the convergence report now varies r_max and r_min at fixed
+nodes; Eq. 21 applies to every flavour; Ji Eq. 13 cited for J = (A + B)/2; GPD table conventions documented. Deferred:
+no upper |t| bound in `dvcs`, no M_X <= W - M check in `diffractive`, an xi-dependent GPD toy. Not run: live routing for
+the 4 Th19-Th20 cases (paid; pending).
+
 ## HADRON-PHASE5 (2026-10-23; branch `feat/hadron-phase5-tmd`)
 
 Hadron-structure plan, phase 5 (Th18 SIDIS and TMDs, fragmentation functions, profile `theory:tmd-gaussian-lo`),

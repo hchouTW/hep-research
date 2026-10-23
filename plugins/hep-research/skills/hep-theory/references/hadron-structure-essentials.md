@@ -17,9 +17,9 @@ no page yet: say so and apply the general discipline of hep-theory.
 | C | Drell-Yan (cross sections, x_F, rapidity frames, angular coefficients) | [Drell-Yan](drell-yan.md) (Th15) | LO d2sigma/dM dy and dM dx_F (photon exchange), conversions between (M, y), (M, x_F), (x_1, x_2), (tau, y), CS <-> HX rotation with invariants, Lam-Tung combination (`drell_yan_lo.py`) | NLO, threshold resummation, Z exchange (refused by the script) |
 | D | Nuclear effects and nuclear PDFs | [nuclear targets](nuclear-parton-effects.md) (Th16) | bound-nucleon (isospin) combination, per-nucleon <-> per-nucleus conversions, member-by-member nuclear ratios with the set's rule (`nuclear_combination.py`) | mechanism models (shadowing, EMC effect, energy loss), deuteron corrections, Coulomb corrections |
 | E | SIDIS, fragmentation functions, TMDs, Drell-Yan q_T resummation | [SIDIS and TMDs](sidis-and-tmd.md), [fragmentation functions](fragmentation-functions.md) (Th18) | SIDIS invariants, Trento angles, leading-power q_T and region classification (`sidis_kinematics.py`); Gaussian-ansatz SIDIS and Drell-Yan shapes and the Sivers sign change (`tmd_gaussian.py`); FF momentum sum rule (`sum_rules.py`) | TMD evolution, matching, nonperturbative prescriptions, CSS resummation |
-| F | Small-x physics and saturation (dipole picture) | planned | - | - |
+| F | Small-x physics and saturation (dipole picture) | [small x](small-x-and-saturation.md) (Th19) | LO photon wave functions and the GBW dipole model: sigma_T, sigma_L, F_2, F_L with a convergence report (`dipole_lo.py`) | BK/JIMWLK and BFKL evolution, small-x resummed DGLAP, other dipole models |
 | G | Global PDF / nPDF / FF fits (theory inputs; statistics in hep-statistics) | planned | - | - |
-| H | Exclusive processes, GPDs, diffractive DIS | planned | - | - |
+| H | Exclusive processes, GPDs, diffractive DIS | [exclusive and GPDs](exclusive-and-gpd.md) (Th20) | t_min, xi, the BMK and Trento azimuths, x_P and beta (`exclusive_kinematics.py`); GPD form-factor and Ji sum-rule integrals (`sum_rules.py`) | GPD extraction, Bethe-Heitler and DVCS amplitudes, Compton form factors |
 
 Theory-domain profiles (in `<plugin root>/profiles/registry.json`): the DIS parton model (LO F_2 and O(alpha_s) F_L,
 synthetic only), LO Drell-Yan (O(alpha_s) angular coefficients and Lam-Tung, with a published benchmark) and
