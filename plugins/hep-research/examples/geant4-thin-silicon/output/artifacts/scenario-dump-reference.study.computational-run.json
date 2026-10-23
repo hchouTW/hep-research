@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.7.0",
+ "contract_version": "3.8.0",
  "extension": {
   "commands": [
    "check_geant4_study.py label --write"
@@ -275,8 +275,8 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.7.0",
-  "plugin": "0.25.1",
+  "contracts": "3.8.0",
+  "plugin": "0.26.0",
   "profiles": {}
  }
 }

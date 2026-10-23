@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.7.0"
+CONTRACTS_VERSION = "3.8.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -140,6 +140,13 @@ CONTRACTS_VERSION = "3.7.0"
 # analysis check dispatches rules by (rule_id, version) and names its plugin_release in the report's assessment. No
 # artifact type, vocabulary term, envelope field or capability changes: the registry, the check report and the
 # bundle live outside an artifacts_dir, and a 3.6 reader refuses a 1.1.0 registry (schema enum) instead of misreading it.
+# 3.8.0 (cross-artifact check Phase 2, releases R2 and R3 shipped together; docs/dev/cross-artifact-check/m2a-design.md)
+# adds check-context 1.1.0 (no 'required'; paired with 1.1.0 suites), result binding 1.1.0 (campaigns[].inputs), the
+# rule registry 1.2.0 (keyed by rule_id and version, retired versions kept), SemVer pre-release suite versions, the
+# effect catalog 1.1.0 (description_required) and the stable 1.1.0 suites, now the default. The measurement
+# vocabulary response_corrections gains cutoff_transmission, survival and fragmentation_feeddown (catalog effects it
+# lacked). No artifact type, envelope field or capability changes. A 3.7 reader refuses a 1.1.0 check context, a 1.1.0
+# result binding and a 1.2.0 registry as invalid input instead of misreading them (refusal-matrix.md).
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

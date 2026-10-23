@@ -1159,7 +1159,7 @@
     "tests/skills/hep_computing/test_workflow_c6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "98159ba5 2026-10-17"
+   "last_commit": "7d992293 2026-10-22"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1432,7 +1432,7 @@
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "890f8481 2026-10-22"
+   "last_commit": "7d992293 2026-10-22"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
@@ -2745,7 +2745,7 @@
     "tests/skills/hep_measurement/test_review_procedure.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "77d2607e 2026-10-16"
+   "last_commit": "7d992293 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/systematics.md",
@@ -3721,7 +3721,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "7d992293 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -3810,7 +3810,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "7d992293 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
