@@ -25,7 +25,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 120008,
+   "bytes": 119084,
    "uncited": 0
   },
   "hep-ml": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 13,
-   "bytes": 189490,
+   "bytes": 190161,
    "uncited": 0
   },
   "hep-theory": {
@@ -86,7 +86,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "b66baedf 2026-10-23"
   },
   {
    "path": "skills/hep-authoring/references/artifact-packaging-for-release.md",
@@ -1146,7 +1146,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "d8ab97cb 2026-10-23"
+   "last_commit": "56a5a6c9 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
@@ -1484,7 +1484,7 @@
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "56a5a6c9 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1519,7 +1519,7 @@
     "skills/hep-computing/references/root-usage-patterns.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "56a5a6c9 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/root-debugging.md",
@@ -2620,8 +2620,8 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16382,
-   "lines": 113,
+   "bytes": 15458,
+   "lines": 112,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -3562,8 +3562,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 42807,
-   "lines": 465,
+   "bytes": 44363,
+   "lines": 479,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -3582,8 +3582,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15102,
-   "lines": 149,
+   "bytes": 14217,
+   "lines": 142,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",

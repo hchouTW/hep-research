@@ -28,6 +28,11 @@ Budget decisions D1-D3 and the last routing gaps of architecture step 1 (B4b):
 - D2: one SKILL.md size limit: the routing-table test reads `skill_bytes_target` (12,288 B) from
   `tools/measure_entrypoints.py` instead of its own 11,264 B, and honours `tools/budget_exceptions.json` waivers up to
   the 16,384 B hard limit; `docs/maintenance.md` says so.
+- D3: B-03 margin restored to about 0.9 KB in the two skills that were at the limit (hep-measurement 11 -> 935 B,
+  hep-statistics 19 -> 904 B). hep-measurement's guide condenses its script, asset and example lines (details stay
+  in each script's `--help` and the README) and drops two lines that repeated SKILL.md (the blinding invariant) and its
+  own handoff table; hep-statistics' core/stats guide keeps short fit-verdict and toy-tail rules and moves their
+  detail to "Conventions in detail" in `core-stats-commands.md`.
 
 Theory (Th13): cosmic-ray propagation and astroparticle phenomenology in hep-theory. Guidance on three pages and one
 helper script; no propagation code is run and no fit to real data is tested.
