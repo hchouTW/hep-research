@@ -3989,7 +3989,7 @@
     "skills/hep-theory/scripts/drell_yan_lo.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "06176895 2026-10-23"
+   "last_commit": "1c8f21ef 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -4024,7 +4024,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "06176895 2026-10-23"
+   "last_commit": "1c8f21ef 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",

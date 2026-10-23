@@ -298,9 +298,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 6.0 | yes | 6 | - | bb6cb81e 2026-10-23 |
 | `dis-structure-functions.md` | hep-theory | 13.0 | no | 6 | - | bb6cb81e 2026-10-23 |
-| `drell-yan.md` | hep-theory | 10.8 | no | 2 | - | 06176895 2026-10-23 |
+| `drell-yan.md` | hep-theory | 10.8 | no | 2 | - | 1c8f21ef 2026-10-23 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
-| `hadron-structure-essentials.md` | hep-theory | 4.7 | yes | 6 | - | 06176895 2026-10-23 |
+| `hadron-structure-essentials.md` | hep-theory | 4.7 | yes | 6 | - | 1c8f21ef 2026-10-23 |
 | `higher-order-predictions.md` | hep-theory | 4.4 | yes | 5 | - | bb6cb81e 2026-10-23 |
 | `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 5 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
