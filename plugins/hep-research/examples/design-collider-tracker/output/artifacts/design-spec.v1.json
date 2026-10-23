@@ -4,7 +4,7 @@
  "artifact_type": "design-spec",
  "objective": "SYNTHETIC design study (illustrative collider; not CMS or any real detector)",
  "versions": {
-  "plugin": "0.37.0",
+  "plugin": "0.38.0",
   "contracts": "3.12.0",
   "profiles": {
    "experiment:synthetic-collider": "1.0.0"

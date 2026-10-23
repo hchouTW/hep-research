@@ -3,7 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.38.0 (2026-10-24)
+
+Minor release, contracts 3.12.0. It ships the maintainer's decisions on the four spec questions left open by the M3
+independent reviews of the detector system design loop, and automates CHN-16 (calibration residuals into the
+measurement-spec) (#271).
+
+**Before you upgrade:**
+- **design-spec (contracts 3.12.0):** a derived requirement must name in `covered_by` the driving requirement whose H4
+  disposition covers it, and a hard constraint must list its `subsystems`; a 0.37.0 design-spec without them now gives
+  `design.derived_uncovered` or `design.constraint_scope_missing`. Write a new spec version with the fields.
+- A candidate that lacks a subsystem in a hard constraint's scope can no longer pass it (`chain.incomplete`).
+- **Adequacy table 1.1.0:** charge-confusion compliance counts a rigidity-scale-offset evaluation only when the measured
+  offset covers the offset the requirement assumes; an exactly zero assumed offset (tolerance 0) can never be covered,
+  so declare a realistic tolerance.
+- New subcommand `evaluate_design.py calibration` (CHN-16).
 
 Contracts 3.12.0 (minor; no capability added).
 

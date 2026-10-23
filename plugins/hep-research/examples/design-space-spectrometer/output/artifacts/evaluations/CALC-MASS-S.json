@@ -4,7 +4,7 @@
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
-  "plugin": "0.37.0",
+  "plugin": "0.38.0",
   "contracts": "3.12.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-S.json",
-   "sha256": "a2363db9cdba96977000b0254f3f05d5b3634e2524b9629ec619f8ab3cf2d687",
+   "sha256": "19821014bc406ce390ce137d5253ba2eb14462b5f2806182be34f2c1243bb3a2",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-S",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-MASS-S.computational-run.json",
-   "sha256": "9b5e398cbf7700453da26558590804bc751e25da837419989a9d9c3ac5cb8681",
+   "sha256": "626dd3dba60cc0b722bb85247b29a77f45c8d2dcee372df88742b767401ea6d3",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-MASS-S-run",
    "status": [
