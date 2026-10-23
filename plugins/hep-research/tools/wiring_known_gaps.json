@@ -20,13 +20,7 @@
    "references/cosmic-ray-propagation.md"
   ]
  },
- "pointers": {
-  "skills/hep-measurement/references/data-pipelines.md": {
-   "pointer_since": "0.7.0",
-   "remove_in": "0.29.0",
-   "moved_to": "skills/hep-computing/references/analysis-data-pipelines.md"
-  }
- },
+ "pointers": {},
  "readme_counts": {
   "hep-authoring": [
    {

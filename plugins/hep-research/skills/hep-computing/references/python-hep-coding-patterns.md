@@ -1,7 +1,7 @@
 # Python Coding Patterns: PyROOT, uproot, and awkward
 
 Use this reference for concrete Python code and CLI conventions. See
-[Data pipelines](../../hep-measurement/references/data-pipelines.md) for the design-level treatment of chunked
+[Analysis data pipelines](analysis-data-pipelines.md) for the design-level treatment of chunked
 reads, schema audits, and ownership; this file covers the code-level idioms.
 
 ## Naming
@@ -50,7 +50,7 @@ histogram keeps its entries, and a histogram drawn in a helper is gone from the 
 - Read only the branches required for the event processing at hand.
 - Use awkward masks for jagged collections; check multiplicities before indexing
   `[:, 0]`. With object cuts, count *after* the cuts (see the ordered pattern in
-  [data pipelines](../../hep-measurement/references/data-pipelines.md)).
+  [analysis data pipelines](analysis-data-pipelines.md)).
 - Convert to NumPy only at plotting or histogram-filling boundaries.
 - Preserve event weights as arrays aligned with the final selected event mask.
 - Document whether a systematic affects weights, object kinematics, or both.
