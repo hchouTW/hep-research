@@ -2578,6 +2578,28 @@ Both gate runs were on the final tree except this section and the CHANGELOG entr
 the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
 describes it without recommending it. Skipped tests are unverified, not passed.
 
+## 0.29.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.29.0` from main `eba95d89` (main CI green). It ships #240-#249: hep-theory Th13 (cosmic-ray
+propagation, cross sections, solar modulation, new-physics interpretation, `bartels_rotation.py`) with every source read
+in full text (TH13-SOURCES); architecture step 1, the wiring lint `tools/check_wiring.py` with no known gap left; the
+AMS-optionality CI job selected per module (plan 1.1.0); decisions D1-D3 and T2 with its live routing evaluation (D7);
+the `data-pipelines.md` pointer removed. Minor release with no contract change (contracts 3.9.0). The ams02-research
+companion (requires hep-research `>=0.11.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.29.0:** both manifests, `pyproject.toml`, the README, two assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **CHANGELOG:** `Unreleased` is now `0.29.0`, with an upgrade summary.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change; `unfolding-coverage` drifted at 1e-14 and was restored.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 26 pass, 0 fail, 2 skipped (CLI host checks); 5013 tests in 415 modules, 4877 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 26 pass, 0 fail, 2 skipped; 5013 tests, 4785 pass, 0 failures, 228 skipped |
+
 ## 0.28.0 release check (2026-10-23, E2 and the CI lock)
 
 Release branch `release/0.28.0` from main `f1daac78` (main CI green). It ships #238: the `model-card` and
