@@ -3,7 +3,8 @@
  "hubs": {
   "hep-authoring": [
    "references/academic-papers-guide.md",
-   "references/academic-diagrams-guide.md"
+   "references/academic-diagrams-guide.md",
+   "references/papers-review-modes-and-reference-index.md"
   ],
   "hep-computing": [
    "references/agile-development-guide.md",
@@ -137,23 +138,5 @@
    }
   ]
  },
- "gaps": [
-  "R1:skills/hep-authoring/references/artifact-packaging-for-release.md",
-  "R1:skills/hep-authoring/references/code-review-report.md",
-  "R1:skills/hep-authoring/references/code-to-methodology-synthesis.md",
-  "R1:skills/hep-authoring/references/collaboration-results-lifecycle.md",
-  "R1:skills/hep-authoring/references/conflict-of-interest-and-ethics-statements.md",
-  "R1:skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
-  "R1:skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
-  "R1:skills/hep-authoring/references/latex-mechanics-and-tooling.md",
-  "R1:skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
-  "R1:skills/hep-authoring/references/manuscript-consistency-auditing.md",
-  "R1:skills/hep-authoring/references/multi-venue-reformatting.md",
-  "R1:skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
-  "R1:skills/hep-authoring/references/preprint-to-journal-reconciliation.md",
-  "R1:skills/hep-authoring/references/preregistration-and-registered-reports.md",
-  "R1:skills/hep-authoring/references/reproducibility-auditing.md",
-  "R1:skills/hep-authoring/references/supplementary-material-planning.md",
-  "R1:skills/hep-authoring/references/thesis-by-publication-assembly.md"
- ]
+ "gaps": []
 }

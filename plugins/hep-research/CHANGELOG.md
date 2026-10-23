@@ -18,6 +18,12 @@ Removed: `skills/hep-measurement/references/data-pipelines.md`, a "(moved)" poin
 `analysis-data-pipelines.md` (where the material moved) or, for the physics rules, to hep-measurement's
 `analysis-design.md` and `weights-normalization.md`; the hep-measurement README counts twelve references.
 
+Budget decisions D1-D3 and the last routing gaps of architecture step 1 (B4b):
+
+- hep-authoring: the papers guide's "Reference files" section is now "Reference index" (same bytes), so the entry
+  routing part names the reference index (2,377 -> 2,512 B), and the index is a registered hub. The 17 hep-authoring
+  pages it routes to are reachable; `tools/wiring_known_gaps.json` lists no gap.
+
 Theory (Th13): cosmic-ray propagation and astroparticle phenomenology in hep-theory. Guidance on three pages and one
 helper script; no propagation code is run and no fit to real data is tested.
 
@@ -1115,7 +1121,6 @@ been run for the new descriptions and routing tables (gate G2).
 - `validate_covariance.py` and `validate_response.py` label their CLI output `[General method]`, as the core/stats
   guide says (follow-up to the F-15 audit).
 
-
 Upgrade plan v1.3, batch A (Th9, Th7, D7, D1, M5, Th3, ML2, Com1, Com3, X3, X1, X2): test bed, foundations and scope
 (VALIDATION UPGRADE-A). Contracts stay 2.11.0 with one additive optional field (M5, gate G4); no version bump.
 
@@ -1157,7 +1162,6 @@ Upgrade plan v1.3, batch A (Th9, Th7, D7, D1, M5, Th3, ML2, Com1, Com3, X3, X1, 
   an error.
 - Routing cases: 282 (23 new).
 
-
 Upgrade plan v1.3, batch B (C1, M1, D9, D5, D10, D11, M7, D8, M3, D6, S1, S6, ML1, ML3, S11, and the first part of
 E-3): tools needed before a detector-configuration change (VALIDATION UPGRADE-B). Contracts stay 2.11.0 with additive
 changes behind gate G4 (one effect, one composition, optional spec fields); no version bump.
@@ -1188,7 +1192,6 @@ changes behind gate G4 (one effect, one composition, optional spec fields); no v
 - Example `examples/multi-era-fit/` (E-3, first part): the chain above on two synthetic eras with a layer added
   midway; joint-fit coverage 0.689 over 1,000 toys; S1 catches a 5% offset in one era.
 - Routing cases: 312 (30 new).
-
 
 Upgrade plan v1.3, batch C (Th1, D4, D3, D2, M4, E-1, Th8, M8, M10, Th4, Th10, Th12, S2 with the E-3 projection, S7,
 S8, ML4, ML3 extensions, S11 extensions, C7, Com6, Com7, D13, D14, E-2, E-4) (VALIDATION UPGRADE-C). Contracts stay
@@ -1225,7 +1228,6 @@ profile kind); no version bump.
 - Examples: `examples/bc-fragmentation/` (E-1), `examples/pbar-p-curvature-offset/` (E-2),
   `examples/analysis-to-paper/` (E-4); `examples/multi-era-fit/` gains the S2 projection check (new keys only).
 - Routing cases: 356 (44 new; `th-scope-2` becomes a direct case).
-
 
 Upgrade plan v1.3, batch D (S3, S4, S5, S9, S10, M2, M6, M9, Th2, Th5, Th6, Th11, C2, C3, C4, C5, C6, Com2, Com4,
 Com5, D12, and the D13 expansion) (VALIDATION UPGRADE-D). Contracts stay 2.11.0; no version bump. Two new optional
