@@ -3,7 +3,19 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.36.0 (2026-10-24)
+
+Minor release, contracts 3.10.0 (unchanged). It completes the hadron-structure plan with its seventh module: PDF,
+nPDF and FF fits on the hep-statistics side (S12 reweighting and profiling, S13 global-fit specification and review)
+and their theory inputs in hep-theory.
+
+**Before you upgrade:**
+- **Routing:** the hep-statistics description names PDF reweighting/profiling and PDF fits and no longer lists
+  "asymptotics" or "(saying if no shipped tool covers it)" (unpinned phrases). Static routing passes; the live routing
+  run is pending the maintainer's approval.
+- `covariance_fit.py` has a new multiplicative mode `t0` (`t0_prediction`, `t0_iterations`); existing modes are
+  unchanged.
+- Executing a complete global PDF fit is not provided (`global-pdf-fits` is documentation only).
 
 - hep-statistics and hep-theory, hadron structure phase 7 (S12, S13, global fits):
   `skills/hep-statistics/references/pdf-fit-statistics.md` (chi2 and multiplicative uncertainties, tolerances, Hessian

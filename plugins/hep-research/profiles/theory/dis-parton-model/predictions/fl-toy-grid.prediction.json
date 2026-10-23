@@ -13,7 +13,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.35.0",
+  "plugin": "0.36.0",
   "contracts": "3.10.0",
   "profiles": {
    "theory:dis-parton-model": "0.1.0"
