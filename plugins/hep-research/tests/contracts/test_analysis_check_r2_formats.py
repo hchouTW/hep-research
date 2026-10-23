@@ -125,19 +125,29 @@ class Context110(unittest.TestCase):
         fixed_by = {"1.1.0-dev.1": set(), "1.1.0-dev.2": {"r-rep.repetition", "r-ratio.correlation"},
                     "1.1.0-dev.3": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use"},
                     "1.1.0-dev.4": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use",
+                                    "r-run.binding", "r-run.blinding", "r-run.campaign"},
+                    "1.1.0-dev.5": {"r-rep.repetition", "r-ratio.correlation", "r-comp.factor_values", "r-aux.use",
                                     "r-run.binding", "r-run.blinding", "r-run.campaign"}}
-        self.assertEqual(fixed_by[DEV], set(VERSIONS))
+        self.assertEqual(fixed_by[DEV], {r for r, v in VERSIONS.items() if v == "1.1.0"})
         for sid in ("counting-chain", "ratio-subset", "model-card", "run-lineage"):
             old = ac.load_suite(sid, "1.0.0")
             for ver, fixed in fixed_by.items():
                 with self.subTest(suite=sid, version=ver):
                     dev = ac.load_suite(sid, ver)
                     rules = [dict(r, version="1.1.0") if r["rule_id"] in fixed else r for r in old["rules"]]
-                    self.assertEqual((dev["rules"], dev["generator"], dev.get("mode")), (rules, old["generator"], old.get("mode")))
+                    gen = old["generator"]
+                    if ver == "1.1.0-dev.5" and sid == "counting-chain":  # release R3: the new rule and generator (G1, G14)
+                        k = next(i for i, r in enumerate(rules) if r["rule_id"] == "r-real.description")
+                        rules.insert(k + 1, {"rule_id": "r-real.undescribed", "version": "1.0.0", "subject": "applied_effect"})
+                        gen = dict(gen, version="1.1.0")
+                    self.assertEqual((dev["rules"], dev["generator"], dev.get("mode")), (rules, gen, old.get("mode")))
 
     def test_a_1_1_0_context_on_dev_suites_gives_the_1_0_0_outcomes(self):
+        # every 1.0.0 obligation keeps its outcome; the only additions are the release-R3 rule r-real.undescribed
         a, b = self.tmp / "a", self.tmp / "b"
-        self.assertEqual(states(cases.ratio_case(b, to_1_1), b), states(cases.ratio_case(a), a, cases.r1_rules()))
+        new, old = states(cases.ratio_case(b, to_1_1), b), states(cases.ratio_case(a), a, cases.r1_rules())
+        self.assertEqual({k: v for k, v in new.items() if k in old}, old)
+        self.assertEqual({k.split(":")[0] for k in set(new) - set(old)}, {"r-real.undescribed"})
 
     def test_a_1_0_0_suite_does_not_run_a_fixed_rule(self):
         # section 8.2: the stable 1.0.0 suites name the retired versions; they are not run, never run with new code
@@ -300,7 +310,9 @@ class V90ContextConversion(unittest.TestCase):
         ctx = json.loads((dst / ctx_ref).read_text())
         self.assertEqual(ctx["context_version"], "1.1.0")
         self.assertEqual({s["version"] for s in [ctx["suite"]] + ctx.get("suites", [])}, {DEV})
-        self.assertEqual(states(Path(res["bundle"]), dst), states(bundle, src, cases.r1_rules()))
+        new, old = states(Path(res["bundle"]), dst), states(bundle, src, cases.r1_rules())
+        self.assertEqual({k: v for k, v in new.items() if k in old}, old)
+        self.assertEqual({k.split(":")[0] for k in set(new) - set(old)}, {"r-real.undescribed"})
         marker = json.loads(Path(res["marker"]).read_text())
         self.assertEqual(marker["conversions"][0]["converter"], "context-1.0.0-to-1.1.0")
 

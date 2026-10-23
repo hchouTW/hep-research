@@ -67,7 +67,7 @@ class Case:
         return out
 
 
-DEV_SUITE = "1.1.0-dev.4"
+DEV_SUITE = "1.1.0-dev.5"
 
 
 def context_1_1(c, suite_version: str = DEV_SUITE) -> None:
@@ -138,6 +138,19 @@ def chain_case(root: Path, variant=None, freeze: bool = True):
     return c.freeze("case-chain") if freeze else c
 
 
+def described(scope: str | None = None) -> list[dict]:
+    """The other corrections the reduced recipe applies (catalog 1.1.0, r-real.undescribed): livetime and the cutoff
+    fraction inside the exposure normalization, and a fragmentation feed-down that is exactly zero (synthetic); the
+    normalization block describes exposure itself."""
+    keys = {"target_scope": scope} if scope else {}
+    return [{"effect_id": "livetime", "category": "livetime", "applied_in": "normalization", "factor_of": "exposure",
+             "variation_id": "nominal", **keys},
+            {"effect_id": "cutoff_transmission", "category": "cutoff_transmission", "applied_in": "normalization",
+             "factor_of": "exposure", "variation_id": "nominal", **keys},
+            {"effect_id": "fragmentation_feeddown", "category": "fragmentation_feeddown", "applied_in": "estimator",
+             "exact_zero": True, "variation_id": "nominal", "application_id": "background", **keys}]
+
+
 def positive_case(root: Path, variant=None, freeze: bool = True):
     """Reduced synthetic positive case (O12): one instance, explicit spec applicability (correction keys), a recipe
     whose every operation has defined coverage, no response; every obligation is decidable."""
@@ -150,7 +163,7 @@ def positive_case(root: Path, variant=None, freeze: bool = True):
         {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator",
          "target_scope": scope, "variation_id": "nominal", "application_id": "efficiency"},
         {"effect_id": "acceptance", "category": "acceptance", "applied_in": "normalization", "factor_of": "exposure",
-         "target_scope": scope, "variation_id": "nominal"}]
+         "target_scope": scope, "variation_id": "nominal"}] + described(scope)
     c.add("measurement-spec", "spec", "spec.json", spec)
     recipe = load(RECIPE)
     recipe["recipe_id"] = "flux-reduced"
@@ -215,7 +228,9 @@ def ratio_case(root: Path, variant=None, freeze: bool = True):
     spec = c.doc("spec")
     spec["extension"]["corrections"] = [
         {"effect_id": "trigger_efficiency", "category": "trigger_efficiency", "applied_in": "estimator", "variation_id": "nominal"},
-        {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator", "variation_id": "nominal"}]
+        {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator", "variation_id": "nominal"},
+        {"effect_id": "acceptance", "category": "acceptance", "applied_in": "normalization", "factor_of": "exposure",
+         "variation_id": "nominal"}] + described()
     spec["extension"]["ratio"] = {"numerator": "helium flux", "denominator": "proton flux", "cancellations": [
         {"effect": "trigger_efficiency", "treatment": "cancels", "correlation_model": "one per-period estimate divides both species"},
         {"effect": "selection_efficiency", "treatment": "independent", "correlation_model": "separate control samples per species"}]}
@@ -248,7 +263,7 @@ def ratio_case(root: Path, variant=None, freeze: bool = True):
         c.context["roots"].append({"root_id": f"flux-{s}-p1", "quantity": "differential_flux", "unit": "1/(m2 sr s GV)",
                                    "binning": {"item": "spec", "pointer": "/extension/observable/variables/0/edges"},
                                    "scope": scopes[s], "output": {"instance": iid}})
-    c.context["declarations"] = mapping({"trigger_efficiency": insts, "selection_efficiency": insts})
+    c.context["declarations"] = mapping({c2["effect_id"]: insts for c2 in spec["extension"]["corrections"]})
     c.context["suites"] = [{"id": "ratio-subset", "version": "1.0.0"}]
     c.context["ratio_roots"] = [{"root_id": "ratio-p1", "numerator": {"root": "flux-helium-p1"},
                                  "denominator": {"root": "flux-proton-p1"}, "over_axis": "species", "quantity": "ratio", "unit": "1"}]

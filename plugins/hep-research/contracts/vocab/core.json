@@ -133,7 +133,10 @@
    "fakes": "Reco events with no matching truth event (background-like, applied in reco space)",
    "exposure": "Exposure (acceptance x live time) normalization",
    "luminosity": "Integrated luminosity normalization",
-   "livetime": "Detector live time"
+   "livetime": "Detector live time",
+   "cutoff_transmission": "Cutoff transmission: per bin of the variable, the fraction of the live time in which that bin lies above the declared geomagnetic (or other) cutoff threshold, with its safety factor",
+   "survival": "Survival of a species through the material above the measuring layers: the probability P = exp(-sum x/lambda) that it crosses without an inelastic interaction; the flux divides by P",
+   "fragmentation_feeddown": "Fragmentation feed-down: events of a lighter species produced by heavier species fragmenting in the material above the measuring layers, subtracted like a background"
   },
   "envelope_prescriptions": {
    "3-point": "Single scale at mu_0/2, mu_0, 2 mu_0; envelope = min and max of the three",

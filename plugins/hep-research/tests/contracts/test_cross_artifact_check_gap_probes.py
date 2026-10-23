@@ -73,9 +73,9 @@ class ChainProbes(Probe):
         rep = self.positive(cases.context_1_1)
         self.assertEqual((rep["status"], rep["consistency"]), ("complete", "consistent"))
 
-    @PHASE2
     def test_g1_fewer_spec_corrections_do_not_complete(self):
         # G1 (DR-8, V86): a recipe step realizes selection efficiency the spec no longer describes: r-real.undescribed
+        # (release R3, generator 1.1.0 and catalog 1.1.0)
         def drop(c):
             c.doc("spec")["extension"]["corrections"] = [x for x in c.doc("spec")["extension"]["corrections"]
                                                          if x["effect_id"] != "selection_efficiency"]
@@ -110,10 +110,11 @@ class ChainProbes(Probe):
         rep = self.positive(cases.both(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0])), cases.context_1_1))
         self.assertEqual(by_rule(rep, "r-comp.factor_values")[0]["state"], "violated")
 
-    @PHASE2
     def test_g14_factor_obligation_does_not_depend_on_the_mapping_key(self):
         # G14 (V87): a factor table bound under a child key (acceptance) still produces the factor obligation
-        rep = self.positive(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0]), key="acceptance"))
+        # (counting-chain-obligations 1.1.0, a 1.1.0 context)
+        rep = self.positive(cases.both(with_factor_table(exposure_table([1.0, 3.0], [0.5, 1.0], [2.0, 2.0]), key="acceptance"),
+                                       cases.context_1_1))
         self.assertTrue(by_rule(rep, "r-comp.factor_values"), "no factor obligation for a table under a child key")
 
     def test_g15_two_bundle_coverage_contracts_for_one_table(self):

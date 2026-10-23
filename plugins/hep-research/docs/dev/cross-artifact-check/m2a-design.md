@@ -220,3 +220,49 @@ G4 (V79, second part) under DR-6, `r-comp.factor_values` 1.1.0 in the suites `1.
 Phase 0 comparison set: on dev.3 only `g4-tol` changes from satisfied to violated; on 1.0.0 the 4 `r-comp.factor_values`
 obligations become `rule_not_run`.
 
+## Phase 2, release R3: undescribed corrections and the factor key (2026-10-23)
+
+G1 (V86) under DR-8, with the maintainer's scope decision (`decision-architecture.md`, 2026-10-23), and G14 (V87), in
+the suites `1.1.0-dev.5`.
+
+**Catalog 1.1.0.**
+- Each effect gains `description_required`; it is false only for `bin_width`.
+- A coverage contract written for catalog 1.0.0 still reads: the check now requires the same major and a version not
+  newer than the installed catalog, instead of exact equality, because catalog minors only add.
+- The catalog version is in the lock's member-set closures, so a bundle frozen against catalog 1.0.0 shows a lock
+  difference and is reproduced from its snapshots (D11b), as with any definition change.
+
+**Generator `counting-chain-obligations` 1.1.0.**
+- New subject kind `applied_effect`: each effect a step of an instance applies, by its coverage contract (`covers`,
+  plus the members of a class coverage that lists them). A class coverage with undefined members applies no member
+  here (DR-8).
+- G14: the factor obligation comes from a factor table bound under the composition's parent or any child key. Two
+  different tables both give an obligation, keyed `@<item>`.
+- Version 1.0.0 is unchanged.
+
+**`r-real.undescribed` 1.0.0 (new rule).**
+
+| Applied effect | Described by | Otherwise |
+| --- | --- | --- |
+| `background` | a non-empty `backgrounds` block | `no_backgrounds_reason` → violated `check.description_contradicted`; nothing → violated `check.undescribed_correction` |
+| `exposure`, `luminosity`, `livetime` | the observable's normalization kind, as the measurement contract maps them (`NORMALIZATION_CORRECTIONS`; a correction next to it would count it twice), or a correction | violated `check.undescribed_correction` |
+| any other effect | a spec correction of exactly that category that applies to the instance; a class name describes no member | an unbound correction → unverified `check.applicability_unbound`; none → violated |
+| `bin_width` (`description_required: false`) | — | not applicable, `check.description_not_required` |
+
+**Contract and example changes the broad scope needs.**
+- The measurement vocabulary `response_corrections` gains `cutoff_transmission`, `survival` and
+  `fragmentation_feeddown`, the catalog effects it lacked (additive).
+- The AMS-02 flux-ratio example spec now describes livetime and the cutoff fraction (factors of exposure), survival
+  (1 in every bin, synthetic) and fragmentation feed-down (`exact_zero`: no heavier species in the synthetic sample).
+  Exposure stays described by the normalization block.
+- The reduced and ratio test cases describe the same corrections.
+
+**Phase 0 comparison set.**
+- On dev.5:
+  - `g1-drop-selection` gives `violated` `check.undescribed_correction`.
+  - `g14-child-key` gets its factor obligation.
+  - The new corrections' description, stage and classification obligations are satisfied.
+  - The positive, ratio, model and run cases stay complete.
+- On 1.0.0: the example's added corrections give satisfied description obligations. The earlier `rule_not_run`
+  changes are unchanged.
+

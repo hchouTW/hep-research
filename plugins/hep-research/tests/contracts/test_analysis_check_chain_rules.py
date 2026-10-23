@@ -130,7 +130,9 @@ class Realization(Tmp):
             c.context["declarations"] = []
         rep = self.chain(unmapped)
         reals = [o for o in by_rule(rep, "r-real.description") if o["reason"] != "check.realized_by_response"]
-        self.assertEqual(len(reals), 12)
+        spec = json.loads((ROOT / "examples" / "ams-flux-ratio" / "output" / "artifacts" / "measurement_spec.json").read_text())
+        chain = [c for c in spec["extension"]["corrections"] if c["applied_in"] not in ("response_matrix", "response")]
+        self.assertEqual(len(reals), 4 * len(chain))  # every chain correction against each of the four instances
         self.assertEqual({o["reason"] for o in reals}, {"check.applicability_unbound"})
         mapped = self.chain()
         self.assertNotIn("check.applicability_unbound", {o["reason"] for o in by_rule(mapped, "r-real.description")})

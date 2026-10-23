@@ -31,6 +31,17 @@ if __package__ in (None, ""):
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import validate  # noqa: E402
 
+
+def _catalog_compatible(written_for, installed) -> bool:
+    """A coverage contract written against catalog X.Y.Z reads under an installed catalog of the same major version
+    that is not older: catalog minors only add (1.1.0 adds description_required)."""
+    from contracts.semver import parse
+    try:
+        w, i = parse(str(written_for)), parse(str(installed))
+    except ValueError:
+        return False
+    return w[0] == i[0] and w <= i
+
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "contracts" / "vocab" / "effects.json"
 COVERAGE_DIR = ROOT / "contracts" / "semantics" / "coverage"
@@ -96,8 +107,10 @@ def check_coverage(cov, cat, table) -> list[dict]:
         out.append(_f("coverage.wrong_table", "table_id", f"the contract is for '{cov['table_id']}'"))
     if canonical_sha256(table) != cov["table_sha256"]:
         out.append(_f("coverage.table_changed", "table_sha256", "the table differs from the one the contract is bound to"))
-    if cov["catalog_version"] != cat.get("catalog_version"):
-        out.append(_f("coverage.catalog_version", "catalog_version", "the contract names another catalog version"))
+    if not _catalog_compatible(cov["catalog_version"], cat.get("catalog_version")):
+        out.append(_f("coverage.catalog_version", "catalog_version",
+                      f"the contract names catalog {cov['catalog_version']}, not compatible with the installed {cat.get('catalog_version')} "
+                      "(same major, not newer)"))
     effects = {e["effect_id"]: e for e in cat.get("effects", [])}
     classes = {c["class_id"]: c for c in cat.get("classes", [])}
     table_ops = {o["operator_id"] for o in table.get("operators", [])}

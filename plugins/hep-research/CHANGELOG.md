@@ -5,6 +5,24 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-artifact check, release R3: a correction a step applies must be in the spec (G1, DR-8, V86), and the factor
+  obligation no longer depends on the mapping key (G14, V87).** The new rule `r-real.undescribed` runs on generator
+  `counting-chain-obligations` 1.1.0 and the effect catalog 1.1.0, in the suites `1.1.0-dev.5`.
+  - **Rule:** every effect a recipe step applies must be described:
+    - background by a non-empty `backgrounds` block (`no_backgrounds_reason` with an applied background contradicts it);
+    - exposure, luminosity and livetime by the observable's normalization kind;
+    - any other effect by a spec correction of exactly that category;
+    - `bin_width` needs nothing.
+  - **Scope:** per the maintainer's decision, every catalog effect except `bin_width` is `description_required`.
+  - **G14:** the generator builds the factor obligation for a table bound under the composition's parent or any child
+    key.
+  - **Catalog compatibility:** coverage contracts written for catalog 1.0.0 still read; the version check is now SemVer
+    compatibility, not equality.
+  - **Vocabulary:** `response_corrections` gains `cutoff_transmission`, `survival` and `fragmentation_feeddown`.
+  - **AMS example:** the AMS-02 flux-ratio example spec now describes the livetime, cutoff fraction, survival and (exact
+    zero) fragmentation feed-down corrections its recipe applies; its artifacts are regenerated.
+  - **Lock pins:** bundles frozen against catalog 1.0.0 show a catalog lock difference and are reproduced from their
+    snapshots.
 - **CI plan: a changed test helper selects the tests that import it.** A non-test `.py` file under `tests/` (for
   example `analysis_check_cases.py`) now selects every test module that imports it by name. The impact map listed
   the helper but not all of its importers, so three of them would have been skipped. A helper that no test module
