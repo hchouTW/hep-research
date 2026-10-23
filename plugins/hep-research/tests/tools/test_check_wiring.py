@@ -19,25 +19,7 @@ from tools import check_wiring as cw  # noqa: E402
 # The known gaps when the lint came in (0.28.0 + Th13, after the B4a fixes), as the first 12 hex digits of the
 # SHA-256 of each key (hashed so that this file does not count as citing the pages). The known-gaps file may only
 # lose entries: a new gap is fixed, never listed. Shrink this baseline with the file; never add to it.
-BASELINE_GAPS = {
-    "14fb707b539c",
-    "21acb8095231",
-    "3a6c8e4dcebe",
-    "48672cdcaa10",
-    "4d07b949fdbe",
-    "51362bd36aa2",
-    "55f400a8a324",
-    "61c0117e004e",
-    "6443da68f956",
-    "89919072da48",
-    "b9f5ee00d934",
-    "bdf9e4edee3f",
-    "be78eb14877d",
-    "d4207363aae1",
-    "d7e8b2a2da54",
-    "f0e2caf725de",
-    "f13e5b167549",
-}
+BASELINE_GAPS: set[str] = set()  # every gap of the baseline is fixed (B4b, 2026-10-23)
 
 TABLE = "## Resources\n\n| Request | Read or run |\n|---|---|\n| Entry | [entry](references/entry.md) |\n"
 

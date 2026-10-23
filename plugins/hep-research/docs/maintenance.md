@@ -97,7 +97,11 @@ unverified, never passing.
 
 `tools/measure_entrypoints.py` (run by `run_all_checks.py`) sets the budget (upgrade plan B-01, 2026-10-17): a
 `SKILL.md` above 12,288 bytes gives a warning, which an entry `"<skill>:bytes": "<reason>"` in
-`tools/budget_exceptions.json` may waive; above 16,384 bytes or 500 lines it fails, with no exception. A description
+`tools/budget_exceptions.json` may waive; above 16,384 bytes or 500 lines it fails, with no exception.
+`tests/skills/test_routing_tables.py` applies the same 12,288-byte limit as a failure (it reads `BUDGET`; a waived
+skill is held to 16,384) and keeps each Resources table at 1.5-3 KB (B-02); decisions D2 and D1, 2026-10-23, which
+replaced the separate 11,264-byte and 2.5 KB test limits. SKILL.md plus its entry reference stays within 25,600 bytes
+(B-03), the budget that binds. A description
 stays at or under 1,024 characters, the limit of the [Agent Skills specification](https://agentskills.io/specification),
 and the profile registry at or under 3,072 bytes (`REGISTRY_BUDGET` in `contracts/registry.py`). Until 2026-10-17
 the budget was 8,192 bytes per `SKILL.md`. On 2026-10-13 the three files that sat at the limit were trimmed by moving their reference and script lists into index
