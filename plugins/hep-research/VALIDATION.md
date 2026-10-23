@@ -3160,8 +3160,11 @@ passage before the edit. Severity S3 (guidance), ledger `documentation_fixes` TH
 | solar modulation | 29 | Gieseler et al.: phi depends on LIS, energy range and magnetic epoch (not cycle phase); Tomassetti et al.: the +-0.8-month systematic is inside the +-1.2 and the fit is in Sec. 3; the LIS-dependence claim now rests on Usoskin et al. 2017 Sec. 6.3 (the unopened 2005 paper's "factor 2" and "linear conversion" dropped); Bartels epoch and 2426 = 2011-05-15 confirmed (270 Caltech rows, 0 mismatches) |
 | new physics | 32 | L scaling in Calore et al. Sec. 4; BIG to QUAINT shift (Sec. 5.1) vs shape (Sec. 5.2); Cuoco et al. 2017 Delta chi^2 = 25 without systematics; Cuoco et al. 2019: fell to 3 sigma with updated cross sections, correlations matter more; Di Mauro et al. 2016 "comparable or stronger"; Hooper et al. 2009 "could plausibly"; Profumo et al. 2018 radially dependent diffusion (not two-zone); Manconi et al. 1 sigma band of simulated populations |
 
-Not changed: journal references not printed in the PDFs and not found in citing papers (Evoli et al. 2020, Maurin et
-al. 2022, Orusa et al. 2022, Tomassetti et al. 2017, Ding et al. 2021) are listed as not confirmed; the instrument name
+Journal references: the five not printed in the PDFs or found in citing papers (Evoli et al. 2020, Maurin et al.
+2022, Orusa et al. 2022, Tomassetti et al. 2017, Ding et al. 2021) were then confirmed at three primary records (arXiv
+journal-ref/DOI, INSPIRE-HEP publication info, Crossref), and all 16 DOIs on the list resolve at Crossref to the cited
+paper (first author and title); Maurin et al. (A&A 668, A7) and Ding et al. (JCAP 09 (2021) 005) gained their volume
+and article. Not changed: the instrument name
 in one collaboration title stays replaced (layering rule). The source texts stay outside the repository.
 A separate read-only agent then checked the whole diff against the source texts: one overstatement (the Usoskin et
 al. 2017 series comparison: three causes, not the LIS alone), one locator (Delta chi^2 = 25 is in the letter's main

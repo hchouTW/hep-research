@@ -213,9 +213,8 @@ First read on 2026-10-20 through a summarizing fetch (a search snippet under hep
 (arXiv PDF at the version listed, else the current one; the two Bartels sources and the proceedings from their own pages), and each
 attribution, section, equation and number on this page, [solar modulation models](solar-modulation-models.md) and
 [cosmic-ray new physics](cosmic-ray-new-physics.md) was checked against it and corrected where it differed (VALIDATION
-TH13-SOURCES). Usoskin et al. 2005 (JGR) was not opened and nothing rests on it. Journal references not printed in the
-PDF were matched to citing papers' reference lists, except Evoli et al. 2020, Maurin et al. 2022, Orusa et al. 2022,
-Tomassetti et al. 2017 and Ding et al. 2021 (not confirmed).
+TH13-SOURCES). Usoskin et al. 2005 (JGR) was not opened and nothing rests on it. Journal references and DOIs were
+confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23).
 
 - A.W. Strong, I.V. Moskalenko, arXiv:astro-ph/9807150v2 (DOI 10.1086/306470); abstract, Secs. 2-3 (Eq. 1),
   App. A-B.
@@ -230,7 +229,7 @@ Tomassetti et al. 2017 and Ding et al. 2021 (not confirmed).
 - C. Evoli, R. Aloisio, P. Blasi, arXiv:1904.10220v2 (PRD 99 (2019) 103023).
 - M. Korsmeier, A. Cuoco, arXiv:1607.06093v3 (PRD 94 (2016) 123019); arXiv:2103.09824v2 (PRD 103 (2021) 103016),
   Secs. II, IV (Eq. 10), VII, Table II.
-- D. Maurin et al., arXiv:2203.00522v2 (A&A, DOI 10.1051/0004-6361/202243446); abstract, Secs. 2.3, 3, 5.
+- D. Maurin et al., arXiv:2203.00522v2 (A&A 668 (2022) A7, DOI 10.1051/0004-6361/202243446); abstract, Secs. 2.3, 3, 5.
 - C. Evoli, D. Gaggero, A. Vittino, M. Di Mauro, D. Grasso, M.N. Mazziotta, arXiv:1711.09616v2 (JCAP, DOI
   10.1088/1475-7516/2018/07/006); Secs. 3, 5.
 - Y. Genolini, D. Maurin, I.V. Moskalenko, M. Unger, arXiv:1803.04686v1 (PRC 98 (2018) 034611); abstract, Secs. II,
@@ -271,7 +270,7 @@ Tomassetti et al. 2017 and Ding et al. 2021 (not confirmed).
 - "Searching for Dark Matter Annihilation from Milky Way Dwarf Spheroidal Galaxies with Six Years of [satellite]
   Data" (collaboration paper; the instrument name in the title is replaced here, per the plugin's no-experiment-names
   rule for skill text), arXiv:1503.02641 (PRL 115 (2015) 231301); M. Di Mauro, F. Donato, N. Fornengo,
-  A. Vittino, arXiv:1507.07001 (JCAP 05 (2016) 031); Y.-C. Ding et al., arXiv:2104.14881 (JCAP, DOI
+  A. Vittino, arXiv:1507.07001 (JCAP 05 (2016) 031); Y.-C. Ding et al., arXiv:2104.14881 (JCAP 09 (2021) 005, DOI
   10.1088/1475-7516/2021/09/005).
 
 Not verified and therefore not used: the Planck 2018 annihilation limit, a numerical diffusion coefficient from the HAWC abstract, and what the

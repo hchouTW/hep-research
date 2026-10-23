@@ -10,7 +10,8 @@ Sources (Th13): the three cosmic-ray pages' sources, first read through a summar
 number was checked; about 30 statements were corrected (wrong locators, overstated or misread findings, author
 initials and order) and the pages now carry the read level "full text, 2026-10-23" (VALIDATION TH13-SOURCES, ledger
 `documentation_fixes` TH13-SOURCES). The DRAGON2 D_pp prefactor and beta^eta form, previously "not read", are now cited
-(App. C.8-C.9); the "factor 2" LIS claim from an unopened 2005 paper was dropped.
+(App. C.8-C.9); the "factor 2" LIS claim from an unopened 2005 paper was dropped. Journal references and all 16 DOIs on the
+sources list were then confirmed at arXiv, INSPIRE-HEP and Crossref.
 
 Routing (T2): the hep-theory description names "cosmic-ray propagation and solar modulation" (1,020 of 1,024
 characters; room made by dropping three phrases no routing case pins: "importing", "truncation", "and its global
