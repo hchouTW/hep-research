@@ -139,3 +139,10 @@ shadow mode. A new gate would need a new measurement with its own pre-registered
 The maintainer changed the decision-point outcome from Stop to Continue (`decision-value-gate.md`, "Decision
 changed"). Phase 2 may change rules, but the value gate is still not passed, so the condition "the value gate passed"
 above is unmet and every rule stays in shadow mode.
+
+## 2026-10-23, decision changed to Shrink
+
+The maintainer changed the decision-point outcome to Shrink (`decision-value-gate.md`, "Decision changed to
+Shrink"). `model-card` and `run-lineage` are deprecated and leave in the minor after their deprecation; `counting-chain`
+is frozen and `ratio-subset` kept. The value gate is still not passed, so every rule stays in shadow mode; no
+retired suite can become an enforcing condition.

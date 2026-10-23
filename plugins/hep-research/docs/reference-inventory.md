@@ -147,7 +147,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `systematic-review-screening.md` | hep-citations | 3.1 | yes | 3 | - | ebb58136 2026-10-19 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
-| `analysis-data-pipelines.md` | hep-computing | 11.6 | yes | 9 | hep-measurement | a57e22cf 2026-10-17 |
+| `analysis-data-pipelines.md` | hep-computing | 11.7 | yes | 9 | hep-measurement | a57e22cf 2026-10-17 |
 | `analysis-workflows.md` | hep-computing | 3.7 | yes | 4 | - | 7d992293 2026-10-22 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
 | `batch-scheduling.md` | hep-computing | 30.4 | yes | 14 | - | 9257d7b5 2026-10-15 |

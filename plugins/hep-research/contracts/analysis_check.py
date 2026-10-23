@@ -924,6 +924,22 @@ def _vocab(project):
     return Vocabulary.with_profiles(proj.profiles)
 
 
+# Suites deprecated by the value gate's Shrink decision (docs/dev/cross-artifact-check/decision-value-gate.md,
+# 2026-10-23): removed in the minor release after the one that deprecates them (architecture section 13.4)
+DEPRECATED_SUITES = {"model-card": "the model-card suite (and --mode model)", "run-lineage": "the run-lineage suite (and --results)"}
+
+
+def deprecation_notice(context: dict) -> str | None:
+    """A note for stderr when a context selects a deprecated suite; the report and stdout are unchanged."""
+    ctx = context if isinstance(context, dict) else {}
+    ids = [(ctx.get("suite") or {}).get("id")] + [(x or {}).get("id") for x in ctx.get("suites") or [] if isinstance(x, dict)]
+    hit = [DEPRECATED_SUITES[i] for i in dict.fromkeys(ids) if i in DEPRECATED_SUITES]
+    if not hit:
+        return None
+    return (f"deprecated: {', '.join(hit)} of the cross-artifact check will be removed in the next minor release "
+            "(value gate Shrink, 2026-10-23); reproduce such reports with hep-research 0.26.x")
+
+
 def main(argv=None) -> int:
     import argparse
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -982,6 +998,9 @@ def main(argv=None) -> int:
                 return 1
             args.out.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
             record_bundle(args.root, args.out, doc)
+            note = deprecation_notice(context)
+            if note:
+                print(note, file=sys.stderr)
             print(json.dumps({"status": "frozen", "bundle_digest": doc["bundle_digest"], "out": str(args.out)}, indent=1))
             return 0
         if args.cmd == "snapshots":
@@ -1013,6 +1032,9 @@ def main(argv=None) -> int:
             cfg_path = args.project / "hep-research.project.json" if args.project.is_dir() else args.project
             blinding = (json.loads(cfg_path.read_text(encoding="utf-8")) or {}).get("blinding") or {"blinded": [], "allowed_outputs": []}
         view, diags = load_subject(args.bundle, args.root)
+        note = deprecation_notice(view.get("context") or {})
+        if note:
+            print(note, file=sys.stderr)
         if args.out is not None:
             refs = {(Path(args.root).resolve() / it.get("ref", "")).resolve() for it in view["bundle"].get("items", [])
                     if isinstance(it, dict)}

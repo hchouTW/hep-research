@@ -140,7 +140,8 @@ is mergeable only if it is made in two steps.
 Partitioned, the same two steps go through `core/partition`: each chunk returns its records and sources unreduced, the
 chunks are merged with `concat` rules, and the deduplication and sum happen once, on the merged records, in key order,
 so the partitioned and the single-run results agree to the last bit. Record the merge inputs (chunks merged and
-expected, the source file digests): a run-lineage result binding can then show that the merge was complete. A merge
+expected, the source file digests): a run-lineage result binding can then show that the merge was complete (that suite is deprecated and removed in the
+next minor release; the merge inputs stay worth recording). A merge
 that is incomplete gives no reduced number.
 
 `<plugin root>/skills/hep-computing/assets/time_slice_reduction.py` implements this (`reduce`, `partial` as a

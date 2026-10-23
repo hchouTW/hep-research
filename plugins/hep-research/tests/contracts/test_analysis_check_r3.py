@@ -135,5 +135,34 @@ class CatalogVersion(unittest.TestCase):
         self.assertFalse(_catalog_compatible("x", "1.1.0"))
 
 
+
+class ShrinkDeprecation(unittest.TestCase):
+    """The value gate's Shrink decision (2026-10-23): model-card and run-lineage are deprecated; the check CLI says so
+    on stderr and changes neither stdout nor the report; counting-chain and ratio-subset say nothing."""
+
+    def check_cli(self, bundle: Path, root: Path):
+        import subprocess
+        return subprocess.run([sys.executable, str(ROOT / "contracts" / "analysis_check.py"), "check", str(bundle),
+                               "--root", str(root)], capture_output=True, text=True, timeout=300)
+
+    def test_notice_for_deprecated_suites_only(self):
+        import json
+        for builder, deprecated in ((cases.model_case, True), (cases.ratio_case, False)):
+            with self.subTest(case=builder.__name__):
+                root = Path(tempfile.mkdtemp()) / "c"
+                res = self.check_cli(builder(root, cases.context_1_1), root)
+                self.assertEqual("deprecated:" in res.stderr, deprecated, res.stderr[-500:])
+                self.assertIn("obligations", json.loads(res.stdout))
+
+    def test_deprecated_rules_are_registered_as_deprecated(self):
+        import json
+        reg = json.loads((ROOT / "contracts" / "rules" / "registry.json").read_text())
+        live = [r for r in reg["rules"] if r["lifecycle"] != "retired" and r["kind"] != "legacy"]
+        for r in live:
+            gone = any(x.startswith(("model-card", "run-lineage")) for x in r["suites"])
+            with self.subTest(rule=f"{r['rule_id']}@{r['version']}"):
+                self.assertEqual(r["lifecycle"] == "deprecated", gone)
+
+
 if __name__ == "__main__":
     unittest.main()
