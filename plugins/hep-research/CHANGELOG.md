@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Routing (T2): the hep-theory description names "cosmic-ray propagation and solar modulation" (1,020 of 1,024
+characters; room made by dropping three phrases no routing case pins: "importing", "truncation", "and its global
+analyses"). A new English case `th13-mod-2` (solar modulation) and the trigger term "cosmic-ray propagation" on
+`th13-codes-1` pin it; 425 routing cases. Live routing evaluation: see VALIDATION or the PR.
+
 CI: the AMS-optionality job is selected like the units shards. A pull request's plan (`tools/ci_plan.py`, plan 1.1.0)
 lists `ams_optional_modules`, the selected test modules that are in that check's suites; the part runs when the list is
 not empty, and `tools/check_ams_optional.py --plan` reruns only those modules (its fixed steps, a few seconds, always

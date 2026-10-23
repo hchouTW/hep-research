@@ -4074,7 +4074,8 @@
    "prompt": "GALPROP quotes D0 at 4 GV and a USINE fit quotes K0 at 1 GV in kpc^2/Myr; put both diffusion coefficients in one set of conventions before I compare the transport parameters.",
    "expected_primary": "hep-theory",
    "trigger_terms": [
-    "conventions"
+    "conventions",
+    "cosmic-ray propagation"
    ],
    "set": "Th13"
   },
@@ -4109,6 +4110,17 @@
    "trigger_terms": [
     "theory uncertainties",
     "model alternatives"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-mod-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which solar modulation model should predict the positron-to-electron ratio across the last polarity reversal, and where does the force-field approximation break down?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "solar modulation"
    ],
    "set": "Th13"
   },
