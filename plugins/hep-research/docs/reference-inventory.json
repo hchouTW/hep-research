@@ -3602,7 +3602,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "cf16c262 2026-10-23"
+   "last_commit": "6c7b8ea3 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3716,7 +3716,7 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "6c7b8ea3 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -4075,7 +4075,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "untracked"
+   "last_commit": "6c7b8ea3 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
@@ -4099,7 +4099,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2414de9a 2026-10-23"
+   "last_commit": "6c7b8ea3 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",

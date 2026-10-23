@@ -281,12 +281,12 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c0396 2026-10-22 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 44.4 | yes | 6 | hep-detector, hep-measurement | cf16c262 2026-10-23 |
-| `core-stats-guide.md` | hep-statistics | 14.5 | yes | 12 | hep-measurement | cf16c262 2026-10-23 |
+| `core-stats-guide.md` | hep-statistics | 14.5 | yes | 12 | hep-measurement | 6c7b8ea3 2026-10-23 |
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
 | `nuisance-modeling.md` | hep-statistics | 20.5 | yes | 9 | hep-measurement | d8ab97cb 2026-10-23 |
-| `pdf-fit-statistics.md` | hep-statistics | 7.7 | yes | 6 | hep-theory | untracked |
+| `pdf-fit-statistics.md` | hep-statistics | 7.7 | yes | 6 | hep-theory | 6c7b8ea3 2026-10-23 |
 | `roofit-and-roostats-methods.md` | hep-statistics | 7.6 | yes | 6 | - | 09237aee 2026-10-17 |
 | `statistical-inference-for-physics.md` | hep-statistics | 13.3 | yes | 11 | hep-authoring, hep-citations, hep-computing, hep-theory | e03c0396 2026-10-22 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | - | 578c12ff 2026-10-13 |
@@ -304,8 +304,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `exclusive-and-gpd.md` | hep-theory | 6.9 | no | 2 | - | 2414de9a 2026-10-23 |
 | `fragmentation-functions.md` | hep-theory | 3.9 | no | 3 | - | bd9d753e 2026-10-23 |
-| `global-fits-theory-inputs.md` | hep-theory | 4.9 | no | 2 | hep-statistics | untracked |
-| `hadron-structure-essentials.md` | hep-theory | 6.8 | yes | 13 | - | 2414de9a 2026-10-23 |
+| `global-fits-theory-inputs.md` | hep-theory | 4.9 | no | 2 | hep-statistics | 6c7b8ea3 2026-10-23 |
+| `hadron-structure-essentials.md` | hep-theory | 6.8 | yes | 13 | - | 6c7b8ea3 2026-10-23 |
 | `higher-order-predictions.md` | hep-theory | 4.4 | yes | 6 | - | bb6cb81e 2026-10-23 |
 | `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 5 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
