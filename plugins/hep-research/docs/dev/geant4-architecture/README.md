@@ -16,7 +16,7 @@ branch `worktree-geant4-architecture`, based on `main` at `9f08796` (0.23.0 plus
 | `gate_operating_characteristics.py` | Convergence-gate operating characteristics, two-stage factors, Welch degrees of freedom (§A.8, §A.9, §A Appendix B). Needs numpy and scipy; a design aid, not plugin code |
 | `j15_design_estimates.py` | J15 design numbers (§B Appendix A). Standard library; scipy optional |
 | `design_search_closure.py` | Reference values of task C's plane-placement closure test (§C Appendix A). Standard library |
-| `prototype/phase1-core.patch` | Reference prototype of A1.1, A1.2, the first half of A1.3 and the enum fix of A1.12; applies to `9f08796`; predates the current spec (see §A.0); not reviewed for merge |
+| `prototype/phase1-core.patch` | Reference prototype of parts of A1.1–A1.3 and the enum fix of A1.12 (changes `contracts/validate.py`, `check_geant4_study.py`, `geant4_benchmarks.py`, the study-spec schema and two tests; nothing in `core/`); applies to `9f08796`; predates the current spec (§A.0 lists what it lacks); not reviewed for merge |
 
 ## If you are an agent starting work here
 

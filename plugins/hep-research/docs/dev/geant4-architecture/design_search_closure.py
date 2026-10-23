@@ -2,8 +2,10 @@
 
 Curvature variance factor A (sigma_k^2 = A sigma^2 / L^4) of a least-squares parabola y = a + b x + k x^2 / 2
 through N equal-weight planes at positions x in [0, L] (L = 1), measurement term only. Exact rational arithmetic.
-Prints the equal-spacing value, clustered configurations, and the best placement found by exhaustive enumeration
-on a 1/G grid (planes distinct, first at 0 and last at 1). Standard library only. Design aid, not plugin code.
+Prints the equal-spacing value, clustered configurations (coincident planes), the asymptotic large-N limit, and the
+best placement found by exhaustive enumeration on a 1/G grid (planes distinct, so minimum spacing 1/G; first at 0
+and last at 1). A local search without the grid but with minimum spacing 1/32 converges to the same 47.66.
+Standard library only. Design aid, not plugin code.
 """
 from fractions import Fraction as Fr
 from itertools import combinations
@@ -21,13 +23,21 @@ def curvature_factor(xs):
 def main(n=6):
     eq = curvature_factor([Fr(i, n - 1) for i in range(n)])
     print(f"equal spacing: A = {float(eq):.2f}")
-    print(f"clusters 2/2/2 at 0, 1/2, 1: A = {float(curvature_factor([0, 0, Fr(1, 2), Fr(1, 2), 1, 1])):.2f}")
-    print(f"continuous limit 256/N: A = {256 / n:.2f}, MDR ratio {sqrt(float(eq) * n / 256):.3f}")
+    def show(label, a):
+        print(f"{label}: A = {float(a):.2f}, MDR ratio {sqrt(float(eq / a)):.3f}")
+
+    show("clusters 2/2/2 at 0, 1/2, 1 (coincident)", curvature_factor([0, 0, Fr(1, 2), Fr(1, 2), 1, 1]))
+    show("clusters 2/3/1 at 0, 1/2, 1 (coincident)", curvature_factor([0, 0, Fr(1, 2), Fr(1, 2), Fr(1, 2), 1]))
+    a, m = min((curvature_factor([0, 0] + [Fr(i, 1000)] * 3 + [1]), Fr(i, 1000))
+               for i in range(1, 1000))
+    show(f"clusters 2/3/1 at 0, {float(m):.3f}, 1 (best middle position, 1/1000 scan)", a)
+    print(f"asymptotic large-N limit (N/4, N/2, N/4 at 0, 1/2, 1): A = 256/N = {256 / n:.2f}, "
+          f"MDR ratio {sqrt(float(eq) * n / 256):.3f} (not reachable with N = {n} integer clusters)")
     for g in (16, 32):
         grid = [Fr(i, g) for i in range(g + 1)]
         best = min((c for c in combinations(grid, n) if c[0] == 0 and c[-1] == 1), key=curvature_factor)
         a = curvature_factor(best)
-        print(f"best on 1/{g} grid: A = {float(a):.2f} at {[str(x) for x in best]}, "
+        print(f"best on 1/{g} grid (minimum spacing 1/{g}): A = {float(a):.2f} at {[str(x) for x in best]}, "
               f"MDR ratio {sqrt(float(eq / a)):.3f}")
 
 

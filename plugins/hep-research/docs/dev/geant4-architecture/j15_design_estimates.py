@@ -146,6 +146,10 @@ def main():
     print("  for comparison, WITH the bend (-50 mrad start toward -y):")
     for R in (0.6, 1):
         print(f"  {R:>6} GV: Si6 y = {arc_y(SI_C[-1], R, -0.05):6.1f} mm; TOF2 first layer y = {arc_y(TOF2[0][0], R, -0.05):6.1f} mm")
+    print("  normal incidence (0 mrad):")
+    for R in (0.6, 1):
+        print(f"  {R:>6} GV: Si6 y = {arc_y(SI_C[-1], R, 0.0):6.1f} mm; TOF2 layers y = {arc_y(TOF2[0][0], R, 0.0):6.1f}, "
+              f"{arc_y(TOF2[1][0], R, 0.0):6.1f} mm")
 
     print("\n== proton energy loss and beta change ==")
     for R in (0.6, 1, 2):
