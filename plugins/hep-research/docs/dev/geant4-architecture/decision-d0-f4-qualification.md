@@ -1,7 +1,7 @@
 # Decision record D0: how a detector-level Geant4 study qualifies as F4
 
 Status: **open — awaiting the maintainer** (prepared 2026-10-24 by the agent; an agent-written record is not
-approval). Sent for decision as issue #273 (https://github.com/hchouTW/hep-research/issues/273). Programme: `geant4-program.md` (§P.7 item 1, B2.8; English translation `geant4-program.en.md`).
+approval). Sent for decision as issue #273 (https://github.com/hchouTW/hep-research/issues/273). Programme: `geant4-program.md` (§P.7 item 1 and §P.7.1, B2.8; English translation `geant4-program.en.md`).
 Baseline: `main` `5584927` (0.38.0, contracts 3.12.0). Labels: **Confirmed** (checked in code), **Inferred**,
 **Unresolved**.
 

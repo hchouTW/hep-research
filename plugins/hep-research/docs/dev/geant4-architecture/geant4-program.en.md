@@ -9,40 +9,101 @@
 
 ## How to use this document
 
-**For the implementing agent:**
-1. Read §P.0 (stages at a glance), §P.10 (running in an isolated worktree), §P.6 (gates) and §P.4 (interface ownership).
-2. Create and confirm the isolated worktree for your stage per §P.10.2 (`.claude/worktrees/geant4-<stage>`, branch `worktree-geant4-<stage>`, based on the latest `origin/main` that contains the prerequisite stages); every later step happens in it.
-3. Read main's `skills/hep-detector/references/system-design-workflow.md` (design loop, fidelities, gates); it is a prerequisite of Parts 3 and 4.
-4. Read the task card of the part your stage belongs to (§A.0, §B.0 or §C.0), then that part's §1–§4 and your stage's work items and acceptance checklist.
-5. Read Part 5 only when you need the reason for a rule.
-6. This document is about 3,200 lines: read it in pieces by section number from the table of contents (e.g. search for `## §A.5`), not all at once.
+This document is a specification: Parts 1–4 state **what is to be done now and how it is accepted**, Part 5 gives the reasons, and Part 6 collects all history (version history, reviews and how they were handled, old-to-new mappings). The body does not describe "how it used to be"; read Part 6 only when you need the history.
 
-**Authority of each part:**
+**For the agent implementing a stage:**
+1. Read §P.0 (stages and dependency graph) and §P.10 (running in an isolated worktree), then find your stage's row in the "Reading index per stage" below and read it in order.
+2. Create and confirm the isolated worktree for your stage per §P.10.2 (`.claude/worktrees/geant4-<stage>`, branch `worktree-geant4-<stage>`, based on the latest `origin/main` that contains all prerequisite stages); every later step happens in it.
+3. First read main's `skills/hep-detector/references/system-design-workflow.md` (design loop, fidelities, gates H1–H4); Parts 3 and 4 build on it.
+4. For an unfamiliar term, check the "Glossary" below first, then the part's §X.1.
+5. This document is about 3,500 lines: read it in pieces by section number from the table of contents (e.g. search for `## §A.5`), not all at once.
+
+**For reviewers:** read §P.0–§P.4, §P.6 and §P.7, then the stage under review (the same row of the index); Part 5 gives the reasons; Part 6 §H.2 lists earlier review findings and where they are handled.
+
+**For the maintainer:** open decisions are collected in §P.7 (D0 in §P.7.1; the maintainer's form is `decision-d0-f4-qualification.md` in the same folder, issue #273); gates are in §P.6; risks in §P.8.
+
+### Reading index per stage
+
+Reading one row in order is enough to start that stage. "Common" means §P.0, §P.10 and main's `system-design-workflow.md`, which every stage reads.
+
+| Stage | Task card and common prerequisites | Work items and acceptance of the stage | Gates (§P.6) | Open decisions that block it (§P.7) | Checks and order of work | Rationale (Part 5, when needed) |
+|---|---|---|---|---|---|---|
+| A1 | §A.0–§A.4 | §A.5 (A1.1–A1.17) | G-A1 | items 2–7, 15 | §A.7, §A.8, §A.11, §A Appendices A–C | validation classes and decisions; contracts, traceability and sci-fix; execution, seeds and reproduction |
+| A2 | §A.0–§A.4 | §A.6 | G-A2 | item 8 | §A.7, §A.8, §A.11 | data layers and run summary; architecture overview |
+| B1 | §B.0–§B.4; A2's interfaces (§A.2) | §B.5 | G-B1a, G-B1b | items 8, 9 | §B.8, §A.8, §B.11 | architecture overview; generality |
+| B2 | §B.0–§B.4 | §B.6 (including the B2.8 qualification path) | G-B2; the qualification rule is not in force before G-D0 | item 1 (D0, §P.7.1), items 10, 11 | §B.8, §A.8, §B.11 | relation to main's design loop; validation classes and decisions |
+| B3 | §B.0–§B.4; §B Appendix A | §B.7 | G-D0 | items 1, 12 | §B.8, §A.8, §B.11 | relation to main's design loop |
+| C1 | §C.0–§C.4 | §C.5 | G-C1 | items 4, 13 | §C.8, §A.8, §C.11, §C Appendix A | relation to main's design loop |
+| C2 | §C.0–§C.4; B2's interfaces (§B.2) | §C.6 | G-C2a, G-C2b; confirmation also G-D0 | items 1, 13 | §C.8, §A.8, §C.11 | relation to main's design loop; execution, seeds and reproduction |
+| C3 | §C.0–§C.4 | §C.7 | G-C3 | item 14 | §C.8, §A.8, §C.11 | relation to main's design loop; generality |
+
+Part 5 sections are named rather than numbered here; see the table of contents for their numbers.
+
+### Authority of each part
 
 | Part | Sections | Content | Authority |
 |---|---|---|---|
-| Part 1 Program plan | §P | Evaluation, principles, stages, interface ownership, naming, gates, open decisions, risks, execution environment | Stage order and dependencies, numbering, version placeholders, interface ownership, gates, open decisions, execution environment |
-| Part 2 Task A | §A | Work items and acceptance of A1, A2; the shared hard rules (§A.3) and checks (§A.8) | Content and acceptance of these two stages |
-| Part 3 Task B | §B | Geant4 F4 evaluator and the J15 design project; work items and acceptance of B1, B2, B3 | Content and acceptance of these three stages; J15's numbers |
+| Part 1 Program plan | §P | Stages at a glance, relation to main, principles, stage boundaries, interface ownership, naming, gates, open decisions, risks, execution environment | Stage order and dependencies, numbering, version placeholders, interface ownership, gates, open decisions, execution environment |
+| Part 2 Task A | §A | Work items and acceptance of A1, A2; the shared hard rules (§A.3) and checks (§A.8) | Content and acceptance of these two stages; §A.8 applies to every stage |
+| Part 3 Task B | §B | Geant4 F4 evaluator and the J15 design project; work items and acceptance of B1, B2, B3 | Content and acceptance of these three stages; J15's numbers; details of the F4 qualification path (B2.8) |
 | Part 4 Task C | §C | Automated generation of design candidates; work items and acceptance of C1, C2, C3 | Content and acceptance of these three stages |
-| Part 5 Design rationale | §R | Design basis from real experiments, the architecture, relation to main's design loop, superseded designs | Rationale only; where it conflicts with Parts 2–4, Parts 2–4 win and the conflict is reported |
+| Part 5 Design rationale | §R | Relation to main's design loop, design basis from real experiments, the architecture | Rationale only; where it conflicts with Parts 1–4, Parts 1–4 win and the conflict is reported |
+| Part 6 Revision, review and decision record | §H | Version history, review findings and how they were handled, old-to-new design mapping, superseded designs, decision log | History only; not part of the specification |
 
-**Numbering:**
-- Sections: "§A.8" is section 8 of Part 2 (task A), "§P.10.2" is section 10.2 of Part 1, "§B Appendix A" is appendix A of Part 3.
+### Numbering and conventions
+
+- Sections: "§A.8" is section 8 of Part 2 (task A), "§P.10.2" is section 10.2 of Part 1, "§B Appendix A" is appendix A of Part 3, "§H.2" is section 2 of Part 6.
 - Work items: "A1.6", "B2.1", "C2.4" (stage.number), unique across the whole document.
+- Gates: "G-A1", "G-B2", "G-D0" and so on, defined in §P.6. Open decisions: the numbers of §P.7 ("§P.7 item 1" = D0).
 - Contract changes: named by owning stage as CV-A1, CV-B2, CV-C1, CV-C2, numbers fixed at release in merge order (all ≥ 3.13.0); "C1", "C2" on their own mean only stages.
-- Fidelities: always main's F0–F5 (F0 heuristic, F1 analytic tool contract, F2 toy MC, F3 response / expected precision, F4 Geant4 study re-issued as `validated-in-scope`, F5 measurement); short Geant4 runs inside a search produce only "search values", which have no fidelity.
+- Fidelities: always main's F0–F5 (table below); short Geant4 runs inside a search produce only "search values", which have no fidelity.
 - Parts 2–4 share one structure: §X.0 task card, §X.1 terms and files, §X.2 prerequisites and provided interfaces, §X.3 hard rules, §X.4 design summary, from §X.5 one section per stage (work items and acceptance checklist), then contracts and versions, checks, not done and deferred, open decisions and risks, order of work, appendices.
+- Code citations are written `file:line` or "`file` line n", against the baseline `5584927`; each stage rechecks them on its new base when it starts (§P.10.2).
 
-**Consolidation note:** on 2026-10-23 the previously separate `plan.md`, `task-a-core.md`, `task-b-j15.md`, `task-c-design-search.md` and `architecture.md` (and their English versions) were merged into this document with unchanged content; only section numbers and cross-references were rewritten, and the old files were removed. Each part's version history stays in that part's appendix. The programs computing design numbers (`gate_operating_characteristics.py`, `j15_design_estimates.py`, `design_search_closure.py`) remain separate files in the same folder.
+### Glossary
 
-**Re-plan note:** on 2026-10-24, after the review against main 0.38.0 ([`review-2026-10-24-main-0.38.md`](review-2026-10-24-main-0.38.md)), the program was re-planned around main's detector system design loop: task B becomes the Geant4 evaluator for F4, J15 becomes a design project, and task C becomes the candidate generator `evaluate_design.py search`; see §P.1 and §P.11.
+Terms used across parts; part-specific terms are in that part's §X.1.
+
+| Term | Meaning | Source |
+|---|---|---|
+| Design loop | main's detector system design loop: D0 framing to D4 review, design-spec / design-candidate / design-evaluation, human gates H1–H4 | main's `system-design-workflow.md` |
+| design-spec | Design requirements: goals, requirements (REQ, with denominator and tolerance), allocations, constraints, `comparison_basis` | main `contracts/schemas/ext_design_spec.json` |
+| design-candidate | One candidate design: subsystems keyed by `DES-*` (role, technology, parameters, calibration); a variant is `derived_from` + `overrides` | main `ext_design_candidate.json` |
+| design-evaluation | The evaluation of one candidate, one figure of merit, one fidelity; written only by `evaluate_design.py` | main `ext_design_evaluation.json` |
+| Figure of merit (fom) | A quantity of the adequacy table, e.g. `momentum-resolution-core`, `charge-confusion-rate`, `shower-containment` | main `contracts/rules/design_adequacy.json` |
+| Denominator | The conditions under which a number holds, e.g. rigidity and species | main `system-design-workflow.md` D1 |
+| Fidelity F0–F5 | F0 heuristic (no run), F1 analytic tool contract, F2 toy MC, F3 response / expected precision, F4 Geant4 study re-issued as `validated-in-scope`, F5 measurement | main `contracts/design.py` line 65 |
+| Verdict | pass / fail / inconclusive with a reason code; derived only by `contracts/design.py` from the artifacts; this program's code never writes one | §P.2 R9 |
+| Bound: `optimistic` / `estimate` | `optimistic` can only exclude a candidate; `estimate` can decide, but needs a usable uncertainty | main `design.py` |
+| Tail sources | alignment, calibration-non-uniformity, noise-digitization, pattern-recognition; an F4 resolution or charge confusion is an `estimate` only when all four are simulated | main `design.py` line 64; B2.2 |
+| Model envelope | The [lo, hi] of the physics-list variations; `design.py` judges each end separately (FID-05) | B2.6, B3.4 |
+| `validated-in-scope` | Label of a study record: validated within its declared scope; only `check_geant4_study.py label --upgrade` can re-issue it | §A.4, B2.8 |
+| Upgrade | `label --upgrade` re-issuing a study record as `validated-in-scope`; conditions in §A.4 and B2.8 | `check_geant4_study.py` |
+| F4 qualification path, D0, D0-a–D0-d | The conditions under which a detector-level study becomes F4 (material definition, field, reconstruction, tracking reference) and their sub-decisions; awaiting the maintainer | §P.7.1, B2.8 |
+| CV-A1, CV-B2, CV-C1, CV-C2 | The contracts minor changes of the stages | §P.5 |
+| Study / study record | A set of Geant4 runs with their benchmarks, convergence and scope; the record is a computational-run artifact | §A.1 |
+| Evidence role | `extension.simulation.evidence_role`: what a run is for in a study (e.g. nominal, scan, regression, search, confirmation) | A1.4 |
+| Summary, observable declaration | `simulation-summary/1` (accumulators per block) and `simulation-observables/1` (observable definitions); schemas in `contracts/schemas/` | A1.5 |
+| Block, batch means | A run is split into K blocks; the standard error is estimated from the spread between blocks | §A.4 |
+| Seed hash H | Deterministic hash deriving a Geant4 seed from the study, role and point | A1.4, A2.2 |
+| Boundary artifacts | The summary, column map and effective config written by `layered_sim`; the study layer reads only these | A2 |
+| `element_sim`, `simreco`, `simroot` | B's Geant4 application, the reconstruction program not linked to Geant4, the ROOT-file reader | §B.1 |
+| Realization profile | The declared file with which `from-geometry` supplies fields the geometry mapping lacks (materials, transverse size, field extent) | B1.8 |
+| `from-geometry` | `geant4_run.py from-geometry`: `design-geometry/1` → `element_sim.spec/1` | B1.8 |
+| `search_summary`, search values | The search record `evaluate_design.py search` writes in a computational-run; its values are not evaluations and have no fidelity | C1.6 |
+| `expand --search` | Writes search finalists as design-candidates, which are then evaluated in the ordinary way | C1.7 |
+| sci-fix, ledger, advisory | The process for fixing wrong numbers: `sci-fix:` commits, ledger entries, advisories for affected versions | §A.5 A1.14 |
+| Journeys J14, J15, J16 | J14 thin silicon (existing), J15 minimal spectrometer design project (B3), J16 automated candidate generation (C3) | §P.5 |
+| G-* gates | Conditions before a stage starts or merges | §P.6 |
+| H1–H4 | The human gates of main's design loop (scope, requirements baseline, architecture selection, design baseline) | main `system-design-workflow.md` |
+
+**History:** how this document was consolidated and re-planned, and every part's version history, are in Part 6 (§H.1).
 
 ## Table of contents
 
 - **Part 1 — Program plan (§P)**
   - §P.0 One-page summary
-  - §P.1 Evaluation: problems and how they are handled
+  - §P.1 Relation to main: what main provides and what this program adds
   - §P.2 Planning principles
   - §P.3 Content and acceptance of the stages (summary)
   - §P.4 Interface ownership
@@ -52,7 +113,6 @@
   - §P.8 Main cross-task risks
   - §P.9 Document map and authority
   - §P.10 Execution environment: isolated worktree
-  - §P.11 Version history
 - **Part 2 — Task A: correctness fixes and boundary artifacts (§A)**
   - §A.0 Task card
   - §A.1 Terms and files
@@ -68,9 +128,8 @@
   - §A.11 Suggested order of work
   - §A Appendix A: Statistics summary
   - §A Appendix B: Numbers
-  - §A Appendix C: Baseline values (`9f08796`; rechecked against `5584927` on 2026-10-24)
+  - §A Appendix C: Baseline values (`5584927`; first taken at `9f08796`, rechecked at `5584927`)
   - §A Appendix D: Sources
-  - §A Appendix E: Version history
 - **Part 3 — Task B: `element_sim`, reconstruction and the J15 minimal spectrometer (§B)**
   - §B.0 Task card
   - §B.1 Terms and files
@@ -86,7 +145,6 @@
   - §B.11 Suggested order of work
   - §B Appendix A: numbers
   - §B Appendix B: sources
-  - §B Appendix C: version history
 - **Part 4 — Task C: automated candidate generation (§C)**
   - §C.0 Task card
   - §C.1 Terms and files
@@ -102,30 +160,35 @@
   - §C.11 Suggested order of work
   - §C Appendix A: Numbers
   - §C Appendix B: Sources
-  - §C Appendix C: Version history
 - **Part 5 — Design rationale (§R)**
   - §R.0 Summary
-  - §R.1 Design basis: what real experiments teach
-  - §R.2 Goals, constraints and principles
-  - §R.3 Architecture overview
-  - §R.4 Data tiers and the run summary
-  - §R.5 Execution, seeds, blocks and reproducibility
-  - §R.6 Validation classes and decisions
-  - §R.7 Contracts, traceability and sci-fix
-  - §R.8 Code and CI
-  - §R.9 Generality
-  - §R.10 Stages and acceptance
-  - §R.11 Residual risks
-  - §R.12 Decision record
-  - §R.13 History: superseded designs
-  - §R.14 Sources
-  - §R.15 Relation to main's detector system design loop (2026-10-24)
+  - §R.1 Relation to main's detector system design loop
+  - §R.2 Design basis: what real experiments teach
+  - §R.3 Goals, constraints and principles
+  - §R.4 Architecture overview
+  - §R.5 Data tiers and the run summary
+  - §R.6 Execution, seeds, blocks and reproducibility
+  - §R.7 Validation classes and decisions
+  - §R.8 Contracts, traceability and sci-fix
+  - §R.9 Code and CI
+  - §R.10 Generality
+  - §R.11 Stages and acceptance
+  - §R.12 Residual risks
+  - §R.13 Decision record
+  - §R.14 History: superseded designs
+  - §R.15 Sources
+- **Part 6 — Revisions, reviews and decisions (§H)**
+  - §H.1 Version history
+  - §H.2 Reviews and how they were handled
+  - §H.3 Concept mapping: old design → current
+  - §H.4 Superseded designs
+  - §H.5 Decision log
 
 ---
 
 # Part 1 — Program plan (§P)
 
-> Date: 2026-10-24 (re-planned against the detector system design loop of main 0.38.0)
+> Date: 2026-10-24
 
 ---
 
@@ -158,25 +221,26 @@ C1 ───────────────────────┴─�
 
 ---
 
-## §P.1 Evaluation: problems and how they are handled
+## §P.1 Relation to main: what main provides and what this program adds
 
-The previous version (2026-10-23) was based on main `9f08796` (0.23.0). The review against main 0.38.0 on 2026-10-24 (`review-2026-10-24-main-0.38.md`) found that main already has a complete design loop, so the program was re-planned.
-
-| # | Problem | Impact | Handling |
-|---|---|---|---|
-| P1 | **A detector-level Geant4 study cannot become F4.** F4 accepts only studies re-issued as `validated-in-scope` (`contracts/design.py:1004`); upgrading needs a reference benchmark whose scope covers the study, and resolution, charge confusion and shower containment have none | No Geant4 result of task B or C can enter the design loop | Build an F4 qualification path (D0, §P.7 item 1): the study may be upgraded only when four conditions hold: material definition, the field-propagation verification, the reconstruction verification and a new tracking reference benchmark (B2.8); the F4 uncertainty policy is a separate maintainer decision (D0-c) |
-| P2 | **Fidelity name clash.** Task C's F0/F1/F2 in the previous version meant something different from main's F0–F5 | Readers and `design.py` read the same name differently | The whole document uses main's names (§P.5); short Geant4 runs inside a search produce only "search values", which have no fidelity |
-| P3 | **Task C rebuilt a design system of its own**: its own requirements spec, design format, requirement verdicts, ranking and "recommended design", and broke main's rules (verdicts derived only by `design.py`, never claim a global optimum, gates need a human) | Cannot be merged | C becomes a candidate generator for stage D2, `evaluate_design.py search`: it reads the design-spec and a base candidate, writes only a `search_summary`, and finalists become candidates through `expand`, whose verdicts `report` derives |
-| P4 | **The F4 data path is incomplete.** Nothing on main writes `extension.study.results` or `tail_sources_simulated`; `evaluate_design.py f4` calls `label --upgrade` without `--run-record`, so `label` always refuses | F4 cannot actually be produced | A1 fixes the pass-through and the exit code in `f4`; B2 makes `label` write the fields F4 needs and adds an end-to-end test |
-| P5 | **A1 missed a defect and used old formats.** The convergence gate passes on coarser points when the finest scan point is missing (D11); the ledger and advisory formats changed; a Garwood interval and a seed derivation already exist in `core/stats` | A1 cannot start as written | A1 adds D11, uses the new formats and reuses existing functions (Part 2) |
-| P6 | **A1 scope creep** (handling kept from the previous version). Functions only later stages need stay out of A1 | The sci-fix is delayed | Principle R1; the decision engine has only `equivalence` and `detection_limit` in A1, B2 adds `change`; requirement verdicts belong to `design.py` |
-| P7 | **Contract-change placeholders depend on merge order.** C1 no longer depends on A and may merge before A1 | The order "CV1–CV3" no longer holds | Named by owning stage: CV-A1, CV-B2, CV-C1, CV-C2; numbers fixed at release in merge order (§P.5) |
-| P8 | **Interfaces in the wrong layer** (kept). `core/` may import only `core` (`check_layering.py:4`) | `core/` cannot use `contracts/schema.py` | The summary schemas live in `contracts/schemas/` and are validated by adapter or skill scripts; `core/simulation/` only computes |
-| P9 | **Open decisions and gates scattered** (kept) | Nobody sees which decision blocks which stage | Merged into the two tables §P.6 and §P.7; items main has already decided are marked with their source |
+The detector system design loop of main 0.37.0–0.38.0 already provides a complete framework for requirements, candidates, evidence and verdicts; this program does not build a second one, it only fills the gaps.
 
 **Interfaces main provides that this program uses directly:** design-spec, design-candidate, design-evaluation (contracts 3.11.0); `contracts/design.py` (verdicts, aggregation, screening, comparison basis, ranking and Pareto, F4 and F5 checks); `contracts/rules/design_adequacy.json` (screening and compliance fidelity per figure of merit); `contracts/rules/design_geometry.json` (the `layered-spectrometer` mapping 1.0.0); `evaluate_design.py` `run`, `budget`, `geometry`, `f4`, `scan`, `expand`, `plan`, `report`; parameter-level staleness and `run_workflow.py --incremental`; `scan_summary`; the capability `detector-design` (hep-detector).
 
-**What this program adds:** correct labels and statistics (A1); a Geant4 application, reconstruction and tail sources that can produce F4 (B1, B2); a complete demonstration of J15 as a design project (B3); automated candidate generation and multi-fidelity Geant4 search (C1, C2); demonstrations on two examples (C3).
+**Gaps this program fills** (checked against the baseline `5584927`):
+
+| # | Gap | Evidence | Stage that fills it |
+|---|---|---|---|
+| 1 | A Geant4 study's `validated-in-scope` can be issued wrongly (defects D1–D11), and F4 accepts only this label | `contracts/design.py:1004`; §A.4 | A1 |
+| 2 | `evaluate_design.py f4 --label-spec` does not pass run records to `label --upgrade`, so that path always refuses | `evaluate_design.py:503-506`; `check_geant4_study.py:544-569` | A1 (A1.17) |
+| 3 | No Geant4 application can simulate a spectrometer (piecewise field, many tracking planes, TOF, calorimeter) and take a `design-geometry/1` file | `adapters/geant4/` has only `layered_sim` | B1 |
+| 4 | Nothing writes a study record's `results.<fom>`, `tail_sources_simulated` and geometry file, and no reconstruction simulates the tail sources | `check_geant4_study.py:584-617`; `design.py:1058-1059` | B2 |
+| 5 | A detector-level study has no reference benchmark and cannot be upgraded to F4; an F4 `estimate` with only a statistical error is judged to have no usable uncertainty | `check_geant4_study.py:535-543`; `design.py:1300-1309` | B2 (qualification path) and D0 (§P.7.1) |
+| 6 | No demonstration project goes through the design loop up to F4 | main's `examples/design-space-spectrometer` has F1 evaluations only | B3 (J15) |
+| 7 | Candidates are written by hand or varied by `scan` over one candidate's parameter grid; there is no automated generation across structures and no multi-fidelity Geant4 search | `evaluate_design.py` `scan`, `expand` | C1, C2 |
+| 8 | No example shows that the search is independent of the detector kind | main's Example A and Example B | C3 |
+
+**What this program does not do:** its own requirements spec, design format, verdicts, ranking or "recommended design"; these belong to main's artifacts and `contracts/design.py` (§P.2 R8–R10).
 
 ---
 
@@ -189,7 +253,7 @@ The previous version (2026-10-23) was based on main `9f08796` (0.23.0). The revi
 | R3 | **One official implementation per quantity** | An implementation in another language or place may only serve as a test oracle; functions `core/stats` already has are reused |
 | R4 | **Keep the sci-fix minimal** | A1 contains only the changes needed to fix the defects and their direct foundations (including the small fixes that keep the F4 consumer from misreporting) |
 | R5 | **Every stage can be merged on its own** | It has its own version, VALIDATION entry, CHANGELOG and acceptance list; after the merge the plugin is consistent |
-| R6 | **Reproducible verdicts, traceable numbers** | Reproduction means the same verdict and label (§R.5.6); results carry the search size and the evidence correlation |
+| R6 | **Reproducible verdicts, traceable numbers** | Reproduction means the same verdict and label (§R.6.6); results carry the search size and the evidence correlation |
 | R7 | **AI is the designer, not the judge** | Claude chooses structures, proposes candidates and interprets results; "is it met" is derived only by `contracts/design.py` from the artifacts, and gates are approved by a human |
 | R8 | **Plug into main's design loop, do not build a second one** | Requirements are a design-spec, candidates are design-candidates, evidence is design-evaluations; fidelities are main's F0–F5 |
 | R9 | **Verdicts are derived only by `design.py`** | This program's code writes no verdict, maturity, stale marker, `screened_out` or `at-risk`; `core/stats/decisions.py` decides only study-layer gates (convergence, benchmarks, regression) |
@@ -203,10 +267,10 @@ The full work items and acceptance of each stage are in Parts 2–4; here only t
 
 | Stage | Includes | Explicitly excludes (in which stage) |
 |---|---|---|
-| A1 | Fixes of D1–D8, D10, D11; benchmark table and validation classes (reference, setup-matched, sanity, interface); scope comparison; configuration and isolation (`spec-v1`); block batch means, exact intervals (reusing `central_interval` of `core/stats/poisson_diagnostics.py`), MPV, quantiles; the decision engine's `equivalence` and `detection_limit`; two-stage event counts; seed hash H (its relation to `toy_ensemble.toy_seed` stated); `extension.simulation.evidence_role`; the schemas of `simulation-summary/1` and `simulation-observables/1` (`contracts/schemas/`); the Python summary generator; `tolerance_mode` `absolute` (the P6 exception: A1's own J14 benchmarks need it); `evaluate_design.py f4` passes `--label-run-record` through and maps `label` exit 3 to `incomplete`; the new ledger and advisory `/2` formats; J14 regeneration | `change` and regression (B2), the `results` and tail-source fields (B2), the seed rules for search and confirmation (C2), the `values` accumulator (C2), C++ summary (A2) |
+| A1 | Fixes of D1–D8, D10, D11; benchmark table and validation classes (reference, setup-matched, sanity, interface); scope comparison; configuration and isolation (`spec-v1`); block batch means, exact intervals (reusing `central_interval` of `core/stats/poisson_diagnostics.py`), MPV, quantiles; the decision engine's `equivalence` and `detection_limit`; two-stage event counts; seed hash H (its relation to `toy_ensemble.toy_seed` stated); `extension.simulation.evidence_role`; the schemas of `simulation-summary/1` and `simulation-observables/1` (`contracts/schemas/`); the Python summary generator; `tolerance_mode` `absolute` (the exception to principle R1: A1's own J14 benchmarks need it); `evaluate_design.py f4` passes `--label-run-record` through and maps `label` exit 3 to `incomplete`; the new ledger and advisory `/2` formats; J14 regeneration | `change` and regression (B2), the `results` and tail-source fields (B2), the seed rules for search and confirmation (C2), the `values` accumulator (C2), C++ summary (A2) |
 | A2 | `g4sim` (`SimHash`, `SimSeed`, `SimSummary`, `MiniJson`, `SimProbe`); `per-event` seeding; `layered_sim` writes summary, column map, effective config; `tree-v1`; effective config stored by content hash; `validate_spec`, `spec.schema.json` and `Spec.cc` accept `run.seeding`, `output.observables`, `output.blocks`, `output.debug_observable_dump`; `geant4_run.py run` writes `argv`, `script_sha256`, `versions.plugin_release`; the study layer reads only boundary artifacts; schema keywords (`maxItems`, `maximum`, `exclusiveMaximum`; never `uniqueItems`) | `element_sim` (B1) |
 | B1 | `element_sim.spec/1`, `element_sim`, piecewise-uniform field, a plane hit table for every charged track, calorimeter mother volume and leakage columns, per-event ROOT files, `simroot`, `geant4_run.py check-spec` (registered in `MISSING_FILE_ARGS`), `geant4_run.py from-geometry` with the realization profile, interface consistency of the two backends, deterministic field check | `simreco` and tail sources (B2), mapping 1.1.0 (B2), J15 (B3) |
-| B2 | `simreco` (digitization and reconstruction, portable RNG); switchable tail sources (misalignment as at least 20 reconstruction replicas, digitization and noise, hit association, a position-dependent field error; a global field scale belongs to rigidity-scale-offset) and the curvature offset; `geant4_run.py reco` and `table`; transitive processing chains; verification and regression classes, the regression role, the decision engine's `change`; Gaussian-core resolution and counting charge-confusion observables; `label` `--results`, `--geometry` and `f4` `--label-results`, `--label-geometry`; `f4` accepts asymmetric or exact uncertainties; mapping 1.1.0; tracking reference benchmark (Lynch–Dahl, qualifies `momentum-resolution-core` only), the per-class scope model and the F4 qualification rule; end-to-end test `geometry → study → label --upgrade → f4` (including one case that reaches a decisive `design.py` row); CV-B2 | J15 design project (B3); the surrogate class for task C (deleted) |
+| B2 | `simreco` (digitization and reconstruction, portable RNG); switchable tail sources (misalignment as at least 20 reconstruction replicas, digitization and noise, hit association, a position-dependent field error; a global field scale belongs to rigidity-scale-offset) and the curvature offset; `geant4_run.py reco` and `table`; transitive processing chains; verification and regression classes, the regression role, the decision engine's `change`; Gaussian-core resolution and counting charge-confusion observables; `label` `--results`, `--geometry` and `f4` `--label-results`, `--label-geometry`; `f4` accepts asymmetric or exact uncertainties; mapping 1.1.0; tracking reference benchmark (Lynch–Dahl, qualifies `momentum-resolution-core` only), the per-class scope model and the F4 qualification rule; end-to-end test `geometry → study → label --upgrade → f4` (including one case that reaches a decisive `design.py` row); CV-B2 | J15 design project (B3); the surrogate class (not done, §B.9) |
 | B3 | J15's design-spec and candidates (nominal 0.5 T / N = 6, variants N = 4, N = 8); F1 and F2 through `evaluate_design.py run`; one F4 study per (figure of merit, denominator); demonstrating that the bound moves from `optimistic` to `estimate` as tail sources are switched on, the model envelope, and charge confusion at `chain.incomplete` without data validation; the validation ladder (field propagation, TOF, sampling fraction; the isolated PVT benchmark is a separate study record) as an `unvalidated` record; calorimeter cut convergence, variations, TOF σ_t sensitivity; journey J15 | — |
 | C1 | `evaluate_design.py search` and `expand --search`; the search spec (parameter ranges, subsystem slots per role, evaluation budget, seed, objectives = figures of merit of the adequacy table); genome and decoder (written as `overrides` on the base candidate); in-process F1 evaluation by the same tools the tool contracts run (`argv=None` added to four tools' `main()`); NSGA-II, Sobol, WFG hypervolume; `search_summary` (CV-C1, exempt from the orphan-run rule); closure tests; the section "D2 automated candidate generation" in `system-design-workflow.md` | Any Geant4 evaluation (C2); verdicts, ranking, recommended design (not done; `design.py`'s job); a new reference file or `SKILL.md` change (not done) |
 | C2 | Search values from `from-geometry` and short `element_sim` runs; common random numbers and paired comparison (G-C2a); the `values` accumulator (Python and `SimSummary.hh`, `values_max` per block); winner's-curse toys; seed roles and cache key; F4 confirmation of finalists; the search-seed rule in `design.py` (CV-C2) | Examples (C3); selection-aware coverage (only proposed to hep-statistics and `design.py`) |
@@ -268,8 +332,6 @@ Calls across adapters and skills always go through subprocesses and JSON files (
 | Open decisions | D0 and the numbers of §P.7 | D0 = F4 qualification path |
 | Section references | all within this document: "§P.n" is Part 1, "§A.n", "§B.n", "§C.n" are Parts 2–4, "§R.n" is Part 5; "§B Appendix A" is the appendix of Part 3 | — |
 
-The previous CV1, CV2, CV3 become CV-A1, CV-B2, CV-C2; CV-C1 is new. The previous task C's "F0" corresponds to main's F1, and its "F1, F2" and "confirmation" correspond to search values and F4.
-
 ---
 
 ## §P.6 Stage gates
@@ -293,7 +355,7 @@ The previous CV1, CV2, CV3 become CV-A1, CV-B2, CV-C2; CV-C1 is new. The previou
 
 | # | Item | Recommendation | Blocks |
 |---|---|---|---|
-| 1 | **D0: the path by which a detector-level Geant4 study becomes F4** | Build a qualification path (direction chosen by the user; `validated-in-scope` keeps a single meaning across the plugin). The study is upgraded only when all four conditions hold, each matched to it by its own key: (1) material definition: every material of the realized geometry has composition and density from an independent source, and a geantino scan reproduces the candidate's declared `layer_x_over_x0` / `passive_x_over_x0` within a declared tolerance (A1's material benchmarks are evidence for the materials' physics, not a precondition); (2) the field-propagation verification passed for the same field-configuration hash; (3) `reco-closure` passed for the same reco-spec hash; (4) the tracking reference benchmark: multiple-scattering core width in an isolated Si slab against Lynch–Dahl (F = 98 %), with a negative control, scope dimensions material, thickness, rigidity, species, qualifying `momentum-resolution-core` only (point resolution is a declared input that no benchmark validates). The scope model becomes a conjunction over benchmark classes; external benchmark records enter through `--reference-record` and are re-derived by `dependencies.py` (CV-B2, B2.8). Sub-decisions: **D0-b** charge confusion needs a tail benchmark (fraction of scattering angles beyond about 3θ₀ against single-scattering / Molière theory or published data) and is not qualified until then; **D0-c** (the real decision) F4 uncertainty: with FID-01's statistical error only (about 1–3 %), every upgraded F4 `estimate` is `uncertainty.missing` because of `min_relative_uncertainty` (0.2 / 0.3 / 0.1); options (a) CV-B2 changes FID-01 so F4 uncertainty = statistical ⊕ tail-replica spread (recommended; the model envelope is not added, because FID-05 already judges each end and adding it would count it twice), (b) revise the adequacy table's F4 minima (placeholders today), (c) both; **D0-d** additionally admit unvalidated F4 for screening only for figures of merit whose screening fidelity is F4 (e.g. shower containment, which D0 does not cover), offered as an option, not chosen. Recommendation: approve the direction, conditional on the revised B2.8 and a decision on D0-c | B3, C2's confirmation |
+| 1 | **D0: the path by which a detector-level Geant4 study becomes F4** (full content in §P.7.1) | Build the qualification path and approve it conditionally (D0-a); charge confusion also needs a tail benchmark (D0-b); the F4 uncertainty policy (D0-c) is the real decision; screening-only F4 as a complementary option (D0-d) | B3, C2's confirmation |
 | 2 | Classification of CV-A1 | minor plus sci-fix | A1 |
 | 3 | Stewards and second consumers of the new `core/` modules | statistics to hep-statistics; `core/simulation/` to hep-detector; registered in `OWNERS.json` | A1 |
 | 4 | hep-computing agrees to declare `simulation` and `search_summary` in `ext_computational_run.json` | agree | A1, C1 |
@@ -309,12 +371,51 @@ The previous CV1, CV2, CV3 become CV-A1, CV-B2, CV-C2; CV-C1 is new. The previou
 | 14 | Whether the Bayesian-optimisation backend (Ax/BoTorch) is listed as a tested tool | list as optional | C3 |
 | 15 | New CI impact groups (`adapters/geant4/**`, `core/stats/**`, `core/simulation/**`) | add them, to avoid full CI runs | A1 |
 
-**Already decided by main (no longer open):**
+### §P.7.1 D0: the path by which a detector-level Geant4 study becomes F4
+
+**Question.** The design loop accepts a Geant4 study as F4 evidence only when it has been re-issued as `validated-in-scope` (`contracts/design.py:1003-1005`); `label --upgrade` needs a reference benchmark whose scope contains the study's (`check_geant4_study.py:535-543`), and the existing benchmarks are all MeV-scale observables in thin slabs. So detector-level studies (resolution, charge confusion, shower containment) cannot become F4 today. Even if they could be upgraded, the F4 uncertainty under FID-01 is only the statistical error (about 1–3 %), below the adequacy table's `min_relative_uncertainty` (resolution 0.2, charge confusion 0.3, shower containment 0.1; these values are placeholders), so `design.py` judges it to have no usable uncertainty (`uncertainty.missing`, `design.py:1300-1309`).
+
+**Direction (chosen by the user, awaiting the maintainer).** Build a qualification path, so that `validated-in-scope` keeps a single meaning across the plugin; do not let `design.py` accept un-upgraded F4.
+
+**Upgrade conditions** (all four must hold, each matched to the study by its own key; implementation details in B2.8):
+
+| Condition | Matched by | Content |
+|---|---|---|
+| 1. Material definition | the materials of the realized geometry | Composition and density of every material come from a recorded independent source; a geantino scan reproduces the candidate's declared `layer_x_over_x0` / `passive_x_over_x0` within a declared tolerance. A1's material benchmarks are evidence for the materials' physics, not a precondition |
+| 2. Field | field-configuration hash | The field-propagation verification (B1's analytic helix) passed |
+| 3. Reconstruction | reco-spec hash | `reco-closure` passed |
+| 4. Tracking reference | benchmark scope: material, thickness, rigidity, species | Multiple-scattering core width in an isolated Si slab against Lynch–Dahl (F = 98 %), with a negative control; qualifies `momentum-resolution-core` only. Point resolution is a declared input that no benchmark validates (at 100 GV it dominates the core); Highland (about 11 % accuracy) cannot serve as a reference |
+
+**Scope model (CV-B2).** Each benchmark class declares the scope keys it covers, and the upgrade condition is the conjunction over classes; field configuration and reco spec are matched by hash; external benchmark records enter through `--reference-record` and are re-derived by `contracts/dependencies.py`. Existing (J14-type) studies keep their behaviour.
+
+**Sub-decisions:**
+
+| Id | Question | Recommendation |
+|---|---|---|
+| D0-a | Approve the direction of the qualification path? | Approve conditionally: on the revised B2.8 (scope model, material definition, charge confusion only through a tail benchmark) and on the decision on D0-c |
+| D0-b | How does charge confusion qualify? | A core-width benchmark cannot validate the tails that drive charge confusion away from the MDR (single large-angle scattering, nuclear interactions, wrong hit association); it needs a tail benchmark (fraction of scattering angles beyond about 3θ₀ against single-scattering / Molière theory or published data); until then charge confusion is not qualified |
+| D0-c | The F4 uncertainty (the real decision) | (a) CV-B2 changes FID-01: F4 uncertainty = statistical ⊕ tail-replica spread (at least 20 reconstruction replicas with independent misalignment and field-non-uniformity draws); the model envelope is not added, because FID-05 already judges each end and adding it would count it twice. If the combined uncertainty is still below the minimum, (b) revising the adequacy table's F4 minima is needed as well. Either way, an end-to-end test must reach a decisive verdict row, not only `uncertainty.missing` |
+| D0-d | Also admit un-upgraded F4 for screening only, for quantities with no reference (e.g. shower containment)? | Offered as an option, not chosen; decide after D0-a and D0-c |
+
+**What approval unblocks:**
+
+| Approved | Unblocks |
+|---|---|
+| D0-a and D0-c | B2.8's rules take effect; B3 produces decisive F4 resolution evaluations; C2's F4 confirmation of finalists |
+| D0-b | F4 charge-confusion evaluations (still needing the data-validation and rigidity-scale-offset upstreams the adequacy table requires) |
+| D0-d | Screening candidates on shower containment at F4 |
+
+**Before approval:** B2 may merge with the qualification rules present but not in force (G-D0); B3 and C2's confirmation do not start; confirmation studies stay `unvalidated`.
+
+**The maintainer's form:** `decision-d0-f4-qualification.md` in the same folder (issue #273); once the maintainer fills in its Decision section, this section and B2.8 are updated accordingly.
+
+### §P.7.2 Already decided by main (no longer open)
+
 - The owner of the capability `detector-design` is hep-detector (`docs/capability-map.json`).
 - The entry to the design loop is a hub link with no change to the `SKILL.md` description (CHANGELOG 0.37.0, OQ-01); task C only adds a section to `system-design-workflow.md`.
-- The search is a subcommand, following the precedent of `scan` (OQ-18).
-- The previous `extension.design_search` becomes the computational-run field `search_summary` (like `scan_summary`).
-- The previous detector-design adapter, requirements-spec schema and component-catalogue schema are deleted.
+- The search is a subcommand of `evaluate_design.py`, following the precedent of `scan` (OQ-18).
+- The search record lives in the computational-run field `search_summary` (like `scan_summary`), with no separate extension.
+- No design adapter, requirements-spec schema or component-catalogue schema is added; main's design loop provides these.
 
 ---
 
@@ -339,12 +440,13 @@ The previous CV1, CV2, CV3 become CV-A1, CV-B2, CV-C2; CV-C1 is new. The previou
 
 | Document | Content | Authority |
 |---|---|---|
-| Part 1 (this part) | Evaluation, principles, stages, interface ownership, naming, gates, open decisions, risks, execution environment | Order, numbering, version placeholders, ownership, gates, open decisions, execution environment (isolated worktree) |
+| Part 1 (this part) | Stages at a glance, relation to main, principles, stage boundaries, interface ownership, naming, gates, open decisions, risks, execution environment | Order, numbering, version placeholders, ownership, gates, open decisions, execution environment (isolated worktree) |
 | Part 2 (task A) | Work items and acceptance of A1, A2 | Content and acceptance of these two stages |
 | Part 3 (task B) | J15 design; work items and acceptance of B1, B2, B3 | Content and acceptance of these three stages; J15's numbers |
 | Part 4 (task C) | Design of automated candidate generation; work items and acceptance of C1, C2, C3 | Content and acceptance of these three stages |
-| Part 5 (design rationale) | Design rationale, reference experiments, relation to main's design loop, superseded designs | Rationale; where it conflicts with the specs, the specs win and the conflict is reported |
-| `review-2026-10-24-main-0.38.md` | Review record against main 0.38.0 (findings and recommendations) | The basis of the re-plan; this document has been revised accordingly |
+| Part 5 (design rationale) | Relation to main's design loop, design rationale, reference experiments, architecture | Rationale; where it conflicts with the specs, the specs win and the conflict is reported |
+| Part 6 (record) | Version history, review findings and how they were handled (including the review against main 0.38.0), old-to-new design mapping, superseded designs, decision log | History only; not part of the specification |
+| `decision-d0-f4-qualification.md` | Decision record for D0 (the maintainer's form; issue #273) | The maintainer's decision; content matches §P.7.1 |
 | `README.md` | Folder entry, points to this document | — |
 | `gate_operating_characteristics.py`, `j15_design_estimates.py`, `design_search_closure.py` | Programs computing design numbers | The numbers of the corresponding appendices |
 
@@ -384,7 +486,7 @@ Parts 2–4 share one structure: §X.0 task card, §X.1 terms and files, §X.2 p
 4. Build directories, E2 output, ROOT files and trial results go in uncommitted directories inside the worktree (e.g. `build/`, `work/`, excluded by `.gitignore`) or in a scratch directory dedicated to that worktree; worktrees do not share build directories. The Geant4 installation itself (E2) may be shared read-only by several worktrees.
 5. Commit only on the stage's branch; commits carry the required trailers; push to the remote branch of the same name. Without the maintainer's approval, do not push to `main` or open a pull request.
 6. Before merging, run the checks of §A.8 in the worktree and confirm the gates (§P.6).
-7. When the spec needs a correction: before the maintainer approves the spec, change it in the documentation worktree (`.claude/worktrees/geant4-architecture`, branch `worktree-geant4-architecture`); after implementation has started, change it in the stage's worktree. In both cases change the Chinese and English versions together and record it in the version history; when other stages are affected, update this part at the same time.
+7. When the spec needs a correction: before the maintainer approves the spec, change it in the documentation worktree (`.claude/worktrees/geant4-architecture`, branch `worktree-geant4-architecture`); after implementation has started, change it in the stage's worktree. In both cases change the Chinese and English versions together and record it in the version history in Part 6 §H.1; when other stages are affected, update this part at the same time.
 8. Isolation for independent review follows Appendix A7 of `docs/dev/independent-review-spec.md` (host settings: `CLAUDE_CODE_FORK_SUBAGENT=0` or `Agent(fork)` in `permissions.deny`, and a named non-fork subagent type); worktrees are for implementation only. Reviews only read, never write.
 
 ### §P.10.4 Stages that can run in parallel
@@ -404,21 +506,10 @@ Each parallel stage uses its own worktree and branch; a single stage is never im
 
 ---
 
-## §P.11 Version history
-
-| Version | Content |
-|---|---|
-| 2026-10-23 | First version: consolidated evaluation, planning principles, eight stages (B split into B1–B3, C into C1–C3), interface ownership, naming (contract versions written CV1–CV3), gates, consolidated open decisions and risks |
-| 2026-10-23 | Added §P.10 "Execution environment: isolated worktree" (creating, confirming, rules, parallel stages, finishing) and the reading guide for agents |
-| **2026-10-24 (this version)** | **Re-planned against the detector system design loop of main 0.38.0 (review record `review-2026-10-24-main-0.38.md`): baseline `5584927`; main's fidelities F0–F5 adopted; B becomes the F4 evaluator (`from-geometry`, tail sources, `results` fields, qualification path D0); J15 becomes a design project; C becomes the candidate generator `evaluate_design.py search` and no longer depends on A; contract placeholders become CV-A1, CV-B2, CV-C1, CV-C2; G-D0 and G-B2 added; open decisions renumbered and those main already decided marked** |
-| 2026-10-24 | Fixes after a new independent review: D0 becomes v2 (material definition replaces material-benchmark scope; per-class scope model; tracking reference against Lynch–Dahl, qualifying `momentum-resolution-core` only; sub-decisions D0-b, D0-c, D0-d); G-D0 includes D0-c, G-B2 tests both paths and reaches a decisive row; C2's adapter 0.5.0; B2's tail sources become reconstruction replicas and a position-dependent field error; risk 12 added |
-
----
-
 # Part 2 — Task A: correctness fixes and boundary artifacts (§A)
 
 > Order: A1 → A2; then task B (Part 3). Task C's C1 does not depend on task A (§P.0)
-> Baseline: hep-research `main` at `5584927` (0.38.0), contracts 3.12.0, adapter geant4 0.1.0 (unchanged since `9f08796`), Geant4 11.4.3; first written against `9f08796` (0.23.0)
+> Baseline: hep-research `main` at `5584927` (0.38.0), contracts 3.12.0, adapter geant4 0.1.0 (unchanged since `9f08796`), Geant4 11.4.3
 > Date: 2026-10-24
 
 ---
@@ -454,8 +545,8 @@ Each parallel stage uses its own worktree and branch; a single stage is never im
 **First step:** create the isolated worktree for this stage per §P.10.2 (`.claude/worktrees/geant4-<stage>`, branch `worktree-geant4-<stage>`, based on the latest `origin/main` that contains the prerequisite stages), and confirm `git rev-parse --show-toplevel`, `git branch --show-current` and `git status`. Every following step happens in this worktree.
 
 **Before starting:**
-1. Check whether `main` has moved past `5584927` (0.38.0; the checks were redone against it on 2026-10-24, see §A Appendix C and the review record `review-2026-10-24-main-0.38.md`). If so, read the new CHANGELOG, redo the checks of §A Appendix C, and update this part (both languages).
-2. Read §P.0–§P.6; read §R.0 and §R.2; read the sci-fix process (evidence grades and ledger around lines 126–251, advisories around lines 252–294), the adapter-change process and the release steps in `docs/maintenance.md`; read D3 (the F4 row) of `skills/hep-detector/references/system-design-workflow.md`.
+1. Check whether `main` has moved past `5584927` (0.38.0; this part's code citations and values were checked against it, see §A Appendix C; the review record of that check is in §H.2). If so, read the new CHANGELOG, redo the checks of §A Appendix C, and update this part (both languages).
+2. Read §P.0–§P.6; read §R.0 and §R.3; read the sci-fix process (evidence grades and ledger around lines 126–251, advisories around lines 252–294), the adapter-change process and the release steps in `docs/maintenance.md`; read D3 (the F4 row) of `skills/hep-detector/references/system-design-workflow.md`.
 3. Start A1 from `prototype/phase1-core.patch`. It changes only `contracts/validate.py`, `check_geant4_study.py`, `geant4_benchmarks.py`, the study-spec schema and two test files, nothing in `core/`: the benchmark table (grades and kinds, no validation classes), the scope comparison with kinds (`scope_outside()`; dimensions hard-coded as particle, material, energy, thickness, with an exception for `longitudinal-profile`), configuration and target hash in the benchmark output (derived from the run record's `extension.simulation.geometry`, not from spec/1; no target for `longitudinal-profile`), and the enum fix of A1.12. It predates this spec: it lacks `target_slabs`, `setup-matched`, per-benchmark scope dimensions, `hash_scheme`, the `dependencies.py` re-derivation and CV-A1 gating; it gates at a hard-coded 3.6.0 (which would apply the new rules retroactively to 3.6.0–3.12.x records and must be replaced by the CV-A1 constant); it writes `longitudinal-profile` as `("reference", ("shower-shape",))`. It still applies to `5584927` (dry run; `contracts/validate.py` offset by 2 lines).
 
 ---
@@ -483,7 +574,7 @@ Each parallel stage uses its own worktree and branch; a single stage is never im
 | IUT | intersection-union test: passes only if every observable is equivalent |
 | DL | detection limit of a negative control |
 | sci-fix | The process in `docs/maintenance.md` for fixing scientific-correctness defects |
-| Notation | "A1.6", "B1.3", "C2.1" are work items (unique across the document); "§A.7", "§P.4", "§R.6" are sections of this document's parts (§P Part 1, §A this part, §B Part 3, §C Part 4, §R Part 5) |
+| Notation | "A1.6", "B1.3", "C2.1" are work items (unique across the document); "§A.7", "§P.4", "§R.7" are sections of this document's parts (§P Part 1, §A this part, §B Part 3, §C Part 4, §R Part 5) |
 
 **Main files (relative to `plugins/hep-research/`):**
 
@@ -542,7 +633,7 @@ Breaking any of these blocks the merge.
 11. **Contract versions.** New rules are gated with `strict or _at_least(contract_version, CV-A1)`, with no warning branch.
 12. **The offline replay of J14** always runs, without Geant4 or a compiler.
 13. **No change to existing outputs.** A2 only adds files and optional fields; J14's existing specs must produce a CSV bit-identical to the pre-A2 one (same host).
-14. **Not done:** integer quantization, 128-bit integers, bit-identical statistics, spec-format conversion, `simstat`, a `simcore` not linked to Geant4 (reasons in §R.13).
+14. **Not done:** integer quantization, 128-bit integers, bit-identical statistics, spec-format conversion, `simstat`, a `simcore` not linked to Geant4 (reasons in §R.14).
 
 ---
 
@@ -778,7 +869,7 @@ A1 changes only Python. Statistics are computed from summaries that Python produ
 
 ### A1.16 Completeness of the convergence scan (D11)
 
-Numbered when added on 2026-10-24; not renumbered, so that existing references stay valid.
+A1.16 and A1.17 come after A1.15 and are not renumbered, so that existing references stay valid.
 
 **Change:** `convergence()` in `check_geant4_study.py` (from line 335; `vals` at lines 341–348); protocol lines 93–95.
 
@@ -1132,7 +1223,7 @@ Computed by `gate_operating_characteristics.py` (needs numpy and scipy; a design
 - Mean se_diff under the two-stage design ≈ 0.189 tol (target 0.25 tol); probability that at least one point of a pair misses its target 0.190.
 - Detection-limit power (the caught definition of A1.10) is near 0.977 (the reviewer's calculation about 0.9785).
 
-## §A Appendix C: Baseline values (`9f08796`; rechecked against `5584927` on 2026-10-24)
+## §A Appendix C: Baseline values (`5584927`; first taken at `9f08796`, rechecked at `5584927`)
 
 | Item | Value |
 |---|---|
@@ -1162,20 +1253,7 @@ Computed by `gate_operating_characteristics.py` (needs numpy and scipy; a design
 
 ## §A Appendix D: Sources
 
-The experiments and frameworks the design refers to (ATLAS, CMS, ALICE, Key4hep, Allpix², geant-val, Belle II) are in §R.14. Relevant Geant4 11.4.3 source files: `G4RunManager.cc`, `G4MTRunManager.cc`, `G4WorkerRunManager.cc`, `G4EmParameters.cc`, `G4ProductionCutsTable`, `G4HadronicProcess.hh`, `G4EnergyRangeManager`, `G4AccumulableManager`, `G4VAccumulable`, `G4PhysicalVolumeStore`, `G4LogicalVolume`, `G4NistMaterialBuilder.cc`, `G4PVPlacement`.
-
-## §A Appendix E: Version history
-
-| Version | Content |
-|---|---|
-| Before 2026-10-21 | Three rounds of independent review, two checks against 0.21.0 and `9f08796`, stage 1 prototype |
-| 2026-10-22 | Language split, per-event ROOT files, task split, organized as an implementation spec; redesign referencing real experiments (Part 5 (design rationale)); rewritten for the new architecture |
-| 2026-10-23 | Fixes after independent review (two-stage operating characteristics recomputed, definition of H, caught definition, reseeding at the start of `GeneratePrimaries`, etc.); re-examined for automated design (statistics moved to `core/`) |
-| 2026-10-23 | Reorganized per the plan (Part 1): A1 back to a minimal sci-fix (`change`, `threshold`, `order`, paired comparisons, search roles and `values` moved to B2 and C2); contract version written CV1; the seed hash in `core/simulation/seeds.py`; section numbering consistent with tasks B and C (§A.2 prerequisites and provided interfaces, §A.8 checks, §A.10 open decisions and risks) |
-| 2026-10-23 | Added the isolated-worktree execution rule: header, the first step of §A.0, the start of §A.11 (§P.10) |
-| 2026-10-23 | Fixes after the detailed check: new spec fields added to `validate_spec()`, `spec.schema.json` and `Spec.cc` together; A1.5's selections match the current code; `tolerance` and the direction of `count_if`; names of the seed fields and `cmd_chunk`; trial runs and N rounded up to a multiple of K; tol and se_rel of DL; the `tree-v1` target; `float.hex()` special values, `setTheSeeds`, `IsBlocked()` and the general processes; cross-platform tolerance of Box–Muller; D7 and D8 in the ledger; factual corrections (line numbers, size of `recorded/`, `summaries/`, the prototype's description) |
-| **2026-10-24 (this version)** | **Re-planned against main 0.38.0 (detector design loop): baseline `5584927` / contracts 3.12.0; D11 added (A1.16) and F4-consumer compatibility (A1.17); ledger and advisories in main's current formats (one entry per fix, `documentation_fixes`, advisory `/2`, SFA-2026-039/-040, covering F4 design evaluations); Garwood, `toy_seed` and `coverage_gate` reused; summary schemas moved to `contracts/schemas/`, column-map and effective-config schemas to the adapter; definition of `statistical_uncertainty`; `evidence_role`; CV1 written CV-A1; `CORE_VERSION` and `OWNERS.json`; A2's run records gain `argv`, `script_sha256`, `versions.plugin_release`, schema keywords `oneOf`/`not` and exemptions; line numbers updated** |
-| 2026-10-24 | Fixes after a new independent review: §P.7 item references (items 2–8); A1.6 note on coverage under `design.py`'s one-sided 0.95 decision; A1.17 states `label`'s exit codes and B2's `--label-results`/`--label-geometry`; A2.8 `SIM_SOURCES` and `MiniJson.hh`; `f4` lines 498–553; scope of the tracking reference and that it qualifies `momentum-resolution-core` only |
+The experiments and frameworks the design refers to (ATLAS, CMS, ALICE, Key4hep, Allpix², geant-val, Belle II) are in §R.15. Relevant Geant4 11.4.3 source files: `G4RunManager.cc`, `G4MTRunManager.cc`, `G4WorkerRunManager.cc`, `G4EmParameters.cc`, `G4ProductionCutsTable`, `G4HadronicProcess.hh`, `G4EnergyRangeManager`, `G4AccumulableManager`, `G4VAccumulable`, `G4PhysicalVolumeStore`, `G4LogicalVolume`, `G4NistMaterialBuilder.cc`, `G4PVPlacement`.
 
 ---
 
@@ -1207,7 +1285,7 @@ The experiments and frameworks the design refers to (ATLAS, CMS, ALICE, Key4hep,
 **Definition of done:** the acceptance checklists of B1.10, B2.10 and B3.9 are all ticked; all checks of §A.8 pass; gates G-B1a, G-B1b and G-B2 (§P.6) pass; the qualification rules of B2.8 and B3's F4 confirmation merge only after D0 is approved.
 
 **Main decisions:**
-1. **Add a backend, do not change `layered_sim`.** `element_sim` leaves J14's program untouched and validates the output-layer interface with a real second backend (§R.3.2).
+1. **Add a backend, do not change `layered_sim`.** `element_sim` leaves J14's program untouched and validates the output-layer interface with a real second backend (§R.4.2).
 2. **The design-candidate is the single source of truth.** The geometry of an F4 study always comes from `evaluate_design.py geometry` applied to the candidate, and `element_sim.spec/1` is derived from it deterministically (B1.8); hand-written specs are only for studies that are not used as F4.
 3. **Field accuracy by a deterministic check.** Charged geantino against an analytic helix, no statistics needed; done in B1 (B1.7).
 4. **F4 through a qualification path.** A detector-level study can become `validated-in-scope` through `label --upgrade` only when the material-definition, field and reconstruction verifications have passed and the tracking reference benchmark has passed (B2.8, D0); charge confusion additionally needs a tail benchmark (D0-b); the F4-uncertainty policy (D0-c) decides whether an upgraded evaluation can reach a verdict. J15's verification ladder is a separate record that is always `unvalidated` (B3.2).
@@ -1241,7 +1319,7 @@ The experiments and frameworks the design refers to (ATLAS, CMS, ALICE, Key4hep,
 | TOF station | TOF1 or TOF2; two layers per station (a, b) |
 | charged geantino | Geant4's charged test particle that feels only the field and has no material interactions (mass 0, β = 1) |
 | processing chain | simulation → reduction → digitization and reconstruction → table, one computational-run record per step |
-| Notation | "B1.3" is a work item of this part; "§B.4.2" is a section of this part; "A1.6", "C2.1" are work items of tasks A and C; "§A.3", "§P.4", "§R.6" are sections of other parts of this document |
+| Notation | "B1.3" is a work item of this part; "§B.4.2" is a section of this part; "A1.6", "C2.1" are work items of tasks A and C; "§A.3", "§P.4", "§R.7" are sections of other parts of this document |
 
 **Main files (relative to `plugins/hep-research/`):** `adapters/geant4/assets/g4sim/` (created in A2, extended here); `adapters/geant4/assets/element_sim/` (new); `adapters/geant4/assets/simroot/` (new); `adapters/geant4/assets/simreco/` (new, does not link Geant4); `adapters/geant4/assets/geant4_run.py` (adds `check-spec`, `from-geometry`, `reco`, `table`; `SIM_SOURCES` defined at line 63, used at lines 327 and 386); `core/stats/decisions.py` (B2 adds `change`); `contracts/validate.py`, `contracts/dependencies.py`, `contracts/design.py`, `contracts/rules/design_geometry.json`, `contracts/schemas/design_geometry.json` (CV-B2); `skills/hep-detector/scripts/check_geant4_study.py` (`cmd_label` from line 496), `skills/hep-detector/scripts/geant4_benchmarks.py` (`GRADES` at line 92, new benchmark functions), `skills/hep-detector/scripts/evaluate_design.py` (`geometry` at line 462, `f4` at lines 498–553); `skills/hep-detector/assets/geant4-study-spec.schema.json`; `skills/hep-detector/references/geant4-study-protocol.md`, `system-design-workflow.md`; `tests/skills/test_cli_robustness.py` (`MISSING_FILE_ARGS`, the `geant4_run.py` entry at line 153); `docs/researcher-journeys.md`, `docs/maintenance.md`, `docs/capability-matrix.md` ("twenty-three scripts" at line 49, checked by the test class `DetectorScriptCount` at line 145 of `tests/skills/test_documented_output_claims.py`), `docs/capability-map.json` and `docs/capability-map.md`; `examples/design-minimal-spectrometer/` and `tests/examples/test_design_minimal_spectrometer.py` (new).
 
@@ -1391,7 +1469,7 @@ At 0.6 GV β changes by 2.87 % between the stations, more than the TOF resolutio
 
 ### §B.4.3 Comparison with real instruments
 
-| Instrument | Configuration (sources in §R.14) | Compared with J15 |
+| Instrument | Configuration (sources in §R.15) | Compared with J15 |
 |---|---|---|
 | PAMELA | 0.43 T permanent magnet; 6 double-sided silicon microstrip planes, resolution better than 4 µm; MDR above 1 TV; three TOF planes (S1–S3, segmented into paddles); tungsten/silicon imaging calorimeter 16.3 X₀, 0.6 λ; also anticoincidence, S4, neutron detector | Almost the same type; J15 assumes 10 µm Si resolution (more conservative), unsegmented TOF, no anticoincidence |
 | AMS-02 | TOF with four planes (8, 8, 10, 8 counters); about 140 ps system resolution for protons | J15's 100 ps per layer is optimistic, hence the 100 and 150 ps sensitivity (B3.5) |
@@ -1426,7 +1504,7 @@ J15's README uses this table to argue that J15 is reasonable, and stresses that 
 | `elements` | Box elements: name, material, centre, half-lengths, mother (the world or one element; only one level of nesting), role (`passive`, `tracker-plane`, `tof-layer`, `calorimeter` (mother), `calorimeter-active`, `calorimeter-passive`), repetition (for the calorimeter's sampling layers) |
 | `field` | `regions[]`: the element each region is attached to, the B vector (uniform within the region); accuracy parameters (B1.2). J15 nominally has one region |
 | `physics` | Physics list and EM option, cuts, regions (same semantics as `layered_sim`, through `g4sim`) |
-| `source` | `type: gun`: particle, energy (`energy_MeV` or `ekin_per_nucleon_MeV`), position, direction; `gps` and `event-file` define the interface only (§R.9.2), exit 2 if encountered |
+| `source` | `type: gun`: particle, energy (`energy_MeV` or `ekin_per_nucleon_MeV`), position, direction; `gps` and `event-file` define the interface only (§R.10.2), exit 2 if encountered |
 | `run` | Number of events, threads, logical run seed; `seeding` allows only `per-event` |
 | `output.observables`, `output.blocks` | As in A2.3 (referring to `simulation-observables/1`) |
 | `output.event_file` | `level`: `none` (default), `summary`, `crossings`, `hits`; `compression` (default 1); `max_events_hits` (the maximum number of events allowed at `hits` level, default 100) |
@@ -1751,7 +1829,7 @@ A1's other conditions (convergence gate, including D11; no remaining gaps; varia
 - Following §B.4.4, write the design-spec `j15-v1`, the candidates `cand-N6`, `cand-N4`, `cand-N8` and the realization profile in `examples/design-minimal-spectrometer/`, in the format of main's `examples/design-space-spectrometer/`.
 - For the human gates H1 and H2 the agent prepares the decision records and marks them as needing a human signature (the README notes that in the example they are a demonstration).
 - F1: `evaluate_design.py run` for every candidate and requirement (`tracker_resolution`, `multiple_scattering`, `charge_confusion_rate`); `budget` for mass and channel count.
-- F2: `toy_spectrometer`'s resolution and `design_estimates.py infield-acceptance`'s acceptance. This replaces the earlier "one-off multiple-scattering comparison": the F1 and F2 values and the hand-computed tables of §B.4.2 are cross-checked (test).
+- F2: `toy_spectrometer`'s resolution and `design_estimates.py infield-acceptance`'s acceptance. The F1 and F2 values and the hand-computed tables of §B.4.2 are cross-checked (test).
 - `evaluate_design.py plan` lists the missing evidence; `report` derives the compliance matrix, screening and comparison basis.
 
 ### B3.2 Verification ladder (a separate `unvalidated` record)
@@ -1858,8 +1936,8 @@ The verification ladder is J15's verification carrier, written in a **separate**
 
 | Item | Decision | Reason / trigger |
 |---|---|---|
-| σ(1/R) in the measurement-dominated regime as a benchmark | not done | replaced by the fitter unit test and `reco-closure` |
-| `skills/hep-detector/scripts/digitize_reconstruct.py` | not done | replaced by the C++ `simreco` |
+| σ(1/R) in the measurement-dominated regime as a benchmark | not done | checked by the fitter unit test and `reco-closure` |
+| `skills/hep-detector/scripts/digitize_reconstruct.py` | not done | digitization and reconstruction are done by the C++ `simreco` |
 | surrogate class and `surrogate-comparison` | not done | main's fidelity and bound model already covers approximate evaluations; task C's search values are not evaluations (§C) |
 | new geometry features in `layered_sim` | not done | new features go only into `element_sim` |
 | Python reading ROOT directly in the pipeline (uproot) | not done | through `simroot` |
@@ -1867,7 +1945,7 @@ The verification ladder is J15's verification carrier, written in a **separate**
 | ion sources and Birks visible energy | deferred | for cosmic-ray nuclei studies, and PVT's Birks constant has a literature record. When implemented, per 11.4.3: get the ion with `GetIon(Z, A)` in `GeneratePrimaries`; set kB in `Construct` (`GetIonisation()->SetBirksConstant`), call `G4EmParameters::Instance()->SetBirks(true)` in PreInit, then obtain it with `G4LossTableManager::Instance()->EmSaturation()` (check API names against the 11.4.3 source when implementing) |
 | non-box solids, rotations, GDML import, field maps, fringe fields in `element_sim` | deferred | the first study that needs them and cannot use a user application; the extension point is "geometry kind → realizer" (Part 5): a new geometry kind adds a mapping table and a realizer |
 | primary exit record in `element_sim` (J14's observables) | deferred | when J14 migrates to `element_sim` and `layered_sim` is retired (§P.8) |
-| distribution-level benchmarks (including regression histogram comparison), combinations of observables, profiles, `gps` and `event-file` sources, `simreduce` | deferred (interfaces defined in §R.9.2) | each one's first use case |
+| distribution-level benchmarks (including regression histogram comparison), combinations of observables, profiles, `gps` and `event-file` sources, `simreduce` | deferred (interfaces defined in §R.10.2) | each one's first use case |
 | RNTuple, vector columns | deferred | when ROOT file size or read speed becomes a bottleneck |
 | real alignment algorithms, Kalman filter, full pattern recognition | deferred | B2.2's minimal models are enough to make the bound honest; the first study that needs realistic tail shapes |
 
@@ -1977,27 +2055,15 @@ If the direction is the same as the bending (−50 mrad): y at Si6 is −151 mm 
 - Geant4 v11.4.3 source, for the field and event files: `G4FieldManager.hh`, `G4ChordFinder.hh`, `G4PropagatorInField.cc`, `G4FieldParameters`, `G4LogicalVolume`, `G4ChargedGeantino.cc`, `G4VAnalysisManager.hh`, `G4EmSaturation`, `G4LossTableManager`, `G4IonTable`, `G4NistMaterialBuilder.cc`
 - Geant4 Book for Application Developers, [Basic Examples](https://geant4.web.cern.ch/documentation/dev/bfad_html/ForApplicationDevelopers/Examples/BasicCodes.html) (B4, B5)
 - hep-research `main` `5584927`: `skills/hep-detector/references/system-design-workflow.md`, `contracts/design.py` (`check_f4` lines 988–1062, `TAIL_SOURCES` line 64), `skills/hep-detector/scripts/evaluate_design.py` (`geometry` line 462, `f4` lines 498–553), `contracts/rules/design_geometry.json`, `contracts/rules/design_adequacy.json`, `examples/design-space-spectrometer/`, `skills/hep-detector/references/geant4-study-protocol.md` (§6 lines 161–168)
-- Sources for PAMELA and AMS-02 are in §R.14
+- Sources for PAMELA and AMS-02 are in §R.15
 - To obtain: PDG's muon energy-loss tables (Groom, Mokhov & Striganov); Sternheimer, Berger & Seltzer (1984), *Atomic Data and Nuclear Data Tables* 30, 261; Lynch & Dahl (1991), *Nucl. Instrum. Methods B* 58, 6 (multiple-scattering width formula and its accuracy); published multiple-scattering measurements (e.g. MuScat)
-
-## §B Appendix C: version history
-
-| Version | Content |
-|---|---|
-| Detector document and v5 | Single-axis stacked spectrometer; correction of the Gluckstern small-N formula; field direction and field-check grid |
-| 2026-10-22 | Two layers each for TOF1 and TOF2; digitization and reconstruction moved to C++; per-event ROOT file; split out as task B; rewritten for the new architecture (`element_sim` replaces spec/2; B1, B2; PAMELA and AMS-02 comparison and TOF sensitivity) |
-| 2026-10-23 | Fixes after independent review (B1.6 compares only common observables, calorimeter leakage, table entries, surrogate and regression rules, total-momentum rigidity, CLI and `SIM_SOURCES`, portable random numbers, explicit stepper construction, etc.) |
-| 2026-10-23 | Reorganized per the plan (Part 1): B2 split into B2 (reconstruction and contracts) and B3 (J15 study); deterministic field check moved to B1.7; `geant4_run.py check-spec` added; the decision engine's `change` and the regression role added in B2 |
-| 2026-10-23 | Isolated-worktree execution rules added: header, first step of §B.0, start of §B.11 (§P.10) |
-| **2026-10-24 (re-plan)** | **Re-planned against main 0.38.0's design loop (findings B1–B12 of the review record `review-2026-10-24-main-0.38.md`): task B becomes main's missing F4 evaluator; B1 adds `from-geometry` and the realization profile, crossings of every charged track, a piecewise-uniform field; B2 adds switchable tail sources, F4 observables, `label --results --geometry`, `f4-results/1`, mapping 1.1.0, the F4 changes to `design.py`, the F4 qualification path (D0) with `multiple-scattering-reference`, the end-to-end test, and drops the surrogate class; B3 becomes the J15 design project (F1, F2, F4) with the verification ladder as a separate record; fidelities use main's F0–F5; the contract change is named CV-B2; VALIDATION entry GEANT4-F4; facts corrected (`MISSING_FILE_ARGS` line 153, script count 23, benchmark function lines, model ranges of protocol §6)** |
-| 2026-10-24 (this version, after the fresh read-through) | Fixes from a reviewer who had not seen the revisions: D0 v2 (material definition replaces material benchmarks as a precondition, a per-class scope model, the tracking reference qualifies only the core resolution, charge confusion needs a tail benchmark (D0-b), the F4-uncertainty policy (D0-c), F4 for screening as a complement (D0-d)); new `material-definition` and `ms-tail-reference`; tail sources use a reconstruction-replica ensemble and a position-dependent field error, and the global scale belongs to `rigidity-scale-offset`; `f4 --label-results --label-geometry` with both paths tested; non-counting F4 writes a coverage-0.90 interval; a test reaching row 16; the muon field-check tolerance becomes 0.3 %; the multiple-scattering model variation is confirmed by the probe; the `SIM_SOURCES` keys; line numbers of `label` and `f4`; the `response` step of B3.6 removed |
 
 ---
 
 # Part 4 — Task C: automated candidate generation (§C)
 
 > Order: C1 is based on main (independent of tasks A and B); C2 after B2 and C1 (F4 confirmation also needs approval of D0 in §P.7); C3 after C2
-> Date: 2026-10-24 (re-planned on the detector system design loop of main 0.38.0)
+> Date: 2026-10-24
 > In one sentence: add `evaluate_design.py search` to the D2 stage of main's design loop to generate candidate designs automatically; the search only proposes candidates, while verdicts, screening, comparison and the Pareto front are always derived by `contracts/design.py`, and reported performance comes only from F4 confirmation studies
 
 ---
@@ -2054,7 +2120,7 @@ If the direction is the same as the bending (−50 mrad): y at Si6 is −151 mm 
 | Winner's curse | Selecting the best of n noisy evaluations gives an estimate that is optimistic in expectation |
 | Search size | The number of distinct designs and topologies actually evaluated; written to the `search_summary`, like a look-elsewhere count |
 | seed_group, paired comparison | A set of Geant4 search runs sharing S; the SE of a difference is estimated from per-block differences (common random numbers; C2.1) |
-| Notation | "C1.3" is a work item of this part; "A1.8", "B2.1" are work items of tasks A and B (work-item numbers are unique in the whole document); "§C.4" is a section of this part; "§A.3", "§P.7", "§R.6" etc. are sections of other parts of this document |
+| Notation | "C1.3" is a work item of this part; "A1.8", "B2.1" are work items of tasks A and B (work-item numbers are unique in the whole document); "§C.4" is a section of this part; "§A.3", "§P.7", "§R.7" etc. are sections of other parts of this document |
 
 **Main files (relative to `plugins/hep-research/`):**
 - `skills/hep-detector/scripts/evaluate_design.py` (new subcommand `search`; `expand` accepts `--search`).
@@ -2137,27 +2203,12 @@ D0 scope (H1) → D1 allocation (H2) → D2 exploration ────────
 | `evaluate_design.py`/`contracts/design.py` | Official evaluation, verdicts, screening, comparison, Pareto | Behave differently by proposer |
 | User and reviewers | Human records of H1–H4; dispositions (accept-risk, next-study) | — |
 
-### §C.4.3 Concepts of the old task C and their main counterparts
+### §C.4.3 Division of work with main's existing mechanisms
 
-| Old task C concept | main counterpart | Handling |
-|---|---|---|
-| Requirements spec `detector-requirements/1`, `confirmed_by_user` | design-spec (REQ, denominators, allocations, `comparison_basis`, `pareto_axes`); H1, H2 | Deleted; read the design-spec instead |
-| Objective and constraint catalogue | Figure-of-merit ids of `design_adequacy.json` | Deleted; use the ids |
-| Component catalogue `catalogue/1` | `subsystem_roles` + design blocks of the tool contracts | Becomes realization rules per role with parameter ranges (new) |
-| Design grammar `detector-design/1` | design-candidate (subsystem graph) | Deleted; the genome is only an internal encoding + decoder (new) |
-| `realize()` → `element_sim.spec/1` | `evaluate_design.py geometry` + B1's `from-geometry` | Deleted; provided by task B |
-| Fidelities F0/F1/F2 | main's F1; Geant4 search values (no fidelity); F4 | Renamed (§C.4.6) |
-| Design hash and evaluation cache | `effective_digest`, `parameter_digest`, `--replace`, `run_workflow.py --incremental` | The in-search cache stays; official evaluations use main's mechanisms |
-| `threshold` requirement verdicts, `order`, own Pareto, "recommended design" | Verdict table and aggregation, `ranking()`, `pareto()` | Deleted |
-| Search record `extension.design_search` | The `scan_summary` pattern | Becomes `search_summary` (CV-C1) |
-| CV3 role rules | Orphan-run rule | Becomes the CV-C2 seed rule |
-| Adapter `detector-design`, reference, one `SKILL.md` line | Capability `detector-design` (hep-detector), workflow document | Deleted; one new workflow section |
-| `proposer: llm` | Parameter `source`/`status: proposal` | Merged, and also flagged in the `search_summary` |
-| NSGA-II, Sobol, hypervolume, repair and violation measure | None | Kept (new) |
-| Multi-fidelity Geant4 search, paired comparison, G-C2a, `values` | None | Kept (C2) |
-| Winner's-curse and search-size protection | Partly: RSK-04 expands only points that enter comparison | Kept and extended |
-| Closure tests | None | Kept |
-| J16 | Examples A, B (no journey) | Now run on Examples A, B |
+- Requirements, candidates and evidence use main's design-spec, design-candidate and design-evaluation; verdicts, screening, the comparison basis, ranking and Pareto are derived by `contracts/design.py`.
+- This task adds: the genome and decoder, the realization rules per role and the materials table, the searcher (Sobol, NSGA-II, hypervolume), `search_summary` and `expand --search`, Geant4 search values and paired comparison (C2), protection against the winner's curse and for search size, and the closure tests.
+- The finalists' Geant4 geometry is produced by main's `evaluate_design.py geometry` and task B's `from-geometry`; formal evaluation and reruns use main's `effective_digest`, `parameter_digest`, `--replace` and `run_workflow.py --incremental`.
+- The correspondence between concepts of the earlier design and the current approach is in §H.3.
 
 ### §C.4.4 Search spec `design-search-spec/1`
 
@@ -2460,11 +2511,11 @@ All CV-* numbers are fixed at release in merge order, each ≥ 3.13.0.
 
 | Item | Decision | Reason / trigger |
 |---|---|---|
-| The search writing verdicts, rankings, a recommended design, or claiming an optimum | Not done | Derived by design.py (review C2, C3) |
+| The search writing verdicts, rankings, a recommended design, or claiming an optimum | Not done | Derived by design.py (§C.0 decision 1) |
 | Letting the LLM decide the design by itself | Not done | No real case does this; verdicts must be reproducible |
-| Selection-aware or multiplicity-corrected coverage | Deferred, as a proposal | main uses `coverage_cl` per figure of merit with no multiplicity correction; for review with hep-statistics and design.py (review C12) |
-| Cost as an objective | Not done | Cost has no evaluator (review C13); trigger: main adds a cost evaluator |
-| Calorimeter-depth closure test | Deferred | The old "depth ≥ 16 X₀" is not a figure of merit of the adequacy table; shower-containment is `capability.unavailable` below F4; trigger: B2's shower-containment F4 available |
+| Selection-aware or multiplicity-corrected coverage | Deferred, as a proposal | main uses `coverage_cl` per figure of merit with no multiplicity correction; for review with hep-statistics and design.py |
+| Cost as an objective | Not done | Cost has no evaluator; trigger: main adds a cost evaluator |
+| Calorimeter-depth closure test | Deferred | "Depth ≥ 16 X₀" is not a figure of merit of the adequacy table; shower-containment is `capability.unavailable` below F4; trigger: B2's shower-containment F4 available |
 | Differentiable simulation and differentiable surrogates (MODE route) | Deferred | Geant4 is not differentiable; differentiable surrogates are still immature at point-cloud scale (`MODE2023`). Trigger: a problem with > 20 continuous parameters and an insufficient Geant4 search budget |
 | Cylindrical and non-box geometry for Geant4 search values | Deferred | `element_sim` has only box elements. Trigger: a new geometry kind and realizer (the extension point in §R) |
 | Geant4 search values for Cherenkov, RICH, TRD | Deferred | Need optical physics and dedicated reconstruction; searching at F1 (`cherenkov_angle`) is possible |
@@ -2539,24 +2590,13 @@ Coincident clusters are not bound by the minimum spacing, so they are not the cl
 - `VIBRATO2026`: W. Chung et al., "Agentic-AI detector co-design and optimization in vertically-integrated differentiable full simulations", [arXiv:2604.21804](https://arxiv.org/abs/2604.21804) (preprint)
 - All retrieved on 2026-10-23; the citation keys are provisional names in this document, and authors and journal data must be checked through hep-citations before citing
 
-## §C Appendix C: Version history
-
-| Version | Content |
-|---|---|
-| 2026-10-23 | First proposal: three roles, requirements spec, component catalogue and design grammar, F0/F1/F2 multi-fidelity, search and confirmation separated, contracts, C1/C2, J16; later references to the shared `core/` modules after the re-examination of task A |
-| 2026-10-23 | Reorganised per the plan (Part 1): three stages; `threshold`, `order`, paired comparison, `values`, search roles and seed_group added by C2.1; realization checked with `check-spec`; contract version recorded as CV3; J16 and MOBO moved to C3 |
-| 2026-10-23 | Isolated-worktree execution rules added (§P.10) |
-| 2026-10-23 | Fixes after the detailed check: schema keyword limits; two-sided bound of `order`; paired `relative` mode; cache key; parent re-evaluation; design dedup; materials table; genome repair and violation measure; minimum spacing of the closure test; citation keys; `values_max` per block |
-| **2026-10-24 (this version)** | **Re-planned on the detector system design loop of main 0.38.0 (review record `review-2026-10-24-main-0.38.md`, C1–C13, P2–P4): task C becomes the D2 candidate generator `evaluate_design.py search`; deleted the formats of the requirements spec, component catalogue and design grammar, `realize()`, `threshold`/`order`, the recommended design and own Pareto, adapter `detector-design`, the reference and the `SKILL.md` line; fidelities use main's F0–F5 (old F0 = F1, Geant4 search values have no fidelity, confirmation = F4); the search population lives in `search_summary` (CV-C1), and only finalists are expanded; in-process F1 calls the same tool as the tool contract; the C2 seed rule (CV-C2) replaces the role rules; C1 no longer depends on task A; J16 now runs on Examples A, B; the Bayesian-optimisation backend becomes the optional `adapters/design-bo/`; concept-mapping table added (§C.4.3)** |
-| 2026-10-24 | Fixes after a new independent review: C1.4 adds `argv=None` to four tools, redirects stdout and catches `SystemExit`, with a call budget; confirmation seeds become H(study_id, role, point_id); the closure test claims only the exhaustive 1/32-grid value; D0-c added to the open decisions |
-
 ---
 
 # Part 5 — Design rationale (§R)
 
-> Baseline: hep-research `main` at `5584927` (0.38.0), contracts 3.12.0, adapter geant4 0.1.0, Geant4 11.4.3; most code facts in §R.1–§R.14 were checked at `9f08796`, and the files concerned (the Geant4 adapter, `check_geant4_study.py`, `geant4_benchmarks.py`) are unchanged in 0.38.0
-> Date: 2026-10-22 (corrected 2026-10-23 after the detailed check; aligned with the re-plan 2026-10-24)
-> Note: this part was originally written before the re-plans of 2026-10-23 and 2026-10-24; on 2026-10-24 only the passages that conflict with main's design loop were changed, and §R.15 was added. Where other passages conflict with Parts 1–4, Parts 1–4 win and the conflict is reported.
+> Baseline: hep-research `main` at `5584927` (0.38.0), contracts 3.12.0, adapter geant4 0.1.0, Geant4 11.4.3; most code facts cited in this part were checked at `9f08796`, and the files concerned (the Geant4 adapter, `check_geant4_study.py`, `geant4_benchmarks.py`) are unchanged in 0.38.0
+> Date: 2026-10-24
+> Purpose: this part gives the reasons for the rules in Parts 1–4 (design basis, architecture, relation to main's design loop); it is not an implementation spec. Where it conflicts with Parts 1–4, Parts 1–4 win and the conflict is reported. Revision history is in §H.1, superseded designs in §H.4.
 
 ---
 
@@ -2568,14 +2608,14 @@ Coincident clusters are not bound by the minimum spacing, so they are not the cl
 
 | Problem | What real experiments do | This architecture |
 |---|---|---|
-| reproducibility under parallel execution | ATLAS reseeds each event from the event and run numbers; Allpix² seeds by event number, "reproducible even when the number of workers is different" | each event reseeded with H(logical-run seed, event number); job splitting and thread count do not affect event content (§R.5) |
-| merging results of many parallel jobs | CMS DQM: jobs fill histograms independently; the harvesting step merges them and only then runs quality tests | simulation programs write mergeable run summaries; Python infers and decides only after merging (§R.4) |
-| tracing configuration and processing chains | CMS identifies configurations by parameter-set hashes and records each processing step in a process history | each step records hashes of its configuration, inputs and code; multi-level chains are traced transitively (§R.7) |
-| supporting several simulation engines | ALICE's Virtual MC puts an insulation layer between user code and the engine, but separating geometry took years | no abstraction at the API level; abstraction at the **output**: any backend that delivers three boundary artifacts (§R.3) |
-| sharing data between components | Key4hep uses EDM4hep as the common data model between components; legacy tools join by converting | the boundary artifacts are the common data model; other frameworks join through a reducer (§R.3.4) |
-| whether a simulation can be trusted | Geant4's geant-val compares with experimental data across releases; CMS selects the physics list with test-beam data, then checks with collision data; ATLAS validates fast simulation against Geant4 | five validation classes, each with its own reference, statistics and rule on upgrading (§R.6) |
-| whether a software change alters results | Belle II runs validation scripts nightly, compares across versions and can bisect the commit that caused a degradation; geant-val runs monthly | a regression class: compares with the previous version, detects change, never upgrades (§R.6.5) |
-| data volume tiers | ATLAS: HITS → RDO → AOD; only the tiers needed downstream are kept | four data tiers: event detail (not committed) → per-event summary → run summary → decision records (§R.4.1) |
+| reproducibility under parallel execution | ATLAS reseeds each event from the event and run numbers; Allpix² seeds by event number, "reproducible even when the number of workers is different" | each event reseeded with H(logical-run seed, event number); job splitting and thread count do not affect event content (§R.6) |
+| merging results of many parallel jobs | CMS DQM: jobs fill histograms independently; the harvesting step merges them and only then runs quality tests | simulation programs write mergeable run summaries; Python infers and decides only after merging (§R.5) |
+| tracing configuration and processing chains | CMS identifies configurations by parameter-set hashes and records each processing step in a process history | each step records hashes of its configuration, inputs and code; multi-level chains are traced transitively (§R.8) |
+| supporting several simulation engines | ALICE's Virtual MC puts an insulation layer between user code and the engine, but separating geometry took years | no abstraction at the API level; abstraction at the **output**: any backend that delivers three boundary artifacts (§R.4) |
+| sharing data between components | Key4hep uses EDM4hep as the common data model between components; legacy tools join by converting | the boundary artifacts are the common data model; other frameworks join through a reducer (§R.4.4) |
+| whether a simulation can be trusted | Geant4's geant-val compares with experimental data across releases; CMS selects the physics list with test-beam data, then checks with collision data; ATLAS validates fast simulation against Geant4 | validation classes by the nature of the reference (six implemented, model-to-model deferred), each with its own reference, statistics and rule on upgrading (§R.7) |
+| whether a software change alters results | Belle II runs validation scripts nightly, compares across versions and can bisect the commit that caused a degradation; geant-val runs monthly | a regression class: compares with the previous version, detects change, never upgrades (§R.7.5) |
+| data volume tiers | ATLAS: HITS → RDO → AOD; only the tiers needed downstream are kept | four data tiers: event detail (not committed) → per-event summary → run summary → decision records (§R.5.1) |
 
 **The core of the architecture (six sentences):**
 1. **Two planes.** Per-event processing is in C++ (the data plane: simulation, digitization, reconstruction); inference after merging, decisions, records and contracts are in Python (the control plane).
@@ -2583,60 +2623,107 @@ Coincident clusters are not bound by the minimum spacing, so they are not the cl
 3. **Event determinism.** Event content depends only on the logical-run seed and the event number; job splitting, thread count and processing order do not matter.
 4. **Reproducibility means "same decisions".** On replay, decisions and labels must be identical and numbers within a relative difference of 1e-9; decisions close to a threshold are flagged. Source files are traced by hash. Re-execution on the same platform gives bit-identical events; across platforms (different libm) floating-point accumulators need only agree within a relative difference of 1e-12.
 5. **One variance method.** The run summary splits events into K blocks by event number; every SE is estimated by batch means over the blocks, with exact intervals for small counts.
-6. **Five kinds of validation (model-to-model deferred).** Verification, physics reference, setup-matched measurement, regression, model-to-model; only physics reference and setup-matched measurement can upgrade, under conditions the contract re-derives from evidence.
+6. **Validation classified by the nature of the reference.** Six classes are implemented: verification, physics reference (reference), setup-matched measurement (setup-matched), regression, and the non-upgrading sanity and interface; model-to-model (surrogate) is deferred. Only reference and setup-matched can upgrade, under conditions the contract re-derives from evidence.
 
-**Stages:** the order, content and versions of the eight stages (A1, A2, B1, B2, B3, C1, C2, C3) are in §P.0 and §P.3; §R.10 lists only one-line pointers.
+**Stages:** the order, content and versions of the eight stages (A1, A2, B1, B2, B3, C1, C2, C3) are in §P.0 and §P.3; §R.11 lists only one-line pointers.
 
-**Relation to main's design loop.** Since 0.37.0 main has a detector system design loop (design-spec, design-candidate, design-evaluation; verdicts derived by `contracts/design.py`; fidelity F0–F5, a Geant4 study being F4). The division of work in this program: task A makes the label F4 depends on correct; task B provides a spectrometer-capable Geant4 application and the F4 study-record interface; task C is a candidate generator for stage D2 that writes no verdicts and ranks nothing. The reasons are in §R.15.
+**Relation to main's design loop.** Since 0.37.0 main has a detector system design loop (design-spec, design-candidate, design-evaluation; verdicts derived by `contracts/design.py`; fidelity F0–F5, a Geant4 study being F4). The division of work in this program: task A makes the label F4 depends on correct; task B provides a spectrometer-capable Geant4 application and the F4 study-record interface; task C is a candidate generator for stage D2 that writes no verdicts and ranks nothing. The reasons are in §R.1.
 
 ---
 
-## §R.1 Design basis: what real experiments teach
+## §R.1 Relation to main's detector system design loop
 
-Each point has a source (§R.14). "Taken" is what this architecture adopts; "not taken" is what it deliberately leaves out, and why.
+main 0.37.0–0.38.0 added a detector system design loop to hep-detector (`references/system-design-workflow.md`, `contracts/design.py`, `scripts/evaluate_design.py`). This program plugs into that loop rather than building a second one; this section gives the reasons for the division of work.
 
-### §R.1.1 Random numbers and reproducibility
+### §R.1.1 Fidelity and where Geant4 sits
+
+| Fidelity (main) | Meaning | What this program provides |
+|---|---|---|
+| F0 | heuristic argument, no run | — |
+| F1 | analytic, run through a tool contract (`tracker_resolution`, `multiple_scattering`, `design_estimates` and others) | C1's search inner loop uses the same functions in-process |
+| F2 | toy Monte Carlo (`toy_spectrometer`, `design_estimates.py infield-acceptance`) | B3 runs them on the J15 candidates, replacing hand comparisons |
+| F3 | response assembly and expected precision (hep-statistics Asimov fit) | — |
+| F4 | a Geant4 study re-issued `validated-in-scope` by `check_geant4_study.py label --upgrade` | A1 makes the label correct; B1 and B2 make spectrometer studies possible and write the F4 fields; B3 (J15) and C2's confirmation produce F4 |
+| F5 | prototype or test-beam measurement | — |
+
+Short Geant4 runs inside a search have no fidelity and are not evaluations; they are search values stored in the `search_summary`. Reason: F4 requires a qualified study; search runs trade statistics for speed and are entangled with the selection (the winner's curse), so they must not count as evidence.
+
+### §R.1.2 Who owns verdicts
+
+Whether a requirement is met, maturity, staleness, screening, the comparison basis, ranking and the Pareto front are all derived by `contracts/design.py` from the artifacts, never written by hand (the workflow's "Never" section). This program's statistical decisions (`core/stats/decisions.py`'s `equivalence`, `detection_limit`, `change`, the convergence gate and paired comparison) answer only study-level questions: did a benchmark pass, did a run converge, did a result change between versions, is the difference between two designs in a search resolved. Reason: they are inputs to a study label; requirement compliance also needs the adequacy table, the bound combination and the upstream chain, which only `design.py` has. Task C therefore writes no requirement verdicts, no ranking and no "recommended design" (superseded designs: §H.4).
+
+### §R.1.3 No optimum claimed; human gates
+
+main ranks only when the comparison basis holds and every surviving candidate has a non-optimistic expected-precision evaluation with the same fidelity vector and denominator; a Pareto dominance is decided only beyond the combined 1σ; a global optimum is never claimed; gates H1–H4 need a human. Task C is therefore a D2 candidate generator: a search population of order 10⁴ stays in the `search_summary`, only finalists become candidates through `expand`, and they then go through the ordinary `evaluate_design.py run` and `report`. The winner's curse is handled by requiring confirmation through F4 studies with fresh seeds, enforced by CV-C2's rule: an evaluation whose seed appears in a search summary is `design.contract_mismatch`.
+
+### §R.1.4 Parameter-level staleness and incremental reruns
+
+main's evaluations bind the candidate by `parameter_digest`: they go stale only when a parameter they read changes; `run_workflow.py --incremental` skips on argv, scripts, the plugin release digest, the environment and the inputs. Task C therefore has no design-cache rules of its own, only the search-internal cache key (including S, N, K, B); `geant4_run.py run` also writes `argv`, `script_sha256` and `versions.plugin_release` as `run_workflow.py` does (A2).
+
+### §R.1.5 The F4 study-record interface and the qualification path
+
+What `design.py` requires of F4: the study record is `validated-in-scope`; the geometry file written by `evaluate_design.py geometry` (`design-geometry/1`) is in the `input_manifest`, and its parameter digest matches the candidate; `extension.study.results.<figure of merit>` has `value`, `statistical_uncertainty` and `model_envelope`; `tail_sources_simulated` lists which tail sources were simulated (only with all four of alignment, calibration-non-uniformity, noise-digitization and pattern-recognition is the bound `estimate`, otherwise it is `optimistic`).
+
+How this program meets it: B1's `from-geometry` derives `element_sim.spec/1` from the geometry file and a declared realization profile; B2's `simreco` makes the four tail sources switchable stages, and `label` writes `results`, the tail sources and the geometry file; `statistical_uncertainty` is defined as the 68.27 % t half-width (A1), consistent with `design.py` reading it as a Gaussian with coverage 0.6827; one study per (figure of merit, denominator), because a candidate has one `geometry_ref` and `results` is not keyed by denominator. `design.py` decides at the one-sided 0.95 level, and the converted scalar slightly under-covers (1.70 SE against t_{0.95}(15) ≈ 1.753 SE); once CV-B2 lets `f4` accept uncertainty objects, a central interval at coverage 0.90 is written instead (A1.6).
+
+**Qualification path (D0, pending the maintainer's approval; §P.7 item 1, B2.8).** Detector-level studies (resolution, charge confusion, shower containment) have no matching physics reference and can never be upgraded under the current rules. The program chooses a qualification path rather than letting `design.py` accept unvalidated F4. The study is upgraded only when all four conditions hold, each matched to it by its own key: (1) material definition: every material of the realized geometry has composition and density from an independent source, and a geantino scan reproduces the candidate's declared X/X₀ (A1's material-benchmark scopes are MeV-scale and cannot be a precondition); (2) the field-propagation verification (B1's analytic helix) passed for the same field-configuration hash; (3) the reconstruction verification (`reco-closure`) passed for the same reco-spec hash; (4) the tracking reference benchmark: multiple-scattering core width in an isolated Si slab against Lynch–Dahl (F = 98 %), with a negative control, scope dimensions material, thickness, rigidity, species, qualifying `momentum-resolution-core` only; point resolution is a declared input (it dominates the core at 100 GV) that no benchmark validates; Highland's accuracy of about 11 % rules it out as a reference. Scope matching becomes a per-class conjunction (CV-B2). Charge confusion needs a tail benchmark (D0-b); shower containment is outside the path (D0-d offers a screening-only option). The real decision is F4 uncertainty (D0-c): with the statistical error only, an upgraded F4 `estimate` becomes `uncertainty.missing` under the adequacy table's `min_relative_uncertainty`. Reason: `validated-in-scope` keeps a single meaning across the plugin; condition 4 gives detector-level studies a physical anchor, and the first three ensure the rest of the study is correct inference.
+
+### §R.1.6 Extension point: geometry kind -> realizer
+
+`contracts/rules/design_geometry.json` maps a candidate's parameters to a geometry kind (today only `layered-spectrometer`). Each kind needs a realizer that turns the geometry file into a backend's spec: `element_sim` (B1's `from-geometry`), a user's Geant4 application (including `g4sim`) or a GDML file when the user's build has GDML, later DD4hep. Adding a detector kind = one mapping entry (contracts) plus one realizer; the study layer reads only boundary artifacts and does not change. C1's search is driven by tool contracts, so at F1 and F2 it does not depend on the detector kind; its Geant4 part can use only geometry kinds with a realizer (today spectrometers; B2's mapping 1.1.0 adds fields for TOF and EM calorimeters).
+
+### §R.1.7 Why the search is not an adapter
+
+An adapter is an optional component that connects an external tool, and no skill or core module may depend on it (the opening of `docs/adapter-authoring.md`). The search is plugin logic over main's artifacts, so it lives in `evaluate_design.py search`, following main's precedent of making `scan` a subcommand (OQ-18). Only the optional Bayesian-optimisation backend (Ax/BoTorch) is an external tool, hence `adapters/design-bo/`.
+
+---
+
+## §R.2 Design basis: what real experiments teach
+
+Each point has a source (§R.15). "Taken" is what this architecture adopts; "not taken" is what it deliberately leaves out, and why.
+
+### §R.2.1 Random numbers and reproducibility
 
 - **ATLAS (AthenaMT):** random streams for different purposes are distinguished by the name of the algorithm using them; generator states are reseeded for each event from the event and run numbers; the goal is that "the sequence of random numbers must be independent of the order in which events are processed".
 - **Allpix²:** the main thread seeds each event from a central seed generator as events are created; a worker seeds its engine just before running the event; the design aims at "reproducibility of simulation results from the same inputs even when the number of workers is different". Modules that need ordered output wait in a buffer queue, saving the random-engine state.
 - **CMS:** a different approach: one engine per module and per stream, whose state can be saved into the event and restored later for exact replay.
 - **Taken:** the per-event reseeding of ATLAS and Allpix². It is the simplest, and it makes "one logical run split into several jobs" produce exactly the same events as a single job. **Not taken:** CMS's state saving (saving engine states per event is unnecessary at our scale).
 
-### §R.1.2 Merging results and where decisions are made
+### §R.2.2 Merging results and where decisions are made
 
 - **CMS DQM:** data is split into any number of jobs, processed out of order and massively parallel; each job fills MonitorElements (mostly histograms); the harvesting step merges matching histograms across files and only then runs quality tests and derived quantities, single-threaded and in order.
 - **Taken:** simulation programs fill only "mergeable accumulators" (counts, sums, histograms); all decisions are made after merging, in Python. This is exactly the split between the run summary and the control plane.
 
-### §R.1.3 Traceability
+### §R.2.3 Traceability
 
 - **CMS:** configurations are identified by parameter-set hashes, and a process history records every processing step the data went through.
-- **Taken:** every step (simulation, digitization, reconstruction, table) writes a record with the hashes of its configuration, inputs and code; the input chain of a simulated table can be any depth, checked transitively by the contract (§R.7.4).
+- **Taken:** every step (simulation, digitization, reconstruction, table) writes a record with the hashes of its configuration, inputs and code; the input chain of a simulated table can be any depth, checked transitively by the contract (§R.8.4).
 
-### §R.1.4 Several engines
+### §R.2.4 Several engines
 
 - **ALICE Virtual MC:** an insulation layer between user code and the transport engine, so that geometry and hit-generation code is written once; at the time Geant3 was used in production, Geant4 only for physics validation, FLUKA was not yet finished, and separating geometry from transport was still ongoing.
 - **ATLAS AtlFast3:** work is routed by particle type and energy to Geant4, FastCaloSim V2 and FastCaloGAN; fast simulation is validated by showing "no sizeable differences from the Geant4 simulation" after reconstruction.
-- **Taken:** abstraction at the **output**, not at the stepping API: a backend may simulate however it likes, as long as it delivers the same boundary artifacts. A backend that mixes simulators describes its routing in the effective config. Fast simulation and ML surrogates validated against Geant4 are "model-to-model" validation (§R.6.5). **Not taken:** a VMC-style engine abstraction layer (ALICE's experience shows high cost and a long time scale).
+- **Taken:** abstraction at the **output**, not at the stepping API: a backend may simulate however it likes, as long as it delivers the same boundary artifacts. A backend that mixes simulators describes its routing in the effective config. Fast simulation and ML surrogates validated against Geant4 are "model-to-model" validation (§R.7.5). **Not taken:** a VMC-style engine abstraction layer (ALICE's experience shows high cost and a long time scale).
 
-### §R.1.5 A common data model and geometry
+### §R.2.5 A common data model and geometry
 
 - **Key4hep:** Gaudi as the processing framework, DD4hep for geometry, EDM4hep (built with podio) as the data model; EDM4hep is the exchange format between components in memory and on file; legacy iLCSoft processors convert to and from EDM4hep on entry and exit instead of being rewritten.
 - **Taken:** the boundary artifacts are our common data model; external frameworks join through a "reducer" (for example reducing an EDM4hep file to a run summary). Geometry is taken from the backend's actual (as-built) geometry. **Not taken:** Gaudi or DD4hep as dependencies (plugin constraints).
-- **GDML:** Geant4 can write the actual geometry as GDML, but only when built with GDML; this plugin's build has `GEANT4_USE_GDML: OFF` (`geant4_build.py` line 53). So the probe walks the actual geometry itself (§R.3.3); a user's build with GDML may attach a GDML file as well.
+- **GDML:** Geant4 can write the actual geometry as GDML, but only when built with GDML; this plugin's build has `GEANT4_USE_GDML: OFF` (`geant4_build.py` line 53). So the probe walks the actual geometry itself (§R.4.3); a user's build with GDML may attach a GDML file as well.
 
-### §R.1.6 Validation
+### §R.2.6 Validation
 
 - **geant-val (Geant4 collaboration):** community validation tests run monthly with development releases; results are stored in a database, compared across releases, with χ² and KS tests on distributions.
 - **CMS:** first tunes and selects the physics list with test-beam data, then checks calorimeter response and resolution with isolated charged particles in collision data; compares several Geant4 versions before adopting one, trading speed against accuracy.
 - **Belle II:** every software package has validation scripts producing histograms; they run centrally every night, are compared across versions, and a tool bisects the commit that introduced a degradation.
-- **Taken:** "validation" split into five classes of different nature (§R.6): verification as an exact consequence; a physics reference on an isolated target (geant-val's thin-target tests belong here); comparison with a measurement on the same configuration (CMS test beams); regression across versions (Belle II, geant-val's monthly comparison); model-to-model (ATLAS fast simulation).
+- **Taken:** validation classified by the nature of the reference (§R.7): verification as an exact consequence; a physics reference on an isolated target (geant-val's thin-target tests belong here); comparison with a measurement on the same configuration (CMS test beams); regression across versions (Belle II, geant-val's monthly comparison); model-to-model (ATLAS fast simulation; deferred).
 
-### §R.1.7 Data tiers
+### §R.2.7 Data tiers
 
 - **ATLAS:** simulation writes a HITS file; digitization writes RDO (conceptually similar to raw detector data); reconstruction writes AOD.
-- **Taken:** four data tiers, each with its own retention rule (§R.4.1).
+- **Taken:** four data tiers, each with its own retention rule (§R.5.1).
 
-### §R.1.8 Real instruments (comparison for J15)
+### §R.2.8 Real instruments (comparison for J15)
 
 - **PAMELA:** a 0.43 T permanent magnet; 6 planes of double-sided silicon microstrip sensors, resolution better than 4 µm; MDR above 1 TV; three TOF planes (S1–S3, segmented into paddles); a tungsten/silicon imaging calorimeter of 16.3 X₀ and 0.6 λ; plus anticoincidence, S4 and a neutron detector.
 - **AMS-02:** four TOF planes (8, 8, 10 and 8 counters); about 140 ps for protons for the system.
@@ -2644,18 +2731,18 @@ Each point has a source (§R.14). "Taken" is what this architecture adopts; "not
 
 ---
 
-## §R.2 Goals, constraints and principles
+## §R.3 Goals, constraints and principles
 
-### §R.2.1 Goals
+### §R.3.1 Goals
 
 | Goal | Guaranteed by |
 |---|---|
-| `validated-in-scope` cannot be obtained wrongly | facts the contract re-derives from evidence (§R.7) |
-| reproducible decisions, traceable numbers | event determinism (§R.5.1), inference after merging (§R.4), the same-decision definition of reproducibility (§R.5.6), hashes of every step (§R.7.4) |
-| the study layer is not tied to one backend, geometry or kind of study | a backend interface at the output (§R.3) |
+| `validated-in-scope` cannot be obtained wrongly | facts the contract re-derives from evidence (§R.8) |
+| reproducible decisions, traceable numbers | event determinism (§R.6.1), inference after merging (§R.5), the same-decision definition of reproducibility (§R.6.6), hashes of every step (§R.8.4) |
+| the study layer is not tied to one backend, geometry or kind of study | a backend interface at the output (§R.4) |
 | demonstrate a field, several subsystems and reconstruction | J15 (B1, B2, B3) |
 
-### §R.2.2 Constraints
+### §R.3.2 Constraints
 
 - The Python modules this program adds use only the standard library. This is a deliberate choice, not a plugin constraint: main's `core/` allows numpy and scipy (`docs/architecture.md` §3); this program's computations do not need them, and J14's offline replay gains no extra dependency. The one exception is C3's optional backend `adapters/design-bo/` (lazy import).
 - G5 licence boundary: Python exchanges only JSON and CSV with separate executables; no Geant4 example code is copied.
@@ -2664,14 +2751,14 @@ Each point has a source (§R.14). "Taken" is what this architecture adopts; "not
 - Files ≤ 2 MiB; hep-detector quick load ≤ 25,600 bytes (24,669 now), description ≤ 1,024 characters (`measure_entrypoints.py` reports 1,016). `SKILL.md` and the description are not changed; main already provides the entry to the design loop through a hub link (OQ-01), and task C only adds a section to `system-design-workflow.md`.
 - J14's offline replay must always run, with no Geant4 and no compiler.
 
-### §R.2.3 Principles
+### §R.3.3 Principles
 
 1. **Correctness before extension.** Nothing new is merged before A1.
 2. **Per-event in C++, after merging in Python.** Code that processes per-event data is in the data plane; code that processes merged accumulators is in the control plane. One production implementation per quantity; one in the other language may exist only in tests, as an oracle.
 3. **Abstract at the output.** The study layer knows only the boundary artifacts, never a backend's column names, spec format or UI commands.
 4. **Trust the actual state; declarations are only the fallback.** Geometry, field and physics settings come from the probe; declarations alone are marked `source: declared` and cannot upgrade.
 5. **Upgrade-relevant facts are decided by the contract.** Grade, kind, scope dimensions, configuration and target hash are never self-declared by a record.
-6. **The validation class follows the nature of the reference** (§R.6).
+6. **The validation class follows the nature of the reference** (§R.7).
 7. **Event determinism.** Event content depends only on the logical-run seed and the event number.
 8. **What is reproduced is the decision.** Numbers are compared within tolerances, decisions must be identical, sources are traced by hash.
 9. **Stopping rules, grids and block counts of evidence are declared in advance.** Topping up, refining and redoing controls are never decided from results.
@@ -2680,9 +2767,9 @@ Each point has a source (§R.14). "Taken" is what this architecture adopts; "not
 
 ---
 
-## §R.3 Architecture overview
+## §R.4 Architecture overview
 
-### §R.3.1 Two planes and the components
+### §R.4.1 Two planes and the components
 
 ```
 Control plane (Python, standard library)
@@ -2699,9 +2786,9 @@ Control plane (Python, standard library)
                     search seeds never used for confirmation (CV-C2); design.py derives requirement verdicts (in main)
         ▲
         │  three boundary artifacts (JSON; small, committable, hashable)
-        │    run summary        simulation-summary/1    (§R.4)
-        │    column map         simulation-columns/1    (§R.3.5)
-        │    effective config   engine-independent envelope + actual geometry tree (§R.3.3)
+        │    run summary        simulation-summary/1    (§R.5)
+        │    column map         simulation-columns/1    (§R.4.5)
+        │    effective config   engine-independent envelope + actual geometry tree (§R.4.3)
         │
 Data plane (C++)
   g4sim/         shared Geant4 helper library (headers):
@@ -2731,7 +2818,7 @@ Data plane (C++)
 | `simroot` | C++ | B1 | Geant4 analysis (g4tools) |
 | `simreco` | C++ | B2 | standard library, `SimSummary.hh`, `MiniJson.hh` |
 
-### §R.3.2 Backends
+### §R.4.2 Backends
 
 | Backend | Purpose | Geometry | Status |
 |---|---|---|---|
@@ -2740,9 +2827,9 @@ Data plane (C++)
 | a user's Geant4 application | an experiment group's own geometry | anything (GDML included) | delivers the boundary artifacts by including `g4sim` |
 | other engines or frameworks | FLUKA, fast simulation, ML surrogates, Key4hep and others | anything | a reducer converts their output into boundary artifacts; with probe content declared only (`source: declared`) they cannot upgrade |
 
-**Why a new `element_sim` rather than reworking `layered_sim`.** Moving `layered_sim` to a new geometry format needs a spec conversion with a same-host bit-identical check, plus a dual-format accessor maintained forever; it was the most costly and least valuable step of the previous version (§R.13). A new program leaves J14's program untouched and gives two real backends to test the output interface from day one. Both share `g4sim`, avoiding duplication.
+**Why a new `element_sim` rather than reworking `layered_sim`.** Moving `layered_sim` to a new geometry format needs a spec conversion with a same-host bit-identical check, plus a dual-format accessor maintained forever; it was the most costly and least valuable step of the previous version (§R.14). A new program leaves J14's program untouched and gives two real backends to test the output interface from day one. Both share `g4sim`, avoiding duplication.
 
-### §R.3.3 Effective config
+### §R.4.3 Effective config
 
 ```
 { "engine": "geant4", "engine_version": "11.4.3", "probe_version": "...",
@@ -2765,19 +2852,19 @@ Data plane (C++)
 | field | field managers are per thread; the master also calls `ConstructSDandField`, so backends using `g4sim` see the field on the master; a declared field the master cannot see marks the config `source: declared` |
 | mixed simulators | a backend that routes particles or regions to different simulators describes the routing in `sections` |
 
-### §R.3.4 Reducers (where external backends join)
+### §R.4.4 Reducers (where external backends join)
 
-A backend that cannot include `g4sim` (other engines, Key4hep's EDM4hep files, ML surrogates) joins through a recorded reduction step: it reads that backend's per-event output and writes a run summary and a column map as declared in `output.observables`; its effective config is declared only. The step is itself a computational-run record in the processing chain (§R.7.4). The first reducer, `simreduce`, reads the output of `simroot dump` (implemented after B1, at the first need).
+A backend that cannot include `g4sim` (other engines, Key4hep's EDM4hep files, ML surrogates) joins through a recorded reduction step: it reads that backend's per-event output and writes a run summary and a column map as declared in `output.observables`; its effective config is declared only. The step is itself a computational-run record in the processing chain (§R.8.4). The first reducer, `simreduce`, reads the output of `simroot dump` (implemented after B1, at the first need).
 
-### §R.3.5 Column map (`simulation-columns/1`)
+### §R.4.5 Column map (`simulation-columns/1`)
 
 For each observable and output column: semantic name, actual column name, unit, operational definition, and the file it lives in (`csv`, which ntuple of `root`, or `summary`); with `column_map_version`. Only declarative operations (rename, unit, sum, filter) are allowed; a conversion that computes something is a separate recorded step.
 
 ---
 
-## §R.4 Data tiers and the run summary
+## §R.5 Data tiers and the run summary
 
-### §R.4.1 Four data tiers
+### §R.5.1 Four data tiers
 
 | Tier | Content | Analogue | Retention |
 |---|---|---|---|
@@ -2788,7 +2875,7 @@ For each observable and output column: semantic name, actual column name, unit, 
 
 J14's offline replay needs only T3 and T4; T2 is used only for optional oracle tests and the high-statistics MPV check.
 
-### §R.4.2 Run summary (`simulation-summary/1`)
+### §R.5.2 Run summary (`simulation-summary/1`)
 
 One JSON per job.
 
@@ -2797,18 +2884,18 @@ One JSON per job.
 | `run` | identity and seed of the logical run, the event-number range this job covers, `seeding`, block size B and block count K, hashes of the spec and effective config, the producer (`layered_sim`, `element_sim`, `simreco`, `python-csv`, a reducer) and its version |
 | `observables[]` | per declared observable: semantic name (matching the column map), unit, accumulators |
 | blocks | events go into blocks by number: block b covers events [b·B, (b+1)·B); each block has its own set of accumulators |
-| accumulators | integers: `n`, the count per histogram bin (declared fixed bins; overflow and underflow separate), `count_if[]` (the number of events with x > a declared threshold); floating point: Σx, Σx², `min`, `max`, with Neumaier compensated summation; from C2 `values` may appear (raw values per block for empirical quantiles, omitted and recorded when above `values_max`); `profile` and 2D histograms are interfaces only (§R.9.2) |
+| accumulators | integers: `n`, the count per histogram bin (declared fixed bins; overflow and underflow separate), `count_if[]` (the number of events with x > a declared threshold); floating point: Σx, Σx², `min`, `max`, with Neumaier compensated summation; from C2 `values` may appear (raw values per block for empirical quantiles, omitted and recorded when above `values_max`); `profile` and 2D histograms are interfaces only (§R.10.2) |
 | `merge` | each accumulator's merge rule (`sum`, `min`, `max`, `hist`); several jobs of one logical run merge by block number |
 
-**Event weights.** `layered_sim`'s deposits are already multiplied by the track weight, while the CSV's `weight` column is only the primary vertex weight. To avoid double weighting, the event weight must be 1 for now (otherwise exit 2); the meaning of weighted accumulation and rules for biasing are deferred (§R.9.3).
+**Event weights.** `layered_sim`'s deposits are already multiplied by the track weight, while the CSV's `weight` column is only the primary vertex weight. To avoid double weighting, the event weight must be 1 for now (otherwise exit 2); the meaning of weighted accumulation and rules for biasing are deferred (§R.10.3).
 
-**Numerical precision.** Integer accumulators (counts, histograms, `count_if`) are exact. Floating-point sums use compensated summation; different job splits or thread counts change only the merge order, giving relative differences of about 1e-15, far below the reproducibility tolerance (§R.5.6).
+**Numerical precision.** Integer accumulators (counts, histograms, `count_if`) are exact. Floating-point sums use compensated summation; different job splits or thread counts change only the merge order, giving relative differences of about 1e-15, far below the reproducibility tolerance (§R.6.6).
 
 ---
 
-## §R.5 Execution, seeds, blocks and reproducibility
+## §R.6 Execution, seeds, blocks and reproducibility
 
-### §R.5.1 Logical runs and event determinism
+### §R.6.1 Logical runs and event determinism
 
 - A **logical run** is fixed by the spec, the backend and the logical-run seed S, and has N events numbered 0 … N−1.
 - `seeding: per-event` (the default for new specs): event i reseeds at its start with H(S, i). Therefore:
@@ -2817,7 +2904,7 @@ One JSON per job.
 - `seeding: stream`: the old behaviour (serial: one continuous stream; MT: the master draws per-event seeds in batches). Used only for J14's existing specs, so that A2's regression check can require bit-identical CSVs.
 - Seeds: S = H(study_id, role, point_id), mapped to [1, 2³¹); the evidence roles in A1 are trial, nominal, scan, control, variation, calibration; B2 adds regression and C2 adds confirmation and the search roles; positive and negative controls use different point_ids. No S repeats within a study, with one exception: C2's seed_group, whose runs share S on purpose so that paired comparison reduces the variance of differences (§C.6 C2.1, C2.3). The S of design evaluations is defined in §C.
 
-### §R.5.2 Blocks and batch means
+### §R.6.2 Blocks and batch means
 
 - Block size B and block count K (K ≥ 16) are declared before the first evidence run; N = K·B.
 - From the summary, each block b gives an estimate θ_b (mean, fraction, ratio, quantile, mode); report θ̄ = the mean; SE = sd(θ_b)/√K, with K − 1 degrees of freedom.
@@ -2825,23 +2912,23 @@ One JSON per job.
 - One run is enough to estimate the SE; there is no need for several processes for statistics, and job splitting is only for parallelism.
 - Precondition: no state carried between events (adaptive biasing, cross-event caches and the like). The probe records biasing and related settings; when in doubt, use several independent logical runs instead.
 
-### §R.5.3 Estimators
+### §R.6.3 Estimators
 
 - **Several observables:** the vector of per-block estimates is kept together; covariances between observables are estimated from these vectors.
 - **Full-sample values:** means and fractions also from the merged accumulators; the difference from θ̄ goes into the record as a diagnostic.
 - **Quantiles:** linear interpolation within a histogram bin; the bin width must be below 1/10 of the tolerance; a quantile in the overflow or underflow bin makes the estimate incomplete. From C2, with a `values` accumulator, the empirical quantile within each block is used instead.
 - **MPV:** per block, take the highest histogram bin and interpolate the mode with a three-point parabola through it and its neighbours; report the mean of the K modes. At design time a toy shows the bias's 95 % upper bound ≤ tol/10 (the toy uses Landau–Vavilov, checked against the shape from one high-statistics Geant4 run); at every run, the difference between θ̄ and the mode of the merged histogram must be ≤ tol/5 + 2·SE, otherwise the benchmark is incomplete.
 
-### §R.5.4 Small counts
+### §R.6.4 Small counts
 
 - When a counting estimator has a block at 0, or a merged total < 100 (the threshold can be declared), exact intervals on the merged accumulators are used instead: Clopper–Pearson for fractions, Garwood for counts; comparing two runs uses the exact conditional binomial interval for the ratio of the rates, with relative difference = ratio − 1.
-- There is no SE in these cases; the gate decides on interval endpoints (§R.6.6), and event planning uses the Poisson variance of the trial run.
+- There is no SE in these cases; the gate decides on interval endpoints (§R.7.6), and event planning uses the Poisson variance of the trial run.
 
-### §R.5.5 Two-stage event count
+### §R.6.5 Two-stage event count
 
 N = ceil(N_trial·(SE_trial/target)²·f), with f = F₀.₉₀(K − 1, K_trial − 1) (≈ 1.97 when both are 16). About 10 % of evidence runs miss their target and are incomplete, with no top-up; F₀.₉₅ (≈ 2.40) brings this to about 5 % at about 22 % more events.
 
-### §R.5.6 What reproducibility means
+### §R.6.6 What reproducibility means
 
 | Level | Requirement |
 |---|---|
@@ -2852,21 +2939,21 @@ N = ceil(N_trial·(SE_trial/target)²·f), with f = F₀.₉₀(K − 1, K_trial
 
 ---
 
-## §R.6 Validation classes and decisions
+## §R.7 Validation classes and decisions
 
-### §R.6.1 Kinds of validation and the classes
+### §R.7.1 Kinds of validation and the classes
 
 | Class | Reference | Examples | Statistics | Can upgrade |
 |---|---|---|---|---|
 | verification | an exact consequence of the inputs | charged geantino against the analytic helix, kinematics, least-squares algebra | deterministic comparison or IUT | no |
-| physics reference (reference) | a physics model Geant4 approximates, or a published thin-target measurement, on an isolated target | Bethe stopping power, Landau–Vavilov MPV, geant-val-style thin-target tests | IUT (scalars); χ² (distributions, §R.9.2) | yes (in scope) |
+| physics reference (reference) | a physics model Geant4 approximates, or a published thin-target measurement, on an isolated target | Bethe stopping power, Landau–Vavilov MPV, geant-val-style thin-target tests | IUT (scalars); χ² (distributions, §R.10.2) | yes (in scope) |
 | setup-matched measurement (setup-matched) | a published measurement whose configuration has the same target hash | a test-beam longitudinal profile, a module's response and resolution | as above, plus the measurement uncertainties | yes (in scope) |
 | regression | the same study's result with the previous software or Geant4 version | MPV, histogram shapes before and after a change | difference and SE for scalars; χ² p-value for histograms | no; only flags "changed" and may trigger an advisory |
-| model-to-model (surrogate) | a full simulation such as Geant4, as the reference for fast simulation or an ML surrogate | a parametrized calorimeter against Geant4 | IUT or χ² | cannot upgrade physics labels; the surrogate itself may get a "consistent with the reference simulation in scope" mark. Deferred from 2026-10-24, not in CV-B2 (fast simulation in a design context is expressed by main's fidelity and bound) |
+| model-to-model (surrogate) | a full simulation such as Geant4, as the reference for fast simulation or an ML surrogate | a parametrized calorimeter against Geant4 | IUT or χ² | cannot upgrade physics labels; the surrogate itself may get a "consistent with the reference simulation in scope" mark. Deferred, not in CV-B2 (fast simulation in a design context is expressed by main's fidelity and bound) |
 
 There are also `sanity` (a rough plausibility check) and `interface` (an interface check); neither can upgrade. The implemented classes are therefore six: A1's reference, setup-matched, sanity and interface, and B2's verification and regression; model-to-model (surrogate) is deferred (§A.4.4).
 
-### §R.6.2 Benchmark table (CV-A1, extended in CV-B2)
+### §R.7.2 Benchmark table (CV-A1, extended in CV-B2)
 
 `contracts/validate.py` carries its own table; `_study_upgrade` takes class, grade, kinds and scope dimensions only from it.
 
@@ -2883,14 +2970,14 @@ There are also `sanity` (a rough plausibility check) and `interface` (an interfa
 | `published-data` | interface | — | — |
 | added in CV-B2: J15's checks (`field-propagation` and others) | verification or sanity | — | — |
 | added in CV-B2: `regression-comparison` | regression | — | — |
-| added in CV-B2: a tracking reference benchmark (multiple-scattering core width in an isolated Si slab against Lynch–Dahl (F = 98 %), with a negative control; qualifies `momentum-resolution-core` only; condition 4 of the F4 qualification path, §R.15.5) | reference | see §B | material, thickness, rigidity, species |
+| added in CV-B2: a tracking reference benchmark (multiple-scattering core width in an isolated Si slab against Lynch–Dahl (F = 98 %), with a negative control; qualifies `momentum-resolution-core` only; condition 4 of the F4 qualification path, §R.1.5) | reference | see §B | material, thickness, rigidity, species |
 | deferred: `surrogate-comparison` | surrogate | — | — |
 
 The scope of `regression-comparison` is the intersection of the two compared studies' scopes, re-derived by `dependencies.py` (the CV-B2 table of §B governs).
 
 A record whose class or grade disagrees with the table, or whose name is not in it, is an error. `GRADES` in `geant4_benchmarks.py` stays for the tool, with a consistency test.
 
-### §R.6.3 Scope (CV-A1)
+### §R.7.3 Scope (CV-A1)
 
 - Compare the controlled `observable.kind`; `label` writes it into `declared_scope.observable_kind`.
 - The dimension list is declared per benchmark (fourth column of 6.2), each dimension typed: categorical or a numeric range; a scalar is [v, v]. A new use case adds dimensions by changing the table only.
@@ -2898,7 +2985,7 @@ A record whose class or grade disagrees with the table, or whose name is not in 
 - With a target-hash dimension, the declared scope must carry the same `target_geometry_sha256` and `hash_scheme`.
 - Gating: `strict or _at_least(contract_version, CV-A1)`, no warning branch.
 
-### §R.6.4 Configuration and isolation (CV-A1)
+### §R.7.4 Configuration and isolation (CV-A1)
 
 - **Target:** the benchmark config declares `target_slabs` (A1, `layered_sim`) or a list of target volumes (from A2, matching placements in the geometry tree).
 - **Vacuum:** the world material is `G4_Galactic`, or its density is < 1e-20 g/cm³.
@@ -2914,12 +3001,12 @@ A record whose class or grade disagrees with the table, or whose name is not in 
 - A backend with declarations only can run and be published but cannot upgrade.
 - **Contract rule:** every counted benchmark must be isolated (reference), or both isolated and matching the target hash of the measured setup (setup-matched); `dependencies.py` must re-derive from the run records in `evidence_records` and compare.
 
-### §R.6.5 Regression and model-to-model (CV-B2)
+### §R.7.5 Regression and model-to-model (CV-B2)
 
-- **Regression:** the same study with the same settings runs once on each of two versions (plugin, backend or Geant4) (point_id is the version tag, so the samples are independent), and every scalar observable is compared. Three outcomes: `changed` (|diff| − t_{1−α/m}·se_diff > tol), `unchanged` (the pass rule of §R.6.6), `unresolved`; "not significant" does not mean "unchanged". Histogram comparison is deferred to distribution-level benchmarks. Labels are not affected; a reference observable marked `changed` can trigger a sci-fix check.
-- **Model-to-model (deferred from 2026-10-24):** a surrogate never changes the physics label. A surrogate's study declares its reference study (a study record) and scope; decided by IUT (χ² only as a diagnostic). On pass, `extension.study.surrogate` is recorded (reference study's reference and hash, scope the intersection of the two).
+- **Regression:** the same study with the same settings runs once on each of two versions (plugin, backend or Geant4) (point_id is the version tag, so the samples are independent), and every scalar observable is compared. Three outcomes: `changed` (|diff| − t_{1−α/m}·se_diff > tol), `unchanged` (the pass rule of §R.7.6), `unresolved`; "not significant" does not mean "unchanged". Histogram comparison is deferred to distribution-level benchmarks. Labels are not affected; a reference observable marked `changed` can trigger a sci-fix check.
+- **Model-to-model (deferred):** a surrogate never changes the physics label. A surrogate's study declares its reference study (a study record) and scope; decided by IUT (χ² only as a diagnostic). On pass, `extension.study.surrogate` is recorded (reference study's reference and hash, scope the intersection of the two).
 
-### §R.6.6 Convergence gate (IUT)
+### §R.7.6 Convergence gate (IUT)
 
 - **Difference:** a is the finest setting, b the second-finest; in `relative` mode diff = (a − b)/b and se_diff = √(se_a² + se_b²)/|b|, in `absolute` mode diff = a − b and se_diff = √(se_a² + se_b²) (the two points are independent logical runs); ν by Welch's formula for each pair. From C2 a paired mode can be declared (`pairing: paired`): both points are in one seed_group with equal K and B, se_diff is estimated from per-block differences, ν = K − 1 (defined in §C.6 C2.1); independent remains the default.
 - **Event-count target:** each point's se target is tol/(4√2), so that se_diff ≤ tol/4.
@@ -2935,9 +3022,9 @@ A record whose class or grade disagrees with the table, or whose name is not in 
 | tol | 0.050 | 0.044 | 0.054 | 0.050 | 0.002 | 0.002 |
 | 2 tol | 0.000 | 0.000 | 0.000 | 0.988 | 0.780 | 0.952 |
 
-At a true difference of tol about 90 % of results are unresolved, which is inherent to an equivalence test. Under the two-stage design about 19 % of point pairs are incomplete because one point missed its target. The independent review of 2026-10-23 found that the old two-stage columns double-counted the trial χ²; they have been recomputed.
+At a true difference of tol about 90 % of results are unresolved, which is inherent to an equivalence test. Under the two-stage design about 19 % of point pairs are incomplete because one point missed its target.
 
-### §R.6.7 Negative controls and the detection limit
+### §R.7.7 Negative controls and the detection limit
 
 - Decision quantity: shift = (control − nominal)/reference, with the SE combined from both runs.
 - Detection limit: DL = tol + |rel| + t_{0.977}(ν)·se_rel.
@@ -2945,28 +3032,28 @@ At a true difference of tol about 90 % of results are unresolved, which is inher
 - Design requirement: a toy shows that an injection at the DL is caught with probability ≥ 0.977; the true power is near 0.977, so the acceptance threshold is 0.977 − 3σ_MC (an A1 acceptance condition).
 - Realization: inject both signs (otherwise restrict the claim to one sign); at the detection limit = caught and |shift| ≤ 1.1 × DL. A single miss is recorded and explained, does not fail automatically, and the control is never rerun with another seed.
 
-### §R.6.8 Stopping rule and evidence correlation
+### §R.7.8 Stopping rule and evidence correlation
 
 - The stopping rule, scan grid, K and B, and the handling of unresolved results are written into the study spec before the first evidence run.
 - `extension.study.evidence_overlap` lists runs shared by several decisions.
 
 ---
 
-## §R.7 Contracts, traceability and sci-fix
+## §R.8 Contracts, traceability and sci-fix
 
-### §R.7.1 CV-A1 (A1)
+### §R.8.1 CV-A1 (A1)
 
-The table, scope and isolation rules of §R.6.2–6.4; `dependencies.py`'s re-derivation; an optional `simulation` property in `ext_computational_run.json` (needs hep-computing's agreement; fields in §A). `study` stays an open object so that B2 can add the fields F4 needs.
+The table, scope and isolation rules of §R.7.2–6.4; `dependencies.py`'s re-derivation; an optional `simulation` property in `ext_computational_run.json` (needs hep-computing's agreement; fields in §A). `study` stays an open object so that B2 can add the fields F4 needs.
 
-### §R.7.2 CV-B2 (B2)
+### §R.8.2 CV-B2 (B2)
 
-The new entries of §R.6.2 (verification, `regression-comparison`, the tracking reference benchmark); the regression rules of §R.6.5; the transitive processing chain of §R.7.4; the F4 study-record fields `results` and `tail_sources_simulated` and asymmetric uncertainties for counting figures of merit; `design_geometry.json` 1.1.0. Gated like CV-A1. CV-C1 (C1) adds `search_summary`; CV-C2 (C2) adds one `design.py` rule: an evaluation whose run or study seed appears in a search summary is `design.contract_mismatch`; see §C.
+The new entries of §R.7.2 (verification, `regression-comparison`, the tracking reference benchmark); the regression rules of §R.7.5; the transitive processing chain of §R.8.4; the F4 study-record fields `results` and `tail_sources_simulated` and asymmetric uncertainties for counting figures of merit; `design_geometry.json` 1.1.0. Gated like CV-A1. CV-C1 (C1) adds `search_summary`; CV-C2 (C2) adds one `design.py` rule: an evaluation whose run or study seed appears in a search summary is `design.contract_mismatch`; see §C.
 
-### §R.7.3 sci-fix and advisories (A1)
+### §R.8.3 sci-fix and advisories (A1)
 
-The fixes of D1–D11 are recorded in main's current ledger format (`docs/maintenance.md`): one entry per fix (e.g. the variance method split into batch-means SE, exact low-count intervals and the MPV estimator); S1 with C4 where a closed form exists and a per-entry review sign-off; S3 in `documentation_fixes`. Advisories use format `/2` with `applies_to.match` groups; they cover wrongly upgraded study records and the F4 design-evaluations built on them (§R.15.5). Entries, severities and advisory numbers follow A1.14 in §A.
+The fixes of D1–D11 are recorded in main's current ledger format (`docs/maintenance.md`): one entry per fix (e.g. the variance method split into batch-means SE, exact low-count intervals and the MPV estimator); S1 with C4 where a closed form exists and a per-entry review sign-off; S3 in `documentation_fixes`. Advisories use format `/2` with `applies_to.match` groups; they cover wrongly upgraded study records and the F4 design-evaluations built on them (§R.1.5). Entries, severities and advisory numbers follow A1.14 in §A.
 
-### §R.7.4 Tracing processing chains
+### §R.8.4 Tracing processing chains
 
 - Every processing step (simulation, reduction, digitization and reconstruction, table) writes a computational-run record with `**trace.provenance()`, the configuration hash, hashes of input records and files, and the code hash.
 - The input chain of a simulated table can be any depth, as long as every level is a recorded computational-run and every root of the chain is a simulation run (CV-B2; previously only one level).
@@ -2974,11 +3061,11 @@ The fixes of D1–D11 are recorded in main's current ledger format (`docs/mainte
 
 ---
 
-## §R.8 Code and CI
+## §R.9 Code and CI
 
 | Location | Change |
 |---|---|
-| `contracts/validate.py`, `dependencies.py` | §R.6, §R.7 |
+| `contracts/validate.py`, `dependencies.py` | §R.7, §R.8 |
 | `contracts/schema.py` | `maxItems`, `maximum`, `exclusiveMaximum` (added in A2.7; needed by `element_sim`'s schema; no contracts version change) |
 | `core/stats/`, `core/simulation/` | Block estimators, the study-level decision engine (A1's `equivalence` and `detection_limit`; B2's `change`; C2's paired mode), distribution functions, the seed hash, summary reading. They are in `core/` because both hep-detector's scripts and the geant4 adapter need them, and the layering rules let adapters import only `core` and `contracts` (§A.3 rule 1, §A.4.5); `core/` may import only `core`, so the summary schemas live in `contracts/schemas/` and scripts validate them with `contracts.schema`. Main's existing functions (the Garwood interval, `toy_ensemble`) are reused, not rewritten |
 | `skills/hep-detector/scripts/` | inference and decisions read only boundary artifacts; geometry facts (minimum thickness, configuration) come from the effective config, records from before A2 still from spec/1; `check_geant4_study.py label` writes the F4 fields (B2); `evaluate_design.py` gains the `search` subcommand (C1) and fixes `f4`'s `--label-run-record` pass-through and exit codes (A1); no new script; `SKILL.md` and description unchanged |
@@ -2990,9 +3077,9 @@ The fixes of D1–D11 are recorded in main's current ledger format (`docs/mainte
 
 ---
 
-## §R.9 Generality
+## §R.10 Generality
 
-### §R.9.1 Use cases covered
+### §R.10.1 Use cases covered
 
 | Use case | Supported by | Status |
 |---|---|---|
@@ -3002,10 +3089,10 @@ The fixes of D1–D11 are recorded in main's current ledger format (`docs/mainte
 | test beams and modules (compared with data) | the setup-matched class, target hashes from the geometry tree, per-benchmark scope dimensions | contracts in A1 and A2; geometry from a user application or `element_sim` |
 | rare events | exact counting intervals | A1 |
 | software or Geant4 changes | the regression class | B2 |
-| fast simulation, ML surrogates | the surrogate class, reducers | deferred (moved out of B2 on 2026-10-24); reducers at the first need |
+| fast simulation, ML surrogates | the surrogate class, reducers | deferred; reducers at the first need |
 | other engines or frameworks (FLUKA, Key4hep) | the output interface, reducers | interface ready; converters deferred |
 
-### §R.9.2 Interfaces defined now, implemented later
+### §R.10.2 Interfaces defined now, implemented later
 
 | Interface | Content | First use case |
 |---|---|---|
@@ -3015,7 +3102,7 @@ The fixes of D1–D11 are recorded in main's current ledger format (`docs/mainte
 | sources | `gps` (declarative settings only), `event-file`; the summary records the source area and solid angle for flux normalization | the first spectrum or flux study |
 | `simreduce` | reads event files (through `simroot`) or external formats and writes summaries as declared | the first observable decided after the fact, or the first external backend |
 
-### §R.9.3 Deferred (with triggers)
+### §R.10.3 Deferred (with triggers)
 
 | Item | Trigger |
 |---|---|
@@ -3029,21 +3116,21 @@ The fixes of D1–D11 are recorded in main's current ledger format (`docs/mainte
 | `physics_config_comparison` | a study that needs to compare physics settings |
 | RNTuple, vector columns | ROOT file size or read speed becomes a bottleneck |
 
-### §R.9.4 Deliberately not done
+### §R.10.4 Deliberately not done
 
 - An engine abstraction layer (VMC-style): abstraction at the output is enough, and ALICE's experience shows API-level abstraction is costly.
 - A processing framework (Gaudi-style), a validation database and website (geant-val-style): they solve the scale problems of large collaborations and break the plugin's constraints.
 - A general expression language, a plug-in system for estimators, one probe content for all engines.
-- Integer quantization and bit-identical statistics (§R.13).
+- Integer quantization and bit-identical statistics (§H.4).
 - Topping up, refining or reseeding controls based on results.
 - The `uses-validated-physics` label, contracts 4.0, Python bindings, a content-addressed cache, `simstat`, a Geant4-free `simcore`.
-- An own requirements spec, own requirement verdicts, candidate ranking or a "recommended design", and any claim of a global optimum: these belong to main's `contracts/design.py` and human gates (§R.15.2, §R.15.3).
+- An own requirements spec, own requirement verdicts, candidate ranking or a "recommended design", and any claim of a global optimum: these belong to main's `contracts/design.py` and human gates (§R.1.2, §R.1.3).
 
 ---
 
-## §R.10 Stages and acceptance
+## §R.11 Stages and acceptance
 
-Before 2026-10-23 this section copied the content and acceptance of each stage, which easily drifted from the task specs, so it now points to them. Stage order, scope boundaries, interface ownership, gates and open decisions are defined in Part 1; the work items and acceptance of each stage are defined in the task specs.
+This section only points to the specs; it does not copy them. Stage order, scope boundaries, interface ownership, gates and open decisions are defined in Part 1; the work items and acceptance of each stage are defined in Parts 2–4.
 
 | Stage | In one sentence | Spec |
 |---|---|---|
@@ -3058,12 +3145,12 @@ Before 2026-10-23 this section copied the content and acceptance of each stage, 
 
 ---
 
-## §R.11 Residual risks
+## §R.12 Residual risks
 
 1. J14's detection limits may change with block batch means, t quantiles and controls in observable units, and the controls may need redesigning.
 2. Block batch means has an O(1/B) bias for ratios, quantiles and modes of skewed distributions that K does not reduce; the coverage toy allows ±0.02, and B is raised if needed.
 3. Block independence fails when state is carried between events; the probe records the relevant settings, and several independent logical runs are used when in doubt.
-4. Under the two-stage design about 10 % of evidence runs miss their target (§R.5.5).
+4. Under the two-stage design about 10 % of evidence runs miss their target (§R.6.5).
 5. With tolerance comparisons, decisions close to a threshold may differ across platforms; handled by margin flags and "the CI platform decides".
 6. Two Geant4 programs: `layered_sim` is frozen in maintenance mode, and `g4sim` keeps duplication down.
 7. The probe assumes workers match the master; if a thread-local difference appears, dump per thread.
@@ -3071,65 +3158,25 @@ Before 2026-10-23 this section copied the content and acceptance of each stage, 
 9. The reading ability of `G4RootAnalysisReader` is unverified (the B1 trial).
 10. Only 931 bytes of quick-load budget remain; this architecture does not change `SKILL.md` or the description (main's hub link provides the entry to the design loop).
 11. Effort: the prototype estimates A1's contract part at about 8–12 engineer-days plus Geant4 time; the rest is not estimated.
-12. Until the maintainer approves the detector-level F4 qualification path (§R.15.5), J15's and task C's confirmation studies can only be `unvalidated`, and design.py will not count them as F4.
+12. Until the maintainer approves the detector-level F4 qualification path (§R.1.5), J15's and task C's confirmation studies can only be `unvalidated`, and design.py will not count them as F4.
 
 ---
 
-## §R.12 Decision record
+## §R.13 Decision record
 
-### §R.12.1 Decided by the user
-
-| Date | Decision | Where |
-|---|---|---|
-| 2026-10-22 | core code in C++, Python as the interface; compute core in C++, reference values stay in Python; separate executables exchanging JSON/CSV, no Python bindings | principle 2 (as interpreted by item 1 of 12.2) |
-| 2026-10-22 | J15's TOF1 and TOF2 two layers each, all four of the same material | §B |
-| 2026-10-22 | detailed per-event information stored in ROOT files | §R.4.1 T1, B1 |
-| 2026-10-22 | J15 split from the rest into a second task, done later | task A (A1, A2), task B (B1, B2, B3); task C added later (§P.0) |
-| 2026-10-24 | full rewrite to plug into main's design loop; task C's search is `evaluate_design.py search`; detector-level Geant4 studies become F4 through a qualification path | §R.15, §P.0 |
-
-### §R.12.2 Proposals of this part (need the user's confirmation)
-
-1. **Interpreting the language split:** per-event computation (simulation, digitization, reconstruction, accumulation) in C++; inference after merging in Python.
-2. **A backend interface at the output** (three boundary artifacts), no engine abstraction layer.
-3. **Event determinism:** `seeding: per-event` by default for new specs; job splitting and thread count do not affect events.
-4. **Reproducibility means "same decisions"**, with numbers compared within tolerances; no integer quantization and no bit-identical statistics.
-5. **Block batch means:** K ≥ 16 blocks by event number within one run; J14 runs with per-event data are recomputed offline without re-recording.
-6. **A new `element_sim`**, with `layered_sim`'s spec format unchanged; both share `g4sim`.
-7. **Six validation classes** (of the five kinds, model-to-model is deferred; plus sanity and interface), with verification and regression added in CV-B2 (B2); surrogate deferred.
-8. **Eight stages** (A1, A2, B1, B2, B3, C1, C2, C3; §P.0), with ROOT files and `simroot` in B1.
-9. The two-stage factor F₀.₉₀ or F₀.₉₅; the threshold for exact intervals (any block at 0 or a total < 100).
-
-### §R.12.3 For the maintainer to decide
-
-The merged list and its proposals are in §P.7; this part's original seven items are all included there.
+The decisions taken by the user (with dates) and this part's proposals moved to §H.5; open decisions for the maintainer are in §P.7.
 
 ---
 
-## §R.13 History: superseded designs
+## §R.14 History: superseded designs
 
-| Previous design | Replaced by | Basis |
-|---|---|---|
-| `simstat` and a Geant4-free `simcore`: moving run-level statistics to C++ | inference stays in Python, reading merged summaries | little code and data, no gain from C++, and replay would need a compiler (soundness assessment P1); CMS DQM also decides only after merging |
-| spec/2, `layered_sim convert`, a dual-format accessor, a same-host bit-identical gate | `layered_sim`'s format unchanged; a new `element_sim` | the most costly, least valuable step; a new program leaves J14 untouched and gives a real second backend |
-| integer quantization, a two-word 128-bit integer, round half to even, `%.17g` needed for recomputation | compensated floating-point sums; integers only for counts and histograms; reproducibility defined as same decisions | bit identity is not a scientific need; real experiments aim at reproducible events and traceable sources |
-| 16 independent processes per evidence run | blocks by event number within one run | batch means is batching within a run; per-event seeds make job splitting irrelevant to statistics |
-| per-event seeding forced only for bit identity | per-event seeding as the default for new specs, for event determinism | the practice of ATLAS and Allpix² |
-| an interface-only synthetic backend | `element_sim` as a real second backend | third check R19 |
-| validation as grades only (reference, sanity, verification, interface) | six validation classes (adding setup-matched and regression; surrogate deferred) | geant-val, Belle II, ATLAS AtlFast3 |
-| task C's own requirements spec `detector-requirements/1`, component catalogue and design format `detector-design/1` | main's design-spec and design-candidate; the genome is only the optimiser's internal encoding, decoded into `overrides` on a base candidate | main 0.37.0 already has these artifacts (2026-10-24 review C4, C5) |
-| task C's fidelities F0, F1, F2 | main's F0–F5: the old F0 is main's F1; short Geant4 runs inside a search are search values only; confirmation is F4 | name clash (review P2) |
-| task C's requirement verdicts (`threshold`), `order`, own Pareto and "recommended design" | `contracts/design.py` derives verdicts, screening, ranking and Pareto; no optimum is claimed | main's rules (review C2, C3) |
-| `realize()`: design -> spec | `evaluate_design.py geometry` writes `design-geometry/1`, B1's `from-geometry` derives `element_sim.spec/1` | main already has the geometry step (review C6, B4) |
-| `adapters/detector-design/` and its version series | `evaluate_design.py search`; only the optional Bayesian-optimisation backend is an adapter | an adapter is an optional component connecting an external tool (review P3) |
-| the surrogate class B2 added for task C | deferred | fast simulation in a design context is expressed by main's fidelity and bound (review's B re-plan) |
-
-Still valid from the previous version (merged here): the fixes of D1–D10, the contracts grade table and per-benchmark scope dimensions, the isolation and field definitions, versioned target hashes, the IUT gate and its t-based operating characteristics, exact counting intervals, MPV interpolation with two bias checks, the t-based detection limit, the two-stage event count, the event-weight restriction, the probe's content and timing, the ROOT file design, J15's design. Of the 25 findings of the third deep check, R11, R12, R16 and R18 no longer apply because the design changed, R19 is resolved by `element_sim`, and the rest are merged.
+Superseded designs, the reasons, and the earlier content that still holds moved to §H.4.
 
 ---
 
-## §R.14 Sources
+## §R.15 Sources
 
-- ATLAS Collaboration, *Software and computing for Run 3 of the ATLAS experiment at the LHC*, [arXiv:2404.06335](https://arxiv.org/pdf/2404.06335) (random numbers: §R.3.1; data formats: §R.2.3)
+- ATLAS Collaboration, *Software and computing for Run 3 of the ATLAS experiment at the LHC*, [arXiv:2404.06335](https://arxiv.org/pdf/2404.06335) (random numbers: the paper's section 3.1; data formats: its section 2.3)
 - ATLAS Collaboration, *AtlFast3: the next generation of fast simulation in ATLAS*, [arXiv:2109.02551](https://ar5iv.labs.arxiv.org/html/2109.02551)
 - CMSSW `RandomNumberGenerator.h` ([LXR](https://cmssdt.cern.ch/lxr/source/FWCore/Utilities/interface/RandomNumberGenerator.h)); DQM `README.md` ([LXR](https://cmssdt.cern.ch/lxr/source/DQMServices/Core/README.md)); `ProcessHistory` ([doxygen](https://cmsdoxygen.web.cern.ch/cmsdoxygen/CMSSW_12_3_2/doc/html/d8/d42/ProcessHistory_8cc_source.html))
 - S. Banerjee, V. Ivanchenko (CMS), *Validation of physics models of Geant4 using data from the CMS experiment*, [EPJ Web Conf. CHEP 2021](https://www.epj-conferences.org/articles/epjconf/abs/2021/05/epjconf_chep2021_03010/epjconf_chep2021_03010.html)
@@ -3144,47 +3191,312 @@ Still valid from the previous version (merged here): the fixes of D1–D10, the 
 
 ---
 
-## §R.15 Relation to main's detector system design loop (2026-10-24)
+# Part 6 — Revisions, reviews and decisions (§H)
 
-main 0.37.0–0.38.0 added a detector system design loop to hep-detector (`references/system-design-workflow.md`, `contracts/design.py`, `scripts/evaluate_design.py`). On 2026-10-24 this program was changed to plug into that loop rather than build a second one; this section gives the reasons for the division of work.
+> This part keeps history only: version history, review findings and how they were handled, the mapping from old to current designs, superseded designs and the decision log. Parts 1–5 state the current specification; nothing here is binding.
 
-### §R.15.1 Fidelity and where Geant4 sits
+---
 
-| Fidelity (main) | Meaning | What this program provides |
+## §H.1 Version history
+
+Ordered by date, and within a day by Parts 1, 2, 3, 4, 5.
+
+| Date | Part | Change |
 |---|---|---|
-| F0 | heuristic argument, no run | — |
-| F1 | analytic, run through a tool contract (`tracker_resolution`, `multiple_scattering`, `design_estimates` and others) | C1's search inner loop uses the same functions in-process |
-| F2 | toy Monte Carlo (`toy_spectrometer`, `design_estimates.py infield-acceptance`) | B3 runs them on the J15 candidates, replacing hand comparisons |
-| F3 | response assembly and expected precision (hep-statistics Asimov fit) | — |
-| F4 | a Geant4 study re-issued `validated-in-scope` by `check_geant4_study.py label --upgrade` | A1 makes the label correct; B1 and B2 make spectrometer studies possible and write the F4 fields; B3 (J15) and C2's confirmation produce F4 |
-| F5 | prototype or test-beam measurement | — |
+| Before v5 | Part 3 | Detector document and v5: single-axis stacked spectrometer; correction of the Gluckstern small-N formula; field direction and field-check grid |
+| Before 2026-10-21 | Part 2 | Three rounds of independent review, two checks against 0.21.0 and `9f08796`, stage 1 prototype |
+| 2026-10-22 | Part 2 | Language split, per-event ROOT files, task split, organized as an implementation spec; redesign referencing real experiments (Part 5 (design rationale)); rewritten for the new architecture |
+| 2026-10-22 | Part 3 | Two layers each for TOF1 and TOF2; digitization and reconstruction moved to C++; per-event ROOT file; split out as task B; rewritten for the new architecture (`element_sim` replaces spec/2; B1, B2; PAMELA and AMS-02 comparison and TOF sensitivity) |
+| 2026-10-22 | Part 5 | First version |
+| 2026-10-23 | Part 1 | First version: consolidated evaluation, planning principles, eight stages (B split into B1–B3, C into C1–C3), interface ownership, naming (contract versions written CV1–CV3), gates, consolidated open decisions and risks |
+| 2026-10-23 | Part 1 | Added §P.10 "Execution environment: isolated worktree" (creating, confirming, rules, parallel stages, finishing) and the reading guide for agents |
+| 2026-10-23 | Whole document | Consolidation: the previously separate `plan.md`, `task-a-core.md`, `task-b-j15.md`, `task-c-design-search.md` and `architecture.md` (and their English versions) were merged into this document with unchanged content; only section numbers and cross-references were rewritten, and the old files were removed. The programs computing design numbers (`gate_operating_characteristics.py`, `j15_design_estimates.py`, `design_search_closure.py`) remain separate files in the same folder |
+| 2026-10-23 | Part 2 | Fixes after independent review (two-stage operating characteristics recomputed, definition of H, caught definition, reseeding at the start of `GeneratePrimaries`, etc.); re-examined for automated design (statistics moved to `core/`) |
+| 2026-10-23 | Part 2 | Reorganized per the plan (Part 1): A1 back to a minimal sci-fix (`change`, `threshold`, `order`, paired comparisons, search roles and `values` moved to B2 and C2); contract version written CV1; the seed hash in `core/simulation/seeds.py`; section numbering consistent with tasks B and C (§A.2 prerequisites and provided interfaces, §A.8 checks, §A.10 open decisions and risks) |
+| 2026-10-23 | Part 2 | Added the isolated-worktree execution rule: header, the first step of §A.0, the start of §A.11 (§P.10) |
+| 2026-10-23 | Part 2 | Fixes after the detailed check: new spec fields added to `validate_spec()`, `spec.schema.json` and `Spec.cc` together; A1.5's selections match the current code; `tolerance` and the direction of `count_if`; names of the seed fields and `cmd_chunk`; trial runs and N rounded up to a multiple of K; tol and se_rel of DL; the `tree-v1` target; `float.hex()` special values, `setTheSeeds`, `IsBlocked()` and the general processes; cross-platform tolerance of Box–Muller; D7 and D8 in the ledger; factual corrections (line numbers, size of `recorded/`, `summaries/`, the prototype's description) |
+| 2026-10-23 | Part 3 | Fixes after independent review (B1.6 compares only common observables, calorimeter leakage, table entries, surrogate and regression rules, total-momentum rigidity, CLI and `SIM_SOURCES`, portable random numbers, explicit stepper construction, etc.) |
+| 2026-10-23 | Part 3 | Reorganized per the plan (Part 1): B2 split into B2 (reconstruction and contracts) and B3 (J15 study); deterministic field check moved to B1.7; `geant4_run.py check-spec` added; the decision engine's `change` and the regression role added in B2 |
+| 2026-10-23 | Part 3 | Isolated-worktree execution rules added: header, first step of §B.0, start of §B.11 (§P.10) |
+| 2026-10-23 | Part 4 | First proposal: three roles, requirements spec, component catalogue and design grammar, F0/F1/F2 multi-fidelity, search and confirmation separated, contracts, C1/C2, J16; later references to the shared `core/` modules after the re-examination of task A |
+| 2026-10-23 | Part 4 | Reorganised per the plan (Part 1): three stages; `threshold`, `order`, paired comparison, `values`, search roles and seed_group added by C2.1; realization checked with `check-spec`; contract version recorded as CV3; J16 and MOBO moved to C3 |
+| 2026-10-23 | Part 4 | Isolated-worktree execution rules added (§P.10) |
+| 2026-10-23 | Part 4 | Fixes after the detailed check: schema keyword limits; two-sided bound of `order`; paired `relative` mode; cache key; parent re-evaluation; design dedup; materials table; genome repair and violation measure; minimum spacing of the closure test; citation keys; `values_max` per block |
+| 2026-10-23 | Part 5 | Corrected after the detailed check; §R.11 used to copy each stage's content and acceptance, which easily drifted from the task specs, and now points to them |
+| 2026-10-23 | Part 5 | The independent review found that the two-stage columns of the convergence-gate operating table double-counted the trial χ²; recomputed with `gate_operating_characteristics.py` (§R.7.6) |
+| 2026-10-24 | Whole document | Re-plan: after the review against main 0.38.0 (§H.2.1), the program was re-planned around main's detector system design loop: task B becomes the Geant4 evaluator for F4, J15 becomes a design project, and task C becomes the candidate generator `evaluate_design.py search` |
+| 2026-10-24 | Part 1 | Re-planned against the detector system design loop of main 0.38.0 (§H.2.1): baseline `5584927`; main's fidelities F0–F5 adopted; B becomes the F4 evaluator (`from-geometry`, tail sources, `results` fields, qualification path D0); J15 becomes a design project; C becomes the candidate generator `evaluate_design.py search` and no longer depends on A; contract placeholders become CV-A1, CV-B2, CV-C1, CV-C2; G-D0 and G-B2 added; open decisions renumbered and those main already decided marked |
+| 2026-10-24 | Part 1 | Fixes after a new independent review: D0 becomes v2 (material definition replaces material-benchmark scope; per-class scope model; tracking reference against Lynch–Dahl, qualifying `momentum-resolution-core` only; sub-decisions D0-b, D0-c, D0-d); G-D0 includes D0-c, G-B2 tests both paths and reaches a decisive row; C2's adapter 0.5.0; B2's tail sources become reconstruction replicas and a position-dependent field error; risk 12 added |
+| 2026-10-24 | Part 1 | Reorganisation: the front matter gains a per-stage reading index and a global glossary; §P.1 rewritten as "relation to main"; D0 in §P.7 becomes its own §P.7.1; history (the front matter's consolidation and re-plan notes, the problem table of §P.1, the old-to-new naming map) moved to Part 6 |
+| 2026-10-24 | Part 2 | Re-planned against main 0.38.0 (detector design loop): baseline `5584927` / contracts 3.12.0; D11 added (A1.16) and F4-consumer compatibility (A1.17); ledger and advisories in main's current formats (one entry per fix, `documentation_fixes`, advisory `/2`, SFA-2026-039/-040, covering F4 design evaluations); Garwood, `toy_seed` and `coverage_gate` reused; summary schemas moved to `contracts/schemas/`, column-map and effective-config schemas to the adapter; definition of `statistical_uncertainty`; `evidence_role`; CV1 written CV-A1; `CORE_VERSION` and `OWNERS.json`; A2's run records gain `argv`, `script_sha256`, `versions.plugin_release`, schema keywords `oneOf`/`not` and exemptions; line numbers updated. Part 2 was first written against `9f08796` (0.23.0); from here its baseline is `5584927` (0.38.0) |
+| 2026-10-24 | Part 2 | Fixes after a new independent review: §P.7 item references (items 2–8); A1.6 note on coverage under `design.py`'s one-sided 0.95 decision; A1.17 states `label`'s exit codes and B2's `--label-results`/`--label-geometry`; A2.8 `SIM_SOURCES` and `MiniJson.hh`; `f4` lines 498–553; scope of the tracking reference and that it qualifies `momentum-resolution-core` only |
+| 2026-10-24 | Part 3 | Re-planned against main 0.38.0's design loop (findings B1–B12 of §H.2.1): task B becomes main's missing F4 evaluator; B1 adds `from-geometry` and the realization profile, crossings of every charged track, a piecewise-uniform field; B2 adds switchable tail sources, F4 observables, `label --results --geometry`, `f4-results/1`, mapping 1.1.0, the F4 changes to `design.py`, the F4 qualification path (D0) with `multiple-scattering-reference`, the end-to-end test, and drops the surrogate class; B3 becomes the J15 design project (F1, F2, F4) with the verification ladder as a separate record; fidelities use main's F0–F5; the contract change is named CV-B2; VALIDATION entry GEANT4-F4; facts corrected (`MISSING_FILE_ARGS` line 153, script count 23, benchmark function lines, model ranges of protocol §6) |
+| 2026-10-24 | Part 3 | Fixes from a reviewer who had not seen the revisions (§H.2.2): D0 v2 (material definition replaces material benchmarks as a precondition, a per-class scope model, the tracking reference qualifies only the core resolution, charge confusion needs a tail benchmark (D0-b), the F4-uncertainty policy (D0-c), F4 for screening as a complement (D0-d)); new `material-definition` and `ms-tail-reference`; tail sources use a reconstruction-replica ensemble and a position-dependent field error, and the global scale belongs to `rigidity-scale-offset`; `f4 --label-results --label-geometry` with both paths tested; non-counting F4 writes a coverage-0.90 interval; a test reaching row 16; the muon field-check tolerance becomes 0.3 %; the multiple-scattering model variation is confirmed by the probe; the `SIM_SOURCES` keys; line numbers of `label` and `f4`; the `response` step of B3.6 removed |
+| 2026-10-24 | Part 4 | Re-planned on the detector system design loop of main 0.38.0 (§H.2.1, C1–C13, P2–P4): task C becomes the D2 candidate generator `evaluate_design.py search`; deleted the formats of the requirements spec, component catalogue and design grammar, `realize()`, `threshold`/`order`, the recommended design and own Pareto, adapter `detector-design`, the reference and the `SKILL.md` line; fidelities use main's F0–F5 (old F0 = F1, Geant4 search values have no fidelity, confirmation = F4); the search population lives in `search_summary` (CV-C1), and only finalists are expanded; in-process F1 calls the same tool as the tool contract; the C2 seed rule (CV-C2) replaces the role rules; C1 no longer depends on task A; J16 now runs on Examples A, B; the Bayesian-optimisation backend becomes the optional `adapters/design-bo/`; concept-mapping table added (now §H.3) |
+| 2026-10-24 | Part 4 | Fixes after a new independent review: C1.4 adds `argv=None` to four tools, redirects stdout and catches `SystemExit`, with a call budget; confirmation seeds become H(study_id, role, point_id); the closure test claims only the exhaustive 1/32-grid value; D0-c added to the open decisions |
+| 2026-10-24 | Part 5 | Aligned with the re-plan: only passages conflicting with main's design loop changed; §R.1 (relation to main's design loop) added; the model-to-model (surrogate) class moved out of B2 and deferred (§R.7.1, §R.7.5, §R.10.1) |
+| 2026-10-24 | Part 5 | Reorganised: this part states only the current reasons; the §R.13 decision log moved to §H.5 and §R.14 superseded designs to §H.4 |
+| 2026-10-24 | Whole document | Reorganisation: history moved to Part 6; the review record `review-2026-10-24-main-0.38.md` folded into §H.2 and the file removed; Part 5's former last section, "relation to main's detector system design loop", moved to §R.1 and the following sections shifted by one (now §R.0–§R.15); the front matter gains a per-stage reading index and a global glossary; the body states only the current specification |
 
-Short Geant4 runs inside a search have no fidelity and are not evaluations; they are search values stored in the `search_summary`. Reason: F4 requires a qualified study; search runs trade statistics for speed and are entangled with the selection (the winner's curse), so they must not count as evidence.
+---
 
-### §R.15.2 Who owns verdicts
+## §H.2 Reviews and how they were handled
 
-Whether a requirement is met, maturity, staleness, screening, the comparison basis, ranking and the Pareto front are all derived by `contracts/design.py` from the artifacts, never written by hand (the workflow's "Never" section). This program's statistical decisions (`core/stats/decisions.py`'s `equivalence`, `detection_limit`, `change`, the convergence gate and paired comparison) answer only study-level questions: did a benchmark pass, did a run converge, did a result change between versions, is the difference between two designs in a search resolved. Reason: they are inputs to a study label; requirement compliance also needs the adequacy table, the bound combination and the upstream chain, which only `design.py` has. Task C's own requirement verdicts (`threshold`), `order` and "recommended design" are therefore deleted (§R.13).
+### §H.2.1 Review against main 0.38.0 (2026-10-24)
 
-### §R.15.3 No optimum claimed; human gates
+> Subject: this document at commit `3f8b9c1` (baseline `9f08796` / 0.23.0 / contracts 3.5.0); compared with `origin/main` `5584927` (0.38.0, contracts 3.12.0, 197 commits after the baseline). Method: four independent reviewers (task A, task B/J15, task C, plan and architecture) each compared against main's code; the main claims were rechecked on main by the main session (marked ✔). Formerly the separate file `review-2026-10-24-main-0.38.md`, folded into this section.
 
-main ranks only when the comparison basis holds and every surviving candidate has a non-optimistic expected-precision evaluation with the same fidelity vector and denominator; a Pareto dominance is decided only beyond the combined 1σ; a global optimum is never claimed; gates H1–H4 need a human. Task C is therefore a D2 candidate generator: a search population of order 10⁴ stays in the `search_summary`, only finalists become candidates through `expand`, and they then go through the ordinary `evaluate_design.py run` and `report`. The winner's curse is handled by requiring confirmation through F4 studies with fresh seeds, enforced by CV-C2's rule: an evaluation whose seed appears in a search summary is `design.contract_mismatch`.
+**User's decisions (same day):** full rewrite to plug into main's design loop; task C's search becomes `evaluate_design.py search`; detector-level Geant4 studies become F4 through a qualification path (D0). The "Handled" column of the tables says where each finding sits in the current specification.
 
-### §R.15.4 Parameter-level staleness and incremental reruns
+**Conclusions:**
+1. **main already has a complete detector system design loop** (0.37.0–0.38.0, hep-detector, M0–M4): three artifacts design-spec / design-candidate / design-evaluation; `contracts/design.py` derives verdicts, maturity, staleness and screening; fidelities F0–F5 (F4 = a Geant4 study re-issued by `check_geant4_study.py label --upgrade`); `scan` / `expand` / Pareto; human gates H1–H4; "never claim a global optimum". The document of the time did not mention any of this.
+2. **Task A still stands and is more urgent**: F4 accepts only `validated-in-scope` studies (`contracts/design.py:1004` ✔), and A1 fixes exactly how that label is decided. But A1's process, contracts and interfaces were partly out of date, and it missed a defect main had documented.
+3. **Task B's Geant4 infrastructure is still sound, but its role changes**: main's F4 path lacks a Geant4 application that can run a spectrometer; yet the B of the time did not write the fields F4 needs, J15 was `unvalidated` by rule, and none of the four tail sources was simulated.
+4. **Task C as then written could not merge**: it rebuilt a design system next to main's and broke main's rules; the genuinely new parts (automated candidate generation, multi-fidelity Geant4 search, common-random-number paired comparison, winner's-curse protection, closure tests) are kept, as a D2 candidate generator.
+5. **main itself had two problems** (end of this section).
 
-main's evaluations bind the candidate by `parameter_digest`: they go stale only when a parameter they read changes; `run_workflow.py --incremental` skips on argv, scripts, the plugin release digest, the environment and the inputs. Task C therefore has no design-cache rules of its own, only the search-internal cache key (including S, N, K, B); `geant4_run.py run` also writes `argv`, `script_sha256` and `versions.plugin_release` as `run_workflow.py` does (A2).
+**Three aspects:**
 
-### §R.15.5 The F4 study-record interface and the qualification path
+| Aspect | Assessment |
+|---|---|
+| Reasonableness | A is more necessary (F4 depends on a correct label). B is more valuable: in main's adequacy table shower-containment, tracking-selection-efficiency, hadronic-energy-resolution, trigger-efficiency and others are `capability.unavailable` below F4. C's "automated optimisation" conflicted with main's principles (no optimum claimed, humans decide) and had to become candidate generation with verdicts from `design.py` |
+| Correctness | The adapter, `check_geant4_study.py`, `geant4_benchmarks.py` and `schema.py` were unchanged, so most citations stayed correct; `contracts/validate.py`, the ledger, versions, the script count and `geant4_benchmarks.py` function lines needed updating; Appendix A's physics numbers agree with `j15_design_estimates.py` |
+| Flexibility | General enough on the output side; the backend was J15/AMS-shaped; "geometry kind → realizer" should be the extension point, and C's search should be driven by tool contracts |
 
-What `design.py` requires of F4: the study record is `validated-in-scope`; the geometry file written by `evaluate_design.py geometry` (`design-geometry/1`) is in the `input_manifest`, and its parameter digest matches the candidate; `extension.study.results.<figure of merit>` has `value`, `statistical_uncertainty` and `model_envelope`; `tail_sources_simulated` lists which tail sources were simulated (only with all four of alignment, calibration-non-uniformity, noise-digitization and pattern-recognition is the bound `estimate`, otherwise it is `optimistic`).
+**Interfaces main provides that the program must use:**
 
-How this program meets it: B1's `from-geometry` derives `element_sim.spec/1` from the geometry file and a declared realization profile; B2's `simreco` makes the four tail sources switchable stages, and `label` writes `results`, the tail sources and the geometry file; `statistical_uncertainty` is defined as the 68.27 % t half-width (A1), consistent with `design.py` reading it as a Gaussian with coverage 0.6827; one study per (figure of merit, denominator), because a candidate has one `geometry_ref` and `results` is not keyed by denominator. `design.py` decides at the one-sided 0.95 level, and the converted scalar slightly under-covers (1.70 SE against t_{0.95}(15) ≈ 1.753 SE); once CV-B2 lets `f4` accept uncertainty objects, a central interval at coverage 0.90 is written instead (A1.6).
+| main interface | Location | Meaning for the program | Handled |
+|---|---|---|---|
+| design-spec | `contracts/schemas/ext_design_spec.json` | Replaces task C's `detector-requirements/1` | §C.4.4, C1.1 |
+| design-candidate, `subsystem_roles` | `ext_design_candidate.json`; `contracts/vocab/core.json:203` | Replaces `detector-design/1`; the genome is only an internal encoding | §C.4.5, C1.3 |
+| Fidelities F0–F5 | `contracts/design.py:65` ✔; `system-design-workflow.md:100-105` ✔ | Task C's F0/F1/F2 clashed | Conventions in the front matter, §P.5, §C.4.6 |
+| `evaluate_design.py geometry` → study → `f4` | `evaluate_design.py:462-560` ✔; `design.py:988-1062` ✔ | B must consume `design-geometry/1`; the study record must write `results`, `tail_sources_simulated` and list the geometry file | B1.8, B2.6 |
+| Geometry mapping `layered-spectrometer` 1.0.0 | `contracts/rules/design_geometry.json` ✔ | Only five fields; needs 1.1.0 | B2.6 |
+| Tail sources | `design.py:64`, `1058-1059` ✔ | Only with all four simulated is F4 an `estimate` | B2.2 |
+| Parameter-level staleness, `run_workflow.py --incremental` | `system-design-workflow.md:138-145` | Replaces task C's design cache | §C.4.3, §C.4.8 |
+| `scan_summary` | `ext_computational_run.json`; `design.py:1663` | The search population becomes a `search_summary`; only finalists are expanded | C1.6, C1.7 |
+| Verdicts, ranking, Pareto | `design.py:1369-1508`, `1949-2051` | Task C's own verdicts and ranking deleted | §C.3, §C.4.3 |
+| Capability `detector-design` | `docs/capability-map.json:153` ✔ | The search lives in hep-detector scripts | C1.6, §P.7.2 |
+| Schema keywords supported | `contracts/schema.py:61-63` ✔ | Still no `maxItems`/`maximum`/`exclusiveMaximum`/`uniqueItems` | A2.7, C1.1 |
 
-**Qualification path (D0, pending the maintainer's approval; §P.7 item 1, B2.8).** Detector-level studies (resolution, charge confusion, shower containment) have no matching physics reference and can never be upgraded under the current rules. The program chooses a qualification path rather than letting `design.py` accept unvalidated F4. The study is upgraded only when all four conditions hold, each matched to it by its own key: (1) material definition: every material of the realized geometry has composition and density from an independent source, and a geantino scan reproduces the candidate's declared X/X₀ (A1's material-benchmark scopes are MeV-scale and cannot be a precondition); (2) the field-propagation verification (B1's analytic helix) passed for the same field-configuration hash; (3) the reconstruction verification (`reco-closure`) passed for the same reco-spec hash; (4) the tracking reference benchmark: multiple-scattering core width in an isolated Si slab against Lynch–Dahl (F = 98 %), with a negative control, scope dimensions material, thickness, rigidity, species, qualifying `momentum-resolution-core` only; point resolution is a declared input (it dominates the core at 100 GV) that no benchmark validates; Highland's accuracy of about 11 % rules it out as a reference. Scope matching becomes a per-class conjunction (CV-B2). Charge confusion needs a tail benchmark (D0-b); shower containment is outside the path (D0-d offers a screening-only option). The real decision is F4 uncertainty (D0-c): with the statistical error only, an upgraded F4 `estimate` becomes `uncertainty.missing` under the adequacy table's `min_relative_uncertainty`. Reason: `validated-in-scope` keeps a single meaning across the plugin; condition 4 gives detector-level studies a physical anchor, and the first three ensure the rest of the study is correct inference.
+**Findings (severity: blocker, major, minor):**
 
-### §R.15.6 Extension point: geometry kind -> realizer
+Cross-part and plan:
 
-`contracts/rules/design_geometry.json` maps a candidate's parameters to a geometry kind (today only `layered-spectrometer`). Each kind needs a realizer that turns the geometry file into a backend's spec: `element_sim` (B1's `from-geometry`), a user's Geant4 application (including `g4sim`) or a GDML file when the user's build has GDML, later DD4hep. Adding a detector kind = one mapping entry (contracts) plus one realizer; the study layer reads only boundary artifacts and does not change. C1's search is driven by tool contracts, so at F1 and F2 it does not depend on the detector kind; its Geant4 part can use only geometry kinds with a realizer (today spectrometers; B2's mapping 1.1.0 adds fields for TOF and EM calorimeters).
+| # | Severity | Problem | Proposal | Handled |
+|---|---|---|---|---|
+| P1 | Blocker | Detector-level Geant4 studies have no reference benchmark, can never be `validated-in-scope`, and so never count as F4 | New open decision D0 | §P.7.1, B2.8; decision record and issue #273 |
+| P2 | Blocker | Fidelity names clash with main | Use main's F0–F5 throughout | Front matter, §P.5, §C.4.6 |
+| P3 | Major | `adapters/detector-design/` does not fit the definition of an adapter | Put the search in hep-detector scripts | C1.6; `adapters/design-bo/` is only an optional backend (C3.2) |
+| P4 | Major | Several §P.7 items had been decided by main | Mark them decided | §P.7.2 |
+| P5 | Major | C no longer needs A; B must provide the F4 interface | New stage graph | §P.0 |
+| P6 | Minor | Baseline contracts 3.5.0 out of date | 3.12.0; CVn fixed at release | Front matter, §P.5 |
+| P7 | Minor | main moves fast; shared files | Add risks and CI impact groups | §P.8 items 1, 8; §P.7 item 15 |
+| P8 | Minor | Independent-review isolation is set by `independent-review-spec.md` | Cite that spec | §P.10.3 rule 8 |
+| P9 | Minor | core's required dependencies already include numpy, scipy | State "standard library only" as a deliberate choice | §A.3, §C.3, §R.3.2 |
+| R1 | Major | The design rationale differed from main's decisions | Add a section "relation to main's design loop" to Part 5 | §R.1 (§R.2 after the reorganisation) |
 
-### §R.15.7 Why the search is not an adapter
+Task A:
 
-An adapter is an optional component that connects an external tool, and no skill or core module may depend on it (the opening of `docs/adapter-authoring.md`). The search is plugin logic over main's artifacts, so it lives in `evaluate_design.py search`, following main's precedent of making `scan` a subcommand (OQ-18). Only the optional Bayesian-optimisation backend (Ax/BoTorch) is an external tool, hence `adapters/design-bo/`.
+| # | Severity | Problem | Proposal | Handled |
+|---|---|---|---|---|
+| A1 | Major | Missed defect D11: the convergence gate decides on the two finest values among the supplied summaries (`check_geant4_study.py:341-348` ✔) | Add D11 | A1.16 |
+| A2 | Major | The ledger format changed (`maintenance.md:126-237`) | One entry per fix, `independence`, `mutants`, sign-off, `documentation_fixes` | A1.14 |
+| A3 | Major | The advisory format became `/2` | Match groups; SFA-2026-039, -040; cover F4 evaluations | A1.14 |
+| A4 | Major | Garwood, `toy_seed`, `coverage_gate` already in `core/stats` | Reuse | §A.3, §A.4.5, A1.6, A1.15 |
+| A5 | Major | `core/` cannot import `contracts` | Schemas in `contracts/schemas/` | A1.5, §A.4.5 |
+| A6 | Major | `f4` did not pass `--run-record`; exit codes misreported | `--label-run-record`; 3 → `incomplete` | A1.17 |
+| A7 | Major | The F4 figures of merit have no matching kind | State it and define the mapping | A1.1, B2.7 |
+| A8 | Major | The version threshold "3.5.0 or below" was wrong | "Below CV-A1"; replace the prototype's 3.6.0 | A1.2, §A.0 |
+| A9 | Minor | F4 reads a scalar uncertainty as a 0.6827 Gaussian | 68.27 % t half-width; the exact branch writes an asymmetric one | A1.6, B2.6 |
+| A10 | Minor | `oneOf`, `not`; `output.schema.json` is not a JSON Schema | Implement or restrict; exempt | A2.7 |
+| A11 | Minor | `study` is an open object; new 3.11.0 fields | Keep it open; write `argv` etc. | A1.12, A2.3 |
+| A12 | Minor | `evidence_records[].role` already exists | `simulation.evidence_role` | A1.4 |
+| A13 | Minor | New checking tools | Add to the list | §A.8 |
+| A14 | Minor | `CORE_VERSION`, `OWNERS.json` admission rule | Bump the version, register | §A.4.5 |
+| A15 | Minor | `validate.py` line numbers etc. moved | Update | All citations updated (§A Appendix C) |
+
+Task B and J15:
+
+| # | Severity | Problem | Proposal | Handled |
+|---|---|---|---|---|
+| B1 | Blocker | Nothing writes `extension.study.results`, `tail_sources_simulated`; `label --write` rebuilds the record (`check_geant4_study.py:584-617` ✔) | `label --results --geometry`; end-to-end test | B2.6, B2.10 |
+| B2 | Blocker | J15 is always `unvalidated`; no tracking reference | Separate the verification carrier from the F4 studies; a tracking reference benchmark | B3.2, B2.7, B2.8 |
+| B3 | Major | None of the four tail sources simulated | Switchable reconstruction stages | B2.2 |
+| B4 | Major | `design-geometry/1` has only five fields | `from-geometry`; mapping 1.1.0 | B1.8, B2.6 |
+| B5 | Major | One `geometry_ref` per candidate; `results` not keyed by denominator | One study per (fom, denominator) | B3.6; §P.7 item 12 |
+| B6 | Major | F4 always writes a symmetric Gaussian; charge confusion is a counting quantity | Counting estimator with exact intervals | B2.3, B2.6 |
+| B7 | Major | 68 % half-width differs from a Gaussian core | Declare a core estimator | B2.3 |
+| B8 | Minor | Model envelope judged end by end | Multiple-scattering model variation | B3.4 |
+| B9 | Minor | Model ranges of protocol §6 | Correct | B3.4 |
+| B10 | Minor | `MISSING_FILE_ARGS` line, script count, function lines | Update | §B.1, B1.6, B3.8 |
+| B11 | Minor | The B/N table not printed by the script | Have the script print it | `j15_design_estimates.py`; §B Appendix A |
+| B12 | Minor | main already has F1/F2 | Use `evaluate_design.py run` | B3.1 |
+
+Task C:
+
+| # | Severity | Problem | Proposal | Handled |
+|---|---|---|---|---|
+| C1 | Blocker | Fidelity name clash | As P2 | §C.4.6 |
+| C2 | Blocker | Own requirement verdicts | Derived by `report` | §C.3; §H.3 |
+| C3 | Blocker | Recommended design, `order`, own Pareto | Delete | §C.3, §C.4.7 |
+| C4 | Major | Requirements spec duplicates the design-spec | Read the design-spec; H1/H2 | §C.4.4, C1.1 |
+| C5 | Major | Design format duplicates the design-candidate | Genome + decoder | §C.4.5, C1.3 |
+| C6 | Major | `geometry` already writes the study geometry | B's `from-geometry` replaces `realize()` | C2.2, B1.8 |
+| C7 | Major | The search population cannot enter the artifacts_dir | `search_summary`; expand only finalists | C1.6, C1.7 |
+| C8 | Major | Adapter definition | As P3 | C1.6 |
+| C9 | Major | Routing already exists | A workflow section, no `SKILL.md` change | C1.9 |
+| C10 | Major | No rule binds confirmation seeds to search seeds | `search_summary` + `design.py` seed rule | C2.6 |
+| C11 | Major | main already covers several detector kinds | The search is detector-agnostic | C3.1 |
+| C12 | Minor | No multiplicity correction | As a proposal | §C.9 (deferred) |
+| C13 | Minor | cost has no evaluator | Cannot be an objective | §C.3 rule 6 |
+
+**Problems on main (reported to the maintainer, issue #273; fixed by A1):**
+1. **The F4 `--label-spec` path cannot complete.** `evaluate_design.py:503-506` ✔ calls `label --upgrade` without `--run-record`, so `label` always refuses (`check_geant4_study.py:544-569` ✔); the rebuilt record also lacks `results` and `tail_sources_simulated` (`:584-617` ✔). Tests use only synthetic records. → A1.17, B2.6.
+2. **The convergence gate can pass on coarser points** (D11). → A1.16.
+
+**Stage graph proposed at the time** (adopted; see §P.0):
+
+```
+D0 maintainer decides how a detector-level study becomes F4 (blocks B3', C2')
+A1' -> A2 -> B1' -> B2' -> B3'
+C1' (depends only on main)
+B2' + C1' -> C2' -> C3'
+```
+
+### §H.2.2 Read-through by a reviewer who had not seen the revisions (2026-10-24)
+
+A reviewer who had not seen the editing history read the whole document from the start, with only the document and the code. Conclusion: careful and mostly correct about the code (35 of 37 sampled citations correct); the three scripts reproduce every number in the document; A1, A2 and B1 can be built from the document alone. The weak point was the path that gives the document its value: a detector-level study becoming F4 and producing a usable verdict.
+
+| # | Severity | Finding | Handled |
+|---|---|---|---|
+| F1 | Blocker | D0 condition 1 (materials inside passed material-benchmark scopes) cannot be met by J15: Pb and PVT have no benchmark, J14 uses `Si_study` not `G4_Si`, A1's scopes are MeV-scale | D0 v2 condition 1 becomes a material-definition check (B2.8, §P.7.1); `material-definition` added (B2.7) |
+| F2 | Blocker | The qualification rule is a conjunction over benchmarks of different dimensions, but `label` checks one declared scope against every benchmark (`check_geant4_study.py:537-543`) and `_study_upgrade` needs only one | Per-class scope model (CV-B2); external records enter through `--reference-record` (B2.8, §P.4) |
+| F3 | Blocker | Alignment and calibration non-uniformity drawn once per run and shared by all blocks; a global scale changes neither width nor charge sign | At least 20 reconstruction replicas; a position-dependent field error; the global scale belongs to `rigidity-scale-offset` (B2.1, B2.2, B2.10) |
+| F4 | Major | A statistical error below the adequacy table's `min_relative_uncertainty` makes every upgraded F4 `estimate` `uncertainty.missing` (`design.py:1305-1309`) | D0-c (§P.7.1, B2.8); a test reaching row 16 (B2.10); risk 12 (§P.8) |
+| F5 | Major | The `f4 --label-spec` pass-through omits `--results`/`--geometry`, so the rebuilt record loses `results` | `f4 --label-results --label-geometry`; both paths tested (B2.6, B2.10, A1.17) |
+| F6 | Major | The muon field-propagation tolerance 0.05 % can never pass with an SE of 0.07–0.10 % | Tolerance 0.3 %, SE target 0.075 %, event counts recomputed (B3.2) |
+| F7 | Major | A core-width benchmark cannot qualify charge confusion (driven by tails); at 100 GV the core is dominated by point resolution | The tracking reference qualifies `momentum-resolution-core` only; charge confusion needs a tail benchmark (D0-b); point resolution is a declared input (B2.7, B2.8) |
+| F8 | Major | Four F1 tools' `main()` take no argv | C1 adds `argv=None`, redirects stdout, catches `SystemExit` (C1.4, §C.3 rule 3) |
+| F9 | Major | One seed per design for confirmation studies conflicts with A1.4's unique S per evidence point | S = H(study_id, role, point_id) (§C.1, C2.1, C2.4) |
+| F10 | Major (unverified) | option0 and option4 may use the same multiple-scattering model for muons and hadrons, giving a false-zero envelope | Standard EM against `G4EmStandardPhysicsSS`, confirmed by the probe (B3.4) |
+| F11 | Minor | §P.7 item numbers off by one in Part 2 and §B.10 | Corrected (A1.9, A1.13, §A.10, §B.10) |
+| F12 | Minor | A 0.6827 t half-width slightly under-covers under `design.py`'s one-sided 0.95 decision | After CV-B2, write a central interval at coverage 0.90 (A1.6, B2.6, §R.1.5) |
+| F13 | Minor | C2's adapter version inconsistent | 0.5.0 everywhere (§P.0, §P.5, C2.7) |
+| F14 | Minor | Parts 1 and 5 described the tracking reference differently from Part 3 | Aligned to B2.7, B2.8 (§P.7.1, §R.7.2, §R.1.5) |
+| F15 | Minor | Moving `MiniJson.hh` changes the `SIM_SOURCES` hash key | A2.8, B1.9 explain the key move |
+| F16 | Minor | `f4` line range and `label` start line | `f4` is 498–553; `cmd_label` from 496 (A1.17, B2.6) |
+| F17 | Minor | `label`'s exit codes unclear | Explicit exit-code table (A1.17) |
+| F18 | Minor | B3.6's `response` step unnecessary (F4 ranks above F3) | Removed (B3.6) |
+| F19 | Minor | "A local search not tied to the grid gives the same value" not computed by the script | C1.8 claims only the exhaustive 1/32-grid value |
+| F20 | Minor | Line count and number of validation classes inconsistent | Front matter "about 3,200 lines"; class count aligned (§R.0, §R.7.1, §H.5.2) |
+
+**One handling that differs from the fix spec:** the post-review fix spec first proposed that D0-c add the model-envelope half-width to the F4 uncertainty. While fixing Part 3 it turned out that `design.py` already judges each end of the envelope separately (FID-05, `design.py:1310-1316`), so adding it would count it twice; D0-c (a) is therefore only "statistical ⊕ spread of the reconstruction replicas", and the whole document, the decision record and the issue were corrected accordingly.
+
+**The reviewer's advice on D0** (recorded in §P.7.1 and the decision record): the direction is right, but approve it conditionally on the revised B2.8 (scope model, material-definition condition, charge confusion only through a tail benchmark) and a decision on D0-c; screening-only F4 deserves another look as a complement.
+
+### §H.2.3 Problem list of the previous plan version
+
+The previous version (2026-10-23) was based on main `9f08796` (0.23.0). The review against main 0.38.0 on 2026-10-24 (§H.2.1) found that main already has a complete design loop, so the program was re-planned. The problems and handling listed then (formerly §P.1):
+
+| # | Problem | Impact | Handling |
+|---|---|---|---|
+| P1 | **A detector-level Geant4 study cannot become F4.** F4 accepts only studies re-issued as `validated-in-scope` (`contracts/design.py:1004`); upgrading needs a reference benchmark whose scope covers the study, and resolution, charge confusion and shower containment have none | No Geant4 result of task B or C can enter the design loop | Build an F4 qualification path (D0, §P.7 item 1): the study may be upgraded only when four conditions hold: material definition, the field-propagation verification, the reconstruction verification and a new tracking reference benchmark (B2.8); the F4 uncertainty policy is a separate maintainer decision (D0-c) |
+| P2 | **Fidelity name clash.** Task C's F0/F1/F2 in the previous version meant something different from main's F0–F5 | Readers and `design.py` read the same name differently | The whole document uses main's names (§P.5); short Geant4 runs inside a search produce only "search values", which have no fidelity |
+| P3 | **Task C rebuilt a design system of its own**: its own requirements spec, design format, requirement verdicts, ranking and "recommended design", and broke main's rules (verdicts derived only by `design.py`, never claim a global optimum, gates need a human) | Cannot be merged | C becomes a candidate generator for stage D2, `evaluate_design.py search`: it reads the design-spec and a base candidate, writes only a `search_summary`, and finalists become candidates through `expand`, whose verdicts `report` derives |
+| P4 | **The F4 data path is incomplete.** Nothing on main writes `extension.study.results` or `tail_sources_simulated`; `evaluate_design.py f4` calls `label --upgrade` without `--run-record`, so `label` always refuses | F4 cannot actually be produced | A1 fixes the pass-through and the exit code in `f4`; B2 makes `label` write the fields F4 needs and adds an end-to-end test |
+| P5 | **A1 missed a defect and used old formats.** The convergence gate passes on coarser points when the finest scan point is missing (D11); the ledger and advisory formats changed; a Garwood interval and a seed derivation already exist in `core/stats` | A1 cannot start as written | A1 adds D11, uses the new formats and reuses existing functions (Part 2) |
+| P6 | **A1 scope creep** (handling kept from the previous version). Functions only later stages need stay out of A1 | The sci-fix is delayed | Principle R1; the decision engine has only `equivalence` and `detection_limit` in A1, B2 adds `change`; requirement verdicts belong to `design.py` |
+| P7 | **Contract-change placeholders depend on merge order.** C1 no longer depends on A and may merge before A1 | The order "CV1–CV3" no longer holds | Named by owning stage: CV-A1, CV-B2, CV-C1, CV-C2; numbers fixed at release in merge order (§P.5) |
+| P8 | **Interfaces in the wrong layer** (kept). `core/` may import only `core` (`check_layering.py:4`) | `core/` cannot use `contracts/schema.py` | The summary schemas live in `contracts/schemas/` and are validated by adapter or skill scripts; `core/simulation/` only computes |
+| P9 | **Open decisions and gates scattered** (kept) | Nobody sees which decision blocks which stage | Merged into the two tables §P.6 and §P.7; items main has already decided are marked with their source |
+
+---
+
+## §H.3 Concept mapping: old design → current
+
+Concepts of the old task C and their main counterparts (formerly §C.4.3):
+
+| Old task C concept | main counterpart | Handling |
+|---|---|---|
+| Requirements spec `detector-requirements/1`, `confirmed_by_user` | design-spec (REQ, denominators, allocations, `comparison_basis`, `pareto_axes`); H1, H2 | Deleted; read the design-spec instead |
+| Objective and constraint catalogue | Figure-of-merit ids of `design_adequacy.json` | Deleted; use the ids |
+| Component catalogue `catalogue/1` | `subsystem_roles` + design blocks of the tool contracts | Becomes realization rules per role with parameter ranges (new) |
+| Design grammar `detector-design/1` | design-candidate (subsystem graph) | Deleted; the genome is only an internal encoding + decoder (new) |
+| `realize()` → `element_sim.spec/1` | `evaluate_design.py geometry` + B1's `from-geometry` | Deleted; provided by task B |
+| Fidelities F0/F1/F2 | main's F1; Geant4 search values (no fidelity); F4 | Renamed (§C.4.6) |
+| Design hash and evaluation cache | `effective_digest`, `parameter_digest`, `--replace`, `run_workflow.py --incremental` | The in-search cache stays; official evaluations use main's mechanisms |
+| `threshold` requirement verdicts, `order`, own Pareto, "recommended design" | Verdict table and aggregation, `ranking()`, `pareto()` | Deleted |
+| Search record `extension.design_search` | The `scan_summary` pattern | Becomes `search_summary` (CV-C1) |
+| CV3 role rules | Orphan-run rule | Becomes the CV-C2 seed rule |
+| Adapter `detector-design`, reference, one `SKILL.md` line | Capability `detector-design` (hep-detector), workflow document | Deleted; one new workflow section |
+| `proposer: llm` | Parameter `source`/`status: proposal` | Merged, and also flagged in the `search_summary` |
+| NSGA-II, Sobol, hypervolume, repair and violation measure | None | Kept (new) |
+| Multi-fidelity Geant4 search, paired comparison, G-C2a, `values` | None | Kept (C2) |
+| Winner's-curse and search-size protection | Partly: RSK-04 expands only points that enter comparison | Kept and extended |
+| Closure tests | None | Kept |
+| J16 | Examples A, B (no journey) | Now run on Examples A, B |
+
+Old-to-new naming (formerly in §P.5 and §P.7):
+
+- The previous CV1, CV2, CV3 become CV-A1, CV-B2, CV-C2; CV-C1 is new. The previous task C's "F0" corresponds to main's F1, and its "F1, F2" and "confirmation" correspond to search values and F4.
+- The previous `extension.design_search` becomes the computational-run field `search_summary` (like `scan_summary`).
+- The previous detector-design adapter, requirements-spec schema and component-catalogue schema are deleted.
+
+---
+
+## §H.4 Superseded designs
+
+(Formerly §R.14 "Evolution: superseded designs")
+
+| Previous design | Replaced by | Basis |
+|---|---|---|
+| `simstat` and a Geant4-free `simcore`: moving run-level statistics to C++ | inference stays in Python, reading merged summaries | little code and data, no gain from C++, and replay would need a compiler (soundness assessment P1); CMS DQM also decides only after merging |
+| spec/2, `layered_sim convert`, a dual-format accessor, a same-host bit-identical gate | `layered_sim`'s format unchanged; a new `element_sim` | the most costly, least valuable step; a new program leaves J14 untouched and gives a real second backend |
+| integer quantization, a two-word 128-bit integer, round half to even, `%.17g` needed for recomputation | compensated floating-point sums; integers only for counts and histograms; reproducibility defined as same decisions | bit identity is not a scientific need; real experiments aim at reproducible events and traceable sources |
+| 16 independent processes per evidence run | blocks by event number within one run | batch means is batching within a run; per-event seeds make job splitting irrelevant to statistics |
+| per-event seeding forced only for bit identity | per-event seeding as the default for new specs, for event determinism | the practice of ATLAS and Allpix² |
+| an interface-only synthetic backend | `element_sim` as a real second backend | third check R19 |
+| validation as grades only (reference, sanity, verification, interface) | six validation classes (adding setup-matched and regression; surrogate deferred) | geant-val, Belle II, ATLAS AtlFast3 |
+| task C's own requirements spec `detector-requirements/1`, component catalogue and design format `detector-design/1` | main's design-spec and design-candidate; the genome is only the optimiser's internal encoding, decoded into `overrides` on a base candidate | main 0.37.0 already has these artifacts (§H.2.1 C4, C5) |
+| task C's fidelities F0, F1, F2 | main's F0–F5: the old F0 is main's F1; short Geant4 runs inside a search are search values only; confirmation is F4 | name clash (§H.2.1 P2) |
+| task C's requirement verdicts (`threshold`), `order`, own Pareto and "recommended design" | `contracts/design.py` derives verdicts, screening, ranking and Pareto; no optimum is claimed | main's rules (§H.2.1 C2, C3) |
+| `realize()`: design -> spec | `evaluate_design.py geometry` writes `design-geometry/1`, B1's `from-geometry` derives `element_sim.spec/1` | main already has the geometry step (§H.2.1 C6, B4) |
+| `adapters/detector-design/` and its version series | `evaluate_design.py search`; only the optional Bayesian-optimisation backend is an adapter | an adapter is an optional component connecting an external tool (§H.2.1 P3) |
+| the surrogate class B2 added for task C | deferred | fast simulation in a design context is expressed by main's fidelity and bound (§H.2.1, task B's re-plan) |
+
+Still valid from the previous version (merged into Part 5): the fixes of D1–D10, the contracts grade table and per-benchmark scope dimensions, the isolation and field definitions, versioned target hashes, the IUT gate and its t-based operating characteristics, exact counting intervals, MPV interpolation with two bias checks, the t-based detection limit, the two-stage event count, the event-weight restriction, the probe's content and timing, the ROOT file design, J15's design. Of the 25 findings of the third deep check, R11, R12, R16 and R18 no longer apply because the design changed, R19 is resolved by `element_sim`, and the rest are merged.
+
+---
+
+## §H.5 Decision log
+
+(Formerly §R.13 "Decision log")
+
+### §H.5.1 Decided by the user
+
+| Date | Decision | Where |
+|---|---|---|
+| 2026-10-22 | core code in C++, Python as the interface; compute core in C++, reference values stay in Python; separate executables exchanging JSON/CSV, no Python bindings | principle 2 (as interpreted by item 1 of §H.5.2) |
+| 2026-10-22 | J15's TOF1 and TOF2 two layers each, all four of the same material | §B |
+| 2026-10-22 | detailed per-event information stored in ROOT files | §R.5.1 T1, B1 |
+| 2026-10-22 | J15 split from the rest into a second task, done later | task A (A1, A2), task B (B1, B2, B3); task C added later (§P.0) |
+| 2026-10-24 | full rewrite to plug into main's design loop; task C's search is `evaluate_design.py search`; detector-level Geant4 studies become F4 through a qualification path | §R.1, §P.0 |
+| 2026-10-24 | D0 sent to the maintainer for decision: decision record `decision-d0-f4-qualification.md`, issue #273 | §P.7.1 |
+| 2026-10-24 | Put the corrections into the document and reorganise it so that Claude can understand it clearly | §H.1 |
+
+### §H.5.2 Proposals of Part 5 (need the user's confirmation)
+
+1. **Interpreting the language split:** per-event computation (simulation, digitization, reconstruction, accumulation) in C++; inference after merging in Python.
+2. **A backend interface at the output** (three boundary artifacts), no engine abstraction layer.
+3. **Event determinism:** `seeding: per-event` by default for new specs; job splitting and thread count do not affect events.
+4. **Reproducibility means "same decisions"**, with numbers compared within tolerances; no integer quantization and no bit-identical statistics.
+5. **Block batch means:** K ≥ 16 blocks by event number within one run; J14 runs with per-event data are recomputed offline without re-recording.
+6. **A new `element_sim`**, with `layered_sim`'s spec format unchanged; both share `g4sim`.
+7. **Six validation classes** (of the five kinds, model-to-model is deferred; plus sanity and interface), with verification and regression added in CV-B2 (B2); surrogate deferred.
+8. **Eight stages** (A1, A2, B1, B2, B3, C1, C2, C3; §P.0), with ROOT files and `simroot` in B1.
+9. The two-stage factor F₀.₉₀ or F₀.₉₅; the threshold for exact intervals (any block at 0 or a total < 100).
+
+### §H.5.3 For the maintainer to decide
+
+The merged list and its proposals are in §P.7; Part 5's original seven items are all included there.

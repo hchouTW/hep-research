@@ -9,40 +9,101 @@
 
 ## 如何使用本文件
 
-**給執行的 agent：**
-1. 讀 §P.0（階段一覽）、§P.10（在 isolated worktree 中執行）、§P.6（閘門）、§P.4（介面擁有權）。
-2. 依 §P.10.2 為你的階段建立並確認 isolated worktree（`.claude/worktrees/geant4-<階段>`，分支 `worktree-geant4-<階段>`，基底為含前置階段的最新 `origin/main`）；之後所有步驟都在其中進行。
-3. 讀 main 的 `skills/hep-detector/references/system-design-workflow.md`（設計流程、保真度、閘門），它是第 3、4 部的前提。
-4. 讀你的階段所屬那一部的任務卡（§A.0、§B.0 或 §C.0），再讀該部的 §1–§4 與你的階段的工作項及驗收清單。
-5. 需要某條規則的理由時，才讀第 5 部。
-6. 本文件約 3,200 行：依目錄的節號分段讀取（例如搜尋 `## §A.5`），不要一次讀完。
+本文件是規格：第 1–4 部寫的是**現在要做的事與驗收**，第 5 部寫理由，第 6 部集中所有歷史（版本歷程、審查與處理、新舊對照）。正文不描述「以前怎麼寫」；需要歷史時才讀第 6 部。
 
-**各部的權威範圍：**
+**給執行某個階段的 agent：**
+1. 讀 §P.0（階段一覽與依賴圖）、§P.10（在 isolated worktree 中執行），再查下面「依階段的閱讀索引」中你的階段那一列，依序讀完。
+2. 依 §P.10.2 為你的階段建立並確認 isolated worktree（`.claude/worktrees/geant4-<階段>`，分支 `worktree-geant4-<階段>`，基底為含全部前提階段的最新 `origin/main`）；之後所有步驟都在其中進行。
+3. 先讀 main 的 `skills/hep-detector/references/system-design-workflow.md`（設計流程、保真度、閘門 H1–H4）；第 3、4 部以它為前提。
+4. 遇到不熟的名詞先查下面的「名詞表」，再查該部的 §X.1。
+5. 本文件約 3,500 行：依目錄的節號分段讀取（例如搜尋 `## §A.5`），不要一次讀完。
+
+**給審查者：** 讀 §P.0–§P.4、§P.6、§P.7，再讀要審的階段（索引中的同一列）；第 5 部說明理由；第 6 部 §H.2 列出先前審查的發現與處理位置。
+
+**給維護者：** 待決事項集中在 §P.7（D0 在 §P.7.1，給維護者填寫的表單是同資料夾的 `decision-d0-f4-qualification.md`，issue #273）；閘門在 §P.6；風險在 §P.8。
+
+### 依階段的閱讀索引
+
+依序讀完一列即可開始該階段。「共同」指每個階段都要讀的 §P.0、§P.10 與 main 的 `system-design-workflow.md`。
+
+| 階段 | 任務卡與共同前提 | 階段的工作項與驗收 | 閘門（§P.6） | 擋住它的待決事項（§P.7） | 檢查與執行步驟 | 理由（第 5 部，需要時） |
+|---|---|---|---|---|---|---|
+| A1 | §A.0–§A.4 | §A.5（A1.1–A1.17） | G-A1 | 第 2–7、15 項 | §A.7、§A.8、§A.11、§A 附錄 A–C | 驗證類別與判定；契約、追溯與 sci-fix；執行、種子與重現 |
+| A2 | §A.0–§A.4 | §A.6 | G-A2 | 第 8 項 | §A.7、§A.8、§A.11 | 資料分層與 run summary；架構總覽 |
+| B1 | §B.0–§B.4；A2 的介面（§A.2） | §B.5 | G-B1a、G-B1b | 第 8、9 項 | §B.8、§A.8、§B.11 | 架構總覽；通用性 |
+| B2 | §B.0–§B.4 | §B.6（含 B2.8 資格路徑） | G-B2；資格規則在 G-D0 前不生效 | 第 1 項（D0，§P.7.1）、第 10、11 項 | §B.8、§A.8、§B.11 | 與 main 設計流程的關係；驗證類別與判定 |
+| B3 | §B.0–§B.4；§B 附錄 A | §B.7 | G-D0 | 第 1、12 項 | §B.8、§A.8、§B.11 | 與 main 設計流程的關係 |
+| C1 | §C.0–§C.4 | §C.5 | G-C1 | 第 4、13 項 | §C.8、§A.8、§C.11、§C 附錄 A | 與 main 設計流程的關係 |
+| C2 | §C.0–§C.4；B2 的介面（§B.2） | §C.6 | G-C2a、G-C2b；確認另需 G-D0 | 第 1、13 項 | §C.8、§A.8、§C.11 | 與 main 設計流程的關係；執行、種子與重現 |
+| C3 | §C.0–§C.4 | §C.7 | G-C3 | 第 14 項 | §C.8、§A.8、§C.11 | 與 main 設計流程的關係；通用性 |
+
+第 5 部的節以名稱指出；節號見目錄。
+
+### 各部的權威範圍
 
 | 部 | 節號 | 內容 | 權威範圍 |
 |---|---|---|---|
-| 第 1 部 計畫總覽 | §P | 評估、原則、階段、介面擁有權、命名、閘門、待決事項、風險、執行環境 | 階段的順序與依賴、編號、版本代號、介面擁有權、閘門、待決事項、執行環境 |
-| 第 2 部 任務 A | §A | A1、A2 的工作項與驗收；共用的硬性限制（§A.3）與檢查（§A.8） | 這兩個階段的內容與驗收 |
-| 第 3 部 任務 B | §B | Geant4 F4 評估器與 J15 設計專案；B1、B2、B3 的工作項與驗收 | 這三個階段的內容與驗收；J15 的數值 |
+| 第 1 部 計畫總覽 | §P | 階段一覽、與 main 的關係、原則、階段邊界、介面擁有權、命名、閘門、待決事項、風險、執行環境 | 階段的順序與依賴、編號、版本代號、介面擁有權、閘門、待決事項、執行環境 |
+| 第 2 部 任務 A | §A | A1、A2 的工作項與驗收；共用的硬性限制（§A.3）與檢查（§A.8） | 這兩個階段的內容與驗收；§A.8 對所有階段適用 |
+| 第 3 部 任務 B | §B | Geant4 F4 評估器與 J15 設計專案；B1、B2、B3 的工作項與驗收 | 這三個階段的內容與驗收；J15 的數值；F4 資格路徑的細節（B2.8） |
 | 第 4 部 任務 C | §C | 自動產生設計候選；C1、C2、C3 的工作項與驗收 | 這三個階段的內容與驗收 |
-| 第 5 部 設計理由 | §R | 從實際實驗得到的設計依據、架構、與 main 設計流程的關係、被取代的設計 | 只說明理由；與第 2–4 部衝突時以第 2–4 部為準並回報 |
+| 第 5 部 設計理由 | §R | 與 main 設計流程的關係、從實際實驗得到的設計依據、架構 | 只說明理由；與第 1–4 部衝突時以第 1–4 部為準並回報 |
+| 第 6 部 修訂、審查與決定紀錄 | §H | 版本歷程、審查的發現與處理、新舊設計對照、被取代的設計、決策紀錄 | 只記錄歷史，不構成規格 |
 
-**編號：**
-- 節：「§A.8」是第 2 部（任務 A）的第 8 節，「§P.10.2」是第 1 部的 10.2 節，「§B 附錄 A」是第 3 部的附錄 A。
+### 編號與慣例
+
+- 節：「§A.8」是第 2 部（任務 A）的第 8 節，「§P.10.2」是第 1 部的 10.2 節，「§B 附錄 A」是第 3 部的附錄 A，「§H.2」是第 6 部的第 2 節。
 - 工作項：「A1.6」「B2.1」「C2.4」（階段.序號），在全文中唯一。
+- 閘門：「G-A1」「G-B2」「G-D0」等，定義在 §P.6。待決事項：§P.7 的編號（「§P.7 第 1 項」= D0）。
 - 契約變更：以擁有的階段命名為 CV-A1、CV-B2、CV-C1、CV-C2，號碼在發布時依合併順序決定（都 ≥ 3.13.0）；「C1」「C2」單獨出現時只指階段。
-- 保真度：一律是 main 的 F0–F5（F0 啟發式、F1 解析 tool contract、F2 toy MC、F3 response／expected precision、F4 重新發出為 `validated-in-scope` 的 Geant4 研究、F5 量測）；搜尋中的 Geant4 短 run 只產生「搜尋值」，沒有保真度。
+- 保真度：一律是 main 的 F0–F5（下表）；搜尋中的 Geant4 短 run 只產生「搜尋值」，沒有保真度。
 - 第 2–4 部的結構相同：§X.0 任務卡、§X.1 名詞與檔案、§X.2 前提與提供的介面、§X.3 硬性限制、§X.4 設計摘要、§X.5 起每個階段一節（工作項與驗收清單），之後是契約與版本、檢查、不做與延後、待決事項與風險、執行步驟、附錄。
+- 程式碼引用寫成 `檔案:行` 或「`檔案` 行 n」，以基準 `5584927` 為準；每個階段開始時在新基底上重新核對（§P.10.2）。
 
-**整合紀錄：** 2026-10-23 由原本分散的 `plan.md`、`task-a-core.md`、`task-b-j15.md`、`task-c-design-search.md`、`architecture.md`（與各自的英文版）合併而成，內容不變，只改寫節號與交叉引用；舊檔已移除。各部的版本歷程保留在該部的附錄。設計數值的計算程式（`gate_operating_characteristics.py`、`j15_design_estimates.py`、`design_search_closure.py`）仍是同一資料夾中的獨立檔案。
+### 名詞表
 
-**重新規劃紀錄：** 2026-10-24 對照 main 0.38.0 審查（[`review-2026-10-24-main-0.38.md`](review-2026-10-24-main-0.38.md)）後，依 main 的探測器系統設計流程重新規劃：任務 B 成為 F4 的 Geant4 評估器，J15 成為設計專案，任務 C 成為 `evaluate_design.py search` 候選產生器；詳見 §P.1 與 §P.11。
+跨部使用的名詞；各部專用的名詞在該部的 §X.1。
+
+| 名詞 | 意義 | 出處 |
+|---|---|---|
+| 設計流程（design loop） | main 的探測器系統設計流程：D0 架構到 D4 審查、design-spec／design-candidate／design-evaluation、人工閘門 H1–H4 | main 的 `system-design-workflow.md` |
+| design-spec | 設計需求：目標、需求（REQ，含分母與容許值）、配分、限制、`comparison_basis` | main `contracts/schemas/ext_design_spec.json` |
+| design-candidate | 一個候選設計：以 `DES-*` 為鍵的子系統（角色、技術、參數、校正），變體以 `derived_from`＋`overrides` 表示 | main `ext_design_candidate.json` |
+| design-evaluation | 一個候選、一個 figure of merit、一個保真度的評估；只由 `evaluate_design.py` 寫出 | main `ext_design_evaluation.json` |
+| figure of merit（fom） | 適足表中的量，例如 `momentum-resolution-core`、`charge-confusion-rate`、`shower-containment` | main `contracts/rules/design_adequacy.json` |
+| 分母（denominator） | 一個數值成立的條件，例如剛度與粒子種類 | main `system-design-workflow.md` D1 |
+| 保真度 F0–F5 | F0 啟發式（無 run）、F1 解析 tool contract、F2 toy MC、F3 response／expected precision、F4 重新發出為 `validated-in-scope` 的 Geant4 研究、F5 量測 | main `contracts/design.py` 行 65 |
+| 判定（verdict） | pass／fail／inconclusive 與理由碼；只由 `contracts/design.py` 從產物推導，本計畫的程式不寫 | §P.2 R9 |
+| bound：`optimistic`／`estimate` | `optimistic` 只能排除候選；`estimate` 可以判定，但需要可用的不確定度 | main `design.py` |
+| 尾部來源（tail sources） | alignment、calibration-non-uniformity、noise-digitization、pattern-recognition；四種都模擬時 F4 的解析度與電荷誤判才是 `estimate` | main `design.py` 行 64；B2.2 |
+| 模型包絡（model envelope） | physics list 變化的 [lo, hi]，`design.py` 逐端判定（FID-05） | B2.6、B3.4 |
+| `validated-in-scope` | 研究紀錄的 label：在宣告範圍內通過驗證；只能由 `check_geant4_study.py label --upgrade` 重新發出 | §A.4、B2.8 |
+| 升級（upgrade） | `label --upgrade` 把研究紀錄重新發出為 `validated-in-scope` 的過程；條件見 §A.4 與 B2.8 | `check_geant4_study.py` |
+| F4 資格路徑、D0、D0-a–D0-d | 偵測器層級研究成為 F4 的條件（材料定義、場、重建、徑跡 reference）與其子決定；待維護者核准 | §P.7.1、B2.8 |
+| CV-A1、CV-B2、CV-C1、CV-C2 | 各階段的 contracts minor 變更 | §P.5 |
+| 研究（study）／研究紀錄 | 一組 Geant4 run 與其 benchmark、收斂、範圍；紀錄是 computational-run 產物 | §A.1 |
+| evidence 角色 | `extension.simulation.evidence_role`：run 在研究中的用途（例如 nominal、scan、regression、search、confirmation） | A1.4 |
+| summary、觀測量宣告 | `simulation-summary/1`（每個區塊的累加器）與 `simulation-observables/1`（觀測量的定義）；schema 在 `contracts/schemas/` | A1.5 |
+| 區塊、batch means | 一個 run 分成 K 個區塊，以區塊間的離散估計標準誤 | §A.4 |
+| 種子雜湊 H | 由研究、角色與點推導出 Geant4 種子的確定性雜湊 | A1.4、A2.2 |
+| 邊界產物 | `layered_sim` 寫出的 summary、column map、effective config；研究層只讀它們 | A2 |
+| `element_sim`、`simreco`、`simroot` | B 的 Geant4 應用、不連結 Geant4 的重建程式、ROOT 檔讀取工具 | §B.1 |
+| 實現設定檔（realization profile） | `from-geometry` 補足幾何對照表沒有的欄位（材料、橫向大小、場範圍）的宣告檔 | B1.8 |
+| `from-geometry` | `geant4_run.py from-geometry`：`design-geometry/1` → `element_sim.spec/1` | B1.8 |
+| `search_summary`、搜尋值 | `evaluate_design.py search` 寫在 computational-run 的搜尋紀錄；其中的值不是 evaluation，沒有保真度 | C1.6 |
+| `expand --search` | 把搜尋的決選者寫成 design-candidate，之後照一般流程評估 | C1.7 |
+| sci-fix、帳本、advisory | 修正錯誤數字的流程：`sci-fix:` commit、帳本條目、受影響版本的 advisory | §A.5 A1.14 |
+| journey J14、J15、J16 | J14 薄矽層（既有）、J15 最小磁譜儀設計專案（B3）、J16 自動產生候選（C3） | §P.5 |
+| G-* 閘門 | 階段開始或合併前的條件 | §P.6 |
+| H1–H4 | main 設計流程的人工閘門（範圍、需求基準、架構選擇、設計基準） | main `system-design-workflow.md` |
+
+**歷史：** 本文件的整合經過、重新規劃與各部的版本歷程都在第 6 部（§H.1）。
 
 ## 目錄
 
 - **第 1 部　計畫總覽（§P）**
   - §P.0 一頁摘要
-  - §P.1 評估：問題與處理
+  - §P.1 與 main 的關係：main 提供的與本計畫補上的
   - §P.2 規劃原則
   - §P.3 階段的內容與驗收（摘要）
   - §P.4 介面擁有權
@@ -52,7 +113,6 @@
   - §P.8 跨任務的主要風險
   - §P.9 文件地圖與權威分工
   - §P.10 執行環境：isolated worktree
-  - §P.11 版本歷程
 - **第 2 部　任務 A：正確性修正與邊界產物（§A）**
   - §A.0 任務卡
   - §A.1 名詞與檔案
@@ -68,9 +128,8 @@
   - §A.11 建議的執行步驟
   - §A 附錄 A：統計規格彙整
   - §A 附錄 B：數值
-  - §A 附錄 C：基準核對值（`9f08796`；2026-10-24 依 `5584927` 重新核對）
+  - §A 附錄 C：基準核對值（`5584927`；最初於 `9f08796` 取得，在 `5584927` 上重新核對）
   - §A 附錄 D：出處
-  - §A 附錄 E：版本歷程
 - **第 3 部　任務 B：`element_sim`、重建與 J15 最小磁譜儀（§B）**
   - §B.0 任務卡
   - §B.1 名詞與檔案
@@ -86,7 +145,6 @@
   - §B.11 建議的執行步驟
   - §B 附錄 A：數值
   - §B 附錄 B：出處
-  - §B 附錄 C：版本歷程
 - **第 4 部　任務 C：自動化候選設計產生（§C）**
   - §C.0 任務卡
   - §C.1 名詞與檔案
@@ -102,30 +160,35 @@
   - §C.11 建議的執行步驟
   - §C 附錄 A：數值
   - §C 附錄 B：出處
-  - §C 附錄 C：版本歷程
 - **第 5 部　設計理由（§R）**
   - §R.0 摘要
-  - §R.1 設計依據：從實際實驗學到的事
-  - §R.2 目標、限制與原則
-  - §R.3 架構總覽
-  - §R.4 資料分層與 run summary
-  - §R.5 執行、種子、區塊與重現
-  - §R.6 驗證類別與判定
-  - §R.7 契約、追溯與 sci-fix
-  - §R.8 程式與 CI
-  - §R.9 通用性
-  - §R.10 階段與驗收
-  - §R.11 殘餘風險
-  - §R.12 決策紀錄
-  - §R.13 演進紀錄：被取代的設計
-  - §R.14 出處
-  - §R.15 與 main 探測器系統設計流程的關係（2026-10-24）
+  - §R.1 與 main 探測器系統設計流程的關係
+  - §R.2 設計依據：從實際實驗學到的事
+  - §R.3 目標、限制與原則
+  - §R.4 架構總覽
+  - §R.5 資料分層與 run summary
+  - §R.6 執行、種子、區塊與重現
+  - §R.7 驗證類別與判定
+  - §R.8 契約、追溯與 sci-fix
+  - §R.9 程式與 CI
+  - §R.10 通用性
+  - §R.11 階段與驗收
+  - §R.12 殘餘風險
+  - §R.13 決策紀錄
+  - §R.14 演進紀錄：被取代的設計
+  - §R.15 出處
+- **第 6 部　修訂、審查與決定紀錄（§H）**
+  - §H.1 版本歷程
+  - §H.2 審查與處理
+  - §H.3 概念對照：舊設計 → 現行
+  - §H.4 被取代的設計
+  - §H.5 決策紀錄
 
 ---
 
 # 第 1 部　計畫總覽（§P）
 
-> 日期：2026-10-24（依 main 0.38.0 的探測器系統設計流程重新規劃）
+> 日期：2026-10-24
 
 ---
 
@@ -158,25 +221,26 @@ C1 ───────────────────────┴─�
 
 ---
 
-## §P.1 評估：問題與處理
+## §P.1 與 main 的關係：main 提供的與本計畫補上的
 
-前一版（2026-10-23）以 main `9f08796`（0.23.0）為基準。2026-10-24 對照 main 0.38.0 的審查（`review-2026-10-24-main-0.38.md`）發現 main 已經有完整的設計流程，於是重新規劃。
-
-| # | 問題 | 影響 | 處理 |
-|---|---|---|---|
-| P1 | **偵測器層級的 Geant4 研究無法成為 F4。** F4 只接受重新發出為 `validated-in-scope` 的研究（`contracts/design.py:1004`），升級需要涵蓋研究範圍的 reference benchmark，而解析度、電荷誤判、簇射包含都沒有 | 任務 B 與 C 的 Geant4 結果都進不了設計流程 | 建立 F4 資格路徑（D0，§P.7 第 1 項）：材料定義、場傳播驗證、重建驗證、新的徑跡 reference benchmark 四個條件都成立時才可升級（B2.8）；F4 不確定度的政策另由維護者決定（D0-c） |
-| P2 | **保真度名稱衝突。** 前一版任務 C 的 F0／F1／F2 與 main 的 F0–F5 意義不同 | 讀者與 `design.py` 對同一個名稱有不同解讀 | 全文採用 main 的名稱（§P.5）；搜尋中的 Geant4 短 run 只產生「搜尋值」，不是任何保真度 |
-| P3 | **任務 C 再造一套設計系統**：自己的需求規格、設計格式、需求判定、排序與「推薦設計」，並違反 main 的規則（判定只由 `design.py` 推導、絕不宣稱全域最佳、閘門要人） | 不能合併 | C 改為 D2 階段的候選產生器 `evaluate_design.py search`：讀 design-spec 與基礎候選，只寫 `search_summary`，決選者經 `expand` 成為候選，由 `report` 推導判定 |
-| P4 | **F4 的資料路徑不完整。** main 上沒有程式寫出 `extension.study.results` 與 `tail_sources_simulated`；`evaluate_design.py f4` 呼叫 `label --upgrade` 時沒有傳 `--run-record`，`label` 必然拒絕 | F4 實際上無法產生 | A1 修正 `f4` 的轉傳與結束碼；B2 讓 `label` 寫出 F4 需要的欄位，並加端到端測試 |
-| P5 | **A1 漏掉一個缺陷並使用舊格式。** 收斂閘門缺少最細的掃描點時以較粗的點通過（D11）；帳本與 advisory 的格式已改；Garwood 區間與種子推導在 `core/stats` 已有 | A1 不能照舊開始 | A1 加 D11、改用新格式、重用既有函式（第 2 部） |
-| P6 | **A1 的範圍膨脹**（沿用前一版的處理）。只有後續階段需要的功能不放進 A1 | sci-fix 被拖慢 | 原則 R1；判定引擎在 A1 只有 `equivalence` 與 `detection_limit`，B2 加 `change`；需求判定一律由 `design.py` 負責 |
-| P7 | **契約變更的代號依合併順序而定。** C1 不再依賴 A，可能比 A1 先合併 | 「CV1–CV3」的順序不再成立 | 以擁有的階段命名：CV-A1、CV-B2、CV-C1、CV-C2；號碼在發布時依合併順序決定（§P.5） |
-| P8 | **介面放錯層**（沿用）。`core/` 只能 import `core`（`check_layering.py:4`） | `core/` 無法使用 `contracts/schema.py` | summary 的 schema 放在 `contracts/schemas/`，由 adapter 或 skill 腳本驗證；`core/simulation/` 只做計算 |
-| P9 | **待決事項與閘門分散**（沿用） | 看不到哪個決定擋住哪個階段 | 合併為 §P.6、§P.7 兩張表；main 已決定的事項標明出處 |
+main 0.37.0–0.38.0 的探測器系統設計流程已經提供需求、候選、證據與判定的完整框架；本計畫不另建一套，只補上它缺的部分。
 
 **main 已提供、本計畫直接使用的介面：** design-spec、design-candidate、design-evaluation（contracts 3.11.0）；`contracts/design.py`（判定、彙整、篩選、比較基準、排序與 Pareto、F4 與 F5 的檢查）；`contracts/rules/design_adequacy.json`（每個 figure of merit 的篩選與合規保真度）；`contracts/rules/design_geometry.json`（`layered-spectrometer` 對照表 1.0.0）；`evaluate_design.py` 的 `run`、`budget`、`geometry`、`f4`、`scan`、`expand`、`plan`、`report`；參數層級的過時與 `run_workflow.py --incremental`；`scan_summary`；能力 `detector-design`（hep-detector）。
 
-**本計畫新增的：** 正確的標籤與統計（A1）；能產生 F4 的 Geant4 應用、重建與尾部來源（B1、B2）；把 J15 做成設計專案的完整示範（B3）；自動產生候選與 Geant4 多保真度搜尋（C1、C2）；兩個範例上的示範（C3）。
+**本計畫補上的缺口**（以基準 `5584927` 核對）：
+
+| # | 缺口 | 證據 | 補上的階段 |
+|---|---|---|---|
+| 1 | Geant4 研究的 `validated-in-scope` 可能被錯誤發出（缺陷 D1–D11），而 F4 只接受這個 label | `contracts/design.py:1004`；§A.4 | A1 |
+| 2 | `evaluate_design.py f4 --label-spec` 不把 run record 傳給 `label --upgrade`，這條路徑必然被拒絕 | `evaluate_design.py:503-506`；`check_geant4_study.py:544-569` | A1（A1.17） |
+| 3 | 沒有能模擬磁譜儀（分區磁場、多層徑跡、TOF、量能器）並消化 `design-geometry/1` 的 Geant4 應用 | `adapters/geant4/` 只有 `layered_sim` | B1 |
+| 4 | 沒有程式寫出研究紀錄的 `results.<fom>`、`tail_sources_simulated` 與幾何檔，也沒有模擬尾部來源的重建 | `check_geant4_study.py:584-617`；`design.py:1058-1059` | B2 |
+| 5 | 偵測器層級的研究沒有 reference benchmark，無法升級為 F4；只用統計誤差的 F4 `estimate` 會被判為沒有可用的不確定度 | `check_geant4_study.py:535-543`；`design.py:1300-1309` | B2（資格路徑）與 D0（§P.7.1） |
+| 6 | 沒有走完設計流程到 F4 的示範專案 | main 的 `examples/design-space-spectrometer` 只有 F1 評估 | B3（J15） |
+| 7 | 候選只能手寫，或以 `scan` 在單一候選的參數網格上變化；沒有跨結構的自動產生與 Geant4 多保真度搜尋 | `evaluate_design.py` 的 `scan`、`expand` | C1、C2 |
+| 8 | 沒有展示搜尋與探測器種類無關的範例 | main 的 Example A、Example B | C3 |
+
+**本計畫不做的：** 自己的需求規格、設計格式、判定、排序或「推薦設計」；這些都由 main 的產物與 `contracts/design.py` 負責（§P.2 R8–R10）。
 
 ---
 
@@ -189,7 +253,7 @@ C1 ───────────────────────┴─�
 | R3 | **同一個量只有一份正式實作** | 另一種語言或另一個位置的實作只能在測試中作為 oracle；`core/stats` 已有的函式直接重用 |
 | R4 | **sci-fix 保持最小** | A1 只含修正缺陷所需的變更與它們的直接基礎（包括讓 F4 的消費端不誤報的小修正） |
 | R5 | **每個階段可單獨合併** | 有自己的版本、VALIDATION 條目、CHANGELOG、驗收清單；合併後 plugin 是一致的 |
-| R6 | **判定可重現，數字可追溯** | 重現的定義是判定與 label 相同（§R.5.6）；結果附搜尋規模與證據相關性 |
+| R6 | **判定可重現，數字可追溯** | 重現的定義是判定與 label 相同（§R.6.6）；結果附搜尋規模與證據相關性 |
 | R7 | **AI 是設計者，不是裁判** | Claude 選結構、提出候選、解讀結果；「是否符合」只由 `contracts/design.py` 從產物推導，閘門由人核准 |
 | R8 | **接上 main 的設計流程，不另建一套** | 需求用 design-spec，候選用 design-candidate，證據用 design-evaluation；保真度用 main 的 F0–F5 |
 | R9 | **判定只由 `design.py` 推導** | 本計畫的程式不寫判定、成熟度、過時標記、`screened_out` 或 `at-risk`；`core/stats/decisions.py` 只判定研究層的閘門（收斂、benchmark、regression） |
@@ -203,10 +267,10 @@ C1 ───────────────────────┴─�
 
 | 階段 | 包含 | 明確不包含（在哪個階段） |
 |---|---|---|
-| A1 | D1–D8、D10、D11 的修正；benchmark 表與驗證類別（reference、setup-matched、sanity、interface）；範圍比對；configuration 與隔離（`spec-v1`）；區塊 batch means、精確區間（重用 `core/stats/poisson_diagnostics.py` 的 `central_interval`）、MPV、分位數；判定引擎的 `equivalence` 與 `detection_limit`；兩階段事件數；種子雜湊 H（與 `toy_ensemble.toy_seed` 的關係寫明）；`extension.simulation.evidence_role`；`simulation-summary/1` 與 `simulation-observables/1` 的 schema（`contracts/schemas/`）；Python summary 產生器；`tolerance_mode` 的 `absolute`（P6 的例外：A1 自己的 J14 benchmark 就需要它）；`evaluate_design.py f4` 轉傳 `--label-run-record`、把 `label` 結束碼 3 對應為 `incomplete`；帳本與 advisory `/2` 的新格式；J14 重產 | `change` 與 regression（B2）、`results` 與尾部來源欄位（B2）、搜尋與確認的種子規則（C2）、`values` 累加器（C2）、C++ summary（A2） |
+| A1 | D1–D8、D10、D11 的修正；benchmark 表與驗證類別（reference、setup-matched、sanity、interface）；範圍比對；configuration 與隔離（`spec-v1`）；區塊 batch means、精確區間（重用 `core/stats/poisson_diagnostics.py` 的 `central_interval`）、MPV、分位數；判定引擎的 `equivalence` 與 `detection_limit`；兩階段事件數；種子雜湊 H（與 `toy_ensemble.toy_seed` 的關係寫明）；`extension.simulation.evidence_role`；`simulation-summary/1` 與 `simulation-observables/1` 的 schema（`contracts/schemas/`）；Python summary 產生器；`tolerance_mode` 的 `absolute`（原則 R1 的例外：A1 自己的 J14 benchmark 就需要它）；`evaluate_design.py f4` 轉傳 `--label-run-record`、把 `label` 結束碼 3 對應為 `incomplete`；帳本與 advisory `/2` 的新格式；J14 重產 | `change` 與 regression（B2）、`results` 與尾部來源欄位（B2）、搜尋與確認的種子規則（C2）、`values` 累加器（C2）、C++ summary（A2） |
 | A2 | `g4sim`（`SimHash`、`SimSeed`、`SimSummary`、`MiniJson`、`SimProbe`）；`per-event` 種子；`layered_sim` 寫出 summary、column map、effective config；`tree-v1`；effective config 依內容雜湊存放；`validate_spec`、`spec.schema.json` 與 `Spec.cc` 接受 `run.seeding`、`output.observables`、`output.blocks`、`output.debug_observable_dump`；`geant4_run.py run` 寫出 `argv`、`script_sha256`、`versions.plugin_release`；研究層只讀邊界產物；schema 關鍵字（`maxItems`、`maximum`、`exclusiveMaximum`；不用 `uniqueItems`） | `element_sim`（B1） |
 | B1 | `element_sim.spec/1`、`element_sim`、分區均勻磁場、所有帶電徑跡的平面 hit 表、量能器母體與漏失欄、逐事件 ROOT 檔、`simroot`、`geant4_run.py check-spec`（登記於 `MISSING_FILE_ARGS`）、`geant4_run.py from-geometry` 與實現設定檔（realization profile）、兩個後端的介面一致性、確定性場檢查 | `simreco` 與尾部來源（B2）、對照表 1.1.0（B2）、J15（B3） |
-| B2 | `simreco`（數位化與重建，可攜的亂數）；可切換的尾部來源（錯位以至少 20 個重建副本表示、數位化與雜訊、hit 指派、位置相關的磁場誤差；全域磁場尺度屬於 rigidity-scale-offset）與曲率偏移；`geant4_run.py reco` 與 `table`；遞移的處理鏈；verification 與 regression 類別、regression 角色、判定引擎的 `change`；高斯核心解析度與計數型電荷誤判的觀測量；`label` 的 `--results`、`--geometry` 與 `f4` 的 `--label-results`、`--label-geometry`；`f4` 接受不對稱或精確的不確定度；對照表 1.1.0；徑跡 reference benchmark（Lynch–Dahl，只認可 `momentum-resolution-core`）、依類別的範圍模型與 F4 資格規則；`geometry → 研究 → label --upgrade → f4` 端到端測試（含一例達到 `design.py` 的決定性列）；CV-B2 | J15 設計專案（B3）；任務 C 用的 surrogate 類別（刪除） |
+| B2 | `simreco`（數位化與重建，可攜的亂數）；可切換的尾部來源（錯位以至少 20 個重建副本表示、數位化與雜訊、hit 指派、位置相關的磁場誤差；全域磁場尺度屬於 rigidity-scale-offset）與曲率偏移；`geant4_run.py reco` 與 `table`；遞移的處理鏈；verification 與 regression 類別、regression 角色、判定引擎的 `change`；高斯核心解析度與計數型電荷誤判的觀測量；`label` 的 `--results`、`--geometry` 與 `f4` 的 `--label-results`、`--label-geometry`；`f4` 接受不對稱或精確的不確定度；對照表 1.1.0；徑跡 reference benchmark（Lynch–Dahl，只認可 `momentum-resolution-core`）、依類別的範圍模型與 F4 資格規則；`geometry → 研究 → label --upgrade → f4` 端到端測試（含一例達到 `design.py` 的決定性列）；CV-B2 | J15 設計專案（B3）；surrogate 類別（不做，§B.9） |
 | B3 | J15 的 design-spec 與候選（名義 0.5 T／N = 6，變體 N = 4、N = 8）；F1、F2 經 `evaluate_design.py run`；每個（figure of merit, 分母）一份 F4 研究；示範尾部來源開啟時界限由 `optimistic` 變成 `estimate`、模型包絡、電荷誤判在缺資料驗證時為 `chain.incomplete`；驗證梯（場傳播、TOF、取樣分率；隔離的 PVT benchmark 是獨立的研究紀錄）為 `unvalidated` 紀錄；量能器 cut 收斂、variation、TOF σ_t 敏感度；journey J15 | — |
 | C1 | `evaluate_design.py search` 與 `expand --search`；搜尋 spec（參數範圍、各角色的子系統槽、評估預算、種子、目標 = 適足表的 figure of merit）；基因組與解碼器（寫成基礎候選的 `overrides`）；在行程內以與 tool contract 相同的工具做 F1 評估（四個工具的 `main()` 加 `argv=None`）；NSGA-II、Sobol、WFG 超體積；`search_summary`（CV-C1，免孤兒規則）；封閉測試；`system-design-workflow.md` 的「D2 自動產生候選」一節 | 任何 Geant4 評估（C2）；判定、排序、推薦設計（不做，由 `design.py`）；新的 reference 檔或 `SKILL.md` 修改（不做） |
 | C2 | 以 `from-geometry` 與短 `element_sim` run 產生的搜尋值；共同亂數與配對比較（G-C2a）；`values` 累加器（Python 與 `SimSummary.hh`，`values_max` 以區塊計）；贏家詛咒 toy；種子角色與快取鍵；決選者的 F4 確認；`design.py` 的搜尋種子規則（CV-C2） | 範例（C3）；選擇感知的覆蓋率（只提案給 hep-statistics 與 `design.py`） |
@@ -268,8 +332,6 @@ C1 ───────────────────────┴─�
 | 待決事項 | D0 與 §P.7 的編號 | D0 = F4 資格路徑 |
 | 節的引用 | 全部在本文件中：「§P.n」是第 1 部、「§A.n」「§B.n」「§C.n」是第 2–4 部、「§R.n」是第 5 部；「§B 附錄 A」是第 3 部的附錄 | — |
 
-前一版的 CV1、CV2、CV3 分別改為 CV-A1、CV-B2、CV-C2；CV-C1 是新的。前一版任務 C 的「F0」相當於 main 的 F1，「F1、F2」與「確認」相當於搜尋值與 F4。
-
 ---
 
 ## §P.6 階段閘門
@@ -293,7 +355,7 @@ C1 ───────────────────────┴─�
 
 | # | 事項 | 建議 | 阻擋 |
 |---|---|---|---|
-| 1 | **D0：偵測器層級 Geant4 研究成為 F4 的路徑** | 建立資格路徑（使用者已選定方向；`validated-in-scope` 在全 plugin 維持單一意義）。四個條件全部成立才升級，各以自己的鍵對應研究：(1) 材料定義：實現幾何的每種材料有獨立來源的成分與密度，且 geantino 掃描在宣告的容許值內重現候選宣告的 `layer_x_over_x0`／`passive_x_over_x0`（A1 的材料 benchmark 是材料物理的證據，不是前提）；(2) 場傳播 verification 在同一磁場設定雜湊下通過；(3) `reco-closure` 在同一重建 spec 雜湊下通過；(4) 徑跡 reference benchmark：孤立 Si 片的多重散射核心寬度對照 Lynch–Dahl（F = 98 %），附負對照，範圍維度為材料、厚度、剛度、粒子，只認可 `momentum-resolution-core`（點解析度是宣告的輸入，沒有 benchmark 驗證）。範圍模型改為依 benchmark 類別的交集，外部 benchmark 紀錄經 `--reference-record` 進入並由 `dependencies.py` 重新推導（CV-B2，B2.8）。子決定：**D0-b** 電荷誤判需要尾部 benchmark（約 3θ₀ 以外的散射比例，對照單次散射／Molière 或已發表資料），在此之前不認可；**D0-c**（真正需要決定的事）F4 的不確定度：依 FID-01 只用統計誤差（約 1–3 %）時，升級的 F4 `estimate` 一律因 `min_relative_uncertainty`（0.2／0.3／0.1）成為 `uncertainty.missing`，選項為 (a) CV-B2 修改 FID-01，F4 不確定度 = 統計 ⊕ 尾部副本的離散（建議；模型包絡不併入，因為 FID-05 已逐端判定，併入會重複計算）、(b) 修訂適足表的 F4 下限（目前是預設值）、(c) 兩者；**D0-d** 對篩選保真度為 F4 的量（例如 D0 不涵蓋的簇射包含）另允許未驗證的 F4 只用於篩選，作為選項提出、未採用。建議：方向核准，以修訂後的 B2.8 與 D0-c 的決定為條件 | B3、C2 的確認 |
+| 1 | **D0：偵測器層級 Geant4 研究成為 F4 的路徑**（完整內容見 §P.7.1） | 建立資格路徑並有條件核准（D0-a）；電荷誤判另需尾部 benchmark（D0-b）；F4 不確定度的政策（D0-c）是真正需要決定的事；只用於篩選的 F4 作為補充選項（D0-d） | B3、C2 的確認 |
 | 2 | CV-A1 的歸類 | minor 加 sci-fix | A1 |
 | 3 | 新 `core/` 模組的 steward 與第二個使用者 | 統計歸 hep-statistics；`core/simulation/` 歸 hep-detector；`OWNERS.json` 登錄 | A1 |
 | 4 | hep-computing 同意在 `ext_computational_run.json` 宣告 `simulation` 與 `search_summary` | 同意 | A1、C1 |
@@ -309,12 +371,51 @@ C1 ───────────────────────┴─�
 | 14 | 貝氏最佳化後端（Ax/BoTorch）是否列為測試過的工具 | 列為選用 | C3 |
 | 15 | 新增 CI 影響群組（`adapters/geant4/**`、`core/stats/**`、`core/simulation/**`） | 新增，減少全量 CI | A1 |
 
-**已由 main 決定（不再待決）：**
+### §P.7.1 D0：偵測器層級 Geant4 研究成為 F4 的路徑
+
+**問題。** 設計流程只把重新發出為 `validated-in-scope` 的 Geant4 研究當作 F4 證據（`contracts/design.py:1003-1005`）；`label --upgrade` 需要一個範圍涵蓋研究的 reference benchmark（`check_geant4_study.py:535-543`），而現有的 benchmark 都是 MeV 級薄片的觀測量。因此偵測器層級的研究（解析度、電荷誤判、簇射包含）目前無法成為 F4。即使能升級，F4 的不確定度依 FID-01 只是統計誤差（約 1–3 %），低於適足表的 `min_relative_uncertainty`（解析度 0.2、電荷誤判 0.3、簇射包含 0.1；這些值是預設值），`design.py` 會判為沒有可用的不確定度（`uncertainty.missing`，`design.py:1300-1309`）。
+
+**方向（使用者已選定，待維護者核准）。** 建立資格路徑，讓 `validated-in-scope` 在全 plugin 維持單一意義；不採用「讓 `design.py` 接受未升級的 F4」。
+
+**升級條件**（四個條件全部成立，各以自己的鍵對應研究；實作細節在 B2.8）：
+
+| 條件 | 對應的鍵 | 內容 |
+|---|---|---|
+| 1. 材料定義 | 實現幾何的材料 | 每種材料的成分與密度有記錄的獨立來源；geantino 掃描在宣告的容許值內重現候選宣告的 `layer_x_over_x0`／`passive_x_over_x0`。A1 的材料 benchmark 是材料物理的證據，不是前提 |
+| 2. 場 | 磁場設定雜湊 | 場傳播 verification（B1 的解析螺旋）通過 |
+| 3. 重建 | 重建 spec 雜湊 | `reco-closure` 通過 |
+| 4. 徑跡 reference | benchmark 範圍：材料、厚度、剛度、粒子 | 孤立 Si 片的多重散射核心寬度對照 Lynch–Dahl（F = 98 %），附負對照；只認可 `momentum-resolution-core`。點解析度是宣告的輸入，沒有 benchmark 驗證（100 GV 時主導核心）；Highland（準確度約 11 %）不能當參考 |
+
+**範圍模型（CV-B2）。** 每個 benchmark 類別宣告自己涵蓋的範圍鍵，升級條件是各類別的交集；磁場設定與重建 spec 以雜湊對應；外部 benchmark 紀錄經 `--reference-record` 進入，並由 `contracts/dependencies.py` 重新推導。既有（J14 類型）研究的行為不變。
+
+**子決定：**
+
+| 編號 | 問題 | 建議 |
+|---|---|---|
+| D0-a | 是否核准資格路徑的方向 | 有條件核准：以修訂後的 B2.8（範圍模型、材料定義、電荷誤判只經尾部 benchmark）與 D0-c 的決定為條件 |
+| D0-b | 電荷誤判如何取得資格 | 核心寬度的 benchmark 不能驗證遠離 MDR 時主導電荷誤判的尾部（單次大角度散射、核作用、錯誤的 hit 指派）；需要尾部 benchmark（約 3θ₀ 以外的散射比例，對照單次散射／Molière 理論或已發表資料）；在此之前電荷誤判不認可 |
+| D0-c | F4 的不確定度（真正需要決定的事） | (a) CV-B2 修改 FID-01：F4 不確定度 = 統計 ⊕ 尾部副本的離散（至少 20 個以獨立錯位與磁場不均抽樣的重建副本）；模型包絡不併入，因為 FID-05 已逐端判定，併入會重複計算。合併後仍低於下限時，另需 (b) 修訂適足表的 F4 下限。不論選哪一項，都要有一個到達決定性判定列（不只是 `uncertainty.missing`）的端到端測試 |
+| D0-d | 對沒有 reference 的量（例如簇射包含）是否另允許只用於篩選的未升級 F4 | 作為選項提出，未採用；在 D0-a 與 D0-c 之後再決定 |
+
+**核准後解除的阻擋：**
+
+| 核准 | 解除 |
+|---|---|
+| D0-a 與 D0-c | B2.8 的規則生效；B3 產生可判定的 F4 解析度評估；C2 對決選者的 F4 確認 |
+| D0-b | F4 電荷誤判評估（仍需適足表要求的資料驗證與 rigidity-scale-offset 上游） |
+| D0-d | 以 F4 的簇射包含篩選候選 |
+
+**核准前：** B2 可以合併，資格規則保留但不生效（G-D0）；B3 與 C2 的確認不開始；確認研究維持 `unvalidated`。
+
+**給維護者的表單：** 同資料夾的 `decision-d0-f4-qualification.md`（issue #273）；維護者在其 Decision 一節填寫決定後，本節與 B2.8 依之更新。
+
+### §P.7.2 已由 main 決定（不再待決）
+
 - `detector-design` 能力的擁有者是 hep-detector（`docs/capability-map.json`）。
 - 設計流程的入口是 hub 連結，不改 `SKILL.md` 描述（CHANGELOG 0.37.0，OQ-01）；任務 C 只在 `system-design-workflow.md` 加一節。
-- 搜尋的子命令形式沿用 `scan` 的先例（OQ-18）。
-- 前一版的 `extension.design_search` 改為 computational-run 的 `search_summary` 欄位（同 `scan_summary`）。
-- 前一版的 detector-design adapter、需求規格 schema 與元件目錄 schema 已刪除。
+- 搜尋是 `evaluate_design.py` 的子命令，依 `scan` 的先例（OQ-18）。
+- 搜尋紀錄放在 computational-run 的 `search_summary` 欄位（同 `scan_summary`），不另設 extension。
+- 不新增設計用的 adapter、需求規格 schema 或元件目錄 schema；這些由 main 的設計流程提供。
 
 ---
 
@@ -339,12 +440,13 @@ C1 ───────────────────────┴─�
 
 | 文件 | 內容 | 權威範圍 |
 |---|---|---|
-| 第 1 部（本部） | 評估、原則、階段、介面擁有權、命名、閘門、待決事項、風險、執行環境 | 順序、編號、版本代號、擁有權、閘門、待決事項、執行環境（isolated worktree） |
+| 第 1 部（本部） | 階段一覽、與 main 的關係、原則、階段邊界、介面擁有權、命名、閘門、待決事項、風險、執行環境 | 順序、編號、版本代號、擁有權、閘門、待決事項、執行環境（isolated worktree） |
 | 第 2 部（任務 A） | A1、A2 的工作項與驗收 | 這兩個階段的內容與驗收 |
 | 第 3 部（任務 B） | J15 的設計；B1、B2、B3 的工作項與驗收 | 這三個階段的內容與驗收；J15 的數值 |
 | 第 4 部（任務 C） | 自動產生候選的設計；C1、C2、C3 的工作項與驗收 | 這三個階段的內容與驗收 |
-| 第 5 部（設計理由） | 設計理由、參考實驗、與 main 設計流程的關係、被取代的設計 | 理由；與規格衝突時以規格為準並回報 |
-| `review-2026-10-24-main-0.38.md` | 對照 main 0.38.0 的審查紀錄（發現與建議） | 重新規劃的依據；本文件已依它修改 |
+| 第 5 部（設計理由） | 與 main 設計流程的關係、設計理由、參考實驗、架構 | 理由；與規格衝突時以規格為準並回報 |
+| 第 6 部（紀錄） | 版本歷程、審查的發現與處理（含對照 main 0.38.0 的審查）、新舊設計對照、被取代的設計、決策紀錄 | 只記錄歷史，不構成規格 |
+| `decision-d0-f4-qualification.md` | D0 的決定紀錄（給維護者填寫的表單；issue #273） | 維護者的決定；內容與 §P.7.1 一致 |
 | `README.md` | 資料夾入口，指向本文件 | — |
 | `gate_operating_characteristics.py`、`j15_design_estimates.py`、`design_search_closure.py` | 設計數值的計算程式 | 對應附錄的數值 |
 
@@ -384,7 +486,7 @@ C1 ───────────────────────┴─�
 4. 建置目錄、E2 的輸出、ROOT 檔與 trial 的結果放在該 worktree 內不提交的目錄（例如 `build/`、`work/`，由 `.gitignore` 排除），或該 worktree 專屬的暫存目錄；不同 worktree 不共用建置目錄。Geant4 本身的安裝（E2）可以由多個 worktree 唯讀共用。
 5. 只在該階段的分支提交；commit 附規定的 trailer；推送到同名的遠端分支。未經維護者核准不推送 `main`、不開 pull request。
 6. 合併前在 worktree 中執行 §A.8 的檢查，並確認閘門（§P.6）。
-7. 規格需要修正時：維護者核准規格之前，在文件的 worktree（`.claude/worktrees/geant4-architecture`，分支 `worktree-geant4-architecture`）中修改；實作開始之後，在該階段的 worktree 中修改。兩種情況都同時修改中英兩版並記入版本歷程；影響其他階段時同時更新本部。
+7. 規格需要修正時：維護者核准規格之前，在文件的 worktree（`.claude/worktrees/geant4-architecture`，分支 `worktree-geant4-architecture`）中修改；實作開始之後，在該階段的 worktree 中修改。兩種情況都同時修改中英兩版並在第 6 部 §H.1 記入版本歷程；影響其他階段時同時更新本部。
 8. 獨立審查的隔離依 `docs/dev/independent-review-spec.md` 附錄 A7（主機設定：`CLAUDE_CODE_FORK_SUBAGENT=0` 或 `permissions.deny` 中的 `Agent(fork)`，並指名非 fork 的 subagent 類型）；worktree 只用於實作。審查只讀不寫。
 
 ### §P.10.4 可以平行的階段
@@ -404,21 +506,10 @@ C1 ───────────────────────┴─�
 
 ---
 
-## §P.11 版本歷程
-
-| 版本 | 內容 |
-|---|---|
-| 2026-10-23 | 初版：整合評估、規劃原則、八個階段（B 拆為 B1–B3、C 為 C1–C3）、介面擁有權、命名（契約版本改記 CV1–CV3）、閘門、合併的待決事項與風險 |
-| 2026-10-23 | 加入 §P.10「執行環境：isolated worktree」（建立、確認、規則、平行階段、結束）與給 agent 的讀法 |
-| **2026-10-24（本版）** | **依 main 0.38.0 的探測器系統設計流程重新規劃（審查紀錄 `review-2026-10-24-main-0.38.md`）：基準改為 `5584927`；採用 main 的保真度 F0–F5；B 改為 F4 評估器（`from-geometry`、尾部來源、`results` 欄位、資格路徑 D0）；J15 改為設計專案；C 改為 `evaluate_design.py search` 候選產生器、不依賴 A；契約代號改為 CV-A1、CV-B2、CV-C1、CV-C2；新增 G-D0、G-B2；待決事項重新編號並標出 main 已決定者** |
-| 2026-10-24 | 新的獨立審查後修正：D0 改為 v2（材料定義取代材料 benchmark 範圍；依類別的範圍模型；徑跡 reference 對照 Lynch–Dahl、只認可 `momentum-resolution-core`；子決定 D0-b、D0-c、D0-d）；G-D0 含 D0-c，G-B2 測兩條路徑並達到決定性的列；C2 的 adapter 0.5.0；B2 的尾部來源改為重建副本與位置相關的磁場誤差；新增風險 12 |
-
----
-
 # 第 2 部　任務 A：正確性修正與邊界產物（§A）
 
 > 順序：A1 → A2；之後是任務 B（第 3 部）。任務 C 的 C1 不依賴任務 A（§P.0）
-> 基準：hep-research `main` 的 `5584927`（0.38.0），contracts 3.12.0，adapter geant4 0.1.0（自 `9f08796` 未變），Geant4 11.4.3；最初依 `9f08796`（0.23.0）撰寫
+> 基準：hep-research `main` 的 `5584927`（0.38.0），contracts 3.12.0，adapter geant4 0.1.0（自 `9f08796` 未變），Geant4 11.4.3
 > 日期：2026-10-24
 
 ---
@@ -454,8 +545,8 @@ C1 ───────────────────────┴─�
 **第一步：** 依 §P.10.2 為本階段建立 isolated worktree（`.claude/worktrees/geant4-<階段>`，分支 `worktree-geant4-<階段>`，基底為已含前提階段的最新 `origin/main`），並確認 `git rev-parse --show-toplevel`、`git branch --show-current` 與 `git status`。以下所有步驟都在這個 worktree 中進行。
 
 **開始前必做：**
-1. 確認 `main` 是否已超過 `5584927`（0.38.0；2026-10-24 已依它重做核對，見 §A 附錄 C 與審查紀錄 `review-2026-10-24-main-0.38.md`）。若是，讀新的 CHANGELOG，重做 §A 附錄 C 的核對，並更新本部（中英兩版）。
-2. 讀 §P.0–§P.6；讀 §R.0、§R.2；讀 `docs/maintenance.md` 的 sci-fix 流程（證據層級與帳本約第 126–251 行、advisory 約第 252–294 行）、adapter 變更流程、release 步驟；讀 `skills/hep-detector/references/system-design-workflow.md` 的 D3（F4 的列）。
+1. 確認 `main` 是否已超過 `5584927`（0.38.0；本部的程式碼引用與數值都依它核對，見 §A 附錄 C；核對時的審查紀錄見 §H.2）。若是，讀新的 CHANGELOG，重做 §A 附錄 C 的核對，並更新本部（中英兩版）。
+2. 讀 §P.0–§P.6；讀 §R.0、§R.3；讀 `docs/maintenance.md` 的 sci-fix 流程（證據層級與帳本約第 126–251 行、advisory 約第 252–294 行）、adapter 變更流程、release 步驟；讀 `skills/hep-detector/references/system-design-workflow.md` 的 D3（F4 的列）。
 3. A1 從 `prototype/phase1-core.patch` 開始。它只改 `contracts/validate.py`、`check_geant4_study.py`、`geant4_benchmarks.py`、study spec schema 與兩個測試檔，不含 `core/`：benchmark 表（等級與 kind，沒有驗證類別）、含 kind 的範圍比對（`scope_outside()`；維度寫死為 particle、material、energy、thickness，`longitudinal-profile` 例外）、benchmark 輸出 configuration 與目標雜湊（由 run record 的 `extension.simulation.geometry` 推導，不是由 spec/1；`longitudinal-profile` 沒有目標），以及 A1.12 的 enum 修正。它早於本規格：缺 `target_slabs`、`setup-matched`、依 benchmark 宣告的範圍維度、`hash_scheme`、`dependencies.py` 的重新推導與 CV-A1 閘控；閘控寫死 3.6.0（會把新規則追溯套用到 3.6.0–3.12.x 的紀錄，必須改為 CV-A1 的常數）；把 `longitudinal-profile` 寫成 `("reference", ("shower-shape",))`。它在 `5584927` 上仍可套用（dry run；`contracts/validate.py` 偏移 2 行）。
 
 ---
@@ -483,7 +574,7 @@ C1 ───────────────────────┴─�
 | IUT | intersection-union test：所有觀測量都等價才通過 |
 | DL | negative control 的偵測極限 |
 | sci-fix | `docs/maintenance.md` 中修正科學正確性缺陷的流程 |
-| 記法 | 「A1.6」「B1.3」「C2.1」是工作項（全文唯一）；「§A.7」「§P.4」「§R.6」是本文件各部的節（§P 第 1 部、§A 本部、§B 第 3 部、§C 第 4 部、§R 第 5 部） |
+| 記法 | 「A1.6」「B1.3」「C2.1」是工作項（全文唯一）；「§A.7」「§P.4」「§R.7」是本文件各部的節（§P 第 1 部、§A 本部、§B 第 3 部、§C 第 4 部、§R 第 5 部） |
 
 **主要檔案（相對 `plugins/hep-research/`）：**
 
@@ -542,7 +633,7 @@ C1 ───────────────────────┴─�
 11. **契約版本。** 新規則以 `strict or _at_least(contract_version, CV-A1)` 閘控，不設 warning 分支。
 12. **J14 的離線重播** 永遠可以執行，且不需要 Geant4 與編譯器。
 13. **不改既有輸出。** A2 只新增檔案與選用欄位；J14 既有 spec 的 CSV 必須和 A2 前逐位元相同（同一主機）。
-14. **不做：** 整數量化、128 位元整數、逐位元相同的統計量、spec 格式轉換、`simstat`、不連結 Geant4 的 `simcore`（理由見 §R.13）。
+14. **不做：** 整數量化、128 位元整數、逐位元相同的統計量、spec 格式轉換、`simstat`、不連結 Geant4 的 `simcore`（理由見 §R.14）。
 
 ---
 
@@ -778,7 +869,7 @@ A1 只改 Python。統計量由 Python 從逐事件 CSV 產生的 summary 計算
 
 ### A1.16 收斂閘門的掃描點完整性（D11）
 
-編號在 2026-10-24 加入；為了不改動既有引用，不重新編號。
+A1.16、A1.17 排在 A1.15 之後，不重新編號，以保持既有引用不變。
 
 **修改：** `check_geant4_study.py` 的 `convergence()`（行 335 起；`vals` 在行 341–348）；protocol 第 93–95 行。
 
@@ -1132,7 +1223,7 @@ computational-run schema 的擁有者是 hep-computing。CV-B2 屬任務 B（B2�
 - 兩階段設計下 se_diff 的平均 ≈ 0.189 tol（目標 0.25 tol）；一對點至少一點未達標的機率 0.190。
 - 偵測極限的檢定力（A1.10 的 caught 定義）在 0.977 附近（審查者的計算約 0.9785）。
 
-## §A 附錄 C：基準核對值（`9f08796`；2026-10-24 依 `5584927` 重新核對）
+## §A 附錄 C：基準核對值（`5584927`；最初於 `9f08796` 取得，在 `5584927` 上重新核對）
 
 | 項目 | 值 |
 |---|---|
@@ -1162,20 +1253,7 @@ computational-run schema 的擁有者是 hep-computing。CV-B2 屬任務 B（B2�
 
 ## §A 附錄 D：出處
 
-設計所參考的實驗與框架（ATLAS、CMS、ALICE、Key4hep、Allpix²、geant-val、Belle II）見 §R.14。Geant4 11.4.3 原始碼的相關檔案：`G4RunManager.cc`、`G4MTRunManager.cc`、`G4WorkerRunManager.cc`、`G4EmParameters.cc`、`G4ProductionCutsTable`、`G4HadronicProcess.hh`、`G4EnergyRangeManager`、`G4AccumulableManager`、`G4VAccumulable`、`G4PhysicalVolumeStore`、`G4LogicalVolume`、`G4NistMaterialBuilder.cc`、`G4PVPlacement`。
-
-## §A 附錄 E：版本歷程
-
-| 版本 | 內容 |
-|---|---|
-| 2026-10-21 前 | 三輪獨立審查、依 0.21.0 與 `9f08796` 的兩次核對、階段 1 原型 |
-| 2026-10-22 | 語言分工、逐事件 ROOT 檔、任務拆分、整理為實作規格；參考實際實驗重新設計（第 5 部（設計理由））；依新架構改寫 |
-| 2026-10-23 | 獨立審查後修正（兩階段操作特性重算、H 的定義、caught 定義、`GeneratePrimaries` 開頭重設種子等）；依自動化設計重新審視（統計移到 `core/`） |
-| 2026-10-23 | 依計畫（第 1 部）重新整理：A1 回到最小的 sci-fix（`change`、`threshold`、`order`、配對比較、search 角色、`values` 移到 B2、C2）；契約版本改記 CV1；種子雜湊放在 `core/simulation/seeds.py`；節的編號與任務 B、C 一致（§A.2 前提與提供的介面、§A.8 檢查、§A.10 待決與風險） |
-| 2026-10-23 | 加入 isolated worktree 的執行規定：檔頭、§A.0 的第一步、§A.11 的開頭（§P.10） |
-| 2026-10-23 | 詳細檢查後修正：spec 新欄位同時加入 `validate_spec()`、`spec.schema.json`、`Spec.cc`；A1.5 的選擇與現行程式一致；`tolerance`、`count_if` 的方向；種子欄位的名稱與 `cmd_chunk`；trial run 與 N 進位到 K 的倍數；DL 的 tol 與 se_rel；`tree-v1` 的目標；`float.hex()` 的特殊值、`setTheSeeds`、`IsBlocked()` 與 general process；Box–Muller 的跨平台容差；ledger 補 D7、D8；事實更正（行號、`recorded/` 大小、`summaries/`、原型的描述） |
-| **2026-10-24（本版）** | **對照 main 0.38.0（探測器設計流程）重新規劃：基準改為 `5584927`／contracts 3.12.0；新增 D11（A1.16）與 F4 消費端的相容（A1.17）；ledger 與 advisory 改用 main 的現行格式（每個修正一筆、`documentation_fixes`、advisory `/2`、SFA-2026-039／-040，涵蓋 F4 設計評估）；重用 Garwood、`toy_seed`、`coverage_gate`；summary 的 schema 移到 `contracts/schemas/`，column map 與 effective config 的 schema 移到 adapter；`statistical_uncertainty` 的定義；`evidence_role`；CV1 改記 CV-A1；`CORE_VERSION` 與 `OWNERS.json`；A2 的 run record 加入 `argv`、`script_sha256`、`versions.plugin_release`，schema 關鍵字的 `oneOf`／`not` 與豁免；行號更新** |
-| 2026-10-24 | 新的獨立審查後修正：§P.7 項次對應（第 2–8 項）；A1.6 對 `design.py` 單邊 0.95 判定的涵蓋率說明；A1.17 明列 `label` 的結束碼、B2 的 `--label-results`／`--label-geometry`；A2.8 的 `SIM_SOURCES` 與 `MiniJson.hh`；`f4` 的行號 498–553；徑跡 reference 的範圍與只認可 `momentum-resolution-core` |
+設計所參考的實驗與框架（ATLAS、CMS、ALICE、Key4hep、Allpix²、geant-val、Belle II）見 §R.15。Geant4 11.4.3 原始碼的相關檔案：`G4RunManager.cc`、`G4MTRunManager.cc`、`G4WorkerRunManager.cc`、`G4EmParameters.cc`、`G4ProductionCutsTable`、`G4HadronicProcess.hh`、`G4EnergyRangeManager`、`G4AccumulableManager`、`G4VAccumulable`、`G4PhysicalVolumeStore`、`G4LogicalVolume`、`G4NistMaterialBuilder.cc`、`G4PVPlacement`。
 
 ---
 
@@ -1207,7 +1285,7 @@ computational-run schema 的擁有者是 hep-computing。CV-B2 屬任務 B（B2�
 **完成的定義：** B1.10、B2.10、B3.9 的驗收清單全部打勾；§A.8 的檢查全部通過；閘門 G-B1a、G-B1b、G-B2（§P.6）通過；B2.8 的資格規則與 B3 的 F4 確認在 D0 核准後才合併。
 
 **主要決定：**
-1. **新增後端，不改 `layered_sim`。** `element_sim` 讓 J14 的程式不動，並以真正的第二個後端驗證輸出層介面（§R.3.2）。
+1. **新增後端，不改 `layered_sim`。** `element_sim` 讓 J14 的程式不動，並以真正的第二個後端驗證輸出層介面（§R.4.2）。
 2. **候選設計是唯一的真實來源。** F4 研究的幾何一律由 `evaluate_design.py geometry` 從候選產生，`element_sim.spec/1` 由它確定性推導（B1.8）；手寫的 spec 只用於不作為 F4 的研究。
 3. **場精度用確定性檢查。** charged geantino 對解析螺旋，不需要統計；在 B1 完成（B1.7）。
 4. **F4 經資格路徑。** 偵測器層級的研究只有在材料定義、場、重建三項驗證都通過，而且徑跡 reference benchmark 通過時，才能經 `label --upgrade` 成為 `validated-in-scope`（B2.8，D0）；電荷誤判另需尾部 benchmark（D0-b）；F4 不確定度的政策（D0-c）決定升級後的 evaluation 能否作出判定。J15 的驗證梯另立一份永遠 `unvalidated` 的紀錄（B3.2）。
@@ -1241,7 +1319,7 @@ computational-run schema 的擁有者是 hep-computing。CV-B2 屬任務 B（B2�
 | TOF 站 | TOF1 或 TOF2；每站兩層（a、b） |
 | charged geantino | Geant4 中只受場作用、無物質交互作用的帶電測試粒子（質量 0，β = 1） |
 | 處理鏈 | 模擬 → 縮減 → 數位化與重建 → 表格，每一步一份 computational-run 紀錄 |
-| 記法 | 「B1.3」是本部的工作項；「§B.4.2」是本部的節；「A1.6」「C2.1」是任務 A、C 的工作項；「§A.3」「§P.4」「§R.6」是本文件其他部的節 |
+| 記法 | 「B1.3」是本部的工作項；「§B.4.2」是本部的節；「A1.6」「C2.1」是任務 A、C 的工作項；「§A.3」「§P.4」「§R.7」是本文件其他部的節 |
 
 **主要檔案（相對 `plugins/hep-research/`）：** `adapters/geant4/assets/g4sim/`（A2 建立，本任務擴充）；`adapters/geant4/assets/element_sim/`（新增）；`adapters/geant4/assets/simroot/`（新增）；`adapters/geant4/assets/simreco/`（新增，不連結 Geant4）；`adapters/geant4/assets/geant4_run.py`（新增 `check-spec`、`from-geometry`、`reco`、`table`；`SIM_SOURCES` 行 63 定義，行 327、386 使用）；`core/stats/decisions.py`（B2 加入 `change`）；`contracts/validate.py`、`contracts/dependencies.py`、`contracts/design.py`、`contracts/rules/design_geometry.json`、`contracts/schemas/design_geometry.json`（CV-B2）；`skills/hep-detector/scripts/check_geant4_study.py`（`cmd_label` 從行 496 起）、`skills/hep-detector/scripts/geant4_benchmarks.py`（`GRADES` 行 92、新的 benchmark 函式）、`skills/hep-detector/scripts/evaluate_design.py`（`geometry` 行 462、`f4` 行 498–553）；`skills/hep-detector/assets/geant4-study-spec.schema.json`；`skills/hep-detector/references/geant4-study-protocol.md`、`system-design-workflow.md`；`tests/skills/test_cli_robustness.py`（`MISSING_FILE_ARGS`，`geant4_run.py` 的條目在行 153）；`docs/researcher-journeys.md`、`docs/maintenance.md`、`docs/capability-matrix.md`（行 49 的「twenty-three scripts」，由 `tests/skills/test_documented_output_claims.py` 行 145 的測試類別 `DetectorScriptCount` 檢查）、`docs/capability-map.json` 與 `docs/capability-map.md`；`examples/design-minimal-spectrometer/` 與 `tests/examples/test_design_minimal_spectrometer.py`（新增）。
 
@@ -1391,7 +1469,7 @@ x:  −1000   −810 … −780   −520 −500        …         300  320    4
 
 ### §B.4.3 和實際儀器的對照
 
-| 儀器 | 配置（出處見 §R.14） | 和 J15 比較 |
+| 儀器 | 配置（出處見 §R.15） | 和 J15 比較 |
 |---|---|---|
 | PAMELA | 0.43 T 永久磁鐵；6 片雙面矽微條平面，解析度優於 4 µm；MDR 超過 1 TV；三個 TOF 平面（S1–S3，分割成 paddle）；鎢／矽成像量能器 16.3 X₀、0.6 λ；另有反符合、S4、中子偵測器 | 幾乎同型；J15 的 Si 解析度假設 10 µm（較保守）、TOF 不分割、沒有反符合 |
 | AMS-02 | TOF 四個平面（8、8、10、8 個計數器）；系統對質子約 140 ps | J15 每層 100 ps 較樂觀，所以做 100 與 150 ps 的敏感度（B3.5） |
@@ -1426,7 +1504,7 @@ J15 的 README 以這張表說明 J15 的合理性，並強調 J15 是合成幾�
 | `elements` | 盒狀元件：名稱、材料、中心、半長、母體（世界或一個元件；只允許一層巢狀）、角色（`passive`、`tracker-plane`、`tof-layer`、`calorimeter`（母體）、`calorimeter-active`、`calorimeter-passive`）、重複（用於量能器的取樣層） |
 | `field` | `regions[]`：每區附加的元件、B 向量（區內均勻）；精度參數（B1.2）。J15 名義上只有一區 |
 | `physics` | physics list 與 EM 選項、cut、region（同 `layered_sim` 的語意，經 `g4sim`） |
-| `source` | `type: gun`：粒子、能量（`energy_MeV` 或 `ekin_per_nucleon_MeV`）、位置、方向；`gps` 與 `event-file` 只定義介面（§R.9.2），遇到時 exit 2 |
+| `source` | `type: gun`：粒子、能量（`energy_MeV` 或 `ekin_per_nucleon_MeV`）、位置、方向；`gps` 與 `event-file` 只定義介面（§R.10.2），遇到時 exit 2 |
 | `run` | 事件數、執行緒、邏輯 run 種子；`seeding` 只允許 `per-event` |
 | `output.observables`、`output.blocks` | 同 A2.3（引用 `simulation-observables/1`） |
 | `output.event_file` | `level`：`none`（預設）、`summary`、`crossings`、`hits`；`compression`（預設 1）；`max_events_hits`（`hits` 層級允許的最大事件數，預設 100） |
@@ -1751,7 +1829,7 @@ A1 的其他條件（收斂閘門，含 D11；無殘留缺口；變化表）照�
 - 依 §B.4.4 在 `examples/design-minimal-spectrometer/` 寫出 design-spec `j15-v1`、候選 `cand-N6`、`cand-N4`、`cand-N8` 與實現設定檔；格式同 main 的 `examples/design-space-spectrometer/`。
 - 人工閘門 H1、H2 由 agent 準備決策紀錄、標明需人簽署（README 註明範例中為示範）。
 - F1：`evaluate_design.py run` 對每個候選與需求（`tracker_resolution`、`multiple_scattering`、`charge_confusion_rate`）；`budget` 對質量與通道數。
-- F2：`toy_spectrometer` 的解析度與 `design_estimates.py infield-acceptance` 的接受度。這取代舊文件的「多重散射一次性比較」：F1 與 F2 的數值與 §B.4.2 的手算表互相核對（測試）。
+- F2：`toy_spectrometer` 的解析度與 `design_estimates.py infield-acceptance` 的接受度。F1 與 F2 的數值與 §B.4.2 的手算表互相核對（測試）。
 - `evaluate_design.py plan` 列出缺少的證據；`report` 推導合規矩陣、篩選與比較基準。
 
 ### B3.2 驗證梯（另一份 `unvalidated` 紀錄）
@@ -1858,8 +1936,8 @@ A1 的其他條件（收斂閘門，含 D11；無殘留缺口；變化表）照�
 
 | 項目 | 決定 | 理由 / 觸發條件 |
 |---|---|---|
-| 量測主導區 σ(1/R) 作為 benchmark | 不做 | 改為擬合器單元測試與 `reco-closure` |
-| `skills/hep-detector/scripts/digitize_reconstruct.py` | 不做 | 改為 C++ 的 `simreco` |
+| 量測主導區 σ(1/R) 作為 benchmark | 不做 | 以擬合器單元測試與 `reco-closure` 檢查 |
+| `skills/hep-detector/scripts/digitize_reconstruct.py` | 不做 | 數位化與重建由 C++ 的 `simreco` 負責 |
 | surrogate 類別與 `surrogate-comparison` | 不做 | main 的保真度與 bound 模型已涵蓋近似評估；任務 C 的搜尋值不是 evaluation（§C） |
 | `layered_sim` 的新幾何功能 | 不做 | 新功能只加在 `element_sim` |
 | 管線中以 Python 直接讀 ROOT（uproot） | 不做 | 經 `simroot` |
@@ -1867,7 +1945,7 @@ A1 的其他條件（收斂閘門，含 D11；無殘留缺口；變化表）照�
 | 離子源與 Birks 可見能量 | 延後 | 宇宙線核素研究，且 PVT 的 Birks 常數有文獻紀錄。實作時依 11.4.3：在 `GeneratePrimaries` 中以 `GetIon(Z, A)` 取得離子；在 `Construct` 設定 kB（`GetIonisation()->SetBirksConstant`）、PreInit 呼叫 `G4EmParameters::Instance()->SetBirks(true)`，再以 `G4LossTableManager::Instance()->EmSaturation()` 取得（API 名稱實作時以 11.4.3 原始碼核對） |
 | `element_sim` 的非盒狀 solid、旋轉、GDML 讀入、field map、邊緣場 | 延後 | 第一個需要它們、又不能用使用者應用的研究；擴充點是「幾何種類 → 實現程式」（第 5 部），新的幾何種類加一個對照表與一個 realizer |
 | `element_sim` 的主粒子出射紀錄（J14 的觀測量） | 延後 | 把 J14 遷移到 `element_sim` 並退役 `layered_sim` 時（§P.8） |
-| 分布層級的 benchmark（含 regression 的直方圖比較）、觀測量的組合、profile、`gps` 與 `event-file` 粒子源、`simreduce` | 延後（介面已定義於 §R.9.2） | 各自的第一個用例 |
+| 分布層級的 benchmark（含 regression 的直方圖比較）、觀測量的組合、profile、`gps` 與 `event-file` 粒子源、`simreduce` | 延後（介面已定義於 §R.10.2） | 各自的第一個用例 |
 | RNTuple、vector 欄 | 延後 | ROOT 檔大小或讀取速度成為瓶頸 |
 | 真實的對準演算法、Kalman 濾波、完整的 pattern recognition | 延後 | B2.2 的最小模型足以讓 bound 誠實；第一個需要真實尾部形狀的研究 |
 
@@ -1977,27 +2055,15 @@ A1 的其他條件（收斂閘門，含 D11；無殘留缺口；變化表）照�
 - Geant4 v11.4.3 原始碼，與場和事件檔相關：`G4FieldManager.hh`、`G4ChordFinder.hh`、`G4PropagatorInField.cc`、`G4FieldParameters`、`G4LogicalVolume`、`G4ChargedGeantino.cc`、`G4VAnalysisManager.hh`、`G4EmSaturation`、`G4LossTableManager`、`G4IonTable`、`G4NistMaterialBuilder.cc`
 - Geant4 Book for Application Developers，[Basic Examples](https://geant4.web.cern.ch/documentation/dev/bfad_html/ForApplicationDevelopers/Examples/BasicCodes.html)（B4、B5）
 - hep-research `main` `5584927`：`skills/hep-detector/references/system-design-workflow.md`、`contracts/design.py`（`check_f4` 行 988–1062、`TAIL_SOURCES` 行 64）、`skills/hep-detector/scripts/evaluate_design.py`（`geometry` 行 462、`f4` 行 498–553）、`contracts/rules/design_geometry.json`、`contracts/rules/design_adequacy.json`、`examples/design-space-spectrometer/`、`skills/hep-detector/references/geant4-study-protocol.md`（§6 行 161–168）
-- PAMELA 與 AMS-02 的出處見 §R.14
+- PAMELA 與 AMS-02 的出處見 §R.15
 - 待取得：PDG 的 μ 能損表（Groom, Mokhov & Striganov）；Sternheimer, Berger & Seltzer (1984), *Atomic Data and Nuclear Data Tables* 30, 261；Lynch & Dahl (1991), *Nucl. Instrum. Methods B* 58, 6（多重散射寬度公式與其精度）；已發表的多重散射量測（例如 MuScat）
-
-## §B 附錄 C：版本歷程
-
-| 版本 | 內容 |
-|---|---|
-| 探測器文件與 v5 | 單軸疊層磁譜儀；Gluckstern 小 N 公式更正；磁場方向與場檢查網格 |
-| 2026-10-22 | TOF1、TOF2 各兩層；數位化與重建改為 C++；逐事件 ROOT 檔；拆分為任務 B；依新架構改寫（`element_sim` 取代 spec/2；B1、B2；PAMELA、AMS-02 對照與 TOF 敏感度） |
-| 2026-10-23 | 獨立審查後修正（B1.6 只比共同觀測量、量能器漏失、表條目、surrogate 與 regression 規則、總動量剛度、CLI 與 `SIM_SOURCES`、可攜的亂數、stepper 明確建立等） |
-| 2026-10-23 | 依計畫（第 1 部）重新整理：B2 拆為 B2（重建與契約）與 B3（J15 研究）；確定性場檢查移到 B1.7；新增 `geant4_run.py check-spec`；判定引擎的 `change` 與 regression 角色在 B2 加入 |
-| 2026-10-23 | 加入 isolated worktree 的執行規定：檔頭、§B.0 的第一步、§B.11 的開頭（§P.10） |
-| **2026-10-24（重新規劃）** | **對照 main 0.38.0 的設計流程重新規劃（審查紀錄 `review-2026-10-24-main-0.38.md` 的 B1–B12）：任務 B 成為 main 缺少的 F4 評估器；B1 加入 `from-geometry` 與實現設定檔、所有帶電徑跡的穿越、分區均勻場；B2 加入可切換的尾部來源、F4 觀測量、`label --results --geometry`、`f4-results/1`、對照表 1.1.0、`design.py` 的 F4 變更、F4 資格路徑（D0）與 `multiple-scattering-reference`、端到端測試，刪除 surrogate 類別；B3 改為 J15 設計專案（F1、F2、F4），驗證梯另立紀錄；保真度採 main 的 F0–F5；契約版本記為 CV-B2；VALIDATION 條目 GEANT4-F4；更正事實（`MISSING_FILE_ARGS` 行 153、腳本數 23、benchmark 函式行號、protocol §6 的模型範圍）** |
-| 2026-10-24（本版，獨立通讀後） | 依未參與修改的審查者的通讀修正：D0 改為 v2（材料定義取代材料 benchmark 的前提、逐類別的範圍模型、徑跡 reference 只使核心解析度合格、電荷誤判需尾部 benchmark（D0-b）、F4 不確定度政策（D0-c）、篩選用 F4 的補充（D0-d））；新增 `material-definition` 與 `ms-tail-reference`；尾部來源改用重建複本集合與位置相關的場誤差，整體尺度歸 `rigidity-scale-offset`；`f4 --label-results --label-geometry` 與兩條路徑的測試；非計數型 F4 寫覆蓋率 0.90 的區間；到達第 16 列的測試；μ 場檢查的容許值改為 0.3 %；多重散射模型的變化由探針確認；`SIM_SOURCES` 的鍵；`label` 與 `f4` 的行號；刪除 B3.6 的 `response` 步驟 |
 
 ---
 
 # 第 4 部　任務 C：自動化候選設計產生（§C）
 
 > 順序：C1 以 main 為基底（不依賴任務 A、B）；C2 在 B2 與 C1 之後（F4 確認另需 §P.7 的 D0 核准）；C3 在 C2 之後
-> 日期：2026-10-24（依 main 0.38.0 的探測器系統設計流程重新規劃）
+> 日期：2026-10-24
 > 一句話：在 main 的設計流程 D2 階段加入自動產生候選設計的 `evaluate_design.py search`；搜尋只提出候選，判定、篩選、比較與 Pareto 一律由 `contracts/design.py` 推導，回報的性能只來自 F4 確認研究
 
 ---
@@ -2054,7 +2120,7 @@ A1 的其他條件（收斂閘門，含 D11；無殘留缺口；變化表）照�
 | 贏家詛咒 | 從 n 個帶雜訊的評估中選最佳者時，其估計值的期望偏樂觀 |
 | 搜尋規模 | 實際評估的不重複設計數與拓撲數；寫入 `search_summary`，類似 look-elsewhere |
 | seed_group、配對比較 | 一組共用 S 的 Geant4 搜尋 run；以逐區塊差值估計差值的 SE（common random numbers；C2.1） |
-| 記法 | 「C1.3」是本部的工作項；「A1.8」「B2.1」是任務 A、B 的工作項（工作項編號全文唯一）；「§C.4」是本部的節；「§A.3」「§P.7」「§R.6」等是同一文件其他部的節 |
+| 記法 | 「C1.3」是本部的工作項；「A1.8」「B2.1」是任務 A、B 的工作項（工作項編號全文唯一）；「§C.4」是本部的節；「§A.3」「§P.7」「§R.7」等是同一文件其他部的節 |
 
 **主要檔案（相對 `plugins/hep-research/`）：**
 - `skills/hep-detector/scripts/evaluate_design.py`（新增子命令 `search`；`expand` 接受 `--search`）。
@@ -2137,27 +2203,12 @@ D0 範疇（H1） → D1 配分（H2） → D2 探索 ────────�
 | `evaluate_design.py`／`contracts/design.py` | 正式評估、判定、篩選、比較、Pareto | 依提案者改變行為 |
 | 使用者與審查者 | H1–H4 的人工紀錄；處置（accept-risk、next-study） | — |
 
-### §C.4.3 舊任務 C 的概念與 main 的對應
+### §C.4.3 與 main 既有機制的分工
 
-| 舊任務 C 的概念 | main 的對應 | 處理 |
-|---|---|---|
-| 需求規格 `detector-requirements/1`、`confirmed_by_user` | design-spec（REQ、分母、配分、`comparison_basis`、`pareto_axes`）；H1、H2 | 刪除，改讀 design-spec |
-| 目標與約束目錄 | `design_adequacy.json` 的 figure of merit id | 刪除，改用 id |
-| 元件目錄 `catalogue/1` | `subsystem_roles` ＋ tool contract 的 design 區塊 | 改為角色的實現規則與參數範圍（新） |
-| 設計文法 `detector-design/1` | design-candidate（子系統圖） | 刪除；基因只作內部編碼＋解碼器（新） |
-| `realize()` → `element_sim.spec/1` | `evaluate_design.py geometry` ＋ B1 的 `from-geometry` | 刪除，由任務 B 提供 |
-| 保真度 F0／F1／F2 | main 的 F1；Geant4 搜尋值（無保真度）；F4 | 改名（§C.4.6） |
-| 設計雜湊與評估快取 | `effective_digest`、`parameter_digest`、`--replace`、`run_workflow.py --incremental` | 搜尋內的快取保留，正式評估用 main 的機制 |
-| `threshold` 需求判定、`order`、自訂 Pareto、「推薦設計」 | 判定表與彙整、`ranking()`、`pareto()` | 刪除 |
-| 搜尋紀錄 `extension.design_search` | `scan_summary` 的模式 | 改為 `search_summary`（CV-C1） |
-| CV3 的角色規則 | 孤兒 run 規則 | 改為 CV-C2 的種子規則 |
-| adapter `detector-design`、reference、`SKILL.md` 一行 | 能力 `detector-design`（hep-detector）、workflow 文件 | 刪除；新增 workflow 一節 |
-| `proposer: llm` | 參數 `source`／`status: proposal` | 合併，另在 `search_summary` 標記 |
-| NSGA-II、Sobol、超體積、修復與違反量 | 無 | 保留（新） |
-| Geant4 多保真度搜尋、配對比較、G-C2a、`values` | 無 | 保留（C2） |
-| 贏家詛咒與搜尋規模的保護 | 部分：RSK-04 只展開進入比較的點 | 保留並延伸 |
-| 封閉測試 | 無 | 保留 |
-| J16 | Example A、B（無 journey） | 改為在 Example A、B 上執行 |
+- 需求、候選與證據都用 main 的 design-spec、design-candidate、design-evaluation；判定、篩選、comparison basis、排序與 Pareto 由 `contracts/design.py` 推導。
+- 本任務新增的是：基因與解碼器、角色的實現規則與材料表、搜尋器（Sobol、NSGA-II、超體積）、`search_summary` 與 `expand --search`、Geant4 搜尋值與配對比較（C2）、贏家詛咒與搜尋規模的保護、封閉測試。
+- 決選者的 Geant4 幾何由 main 的 `evaluate_design.py geometry` 與任務 B 的 `from-geometry` 產生；正式評估與重跑用 main 的 `effective_digest`、`parameter_digest`、`--replace` 與 `run_workflow.py --incremental`。
+- 早期設計中的概念與現行做法的對照見 §H.3。
 
 ### §C.4.4 搜尋 spec `design-search-spec/1`
 
@@ -2460,11 +2511,11 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 
 | 項目 | 決定 | 理由 / 觸發條件 |
 |---|---|---|
-| 搜尋寫判定、排序、推薦設計或宣稱最佳 | 不做 | 由 design.py 推導（審查 C2、C3） |
+| 搜尋寫判定、排序、推薦設計或宣稱最佳 | 不做 | 由 design.py 推導（§C.0 決定 1） |
 | 讓 LLM 單獨決定設計 | 不做 | 沒有實際案例這樣做；判定必須可重現 |
-| 選擇感知或多重比較的覆蓋率 | 延後，作為提案 | main 每個 figure of merit 用 `coverage_cl`，沒有多重比較修正；交給 hep-statistics 與 design.py 審查（審查 C12） |
-| 以成本為目標 | 不做 | cost 沒有評估器（審查 C13）；觸發：main 加入 cost 的評估器 |
-| 量能器深度的封閉測試 | 延後 | 舊的「深度 ≥ 16 X₀」不是適足表的 figure of merit；shower-containment 在 F4 以下是 `capability.unavailable`；觸發：B2 的 shower-containment F4 可用 |
+| 選擇感知或多重比較的覆蓋率 | 延後，作為提案 | main 每個 figure of merit 用 `coverage_cl`，沒有多重比較修正；交給 hep-statistics 與 design.py 審查 |
+| 以成本為目標 | 不做 | cost 沒有評估器；觸發：main 加入 cost 的評估器 |
+| 量能器深度的封閉測試 | 延後 | 「深度 ≥ 16 X₀」不是適足表的 figure of merit；shower-containment 在 F4 以下是 `capability.unavailable`；觸發：B2 的 shower-containment F4 可用 |
 | 可微分模擬與可微分代理模型（MODE 路線） | 延後 | Geant4 不可微；可微分代理模型對點雲尺度仍不成熟（`MODE2023`）。觸發：一個連續參數 > 20 的問題，且 Geant4 搜尋預算不足 |
 | Geant4 搜尋值的圓柱與非盒狀幾何 | 延後 | `element_sim` 只有盒狀元件。觸發：新的幾何種類與 realizer（§R 的擴充點） |
 | Cherenkov、RICH、TRD 的 Geant4 搜尋值 | 延後 | 需要光學物理與專用重建；F1（`cherenkov_angle`）的搜尋可以做 |
@@ -2539,24 +2590,13 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 - `VIBRATO2026`：W. Chung et al., "Agentic-AI detector co-design and optimization in vertically-integrated differentiable full simulations", [arXiv:2604.21804](https://arxiv.org/abs/2604.21804)（預印本）
 - 以上於 2026-10-23 取得；citation key 是本文件的暫定名稱，作者與期刊資訊在引用前需經 hep-citations 核對
 
-## §C 附錄 C：版本歷程
-
-| 版本 | 內容 |
-|---|---|
-| 2026-10-23 | 初版提案：三個角色、需求規格、元件目錄與設計文法、F0/F1/F2 多保真度、搜尋與確認分開、契約、C1/C2、J16；之後依任務 A 的重新審視引用 `core/` 的共用模組 |
-| 2026-10-23 | 依計畫（第 1 部）重新整理：三個階段；`threshold`、`order`、配對比較、`values`、search 角色與 seed_group 由 C2.1 加入；實現以 `check-spec` 驗證；契約版本記為 CV3；J16 與 MOBO 移到 C3 |
-| 2026-10-23 | 加入 isolated worktree 的執行規定（§P.10） |
-| 2026-10-23 | 詳細檢查後的修正：schema 關鍵字限制；`order` 的雙邊界限；配對 `relative` 模式；快取鍵；親代重新評估；設計去重；材料表；基因的修復與違反量；封閉測試的最小間距；citation key；`values_max` 每區塊 |
-| **2026-10-24（本版）** | **依 main 0.38.0 的探測器系統設計流程重新規劃（審查紀錄 `review-2026-10-24-main-0.38.md` 的 C1–C13、P2–P4）：任務 C 改為 D2 的候選產生器 `evaluate_design.py search`；刪除需求規格、元件目錄與設計文法的格式、`realize()`、`threshold`／`order`、推薦設計與自訂 Pareto、adapter `detector-design`、reference 與 `SKILL.md` 一行；保真度改用 main 的 F0–F5（舊 F0 = F1，Geant4 搜尋值沒有保真度，確認 = F4）；搜尋族群存在 `search_summary`（CV-C1），只展開決選者；行程內 F1 呼叫 tool contract 的同一工具；C2 的種子規則（CV-C2）取代角色規則；C1 不再依賴任務 A；J16 改在 Example A、B 上執行；貝氏最佳化後端改為選用的 `adapters/design-bo/`；新增概念對應表（§C.4.3）** |
-| 2026-10-24 | 新的獨立審查後修正：C1.4 的四個工具加 `argv=None`、重導 stdout 與攔截 `SystemExit`、呼叫預算；確認研究的種子改為 H(study_id, role, point_id)；封閉測試只宣稱 1/32 格點的窮舉值；待決事項加入 D0-c |
-
 ---
 
 # 第 5 部　設計理由（§R）
 
-> 基準：hep-research `main` 的 `5584927`（0.38.0），contracts 3.12.0，adapter geant4 0.1.0，Geant4 11.4.3；§R.1–§R.14 的程式事實多半查自 `9f08796`，相關檔案（Geant4 adapter、`check_geant4_study.py`、`geant4_benchmarks.py`）到 0.38.0 未變
-> 日期：2026-10-22（2026-10-23 依詳細檢查修正；2026-10-24 對齊重新規劃）
-> 注意：本部原寫於 2026-10-23 與 2026-10-24 兩次重新規劃之前；2026-10-24 只修改與 main 設計流程衝突的部分，並新增 §R.15。其餘段落若和第 1–4 部衝突，以第 1–4 部為準並回報。
+> 基準：hep-research `main` 的 `5584927`（0.38.0），contracts 3.12.0，adapter geant4 0.1.0，Geant4 11.4.3；本部引用的程式事實多半查自 `9f08796`，相關檔案（Geant4 adapter、`check_geant4_study.py`、`geant4_benchmarks.py`）到 0.38.0 未變
+> 日期：2026-10-24
+> 用途：本部說明第 1–4 部各項規則的理由（設計依據、架構、與 main 設計流程的關係）；不是實作規格。與第 1–4 部衝突時以第 1–4 部為準並回報。修訂歷程見 §H.1，被取代的設計見 §H.4。
 
 ---
 
@@ -2568,14 +2608,14 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 
 | 問題 | 實際實驗的做法 | 本架構 |
 |---|---|---|
-| 平行執行下的可重現性 | ATLAS 每個事件依事件與 run 編號重設亂數；Allpix² 依事件編號給種子，「worker 數不同仍可重現」 | 每個事件以 H(邏輯 run 種子, 事件編號) 重設亂數；工作切分與執行緒數不影響事件內容（§R.5） |
-| 大量平行工作的結果合併 | CMS DQM：工作各自填直方圖，harvesting 步驟合併後才做品質判定 | 模擬程式寫出可合併的 run summary；Python 只在合併後推論與判定（§R.4） |
-| 設定與處理鏈的追溯 | CMS 以參數集的雜湊與 process history 記錄每個處理步驟 | 每個步驟的設定雜湊、輸入雜湊與程式雜湊寫入紀錄；多層鏈可遞移追溯（§R.7） |
-| 支援多個模擬引擎 | ALICE 的 Virtual MC 在使用者程式與引擎之間加隔離層，但幾何分離多年仍在進行 | 不在 API 層抽象化；在**輸出**層抽象化：任何後端交出三個邊界產物即可（§R.3） |
-| 不同元件共用資料 | Key4hep 以 EDM4hep 作為元件間的共同資料模型，舊工具以轉換接入 | 邊界產物就是共同資料模型；其他框架以縮減工具轉換接入（§R.3.4） |
-| 模擬是否可信 | Geant4 以 geant-val 對實驗數據做跨版本比較；CMS 先用試束數據選 physics list，再用碰撞數據檢查；ATLAS 快速模擬以 Geant4 為參考 | 五種驗證類別，各有自己的參考、統計方法與可否升級的規則（§R.6） |
-| 軟體改版是否改變結果 | Belle II 每晚執行驗證腳本、跨版本比較並可二分搜尋造成退化的提交；geant-val 每月執行 | 回歸類別：和前一版比較，只偵測改變，不升級（§R.6.5） |
-| 資料量分層 | ATLAS：HITS → RDO → AOD；只保留下游需要的層級 | 四層資料：事件細節（不提交）→ 逐事件摘要 → run summary → 判定紀錄（§R.4.1） |
+| 平行執行下的可重現性 | ATLAS 每個事件依事件與 run 編號重設亂數；Allpix² 依事件編號給種子，「worker 數不同仍可重現」 | 每個事件以 H(邏輯 run 種子, 事件編號) 重設亂數；工作切分與執行緒數不影響事件內容（§R.6） |
+| 大量平行工作的結果合併 | CMS DQM：工作各自填直方圖，harvesting 步驟合併後才做品質判定 | 模擬程式寫出可合併的 run summary；Python 只在合併後推論與判定（§R.5） |
+| 設定與處理鏈的追溯 | CMS 以參數集的雜湊與 process history 記錄每個處理步驟 | 每個步驟的設定雜湊、輸入雜湊與程式雜湊寫入紀錄；多層鏈可遞移追溯（§R.8） |
+| 支援多個模擬引擎 | ALICE 的 Virtual MC 在使用者程式與引擎之間加隔離層，但幾何分離多年仍在進行 | 不在 API 層抽象化；在**輸出**層抽象化：任何後端交出三個邊界產物即可（§R.4） |
+| 不同元件共用資料 | Key4hep 以 EDM4hep 作為元件間的共同資料模型，舊工具以轉換接入 | 邊界產物就是共同資料模型；其他框架以縮減工具轉換接入（§R.4.4） |
+| 模擬是否可信 | Geant4 以 geant-val 對實驗數據做跨版本比較；CMS 先用試束數據選 physics list，再用碰撞數據檢查；ATLAS 快速模擬以 Geant4 為參考 | 依參考的性質區分的驗證類別（實作六個，模型對模型延後），各有自己的參考、統計方法與可否升級的規則（§R.7） |
+| 軟體改版是否改變結果 | Belle II 每晚執行驗證腳本、跨版本比較並可二分搜尋造成退化的提交；geant-val 每月執行 | 回歸類別：和前一版比較，只偵測改變，不升級（§R.7.5） |
+| 資料量分層 | ATLAS：HITS → RDO → AOD；只保留下游需要的層級 | 四層資料：事件細節（不提交）→ 逐事件摘要 → run summary → 判定紀錄（§R.5.1） |
 
 **架構的核心（六句話）：**
 1. **兩個平面。** 逐事件的處理在 C++（資料平面：模擬、數位化、重建）；合併後的推論、判定、紀錄與契約在 Python（控制平面）。
@@ -2583,60 +2623,107 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 3. **事件決定性。** 事件內容只由邏輯 run 種子與事件編號決定；工作切分、執行緒數、執行順序都不影響。
 4. **可重現的定義是「判定相同」。** 重播時判定與 label 必須完全相同，數值在相對差 1e-9 內；接近門檻的判定會被標記。來源檔案以雜湊追溯。同一平台重新執行時事件逐位元相同；跨平台（libm 不同）只要求浮點累加量相對差 ≤ 1e-12。
 5. **一種變異數方法。** run summary 依事件編號分成 K 個區塊；SE 一律以區塊的 batch means 估計，計數很少時用精確區間。
-6. **驗證依性質分成五類（模型對模型延後）。** verification、物理參考、配置對應的量測、回歸、模型對模型；只有物理參考與配置對應的量測能升級，而且條件由契約從證據重新推導。
+6. **驗證依參考的性質分類。** 實作六個類別：verification、物理參考（reference）、配置對應的量測（setup-matched）、回歸（regression），以及不能升級的 sanity、interface；模型對模型（surrogate）延後。只有 reference 與 setup-matched 能升級，而且條件由契約從證據重新推導。
 
-**階段：** 八個階段（A1、A2、B1、B2、B3、C1、C2、C3）的順序、內容與版本見 §P.0 與 §P.3；§R.10 只列一句話的指向。
+**階段：** 八個階段（A1、A2、B1、B2、B3、C1、C2、C3）的順序、內容與版本見 §P.0 與 §P.3；§R.11 只列一句話的指向。
 
-**與 main 的設計流程。** main 0.37.0 起有探測器系統設計流程（design-spec、design-candidate、design-evaluation；判定由 `contracts/design.py` 推導；保真度 F0–F5，Geant4 研究是 F4）。本計畫的分工是：任務 A 讓 F4 依賴的標籤正確；任務 B 提供能跑磁譜儀的 Geant4 應用與 F4 研究紀錄介面；任務 C 是 D2 階段的候選產生器，不寫判定、不排序。理由見 §R.15。
+**與 main 的設計流程。** main 0.37.0 起有探測器系統設計流程（design-spec、design-candidate、design-evaluation；判定由 `contracts/design.py` 推導；保真度 F0–F5，Geant4 研究是 F4）。本計畫的分工是：任務 A 讓 F4 依賴的標籤正確；任務 B 提供能跑磁譜儀的 Geant4 應用與 F4 研究紀錄介面；任務 C 是 D2 階段的候選產生器，不寫判定、不排序。理由見 §R.1。
 
 ---
 
-## §R.1 設計依據：從實際實驗學到的事
+## §R.1 與 main 探測器系統設計流程的關係
 
-本節每一點都附出處（§R.14）。「取用」是本架構採用的部分；「不取用」是刻意不做的部分與理由。
+main 0.37.0–0.38.0 在 hep-detector 加入探測器系統設計流程（`references/system-design-workflow.md`、`contracts/design.py`、`scripts/evaluate_design.py`）。本計畫接上這個流程，不另建一套；本節說明分工的理由。
 
-### §R.1.1 亂數與可重現性
+### §R.1.1 保真度與 Geant4 的位置
+
+| 保真度（main） | 意義 | 本計畫提供的部分 |
+|---|---|---|
+| F0 | 啟發式論證，沒有 run | — |
+| F1 | 解析式，由 tool contract 執行（`tracker_resolution`、`multiple_scattering`、`design_estimates` 等） | C1 的搜尋內圈在行程內使用同樣的函式 |
+| F2 | toy Monte Carlo（`toy_spectrometer`、`design_estimates.py infield-acceptance`） | B3 對 J15 候選直接執行，取代手算比較 |
+| F3 | 響應組裝與預期精度（hep-statistics 的 Asimov 擬合） | — |
+| F4 | 經 `check_geant4_study.py label --upgrade` 重新發出 `validated-in-scope` 的 Geant4 研究 | A1 讓標籤正確；B1、B2 讓磁譜儀研究可行並寫出 F4 欄位；B3（J15）與 C2 的確認產生 F4 |
+| F5 | 原型或試束量測 | — |
+
+搜尋過程中的短 Geant4 run 沒有保真度，也不是 evaluation，只是存在 `search_summary` 中的搜尋值。理由：F4 要求研究經過資格判定；搜尋中的 run 為了速度犧牲統計，而且和選擇過程相關（贏家詛咒），不應該被當成證據。
+
+### §R.1.2 判定的擁有權
+
+需求是否滿足、成熟度、過時、篩選、比較基礎、排序與 Pareto 都由 `contracts/design.py` 從產物推導，絕不手寫（workflow 的「Never」一節）。本計畫的統計判定（`core/stats/decisions.py` 的 `equivalence`、`detection_limit`、`change`、收斂閘門與配對比較）只回答研究層的問題：benchmark 是否通過、run 是否收斂、版本之間是否改變、兩個設計在搜尋中的差值是否已分辨。理由：它們是研究標籤的輸入；需求的合規還需要適足表、bound 的組合與上游鏈，這些只有 `design.py` 有。所以任務 C 不寫需求判定、不排序、不給「推薦設計」（被取代的設計見 §H.4）。
+
+### §R.1.3 不宣稱最佳；人工閘門
+
+main 只在比較基礎成立、所有存活的候選都有相同保真度向量與分母的非樂觀 expected-precision 評估時才排序；Pareto 只在超過合併 1σ 時才判定支配；永遠不宣稱全域最佳；閘門 H1–H4 需要人。所以任務 C 是 D2 的候選產生器：10⁴ 級的搜尋族群留在 `search_summary`，只有決選者以 `expand` 成為候選，再由一般的 `evaluate_design.py run` 與 `report` 處理。贏家詛咒以「確認必須用新種子的 F4 研究」處理，並由 CV-C2 的規則強制：種子出現在搜尋摘要中的 evaluation 判為 `design.contract_mismatch`。
+
+### §R.1.4 參數層級的過時與增量重跑
+
+main 的 evaluation 以 `parameter_digest` 綁定候選：只有它讀到的參數改變才過時；`run_workflow.py --incremental` 以 argv、程式、plugin release 摘要、環境與輸入作為略過的鍵。所以任務 C 沒有自己的設計快取規則，只保留搜尋內部的快取鍵（含 S、N、K、B）；`geant4_run.py run` 也像 `run_workflow.py` 一樣寫出 `argv`、`script_sha256` 與 `versions.plugin_release`（A2）。
+
+### §R.1.5 F4 的研究紀錄介面與資格路徑
+
+`design.py` 對 F4 的要求：研究紀錄是 `validated-in-scope`；`evaluate_design.py geometry` 產生的幾何檔（`design-geometry/1`）列在 `input_manifest`，且參數摘要和候選一致；`extension.study.results.<figure of merit>` 有 `value`、`statistical_uncertainty`、`model_envelope`；`tail_sources_simulated` 列出模擬了哪些尾部來源（alignment、calibration-non-uniformity、noise-digitization、pattern-recognition 四種都有時 bound 才是 `estimate`，否則是 `optimistic`）。
+
+本計畫的對應：B1 的 `from-geometry` 由幾何檔與宣告的實現設定檔推導 `element_sim.spec/1`；B2 的 `simreco` 把四種尾部來源做成可切換的階段，`label` 寫出 `results`、尾部來源與幾何檔；`statistical_uncertainty` 定義為 68.27 % 的 t 半寬（A1），和 `design.py` 讀成覆蓋率 0.6827 高斯的方式一致；每個（figure of merit, 分母）一份研究，因為每個候選只有一個 `geometry_ref`，而 `results` 不以分母為鍵。`design.py` 以單邊 0.95 判定，這個純量換算後略低估（1.70 SE 對 t_{0.95}(15) ≈ 1.753 SE）；CV-B2 讓 `f4` 接受不確定度物件後，改寫覆蓋率 0.90 的中央區間（A1.6）。
+
+**資格路徑（D0，待維護者核准；§P.7 第 1 項、B2.8）。** 偵測器層級的研究（解析度、電荷誤判、簇射包含）沒有對應的物理參考，依現有規則永遠無法升級。選擇建立資格路徑，而不是讓 `design.py` 接受未驗證的 F4。四個條件全部成立才升級，各以自己的鍵對應研究：(1) 材料定義：實現幾何的每種材料有獨立來源的成分與密度，且 geantino 掃描重現候選宣告的 X/X₀（A1 的材料 benchmark 範圍是 MeV 級，不能當前提）；(2) 磁場傳播的 verification（B1 的解析螺旋）在同一磁場設定雜湊下通過；(3) 重建的 verification（`reco-closure`）在同一重建 spec 雜湊下通過；(4) 徑跡 reference benchmark：孤立 Si 片的多重散射核心寬度對照 Lynch–Dahl（F = 98 %），附負對照，範圍維度為材料、厚度、剛度、粒子，只認可 `momentum-resolution-core`；點解析度是宣告的輸入（100 GV 時主導核心），沒有 benchmark 驗證；Highland 的準確度約 11 %，不能當參考。範圍比對改為依類別的交集（CV-B2）。電荷誤判需要尾部 benchmark（D0-b），簇射包含不在路徑內（D0-d 提出只用於篩選的選項）。真正要決定的是 F4 的不確定度（D0-c）：只用統計誤差時，升級的 F4 `estimate` 會因適足表的 `min_relative_uncertainty` 成為 `uncertainty.missing`。理由：`validated-in-scope` 在全 plugin 只保留一個意義；第 4 項給偵測器層級的研究一個物理上的錨點，而前三項保證研究的其他部分是正確推論。
+
+### §R.1.6 擴充點：幾何種類 → realizer
+
+`contracts/rules/design_geometry.json` 把候選的參數對應到一種幾何（目前只有 `layered-spectrometer`）。每一種幾何需要一個 realizer，把幾何檔變成某個後端的 spec：`element_sim`（B1 的 `from-geometry`）、使用者的 Geant4 應用（引入 `g4sim`）或使用者建置開啟 GDML 時的 GDML 檔，之後可以是 DD4hep。加入一種探測器 = 一個對照表條目（契約）加一個 realizer；研究層只讀邊界產物，不需要改。C1 的搜尋由 tool contract 驅動，所以在 F1、F2 與探測器種類無關；Geant4 部分只能用已有 realizer 的幾何種類（目前是磁譜儀；B2 的對照表 1.1.0 加入 TOF 與電磁量能器的欄位）。
+
+### §R.1.7 為什麼搜尋不是 adapter
+
+adapter 是連接外部工具的選用元件，沒有任何 skill 或 core 模組可以依賴它（`docs/adapter-authoring.md` 開頭）。搜尋是 plugin 對 main 產物的邏輯，所以放在 `evaluate_design.py search`，沿用 main 把 `scan` 做成子命令的先例（OQ-18）。只有選用的貝氏最佳化後端（Ax／BoTorch）是外部工具，因此是 `adapters/design-bo/`。
+
+---
+
+## §R.2 設計依據：從實際實驗學到的事
+
+本節每一點都附出處（§R.15）。「取用」是本架構採用的部分；「不取用」是刻意不做的部分與理由。
+
+### §R.2.1 亂數與可重現性
 
 - **ATLAS（AthenaMT）：** 不同用途的亂數流以使用它的演算法名稱區分；每個事件依事件與 run 編號重設亂數狀態；目標是「亂數序列必須和事件的處理順序無關」。
 - **Allpix²：** 主執行緒依事件建立順序從中央種子產生器給每個事件種子；worker 執行前才設定；設計目標是「即使 worker 數不同，相同輸入仍得到相同結果」。需要依序輸出的模組以緩衝佇列等待，並保存亂數狀態。
 - **CMS：** 另一種做法：每個模組、每個 stream 一個亂數引擎，並可把引擎狀態存進事件，之後還原以精確重播。
 - **取用：** ATLAS 與 Allpix² 的逐事件重設種子。它最簡單，而且讓「把一個邏輯 run 切成多個工作」與「單一工作」產生完全相同的事件。**不取用：** CMS 的狀態保存（需要在每個事件保存引擎狀態，對我們的規模不必要）。
 
-### §R.1.2 結果合併與判定的位置
+### §R.2.2 結果合併與判定的位置
 
 - **CMS DQM：** 資料被切成任意多個工作、亂序且大量平行地處理；每個工作填 MonitorElement（主要是直方圖）；harvesting 步驟合併各檔案中相同的直方圖，之後才在單執行緒中依序做品質測試與衍生量。
 - **取用：** 模擬程式只填「可合併的累加量」（計數、和、直方圖）；所有判定在合併之後、在 Python 中進行。這就是 run summary 與控制平面的分工。
 
-### §R.1.3 追溯
+### §R.2.3 追溯
 
 - **CMS：** 以參數集的雜湊識別設定，並以 process history 記錄資料經過的每個處理步驟。
-- **取用：** 每個步驟（模擬、數位化、重建、表格）都寫一份紀錄，含設定、輸入、程式的雜湊；simulated 表格的輸入鏈可以任意深，契約遞移地檢查（§R.7.4）。
+- **取用：** 每個步驟（模擬、數位化、重建、表格）都寫一份紀錄，含設定、輸入、程式的雜湊；simulated 表格的輸入鏈可以任意深，契約遞移地檢查（§R.8.4）。
 
-### §R.1.4 多引擎
+### §R.2.4 多引擎
 
 - **ALICE Virtual MC：** 在使用者程式與傳輸引擎之間加一層隔離，讓幾何與 hit 產生的程式只寫一次；當時 Geant3 用於生產，Geant4 只用於物理驗證，FLUKA 尚未完成，幾何與傳輸的分離仍在進行。
 - **ATLAS AtlFast3：** 依粒子種類與能量把工作分給 Geant4、FastCaloSim V2、FastCaloGAN；快速模擬以「重建後和 Geant4 無可分辨的差異」來驗證。
-- **取用：** 在**輸出**層抽象化，而不是在 stepping API 層：後端怎麼模擬都可以，只要交出相同的邊界產物。混合多個模擬器的後端，在 effective config 中描述其分派方式。快速模擬與 ML 代理模型以 Geant4 為參考時，屬於「模型對模型」驗證（§R.6.5）。**不取用：** 寫一個 VMC 式的引擎抽象層（ALICE 的經驗顯示成本高、週期長）。
+- **取用：** 在**輸出**層抽象化，而不是在 stepping API 層：後端怎麼模擬都可以，只要交出相同的邊界產物。混合多個模擬器的後端，在 effective config 中描述其分派方式。快速模擬與 ML 代理模型以 Geant4 為參考時，屬於「模型對模型」驗證（§R.7.5）。**不取用：** 寫一個 VMC 式的引擎抽象層（ALICE 的經驗顯示成本高、週期長）。
 
-### §R.1.5 共同資料模型與幾何
+### §R.2.5 共同資料模型與幾何
 
 - **Key4hep：** Gaudi 處理框架、DD4hep 幾何、EDM4hep（以 podio 建立）資料模型；EDM4hep 是元件之間在記憶體與檔案中的交換格式；舊的 iLCSoft 處理器在進出時和 EDM4hep 互相轉換，不必改寫。
 - **取用：** 邊界產物就是我們的共同資料模型；外部框架以「縮減工具」轉換接入（例如把 EDM4hep 檔縮減成 run summary）。幾何以後端的實際幾何（as-built）為準。**不取用：** Gaudi、DD4hep 作為依賴（plugin 的限制）。
-- **GDML：** Geant4 能把實際幾何寫成 GDML，但需要建置時開啟 GDML；本 plugin 的建置是 `GEANT4_USE_GDML: OFF`（`geant4_build.py` 行 53）。所以實際幾何由探針自行走訪（§R.3.3）；使用者的建置有 GDML 時可另外附上。
+- **GDML：** Geant4 能把實際幾何寫成 GDML，但需要建置時開啟 GDML；本 plugin 的建置是 `GEANT4_USE_GDML: OFF`（`geant4_build.py` 行 53）。所以實際幾何由探針自行走訪（§R.4.3）；使用者的建置有 GDML 時可另外附上。
 
-### §R.1.6 驗證
+### §R.2.6 驗證
 
 - **geant-val（Geant4 合作組）：** 社群的驗證測試每月以開發版執行，結果存入資料庫，跨版本比較，並對分布做 χ² 與 KS 檢定。
 - **CMS：** 先以試束數據調校並選定 physics list，再以碰撞數據中的孤立帶電粒子檢查量能器的響應與解析度；在多個 Geant4 版本之間比較後才採用，並在速度與準確度之間取捨。
 - **Belle II：** 每個軟體套件都有驗證腳本產生直方圖；每晚集中執行、跨版本比較，並有工具二分搜尋造成退化的提交。
-- **取用：** 把「驗證」分成性質不同的五類（§R.6）：精確推論的 verification；孤立目標對物理模型的參考（geant-val 的薄靶測試屬此類）；和同一配置量測的比較（CMS 的試束）；跨版本回歸（Belle II、geant-val 的每月比較）；模型對模型（ATLAS 快速模擬）。
+- **取用：** 依參考的性質區分驗證（§R.7）：精確推論的 verification；孤立目標對物理模型的參考（geant-val 的薄靶測試屬此類）；和同一配置量測的比較（CMS 的試束）；跨版本回歸（Belle II、geant-val 的每月比較）；模型對模型（ATLAS 快速模擬；延後）。
 
-### §R.1.7 資料分層
+### §R.2.7 資料分層
 
 - **ATLAS：** 模擬輸出 HITS 檔；數位化輸出 RDO（概念上類似探測器的原始數據）；重建輸出 AOD。
-- **取用：** 四層資料，各有保存規則（§R.4.1）。
+- **取用：** 四層資料，各有保存規則（§R.5.1）。
 
-### §R.1.8 實際儀器（J15 的對照）
+### §R.2.8 實際儀器（J15 的對照）
 
 - **PAMELA：** 0.43 T 永久磁鐵；6 片雙面矽微條平面，解析度優於 4 µm；MDR 超過 1 TV；三個 TOF 平面（S1–S3，分割成 paddle）；鎢／矽成像量能器 16.3 X₀、0.6 λ；另有反符合、S4 與中子偵測器。
 - **AMS-02：** TOF 四個平面（8、8、10、8 個計數器）；系統對質子約 140 ps。
@@ -2644,18 +2731,18 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 
 ---
 
-## §R.2 目標、限制與原則
+## §R.3 目標、限制與原則
 
-### §R.2.1 目標
+### §R.3.1 目標
 
 | 目標 | 由什麼保證 |
 |---|---|
-| `validated-in-scope` 不能被錯誤取得 | 契約從證據重新推導的事實（§R.7） |
-| 判定可重現、數值可追溯 | 事件決定性（§R.5.1）、合併後推論（§R.4）、判定相同的重現定義（§R.5.6）、每個步驟的雜湊（§R.7.4） |
-| 研究層不綁死後端、幾何或研究類型 | 輸出層的後端介面（§R.3） |
+| `validated-in-scope` 不能被錯誤取得 | 契約從證據重新推導的事實（§R.8） |
+| 判定可重現、數值可追溯 | 事件決定性（§R.6.1）、合併後推論（§R.5）、判定相同的重現定義（§R.6.6）、每個步驟的雜湊（§R.8.4） |
+| 研究層不綁死後端、幾何或研究類型 | 輸出層的後端介面（§R.4） |
 | 示範磁場、多子系統與重建 | J15（B1、B2、B3） |
 
-### §R.2.2 限制
+### §R.3.2 限制
 
 - 本計畫新增的 Python 模組只用標準函式庫。這是刻意的選擇，不是 plugin 的限制：main 的 `core/` 允許 numpy、scipy（`docs/architecture.md` §3）；本計畫的計算不需要它們，而且讓 J14 的離線重播不多一層依賴。唯一例外是 C3 的選用後端 `adapters/design-bo/`（延遲匯入）。
 - G5 授權邊界：Python 只和獨立執行檔交換 JSON 與 CSV；不複製 Geant4 範例程式碼。
@@ -2664,14 +2751,14 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 - 檔案 ≤ 2 MiB；hep-detector quick load ≤ 25,600 bytes（目前 24,669）、description ≤ 1,024 字元（`measure_entrypoints.py` 回報 1,016）。`SKILL.md` 與 description 不改；設計流程的入口已由 main 以 hub 連結提供（OQ-01），任務 C 只在 `system-design-workflow.md` 加一節。
 - J14 的離線重播必須永遠可以執行，不需要 Geant4 與編譯器。
 
-### §R.2.3 原則
+### §R.3.3 原則
 
 1. **正確性先於擴充。** A1 合併前，不合併任何新功能。
 2. **逐事件在 C++，合併後在 Python。** 處理逐事件資料的程式在資料平面；處理合併後累加量的程式在控制平面。同一個量只有一份正式實作；另一種語言的實作只能在測試中作為 oracle。
 3. **在輸出層抽象化。** 研究層只認邊界產物，不認後端的欄名、spec 格式或 UI 指令。
 4. **相信實際狀態，宣告只是退路。** 幾何、場與物理設定以探針讀到的為準；只有宣告時標記 `source: declared`，不能升級。
 5. **可升級的事實由契約認定。** 等級、kind、範圍維度、configuration、目標雜湊都不得由紀錄自行宣告。
-6. **驗證類別依參考的性質決定**（§R.6）。
+6. **驗證類別依參考的性質決定**（§R.7）。
 7. **事件決定性。** 事件內容只由邏輯 run 種子與事件編號決定。
 8. **重現的是判定。** 數值以容差比較，判定必須相同；來源以雜湊追溯。
 9. **證據的停止規則、格點與區塊數事先宣告。** 加跑、加密、重做控制組都不得依結果決定。
@@ -2680,9 +2767,9 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 
 ---
 
-## §R.3 架構總覽
+## §R.4 架構總覽
 
-### §R.3.1 兩個平面與元件
+### §R.4.1 兩個平面與元件
 
 ```
 控制平面（Python，標準函式庫）
@@ -2699,9 +2786,9 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
                     design.py 推導需求判定（main 既有）
         ▲
         │  三個邊界產物（JSON；小、可提交、可雜湊）
-        │    run summary        simulation-summary/1    （§R.4）
-        │    column map         simulation-columns/1    （§R.3.5）
-        │    effective config   引擎無關外框 + 實際幾何樹 （§R.3.3）
+        │    run summary        simulation-summary/1    （§R.5）
+        │    column map         simulation-columns/1    （§R.4.5）
+        │    effective config   引擎無關外框 + 實際幾何樹 （§R.4.3）
         │
 資料平面（C++）
   g4sim/         共用 Geant4 輔助程式庫（標頭檔）：
@@ -2731,7 +2818,7 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 | `simroot` | C++ | B1 | Geant4 analysis（g4tools） |
 | `simreco` | C++ | B2 | 標準函式庫、`SimSummary.hh`、`MiniJson.hh` |
 
-### §R.3.2 後端
+### §R.4.2 後端
 
 | 後端 | 用途 | 幾何 | 狀態 |
 |---|---|---|---|
@@ -2740,9 +2827,9 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 | 使用者的 Geant4 應用 | 實驗組自己的幾何 | 任意（含 GDML） | 引入 `g4sim` 即可交出邊界產物 |
 | 其他引擎或框架 | FLUKA、快速模擬、ML 代理模型、Key4hep 等 | 任意 | 以縮減工具把其輸出轉成邊界產物；探針只有宣告（`source: declared`）時不能升級 |
 
-**為什麼新增 `element_sim` 而不是改造 `layered_sim`。** 把 `layered_sim` 改成新的幾何格式，需要 spec 轉換與同主機逐位元相同的驗證，還要永久維護雙格式存取器；這是上一版成本最高、價值最低的一步（§R.13）。新增一個程式則讓 J14 的程式完全不動，並從第一天就有兩個真正的後端驗證輸出層介面。兩者共用 `g4sim`，避免重複。
+**為什麼新增 `element_sim` 而不是改造 `layered_sim`。** 把 `layered_sim` 改成新的幾何格式，需要 spec 轉換與同主機逐位元相同的驗證，還要永久維護雙格式存取器；這是上一版成本最高、價值最低的一步（§R.14）。新增一個程式則讓 J14 的程式完全不動，並從第一天就有兩個真正的後端驗證輸出層介面。兩者共用 `g4sim`，避免重複。
 
-### §R.3.3 effective config
+### §R.4.3 effective config
 
 ```
 { "engine": "geant4", "engine_version": "11.4.3", "probe_version": "...",
@@ -2765,19 +2852,19 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 | 場 | field manager 逐執行緒；master 也呼叫 `ConstructSDandField`，所以 `g4sim` 的後端在 master 看得到場；宣告了場而 master 看不到時，標記 `source: declared` |
 | 混合模擬器 | 後端若依粒子或區域分派給不同模擬器，在 `sections` 中描述分派規則 |
 
-### §R.3.4 縮減工具（外部後端的接入點）
+### §R.4.4 縮減工具（外部後端的接入點）
 
-不能引入 `g4sim` 的後端（其他引擎、Key4hep 的 EDM4hep 檔、ML 代理模型）以一個有紀錄的縮減步驟接入：讀它的逐事件輸出，依 `output.observables` 的宣告寫出 run summary 與 column map；effective config 只有宣告。這個步驟本身是一份 computational-run 紀錄，列在處理鏈中（§R.7.4）。第一個縮減工具 `simreduce` 讀 `simroot dump` 的輸出（B1 之後、第一個需要時實作）。
+不能引入 `g4sim` 的後端（其他引擎、Key4hep 的 EDM4hep 檔、ML 代理模型）以一個有紀錄的縮減步驟接入：讀它的逐事件輸出，依 `output.observables` 的宣告寫出 run summary 與 column map；effective config 只有宣告。這個步驟本身是一份 computational-run 紀錄，列在處理鏈中（§R.8.4）。第一個縮減工具 `simreduce` 讀 `simroot dump` 的輸出（B1 之後、第一個需要時實作）。
 
-### §R.3.5 column map（`simulation-columns/1`）
+### §R.4.5 column map（`simulation-columns/1`）
 
 每個觀測量與輸出欄的語意名稱、實際欄名、單位、操作定義、所在檔案（`csv`、`root` 的哪個 ntuple、`summary`）；附 `column_map_version`。只允許宣告式運算（改名、單位換算、加總、篩選）；需要計算的轉換是另一個有紀錄的步驟。
 
 ---
 
-## §R.4 資料分層與 run summary
+## §R.5 資料分層與 run summary
 
-### §R.4.1 四層資料
+### §R.5.1 四層資料
 
 | 層 | 內容 | 對應 | 保存 |
 |---|---|---|---|
@@ -2788,7 +2875,7 @@ F1 搜尋 2×10⁴ 個設計：分鐘級；Geant4 搜尋約 500 × 10³ 事件�
 
 J14 的離線重播只需要 T3 與 T4；T2 只用於可選的 oracle 測試與 MPV 的高統計核對。
 
-### §R.4.2 run summary（`simulation-summary/1`）
+### §R.5.2 run summary（`simulation-summary/1`）
 
 每個工作（job）一份 JSON。
 
@@ -2797,18 +2884,18 @@ J14 的離線重播只需要 T3 與 T4；T2 只用於可選的 oracle 測試與 
 | `run` | 邏輯 run 的識別與種子、這個工作涵蓋的事件編號範圍、`seeding`、區塊大小 B 與區塊數 K、spec 與 effective config 的雜湊、產生者（`layered_sim`、`element_sim`、`simreco`、`python-csv`、縮減工具）與版本 |
 | `observables[]` | 每個宣告的觀測量：語意名稱（對應 column map）、單位、累加器 |
 | 區塊 | 事件依編號分入區塊：區塊 b 涵蓋事件 [b·B, (b+1)·B)；每個區塊有自己的一組累加器 |
-| 累加器 | 整數：`n`、直方圖每格的計數（宣告的固定分格；溢位與下溢分開）、`count_if[]`（x > 宣告門檻的事件數）；浮點：Σx、Σx²、`min`、`max`，以 Neumaier 補償加總；C2 起可有 `values`（每個區塊保存原始值，供經驗分位數，超過 `values_max` 時省略並記錄）；`profile` 與二維直方圖只定義介面（§R.9.2） |
+| 累加器 | 整數：`n`、直方圖每格的計數（宣告的固定分格；溢位與下溢分開）、`count_if[]`（x > 宣告門檻的事件數）；浮點：Σx、Σx²、`min`、`max`，以 Neumaier 補償加總；C2 起可有 `values`（每個區塊保存原始值，供經驗分位數，超過 `values_max` 時省略並記錄）；`profile` 與二維直方圖只定義介面（§R.10.2） |
 | `merge` | 每個累加器的合併規則（`sum`、`min`、`max`、`hist`）；同一個邏輯 run 的多個工作依區塊編號合併 |
 
-**事件權重。** `layered_sim` 的沉積已經乘上 track 權重，CSV 的 `weight` 欄只是主粒子頂點的權重。為避免重複加權，目前要求事件權重為 1（否則 exit 2）；加權累加的語意與 biasing 的規則延後（§R.9.3）。
+**事件權重。** `layered_sim` 的沉積已經乘上 track 權重，CSV 的 `weight` 欄只是主粒子頂點的權重。為避免重複加權，目前要求事件權重為 1（否則 exit 2）；加權累加的語意與 biasing 的規則延後（§R.10.3）。
 
-**數值精度。** 整數累加量（計數、直方圖、`count_if`）精確。浮點和以補償加總計算；不同工作切分或執行緒數下，合併順序不同，只造成約 1e-15 的相對差異，遠小於重現的容差（§R.5.6）。
+**數值精度。** 整數累加量（計數、直方圖、`count_if`）精確。浮點和以補償加總計算；不同工作切分或執行緒數下，合併順序不同，只造成約 1e-15 的相對差異，遠小於重現的容差（§R.6.6）。
 
 ---
 
-## §R.5 執行、種子、區塊與重現
+## §R.6 執行、種子、區塊與重現
 
-### §R.5.1 邏輯 run 與事件決定性
+### §R.6.1 邏輯 run 與事件決定性
 
 - 一個**邏輯 run** 由 spec、後端與邏輯 run 種子 S 決定，含 N 個事件，編號 0 … N−1。
 - `seeding: per-event`（新 spec 的預設）：事件 i 在開始時以 H(S, i) 重設亂數。所以：
@@ -2817,7 +2904,7 @@ J14 的離線重播只需要 T3 與 T4；T2 只用於可選的 oracle 測試與 
 - `seeding: stream`：舊行為（serial 為連續亂數流；MT 由 master 分批產生每事件種子）。只用於 J14 既有的 spec，讓 A2 的回歸檢查可以要求 CSV 逐位元相同。
 - 種子：S = H(study_id, role, point_id)，映射到 [1, 2³¹)；evidence 角色在 A1 為 trial、nominal、scan、control、variation、calibration，B2 加入 regression，C2 加入 confirmation 與 search 角色；正負兩個方向的控制組用不同的 point_id。同一研究中 S 不得重複，唯一的例外是 C2 的 seed_group：同一組的 run 刻意共用 S，以配對比較降低差值的變異（§C.6 C2.1、C2.3）。設計評估的 S 定義見 §C。
 
-### §R.5.2 區塊與 batch means
+### §R.6.2 區塊與 batch means
 
 - 區塊大小 B 與區塊數 K（K ≥ 16）在第一個證據 run 前宣告；N = K·B。
 - 每個區塊 b 由 summary 算出估計量 θ_b（平均、比例、比值、分位數、眾數）；回報 θ̄ = 平均；SE = sd(θ_b)/√K，自由度 K − 1。
@@ -2825,23 +2912,23 @@ J14 的離線重播只需要 T3 與 T4；T2 只用於可選的 oracle 測試與 
 - 一個 run 就足以估計 SE，不需要為統計開多個行程；工作切分只為了平行化。
 - 前提：事件之間沒有狀態（例如會自我調整的 biasing、跨事件的快取）。探針記錄 biasing 與相關設定，有疑慮時改為多個獨立的邏輯 run。
 
-### §R.5.3 估計量
+### §R.6.3 估計量
 
 - **多個觀測量：** 每個區塊的估計量向量一起保存，觀測量之間的共變異由這些向量估計。
 - **全樣本值：** 平均與比例另由合併累加器算出，和 θ̄ 的差寫入紀錄作為診斷。
 - **分位數：** 直方圖內線性內插；分格寬度須小於容許值的 1/10；落在溢位或下溢格時判為 incomplete。C2 起有 `values` 累加器時，改用區塊內的經驗分位數。
 - **MPV：** 每個區塊的直方圖取最大格，以它和相鄰兩格做三點拋物線內插；回報 K 個眾數的平均。設計時以 toy 證明偏差的 95 % 上界 ≤ tol/10（toy 用 Landau–Vavilov，並以一次高統計 Geant4 run 的形狀核對）；每次執行時，θ̄ 與合併直方圖的眾數之差須 ≤ tol/5 + 2·SE，否則該 benchmark 判為 incomplete。
 
-### §R.5.4 計數很少時
+### §R.6.4 計數很少時
 
 - 計數型估計量在任一區塊為 0、或合併總數 < 100（門檻可宣告）時，改用合併累加器上的精確區間：比例用 Clopper–Pearson，計數用 Garwood；兩個 run 的比較用精確條件二項法求率之比的區間，相對差 = 比 − 1。
-- 這些情況沒有 SE；閘門以區間端點判定（§R.6.6），事件數規劃用試探 run 的 Poisson 變異數。
+- 這些情況沒有 SE；閘門以區間端點判定（§R.7.6），事件數規劃用試探 run 的 Poisson 變異數。
 
-### §R.5.5 兩階段事件數
+### §R.6.5 兩階段事件數
 
 N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial − 1)（兩者都是 16 時 ≈ 1.97）。約 10 % 的證據 run 會未達標而判為 incomplete，不得補跑；改用 F₀.₉₅（≈ 2.40）可降到約 5 %，事件數多約 22 %。
 
-### §R.5.6 重現的定義
+### §R.6.6 重現的定義
 
 | 層次 | 要求 |
 |---|---|
@@ -2852,21 +2939,21 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 
 ---
 
-## §R.6 驗證類別與判定
+## §R.7 驗證類別與判定
 
-### §R.6.1 驗證的性質與類別
+### §R.7.1 驗證的性質與類別
 
 | 類別 | 參考 | 例子 | 統計 | 能否升級 |
 |---|---|---|---|---|
 | verification | 輸入的精確推論 | charged geantino 對解析螺旋、運動學、最小平方代數 | 確定性比較或 IUT | 不能 |
-| 物理參考（reference） | Geant4 所近似的物理模型或已發表的薄靶量測，在孤立目標上 | Bethe stopping power、Landau–Vavilov MPV、geant-val 式的薄靶測試 | IUT（純量）；χ²（分布，§R.9.2） | 能（範圍內） |
+| 物理參考（reference） | Geant4 所近似的物理模型或已發表的薄靶量測，在孤立目標上 | Bethe stopping power、Landau–Vavilov MPV、geant-val 式的薄靶測試 | IUT（純量）；χ²（分布，§R.10.2） | 能（範圍內） |
 | 配置對應的量測（setup-matched） | 已發表的量測，且目標雜湊和量測配置相同 | 試束的縱向剖面、模組的響應與解析度 | 同上，加量測不確定度 | 能（範圍內） |
 | 回歸（regression） | 同一研究在前一個軟體或 Geant4 版本的結果 | 改版前後的 MPV、直方圖形狀 | 純量的差值與 SE；直方圖的 χ² p 值 | 不能；只標記「改變」並可觸發 advisory |
-| 模型對模型（surrogate） | 以 Geant4 等完整模擬為參考的快速模擬或 ML 代理模型 | 參數化量能器對 Geant4 | IUT 或 χ² | 不能升級物理 label；代理模型自己可得到「在範圍內與參考模擬一致」的標記。2026-10-24 起延後，不在 CV-B2（設計情境中的快速模擬由 main 的保真度與 bound 表示） |
+| 模型對模型（surrogate） | 以 Geant4 等完整模擬為參考的快速模擬或 ML 代理模型 | 參數化量能器對 Geant4 | IUT 或 χ² | 不能升級物理 label；代理模型自己可得到「在範圍內與參考模擬一致」的標記。延後，不在 CV-B2（設計情境中的快速模擬由 main 的保真度與 bound 表示） |
 
 另有 `sanity`（粗略的合理範圍檢查）與 `interface`（介面檢查），兩者都不能升級。所以實作的類別共六個：A1 的 reference、setup-matched、sanity、interface，B2 的 verification、regression；模型對模型（surrogate）延後（§A.4.4）。
 
-### §R.6.2 benchmark 表（CV-A1，CV-B2 擴充）
+### §R.7.2 benchmark 表（CV-A1，CV-B2 擴充）
 
 `contracts/validate.py` 自帶表格；`_study_upgrade` 只從表取得類別、等級、kind 與範圍維度。
 
@@ -2883,14 +2970,14 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 | `published-data` | interface | — | — |
 | CV-B2 加入：J15 的檢查（`field-propagation` 等） | verification 或 sanity | — | — |
 | CV-B2 加入：`regression-comparison` | regression | — | — |
-| CV-B2 加入：徑跡的 reference benchmark（孤立 Si 片的多重散射核心寬度，對照 Lynch–Dahl（F = 98 %），附負對照；只認可 `momentum-resolution-core`；F4 資格路徑的第 4 項，§R.15.5） | reference | 見 §B | 材料、厚度、剛度、粒子 |
+| CV-B2 加入：徑跡的 reference benchmark（孤立 Si 片的多重散射核心寬度，對照 Lynch–Dahl（F = 98 %），附負對照；只認可 `momentum-resolution-core`；F4 資格路徑的第 4 項，§R.1.5） | reference | 見 §B | 材料、厚度、剛度、粒子 |
 | 延後：`surrogate-comparison` | surrogate | — | — |
 
 `regression-comparison` 的範圍取被比較的兩個研究範圍的交集，由 `dependencies.py` 重新推導（§B 的 CV-B2 表為準）。
 
 紀錄中的類別或等級和表不一致、或名稱不在表中，判為 error。`geant4_benchmarks.py` 的 `GRADES` 保留給工具，以測試確保一致。
 
-### §R.6.3 範圍（CV-A1）
+### §R.7.3 範圍（CV-A1）
 
 - 比對受控的 `observable.kind`；`label` 把它寫入 `declared_scope.observable_kind`。
 - 維度清單依 benchmark 宣告（6.2 的第四欄），每個維度有型別：類別或數值區間；純量視為 [v, v]。新用例加維度只改表格。
@@ -2898,7 +2985,7 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 - 以目標雜湊為維度時，宣告範圍必須帶相同的 `target_geometry_sha256` 與 `hash_scheme`。
 - 閘控：`strict or _at_least(contract_version, CV-A1)`，無 warning 分支。
 
-### §R.6.4 configuration 與隔離（CV-A1）
+### §R.7.4 configuration 與隔離（CV-A1）
 
 - **目標：** benchmark 設定宣告 `target_slabs`（A1，`layered_sim`）或目標體積清單（A2 起，對應幾何樹的放置）。
 - **真空：** 世界材料為 `G4_Galactic`，或密度 < 1e-20 g/cm³。
@@ -2914,12 +3001,12 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 - 只有宣告的後端可以執行與發布，但不能升級。
 - **契約規則：** 每個被計入的 benchmark 必須是 isolated（reference），或既是 isolated 又和量測配置的目標雜湊相符（setup-matched）；`dependencies.py` 必須從 `evidence_records` 中的 run record 重新推導並比對。
 
-### §R.6.5 回歸與模型對模型（CV-B2）
+### §R.7.5 回歸與模型對模型（CV-B2）
 
-- **回歸：** 對同一研究、同一設定，在新舊兩個版本（plugin、後端或 Geant4）上各執行一次（point_id 為版本標籤，樣本獨立），比較每個純量觀測量。三種判定：`changed`（|diff| − t_{1−α/m}·se_diff > tol）、`unchanged`（§R.6.6 的通過規則）、`unresolved`；「不顯著」不等於「沒有改變」。直方圖的比較延後到分布層級的 benchmark。不影響 label；reference 觀測量 `changed` 時可觸發 sci-fix 的檢查。
-- **模型對模型（2026-10-24 起延後）：** 代理模型永遠不改變物理 label。代理模型的研究宣告它的參考研究（study record）與範圍；以 IUT 判定（χ² 只作診斷）。通過時記錄 `extension.study.surrogate`（參考研究的引用與雜湊、範圍取兩者的交集）。
+- **回歸：** 對同一研究、同一設定，在新舊兩個版本（plugin、後端或 Geant4）上各執行一次（point_id 為版本標籤，樣本獨立），比較每個純量觀測量。三種判定：`changed`（|diff| − t_{1−α/m}·se_diff > tol）、`unchanged`（§R.7.6 的通過規則）、`unresolved`；「不顯著」不等於「沒有改變」。直方圖的比較延後到分布層級的 benchmark。不影響 label；reference 觀測量 `changed` 時可觸發 sci-fix 的檢查。
+- **模型對模型（延後）：** 代理模型永遠不改變物理 label。代理模型的研究宣告它的參考研究（study record）與範圍；以 IUT 判定（χ² 只作診斷）。通過時記錄 `extension.study.surrogate`（參考研究的引用與雜湊、範圍取兩者的交集）。
 
-### §R.6.6 收斂閘門（IUT）
+### §R.7.6 收斂閘門（IUT）
 
 - **差值：** a 為最細的設定，b 為第二細的設定；`relative` 模式 diff = (a − b)/b、se_diff = √(se_a² + se_b²)/|b|，`absolute` 模式 diff = a − b、se_diff = √(se_a² + se_b²)（兩個點是獨立的邏輯 run）；ν 以 Welch 公式逐對計算。C2 起可宣告配對模式（`pairing: paired`）：兩點屬於同一 seed_group、K 與 B 相同，以逐區塊差值估計 se_diff，ν = K − 1（定義見 §C.6 C2.1）；預設仍為獨立。
 - **事件數目標：** 每個點的 se 目標為 tol/(4√2)，使 se_diff ≤ tol/4。
@@ -2935,9 +3022,9 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 | tol | 0.050 | 0.044 | 0.054 | 0.050 | 0.002 | 0.002 |
 | 2 tol | 0.000 | 0.000 | 0.000 | 0.988 | 0.780 | 0.952 |
 
-真實差值為 tol 時約 90 % 是 unresolved，這是等價檢定的本質。兩階段設計下約 19 % 的點對有一點未達標而不完整。2026-10-23 的獨立審查發現舊版的兩階段欄重複計入試探的 χ²，已重算。
+真實差值為 tol 時約 90 % 是 unresolved，這是等價檢定的本質。兩階段設計下約 19 % 的點對有一點未達標而不完整。
 
-### §R.6.7 negative control 與偵測極限
+### §R.7.7 negative control 與偵測極限
 
 - 判定量：shift = (control − nominal)/reference，SE 由兩個 run 合成。
 - 偵測極限：DL = tol + |rel| + t_{0.977}(ν)·se_rel。
@@ -2945,28 +3032,28 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 - 設計要求：toy 證明在 DL 注入時抓到的機率 ≥ 0.977；真實檢定力在 0.977 附近，所以驗收門檻為 0.977 − 3σ_MC（A1 的驗收條件）。
 - 實現：正負兩個方向都注入（否則宣稱限縮為單向）；位於偵測極限 = caught 且 |shift| ≤ 1.1 × DL。單次未抓到時記錄並說明，不自動失敗，不得換種子重跑。
 
-### §R.6.8 停止規則與證據相關性
+### §R.7.8 停止規則與證據相關性
 
 - 停止規則、掃描格點、K 與 B、unresolved 的處理在第一個證據 run 前寫入 study spec。
 - `extension.study.evidence_overlap` 列出被多個判定共用的 run。
 
 ---
 
-## §R.7 契約、追溯與 sci-fix
+## §R.8 契約、追溯與 sci-fix
 
-### §R.7.1 CV-A1（A1）
+### §R.8.1 CV-A1（A1）
 
-§R.6.2–6.4 的表格、範圍與隔離規則；`dependencies.py` 的重新推導；`ext_computational_run.json` 加入選用的 `simulation` 屬性（需 hep-computing 同意；欄位見 §A）。`study` 仍是開放物件，讓 B2 加入 F4 需要的欄位。
+§R.7.2–6.4 的表格、範圍與隔離規則；`dependencies.py` 的重新推導；`ext_computational_run.json` 加入選用的 `simulation` 屬性（需 hep-computing 同意；欄位見 §A）。`study` 仍是開放物件，讓 B2 加入 F4 需要的欄位。
 
-### §R.7.2 CV-B2（B2）
+### §R.8.2 CV-B2（B2）
 
-§R.6.2 的新條目（verification、`regression-comparison`、徑跡的 reference benchmark）；§R.6.5 的回歸規則；§R.7.4 的遞移處理鏈；F4 研究紀錄的 `results`、`tail_sources_simulated` 與計數型 figure of merit 的不對稱不確定度；`design_geometry.json` 1.1.0。閘控方式同 CV-A1。CV-C1（C1）加入 `search_summary`；CV-C2（C2）加入一條 `design.py` 規則：run 或研究的種子出現在搜尋摘要中的 evaluation 判為 `design.contract_mismatch`；見 §C。
+§R.7.2 的新條目（verification、`regression-comparison`、徑跡的 reference benchmark）；§R.7.5 的回歸規則；§R.8.4 的遞移處理鏈；F4 研究紀錄的 `results`、`tail_sources_simulated` 與計數型 figure of merit 的不對稱不確定度；`design_geometry.json` 1.1.0。閘控方式同 CV-A1。CV-C1（C1）加入 `search_summary`；CV-C2（C2）加入一條 `design.py` 規則：run 或研究的種子出現在搜尋摘要中的 evaluation 判為 `design.contract_mismatch`；見 §C。
 
-### §R.7.3 sci-fix 與 advisory（A1）
+### §R.8.3 sci-fix 與 advisory（A1）
 
-缺陷 D1–D11 的修正依 main 目前的帳本格式記錄（`docs/maintenance.md`）：一筆只修一件事（例如變異數方法拆成 batch-means SE、精確低計數區間、MPV 估計三筆）；S1 有封閉形式時附 C4 與逐筆審查簽核；S3 放在 `documentation_fixes`。advisory 採 `/2` 格式，以 `applies_to.match` 群組比對；範圍包含錯誤升級的研究紀錄，以及建立在它們之上的 F4 design-evaluation（§R.15.5）。條目、等級與 advisory 編號以 §A 的 A1.14 為準。
+缺陷 D1–D11 的修正依 main 目前的帳本格式記錄（`docs/maintenance.md`）：一筆只修一件事（例如變異數方法拆成 batch-means SE、精確低計數區間、MPV 估計三筆）；S1 有封閉形式時附 C4 與逐筆審查簽核；S3 放在 `documentation_fixes`。advisory 採 `/2` 格式，以 `applies_to.match` 群組比對；範圍包含錯誤升級的研究紀錄，以及建立在它們之上的 F4 design-evaluation（§R.1.5）。條目、等級與 advisory 編號以 §A 的 A1.14 為準。
 
-### §R.7.4 處理鏈的追溯
+### §R.8.4 處理鏈的追溯
 
 - 每個處理步驟（模擬、縮減、數位化與重建、表格）寫一份 computational-run 紀錄，含 `**trace.provenance()`、設定雜湊、輸入紀錄與檔案的雜湊、程式雜湊。
 - simulated 表格的輸入鏈可以任意深，只要每一層都是有紀錄的 computational-run，而且鏈的每個根都是模擬 run（CV-B2；以前只允許一層）。
@@ -2974,11 +3061,11 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 
 ---
 
-## §R.8 程式與 CI
+## §R.9 程式與 CI
 
 | 位置 | 變更 |
 |---|---|
-| `contracts/validate.py`、`dependencies.py` | §R.6、§R.7 |
+| `contracts/validate.py`、`dependencies.py` | §R.7、§R.8 |
 | `contracts/schema.py` | `maxItems`、`maximum`、`exclusiveMaximum`（A2.7 加入；`element_sim` 的 schema 需要；不升契約版本） |
 | `core/stats/`、`core/simulation/` | 區塊估計量、研究層的判定引擎（A1 的 `equivalence`、`detection_limit`；B2 的 `change`；C2 的配對模式）、分布函式、種子雜湊、summary 的讀取。放在 `core/` 是因為 hep-detector 的腳本與 geant4 adapter 都要用，而分層規則只允許 adapter import `core` 與 `contracts`（§A.3 第 1 條、§A.4.5）；`core/` 只能 import `core`，所以 summary 的 schema 放在 `contracts/schemas/`，由腳本以 `contracts.schema` 驗證。重用 main 既有的函式（Garwood 區間、`toy_ensemble`），不重寫 |
 | `skills/hep-detector/scripts/` | 推論與判定只讀邊界產物；幾何事實（最小厚度、configuration）從 effective config 讀取，A2 前的紀錄仍從 spec/1 讀取；`check_geant4_study.py label` 寫出 F4 欄位（B2）；`evaluate_design.py` 加 `search` 子命令（C1）並修正 `f4` 的 `--label-run-record` 轉傳與結束碼（A1）；不新增腳本；`SKILL.md` 與 description 不改 |
@@ -2990,9 +3077,9 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 
 ---
 
-## §R.9 通用性
+## §R.10 通用性
 
-### §R.9.1 涵蓋的用例
+### §R.10.1 涵蓋的用例
 
 | 用例 | 由什麼支援 | 狀態 |
 |---|---|---|
@@ -3002,10 +3089,10 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 | 試束或模組（和數據比較） | setup-matched 類別、幾何樹推導的目標雜湊、依 benchmark 宣告的範圍維度 | 契約在 A1、A2；幾何用使用者應用或 `element_sim` |
 | 稀有事件 | 精確計數區間 | A1 |
 | 軟體或 Geant4 改版 | regression 類別 | B2 |
-| 快速模擬、ML 代理模型 | surrogate 類別、縮減工具 | 延後（2026-10-24 移出 B2）；縮減工具在第一個需要時 |
+| 快速模擬、ML 代理模型 | surrogate 類別、縮減工具 | 延後；縮減工具在第一個需要時 |
 | 其他引擎或框架（FLUKA、Key4hep） | 輸出層介面、縮減工具 | 介面已備；轉換工具延後 |
 
-### §R.9.2 現在只定義介面的項目
+### §R.10.2 現在只定義介面的項目
 
 | 介面 | 內容 | 第一個用例 |
 |---|---|---|
@@ -3015,7 +3102,7 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 | 粒子源 | `gps`（只允許宣告式設定）、`event-file`；summary 記錄通量歸一化所需的源面積與立體角 | 第一個能譜或通量研究 |
 | `simreduce` | 讀事件檔（經 `simroot`）或外部格式，依宣告輸出 summary | 第一個事後才決定的觀測量，或第一個外部後端 |
 
-### §R.9.3 延後（附觸發條件）
+### §R.10.3 延後（附觸發條件）
 
 | 項目 | 觸發條件 |
 |---|---|
@@ -3029,21 +3116,21 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 | `physics_config_comparison` | 需要比較物理設定的研究 |
 | RNTuple、vector 欄 | ROOT 檔大小或讀取速度成為瓶頸 |
 
-### §R.9.4 刻意不做
+### §R.10.4 刻意不做
 
 - 引擎抽象層（VMC 式）：在輸出層抽象化已足夠，ALICE 的經驗顯示 API 層抽象的成本高。
 - 處理框架（Gaudi 式）、驗證資料庫與網站（geant-val 式）：它們解決大型合作組的規模問題，違反 plugin 的限制。
 - 通用運算式語言、估計量的外掛系統、跨引擎的統一探針內容。
-- 整數量化與逐位元相同的統計量（§R.13）。
+- 整數量化與逐位元相同的統計量（§H.4）。
 - 依結果加跑、加密、換種子重跑控制組。
 - `uses-validated-physics` label、contracts 4.0、Python 綁定、內容定址快取、`simstat`、不連結 Geant4 的 `simcore`。
-- 自己的需求規格、需求判定、候選排序或「推薦設計」，以及任何全域最佳的宣稱：這些屬於 main 的 `contracts/design.py` 與人工閘門（§R.15.2、§R.15.3）。
+- 自己的需求規格、需求判定、候選排序或「推薦設計」，以及任何全域最佳的宣稱：這些屬於 main 的 `contracts/design.py` 與人工閘門（§R.1.2、§R.1.3）。
 
 ---
 
-## §R.10 階段與驗收
+## §R.11 階段與驗收
 
-本節在 2026-10-23 以前複製了各階段的內容與驗收，容易和任務規格不一致，因此改為指向。階段的順序、內容邊界、介面擁有權、閘門與待決事項以 第 1 部 為準；每個階段的工作項與驗收以任務規格為準。
+本節只指向規格，不複製內容。階段的順序、內容邊界、介面擁有權、閘門與待決事項以第 1 部為準；每個階段的工作項與驗收以第 2–4 部為準。
 
 | 階段 | 一句話 | 規格 |
 |---|---|---|
@@ -3058,12 +3145,12 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 
 ---
 
-## §R.11 殘餘風險
+## §R.12 殘餘風險
 
 1. J14 的偵測極限可能因區塊 batch means、t 分位數與觀測量單位的控制組而改變，需要重新設計控制組。
 2. 區塊 batch means 對偏斜分布的比值、分位數與眾數有 O(1/B) 的偏差，不隨 K 減少；覆蓋率 toy 容許 ±0.02，必要時加大 B。
 3. 區塊獨立的前提在事件之間有狀態時不成立；探針記錄相關設定，有疑慮時改為多個獨立的邏輯 run。
-4. 兩階段設計下約 10 % 的證據 run 未達標（§R.5.5）。
+4. 兩階段設計下約 10 % 的證據 run 未達標（§R.6.5）。
 5. 以容差比較時，接近門檻的判定在不同平台可能不同；以邊距標記與「CI 平台為準」處理。
 6. 兩個 Geant4 程式：`layered_sim` 凍結於維護模式，靠 `g4sim` 控制重複。
 7. 探針假設 worker 與 master 設定相同；若發現 thread-local 差異，改為逐執行緒傾印。
@@ -3071,65 +3158,25 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 9. `G4RootAnalysisReader` 的讀取能力未驗證（B1 的試作）。
 10. quick load 只剩 931 bytes；本架構不改 `SKILL.md` 與 description（設計流程的入口由 main 的 hub 連結提供）。
 11. 工作量：原型估計 A1 的契約部分約 8–12 個工作天，另加 Geant4 執行時間；其餘未估計。
-12. 偵測器層級的 F4 資格路徑（§R.15.5）未經維護者核准前，J15 與任務 C 的確認研究只能是 `unvalidated`，design.py 不會把它們算作 F4。
+12. 偵測器層級的 F4 資格路徑（§R.1.5）未經維護者核准前，J15 與任務 C 的確認研究只能是 `unvalidated`，design.py 不會把它們算作 F4。
 
 ---
 
-## §R.12 決策紀錄
+## §R.13 決策紀錄
 
-### §R.12.1 使用者已決定
-
-| 日期 | 決定 | 位置 |
-|---|---|---|
-| 2026-10-22 | 核心程式用 C++，Python 作為介面；計算核心用 C++、參考值留在 Python；以獨立執行檔交換 JSON/CSV，不用 Python 綁定 | 原則 2（依 12.2 第 1 項的詮釋） |
-| 2026-10-22 | J15 的 TOF1、TOF2 各兩層，四層同材料 | §B |
-| 2026-10-22 | 詳細的逐事件資訊存成 ROOT 檔 | §R.4.1 T1、B1 |
-| 2026-10-22 | J15 與其他部分拆成兩個任務，J15 後做 | 任務 A（A1、A2）、任務 B（B1、B2、B3）；之後加入任務 C（§P.0） |
-| 2026-10-24 | 全面重寫以接上 main 的設計流程；任務 C 的搜尋做成 `evaluate_design.py search`；偵測器層級的 Geant4 研究經資格路徑成為 F4 | §R.15、§P.0 |
-
-### §R.12.2 本部的提議（需要使用者確認）
-
-1. **語言分工的詮釋：** 逐事件的計算（模擬、數位化、重建、累加）在 C++；合併後的推論在 Python。
-2. **輸出層的後端介面**（三個邊界產物），不做引擎抽象層。
-3. **事件決定性：** 新 spec 預設 `seeding: per-event`；工作切分與執行緒數不影響事件。
-4. **重現的定義是「判定相同」**，數值以容差比較；不做整數量化與逐位元相同的統計量。
-5. **區塊 batch means：** 一個 run 內依事件編號分 K ≥ 16 個區塊；J14 有逐事件資料的 run 離線重算，不重錄。
-6. **新增 `element_sim`**，`layered_sim` 不改 spec 格式；兩者共用 `g4sim`。
-7. **六個驗證類別**（五種性質中模型對模型延後，另有 sanity、interface），其中 verification、regression 在 CV-B2（B2）加入；surrogate 延後。
-8. **八個階段**（A1、A2、B1、B2、B3、C1、C2、C3；§P.0），ROOT 檔與 `simroot` 在 B1。
-9. 兩階段係數用 F₀.₉₀ 或 F₀.₉₅；精確區間的切換門檻（任一區塊為 0 或總數 < 100）。
-
-### §R.12.3 待維護者決定
-
-合併後的清單與建議見 §P.7；本部原有的七項都已併入該清單。
+使用者已決定的事項（含日期）與本部的提議移到 §H.5；待維護者決定的事項見 §P.7。
 
 ---
 
-## §R.13 演進紀錄：被取代的設計
+## §R.14 演進紀錄：被取代的設計
 
-| 前一版的設計 | 取代為 | 依據 |
-|---|---|---|
-| `simstat` 與不連結 Geant4 的 `simcore`：把逐 run 的統計搬到 C++ | 推論留在 Python，讀合併後的 summary | 程式與資料量小，C++ 無收益，且使重播需要編譯器（合理性評估 P1）；CMS DQM 也在合併後才判定 |
-| spec/2、`layered_sim convert`、雙格式存取器、同主機逐位元相同的閘門 | `layered_sim` 不改格式；新增 `element_sim` | 成本最高、價值最低；新增程式讓 J14 不動，並得到真正的第二後端 |
-| 整數量化、雙字組 128 位元整數、五成雙捨入、`%.17g` 才能重算 | 浮點補償加總；整數只用於計數與直方圖；重現定義為判定相同 | 逐位元相同不是科學需求；實際實驗追求可重現的事件與可追溯的來源 |
-| 每個證據 run 16 個獨立行程 | 一個 run 內依事件編號分區塊 | batch means 本來就是 run 內分批；逐事件種子讓工作切分與統計無關 |
-| 強制逐事件種子只為了逐位元相同 | 逐事件種子作為新 spec 的預設，目的是事件決定性 | ATLAS、Allpix² 的做法 |
-| 只檢查介面的合成後端 | `element_sim` 是真正的第二後端 | 第三次檢查 R19 |
-| 驗證只有等級（reference、sanity、verification、interface） | 六個驗證類別（加入 setup-matched、regression；surrogate 延後） | geant-val、Belle II、ATLAS AtlFast3 |
-| 任務 C 自己的需求規格 `detector-requirements/1`、元件目錄與設計格式 `detector-design/1` | main 的 design-spec 與 design-candidate；基因組只是最佳化器的內部編碼，解碼成基礎候選的 `overrides` | main 0.37.0 已有這些產物（2026-10-24 審查 C4、C5） |
-| 任務 C 的保真度 F0、F1、F2 | main 的 F0–F5：舊 F0 是 main 的 F1；搜尋中的短 Geant4 run 只是搜尋值；確認是 F4 | 名稱衝突（審查 P2） |
-| 任務 C 的需求判定（`threshold`）、`order`、自訂 Pareto 與「推薦設計」 | `contracts/design.py` 推導判定、篩選、排序與 Pareto；不宣稱最佳 | main 的規則（審查 C2、C3） |
-| `realize()`：設計 → spec | `evaluate_design.py geometry` 產生 `design-geometry/1`，B1 的 `from-geometry` 推導 `element_sim.spec/1` | main 已有幾何產生步驟（審查 C6、B4） |
-| `adapters/detector-design/` 與其版本序列 | `evaluate_design.py search`；只有選用的貝氏最佳化後端是 adapter | adapter 是連接外部工具的選用元件（審查 P3） |
-| B2 為任務 C 加入的 surrogate 類別 | 延後 | 設計情境中的快速模擬由 main 的保真度與 bound 表示（審查 B 的重新規劃） |
-
-仍然有效的前一版內容（已併入本部）：缺陷 D1–D10 的修正、契約的等級表與依 benchmark 宣告的範圍維度、隔離與場的定義、目標雜湊的版本、IUT 閘門與 t 分位數的操作特性、精確計數區間、MPV 的內插與兩道偏差檢查、t 分位數的偵測極限、兩階段事件數、事件權重的限制、探針的內容與時機、ROOT 檔的設計、J15 的設計。第三次深度檢查的 25 項發現中，R11、R12、R16、R18 因設計改變而不再適用，R19 由 `element_sim` 解決，其餘都已併入。
+被取代的設計、取代的理由，以及仍然有效的早期內容，移到 §H.4。
 
 ---
 
-## §R.14 出處
+## §R.15 出處
 
-- ATLAS Collaboration, *Software and computing for Run 3 of the ATLAS experiment at the LHC*, [arXiv:2404.06335](https://arxiv.org/pdf/2404.06335)（亂數：§R.3.1；資料格式：§R.2.3）
+- ATLAS Collaboration, *Software and computing for Run 3 of the ATLAS experiment at the LHC*, [arXiv:2404.06335](https://arxiv.org/pdf/2404.06335)（亂數：論文第 3.1 節；資料格式：論文第 2.3 節）
 - ATLAS Collaboration, *AtlFast3: the next generation of fast simulation in ATLAS*, [arXiv:2109.02551](https://ar5iv.labs.arxiv.org/html/2109.02551)
 - CMSSW `RandomNumberGenerator.h`（[LXR](https://cmssdt.cern.ch/lxr/source/FWCore/Utilities/interface/RandomNumberGenerator.h)）；DQM `README.md`（[LXR](https://cmssdt.cern.ch/lxr/source/DQMServices/Core/README.md)）；`ProcessHistory`（[doxygen](https://cmsdoxygen.web.cern.ch/cmsdoxygen/CMSSW_12_3_2/doc/html/d8/d42/ProcessHistory_8cc_source.html)）
 - S. Banerjee, V. Ivanchenko (CMS), *Validation of physics models of Geant4 using data from the CMS experiment*, [EPJ Web Conf. CHEP 2021](https://www.epj-conferences.org/articles/epjconf/abs/2021/05/epjconf_chep2021_03010/epjconf_chep2021_03010.html)
@@ -3144,47 +3191,312 @@ N = ceil(N_trial·(SE_trial/target)²·f)，f = F₀.₉₀(K − 1, K_trial −
 
 ---
 
-## §R.15 與 main 探測器系統設計流程的關係（2026-10-24）
+# 第 6 部　修訂、審查與決定紀錄（§H）
 
-main 0.37.0–0.38.0 在 hep-detector 加入探測器系統設計流程（`references/system-design-workflow.md`、`contracts/design.py`、`scripts/evaluate_design.py`）。本計畫在 2026-10-24 改為接上這個流程，不另建一套；本節說明分工的理由。
+> 本部只保存歷史：版本歷程、審查的發現與處理、舊設計與現行設計的對照、被取代的設計與決策紀錄。現行規格以第 1–5 部為準；本部的內容沒有約束力。
 
-### §R.15.1 保真度與 Geant4 的位置
+---
 
-| 保真度（main） | 意義 | 本計畫提供的部分 |
+## §H.1 版本歷程
+
+依日期排序，同一天內依第 1、2、3、4、5 部排列。
+
+| 日期 | 部 | 變更 |
 |---|---|---|
-| F0 | 啟發式論證，沒有 run | — |
-| F1 | 解析式，由 tool contract 執行（`tracker_resolution`、`multiple_scattering`、`design_estimates` 等） | C1 的搜尋內圈在行程內使用同樣的函式 |
-| F2 | toy Monte Carlo（`toy_spectrometer`、`design_estimates.py infield-acceptance`） | B3 對 J15 候選直接執行，取代手算比較 |
-| F3 | 響應組裝與預期精度（hep-statistics 的 Asimov 擬合） | — |
-| F4 | 經 `check_geant4_study.py label --upgrade` 重新發出 `validated-in-scope` 的 Geant4 研究 | A1 讓標籤正確；B1、B2 讓磁譜儀研究可行並寫出 F4 欄位；B3（J15）與 C2 的確認產生 F4 |
-| F5 | 原型或試束量測 | — |
+| v5 以前 | 第 3 部 | 探測器文件與 v5：單軸疊層磁譜儀；Gluckstern 小 N 公式更正；磁場方向與場檢查網格 |
+| 2026-10-21 前 | 第 2 部 | 三輪獨立審查、依 0.21.0 與 `9f08796` 的兩次核對、階段 1 原型 |
+| 2026-10-22 | 第 2 部 | 語言分工、逐事件 ROOT 檔、任務拆分、整理為實作規格；參考實際實驗重新設計（第 5 部（設計理由））；依新架構改寫 |
+| 2026-10-22 | 第 3 部 | TOF1、TOF2 各兩層；數位化與重建改為 C++；逐事件 ROOT 檔；拆分為任務 B；依新架構改寫（`element_sim` 取代 spec/2；B1、B2；PAMELA、AMS-02 對照與 TOF 敏感度） |
+| 2026-10-22 | 第 5 部 | 初版 |
+| 2026-10-23 | 第 1 部 | 初版：整合評估、規劃原則、八個階段（B 拆為 B1–B3、C 為 C1–C3）、介面擁有權、命名（契約版本改記 CV1–CV3）、閘門、合併的待決事項與風險 |
+| 2026-10-23 | 第 1 部 | 加入 §P.10「執行環境：isolated worktree」（建立、確認、規則、平行階段、結束）與給 agent 的讀法 |
+| 2026-10-23 | 全文 | 整合：由原本分散的 `plan.md`、`task-a-core.md`、`task-b-j15.md`、`task-c-design-search.md`、`architecture.md`（與各自的英文版）合併為本文件，內容不變，只改寫節號與交叉引用；舊檔已移除。設計數值的計算程式（`gate_operating_characteristics.py`、`j15_design_estimates.py`、`design_search_closure.py`）仍是同一資料夾中的獨立檔案 |
+| 2026-10-23 | 第 2 部 | 獨立審查後修正（兩階段操作特性重算、H 的定義、caught 定義、`GeneratePrimaries` 開頭重設種子等）；依自動化設計重新審視（統計移到 `core/`） |
+| 2026-10-23 | 第 2 部 | 依計畫（第 1 部）重新整理：A1 回到最小的 sci-fix（`change`、`threshold`、`order`、配對比較、search 角色、`values` 移到 B2、C2）；契約版本改記 CV1；種子雜湊放在 `core/simulation/seeds.py`；節的編號與任務 B、C 一致（§A.2 前提與提供的介面、§A.8 檢查、§A.10 待決與風險） |
+| 2026-10-23 | 第 2 部 | 加入 isolated worktree 的執行規定：檔頭、§A.0 的第一步、§A.11 的開頭（§P.10） |
+| 2026-10-23 | 第 2 部 | 詳細檢查後修正：spec 新欄位同時加入 `validate_spec()`、`spec.schema.json`、`Spec.cc`；A1.5 的選擇與現行程式一致；`tolerance`、`count_if` 的方向；種子欄位的名稱與 `cmd_chunk`；trial run 與 N 進位到 K 的倍數；DL 的 tol 與 se_rel；`tree-v1` 的目標；`float.hex()` 的特殊值、`setTheSeeds`、`IsBlocked()` 與 general process；Box–Muller 的跨平台容差；ledger 補 D7、D8；事實更正（行號、`recorded/` 大小、`summaries/`、原型的描述） |
+| 2026-10-23 | 第 3 部 | 獨立審查後修正（B1.6 只比共同觀測量、量能器漏失、表條目、surrogate 與 regression 規則、總動量剛度、CLI 與 `SIM_SOURCES`、可攜的亂數、stepper 明確建立等） |
+| 2026-10-23 | 第 3 部 | 依計畫（第 1 部）重新整理：B2 拆為 B2（重建與契約）與 B3（J15 研究）；確定性場檢查移到 B1.7；新增 `geant4_run.py check-spec`；判定引擎的 `change` 與 regression 角色在 B2 加入 |
+| 2026-10-23 | 第 3 部 | 加入 isolated worktree 的執行規定：檔頭、§B.0 的第一步、§B.11 的開頭（§P.10） |
+| 2026-10-23 | 第 4 部 | 初版提案：三個角色、需求規格、元件目錄與設計文法、F0/F1/F2 多保真度、搜尋與確認分開、契約、C1/C2、J16；之後依任務 A 的重新審視引用 `core/` 的共用模組 |
+| 2026-10-23 | 第 4 部 | 依計畫（第 1 部）重新整理：三個階段；`threshold`、`order`、配對比較、`values`、search 角色與 seed_group 由 C2.1 加入；實現以 `check-spec` 驗證；契約版本記為 CV3；J16 與 MOBO 移到 C3 |
+| 2026-10-23 | 第 4 部 | 加入 isolated worktree 的執行規定（§P.10） |
+| 2026-10-23 | 第 4 部 | 詳細檢查後的修正：schema 關鍵字限制；`order` 的雙邊界限；配對 `relative` 模式；快取鍵；親代重新評估；設計去重；材料表；基因的修復與違反量；封閉測試的最小間距；citation key；`values_max` 每區塊 |
+| 2026-10-23 | 第 5 部 | 依詳細檢查修正；§R.11 原本複製各階段的內容與驗收，容易和任務規格不一致，改為指向 |
+| 2026-10-23 | 第 5 部 | 獨立審查發現收斂閘門操作特性表的兩階段欄重複計入試探的 χ²，已以 `gate_operating_characteristics.py` 重算（§R.7.6） |
+| 2026-10-24 | 全文 | 重新規劃：對照 main 0.38.0 審查（§H.2.1）後，依 main 的探測器系統設計流程重新規劃：任務 B 成為 F4 的 Geant4 評估器，J15 成為設計專案，任務 C 成為 `evaluate_design.py search` 候選產生器 |
+| 2026-10-24 | 第 1 部 | 依 main 0.38.0 的探測器系統設計流程重新規劃（§H.2.1）：基準改為 `5584927`；採用 main 的保真度 F0–F5；B 改為 F4 評估器（`from-geometry`、尾部來源、`results` 欄位、資格路徑 D0）；J15 改為設計專案；C 改為 `evaluate_design.py search` 候選產生器、不依賴 A；契約代號改為 CV-A1、CV-B2、CV-C1、CV-C2；新增 G-D0、G-B2；待決事項重新編號並標出 main 已決定者 |
+| 2026-10-24 | 第 1 部 | 新的獨立審查後修正：D0 改為 v2（材料定義取代材料 benchmark 範圍；依類別的範圍模型；徑跡 reference 對照 Lynch–Dahl、只認可 `momentum-resolution-core`；子決定 D0-b、D0-c、D0-d）；G-D0 含 D0-c，G-B2 測兩條路徑並達到決定性的列；C2 的 adapter 0.5.0；B2 的尾部來源改為重建副本與位置相關的磁場誤差；新增風險 12 |
+| 2026-10-24 | 第 1 部 | 重新整理：前言加入依階段的閱讀索引與全域名詞表；§P.1 改寫為「與 main 的關係」；§P.7 的 D0 獨立成 §P.7.1；歷史內容（前言的整合與重新規劃紀錄、§P.1 的問題表、命名的新舊對照）移到第 6 部 |
+| 2026-10-24 | 第 2 部 | 對照 main 0.38.0（探測器設計流程）重新規劃：基準改為 `5584927`／contracts 3.12.0；新增 D11（A1.16）與 F4 消費端的相容（A1.17）；ledger 與 advisory 改用 main 的現行格式（每個修正一筆、`documentation_fixes`、advisory `/2`、SFA-2026-039／-040，涵蓋 F4 設計評估）；重用 Garwood、`toy_seed`、`coverage_gate`；summary 的 schema 移到 `contracts/schemas/`，column map 與 effective config 的 schema 移到 adapter；`statistical_uncertainty` 的定義；`evidence_role`；CV1 改記 CV-A1；`CORE_VERSION` 與 `OWNERS.json`；A2 的 run record 加入 `argv`、`script_sha256`、`versions.plugin_release`，schema 關鍵字的 `oneOf`／`not` 與豁免；行號更新。第 2 部最初依 `9f08796`（0.23.0）撰寫，自此以 `5584927`（0.38.0）為基準 |
+| 2026-10-24 | 第 2 部 | 新的獨立審查後修正：§P.7 項次對應（第 2–8 項）；A1.6 對 `design.py` 單邊 0.95 判定的涵蓋率說明；A1.17 明列 `label` 的結束碼、B2 的 `--label-results`／`--label-geometry`；A2.8 的 `SIM_SOURCES` 與 `MiniJson.hh`；`f4` 的行號 498–553；徑跡 reference 的範圍與只認可 `momentum-resolution-core` |
+| 2026-10-24 | 第 3 部 | 對照 main 0.38.0 的設計流程重新規劃（§H.2.1 的 B1–B12）：任務 B 成為 main 缺少的 F4 評估器；B1 加入 `from-geometry` 與實現設定檔、所有帶電徑跡的穿越、分區均勻場；B2 加入可切換的尾部來源、F4 觀測量、`label --results --geometry`、`f4-results/1`、對照表 1.1.0、`design.py` 的 F4 變更、F4 資格路徑（D0）與 `multiple-scattering-reference`、端到端測試，刪除 surrogate 類別；B3 改為 J15 設計專案（F1、F2、F4），驗證梯另立紀錄；保真度採 main 的 F0–F5；契約版本記為 CV-B2；VALIDATION 條目 GEANT4-F4；更正事實（`MISSING_FILE_ARGS` 行 153、腳本數 23、benchmark 函式行號、protocol §6 的模型範圍） |
+| 2026-10-24 | 第 3 部 | 依未參與修改的審查者的通讀修正（§H.2.2）：D0 改為 v2（材料定義取代材料 benchmark 的前提、逐類別的範圍模型、徑跡 reference 只使核心解析度合格、電荷誤判需尾部 benchmark（D0-b）、F4 不確定度政策（D0-c）、篩選用 F4 的補充（D0-d））；新增 `material-definition` 與 `ms-tail-reference`；尾部來源改用重建複本集合與位置相關的場誤差，整體尺度歸 `rigidity-scale-offset`；`f4 --label-results --label-geometry` 與兩條路徑的測試；非計數型 F4 寫覆蓋率 0.90 的區間；到達第 16 列的測試；μ 場檢查的容許值改為 0.3 %；多重散射模型的變化由探針確認；`SIM_SOURCES` 的鍵；`label` 與 `f4` 的行號；刪除 B3.6 的 `response` 步驟 |
+| 2026-10-24 | 第 4 部 | 依 main 0.38.0 的探測器系統設計流程重新規劃（§H.2.1 的 C1–C13、P2–P4）：任務 C 改為 D2 的候選產生器 `evaluate_design.py search`；刪除需求規格、元件目錄與設計文法的格式、`realize()`、`threshold`／`order`、推薦設計與自訂 Pareto、adapter `detector-design`、reference 與 `SKILL.md` 一行；保真度改用 main 的 F0–F5（舊 F0 = F1，Geant4 搜尋值沒有保真度，確認 = F4）；搜尋族群存在 `search_summary`（CV-C1），只展開決選者；行程內 F1 呼叫 tool contract 的同一工具；C2 的種子規則（CV-C2）取代角色規則；C1 不再依賴任務 A；J16 改在 Example A、B 上執行；貝氏最佳化後端改為選用的 `adapters/design-bo/`；新增概念對應表（現在的 §H.3） |
+| 2026-10-24 | 第 4 部 | 新的獨立審查後修正：C1.4 的四個工具加 `argv=None`、重導 stdout 與攔截 `SystemExit`、呼叫預算；確認研究的種子改為 H(study_id, role, point_id)；封閉測試只宣稱 1/32 格點的窮舉值；待決事項加入 D0-c |
+| 2026-10-24 | 第 5 部 | 對齊重新規劃：只修改與 main 設計流程衝突的段落，新增 §R.1（與 main 設計流程的關係）；模型對模型（surrogate）類別自 B2 移出、延後（§R.7.1、§R.7.5、§R.10.1） |
+| 2026-10-24 | 第 5 部 | 整理：本部只寫現行理由；§R.13 決策紀錄移到 §H.5，§R.14 被取代的設計移到 §H.4 |
+| 2026-10-24 | 全文 | 重新整理：歷史內容移到第 6 部；審查紀錄 `review-2026-10-24-main-0.38.md` 併入 §H.2 並刪除該檔；原第 5 部最後一節「與 main 探測器系統設計流程的關係」移為 §R.1，其後各節依序後移一號（共 §R.0–§R.15）；前言加入依階段的閱讀索引與全域名詞表；正文只寫現行規格 |
 
-搜尋過程中的短 Geant4 run 沒有保真度，也不是 evaluation，只是存在 `search_summary` 中的搜尋值。理由：F4 要求研究經過資格判定；搜尋中的 run 為了速度犧牲統計，而且和選擇過程相關（贏家詛咒），不應該被當成證據。
+---
 
-### §R.15.2 判定的擁有權
+## §H.2 審查與處理
 
-需求是否滿足、成熟度、過時、篩選、比較基礎、排序與 Pareto 都由 `contracts/design.py` 從產物推導，絕不手寫（workflow 的「Never」一節）。本計畫的統計判定（`core/stats/decisions.py` 的 `equivalence`、`detection_limit`、`change`、收斂閘門與配對比較）只回答研究層的問題：benchmark 是否通過、run 是否收斂、版本之間是否改變、兩個設計在搜尋中的差值是否已分辨。理由：它們是研究標籤的輸入；需求的合規還需要適足表、bound 的組合與上游鏈，這些只有 `design.py` 有。所以任務 C 原本的需求判定（`threshold`）、`order` 與「推薦設計」都刪除（§R.13）。
+### §H.2.1 對照 main 0.38.0 的審查（2026-10-24）
 
-### §R.15.3 不宣稱最佳；人工閘門
+> 對象：本文件 commit `3f8b9c1`（基準 `9f08796`／0.23.0／contracts 3.5.0）；對照：`origin/main` `5584927`（0.38.0，contracts 3.12.0，比基準多 197 個 commit）。方法：四位獨立審查者（任務 A、任務 B／J15、任務 C、計畫與架構）各自對照 main 的程式碼；主要論點由主工作階段在 main 上複核（標 ✔）。原為獨立檔案 `review-2026-10-24-main-0.38.md`，已併入本節。
 
-main 只在比較基礎成立、所有存活的候選都有相同保真度向量與分母的非樂觀 expected-precision 評估時才排序；Pareto 只在超過合併 1σ 時才判定支配；永遠不宣稱全域最佳；閘門 H1–H4 需要人。所以任務 C 是 D2 的候選產生器：10⁴ 級的搜尋族群留在 `search_summary`，只有決選者以 `expand` 成為候選，再由一般的 `evaluate_design.py run` 與 `report` 處理。贏家詛咒以「確認必須用新種子的 F4 研究」處理，並由 CV-C2 的規則強制：種子出現在搜尋摘要中的 evaluation 判為 `design.contract_mismatch`。
+**使用者的決定（同日）：** 全面重寫以接上 main 的設計流程；任務 C 的搜尋做成 `evaluate_design.py search`；偵測器層級的 Geant4 研究經資格路徑成為 F4（D0）。下表的「處理」欄指出各發現在現行規格中的位置。
 
-### §R.15.4 參數層級的過時與增量重跑
+**結論：**
+1. **main 已經有完整的探測器系統設計流程**（0.37.0–0.38.0，hep-detector，M0–M4）：design-spec／design-candidate／design-evaluation 三種產物；`contracts/design.py` 推導判定、成熟度、過時與篩選；保真度 F0–F5（F4 = 經 `check_geant4_study.py label --upgrade` 重新發出的 Geant4 研究）；`scan`／`expand`／Pareto；人工閘門 H1–H4；「絕不宣稱全域最佳」。當時的文件完全沒有提到這些。
+2. **任務 A 仍然成立，而且更急**：F4 只接受 `validated-in-scope` 的研究（`contracts/design.py:1004` ✔），A1 修正的正是這個標籤的判定。但 A1 的流程、契約與介面部分已過時，並漏了一個 main 已記載的缺陷。
+3. **任務 B 的 Geant4 基礎設施仍然合理，但定位要改**：main 的 F4 路徑缺一個能跑磁譜儀的 Geant4 應用；然而當時的 B 不會寫出 F4 需要的欄位、J15 依規則永遠是 `unvalidated`、四種尾部來源都沒有模擬。
+4. **任務 C 照當時的寫法不能合併**：它在 main 旁邊再造一套設計系統，並違反 main 的規則；真正新的部分（自動產生候選、Geant4 多保真度搜尋、共同亂數配對比較、贏家詛咒保護、封閉測試）保留，改為 D2 的候選產生器。
+5. **main 本身有兩個問題**（見本節末）。
 
-main 的 evaluation 以 `parameter_digest` 綁定候選：只有它讀到的參數改變才過時；`run_workflow.py --incremental` 以 argv、程式、plugin release 摘要、環境與輸入作為略過的鍵。所以任務 C 不再有自己的設計快取規則，只保留搜尋內部的快取鍵（含 S、N、K、B）；`geant4_run.py run` 也像 `run_workflow.py` 一樣寫出 `argv`、`script_sha256` 與 `versions.plugin_release`（A2）。
+**三個面向：**
 
-### §R.15.5 F4 的研究紀錄介面與資格路徑
+| 面向 | 評估 |
+|---|---|
+| 合理性 | A 的必要性提高（F4 依賴正確的標籤）。B 的價值提高：main 的適足表中 shower-containment、tracking-selection-efficiency、hadronic-energy-resolution、trigger-efficiency 等在 F4 以下都是 `capability.unavailable`。C 的「自動優化」與 main「不宣稱最佳、由人決定」的原則衝突，需改為產生候選、交給 `design.py` 判定 |
+| 正確性 | adapter、`check_geant4_study.py`、`geant4_benchmarks.py`、`schema.py` 未變，大多數引用仍正確；`contracts/validate.py`、帳本、版本、腳本數量、`geant4_benchmarks.py` 的函式行號需要更新；附錄 A 的物理數字與 `j15_design_estimates.py` 一致 |
+| 靈活性 | 輸出端夠一般；後端是 J15／AMS 形狀；應以「幾何種類 → realizer」作為擴充點，並讓 C 的搜尋由 tool contract 驅動 |
 
-`design.py` 對 F4 的要求：研究紀錄是 `validated-in-scope`；`evaluate_design.py geometry` 產生的幾何檔（`design-geometry/1`）列在 `input_manifest`，且參數摘要和候選一致；`extension.study.results.<figure of merit>` 有 `value`、`statistical_uncertainty`、`model_envelope`；`tail_sources_simulated` 列出模擬了哪些尾部來源（alignment、calibration-non-uniformity、noise-digitization、pattern-recognition 四種都有時 bound 才是 `estimate`，否則是 `optimistic`）。
+**main 已提供、本計畫必須使用的介面：**
 
-本計畫的對應：B1 的 `from-geometry` 由幾何檔與宣告的實現設定檔推導 `element_sim.spec/1`；B2 的 `simreco` 把四種尾部來源做成可切換的階段，`label` 寫出 `results`、尾部來源與幾何檔；`statistical_uncertainty` 定義為 68.27 % 的 t 半寬（A1），和 `design.py` 讀成覆蓋率 0.6827 高斯的方式一致；每個（figure of merit, 分母）一份研究，因為每個候選只有一個 `geometry_ref`，而 `results` 不以分母為鍵。`design.py` 以單邊 0.95 判定，這個純量換算後略低估（1.70 SE 對 t_{0.95}(15) ≈ 1.753 SE）；CV-B2 讓 `f4` 接受不確定度物件後，改寫覆蓋率 0.90 的中央區間（A1.6）。
+| main 的介面 | 位置 | 對本計畫的意義 | 處理 |
+|---|---|---|---|
+| design-spec | `contracts/schemas/ext_design_spec.json` | 取代任務 C 的 `detector-requirements/1` | §C.4.4、C1.1 |
+| design-candidate、`subsystem_roles` | `ext_design_candidate.json`；`contracts/vocab/core.json:203` | 取代 `detector-design/1`；基因組只作內部編碼 | §C.4.5、C1.3 |
+| 保真度 F0–F5 | `contracts/design.py:65` ✔；`system-design-workflow.md:100-105` ✔ | 任務 C 的 F0／F1／F2 名稱衝突 | 前言的慣例、§P.5、§C.4.6 |
+| `evaluate_design.py geometry` → 研究 → `f4` | `evaluate_design.py:462-560` ✔；`design.py:988-1062` ✔ | B 必須消化 `design-geometry/1`，研究紀錄必須寫 `results`、`tail_sources_simulated` 並列幾何檔 | B1.8、B2.6 |
+| 幾何對照表 `layered-spectrometer` 1.0.0 | `contracts/rules/design_geometry.json` ✔ | 只有五個欄位；需要 1.1.0 | B2.6 |
+| 尾部來源 | `design.py:64`、`1058-1059` ✔ | 四種都模擬，F4 才是 `estimate` | B2.2 |
+| 參數層級的過時、`run_workflow.py --incremental` | `system-design-workflow.md:138-145` | 取代任務 C 的設計快取 | §C.4.3、§C.4.8 |
+| `scan_summary` | `ext_computational_run.json`；`design.py:1663` | 搜尋族群存成 `search_summary`，只展開決選者 | C1.6、C1.7 |
+| 判定、排序、Pareto | `design.py:1369-1508`、`1949-2051` | 刪除任務 C 自己的判定與排序 | §C.3、§C.4.3 |
+| 能力 `detector-design` | `docs/capability-map.json:153` ✔ | 搜尋放在 hep-detector 腳本 | C1.6、§P.7.2 |
+| schema 支援的關鍵字 | `contracts/schema.py:61-63` ✔ | 仍沒有 `maxItems`／`maximum`／`exclusiveMaximum`／`uniqueItems` | A2.7、C1.1 |
 
-**資格路徑（D0，待維護者核准；§P.7 第 1 項、B2.8）。** 偵測器層級的研究（解析度、電荷誤判、簇射包含）沒有對應的物理參考，依現有規則永遠無法升級。選擇建立資格路徑，而不是讓 `design.py` 接受未驗證的 F4。四個條件全部成立才升級，各以自己的鍵對應研究：(1) 材料定義：實現幾何的每種材料有獨立來源的成分與密度，且 geantino 掃描重現候選宣告的 X/X₀（A1 的材料 benchmark 範圍是 MeV 級，不能當前提）；(2) 磁場傳播的 verification（B1 的解析螺旋）在同一磁場設定雜湊下通過；(3) 重建的 verification（`reco-closure`）在同一重建 spec 雜湊下通過；(4) 徑跡 reference benchmark：孤立 Si 片的多重散射核心寬度對照 Lynch–Dahl（F = 98 %），附負對照，範圍維度為材料、厚度、剛度、粒子，只認可 `momentum-resolution-core`；點解析度是宣告的輸入（100 GV 時主導核心），沒有 benchmark 驗證；Highland 的準確度約 11 %，不能當參考。範圍比對改為依類別的交集（CV-B2）。電荷誤判需要尾部 benchmark（D0-b），簇射包含不在路徑內（D0-d 提出只用於篩選的選項）。真正要決定的是 F4 的不確定度（D0-c）：只用統計誤差時，升級的 F4 `estimate` 會因適足表的 `min_relative_uncertainty` 成為 `uncertainty.missing`。理由：`validated-in-scope` 在全 plugin 只保留一個意義；第 4 項給偵測器層級的研究一個物理上的錨點，而前三項保證研究的其他部分是正確推論。
+**發現（嚴重度：阻擋、主要、次要）：**
 
-### §R.15.6 擴充點：幾何種類 → realizer
+跨部與計畫：
 
-`contracts/rules/design_geometry.json` 把候選的參數對應到一種幾何（目前只有 `layered-spectrometer`）。每一種幾何需要一個 realizer，把幾何檔變成某個後端的 spec：`element_sim`（B1 的 `from-geometry`）、使用者的 Geant4 應用（引入 `g4sim`）或使用者建置開啟 GDML 時的 GDML 檔，之後可以是 DD4hep。加入一種探測器 = 一個對照表條目（契約）加一個 realizer；研究層只讀邊界產物，不需要改。C1 的搜尋由 tool contract 驅動，所以在 F1、F2 與探測器種類無關；Geant4 部分只能用已有 realizer 的幾何種類（目前是磁譜儀；B2 的對照表 1.1.0 加入 TOF 與電磁量能器的欄位）。
+| # | 嚴重度 | 問題 | 建議 | 處理 |
+|---|---|---|---|---|
+| P1 | 阻擋 | 偵測器層級的 Geant4 研究沒有參考 benchmark，永遠無法 `validated-in-scope`，因此永遠不算 F4 | 新增待決事項 D0 | §P.7.1、B2.8；決定紀錄與 issue #273 |
+| P2 | 阻擋 | 保真度名稱與 main 衝突 | 全文採用 main 的 F0–F5 | 前言、§P.5、§C.4.6 |
+| P3 | 主要 | `adapters/detector-design/` 與 adapter 的定義不符 | 搜尋放在 hep-detector 腳本 | C1.6；`adapters/design-bo/` 只是選用後端（C3.2） |
+| P4 | 主要 | §P.7 有幾項已由 main 決定 | 標為已決定 | §P.7.2 |
+| P5 | 主要 | C 不再需要依賴 A；B 必須提供 F4 介面 | 新階段圖 | §P.0 |
+| P6 | 次要 | 基準 contracts 3.5.0 已過時 | 改為 3.12.0；CVn 在發布時才定 | 前言、§P.5 |
+| P7 | 次要 | main 變動快；共用檔案 | 新增風險與 CI 影響群組 | §P.8 第 1、8 項；§P.7 第 15 項 |
+| P8 | 次要 | 獨立審查的隔離由 `independent-review-spec.md` 規定 | 引用該規格 | §P.10.3 第 8 條 |
+| P9 | 次要 | core 的必要依賴本來就含 numpy、scipy | 「只用標準函式庫」寫成刻意的選擇 | §A.3、§C.3、§R.3.2 |
+| R1 | 主要 | 設計理由與 main 的決定不同 | 第 5 部補一節「與 main 設計流程的關係」 | §R.1（重新整理後為 §R.2） |
 
-### §R.15.7 為什麼搜尋不是 adapter
+任務 A：
 
-adapter 是連接外部工具的選用元件，沒有任何 skill 或 core 模組可以依賴它（`docs/adapter-authoring.md` 開頭）。搜尋是 plugin 對 main 產物的邏輯，所以放在 `evaluate_design.py search`，沿用 main 把 `scan` 做成子命令的先例（OQ-18）。只有選用的貝氏最佳化後端（Ax／BoTorch）是外部工具，因此是 `adapters/design-bo/`。
+| # | 嚴重度 | 問題 | 建議 | 處理 |
+|---|---|---|---|---|
+| A1 | 主要 | 漏掉的缺陷 D11：收斂閘門以已提供 summary 中最細的兩個值判定（`check_geant4_study.py:341-348` ✔） | 新增 D11 | A1.16 |
+| A2 | 主要 | 帳本格式已改（`maintenance.md:126-237`） | 一筆一修正、`independence`、`mutants`、簽核、`documentation_fixes` | A1.14 |
+| A3 | 主要 | advisory 格式改為 `/2` | match 群組；SFA-2026-039、-040；涵蓋 F4 評估 | A1.14 |
+| A4 | 主要 | Garwood、`toy_seed`、`coverage_gate` 已在 `core/stats` | 重用 | §A.3、§A.4.5、A1.6、A1.15 |
+| A5 | 主要 | `core/` 不能 import `contracts` | schema 放 `contracts/schemas/` | A1.5、§A.4.5 |
+| A6 | 主要 | `f4` 沒有轉傳 `--run-record`；結束碼誤報 | `--label-run-record`；3 → `incomplete` | A1.17 |
+| A7 | 主要 | F4 的 figure of merit 沒有對應的 kind | 說明並定義對應 | A1.1、B2.7 |
+| A8 | 主要 | 版本門檻「3.5.0 或以下」已不對 | 「低於 CV-A1」；換掉原型的 3.6.0 | A1.2、§A.0 |
+| A9 | 次要 | F4 把純量不確定度讀成 0.6827 高斯 | 68.27 % 的 t 半寬；精確分支寫不對稱 | A1.6、B2.6 |
+| A10 | 次要 | `oneOf`、`not`；`output.schema.json` 不是 JSON Schema | 實作或限定；豁免 | A2.7 |
+| A11 | 次要 | `study` 是開放物件；3.11.0 新欄位 | 保持開放；寫 `argv` 等 | A1.12、A2.3 |
+| A12 | 次要 | `evidence_records[].role` 已存在 | `simulation.evidence_role` | A1.4 |
+| A13 | 次要 | 新的檢查工具 | 加入清單 | §A.8 |
+| A14 | 次要 | `CORE_VERSION`、`OWNERS.json` 准入規則 | 提升版本、登錄 | §A.4.5 |
+| A15 | 次要 | `validate.py` 行號等移動 | 更新 | 全部引用已更新（§A 附錄 C） |
+
+任務 B 與 J15：
+
+| # | 嚴重度 | 問題 | 建議 | 處理 |
+|---|---|---|---|---|
+| B1 | 阻擋 | 沒有程式寫出 `extension.study.results`、`tail_sources_simulated`；`label --write` 重建紀錄（`check_geant4_study.py:584-617` ✔） | `label --results --geometry`；端到端測試 | B2.6、B2.10 |
+| B2 | 阻擋 | J15 永遠 `unvalidated`；沒有徑跡 reference | 驗證載體與 F4 研究分開；徑跡 reference benchmark | B3.2、B2.7、B2.8 |
+| B3 | 主要 | 四種尾部來源都沒有模擬 | 可切換的重建階段 | B2.2 |
+| B4 | 主要 | `design-geometry/1` 只有五個欄位 | `from-geometry`；對照表 1.1.0 | B1.8、B2.6 |
+| B5 | 主要 | 每個候選一個 `geometry_ref`，`results` 不分分母 | 每個（fom, 分母）一份研究 | B3.6；§P.7 第 12 項 |
+| B6 | 主要 | F4 一律寫對稱高斯；電荷誤判是計數型 | 計數估計與精確區間 | B2.3、B2.6 |
+| B7 | 主要 | 68 % 半寬與高斯核心不同 | 宣告核心估計 | B2.3 |
+| B8 | 次要 | 模型包絡兩端分別判定 | 多重散射模型變化 | B3.4 |
+| B9 | 次要 | protocol §6 的模型範圍 | 更正 | B3.4 |
+| B10 | 次要 | `MISSING_FILE_ARGS` 行號、腳本數、函式行號 | 更新 | §B.1、B1.6、B3.8 |
+| B11 | 次要 | B／N 表未由程式印出 | 讓程式印出 | `j15_design_estimates.py`；§B 附錄 A |
+| B12 | 次要 | main 已有 F1／F2 | 改用 `evaluate_design.py run` | B3.1 |
+
+任務 C：
+
+| # | 嚴重度 | 問題 | 建議 | 處理 |
+|---|---|---|---|---|
+| C1 | 阻擋 | 保真度名稱衝突 | 同 P2 | §C.4.6 |
+| C2 | 阻擋 | 自行寫需求判定 | 由 `report` 推導 | §C.3；§H.3 |
+| C3 | 阻擋 | 推薦設計、`order`、自訂 Pareto | 刪除 | §C.3、§C.4.7 |
+| C4 | 主要 | 需求規格重複 design-spec | 讀 design-spec；H1／H2 | §C.4.4、C1.1 |
+| C5 | 主要 | 設計格式重複 design-candidate | 基因組＋解碼器 | §C.4.5、C1.3 |
+| C6 | 主要 | `geometry` 已產生研究幾何 | 由 B 的 `from-geometry` 取代 `realize()` | C2.2、B1.8 |
+| C7 | 主要 | 搜尋族群不能進 artifacts_dir | `search_summary`；只展開決選者 | C1.6、C1.7 |
+| C8 | 主要 | adapter 定義 | 同 P3 | C1.6 |
+| C9 | 主要 | 路由已存在 | workflow 一節，不改 `SKILL.md` | C1.9 |
+| C10 | 主要 | 確認與搜尋種子沒有綁定規則 | `search_summary`＋`design.py` 種子規則 | C2.6 |
+| C11 | 主要 | main 已涵蓋多種探測器 | 搜尋與探測器種類無關 | C3.1 |
+| C12 | 次要 | 沒有多重比較修正 | 作為提案 | §C.9（延後） |
+| C13 | 次要 | cost 沒有評估器 | 不能當目標 | §C.3 第 6 條 |
+
+**main 本身的問題（已回報維護者，issue #273；由 A1 修正）：**
+1. **F4 的 `--label-spec` 路徑無法完成。** `evaluate_design.py:503-506` ✔ 呼叫 `label --upgrade` 時沒有 `--run-record`，`label` 必然拒絕（`check_geant4_study.py:544-569` ✔）；重建的紀錄也沒有 `results` 與 `tail_sources_simulated`（`:584-617` ✔）。測試只用合成紀錄。→ A1.17、B2.6。
+2. **收斂閘門可用較粗的點通過**（D11）。→ A1.16。
+
+**當時建議的新階段圖**（已採用，見 §P.0）：
+
+```
+D0 維護者決定：偵測器層級研究如何成為 F4（擋 B3′、C2′）
+A1′ → A2 → B1′ → B2′ → B3′
+C1′（只依賴 main）
+B2′ ＋ C1′ → C2′ → C3′
+```
+
+### §H.2.2 未參與修改者的通讀（2026-10-24）
+
+一位沒看過修改過程的審查者，只拿文件與程式碼從頭讀完全文。結論：文件仔細、對程式碼大致正確（抽查 37 處引用，35 處正確）；三支計算程式重算的數字都和文件一致；A1、A2、B1 只看文件就能實作。弱點在讓文件有價值的那條路徑：偵測器層級研究成為 F4 並產生可用的判定。
+
+| # | 嚴重度 | 發現 | 處理 |
+|---|---|---|---|
+| F1 | 阻擋 | D0 條件 1（材料在已通過的材料 benchmark 範圍內）J15 無法滿足：Pb、PVT 沒有 benchmark，J14 用 `Si_study` 不是 `G4_Si`，A1 的範圍是 MeV 級 | D0 v2 條件 1 改為材料定義檢查（B2.8、§P.7.1）；新增 `material-definition`（B2.7） |
+| F2 | 阻擋 | 資格規則是多個不同維度 benchmark 的交集，但 `label` 用單一 declared scope 對每個 benchmark 比對（`check_geant4_study.py:537-543`），`_study_upgrade` 只要一個 | 依類別的範圍模型（CV-B2）；外部紀錄經 `--reference-record` 進入（B2.8、§P.4） |
+| F3 | 阻擋 | 對準與校正不均每個 run 只抽一次，所有區塊共用；整體尺度不改寬度、不翻轉電荷 | 至少 20 個重建複本；位置相關的場誤差；整體尺度歸 `rigidity-scale-offset`（B2.1、B2.2、B2.10） |
+| F4 | 主要 | 統計誤差低於適足表的 `min_relative_uncertainty`，升級的 F4 `estimate` 一律 `uncertainty.missing`（`design.py:1305-1309`） | D0-c（§P.7.1、B2.8）；到達第 16 列的測試（B2.10）；風險 12（§P.8） |
+| F5 | 主要 | `f4 --label-spec` 的轉傳不含 `--results`／`--geometry`，重建的紀錄會失去 `results` | `f4 --label-results --label-geometry`；兩條路徑都測（B2.6、B2.10、A1.17） |
+| F6 | 主要 | μ 場傳播的容許值 0.05 % 在 SE 0.07–0.10 % 下永遠無法通過 | 容許值 0.3 %、SE 目標 0.075 %，事件數重算（B3.2） |
+| F7 | 主要 | 核心寬度 benchmark 不能認可電荷誤判（由尾部決定）；100 GV 時核心由點解析度主導 | 徑跡 reference 只認可 `momentum-resolution-core`；電荷誤判需尾部 benchmark（D0-b）；點解析度是宣告的輸入（B2.7、B2.8） |
+| F8 | 主要 | 四個 F1 工具的 `main()` 不接受 argv | C1 加 `argv=None`、重導 stdout、攔截 `SystemExit`（C1.4、§C.3 第 3 條） |
+| F9 | 主要 | 確認研究每個設計只有一個種子，與 A1.4 每個證據點 S 唯一衝突 | S = H(study_id, role, point_id)（§C.1、C2.1、C2.4） |
+| F10 | 主要（未核對） | option0 與 option4 對 μ 與強子可能用同一多重散射模型，包絡為假的 0 | 改為標準 EM 對 `G4EmStandardPhysicsSS`，由探針確認（B3.4） |
+| F11 | 次要 | §P.7 項次在第 2 部與 §B.10 的引用錯一號 | 已更正（A1.9、A1.13、§A.10、§B.10） |
+| F12 | 次要 | 0.6827 的 t 半寬在 `design.py` 單邊 0.95 判定下略低涵蓋 | CV-B2 後寫覆蓋率 0.90 的中央區間（A1.6、B2.6、§R.1.5） |
+| F13 | 次要 | C2 的 adapter 版本不一致 | 一律 0.5.0（§P.0、§P.5、C2.7） |
+| F14 | 次要 | 第 1、5 部與第 3 部對徑跡 reference 的描述不一致 | 以 B2.7、B2.8 為準統一（§P.7.1、§R.7.2、§R.1.5） |
+| F15 | 次要 | 移動 `MiniJson.hh` 會改變 `SIM_SOURCES` 的雜湊鍵 | A2.8、B1.9 說明鍵的移動 |
+| F16 | 次要 | `f4` 的行號與 `label` 的起始行 | `f4` 為 498–553；`cmd_label` 自 496（A1.17、B2.6） |
+| F17 | 次要 | `label` 的結束碼不明確 | 明列結束碼表（A1.17） |
+| F18 | 次要 | B3.6 的 `response` 步驟不必要（F4 高於 F3） | 刪除（B3.6） |
+| F19 | 次要 | 「不受格點限制的局部搜尋得到相同值」未由程式計算 | C1.8 只宣稱 1/32 格點的窮舉值 |
+| F20 | 次要 | 行數與驗證類別數量不一致 | 前言改為約 3,200 行；類別數統一（§R.0、§R.7.1、§H.5.2） |
+
+**與規格不同的一項處理：** 審查後的修正規格原本建議 D0-c 把模型包絡的半寬也併入 F4 不確定度。修正第 3 部時發現 `design.py` 已對包絡兩端分別判定（FID-05，`design.py:1310-1316`），併入會重複計算，因此 D0-c (a) 只是「統計 ⊕ 重建複本的分散」；全文、決定紀錄與 issue 都依此修正。
+
+**審查者對 D0 的建議**（已寫入 §P.7.1 與決定紀錄）：方向正確，但應在修訂後的 B2.8（範圍模型、材料定義條件、電荷誤判只經尾部 benchmark）與 D0-c 的決定之下有條件核准；只用於篩選的 F4 值得作為補充重新考慮。
+
+### §H.2.3 先前計畫版本的問題清單
+
+前一版（2026-10-23）以 main `9f08796`（0.23.0）為基準。2026-10-24 對照 main 0.38.0 的審查（§H.2.1）發現 main 已經有完整的設計流程，於是重新規劃。當時列出的問題與處理（原 §P.1）：
+
+| # | 問題 | 影響 | 處理 |
+|---|---|---|---|
+| P1 | **偵測器層級的 Geant4 研究無法成為 F4。** F4 只接受重新發出為 `validated-in-scope` 的研究（`contracts/design.py:1004`），升級需要涵蓋研究範圍的 reference benchmark，而解析度、電荷誤判、簇射包含都沒有 | 任務 B 與 C 的 Geant4 結果都進不了設計流程 | 建立 F4 資格路徑（D0，§P.7 第 1 項）：材料定義、場傳播驗證、重建驗證、新的徑跡 reference benchmark 四個條件都成立時才可升級（B2.8）；F4 不確定度的政策另由維護者決定（D0-c） |
+| P2 | **保真度名稱衝突。** 前一版任務 C 的 F0／F1／F2 與 main 的 F0–F5 意義不同 | 讀者與 `design.py` 對同一個名稱有不同解讀 | 全文採用 main 的名稱（§P.5）；搜尋中的 Geant4 短 run 只產生「搜尋值」，不是任何保真度 |
+| P3 | **任務 C 再造一套設計系統**：自己的需求規格、設計格式、需求判定、排序與「推薦設計」，並違反 main 的規則（判定只由 `design.py` 推導、絕不宣稱全域最佳、閘門要人） | 不能合併 | C 改為 D2 階段的候選產生器 `evaluate_design.py search`：讀 design-spec 與基礎候選，只寫 `search_summary`，決選者經 `expand` 成為候選，由 `report` 推導判定 |
+| P4 | **F4 的資料路徑不完整。** main 上沒有程式寫出 `extension.study.results` 與 `tail_sources_simulated`；`evaluate_design.py f4` 呼叫 `label --upgrade` 時沒有傳 `--run-record`，`label` 必然拒絕 | F4 實際上無法產生 | A1 修正 `f4` 的轉傳與結束碼；B2 讓 `label` 寫出 F4 需要的欄位，並加端到端測試 |
+| P5 | **A1 漏掉一個缺陷並使用舊格式。** 收斂閘門缺少最細的掃描點時以較粗的點通過（D11）；帳本與 advisory 的格式已改；Garwood 區間與種子推導在 `core/stats` 已有 | A1 不能照舊開始 | A1 加 D11、改用新格式、重用既有函式（第 2 部） |
+| P6 | **A1 的範圍膨脹**（沿用前一版的處理）。只有後續階段需要的功能不放進 A1 | sci-fix 被拖慢 | 原則 R1；判定引擎在 A1 只有 `equivalence` 與 `detection_limit`，B2 加 `change`；需求判定一律由 `design.py` 負責 |
+| P7 | **契約變更的代號依合併順序而定。** C1 不再依賴 A，可能比 A1 先合併 | 「CV1–CV3」的順序不再成立 | 以擁有的階段命名：CV-A1、CV-B2、CV-C1、CV-C2；號碼在發布時依合併順序決定（§P.5） |
+| P8 | **介面放錯層**（沿用）。`core/` 只能 import `core`（`check_layering.py:4`） | `core/` 無法使用 `contracts/schema.py` | summary 的 schema 放在 `contracts/schemas/`，由 adapter 或 skill 腳本驗證；`core/simulation/` 只做計算 |
+| P9 | **待決事項與閘門分散**（沿用） | 看不到哪個決定擋住哪個階段 | 合併為 §P.6、§P.7 兩張表；main 已決定的事項標明出處 |
+
+---
+
+## §H.3 概念對照：舊設計 → 現行
+
+舊任務 C 的概念與 main 的對應（原 §C.4.3）：
+
+| 舊任務 C 的概念 | main 的對應 | 處理 |
+|---|---|---|
+| 需求規格 `detector-requirements/1`、`confirmed_by_user` | design-spec（REQ、分母、配分、`comparison_basis`、`pareto_axes`）；H1、H2 | 刪除，改讀 design-spec |
+| 目標與約束目錄 | `design_adequacy.json` 的 figure of merit id | 刪除，改用 id |
+| 元件目錄 `catalogue/1` | `subsystem_roles` ＋ tool contract 的 design 區塊 | 改為角色的實現規則與參數範圍（新） |
+| 設計文法 `detector-design/1` | design-candidate（子系統圖） | 刪除；基因只作內部編碼＋解碼器（新） |
+| `realize()` → `element_sim.spec/1` | `evaluate_design.py geometry` ＋ B1 的 `from-geometry` | 刪除，由任務 B 提供 |
+| 保真度 F0／F1／F2 | main 的 F1；Geant4 搜尋值（無保真度）；F4 | 改名（§C.4.6） |
+| 設計雜湊與評估快取 | `effective_digest`、`parameter_digest`、`--replace`、`run_workflow.py --incremental` | 搜尋內的快取保留，正式評估用 main 的機制 |
+| `threshold` 需求判定、`order`、自訂 Pareto、「推薦設計」 | 判定表與彙整、`ranking()`、`pareto()` | 刪除 |
+| 搜尋紀錄 `extension.design_search` | `scan_summary` 的模式 | 改為 `search_summary`（CV-C1） |
+| CV3 的角色規則 | 孤兒 run 規則 | 改為 CV-C2 的種子規則 |
+| adapter `detector-design`、reference、`SKILL.md` 一行 | 能力 `detector-design`（hep-detector）、workflow 文件 | 刪除；新增 workflow 一節 |
+| `proposer: llm` | 參數 `source`／`status: proposal` | 合併，另在 `search_summary` 標記 |
+| NSGA-II、Sobol、超體積、修復與違反量 | 無 | 保留（新） |
+| Geant4 多保真度搜尋、配對比較、G-C2a、`values` | 無 | 保留（C2） |
+| 贏家詛咒與搜尋規模的保護 | 部分：RSK-04 只展開進入比較的點 | 保留並延伸 |
+| 封閉測試 | 無 | 保留 |
+| J16 | Example A、B（無 journey） | 改為在 Example A、B 上執行 |
+
+命名的新舊對照（原 §P.5、§P.7）：
+
+- 前一版的 CV1、CV2、CV3 分別改為 CV-A1、CV-B2、CV-C2；CV-C1 是新的。前一版任務 C 的「F0」相當於 main 的 F1，「F1、F2」與「確認」相當於搜尋值與 F4。
+- 前一版的 `extension.design_search` 改為 computational-run 的 `search_summary` 欄位（同 `scan_summary`）。
+- 前一版的 detector-design adapter、需求規格 schema 與元件目錄 schema 已刪除。
+
+---
+
+## §H.4 被取代的設計
+
+（原 §R.14「演進紀錄：被取代的設計」）
+
+| 前一版的設計 | 取代為 | 依據 |
+|---|---|---|
+| `simstat` 與不連結 Geant4 的 `simcore`：把逐 run 的統計搬到 C++ | 推論留在 Python，讀合併後的 summary | 程式與資料量小，C++ 無收益，且使重播需要編譯器（合理性評估 P1）；CMS DQM 也在合併後才判定 |
+| spec/2、`layered_sim convert`、雙格式存取器、同主機逐位元相同的閘門 | `layered_sim` 不改格式；新增 `element_sim` | 成本最高、價值最低；新增程式讓 J14 不動，並得到真正的第二後端 |
+| 整數量化、雙字組 128 位元整數、五成雙捨入、`%.17g` 才能重算 | 浮點補償加總；整數只用於計數與直方圖；重現定義為判定相同 | 逐位元相同不是科學需求；實際實驗追求可重現的事件與可追溯的來源 |
+| 每個證據 run 16 個獨立行程 | 一個 run 內依事件編號分區塊 | batch means 本來就是 run 內分批；逐事件種子讓工作切分與統計無關 |
+| 強制逐事件種子只為了逐位元相同 | 逐事件種子作為新 spec 的預設，目的是事件決定性 | ATLAS、Allpix² 的做法 |
+| 只檢查介面的合成後端 | `element_sim` 是真正的第二後端 | 第三次檢查 R19 |
+| 驗證只有等級（reference、sanity、verification、interface） | 六個驗證類別（加入 setup-matched、regression；surrogate 延後） | geant-val、Belle II、ATLAS AtlFast3 |
+| 任務 C 自己的需求規格 `detector-requirements/1`、元件目錄與設計格式 `detector-design/1` | main 的 design-spec 與 design-candidate；基因組只是最佳化器的內部編碼，解碼成基礎候選的 `overrides` | main 0.37.0 已有這些產物（§H.2.1 的 C4、C5） |
+| 任務 C 的保真度 F0、F1、F2 | main 的 F0–F5：舊 F0 是 main 的 F1；搜尋中的短 Geant4 run 只是搜尋值；確認是 F4 | 名稱衝突（§H.2.1 的 P2） |
+| 任務 C 的需求判定（`threshold`）、`order`、自訂 Pareto 與「推薦設計」 | `contracts/design.py` 推導判定、篩選、排序與 Pareto；不宣稱最佳 | main 的規則（§H.2.1 的 C2、C3） |
+| `realize()`：設計 → spec | `evaluate_design.py geometry` 產生 `design-geometry/1`，B1 的 `from-geometry` 推導 `element_sim.spec/1` | main 已有幾何產生步驟（§H.2.1 的 C6、B4） |
+| `adapters/detector-design/` 與其版本序列 | `evaluate_design.py search`；只有選用的貝氏最佳化後端是 adapter | adapter 是連接外部工具的選用元件（§H.2.1 的 P3） |
+| B2 為任務 C 加入的 surrogate 類別 | 延後 | 設計情境中的快速模擬由 main 的保真度與 bound 表示（§H.2.1，任務 B 的重新規劃） |
+
+仍然有效的前一版內容（已併入第 5 部）：缺陷 D1–D10 的修正、契約的等級表與依 benchmark 宣告的範圍維度、隔離與場的定義、目標雜湊的版本、IUT 閘門與 t 分位數的操作特性、精確計數區間、MPV 的內插與兩道偏差檢查、t 分位數的偵測極限、兩階段事件數、事件權重的限制、探針的內容與時機、ROOT 檔的設計、J15 的設計。第三次深度檢查的 25 項發現中，R11、R12、R16、R18 因設計改變而不再適用，R19 由 `element_sim` 解決，其餘都已併入。
+
+---
+
+## §H.5 決策紀錄
+
+（原 §R.13「決策紀錄」）
+
+### §H.5.1 使用者已決定
+
+| 日期 | 決定 | 位置 |
+|---|---|---|
+| 2026-10-22 | 核心程式用 C++，Python 作為介面；計算核心用 C++、參考值留在 Python；以獨立執行檔交換 JSON/CSV，不用 Python 綁定 | 原則 2（依 §H.5.2 第 1 項的詮釋） |
+| 2026-10-22 | J15 的 TOF1、TOF2 各兩層，四層同材料 | §B |
+| 2026-10-22 | 詳細的逐事件資訊存成 ROOT 檔 | §R.5.1 T1、B1 |
+| 2026-10-22 | J15 與其他部分拆成兩個任務，J15 後做 | 任務 A（A1、A2）、任務 B（B1、B2、B3）；之後加入任務 C（§P.0） |
+| 2026-10-24 | 全面重寫以接上 main 的設計流程；任務 C 的搜尋做成 `evaluate_design.py search`；偵測器層級的 Geant4 研究經資格路徑成為 F4 | §R.1、§P.0 |
+| 2026-10-24 | D0 送維護者決定：決定紀錄 `decision-d0-f4-qualification.md`，issue #273 | §P.7.1 |
+| 2026-10-24 | 把修正內容放進文件並重新整理，讓 Claude 能清楚理解 | §H.1 |
+
+### §H.5.2 第 5 部的提議（需要使用者確認）
+
+1. **語言分工的詮釋：** 逐事件的計算（模擬、數位化、重建、累加）在 C++；合併後的推論在 Python。
+2. **輸出層的後端介面**（三個邊界產物），不做引擎抽象層。
+3. **事件決定性：** 新 spec 預設 `seeding: per-event`；工作切分與執行緒數不影響事件。
+4. **重現的定義是「判定相同」**，數值以容差比較；不做整數量化與逐位元相同的統計量。
+5. **區塊 batch means：** 一個 run 內依事件編號分 K ≥ 16 個區塊；J14 有逐事件資料的 run 離線重算，不重錄。
+6. **新增 `element_sim`**，`layered_sim` 不改 spec 格式；兩者共用 `g4sim`。
+7. **六個驗證類別**（五種性質中模型對模型延後，另有 sanity、interface），其中 verification、regression 在 CV-B2（B2）加入；surrogate 延後。
+8. **八個階段**（A1、A2、B1、B2、B3、C1、C2、C3；§P.0），ROOT 檔與 `simroot` 在 B1。
+9. 兩階段係數用 F₀.₉₀ 或 F₀.₉₅；精確區間的切換門檻（任一區塊為 0 或總數 < 100）。
+
+### §H.5.3 待維護者決定
+
+合併後的清單與建議見 §P.7；第 5 部原有的七項都已併入該清單。
