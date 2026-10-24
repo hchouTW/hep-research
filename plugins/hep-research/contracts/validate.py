@@ -350,16 +350,20 @@ GEANT4_A1_FROM = "3.13.0"  # CV-A1 (Geant4 correctness sci-fix): benchmark table
 # CV-A1: benchmark -> validation class (the value a record's grade must have), the observable kinds it supports and its
 # scope dimensions (categorical or interval). Only reference and setup-matched benchmarks upgrade; the record never
 # declares a class, kind or dimension. Entries are added in later contract versions.
+_SLAB_SCOPE = (("particle", "categorical"), ("material", "categorical"), ("energy_MeV", "interval"),
+               ("thickness_mm", "interval"))
 GEANT4_BENCHMARKS = {
-    "stopping-power": {"class": "reference", "kinds": ("stopping-power",)},
-    "range": {"class": "reference", "kinds": ("range",)},
-    "thin-layer-mpv": {"class": "reference", "kinds": ("most-probable-value",)},
-    "thin-layer-width": {"class": "sanity", "kinds": ("thin-layer-width",)},
-    "multiple-scattering": {"class": "sanity", "kinds": ()},
-    "em-shower-shape": {"class": "sanity", "kinds": ()},
-    "shower-containment": {"class": "sanity", "kinds": ()},
-    "longitudinal-profile": {"class": "setup-matched", "kinds": ("shower-maximum",)},
-    "published-data": {"class": "interface", "kinds": ()},
+    "stopping-power": {"class": "reference", "kinds": ("stopping-power",), "scope": _SLAB_SCOPE},
+    "range": {"class": "reference", "kinds": ("range",), "scope": _SLAB_SCOPE},
+    "thin-layer-mpv": {"class": "reference", "kinds": ("most-probable-value",), "scope": _SLAB_SCOPE},
+    "thin-layer-width": {"class": "sanity", "kinds": ("thin-layer-width",), "scope": _SLAB_SCOPE},
+    "multiple-scattering": {"class": "sanity", "kinds": (), "scope": ()},
+    "em-shower-shape": {"class": "sanity", "kinds": (), "scope": ()},
+    "shower-containment": {"class": "sanity", "kinds": (), "scope": ()},
+    "longitudinal-profile": {"class": "setup-matched", "kinds": ("shower-maximum",),
+                             "scope": (("particle", "categorical"), ("energy_MeV", "interval"),
+                                       ("target_geometry_sha256", "target-hash"))},
+    "published-data": {"class": "interface", "kinds": (), "scope": ()},
 }
 GEANT4_UPGRADING_CLASSES = ("reference", "setup-matched")
 
@@ -397,7 +401,8 @@ def _upgrading(b: dict, a1: bool) -> bool:
 
 def _scope_inside(declared: dict, bench: dict, benchmark: str | None = None, a1: bool = False) -> list[str]:
     """Where a declared scope leaves a benchmark's scope (particle, material, energy and thickness ranges). CV-A1
-    (a1): the declared observable_kind must be one of the kinds the benchmark supports (GEANT4_BENCHMARKS)."""
+    (a1): the declared observable_kind must be one of the kinds the benchmark supports, and every scope dimension of
+    the benchmark (GEANT4_BENCHMARKS) must be declared and inside (_scope_dimensions)."""
     out = []
     if a1:
         kinds = (GEANT4_BENCHMARKS.get(benchmark) or {}).get("kinds", ())
@@ -406,6 +411,7 @@ def _scope_inside(declared: dict, bench: dict, benchmark: str | None = None, a1:
             out.append("the declared scope has no observable_kind")
         elif kind not in kinds:
             out.append(f"observable kind {kind!r} is not one {benchmark} supports ({list(kinds)})")
+        return out + _scope_dimensions(declared, bench, (GEANT4_BENCHMARKS.get(benchmark) or {}).get("scope", ()))
     for k in ("particle", "material"):
         if declared.get(k) is not None and bench.get(k) is not None and declared[k] != bench[k]:
             out.append(f"{k} {declared[k]!r} is not the benchmark's {bench[k]!r}")
@@ -419,6 +425,46 @@ def _scope_inside(declared: dict, bench: dict, benchmark: str | None = None, a1:
         blo, bhi = (b, b) if isinstance(b, (int, float)) else (b[0], b[-1])
         if lo < blo * (1 - 1e-9) or hi > bhi * (1 + 1e-9):
             out.append(f"{k} {d} is outside the benchmarked {b}")
+    return out
+
+
+def _interval(v) -> tuple[float, float] | None:
+    """A scalar is [v, v]; a list or pair is [first, last]; anything else is no interval."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return float(v), float(v)
+    if isinstance(v, (list, tuple)) and v and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in v):
+        return float(min(v)), float(max(v))
+    return None
+
+
+def _scope_dimensions(declared: dict, bench: dict, dims) -> list[str]:
+    """CV-A1: every dimension the benchmark has must be declared and lie inside the benchmark's: categorical by set
+    inclusion, interval by interval inclusion (relative slack 1e-9), the target hash by equality with the same
+    hash_scheme. A dimension missing from the declaration, or a benchmark that states none, is outside."""
+    out = []
+    for k, kind in dims:
+        d, b = declared.get(k), bench.get(k)
+        if d is None:
+            out.append(f"the declared scope has no {k} (every dimension of the benchmark is required)")
+            continue
+        if b is None:
+            out.append(f"{k}: the benchmark states none")
+            continue
+        if kind == "categorical":
+            ds = set(d) if isinstance(d, (list, tuple)) else {d}
+            bs = set(b) if isinstance(b, (list, tuple)) else {b}
+            if not ds <= bs:
+                out.append(f"{k} {sorted(map(str, ds - bs))} is not in the benchmark's {sorted(map(str, bs))}")
+        elif kind == "interval":
+            di, bi = _interval(d), _interval(b)
+            if di is None or bi is None:
+                out.append(f"{k}: {d!r} or the benchmark's {b!r} is not a number or range")
+            elif di[0] < bi[0] - 1e-9 * abs(bi[0]) or di[1] > bi[1] + 1e-9 * abs(bi[1]):
+                out.append(f"{k} {d} is outside the benchmarked {b}")
+        elif d != b or declared.get("hash_scheme") != bench.get("hash_scheme"):
+            out.append(f"{k} {d} ({declared.get('hash_scheme')}) is not the benchmark's {b} ({bench.get('hash_scheme')})")
     return out
 
 

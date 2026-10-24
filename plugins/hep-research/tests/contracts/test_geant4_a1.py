@@ -125,5 +125,35 @@ class ScopeKind(unittest.TestCase):
                     self.assertEqual(strict_exit(doc), 0 if kind in kinds else 1)
 
 
+class ScopeDimensions(unittest.TestCase):
+    """geant4-scope-missing-dimension (D1): every scope dimension of the benchmark (A1.1 fourth column) must be
+    declared; categorical by set inclusion, interval by interval inclusion, a scalar read as [v, v] (A1.2)."""
+    # J14's thin-layer-mpv scope: mu-, Si_study, 10 GeV, 0.3 mm; per dimension: declared value -> inside?
+    CASES = {"particle": [("mu-", True), (["mu-"], True), ("mu+", False), (["mu-", "mu+"], False)],
+             "material": [("Si_study", True), ("G4_Si", False), (["Si_study", "G4_Si"], False)],
+             "energy_MeV": [([10000.0, 10000.0], True), (10000.0, True), ([9000.0, 10000.0], False),
+                            (12000.0, False)],
+             "thickness_mm": [([0.3, 0.3], True), (0.3, True), ([0.3, 0.5], False), (0.1, False)]}
+
+    def test_each_dimension_missing_inside_or_outside(self):
+        base = j14_record()
+        for dim, cases in self.CASES.items():
+            for value, inside in [*cases, (None, False)]:
+                doc = copy.deepcopy(base)
+                scope = doc["extension"]["study"]["declared_scope"]
+                if value is None:
+                    scope.pop(dim)
+                else:
+                    scope[dim] = value
+                with self.subTest(dimension=dim, declared=value):
+                    self.assertEqual(strict_exit(doc), 0 if inside else 1)
+
+    def test_a_scope_that_declares_only_the_kind_is_outside(self):
+        """The defect itself: dimensions missing from the declaration were unconstrained."""
+        doc = j14_record()
+        doc["extension"]["study"]["declared_scope"] = {"observable_kind": "most-probable-value"}
+        self.assertEqual(strict_exit(doc), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
