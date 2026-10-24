@@ -71,7 +71,7 @@
   "energy_MeV": 10000.0
  },
  "physics": {
-  "layered_sim_spec": "specs/mpv-mu10GeV.json",
+  "layered_sim_spec": "recorded/specs/mpv-nominal.json",
   "ui_order": "after-physics-list-before-initialize",
   "justification": [
    {
@@ -112,6 +112,105 @@
    "mpv_deposit_MeV": 0.02,
    "tail_fraction": 0.1
   }
+ },
+ "observables": [
+  {
+   "name": "mean_deposit_MeV",
+   "source_column": "edep_Si_MeV",
+   "bins": {
+    "lo": 0.0,
+    "hi": 1000.0,
+    "width": 1000.0
+   },
+   "estimator": "mean"
+  },
+  {
+   "name": "mpv_deposit_MeV",
+   "source_column": "edep_Si_MeV",
+   "bins": {
+    "lo": 0.05,
+    "hi": 0.13,
+    "width": 0.002
+   },
+   "estimator": "mode"
+  },
+  {
+   "name": "tail_fraction",
+   "source_column": "edep_Si_MeV",
+   "bins": {
+    "lo": 0.0,
+    "hi": 1000.0,
+    "width": 1000.0
+   },
+   "thresholds": [
+    0.25
+   ],
+   "estimator": "proportion"
+  },
+  {
+   "name": "mpv_loss_MeV",
+   "source_column": "primary_eloss_MeV",
+   "bins": {
+    "lo": 0.05,
+    "hi": 0.13,
+    "width": 0.002
+   },
+   "estimator": "mode",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    }
+   ]
+  },
+  {
+   "name": "loss_transmitted_MeV",
+   "source_column": "primary_eloss_MeV",
+   "bins": {
+    "lo": 0.05,
+    "hi": 0.13,
+    "width": 0.002
+   },
+   "estimator": "mode",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "column": "primary_end_process",
+     "op": "==",
+     "value": "Transportation"
+    }
+   ]
+  },
+  {
+   "name": "deposit_transmitted_MeV",
+   "source_column": "edep_Si_MeV",
+   "bins": {
+    "lo": 0.02,
+    "hi": 0.3,
+    "width": 0.002
+   },
+   "estimator": "mode",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "column": "primary_end_process",
+     "op": "==",
+     "value": "Transportation"
+    }
+   ]
+  }
+ ],
+ "blocks": {
+  "K": 16
  },
  "statistical_target": {
   "observable": "mpv_loss_MeV",

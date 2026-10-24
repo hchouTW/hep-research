@@ -23,8 +23,10 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
   thin-layer-mpv    (reference) most probable energy loss of the primary against the PDG Landau-Vavilov value
                     Delta_p = xi [ln(2 m c^2 b^2 g^2 / I) + ln(xi / I) + j - b^2 - delta(bg)], j = 0.200, xi =
                     (K/2)(Z/A) z^2 (rho x / b^2) (RPP 2024 eq. 34.12); applicable only for kappa = xi / W_max < 0.05.
-                    MPV estimator: the vertex of the least-squares parabola through the fullest bin and two bins on
-                    each side of a histogram with the declared bin width; the most probable deposit is reported too.
+                    MPV estimator (A1.7): in each block's histogram (the summary observable's bins), the vertex of
+                    the three-point parabola through the fullest bin and its neighbours; the MPV is the mean of the K
+                    block modes with its batch-means SE; more than K/4 fallback blocks, or a mean of block modes more
+                    than tol/5 + 2 SE from the merged histogram's mode, is not applicable (incomplete).
   thin-layer-width  (sanity) FWHM of the deposit distribution against 4 xi (thin-layer widths are wider: RPP 2024).
   multiple-scattering (sanity) core width of the projected exit angle (both projections, RMS of the central 98 %
                     divided by the Gaussian truncation factor 0.8673) against Highland from multiple_scattering.py,
@@ -41,19 +43,28 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
                     same fit to published test-beam data (config key published: alpha and beta with their uncertainties
                     and source); the reference accuracy is the published t_max uncertainty (alpha and beta propagated
                     without their correlation, conservative) plus a stated systematic_relative for known differences
-                    between the planar model and the measurement; SE by a seeded bootstrap of the events (refit).
+                    between the planar model and the measurement; the fit is made per block and t_max is the batch
+                    mean of the block fits.
   published-data    (interface) the Geant4 mean of a named column and a published value, handed to hep-statistics.
-Verdict: |G4 - ref| / ref <= tolerance, tolerance = reference accuracy + k x SE (SE by a seeded bootstrap of the
-events), plus a stated binning term for the MPV. Detection limit: tolerance + |observed relative difference| + 2 SE
-(an injected error of that size, of either sign, fails with probability >= 0.977). Every reference benchmark reruns on its negative control (a Geant4 run with an error of known
-size injected on the Geant4 side, set at the claimed detection limit, the reference unchanged): the control must
-fail, or the benchmark is not validation evidence for that scope. Gross controls (msc off) do not count.
+Data (contracts CV-A1): stopping-power, range, thin-layer-mpv, thin-layer-width and longitudinal-profile read a run
+summary (simulation-summary/1, adapters/geant4/assets/summary_from_csv.py) and estimate their statistic by batch
+means over its K blocks (core/simulation/estimates.py; SE on K - 1 degrees of freedom); the summary observable must
+have the selection the benchmark's definition requires (transmitted: primary_fate == 1 and primary_end_process ==
+Transportation; range: stopped with no hadronic end process). The other sanity and interface benchmarks read the
+per-event CSV. Verdict: |G4 - ref| / ref <= tolerance, tolerance = reference accuracy + k x SE, plus a stated binning
+term for the MPV. Negative controls (A1.10, core/stats/decisions.py): every reference or setup-matched benchmark reruns
+on its controls (Geant4 runs with an error of known size injected on the Geant4 side, the reference unchanged); a
+control is judged on the observable: shift = (control - nominal) / reference with the SE of both runs, caught when the
+control's verdict is fail; detection limit DL = tolerance + |relative difference| + t_0.977(nu) SE_shift (Welch nu);
+a control is at the claimed limit when caught and |shift| <= 1.1 DL. Controls in both directions validate the claim;
+one direction narrows it to that sign (scope.detection_limit_sign). Gross controls (msc off) do not count.
 
 Input: a benchmark config JSON (schema geant4-benchmarks/1; paths relative to the config file):
-  {"schema", "study_spec", "benchmarks": [{"benchmark", "csv", "run_record", "slab", "material", "particle",
-   "energy_MeV", "thickness_mm", "tolerance": {"reference_accuracy_relative", "k_sigma"}, "bootstrap": {"resamples",
-   "seed"}, "binning": {"bin_width_MeV"}, "negative_control": {"csv", "run_record", "injected", "injected_relative"},
-   "reference_table" (range), "column"/"published" (published-data), "layers" [{"t", "column"}], "published"
+  {"schema", "study_spec", "benchmarks": [{"benchmark", "summary" and "observable" (summary-based benchmarks) or
+   "csv", "run_record", "slab", "material", "particle", "energy_MeV", "thickness_mm", "tolerance":
+   {"reference_accuracy_relative", "k_sigma"}, "binning": {"bin_width_MeV"}, "negative_controls": [{"summary" or
+   "csv", "run_record", "injected", "injected_relative"}] (or one "negative_control"), "reference_table" (range),
+   "column"/"published" (published-data), "layers" [{"t", "observable"}] (longitudinal-profile), "published"
    {"alpha", "beta", "source"}, "systematic_relative" (longitudinal-profile), "target_slabs" (the slabs of the target,
    absorbers included; default the measured slab; required for longitudinal-profile), "measured_configuration"
    {"target_geometry_sha256", "hash_scheme"} (setup-matched: the configuration the measurement was made on)}]}
@@ -66,7 +77,9 @@ Usage: geant4_benchmarks.py run --config CONFIG.json [--out OUT.json] [--status 
        geant4_benchmarks.py reference --study-spec SPEC.json --material NAME --particle P --energy-mev E [--thickness-mm T]
 Output JSON: status, status_label, inputs, defaults_used, benchmarks [{benchmark, grade, reference {source, version,
 validity}, scope {particle, energy_MeV, material, thickness_mm, observable}, statistic, geant4, reference_value,
-relative_difference, tolerance {total, parts}, detection_limit_relative, verdict, negative_control {...},
+relative_difference, relative_se, tolerance {total, parts}, detection_limit_relative, verdict, negative_control
+{status, controls [{shift, se_of_shift, sign, detection_limit_relative, at_claimed_detection_limit, ...}],
+detection_limit_sign},
 configuration, target_geometry_sha256, hash_scheme, target_slabs, configuration_basis, configuration_gap,
 validation_evidence}], gaps.
 Exit codes: 0 every benchmark ran and no reference benchmark failed; 1 a reference benchmark failed or its negative
@@ -79,7 +92,6 @@ import gzip
 import hashlib
 import json
 import math
-import random
 import statistics
 import subprocess
 import sys
@@ -88,7 +100,11 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
+from contracts.schema import validate as schema_validate  # noqa: E402
 from contracts.validate import geant4_spec_v1  # noqa: E402  (CV-A1: one configuration derivation)
+from core.simulation import estimates as E, summary as S  # noqa: E402
+from core.stats.batch_means import batch_mean  # noqa: E402
+from core.stats.decisions import detection_limit, welch_dof  # noqa: E402
 from core import constants as K  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
@@ -208,41 +224,6 @@ def _is_num(v: str) -> bool:
         return False
 
 
-def bootstrap(values: list[float], stat, resamples: int, seed: int) -> float:
-    rng = random.Random(seed)
-    n = len(values)
-    est = [stat([values[rng.randrange(n)] for _ in range(n)]) for _ in range(resamples)]
-    return statistics.stdev(est)
-
-
-def mpv(values: list[float], width: float, half: int = 2) -> float:
-    """Vertex of the least-squares parabola through the fullest histogram bin and `half` bins on each side (bins of
-    `width` from 0); the vertex is kept inside the fitted window."""
-    counts: dict[int, int] = {}
-    for v in values:
-        b = int(math.floor(v / width))
-        counts[b] = counts.get(b, 0) + 1
-    k = max(sorted(counts), key=lambda b: counts[b])
-    xs = list(range(-half, half + 1))
-    ys = [counts.get(k + x, 0) for x in xs]
-    n, sx2, sx4 = len(xs), sum(x * x for x in xs), sum(x ** 4 for x in xs)
-    sy, sxy, sx2y = sum(ys), sum(x * y for x, y in zip(xs, ys)), sum(x * x * y for x, y in zip(xs, ys))
-    b1 = sxy / sx2  # symmetric window: the linear term decouples
-    a2 = (n * sx2y - sx2 * sy) / (n * sx4 - sx2 * sx2)
-    shift = -b1 / (2 * a2) if a2 < 0 else 0.0
-    return (k + 0.5 + max(-half, min(half, shift))) * width
-
-
-def fwhm(values: list[float], width: float) -> float:
-    counts: dict[int, int] = {}
-    for v in values:
-        b = int(math.floor(v / width))
-        counts[b] = counts.get(b, 0) + 1
-    peak = max(counts.values())
-    above = sorted(b for b, c in counts.items() if c >= peak / 2)
-    return (above[-1] - above[0] + 1) * width
-
-
 def transmitted(rows: list[dict]) -> tuple[list[dict], dict]:
     kept = [r for r in rows if r.get("primary_fate") == 1 and r.get("primary_end_process") == "Transportation"]
     hadronic = sum(1 for r in rows if any(h in str(r.get("primary_end_process")) for h in HADRONIC_END))
@@ -283,23 +264,55 @@ def _tol(b: dict, se_rel: float, extra: float = 0.0) -> tuple[float, dict, float
         total + 2 * se_rel
 
 
-def detection_limit(tol: float, rel: float, se_rel: float) -> float:
-    """Smallest injected relative error, of either sign, that fails with probability >= 0.977 given the offset
-    already observed: |rel + delta| >= |delta| - |rel| must exceed tol by 2 SE."""
-    return tol + abs(rel) + 2 * se_rel
+TRANSMITTED = [{"column": "primary_fate", "op": "==", "value": 1},
+               {"column": "primary_end_process", "op": "==", "value": "Transportation"}]
+STOPPED = [{"column": "primary_fate", "op": "==", "value": 0}] + [
+    {"column": "primary_end_process", "op": "!contains", "value": h} for h in HADRONIC_END]
+SUMMARY_BENCHMARKS = ("stopping-power", "range", "thin-layer-mpv", "thin-layer-width", "longitudinal-profile")
 
 
-def bench_stopping_power(b: dict, rows: list[dict], study: dict) -> dict:
+class Summary:
+    """The run summary (simulation-summary/1) behind a summary-based benchmark: validated, its observables estimated
+    by core.simulation.estimates; each benchmark names the observables it needs and their required selection."""
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.doc = json.loads(path.read_text(encoding="utf-8"))
+        rep = schema_validate(self.doc, "simulation_summary.json")
+        if self.doc.get("summary_version") != "simulation-summary/1" or not rep.ok:
+            raise BenchmarkError(f"{path.name}: not a valid simulation-summary/1 "
+                                 + "; ".join(f.message for f in rep.errors)[:200])
+
+    def obs(self, name: str, column: str, selection: list, what: str) -> dict:
+        try:
+            o = S.observable(self.doc, name)
+        except S.SummaryError as exc:
+            raise BenchmarkError(f"{self.path.name}: {exc}") from exc
+        if o["source_column"] != column or o["selection"] != selection:
+            raise BenchmarkError(f"{self.path.name}: observable {name} must be {what} (column {column}, selection "
+                                 f"{selection}), not column {o['source_column']} with selection {o['selection']}")
+        return o
+
+    def estimate(self, o: dict, estimator: str, tol=None) -> dict:
+        r = E.estimate(self.doc, {**o, "estimator": estimator}, tol)
+        if r.get("status") != "ok":
+            raise BenchmarkError(f"{self.path.name}: {o['name']} estimate incomplete ({r.get('reason')})")
+        return r
+
+    def selection(self, o: dict) -> dict:
+        events = sum(b["events"] for b in o["blocks"])
+        used = sum(b["n"] for b in o["blocks"])
+        return {"events": events, "used": used, "excluded": events - used,
+                "excluded_fraction": (events - used) / events if events else None, "blocks": len(o["blocks"])}
+
+
+def bench_stopping_power(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
     mass, z = particle_props(b["particle"])
-    kept, sel = transmitted(rows)
-    if len(kept) < 2:
-        raise BenchmarkError("stopping-power: fewer than two transmitted primaries")
-    loss = [r["primary_eloss_MeV"] for r in kept]
+    o = summ.obs(b["observable"], "primary_eloss_MeV", TRANSMITTED, "the energy loss of transmitted primaries")
+    e = summ.estimate(o, "mean")
     t_cm = b["thickness_mm"] / 10
-    mean_loss = statistics.fmean(loss)
-    bs = b.get("bootstrap", {})
-    se = bootstrap(loss, statistics.fmean, bs.get("resamples", 200), bs.get("seed", 1))
+    mean_loss = e["value"]
     g4 = mean_loss / t_cm
     e_mid = b["energy_MeV"] - mean_loss / 2
     ref = bethe(e_mid, mass, z, mat) * mat["density_g_cm3"]
@@ -307,22 +320,21 @@ def bench_stopping_power(b: dict, rows: list[dict], study: dict) -> dict:
     _, _, bg = kinematics(b["energy_MeV"], mass)
     applicable = 0.1 <= bg <= 1000
     rel = (g4 - ref) / ref
-    tol, parts, _ = _tol(b, se / mean_loss)
-    dl = detection_limit(tol, rel, se / mean_loss)
+    se_rel = e["se"] / mean_loss
+    tol, parts, _ = _tol(b, se_rel)
     return {"statistic": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
-            "geant4": g4, "geant4_se": se / t_cm, "reference_value": ref, "relative_difference": rel,
-            "tolerance": {"total": tol, "parts": parts}, "detection_limit_relative": dl,
+            "geant4": g4, "geant4_se": e["se"] / t_cm, "geant4_dof": e["dof"], "reference_value": ref,
+            "relative_difference": rel, "relative_se": se_rel, "tolerance": {"total": tol, "parts": parts},
             "verdict": ("pass" if abs(rel) <= tol else "fail") if applicable else "not-applicable",
-            "selection": sel, "beta_gamma": bg,
+            "selection": summ.selection(o), "beta_gamma": bg, "estimator": e["method"],
             "thin_slab_approximation": {"bethe_at_entry": ref_in, "bethe_at_mean_energy": ref,
                                         "relative_change": (ref - ref_in) / ref_in},
-            "mean_deposit_over_mean_loss": statistics.fmean(r[f"edep_{b['slab']}_MeV"] for r in kept) / mean_loss,
             "reference": {"source": f"Bethe mean rate, {RPP}, eq. 34.5, with I, Z/A, density and Sternheimer "
                                     f"parameters from the study spec ({mat['reference_source']})",
                           "version": "RPP 2024", "validity": "0.1 <~ beta gamma <~ 1000, accuracy a few percent"}}
 
 
-def bench_range(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
+def bench_range(b: dict, summ: Summary, study: dict, cfg_dir: Path) -> dict:
     table = json.loads((cfg_dir / b["reference_table"]).read_text(encoding="utf-8"))
     pts = sorted((float(p["energy_MeV"]), float(p["projected_range_g_cm2"])) for p in table["extension"]["points"]) \
         if "extension" in table else sorted((float(p["energy_MeV"]), float(p["projected_range_g_cm2"]))
@@ -336,77 +348,77 @@ def bench_range(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
                            / (math.log(e1) - math.log(e0)))
             break
     mat = material(study, b["material"], ("density_g_cm3", "reference_source"))
-    stopped = [r for r in rows if r.get("primary_fate") == 0 and not any(
-        h in str(r.get("primary_end_process")) for h in HADRONIC_END)]
-    sel = {"events": len(rows), "used": len(stopped), "excluded": len(rows) - len(stopped),
-           "excluded_fraction": (len(rows) - len(stopped)) / len(rows)}
-    if len(stopped) < 2:
-        raise BenchmarkError("range: fewer than two stopped primaries")
+    o = summ.obs(b["observable"], "primary_end_x_mm", STOPPED,
+                 "the end position of primaries that stopped without a hadronic process")
+    est = summ.estimate(o, "mean")
     x0 = b.get("entry_x_mm", 0.0)
-    depth = [(r["primary_end_x_mm"] - x0) / 10 * mat["density_g_cm3"] for r in stopped]
-    g4 = statistics.fmean(depth)
-    bs = b.get("bootstrap", {})
-    se = bootstrap(depth, statistics.fmean, bs.get("resamples", 200), bs.get("seed", 1))
+    scale = mat["density_g_cm3"] / 10
+    g4, se = (est["value"] - x0) * scale, est["se"] * scale
     rel = (g4 - ref) / ref
     tol, parts, _ = _tol(b, se / g4)
-    dl = detection_limit(tol, rel, se / g4)
     return {"statistic": "mean projected stopping depth (g/cm^2) of primaries that stopped without a hadronic process",
-            "geant4": g4, "geant4_se": se, "reference_value": ref, "relative_difference": rel,
-            "tolerance": {"total": tol, "parts": parts}, "detection_limit_relative": dl,
-            "verdict": "pass" if abs(rel) <= tol else "fail", "selection": sel,
+            "geant4": g4, "geant4_se": se, "geant4_dof": est["dof"], "reference_value": ref,
+            "relative_difference": rel, "relative_se": se / ref, "tolerance": {"total": tol, "parts": parts},
+            "verdict": "pass" if abs(rel) <= tol else "fail", "selection": summ.selection(o),
+            "estimator": est["method"],
             "reference": {"source": table.get("source", b["reference_table"]), "version": table.get("version"),
                           "validity": "projected range without nuclear interactions (PSTAR/ASTAR)"}}
 
 
-def bench_mpv(b: dict, rows: list[dict], study: dict) -> dict:
+def bench_mpv(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
     mass, z = particle_props(b["particle"])
-    kept, sel = transmitted(rows)
     lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
     width = b.get("binning", {}).get("bin_width_MeV")
     if not isinstance(width, (int, float)) or width <= 0:
         raise BenchmarkError("thin-layer-mpv: binning.bin_width_MeV is required")
+    o = summ.obs(b["observable"], "primary_eloss_MeV", TRANSMITTED, "the energy loss of transmitted primaries")
+    if abs(o["bins"]["width"] - width) > 1e-12 * width:
+        raise BenchmarkError(f"thin-layer-mpv: the summary bins {o['bins']['width']} MeV, the config declares {width}")
     base = {"reference": {"source": f"most probable energy loss Delta_p, {RPP}, eq. 34.12 (j = 0.200), delta(beta "
                                     f"gamma) from Sternheimer parameters in the study spec ({mat['reference_source']})",
                           "version": "RPP 2024",
                           "validity": "kappa = xi / W_max < 0.05; RPP gives no numerical thickness range or accuracy: "
                                       "the thickness of validity and the accuracy are declared in the study spec"},
-            "landau": lv, "selection": sel, "estimator": f"least-squares parabola vertex through the fullest bin "
-                                                         f"and two bins on each side, bin width {width} MeV, bins from 0"}
+            "landau": lv, "selection": summ.selection(o),
+            "estimator": f"mean of the three-point parabola modes of the K block histograms (bin width {width} MeV, "
+                         "bins from the observable declaration), batch-means SE"}
     if lv["kappa"] >= 0.05:
         return {**base, "verdict": "not-applicable", "statistic": "most probable energy loss",
                 "reason": f"kappa = {lv['kappa']:.4g} >= 0.05: not the Landau-Vavilov regime"}
-    loss = [r["primary_eloss_MeV"] for r in kept]
-    dep = [r[f"edep_{b['slab']}_MeV"] for r in kept]
-    g4 = mpv(loss, width)
-    bs = b.get("bootstrap", {})
-    se = bootstrap(loss, lambda v: mpv(v, width), bs.get("resamples", 200), bs.get("seed", 1))
     ref = lv["delta_p_MeV"]
+    acc = (b.get("tolerance") or {}).get("reference_accuracy_relative")
+    est = E.estimate(summ.doc, {**o, "estimator": "mode"}, acc)
+    if est.get("status") != "ok":
+        return {**base, "verdict": "not-applicable", "statistic": "most probable energy loss",
+                "reason": f"MPV estimate incomplete ({est.get('reason')}; A1.7)", "mpv_estimate": est}
+    g4, se = est["value"], est["se"]
     rel = (g4 - ref) / ref
     binning = width / math.sqrt(12) / ref
     tol, parts, _ = _tol(b, se / ref, binning)
-    dl = detection_limit(tol, rel, se / ref)
-    dep_mpv = mpv(dep, width)
     return {**base, "statistic": "most probable energy loss of transmitted primaries (MeV)", "geant4": g4,
-            "geant4_se": se, "reference_value": ref, "relative_difference": rel,
-            "tolerance": {"total": tol, "parts": parts}, "detection_limit_relative": dl,
+            "geant4_se": se, "geant4_dof": est["dof"], "reference_value": ref, "relative_difference": rel,
+            "relative_se": se / ref, "tolerance": {"total": tol, "parts": parts},
             "verdict": "pass" if abs(rel) <= tol else "fail",
-            "most_probable_deposit_MeV": dep_mpv, "deposit_minus_loss_relative": (dep_mpv - g4) / g4}
+            "mpv_checks": {"fallback_blocks": est["fallback_blocks"], "merged_mode": est.get("merged_mode"),
+                           "merged_check": est.get("merged_check")}}
 
 
-def bench_width(b: dict, rows: list[dict], study: dict) -> dict:
+def bench_width(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
     mass, z = particle_props(b["particle"])
-    kept, sel = transmitted(rows)
     lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
-    width = b.get("binning", {}).get("bin_width_MeV", lv["xi_MeV"] / 10)
-    g4 = fwhm([r[f"edep_{b['slab']}_MeV"] for r in kept], width)
+    o = summ.obs(b["observable"], f"edep_{b['slab']}_MeV", TRANSMITTED, "the deposit of transmitted primaries")
+    hist, w = S.merged_accumulators(o)["hist"], o["bins"]["width"]
+    peak = max(hist)
+    above = [i for i, c in enumerate(hist) if c >= peak / 2]
+    g4 = (above[-1] - above[0] + 1) * w
     ref = 4 * lv["xi_MeV"]
     return {"statistic": "FWHM of the deposit distribution (MeV)", "geant4": g4, "reference_value": ref,
             "relative_difference": (g4 - ref) / ref, "verdict": "plausible" if 0.5 <= g4 / ref <= 3 else "implausible",
             "plausibility_window": "0.5 to 3 x the Landau width (thin layers are wider than 4 xi, RPP 2024)",
-            "selection": sel, "reference": {"source": f"Landau FWHM 4 xi, {RPP}", "version": "RPP 2024",
-                                            "validity": "sanity only"}}
+            "selection": summ.selection(o), "reference": {"source": f"Landau FWHM 4 xi, {RPP}", "version": "RPP 2024",
+                                                          "validity": "sanity only"}}
 
 
 def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
@@ -582,12 +594,15 @@ def fit_gamma_profile(ts, ys, ses) -> dict:
             "ndf": len(ts) - 4}
 
 
-def bench_profile(b: dict, rows: list[dict]) -> dict:
-    """t_max of the per-layer mean profile against the same Gamma fit to published test-beam data."""
+def bench_profile(b: dict, summ: Summary) -> dict:
+    """t_max of the per-layer mean profile against the same Gamma fit to published test-beam data; the Gamma fit is
+    made in every block (layer means of the block, weights from the spread of the block means) and t_max is their
+    batch mean (A1.6)."""
     layers = b.get("layers")
     if not isinstance(layers, list) or len(layers) < 5 or not all(
-            isinstance(x, dict) and isinstance(x.get("t"), (int, float)) and x.get("column") in rows[0] for x in layers):
-        raise BenchmarkError("longitudinal-profile: layers must list at least five {t, column} with existing columns")
+            isinstance(x, dict) and isinstance(x.get("t"), (int, float)) and x.get("observable") for x in layers):
+        raise BenchmarkError("longitudinal-profile: layers must list at least five {t, observable} (summary "
+                             "observables of the layer deposits)")
     pub = b.get("published") or {}
     try:
         (a_ref, a_se), (b_ref, b_se) = pub["alpha"], pub["beta"]
@@ -596,35 +611,36 @@ def bench_profile(b: dict, rows: list[dict]) -> dict:
     if not pub.get("source"):
         raise BenchmarkError("longitudinal-profile: published.source (citation and table) is required")
     ts = [x["t"] for x in layers]
-
-    def fit(sample):
-        n = len(sample)
-        means = [statistics.fmean(r[x["column"]] for r in sample) for x in layers]
-        ses = [statistics.stdev([r[x["column"]] for r in sample]) / math.sqrt(n) for x in layers]
-        return fit_gamma_profile(ts, means, ses)
-    res = fit(rows)
-    bs = b.get("bootstrap", {})
-    rng = random.Random(bs.get("seed", 1))
-    reps = [fit([rows[rng.randrange(len(rows))] for _ in rows])["t_max"] for _ in range(bs.get("resamples", 100))]
-    se = statistics.stdev(reps)
+    obs = []
+    for x in layers:
+        try:
+            obs.append(S.observable(summ.doc, x["observable"]))
+        except S.SummaryError as exc:
+            raise BenchmarkError(f"longitudinal-profile: {exc}") from exc
+    per_block = [S.block_means(o) for o in obs]  # [layer][block]
+    k = len(per_block[0])
+    spread = [statistics.stdev(v) if len(v) > 1 else 0.0 for v in per_block]
+    tmax = [fit_gamma_profile(ts, [per_block[j][i] for j in range(len(ts))], spread)["t_max"] for i in range(k)]
+    est = batch_mean(tmax)
+    merged = fit_gamma_profile(ts, [statistics.fmean(v) for v in per_block], [s / math.sqrt(k) for s in spread])
     ref = (a_ref - 1) / b_ref
     ref_se = math.hypot(a_se / b_ref, (a_ref - 1) * b_se / b_ref ** 2)
     syst = b.get("systematic_relative", 0.0)
     if not isinstance(syst, (int, float)) or syst < 0:
         raise BenchmarkError("longitudinal-profile: systematic_relative must be a nonnegative number")
     b = {**b, "tolerance": {**b.get("tolerance", {}), "reference_accuracy_relative": ref_se / ref + syst}}
-    rel = (res["t_max"] - ref) / ref
-    tol, parts, _ = _tol(b, se / res["t_max"])
+    rel = (est["value"] - ref) / ref
+    tol, parts, _ = _tol(b, est["se"] / est["value"])
     parts["published_uncertainty"], parts["systematic"] = ref_se / ref, syst
     return {"statistic": "shower maximum t_max = (alpha - 1) / beta of the Gamma fit to the per-layer mean deposits "
                          "(layer units)",
-            "geant4": res["t_max"], "geant4_se": se, "reference_value": ref, "reference_se": ref_se,
-            "relative_difference": rel, "tolerance": {"total": tol, "parts": parts},
-            "detection_limit_relative": detection_limit(tol, rel, se / res["t_max"]),
-            "verdict": "pass" if abs(rel) <= tol else "fail",
-            "fit": {k: res[k] for k in ("alpha", "beta", "Q_E", "Q0", "chi2", "ndf")},
-            "published_fit": {"alpha": [a_ref, a_se], "beta": [b_ref, b_se]},
-            "layers_fitted": ts, "events": len(rows),
+            "geant4": est["value"], "geant4_se": est["se"], "geant4_dof": est["dof"], "reference_value": ref,
+            "reference_se": ref_se, "relative_difference": rel, "relative_se": est["se"] / ref,
+            "tolerance": {"total": tol, "parts": parts}, "verdict": "pass" if abs(rel) <= tol else "fail",
+            "fit": {kk: merged[kk] for kk in ("alpha", "beta", "Q_E", "Q0", "chi2", "ndf")},
+            "estimator": "batch mean of the per-block Gamma-fit t_max",
+            "published_fit": {"alpha": [a_ref, a_se], "beta": [b_ref, b_se]}, "layers_fitted": ts,
+            "events": sum(bb["events"] for bb in obs[0]["blocks"]),
             "reference": {"source": pub["source"], "version": pub.get("version"),
                           "validity": "the measured configuration only (stack, energy, particle, readout window); "
                                       + (pub.get("validity") or "")}}
@@ -641,27 +657,6 @@ def bench_published(b: dict, rows: list[dict]) -> dict:
                                               "reason": "compatibility with a published measurement is a statistical "
                                                         "question; this benchmark gives no verdict"},
             "reference": {"source": "published measurement (dataset-record)", "version": None, "validity": "interface"}}
-
-
-def evaluate(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
-    name = b["benchmark"]
-    if name == "stopping-power":
-        return bench_stopping_power(b, rows, study)
-    if name == "range":
-        return bench_range(b, rows, study, cfg_dir)
-    if name == "thin-layer-mpv":
-        return bench_mpv(b, rows, study)
-    if name == "thin-layer-width":
-        return bench_width(b, rows, study)
-    if name == "multiple-scattering":
-        return bench_ms(b, rows, study, cfg_dir)
-    if name == "em-shower-shape":
-        return bench_shower(b, rows, study)
-    if name == "shower-containment":
-        return bench_containment(b, rows)
-    if name == "longitudinal-profile":
-        return bench_profile(b, rows)
-    return bench_published(b, rows)
 
 
 def configuration(b: dict, cfg_dir: Path) -> dict:
@@ -689,41 +684,102 @@ def configuration(b: dict, cfg_dir: Path) -> dict:
     return out
 
 
+def evaluate(b: dict, src, study: dict, cfg_dir: Path) -> dict:
+    name = b["benchmark"]
+    if name == "stopping-power":
+        return bench_stopping_power(b, src, study)
+    if name == "range":
+        return bench_range(b, src, study, cfg_dir)
+    if name == "thin-layer-mpv":
+        return bench_mpv(b, src, study)
+    if name == "thin-layer-width":
+        return bench_width(b, src, study)
+    if name == "multiple-scattering":
+        return bench_ms(b, src, study, cfg_dir)
+    if name == "em-shower-shape":
+        return bench_shower(b, src, study)
+    if name == "shower-containment":
+        return bench_containment(b, src)
+    if name == "longitudinal-profile":
+        return bench_profile(b, src)
+    return bench_published(b, src)
+
+
+def source(b: dict, cfg_dir: Path, entry: dict | None = None):
+    """The data a benchmark reads: the run summary for the summary-based benchmarks, else the per-event CSV."""
+    e = entry or b
+    if b["benchmark"] in SUMMARY_BENCHMARKS:
+        if not e.get("summary"):
+            raise BenchmarkError(f"{b['benchmark']}: 'summary' (a simulation-summary/1 of the run) is required")
+        return Summary(cfg_dir / e["summary"])
+    return read_csv(cfg_dir / e["csv"])
+
+
+def controls(b: dict, res: dict, study: dict, cfg_dir: Path) -> dict:
+    """D3 (A1.10): each negative control is judged on the observable: shift = (control - nominal)/reference, its SE
+    combined from the two runs, caught when the control's benchmark verdict is fail; at the claimed detection limit
+    DL = tol + |rel| + t_0.977(nu) se_shift when caught and |shift| <= 1.1 DL. Both directions validate the claim;
+    one direction narrows it to that sign (detection_limit_sign)."""
+    entries = b.get("negative_controls") or ([b["negative_control"]] if b.get("negative_control") else [])
+    se_n, dof_n = res.get("relative_se"), res.get("geant4_dof")
+    tol, rel = res["tolerance"]["total"], res["relative_difference"]
+    out, dls = [], []
+    for nc in entries:
+        nres = evaluate(b, source(b, cfg_dir, nc), study, cfg_dir)
+        caught = nres["verdict"] == "fail"
+        shift = (nres["geant4"] - res["geant4"]) / res["reference_value"] if nres.get("geant4") is not None else None
+        se_c, dof_c = nres.get("relative_se"), nres.get("geant4_dof")
+        if None in (se_n, se_c, dof_n, dof_c):
+            raise BenchmarkError(f"{b['benchmark']}: the control and the nominal need batch-means SEs")
+        se_shift = math.hypot(se_n, se_c)
+        dl = detection_limit(tol, rel, se_shift, welch_dof(se_n, dof_n, se_c, dof_c))["value"]
+        dls.append(dl)
+        out.append({"status": "caught" if caught else "not-caught", "injected": nc.get("injected"),
+                    "injected_relative": nc.get("injected_relative"), "shift": shift, "se_of_shift": se_shift,
+                    "sign": "+" if shift and shift > 0 else "-", "detection_limit_relative": dl,
+                    "at_claimed_detection_limit": bool(caught and shift is not None and abs(shift) <= 1.1 * dl),
+                    "relative_difference": nres.get("relative_difference"), "verdict_on_control": nres["verdict"],
+                    "summary": nc.get("summary"), "csv": nc.get("csv"), "run_record": nc.get("run_record")})
+    if not out:
+        planned = detection_limit(tol, rel, math.sqrt(2) * se_n, 2 * dof_n)["value"] if se_n and dof_n else None
+        return {"status": "missing", "planned_detection_limit_relative": planned,
+                "planned_basis": "a control with the nominal's SE (se_shift = sqrt(2) se, nu = 2 (K - 1))"}
+    signs = {c["sign"] for c in out if c["status"] == "caught"}
+    return {"status": "caught" if all(c["status"] == "caught" for c in out) else "not-caught", "controls": out,
+            "at_claimed_detection_limit": all(c["at_claimed_detection_limit"] for c in out),
+            "detection_limit_relative": max(dls), "detection_limit_sign": "+-" if signs == {"+", "-"} else
+            "".join(sorted(signs)) or None}
+
+
 def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
     name = b.get("benchmark")
     if name not in GRADES:
         raise BenchmarkError(f"unknown benchmark {name!r} (known: {sorted(GRADES)})")
-    for k in ("csv", "particle", "energy_MeV") + (("material", "slab", "thickness_mm") if name in (
+    data = ("summary", "observable") if name in SUMMARY_BENCHMARKS and name != "longitudinal-profile" else \
+        (("summary",) if name == "longitudinal-profile" else ("csv",))
+    for k in data + ("particle", "energy_MeV") + (("material", "slab", "thickness_mm") if name in (
             "stopping-power", "thin-layer-mpv", "thin-layer-width", "range") else ()):
         if k not in b:
             raise BenchmarkError(f"{name}: '{k}' is required")
     check_inputs(b["energy_MeV"], b.get("thickness_mm"))
-    rows = read_csv(cfg_dir / b["csv"])
-    res = evaluate(b, rows, study, cfg_dir)
+    res = evaluate(b, source(b, cfg_dir), study, cfg_dir)
     grade = GRADES[name]
     out = {"benchmark": name, "grade": grade, **res,
            "scope": {"particle": b["particle"], "energy_MeV": b["energy_MeV"], "material": b.get("material"),
                      "thickness_mm": b.get("thickness_mm"), "observable": res.get("statistic")},
-           "inputs": {"csv": b["csv"], "run_record": b.get("run_record")}}
+           "inputs": {"summary": b.get("summary"), "observable": b.get("observable"), "csv": b.get("csv"),
+                      "run_record": b.get("run_record")}}
     conf = configuration(b, cfg_dir)
     out.update({k: v for k, v in conf.items() if k != "configuration_gap"})
     if grade in UPGRADING and res["verdict"] in ("pass", "fail"):
-        nc = b.get("negative_control")
-        if not nc:
-            out["negative_control"] = {"status": "missing"}
-        else:
-            nres = evaluate(b, read_csv(cfg_dir / nc["csv"]), study, cfg_dir)
-            caught = nres["verdict"] == "fail"
-            inj = nc.get("injected_relative")
-            # the control must sit at (not far above) the detection limit it is meant to demonstrate
-            at_limit = isinstance(inj, (int, float)) and 0 < inj <= 1.1 * res["detection_limit_relative"]
-            out["negative_control"] = {"status": "caught" if caught else "not-caught", "injected": nc.get("injected"),
-                                       "injected_relative": nc.get("injected_relative"),
-                                       "at_claimed_detection_limit": bool(at_limit),
-                                       "relative_difference": nres.get("relative_difference"),
-                                       "verdict_on_control": nres["verdict"], "csv": nc["csv"],
-                                       "run_record": nc.get("run_record")}
-        out["scope"]["detection_limit_relative"] = res["detection_limit_relative"]
+        nc = controls(b, res, study, cfg_dir)
+        out["negative_control"] = nc
+        out["detection_limit_relative"] = nc.get("detection_limit_relative", nc.get("planned_detection_limit_relative"))
+        out["scope"]["detection_limit_relative"] = out["detection_limit_relative"]
+        if nc.get("detection_limit_sign"):
+            out["scope"]["detection_limit_sign"] = nc["detection_limit_sign"]
+        if conf.get("target_geometry_sha256") and name == "longitudinal-profile":
+            out["scope"].update(target_geometry_sha256=conf["target_geometry_sha256"], hash_scheme=conf["hash_scheme"])
     nc_ok = out.get("negative_control", {}).get("status") == "caught"
     m = conf.get("measured_configuration") or {}
     matched = grade != "setup-matched" or (m.get("target_geometry_sha256") == conf.get("target_geometry_sha256")
@@ -763,8 +819,11 @@ def cmd_run(args) -> tuple[str, dict]:
             elif r.get("configuration_gap"):
                 gaps.append(f"{r['benchmark']}: {r['configuration_gap']}")
             elif not nc.get("at_claimed_detection_limit"):
-                gaps.append(f"{r['benchmark']}: negative control injected {nc.get('injected_relative')} is not at the "
-                            f"claimed detection limit {r['detection_limit_relative']:.4g}")
+                gaps.append(f"{r['benchmark']}: a negative control's shift of the observable is not at the claimed "
+                            f"detection limit {r['detection_limit_relative']:.4g} (|shift| <= 1.1 DL)")
+            elif nc.get("detection_limit_sign") in ("+", "-"):
+                gaps.append(f"{r['benchmark']}: negative controls in one direction only: the detection limit is "
+                            f"claimed for sign {nc['detection_limit_sign']} only")
         elif r["verdict"] in ("implausible", "not-applicable"):
             gaps.append(f"{r['benchmark']} ({r['grade']}): {r['verdict']}" + (f" ({r['reason']})" if r.get("reason")
                                                                              else ""))

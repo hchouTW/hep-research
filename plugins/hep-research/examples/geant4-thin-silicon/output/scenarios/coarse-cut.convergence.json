@@ -1,34 +1,59 @@
 {
  "convergence": {
   "gate": "fail",
+  "multiplicity": 3,
   "parameters": [
    {
     "observables": [
      {
+      "dof": 27.43470468439411,
       "finest": 0.3,
+      "margin": 0.006959291679395534,
       "next": 1.0,
       "observable": "mean_deposit_MeV",
-      "relative_change": -0.015519646772418646,
-      "se_of_change": 0.002657277327272158,
+      "reason": "beyond-tolerance",
+      "relative_change": -0.01924326878609781,
+      "se_of_change": 0.001019314821723687,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
       "tolerance": 0.01,
+      "tolerance_mode": "relative",
       "verdict": "fail"
      },
      {
+      "dof": 26.693595135510495,
       "finest": 0.3,
+      "margin": null,
       "next": 1.0,
       "observable": "mpv_deposit_MeV",
-      "relative_change": -0.01413921265578822,
-      "se_of_change": 0.006296806236142746,
+      "reason": "se-target-missed",
+      "relative_change": -0.009434128640726036,
+      "se_of_change": 0.004302289523791999,
+      "se_targets_met": {
+       "finest": false,
+       "next": true
+      },
       "tolerance": 0.02,
-      "verdict": "pass"
+      "tolerance_mode": "relative",
+      "verdict": "unresolved"
      },
      {
+      "dof": 29.401728208375914,
       "finest": 0.3,
+      "margin": 0.04344868222642445,
       "next": 1.0,
       "observable": "tail_fraction",
-      "relative_change": -0.15855106888361042,
-      "se_of_change": 0.03263479306271383,
+      "reason": "beyond-tolerance",
+      "relative_change": -0.17436588124163518,
+      "se_of_change": 0.013846767210644048,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
       "tolerance": 0.1,
+      "tolerance_mode": "relative",
       "verdict": "fail"
      }
     ],
@@ -44,7 +69,7 @@
     "verdict": "fail"
    }
   ],
-  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
  },
  "record_problems": [],
  "statistical_target": {
@@ -53,22 +78,164 @@
  },
  "summaries": [
   {
-   "path": "recorded/summaries/mpv-cut-1.0.json",
+   "legacy": false,
+   "observables": {
+    "deposit_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.0002088568984566272,
+     "status": "ok",
+     "value": 0.08528215574824295
+    },
+    "loss_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.0002086480853885618,
+     "status": "ok",
+     "value": 0.08528184025447748
+    },
+    "mean_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.10824396780008803,
+     "method": "batch means of block means",
+     "n": 480000,
+     "se": 8.915242465701163e-05,
+     "status": "ok",
+     "value": 0.10824396780008802
+    },
+    "mpv_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "merged_check": {
+      "bound": 0.008908313103500374,
+      "relative_difference": 0.002101260832403919
+     },
+     "merged_mode": 0.08510333145115755,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00020885689845662604,
+     "status": "ok",
+     "value": 0.08528215574824295
+    },
+    "mpv_loss_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.0002086480853885618,
+     "status": "ok",
+     "value": 0.08528184025447748
+    },
+    "tail_fraction": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.028554166666666665,
+     "k": 13706,
+     "low_count": false,
+     "method": "batch means of block proportions",
+     "n": 480000,
+     "se": 0.00029885390646168134,
+     "status": "ok",
+     "value": 0.028554166666666665
+    }
+   },
+   "path": "recorded/blocks/mpv-cut-1.0.json",
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-1.0",
-    "sha256": "41e617b98d62842236c5a18dd0c2bbcccf4e738160c3b27c537c7ce72cd629f8"
+    "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-cut-1.0.computational-run.json",
+    "sha256": "32026a268e9e5e6fdb881ef97e99053fea64e5dc699c1cc2de64123c071d0c18"
    },
-   "sha256": "0cb0838ae92ebf0348dffc613c219327131cb530f7035050de1cc8085843ea91"
+   "sha256": "fa879940ec7ba88b46af8b569e40cb77c4d4fba42e77692d3eb082852d2b8ff5"
   },
   {
-   "path": "recorded/summaries/mpv-cut-0.3.json",
+   "legacy": false,
+   "observables": {
+    "deposit_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00030166315960419317,
+     "status": "ok",
+     "value": 0.0844775929201556
+    },
+    "loss_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.0003022708829827427,
+     "status": "ok",
+     "value": 0.08446812256990693
+    },
+    "mean_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.10616100003323721,
+     "method": "batch means of block means",
+     "n": 490768,
+     "se": 6.50045148582205e-05,
+     "status": "ok",
+     "value": 0.10616100003323721
+    },
+    "mpv_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "merged_check": {
+      "bound": 0.011167178216071052,
+      "relative_difference": 0.0035464133536888057
+     },
+     "merged_mode": 0.08417905918057664,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00030166315960419236,
+     "status": "ok",
+     "value": 0.0844775929201556
+    },
+    "mpv_loss_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.0003022708829827427,
+     "status": "ok",
+     "value": 0.08446812256990693
+    },
+    "tail_fraction": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.02357529423271281,
+     "k": 11570,
+     "low_count": false,
+     "method": "batch means of block proportions",
+     "n": 490768,
+     "se": 0.0002588705838803774,
+     "status": "ok",
+     "value": 0.023575294232712807
+    }
+   },
+   "path": "recorded/blocks/mpv-cut-0.3.json",
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-0.3",
-    "sha256": "4c835d3b0458b34fb1444b2a56c6f613d40c2f6e479d3cfc5170560df88e9940"
+    "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-cut-0.3.computational-run.json",
+    "sha256": "bd6d8da0f90ebcb292d35622ed200b6214cf3254bdfe887a0a5cbc826881fe16"
    },
-   "sha256": "e4657e00321c1ce3ed0b1b20b930ff3f5e691ecd54c32a881517cefd93ce9801"
+   "sha256": "8ce2cf956f4066e461ec05737edb1ab7c2ba21a24c91a194f2b64fbe5264c27a"
   }
  ]
 }

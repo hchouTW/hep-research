@@ -79,6 +79,11 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
   hep-measurement `cr_spectrum_powerlaw_fit.py` ([conventions](core-stats-commands.md#broken-power-law)).
 - **Change points** (`change_point.py`, helper, no CLI): weighted trends, binary segmentation, CUSUM and
   toy-calibrated thresholds for a declared false-alarm rate; used by hep-detector `stability_monitor.py`.
+- **Simulation studies** (`distributions.py`, `batch_means.py`, `decisions.py`, helpers, no CLI): t and F quantiles
+  for non-integer degrees of freedom; batch-means estimators over K blocks of a run (SE on K - 1 degrees of freedom,
+  exact intervals at low counts, histogram quantiles, the block-mode MPV); the equivalence gate (an
+  intersection-union test with multiplicity m) and the negative-control detection limit. They decide only
+  study-layer gates of hep-detector's Geant4 studies; requirement verdicts belong to `contracts/design.py`.
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records

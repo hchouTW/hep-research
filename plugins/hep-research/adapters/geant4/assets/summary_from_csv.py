@@ -99,8 +99,15 @@ def cmd(args) -> tuple[str, dict]:
         if biasing(sim):
             raise InputError(f"the run used biasing commands {biasing(sim)} but the CSV has no weight column")
         weight = "absent"
+    phys, gun = sim.get("physics") or {}, sim.get("gun") or {}
+    settings = {"default_cut_mm": phys.get("default_cut_mm"), "step_limit_mm": phys.get("step_limit_mm", 0.0),
+                "em_constructor": phys.get("em_constructor"), "reference_list": phys.get("reference_list"),
+                "ui_commands": sim.get("ui_commands", []), "particle": gun.get("particle"),
+                "energy_MeV": gun.get("energy_MeV")}
     run = {"run_id": rec.get("artifact_id"), "evidence_role": args.evidence_role, "seeding": "stream",
-           "spec_sha256": sim.get("spec_sha256"), "weight_column": weight,
+           "spec_sha256": sim.get("spec_sha256"), "weight_column": weight, "settings": settings,
+           "data_path_problems": sim.get("data_path_problems", []),
+           "datasets_content_match": all(d.get("content_match") for d in sim.get("datasets", [])),
            "run_record": {"ref": tilde(Path(args.run_record).resolve()), "sha256": sha256_file(Path(args.run_record))},
            "csv": [{"name": Path(c).name, "sha256": sha256_file(Path(c))} for c in args.csv]}
     if args.logical_run_seed is not None:
@@ -108,6 +115,7 @@ def cmd(args) -> tuple[str, dict]:
     if args.seed_scheme:
         run["seed_scheme"] = args.seed_scheme
     run = {k: v for k, v in run.items() if v is not None}
+    run["run_record"]["artifact_id"] = rec.get("artifact_id")
     try:
         doc = S.build(rows, obs, args.block_size, args.blocks, args.first_event, run,
                       {"name": "python-csv", "version": VERSION, **trace.provenance()})

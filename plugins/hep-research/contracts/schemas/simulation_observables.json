@@ -40,7 +40,9 @@
         "<",
         "<=",
         ">",
-        ">="
+        ">=",
+        "contains",
+        "!contains"
        ]
       },
       "value": {
@@ -92,6 +94,25 @@
     "description": "required under tolerance_mode absolute, in the observable's unit",
     "type": "number",
     "exclusiveMinimum": 0
+   },
+   "estimator": {
+    "description": "how the study scripts estimate it (core/simulation/estimates.py); default mean",
+    "enum": [
+     "mean",
+     "proportion",
+     "mode",
+     "quantile"
+    ]
+   },
+   "quantile": {
+    "description": "estimator quantile: the probability q",
+    "type": "number",
+    "exclusiveMinimum": 0
+   },
+   "threshold_index": {
+    "description": "estimator proportion: which threshold of count_if (default 0)",
+    "type": "integer",
+    "minimum": 0
    }
   },
   "additionalProperties": false

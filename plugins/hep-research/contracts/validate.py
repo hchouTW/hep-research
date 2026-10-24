@@ -301,6 +301,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
             rep.add("error", "$.status", "status.failed_unlabeled", "non-zero exit status must carry 'failed'")
         if strict or _at_least(doc.get("contract_version"), GEANT4_UPGRADE_FROM):
             _study_upgrade(doc, ext, status, rep, a1=_geant4_a1(doc, status, strict))
+        if isinstance(ext.get("simulation"), dict) and (strict or _at_least(doc.get("contract_version"), GEANT4_A1_FROM)):
+            _evidence_role(ext["simulation"], rep)
     elif t == "ml-artifact":
         if not ext.get("splits", {}).get("grouping_key"):
             rep.add("error", "$.extension.splits.grouping_key", "ml.no_grouping", "splits need a grouping key (leakage control)")
@@ -353,7 +355,7 @@ GEANT4_A1_FROM = "3.13.0"  # CV-A1 (Geant4 correctness sci-fix): benchmark table
 # declares a class, kind or dimension. Entries are added in later contract versions.
 _SLAB_SCOPE = (("particle", "categorical"), ("material", "categorical"), ("energy_MeV", "interval"),
                ("thickness_mm", "interval"))
-GEANT4_BENCHMARKS = {
+GEANT4_BENCHMARKS: dict[str, dict[str, Any]] = {
     "stopping-power": {"class": "reference", "kinds": ("stopping-power",), "scope": _SLAB_SCOPE},
     "range": {"class": "reference", "kinds": ("range",), "scope": _SLAB_SCOPE},
     "thin-layer-mpv": {"class": "reference", "kinds": ("most-probable-value",), "scope": _SLAB_SCOPE},
@@ -367,6 +369,11 @@ GEANT4_BENCHMARKS = {
     "published-data": {"class": "interface", "kinds": (), "scope": ()},
 }
 GEANT4_UPGRADING_CLASSES = ("reference", "setup-matched")
+
+
+def _bench(name) -> dict[str, Any]:
+    """The contracts-table entry of a benchmark name ({} for an unknown or non-string name)."""
+    return GEANT4_BENCHMARKS.get(name, {}) if isinstance(name, str) else {}
 GEANT4_HASH_SCHEMES = ("spec-v1", "tree-v1")
 VACUUM_DENSITY_G_CM3 = 1e-20  # a world material below this density is vacuum (A1.3), like G4_Galactic
 
@@ -434,12 +441,34 @@ def _configuration(b: dict, i: int, rep: Report) -> None:
     if not (isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{64}", sha)) or scheme not in GEANT4_HASH_SCHEMES:
         rep.add("error", f"{where}.target_geometry_sha256", "geant4.configuration_missing",
                 f"{b.get('benchmark')} needs target_geometry_sha256 and a hash_scheme of {list(GEANT4_HASH_SCHEMES)}")
-    if (GEANT4_BENCHMARKS.get(b.get("benchmark")) or {}).get("class") == "setup-matched":
+    if _bench(b.get("benchmark")).get("class") == "setup-matched":
         m = b.get("measured_configuration") or {}
         if m.get("target_geometry_sha256") != sha or m.get("hash_scheme") != scheme:
             rep.add("error", f"{where}.measured_configuration", "geant4.setup_mismatch",
                     f"{b.get('benchmark')} is setup-matched: its target hash and scheme ({sha}, {scheme}) must equal "
                     f"the measured configuration's ({m.get('target_geometry_sha256')}, {m.get('hash_scheme')})")
+
+
+GEANT4_EVIDENCE_ROLES = ("trial", "nominal", "scan", "control", "variation", "calibration")  # CV-A1; B2, C2 add roles
+GEANT4_SEED_SCHEMES = ("hash-v1", "legacy")
+
+
+def _evidence_role(sim: dict, rep: Report) -> None:
+    """CV-A1 (A1.4): a run record's evidence role is from the enum (the field is evidence_role, not role: a study
+    record's evidence_records[].role means something else), and its seed scheme is hash-v1 (with the logical-run seed)
+    or legacy."""
+    role = sim.get("evidence_role")
+    if role is not None and role not in GEANT4_EVIDENCE_ROLES:
+        rep.add("error", "$.extension.simulation.evidence_role", "geant4.evidence_role_unknown",
+                f"evidence role {role!r} is not one of {list(GEANT4_EVIDENCE_ROLES)}")
+    scheme = sim.get("seed_scheme")
+    if scheme is not None and scheme not in GEANT4_SEED_SCHEMES:
+        rep.add("error", "$.extension.simulation.seed_scheme", "geant4.seed_scheme_unknown",
+                f"seed scheme {scheme!r} is not one of {list(GEANT4_SEED_SCHEMES)}")
+    if scheme == "hash-v1" and not (isinstance(sim.get("logical_run_seed"), int)
+                                    and 1 <= sim["logical_run_seed"] <= 2 ** 31 - 1):
+        rep.add("error", "$.extension.simulation.logical_run_seed", "geant4.seed_scheme_unknown",
+                "seed scheme hash-v1 needs logical_run_seed in [1, 2^31 - 1]")
 
 
 def _geant4_a1(doc: dict, status: set, strict: bool) -> bool:
@@ -469,7 +498,7 @@ def _benchmark_table(study, rep: Report) -> None:
 def _upgrading(b: dict, a1: bool) -> bool:
     """Whether a benchmark result can count for an upgrade: by the table's class under CV-A1, else by its own grade."""
     if a1:
-        return (GEANT4_BENCHMARKS.get(b.get("benchmark")) or {}).get("class") in GEANT4_UPGRADING_CLASSES
+        return _bench(b.get("benchmark")).get("class") in GEANT4_UPGRADING_CLASSES
     return b.get("grade") == "reference"
 
 
@@ -479,13 +508,13 @@ def _scope_inside(declared: dict, bench: dict, benchmark: str | None = None, a1:
     the benchmark (GEANT4_BENCHMARKS) must be declared and inside (_scope_dimensions)."""
     out = []
     if a1:
-        kinds = (GEANT4_BENCHMARKS.get(benchmark) or {}).get("kinds", ())
+        kinds = _bench(benchmark).get("kinds", ())
         kind = declared.get("observable_kind")
         if kind is None:
             out.append("the declared scope has no observable_kind")
         elif kind not in kinds:
             out.append(f"observable kind {kind!r} is not one {benchmark} supports ({list(kinds)})")
-        return out + _scope_dimensions(declared, bench, (GEANT4_BENCHMARKS.get(benchmark) or {}).get("scope", ()))
+        return out + _scope_dimensions(declared, bench, _bench(benchmark).get("scope", ()))
     for k in ("particle", "material"):
         if declared.get(k) is not None and bench.get(k) is not None and declared[k] != bench[k]:
             out.append(f"{k} {declared[k]!r} is not the benchmark's {bench[k]!r}")

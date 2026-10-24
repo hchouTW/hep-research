@@ -19,10 +19,18 @@ SCRIPT = PLUGIN / "skills" / "hep-detector" / "scripts" / "geant4_benchmarks.py"
 ASSETS = PLUGIN / "skills" / "hep-detector" / "assets"
 REF = PLUGIN / "examples" / "geant4-thin-silicon" / "refdata" / "pdg-silicon-2024.json"
 sys.path.insert(0, str(SCRIPT.parent))
+sys.path.insert(0, str(PLUGIN))
 import geant4_benchmarks as G  # noqa: E402
+from core.simulation import summary as S  # noqa: E402
 
 COLS = ["event", "primary_eloss_MeV", "edep_Si_MeV", "primary_fate", "primary_end_process", "exit_dx", "exit_dy",
         "exit_dz"]
+K = 16
+FINE = {"lo": 0.0, "hi": 0.4, "width": 0.004}
+DECL = [{"name": "loss_transmitted_MeV", "source_column": "primary_eloss_MeV", "selection": G.TRANSMITTED,
+         "bins": FINE},
+        {"name": "deposit_transmitted_MeV", "source_column": "edep_Si_MeV", "selection": G.TRANSMITTED, "bins": FINE},
+        {"name": "deposit_as_loss_MeV", "source_column": "edep_Si_MeV", "selection": G.TRANSMITTED, "bins": FINE}]
 
 
 def silicon(origin="independent"):
@@ -77,11 +85,18 @@ class _Cfg(unittest.TestCase):
     def tearDown(self):
         self._t.cleanup()
 
-    def csv(self, name, rows, gz=False):
-        text = "# SIMULATION\n" + ",".join(COLS) + "\n" + "".join(",".join(map(str, r)) + "\n" for r in rows)
+    def csv(self, name, rows, gz=False, decl=None, cols=COLS):
+        """The per-event CSV and, next to it, its block summary (K blocks, simulation-summary/1) as name.json."""
+        text = "# SIMULATION\n" + ",".join(cols) + "\n" + "".join(",".join(map(str, r)) + "\n" for r in rows)
         p = self.d / (name + (".csv.gz" if gz else ".csv"))
         p.write_bytes(gzip.compress(text.encode(), mtime=0)) if gz else p.write_text(text)
+        dicts = [dict(zip(cols, r)) for r in rows]
+        (self.d / f"{name}.json").write_text(json.dumps(S.build(dicts, decl or DECL, len(rows) // K, K)))
         return p.name
+
+    @staticmethod
+    def summ(csv):
+        return csv.split(".")[0] + ".json"
 
     def run_record(self, name="run.json", world="G4_Galactic", others=()):
         """A SYNTHETIC layered_sim run record: one 0.3 mm Si slab (plus other slabs), in the given world."""
@@ -109,12 +124,13 @@ class _Cfg(unittest.TestCase):
         p.write_text(json.dumps({"schema": "geant4-benchmarks/1", "study_spec": "study.json", "benchmarks": benches}))
         return p
 
-    def sp(self, csv, control=None, inj=None):
-        b = {"benchmark": "stopping-power", "csv": csv, "particle": "proton", "energy_MeV": 100.0,
-             "material": "Si_study", "slab": "Si", "thickness_mm": 0.3, "bootstrap": {"resamples": 40, "seed": 1},
+    def sp(self, csv, control=None, inj=None, observable="loss_transmitted_MeV"):
+        b = {"benchmark": "stopping-power", "summary": self.summ(csv), "observable": observable, "particle": "proton",
+             "energy_MeV": 100.0, "material": "Si_study", "slab": "Si", "thickness_mm": 0.3,
              "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3}, "run_record": self.run_record()}
         if control:
-            b["negative_control"] = {"csv": control, "injected": f"density x {1 + inj}", "injected_relative": inj}
+            b["negative_controls"] = [{"summary": self.summ(control), "injected": f"density x {1 + inj}",
+                                       "injected_relative": inj}]
         return b
 
 
@@ -158,28 +174,42 @@ class StoppingPower(_Cfg):
         code, out = run("run", "--config", self.config([self.sp(self.csv("good", self.protons()))]))
         b = out["benchmarks"][0]
         self.assertEqual(b["verdict"], "pass", b)
-        dl = b["detection_limit_relative"]
+        dl = b["detection_limit_relative"]  # planned: a control with the nominal's SE
         bad = self.csv("bad", self.protons(scale=1 + dl, seed=2))
         code, out = run("run", "--config", self.config([self.sp(self.csv("good", self.protons()), bad, round(dl, 4))]))
         self.assertEqual(code, 0, out)
         b = out["benchmarks"][0]
         self.assertEqual(b["negative_control"]["status"], "caught")
-        self.assertTrue(b["negative_control"]["at_claimed_detection_limit"])
+        self.assertTrue(b["negative_control"]["at_claimed_detection_limit"], b["negative_control"])
+        self.assertEqual(b["scope"]["detection_limit_sign"], "+")  # one direction: the claim is narrowed
+        self.assertTrue(any("one direction only" in g for g in out["gaps"]))
         self.assertTrue(b["validation_evidence"])
         self.assertIn("detection_limit_relative", b["scope"])
 
+    def test_both_directions_validate_the_detection_limit(self):
+        good = self.csv("good", self.protons())
+        dl = run("run", "--config", self.config([self.sp(good)]))[1]["benchmarks"][0]["detection_limit_relative"]
+        plus, minus = self.csv("plus", self.protons(scale=1 + dl, seed=2)), self.csv("minus", self.protons(scale=1 - dl, seed=3))
+        b = self.sp(good, plus, round(dl, 4))
+        b["negative_controls"].append({"summary": self.summ(minus), "injected_relative": -round(dl, 4)})
+        out = run("run", "--config", self.config([b]))[1]
+        r = out["benchmarks"][0]
+        self.assertEqual((r["negative_control"]["status"], r["scope"]["detection_limit_sign"]), ("caught", "+-"), r)
+        self.assertEqual([c["sign"] for c in r["negative_control"]["controls"]], ["+", "-"])
+
     def test_the_energy_loss_is_used_not_the_deposit(self):
-        code, out = run("run", "--config", self.config([self.sp(self.csv("dep", self.protons(deposit=0.8)))]))
-        b = out["benchmarks"][0]
-        self.assertEqual(b["verdict"], "pass")
-        self.assertAlmostEqual(b["mean_deposit_over_mean_loss"], 0.8, places=6)
+        """A summary observable that carries the deposit under the energy-loss benchmark is refused."""
+        code, out = run("run", "--config", self.config([self.sp(self.csv("dep", self.protons(deposit=0.8)),
+                                                                observable="deposit_as_loss_MeV")]))
+        self.assertEqual(code, 2, out)
+        self.assertIn("energy loss of transmitted primaries", out["error"])
 
     def test_inelastic_and_stopped_primaries_are_excluded_and_counted(self):
-        extra = [[9000 + i, 99.0, 1.0, 0, "protonInelastic", 0, 0, 0] for i in range(40)]
+        extra = [[4000 + i, 99.0, 1.0, 0, "protonInelastic", 0, 0, 0] for i in range(48)]
         code, out = run("run", "--config", self.config([self.sp(self.csv("inel", self.protons(extra=extra), gz=True))]))
         b = out["benchmarks"][0]
         self.assertEqual(b["verdict"], "pass")
-        self.assertEqual((b["selection"]["excluded"], b["selection"]["ended_in_hadronic_process"]), (40, 40))
+        self.assertEqual(b["selection"]["excluded"], 48)
 
     def test_a_control_that_is_not_caught_is_no_evidence(self):
         good = self.csv("good", self.protons())
@@ -209,9 +239,9 @@ class StoppingPower(_Cfg):
 
     def test_every_output_field(self):
         b = run("run", "--config", self.config([self.sp(self.csv("good", self.protons()))]))[1]["benchmarks"][0]
-        for k in ("benchmark", "grade", "reference", "scope", "statistic", "geant4", "reference_value",
-                  "relative_difference", "tolerance", "detection_limit_relative", "verdict", "negative_control",
-                  "validation_evidence"):
+        for k in ("benchmark", "grade", "reference", "scope", "statistic", "geant4", "geant4_se", "geant4_dof",
+                  "reference_value", "relative_difference", "relative_se", "tolerance", "detection_limit_relative",
+                  "verdict", "negative_control", "validation_evidence"):
             self.assertIn(k, b)
         self.assertEqual(set(b["reference"]), {"source", "version", "validity"})
         self.assertEqual(set(b["tolerance"]["parts"]), {"reference_accuracy", "mc_statistics", "k_sigma", "binning"})
@@ -231,21 +261,26 @@ class ThinLayer(_Cfg):
         return rows
 
     def mpv(self, csv, **over):
-        b = {"benchmark": "thin-layer-mpv", "csv": csv, "particle": "mu-", "energy_MeV": 10000.0,
-             "material": "Si_study", "slab": "Si", "thickness_mm": 0.3, "binning": {"bin_width_MeV": 0.002},
-             "bootstrap": {"resamples": 30, "seed": 1}, "tolerance": {"reference_accuracy_relative": 0.03}}
+        b = {"benchmark": "thin-layer-mpv", "summary": self.summ(csv), "observable": "loss_transmitted_MeV",
+             "particle": "mu-", "energy_MeV": 10000.0, "material": "Si_study", "slab": "Si", "thickness_mm": 0.3,
+             "binning": {"bin_width_MeV": FINE["width"]}, "tolerance": {"reference_accuracy_relative": 0.03}}
         b.update(over)
         return b
 
-    def test_mpv_at_the_reference_passes_and_reports_the_deposit_mpv(self):
+    def test_mpv_at_the_reference_passes_with_the_block_mode_estimator(self):
         code, out = run("run", "--config", self.config([self.mpv(self.csv("mu", self.muons()))]))
         b = out["benchmarks"][0]
         self.assertEqual(b["verdict"], "pass", b)
-        self.assertIn("most_probable_deposit_MeV", b)
-        self.assertIn("least-squares parabola", b["estimator"])
+        self.assertEqual((b["geant4_dof"], b["mpv_checks"]["fallback_blocks"]), (K - 1, 0))
+        self.assertIn("three-point parabola", b["estimator"])
+
+    def test_a_binning_other_than_the_summary_is_refused(self):
+        code, out = run("run", "--config", self.config([self.mpv(self.csv("mu", self.muons()),
+                                                                 binning={"bin_width_MeV": 0.002})]))
+        self.assertEqual(code, 2, out)
 
     def test_kappa_above_005_is_not_applicable(self):
-        rows = [[i, 0.5, 0.5, 1, "Transportation", 1, 0, 0] for i in range(100)]
+        rows = [[i, 0.25, 0.25, 1, "Transportation", 1, 0, 0] for i in range(160)]
         code, out = run("run", "--config", self.config([self.mpv(self.csv("p10", rows), particle="proton",
                                                                  energy_MeV=10.0)]))
         self.assertEqual(code, 3, out)
@@ -255,8 +290,8 @@ class ThinLayer(_Cfg):
         csv = self.csv("mu", self.muons(n=3000))
         (self.d / "stack.json").write_text((ASSETS / "detector-stack.example.json").read_text(encoding="utf-8"))
         code, out = run("run", "--config", self.config([
-            {"benchmark": "thin-layer-width", "csv": csv, "particle": "mu-", "energy_MeV": 10000.0,
-             "material": "Si_study", "slab": "Si", "thickness_mm": 0.3},
+            {"benchmark": "thin-layer-width", "summary": self.summ(csv), "observable": "deposit_transmitted_MeV",
+             "particle": "mu-", "energy_MeV": 10000.0, "material": "Si_study", "slab": "Si", "thickness_mm": 0.3},
             {"benchmark": "multiple-scattering", "csv": csv, "particle": "mu-", "energy_MeV": 10000.0,
              "highland_stack": "stack.json"}]))
         grades = {b["benchmark"]: b["grade"] for b in out.get("benchmarks", [])}
@@ -333,12 +368,16 @@ class LongitudinalProfile(_Cfg):
                                 for t in self.LAYERS])
         (self.d / name).write_text("# SIMULATION\n" + ",".join(cols) + "\n"
                                    + "".join(",".join(map(str, r)) + "\n" for r in lines))
-        return name
+        decl = [{"name": f"layer{t}", "source_column": f"edep_copy{t}_MeV", "bins": {"lo": 0, "hi": 1e6, "width": 1e6}}
+                for t in self.LAYERS]
+        out = name.split(".")[0] + ".json"
+        (self.d / out).write_text(json.dumps(S.build([dict(zip(cols, r)) for r in lines], decl, n // K, K)))
+        return out
 
     def bench(self, csv, **over):
-        b = {"benchmark": "longitudinal-profile", "csv": csv, "particle": "e-", "energy_MeV": 100000.0,
-             "layers": [{"t": t, "column": f"edep_copy{t}_MeV"} for t in self.LAYERS], "published": self.PUB,
-             "systematic_relative": 0.01, "tolerance": {"k_sigma": 3}, "bootstrap": {"resamples": 30, "seed": 2}}
+        b = {"benchmark": "longitudinal-profile", "summary": csv, "particle": "e-", "energy_MeV": 100000.0,
+             "layers": [{"t": t, "observable": f"layer{t}"} for t in self.LAYERS], "published": self.PUB,
+             "systematic_relative": 0.01, "tolerance": {"k_sigma": 3}}
         b.update(over)
         return b
 
@@ -357,7 +396,7 @@ class LongitudinalProfile(_Cfg):
     def test_pass_and_a_stretched_profile_caught_as_control(self):
         good, bad = self.rows("good.csv"), self.rows("stretched.csv", stretch=1.12, seed=4)
         code, out = run("run", "--config", self.config([self.bench(good, negative_control={
-            "csv": bad, "injected": "depth scale x 1.12 (SYNTHETIC)", "injected_relative": 0.12})]))
+            "summary": bad, "injected": "depth scale x 1.12 (SYNTHETIC)", "injected_relative": 0.12})]))
         r = out["benchmarks"][0]
         self.assertEqual((code, r["grade"], r["verdict"]), (0, "setup-matched", "pass"), out)
         self.assertAlmostEqual(r["reference_value"], 4.42 / 0.5, places=12)

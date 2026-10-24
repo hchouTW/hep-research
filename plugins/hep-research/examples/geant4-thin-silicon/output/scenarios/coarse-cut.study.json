@@ -1,4 +1,7 @@
 {
+ "blocks": {
+  "K": 16
+ },
  "citations": {
   "literature_record": "../artifacts/geant4.literature-record.json"
  },
@@ -84,6 +87,102 @@
   "unit": "MeV",
   "weighted": false
  },
+ "observables": [
+  {
+   "bins": {
+    "hi": 1000.0,
+    "lo": 0.0,
+    "width": 1000.0
+   },
+   "estimator": "mean",
+   "name": "mean_deposit_MeV",
+   "source_column": "edep_Si_MeV"
+  },
+  {
+   "bins": {
+    "hi": 0.13,
+    "lo": 0.05,
+    "width": 0.002
+   },
+   "estimator": "mode",
+   "name": "mpv_deposit_MeV",
+   "source_column": "edep_Si_MeV"
+  },
+  {
+   "bins": {
+    "hi": 1000.0,
+    "lo": 0.0,
+    "width": 1000.0
+   },
+   "estimator": "proportion",
+   "name": "tail_fraction",
+   "source_column": "edep_Si_MeV",
+   "thresholds": [
+    0.25
+   ]
+  },
+  {
+   "bins": {
+    "hi": 0.13,
+    "lo": 0.05,
+    "width": 0.002
+   },
+   "estimator": "mode",
+   "name": "mpv_loss_MeV",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    }
+   ],
+   "source_column": "primary_eloss_MeV"
+  },
+  {
+   "bins": {
+    "hi": 0.13,
+    "lo": 0.05,
+    "width": 0.002
+   },
+   "estimator": "mode",
+   "name": "loss_transmitted_MeV",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "column": "primary_end_process",
+     "op": "==",
+     "value": "Transportation"
+    }
+   ],
+   "source_column": "primary_eloss_MeV"
+  },
+  {
+   "bins": {
+    "hi": 0.3,
+    "lo": 0.02,
+    "width": 0.002
+   },
+   "estimator": "mode",
+   "name": "deposit_transmitted_MeV",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "column": "primary_end_process",
+     "op": "==",
+     "value": "Transportation"
+    }
+   ],
+   "source_column": "edep_Si_MeV"
+  }
+ ],
  "particle": {
   "energy_MeV": 10000.0,
   "name": "mu-"
@@ -106,7 +205,7 @@
     "source": "convergence gate of this study"
    }
   ],
-  "layered_sim_spec": "../../specs/mpv-mu10GeV.json",
+  "layered_sim_spec": "../../recorded/specs/mpv-nominal.json",
   "ui_order": "after-physics-list-before-initialize"
  },
  "reproducibility": {

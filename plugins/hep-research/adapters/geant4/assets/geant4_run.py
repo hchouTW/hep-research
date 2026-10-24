@@ -21,7 +21,8 @@ Subcommands:
   scan       base spec + parameter grid -> specs and a workflow.json for skills/hep-computing/scripts/run_workflow.py
              (point k gets seeds [s0, s1 + k] unless the grid scans run.seeds);
              a step whose estimated time (events / --events-per-second) exceeds 3600 s is refused: partition it
-  chunk      a local_partition.py worker: events [start, stop) with the chunk's seed; writes additive sums only
+  chunk      a local_partition.py worker: events [start, stop) with the chunk's seed (with --logical-run-seed S the
+             job seeds H(S, start, 0), H(S, start, 1), core/simulation/seeds.py); writes additive sums only
              (n_events, sum_*, sumsq_*) plus {"csv": [{path, sha256}], "records": [...]} for --rule csv=concat
   summarize  means and standard errors from a merged partition result (non-additive quantities after the merge);
              with --work, the chunk CSVs are checked against the merged hashes and for duplicate event numbers;
@@ -31,6 +32,7 @@ Subcommands:
 Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_run.py build-sim --build-record BUILD.json --work DIR
   python3 adapters/geant4/assets/geant4_run.py run --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --run-id ID --record OUT.json
+      [--evidence-role ROLE --point-id ID [--logical-run-seed S]]
   python3 adapters/geant4/assets/geant4_run.py scan --base SPEC.json --grid GRID.json --exe EXE --build-record BUILD.json --out-dir DIR --events-per-second R
   python3 adapters/geant4/assets/geant4_run.py chunk --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --start A --stop B --seed S --id ID --out OUT.json
   python3 adapters/geant4/assets/geant4_run.py summarize --merged MERGED.json [--work DIR] [--single-record RUN.json]
@@ -58,6 +60,7 @@ sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from g4common import (ASSETS, DATA_VARS, PLUGIN, JsonArgumentParser, SpecError, build_record_ok, data_env,  # noqa: E402
                       expand, install_prefix, record_skeleton, sha256_file, sha256_json, tilde, write_json)
+from core.simulation.seeds import job_seeds  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 SIM_SOURCES = ("CMakeLists.txt", "MiniJson.hh", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Physics.hh",
@@ -362,6 +365,18 @@ def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: 
     return rec
 
 
+def _evidence_fields(sim: dict, args) -> None:
+    """A1.4: what the run is for in a study (extension.simulation.evidence_role, point_id) and its seed scheme
+    (hash-v1 with the logical-run seed S, or legacy)."""
+    for key in ("evidence_role", "point_id", "logical_run_seed"):
+        if getattr(args, key, None) is not None:
+            sim[key] = getattr(args, key)
+    if getattr(args, "logical_run_seed", None) is not None:
+        sim["seed_scheme"] = "hash-v1"
+    elif getattr(args, "evidence_role", None) is not None:
+        sim["seed_scheme"] = "legacy"
+
+
 def cmd_build_sim(args) -> tuple[str, dict]:
     build = _load_build(args.build_record)
     if not shutil.which("cmake"):
@@ -414,10 +429,17 @@ def cmd_run(args) -> tuple[str, dict]:
     except FileNotFoundError as exc:
         return "missing-dependency", {"error": str(exc)}
     work = expand(str(args.work)).resolve()
+    if args.logical_run_seed is not None:  # A1.4: a single job of logical run S has the seed pair (H(S,0,0), H(S,0,1))
+        first = int(spec["run"].get("first_event", 0))
+        want = list(job_seeds(args.logical_run_seed, first))
+        if list(spec["run"].get("seeds") or []) != want:
+            raise SpecError(f"run.seeds {spec['run'].get('seeds')} are not the job seeds {want} of logical run seed "
+                            f"{args.logical_run_seed} starting at event {first} (core/simulation/seeds.py)")
     status, summary, result = run_one(spec, exe, build, build_path, work, args.run_id, args.timeout,
                                       _overrides(args.data_override))
     if status == "rejected":
         return status, summary
+    _evidence_fields(result["simulation"], args)
     created = args.created or datetime.date.today().isoformat()
     record_path = expand(str(args.record))
     write_run_record(record_path, args.run_id, spec_path, spec, exe, result, work, created)
@@ -500,8 +522,9 @@ def cmd_chunk(args) -> tuple[str, dict]:
     except FileNotFoundError as exc:
         return "missing-dependency", {"error": str(exc)}
     chunk_no = int(args.id.lstrip("c")) if args.id.lstrip("c").isdigit() else 0
-    spec["run"].update(events=args.stop - args.start, first_event=args.start, chunk=chunk_no,
-                       seeds=[max(1, args.seed), args.start + 1])
+    seeds = list(job_seeds(args.logical_run_seed, args.start)) if args.logical_run_seed is not None else \
+        [max(1, args.seed), args.start + 1]  # A1.4: the job starting at event e has (H(S, e, 0), H(S, e, 1))
+    spec["run"].update(events=args.stop - args.start, first_event=args.start, chunk=chunk_no, seeds=seeds)
     work = expand(str(args.work)).resolve()
     status, summary, result = run_one(spec, exe, build, build_path, work, args.id, args.timeout, {})
     if status != "ok":
@@ -622,6 +645,11 @@ def main(argv=None) -> int:
     p.add_argument("--timeout", type=float, default=86400.0)
     p.add_argument("--data-override", action="append",
                    help="VAR=PATH: point a dataset variable elsewhere (negative control of the data-path check)")
+    p.add_argument("--evidence-role", help="what the run is for in a study: trial, nominal, scan, control, variation, "
+                                           "calibration (extension.simulation.evidence_role)")
+    p.add_argument("--point-id", help="the evidence point of the study this run is")
+    p.add_argument("--logical-run-seed", type=int, help="S = H(study_id, role, point_id); run.seeds must be its job "
+                                                        "seeds (seed_scheme hash-v1)")
     p = sub.add_parser("scan", help="spec grid -> workflow.json for run_workflow.py")
     for name in ("--base", "--grid", "--exe", "--build-record", "--out-dir"):
         p.add_argument(name, required=True)
@@ -632,6 +660,7 @@ def main(argv=None) -> int:
         p.add_argument(name, required=True)
     for name in ("--start", "--stop", "--seed"):
         p.add_argument(name, type=int, required=True)
+    p.add_argument("--logical-run-seed", type=int, help="the job's seeds become (H(S, start, 0), H(S, start, 1))")
     p.add_argument("--created")
     p.add_argument("--timeout", type=float, default=86400.0)
     p = sub.add_parser("summarize", help="means after a partition merge")

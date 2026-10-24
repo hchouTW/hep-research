@@ -49,7 +49,8 @@
    ],
    "files": [
     "seeds",
-    "summary"
+    "summary",
+    "estimates"
    ],
    "source": "new in this plugin (Geant4 program, stage A1, 2026-10-24)"
   },

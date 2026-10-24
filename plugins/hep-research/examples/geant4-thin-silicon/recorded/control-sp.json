@@ -1,5 +1,13 @@
 {
- "detection_limit_relative": 0.03776020023771021,
- "injected": "silicon density x 1.038 on the Geant4 side (reference keeps 2.329 g/cm3)",
- "injected_relative": 0.038
+ "controls": {
+  "sp-control": {
+   "injected": "silicon density x 1.038 on the Geant4 side (reference keeps 2.329 g/cm3)",
+   "injected_relative": 0.038
+  },
+  "sp-control-minus": {
+   "injected": "silicon density x 0.960 on the Geant4 side (reference keeps 2.329 g/cm3)",
+   "injected_relative": -0.04
+  }
+ },
+ "planned_detection_limit_relative": 0.03986319875310263
 }

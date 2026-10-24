@@ -20,7 +20,8 @@ sys.path.insert(0, str(PLUGIN))
 SUBCOMMAND_MODULES = ("likelihood_limits", "poisson_diagnostics", "statistical_toys", "template_fit",
                       "unfolding_diagnostics")
 VALIDATORS = ("validate_covariance", "validate_response")
-HELPERS = ("broken_power_law", "change_point", "fit_diagnostics", "tail_estimation", "toy_ensemble")  # importable helpers without a CLI, documented under the conventions
+HELPERS = ("batch_means", "broken_power_law", "change_point", "decisions", "distributions", "fit_diagnostics",
+           "tail_estimation", "toy_ensemble")  # importable helpers without a CLI, documented under the conventions
 
 
 def subcommands(module):

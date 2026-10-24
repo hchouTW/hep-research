@@ -6,6 +6,7 @@ the parent commit as well: a test fails there by assertion when the parent accep
 Expected outcomes are transcribed from the program spec, docs/dev/geant4-architecture/geant4-program.en.md (A1.1
 benchmark table, A1.2 scope rules, A1.3 configuration rules), never from the code's output."""
 import copy
+import math
 import json
 import subprocess
 import sys
@@ -301,28 +302,120 @@ class ScanCompleteness(unittest.TestCase):
     incomplete (exit 3); 'the two finest' are the two finest declared values."""
 
     def gate(self, cuts: list[float]) -> tuple[int, dict]:
-        """J14's MPV study (declared cuts 0.1, 0.03, 0.01 mm; 0.01 mm is the nominal run) with the given summaries."""
+        """J14's MPV study (declared cuts 0.1, 0.03, 0.01 mm) with J14's legacy single-run summaries of the given cuts
+        (the format the parent reads; 0.01 mm is the 0.38.0 nominal run, supplied as a scan point)."""
         args = []
         for c in cuts:
-            args += ["--summary", "nominal=recorded/summaries/mpv-nominal.json" if c == 0.01 else
+            args += ["--summary", "scan=recorded/summaries/mpv-nominal.json" if c == 0.01 else
                      f"scan=recorded/summaries/mpv-cut-{c}.json"]
         p = subprocess.run([sys.executable, "-B", str(CHECK), "run", "--spec", "study-mpv.json", *args],
                            capture_output=True, text=True, timeout=600, cwd=J14)
         return p.returncode, json.loads(p.stdout)
 
     def test_every_subset_of_the_declared_values(self):
-        """Exhaustive over the non-empty subsets of the three declared cuts: only the full set gives J14's pass."""
+        """Exhaustive over the non-empty subsets of the three declared cuts: every subset with a missing value is
+        incomplete (exit 3) with exactly those values listed; only the full set is judged on the observables."""
         import itertools
         declared = [0.1, 0.03, 0.01]
         for n in (1, 2, 3):
             for cuts in itertools.combinations(declared, n):
                 code, out = self.gate(list(cuts))
+                param = out["convergence"]["parameters"][0]
+                missing = sorted(set(declared) - set(cuts))
                 with self.subTest(cuts=cuts):
-                    self.assertEqual(code, 0 if n == 3 else 3, out.get("convergence"))
+                    if missing:
+                        self.assertEqual((code, param.get("reason"), param.get("missing_values")),
+                                         (3, "missing-scan-value", missing), out.get("convergence"))
+                    else:
+                        self.assertNotEqual(param.get("reason"), "missing-scan-value")
+                        self.assertIn("observables", param)
 
     def test_the_two_finest_are_declared_values(self):
         code, out = self.gate([0.1, 0.03, 0.01])
         self.assertEqual(out["convergence"]["parameters"][0]["two_finest"], [0.01, 0.03])
+
+
+ASSETS = PLUGIN / "skills" / "hep-detector" / "assets"
+
+
+class GateIUT(unittest.TestCase):
+    """geant4-gate-iut (D4, A1.8): the convergence gate is an equivalence test. Pass needs |diff| + t_0.95 se <= tol
+    (and both points on their se target); fail needs |diff| - t_(1-0.05/m) se > tol; anything else is incomplete
+    (exit 3). The old rule passed whenever |diff| <= tol with se <= tol/2 and failed whenever |diff| > tol."""
+
+    def setUp(self):
+        self._t = tempfile.TemporaryDirectory()
+        self.d = Path(self._t.name)
+        import shutil
+        shutil.copyfile(ASSETS / "geant4-layered-sim.example.json", self.d / "geant4-layered-sim.example.json")
+        study = json.loads((ASSETS / "geant4-study-spec.example.json").read_text(encoding="utf-8"))
+        study["physics"]["layered_sim_spec"] = "geant4-layered-sim.example.json"
+        (self.d / "study.json").write_text(json.dumps(study))
+        self.ls = json.loads((self.d / "geant4-layered-sim.example.json").read_text(encoding="utf-8"))
+
+    def tearDown(self):
+        self._t.cleanup()
+
+    def summary(self, name, cut, mean, se):
+        """A legacy single-run summary (the format the parent reads); the other two observables are equal at both
+        points with negligible se."""
+        st = {"default_cut_mm": cut, "step_limit_mm": 0.0, "em_constructor": self.ls["physics"].get("em_constructor"),
+              "reference_list": self.ls["physics"].get("reference_list"), "ui_commands": [],
+              "particle": self.ls["gun"]["particle"], "energy_MeV": self.ls["gun"]["energy_MeV"]}
+        doc = {"schema": "geant4-run-summary/1", "run_record": {"artifact_id": name, "sha256": "0" * 64},
+               "csv": {"name": "x.csv", "sha256": "0" * 64}, "events": 10 ** 6, "settings": st, "spec_sha256": None,
+               "data_path_problems": [], "datasets_content_match": True, "bootstrap": {"resamples": 200, "seed": 1},
+               "observables": {"mean_deposit_MeV": {"value": mean, "se": se},
+                               "mpv_deposit_MeV": {"value": 0.084, "se": 1e-6},
+                               "mpv_loss_MeV": {"value": 0.084, "se": 1e-6},
+                               "tail_fraction": {"value": 0.03, "se": 1e-6}}}
+        p = self.d / f"{name}.json"
+        p.write_text(json.dumps(doc))
+        return p
+
+    def gate(self, rel_diff, rel_se_point):
+        """mean_deposit_MeV (tol 0.01 relative) differs by rel_diff between the two finest cuts, each point with
+        relative se rel_se_point; the coarsest cut equals the second-finest."""
+        b = 0.1
+        args = []
+        for name, cut, mean in (("a", 0.01, b * (1 + rel_diff)), ("b", 0.03, b), ("c", 0.1, b)):
+            args += ["--summary", f"scan={self.summary(name, cut, mean, rel_se_point * b)}"]
+        p = subprocess.run([sys.executable, "-B", str(CHECK), "run", "--spec", self.d / "study.json", *args],
+                           capture_output=True, text=True, timeout=120)
+        return p.returncode
+
+    def test_the_rule_on_cases_where_the_old_gate_decided_otherwise(self):
+        """Expected exit codes from the A1.8 rule with normal quantiles (the legacy summaries carry no dof): tol 0.01,
+        m = 3 observables x 1 parameter; se target tol / (4 sqrt 2) = 0.00177 per point."""
+        tol = 0.01
+        z95, zfail = 1.6449, 2.1280  # Phi^-1(0.95), Phi^-1(1 - 0.05/3)
+        for rel_diff, rel_se in ((0.9 * tol, 0.2 * tol), (0.5 * tol, 0.2 * tol), (1.05 * tol, 0.07 * tol),
+                                 (0.2 * tol, 0.1 * tol), (1.5 * tol, 0.1 * tol), (0.0, 0.1 * tol)):
+            se_diff = math.hypot(rel_se, rel_se)
+            if abs(rel_diff) + z95 * se_diff <= tol and rel_se <= tol / (4 * math.sqrt(2)):
+                want = 0
+            elif abs(rel_diff) - zfail * se_diff > tol:
+                want = 1
+            else:
+                want = 3
+            with self.subTest(rel_diff=rel_diff, rel_se=rel_se):
+                self.assertEqual(self.gate(rel_diff, rel_se), want)
+
+    def test_pass_probability_against_the_normal_closed_form(self):
+        """Analytic oracle: with a known se, P(pass) = Phi((tol - z se - d)/se) - Phi((-tol + z se - d)/se); the
+        equivalence decision on 2e4 normal draws per true difference matches it to 4 sigma_MC."""
+        from core.stats.decisions import equivalence
+        rng = __import__("random").Random(5)
+
+        def phi(x):
+            return 0.5 * (1 + math.erf(x / math.sqrt(2)))
+        tol, se, n = 1.0, 0.25, 20000
+        z = 1.6448536269514722
+        for d in (0.0, 0.3, 0.6, 0.9, 1.2):
+            want = phi((tol - z * se - d) / se) - phi((-tol + z * se - d) / se)
+            got = sum(equivalence(rng.gauss(d, se), se, 1e9, tol)["verdict"] == "pass" for _ in range(n)) / n
+            with self.subTest(d=d):
+                self.assertLessEqual(abs(got - want), 4 * math.sqrt(max(want * (1 - want), 1 / n) / n) + 1e-4)
 
 
 if __name__ == "__main__":

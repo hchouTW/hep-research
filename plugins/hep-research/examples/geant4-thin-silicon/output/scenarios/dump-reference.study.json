@@ -1,4 +1,7 @@
 {
+ "blocks": {
+  "K": 16
+ },
  "citations": {
   "literature_record": "../artifacts/geant4.literature-record.json"
  },
@@ -81,6 +84,40 @@
   "unit": "MeV/cm",
   "weighted": false
  },
+ "observables": [
+  {
+   "bins": {
+    "hi": 1000.0,
+    "lo": 0.0,
+    "width": 1000.0
+   },
+   "estimator": "mean",
+   "name": "mean_deposit_MeV",
+   "source_column": "edep_Si_MeV"
+  },
+  {
+   "bins": {
+    "hi": 1000.0,
+    "lo": 0.0,
+    "width": 1000.0
+   },
+   "estimator": "mean",
+   "name": "loss_transmitted_MeV",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "column": "primary_end_process",
+     "op": "==",
+     "value": "Transportation"
+    }
+   ],
+   "source_column": "primary_eloss_MeV"
+  }
+ ],
  "particle": {
   "energy_MeV": 100.0,
   "name": "proton"

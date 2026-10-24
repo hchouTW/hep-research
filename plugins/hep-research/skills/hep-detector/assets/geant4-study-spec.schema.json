@@ -355,6 +355,37 @@
    },
    "additionalProperties": false
   },
+  "observables": {
+   "description": "CV-A1 (A1.12): the observable declarations (contracts/schemas/simulation_observables.json, simulation-observables/1) the run summaries accumulate; every name of convergence_plan.observables and statistical_target.observable is declared; the singular observable stays the study's main observable",
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "source_column",
+     "bins"
+    ]
+   }
+  },
+  "blocks": {
+   "description": "CV-A1 (A1.6): K blocks per logical run (K >= 16), declared before the first evidence run; B = N / K follows from each run's event count",
+   "type": "object",
+   "required": [
+    "K"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "K": {
+     "type": "integer",
+     "minimum": 16
+    },
+    "B": {
+     "type": "integer",
+     "minimum": 1
+    }
+   }
+  },
   "statistical_target": {
    "type": "object",
    "required": [

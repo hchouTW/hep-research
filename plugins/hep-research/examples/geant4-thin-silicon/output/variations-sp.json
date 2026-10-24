@@ -1,6 +1,6 @@
 {
  "domain": "em",
- "envelope_relative": 0.0022373969560187373,
+ "envelope_relative": 0.0009541746406067064,
  "nominal": {
   "model_assignment": {
    "domain": "em",
@@ -8,7 +8,8 @@
    "fluctuation_model": "Urban",
    "known": true
   },
-  "summary": "recorded/summaries/sp-nominal.json",
+  "run_record_id": "geant4-run-sp-nominal",
+  "summary": "recorded/blocks/sp-nominal.json",
   "value": 0.4035049105530633
  },
  "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
@@ -28,12 +29,13 @@
     "fluctuation_model": "Urban",
     "known": true
    },
-   "relative_to_nominal": -0.0007148521168874243,
+   "relative_to_nominal": 0.0003140613837792272,
    "resolved": false,
-   "se": 0.0004543607014468086,
-   "se_of_relative_difference": 0.0015818650369838559,
-   "summary": "recorded/summaries/sp-em-option0.json",
-   "value": 0.40321646421358,
+   "run_record_id": "geant4-run-sp-em-option0",
+   "se": 0.00033318716499221936,
+   "se_of_relative_difference": 0.0015230009381387965,
+   "summary": "recorded/blocks/sp-em-option0.json",
+   "value": 0.4036316358636333,
    "variation": "em-option0"
   },
   {
@@ -50,12 +52,13 @@
     "fluctuation_model": "Urban",
     "known": true
    },
-   "relative_to_nominal": 0.001522544839131313,
+   "relative_to_nominal": 0.0009541746406067064,
    "resolved": false,
-   "se": 0.0004175223445035908,
-   "se_of_relative_difference": 0.0015182315666950458,
-   "summary": "recorded/summaries/sp-em-option3.json",
-   "value": 0.40411926487219,
+   "run_record_id": "geant4-run-sp-em-option3",
+   "se": 0.0005060478055965695,
+   "se_of_relative_difference": 0.0017917981909612672,
+   "summary": "recorded/blocks/sp-em-option3.json",
+   "value": 0.4038899247060733,
    "variation": "em-option3"
   }
  ]

@@ -9,16 +9,17 @@ Subcommands:
   spec        completeness of the study spec (assets/geant4-study-spec.schema.json) and the sourced rule table
               (assets/geant4-physics-rules.json; a rule without a source is refused); reports the rule coverage.
               Exit 1 when the observable, statistical target or validation scope is missing or an error rule fires.
-  summarize   per-run observables from a layered_sim CSV, with seeded-bootstrap standard errors, tied to the run
-              record by hash: the thin-layer set (mean deposit, most probable deposit and energy loss, tail fraction;
-              the default) or, with --observables, leakage fractions (total, rear, albedo, lateral); --slab all sums
-              the deposits of every slab.
-  run         run records against the spec (physics, gun, geometry, spec hash, data paths and dataset hashes), the
-              statistical target (bootstrap SE, not only rms/sqrt(N); too few events gives the N needed), and the
-              convergence gate (hard): every declared value of each cut or step-limit scan needs a run summary (a
-              missing one makes the gate incomplete, exit 3), and every declared observable changes by no more than
-              its tolerance between the two finest declared settings, with the difference resolved (SE of the
-              difference <= tolerance / 2). This is the only place a too-coarse cut is caught.
+  run         run summaries (simulation-summary/1, written by adapters/geant4/assets/summary_from_csv.py, or legacy
+              geant4-run-summary/1 for records made before contracts CV-A1) against the spec (physics, gun, spec
+              hash, data paths and dataset hashes, the observable declarations and block count), the statistical
+              target (batch-means SE over the run's K blocks; a missed target is incomplete, exit 3, and is not topped
+              up), and the convergence gate (hard): every declared value of each cut or step-limit scan needs a run
+              summary (a missing one makes the gate incomplete), and between the two finest declared settings every
+              declared observable is equivalent within its tolerance (intersection-union test: pass when |diff| +
+              t_0.95 se <= tol and both points meet the se target tol/(4 sqrt 2); fail, exit 1, when |diff| -
+              t_(1-0.05/m) se > tol; otherwise incomplete, exit 3; core/stats/decisions.py). This is the only place a
+              too-coarse cut is caught. Each observable is estimated by core/simulation/estimates.py (mean,
+              proportion, mode or quantile per the study spec's observables; exact intervals at low counts).
   variations  a variation table: each variation's model assignment for the particle and energy (EM constructor and
               fluctuation model for EM observables; the hadronic model in use for hadronic ones); a variation that
               keeps the model is excluded, never listed as a systematic; the spread is a model envelope, not a sigma.
@@ -29,14 +30,14 @@ Subcommands:
               listing the gaps; only invalid input is refused (exit 2).
 Usage (paths relative to the current folder):
   check_geant4_study.py spec --spec STUDY.json [--rules RULES.json]
-  check_geant4_study.py summarize --record RUN.json --csv EVENTS.csv[.gz] --slab NAME|all --out SUMMARY.json [--observables ...] [--bootstrap 200 --seed 1]
   check_geant4_study.py run --spec STUDY.json --summary SUMMARY.json [...] [--out CONVERGENCE.json]
   check_geant4_study.py variations --spec STUDY.json --nominal SUMMARY.json --variation NAME=SUMMARY.json [...] --out VARIATIONS.json
   check_geant4_study.py label --spec STUDY.json --benchmarks BENCH.json --convergence CONV.json [--variations VAR.json]
                         --project-root ROOT [--reference-record DATASET.json ...] [--write STUDY_RECORD.json] [--created DATE]
 Output JSON: status, status_label, inputs, defaults_used and the subcommand's result.
 Exit codes: 0 ok (label: the record was written or evaluated); 1 a negative verdict (missing required fields, an
-error rule, a record that disagrees with the spec, too few events, an unconverged scan); 2 bad input; 3 incomplete.
+error rule, a record that disagrees with the spec, a resolved convergence failure); 2 bad input; 3 incomplete (a
+missing scan value, an unresolved difference, a missed se or statistical target).
 Standard library only.
 """
 from __future__ import annotations
@@ -46,7 +47,6 @@ import datetime
 import hashlib
 import json
 import math
-import statistics
 import sys
 from pathlib import Path
 
@@ -57,7 +57,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV reader and bootstrap for both scripts)
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts import trace  # noqa: E402
+from contracts.schema import validate as schema_validate  # noqa: E402
 from contracts.validate import scope_outside  # noqa: E402  (CV-A1: the single scope implementation)
+from core.simulation import estimates as E  # noqa: E402
+from core.simulation.summary import SUMMARY_VERSION  # noqa: E402
+from core.stats import batch_means as M, decisions as D  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
@@ -81,10 +85,6 @@ HADRONIC = {"QGSP_BIC": {"nucleon": [(1000.0, "BIC"), (1500.0, "BIC/BERT"), (300
             "FTFP_BERT": {"nucleon": [(3000.0, "BERT"), (6000.0, "BERT/FTFP"), (math.inf, "FTFP")],
                           "pion": [(3000.0, "BERT"), (6000.0, "BERT/FTFP"), (math.inf, "FTFP")]}}
 NUCLEONS, PIONS = ("proton", "neutron"), ("pi+", "pi-")
-THIN_OBSERVABLES = ["mean_deposit_MeV", "mpv_deposit_MeV", "tail_fraction", "mpv_loss_MeV"]
-# leakage observables: energy leaving the world over the primary kinetic energy (an escaping e+ counts its 2 m_e c^2);
-# rear = through the +x end face, albedo = the -x end face, lateral = the y and z faces
-LEAK_OBSERVABLES = ["leakage_fraction", "rear_leakage_fraction", "albedo_fraction", "lateral_leakage_fraction"]
 
 
 class StudyError(ValueError):
@@ -206,6 +206,13 @@ def cmd_spec(args) -> tuple[str, dict]:
         if get(study, k) in (None, [], {}, "") and k.split(".")[0] not in missing:
             missing.append(k)
     doc = dict(study, derived=derived(study))
+    if study.get("observables") is not None:  # CV-A1 (A1.12): the declarations and the names that must be declared
+        rep = schema_validate(study["observables"], "simulation_observables.json")
+        if not rep.ok:
+            raise StudyError("observables: " + "; ".join(f.message for f in rep.errors)[:300])
+        names = {o["name"] for o in study["observables"]}
+        need = set(get(study, "convergence_plan.observables") or []) | {get(study, "statistical_target.observable")}
+        missing += [f"observables.{n}" for n in sorted(need - names - {None})]
     findings, applicable = [], []
     for r in rules:
         if holds(r["condition"], doc):
@@ -213,7 +220,7 @@ def cmd_spec(args) -> tuple[str, dict]:
             if not holds(r["requires"], doc):
                 findings.append({"rule": r["id"], "severity": r["severity"], "concern": r["concern"],
                                  "read": r.get("read"), "source": r["source"], "requires": r["requires"]})
-    blocking = [m for m in missing if m.split(".")[0] in ("observable", "statistical_target") or
+    blocking = [m for m in missing if m.split(".")[0] in ("observable", "statistical_target", "observables") or
                 m == "validation_plan.scope" or m == "validation_plan"]
     errors = [f for f in findings if f["severity"] == "error"]
     status = "failed" if blocking or errors else "ok"
@@ -233,82 +240,56 @@ def _kinds(cond) -> list[str]:
     return []
 
 
-def read_csv(path: Path) -> list[dict]:
-    try:
-        return B.read_csv(path)
-    except B.BenchmarkError as exc:
-        raise StudyError(str(exc)) from exc
+LEGACY_DOF = 1e6  # a geant4-run-summary/1 (bootstrap SE, before CV-A1) is read with a normal approximation
+SE_TARGET_DIVISOR = 4 * math.sqrt(2)  # per-point se target tol / (4 sqrt 2) of the convergence gate (A1.8)
+TWO_STAGE_FACTOR = (0.95, "F_0.95(K - 1, K_trial - 1)")  # A1.9 safety factor (maintainer decision: F_0.95)
 
 
-def _mpv(values, width):
-    return B.mpv(values, width)
+def _decls(study: dict) -> dict:
+    return {o["name"]: o for o in study.get("observables") or [] if isinstance(o, dict) and "name" in o}
 
 
-def boot(values, stat, n_boot, seed) -> float:
-    return B.bootstrap(values, stat, n_boot, seed)
-
-
-def cmd_summarize(args) -> tuple[str, dict]:
-    rec = load_json(args.record)
-    sim = get(rec, "extension.simulation")
-    if not sim:
-        raise StudyError("--record is not a Geant4 run record (no extension.simulation)")
-    csv = Path(args.csv)
-    rows = read_csv(csv)
-    if args.slab == "all":  # the summed deposit of every slab (thick or segmented absorbers)
-        cols = [c for c in rows[0] if c.startswith("edep_") and c.endswith("_MeV") and c != "edep_world_MeV"
-                and not c.startswith("edep_copy")]
-        dep = [math.fsum(r[c] for c in cols) for r in rows]
-    else:
-        col = f"edep_{args.slab}_MeV"
-        if col not in rows[0]:
-            raise StudyError(f"{csv.name} has no column {col}")
-        dep = [r[col] for r in rows]
-    width = args.mpv_bin_mev
-    tail_thr = args.tail_threshold_mev
-    wanted = set(args.observables or THIN_OBSERVABLES)
-    unknown = wanted - set(THIN_OBSERVABLES) - set(LEAK_OBSERVABLES)
-    if unknown:
-        raise StudyError(f"unknown observables {sorted(unknown)}; known: {THIN_OBSERVABLES + LEAK_OBSERVABLES}")
+def load_summary(path: str, study: dict) -> dict:
+    """A run summary read for the study: simulation-summary/1 (validated with contracts/schemas, every observable
+    estimated through core.simulation.estimates with the study's declaration, which the summary must match), or a
+    legacy geant4-run-summary/1 (value and bootstrap SE; replay of records made before CV-A1)."""
+    doc = load_json(path)
+    if doc.get("schema") == "geant4-run-summary/1":
+        obs = {k: {"value": v["value"], "se": v["se"], "dof": LEGACY_DOF, "status": "ok",
+                   "method": "legacy single-run summary (bootstrap SE)"} for k, v in doc["observables"].items()}
+        return {"legacy": True, "settings": doc["settings"], "events": doc["events"], "observables": obs,
+                "spec_sha256": doc.get("spec_sha256"), "data_path_problems": doc.get("data_path_problems", []),
+                "datasets_content_match": doc.get("datasets_content_match", False), "run_record": doc["run_record"],
+                "estimate_note": doc.get("bootstrap")}
+    if doc.get("summary_version") != SUMMARY_VERSION:
+        raise StudyError(f"{path}: neither a {SUMMARY_VERSION} nor a legacy geant4-run-summary/1")
+    rep = schema_validate(doc, "simulation_summary.json")
+    if not rep.ok:
+        raise StudyError(f"{path}: invalid {SUMMARY_VERSION}: " + "; ".join(f.message for f in rep.errors)[:300])
+    run, decls = doc["run"], _decls(study)
+    k = get(study, "blocks.K")
+    if isinstance(k, int) and run["blocks"] != k:
+        raise StudyError(f"{path}: {run['blocks']} blocks, the study spec declares K = {k}")
+    tol = get(study, "convergence_plan.tolerance_relative") or {}
     obs = {}
-
-    def add(name, values, stat=statistics.fmean):
-        obs[name] = {"value": stat(values), "se": boot(values, stat, args.bootstrap, args.seed)}
-    if "mean_deposit_MeV" in wanted:
-        add("mean_deposit_MeV", dep)
-    if "mpv_deposit_MeV" in wanted:
-        add("mpv_deposit_MeV", dep, lambda v: _mpv(v, width))
-    if "tail_fraction" in wanted:
-        p = sum(d > tail_thr for d in dep) / len(dep)
-        obs["tail_fraction"] = {"value": p, "se": math.sqrt(max(p * (1 - p), 1 / len(dep) ** 2) / len(dep)),
-                                "threshold_MeV": tail_thr}
-    if "mpv_loss_MeV" in wanted and "primary_eloss_MeV" in rows[0]:
-        loss = [r["primary_eloss_MeV"] for r in rows if r.get("primary_fate") == 1]
-        if len(loss) > 1:
-            add("mpv_loss_MeV", loss, lambda v: _mpv(v, width))
-    leak_cols = {"leakage_fraction": ("leak_gamma_MeV", "leak_e_MeV", "leak_nu_MeV", "leak_other_MeV"),
-                 "rear_leakage_fraction": ("leak_rear_MeV",), "albedo_fraction": ("leak_front_MeV",),
-                 "lateral_leakage_fraction": ("leak_lateral_MeV",)}
-    for name, cs in leak_cols.items():
-        if name in wanted:
-            if not all(c in rows[0] for c in cs):
-                raise StudyError(f"{name} needs the CSV columns {list(cs)} (layered_sim from the leakage-by-face "
-                                 "version on)")
-            add(name, [math.fsum(r[c] for c in cs) / r["primary_ekin_MeV"] for r in rows])
-    doc = {"schema": "geant4-run-summary/1", "run_record": {"artifact_id": rec["artifact_id"],
-                                                            "sha256": sha256_file(Path(args.record))},
-           "csv": {"name": csv.name, "sha256": sha256_file(csv)}, "events": len(rows),
-           "settings": {"default_cut_mm": sim["physics"].get("default_cut_mm"),
-                        "step_limit_mm": sim["physics"].get("step_limit_mm", 0.0),
-                        "em_constructor": sim["physics"].get("em_constructor"),
-                        "reference_list": sim["physics"].get("reference_list"),
-                        "ui_commands": sim.get("ui_commands", []), "particle": sim["gun"]["particle"],
-                        "energy_MeV": sim["gun"]["energy_MeV"]},
-           "spec_sha256": sim.get("spec_sha256"), "data_path_problems": sim.get("data_path_problems", []),
-           "datasets_content_match": all(d.get("content_match") for d in sim.get("datasets", [])),
-           "bootstrap": {"resamples": args.bootstrap, "seed": args.seed}, "mpv_bin_MeV": width, "observables": obs}
-    write_json(args.out, doc)
-    return "ok", {"summary": args.out, "events": len(rows), "observables": obs}
+    for o in doc["observables"]:
+        d = decls.get(o["name"])
+        if d is None:
+            continue
+        for key, default in (("source_column", None), ("selection", []), ("bins", None), ("thresholds", [])):
+            if o.get(key, default) != d.get(key, default):
+                raise StudyError(f"{path}: observable {o['name']} {key} {o.get(key)!r} differs from the study's "
+                                 f"declaration {d.get(key, default)!r}")
+        try:
+            obs[o["name"]] = E.estimate(doc, d, tol.get(o["name"]))
+        except (ValueError, ArithmeticError) as exc:
+            obs[o["name"]] = {"value": None, "status": "incomplete", "reason": str(exc)}
+    return {"legacy": False, "settings": run.get("settings") or {}, "events": run["events_in_blocks"],
+            "observables": obs, "spec_sha256": run.get("spec_sha256"),
+            "data_path_problems": run.get("data_path_problems", []),
+            "datasets_content_match": run.get("datasets_content_match", False),
+            "run_record": run.get("run_record") or {}, "evidence_role": run.get("evidence_role"),
+            "blocks": run["blocks"], "block_size": run["block_size"]}
 
 
 def check_records(study: dict, sums: list[dict]) -> list[str]:
@@ -317,29 +298,73 @@ def check_records(study: dict, sums: list[dict]) -> list[str]:
     scanned = {p["name"].split(".")[-1] for p in get(study, "convergence_plan.parameters") or []}
     for s in sums:
         st = s["settings"]
-        rid = s["run_record"]["artifact_id"]
-        if st["particle"] != ls.get("gun", {}).get("particle") or st["energy_MeV"] != ls.get("gun", {}).get("energy_MeV"):
-            problems.append(f"{rid}: gun {st['particle']} {st['energy_MeV']} MeV differs from the spec")
+        rid = s["run_record"].get("artifact_id")
+        if st.get("particle") != ls.get("gun", {}).get("particle") or st.get("energy_MeV") != ls.get("gun", {}).get(
+                "energy_MeV"):
+            problems.append(f"{rid}: gun {st.get('particle')} {st.get('energy_MeV')} MeV differs from the spec")
         for k in ("em_constructor", "reference_list"):
             if st.get(k) != ls.get("physics", {}).get(k) and s.get("role") != "variation":
                 problems.append(f"{rid}: physics {k} {st.get(k)} differs from the spec {ls.get('physics', {}).get(k)}")
-        if "default_cut_mm" not in scanned and st["default_cut_mm"] != ls.get("physics", {}).get("default_cut_mm"):
-            problems.append(f"{rid}: cut {st['default_cut_mm']} mm differs from the spec and is not a scanned parameter")
+        if "default_cut_mm" not in scanned and st.get("default_cut_mm") != ls.get("physics", {}).get("default_cut_mm"):
+            problems.append(f"{rid}: cut {st.get('default_cut_mm')} mm differs from the spec and is not a scanned "
+                            "parameter")
         if s.get("data_path_problems"):
             problems.append(f"{rid}: data paths {s['data_path_problems']}")
         if not s.get("datasets_content_match", False):
             problems.append(f"{rid}: a dataset content hash differs from the build record")
         if s.get("role") == "nominal" and s.get("spec_sha256") != sha256_json(ls):
             problems.append(f"{rid}: the run's spec hash differs from the study's layered_sim spec")
+        if s.get("evidence_role") and s.get("role") and s["evidence_role"] != s["role"] and not (
+                s["role"] == "scan" and s["evidence_role"] == "nominal"):
+            problems.append(f"{rid}: summary evidence_role {s['evidence_role']} but supplied as {s['role']}")
     return problems
 
 
+def _se_target_met(e: dict, t: float, mode: str) -> bool:
+    """A1.8: a point meets its se target when se (relative under 'relative') <= tol / (4 sqrt 2); the exact
+    low-count branch has no se and is judged on its interval instead (True here)."""
+    if e.get("se") is None:
+        return True
+    se = e["se"] / abs(e["value"]) if mode == "relative" else e["se"]
+    return se <= t / SE_TARGET_DIVISOR
+
+
+def _compare(ea: dict, eb: dict, t: float, mode: str, m: int) -> dict:
+    """One observable between the finest (a) and second-finest (b) declared settings (A1.8)."""
+    if ea.get("status") != "ok" or eb.get("status") != "ok" or ea.get("value") is None or eb.get("value") is None:
+        return {"verdict": "unresolved", "reason": "estimate-incomplete",
+                "detail": ea.get("reason") or eb.get("reason")}
+    met = _se_target_met(ea, t, mode) and _se_target_met(eb, t, mode)
+    targets = {"finest": _se_target_met(ea, t, mode), "next": _se_target_met(eb, t, mode)}
+    if ea.get("low_count") or eb.get("low_count"):
+        if mode != "relative":
+            return {"verdict": "unresolved", "reason": "low-count-absolute-unsupported"}
+        r90 = M.rate_ratio_interval(ea["k"], eb["k"], 0.90, ea["n"], eb["n"])
+        rm = M.rate_ratio_interval(ea["k"], eb["k"], 1 - 2 * D.ALPHA / m, ea["n"], eb["n"])
+        r = D.equivalence(None, None, None, t, m, interval90=(r90[0] - 1, r90[1] - 1), interval_m=(rm[0] - 1, rm[1] - 1))
+        return {**r, "relative_change": ea["value"] / eb["value"] - 1 if eb["value"] else None,
+                "interval90": [r90[0] - 1, r90[1] - 1], "method": "conditional binomial (exact, low count)",
+                "se_targets_met": targets}
+    diff, se = D.difference(ea["value"], ea["se"], eb["value"], eb["se"], mode)
+    nu = D.welch_dof(ea["se"], ea["dof"], eb["se"], eb["dof"])
+    r = D.equivalence(diff, se, nu, t, m, targets_met=met)
+    return {**r, ("relative_change" if mode == "relative" else "change"): diff, "se_of_change": se, "dof": nu,
+            "se_targets_met": targets}
+
+
 def convergence(study: dict, sums: list[dict]) -> dict:
+    """The convergence gate (A1.8, A1.16): every declared value of each scan needs a summary; between the two finest
+    declared settings every declared observable must be equivalent within its tolerance (intersection-union test,
+    core.stats.decisions.equivalence with m = parameters x observables; unresolved or a missed se target is
+    incomplete, a resolved excess is fail)."""
     plan = get(study, "convergence_plan") or {}
     tol = plan.get("tolerance_relative") or {}
-    out, ok = [], True
+    decls = _decls(study)
+    params = plan.get("parameters", [])
+    m = max(1, len(params) * len(plan.get("observables", [])))
+    out = []
     trace.tag("geant4-convergence-complete")
-    for p in plan.get("parameters", []):
+    for p in params:
         key = p["name"].split(".")[-1]
         pts = sorted((s for s in sums if s["settings"].get(key) is not None and s.get("role") in ("scan", "nominal")
                       and s["settings"].get(key) in p["values"]), key=lambda s: s["settings"][key])
@@ -349,35 +374,34 @@ def convergence(study: dict, sums: list[dict]) -> dict:
         if missing:  # D11: every declared value needs a scan or nominal summary (A1.16)
             out.append({"parameter": p["name"], "verdict": "incomplete", "reason": "missing-scan-value",
                         "missing_values": missing, "values": vals, "declared_values": declared})
-            ok = False
             continue
         if len(declared) < 2:
             out.append({"parameter": p["name"], "verdict": "not-run", "reason": "fewer than two declared values"})
-            ok = False
             continue
         finest = [next(s for s in pts if s["settings"][key] == v) for v in declared[:2]]  # the two finest declared
         rows = []
         for o in plan.get("observables", []):
-            a, b = finest[0]["observables"].get(o), finest[1]["observables"].get(o)
-            t = tol.get(o)
-            if a is None or b is None or t is None:
-                rows.append({"observable": o, "verdict": "missing"})
-                ok = False
+            d = decls.get(o) or {}
+            mode = d.get("tolerance_mode", "relative")
+            t = d.get("tolerance") if mode == "absolute" else tol.get(o)
+            ea, eb = finest[0]["observables"].get(o), finest[1]["observables"].get(o)
+            if ea is None or eb is None or not isinstance(t, (int, float)):
+                rows.append({"observable": o, "verdict": "unresolved", "reason": "missing"})
                 continue
-            diff = (a["value"] - b["value"]) / b["value"] if b["value"] else a["value"] - b["value"]
-            se = math.hypot(a["se"], b["se"]) / abs(b["value"]) if b["value"] else math.hypot(a["se"], b["se"])
-            v = "pass" if abs(diff) <= t and se <= t / 2 else ("unresolved" if abs(diff) <= t else "fail")
-            ok = ok and v == "pass"
-            rows.append({"observable": o, "finest": vals[0], "next": vals[1], "relative_change": diff,
-                         "se_of_change": se, "tolerance": t, "verdict": v})
+            rows.append({"observable": o, "finest": declared[0], "next": declared[1], "tolerance": t,
+                         "tolerance_mode": mode, **_compare(ea, eb, t, mode, m)})
+        vs = {r["verdict"] for r in rows}
+        verdict = "fail" if "fail" in vs else ("incomplete" if vs - {"pass"} else "pass")
         out.append({"parameter": p["name"], "values": vals, "two_finest": declared[:2], "observables": rows,
-                    "verdict": "pass" if all(r["verdict"] == "pass" for r in rows) else "fail"})
-    verdicts = {p["verdict"] for p in out}
-    gate = "pass" if ok and out else ("incomplete" if verdicts <= {"pass", "incomplete"} and out else "fail")
-    return {"gate": gate, "parameters": out,
+                    "verdict": verdict})
+    vs = {p["verdict"] for p in out}
+    gate = "fail" if "fail" in vs or "not-run" in vs or not out else ("incomplete" if vs - {"pass"} else "pass")
+    return {"gate": gate, "parameters": out, "multiplicity": m,
             "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); "
-                    "between the two finest declared settings every declared observable changes by at most its "
-                    "relative tolerance and the SE of the change is at most half the tolerance"}
+                    "between the two finest declared settings every declared observable is equivalent within its "
+                    "tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target "
+                    "tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts "
+                    "decide on exact interval endpoints (A1.8)"}
 
 
 def stat_target(study: dict, nominal: dict | None) -> dict:
@@ -386,15 +410,20 @@ def stat_target(study: dict, nominal: dict | None) -> dict:
     if not nominal or not q or not isinstance(target, (int, float)):
         return {"verdict": "not-checked", "reason": "no nominal summary or no statistical_target.observable/relative_se"}
     o = nominal["observables"].get(q)
-    if not o:
-        return {"verdict": "not-checked", "reason": f"observable {q} not in the nominal summary"}
-    rel = o["se"] / abs(o["value"]) if o["value"] else math.inf
+    if not o or o.get("status") != "ok" or o.get("value") is None:
+        return {"verdict": "not-checked", "reason": f"observable {q} not estimated in the nominal summary"}
+    if o.get("se") is None:  # exact low-count branch: the 68.27 % interval half-width stands in for the se
+        lo, hi = M.exact_proportion(o["k"], o["n"], 0.6827)
+        rel = (hi - lo) / 2 / abs(o["value"]) if o["value"] else math.inf
+    else:
+        rel = o["se"] / abs(o["value"]) if o["value"] else math.inf
     n = nominal["events"]
     need = math.ceil(n * (rel / target) ** 2)
-    return {"observable": q, "relative_se": rel, "target": target, "events": n, "verdict": "pass" if rel <= target
-            else "fail", "events_needed": need if rel > target else None,
-            "estimate": f"seeded bootstrap of this run ({nominal['bootstrap']['resamples']} resamples); N_needed = "
-                        "N (SE/target)^2, assuming SE ~ 1/sqrt(N); the delta-ray tail makes means converge slowly"}
+    return {"observable": q, "relative_se": rel, "target": target, "events": n,
+            "verdict": "pass" if rel <= target else "target-missed",
+            "events_needed": need if rel > target else None,
+            "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = "
+                        "N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)"}
 
 
 def cmd_run(args) -> tuple[str, dict]:
@@ -402,10 +431,8 @@ def cmd_run(args) -> tuple[str, dict]:
     sums = []
     for item in args.summary:
         role, _, path = item.rpartition("=")
-        s = load_json(path)
-        if s.get("schema") != "geant4-run-summary/1":
-            raise StudyError(f"{path}: not a geant4-run-summary/1")
-        s["role"] = role or "scan"
+        s = load_summary(path, study)
+        s["role"] = role or s.get("evidence_role") or "scan"
         s["path"] = path
         sums.append(s)
     nominal = next((s for s in sums if s["role"] == "nominal"), None)
@@ -414,13 +441,15 @@ def cmd_run(args) -> tuple[str, dict]:
     conv = convergence(study, sums)
     doc = {"record_problems": problems, "statistical_target": stat, "convergence": conv,
            "summaries": [{"role": s["role"], "path": s["path"], "sha256": sha256_file(Path(s["path"])),
-                          "run_record": s["run_record"]} for s in sums]}
+                          "run_record": s["run_record"], "legacy": s["legacy"],
+                          "observables": s["observables"]} for s in sums]}
     if args.out:
         write_json(args.out, doc)
-    ok = not problems and stat["verdict"] in ("pass", "not-checked") and conv["gate"] == "pass"
-    if not ok and not problems and stat["verdict"] in ("pass", "not-checked") and conv["gate"] == "incomplete":
+    if problems or conv["gate"] == "fail":
+        return "failed", doc
+    if conv["gate"] == "incomplete" or stat["verdict"] == "target-missed":
         return "incomplete", doc
-    return ("ok" if ok else "failed"), doc
+    return "ok", doc
 
 
 def model_assignment(settings: dict, domain: str) -> dict:
@@ -447,14 +476,14 @@ def cmd_variations(args) -> tuple[str, dict]:
     study = load_study(Path(args.spec))
     domain = get(study, "observable.domain") or "em"
     obs = get(study, "variation_plan.observable") or get(study, "statistical_target.observable")
-    nominal = load_json(args.nominal)
+    nominal = load_summary(args.nominal, study)
     nm = model_assignment(nominal["settings"], domain)
     if obs not in nominal["observables"]:
         raise StudyError(f"observable {obs} not in the nominal summary")
     rows, included = [], [nominal["observables"][obs]["value"]]
     for item in args.variation:
         name, _, path = item.partition("=")
-        s = load_json(path)
+        s = load_summary(path, study)
         ma = model_assignment(s["settings"], domain)
         keys = ("domain", "particle_class", "model") if domain == "hadronic" else ("domain", "em_constructor",
                                                                                   "fluctuation_model")
@@ -464,7 +493,8 @@ def cmd_variations(args) -> tuple[str, dict]:
         nse = nominal["observables"][obs].get("se")
         diff_se = math.hypot(se, nse) / abs(included[0]) if se is not None and nse is not None else None
         rel = (val - included[0]) / included[0] if val is not None else None
-        row = {"variation": name, "summary": path, "model_assignment": ma, "nominal_model_assignment": nm,
+        row = {"variation": name, "summary": path, "run_record_id": s["run_record"].get("artifact_id"),
+               "model_assignment": ma, "nominal_model_assignment": nm,
                "value": val, "se": se, "relative_to_nominal": rel, "se_of_relative_difference": diff_se,
                "resolved": None if rel is None or diff_se is None else abs(rel) > 2 * diff_se}
         if changed and val is not None:
@@ -477,6 +507,7 @@ def cmd_variations(args) -> tuple[str, dict]:
         rows.append(row)
     env = (max(included) - min(included)) / abs(included[0]) if len(included) > 1 else None
     doc = {"observable": obs, "domain": domain, "nominal": {"summary": args.nominal, "model_assignment": nm,
+                                                            "run_record_id": nominal["run_record"].get("artifact_id"),
                                                             "value": included[0]},
            "variations": rows, "envelope_relative": env,
            "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; "
@@ -492,6 +523,31 @@ def _rel(path: Path, root: Path) -> str:
         return path.resolve().relative_to(root.resolve()).as_posix()
     except ValueError as exc:
         raise StudyError(f"{path} is outside the project root {root}") from exc
+
+
+def evidence_overlap(conv: dict, bench: dict, var: dict | None) -> list[dict]:
+    """A1.11 (D7): the runs that serve more than one decision of the study (convergence gate, statistical target,
+    each benchmark and its controls, the variation table), so that they are not read as independent evidence."""
+    uses: dict[str, set] = {}
+
+    def use(run, decision):
+        if run:
+            uses.setdefault(str(run), set()).add(decision)
+    for s in conv.get("summaries", []):
+        rid = (s.get("run_record") or {}).get("artifact_id")
+        use(rid, "convergence")
+        if s.get("role") == "nominal":
+            use(rid, "statistical-target")
+    for b in bench.get("benchmarks", []):
+        use((b.get("configuration_basis") or {}).get("artifact_id") or (b.get("inputs") or {}).get("run_record"),
+            f"benchmark:{b.get('benchmark')}")
+        for c in (b.get("negative_control") or {}).get("controls", []):
+            use(c.get("run_record"), f"benchmark:{b.get('benchmark')}")
+    if var:
+        use((var.get("nominal") or {}).get("run_record_id") or (var.get("nominal") or {}).get("summary"), "variations")
+        for v in var.get("variations", []):
+            use(v.get("run_record_id") or v.get("summary"), "variations")
+    return [{"run": r, "decisions": sorted(d)} for r, d in sorted(uses.items()) if len(d) > 1]
 
 
 def cmd_label(args) -> tuple[str, dict]:
@@ -511,7 +567,7 @@ def cmd_label(args) -> tuple[str, dict]:
             f"{p['parameter']} {p['verdict']}" for p in conv.get("convergence", {}).get("parameters", [])))
     if conv.get("record_problems"):
         gaps += [f"record: {p}" for p in conv["record_problems"]]
-    if conv.get("statistical_target", {}).get("verdict") == "fail":
+    if conv.get("statistical_target", {}).get("verdict") in ("fail", "target-missed"):
         st = conv["statistical_target"]
         gaps.append(f"statistical target not met: {st['observable']} relative SE {st['relative_se']:.3g} > "
                     f"{st['target']} (needs about {st['events_needed']} events)")
@@ -544,11 +600,18 @@ def cmd_label(args) -> tuple[str, dict]:
                 gaps += [f"{b['benchmark']}: {o}" for o in outside]
             elif conv.get("convergence", {}).get("gate") == "pass":
                 eligible.append({"benchmark": b["benchmark"], "scope": b["scope"]})
-    run_refs = []
+    run_refs, seen = [], {}
     for path in args.run_record or []:
         rec = load_json(path)
         if rec.get("artifact_type") != "computational-run":
             raise StudyError(f"{path}: not a computational-run")
+        sim = get(rec, "extension.simulation") or {}
+        key = (("S", sim["logical_run_seed"]) if sim.get("seed_scheme") == "hash-v1" else
+               ("legacy", tuple(get(rec, "extension.seeds.layered_sim") or sim.get("random", {}).get("seeds") or [])))
+        if key in seen and key[1]:  # A1.4: S (or a legacy run's full seed pair) is not repeated within a study
+            raise StudyError(f"{path}: {'logical-run seed' if key[0] == 'S' else 'legacy seed pair'} {key[1]} repeats "
+                             f"{seen[key]}")
+        seen[key] = path
         run_refs.append({"ref": _rel(Path(path), root), "artifact_type": "computational-run",
                          "artifact_id": rec["artifact_id"], "version": rec["contract_version"],
                          "sha256": sha256_file(Path(path)), "status": rec["status"]})
@@ -557,6 +620,7 @@ def cmd_label(args) -> tuple[str, dict]:
         run_refs.append({"ref": _rel(Path(path), root), "artifact_type": rec.get("artifact_type"),
                          "artifact_id": rec.get("artifact_id"), "version": rec.get("contract_version"),
                          "sha256": sha256_file(Path(path)), "status": rec.get("status", [])})
+    overlap = evidence_overlap(conv, bench, var)
     labels = ["unvalidated"] + [s for r in run_refs for s in r["status"] if s in PROPAGATING]
     labels = list(dict.fromkeys(labels))
     upgrade, refused = False, []
@@ -617,6 +681,7 @@ def cmd_label(args) -> tuple[str, dict]:
                                     "statistical_target": conv.get("statistical_target"),
                                     "variations": var, "declared_scope": declared, "gaps": gaps,
                                     "phase2_upgrade_eligible_scopes": eligible,
+                                    "evidence_overlap": overlap, "evidence_overlap_version": 1,
                                     "highest_usable_label": doc["highest_usable_label"]}}}
         if upgrade:
             record["artifact_id"] = record["artifact_id"].removesuffix("-study") + "-study-validated"
@@ -637,21 +702,11 @@ def main(argv=None) -> int:
     p = sub.add_parser("spec", help="completeness and physics rules of a study spec")
     p.add_argument("--spec", required=True)
     p.add_argument("--rules")
-    p = sub.add_parser("summarize", help="observables of one run")
-    p.add_argument("--record", required=True)
-    p.add_argument("--csv", required=True)
-    p.add_argument("--slab", required=True)
-    p.add_argument("--out", required=True)
-    p.add_argument("--bootstrap", type=int, default=200)
-    p.add_argument("--seed", type=int, default=1)
-    p.add_argument("--mpv-bin-mev", type=float, default=0.002)
-    p.add_argument("--tail-threshold-mev", type=float, default=0.25)
-    p.add_argument("--observables", nargs="+", help="which observables to compute (default the thin-layer set: "
-                   "mean_deposit_MeV mpv_deposit_MeV tail_fraction mpv_loss_MeV; leakage: leakage_fraction "
-                   "rear_leakage_fraction albedo_fraction lateral_leakage_fraction)")
     p = sub.add_parser("run", help="records against the spec, statistical target, convergence gate")
     p.add_argument("--spec", required=True)
-    p.add_argument("--summary", action="append", required=True, help="[ROLE=]SUMMARY.json; ROLE nominal or scan")
+    p.add_argument("--summary", action="append", required=True,
+                   help="[ROLE=]SUMMARY.json (simulation-summary/1, or a legacy geant4-run-summary/1); ROLE nominal or "
+                        "scan (default the summary's evidence_role)")
     p.add_argument("--out")
     p = sub.add_parser("variations", help="variation table with model assignments")
     p.add_argument("--spec", required=True)
@@ -678,7 +733,7 @@ def main(argv=None) -> int:
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
     defaults = [k for k in ("rules", "bootstrap", "seed", "mpv_bin_mev", "tail_threshold_mev", "created", "status")
                 if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
-    handlers = {"spec": cmd_spec, "summarize": cmd_summarize, "run": cmd_run, "variations": cmd_variations,
+    handlers = {"spec": cmd_spec, "run": cmd_run, "variations": cmd_variations,
                 "label": cmd_label}
     try:
         status, doc = handlers[args.command](args)

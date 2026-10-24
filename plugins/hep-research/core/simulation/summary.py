@@ -19,7 +19,8 @@ OBSERVABLES_VERSION = "simulation-observables/1"
 MERGE = {"events": "sum", "n": "sum", "hist": "hist", "underflow": "sum", "overflow": "sum", "count_if": "sum",
          "sum": "sum", "sumsq": "sum", "min": "min", "max": "max"}
 OPS = {"==": lambda a, b: a == b, "!=": lambda a, b: a != b, "<": lambda a, b: a < b, "<=": lambda a, b: a <= b,
-       ">": lambda a, b: a > b, ">=": lambda a, b: a >= b}
+       ">": lambda a, b: a > b, ">=": lambda a, b: a >= b,
+       "contains": lambda a, b: str(b) in str(a), "!contains": lambda a, b: str(b) not in str(a)}
 
 
 class SummaryError(ValueError):

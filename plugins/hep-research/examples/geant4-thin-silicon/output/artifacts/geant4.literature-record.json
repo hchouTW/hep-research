@@ -44,7 +44,7 @@
    "skills/hep-citations/scripts/manage_literature.py"
   ],
   "code_tags": [],
-  "created": "2026-10-21",
+  "created": "2026-10-24",
   "evidence_ids": []
  },
  "inputs": [],
@@ -55,12 +55,12 @@
  "unresolved_inputs": [],
  "extension": {
   "record_version": "1.0.0",
-  "created": "2026-10-21",
+  "created": "2026-10-24",
   "imported": [
    {
     "path": "literature-input.json",
     "sha256": "47fcacb0329d1d321467d9897e5a6246d2be31aca5bed9c79f65d7b2beb01030",
-    "date": "2026-10-21",
+    "date": "2026-10-24",
     "counts": {
      "sources": 6,
      "claims": 1,

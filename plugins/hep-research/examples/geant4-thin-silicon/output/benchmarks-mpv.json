@@ -6,19 +6,21 @@
    "configuration_basis": {
     "artifact_id": "geant4-run-mpv-nominal",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-    "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099"
+    "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
    },
    "configuration_gap": null,
-   "deposit_minus_loss_relative": 0.0015604862756076893,
-   "detection_limit_relative": 0.0826757688364182,
-   "estimator": "least-squares parabola vertex through the fullest bin and two bins on each side, bin width 0.002 MeV, bins from 0",
-   "geant4": 0.08487795698924731,
-   "geant4_se": 0.0005283350951568302,
+   "detection_limit_relative": 0.0715312464119818,
+   "estimator": "mean of the three-point parabola modes of the K block histograms (bin width 0.002 MeV, bins from the observable declaration), batch-means SE",
+   "geant4": 0.0848381015076379,
+   "geant4_dof": 15,
+   "geant4_se": 0.0002862989614551863,
    "grade": "reference",
    "hash_scheme": "spec-v1",
    "inputs": {
-    "csv": "../recorded/events/mpv-nominal.csv.gz",
-    "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
+    "csv": null,
+    "observable": "loss_transmitted_MeV",
+    "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+    "summary": "../recorded/blocks/mpv-nominal.json"
    },
    "landau": {
     "beta_gamma": 95.63942246882289,
@@ -27,16 +29,51 @@
     "kappa": 1.1013920613450275e-06,
     "xi_MeV": 0.005348088408125617
    },
-   "most_probable_deposit_MeV": 0.08501040787623065,
+   "mpv_checks": {
+    "fallback_blocks": 0,
+    "merged_check": {
+     "bound": 0.012768317554102283,
+     "relative_difference": 0.002817489753166458
+    },
+    "merged_mode": 0.08459974259974261
+   },
    "negative_control": {
     "at_claimed_detection_limit": true,
-    "csv": "../recorded/events/mpv-control.csv.gz",
-    "injected": "silicon density x 1.083 on the Geant4 side (reference keeps 2.329 g/cm3)",
-    "injected_relative": 0.083,
-    "relative_difference": 0.09977568431244103,
-    "run_record": "../recorded/runs/mpv-control.computational-run.json",
-    "status": "caught",
-    "verdict_on_control": "fail"
+    "controls": [
+     {
+      "at_claimed_detection_limit": true,
+      "csv": null,
+      "detection_limit_relative": 0.0715312464119818,
+      "injected": "silicon density x 1.071 on the Geant4 side (reference keeps 2.329 g/cm3)",
+      "injected_relative": 0.071,
+      "relative_difference": 0.07655354096303266,
+      "run_record": "../recorded/runs/mpv-control.computational-run.json",
+      "se_of_shift": 0.005106114549732925,
+      "shift": 0.06281832598292081,
+      "sign": "+",
+      "status": "caught",
+      "summary": "../recorded/blocks/mpv-control.json",
+      "verdict_on_control": "fail"
+     },
+     {
+      "at_claimed_detection_limit": true,
+      "csv": null,
+      "detection_limit_relative": 0.07111865412596297,
+      "injected": "silicon density x 0.929 on the Geant4 side (reference keeps 2.329 g/cm3)",
+      "injected_relative": -0.071,
+      "relative_difference": -0.05771004024443139,
+      "run_record": "../recorded/runs/mpv-control-minus.computational-run.json",
+      "se_of_shift": 0.00491004214624843,
+      "shift": -0.07144525522454326,
+      "sign": "-",
+      "status": "caught",
+      "summary": "../recorded/blocks/mpv-control-minus.json",
+      "verdict_on_control": "fail"
+     }
+    ],
+    "detection_limit_relative": 0.0715312464119818,
+    "detection_limit_sign": "+-",
+    "status": "caught"
    },
    "reference": {
     "source": "most probable energy loss Delta_p, PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf), eq. 34.12 (j = 0.200), delta(beta gamma) from Sternheimer parameters in the study spec (PDG Atomic and Nuclear Properties, silicon, 2024 edition: density 2.329 g/cm3, A 28.0855(3) g/mol (Z/A = 14/28.0855), I 173.0 eV, Sternheimer coefficients a, k, x0, x1, Cbar, delta0 from the header of MUE/muE_silicon_Si.txt (refdata/pdg-silicon-2024.json); never from the Geant4 material dump)",
@@ -44,9 +81,11 @@
     "version": "RPP 2024"
    },
    "reference_value": 0.08368862031620586,
-   "relative_difference": 0.01421145035666392,
+   "relative_difference": 0.013735214980111862,
+   "relative_se": 0.003421002286493018,
    "scope": {
-    "detection_limit_relative": 0.0826757688364182,
+    "detection_limit_relative": 0.0715312464119818,
+    "detection_limit_sign": "+-",
     "energy_MeV": 10000.0,
     "material": "Si_study",
     "observable": "most probable energy loss of transmitted primaries (MeV)",
@@ -54,11 +93,11 @@
     "thickness_mm": 0.3
    },
    "selection": {
-    "ended_in_hadronic_process": 0,
-    "events": 60000,
+    "blocks": 16,
+    "events": 546528,
     "excluded": 0,
     "excluded_fraction": 0.0,
-    "used": 60000
+    "used": 546528
    },
    "statistic": "most probable energy loss of transmitted primaries (MeV)",
    "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
@@ -69,10 +108,10 @@
     "parts": {
      "binning": 0.006898790624199416,
      "k_sigma": 3,
-     "mc_statistics": 0.01893931671333292,
+     "mc_statistics": 0.010263006859479054,
      "reference_accuracy": 0.03
     },
-    "total": 0.05583810733753233
+    "total": 0.04716179748367847
    },
    "validation_evidence": true,
    "verdict": "pass",
@@ -84,14 +123,16 @@
    "configuration_basis": {
     "artifact_id": "geant4-run-mpv-nominal",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-    "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099"
+    "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
    },
-   "geant4": 0.028,
+   "geant4": 0.03,
    "grade": "sanity",
    "hash_scheme": "spec-v1",
    "inputs": {
-    "csv": "../recorded/events/mpv-nominal.csv.gz",
-    "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
+    "csv": null,
+    "observable": "deposit_transmitted_MeV",
+    "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+    "summary": "../recorded/blocks/mpv-nominal.json"
    },
    "plausibility_window": "0.5 to 3 x the Landau width (thin layers are wider than 4 xi, RPP 2024)",
    "reference": {
@@ -100,7 +141,7 @@
     "version": "RPP 2024"
    },
    "reference_value": 0.021392353632502466,
-   "relative_difference": 0.3088788864007095,
+   "relative_difference": 0.4023702354293315,
    "scope": {
     "energy_MeV": 10000.0,
     "material": "Si_study",
@@ -109,11 +150,11 @@
     "thickness_mm": 0.3
    },
    "selection": {
-    "ended_in_hadronic_process": 0,
-    "events": 60000,
+    "blocks": 16,
+    "events": 546528,
     "excluded": 0,
     "excluded_fraction": 0.0,
-    "used": 60000
+    "used": 546528
    },
    "statistic": "FWHM of the deposit distribution (MeV)",
    "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
