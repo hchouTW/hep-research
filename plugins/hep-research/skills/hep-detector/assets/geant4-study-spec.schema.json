@@ -102,6 +102,7 @@
       "other",
       "range",
       "shower-shape",
+      "shower-maximum",
       "stopping-power",
       "thin-layer-width"
      ]
@@ -451,6 +452,21 @@
       },
       "beta_gamma": {
        "type": "number"
+      },
+      "observable_kind": {
+       "type": "string",
+       "minLength": 1,
+       "description": "written by check_geant4_study.py label from observable.kind (CV-A1)"
+      },
+      "target_geometry_sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      },
+      "hash_scheme": {
+       "enum": [
+        "spec-v1",
+        "tree-v1"
+       ]
       }
      },
      "additionalProperties": false

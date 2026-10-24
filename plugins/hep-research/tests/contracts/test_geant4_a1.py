@@ -85,5 +85,45 @@ class SetupMatchedClass(unittest.TestCase):
                 self.assertEqual(strict_exit(doc), 0 if grade == SPEC_CLASS["longitudinal-profile"] else 1)
 
 
+# program spec A1.1, column "Supported kind" (A1.12 adds shower-maximum to the study spec's kind enum)
+SPEC_KINDS = {"stopping-power": {"stopping-power"}, "range": {"range"}, "thin-layer-mpv": {"most-probable-value"},
+              "longitudinal-profile": {"shower-maximum"}}
+KIND_ENUM = ("activation", "angle", "containment", "energy-deposit", "energy-loss", "energy-resolution", "leakage",
+             "most-probable-value", "neutron-capture", "neutron-dose", "neutron-flux", "other", "range",
+             "shower-shape", "shower-maximum", "stopping-power", "thin-layer-width")
+
+
+class ScopeKind(unittest.TestCase):
+    """geant4-scope-kind (D1): the declared observable kind must be one the counted benchmark supports."""
+
+    def test_every_declared_kind_against_the_mpv_benchmark(self):
+        """Exhaustive over the observable-kind enum: J14's MPV record, validated by thin-layer-mpv, stays valid only
+        with the kind that benchmark supports; a declaration without a kind is outside the scope."""
+        base = j14_record()
+        for kind in (*KIND_ENUM, None):
+            doc = copy.deepcopy(base)
+            scope = doc["extension"]["study"]["declared_scope"]
+            scope.pop("observable_kind", None)
+            if kind is not None:
+                scope["observable_kind"] = kind
+            with self.subTest(kind=kind):
+                self.assertEqual(strict_exit(doc), 0 if kind in SPEC_KINDS["thin-layer-mpv"] else 1)
+
+    def test_every_upgrading_benchmark_and_kind(self):
+        """Exhaustive over the upgrading benchmarks x the kind enum: J14's thin-layer-mpv result renamed to each
+        benchmark (graded by the table) is the only one counted."""
+        base = j14_record()
+        mpv = next(b for b in base["extension"]["study"]["benchmarks"] if b["benchmark"] == "thin-layer-mpv")
+        for name, kinds in SPEC_KINDS.items():
+            if name == "longitudinal-profile":
+                continue  # its scope dimensions differ (target hash): ScopeDimensions
+            for kind in KIND_ENUM:
+                doc = copy.deepcopy(base)
+                doc["extension"]["study"]["benchmarks"] = [dict(mpv, benchmark=name, grade=SPEC_CLASS[name])]
+                doc["extension"]["study"]["declared_scope"]["observable_kind"] = kind
+                with self.subTest(benchmark=name, kind=kind):
+                    self.assertEqual(strict_exit(doc), 0 if kind in kinds else 1)
+
+
 if __name__ == "__main__":
     unittest.main()

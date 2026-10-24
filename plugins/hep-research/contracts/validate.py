@@ -395,9 +395,17 @@ def _upgrading(b: dict, a1: bool) -> bool:
     return b.get("grade") == "reference"
 
 
-def _scope_inside(declared: dict, bench: dict) -> list[str]:
-    """Where a declared scope leaves a benchmark's scope (particle, material, energy and thickness ranges)."""
+def _scope_inside(declared: dict, bench: dict, benchmark: str | None = None, a1: bool = False) -> list[str]:
+    """Where a declared scope leaves a benchmark's scope (particle, material, energy and thickness ranges). CV-A1
+    (a1): the declared observable_kind must be one of the kinds the benchmark supports (GEANT4_BENCHMARKS)."""
     out = []
+    if a1:
+        kinds = (GEANT4_BENCHMARKS.get(benchmark) or {}).get("kinds", ())
+        kind = declared.get("observable_kind")
+        if kind is None:
+            out.append("the declared scope has no observable_kind")
+        elif kind not in kinds:
+            out.append(f"observable kind {kind!r} is not one {benchmark} supports ({list(kinds)})")
     for k in ("particle", "material"):
         if declared.get(k) is not None and bench.get(k) is not None and declared[k] != bench[k]:
             out.append(f"{k} {declared[k]!r} is not the benchmark's {bench[k]!r}")
@@ -412,6 +420,12 @@ def _scope_inside(declared: dict, bench: dict) -> list[str]:
         if lo < blo * (1 - 1e-9) or hi > bhi * (1 + 1e-9):
             out.append(f"{k} {d} is outside the benchmarked {b}")
     return out
+
+
+def scope_outside(declared: dict, bench: dict, benchmark: str) -> list[str]:
+    """Where a declared Geant4 study scope leaves a benchmark result's scope under the CV-A1 rules: the single
+    implementation, used by contracts (_study_upgrade) and by hep-detector's check_geant4_study.py label."""
+    return _scope_inside(declared, bench, benchmark, a1=True)
 
 
 SIMULATED_LEVELS = ("detector", "particle-fiducial")
@@ -476,7 +490,7 @@ def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report, a1: bool = Fa
                 "validated-in-scope needs a passed reference benchmark whose negative control was caught")
         return
     declared = study.get("declared_scope") or {}
-    misses = [_scope_inside(declared, b.get("scope") or {}) for b in good]
+    misses = [_scope_inside(declared, b.get("scope") or {}, b.get("benchmark"), a1) for b in good]
     if not declared or all(misses):
         detail = "; ".join(m for ms in misses for m in ms) or "no declared scope"
         rep.add("error", "$.extension.study.declared_scope", "geant4.upgrade_scope_outside",

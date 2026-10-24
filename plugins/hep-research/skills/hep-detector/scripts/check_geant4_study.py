@@ -56,6 +56,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV reader and bootstrap for both scripts)
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts import trace  # noqa: E402
+from contracts.validate import scope_outside  # noqa: E402  (CV-A1: the single scope implementation)
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
@@ -479,20 +480,6 @@ def _rel(path: Path, root: Path) -> str:
         raise StudyError(f"{path} is outside the project root {root}") from exc
 
 
-def scope_within(declared: dict, bench: dict) -> list[str]:
-    out = []
-    for k in ("particle", "material", "observable"):
-        if declared.get(k) is not None and bench.get(k) is not None and k != "observable" and declared[k] != bench[k]:
-            out.append(f"declared {k} {declared[k]} is not the benchmark's {bench[k]}")
-    for k, bk in (("energy_MeV", "energy_MeV"), ("thickness_mm", "thickness_mm")):
-        d, b = declared.get(k), bench.get(bk)
-        if isinstance(d, list) and b is not None:
-            lo, hi = d
-            if lo < b * (1 - 1e-9) or hi > b * (1 + 1e-9):
-                out.append(f"declared {k} {d} is larger than the benchmarked {b}")
-    return out
-
-
 def cmd_label(args) -> tuple[str, dict]:
     spec_path = Path(args.spec)
     study = load_study(spec_path)
@@ -532,11 +519,13 @@ def cmd_label(args) -> tuple[str, dict]:
                         "Geant4 papers, version and documents from one, never from memory (R8)")
     if not any(b.get("validation_evidence") for b in bench.get("benchmarks", [])):
         gaps.append("no reference benchmark is validation evidence for this study (R5 not met)")
-    declared = get(study, "validation_plan.scope") or {}
+    declared = dict(get(study, "validation_plan.scope") or {})
+    if get(study, "observable.kind") is not None:  # CV-A1: the controlled kind is part of the declared scope
+        declared["observable_kind"] = get(study, "observable.kind")
     eligible = []
     for b in bench.get("benchmarks", []):
         if b.get("validation_evidence"):
-            outside = scope_within(declared, b["scope"])
+            outside = scope_outside(declared, b["scope"], b["benchmark"])
             if outside:
                 gaps += [f"{b['benchmark']}: {o}" for o in outside]
             elif conv.get("convergence", {}).get("gate") == "pass":

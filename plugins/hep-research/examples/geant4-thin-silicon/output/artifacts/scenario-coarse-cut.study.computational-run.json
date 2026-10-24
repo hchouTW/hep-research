@@ -192,6 +192,7 @@
     ],
     "material": "Si_study",
     "observable": "most probable energy loss",
+    "observable_kind": "most-probable-value",
     "particle": "mu-",
     "thickness_mm": [
      0.3,
@@ -325,11 +326,11 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "3392f2d777ed165e"
+    "version": "4b68e49d29007c1d"
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "937542edeac13a78"
+    "version": "fde8ed0c8f3448f5"
    }
   ]
  },
@@ -339,10 +340,21 @@
  "provenance": {
   "code_paths": [
    "contracts/__init__.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
    "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
    "core/__init__.py",
    "core/constants/__init__.py",
    "core/constants/physical.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
    "core/status.py",
    "core/trace.py",
    "skills/hep-detector/scripts/check_geant4_study.py",
