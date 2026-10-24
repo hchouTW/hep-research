@@ -1,0 +1,108 @@
+{
+ "schema": "design-search-materials/1",
+ "materials_version": "1.0.0",
+ "source": {
+  "kind": "geant4-nist-dump",
+  "geant4_version": "11.4.3 (geant4-11-04-patch-03), built with adapters/geant4/assets/geant4_build.py",
+  "command": "python3 adapters/geant4/assets/geant4_run.py run --spec <geantino spec with one 0.1 mm slab of each material below> --exe <layered_sim> --build-record <build record> --work <dir> --run-id dump2 --record <record>; the values are copied unrounded from <dir>/dump2/materials.json",
+  "dump_sha256": "9a20c7337e48058a3c16dea34059128ffccdfc4a27f1c1811eb8539528186abb",
+  "note": "Geant4's NIST material table after /run/initialize: density, radiation length X0 and nuclear interaction length lambda_I as Geant4 computes them (lambda_I differs from the PDG table, which uses other cross sections). Used for x/X0 of planes and for the role-rule budget models; check against a new dump with tests/skills/hep_detector/test_design_search.py (HEP_DESIGN_SEARCH_MATERIALS_DUMP)"
+ },
+ "units": {
+  "density_g_cm3": "g/cm3",
+  "radiation_length_cm": "cm",
+  "nuclear_interaction_length_cm": "cm"
+ },
+ "materials": {
+  "G4_Si": {
+   "density_g_cm3": 2.33,
+   "radiation_length_cm": 9.366070292,
+   "nuclear_interaction_length_cm": 45.66030737
+  },
+  "G4_Al": {
+   "density_g_cm3": 2.699,
+   "radiation_length_cm": 8.896317613,
+   "nuclear_interaction_length_cm": 38.89441329
+  },
+  "G4_C": {
+   "density_g_cm3": 2,
+   "radiation_length_cm": 21.34851843,
+   "nuclear_interaction_length_cm": 40.07694684
+  },
+  "G4_Fe": {
+   "density_g_cm3": 7.874,
+   "radiation_length_cm": 1.757493465,
+   "nuclear_interaction_length_cm": 16.99030028
+  },
+  "G4_Cu": {
+   "density_g_cm3": 8.96,
+   "radiation_length_cm": 1.435578024,
+   "nuclear_interaction_length_cm": 15.5879379
+  },
+  "G4_W": {
+   "density_g_cm3": 19.3,
+   "radiation_length_cm": 0.3504180177,
+   "nuclear_interaction_length_cm": 10.31158379
+  },
+  "G4_Pb": {
+   "density_g_cm3": 11.35,
+   "radiation_length_cm": 0.5612532628,
+   "nuclear_interaction_length_cm": 18.24794703
+  },
+  "G4_PbWO4": {
+   "density_g_cm3": 8.28,
+   "radiation_length_cm": 0.8924531919,
+   "nuclear_interaction_length_cm": 20.73974271
+  },
+  "G4_CESIUM_IODIDE": {
+   "density_g_cm3": 4.51,
+   "radiation_length_cm": 1.860287981,
+   "nuclear_interaction_length_cm": 39.30598504
+  },
+  "G4_BGO": {
+   "density_g_cm3": 7.13,
+   "radiation_length_cm": 1.118029995,
+   "nuclear_interaction_length_cm": 22.71013372
+  },
+  "G4_lAr": {
+   "density_g_cm3": 1.396,
+   "radiation_length_cm": 14.00343868,
+   "nuclear_interaction_length_cm": 85.70639539
+  },
+  "G4_PLASTIC_SC_VINYLTOLUENE": {
+   "density_g_cm3": 1.032,
+   "radiation_length_cm": 42.54419965,
+   "nuclear_interaction_length_cm": 69.96938742
+  },
+  "G4_POLYSTYRENE": {
+   "density_g_cm3": 1.06,
+   "radiation_length_cm": 41.31250563,
+   "nuclear_interaction_length_cm": 68.74987867
+  },
+  "G4_KAPTON": {
+   "density_g_cm3": 1.42,
+   "radiation_length_cm": 28.57477541,
+   "nuclear_interaction_length_cm": 55.81690921
+  },
+  "G4_MYLAR": {
+   "density_g_cm3": 1.4,
+   "radiation_length_cm": 28.53640433,
+   "nuclear_interaction_length_cm": 55.92315136
+  },
+  "G4_WATER": {
+   "density_g_cm3": 1,
+   "radiation_length_cm": 36.08297746,
+   "nuclear_interaction_length_cm": 75.37478941
+  },
+  "G4_AIR": {
+   "density_g_cm3": 0.00120479,
+   "radiation_length_cm": 30392.07005,
+   "nuclear_interaction_length_cm": 71009.50127
+  },
+  "G4_SILICON_DIOXIDE": {
+   "density_g_cm3": 2.32,
+   "radiation_length_cm": 11.65772766,
+   "nuclear_interaction_length_cm": 41.31742393
+  }
+ }
+}
