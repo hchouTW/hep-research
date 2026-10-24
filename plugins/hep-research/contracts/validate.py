@@ -300,7 +300,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         if ext.get("exit_status", 0) != 0 and "failed" not in status:
             rep.add("error", "$.status", "status.failed_unlabeled", "non-zero exit status must carry 'failed'")
         if strict or _at_least(doc.get("contract_version"), GEANT4_UPGRADE_FROM):
-            _study_upgrade(doc, ext, status, rep, a1=_geant4_a1(doc, status, strict))
+            _study_upgrade(doc, ext, status, rep, a1=_geant4_a1(doc, status, strict),
+                           b2=strict or _at_least(doc.get("contract_version"), GEANT4_B2_FROM))
         if isinstance(ext.get("simulation"), dict) and (strict or _at_least(doc.get("contract_version"), GEANT4_A1_FROM)):
             _evidence_role(ext["simulation"], rep)
         if "search_summary" in ext and (strict or _at_least(doc.get("contract_version"), SEARCH_SUMMARY_FROM)):
@@ -352,6 +353,10 @@ def _literature_semantics(ext: dict, rep: Report) -> None:
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
 GEANT4_UPGRADE_FROM = "3.1.0"  # Geant4 phase-2 rules (study record upgrade, evidence records) apply from this version
 GEANT4_A1_FROM = "3.13.0"  # CV-A1 (Geant4 correctness sci-fix): benchmark table, kind and per-benchmark scope, isolation
+# CV-B2 (Geant4 program B2): verification, regression and tracking-reference benchmarks, the regression role, the
+# transitive processing chain of simulated tables, the F4 qualification path of detector-level studies (B2.8, D0). It
+# shares the unreleased contracts 3.13.0 with CV-A1 and CV-C1 (the number is fixed at release in merge order).
+GEANT4_B2_FROM = "3.13.0"
 # CV-A1: benchmark -> validation class (the value a record's grade must have), the observable kinds it supports and its
 # scope dimensions (categorical or interval). Only reference and setup-matched benchmarks upgrade; the record never
 # declares a class, kind or dimension. Entries are added in later contract versions.
@@ -369,8 +374,34 @@ GEANT4_BENCHMARKS: dict[str, dict[str, Any]] = {
                              "scope": (("particle", "categorical"), ("energy_MeV", "interval"),
                                        ("target_geometry_sha256", "target-hash"))},
     "published-data": {"class": "interface", "kinds": (), "scope": ()},
+    # CV-B2 (B2.7): verification benchmarks are conditions of the F4 qualification path, never upgrade evidence on
+    # their own; each covers the declared-scope key it is matched by (a hash: equality)
+    "field-propagation": {"class": "verification", "kinds": (), "scope": (("field_configuration_sha256", "hash"),)},
+    "field-propagation-muon": {"class": "sanity", "kinds": (), "scope": ()},
+    "material-definition": {"class": "verification", "kinds": (),
+                            "scope": (("geometry_sha256", "hash"), ("realization_sha256", "hash"))},
+    "reco-closure": {"class": "verification", "kinds": (), "scope": (("reco_spec_sha256", "hash"),)},
+    "tof-beta": {"class": "verification", "kinds": (), "scope": ()},
+    "tof-layer-consistency": {"class": "verification", "kinds": (), "scope": ()},
+    "sampling-fraction": {"class": "sanity", "kinds": (), "scope": ()},
+    "multiple-scattering-reference": {"class": "reference", "kinds": ("tracking-resolution",),
+                                      "scope": (("particle", "categorical"), ("material", "categorical"),
+                                                ("thickness_x0", "interval"), ("rigidity_GV", "interval"))},
+    "ms-tail-reference": {"class": "reference", "kinds": ("charge-confusion",),
+                          "scope": (("particle", "categorical"), ("material", "categorical"),
+                                    ("thickness_x0", "interval"), ("rigidity_GV", "interval"))},
+    "regression-comparison": {"class": "regression", "kinds": (), "scope": ()},
 }
 GEANT4_UPGRADING_CLASSES = ("reference", "setup-matched")
+# CV-B2 (B2.8, D0 decided 2026-10-24): a detector-level study of these kinds is upgradable only when every condition
+# holds, each matched to the study by its own declared-scope keys: the three verifications passed for the same
+# realized geometry, field configuration and reco spec, and the kind's reference benchmark passed with its control
+# caught and its scope covering the study's (multiple-scattering-reference qualifies the resolution core only; charge
+# confusion needs the tail benchmark, D0-b)
+GEANT4_QUALIFICATION = {
+    "tracking-resolution": ("material-definition", "field-propagation", "reco-closure", "multiple-scattering-reference"),
+    "charge-confusion": ("material-definition", "field-propagation", "reco-closure", "ms-tail-reference"),
+}
 
 # CV-C1 (geant4 program C1.6): the search_summary rules of a search run apply natively from this contract version. The
 # number is the placeholder of the stage; it is fixed at release in merge order (all CV-* numbers are >= 3.13.0).
@@ -670,7 +701,8 @@ def _configuration(b: dict, i: int, rep: Report) -> None:
                     f"the measured configuration's ({m.get('target_geometry_sha256')}, {m.get('hash_scheme')})")
 
 
-GEANT4_EVIDENCE_ROLES = ("trial", "nominal", "scan", "control", "variation", "calibration")  # CV-A1; B2, C2 add roles
+GEANT4_EVIDENCE_ROLES = ("trial", "nominal", "scan", "control", "variation", "calibration",
+                         "regression")  # CV-A1; CV-B2 adds regression (B2.7); C2 adds search
 GEANT4_SEED_SCHEMES = ("hash-v1", "legacy")
 
 
@@ -787,8 +819,88 @@ def _scope_dimensions(declared: dict, bench: dict, dims) -> list[str]:
                 out.append(f"{k}: {d!r} or the benchmark's {b!r} is not a number or range")
             elif di[0] < bi[0] - 1e-9 * abs(bi[0]) or di[1] > bi[1] + 1e-9 * abs(bi[1]):
                 out.append(f"{k} {d} is outside the benchmarked {b}")
+        elif kind == "hash":  # CV-B2: a key matched by equality (a field configuration, reco spec or geometry hash)
+            if d != b:
+                out.append(f"{k} {d} is not the benchmark's {b}")
         elif d != b or declared.get("hash_scheme") != bench.get("hash_scheme"):
             out.append(f"{k} {d} ({declared.get('hash_scheme')}) is not the benchmark's {b} ({bench.get('hash_scheme')})")
+    return out
+
+
+def qualification_missing(declared: dict, benchmarks: list) -> list[str] | None:
+    """CV-B2 (B2.8): None when the declared observable kind has no qualification path (the CV-A1 rule applies), else
+    every condition of GEANT4_QUALIFICATION[kind] that does not hold: a missing or failed benchmark, a reference whose
+    control was not caught or that is not validation evidence, or a benchmark whose scope keys do not cover the
+    declared scope (_scope_dimensions). The single implementation, used by _study_upgrade and check_geant4_study.py."""
+    kind = declared.get("observable_kind") if isinstance(declared, dict) else None
+    need = GEANT4_QUALIFICATION.get(kind) if isinstance(kind, str) else None
+    if need is None:
+        return None
+    out = []
+    by_name: dict = {}
+    for b in benchmarks or []:
+        if isinstance(b, dict) and isinstance(b.get("benchmark"), str):
+            by_name.setdefault(b["benchmark"], []).append(b)
+    for name in need:
+        cls = _bench(name).get("class")
+        cands = by_name.get(name, [])
+        if not cands:
+            out.append(f"{name}: not present (condition of the {kind} qualification path)")
+            continue
+        reasons = []
+        for b in cands:
+            why = []
+            if b.get("verdict") != "pass":
+                why.append(f"verdict {b.get('verdict')!r}")
+            if cls == "reference":
+                if (b.get("negative_control") or {}).get("status") != "caught":
+                    why.append("negative control not caught")
+                if b.get("validation_evidence") is not True:
+                    why.append("not validation evidence")
+            why += _scope_dimensions(declared, b.get("scope") or {}, _bench(name).get("scope", ()))
+            if not why:
+                break
+            reasons.append("; ".join(why))
+        else:
+            out.append(f"{name}: " + " | ".join(reasons))
+    return out
+
+
+def qualification_reference(kind, benchmarks) -> dict | None:
+    """CV-B2 (D0-c): the passed reference benchmark (validation evidence, control caught) of the kind's qualification
+    path in a study's benchmark list, else None. Its total relative tolerance is what the upgrade certifies: an F4
+    value of that study cannot be more accurate than it (check_geant4_study.py label adds it to the uncertainty,
+    design.py lowers the F4 floor only when it is there)."""
+    need = GEANT4_QUALIFICATION.get(kind) if isinstance(kind, str) else None
+    for name in need or ():
+        if _bench(name).get("class") != "reference":
+            continue
+        for b in benchmarks or []:
+            if (isinstance(b, dict) and b.get("benchmark") == name and b.get("verdict") == "pass"
+                    and b.get("validation_evidence") is True
+                    and (b.get("negative_control") or {}).get("status") == "caught"
+                    and isinstance((b.get("tolerance") or {}).get("total"), (int, float))):
+                return b
+    return None
+
+
+def qualified_uncertainty(result: dict, reference: dict) -> dict:
+    """CV-B2 (D0-c option (a) with the qualification term): the result with its coverage-0.90 uncertainty widened by
+    the qualifying reference's relative tolerance T, h -> sqrt(h^2 + (T |value|)^2) on each side (T read as a 90 %
+    half-width: it already holds the reference's published accuracy plus k SE), the term recorded in
+    uncertainty_components.qualification. A result without an uncertainty object is returned unchanged."""
+    unc, v = result.get("uncertainty"), result.get("value")
+    if not isinstance(unc, dict) or not isinstance(v, (int, float)):
+        return result
+    t = float(reference["tolerance"]["total"])
+    q = t * abs(v)
+    out = json.loads(json.dumps(result))
+    for side in ("minus", "plus"):
+        out["uncertainty"][side] = math.hypot(float(unc[side]), q)
+    out.setdefault("uncertainty_components", {})["qualification"] = {
+        "benchmark": reference["benchmark"], "relative_tolerance": t, "half_width": q,
+        "method": "the qualifying reference's total tolerance (published accuracy + k SE) times |value|, combined in "
+                  "quadrature with the statistical and replica parts (D0-c)"}
     return out
 
 
@@ -825,7 +937,7 @@ def _simulated_dataset(doc: dict, ext: dict, status: set, rep: Report) -> None:
                 "'validated-in-scope' needs an input study record that carries it (a status is never upgraded by hand)")
 
 
-def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report, a1: bool = False) -> None:
+def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report, a1: bool = False, b2: bool = False) -> None:
     """3.1.0 Geant4 phase 2: evidence records need their capability, and a record with Geant4 study material that
     carries validated-in-scope must show the evidence for it. CV-A1 (a1): classes come from GEANT4_BENCHMARKS, never
     from the record."""
@@ -852,6 +964,17 @@ def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report, a1: bool = Fa
     if (study.get("convergence") or {}).get("gate") != "pass":
         rep.add("error", "$.extension.study.convergence", "geant4.upgrade_unconverged",
                 "validated-in-scope needs a passed convergence gate")
+    declared_q = study.get("declared_scope") or {}
+    missing_q = qualification_missing(declared_q, study.get("benchmarks", [])) if b2 else None
+    if missing_q is not None:  # CV-B2: a detector-level kind upgrades through its qualification path only
+        if missing_q:
+            rep.add("error", "$.extension.study.benchmarks", "geant4.qualification_incomplete",
+                    f"the {declared_q.get('observable_kind')} qualification path is not met: " + "; ".join(missing_q))
+        refs = {n for n in GEANT4_QUALIFICATION[declared_q["observable_kind"]] if _bench(n).get("class") == "reference"}
+        for i, b in enumerate(study.get("benchmarks", [])):  # A1.3 still applies to the counted reference
+            if isinstance(b, dict) and b.get("benchmark") in refs and b.get("verdict") == "pass":
+                _configuration(b, i, rep)
+        return
     good = [b for b in study.get("benchmarks", []) if isinstance(b, dict) and _upgrading(b, a1)
             and b.get("verdict") == "pass" and b.get("validation_evidence") is True
             and (b.get("negative_control") or {}).get("status") == "caught"]

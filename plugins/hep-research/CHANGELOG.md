@@ -169,6 +169,59 @@ bump (VALIDATION GEANT4-ELEMENT). layered_sim is unchanged and gives the same pr
   parameters and the actual driver and stepper classes, and lists the distinct field managers with the volume each
   was attached to; the field block enters the tree-v1 target hash.
 
+Geant4 program stage B2 (`simreco`, tail sources, the F4 interface and the F4 qualification path): geant4 adapter
+0.4.0, contracts CV-B2 in the unreleased 3.13.0 (`GEANT4_B2_FROM`), D0 as decided on 2026-10-24 (VALIDATION
+GEANT4-F4). `CORE_VERSION` stays 1.1.0 (new `core.stats.decisions.change`, `core.simulation.estimates` estimator
+`gaussian-core`, shared helix crossing comparison).
+
+**Before you upgrade:**
+- A detector-level study (`tracking-resolution`) is upgraded only through the qualification path: `material-definition`,
+  `field-propagation`, `reco-closure` and `multiple-scattering-reference`, each matched by its own key in
+  `validation_plan.scope` (`geant4_benchmarks.py scope-keys`); `charge-confusion` cannot be upgraded until a tail
+  reference exists (D0-b). Other kinds keep the CV-A1 rule.
+- `evaluate_design.py f4` takes the study's uncertainty object (coverage 0.90, statistical (+) replica spread; exact
+  for counting) and writes the evaluation's own `geometry_ref`; `design.py check_f4` reads that geometry file and
+  compares its denominator.
+- `contracts/rules/design_geometry.json` is mapping 1.1.0 (optional fields); geometry files of 1.0.0 candidates keep
+  their fields and digest.
+- D0-c as decided on 2026-10-24: on a qualification path `label` widens the F4 uncertainty by the qualifying
+  reference's tolerance, and the adequacy table (1.2.0, still provisional) gives such an F4 resolution the floor
+  `f4_qualified_min_relative_uncertainty` (0.02, Lynch and Dahl's published accuracy) instead of 0.2.
+- `design.py check_f4` validates the study record strictly and compares the study result's denominator.
+- `label` refuses a qualification whose declared hash keys are not the study's own inputs, and results whose reco
+  record is not an evidence record of the study; `simreco_spec.check` refuses a tail source that does nothing;
+  `table` refuses a denominator that is not the simulated gun's and an observable on the wrong column.
+
+- `adapters/geant4/assets/simreco/` (C++17, no Geant4, `-ffp-contract=off`; spec `simreco.spec/1`): point errors or a
+  strip digitization, a Gauss-Newton fit of chained circle arcs with the multiple-scattering covariance in both
+  projections, TOF beta and calorimeter energy, and four switchable tail sources (alignment and
+  calibration-non-uniformity as M >= 20 reconstruction replicas, noise-digitization, pattern-recognition); a run
+  summary (`simulation-summary/1`) whose `tail_sources_simulated` lists only the stages that ran. CI job `simreco`.
+- `geant4_run.py reco` (simroot dump, simreco per replica, a computational-run with `extension.reconstruction`; the
+  design geometry's point and time resolution replace the reco spec's) and `table` (a simulated dataset-record;
+  `--f4-results` writes `f4-results/1` with the model envelope from `--variation` and the geometry's sha256).
+- `check_geant4_study.py label --results --geometry` keeps the results, tail sources and geometry in the re-issued
+  record and its manifest (a mismatched geometry exits 2); `evaluate_design.py f4 --label-results --label-geometry`
+  passes them on, and a refused upgrade lists label's gaps.
+- New benchmarks in the contracts table and `geant4_benchmarks.py`: verification `field-propagation`,
+  `material-definition`, `reco-closure`, `tof-beta`, `tof-layer-consistency`; sanity `field-propagation-muon`,
+  `sampling-fraction`; reference `multiple-scattering-reference` (a Gaussian fitted to the central 98 % against Lynch
+  and Dahl, with density controls) and `ms-tail-reference` (not implemented); regression `regression-comparison`
+  (decided by `change`, never affecting a label); evidence role `regression`; scope kind `hash`.
+- `contracts/dependencies.py`: a simulated table may rest on a chain of recorded computational-runs whose every root
+  is a simulation or study record (from 3.13.0).
+- `from-geometry` realizes mapping 1.1.0's tracker material and size, field extent, TOF layers and calorimeter front
+  face, depth and sampling (a profile declaring 1.1.0, with `calorimetry-em` radiation lengths for the depth check).
+- Independent review fixes: the counted reference keeps the isolation check on the qualification path and its
+  controls count only with the injection in their run records; `material-definition` also checks the passive slab
+  and refuses a length mismatch or a material Geant4 did not resolve; simreco fits a missing plane with the
+  path-weighted field and keeps its material, uses the particle's charge (rigidity 1/|rho|, Highland's z), takes the
+  true beta from the primary's own crossings, and rejects malformed CSV rows (exit 2); the counting interval is
+  centred on the replica mean.
+- `simulation_observables.json`: estimator `gaussian-core` (`core_truncation_sigma`); the study spec schema gains the
+  CV-B2 scope keys, `element_sim_spec`, the kinds `tracking-resolution` and `charge-confusion`, and material `z`,
+  `a_g_mole`, `radiation_length_mm`.
+
 ## 0.38.0 (2026-10-24)
 
 Minor release, contracts 3.12.0. It ships the maintainer's decisions on the four spec questions left open by the M3

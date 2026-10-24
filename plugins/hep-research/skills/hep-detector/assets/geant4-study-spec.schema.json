@@ -90,6 +90,7 @@
      "enum": [
       "activation",
       "angle",
+      "charge-confusion",
       "containment",
       "energy-deposit",
       "energy-loss",
@@ -101,10 +102,11 @@
       "neutron-flux",
       "other",
       "range",
-      "shower-shape",
       "shower-maximum",
+      "shower-shape",
       "stopping-power",
-      "thin-layer-width"
+      "thin-layer-width",
+      "tracking-resolution"
      ]
     },
     "domain": {
@@ -250,6 +252,21 @@
        "independent",
        "geant4-material-dump"
       ]
+     },
+     "z": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "CV-B2: the element's Z (multiple-scattering-reference)"
+     },
+     "a_g_mole": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "CV-B2: A in g/mol (multiple-scattering-reference)"
+     },
+     "radiation_length_mm": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "CV-B2: X0 from the independent source (material-definition, multiple-scattering-reference scope)"
      }
     },
     "additionalProperties": false,
@@ -259,7 +276,6 @@
   "physics": {
    "type": "object",
    "required": [
-    "layered_sim_spec",
     "justification"
    ],
    "properties": {
@@ -296,9 +312,26 @@
       },
       "additionalProperties": false
      }
+    },
+    "element_sim_spec": {
+     "type": "string",
+     "minLength": 1,
+     "description": "Geant4 program B2: an element_sim.spec/1 (derived by geant4_run.py from-geometry for an F4 study); exactly one of layered_sim_spec and element_sim_spec"
     }
    },
-   "additionalProperties": false
+   "additionalProperties": false,
+   "oneOf": [
+    {
+     "required": [
+      "layered_sim_spec"
+     ]
+    },
+    {
+     "required": [
+      "element_sim_spec"
+     ]
+    }
+   ]
   },
   "convergence_plan": {
    "type": "object",
@@ -420,23 +453,35 @@
       "properties": {
        "name": {
         "enum": [
-         "stopping-power",
+         "em-shower-shape",
+         "field-propagation",
+         "field-propagation-muon",
+         "longitudinal-profile",
+         "material-definition",
+         "ms-tail-reference",
+         "multiple-scattering",
+         "multiple-scattering-reference",
+         "published-data",
          "range",
+         "reco-closure",
+         "regression-comparison",
+         "sampling-fraction",
+         "shower-containment",
+         "stopping-power",
          "thin-layer-mpv",
          "thin-layer-width",
-         "multiple-scattering",
-         "em-shower-shape",
-         "shower-containment",
-         "longitudinal-profile",
-         "published-data"
+         "tof-beta",
+         "tof-layer-consistency"
         ]
        },
        "grade": {
         "enum": [
+         "interface",
          "reference",
-         "setup-matched",
+         "regression",
          "sanity",
-         "interface"
+         "setup-matched",
+         "verification"
         ]
        }
       },
@@ -497,6 +542,44 @@
         "spec-v1",
         "tree-v1"
        ]
+      },
+      "thickness_x0": {
+       "type": "array",
+       "items": {
+        "type": "number"
+       },
+       "minItems": 2,
+       "maxItems": 2,
+       "description": "CV-B2: thickness range in radiation lengths (multiple-scattering-reference scope)"
+      },
+      "rigidity_GV": {
+       "type": "array",
+       "items": {
+        "type": "number"
+       },
+       "minItems": 2,
+       "maxItems": 2,
+       "description": "CV-B2: rigidity range in GV (multiple-scattering-reference scope)"
+      },
+      "field_configuration_sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$",
+       "description": "CV-B2 (B2.8): matched by equality with the field-propagation verification's scope (geant4_benchmarks.py scope-keys)"
+      },
+      "reco_spec_sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$",
+       "description": "CV-B2 (B2.8): matched by equality with the reco-closure verification's scope (geant4_benchmarks.py scope-keys)"
+      },
+      "geometry_sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$",
+       "description": "CV-B2 (B2.8): matched by equality with the material-definition verification's scope (geant4_benchmarks.py scope-keys)"
+      },
+      "realization_sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$",
+       "description": "CV-B2 (B2.8): matched by equality with the material-definition verification's scope (geant4_benchmarks.py scope-keys)"
       }
      },
      "additionalProperties": false

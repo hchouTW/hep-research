@@ -169,6 +169,28 @@
        "$ref": "#/$defs/positive2"
       }
      }
+    },
+    "calorimetry-em": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "radiation_lengths_mm",
+      "radiation_length_source"
+     ],
+     "description": "mapping 1.1.0: the radiation lengths calo_depth_x0 is checked with",
+     "properties": {
+      "radiation_lengths_mm": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       }
+      },
+      "radiation_length_source": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
     }
    }
   },

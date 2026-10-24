@@ -1,6 +1,7 @@
 """Study-layer decisions of simulation studies: the equivalence gate (an intersection-union test over observables) and
-the detection limit of a negative control. Each decision has a standard-error branch and an exact-interval branch for
-low counts, takes the multiplicity m, and returns {verdict, margin, reason} with reason from REASONS. These decide only
+the detection limit of a negative control, and (CV-B2, B2.7) the change decision of a regression check. Each decision
+has a standard-error branch and an exact-interval branch for low counts, takes the multiplicity m, and returns
+{verdict, margin, reason} with reason from REASONS. These decide only
 study-layer gates (convergence, benchmarks); requirement verdicts are derived by contracts/design.py. Standard library
 only."""
 from __future__ import annotations
@@ -64,6 +65,21 @@ def equivalence(diff: float | None, se: float | None, dof: float | None, tol: fl
     if lower > tol:
         return {"verdict": "fail", "margin": lower - tol, "reason": "beyond-tolerance"}
     return {"verdict": "unresolved", "margin": None, "reason": "se-target-missed" if upper <= tol else "not-resolved"}
+
+
+def change(diff: float | None, se: float | None, dof: float | None, tol: float, m: int = 1, interval90=None,
+           interval_m=None) -> dict:
+    """Whether an observable changed between two versions (Geant4 program B2.7, regression). SE branch: changed when
+    |diff| - t_{1-alpha/m}(dof) se > tol; unchanged when equivalence passes (|diff| + t_0.95(dof) se <= tol);
+    otherwise unresolved. Exact branch (counts): changed when interval_m lies entirely outside [-tol, tol], unchanged
+    when interval90 lies inside it. {verdict: changed | unchanged | unresolved, margin, reason}."""
+    trace.tag("geant4-regression-change")
+    eq = equivalence(diff, se, dof, tol, m, True, interval90, interval_m)
+    if eq["verdict"] == "pass":
+        return {"verdict": "unchanged", "margin": eq["margin"], "reason": eq["reason"]}
+    if eq["verdict"] == "fail":
+        return {"verdict": "changed", "margin": eq["margin"], "reason": eq["reason"]}
+    return {"verdict": "unresolved", "margin": None, "reason": eq["reason"]}
 
 
 def detection_limit(tol: float, rel: float, se_rel: float, dof: float) -> dict:

@@ -1,6 +1,6 @@
 {
- "$comment": "Design adequacy table (detector system design spec ADQ-01..ADQ-07, contracts 3.11.0): per figure of merit, the nature of the F1 result, the screening and compliance fidelity thresholds, the minimum relative uncertainty of an estimate, the one-sided coverage CL of rows 16 and 17 and of bound combination, the upstreams compliance needs ('with' conditions), the denominator fields it must declare and whether it is a counting quantity (exact intervals). Read only by contracts/design.py. Initial default [Proposal]: frozen only after physics review by a reviewer the maintainer names (OQ-05); until then every pass is reported as provisional. The minimum-uncertainty numbers are placeholders chosen for this initial default, not reviewed values. The four ADQ-07 rows (survival-probability with its data validation, tracking-selection-efficiency, rigidity-scale-offset, low-rigidity-bias) join with M2 (OQ-09). Version 1.1.0 (contracts 3.12.0): upstream_value_checks, a compliance upstream whose measured value must cover the value a requirement's denominator assumes (charge confusion: the curvature offset).",
- "adequacy_version": "1.1.0",
+ "$comment": "Design adequacy table (detector system design spec ADQ-01..ADQ-07, contracts 3.11.0): per figure of merit, the nature of the F1 result, the screening and compliance fidelity thresholds, the minimum relative uncertainty of an estimate, the one-sided coverage CL of rows 16 and 17 and of bound combination, the upstreams compliance needs ('with' conditions), the denominator fields it must declare and whether it is a counting quantity (exact intervals). Read only by contracts/design.py. Initial default [Proposal]: frozen only after physics review by a reviewer the maintainer names (OQ-05); until then every pass is reported as provisional. The minimum-uncertainty numbers are placeholders chosen for this initial default, not reviewed values. The four ADQ-07 rows (survival-probability with its data validation, tracking-selection-efficiency, rigidity-scale-offset, low-rigidity-bias) join with M2 (OQ-09). Version 1.1.0 (contracts 3.12.0): upstream_value_checks, a compliance upstream whose measured value must cover the value a requirement's denominator assumes (charge confusion: the curvature offset). Version 1.2.0 (contracts 3.13.0, Geant4 program D0-c as recommended and approved 2026-10-24): f4_qualified_min_relative_uncertainty, the floor of an F4 estimate from a study upgraded through the qualification path of its observable kind and whose uncertainty holds the qualifying reference's tolerance: the reference's published accuracy instead of min_relative_uncertainty (for momentum-resolution-core 0.2 reflects the F1 formula's 20-50 % bias, not a property of a validated simulation). Provisional like every value here until the physics review (OQ-05).",
+ "adequacy_version": "1.2.0",
  "state": "initial-default",
  "frozen": false,
  "reviewer": null,
@@ -552,6 +552,14 @@
    "source": [
     "spec"
    ]
+  }
+ },
+ "f4_qualified_min_relative_uncertainty": {
+  "$comment": "per figure of merit: the observable kind whose qualification path applies, the floor, and its basis",
+  "momentum-resolution-core": {
+   "observable_kind": "tracking-resolution",
+   "value": 0.02,
+   "basis": "published accuracy of the qualifying reference multiple-scattering-reference: Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)"
   }
  }
 }

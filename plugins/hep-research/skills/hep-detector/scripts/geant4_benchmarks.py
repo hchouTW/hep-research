@@ -77,7 +77,22 @@ input: tree-v1 from the effective config's geometry for records from geant4 adap
 nothing is a configuration_gap), spec-v1 from spec/1 for earlier records (contracts.validate.geant4_configuration); a reference or setup-matched benchmark is validation
 evidence only on an isolated target (vacuum world, every placement in the target) with a run record, and a
 setup-matched one only when its target hash equals the measured configuration's (otherwise configuration_gap).
+Detector-level benchmarks (contracts CV-B2, Geant4 program B2.7; element_sim and simreco outputs, each result with the
+declared-scope keys it covers): field-propagation (verification: charged geantinos of an element_sim run, from the
+crossings simroot dumped, against the analytic helix of core/simulation/helix.py; key field_configuration_sha256),
+material-definition (verification: independent material densities against Geant4's resolved ones and a geantino
+x/X0 scan against the candidate's declared layer_x_over_x0; keys geometry_sha256, realization_sha256), reco-closure
+(verification: simreco on charged geantinos at high rigidity, tail sources off: pull width 1 +- 3 sigma_MC, no bias;
+key reco_spec_sha256, the reco spec without tail sources, replicas and outputs), tof-beta and tof-layer-consistency
+(verification, bookkeeping), field-propagation-muon and sampling-fraction (sanity), multiple-scattering-reference
+(reference: the central-98 % core width of the projected exit angle after an isolated slab, measured at the entry of
+a downstream plane, against Lynch and Dahl's F = 98 % formula with the declared published accuracy, negative controls
+on the slab's density or thickness; scope particle, material, thickness_x0, rigidity_GV), ms-tail-reference
+(reference, D0-b: not applicable until a published tail reference is configured) and regression-comparison
+(regression: core.stats.decisions.change between two versions; never affects the label). scope-keys prints the keys
+a study declares (field configuration, reco spec, geometry and realization-profile hashes).
 Usage: geant4_benchmarks.py run --config CONFIG.json [--out OUT.json] [--status LABEL]
+       geant4_benchmarks.py scope-keys [--element-spec SPEC] [--reco-spec RECO] [--geometry G] [--realization P]
        geant4_benchmarks.py reference --study-spec SPEC.json --material NAME --particle P --energy-mev E [--thickness-mm T]
 Output JSON: status, status_label, inputs, defaults_used, benchmarks [{benchmark, grade, reference {source, version,
 validity}, scope {particle, energy_MeV, material, thickness_mm, observable}, statistic, geant4, reference_value,
@@ -109,7 +124,8 @@ from contracts.schema import validate as schema_validate  # noqa: E402
 from contracts.validate import geant4_configuration  # noqa: E402  (CV-A1, A2.6: one configuration derivation)
 from core.simulation import estimates as E, summary as S  # noqa: E402
 from core.stats.batch_means import batch_mean  # noqa: E402
-from core.stats.decisions import detection_limit, welch_dof  # noqa: E402
+from core.stats.decisions import change, detection_limit, difference, equivalence, welch_dof  # noqa: E402
+from core.simulation import helix as H  # noqa: E402  (B1.7's analytic-helix oracle, the field benchmark's reference)
 from core import constants as K  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
@@ -121,11 +137,20 @@ R_E_CM = K.constant("classical_electron_radius", unit="m").value * 100
 N_A = K.constant("avogadro_constant").value
 K_BETHE = 4 * math.pi * N_A * R_E_CM ** 2 * ME  # MeV mol^-1 cm^2 (PDG Table 34.1: 0.307075)
 J_LANDAU = 0.200  # PDG RPP 2024 eq. 34.12
+PATH_LENGTH = "primary_path_length"  # element_sim's semantic name (column map) of the per-element primary path
 TRUNC_98 = 0.8673  # RMS of a unit Gaussian truncated to its central 98 %
 GRADES = {"stopping-power": "reference", "range": "reference", "thin-layer-mpv": "reference",
           "thin-layer-width": "sanity", "multiple-scattering": "sanity", "em-shower-shape": "sanity",
           "shower-containment": "sanity", "longitudinal-profile": "setup-matched",
-          "published-data": "interface"}
+          "published-data": "interface",
+          # CV-B2 (Geant4 program B2.7): element_sim and simreco benchmarks
+          "field-propagation": "verification", "field-propagation-muon": "sanity", "material-definition": "verification",
+          "reco-closure": "verification", "tof-beta": "verification", "tof-layer-consistency": "verification",
+          "sampling-fraction": "sanity", "multiple-scattering-reference": "reference", "ms-tail-reference": "reference",
+          "regression-comparison": "regression"}
+DETECTOR_BENCHMARKS = ("field-propagation", "field-propagation-muon", "material-definition", "reco-closure", "tof-beta",
+                       "tof-layer-consistency", "sampling-fraction", "multiple-scattering-reference",
+                       "ms-tail-reference", "regression-comparison")
 UPGRADING = ("reference", "setup-matched")  # the classes that are validation evidence (contracts table)
 RPP = "PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)"
 HADRONIC_END = ("Inelastic", "hadElastic", "nCapture", "CoulombScat")
@@ -744,6 +769,460 @@ def configuration(b: dict, cfg_dir: Path) -> dict:
     return out
 
 
+# --- CV-B2 detector benchmarks (Geant4 program B2.7) --------------------------------------------------------------
+
+def _canonical_sha(doc) -> str:
+    return hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def field_configuration_sha256(spec: dict) -> str:
+    """B2.8 condition 2's key: the field regions of an element_sim spec (each region's box and B) and the accuracy
+    parameters, canonical JSON (sorted keys, no whitespace)."""
+    els = {e["name"]: e for e in spec.get("elements", [])}
+    f = spec.get("field") or {}
+    regions = sorted(([[float(els[r["element"]]["centre_mm"][i]) for i in range(3)],
+                       [float(els[r["element"]]["half_mm"][i]) for i in range(3)],
+                       [float(x) for x in r["b_tesla"]]] for r in f.get("regions", [])), key=json.dumps)
+    acc = {k: f[k] for k in sorted(f) if k != "regions"}
+    return _canonical_sha({"regions": regions, "accuracy": acc})
+
+
+def reco_spec_sha256(reco: dict) -> str:
+    """B2.8 condition 3's key: the reco spec without its tail sources, replicas, outputs and note (the reconstruction
+    itself), so the closure with tail sources off and the study with them on share it."""
+    return _canonical_sha({k: v for k, v in reco.items() if k not in ("tail_sources", "replicas", "output", "note")})
+
+
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def read_dump(path: Path) -> list[dict]:
+    """Rows of a simroot dump CSV (numbers as floats, strings kept)."""
+    lines = Path(path).read_text(encoding="utf-8").splitlines()
+    cols = lines[0].split(",")
+    out = []
+    for ln in lines[1:]:
+        if ln:
+            out.append({c: (float(v) if _is_num(v) else v) for c, v in zip(cols, ln.split(","))})
+    return out
+
+
+def _summary_obs(cfg_dir: Path, path: str, name: str) -> tuple[dict, dict]:
+    doc = json.loads((cfg_dir / path).read_text(encoding="utf-8"))
+    rep = schema_validate(doc, "simulation_summary.json")
+    if not rep.ok:
+        raise BenchmarkError(f"{path}: not a valid simulation-summary/1")
+    try:
+        return doc, S.observable(doc, name)
+    except S.SummaryError as exc:
+        raise BenchmarkError(f"{path}: {exc}") from exc
+
+
+def _mean_sd(o: dict) -> tuple[float, float, int]:
+    n = sum(b["n"] for b in o["blocks"])
+    if n < 2:
+        raise BenchmarkError(f"observable {o['name']}: fewer than two entries")
+    s = math.fsum(b["sum"] for b in o["blocks"])
+    ss = math.fsum(b["sumsq"] for b in o["blocks"])
+    mean = s / n
+    return mean, math.sqrt(max(ss / n - mean * mean, 0.0) * n / (n - 1)), n
+
+
+def _equiv(diff: float, se: float, dof: float, tol: float) -> str:
+    return {"pass": "pass", "fail": "fail", "unresolved": "unresolved"}[equivalence(diff, se, dof, tol)["verdict"]]
+
+
+def bench_field_propagation(b: dict, cfg_dir: Path) -> dict:
+    """field-propagation (verification): charged geantinos of an element_sim run against the analytic helix
+    (core/simulation/helix.py, the oracle of B1.7) from the run's crossings (simroot dump); scope the field
+    configuration hash of the reference field (default the run's own)."""
+    spec = json.loads((cfg_dir / b["element_spec"]).read_text(encoding="utf-8"))
+    ref = json.loads((cfg_dir / b["reference_spec"]).read_text(encoding="utf-8")) if b.get("reference_spec") else spec
+    tol_um, tol_ps = float(b.get("tolerance_um", 0.5)), float(b.get("tolerance_ps", 1.0))
+    try:
+        res = H.compare_crossings(spec, read_dump(cfg_dir / b["crossings"]), ref, tol_um, tol_ps)
+    except ValueError as exc:
+        raise BenchmarkError(f"field-propagation: {exc}") from exc
+    return {"statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+            "geant4": res["max_in_plane_um"], "reference_value": 0.0, "max_dt_ps": res["max_dt_ps"],
+            "compared": res["compared"], "verdict": "pass" if not res["problems"] else "fail",
+            "problems": res["problems"][:20], "tolerance": {"in_plane_um": tol_um, "time_ps": tol_ps},
+            "scope": {"field_configuration_sha256": field_configuration_sha256(ref)},
+            "reference": {"source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+                          "version": "exact", "validity": "deterministic: charged geantinos have no interactions"}}
+
+
+def bench_material_definition(b: dict, study: dict, cfg_dir: Path) -> dict:
+    """material-definition (verification, B2.8 condition 1): every material of the realized geometry has a study-spec
+    entry of independent origin whose density equals Geant4's resolved density (relative 1e-3, the effective
+    config's tree), and a geantino scan reproduces the candidate's declared layer_x_over_x0 (and passive_x_over_x0)
+    within the declared relative tolerance, with the independent radiation length; scope the geometry and
+    realization-profile hashes."""
+    spec = json.loads((cfg_dir / b["element_spec"]).read_text(encoding="utf-8"))
+    geo = json.loads((cfg_dir / b["geometry"]).read_text(encoding="utf-8"))
+    rec = json.loads((cfg_dir / b["run_record"]).read_text(encoding="utf-8"))
+    tree = ((((rec.get("extension") or {}).get("simulation") or {}).get("effective_config") or {}).get("geometry")
+            or {}).get("tree") or {}
+    resolved = {m["name"]: float.fromhex(m["density_g_cm3"]) for m in tree.get("materials", [])}
+    if not resolved:
+        raise BenchmarkError("material-definition: the run record has no effective-config geometry tree")
+    tol = float(b.get("tolerance_relative", 0.01))
+    problems, rows = [], []
+    used = {spec["world"]["material"]} | {e["material"] for e in spec["elements"]}
+    for name in sorted(used):
+        if name in resolved and resolved[name] < 1e-20:  # vacuum (G4_Galactic): no material to define
+            continue
+        m = next((x for x in study.get("materials", []) if x.get("name") == name), None)
+        if m is None or m.get("reference_origin") != "independent":
+            problems.append(f"{name}: no study-spec material of independent origin (reference_origin independent)")
+            continue
+        if name not in resolved:
+            problems.append(f"{name}: not among the materials Geant4 resolved (effective-config tree)")
+        elif abs(resolved[name] / m["density_g_cm3"] - 1) > 1e-3:
+            problems.append(f"{name}: Geant4 density {resolved[name]:.6g} g/cm3 differs from the independent "
+                            f"{m['density_g_cm3']} g/cm3")
+    if not b.get("column_map"):
+        raise BenchmarkError("material-definition: column_map (the geantino run's column map) is required")
+    rows_csv = _columns(b, cfg_dir).rows(read_csv(cfg_dir / b["csv"]))
+    planes = [e for e in spec["elements"] if e["role"] == "tracker-plane"]
+    declared = (geo.get("fields") or {}).get("layer_x_over_x0")
+    if declared is None:
+        raise BenchmarkError("material-definition: the geometry file has no layer_x_over_x0")
+    decl = declared if isinstance(declared, list) else [declared] * len(planes)
+    if len(decl) != len(planes):
+        raise BenchmarkError(f"material-definition: {len(decl)} declared layer_x_over_x0 values for {len(planes)} "
+                             "tracker planes")
+    passive_decl = float((geo.get("fields") or {}).get("passive_x_over_x0") or 0.0)
+    prof = json.loads((cfg_dir / b["realization"]).read_text(encoding="utf-8"))
+    pname = ((prof.get("templates") or {}).get("passive") or {}).get("element")  # the element passive_x_over_x0 makes
+    passive = [e for e in spec["elements"] if e["name"] == pname]
+    if passive_decl > 0 or passive:  # B2.8 condition 1 also covers the passive material
+        m_x0 = {x["name"]: x.get("radiation_length_mm") for x in study.get("materials", [])}
+        got = 0.0
+        for e in passive:
+            x0 = m_x0.get(e["material"])
+            if not isinstance(x0, (int, float)):
+                problems.append(f"{e['material']}: no independent radiation_length_mm (passive element {e['name']})")
+                continue
+            got += statistics.fmean(r[f"{PATH_LENGTH}.{e['name']}"] for r in rows_csv) / x0
+        rel = got / passive_decl - 1 if passive_decl > 0 else (math.inf if got > 0 else 0.0)
+        rows.append({"element": "passive", "geantino_x_over_x0": got, "declared": passive_decl, "relative": rel})
+        if abs(rel) > tol:
+            problems.append(f"passive material: geantino x/X0 {got:.6g} against the declared passive_x_over_x0 "
+                            f"{passive_decl}")
+    for e, want in zip(planes, decl):
+        m = next((x for x in study.get("materials", []) if x.get("name") == e["material"]), {})
+        x0 = m.get("radiation_length_mm")
+        if not isinstance(x0, (int, float)):
+            problems.append(f"{e['material']}: no independent radiation_length_mm")
+            continue
+        path = statistics.fmean(r[f"{PATH_LENGTH}.{e['name']}"] for r in rows_csv)
+        got = path / x0
+        rows.append({"element": e["name"], "geantino_x_over_x0": got, "declared": want, "relative": got / want - 1})
+        if abs(got / want - 1) > tol:
+            problems.append(f"{e['name']}: geantino x/X0 {got:.6g} differs from the declared {want} by more than {tol}")
+    return {"statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+            "rows": rows, "verdict": "pass" if not problems else "fail", "problems": problems,
+            "tolerance": {"relative": tol, "density_relative": 1e-3},
+            "scope": {"geometry_sha256": file_sha256(cfg_dir / b["geometry"]),
+                      "realization_sha256": file_sha256(cfg_dir / b["realization"])},
+            "reference": {"source": "the study spec's independent material sources and the candidate's declared x/X0",
+                          "version": "as declared", "validity": "verification of the realized geometry"}}
+
+
+def bench_reco_closure(b: dict, cfg_dir: Path) -> dict:
+    """reco-closure (verification, B2.8 condition 3): simreco on charged geantinos (no multiple scattering, no energy
+    loss) at high rigidity with every tail source off: the pull width within 1 +- 3 sigma_MC (sigma_MC = 1/sqrt(2n))
+    and the mean of the relative inverse-rigidity residual within 3 SE of zero; scope the reco-spec hash (tail sources,
+    replicas and outputs excluded)."""
+    rec = json.loads((cfg_dir / b["reco_record"]).read_text(encoding="utf-8"))
+    rx = (rec.get("extension") or {}).get("reconstruction") or {}
+    if rx.get("tail_sources_simulated"):
+        raise BenchmarkError("reco-closure: the reconstruction must have every tail source off")
+    _, pull = _summary_obs(cfg_dir, b["summary"], b["pull_observable"])
+    _, res = _summary_obs(cfg_dir, b["summary"], b["residual_observable"])
+    pm, psd, n = _mean_sd(pull)
+    rm, rsd, nr = _mean_sd(res)
+    smc = 1 / math.sqrt(2 * n)
+    problems = []
+    if abs(psd - 1) > 3 * smc:
+        problems.append(f"pull width {psd:.4f} outside 1 +- 3 x {smc:.4f}")
+    if abs(rm) > 3 * rsd / math.sqrt(nr):
+        problems.append(f"mean relative residual {rm:.3g} beyond 3 SE ({rsd / math.sqrt(nr):.3g})")
+    return {"statistic": "pull width and bias of the signed inverse rigidity", "geant4": psd, "reference_value": 1.0,
+            "pull_mean": pm, "pull_width": psd, "pull_width_mc_sigma": smc, "residual_mean": rm, "entries": n,
+            "verdict": "pass" if not problems else "fail", "problems": problems,
+            "scope": {"reco_spec_sha256": reco_spec_sha256(rx.get("reco_spec") or {}),
+                      "rigidity_GV": b.get("rigidity_GV"), "particle": b.get("particle")},
+            "reference": {"source": "the truth of the simulated charged geantinos", "version": "exact",
+                          "validity": "closure of the fit; no physics"}}
+
+
+def _summary_equivalence(b: dict, cfg_dir: Path, what: str, target: float) -> dict:
+    _, o = _summary_obs(cfg_dir, b["summary"], b["observable"])
+    mean, sd, n = _mean_sd(o)
+    se = sd / math.sqrt(n)
+    tol = float(b["tolerance_absolute"])
+    verdict = _equiv(mean - target, se, n - 1, tol)
+    return {"statistic": what, "geant4": mean, "reference_value": target, "se": se, "sd": sd, "entries": n,
+            "tolerance": {"absolute": tol}, "verdict": verdict}
+
+
+def bench_field_propagation_muon(b: dict, cfg_dir: Path) -> dict:
+    """field-propagation-muon (sanity): the mean of (1/R_reco - 1/R_true) R_true of simreco on muons against 0,
+    decided by equivalence within the declared absolute tolerance."""
+    r = _summary_equivalence(b, cfg_dir, "mean relative inverse-rigidity residual of muons", 0.0)
+    r["reference"] = {"source": "plane-averaged true 1/R (B2.1)", "version": "-", "validity": "sanity"}
+    return r
+
+
+def bench_tof_beta(b: dict, cfg_dir: Path) -> dict:
+    """tof-beta (verification, bookkeeping): the mean of beta_reco / beta_true - 1 against 0 (equivalence)."""
+    r = _summary_equivalence(b, cfg_dir, "mean relative beta residual", 0.0)
+    r["reference"] = {"source": "kinematics along the true trajectory", "version": "-",
+                      "validity": "bookkeeping verification (no physics control on the Geant4 side)"}
+    return r
+
+
+def bench_tof_layer_consistency(b: dict, cfg_dir: Path) -> dict:
+    """tof-layer-consistency (verification, bookkeeping): a station's two-layer time-difference residual has mean 0 and
+    width sqrt(2) sigma_t (both within the declared tolerances)."""
+    r = _summary_equivalence(b, cfg_dir, "two-layer time-difference residual (ps)", 0.0)
+    want = math.sqrt(2) * float(b["sigma_t_ps"])
+    rel = r["sd"] / want - 1
+    r["width"] = {"geant4": r["sd"], "expected": want, "relative": rel,
+                  "tolerance_relative": float(b.get("width_tolerance_relative", 0.1))}
+    if abs(rel) > r["width"]["tolerance_relative"]:
+        r["verdict"] = "fail"
+    r["reference"] = {"source": "inter-layer path / (beta c), widths sqrt(2) sigma_t", "version": "-",
+                      "validity": "bookkeeping verification"}
+    return r
+
+
+def bench_sampling_fraction(b: dict, cfg_dir: Path) -> dict:
+    """sampling-fraction (sanity): sum of active deposits over active plus passive, against a declared plausible value
+    (with its source) within the declared window (default 10 %)."""
+    doc = json.loads((cfg_dir / b["summary"]).read_text(encoding="utf-8"))
+    a = S.observable(doc, b["active_observable"])
+    p = S.observable(doc, b["passive_observable"])
+    sa, sp = math.fsum(x["sum"] for x in a["blocks"]), math.fsum(x["sum"] for x in p["blocks"])
+    blocks = [x["sum"] / (x["sum"] + y["sum"]) for x, y in zip(a["blocks"], p["blocks"]) if x["sum"] + y["sum"] > 0]
+    bm = batch_mean(blocks)
+    ref = float(b["reference_value"])
+    window = float(b.get("window_relative", 0.10))
+    value = sa / (sa + sp)
+    return {"statistic": "sampling fraction sum(active) / sum(active + passive)", "geant4": value, "se": bm["se"],
+            "reference_value": ref, "relative_difference": value / ref - 1,
+            "verdict": "plausible" if abs(value / ref - 1) <= window else "implausible",
+            "plausibility_window": f"within {window:.0%} of the reference",
+            "reference": {"source": b.get("reference_source", "declared"), "version": "-", "validity": "sanity"}}
+
+
+def lynch_dahl_theta0(z_target: float, a_target: float, x_g_cm2: float, p_mev: float, beta: float, charge: int = 1,
+                      fraction: float = 0.98) -> float:
+    """theta0 (rad) of the Gaussian fitted to the central fraction F of the Moliere distribution (Lynch and Dahl
+    1991): chi_c^2 = 0.157 Z(Z+1) X/A z^2/(p beta)^2, chi_a^2 = 2.007e-5 Z^(2/3) [1 + 3.34 (Z z alpha/beta)^2]/p^2
+    (p in MeV/c, X in g/cm2), Omega = chi_c^2 / (1.167 chi_a^2), v = Omega / (2 (1 - F)),
+    theta0^2 = chi_c^2 / (1 + F^2) [(1 + v)/v ln(1 + v) - 1]."""
+    alpha = K.constant("fine_structure_constant").value
+    chic2 = 0.157 * z_target * (z_target + 1) * x_g_cm2 / a_target * charge ** 2 / (p_mev * beta) ** 2
+    chia2 = 2.007e-5 * z_target ** (2 / 3) * (1 + 3.34 * (z_target * charge * alpha / beta) ** 2) / p_mev ** 2
+    omega = chic2 / (1.167 * chia2)
+    v = 0.5 * omega / (1 - fraction)
+    return math.sqrt(chic2 / (1 + fraction ** 2) * ((1 + v) / v * math.log(1 + v) - 1))
+
+
+def _exit_angles(rows: list[dict], plane_id: int) -> dict[int, list[float]]:
+    """Per event, the two projected angles of the primary at its entry into the downstream measuring plane (the
+    direction after the slab: vacuum and no field in between)."""
+    out = {}
+    for r in rows:
+        if int(r["track_id"]) == 1 and int(r["plane_id"]) == plane_id:
+            out[int(r["event_id"])] = [math.atan2(r["dy"], r["dx"]), math.atan2(r["dz"], r["dx"])]
+    return out
+
+
+def _core98(angles: list[float], fraction: float = 0.98) -> float:
+    """Lynch and Dahl's core width: the sigma of a zero-mean Gaussian fitted (maximum likelihood, truncated normal) to
+    the angles inside the symmetric window |x| <= c that holds the central fraction F. Not RMS / 0.8673: that assumes
+    the inner 98 % is itself Gaussian, and the single-scattering tail inside the window widens it by about 10 %."""
+    mags = sorted(abs(x) for x in angles)
+    c = mags[min(len(mags) - 1, int(fraction * len(mags)))]
+    inside = [x * x for x in angles if abs(x) <= c]
+    m2 = statistics.fmean(inside)
+    nd = statistics.NormalDist()
+
+    def trunc_var(s: float) -> float:  # variance of N(0, s^2) truncated to [-c, c]; increasing in s
+        z = c / s
+        return s * s * (1 - 2 * z * nd.pdf(z) / (2 * nd.cdf(z) - 1))
+
+    if not 0 < m2 < c * c / 3:  # a truncated normal's variance stays below the uniform's c^2 / 3
+        raise BenchmarkError("multiple-scattering-reference: the angles inside the central window are not "
+                             "Gaussian-like (flat or empty): no core width")
+    lo, hi = math.sqrt(m2), math.sqrt(m2)
+    while trunc_var(hi) < m2:
+        hi *= 2
+    for _ in range(100):  # bisection: the ML equation is trunc_var(s) = mean of x^2 inside the window
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if trunc_var(mid) < m2 else (lo, mid)
+    return 0.5 * (lo + hi)
+
+
+def bench_ms_reference(b: dict, study: dict, cfg_dir: Path, crossings: str | None = None) -> dict:
+    """multiple-scattering-reference (reference, B2.8 condition 4): the core width of the projected exit angle after an
+    isolated slab (Gaussian maximum-likelihood fit to the central 98 %, Lynch and Dahl's definition; both projections),
+    per block of events and as batch means, against Lynch and Dahl's F = 98 % formula with the slab material's
+    independent Z, A and density from the study spec; tolerance = the formula's published accuracy (declared with its
+    source) + k SE; scope particle, material, thickness in X0, rigidity."""
+    spec = json.loads((cfg_dir / b["element_spec"]).read_text(encoding="utf-8"))
+    index = {e["name"]: i for i, e in enumerate(spec["elements"])}
+    rows = read_dump(cfg_dir / (crossings or b["crossings"]))
+    ang = _exit_angles(rows, index[b["measuring_plane"]])
+    if len(ang) < 100:
+        raise BenchmarkError("multiple-scattering-reference: fewer than 100 primaries reached the measuring plane")
+    k_blocks = int(b.get("blocks", 16))
+    evs = sorted(ang)
+    per = max(1, len(evs) // k_blocks)
+    widths = [_core98([x for e in evs[i * per:(i + 1) * per] for x in ang[e]]) for i in range(k_blocks)]
+    bm = batch_mean(widths)
+    m = material(study, b["material"], ("z", "a_g_mole", "density_g_cm3", "radiation_length_mm", "reference_source"))
+    mass, z = particle_props(b["particle"])
+    p = float(b["momentum_MeV"])
+    beta = p / math.hypot(p, mass)
+    x = float(b["thickness_mm"]) / 10 * m["density_g_cm3"]
+    ref = lynch_dahl_theta0(m["z"], m["a_g_mole"], x, p, beta, abs(z))
+    rel = bm["value"] / ref - 1
+    tol, parts, _ = _tol(b, bm["se"] / ref)
+    return {"statistic": "core width of the projected exit angle (rad), central 98 %", "geant4": bm["value"],
+            "geant4_dof": bm["dof"], "relative_se": bm["se"] / ref, "reference_value": ref, "relative_difference": rel,
+            "tolerance": {"total": tol, "parts": parts}, "verdict": "pass" if abs(rel) <= tol else "fail",
+            "selection": {"events": len(ang), "blocks": k_blocks},
+            "scope": {"particle": [b["particle"]], "material": [b["material"]],
+                      "thickness_x0": float(b["thickness_mm"]) / m["radiation_length_mm"],
+                      "rigidity_GV": p / 1000 / abs(z)},
+            "reference": {"source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to "
+                                    "Moliere; accuracy " + str(b["tolerance"].get("reference_source", "declared")),
+                          "version": "1991", "validity": b["tolerance"].get("validity", "as declared")}}
+
+
+def bench_ms_tail_reference(b: dict, cfg_dir: Path) -> dict:
+    """ms-tail-reference (reference, D0-b): the fraction of projected exit angles beyond about 3 theta0 against
+    published data; refused until a published reference (with source) is configured: charge-confusion studies are
+    not upgraded without it."""
+    if not isinstance(b.get("published"), dict):
+        return {"statistic": "fraction of projected angles beyond 3 theta0", "verdict": "not-applicable",
+                "reason": "no published tail reference configured (D0-b): charge confusion cannot qualify",
+                "reference": {"source": "none", "version": "-", "validity": "-"}}
+    raise BenchmarkError("ms-tail-reference: a published tail reference is not implemented in this version")
+
+
+def bench_regression(b: dict, cfg_dir: Path) -> dict:
+    """regression-comparison (regression, B2.7): one scalar observable of two versions (two independent logical runs,
+    point ids the version labels) decided by core.stats.decisions.change; it never affects the label."""
+    doc_a, oa = _summary_obs(cfg_dir, b["summary_a"], b["observable"])
+    doc_b, ob = _summary_obs(cfg_dir, b["summary_b"], b["observable"])
+    ea, eb = E.estimate(doc_a, oa), E.estimate(doc_b, ob)
+    mode = b.get("tolerance_mode", "relative")
+    diff, se = difference(ea["value"], ea["se"], eb["value"], eb["se"], mode)
+    dof = welch_dof(ea["se"], ea["dof"], eb["se"], eb["dof"])
+    d = change(diff, se, dof, float(b["tolerance"]), int(b.get("m", 1)))
+    return {"statistic": f"{b['observable']} between {b.get('version_a', 'a')} and {b.get('version_b', 'b')}",
+            "geant4": ea["value"], "reference_value": eb["value"], "difference": diff, "se_of_difference": se,
+            "dof": dof, "tolerance": {"value": float(b["tolerance"]), "mode": mode}, "verdict": d["verdict"],
+            "decision": d, "reference": {"source": "the other version's run", "version": str(b.get("version_b")),
+                                         "validity": "regression only; never validation"}}
+
+
+def evaluate_detector(b: dict, study: dict, cfg_dir: Path) -> dict:
+    name = b["benchmark"]
+    if name == "field-propagation":
+        return bench_field_propagation(b, cfg_dir)
+    if name == "material-definition":
+        return bench_material_definition(b, study, cfg_dir)
+    if name == "reco-closure":
+        return bench_reco_closure(b, cfg_dir)
+    if name == "field-propagation-muon":
+        return bench_field_propagation_muon(b, cfg_dir)
+    if name == "tof-beta":
+        return bench_tof_beta(b, cfg_dir)
+    if name == "tof-layer-consistency":
+        return bench_tof_layer_consistency(b, cfg_dir)
+    if name == "sampling-fraction":
+        return bench_sampling_fraction(b, cfg_dir)
+    if name == "multiple-scattering-reference":
+        return bench_ms_reference(b, study, cfg_dir)
+    if name == "ms-tail-reference":
+        return bench_ms_tail_reference(b, cfg_dir)
+    return bench_regression(b, cfg_dir)
+
+
+def _areal_density_change(b: dict, nc: dict, cfg_dir: Path) -> float | None:
+    """The relative change of the slab's areal density (density x thickness, from each run's effective-config tree)
+    between a negative control's run record and the nominal's: a control is counted only when its run carries the
+    stated injection (slab density or thickness x (1 + delta)); None when either run record or tree is missing."""
+    def areal(rr):
+        try:
+            rec = json.loads((cfg_dir / rr).read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            return None
+        tree = ((((rec.get("extension") or {}).get("simulation") or {}).get("effective_config") or {}).get(
+            "geometry") or {}).get("tree") or {}
+        dens = {m["name"]: float.fromhex(m["density_g_cm3"]) for m in tree.get("materials", [])}
+        slab = next((lv for lv in tree.get("logical_volumes", []) if lv.get("name") == b.get("slab", "Slab")), None)
+        if slab is None or slab.get("material") not in dens:
+            return None
+        return dens[slab["material"]] * 2 * float.fromhex(slab["solid"]["parameters"]["half_x_mm"])
+    a, c = areal(b.get("run_record")), areal(nc.get("run_record"))
+    return None if a in (None, 0.0) or c is None else c / a - 1
+
+
+def run_detector_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
+    """A CV-B2 benchmark: its result, with the scope keys it covers; a reference (multiple-scattering-reference) also
+    reruns on its negative controls (slab density or thickness x (1 +- delta) on the Geant4 side, the reference
+    unchanged): caught when the control's verdict is fail, detection limit as for the slab benchmarks (A1.10)."""
+    name, grade = b["benchmark"], GRADES[b["benchmark"]]
+    res = evaluate_detector(b, study, cfg_dir)
+    out = {"benchmark": name, "grade": grade, **res}
+    out.setdefault("scope", {})
+    if name == "multiple-scattering-reference" and res["verdict"] in ("pass", "fail"):
+        entries = b.get("negative_controls") or []
+        ctl, dls = [], []
+        for nc in entries:
+            nres = bench_ms_reference({**b, "thickness_mm": b["thickness_mm"]}, study, cfg_dir, nc["crossings"])
+            injected = _areal_density_change(b, nc, cfg_dir)
+            caught = nres["verdict"] == "fail" and injected is not None and isinstance(nc.get("injected_relative"), (
+                int, float)) and abs(injected - nc["injected_relative"]) <= 1e-6 * max(1.0, abs(injected))
+            shift = (nres["geant4"] - res["geant4"]) / res["reference_value"]
+            se_shift = math.hypot(res["relative_se"], nres["relative_se"])
+            dl = detection_limit(res["tolerance"]["total"], res["relative_difference"], se_shift,
+                                 welch_dof(res["relative_se"], res["geant4_dof"], nres["relative_se"],
+                                           nres["geant4_dof"]))["value"]
+            dls.append(dl)
+            ctl.append({"status": "caught" if caught else "not-caught", "injected": nc.get("injected"),
+                        "injection_in_run": injected,
+                        "injected_relative": nc.get("injected_relative"), "shift": shift, "se_of_shift": se_shift,
+                        "sign": "+" if shift > 0 else "-", "detection_limit_relative": dl,
+                        "at_claimed_detection_limit": bool(caught and abs(shift) <= 1.1 * dl),
+                        "crossings": nc["crossings"], "run_record": nc.get("run_record")})
+        signs = {c["sign"] for c in ctl if c["status"] == "caught"}
+        out["negative_control"] = ({"status": "missing"} if not ctl else {
+            "status": "caught" if all(c["status"] == "caught" for c in ctl) else "not-caught", "controls": ctl,
+            "at_claimed_detection_limit": all(c["at_claimed_detection_limit"] for c in ctl),
+            "detection_limit_relative": max(dls),
+            "detection_limit_sign": "+-" if signs == {"+", "-"} else "".join(sorted(signs)) or None})
+        conf = configuration(b, cfg_dir)
+        out.update({k: v for k, v in conf.items() if k != "configuration_gap"})
+        out["configuration_gap"] = conf.get("configuration_gap") or (
+            None if conf.get("configuration") == "isolated" else "the slab is not isolated (vacuum world, no field, "
+                                                                   "every placement in the target)")
+        out["validation_evidence"] = (res["verdict"] == "pass" and out["negative_control"].get("status") == "caught"
+                                      and not out["configuration_gap"])
+    else:
+        out["validation_evidence"] = False
+    return out
+
+
 def evaluate(b: dict, src, study: dict, cfg_dir: Path) -> dict:
     name = b["benchmark"]
     if name == "stopping-power":
@@ -822,6 +1301,8 @@ def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
     name = b.get("benchmark")
     if name not in GRADES:
         raise BenchmarkError(f"unknown benchmark {name!r} (known: {sorted(GRADES)})")
+    if name in DETECTOR_BENCHMARKS:
+        return run_detector_benchmark(b, study, cfg_dir)
     data = ("summary", "observable") if name in SUMMARY_BENCHMARKS and name != "longitudinal-profile" else \
         (("summary",) if name == "longitudinal-profile" else ("csv",))
     for k in data + ("particle", "energy_MeV") + (("material", "slab", "thickness_mm") if name in (
@@ -925,6 +1406,24 @@ def cmd_reference(args) -> tuple[str, dict]:
     return "ok", out
 
 
+def cmd_scope_keys(args) -> tuple[str, dict]:
+    """The declared-scope keys of a detector-level study (CV-B2, B2.8): what its validation_plan.scope names so that
+    each qualification condition is matched by its own key."""
+    out = {}
+    if args.element_spec:
+        out["field_configuration_sha256"] = field_configuration_sha256(
+            json.loads(Path(args.element_spec).read_text(encoding="utf-8")))
+    if args.reco_spec:
+        out["reco_spec_sha256"] = reco_spec_sha256(json.loads(Path(args.reco_spec).read_text(encoding="utf-8")))
+    if args.geometry:
+        out["geometry_sha256"] = file_sha256(Path(args.geometry))
+    if args.realization:
+        out["realization_sha256"] = file_sha256(Path(args.realization))
+    if not out:
+        raise BenchmarkError("scope-keys needs at least one of --element-spec, --reco-spec, --geometry, --realization")
+    return "ok", {"scope_keys": out}
+
+
 def main(argv=None) -> int:
     ap = JsonArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="command", required=True)
@@ -937,12 +1436,15 @@ def main(argv=None) -> int:
     p.add_argument("--particle", required=True)
     p.add_argument("--energy-mev", type=float, required=True)
     p.add_argument("--thickness-mm", type=float)
+    p = sub.add_parser("scope-keys", help="the declared-scope keys of a detector-level study (CV-B2)")
+    for name in ("--element-spec", "--reco-spec", "--geometry", "--realization"):
+        p.add_argument(name)
     for sp in sub.choices.values():
         add_status_argument(sp)
     args = ap.parse_args(argv)
     inputs = {k: v for k, v in vars(args).items() if k != "status"}
     try:
-        status, doc = (cmd_run if args.command == "run" else cmd_reference)(args)
+        status, doc = {"run": cmd_run, "reference": cmd_reference, "scope-keys": cmd_scope_keys}[args.command](args)
     except (BenchmarkError, OSError, KeyError, ValueError, TypeError, ArithmeticError) as exc:
         status, doc = "rejected", {"error": f"{type(exc).__name__}: {exc}" if isinstance(exc, KeyError) else str(exc)}
     print(json.dumps({"status": status, "status_label": args.status, "inputs": inputs,

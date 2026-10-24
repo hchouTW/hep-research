@@ -252,6 +252,122 @@ class FromGeometry(unittest.TestCase):
                 self.assertIn(why, out["error"])
 
 
+class Mapping11(unittest.TestCase):
+    """B2.6 (CV-B2): geometry mapping 1.1.0 adds optional fields (tracker material and transverse size, field-region
+    extent, TOF layers and time resolution, calorimeter front face, depth and sampling); a 1.0.0 candidate keeps its
+    fields and digest, from-geometry realizes the new fields with a profile that declares 1.1.0 and refuses them
+    otherwise; adding an optional parameter later changes the digest (the geometry becomes stale)."""
+
+    setUp, tearDown = FromGeometry.setUp, FromGeometry.tearDown
+    geometry, derive = FromGeometry.geometry, FromGeometry.derive
+    PB_X0, PVT_X0 = 5.612, 425.4  # PDG 2024 Atomic and Nuclear Properties: lead 0.5612 cm, polyvinyltoluene 42.54 cm
+
+    def par(self, value, unit):
+        return {"value": value, "unit": unit, "source": "SYNTHETIC (test)", "status": "proposal"}
+
+    def add_new_parameters(self, layers=40):
+        cand = json.loads(self.cand.read_text())
+        subs = cand["extension"]["subsystems"]
+        subs["DES-TRK-001"]["parameters"]["layer_transverse_half_m"] = self.par([0.09, 0.09], "m")
+        subs["DES-TRK-001"]["parameters"]["layer_material"] = self.par("G4_Si", "n/a")
+        subs["DES-MAG-001"]["parameters"]["field_extent_m"] = self.par([-0.03, 0.83], "m")
+        cal = {"method": "SYNTHETIC (test)", "control_samples": ["cosmic muons"]}
+        subs["DES-TOF-001"] = {"role": "tof", "technology": "plastic scintillator", "interfaces": [], "calibration": cal,
+                               "parameters": {"layer_positions_m": self.par([-0.305, -0.285, 0.995, 1.015], "m"),
+                                              "layer_thickness_m": self.par(0.012, "m"),
+                                              "time_resolution_ps": self.par(150.0, "ps")}}
+        depth = layers * (2.0 / self.PB_X0 + 5.0 / self.PVT_X0)
+        subs["DES-CAL-001"] = {"role": "calorimetry-em", "technology": "Pb/scintillator sampling", "interfaces": [],
+                               "calibration": cal,
+                               "parameters": {"front_position_m": self.par(1.06, "m"), "depth_x0": self.par(depth, "1"),
+                                              "sampling_layers": self.par(layers, "1"),
+                                              "passive_material": self.par("G4_Pb", "n/a"),
+                                              "passive_thickness_mm": self.par(2.0, "mm"),
+                                              "active_material": self.par("G4_PLASTIC_SC_VINYLTOLUENE", "n/a"),
+                                              "active_thickness_mm": self.par(5.0, "mm")}}
+        self.cand.write_text(json.dumps(cand, indent=1))
+
+    def profile11(self, path="p11.json"):
+        p = profile()
+        p["mapping_versions"] = ["1.0.0", "1.1.0"]
+        p["templates"]["calorimetry-em"] = {"radiation_lengths_mm": {"G4_Pb": self.PB_X0,
+                                                                     "G4_PLASTIC_SC_VINYLTOLUENE": self.PVT_X0},
+                                            "radiation_length_source": "PDG 2024 Atomic and Nuclear Properties"}
+        out = self.d / path
+        out.write_text(json.dumps(p, indent=1))
+        return out
+
+    def test_a_1_0_0_candidate_keeps_its_fields_refs_and_digest(self):
+        geom = json.loads(self.geometry().read_text())
+        self.assertEqual(geom["mapping_version"], "1.1.0")
+        self.assertEqual(set(geom["fields"]), {"layer_positions_m", "layer_x_over_x0", "passive_x_over_x0",
+                                               "point_resolution_um", "field_T"})
+        self.assertEqual(len(geom["parameter_refs"]), 5)
+        from contracts import design
+        mapping = design.load_json(design.GEOMETRY_FILE)
+        old = dict(mapping, mapping_version="1.0.0", fields=[f for f in mapping["fields"] if not f.get("optional")])
+        proj = design.Project(self.art)
+        self.assertEqual(design.geometry_fields(proj, "ams-like-v1:cand-S", old)[2], geom["parameter_digest"])
+        code, doc, _ = self.derive(self.geometry("G9"))  # a 1.0.0 profile realizes it
+        self.assertEqual(code, 0, doc)
+
+    def test_new_fields_are_realized(self):
+        self.add_new_parameters()
+        geom = self.geometry()
+        g = json.loads(geom.read_text())
+        self.assertIn("DES-TOF-001.parameters.time_resolution_ps", g["parameter_refs"])
+        code, doc, out = self.derive(geom, prof=self.profile11())
+        self.assertEqual(code, 0, doc)
+        spec = json.loads(out.read_text())
+        self.assertEqual(element(spec, "Si1")["half_mm"][1:], [90.0, 90.0])
+        fr = element(spec, "FieldRegion")
+        self.assertAlmostEqual(fr["centre_mm"][0] - fr["half_mm"][0], -530.0, places=9)
+        self.assertAlmostEqual(fr["centre_mm"][0] + fr["half_mm"][0], 330.0, places=9)
+        for name, x in (("TOF1a", -805.0), ("TOF1b", -785.0), ("TOF2a", 495.0), ("TOF2b", 515.0)):
+            self.assertAlmostEqual(element(spec, name)["centre_mm"][0], x, places=9)
+            self.assertAlmostEqual(element(spec, name)["half_mm"][0], 6.0, places=9)
+        calo, pb, sc = (element(spec, n) for n in ("Calo", "CaloPb", "CaloSc"))
+        self.assertAlmostEqual(calo["centre_mm"][0] - calo["half_mm"][0], 560.0, places=9)
+        self.assertAlmostEqual(calo["half_mm"][0], 140.0, places=9)
+        self.assertAlmostEqual(pb["centre_mm"][0], 561.0, places=9)
+        self.assertAlmostEqual(sc["centre_mm"][0], 564.5, places=9)  # Pb 560-562, scintillator 562-567
+        self.assertEqual(pb["repeat"], {"count": 40, "pitch_mm": [7.0, 0.0, 0.0]})
+        self.assertEqual(ES.check_spec(spec), [])
+        import simreco_spec as RS
+        reco = {"schema": "simreco.spec/1", "point_resolution_um": {"bending": 10.0, "non_bending": 30.0},
+                "radiation_length_mm": {"G4_Si": 93.7}, "tof": {"sigma_t_ps": 100.0}}
+        eff = RS.effective(reco, spec, 0, {}, None, g["fields"]["tof_time_resolution_ps"])
+        self.assertEqual(eff["reco"]["tof"]["sigma_t_ps"], 150.0)
+
+    def test_refusals(self):
+        self.add_new_parameters()
+        geom = self.geometry()
+        code, out, _ = self.derive(geom)  # the 1.0.0 profile cannot realize the 1.1.0 fields
+        self.assertEqual(code, 2, out)
+        self.assertIn("mapping version", out["error"])
+        g = json.loads(geom.read_text())
+        cases = {"TOF count": (dict(g["fields"], tof_layer_positions_m=[0.0, 0.1]), "TOF layers"),
+                 "depth": (dict(g["fields"], calo_depth_x0=20.0), "calo_depth_x0"),
+                 "material": (dict(g["fields"], layer_material="G4_Ge"), "layer_material"),
+                 "field extent": (dict(g["fields"], field_extent_m=[0.5, 0.1]), "field_extent_m"),
+                 "partial sampling": ({k: v for k, v in g["fields"].items() if k != "calo_active_material"},
+                                      "go together")}
+        prof = self.profile11()
+        for name, (fields, why) in cases.items():
+            with self.subTest(case=name):
+                gp = self.d / "g.json"
+                gp.write_text(json.dumps(dict(g, fields=fields)))
+                code, out, _ = self.derive(gp, "x.json", prof)
+                self.assertEqual(code, 2, out)
+                self.assertIn(why, out["error"])
+
+    def test_adding_an_optional_parameter_changes_the_digest(self):
+        before = json.loads(self.geometry().read_text())["parameter_digest"]
+        self.add_new_parameters()
+        after = json.loads(self.geometry("G2").read_text())["parameter_digest"]
+        self.assertNotEqual(before, after)
+
+
 class HelixOracle(unittest.TestCase):
     """B1.7's reference: core/simulation/helix.py against section B Appendix A and closed forms."""
 

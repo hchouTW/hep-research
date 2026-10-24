@@ -15,7 +15,8 @@
   "mapping_version": {
    "type": "string",
    "enum": [
-    "1.0.0"
+    "1.0.0",
+    "1.1.0"
    ]
   },
   "geometry": {
@@ -39,6 +40,10 @@
      },
      "from": {
       "$ref": "tool_contract.json#/$defs/expr"
+     },
+     "optional": {
+      "$comment": "mapping 1.1.0: a field read only when the candidate has the parameter (a plain parameter expression)",
+      "type": "boolean"
      }
     }
    }

@@ -222,6 +222,90 @@ def first_entry(traj: dict, lo, hi) -> dict | None:
     return None
 
 
+PLANE_ROLES = ("tracker-plane", "tof-layer")
+
+
+def element_boxes(spec: dict, name: str) -> list[tuple[list, list]]:
+    """[(lo, hi)] of every copy of an element of an element_sim.spec/1 (world coordinates, mm)."""
+    for e in spec["elements"]:
+        if e["name"] == name:
+            n = (e.get("repeat") or {}).get("count", 1)
+            pitch = (e.get("repeat") or {}).get("pitch_mm", [0.0, 0.0, 0.0])
+            shift = e.get("shift_mm", [0.0, 0.0, 0.0])
+            out = []
+            for k in range(n):
+                c = [e["centre_mm"][i] + k * pitch[i] + shift[i] for i in range(3)]
+                out.append(([c[i] - e["half_mm"][i] for i in range(3)], [c[i] + e["half_mm"][i] for i in range(3)]))
+            return out
+    raise ValueError(f"element {name} is not in the spec")
+
+
+def field_boxes(spec: dict) -> list[FieldBox]:
+    """The field regions of an element_sim.spec/1 as boxes (each field element is placed once)."""
+    out = []
+    for r in (spec.get("field") or {}).get("regions", []):
+        (lo, hi), = element_boxes(spec, r["element"])
+        out.append(FieldBox(lo, hi, list(r["b_tesla"])))
+    return out
+
+
+def compare_crossings(spec: dict, rows: list[dict], reference: dict | None, tol_um: float, tol_ps: float) -> dict:
+    """The deterministic field check (B1.7): every charged-geantino primary of an element_sim run (its source, with an
+    optional cycle) followed analytically through the field regions of `reference` (default the run's own spec);
+    rows are the run's crossings (simroot dump: event_id, plane_id, copy, track_id, x_mm, y_mm, z_mm, t_ns); the
+    first entry of track 1 into every tracker plane and TOF layer must lie within tol_um of the analytic entry point
+    in the plane and, for TOF layers, within tol_ps in time; an entry on one side only is a problem.
+    {compared, max_in_plane_um, max_dt_ps, max_normal_um, rows, problems}."""
+    ref = reference or spec
+    src = spec["source"]
+    boxes = field_boxes(ref)
+    names = [e["name"] for e in spec["elements"] if e["role"] in PLANE_ROLES]
+    index = {e["name"]: i for i, e in enumerate(spec["elements"])}
+    roles = {e["name"]: e["role"] for e in spec["elements"]}
+    g4 = {(int(r["event_id"]), int(r["plane_id"]), int(r["copy"])): r for r in rows if int(r["track_id"]) == 1}
+    cycle = src.get("cycle") or [{"energy_MeV": src["energy_MeV"], "direction": src.get("direction", [1.0, 0.0, 0.0])}]
+    first, n = spec["run"].get("first_event", 0), spec["run"]["events"]
+    table, problems, worst_um, worst_ps, worst_dx = [], [], 0.0, 0.0, 0.0
+    for ev in range(first, first + n):
+        c = cycle[ev % len(cycle)]
+        p_gev = c["energy_MeV"] / 1000.0  # massless: p = E
+        traj = trajectory(src.get("position_mm", [0.0, 0.0, 0.0]), c["direction"], p_gev, 1.0, boxes, 1e5)
+        for name in names:
+            for k, (lo, hi) in enumerate(element_boxes(spec, name)):
+                a = first_entry(traj, lo, hi)
+                got = g4.get((ev, index[name], k))
+                if a is None and got is None:
+                    continue
+                if a is None or got is None:
+                    problems.append(f"event {ev} plane {name} copy {k}: "
+                                    + ("Geant4 recorded an entry the analytic trajectory does not make" if a is None
+                                       else "the analytic trajectory enters, Geant4 recorded no entry"))
+                    continue
+                x = a["position_mm"]
+                face = min(range(3), key=lambda i: min(abs(x[i] - lo[i]), abs(x[i] - hi[i])))  # the entry face
+                other = [i for i in range(3) if i != face]
+                gp = [float(got["x_mm"]), float(got["y_mm"]), float(got["z_mm"])]
+                d_um = 1e3 * math.hypot(gp[other[0]] - x[other[0]], gp[other[1]] - x[other[1]])
+                dx = abs(gp[face] - x[face]) * 1e3
+                worst_um, worst_dx = max(worst_um, d_um), max(worst_dx, dx)
+                row = {"event": ev, "plane": name, "copy": k, "rigidity_GV": p_gev, "in_plane_um": d_um,
+                       "normal_um": dx}
+                if roles[name] == "tof-layer":
+                    dt_ps = (float(got["t_ns"]) - a["time_ns"]) * 1e3
+                    row["dt_ps"] = dt_ps
+                    worst_ps = max(worst_ps, abs(dt_ps))
+                    if abs(dt_ps) > tol_ps:
+                        problems.append(f"event {ev} {name}: |dt| = {abs(dt_ps):.3g} ps > {tol_ps} ps")
+                if d_um > tol_um:
+                    problems.append(f"event {ev} {name}: in-plane distance {d_um:.3g} um > {tol_um} um")
+                table.append(row)
+    if not table:
+        problems.append("no crossing was compared")
+    return {"compared": len(table), "max_in_plane_um": worst_um, "max_dt_ps": worst_ps, "max_normal_um": worst_dx,
+            "rows": table, "problems": problems,
+            "field_regions": [{"lo": b.lo, "hi": b.hi, "b_tesla": b.b_tesla} for b in boxes]}
+
+
 def at_coordinate(traj: dict, axis: int, value: float) -> dict | None:
     """The first point at which coordinate `axis` of the trajectory equals `value` (the analytic trajectory evaluated
     at a plane's x)."""

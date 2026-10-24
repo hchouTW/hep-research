@@ -195,6 +195,14 @@ material dump; constants from `core/constants`.
 | `shower-containment` | sanity | rear leakage against the gamma-function profile, RPP 2024 Eqs. 34.34-34.36 (a fit to EGS4 showers, 1-100 GeV; b = 0.5 by default): never validation; a reference for leakage needs published data (`published-data`) |
 | `longitudinal-profile` | setup-matched | the shower maximum t_max = (alpha - 1)/beta of a Gamma fit to per-layer mean deposits against the same fit to published test-beam data (config `published`: alpha, beta with uncertainties and source; their correlation is not used, which is conservative only for a non-negative correlation, the usual case for a Gamma fit; a negative one understates the t_max uncertainty); `systematic_relative` covers stated differences between the planar model and the measurement (readout window, beam spot, upstream material). First reference: a W/Si forward-calorimeter prototype test beam, JINST 19 (2024) P07006 (arXiv:2311.07413), Table 3 |
 | `published-data` | interface | handed to hep-statistics |
+| `field-propagation` | verification | charged geantinos of an `element_sim` run against the analytic helix (`core/simulation/helix.py`); scope the field-configuration hash |
+| `material-definition` | verification | every material of the realized geometry from an independent source (density within 1e-3 of Geant4's resolved one) and a geantino scan reproducing the candidate's `layer_x_over_x0` within the declared tolerance; scope the geometry and realization-profile hashes |
+| `reco-closure` | verification | `simreco` on charged geantinos at high rigidity, every tail source off: pull width 1 +- 3 sigma_MC and no bias; scope the reco-spec hash (tail sources, replicas and outputs excluded) |
+| `tof-beta`, `tof-layer-consistency` | verification | bookkeeping of `simreco`'s beta and two-layer time differences (no physics control) |
+| `field-propagation-muon`, `sampling-fraction` | sanity | mean inverse-rigidity residual of muons; sampling fraction against a declared value |
+| `multiple-scattering-reference` | reference (`tracking-resolution`, core only) | core width of the projected exit angle after an isolated slab: the sigma of a Gaussian fitted (maximum likelihood) to the central 98 %, against Lynch and Dahl's F = 98 % formula (NIM B 58 (1991) 6) with the slab's independent Z, A and density; tolerance the formula's published accuracy (2 % from the paper's abstract: full text not yet read) + k SE; scope particle, material, thickness in X0, rigidity |
+| `ms-tail-reference` | reference (`charge-confusion`) | not implemented (D0-b): needs a published tail reference; charge-confusion studies cannot be upgraded until then |
+| `regression-comparison` | regression | one scalar observable of two versions decided by `core.stats.decisions.change` (changed, unchanged, unresolved); never affects a label |
 
 The grade is the benchmark's validation class in the contracts table (`contracts.validate.GEANT4_BENCHMARKS`, contracts
 CV-A1): a study record that declares another grade, or names a benchmark not in the table, is refused. Only reference
@@ -229,6 +237,30 @@ shift = (control - nominal) / reference; it is caught when its benchmark verdict
 |shift| <= 1.1 DL. Controls in both directions are needed for a two-sided claim; one direction narrows it
 (`detection_limit_sign`). A single miss is recorded, never rerun with another seed; gross controls (multiple
 scattering off) do not count. A benchmark whose control is not caught is not evidence for its scope.
+
+**The multiple-scattering core estimator.** Lynch and Dahl's theta0 is the width of a Gaussian fitted to the central
+98 % of the angles, which is what `multiple-scattering-reference` computes (truncated-normal maximum likelihood in the
+symmetric window holding 98 %). RMS(central 98 %) / 0.8673, the estimator of the `multiple-scattering` sanity
+benchmark, assumes the inner 98 % is itself Gaussian; the single-scattering tail inside the window widens it by about
+10 % (0.3 mm of silicon, protons at 1 and 10 GeV/c, option 4: +11 % against -1.5 % with the fit; VALIDATION
+GEANT4-F4). Point resolution is a declared input that no benchmark validates; at high rigidity it dominates the core.
+
+**Detector-level studies: the F4 qualification path** (CV-B2, decided D0 2026-10-24). A study of kind
+`tracking-resolution` is upgradable only when all four conditions hold, each matched to the study by its own key in
+`validation_plan.scope`: (1) `material-definition` passed for the same geometry and realization-profile hashes;
+(2) `field-propagation` passed for the same field-configuration hash; (3) `reco-closure` passed for the same reco-spec
+hash; (4) `multiple-scattering-reference` passed with its controls caught, covering the declared particle, material,
+thickness in X0 and rigidity. `geant4_benchmarks.py scope-keys --element-spec --reco-spec --geometry --realization`
+prints the hash keys to declare; `label` derives the same keys from the study's own inputs (`--geometry`, the derived
+`element_sim` spec and its provenance, the reconstruction record the results file names) and refuses an upgrade whose
+declared keys differ, so verifications of another configuration cannot be borrowed. The counted reference keeps
+A1.3's isolation check, and its negative controls count only when their run records carry the stated injection
+(the slab's areal density from each run's effective config). Verification benchmarks never upgrade a study on their own, and the convergence gate,
+no remaining gap and a variation table apply as before. A `charge-confusion` study needs `ms-tail-reference` instead
+(D0-b, not yet available); `shower-containment` and the other calorimeter figures of merit have no reference here and
+their F4 studies stay unqualified. Every other kind keeps the CV-A1 rule (any covering reference or setup-matched
+benchmark). Every run a qualification benchmark reads is an evidence record of the study (`label --run-record`):
+`dependencies.py` re-derives the reference benchmark's configuration from its run record.
 
 ## 6. Variations
 
@@ -271,6 +303,30 @@ below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
   `particle-fiducial`; it keeps `unvalidated` unless its input study record carries `validated-in-scope`, and the
   table must stay inside that study's benchmarked scope: the contract does not check this (it checks only that an
   input study record carries `validated-in-scope`), so state the scope in the table's record and check it by hand.
+- A processing chain (CV-B2): a table's inputs may be reconstruction records (`geant4_run.py reco`, a
+  `computational-run` with `extension.reconstruction`) as long as every level is a recorded `computational-run` and
+  every root a simulation or study record; `dependencies.py` follows the chain. While the study is `unvalidated` the
+  table stays `unvalidated`.
+- An F4 study (B2.6): `geant4_run.py table --f4-results` writes `f4-results/1` (value, the coverage-0.90 uncertainty
+  object = statistical (t_0.95(K-1) x batch-means SE) (+) replica spread, the model envelope from `--variation` reco
+  records, the tail sources simulated, the geometry file's sha256); `check_geant4_study.py label --results FILE
+  --geometry GEOMETRY` keeps them in `extension.study` and adds the results, geometry, derived spec and realization
+  profile to `input_manifest` (a geometry sha256 that differs from the results file's exits 2). Then either run
+  `evaluate_design.py f4 --study RECORD`, or `f4 --label-spec ... --label-results ... --label-geometry ...` in one
+  step; both give the same evaluation, whose `geometry_ref` names the geometry its study used. An F4 resolution is an
+  `estimate` only with all four tail sources simulated, else `optimistic` (a tail source switched on must act:
+  `simreco_spec.check` refuses one with zero widths). The results file must come from a reconstruction record among
+  the study's `--run-record`s, with the same tail sources, its observable must read the figure of merit's column and
+  select the fitted tracks, and its denominator must be the simulated gun's (rigidity, species).
+- The F4 uncertainty and floor (D0-c, decided 2026-10-24): on a qualification path `label` adds the qualifying
+  reference's total tolerance T (published accuracy + k SE) times |value| in quadrature to each side of the
+  coverage-0.90 interval (`uncertainty_components.qualification`): an upgraded value is no more accurate than what the
+  upgrade certifies. `design.py` then uses the path's floor (adequacy table `f4_qualified_min_relative_uncertainty`,
+  0.02 for `momentum-resolution-core`: Lynch and Dahl's published accuracy) instead of `min_relative_uncertainty`
+  (0.2, which describes the F1 formula's 20-50 % bias), and only when the evaluation's uncertainty holds the term.
+  Both values are provisional until the adequacy table's physics review (OQ-05). Point resolution is a declared input
+  that no benchmark validates: above the crossover rigidity (about 20-30 GV for protons in J15) the verdict is
+  conditional on the declared point resolution, and the README says so.
 - A response from the runs: `build_response.py build ... --status unvalidated --input-record <run record>` links the
   run records as inputs with their labels. Inference goes to hep-statistics; plots of simulation alone are labelled
   "Simulation" (hep-authoring).
@@ -304,11 +360,24 @@ execution layer. Its records are always `unvalidated`.
 - `assets/g4sim/`: the headers shared by the adapter's programs (seed hash, per-event seeding, summary accumulators,
   the effective-config probe, materials, physics lists, CSV helpers); `g4sim/selftest.cc` checks the Geant4-free ones
   against their Python references (`tests/adapters/test_g4sim.py`).
-- `assets/geant4_verify.py overlaps|budget|balance|mirror|datapaths`: the implementation checks, each able to write a
-  record that lists the checked run as an input.
+- `assets/geant4_verify.py overlaps|budget|balance|mirror|datapaths|field`: the implementation checks, each able to
+  write a record that lists the checked run as an input.
+- From adapter 0.3.0, `element_sim` (box elements, uniform field regions, plane crossings of every charged track, a
+  per-event ROOT event file read by `simroot info|dump|hash`); `geant4_run.py check-spec` and `from-geometry`
+  (a `design-geometry/1` file plus an `element_sim.realization/1` profile to an `element_sim.spec/1`; mapping 1.1.0's
+  optional fields (tracker material and size, field extent, TOF layers, calorimeter front face, depth and sampling)
+  need a profile that declares 1.1.0).
+- From adapter 0.4.0, `simreco` (C++17, no Geant4; `build-sim --program simreco`): point errors or a strip
+  digitization, a circle-arc fit with the multiple-scattering covariance, TOF beta, calorimeter energy, and four tail
+  sources, each switched in the reco spec: `alignment` and `calibration-non-uniformity` as M >= 20 reconstruction
+  replicas (seeded by H(S, "align", m) and H(S, "fieldnu", m)), `noise-digitization` and `pattern-recognition`; a
+  global field scale is not a tail source. `geant4_run.py reco` dumps the crossings, runs `simreco` per replica and
+  writes a record with the input hashes (changing digitization or tail sources needs no new simulation); `table`
+  writes the simulated dataset-record and, with `--f4-results`, the F4 results file. The summary's
+  `tail_sources_simulated` lists only the stages that ran.
 
 The hep-detector side never imports the adapter: `scripts/check_geant4_study.py` (`spec`, `run`, `variations`,
-`label`) and `scripts/geant4_benchmarks.py` (`run`, `reference`) read the files it writes. A worked
+`label`) and `scripts/geant4_benchmarks.py` (`run`, `reference`, `scope-keys`) read the files it writes. A worked
 journey with real runs, negative-control scenarios and an offline replay is
 [examples/geant4-thin-silicon](../../../examples/geant4-thin-silicon/run.py).
 

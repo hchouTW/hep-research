@@ -90,11 +90,12 @@ from core.simulation import estimates as ESTIMATES, summary as SUMMARY  # noqa: 
 from core.simulation.seeds import job_seeds, logical_run_seed  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 import element_spec as ES  # noqa: E402
+import simreco_spec as RS  # noqa: E402
 
 # every source file of each program's build, as paths under assets/, per program (adapter 0.2.0: the g4sim/ group was
 # added and MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths;
 # adapter 0.3.0: a map per program instead of one flat tuple, the keys of a layered_sim record are unchanged)
-ADAPTER_VERSION = "0.3.0"
+ADAPTER_VERSION = "0.4.0"
 SCHEMAS = ASSETS / "schemas"
 STRING_COLUMNS = ("primary_end_process",)  # the only non-numeric CSV column (output.schema.json)
 A2_OUTPUTS = ("summary.json", "column_map.json", "probe.json", "observables_dump.csv")  # adapter 0.2.0
@@ -106,11 +107,13 @@ SIM_SOURCES = {
         "CMakeLists.txt", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Field.hh", "Field.cc", "Actions.hh",
         "Actions.cc", "EventFile.hh", "EventFile.cc", "element_sim.cc")),
     "simroot": ("simroot/simroot.cc",),
+    "simreco": ("simreco/CMakeLists.txt", "simreco/Fit.hh", "simreco/simreco.cc"),
     "g4sim": tuple(f"g4sim/{s}" for s in (
         "MiniJson.hh", "SimHash.hh", "SimSeed.hh", "SimSummary.hh", "SimObservables.hh", "SimProbe.hh", "SimCsv.hh",
         "SimMaterials.hh", "SimPhysics.hh")),
 }
-PROGRAM_GROUPS = {"layered_sim": ("layered_sim", "g4sim"), "element_sim": ("element_sim", "simroot", "g4sim")}
+PROGRAM_GROUPS = {"layered_sim": ("layered_sim", "g4sim"), "element_sim": ("element_sim", "simroot", "g4sim"),
+                  "simreco": ("simreco", "g4sim")}
 PROGRAMS = {"layered_sim.spec/1": "layered_sim", "element_sim.spec/1": "element_sim"}
 
 
@@ -710,19 +713,24 @@ def _evidence_fields(sim: dict, args) -> None:
 
 
 def cmd_build_sim(args) -> tuple[str, dict]:
-    build = _load_build(args.build_record)
+    program = args.program
     if not shutil.which("cmake"):
         return "missing-dependency", {"error": "cmake not found on PATH"}
-    g4dir = install_prefix(build) / "lib" / "cmake" / "Geant4"
-    if not g4dir.is_dir():
-        return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)}"}
-    program = args.program
+    g4opt = []
+    if program != "simreco":  # simreco links no Geant4 (B2.1)
+        if not args.build_record:
+            raise SpecError(f"--build-record is required to build {program}")
+        build = _load_build(args.build_record)
+        g4dir = install_prefix(build) / "lib" / "cmake" / "Geant4"
+        if not g4dir.is_dir():
+            return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)}"}
+        g4opt = [f"-DGeant4_DIR={g4dir}"]
     bld = expand(str(args.work)) / f"{program}-build"
     log = bld / "build.log"
     bld.mkdir(parents=True, exist_ok=True)
     codes = []
     with log.open("w", encoding="utf-8") as fh:
-        for cmd in (["cmake", "-S", str(ASSETS / program), "-B", str(bld), f"-DGeant4_DIR={g4dir}",
+        for cmd in (["cmake", "-S", str(ASSETS / program), "-B", str(bld), *g4opt,
                      "-DCMAKE_BUILD_TYPE=Release"], ["cmake", "--build", str(bld), "--parallel", str(args.jobs)]):
             codes.append(subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT, timeout=3600).returncode)
             if codes[-1]:
@@ -1028,6 +1036,250 @@ def cmd_reduce(args) -> tuple[str, dict]:
                   "source": {"csv": tilde(src), "sha256": sha256_file(src)}}
 
 
+def _run_dir(rec: dict, work_arg) -> Path:
+    work = expand(str(work_arg)) if work_arg else expand(rec["extension"]["environment"]["work"])
+    return work / rec["artifact_id"].removeprefix("geant4-run-")
+
+
+def cmd_reco(args) -> tuple[str, dict]:
+    """B2.4: simroot dump of an element_sim run's crossings, then simreco once per reconstruction replica; one
+    computational-run record (extension.reconstruction) with the input run record and event-file hashes."""
+    rec_path = expand(str(args.run_record))
+    rec = json.loads(rec_path.read_text(encoding="utf-8"))
+    sim = (rec.get("extension") or {}).get("simulation") or {}
+    if (sim.get("program") or {}).get("name") != "element_sim":
+        raise SpecError("--run-record is not an element_sim run record")
+    ef = sim.get("event_file") or {}
+    if ef.get("level") not in ("crossings", "hits"):
+        raise SpecError("the run has no event file at level crossings or hits (simreco reads the crossings)")
+    run_dir = _run_dir(rec, args.work)
+    spec = json.loads((run_dir / "spec.json").read_text(encoding="utf-8"))
+    reco_path = expand(str(args.reco_spec))
+    reco = json.loads(reco_path.read_text(encoding="utf-8"))
+    problems = RS.check(reco, spec)
+    if problems:
+        raise SpecError("; ".join(problems)[:1500])
+    exe = expand(args.simreco)
+    if not exe.is_file():
+        return "missing-dependency", {"error": f"simreco {tilde(exe)} not found (build-sim --program simreco)"}
+    simroot = expand(args.simroot) if args.simroot else expand((ef.get("simroot") or {}).get("path", "simroot"))
+    if not simroot.is_file():
+        return "missing-dependency", {"error": f"simroot {tilde(simroot)} not found (--simroot)"}
+    root = run_dir / "events.root"
+    h = subprocess.run([str(simroot), "hash", str(root)], capture_output=True, text=True, timeout=3600)
+    try:
+        content = json.loads(h.stdout).get("content_sha256")
+    except ValueError:
+        content = None
+    if content is None or content != ef.get("content_sha256"):
+        raise SpecError(f"{tilde(root)} does not match the run record's content_sha256 (changed or missing)")
+    bending, bending_source, tof_ps, tof_source = None, "reco spec", None, "reco spec"
+    if args.geometry:
+        gpath = expand(str(args.geometry))
+        geo = json.loads(gpath.read_text(encoding="utf-8"))
+        pr = (geo.get("fields") or {}).get("point_resolution_um")
+        if not isinstance(pr, (int, float)) or isinstance(pr, bool):
+            raise SpecError("the geometry file's point_resolution_um is not one number")
+        bending, bending_source = float(pr), f"design geometry {tilde(gpath)}"
+        tr = (geo.get("fields") or {}).get("tof_time_resolution_ps")  # mapping 1.1.0 (optional field)
+        if tr is not None:
+            if not isinstance(tr, (int, float)) or isinstance(tr, bool) or tr <= 0:
+                raise SpecError("the geometry file's tof_time_resolution_ps is not one positive number")
+            tof_ps, tof_source = float(tr), f"design geometry {tilde(gpath)}"
+    work = expand(str(args.work_out)).resolve()
+    out_dir = work / args.reco_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    cross = out_dir / "crossings.csv"  # a temporary dump: removed after the replicas (never kept, B2.1)
+    with cross.open("w", encoding="utf-8") as fh:
+        d = subprocess.run([str(simroot), "dump", str(root), "--ntuple", "crossings"], stdout=fh,
+                           stderr=subprocess.PIPE, text=True, timeout=3600)
+    if d.returncode != 0:
+        raise SpecError(f"simroot dump failed: {d.stderr[-300:]}")
+    dump_sha = sha256_file(cross)
+    replicas = reco.get("replicas", 1)
+    outputs, rows, tails = {}, [], RS.tails_on(reco)
+    for m in range(replicas):
+        csv, summ = out_dir / f"results_r{m:03d}.csv", out_dir / f"summary_r{m:03d}.json"
+        eff = RS.effective(reco, spec, m, {"crossings": str(cross), "events": str(run_dir / "events.csv"),
+                                           "out_csv": str(csv), "out_summary": str(summ)}, bending, tof_ps)
+        effp = out_dir / f"effective_r{m:03d}.json"
+        write_json(effp, eff)
+        log = out_dir / f"log_r{m:03d}.txt"
+        with log.open("w", encoding="utf-8") as fh:
+            p = subprocess.run([str(exe), str(effp)], stdout=fh, stderr=subprocess.STDOUT, timeout=args.timeout)
+        text = log.read_text(encoding="utf-8", errors="replace")
+        line = next((ln for ln in reversed(text.splitlines()) if ln.startswith("SIMRECO_STATUS ")), None)
+        st = json.loads(line.split(" ", 1)[1]) if line else {"status": "failed", "error": f"exit {p.returncode}"}
+        if p.returncode == 2 or st.get("status") == "rejected":
+            return "rejected", {"error": f"simreco replica {m}: {st.get('error')}", "log": tilde(log)}
+        if p.returncode != 0 or st.get("status") != "ok":
+            return "failed", {"error": f"simreco replica {m} exit {p.returncode}: {st.get('error')}", "log": tilde(log)}
+        row = {"replica": m, "results": {"ref": f"{args.reco_id}/{csv.name}", "sha256": sha256_file(csv)},
+               "effective_spec": {"ref": f"{args.reco_id}/{effp.name}", "sha256": sha256_file(effp)}}
+        outputs[row["results"]["ref"]] = row["results"]["sha256"]
+        if summ.is_file():  # the run fields the study layer reads, from the simulation run record (as complete_summary)
+            sdoc = json.loads(summ.read_text(encoding="utf-8"))
+            sdoc["run"].update({k: v for k, v in {
+                "run_id": f"geant4-reco-{args.reco_id}-r{m:03d}", "evidence_role": sim.get("evidence_role"),
+                "seed_scheme": sim.get("seed_scheme"), "spec_sha256": sim.get("spec_sha256"),
+                "settings": run_settings(sim), "data_path_problems": sim.get("data_path_problems", []),
+                "datasets_content_match": all(d.get("content_match") for d in sim.get("datasets", [])),
+                "run_record": {"artifact_id": f"geant4-reco-{args.reco_id}"},
+                "simulation_run_record": {"artifact_id": rec["artifact_id"]}}.items() if v is not None})
+            sdoc["run"]["completed_by"] = {"name": "geant4_run.py reco", "adapter": ADAPTER_VERSION}
+            write_json(summ, sdoc)
+            row["summary"] = {"ref": f"{args.reco_id}/{summ.name}", "sha256": sha256_file(summ)}
+            outputs[row["summary"]["ref"]] = row["summary"]["sha256"]
+        rows.append(row)
+    cross.unlink()
+    sources = program_sources("simreco")
+    created = args.created or datetime.date.today().isoformat()
+    labels = list(dict.fromkeys(["unvalidated"] + [s for s in rec.get("status", []) if s in ("failed", "synthetic")]))
+    record = record_skeleton(f"geant4-reco-{args.reco_id}",
+                             f"simreco reconstruction {args.reco_id} of {rec['artifact_id']} ({replicas} replica(s); "
+                             "a reconstructed simulation, not a validated result)", created, labels)
+    base = expand(str(args.project_root)).resolve() if args.project_root else expand(str(args.record)).resolve().parent
+    try:  # refs relative to the project root (contracts/dependencies.py resolves them there)
+        ref = rec_path.resolve().relative_to(base).as_posix()
+    except ValueError:
+        ref = tilde(rec_path)
+    record["inputs"] = [{"ref": ref, "artifact_type": "computational-run", "artifact_id": rec["artifact_id"],
+                         "sha256": sha256_file(rec_path), "status": rec.get("status", [])}]
+    manifest = [{"path": tilde(reco_path), "sha256": sha256_file(reco_path)},
+                {"path": tilde(rec_path), "sha256": sha256_file(rec_path)}]
+    if args.geometry:
+        manifest.append({"path": tilde(expand(str(args.geometry))), "sha256": sha256_file(expand(str(args.geometry)))})
+    record["extension"] = {
+        "input_manifest": manifest,
+        "tools": [{"name": "simreco", "version": sha256_file(exe)[:16]}, {"name": "simroot", "version": sha256_file(simroot)[:16]}],
+        "commands": [f"simroot dump events.root --ntuple crossings | simreco (x{replicas})"],
+        "environment": {"work": tilde(work)}, "seeds": {"simreco": spec["run"]["logical_run_seed"]},
+        "tolerances": {}, "exit_status": 0, "output_hashes": outputs,
+        "argv": list(args.argv_run),
+        "script_sha256": {a: sha256_file(Path(a)) for a in args.argv_run if a.endswith(".py") and Path(a).is_file()},
+        "reconstruction": {
+            "program": {"name": "simreco", "path": tilde(exe), "sha256": sha256_file(exe), "adapter": ADAPTER_VERSION,
+                        "sources_sha256": sources},
+            "reco_spec": reco, "reco_spec_sha256": sha256_file(reco_path),
+            "run_record": {"artifact_id": rec["artifact_id"], "sha256": sha256_file(rec_path)},
+            "event_file_content_sha256": content, "dumped": {"ntuple": "crossings", "columns": "all",
+                                                              "dump_sha256": dump_sha, "kept": False},
+            "events_csv_sha256": sha256_file(run_dir / "events.csv"),
+            "point_resolution_bending_um": bending if bending is not None else reco["point_resolution_um"]["bending"],
+            "point_resolution_source": bending_source,
+            "tof_sigma_t_ps": tof_ps if tof_ps is not None else (reco.get("tof") or {}).get("sigma_t_ps"),
+            "tof_sigma_t_source": tof_source, "replicas": replicas, "tail_sources_simulated": tails,
+            "logical_run_seed": spec["run"]["logical_run_seed"], "outputs": rows}}
+    record["versions"]["plugin_release"] = plugin_release()
+    write_json(expand(str(args.record)), record)
+    return "ok", {"record": tilde(expand(str(args.record))), "replicas": replicas, "tail_sources_simulated": tails,
+                  "outputs": rows}
+
+
+def _reco_summaries(rec: dict, work_arg) -> list[dict]:
+    rx = (rec.get("extension") or {}).get("reconstruction")
+    if not rx:
+        raise SpecError(f"{rec.get('artifact_id')} is not a reco record (no extension.reconstruction)")
+    work = expand(str(work_arg)) if work_arg else expand(rec["extension"]["environment"]["work"])
+    out = []
+    for row in rx["outputs"]:
+        if "summary" not in row:
+            raise SpecError(f"{rec['artifact_id']}: replica {row['replica']} has no summary (declare output.observables)")
+        f = work / row["summary"]["ref"]
+        if not f.is_file() or sha256_file(f) != row["summary"]["sha256"]:
+            raise SpecError(f"{tilde(f)} is missing or changed since the reco record")
+        out.append(json.loads(f.read_text(encoding="utf-8")))
+    return out
+
+
+def cmd_table(args) -> tuple[str, dict]:
+    """B2.4, B2.6: a figure of merit from a reco record's replica summaries, as a simulated dataset-record and, with
+    --f4-results, an f4-results/1 file (value, statistical uncertainty, the coverage-0.90 uncertainty object, model
+    envelope from --variation reco records, tail sources, the geometry file)."""
+    rec_path = expand(str(args.reco_record))
+    rec = json.loads(rec_path.read_text(encoding="utf-8"))
+    summaries = _reco_summaries(rec, args.work)
+    rx = rec["extension"]["reconstruction"]
+    decls = {o["name"]: o for o in (rx["reco_spec"].get("output") or {}).get("observables", [])}
+    if args.observable not in decls:
+        raise SpecError(f"--observable {args.observable} is not declared in the reco spec ({sorted(decls)})")
+    if args.figure_of_merit not in RS.FOM:
+        raise SpecError(f"--figure-of-merit must be one of {sorted(RS.FOM)}")
+    den = {}
+    for kv in args.denominator or []:
+        k, _, v = kv.partition("=")
+        try:
+            den[k] = float(v)
+        except ValueError:
+            den[k] = v
+    for s in summaries:  # the summaries say which stages ran; the record must agree
+        if list(s["run"].get("tail_sources_simulated") or []) != list(rx.get("tail_sources_simulated") or []):
+            raise SpecError(f"a replica summary lists tail sources {s['run'].get('tail_sources_simulated')}, the reco "
+                            f"record {rx.get('tail_sources_simulated')}")
+    problems = RS.check_denominator(den, summaries[0]["run"].get("settings") or {})
+    if problems:
+        raise SpecError("; ".join(problems))
+    res = RS.fom_result(args.figure_of_merit, summaries, decls[args.observable], den)
+    envelope = None
+    if args.variation:
+        var = {"nominal": summaries}
+        for item in args.variation:
+            name, _, path = item.partition("=")
+            vrec = json.loads(expand(path).read_text(encoding="utf-8"))
+            var[name] = _reco_summaries(vrec, args.work)
+        envelope = RS.model_envelope(args.figure_of_merit, var, decls[args.observable])
+        res["model_envelope"] = envelope["envelope"]
+        res["model_envelope_annotation"] = {k: v for k, v in envelope.items() if k != "envelope"}
+    created = args.created or datetime.date.today().isoformat()
+    out = expand(str(args.out))
+    base = expand(str(args.project_root)).resolve() if args.project_root else out.resolve().parent
+    try:  # refs relative to the project root (contracts/dependencies.py resolves them there)
+        ref = rec_path.resolve().relative_to(base).as_posix()
+    except ValueError:
+        ref = tilde(rec_path)
+    labels = list(dict.fromkeys(["unvalidated"] + [s for s in rec.get("status", []) if s in ("failed", "synthetic")]))
+    x = next(iter(den.values()), 0.0)
+    xv = float(x) if isinstance(x, (int, float)) else 0.0
+    edges = [xv * (1 - 1e-9) - 1e-12, xv * (1 + 1e-9) + 1e-12]
+    rule = RS.FOM[args.figure_of_merit]
+    half = (res["uncertainty"]["minus"] + res["uncertainty"]["plus"]) / 2
+    doc = record_skeleton(f"geant4-table-{args.id}", f"Simulated {args.figure_of_merit} from {rec['artifact_id']} "
+                          "(detector level; unvalidated unless an input study record is validated in scope)", created,
+                          labels)
+    doc["artifact_type"] = "dataset-record"
+    doc["inputs"] = [{"ref": ref, "artifact_type": "computational-run", "artifact_id": rec["artifact_id"],
+                      "sha256": sha256_file(rec_path), "status": rec.get("status", [])}]
+    for k in ("extension",):
+        doc.pop(k, None)
+    doc["extension"] = {
+        "dataset_id": f"simulation:{args.id}", "source_evidence_ids": [],
+        "observable": {"quantity": rule["quantity"], "process": f"simulation of {args.figure_of_merit}",
+                       "variables": [{"name": next(iter(den), "point"), "unit": "", "points": [xv]}],
+                       "phase_space": {"definition": json.dumps(den, sort_keys=True)}, "level": "detector",
+                       "normalization": {"kind": "shape-only"}, "bin_semantics": "point", "unit": "1"},
+        "data": {"edges": edges, "values": [res["value"]], "unit": "1",
+                 "uncertainties": [{"name": "statistical (+) replica spread, coverage 0.90", "kind": "statistical",
+                                    "values": [half], "correlation": "uncorrelated", "gaussian": False}]},
+        "covariance": {"status": "absent"}, "status": "simulated",
+        "conditions": f"tail sources simulated: {rx['tail_sources_simulated']}; replicas {rx['replicas']}"}
+    write_json(out, doc)
+    result = {"dataset": tilde(out), "figure_of_merit": args.figure_of_merit, "result": res}
+    if args.f4_results:
+        f4 = {"schema": "f4-results/1", "results": {args.figure_of_merit: res},
+              "tail_sources_simulated": rx["tail_sources_simulated"],
+              "reco_record": {"artifact_id": rec["artifact_id"], "sha256": sha256_file(rec_path)}}
+        if args.geometry:
+            g = expand(str(args.geometry))
+            f4["geometry"] = {"path": tilde(g), "sha256": sha256_file(g)}
+        fp = expand(str(args.f4_results))
+        rep = validate(f4, str(ASSETS / "simreco" / "f4_results.schema.json"))
+        if not rep.ok:
+            raise SpecError("the f4-results file does not validate: " + "; ".join(f.message for f in rep.errors)[:400])
+        write_json(fp, f4)
+        result["f4_results"] = tilde(fp)
+    return "ok", result
+
+
 def cmd_oracle(args) -> tuple[str, dict]:
     cfg = expand(str(args.benchmark_config))
     if not cfg.is_file():
@@ -1055,11 +1307,11 @@ def main(argv=None) -> int:
     ap = JsonArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="command", required=True)
     p = sub.add_parser("build-sim", help="build layered_sim against a recorded Geant4 installation")
-    p.add_argument("--build-record", required=True)
+    p.add_argument("--build-record", help="the Geant4 build record (not needed for simreco)")
     p.add_argument("--work", required=True)
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
-    p.add_argument("--program", choices=("layered_sim", "element_sim"), default="layered_sim",
-                   help="which program to build (element_sim also builds simroot)")
+    p.add_argument("--program", choices=("layered_sim", "element_sim", "simreco"), default="layered_sim",
+                   help="which program to build (element_sim also builds simroot; simreco needs no Geant4)")
     p = sub.add_parser("check-spec", help="validate an element_sim.spec/1 (schema and cross-field rules)")
     p.add_argument("--spec", required=True)
     p = sub.add_parser("from-geometry", help="design-geometry/1 + realization profile -> element_sim.spec/1")
@@ -1105,6 +1357,25 @@ def main(argv=None) -> int:
     p.add_argument("--csv", required=True)
     p.add_argument("--columns", nargs="+", required=True)
     p.add_argument("--out", required=True)
+    p = sub.add_parser("reco", help="simroot dump + simreco per replica of an element_sim run, with its record")
+    for name in ("--run-record", "--reco-spec", "--simreco", "--work-out", "--reco-id", "--record"):
+        p.add_argument(name, required=True)
+    p.add_argument("--work", help="the run record's work folder (default: its extension.environment.work)")
+    p.add_argument("--simroot", help="the simroot executable (default: the run record's)")
+    p.add_argument("--geometry", help="the design-geometry/1 file: its point_resolution_um replaces the spec's bending")
+    p.add_argument("--project-root", help="refs of the record's inputs are relative to it (default: the record's folder)")
+    p.add_argument("--created")
+    p.add_argument("--timeout", type=float, default=86400.0)
+    p = sub.add_parser("table", help="a figure of merit from a reco record: simulated dataset-record, f4-results/1")
+    for name in ("--reco-record", "--figure-of-merit", "--observable", "--out", "--id"):
+        p.add_argument(name, required=True)
+    p.add_argument("--denominator", action="append", help="K=V of the figure of merit's denominator")
+    p.add_argument("--variation", action="append", help="NAME=RECO_RECORD of a physics-list variation (model envelope)")
+    p.add_argument("--f4-results", help="also write the f4-results/1 file here")
+    p.add_argument("--geometry", help="the design-geometry/1 file the study used (named by sha256 in f4-results)")
+    p.add_argument("--work", help="the reco records' work folder (default: each record's)")
+    p.add_argument("--project-root", help="refs of the dataset's inputs are relative to it (default: its folder)")
+    p.add_argument("--created")
     p = sub.add_parser("oracle", help="geant4_benchmarks.py on recorded output, through a subprocess")
     p.add_argument("--benchmark-config", required=True)
     p.add_argument("--out")
@@ -1118,7 +1389,7 @@ def main(argv=None) -> int:
                 if hasattr(args, k) and f"--{k}" not in given]
     handlers = {"build-sim": cmd_build_sim, "check-spec": cmd_check_spec, "from-geometry": cmd_from_geometry,
                 "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk, "summarize": cmd_summarize, "reduce": cmd_reduce,
-                "oracle": cmd_oracle}
+                "reco": cmd_reco, "table": cmd_table, "oracle": cmd_oracle}
     try:
         status, doc = handlers[args.command](args)
     except (SpecError, FileNotFoundError, KeyError, json.JSONDecodeError, IsADirectoryError) as exc:

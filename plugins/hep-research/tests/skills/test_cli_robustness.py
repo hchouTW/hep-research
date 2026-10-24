@@ -152,7 +152,12 @@ MISSING_FILE_ARGS = {
     "adapters/geant4/assets/geant4_examples.py": ["extract", "--example", "B1", "--out-file", M],
     "adapters/geant4/assets/geant4_run.py": [["run", "--spec", M, "--exe", M, "--build-record", M, "--work", OUT,
                                               "--run-id", "r", "--record", OUT], ["check-spec", "--spec", M],
-                                             ["from-geometry", "--geometry", M, "--profile", M, "--out", OUT]],
+                                             ["from-geometry", "--geometry", M, "--profile", M, "--out", OUT],
+                                             ["reco", "--run-record", M, "--reco-spec", M, "--simreco", M,
+                                              "--work-out", OUT, "--reco-id", "r", "--record", OUT],
+                                             ["table", "--reco-record", M, "--figure-of-merit",
+                                              "momentum-resolution-core", "--observable", "core", "--out", OUT,
+                                              "--id", "t"]],
     "adapters/geant4/assets/geant4_verify.py": ["balance", "--run-record", M, "--tolerance-mev", "0.001"],
     "adapters/geant4/assets/summary_from_csv.py": ["--csv", M, "--observables", M, "--block-size", "10", "--blocks",
                                                    "16", "--run-record", M, "--out", OUT],
@@ -212,6 +217,7 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-ml/scripts/serving_capacity.py": "numbers on the command line",
     "adapters/geant4/assets/g4common.py": "shared helpers of the geant4 adapter scripts; only --help",
     "adapters/geant4/assets/element_spec.py": "element_sim spec rules imported by geant4_run.py; only --help",
+    "adapters/geant4/assets/simreco_spec.py": "simreco spec rules imported by geant4_run.py; only --help",
 }
 def argv_sets(entry) -> list[list[str]]:
     """The argv sets of a MISSING_FILE_ARGS entry: one list, or a list of lists (Geant4 program B1.6)."""
