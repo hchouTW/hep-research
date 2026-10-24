@@ -39,8 +39,11 @@ def j14_output() -> Path:
 
 
 def tearDownModule():
+    """Delete the replay and forget it, so a module that runs later (test_simulated_dataset shares this cache)
+    rebuilds it instead of reading a deleted folder (D10)."""
     if "tmp" in _REPLAY:
         _REPLAY["tmp"].cleanup()
+    _REPLAY.clear()
 from contracts import CONTRACTS_VERSION, KNOWN_CAPABILITIES  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 
