@@ -1,6 +1,6 @@
 # Geant4 simulation studies, the J15 minimal spectrometer and automated generation of design candidates: consolidated document
 
-> Document type: consolidated plan, implementation specs and design rationale (for the implementing agent, reviewers and the maintainer). Status: spec approved by the maintainer on 2026-10-24; §P.7 items 2–15 decided as recommended; D0 (item 1) still open
+> Document type: consolidated plan, implementation specs and design rationale (for the implementing agent, reviewers and the maintainer). Status: spec approved by the maintainer on 2026-10-24; §P.7 items 2–15 decided as recommended; D0 (item 1) decided on 2026-10-24 as recommended
 > Baseline: hep-research `main` at `5584927` (0.38.0), contracts 3.12.0, adapter geant4 0.1.0 (unchanged since `9f08796`), Geant4 11.4.3
 > Date: 2026-10-24
 > Language: English translation of the Traditional Chinese original [`geant4-program.md`](geant4-program.md), with the same content. If they disagree, the Chinese wins and the English is corrected at the same time
@@ -371,7 +371,7 @@ Calls across adapters and skills always go through subprocesses and JSON files (
 | 14 | Whether the Bayesian-optimisation backend (Ax/BoTorch) is listed as a tested tool | list as optional | C3 |
 | 15 | New CI impact groups (`adapters/geant4/**`, `core/stats/**`, `core/simulation/**`) | add them, to avoid full CI runs | A1 |
 
-**Decided (2026-10-24):** the maintainer decided items 2–15 as in the "Recommendation" column; item 1 (D0) is still open (issue #273), so G-D0 has not passed.
+**Decided (2026-10-24):** the maintainer decided items 2–15 as in the "Recommendation" column, and item 1 (D0) as recommended in §P.7.1 (D0-a conditional approval, D0-b tail benchmark, D0-c option (a) with (b) as fallback, D0-d not adopted; issue #273); G-D0 has passed.
 
 ### §P.7.1 D0: the path by which a detector-level Geant4 study becomes F4
 
@@ -409,7 +409,7 @@ Calls across adapters and skills always go through subprocesses and JSON files (
 
 **Before approval:** B2 may merge with the qualification rules present but not in force (G-D0); B3 and C2's confirmation do not start; confirmation studies stay `unvalidated`.
 
-**The maintainer's form:** `decision-d0-f4-qualification.md` in the same folder (issue #273); once the maintainer fills in its Decision section, this section and B2.8 are updated accordingly.
+**The maintainer's form:** `decision-d0-f4-qualification.md` in the same folder (issue #273); the maintainer decided on 2026-10-24: D0-a approved conditionally, D0-b only with the tail benchmark, D0-c option (a) with (b) as fallback, D0-d not adopted; B2.8 is updated accordingly.
 
 ### §P.7.2 Already decided by main (no longer open)
 
@@ -1792,7 +1792,7 @@ A1's other conditions (convergence gate, including D11; no remaining gaps; varia
 
 - `shower-containment` and the other calorimeter figures of merit are not on this path: the only reference is the PDG gamma-profile fit (sanity; the header of `geant4_benchmarks.py` says it is never validation), and a published-data reference for leakage is needed (§B.9). J15's shower-containment F4 study therefore stays not upgraded (`f4_unqualified`), and the README says so.
 - The rule, conditions, scope model and sub-decisions are written into `geant4-study-protocol.md` and the F4 row of `system-design-workflow.md`.
-- **While D0 is not approved:** the rest of B2 may merge; the rules of this section (the eligibility decision and scope model in `validate.py` and `check_geant4_study.py`) stay on the branch and do not merge (§P.6, §P.7).
+- **Decided (2026-10-24):** the maintainer approved D0 as recommended (D0-a conditionally, D0-b tail benchmark, D0-c option (a), with (b) if the combined uncertainty stays below the minimum, D0-d not adopted). The rules of this section merge with B2 and are in force; B2 includes the end-to-end test that reaches a decisive verdict row.
 
 ### B2.9 Adapter change procedure and CI
 
@@ -3240,6 +3240,7 @@ Ordered by date, and within a day by Parts 1, 2, 3, 4, 5.
 | 2026-10-24 | Part 5 | Reorganised: this part states only the current reasons; the §R.13 decision log moved to §H.5 and §R.14 superseded designs to §H.4 |
 | 2026-10-24 | Whole document | Reorganisation: history moved to Part 6; the review record `review-2026-10-24-main-0.38.md` folded into §H.2 and the file removed; Part 5's former last section, "relation to main's detector system design loop", moved to §R.1 and the following sections shifted by one (now §R.0–§R.15); the front matter gains a per-stage reading index and a global glossary; the body states only the current specification |
 | 2026-10-24 | Part 1 | Spec approved by the maintainer and §P.7 items 2–15 decided as recommended; D0 still open; spec merged into `main` |
+| 2026-10-24 | Part 1 | D0 decided by the maintainer as recommended (§P.7, §P.7.1, B2.8 and the decision record updated); G-D0 passed |
 | 2026-10-24 | Part 2 | A1 implementation record: the J14 MPV nominal (60,000 events) misses the per-point se target of A1.8, so the maintainer decided to re-record it and its controls live as well (A1.13 had kept it); the A1.7 bias toys set J14's MPV design to 2 keV bins with B >= 75,000 events per block (a first design at 30,000 sat too close to the bias bound); two-stage factor F₀.₉₅ (§P.7 item 5); `check_geant4_study.py summarize` retired in favour of `summary_from_csv.py`; one commit carries the statistics wiring of D3–D5 (their ledger entries share the fix commit) |
 
 ---
