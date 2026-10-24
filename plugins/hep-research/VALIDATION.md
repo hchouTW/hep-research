@@ -2781,7 +2781,13 @@ the spec's baseline; C1 has no prerequisite stage; the `file:line` citations of 
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` (the CI pins) | clean |
 | Contracts 3.13.0 bump | fixtures, design fixture, templates, theory-profile artifacts and 13 examples regenerated with E2: version strings and the hashes that cover them only |
 
-`run_all_checks.py` results for E2 and the CI lock are in the stage report. Not done in this stage: the independent
+| `run_all_checks.py --no-cli --jobs 6`, CI lock (NumPy 2.4.6, SciPy 1.17.1, no torch), head `60d48920` | 29 pass, 0 fail, 2 skipped (CLI host checks); 5293 tests in 440 modules, 5064 pass, 0 failures, 229 skipped |
+| Same with E2 (NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped; 5293 tests, 5156 pass, 0 failures, 137 skipped |
+| `check_packaging.py` | ok, 2702 files, no findings |
+| `python3 -m unittest discover -s tests/contracts -t .` | 1142 tests; 5 errors, all in `test_simulated_dataset.py` (the order dependence already recorded under HADRON-PHASE7; the module passes alone) |
+| `check_relocation.py` | one failure, `tests.adapters.test_geant4` partition test: the worker command breaks on the space in the relocated path; this stage changes nothing under `adapters/` |
+
+Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
