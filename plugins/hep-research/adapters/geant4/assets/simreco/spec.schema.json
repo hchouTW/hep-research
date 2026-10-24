@@ -1,0 +1,270 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "simreco.spec/1",
+ "title": "simreco reco spec",
+ "description": "The reconstruction settings of simreco (Geant4 program B2.1, B2.2), owned by hep-detector; read by geant4_run.py reco, which adds the geometry of the element_sim run, the particle table, the logical-run seed and the replica number (simreco.effective/1). Point resolutions in um, times in ps; the tail-source stages are switched on one by one (the names are contracts/design.py TAIL_SOURCES); alignment and calibration-non-uniformity need at least 20 replicas.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "point_resolution_um",
+  "radiation_length_mm"
+ ],
+ "properties": {
+  "schema": {
+   "const": "simreco.spec/1"
+  },
+  "note": {
+   "type": "string"
+  },
+  "point_resolution_um": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "bending",
+    "non_bending"
+   ],
+   "properties": {
+    "bending": {
+     "type": "number",
+     "exclusiveMinimum": 0,
+     "description": "with reco --geometry the design geometry's point_resolution_um replaces it (B2.1)"
+    },
+    "non_bending": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    }
+   }
+  },
+  "radiation_length_mm": {
+   "type": "object",
+   "description": "X0 of every tracker-plane material (the multiple-scattering covariance of the fit), with sources in the note",
+   "additionalProperties": {
+    "type": "number",
+    "exclusiveMinimum": 0
+   }
+  },
+  "tof": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "sigma_t_ps"
+   ],
+   "properties": {
+    "sigma_t_ps": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    }
+   }
+  },
+  "calorimeter": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "sampling_fraction": {
+     "type": "number",
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "description": "electron sampling fraction from a calibration-role sample"
+    },
+    "mip_active_MeV": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "sampling_fraction_source": {
+     "type": "string"
+    }
+   }
+  },
+  "fit": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "multiple_scattering": {
+     "type": "boolean"
+    },
+    "chi2_per_ndof_cut": {
+     "type": "number",
+     "minimum": 0,
+     "description": "a fitted track is selected when chi2/ndof <= the cut (0 or absent: no cut); charge_flip counts selected tracks"
+    }
+   }
+  },
+  "curvature_offset_per_GV": {
+   "type": "number",
+   "description": "added to the reconstructed signed inverse rigidity (1/GV)"
+  },
+  "field_scale_global": {
+   "type": "number",
+   "exclusiveMinimum": -1,
+   "description": "one relative error for every field region: a rigidity-scale effect, never a tail source"
+  },
+  "replicas": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 1000
+  },
+  "tail_sources": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "alignment": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "on"
+     ],
+     "properties": {
+      "on": {
+       "type": "boolean"
+      },
+      "misalignment_sigma_y_um": {
+       "type": "number",
+       "minimum": 0
+      },
+      "misalignment_sigma_z_um": {
+       "type": "number",
+       "minimum": 0
+      },
+      "misalignment_sigma_rot_urad": {
+       "type": "number",
+       "minimum": 0
+      },
+      "residual_sigma_y_um": {
+       "type": "number",
+       "minimum": 0
+      },
+      "residual_sigma_z_um": {
+       "type": "number",
+       "minimum": 0
+      },
+      "residual_sigma_rot_urad": {
+       "type": "number",
+       "minimum": 0
+      },
+      "method": {
+       "type": "string",
+       "description": "the alignment method the residual model stands for"
+      }
+     }
+    },
+    "calibration-non-uniformity": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "on"
+     ],
+     "properties": {
+      "on": {
+       "type": "boolean"
+      },
+      "sigma": {
+       "type": "number",
+       "minimum": 0,
+       "description": "width of the per-region relative field error (the common mean is removed)"
+      },
+      "gradient_sigma": {
+       "type": "number",
+       "minimum": 0,
+       "description": "width of a linear relative gradient along the stack axis over the lever arm"
+      }
+     }
+    },
+    "noise-digitization": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "on"
+     ],
+     "properties": {
+      "on": {
+       "type": "boolean"
+      },
+      "pitch_y_um": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "pitch_z_um": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "sharing_um": {
+       "type": "number",
+       "minimum": 0
+      },
+      "threshold": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      },
+      "efficiency": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      },
+      "noise_hits_per_plane": {
+       "type": "number",
+       "minimum": 0
+      }
+     }
+    },
+    "pattern-recognition": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "on"
+     ],
+     "properties": {
+      "on": {
+       "type": "boolean"
+      },
+      "window_mm": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "chi2_per_ndof_cut": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "min_hits": {
+       "type": "integer",
+       "minimum": 3
+      }
+     }
+    }
+   }
+  },
+  "output": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "observables": {
+     "type": "array",
+     "description": "simulation-observables/1 over the result CSV columns; with blocks"
+    },
+    "blocks": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "blocks",
+      "block_size"
+     ],
+     "properties": {
+      "blocks": {
+       "type": "integer",
+       "minimum": 2
+      },
+      "block_size": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "first_event": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  }
+ }
+}

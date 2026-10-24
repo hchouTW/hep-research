@@ -312,11 +312,11 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "f7cc310e3dff6f9c"
+    "version": "dedc2c52621c0505"
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "fe7a4c47b3cd75c0"
+    "version": "05c8b15ef45534cd"
    }
   ]
  },
@@ -414,6 +414,7 @@
    "core/protected/trusted_input.py",
    "core/simulation/__init__.py",
    "core/simulation/estimates.py",
+   "core/simulation/helix.py",
    "core/simulation/summary.py",
    "core/stats/__init__.py",
    "core/stats/_linalg.py",

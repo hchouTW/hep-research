@@ -1,6 +1,6 @@
 {
- "$comment": "Initial mapping for layered spectrometer geometries (contracts 3.11.0, ART-33). Value, statistical uncertainty and model envelope are read from the study record at extension.study.results.<figure of merit>.{value, statistical_uncertainty, model_envelope} (ART-32).",
- "mapping_version": "1.0.0",
+ "$comment": "Initial mapping for layered spectrometer geometries (contracts 3.11.0, ART-33). Value, statistical uncertainty and model envelope are read from the study record at extension.study.results.<figure of merit>.{value, statistical_uncertainty, model_envelope} (ART-32). Mapping 1.1.0 (CV-B2, Geant4 program B2.6) adds optional fields (\"optional\": true): read when the candidate has the parameter, left out otherwise, so a 1.0.0 candidate gives the same fields, parameter_refs and digest; from-geometry takes the missing facts from the realization profile.",
+ "mapping_version": "1.1.0",
  "geometry": "layered-spectrometer",
  "fields": [
   {
@@ -50,6 +50,149 @@
      "role": "bending",
      "name": "field_T",
      "unit": "T"
+    }
+   }
+  },
+  {
+   "field": "layer_material",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "layer_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "layer_transverse_half_m",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "layer_transverse_half_m",
+     "unit": "m"
+    }
+   }
+  },
+  {
+   "field": "field_extent_m",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "bending",
+     "name": "field_extent_m",
+     "unit": "m"
+    }
+   }
+  },
+  {
+   "field": "tof_layer_positions_m",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tof",
+     "name": "layer_positions_m",
+     "unit": "m"
+    }
+   }
+  },
+  {
+   "field": "tof_layer_thickness_m",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tof",
+     "name": "layer_thickness_m",
+     "unit": "m"
+    }
+   }
+  },
+  {
+   "field": "tof_time_resolution_ps",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tof",
+     "name": "time_resolution_ps",
+     "unit": "ps"
+    }
+   }
+  },
+  {
+   "field": "calo_front_m",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "front_position_m",
+     "unit": "m"
+    }
+   }
+  },
+  {
+   "field": "calo_depth_x0",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "depth_x0",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "calo_sampling_layers",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "sampling_layers",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "calo_passive_material",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "passive_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "calo_passive_thickness_mm",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "passive_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "calo_active_material",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "active_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "calo_active_thickness_mm",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "active_thickness_mm",
+     "unit": "mm"
     }
    }
   }

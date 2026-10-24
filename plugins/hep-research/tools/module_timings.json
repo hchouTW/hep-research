@@ -408,6 +408,9 @@
   "tests.skills.hep_detector.test_design_search": 20.0,
   "tests.skills.hep_detector.test_design_search_lib": 3.0,
   "tests.core.test_simulation_toys": 0.1,
-  "tests.core.test_simulation_s1_evidence": 2.0
+  "tests.core.test_simulation_s1_evidence": 2.0,
+  "tests.adapters.test_simreco": 22.3,
+  "tests.skills.hep_detector.test_design_b2": 6.8,
+  "tests.skills.hep_detector.test_geant4_b2_benchmarks": 32.8
  }
 }

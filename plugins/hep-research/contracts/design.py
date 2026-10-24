@@ -55,7 +55,8 @@ if __package__ in (None, ""):
 
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from contracts.validate import SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, validate_artifact  # noqa: E402
+from contracts.validate import (SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_reference,  # noqa: E402
+                                validate_artifact)
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_DIR = PLUGIN_ROOT / "contracts" / "tool_contracts"
@@ -279,6 +280,8 @@ class Evaluation:
     bound: str = "estimate"                             # derived bound (CMB), may be 'mixed'
     vector: list = field(default_factory=list)          # [(fom, fidelity, evaluation_id)] of the chain
     f4_unqualified: bool = False                        # ART-31: below screening
+    f4_kind: str | None = None                          # CV-B2: the F4 study's declared observable kind
+    f4_qualification_tolerance: float | None = None     # CV-B2: its qualifying reference's relative tolerance
     unreviewed: bool = False                            # F5 without measurement-acceptance (FID-06)
     better: str | None = None
     contract: str | None = None                         # 'tool:operation'
@@ -972,11 +975,24 @@ def config_problems(proj: Project, name: str, val: ConfigValue, tokens: list[str
 
 def geometry_fields(proj: Project, cid: str, mapping: dict | None = None) -> tuple[dict, list[str], str]:
     """ART-34, ART-35: the geometry fields the mapping table reads from the merged candidate, the parameters read and
-    their digest (TRC-05)."""
+    their digest (TRC-05). CV-B2 (mapping 1.1.0): an optional field (a plain parameter expression) is read only when
+    the candidate has that parameter in exactly one subsystem of the role, else left out with no parameter ref, so a
+    1.0.0 candidate keeps its fields and digest and adding the parameter later changes the digest (stale)."""
     mapping = mapping or load_json(GEOMETRY_FILE)
     ev = Evaluation(Path("."), ".", {"extension": {"candidate": cid, "denominator": {}}})
-    evaluator = Evaluator(proj, ev, proj.effective(cid) or {}, {})
-    fields = {f["field"]: evaluator(f["from"]) for f in mapping["fields"]}
+    subs = proj.effective(cid) or {}
+    evaluator = Evaluator(proj, ev, subs, {})
+
+    def present(f: dict) -> bool:
+        spec = f["from"].get("parameter") if isinstance(f.get("from"), dict) else None
+        if not f.get("optional"):
+            return True
+        if spec is None:
+            raise ExprError(f"optional geometry field {f['field']} must be a plain parameter expression")
+        hits = [sid for sid, s in subs.items() if s.get("role") == spec["role"]]
+        return len(hits) == 1 and isinstance((subs[hits[0]].get("parameters") or {}).get(spec["name"]), dict)
+
+    fields = {f["field"]: evaluator(f["from"]) for f in mapping["fields"] if present(f)}
     refs = sorted(evaluator.refs)
     return fields, refs, proj.parameter_digest(cid, refs)
 
@@ -995,7 +1011,12 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
     parameter digest matches the current candidate (a changed candidate: stale; otherwise a mismatch: a study of
     another layout cannot stand in); its observable must be this figure of merit (else domain.mismatch); value,
     statistical uncertainty and model envelope are the record's; the bound is optimistic for a tail-sensitive figure of
-    merit unless the study simulated every tail source."""
+    merit unless the study simulated every tail source. CV-B2 (Geant4 program B2.6): an evaluation that names its own
+    geometry_ref is checked against that geometry file (the candidate's geometry_ref is only the most recent one);
+    the geometry file's denominator must equal the evaluation's; a study result with an uncertainty object (a central
+    interval at coverage 0.90: statistical (+) the reconstruction-replica spread, D0-c option (a); exact for a
+    counting figure of merit) is the evaluation's uncertainty, else the scalar statistical_uncertainty as a 68.27 %
+    Gaussian (FID-01)."""
     ext = ev.ext
     study_ref = ext.get("study_ref")
     study = proj.docs.get(proj.resolve(study_ref)) if study_ref else None
@@ -1004,17 +1025,21 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
         ev.f4_unqualified = True
         return
     sext = study.get("extension") or {}
-    rep = validate_artifact(study)
+    # strict: a record that declares an older contract version still meets the A1 and CV-B2 upgrade rules
+    rep = validate_artifact(study, strict=True)
     if "validated-in-scope" not in (study.get("status") or []) or not rep.ok or "study" not in sext:
         ev.f4_unqualified = True  # ART-31: not reissued, or not passing the upgrade rules
     block: dict = sext["study"] if isinstance(sext.get("study"), dict) else {}
+    ev.f4_kind = (block.get("declared_scope") or {}).get("observable_kind")
+    ref = qualification_reference(ev.f4_kind, block.get("benchmarks") or [])
+    ev.f4_qualification_tolerance = float(ref["tolerance"]["total"]) if ref else None
     try:
         mapping = load_json(GEOMETRY_FILE)
     except (OSError, ValueError) as exc:
         ev.err("design.contract_unreadable", f"geometry mapping: {exc}")
         return
     cid = ext.get("candidate", "")
-    gref = candidate_geometry_ref(proj, cid)
+    gref = ext.get("geometry_ref") or candidate_geometry_ref(proj, cid)
     if not gref:
         ev.err("design.binding_incomplete", "an F4 evaluation's candidate names its geometry in geometry_ref (ART-30)")
     else:
@@ -1044,6 +1069,10 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
                     ev.err("design.contract_mismatch", "the geometry's parameter digest does not match the candidate (ART-35)")
             if geometry.get("figure_of_merit") != ev.fom:
                 ev.domain.append(f"the study geometry was generated for {geometry.get('figure_of_merit')}, not {ev.fom} (ART-36)")
+            gden = geometry.get("denominator")
+            if isinstance(gden, dict) and gden != (ext.get("denominator") or {}):
+                ev.domain.append(f"the study geometry was generated for the denominator {gden}, not "
+                                 f"{ext.get('denominator')} (CV-B2)")
     fom_map = mapping["figures_of_merit"].get(ev.fom)
     result = (block.get("results") or {}).get(ev.fom) if isinstance(block.get("results"), dict) else None
     if fom_map is None or not isinstance(result, dict):
@@ -1051,11 +1080,17 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
         return
     if not isinstance(result.get("value"), (int, float)) or not close(result["value"], ext.get("value")):
         ev.err("design.contract_mismatch", f"value {ext.get('value')!r}, the study record has {result.get('value')!r} (ART-32)")
+    rden = result.get("denominator")
+    if isinstance(rden, dict) and not same(rden, ext.get("denominator") or {}):  # CV-B2: what the table was made for
+        ev.domain.append(f"the study's result was computed for the denominator {rden}, not {ext.get('denominator')} "
+                         "(CV-B2)")
     stat = result.get("statistical_uncertainty")
     want_unc = ({"minus": float(stat), "plus": float(stat), "coverage": 0.6827, "interval": "central",
                  "distribution": "gaussian"} if isinstance(stat, (int, float)) else None)
+    if isinstance(result.get("uncertainty"), dict):  # CV-B2: the study's uncertainty object
+        want_unc = {k: result["uncertainty"].get(k) for k in ("minus", "plus", "coverage", "interval", "distribution")}
     if want_unc is not None and not same(want_unc, ext.get("uncertainty")):
-        ev.err("design.contract_mismatch", "uncertainty differs from the study's statistical error (FID-01 F4)")
+        ev.err("design.contract_mismatch", "uncertainty differs from the study's (FID-01 F4; CV-B2 uncertainty object)")
     env = result.get("model_envelope")
     if (env is not None or "model_envelope" in ext) and not same(env, ext.get("model_envelope")):
         ev.err("design.contract_mismatch", "model_envelope differs from the study record (FID-05)")
@@ -1309,6 +1344,13 @@ def estimate_state(proj: Project, ev: Evaluation, side: Side) -> tuple[bool, str
     minimum = rules.get("min_relative_uncertainty", 0.0)
     if ev.fidelity == "F5":
         minimum = max(minimum, proj.adequacy.get("f5_min_relative_uncertainty", 0.0))
+    f4q = (proj.adequacy.get("f4_qualified_min_relative_uncertainty") or {}).get(ev.fom)
+    if (ev.fidelity == "F4" and isinstance(f4q, dict) and not ev.f4_unqualified and ev.f4_kind == f4q.get("observable_kind")
+            and ev.f4_qualification_tolerance is not None and v != 0
+            and min(float(unc.get("minus", 0)), float(unc.get("plus", 0))) >= ev.f4_qualification_tolerance * abs(v) * (1 - 1e-9)):
+        # CV-B2 (D0-c): a study upgraded through the qualification path whose uncertainty holds the qualifying
+        # reference's tolerance uses the floor of that path (the reference's published accuracy), not the F1-bias floor
+        minimum = float(f4q["value"])
     if v != 0 and min(sigma_equivalent(unc, "minus"), sigma_equivalent(unc, "plus")) < minimum * abs(v) * (1 - 1e-12):
         return False, "within"
     env = ev.ext.get("model_envelope")
@@ -1333,7 +1375,11 @@ def estimate_state(proj: Project, ev: Evaluation, side: Side) -> tuple[bool, str
 
 def _with_value(ev: Evaluation, value: float) -> Evaluation:
     ext = {k: v for k, v in ev.ext.items() if k != "model_envelope"}
-    return Evaluation(ev.path, ev.rel, dict(ev.doc, extension=dict(ext, value=value)))
+    out = Evaluation(ev.path, ev.rel, dict(ev.doc, extension=dict(ext, value=value)))
+    # CV-B2: each end is judged with the F4 study's qualification (its floor), not as a bare evaluation
+    out.f4_unqualified, out.f4_kind = ev.f4_unqualified, ev.f4_kind
+    out.f4_qualification_tolerance = ev.f4_qualification_tolerance
+    return out
 
 
 def upstream_value_failures(proj: Project, ev: Evaluation, req: dict) -> list[str]:

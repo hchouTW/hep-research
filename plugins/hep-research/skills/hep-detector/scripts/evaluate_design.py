@@ -538,7 +538,9 @@ def f4(args) -> dict:
     """ART-31, ART-32 (M2): an F4 evaluation from a Geant4 study record in the artifacts_dir; with --label-spec,
     --label-benchmarks and --label-convergence the record is first re-issued by check_geant4_study.py label
     --upgrade (run records, reference records and the variation table passed on unchanged). Value, statistical
-    uncertainty and model envelope are the record's; the bound follows FID-03. A1.17: label exits 0 when it wrote a
+    uncertainty and model envelope are the record's (CV-B2: the study's uncertainty object, coverage 0.90, when it has
+    one; the evaluation names the geometry file the study used in geometry_ref; --label-results and --label-geometry
+    are passed on to label as --results and --geometry); the bound follows FID-03. A1.17: label exits 0 when it wrote a
     record (granted or refused upgrade) and 2 on unusable input; its exit 1, 2, 3 map to failed, rejected,
     incomplete, and a refused upgrade or a validated record without results.<fom> is incomplete (exit 3)."""
     proj = load_project(args)
@@ -547,7 +549,9 @@ def f4(args) -> dict:
                "--spec", args.label_spec, "--benchmarks", args.label_benchmarks, "--convergence", args.label_convergence,
                "--project-root", str(args.label_project_root or proj.root), "--upgrade", "--write", str(proj.root / args.study)]
         for flag, values in (("--run-record", args.label_run_record), ("--reference-record", args.label_reference_record),
-                             ("--variations", [args.label_variations] if args.label_variations else [])):
+                             ("--variations", [args.label_variations] if args.label_variations else []),
+                             ("--results", [args.label_results] if args.label_results else []),
+                             ("--geometry", [args.label_geometry] if args.label_geometry else [])):
             for v in values or []:
                 cmd += [flag, v]
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=TOOL_TIMEOUT_S)
@@ -557,12 +561,14 @@ def f4(args) -> dict:
                     "error": f"check_geant4_study.py label --upgrade exited {p.returncode}",
                     "label_output": p.stdout[-3000:]}
         try:
-            upgrade = json.loads(p.stdout).get("upgrade")
+            label_doc = json.loads(p.stdout)
         except ValueError:
-            upgrade = None
+            label_doc = {}
+        upgrade = label_doc.get("upgrade")
         if upgrade != "re-issued as validated-in-scope":
             return {"status": "incomplete", "exit": 3, "reason": "upgrade-refused",
                     "refused": (upgrade or {}).get("refused") if isinstance(upgrade, dict) else upgrade,
+                    "gaps": label_doc.get("gaps", []),
                     "note": "the study record was written unvalidated; an F4 evaluation needs a validated-in-scope "
                             "study (contracts/design.py check_f4)"}
         proj = load_project(args)
@@ -607,6 +613,12 @@ def f4(args) -> dict:
     if isinstance(result.get("statistical_uncertainty"), (int, float)):
         s = float(result["statistical_uncertainty"])
         ext["uncertainty"] = {"minus": s, "plus": s, "coverage": 0.6827, "interval": "central", "distribution": "gaussian"}
+    if isinstance(result.get("uncertainty"), dict):  # CV-B2: the study's uncertainty object (coverage 0.90, D0-c (a))
+        ext["uncertainty"] = {k: result["uncertainty"][k] for k in ("minus", "plus", "coverage", "interval",
+                                                                    "distribution")}
+    geo = block.get("geometry") if isinstance(block.get("geometry"), dict) else None
+    if geo and isinstance(geo.get("path"), str):  # CV-B2: the evaluation names the geometry file its study used
+        ext["geometry_ref"] = geo["path"]
     if isinstance(result.get("model_envelope"), list):
         ext["model_envelope"] = result["model_envelope"]
     rel = w.json(f"evaluations/{eid}.json", envelope("design-evaluation", f"{ns}-{eid}", ext, inputs, [],
@@ -2318,6 +2330,10 @@ def main(argv=None) -> int:
     p.add_argument("--label-reference-record", dest="label_reference_record", action="append",
                    help="a reference dataset-record passed on to label as --reference-record (repeatable)")
     p.add_argument("--label-variations", dest="label_variations", help="the variation table passed on to label")
+    p.add_argument("--label-results", dest="label_results",
+                   help="the f4-results/1 file passed on to label as --results (Geant4 program B2.6)")
+    p.add_argument("--label-geometry", dest="label_geometry",
+                   help="the design-geometry/1 file passed on to label as --geometry (Geant4 program B2.6)")
     p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
     p = sub.add_parser("f5", help="an F5 evaluation from a user-supplied dataset-record (FID-06, FID-07)")
     p.add_argument("--artifacts", type=Path, required=True)

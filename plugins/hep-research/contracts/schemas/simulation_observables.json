@@ -1,5 +1,5 @@
 {
- "$comment": "simulation-observables/1 (contracts CV-A1, Geant4 program A1.5; owner contracts, content proposed by hep-detector): the observables a simulation run summary accumulates. An array of declarations; a study spec's top-level observables and a simulation program's output.observables reference it. Fields may be added (R2).",
+ "$comment": "simulation-observables/1 (contracts CV-A1, Geant4 program A1.5; owner contracts, content proposed by hep-detector): the observables a simulation run summary accumulates. An array of declarations; a study spec's top-level observables and a simulation program's output.observables reference it. Fields may be added (R2). CV-B2 adds the gaussian-core estimator.",
  "type": "array",
  "minItems": 1,
  "items": {
@@ -96,12 +96,13 @@
     "exclusiveMinimum": 0
    },
    "estimator": {
-    "description": "how the study scripts estimate it (core/simulation/estimates.py); default mean",
+    "description": "how the study scripts estimate it (core/simulation/estimates.py); default mean; gaussian-core (contracts CV-B2, Geant4 program B2.3): the width of the iterative truncated Gaussian core per block",
     "enum": [
      "mean",
      "proportion",
      "mode",
-     "quantile"
+     "quantile",
+     "gaussian-core"
     ]
    },
    "quantile": {
@@ -113,6 +114,11 @@
     "description": "estimator proportion: which threshold of count_if (default 0)",
     "type": "integer",
     "minimum": 0
+   },
+   "core_truncation_sigma": {
+    "description": "estimator gaussian-core: the half-width of the truncation window in units of the core width (default 2)",
+    "type": "number",
+    "exclusiveMinimum": 0
    }
   },
   "additionalProperties": false

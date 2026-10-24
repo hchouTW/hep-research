@@ -7,8 +7,8 @@ once in the world, daughters inside their mother and every element inside the wo
 compatible with materials, at most one calorimeter mother, field regions on distinct elements that neither nest nor
 overlap, cut regions on known elements, a gun source, the per-event seeds of the logical run, the hits-level event
 limit, observables on CSV columns), and derives an element_sim.spec/1 from a design-geometry/1 file and an
-element_sim.realization/1 profile (mapping 1.0.0, layered-spectrometer): deterministic, so the same two files give a
-byte-identical spec. Run directly it only prints this help.
+element_sim.realization/1 profile (mappings 1.0.0 and 1.1.0, layered-spectrometer): deterministic, so the same two
+files give a byte-identical spec. Run directly it only prints this help.
 Exit codes: 0 (--help). Standard library only.
 """
 from __future__ import annotations
@@ -26,14 +26,20 @@ from core.simulation.seeds import job_seeds  # noqa: E402
 
 SPEC_SCHEMA = ASSETS / "element_sim" / "spec.schema.json"
 REALIZATION_SCHEMA = ASSETS / "element_sim" / "realization.schema.json"
-ADAPTER_VERSION = "0.3.0"
+ADAPTER_VERSION = "0.4.0"
 VACUUM_DENSITY_G_CM3 = 1e-20  # as contracts/validate.py: G4_Galactic and anything thinner is vacuum
 MATTER_ROLES = ("tracker-plane", "tof-layer", "calorimeter-active", "calorimeter-passive")
 CALO_DAUGHTER_ROLES = ("calorimeter-active", "calorimeter-passive")
 LEVELS = ("none", "summary", "crossings", "hits")
 TOL_MM = 1e-9  # containment and overlap tolerance (Geant4's surface tolerance is 1e-9 mm)
 ROUND_MM = 1e-6  # from-geometry rounds derived lengths to 1 nm, so a float rounding of x/X0 cannot reach the spec
-MAPPINGS = ("1.0.0",)
+MAPPINGS = ("1.0.0", "1.1.0")
+FIELDS_1_1 = ("layer_material", "layer_transverse_half_m", "field_extent_m", "tof_layer_positions_m",
+              "tof_layer_thickness_m", "tof_time_resolution_ps", "calo_front_m", "calo_depth_x0",
+              "calo_sampling_layers", "calo_passive_material", "calo_passive_thickness_mm", "calo_active_material",
+              "calo_active_thickness_mm")
+SAMPLING = FIELDS_1_1[-5:]  # the calorimeter's sampling structure: all five fields or none
+DEPTH_TOLERANCE = 0.01  # relative: calo_depth_x0 against the sampling structure realized with the profile's X0
 NUCLEONS = {"proton": 1, "deuteron": 2, "triton": 3, "He3": 3, "alpha": 4}
 MAX_EVENT = 2 ** 31 - 1  # event numbers are I (32-bit) columns of the event file
 
@@ -300,10 +306,13 @@ def from_geometry(geometry: dict, geometry_ref: dict, profile: dict, profile_ref
         raise SpecError(f"geometry kind {kind!r} is not the profile's {profile['geometry_kind']!r}")
     if kind != "layered-spectrometer":
         raise SpecError(f"unknown geometry kind {kind!r} (from-geometry realizes layered-spectrometer)")
-    if version not in MAPPINGS or version not in profile["mapping_versions"]:
-        raise SpecError(f"mapping version {version!r} is not one this adapter ({list(MAPPINGS)}) and the profile "
-                        f"({profile['mapping_versions']}) both realize")
     fields = geometry.get("fields") or {}
+    # mapping 1.1.0 only adds optional fields: a geometry file that uses none of them is realized as 1.0.0 (a 1.0.0
+    # profile realizes it); one that uses any needs a profile that declares 1.1.0
+    needed = "1.1.0" if any(f in fields for f in FIELDS_1_1) else "1.0.0"
+    if version not in MAPPINGS or needed not in profile["mapping_versions"] or (needed == "1.1.0" and version != "1.1.0"):
+        raise SpecError(f"mapping version {version!r} (fields of {needed}) is not one this adapter ({list(MAPPINGS)}) "
+                        f"and the profile ({profile['mapping_versions']}) both realize")
     for f in ("layer_positions_m", "layer_x_over_x0", "passive_x_over_x0", "field_T"):
         if f not in fields:
             raise SpecError(f"the geometry file has no field {f}")
@@ -323,6 +332,14 @@ def from_geometry(geometry: dict, geometry_ref: dict, profile: dict, profile_ref
     xx0 = _seq(fields["layer_x_over_x0"], n, "layer_x_over_x0")
     t_trk = tmpl["tracking"]
     trans = t_trk["transverse_half_mm"]
+    if "layer_material" in fields and fields["layer_material"] != t_trk["material"]:
+        raise SpecError(f"layer_material {fields['layer_material']!r} is not the tracking template's "
+                        f"{t_trk['material']!r}: its radiation length belongs to the template (add a profile for it)")
+    if "layer_transverse_half_m" in fields:
+        lt = fields["layer_transverse_half_m"]
+        if not (isinstance(lt, list) and len(lt) == 2 and all(isinstance(v, (int, float)) and v > 0 for v in lt)):
+            raise SpecError("layer_transverse_half_m is two positive numbers (m)")
+        trans = [_r(float(v) * 1000.0) for v in lt]
 
     def at(stack_mm: float, half_stack: float, transverse: list) -> tuple[list, list]:
         centre, half = list(origin), [0.0, 0.0, 0.0]
@@ -337,6 +354,11 @@ def from_geometry(geometry: dict, geometry_ref: dict, profile: dict, profile_ref
     b = tmpl["bending"]
     lo, hi = min(pos) * 1000.0, max(pos) * 1000.0
     region_lo, region_hi = lo - b["margin_mm"], hi + b["margin_mm"]
+    if "field_extent_m" in fields:  # mapping 1.1.0: the field region's extent along the stack axis
+        fe = fields["field_extent_m"]
+        if not (isinstance(fe, list) and len(fe) == 2 and all(isinstance(v, (int, float)) for v in fe) and fe[0] < fe[1]):
+            raise SpecError("field_extent_m is [lo, hi] (m, along the stack axis from the origin) with lo < hi")
+        region_lo, region_hi = float(fe[0]) * 1000.0, float(fe[1]) * 1000.0
     rc, rh = at((region_lo + region_hi) / 2, (region_hi - region_lo) / 2, b["transverse_half_mm"])
     elements.append({"name": b["element"], "material": b["material"], "centre_mm": rc, "half_mm": rh,
                      "role": "passive"})
@@ -352,7 +374,7 @@ def from_geometry(geometry: dict, geometry_ref: dict, profile: dict, profile_ref
         if _inside(_box(c, h), rbox):
             el["mother"] = b["element"]
         elements.append(el)
-    elements += json.loads(json.dumps(profile.get("elements", [])))
+    elements += _profile_elements(profile, fields, ax, origin)
     spec = {"schema": "element_sim.spec/1",
             "note": f"derived by geant4_run.py from-geometry from candidate {geometry.get('candidate')} "
                     f"(figure of merit {geometry.get('figure_of_merit')}); never edited by hand (Geant4 program B1.8)",
@@ -379,6 +401,93 @@ def from_geometry(geometry: dict, geometry_ref: dict, profile: dict, profile_ref
     if problems:
         raise SpecError("the derived spec fails check-spec: " + "; ".join(problems)[:1500])
     return spec
+
+
+def _profile_elements(profile: dict, fields: dict, ax: int, origin: list) -> list[dict]:
+    """The profile's other elements, with the mapping 1.1.0 fields applied: TOF layers at tof_layer_positions_m (stack
+    axis from the origin, layer centres; thickness tof_layer_thickness_m; names and transverse sizes the profile's, in
+    order), the calorimeter moved so its front face is at calo_front_m and its sampling structure rebuilt from the five
+    calo sampling fields (layers; passive and active material and thickness: passive then active from the front face,
+    pitch their sum), and calo_depth_x0 checked against that structure with the profile's calorimetry-em radiation
+    lengths (relative DEPTH_TOLERANCE)."""
+    els = json.loads(json.dumps(profile.get("elements", [])))
+    tofs = [e for e in els if e["role"] == "tof-layer"]
+    if "tof_layer_positions_m" in fields:
+        pos = fields["tof_layer_positions_m"]
+        if not isinstance(pos, list) or len(pos) != len(tofs):
+            raise SpecError(f"tof_layer_positions_m has {len(pos) if isinstance(pos, list) else 'no'} values for the "
+                            f"profile's {len(tofs)} TOF layers")
+        for e, p in zip(tofs, pos):
+            e["centre_mm"][ax] = _r(origin[ax] + float(p) * 1000.0)
+    if "tof_layer_thickness_m" in fields:
+        t = fields["tof_layer_thickness_m"]
+        if not isinstance(t, (int, float)) or isinstance(t, bool) or t <= 0:
+            raise SpecError("tof_layer_thickness_m is one positive number (m)")
+        for e in tofs:
+            e["half_mm"][ax] = _r(float(t) * 1000.0 / 2)
+    calo = [e for e in els if e["role"] == "calorimeter"]
+    wants = [f for f in ("calo_front_m", "calo_depth_x0", *SAMPLING) if f in fields]
+    if not wants:
+        return els
+    if len(calo) != 1:
+        raise SpecError(f"{', '.join(wants)} need exactly one calorimeter element in the profile")
+    mother = calo[0]
+    daughters = [e for e in els if e.get("mother") == mother["name"]]
+    front = mother["centre_mm"][ax] - mother["half_mm"][ax]
+    if "calo_front_m" in fields:
+        front = _r(origin[ax] + float(fields["calo_front_m"]) * 1000.0)
+    samp = None
+    if any(f in fields for f in SAMPLING):
+        if not all(f in fields for f in SAMPLING):
+            raise SpecError(f"the calorimeter sampling fields go together: {', '.join(SAMPLING)}")
+        layers = fields["calo_sampling_layers"]
+        samp = {"layers": layers, "passive": {"material": fields["calo_passive_material"],
+                                              "thickness_mm": fields["calo_passive_thickness_mm"]},
+                "active": {"material": fields["calo_active_material"],
+                           "thickness_mm": fields["calo_active_thickness_mm"]}}
+        ok = (isinstance(layers, (int, float)) and not isinstance(layers, bool) and layers == int(layers) and layers > 0
+              and all(isinstance(samp[k]["material"], str) and isinstance(samp[k]["thickness_mm"], (int, float))
+                      and samp[k]["thickness_mm"] > 0 for k in ("passive", "active")))
+        if not ok:
+            raise SpecError("calo_sampling_layers is a positive whole number; the materials are names and the "
+                            "thicknesses positive numbers (mm)")
+        samp["layers"] = int(layers)
+        roles = {"calorimeter-passive": samp["passive"], "calorimeter-active": samp["active"]}
+        if sorted(d["role"] for d in daughters) != sorted(roles):
+            raise SpecError("the calorimeter sampling fields need the profile's calorimeter to have one passive and "
+                            "one active daughter")
+        tp, ta = float(samp["passive"]["thickness_mm"]), float(samp["active"]["thickness_mm"])
+        pitch = tp + ta
+        mother["half_mm"][ax] = _r(samp["layers"] * pitch / 2)
+        for d in daughters:
+            s = roles[d["role"]]
+            d["material"] = s["material"]
+            d["half_mm"][ax] = _r(float(s["thickness_mm"]) / 2)
+            p = [0.0, 0.0, 0.0]
+            p[ax] = _r(pitch)
+            d["repeat"] = {"count": samp["layers"], "pitch_mm": p}
+    shift = front - (mother["centre_mm"][ax] - mother["half_mm"][ax])
+    mother["centre_mm"][ax] = _r(front + mother["half_mm"][ax])
+    offset = 0.0
+    for d in sorted(daughters, key=lambda d: d["role"] != "calorimeter-passive"):
+        if samp is not None:  # passive then active from the front face
+            d["centre_mm"][ax] = _r(front + offset + d["half_mm"][ax])
+            offset += 2 * d["half_mm"][ax]
+        else:
+            d["centre_mm"][ax] = _r(d["centre_mm"][ax] + shift)
+    if "calo_depth_x0" in fields:
+        x0 = ((profile.get("templates") or {}).get("calorimetry-em") or {}).get("radiation_lengths_mm") or {}
+        depth = 0.0
+        for d in daughters:
+            if d["material"] not in x0:
+                raise SpecError(f"calo_depth_x0: the profile's calorimetry-em template has no radiation length for "
+                                f"{d['material']}")
+            depth += (d.get("repeat") or {}).get("count", 1) * 2 * d["half_mm"][ax] / x0[d["material"]]
+        want = float(fields["calo_depth_x0"])
+        if abs(depth / want - 1) > DEPTH_TOLERANCE:
+            raise SpecError(f"calo_depth_x0 {want} differs from the realized sampling structure's {depth:.4g} X0 by "
+                            f"more than {DEPTH_TOLERANCE:.0%}")
+    return els
 
 
 def file_ref(path: Path) -> dict:

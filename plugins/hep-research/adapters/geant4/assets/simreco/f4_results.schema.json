@@ -1,0 +1,159 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "f4-results/1",
+ "title": "F4 results file",
+ "description": "Written by geant4_run.py table --f4-results (Geant4 program B2.6) and read by check_geant4_study.py label --results: per figure of merit the value, the 68.27 % t half-width (non-counting), the uncertainty object (central interval at coverage 0.90: statistical (+) replica spread, D0-c option (a); exact for a counting figure of merit at low counts), the model envelope over the variation table with each end's SE, the estimator and the denominator; the tail sources simulated; the reco record and the design geometry file by sha256.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "results",
+  "tail_sources_simulated",
+  "reco_record"
+ ],
+ "properties": {
+  "schema": {
+   "const": "f4-results/1"
+  },
+  "results": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "value",
+     "uncertainty",
+     "estimator",
+     "denominator",
+     "replicas",
+     "replica_spread"
+    ],
+    "properties": {
+     "value": {
+      "type": "number"
+     },
+     "statistical_uncertainty": {
+      "type": "number",
+      "minimum": 0
+     },
+     "uncertainty": {
+      "type": "object",
+      "required": [
+       "minus",
+       "plus",
+       "coverage",
+       "interval"
+      ],
+      "properties": {
+       "minus": {
+        "type": "number",
+        "minimum": 0
+       },
+       "plus": {
+        "type": "number",
+        "minimum": 0
+       },
+       "coverage": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "exclusiveMaximum": 1
+       },
+       "interval": {
+        "const": "central"
+       },
+       "distribution": {
+        "enum": [
+         "non-gaussian",
+         "exact"
+        ]
+       }
+      },
+      "additionalProperties": false
+     },
+     "uncertainty_components": {
+      "type": "object"
+     },
+     "model_envelope": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+       "type": "number"
+      }
+     },
+     "model_envelope_annotation": {
+      "type": "object"
+     },
+     "estimator": {
+      "type": "object",
+      "required": [
+       "name",
+       "observable"
+      ]
+     },
+     "denominator": {
+      "type": "object"
+     },
+     "replicas": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "replica_spread": {
+      "type": "number",
+      "minimum": 0
+     },
+     "replica_values": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      }
+     },
+     "se": {
+      "type": "number",
+      "minimum": 0
+     },
+     "dof": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     },
+     "counts": {
+      "type": "object"
+     }
+    }
+   }
+  },
+  "tail_sources_simulated": {
+   "type": "array",
+   "items": {
+    "enum": [
+     "alignment",
+     "calibration-non-uniformity",
+     "noise-digitization",
+     "pattern-recognition"
+    ]
+   }
+  },
+  "reco_record": {
+   "type": "object",
+   "required": [
+    "artifact_id",
+    "sha256"
+   ]
+  },
+  "geometry": {
+   "type": "object",
+   "required": [
+    "path",
+    "sha256"
+   ],
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "sha256": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    }
+   }
+  }
+ }
+}

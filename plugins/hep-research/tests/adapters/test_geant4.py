@@ -230,11 +230,13 @@ class Declaration(unittest.TestCase):
                     "layered_sim.cc", "spec.schema.json", "output.schema.json"):
             self.assertIn(f"assets/layered_sim/{src}", listed)
         # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset; adapter
-        # 0.3.0 (B1.9): also every file under element_sim/ and simroot/, and element_spec.py
-        self.assertEqual(doc["version"], "0.3.0")
-        on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas", "element_sim", "simroot")
+        # 0.3.0 (B1.9): also every file under element_sim/ and simroot/, and element_spec.py; 0.4.0 (B2.9): every file
+        # under simreco/ and simreco_spec.py
+        self.assertEqual(doc["version"], "0.4.0")
+        on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas", "element_sim", "simroot", "simreco")
                    for p in (ASSETS / d).iterdir() if p.is_file()}
-        self.assertLessEqual(on_disk | {"assets/summary_from_csv.py", "assets/element_spec.py"}, listed)
+        self.assertLessEqual(on_disk | {"assets/summary_from_csv.py", "assets/element_spec.py",
+                                        "assets/simreco_spec.py"}, listed)
         self.assertNotIn("assets/layered_sim/MiniJson.hh", listed)
 
     def test_adapter_python_imports_no_skill_script_and_no_geant4(self):
@@ -786,6 +788,7 @@ class StudyLayerColumns(unittest.TestCase):
 
     PATTERNS = ("edep_", "chlen_", "plen_", "leak_", "killed_", "exit_d", "exit_ekin", "primary_", "n_sec_")
     EXACT = ("event", "chunk", "weight")
+    SEMANTIC = ("primary_path_length",)  # element_sim's semantic column-map name (B1), not a CSV column
 
     def literals(self, path):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -801,7 +804,8 @@ class StudyLayerColumns(unittest.TestCase):
         for name in ("geant4_benchmarks.py", "check_geant4_study.py"):
             for line, s in self.literals(scripts / name):
                 with self.subTest(script=name, line=line):
-                    self.assertFalse(s.startswith(self.PATTERNS) or s in self.EXACT, f"{name}:{line} {s!r}")
+                    self.assertFalse((s.startswith(self.PATTERNS) and s not in self.SEMANTIC) or s in self.EXACT,
+                                     f"{name}:{line} {s!r}")
 
     def test_the_scan_catches_a_column_name(self):
         tmp = Path(tempfile.mkdtemp())

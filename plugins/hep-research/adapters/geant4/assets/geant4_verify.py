@@ -307,23 +307,6 @@ def check_mirror(rec: dict, run_dir: Path, example: str, local_out: Path, alpha:
         "note": "verification against the local official example at the same settings; not validation"}
 
 
-PLANE_ROLES = ("tracker-plane", "tof-layer")
-
-
-def _element_boxes(spec: dict, name: str) -> list[tuple[list, list]]:
-    for e in spec["elements"]:
-        if e["name"] == name:
-            n = (e.get("repeat") or {}).get("count", 1)
-            pitch = (e.get("repeat") or {}).get("pitch_mm", [0.0, 0.0, 0.0])
-            shift = e.get("shift_mm", [0.0, 0.0, 0.0])
-            out = []
-            for k in range(n):
-                c = [e["centre_mm"][i] + k * pitch[i] + shift[i] for i in range(3)]
-                out.append(([c[i] - e["half_mm"][i] for i in range(3)], [c[i] + e["half_mm"][i] for i in range(3)]))
-            return out
-    raise SpecError(f"element {name} not in the spec")
-
-
 def read_crossings(simroot: Path, root_file: Path) -> list[dict]:
     p = subprocess.run([str(simroot), "dump", str(root_file), "--ntuple", "crossings"], capture_output=True, text=True,
                        timeout=3600)
@@ -340,9 +323,7 @@ def check_field(rec: dict, run_dir: Path, reference: dict | None, tol_um: float,
     if not is_element(rec):
         raise SpecError("the field check reads an element_sim run (its event file's crossings)")
     spec = json.loads((run_dir / "spec.json").read_text(encoding="utf-8"))
-    ref = reference or spec
-    src = spec["source"]
-    if src.get("particle") != "chargedgeantino":
+    if spec["source"].get("particle") != "chargedgeantino":
         raise SpecError("the field check needs charged geantinos (mass 0, beta = 1, no interactions)")
     level = ((spec.get("output") or {}).get("event_file") or {}).get("level", "none")
     if level not in ("crossings", "hits"):
@@ -351,59 +332,15 @@ def check_field(rec: dict, run_dir: Path, reference: dict | None, tol_um: float,
     simroot = simroot or (expand(ef["simroot"]["path"]) if ef.get("simroot") else None)
     if simroot is None or not simroot.is_file():
         raise FileNotFoundError("simroot not found (--simroot)")
-    boxes = []
-    for r in (ref.get("field") or {}).get("regions", []):
-        (lo, hi), = _element_boxes(ref, r["element"])
-        boxes.append(HELIX.FieldBox(lo, hi, list(r["b_tesla"])))
-    names = [e["name"] for e in spec["elements"] if e["role"] in PLANE_ROLES]
-    index = {e["name"]: i for i, e in enumerate(spec["elements"])}
-    roles = {e["name"]: e["role"] for e in spec["elements"]}
-    rows = [r for r in read_crossings(simroot, run_dir / "events.root") if int(r["track_id"]) == 1]
-    g4 = {(int(r["event_id"]), int(r["plane_id"]), int(r["copy"])): r for r in rows}
-    cycle = src.get("cycle") or [{"energy_MeV": src["energy_MeV"], "direction": src.get("direction", [1.0, 0.0, 0.0])}]
-    first, n = spec["run"].get("first_event", 0), spec["run"]["events"]
-    table, problems, worst_um, worst_ps, worst_dx = [], [], 0.0, 0.0, 0.0
-    for ev in range(first, first + n):
-        c = cycle[ev % len(cycle)]
-        p_gev = c["energy_MeV"] / 1000.0  # massless: p = E
-        traj = HELIX.trajectory(src.get("position_mm", [0.0, 0.0, 0.0]), c["direction"], p_gev, 1.0, boxes, 1e5)
-        for name in names:
-            for k, (lo, hi) in enumerate(_element_boxes(spec, name)):
-                a = HELIX.first_entry(traj, lo, hi)
-                got = g4.get((ev, index[name], k))
-                if a is None and got is None:
-                    continue
-                if a is None or got is None:
-                    problems.append(f"event {ev} plane {name} copy {k}: "
-                                    + ("Geant4 recorded an entry the analytic trajectory does not make" if a is None
-                                       else "the analytic trajectory enters, Geant4 recorded no entry"))
-                    continue
-                x = a["position_mm"]
-                face = min(range(3), key=lambda i: min(abs(x[i] - lo[i]), abs(x[i] - hi[i])))  # the entry face
-                other = [i for i in range(3) if i != face]
-                gp = [got["x_mm"], got["y_mm"], got["z_mm"]]
-                d_um = 1e3 * math.hypot(gp[other[0]] - x[other[0]], gp[other[1]] - x[other[1]])
-                dx = abs(gp[face] - x[face]) * 1e3
-                dt_ps = (got["t_ns"] - a["time_ns"]) * 1e3
-                worst_um, worst_dx = max(worst_um, d_um), max(worst_dx, dx)
-                row = {"event": ev, "plane": name, "copy": k, "rigidity_GV": p_gev, "in_plane_um": d_um,
-                       "normal_um": dx}
-                if roles[name] == "tof-layer":
-                    row["dt_ps"] = dt_ps
-                    worst_ps = max(worst_ps, abs(dt_ps))
-                    if abs(dt_ps) > tol_ps:
-                        problems.append(f"event {ev} {name}: |dt| = {abs(dt_ps):.3g} ps > {tol_ps} ps")
-                if d_um > tol_um:
-                    problems.append(f"event {ev} {name}: in-plane distance {d_um:.3g} um > {tol_um} um")
-                table.append(row)
-    status = "ok" if not problems and table else "failed"
-    if not table:
-        problems.append("no crossing was compared")
+    try:
+        res = HELIX.compare_crossings(spec, read_crossings(simroot, run_dir / "events.root"), reference, tol_um, tol_ps)
+    except ValueError as exc:
+        raise SpecError(str(exc)) from exc
+    status = "ok" if not res["problems"] else "failed"
     return status, {"check": "field-propagation", "tolerance_um": tol_um, "tolerance_ps": tol_ps,
                     "reference": "the run's own spec" if reference is None else "--reference-spec",
-                    "field_regions": [{"lo": b.lo, "hi": b.hi, "b_tesla": b.b_tesla} for b in boxes],
-                    "events": n, "compared": len(table), "max_in_plane_um": worst_um, "max_dt_ps": worst_ps,
-                    "max_normal_um": worst_dx, "rows": table, "problems": problems[:50],
+                    "events": spec["run"]["events"], **{k: v for k, v in res.items() if k != "problems"},
+                    "problems": res["problems"][:50],
                     "note": "deterministic (no statistics): charged geantinos against the analytic helix "
                             "(core/simulation/helix.py); verification, not validation"}
 

@@ -2756,6 +2756,73 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## GEANT4-F4 (2026-10-24, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b2` from main `8b3dc9f7`)
+
+Geant4 program stage B2 (spec §B.6): geant4 adapter 0.4.0 (`simreco`, `geant4_run.py reco` and `table`, mapping 1.1.0
+in `from-geometry`), contracts CV-B2 (sharing the unreleased 3.13.0: `GEANT4_B2_FROM`), the F4 qualification path
+(D0, decided 2026-10-24). Scripts and outputs: `~/Workspace/hep-research-tasks/geant4-program/b2/` (`gate_b2.py`,
+`ms_trial.py`, `ms_estimators.py`, `e2e_trial.py`, `PLAN.md`); runs in `~/Workspace/geant4-work/sim-b2/` (`gate/`,
+`ms/`, `e2e/`). Every geometry is invented (the gate candidate is Example A's `cand-S` with the J15 tracker,
+SYNTHETIC).
+
+| Check | Result |
+|---|---|
+| simreco unit tests (`tests/adapters/test_simreco.py`, built with `c++ -std=c++17 -O2 -ffp-contract=off`) | 13 pass: fitter against `tracker_resolution.py`'s measurement term at 300 GV (no scattering) and pull width 1 within 3 sigma_MC; byte-identical reruns; the summary equals `core/simulation/summary.py` recomputed from the result CSV; noise-digitization and pattern-recognition each widen the core and raise charge confusion; alignment and calibration-non-uniformity with 20 replicas widen the replica-mean core with s_rep > 0; the global field scale moves only the mean; the curvature offset follows the Gaussian-core expression; the gaussian-core and exact-interval estimators; reco and table plumbing around the real simreco (record, replicas, a changed event file refused, the dataset-record's chain, the f4-results file). The CI job `simreco` builds and runs them on Linux with the runner's compiler (`HEP_SIMRECO_REQUIRED=1`) |
+| Multiple-scattering core estimator (`ms_trial.py`, `ms_estimators.py`: 0.3 mm G4_Si, protons, option 4, 8000 events) | RMS(central 98 %) / 0.8673 is +11.5 % (10 GeV/c) and +10.6 % (1 GeV/c) above Lynch-Dahl F = 98 %; a Gaussian fitted to the central 98 % (Lynch and Dahl's definition, truncated-normal maximum likelihood) gives -1.4 % (relative SE 0.8 %) and -1.6 % (0.6 %), inside 2 % + 3 SE. `multiple-scattering-reference` uses the fit; the `multiple-scattering` sanity benchmark keeps RMS / 0.8673. Control: slab density x 1.2 with the reference unchanged gives +9.0 % (expected about +9.5 %), fail |
+| Lynch-Dahl accuracy | 2 % against Moliere: the paper's abstract (NIM B 58 (1991) 6, DOI 10.1016/0168-583X(91)95671-Y; abstract+metadata) and PDG 1998 section 23.3 ("achieve accuracies of 2% or better", page read 2026-10-24 from the KEK mirror ccwww.kek.jp/pdg/1998/passagerpp_part2.pdf); PDG 2024 gives no accuracy for its Eq. 34.16. The reference is Moliere theory, not a measurement; the full text (validity range) is unread, an open non-blocking item |
+| G-B2 end-to-end (`gate_b2.py`, 8000 events per run, the event counts and tolerances fixed in the script before the runs): `evaluate_design.py geometry` -> `from-geometry` -> `element_sim` (nominal cut 0.7 mm, scan 0.35 mm, variations QGSP_BIC_EMZ and FTFP_BERT) -> `reco` (tails off, and all four tails with 20 replicas) -> `table --f4-results` -> `label --upgrade --results --geometry` -> `f4` -> `report` | convergence gate pass (cut 0.35 against 0.7 mm: core -0.47 %, SE 2.1 %, tol 10 %); statistical target pass (relative SE 1.46 % against 3 %). Qualification: `material-definition` pass (geantino x/X0 of all six planes equal the declared 0.0032017, densities within 1e-3 of the PDG values for G4_Si, G4_Pb, PVT), `field-propagation` pass (5000 plane entries, largest in-plane deviation 0.0042 um, TOF 1.8e-6 ps), `reco-closure` pass (charged geantinos at 1000 GV: pull width 0.9961, sigma_MC 0.0079), `multiple-scattering-reference` pass at 1 GV (-2.10 %, tolerance 3.93 %; density x 1.13 and x 0.87 both caught at the claimed detection limits 0.084 and 0.079, shifts +0.069 and -0.063). The upgrade is granted; `f4` by path (i) (`label`, then `f4`) and path (ii) (`f4 --label-spec ... --label-results --label-geometry`) give the same evaluation: value 0.01810, bound `estimate`, uncertainty +-0.00087 at coverage 0.90 (statistical t_0.95 x 0.00029 (+) replica spread 4.5e-5 gives +-0.00050; (+) the qualifying reference's tolerance 3.93 % x value, D0-c), model envelope [0.01797, 0.01810], `geometry_ref` the study's geometry file; `validate.py --strict` passes on the project; the report puts both on row 16 (`estimate.decides`, compliant with the SYNTHETIC 3 % requirement) under the qualification-path floor 0.02 (adequacy 1.2.0). Before D0-c the same chain stopped at row 15 (`uncertainty.missing`: 2.7 % against the F1-bias floor 0.2). Refusal: without `reco-closure` the upgrade is refused ("the tracking-resolution qualification path does not hold"; gap "reco-closure: not present") and `f4 --label-spec` is incomplete (exit 3) with the reasons and gaps |
+| Tails off against B1 (§B.4.2, 1 GV protons: multiple-scattering term 1.8-2.6 %) | core 1.794 %, central-68 % half-width 1.859 %: the half-width is in the band, the Gaussian core 0.3 % below its lower edge (§B.7's agent check allows the core slightly below the half-width; both are reported) |
+| Decisive row (`tests/skills/hep_detector/test_design_b2.py`, a SYNTHETIC f4-results file on J14's upgraded study) | an upgraded F4 `estimate` with a D0-c uncertainty of 0.12 at 90 % on 0.3 (sigma-equivalent 24 %) reaches row 16 (`estimate.decides`); with 0.006 it stays at row 15 (`uncertainty.missing`) |
+| Offline tests | `test_design_b2` (label --results and --geometry, geometry mismatch exit 2, both f4 paths equal, gaps listed on refusal, the decisive row, optimistic without all tails), `test_geant4_b2_benchmarks` (change toys, regression, qualification conjunction, the core estimator and a density control), `test_geant4_element.Mapping11` (mapping 1.1.0), `test_simulated_dataset` (a three-level chain accepted, a non-simulation root refused, pre-3.13 refused), `test_cli_robustness` (reco and table missing files) |
+| change toys (6000 toys, nu = 15) | P(changed) at true difference = tol is within alpha/m + 3 sigma_MC for m = 1 and 3; power at 2 tol (sigma 0.3 tol) above 0.9; unchanged at no difference about 0.88 |
+
+D0-c (the maintainer's decision of 2026-10-24 on the recommendation): the 2 % accuracy of Lynch and Dahl is kept,
+now from two sources (the paper's abstract and PDG 1998 section 23.3, "achieve accuracies of 2% or better", page
+read 2026-10-24; the full text is still unread and stays an open, non-blocking item); the F4 uncertainty of a study
+upgraded through a qualification path includes the qualifying reference's tolerance, and its floor is the path's
+(adequacy 1.2.0 `f4_qualified_min_relative_uncertainty`, 0.02 for the resolution) instead of the F1-bias 0.2, applied
+only when the evaluation's uncertainty holds that term (also at each end of the model envelope: a first version
+lost the qualification there and the live report gave row 17; fixed and tested). The values stay provisional until
+the adequacy table's physics review (OQ-05).
+
+Independent review (a code-review agent that did not write the change, given the working tree and §B.6; it read the
+code without running it): ten findings at confidence 50 or more, all fixed and tested: declared qualification hashes
+were not tied to the study's own inputs (now derived from `--geometry`, the derived spec and the results' reco record,
+a mismatch is a gap); the qualification branch skipped the reference's isolation check (restored); a tail source
+with zero widths counted as simulated (refused by `simreco_spec.check`); a figure of merit could be built from any
+observable with the right estimator, without the fitted-track selection, and with a denominator unrelated to the
+simulation (the column, the selection and the gun's rigidity and species are checked; `check_f4` also compares the
+result's denominator); `material-definition` skipped the passive slab, truncated a short list and could skip a
+density (all checked now); the results file was not bound to the study's runs (its reco record must be an evidence
+record with the same tail sources); `check_f4` validated older-version records non-strictly (strict now); the counting
+interval used replica 0 uncentred (centred on the replica mean); a control was "caught" without its injection being
+checked (the control run's slab areal density must differ by the stated fraction); a missing plane used one segment's
+field and dropped its material (path-weighted field, material kept). Lower-confidence items also fixed: rigidity for
+charge above 1 and Highland's z, the true beta taken from the primary's own crossings instead of the fitted path, the
+dataset uncertainty marked non-Gaussian, malformed CSV rows exit 2, `_core98` refuses a flat window. The gate was
+rerun from scratch on the fixed adapter 0.4.0 (the numbers above).
+
+Decisions and deviations, recorded here:
+- The measuring plane of the multiple-scattering reference is 1 um of G4_Si (a tracker plane cannot be vacuum) and
+  is part of the target, so the configuration stays isolated; its crossing is recorded at entry, before its material.
+- Every run a qualification benchmark reads (geantino scan, charged geantinos, the closure reco, the reference runs
+  and their controls) is passed to `label` as `--run-record`: `dependencies.py` re-derives the reference's
+  configuration from its run record, which must be an evidence record or input, and an `unvalidated` record as a
+  plain input would block the re-issue.
+- Mapping 1.1.0's fields are optional (`"optional": true`): a candidate without them keeps the 1.0.0 fields,
+  parameter refs and digest (tested); candidate parameters cannot be objects, so the calorimeter sampling structure is
+  five fields (layers; passive and active material and thickness). A geometry file that uses a 1.1.0 field needs a
+  realization profile that declares 1.1.0; `calo_depth_x0` is checked against the realized structure with the
+  profile's `calorimetry-em` radiation lengths (1 %).
+- `table`'s dataset-record names its denominator point as `points` only (giving `edges` too is a contract error).
+- No impact group for `adapters/geant4/**` is added to `contracts/rules/registry.json` (B2.9 suggests one): without
+  it a change there runs the full CI.
+- Not done in B2: the bit-identity check between Linux (libstdc++) and macOS (libc++) builds compares only what the
+  CI job runs (the tests pass on both); the §A.8 agent run and the Markdown review are B3's (B3.8).
+
+G5: simreco links no Geant4 code; it reads the CSV files simroot writes. The reviewer's confirmation for element_sim
+and simroot (GEANT4-ELEMENT) is still pending.
+
 ## GEANT4-ELEMENT (2026-10-24, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b1` from main `14e45d13`)
 
 Geant4 program stage B1 (spec §B.5): geant4 adapter 0.3.0, `element_sim` and `simroot` (built by `geant4_run.py

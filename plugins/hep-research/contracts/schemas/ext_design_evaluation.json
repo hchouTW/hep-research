@@ -30,6 +30,7 @@
    "type": "boolean"},
   "derivation": {"$comment": "F0 only: heuristic-argument (FID-01)", "type": "string", "x-vocab": "derivation_statuses"},
   "study_ref": {"$comment": "F4: the Geant4 study record (a computational-run)", "type": "string", "minLength": 1},
+  "geometry_ref": {"$comment": "F4 (CV-B2, Geant4 program B2.6): the design-geometry/1 file the study used; contracts/design.py checks the study against it instead of the candidate's most recent geometry_ref", "type": "string", "minLength": 1},
   "model_envelope": {"$comment": "F4 (FID-05): the two ends of the spread between physics lists; not a sigma, each end is compared with the target on its own",
    "type": "array", "minItems": 2, "items": {"type": "number"}},
   "dataset_ref": {"$comment": "F5: the user-supplied dataset-record", "type": "string", "minLength": 1},

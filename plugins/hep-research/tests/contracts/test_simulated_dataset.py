@@ -72,6 +72,45 @@ class SimulatedDataset(unittest.TestCase):
         rep = validate_dependencies(self.table(LITERATURE, ["synthetic", "unvalidated"]), self.root)
         self.assertIn("dataset.simulated_source", self.codes(rep, "error"))
 
+    def processing(self, name: str, source: str) -> str:
+        """A SYNTHETIC processing record (a reconstruction: computational-run without extension.simulation) whose one
+        input is `source`."""
+        d = json.loads((self.root / RUN).read_text(encoding="utf-8"))
+        d["artifact_id"] = f"reco-{name}"
+        d["extension"].pop("simulation", None)
+        d["extension"]["reconstruction"] = {"program": {"name": "simreco"}, "note": "SYNTHETIC"}
+        d["inputs"] = [self.entry(source)]
+        ref = f"output/artifacts/{name}.computational-run.json"
+        (self.root / ref).write_text(json.dumps(d, indent=1), encoding="utf-8")
+        return ref
+
+    def chain_table(self, ref: str, version: str = "3.13.0") -> Path:
+        path = self.table(ref, ["synthetic", "unvalidated"])
+        d = json.loads(path.read_text(encoding="utf-8"))
+        d["contract_version"] = version
+        path.write_text(json.dumps(d, indent=1), encoding="utf-8")
+        return path
+
+    def test_a_processing_chain_rooted_in_simulation_is_accepted(self):
+        """B2.5 (CV-B2): simulation -> reconstruction -> second processing level -> table."""
+        reco = self.processing("reco", RUN)
+        rep = validate_dependencies(self.chain_table(self.processing("reco2", reco)), self.root)
+        self.assertNotIn("dataset.simulated_source", self.codes(rep, "error"), rep["findings"])
+
+    def test_a_chain_whose_root_is_not_a_simulation_run_is_refused(self):
+        bare = self.processing("bare", RUN)
+        d = json.loads((self.root / bare).read_text(encoding="utf-8"))
+        d["inputs"] = []  # a computational-run with neither simulation, study nor inputs: not a simulation root
+        (self.root / bare).write_text(json.dumps(d, indent=1), encoding="utf-8")
+        for name, src in (("from-bare", bare), ("from-literature", LITERATURE)):
+            with self.subTest(root=name):
+                rep = validate_dependencies(self.chain_table(self.processing(name, src)), self.root)
+                self.assertIn("dataset.simulated_source", self.codes(rep, "error"))
+
+    def test_before_cv_b2_a_chain_is_not_a_simulated_source(self):
+        rep = validate_dependencies(self.chain_table(self.processing("reco", RUN), "3.12.0"), self.root)
+        self.assertIn("dataset.simulated_source", self.codes(rep, "error"))
+
     def test_a_communication_using_a_simulated_table_is_warned(self):
         table = self.table(RUN, ["synthetic", "unvalidated"])
         doc = copy.deepcopy(COMMUNICATION)

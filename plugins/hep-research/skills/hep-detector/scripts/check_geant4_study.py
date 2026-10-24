@@ -26,7 +26,11 @@ Subcommands:
               fluctuation model for EM observables; the hadronic model in use for hadronic ones); a variation that
               keeps the model is excluded, never listed as a systematic; the spread is a model envelope, not a sigma.
   label       the highest usable label (phase 1: `unvalidated`, plus every propagating label of the inputs), the gaps,
-              and the scopes that phase 2 could upgrade; --write writes the study record, a computational-run whose
+              and the scopes that phase 2 could upgrade (contracts CV-B2: a tracking-resolution or charge-confusion
+              study qualifies only through every condition of its qualification path, contracts.validate.
+              qualification_missing: material-definition, field-propagation, reco-closure and the kind's reference
+              benchmark, each matched by its own declared-scope keys); with --results and --geometry (Geant4 program
+              B2.6) the record keeps the F4 results, the tail sources and the geometry file; --write writes the study record, a computational-run whose
               inputs are the run records and reference dataset-records (statuses declared, sha256), with the
               benchmarks, convergence, variations and scope embedded. Insufficient evidence still writes the record,
               listing the gaps; only invalid input is refused (exit 2).
@@ -60,7 +64,8 @@ import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV re
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.schema import validate as schema_validate  # noqa: E402
-from contracts.validate import geant4_tree_thickness_mm, scope_outside  # noqa: E402  (CV-A1, A2.6)
+from contracts.validate import (geant4_tree_thickness_mm, qualification_missing, qualification_reference,  # noqa: E402
+                                qualified_uncertainty, scope_outside)
 from core.simulation import estimates as E  # noqa: E402
 from core.simulation.summary import SUMMARY_VERSION  # noqa: E402
 from core.stats import batch_means as M, decisions as D  # noqa: E402
@@ -163,16 +168,38 @@ def load_study(path: Path) -> dict:
     ls = get(study, "physics.layered_sim_spec")
     if isinstance(ls, str):
         study.setdefault("physics", {})["layered_sim"] = load_json(path.parent / ls)
+    es = get(study, "physics.element_sim_spec")  # Geant4 program B2: an element_sim study (geant4 adapter 0.3.0)
+    if isinstance(es, str):
+        study.setdefault("physics", {})["element_sim"] = load_json(path.parent / es)
     return study
+
+
+def sim_spec(study: dict) -> tuple[str, dict]:
+    """(program, spec) of the study: element_sim when it names an element_sim spec, else layered_sim."""
+    es = get(study, "physics.element_sim")
+    if isinstance(es, dict):
+        return "element_sim", es
+    return "layered_sim", get(study, "physics.layered_sim") or {}
+
+
+def spec_hash(program: str, spec: dict) -> str:
+    """The spec hash a run record carries: layered_sim's sha256_json, element_sim's sha256 of the spec file the program
+    read (geant4_run.py writes it with sorted keys, one-space indent and a final newline)."""
+    if program == "element_sim":
+        return hashlib.sha256((json.dumps(spec, indent=1, sort_keys=True) + "\n").encode("utf-8")).hexdigest()
+    return sha256_json(spec)
 
 
 def derived(study: dict, effective_config: dict | None = None) -> dict:
     """Facts the rule table reads. The minimum slab thickness comes from the effective config's geometry tree when
     one is given (records from geant4 adapter 0.2.0, A2.6), else from spec/1's geometry.layers."""
-    ls = get(study, "physics.layered_sim") or {}
+    program, ls = sim_spec(study)
     phys = ls.get("physics", {})
     ui = ls.get("ui_commands", [])
     slabs = [s for layer in get(ls, "geometry.layers") or [] for s in layer.get("slabs", [])]
+    if program == "element_sim":  # every element that is not a mother of another one, thickness along x
+        mothers = {e.get("mother") for e in ls.get("elements", [])}
+        slabs = [{"thickness_mm": 2 * e["half_mm"][0]} for e in ls.get("elements", []) if e["name"] not in mothers]
     ref = phys.get("reference_list")
     had = None
     if ref:
@@ -330,14 +357,14 @@ def load_summary(path: str, study: dict) -> dict:
 
 
 def check_records(study: dict, sums: list[dict]) -> list[str]:
-    ls = get(study, "physics.layered_sim") or {}
+    program, ls = sim_spec(study)
+    gun = ls.get("gun") or ls.get("source") or {}
     problems = []
     scanned = {p["name"].split(".")[-1] for p in get(study, "convergence_plan.parameters") or []}
     for s in sums:
         st = s["settings"]
         rid = s["run_record"].get("artifact_id")
-        if st.get("particle") != ls.get("gun", {}).get("particle") or st.get("energy_MeV") != ls.get("gun", {}).get(
-                "energy_MeV"):
+        if st.get("particle") != gun.get("particle") or st.get("energy_MeV") != gun.get("energy_MeV"):
             problems.append(f"{rid}: gun {st.get('particle')} {st.get('energy_MeV')} MeV differs from the spec")
         for k in ("em_constructor", "reference_list"):
             if st.get(k) != ls.get("physics", {}).get(k) and s.get("role") != "variation":
@@ -349,8 +376,8 @@ def check_records(study: dict, sums: list[dict]) -> list[str]:
             problems.append(f"{rid}: data paths {s['data_path_problems']}")
         if not s.get("datasets_content_match", False):
             problems.append(f"{rid}: a dataset content hash differs from the build record")
-        if s.get("role") == "nominal" and s.get("spec_sha256") != sha256_json(ls):
-            problems.append(f"{rid}: the run's spec hash differs from the study's layered_sim spec")
+        if s.get("role") == "nominal" and s.get("spec_sha256") != spec_hash(program, ls):
+            problems.append(f"{rid}: the run's spec hash differs from the study's {program} spec")
         if s.get("evidence_role") and s.get("role") and s["evidence_role"] != s["role"] and not (
                 s["role"] == "scan" and s["evidence_role"] == "nominal"):
             problems.append(f"{rid}: summary evidence_role {s['evidence_role']} but supplied as {s['role']}")
@@ -591,6 +618,14 @@ def cmd_variations(args) -> tuple[str, dict]:
     return "ok", doc
 
 
+def _inside(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
 def _rel(path: Path, root: Path) -> str:
     try:
         return path.resolve().relative_to(root.resolve()).as_posix()
@@ -623,6 +658,53 @@ def evidence_overlap(conv: dict, bench: dict, var: dict | None) -> list[dict]:
     return [{"run": r, "decisions": sorted(d)} for r, d in sorted(uses.items()) if len(d) > 1]
 
 
+def bound_inputs(study: dict, declared: dict, qualifying: bool, results: dict | None, args) -> list[str]:
+    """CV-B2: gaps unless the declared hash keys and the results file describe this study's own inputs. The results
+    file must come from a reconstruction record that is one of --run-record (same id and sha256), with the same tail
+    sources; on a qualification path the declared geometry, realization, field-configuration and reco-spec hashes
+    must equal the ones derived from --geometry, the element_sim spec (and its provenance) and that reco record, so
+    verifications of another configuration cannot be borrowed by copying their hashes."""
+    gaps: list[str] = []
+    reco = None
+    if results is not None:
+        want = results.get("reco_record") or {}
+        for path in args.run_record or []:
+            if sha256_file(Path(path)) == want.get("sha256") and load_json(path).get("artifact_id") == want.get("artifact_id"):
+                reco = load_json(path)
+        if reco is None:
+            gaps.append(f"the results file's reco record {want.get('artifact_id')!r} is not one of the study's run "
+                        "records (--run-record, same sha256)")
+        else:
+            rx = get(reco, "extension.reconstruction") or {}
+            if list(rx.get("tail_sources_simulated") or []) != list(results.get("tail_sources_simulated") or []):
+                gaps.append(f"the results file lists tail sources {results.get('tail_sources_simulated')}, its reco "
+                            f"record {rx.get('tail_sources_simulated')}")
+    if not qualifying:
+        return gaps
+    program, es = sim_spec(study)
+    actual: dict = {}
+    if args.geometry:
+        actual["geometry_sha256"] = sha256_file(Path(args.geometry))
+    if program == "element_sim":
+        actual["field_configuration_sha256"] = B.field_configuration_sha256(es)
+        prov = es.get("provenance") or {}
+        if isinstance((prov.get("realization") or {}).get("sha256"), str):
+            actual["realization_sha256"] = prov["realization"]["sha256"]
+        g = (prov.get("geometry") or {}).get("sha256")
+        if g and actual.get("geometry_sha256") and g != actual["geometry_sha256"]:
+            gaps.append(f"the element_sim spec was derived from geometry sha256 {g}, --geometry has "
+                        f"{actual['geometry_sha256']}")
+    if reco is not None:
+        actual["reco_spec_sha256"] = B.reco_spec_sha256(get(reco, "extension.reconstruction.reco_spec") or {})
+    for key in ("geometry_sha256", "realization_sha256", "field_configuration_sha256", "reco_spec_sha256"):
+        if key not in actual:
+            gaps.append(f"qualification: {key} cannot be derived from the study's own inputs (--geometry, the "
+                        "derived element_sim spec, the results file's reco record)")
+        elif declared.get(key) != actual[key]:
+            gaps.append(f"qualification: the declared {key} {declared.get(key)} is not the study's own {actual[key]}")
+    return gaps
+
+
 def cmd_label(args) -> tuple[str, dict]:
     spec_path = Path(args.spec)
     study = load_study(spec_path)
@@ -630,6 +712,17 @@ def cmd_label(args) -> tuple[str, dict]:
     bench = load_json(args.benchmarks)
     conv = load_json(args.convergence)
     var = load_json(args.variations) if args.variations else None
+    results = load_json(args.results) if args.results else None
+    if results is not None:  # B2.6: the F4 results file and the geometry file it was computed for
+        if results.get("schema") != "f4-results/1" or not isinstance(results.get("results"), dict):
+            raise StudyError(f"{args.results} is not an f4-results/1 file (geant4_run.py table --f4-results)")
+        if args.geometry:
+            gsha = sha256_file(Path(args.geometry))
+            if (results.get("geometry") or {}).get("sha256") != gsha:
+                raise StudyError(f"the results file names geometry sha256 {(results.get('geometry') or {}).get('sha256')}"
+                                 f", --geometry {args.geometry} has {gsha}")
+    elif args.geometry:
+        raise StudyError("--geometry goes with --results")
     gaps = list(bench.get("gaps", []))
     for b in bench.get("benchmarks", []):
         if b.get("grade") in B.UPGRADING and b.get("verdict") == "fail":
@@ -666,7 +759,15 @@ def cmd_label(args) -> tuple[str, dict]:
     if get(study, "observable.kind") is not None:  # CV-A1: the controlled kind is part of the declared scope
         declared["observable_kind"] = get(study, "observable.kind")
     eligible = []
-    for b in bench.get("benchmarks", []):
+    qmissing = qualification_missing(declared, bench.get("benchmarks", []))
+    if qmissing is not None:  # CV-B2 (B2.8): a detector-level kind qualifies through every condition of its path
+        gaps += [f"qualification ({declared['observable_kind']}): {q}" for q in qmissing]
+        if not qmissing and conv.get("convergence", {}).get("gate") == "pass":
+            eligible.append({"qualification": declared["observable_kind"],
+                             "benchmarks": [b["benchmark"] for b in bench.get("benchmarks", [])
+                                            if b.get("grade") in ("verification", "reference")]})
+    gaps += bound_inputs(study, declared, qmissing is not None, results, args)
+    for b in bench.get("benchmarks", []) if qmissing is None else []:
         if b.get("validation_evidence"):
             outside = scope_outside(declared, b["scope"], b["benchmark"])
             if outside:
@@ -698,7 +799,10 @@ def cmd_label(args) -> tuple[str, dict]:
     labels = list(dict.fromkeys(labels))
     upgrade, refused = False, []
     if args.upgrade:
-        if not eligible:
+        if not eligible and qmissing is not None:
+            refused.append(f"the {declared['observable_kind']} qualification path does not hold (B2.8: every "
+                           "condition passed and matched by its own scope keys, and a passed convergence gate)")
+        elif not eligible:
             refused.append("no scope is eligible (a passed reference benchmark with its control caught, a passed "
                            "convergence gate, the declared scope inside the benchmark scope)")
         if gaps:
@@ -731,6 +835,26 @@ def cmd_label(args) -> tuple[str, dict]:
         ls = get(study, "physics.layered_sim_spec")
         if isinstance(ls, str):
             manifest.append({"path": _rel(spec_path.parent / ls, root), "sha256": sha256_file(spec_path.parent / ls)})
+        geometry_block = None
+        if results is not None:
+            manifest.append({"path": _rel(Path(args.results), root), "sha256": sha256_file(Path(args.results))})
+        if args.geometry:
+            gp = Path(args.geometry)
+            geometry_block = {"path": _rel(gp, root), "sha256": sha256_file(gp)}
+            manifest.append(dict(geometry_block))
+        es = get(study, "physics.element_sim_spec")
+        if isinstance(es, str):  # the derived element_sim spec and the realization profile its provenance names
+            esp = spec_path.parent / es
+            manifest.append({"path": _rel(esp, root), "sha256": sha256_file(esp)})
+            prov = load_json(esp).get("provenance") or {}
+            rp = (prov.get("realization") or {}).get("path")
+            if isinstance(rp, str):
+                rpath = Path(rp.replace("<plugin root>", str(PLUGIN))).expanduser()
+                if not rpath.is_absolute():
+                    rpath = esp.parent / rpath
+                if rpath.is_file():
+                    entry = {"path": _rel(rpath, root) if _inside(rpath, root) else rp, "sha256": sha256_file(rpath)}
+                    manifest.append(entry)
         record = {
             "contract_version": CONTRACTS_VERSION, "artifact_id": study.get("study_id", "geant4-study") + "-study",
             "artifact_type": "computational-run",
@@ -756,6 +880,16 @@ def cmd_label(args) -> tuple[str, dict]:
                                     "phase2_upgrade_eligible_scopes": eligible,
                                     "evidence_overlap": overlap, "evidence_overlap_version": 1,
                                     "highest_usable_label": doc["highest_usable_label"]}}}
+        if results is not None:  # B2.6: kept across the re-issue (label rebuilds the record from scratch)
+            kept = results["results"]
+            ref = qualification_reference(declared.get("observable_kind"), bench.get("benchmarks", [])) \
+                if qmissing == [] else None
+            if ref is not None:  # D0-c: the value is no more accurate than what the qualification certifies
+                kept = {fom: qualified_uncertainty(r, ref) if isinstance(r, dict) else r for fom, r in kept.items()}
+            record["extension"]["study"]["results"] = kept
+            record["extension"]["study"]["tail_sources_simulated"] = list(results.get("tail_sources_simulated", []))
+            if geometry_block:
+                record["extension"]["study"]["geometry"] = geometry_block
         if upgrade:
             record["artifact_id"] = record["artifact_id"].removesuffix("-study") + "-study-validated"
             record["required_capabilities"] = ["core:evidence-records"]
@@ -801,6 +935,11 @@ def main(argv=None) -> int:
     p.add_argument("--project-root", required=True)
     p.add_argument("--write")
     p.add_argument("--created")
+    p.add_argument("--results", help="the f4-results/1 file of geant4_run.py table: written into the study block "
+                                     "(results, tail_sources_simulated) and the input manifest (Geant4 program B2.6)")
+    p.add_argument("--geometry", help="the design-geometry/1 file the study used (its sha256 must equal the results "
+                                      "file's); listed in the input manifest with the realization profile and the "
+                                      "derived element_sim spec")
     p.add_argument("--upgrade", action="store_true",
                    help="phase 2: re-issue an eligible study with no gaps as validated-in-scope (run records become "
                         "evidence records); otherwise the record stays unvalidated and the refusal is reported")

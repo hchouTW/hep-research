@@ -52,7 +52,8 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from contracts import revocation as rv  # noqa: E402
-from contracts.validate import STICKY_STATUSES, geant4_configuration, validate_artifact  # noqa: E402
+from contracts.validate import (GEANT4_B2_FROM, STICKY_STATUSES, _at_least, geant4_configuration,  # noqa: E402
+                                validate_artifact)
 from core.protected.guard import ProtectedUseRefused, guard, protected_main  # noqa: E402
 from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
@@ -200,16 +201,49 @@ class _Checker:
 
     def simulated(self, doc: dict, sdoc: dict, ref: str, where: str):
         """3.2.0: the inputs of a simulated dataset-record are Geant4 run records (extension.simulation) or a study
-        record (extension.study); a communication that uses a simulated table is reminded of the 'Simulation' label."""
+        record (extension.study); a communication that uses a simulated table is reminded of the 'Simulation' label.
+        CV-B2 (Geant4 program B2.5; a dataset-record of contract GEANT4_B2_FROM or later): an input may also be a
+        processing step (a computational-run such as a reconstruction) whose chain of recorded computational-run
+        inputs, at any depth, ends only in simulation or study records."""
         if _dataset_status(doc) == "simulated":
             sext = sdoc.get("extension") or {}
-            if sdoc.get("artifact_type") != "computational-run" or not ({"simulation", "study"} & set(sext)):
+            direct = sdoc.get("artifact_type") == "computational-run" and bool({"simulation", "study"} & set(sext))
+            chain = (not direct and _at_least(doc.get("contract_version"), GEANT4_B2_FROM)
+                     and sdoc.get("artifact_type") == "computational-run" and self._roots_are_simulation(sdoc, 0))
+            if not direct and not chain:
                 self.add("error", where, "dataset.simulated_source",
                          f"{ref!r} is not a simulation run record or study record (computational-run with "
-                         "extension.simulation or extension.study)")
+                         "extension.simulation or extension.study), nor a recorded processing chain whose every root "
+                         "is one (CV-B2)")
         if doc.get("artifact_type") == "communication" and _dataset_status(sdoc) == "simulated":
             self.add("warning", where, "communication.simulated_source",
                      f"{ref!r} is a simulated table: figures and tables from it are labelled 'Simulation' (hep-authoring)")
+
+    def _roots_are_simulation(self, doc: dict, depth: int) -> bool:
+        """Every input of a computational-run is a computational-run, and following them ends only in simulation or
+        study records (refs that do not resolve, or a non-run on the way, break the chain)."""
+        if depth > MAX_DEPTH:
+            return False
+        inputs = [i for i in doc.get("inputs") or [] if isinstance(i, dict) and isinstance(i.get("ref"), str)]
+        if not inputs:
+            return False
+        for inp in inputs:
+            raw = Path(inp["ref"])
+            src = (raw if raw.is_absolute() else self.base / raw).resolve()
+            if not _inside(src, self.root) or not src.is_file():
+                return False
+            try:
+                sdoc = json.loads(src.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return False
+            if not isinstance(sdoc, dict) or sdoc.get("artifact_type") != "computational-run":
+                return False
+            sext = sdoc.get("extension") or {}
+            if {"simulation", "study"} & set(sext):
+                continue
+            if not self._roots_are_simulation(sdoc, depth + 1):
+                return False
+        return True
 
     def evidence(self, path: Path, doc: dict, trail: tuple):
         """3.1.0: extension.evidence_records, run records the artifact relies on by hash without inheriting their
