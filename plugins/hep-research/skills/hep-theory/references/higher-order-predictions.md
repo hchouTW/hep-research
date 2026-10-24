@@ -28,7 +28,9 @@ carries a checkable worked example:
   two opposite-direction combinations (1/2, 2) and (2, 1/2); the 9-point envelope keeps them. They are different
   prescriptions and are not interchangeable; name the one used.
 - The central scale is a choice (Q, a transverse mass, H_T/2); a dynamic scale changes both the central value and the
-  envelope, so record it with the prediction.
+  envelope, so record it with the prediction. Hadron-structure conventions: mu_R = mu_F = Q for inclusive DIS
+  ([DIS structure functions](dis-structure-functions.md)); a resummed prediction states its logarithmic accuracy
+  together with its fixed-order matching (`log_accuracy`, for example "NNLL matched to O(alpha_s)").
 - Correlations: an envelope taken bin by bin has no defined correlation between bins. If a downstream fit needs one,
   the analysis states a prescription (for example fully correlated within one scale choice) and labels it as such.
 

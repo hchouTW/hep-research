@@ -1,0 +1,22 @@
+{
+ "kind": "error",
+ "category": "C01",
+ "planter": "ai",
+ "summary": "The response given to the unfolding is normalized to generated events (selection inefficiency inside the matrix), but the unfolded counts are still divided by the selection efficiency, so that efficiency is corrected twice.",
+ "code_change": "build_world stores 'response': m * selection_eff(sp)[None, :] for the analysis (and the matrix files), while the expected reco counts still come from the selected-normalized m; analyse() keeps dividing by eff_sel_hat.",
+ "description_change": "recipe.json: step 'unfold' now uses operator unfold_with_efficiency, step 'efficiency' kept; response artifacts: normalization conditional_on_generated, inefficiency inside_matrix, includes migration and selection_efficiency (applied_separately unchanged).",
+ "affected": [
+  "unfold",
+  "efficiency",
+  "selection_efficiency",
+  "rigidity_migration",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

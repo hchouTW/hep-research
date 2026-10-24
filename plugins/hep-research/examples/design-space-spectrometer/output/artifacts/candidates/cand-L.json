@@ -1,0 +1,192 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "ams-like-v1-cand-L",
+ "artifact_type": "design-candidate",
+ "objective": "SYNTHETIC design study (AMS-like; not the AMS-02 detector)",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0"
+ },
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24",
+  "evidence_ids": [
+   "ams02:C93",
+   "ams02:C94",
+   "ams02:C112",
+   "ams02:C175"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "candidate_id": "ams-like-v1:cand-L",
+  "design_id": "ams-like-v1",
+  "description": "long lever arm (3.0 m), few layers",
+  "subsystems": {
+   "DES-TRK-001": {
+    "role": "tracking",
+    "technology": "double-sided silicon microstrip ladders",
+    "parameters": {
+     "layer_positions_m": {
+      "value": [
+       0.0,
+       0.75,
+       1.5,
+       2.25,
+       3.0
+      ],
+      "unit": "m",
+      "source": "ams02:C94",
+      "status": "public-fact"
+     },
+     "point_resolution_um": {
+      "value": 10.0,
+      "unit": "um",
+      "source": "ams02:C175",
+      "status": "public-fact"
+     },
+     "layer_x_over_x0": {
+      "value": [
+       0.01,
+       0.01,
+       0.01,
+       0.01,
+       0.01
+      ],
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     },
+     "passive_x_over_x0": {
+      "value": 0.03,
+      "unit": "1",
+      "source": "example proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-MAG-001"
+    ],
+    "calibration": {
+     "method": "track-based alignment with an infrared laser monitor",
+     "control_samples": [
+      "cosmic-ray protons",
+      "high-rigidity tracks"
+     ]
+    }
+   },
+   "DES-MAG-001": {
+    "role": "bending",
+    "technology": "permanent magnet (Nd-Fe-B)",
+    "parameters": {
+     "field_T": {
+      "value": 0.14,
+      "unit": "T",
+      "source": "ams02:C93; ams02:C112",
+      "status": "public-fact"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "pre-flight field map, temperature correction",
+     "control_samples": [
+      "field map"
+     ]
+    }
+   }
+  },
+  "budgets": {
+   "mass": {
+    "DES-TRK-001": {
+     "allocation": 434.5,
+     "estimate": 395.0,
+     "uncertainty": 19.75,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 2200.0,
+     "estimate": 2000.0,
+     "uncertainty": 100.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog masses of comparable components (not weighed)",
+     "fidelity": "F1"
+    }
+   },
+   "power": {
+    "DES-TRK-001": {
+     "allocation": 137.5,
+     "estimate": 125.0,
+     "uncertainty": 25.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "channel_count": {
+    "DES-TRK-001": {
+     "allocation": 110000.0,
+     "estimate": 100000.0,
+     "uncertainty": 20000.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "data_rate": {
+    "DES-TRK-001": {
+     "allocation": 2.75,
+     "estimate": 2.5,
+     "uncertainty": 0.5,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "example engineering estimate",
+     "fidelity": "F1"
+    }
+   }
+  }
+ }
+}

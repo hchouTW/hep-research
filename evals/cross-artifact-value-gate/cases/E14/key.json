@@ -1,0 +1,18 @@
+{
+ "kind": "error",
+ "category": "C07",
+ "planter": "ai",
+ "summary": "The helium unfolding uses the proton response on the argument that migration is a curvature effect, but the response depends on the species' spectral shape inside each bin, so the helium unfolding is biased.",
+ "code_change": "run_analysis passes world['proton'][pname]['response'] to analyse() for both species.",
+ "description_change": "context.json: bindings use-helium-p1 / use-helium-p2 now take response-proton-p1 / response-proton-p2.",
+ "affected": [
+  "helium-p1",
+  "helium-p2",
+  "flux-helium-p1",
+  "flux-helium-p2",
+  "rigidity_migration",
+  "unfold",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

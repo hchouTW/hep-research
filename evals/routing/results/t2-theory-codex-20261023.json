@@ -1,0 +1,3039 @@
+{
+ "meta": {
+  "run_id": "t2-theory-codex-20261023",
+  "date": "2026-10-23",
+  "cli": "codex",
+  "cli_version": [],
+  "model": "gpt-6.1-sol",
+  "models_reported": [],
+  "isolation": "config-dir",
+  "plugin_commit": "aec8191124c8487bffdcd305ad33be5a6f8a13db",
+  "plugin_dirty": false,
+  "cases_file_sha256": "ebfbb6dcab39b936e0a4717933f5e0f11665c5744af5187a42ee537d03505569",
+  "selected": 82,
+  "completed": 82,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 5.0,
+  "reused_cases": 0,
+  "spent_usd": 0.0,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 82,
+   "strict_pass": 79,
+   "lenient_pass": 80
+  },
+  "by_lang": {
+   "de": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "en": {
+    "cases": 47,
+    "strict_pass": 45,
+    "lenient_pass": 45
+   },
+   "ja": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "zh-Hans": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "zh-Hant": {
+    "cases": 32,
+    "strict_pass": 31,
+    "lenient_pass": 32
+   }
+  },
+  "by_kind": {
+   "ams-computing": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "direct": {
+    "cases": 50,
+    "strict_pass": 50,
+    "lenient_pass": 50
+   },
+   "journey": {
+    "cases": 6,
+    "strict_pass": 6,
+    "lenient_pass": 6
+   },
+   "multi-turn": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "negative": {
+    "cases": 8,
+    "strict_pass": 8,
+    "lenient_pass": 8
+   },
+   "neighboring": {
+    "cases": 6,
+    "strict_pass": 5,
+    "lenient_pass": 5
+   },
+   "out-of-v1": {
+    "cases": 7,
+    "strict_pass": 6,
+    "lenient_pass": 7
+   },
+   "recasting": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "theory-no-experiment": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 79,
+    "strict_pass": 76,
+    "lenient_pass": 77
+   },
+   "adversarial": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "quick": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_expected_primary": {
+   "hep-authoring": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "hep-citations": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "hep-computing": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "hep-statistics": {
+    "cases": 5,
+    "strict_pass": 5,
+    "lenient_pass": 5
+   },
+   "hep-theory": {
+    "cases": 73,
+    "strict_pass": 70,
+    "lenient_pass": 71
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 49,
+    "strict_pass": 48,
+    "lenient_pass": 48
+   },
+   "SPLIT": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "T19": {
+    "cases": 7,
+    "strict_pass": 6,
+    "lenient_pass": 6
+   },
+   "T3": {
+    "cases": 5,
+    "strict_pass": 5,
+    "lenient_pass": 5
+   },
+   "Th13": {
+    "cases": 6,
+    "strict_pass": 6,
+    "lenient_pass": 6
+   },
+   "WP11": {
+    "cases": 8,
+    "strict_pass": 8,
+    "lenient_pass": 8
+   },
+   "X1": {
+    "cases": 2,
+    "strict_pass": 1,
+    "lenient_pass": 2
+   },
+   "X3": {
+    "cases": 3,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "outcomes": {
+   "pass": 79,
+   "no-skill": 1,
+   "error": 1,
+   "wrong-skill": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.0,
+   "per_case": 0.0,
+   "per_turn": 0.0
+  }
+ },
+ "cases": [
+  {
+   "id": "c-nuc-xs-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-nuc-xs-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-alphas-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-alphas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-authoring"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-chain-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-chain-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-import-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-import-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-nu-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "c-th-nu-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "co-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "co-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-astro-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-astro-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-coal-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-coal-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-dm-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-dm-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-lepton-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "d-th-lepton-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "eic-dis-theory-1",
+   "lang": "en",
+   "kind": "theory-no-experiment",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "j04",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "j06",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "j07",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "j08",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "j12",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "j13",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": "SPLIT",
+   "expected_primary": "hep-citations",
+   "turns": [
+    {
+     "expected": "hep-citations",
+     "first_skill": "hep-citations",
+     "skills": [
+      "hep-citations",
+      "hep-authoring",
+      "hep-statistics",
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "lit-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "SPLIT",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "out-of-v1-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics",
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "recast-1",
+   "lang": "zh-Hant",
+   "kind": "recasting",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "st-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "st-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-adv-3",
+   "lang": "en",
+   "kind": "negative",
+   "variant": "adversarial",
+   "set": "T19",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-adv-5",
+   "lang": "en",
+   "kind": "negative",
+   "variant": "adversarial",
+   "set": "T19",
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-de-4",
+   "lang": "de",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-ja-5",
+   "lang": "ja",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-quick-6",
+   "lang": "en",
+   "kind": "direct",
+   "variant": "quick",
+   "set": "T19",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-turns-2",
+   "lang": "en",
+   "kind": "multi-turn",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    },
+    {
+     "expected": "hep-statistics",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "error",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 1
+    }
+   ],
+   "outcome": "error",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-zhs-3",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-const-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-drift-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-drift-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-kin-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-kin-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-a-qvalue-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-alphas-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-const-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-decay-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-flavour-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X1",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics",
+      "hep-theory"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-heavyion-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-authoring",
+   "turns": [
+    {
+     "expected": "hep-authoring",
+     "first_skill": "hep-authoring",
+     "skills": [
+      "hep-authoring"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-nucstruct-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-pi0-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-relic-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "X3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-scheme-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-scheme-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-scope-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "X1",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-selection-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-selection-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th-t3-neg",
+   "lang": "en",
+   "kind": "negative",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th13-codes-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th13-dm-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th13-fit-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th13-mod-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th13-mod-2",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "th13-xs-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "Th13",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "theory-no-exp-1",
+   "lang": "en",
+   "kind": "theory-no-experiment",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-bound-dm-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-citations",
+     "skills": [
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-bound-dm-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-crdb-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-crdb-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-crdb-4",
+   "lang": "zh-Hant",
+   "kind": "ams-computing",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-interp-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/experiments/ams-02/evidence/index.md",
+    "profiles/experiments/ams-02/index.md",
+    "profiles/experiments/ams-02/modules/working-rules.md",
+    "profiles/registry.json",
+    "profiles/theory/cr-secondary-ratio/benchmarks/bc-benchmark.json",
+    "profiles/theory/cr-secondary-ratio/index.md",
+    "profiles/theory/cr-secondary-ratio/models/secondary-ratio-models.md",
+    "profiles/theory/cr-secondary-ratio/models/xs-illustrative-A.json",
+    "profiles/theory/cr-secondary-ratio/scripts/predict.py",
+    "profiles/theory/cr-secondary-ratio\\"
+   ],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-interp-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": "hep-theory",
+     "skills": [
+      "hep-theory"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-interp-4",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "hep-statistics",
+   "turns": [
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/experiments/ams-02/datasets",
+    "profiles/experiments/ams-02/evidence",
+    "profiles/experiments/ams-02/index.md",
+    "profiles/experiments/ams-02/modules/working-rules.md;",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [],
+   "builtin_plugins": [],
+   "cli_version": null,
+   "model_reported": null,
+   "cost_usd": 0.0,
+   "n_turns": 1,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/t2-theory-codex-20261023/raw/, not committed)"
+}

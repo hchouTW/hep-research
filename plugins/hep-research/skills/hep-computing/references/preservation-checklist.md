@@ -37,20 +37,23 @@ Each item names the file or command that holds it. Paths are relative to the plu
 
 ## 4. Frozen analysis definition
 
+Only when the analysis uses the experimental cross-artifact check (`<plugin root>/docs/dev/cross-artifact-check/decision-value-gate.md`).
+
 - [ ] The v2 analysis bundle (`<plugin root>/contracts/schemas/analysis_bundle_v2.json`) is frozen with its
       semantic lock: `python3 <plugin root>/contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json
-      --context CONTEXT.json --out bundle.json --snapshots SNAPSHOTS/`.
-- [ ] The definition snapshots written by `--snapshots` are archived with the bundle: they let a later check use
-      the definitions that were current at freeze time, not today's.
-- [ ] `analysis_check.py check bundle.json --root DIR --snapshots SNAPSHOTS/` reruns on the archive. Its report is a
+      --context CONTEXT.json --out bundle.json`.
+- [ ] The definition snapshots freeze writes to `DIR/.hep-research/snapshots/` (or to the folder given with
+      `--snapshots`; the bundle index is `DIR/.hep-research/bundles.json`) are archived with the bundle: they let a
+      later check use the definitions that were current at freeze time, not today's.
+- [ ] `analysis_check.py check bundle.json --root DIR` reruns on the archive (it reads that store). Its report is a
       diagnostic; it authorizes nothing.
 
 ## 5. Results and their bindings
 
 - [ ] Every quoted number comes from an artifact (statistical-result, dataset-record) whose sha256 is recorded, and
       the paper's numbers are rendered from those artifacts, not retyped.
-- [ ] Result bindings (`<plugin root>/contracts/schemas/result_binding.json`) tie each published result to the runs
-      and the complete merge that produced it.
+- [ ] Each published result is tied to the computational-run records that produced it (inputs with digests, output
+      hashes) and, for a partitioned run, to its complete merge record; keep them with the frozen bundle.
 
 ## 6. Products that can be re-folded
 

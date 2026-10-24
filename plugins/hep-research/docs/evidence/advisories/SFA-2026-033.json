@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-033",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S2",
  "ledger": [
   "RC-A3"
@@ -41,10 +43,9 @@
   "artifact_types": [
    "communication"
   ],
-  "extension_keys": [
-   "occurrences",
-   "claims"
-  ]
+  "match": [],
+  "match_basis": "claims is required in every communication artifact and adaptation.py records no field of its own, so no field shows that an adaptation draft was made",
+  "no_trace": "possibly-affected"
  },
  "remedy": "check the adaptation drafts again (check_adaptation) with a release that has the fix; an unmapped or mismatched number is now reported",
  "references": [

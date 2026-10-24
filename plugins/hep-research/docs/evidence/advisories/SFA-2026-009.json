@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-009",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S1",
  "ledger": [
   "POISSON-SF"
@@ -45,9 +47,15 @@
   "artifact_types": [
    "statistical-result"
   ],
-  "extension_keys": [
-   "significance"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.significance",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "recompute the p-value and significance with a release that has the fix (0.4.0 or later); outputs now carry log_p_value_exact_poisson",
  "references": [

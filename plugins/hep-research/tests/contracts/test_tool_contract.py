@@ -358,5 +358,25 @@ class FrontendResponseContractTests(unittest.TestCase):
         self.assertEqual((out["ok"], out["error_kind"]), (False, "failed"))
 
 
+
+class Contract110Tests(unittest.TestCase):
+    """Tool contract 1.1.0 (contracts 3.11.0, ART-42, ART-43): positional arguments in the usage line, and the 1.1.0
+    features refused in a 1.0.0 contract. The design-block checks are in test_design_contracts.py."""
+
+    def test_usage_positionals(self):
+        text = ("usage: toy_spectrometer.py generate [-h] --seed SEED --events-out EVENTS_OUT\n"
+                "                                    --periods-out PERIODS_OUT\n                                    config\n\n")
+        self.assertEqual(tc.usage_positionals(text, ("toy_spectrometer.py", "generate")), ["config"])
+        self.assertEqual(tc.usage_positionals("usage: x.py [-h] --a A [--b B]\n\n", ("x.py",)), [])
+        self.assertIsNone(tc.usage_positionals("no usage", ()))
+
+    def test_shipped_1_0_0_contracts_use_no_1_1_0_feature(self):
+        for p in sorted(tc.CONTRACT_DIR.glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if doc["contract_version"] == "1.0.0":
+                with self.subTest(contract=p.name):
+                    self.assertEqual(tc.uses_1_1(doc), [])
+
+
 if __name__ == "__main__":
     unittest.main()

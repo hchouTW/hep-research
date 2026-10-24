@@ -1,5 +1,5 @@
 {
- "contract_version": "3.5.0",
+ "contract_version": "3.12.0",
  "bindings": {
   "experiments": [
    {
@@ -10,8 +10,8 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.23.0",
-  "contracts": "3.5.0",
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -146,6 +146,33 @@
     "applied_in": "normalization",
     "factor_of": "exposure",
     "notes": "acceptance enters once, inside the exposure normalization (acceptance x livetime x cutoff fraction)"
+   },
+   {
+    "effect_id": "livetime",
+    "category": "livetime",
+    "applied_in": "normalization",
+    "factor_of": "exposure",
+    "notes": "livetime enters once, inside the exposure normalization"
+   },
+   {
+    "effect_id": "cutoff_transmission",
+    "category": "cutoff_transmission",
+    "applied_in": "normalization",
+    "factor_of": "exposure",
+    "notes": "the cutoff fraction per bin enters once, inside the exposure normalization"
+   },
+   {
+    "effect_id": "survival",
+    "category": "survival",
+    "applied_in": "normalization",
+    "notes": "SYNTHETIC: no material above the measuring layers is modelled; survival is 1 in every bin"
+   },
+   {
+    "effect_id": "fragmentation_feeddown",
+    "category": "fragmentation_feeddown",
+    "applied_in": "estimator",
+    "exact_zero": true,
+    "notes": "SYNTHETIC: no heavier species is generated, so no helium is produced by fragmentation; the background subtraction carries no feed-down term"
    },
    {
     "effect_id": "rigidity_migration",

@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-037",
+ "published": "2026-10-22T00:37:17Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S2",
  "ledger": [
   "TRAINING-MEMORY-VERDICT"
@@ -26,9 +28,7 @@
    ],
    "database_specific": {
     "fixed_commit": "117f537517cc7501775687a986bc0395df0cd51d",
-    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
-    "no_artifact": true,
-    "outputs": "skills/hep-ml/scripts/estimate_training_memory.py prints a text report, or JSON with --json (per_gpu_bytes, per_gpu_gb, fits), and writes no artifact; its exit code carried the verdict"
+    "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e"
    }
   }
  ],
@@ -41,12 +41,13 @@
   "trigger": "a configuration whose estimated per-GPU memory exceeds the stated capacity, when the caller reads the exit code or the JSON instead of the text"
  },
  "applies_to": {
-  "artifact_types": [
-   "computational-run"
-  ],
-  "extension_keys": [
-   "tools"
-  ]
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-ml/scripts/estimate_training_memory.py"
+   ],
+   "how_to_recognize": "a text report, or JSON with --json (per_gpu_bytes, per_gpu_gb, fits); its exit code carried the verdict"
+  }
  },
  "remedy": "rerun estimate_training_memory.py on a release that has the fix (or read its text verdict) for any configuration accepted on the exit code alone; the memory numbers themselves did not change",
  "references": [

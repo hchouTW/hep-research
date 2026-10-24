@@ -51,8 +51,11 @@ a machine-checkable condition with its source and severity; `check_geant4_study.
 coverage. The items say when to look and where, not which list to use.
 
 - **Low-energy neutrons** (below 20 MeV): the data-driven ParticleHP models and the G4NDL data (`G4NEUTRONHPDATA`)
-  are only in the `_HP` lists (`geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BIC_HP.cc`,
-  `SetMaxEnergy(20*CLHEP::MeV)`; `geant4:cmake/Modules/G4DatasetDefinitions.cmake`). Rule `G4R-HP-NEUTRON`.
+  are only in the `_HP` lists (with their `_HPT` and `_AllHP` variants) and in the Shielding family (`Shielding`,
+  `ShieldingM`, `ShieldingLIQMD`, built with HP without the suffix)
+  (`geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BIC_HP.cc`,
+  `SetMaxEnergy(20*CLHEP::MeV)`; `geant4:source/physics_lists/lists/src/G4PhysListFactory.cc`;
+  `geant4:cmake/Modules/G4DatasetDefinitions.cmake`). Rule `G4R-HP-NEUTRON`.
 - **Thin layers**: the energy-loss fluctuation model shapes the distribution. The standard EM constructors set Urban
   (`geant4:source/physics_lists/constructors/electromagnetic/src/G4EmStandardPhysics_option4.cc`,
   `SetFluctuationType(fUrbanFluctuation)`; the same call in `G4EmStandardPhysics.cc` and `_option3.cc`), while
@@ -87,7 +90,9 @@ coverage. The items say when to look and where, not which list to use.
 - **Convergence (hard gate).** Scan the production cut (and the step limit when one is used). Between the two finest
   settings of each declared scan, every declared observable (mean deposit, tail fraction, most probable value) must
   change by no more than its relative tolerance, and the standard error of the change must be at most half of it.
-  `check_geant4_study.py run` enforces this. It is the only check that catches a cut that is too coarse: no reference
+  `check_geant4_study.py run` applies this to the two finest declared values *among the supplied run summaries*: it
+  does not require a summary for every declared value, so a missing finest run lets the gate pass on coarser ones.
+  Supply a run for every declared value and check that `two_finest` in the gate output are the two finest declared. It is the only check that catches a cut that is too coarse: no reference
   benchmark sees it, because the reference does not depend on the cut.
 - **Event count.** Estimate it from a trial run. `check_geant4_study.py summarize` gives seeded-bootstrap standard
   errors, and `run` reports the events needed as N (SE/target)^2. The delta-ray tail makes means converge slowly: in
@@ -144,7 +149,7 @@ material dump; constants from `core/constants`.
 | `multiple-scattering` | sanity | Highland, RPP 2024 Eq. 34.16, through `multiple_scattering.py`; RPP gives no numerical accuracy |
 | `em-shower-shape` | sanity | t_max, RPP 2024 Eq. 34.36 (not applicable when the stack does not contain t_max) |
 | `shower-containment` | sanity | rear leakage against the gamma-function profile, RPP 2024 Eqs. 34.34-34.36 (a fit to EGS4 showers, 1-100 GeV; b = 0.5 by default): never validation; a reference for leakage needs published data (`published-data`) |
-| `longitudinal-profile` | reference | the shower maximum t_max = (alpha - 1)/beta of a Gamma fit to per-layer mean deposits against the same fit to published test-beam data (config `published`: alpha, beta with uncertainties and source; their correlation is not used, so the reference uncertainty is conservative); `systematic_relative` covers stated differences between the planar model and the measurement (readout window, beam spot, upstream material). First reference: a W/Si forward-calorimeter prototype test beam, JINST 19 (2024) P07006 (arXiv:2311.07413), Table 3 |
+| `longitudinal-profile` | reference | the shower maximum t_max = (alpha - 1)/beta of a Gamma fit to per-layer mean deposits against the same fit to published test-beam data (config `published`: alpha, beta with uncertainties and source; their correlation is not used, which is conservative only for a non-negative correlation, the usual case for a Gamma fit; a negative one understates the t_max uncertainty); `systematic_relative` covers stated differences between the planar model and the measurement (readout window, beam spot, upstream material). First reference: a W/Si forward-calorimeter prototype test beam, JINST 19 (2024) P07006 (arXiv:2311.07413), Table 3 |
 | `published-data` | interface | handed to hep-statistics |
 
 Each reference benchmark has a tolerance (reference accuracy + k SE + binning) and a detection limit (tolerance +
@@ -158,8 +163,8 @@ not evidence for its scope.
 Vary only what changes the model used for this particle and energy, and state the model assignment
 (`check_geant4_study.py variations`). For thin-layer EM observables vary the EM constructor and the fluctuation model
 (Urban against PAI). For hadronic observables first check that the two lists use different models at that energy:
-QGSP_BIC and FTFP_BERT give a false zero difference for pions below 3 GeV and for any hadron between 6 and 12 GeV
-(Bertini, then FTFP, in both); they differ for nucleons below 1.5 GeV (Binary cascade) and above 12 GeV (QGSP). A reference list with an EM
+QGSP_BIC and FTFP_BERT give a false zero difference for pions below 12 GeV and for nucleons between 1.5 and 12 GeV
+(Bertini, the shared 3-6 GeV Bertini-FTF transition, then FTFP, in both); they differ for nucleons below 1.5 GeV (Binary cascade) and above 12 GeV (QGSP). A reference list with an EM
 suffix that maps to the same constructor (for example `FTFP_BERT_EMZ` against option 4) keeps the EM model and is
 excluded. Report the spread as a model envelope, not a sigma, with each variation's standard error (a difference
 below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
@@ -174,11 +179,14 @@ below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
 - Phase 2 (contracts 3.1.0): `check_geant4_study.py label --upgrade` re-issues the study record as
   `validated-in-scope` only when a scope is eligible and no gap remains. The run records then move from `inputs` to
   `extension.evidence_records` (path and sha256; `dependencies.py` checks the hash, exit status 0, no `failed`, and
-  the output hashes, without inheriting their labels) and the record requires `core:evidence-records`. The contract
+  that output hashes are recorded (present and well formed, not compared with the output files), without inheriting
+  their labels) and the record requires `core:evidence-records`. The contract
   rule (`geant4.upgrade_*`) refuses a record without a passed reference benchmark whose negative control was caught,
-  without a passed convergence gate, or with a declared scope outside the benchmark scope; a run record is never
-  re-issued. This is the one exception to keeping labels on everything derived from them (shared stanza, point 5).
-  Validated means only: within this particle, energy, material, thickness and observable, the run agreed with an
+  without a passed convergence gate, or with a declared particle, material, energy or thickness outside the benchmark
+  scope; a run record is never re-issued. Neither the rule nor `label` compares the observable, and a declared scope
+  that omits the thickness is not checked against the benchmark's thickness: declare both and check them by hand. This is the one exception to keeping labels on everything derived from them (shared stanza, point 5).
+  Validated means only: within this particle, energy, material, thickness and observable (the observable, and an
+  omitted thickness, checked by hand as above), the run agreed with an
   independent reference to the stated tolerance, with the detection limit stated. Never relabel by hand.
 - A table from the runs (resolution, containment, leakage by face): a `dataset-record` with status `simulated`
   (contracts 3.2.0), the run records (or the study record) as `inputs` with their labels, level `detector` or
@@ -203,7 +211,8 @@ execution layer. Its records are always `unvalidated`.
 - `assets/geant4_run.py`: `build-sim` (layered_sim against the installation), `run` (one JSON spec: per-event CSV,
   log, material dump, data-path record and a record with a `simulation` block; a data path or content hash that
   differs from the build record makes the run `failed`), `scan` (a parameter grid as a `workflow.json` for
-  `skills/hep-computing/scripts/run_workflow.py`, steps under 3600 s), `chunk` (a `local_partition.py` worker writing
+  `skills/hep-computing/scripts/run_workflow.py`; a step estimated above 3600 s is refused, and each step runs with
+  `--timeout 3540`), `chunk` (a `local_partition.py` worker writing
   additive sums and `{"csv": [...]}` for `--rule csv=concat`), `summarize` (means after the merge, duplicate check,
   agreement with a single run), `reduce` (a gzip copy of chosen columns for replay) and `oracle` (runs
   `geant4_benchmarks.py` through a subprocess).
@@ -224,6 +233,7 @@ Geant4 papers and the documents from a hep-citations literature-record, never fr
 draft with hep-authoring's `check_citations.py`.
 
 **Done when:** the study spec passes `check_geant4_study.py spec`, the convergence gate passes, every reference
-benchmark's negative control is caught at its claimed detection limit, the study record is `unvalidated` with its
+benchmark's negative control is caught at its claimed detection limit (with no reference benchmark this holds
+vacuously and `label` records the R5 gap: the study is then not validation evidence), the study record is `unvalidated` with its
 evidence and scope embedded and passes `validate.py --strict` and `dependencies.py`, and every citation is in a
 literature-record.

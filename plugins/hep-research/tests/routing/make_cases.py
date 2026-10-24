@@ -419,6 +419,48 @@ C = [
     # batch C, Th12: nuclear-physics entry (decay_chain.py)
  ("c-th-chain-1", "en", "direct", "How long until 226Ra and its daughters reach secular equilibrium, and what are the activities after 30 days?", "hep-theory", ["nuclear decays"], None, None, {}),
  ("c-th-chain-2", "zh-Hant", "direct", "β+ 衰變的 Q 值為什麼要扣掉兩個電子質量？用原子質量怎麼算？", "hep-theory", ["nuclear decays"], None, None, {}),
+    # Th13: cosmic-ray phenomenology (codes, cross sections, modulation, global-fit structure, new-physics claims)
+ ("th13-codes-1", "en", "direct", "GALPROP quotes D0 at 4 GV and a USINE fit quotes K0 at 1 GV in kpc^2/Myr; put both diffusion coefficients in one set of conventions before I compare the transport parameters.", "hep-theory", ["conventions", "cosmic-ray propagation"], None, None, {"set": "Th13"}),
+ ("th13-xs-1", "zh-Hant", "direct", "B/C 預測用的二次產生截面有好幾套參數化，差異多大？截面不確定度要怎麼當成 model alternatives 帶進理論預測？", "hep-theory", ["model alternatives"], None, None, {"set": "Th13"}),
+ ("th13-mod-1", "zh-Hant", "direct", "請把電荷符號依賴的太陽調制模型預測對齊到逐 Bartels rotation 的通量時間分箱，並說明這個近似的適用範圍。", "hep-theory", ["approximations and validity domains"], None, None, {"set": "Th13"}),
+ ("th13-dm-1", "en", "direct", "Give me the predicted dark-matter annihilation contribution to the cosmic antiproton flux, with propagation-model and halo-profile model alternatives as theory uncertainties.", "hep-theory", ["theory uncertainties", "model alternatives"], None, None, {"set": "Th13"}),
+ ("th13-mod-2", "en", "direct", "Which solar modulation model should predict the positron-to-electron ratio across the last polarity reversal, and where does the force-field approximation break down?", "hep-theory", ["solar modulation"], None, None, {"set": "Th13"}),
+ ("th13-fit-1", "en", "neighboring", "Profile the cross-section nuisance parameters in my propagation fit to Li, Be and B ratios and give the interval on delta.", "hep-statistics", ["nuisance parameters"], "hep-theory", None, {"set": "Th13"}),
+    # Th14: hadron structure, unpolarized inclusive DIS (structure_functions_lo.py, sum_rules.py); out-of-v1 neighbours
+ ("th14-sigmar-1", "en", "direct", "Compute the DIS neutral-current reduced cross section sigma_r for e- p at HERA kinematics from my parton values, with the gamma-Z conventions written out.", "hep-theory", ["DIS", "conventions"], None, None, {"set": "Th14"}),
+ ("th14-cc-1", "zh-Hant", "direct", "請用我給的部分子分布值算 e+ p 帶電流的 F_2 與 xF_3，並說明電子極化怎麼進入截面。", "hep-theory", [], None, None, {"set": "Th14"}),
+ ("th14-sumrule-1", "en", "direct", "Check that my tabulated PDFs satisfy the momentum and valence-number sum rules at Q^2 = 10 GeV^2, with the small-x extrapolation shown separately.", "hep-theory", ["PDFs"], None, None, {"set": "Th14"}),
+ ("th14-reco-1", "en", "neighboring", "Reconstruct x and Q^2 with the electron method in my DIS events and give the resolution in each bin.", "hep-detector", ["reconstruction", "resolution"], "hep-theory", None, {"set": "Th14"}),
+ ("th14-heavyion-1", "en", "out-of-v1", "Predict J/psi suppression in Pb-Pb collisions from the quark-gluon plasma melting picture.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+ ("th14-hadmodels-1", "en", "out-of-v1", "Compute the proton's Sivers function in the chiral quark soliton model and give me its x dependence.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+ ("th14-quarkonium-1", "en", "out-of-v1", "Give the NRQCD prediction for J/psi production in p-Pb collisions including nuclear absorption.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+ ("th14-jetsdis-1", "en", "out-of-v1", "Compute dijet cross sections in resolved-photon photoproduction at an electron-ion collider.", "hep-theory", [], None, None, {"set": "Th14", "limited_support": True}),
+    # Th15: Drell-Yan (drell_yan_lo.py)
+ ("th15-dy-1", "en", "direct", "Give the LO Drell-Yan cross section d2sigma/dM dx_F for p p at 120 GeV beam energy on a fixed target, with the x_F definition and rapidity frame stated.", "hep-theory", ["Drell-Yan", "cross sections"], None, None, {"set": "Th15"}),
+ ("th15-pd-1", "en", "direct", "Predict the pd/pp Drell-Yan cross-section ratio at E906 kinematics and say how it depends on dbar/ubar.", "hep-theory", ["Drell-Yan"], None, None, {"set": "Th15"}),
+ ("th15-frames-1", "zh-Hant", "direct", "請把 Collins-Soper 座標系的 lambda、mu、nu 轉到 helicity 座標系，並檢查 Lam-Tung 關係與不隨座標系改變的組合。", "hep-theory", [], None, None, {"set": "Th15"}),
+ ("th15-qt-1", "en", "direct", "I need the O(alpha_s) Drell-Yan q_T distribution at q_T of order M, with the scale envelope as theory uncertainty.", "hep-theory", ["Drell-Yan", "theory uncertainties"], None, None, {"set": "Th15"}),
+    # Th16: nuclear targets (nuclear_combination.py)
+ ("th16-npdf-1", "en", "direct", "Apply the nPDF correction to my p-Pb Drell-Yan prediction and give the nuclear ratio with its uncertainty from the nPDF set's own error members.", "hep-theory", ["nPDFs", "Drell-Yan"], None, None, {"set": "Th16"}),
+ ("th16-pernucleon-1", "zh-Hant", "direct", "鉛靶的 F_2 要用每核子還是每原子核來寫？x 可以大於 1 嗎？請說明慣例。", "hep-theory", [], None, None, {"set": "Th16"}),
+ ("th16-qgp-1", "en", "out-of-v1", "Compute the jet quenching parameter of the quark-gluon plasma in Pb-Pb collisions.", "hep-theory", [], None, None, {"set": "Th16", "limited_support": True}),
+    # Th17: polarized DIS (sum_rules.py polarized rules)
+ ("th17-bjorken-1", "en", "direct", "Evaluate the Bjorken sum rule with its alpha_s corrections at Q^2 = 5 GeV^2 and compare it with my integral of g_1^p - g_1^n; which approximations and validity domain apply?", "hep-theory", ["approximations and validity domains"], None, None, {"set": "Th17"}),
+ ("th17-scheme-1", "zh-Hant", "direct", "AB 與 MS-bar 方案的 Delta Sigma 可以直接比較嗎？請說明極化 DIS 的因子化方案慣例。", "hep-theory", [], None, None, {"set": "Th17"}),
+    # Th18: SIDIS and TMDs (sidis_kinematics.py, tmd_gaussian.py)
+ ("th18-sivers-1", "en", "direct", "Predict the Sivers asymmetry at COMPASS kinematics in a Gaussian TMD model and state the azimuthal-angle conventions and the sign change relative to Drell-Yan.", "hep-theory", ["TMDs", "conventions"], None, None, {"set": "Th18"}),
+ ("th18-qt-1", "en", "direct", "How should I predict the Drell-Yan distribution at q_T -> 0, and which TMD prescriptions count as model alternatives?", "hep-theory", ["Drell-Yan", "model alternatives"], None, None, {"set": "Th18"}),
+ ("th18-pht-1", "en", "neighboring", "Reconstruct the hadron transverse momentum relative to the virtual photon in my SIDIS events and give its resolution.", "hep-detector", ["reconstruction", "resolution"], "hep-theory", None, {"set": "Th18"}),
+    # Th19-Th20: small x and saturation (dipole_lo.py); exclusive processes and GPDs (exclusive_kinematics.py)
+ ("th19-sat-1", "en", "direct", "Predict the saturation signal in e Au scattering at the EIC with a dipole model, and treat nPDF shadowing as a model alternative.", "hep-theory", ["small-x", "model alternatives"], None, None, {"set": "Th19"}),
+ ("th19-dipole-1", "zh-Hant", "direct", "請用 GBW dipole 模型算 x = 1e-3、Q^2 = 10 GeV^2 的 F_2 與 F_L，並說明參數來源與 x 變數的慣例。", "hep-theory", [], None, None, {"set": "Th19"}),
+ ("th20-dvcs-1", "en", "direct", "Compute t_min and the skewness for my DVCS beam-spin asymmetry bins and convert the azimuthal angle between the BMK and Trento conventions.", "hep-theory", ["GPDs", "conventions"], None, None, {"set": "Th20"}),
+ ("th20-extract-1", "en", "neighboring", "Fit Compton form factors to my DVCS asymmetries with a likelihood and give intervals on them.", "hep-statistics", ["likelihoods"], "hep-theory", None, {"set": "Th20"}),
+    # S12-S13: PDF reweighting, profiling and global fits (pdf_reweighting.py, hessian_profiling.py)
+ ("s12-reweight-1", "en", "direct", "Reweight the NNPDF replicas for dbar/ubar with the pd/pp Drell-Yan ratio and tell me the effective number of replicas left.", "hep-statistics", ["PDF reweighting"], None, None, {"set": "S12"}),
+ ("s12-profile-1", "en", "direct", "Do a Hessian profiling of EPPS21 with my new p-Pb data and report the penalty term and the reduced gluon uncertainty.", "hep-statistics", ["profiling"], None, None, {"set": "S12"}),
+ ("s13-fit-1", "en", "direct", "Run a global PDF fit from scratch with my DIS and Drell-Yan data and give me the PDF uncertainty bands.", "hep-statistics", ["PDF fits"], None, None, {"set": "S13"}),
+ ("s13-inputs-1", "zh-Hant", "neighboring", "全域 PDF 擬合要用哪些理論設定：階數、重夸克方案、運動學截斷與 alpha_s 要怎麼一致地寫進規格？", "hep-theory", [], "hep-statistics", None, {"set": "S13"}),
     # batch C, M10: rare-event and neutrino measurements (reference)
  ("c-th-rare-1", "en", "direct", "For my dark-matter search, how should I define the exposure and live time and choose the energy window without looking at the signal region?", "hep-measurement", ["live time", "blinding policy"], None, None, {}),
  ("c-th-rare-2", "zh-Hant", "direct", "近端與遠端偵測器的外推要怎麼設計？通量與截面不確定度哪些會相消？", "hep-measurement", ["correction chains"], None, None, {}),
@@ -535,6 +577,11 @@ C = [
  ("g4-crash-1", "en", "neighboring", "My Geant4 SteppingAction crashes, help me debug it; I suspect crashes and memory leaks in my user code.", "hep-computing", ["crashes and memory leaks"], "hep-detector", None, {"set": "GEANT4"}),
  ("g4-crash-2", "zh-Hant", "neighboring", "我的 Geant4 SteppingAction 一直當掉，請幫我除錯（crashes and memory leaks）。", "hep-computing", ["crashes and memory leaks"], "hep-detector", None, {"set": "GEANT4"}),
  ("j14", "en", "journey", "Run a detector simulation (Geant4) study of energy loss in thin silicon: build and run it reproducibly, check convergence, benchmark it against independent references, and write it up with citations.", "hep-detector", ["detector simulation (Geant4)"], None, "J14", {"set": "GEANT4", "chain": ["hep-detector", "hep-computing", "hep-detector", "hep-citations", "hep-authoring"], "note": "for a comparison with published data, hep-statistics comes before hep-citations"}),
+ # detector system design spec M1 (DSD): the design loop routes to hep-detector; physics goals and the forward chain neighbour it
+ ("dsd-direct-1", "en", "direct", "Compare three spectrometer layouts against my momentum-resolution and charge-confusion requirements at 1 TV and tell me which ones are excluded and what evidence is still missing.", "hep-detector", ["design principles and trade-offs"], None, None, {"set": "DSD"}),
+ ("dsd-direct-2", "zh-Hant", "direct", "請為這個磁譜儀設計建立需求、候選方案與評估，並由程式推導每個需求是否符合（design principles and trade-offs）。", "hep-detector", ["design principles and trade-offs"], None, None, {"set": "DSD"}),
+ ("dsd-neighbor-1", "en", "neighboring", "Define the physics goals and the precision we need on the antiproton-to-proton ratio before we choose a detector layout.", "hep-measurement", ["observable definition"], "hep-detector", None, {"set": "DSD"}),
+ ("dsd-neighbor-2", "zh-Hant", "neighboring", "用 Asimov 資料估計這兩個偵測器方案的預期測量精度（expected precision），nuisance 參數要怎麼放？", "hep-statistics", ["toys and Asimov datasets"], "hep-detector", None, {"set": "DSD"}),
  ("j13", "en", "journey", "Find what AMS-02 published on B/C, compare it with my propagation model, check the compatibility, and write it up.", "hep-citations", ["what a named experiment published"], None, "J13", {"set": "SPLIT", "profiles": ["experiment:ams-02"], "chain": ["hep-citations", "hep-theory", "hep-statistics", "hep-authoring"]}),
 ]
 

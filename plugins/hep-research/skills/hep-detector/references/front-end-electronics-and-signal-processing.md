@@ -44,8 +44,10 @@ question, first establish:
 - **Shockley-Ramo** (*exact*, quasi-static fields): a charge `q` moving with velocity
   `v` induces on an electrode the current `i = q v · E_w`, where `E_w` is that
   electrode's weighting field (unit potential on it, zero on all others, space charge
-  ignored). The induced charge between two points is `q (phi_w(x2) - phi_w(x1))`.
-  (PDG RPP 2025 eq. 35.20 writes the same form.) With resistive elements, as in
+  ignored). Integrating that current with `E_w = -grad phi_w`, the charge induced
+  while it moves between two points is `-q (phi_w(x2) - phi_w(x1))`. (PDG RPP 2025
+  eq. 35.20 writes the same relation with the opposite sign convention for the
+  current; keep one convention when reasoning about polarity.) With resistive elements, as in
   resistive plate chambers or underdepleted silicon, the signal also follows the
   time-dependent reaction of the materials, described by time-dependent weighting
   fields (W. Riegler, NIM A535 (2004) 287).
@@ -55,8 +57,12 @@ question, first establish:
   signal ("small-pixel effect"); a neighbouring electrode that collects nothing sees a
   **bipolar** current with zero net charge, unless trapping (radiation damage) stops
   charges mid-way and leaves a net induced charge on neighbours.
-- Wire chambers and LAr TPC induction planes produce bipolar signals by construction;
-  their charge is recovered by deconvolving the field response (see LAr TPC below).
+- LAr TPC induction planes (and any non-collecting neighbour electrode) produce bipolar
+  signals by construction; their charge is recovered by deconvolving the field response
+  (see LAr TPC below). Collecting electrodes, the anode wires of a wire chamber or the
+  collection plane of a LAr TPC, give unipolar signals with a net charge; in a gas
+  chamber it is dominated by the slow ion drift, with a long `1/(t + t0)` tail that the
+  shaper removes by tail cancellation.
 - **Charge division into the preamplifier.** A charge-sensitive amplifier of open-loop
   gain `A` and feedback capacitance `C_f` has input capacitance `C_in ≈ A C_f`; the
   fraction of the signal charge it receives is `C_in/(C_in + C_det)` (*approximate*).

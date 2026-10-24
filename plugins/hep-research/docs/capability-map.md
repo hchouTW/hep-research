@@ -33,7 +33,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | species-migration | Charge-sign confusion, nuclear interactions in material and species-migration responses | hep-detector | tool | yes | D2, D3, D4 |  |
 | multisample-pid | Multi-sample particle identification (charge from many samples, likelihood ratios) | hep-detector | tool | yes | D10 |  |
 | stability-monitoring | Stability monitoring over time (trends, change points, era boundaries) | hep-detector | tool | yes | D11 |  |
-| detector-design | Detector design principles and a sourced detector atlas | hep-detector | tool | yes | D6, D13, D14 |  |
+| detector-design | Detector design principles, a sourced detector atlas, and the system design loop (derived verdicts) | hep-detector | tool | yes | D6, D13, D14, DSD-M0, DSD-M1, DSD-M2, DSD-M3, DSD-M4 |  |
 | geomagnetic-backtracing | Geomagnetic backtracing with an external tracer | hep-detector | tool | yes | D12 |  |
 | full-detector-simulation | Full detector simulation with Geant4: reproducible runs, implementation checks, convergence gate, independent-reference benchmarks | hep-detector | tool | yes | G4-WP1, G4-WP2, G4-WP3 |  |
 | fits-and-limits | Likelihoods, binned and unbinned fits, template fits, intervals and limits, significance and look-elsewhere effects | hep-statistics | tool | yes | S7, S8 |  |
@@ -47,7 +47,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | recasting | Recasting a published analysis with a parametrized response | hep-theory | tool | yes |  |  |
 | physical-data | Physical constants and particle and nuclear data with source and edition | hep-theory | tool | yes | Th9 |  |
 | relativistic-kinematics | Relativistic kinematics: two-body decays, boosts, invariant mass, Mandelstam variables, thresholds | hep-theory | tool | yes | Th7 |  |
-| cosmic-ray-propagation | Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation | hep-theory | tool | yes | Th1, Th2, Th3, Th6, Th11 |  |
+| cosmic-ray-propagation | Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation; codes, cross-section nuisances, global-fit structure and new-physics interpretation guidance | hep-theory | tool | yes | Th1, Th2, Th3, Th6, Th11, Th13 |  |
 | nuclear-physics-entry | Nuclear cross-section conventions, nuclear decays and Q-values | hep-theory | tool | yes | Th1, Th12 |  |
 | partition-and-batch | Local partition, batch campaigns, resubmission and duplicate-safe merges | hep-computing | tool | yes | C1 |  |
 | root-and-columnar-io | ROOT, PyROOT, uproot/awkward and columnar data tools | hep-computing | tool | yes | C4, C5, C7 |  |
@@ -65,9 +65,21 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | ckm-global-fits | CKM global fits | hep-theory | none | no |  | th-flavour-2 |
 | propagation-global-fits | Global cosmic-ray propagation fits that run a propagation code | hep-statistics | none | no |  | out-of-v1-1 |
 | dark-matter-excess-interpretation | Interpreting an excess with a dark-matter model (which model explains a signal) | hep-theory | none | no |  | wp11-bound-dm-1, wp11-bound-dm-2 |
-| heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1 |
+| heavy-ions | Heavy-ion physics (quark-gluon plasma, collective flow) | hep-theory | none | no |  | th-heavyion-1, th14-heavyion-1, th16-qgp-1 |
 | nuclear-structure | Nuclear-structure calculations (shell model, density functionals) | hep-theory | none | no |  | th-nucstruct-1 |
 | relic-density-solvers | Full relic-density Boltzmann solvers | hep-theory | none | no |  | th-relic-1 |
+| hadron-models | Model calculations of PDFs, TMDs and GPDs (quark models, chiral quark soliton, AdS/QCD) | hep-theory | none | no |  | th14-hadmodels-1 |
+| quarkonium-production | Quarkonium production and absorption (NRQCD, J/psi in pA and eA) | hep-theory | none | no |  | th14-quarkonium-1 |
+| jets-in-dis | Jets and jet substructure in lepton-hadron scattering, resolved-photon photoproduction | hep-theory | none | no |  | th14-jetsdis-1 |
 | neutrino-oscillations | Neutrino-oscillation probabilities, including matter effects | hep-theory | tool | yes | Th4 |  |
 | dark-matter-phenomenology | Dark-matter phenomenology conventions: spin-independent recoil rates in the standard halo model, form factors, J and D factors, flux prefactors, relic-density conventions (no Boltzmann solver) | hep-theory | tool | yes | Th5 |  |
+| dis-structure-functions | Unpolarized inclusive DIS structure functions and cross sections (LO from user-supplied parton values, sum-rule integrals; beyond LO as rules) | hep-theory | tool | yes | Th14 |  |
+| drell-yan | Drell-Yan cross sections (LO, photon exchange), x_F and rapidity-frame conversions, angular coefficients and frames, Lam-Tung combination | hep-theory | tool | yes | Th15 |  |
+| nuclear-parton-effects | Nuclear targets: per-nucleon conventions, isospin combination, nuclear PDF sets and baselines, member-by-member nuclear ratios; mechanism models as rules | hep-theory | tool | yes | Th16 |  |
+| polarized-dis | Polarized DIS: g_1, g_2, asymmetries and depolarization factors, first-moment sum rules, factorization-scheme dependence of Delta Sigma | hep-theory | tool | yes | Th17 |  |
+| sidis-and-tmd | SIDIS kinematics and Trento conventions, fragmentation functions, TMD factorization rules, Gaussian-ansatz TMD shapes, Sivers sign change, Drell-Yan q_T | hep-theory | tool | yes | Th18 |  |
+| small-x-saturation | Small-x physics: dipole picture with LO photon wave functions, GBW saturation model, BK/JIMWLK and BFKL conventions as rules | hep-theory | tool | yes | Th19 |  |
+| exclusive-and-gpd | Exclusive processes and GPDs (DVCS kinematics, azimuthal conventions, GPD properties and sum rules) and diffractive DIS kinematics; GPD extraction outside the tool | hep-theory | tool | yes | Th20 |  |
+| pdf-reweighting-and-profiling | Bayesian reweighting of PDF/nPDF/FF replica sets and linear Hessian profiling of published sets with new data; t0 chi2 for multiplicative uncertainties | hep-statistics | tool | yes | S12 |  |
+| global-pdf-fits | Specification and review of global PDF/nPDF/FF fits (theory inputs, chi2 forms, tolerances, closure tests); executing a full fit needs external software | hep-statistics | documentation | yes | S13 |  |
 <!-- /capability-map -->

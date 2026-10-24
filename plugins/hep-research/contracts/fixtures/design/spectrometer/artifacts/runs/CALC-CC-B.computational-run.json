@@ -1,0 +1,92 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "spectrometer-demo-CALC-CC-B",
+ "artifact_type": "computational-run",
+ "objective": "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-B.json",
+   "sha256": "10bbeb591e655d41f05d1bb9ad9eefd0205b3e0e3a14287dab603300e02a8d59",
+   "artifact_type": "design-candidate",
+   "artifact_id": "spectrometer-demo-cand-B",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-B.json",
+   "sha256": "afba12383dc73d4ba6806ad23f7852085ca82b87c15bf395d81ac5ebd129ea06",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "spectrometer-demo-CALC-TRK-B",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "outputs/CALC-CC-B.json"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "candidates/cand-B.json",
+    "sha256": "10bbeb591e655d41f05d1bb9ad9eefd0205b3e0e3a14287dab603300e02a8d59"
+   },
+   {
+    "path": "evaluations/CALC-TRK-B.json",
+    "sha256": "afba12383dc73d4ba6806ad23f7852085ca82b87c15bf395d81ac5ebd129ea06"
+   }
+  ],
+  "tools": [
+   {
+    "name": "charge_confusion_rate",
+    "version": "plugin"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-detector/scripts/charge_confusion_rate.py gaussian-core --edges 1000.0 2000.0 --sigma-inv-r 6.418847344265906e-05 --status synthetic"
+  ],
+  "environment": {
+   "python": "3"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "outputs/CALC-CC-B.json": "04be9c16166209569044a50f9e653eec5a161af9c497742ddc165ff49ee32c1b"
+  },
+  "argv": [
+   "python3",
+   "skills/hep-detector/scripts/charge_confusion_rate.py",
+   "gaussian-core",
+   "--edges",
+   "1000.0",
+   "2000.0",
+   "--sigma-inv-r",
+   "6.418847344265906e-05",
+   "--status",
+   "synthetic"
+  ],
+  "script_sha256": {
+   "skills/hep-detector/scripts/charge_confusion_rate.py": "501a1e971cee8e4e773315eec13c28fb9d540ac4903976c52bffc9871bd056e6"
+  }
+ }
+}

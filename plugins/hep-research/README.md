@@ -9,7 +9,7 @@ has:
 - optional experiment and theory-domain profiles, and the reference profile of the sourced detector atlas (`profiles/`);
 - tool adapters (`adapters/`).
 
-Version 0.23.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
+Version 0.38.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
 labeled synthetic in file names and metadata. What is and is not validated is listed in
 [docs/capability-matrix.md](docs/capability-matrix.md); test evidence is in [VALIDATION.md](VALIDATION.md).
 
@@ -83,7 +83,7 @@ They have not been run with this plugin. Plugins need a paid plan (Pro, Max, Tea
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Alternatively, **Add > Upload plugin** accepts a `.zip` of this folder; the archive must hold exactly one
    `.claude-plugin/plugin.json`. Build it from a clean checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 2380 files, 34.5 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 2500 files, 42.9 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
 
 The plugin is saved to your account, so it is then available in Chat, in Cowork, and in Claude Code sessions signed
 in to the same account (Claude Code downloads it as a synced plugin; run `/reload-plugins`). Pick a skill by typing
@@ -276,24 +276,49 @@ silently.
 
 The skills and the old entry points never call this check; you run it when you want it.
 `contracts/analysis_check.py` freezes an analysis into a bundle with:
-- a context: roots, recipe instances or models, and typed bindings;
+- a context: roots, recipe instances and typed bindings;
 - a semantic lock.
 
-It then checks a machine-generated list of obligations against five suites:
+It then checks a machine-generated list of obligations against two suites:
 
 | Suite | Checks |
 |---|---|
-| `counting-chain/1.0.0` | correction chains: listed effect members, realization, stage, repetition, factor composition, response use |
-| `ratio-subset/1.0.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
-| `model-card/1.0.0` | model cards: the supported modifier–constraint pairings, one observation per constraint term within an evaluation, cross-model sharing |
-| `run-lineage/1.0.0` | after execution, through a result binding: input closure, run status, the campaign evidence level, blinding-permitted outputs |
+| `counting-chain/1.1.0` | correction chains: listed effect members, realization, every applied correction described in the spec, stage, repetition, factor composition and values, response use |
+| `ratio-subset/1.1.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
 | (custody) | `contracts/custody.py`: an inventory of where each profile comes from; a missing custody value is never read as public |
 
+**Removed in 0.28.0:** the `model-card` and `run-lineage` suites, model-only bundles (`--mode model`) and result
+bindings (`--results`, `--project`), after the value gate's Shrink decision. That decision keeps `counting-chain`
+(frozen: no new rules) and `ratio-subset` (`docs/dev/cross-artifact-check/decision-value-gate.md`). A context or
+bundle that names them is refused with that reason. Reproduce such reports with 0.27.x.
+
+The 1.1.0 suites are the default. They need check contexts in format 1.1.0 (no `required` on roots); a 1.0.0 context
+selects only 1.0.x suites. `contracts/migrate.py --convert check-context=context-1.0.0-to-1.1.0` converts a frozen
+context to the newest installed 1.1.0 suite. Each fix is a new rule version, and the 1.0.0 suites name the old ones,
+which this release no longer runs (`check.rule_not_run`). Reproduce 1.0.0 results with hep-research 0.25.x.
+- **Factor tables:** a factor table's own `tolerance` is not used. The relative tolerance is 1e-9, or
+  Σ|power| · ½·10^(1−d) when the table declares `"significant_digits": d` and every value has at most d significant
+  digits.
+- **Pre-release suites:** the `1.1.0-dev.N` suites remain installed for bundles frozen during development, and
+  `check-report` refuses them.
+
 ```bash
-python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json [--mode model]
-python3 contracts/analysis_check.py check bundle.json --root <project> [--results result-binding.json] [--project <project>]
+python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json
+python3 contracts/analysis_check.py check bundle.json --root <project>
 python3 contracts/analysis_check.py summary report.json      # a bounded summary for the agent
+python3 contracts/analysis_check.py snapshots gc --root <project> [--apply]   # dry run unless --apply
 ```
+
+`freeze` stores the definitions it pinned in `<project>/.hep-research/snapshots/` and lists the bundle in
+`<project>/.hep-research/bundles.json` (`--no-snapshots` turns this off); `check` reproduces a bundle whose
+definitions have changed since from that store. Rules run only at the version the suite names: an obligation of
+another rule version is unverified (`check.rule_not_run`). A report is `complete` only with exit code 0.
+
+**Where it stands: experimental.** This is the diagnostic plane of the architecture in
+`docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md`: no workflow, skill or example runs it. Its
+value gate (`decision-value-gate.md`, 2026-10-22) found that it caught none of 28 planted errors that closure tests
+and contract checks missed, and the owner chose to stop: the code is frozen, no suites are added, and the check
+stays available as an experimental diagnostic.
 
 **Reading a report.** Each obligation ends in one of five states: satisfied, violated, not applicable, unverified or
 unsupported. Coverage counts the decided obligations; it is never a pass rate.
@@ -305,10 +330,11 @@ unsupported. Coverage counts the decided obligations; it is never a pass rate.
 - `contracts/permit.py check-report` reproduces the custodian's conditions as an advisory check. It never allows a
   use (`formal_use_allowed` is always false).
 - **Every rule is in shadow mode.** No rule becomes an enforcing condition until a reviewer other than the author has
-  reviewed it (`docs/dev/v6.3/review-packet.md`), the custodian's gate has adopted
-  `docs/dev/v6.3/custodian-gate-requirement.md`, and the owner has decided per purpose.
+  reviewed it (`docs/dev/cross-artifact-check/review-packet.md`), the custodian's gate has adopted
+  `docs/dev/cross-artifact-check/custodian-gate-requirement.md`, the value gate has passed, and the owner has decided
+  per purpose.
 
-Design and decision records are in [docs/dev/v6.3/](docs/dev/v6.3/README.md).
+Design and decision records are in [docs/dev/cross-artifact-check/](docs/dev/cross-artifact-check/README.md).
 
 ## Checks for maintainers
 

@@ -16,6 +16,74 @@ DECLARATION_TYPES = ("instance_mapping", "partition_exclusive", "partition_cover
                      "applicability_fact", "provenance_binding", "execution_attribution")
 AUTHOR_KINDS = ("person", "agent", "tool")
 ROLES = ("nominal", "systematic", "alternative")
+# input checks each context version enables (P3): a check added later is enabled for the context version that
+# introduces it, so a frozen 1.0.0 context is never judged by a newer check
+INPUT_CHECKS = {"1.0.0": frozenset({"item.not_an_object", "item.schema", "spec.bad_corrections", "spec.duplicate_effect_id"})}
+# 1.1.0 (release R2): factor-table shape (G16), one bundle coverage contract per table (G15), no shared parameter
+# within one model (G12), a stated unit on every root (G22)
+INPUT_CHECKS["1.1.0"] = INPUT_CHECKS["1.0.0"] | {"calibration.shape", "coverage.duplicate_contract",
+                                                 "context.shared_within_model", "context.unit_placeholder"}
+PLACEHOLDER_UNITS = frozenset({"todo", "tbd", "tba", "fixme", "xxx", "?", "??", "unknown", "n/a", "na", "none",
+                               "unit", "<unit>", "placeholder"})
+# the first suite version a 1.1.0 context may select (the lowest pre-release of 1.1.0); a 1.0.0 context selects
+# only versions below it
+FIRST_1_1_SUITE = "1.1.0-0"
+
+
+def input_check_enabled(context_version, check: str) -> bool:
+    """A context of unknown version enables every 1.0.0 check (the schema refuses it separately)."""
+    return check in INPUT_CHECKS.get(str(context_version), INPUT_CHECKS["1.0.0"])
+
+
+def version_findings(ctx: dict) -> list[dict]:
+    """Format rules of check-context 1.1.0 (release R2) that the schema cannot state: no 'required' on a root or
+    ratio root (DR-2: deferral goes through an exception), and the version guard between context and suites (a 1.1.0
+    context selects 1.1.0 or later suites, pre-releases included; a 1.0.0 context selects 1.0.x suites)."""
+    from contracts.semver import precedence
+    version = ctx.get("context_version")
+    if version not in INPUT_CHECKS:
+        return []
+    new = version != "1.0.0"
+    out = []
+    if new:
+        for key in ("roots", "ratio_roots"):
+            for i, r in enumerate(ctx.get(key) or []):
+                if isinstance(r, dict) and "required" in r:
+                    out.append(_f("context.required_removed", f"$.{key}[{i}].required",
+                                  "check-context 1.1.0 has no 'required': defer a root with an exception record (DR-2)"))
+    for i, s in enumerate([ctx.get("suite")] + list(ctx.get("suites") or [])):
+        try:
+            later = precedence(str((s or {}).get("version"))) >= precedence(FIRST_1_1_SUITE)
+        except ValueError:
+            continue  # the schema reports a malformed version
+        if later != new:
+            out.append(_f("context.suite_version", "$.suite" if i == 0 else f"$.suites[{i - 1}]",
+                          f"a {version} context selects {'1.1.0 or later' if new else '1.0.x'} suites, not "
+                          f"{(s or {}).get('id')} {(s or {}).get('version')}"))
+    return out
+
+
+def input_findings(ctx: dict) -> list[dict]:
+    """Context input checks the context version enables (release R2): a root unit that is empty or a placeholder
+    (G22, the minimal fix: the full unit check is coverage extension), and shared parameters that join two
+    parameters of one model (G12: sharing is between models; inside one model it merges constraint terms)."""
+    version = ctx.get("context_version")
+    out = []
+    if input_check_enabled(version, "context.unit_placeholder") and version in INPUT_CHECKS:
+        for key in ("roots", "ratio_roots"):
+            for i, r in enumerate(ctx.get(key) or []):
+                unit = r.get("unit") if isinstance(r, dict) else None
+                if isinstance(unit, str) and (not unit.strip() or unit.strip().lower() in PLACEHOLDER_UNITS):
+                    out.append(_f("context.unit_placeholder", f"$.{key}[{i}].unit",
+                                  f"root {r.get('root_id')!r} states no unit ({unit!r})"))
+    if input_check_enabled(version, "context.shared_within_model") and version in INPUT_CHECKS:
+        for i, e in enumerate(ctx.get("evaluations") or []):
+            for j, sp in enumerate((e or {}).get("shared_parameters") or []):
+                models = [m.get("model") for m in (sp or {}).get("members") or [] if isinstance(m, dict)]
+                for m in sorted({x for x in models if models.count(x) > 1}, key=str):
+                    out.append(_f("context.shared_within_model", f"$.evaluations[{i}].shared_parameters[{j}]",
+                                  f"shared parameter {sp.get('parameter_id')!r} joins two parameters of model {m!r}"))
+    return out
 
 
 def _f(code: str, where: str, message: str) -> dict:

@@ -1,0 +1,12 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "ratio_block computes each species' relative covariance in a helper (still without the cancelling trigger block); the spec's trigger-cancellation verification text is reworded.",
+ "code_change": "ratio_block(): nested rel_cov(b) helper; same terms summed in the same order.",
+ "description_change": "measurement spec: verification text of the trigger_efficiency cancellation reworded.",
+ "affected": [
+  "trigger_efficiency",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

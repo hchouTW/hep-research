@@ -1,5 +1,5 @@
 {
- "contracts_version": "3.5.0",
+ "contracts_version": "3.12.0",
  "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
  "vocabularies": {
   "levels": {
@@ -96,7 +96,35 @@
    "frame": "e.g. center-of-mass, lab",
    "angle_definition": "e.g. theta between incoming e- and outgoing mu-",
    "spin_treatment": "e.g. spin-averaged initial, summed final",
-   "mass_approximation": "e.g. massless final state"
+   "mass_approximation": "e.g. massless final state",
+   "target_normalization": "per nucleon or per nucleus, and the nucleon mass convention (free-nucleon average, atomic mass unit or M_A/A)",
+   "exchanged_bosons": "exchanged bosons included: photon only, photon + Z with interference, W+, W-",
+   "electroweak_scheme": "definition of sin^2 theta_W and the electroweak couplings (on-shell, MS-bar, G_mu) and their input values",
+   "em_coupling": "alpha(0) or a running alpha(Q^2) / alpha(M^2), with its source",
+   "structure_function_signs": "sign convention of the xF_3 term for positive and negative leptons, and its source",
+   "heavy_quark_scheme": "FFNS with n_f, ZM-VFNS, or a named GM-VFNS variant (ACOT, FONLL, RT, ...)",
+   "factorization_scheme": "MS-bar or DIS scheme; for polarized densities Larin MS-bar, AB or JET",
+   "target_mass_treatment": "target-mass corrections neglected, or the named form used",
+   "polarization_convention": "beam and target polarization directions, helicity definition and overall sign of g_1",
+   "xF_definition": "Feynman x as x_1 - x_2, 2 p_L*/sqrt(s), or p_L*/p_L,max",
+   "rapidity_frame": "rapidity in the hadronic centre-of-mass frame or the lab frame, and the +z direction",
+   "azimuth_convention": "named convention for the azimuthal angles phi_h, phi_S, phi (for example Trento)",
+   "log_accuracy": "logarithmic accuracy of a resummation (NLL, NNLL, ...) together with its fixed-order matching"
+  },
+  "conditional_convention_keys": {
+   "target_normalization": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "exchanged_bosons": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "electroweak_scheme": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "em_coupling": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "structure_function_signs": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "heavy_quark_scheme": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "factorization_scheme": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "target_mass_treatment": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "polarization_convention": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "xF_definition": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "rapidity_frame": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "azimuth_convention": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule",
+   "log_accuracy": "core convention key required only where a module names it (hadron structure, contracts 3.10.0); outside the every-derivation completeness rule"
   },
   "evidence_statuses": {
    "public-fact": "",
@@ -133,7 +161,10 @@
    "fakes": "Reco events with no matching truth event (background-like, applied in reco space)",
    "exposure": "Exposure (acceptance x live time) normalization",
    "luminosity": "Integrated luminosity normalization",
-   "livetime": "Detector live time"
+   "livetime": "Detector live time",
+   "cutoff_transmission": "Cutoff transmission: per bin of the variable, the fraction of the live time in which that bin lies above the declared geomagnetic (or other) cutoff threshold, with its safety factor",
+   "survival": "Survival of a species through the material above the measuring layers: the probability P = exp(-sum x/lambda) that it crosses without an inelastic interaction; the flux divides by P",
+   "fragmentation_feeddown": "Fragmentation feed-down: events of a lighter species produced by heavier species fragmenting in the material above the measuring layers, subtracted like a background"
   },
   "envelope_prescriptions": {
    "3-point": "Single scale at mu_0/2, mu_0, 2 mu_0; envelope = min and max of the three",
@@ -168,6 +199,21 @@
    "roc-auc": "Area under the ROC curve (an ML metric; not downstream evidence)",
    "accuracy": "Classification accuracy (an ML metric; not downstream evidence)",
    "loss": "Training or validation loss (an ML metric; not downstream evidence)"
+  },
+  "subsystem_roles": {
+   "tracking": "Position-sensitive layers that measure a trajectory",
+   "bending": "Magnet that bends charged tracks (field, bending power)",
+   "calorimetry-em": "Electromagnetic calorimeter",
+   "calorimetry-had": "Hadronic calorimeter",
+   "tof": "Time-of-flight system",
+   "rich": "Ring-imaging Cherenkov detector",
+   "trd": "Transition-radiation detector",
+   "dedx": "Specific-ionization (dE/dx) measurement",
+   "muon": "Muon system",
+   "trigger": "Trigger system",
+   "veto": "Anticoincidence or veto counter",
+   "active-target": "Active target or detection medium",
+   "shielding": "Passive shielding"
   }
  }
 }

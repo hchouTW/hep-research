@@ -1,0 +1,49 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "collider-tracker-v1-EST-HCAL-B",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-B.json",
+   "sha256": "427a2eca2b75c0ba842d91dbb2701d952f690201ee1c7b6444b75ce6e8ff59c8",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-B",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "collider-tracker-v1:EST-HCAL-B",
+  "candidate": "collider-tracker-v1:cand-B",
+  "figure_of_merit": "hadronic-energy-resolution",
+  "denominator": {
+   "energy_GeV": 100.0,
+   "species": "pion"
+  },
+  "bound": "estimate",
+  "fidelity": "F1",
+  "unavailable": true,
+  "parameter_refs": [],
+  "parameter_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+ }
+}

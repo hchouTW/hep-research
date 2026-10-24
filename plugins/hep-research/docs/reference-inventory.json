@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 352047,
+   "bytes": 355336,
    "uncited": 0
   },
   "hep-citations": {
@@ -15,17 +15,17 @@
   },
   "hep-computing": {
    "references": 35,
-   "bytes": 297676,
+   "bytes": 299243,
    "uncited": 0
   },
   "hep-detector": {
-   "references": 38,
-   "bytes": 498220,
+   "references": 39,
+   "bytes": 523712,
    "uncited": 0
   },
   "hep-measurement": {
-   "references": 13,
-   "bytes": 119524,
+   "references": 12,
+   "bytes": 119084,
    "uncited": 0
   },
   "hep-ml": {
@@ -34,13 +34,13 @@
    "uncited": 0
   },
   "hep-statistics": {
-   "references": 13,
-   "bytes": 187953,
+   "references": 14,
+   "bytes": 198146,
    "uncited": 0
   },
   "hep-theory": {
-   "references": 18,
-   "bytes": 121074,
+   "references": 31,
+   "bytes": 241720,
    "uncited": 0
   }
  },
@@ -86,7 +86,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "b66baedf 2026-10-23"
   },
   {
    "path": "skills/hep-authoring/references/artifact-packaging-for-release.md",
@@ -405,16 +405,19 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 13198,
-   "lines": 171,
+   "bytes": 16487,
+   "lines": 199,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
     "skills/hep-authoring/SKILL.md",
+    "skills/hep-detector/references/system-design-workflow.md",
     "tests/skills/hep_authoring/test_review_pilot_fixes.py"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "29c2380f 2026-10-22"
+   "cited_by_other_skills": [
+    "hep-detector"
+   ],
+   "last_commit": "cecc4dcb 2026-10-22"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -906,10 +909,12 @@
     "skills/hep-citations/references/literature-guide.md",
     "skills/hep-citations/references/literature-lookup-recipes.md",
     "skills/hep-citations/references/literature-review.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [
-    "hep-authoring"
+    "hep-authoring",
+    "hep-theory"
    ],
    "last_commit": "ebb58136 2026-10-19"
   },
@@ -1127,30 +1132,30 @@
   {
    "path": "skills/hep-computing/references/analysis-data-pipelines.md",
    "owner": "hep-computing",
-   "bytes": 11578,
+   "bytes": 11550,
    "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/assets/time_slice_reduction.py",
     "skills/hep-computing/references/columnar-and-large-scale-data.md",
+    "skills/hep-computing/references/python-hep-coding-patterns.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/analysis-design.md",
     "skills/hep-measurement/references/correction-chain.md",
-    "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/weights-normalization.md"
    ],
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "a57e22cf 2026-10-17"
+   "last_commit": "56a5a6c9 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 3657,
-   "lines": 53,
+   "bytes": 4072,
+   "lines": 56,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1159,7 +1164,7 @@
     "tests/skills/hep_computing/test_workflow_c6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "98159ba5 2026-10-17"
+   "last_commit": "ed88037e 2026-10-24"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1308,8 +1313,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 10710,
-   "lines": 148,
+   "bytes": 11497,
+   "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
     "core/status.py",
@@ -1318,7 +1323,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "338f8d78 2026-10-19"
+   "last_commit": "ceed8ab2 2026-10-22"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1423,8 +1428,8 @@
   {
    "path": "skills/hep-computing/references/preservation-checklist.md",
    "owner": "hep-computing",
-   "bytes": 4446,
-   "lines": 71,
+   "bytes": 4746,
+   "lines": 74,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1432,7 +1437,7 @@
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "98159ba5 2026-10-17"
+   "last_commit": "d8ab97cb 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
@@ -1469,7 +1474,7 @@
   {
    "path": "skills/hep-computing/references/python-hep-coding-patterns.md",
    "owner": "hep-computing",
-   "bytes": 6578,
+   "bytes": 6548,
    "lines": 124,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1482,7 +1487,7 @@
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "56a5a6c9 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1501,8 +1506,8 @@
   {
    "path": "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 37160,
-   "lines": 726,
+   "bytes": 37283,
+   "lines": 727,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1517,7 +1522,7 @@
     "skills/hep-computing/references/root-usage-patterns.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "56a5a6c9 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/root-debugging.md",
@@ -1665,8 +1670,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 19860,
-   "lines": 278,
+   "bytes": 20356,
+   "lines": 282,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1693,7 +1698,7 @@
     "tests/skills/hep_detector/test_adding_layer_d6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1d03565d 2026-10-17"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -1725,6 +1730,7 @@
    "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/rules/design_adequacy.json",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -1758,8 +1764,8 @@
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
    "owner": "hep-detector",
-   "bytes": 8181,
-   "lines": 41,
+   "bytes": 9848,
+   "lines": 44,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-design-principles.md",
@@ -1769,7 +1775,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "28f7d9c7 2026-10-21"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -1850,16 +1856,18 @@
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
    "owner": "hep-detector",
-   "bytes": 5448,
-   "lines": 71,
+   "bytes": 5708,
+   "lines": 75,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/rules/design_adequacy.json",
     "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/references/system-design-workflow.md",
     "skills/hep-detector/scripts/detector_atlas.py",
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cbcf6c34 2026-10-17"
+   "last_commit": "97c6b0b5 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/detector-glossary.md",
@@ -2029,8 +2037,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 25139,
-   "lines": 381,
+   "bytes": 25618,
+   "lines": 387,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2047,7 +2055,7 @@
     "skills/hep-detector/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2073,8 +2081,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 19829,
-   "lines": 230,
+   "bytes": 21051,
+   "lines": 240,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2090,7 +2098,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "7013f194 2026-10-21"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2264,8 +2272,8 @@
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "owner": "hep-detector",
-   "bytes": 18539,
-   "lines": 244,
+   "bytes": 19836,
+   "lines": 260,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2281,7 +2289,7 @@
     "skills/hep-detector/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
@@ -2328,8 +2336,8 @@
   {
    "path": "skills/hep-detector/references/response-and-forward-folding.md",
    "owner": "hep-detector",
-   "bytes": 14230,
-   "lines": 167,
+   "bytes": 15880,
+   "lines": 181,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/references/preservation-checklist.md",
@@ -2352,7 +2360,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "894eec20 2026-10-19"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -2363,6 +2371,7 @@
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2403,7 +2412,21 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "ed36cea3 2026-10-17"
+   "last_commit": "c90b601b 2026-10-22"
+  },
+  {
+   "path": "skills/hep-detector/references/system-design-workflow.md",
+   "owner": "hep-detector",
+   "bytes": 17995,
+   "lines": 217,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-design-principles.md",
+    "skills/hep-detector/scripts/design_estimates.py",
+    "skills/hep-detector/scripts/evaluate_design.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e4f24d84 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
@@ -2430,6 +2453,7 @@
    "lines": 245,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/rules/design_adequacy.json",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -2458,8 +2482,8 @@
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
    "owner": "hep-detector",
-   "bytes": 16079,
-   "lines": 236,
+   "bytes": 16505,
+   "lines": 241,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2478,13 +2502,13 @@
     "skills/hep-detector/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/analysis-design.md",
    "owner": "hep-measurement",
-   "bytes": 13556,
-   "lines": 135,
+   "bytes": 13940,
+   "lines": 139,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -2497,7 +2521,6 @@
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/assets/measurement_spec.template.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
-    "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/histograms-efficiencies.md",
     "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
@@ -2509,7 +2532,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "fe71ebcf 2026-10-17"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/analysis-validation.md",
@@ -2573,8 +2596,8 @@
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
    "owner": "hep-measurement",
-   "bytes": 15554,
-   "lines": 183,
+   "bytes": 15913,
+   "lines": 187,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2597,7 +2620,7 @@
     "hep-detector",
     "hep-theory"
    ],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "f146d22b 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -2616,35 +2639,10 @@
    "last_commit": "3c10ac23 2026-10-22"
   },
   {
-   "path": "skills/hep-measurement/references/data-pipelines.md",
-   "owner": "hep-measurement",
-   "bytes": 423,
-   "lines": 5,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-computing/SKILL.md",
-    "skills/hep-computing/assets/time_slice_reduction.py",
-    "skills/hep-computing/references/analysis-data-pipelines.md",
-    "skills/hep-computing/references/columnar-and-large-scale-data.md",
-    "skills/hep-computing/references/python-hep-coding-patterns.md",
-    "skills/hep-computing/references/root-balanced-design-guidelines.md",
-    "skills/hep-measurement/README.md",
-    "skills/hep-measurement/references/analysis-design.md",
-    "skills/hep-measurement/references/correction-chain.md",
-    "skills/hep-measurement/references/hep-measurement-guide.md",
-    "skills/hep-measurement/references/weights-normalization.md",
-    "tests/skills/hep_measurement/test_method_references.py"
-   ],
-   "cited_by_other_skills": [
-    "hep-computing"
-   ],
-   "last_commit": "9257d7b5 2026-10-15"
-  },
-  {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 16382,
-   "lines": 113,
+   "bytes": 15458,
+   "lines": 112,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -2661,7 +2659,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "73b525a2 2026-10-21"
+   "last_commit": "cf16c262 2026-10-23"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -2729,8 +2727,8 @@
   {
    "path": "skills/hep-measurement/references/review-and-artifacts.md",
    "owner": "hep-measurement",
-   "bytes": 7736,
-   "lines": 108,
+   "bytes": 7900,
+   "lines": 109,
    "linked_from_skill_md": true,
    "cited_by": [
     "examples/ams-flux-ratio/run.py",
@@ -2744,7 +2742,7 @@
     "tests/skills/hep_measurement/test_review_procedure.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "77d2607e 2026-10-16"
+   "last_commit": "7d992293 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/systematics.md",
@@ -2807,11 +2805,11 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/references/analysis-data-pipelines.md",
+    "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
     "skills/hep-detector/references/triggers-luminosity-pileup.md",
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/references/analysis-design.md",
-    "skills/hep-measurement/references/data-pipelines.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
@@ -3541,8 +3539,8 @@
   {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",
    "owner": "hep-statistics",
-   "bytes": 11577,
-   "lines": 159,
+   "bytes": 12414,
+   "lines": 167,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -3565,7 +3563,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "14eeda45 2026-10-15"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/combinations.md",
@@ -3585,8 +3583,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 42807,
-   "lines": 465,
+   "bytes": 44363,
+   "lines": 479,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -3600,13 +3598,13 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "a73d421e 2026-10-17"
+   "last_commit": "cf16c262 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 15102,
-   "lines": 149,
+   "bytes": 14463,
+   "lines": 145,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3625,7 +3623,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "73b525a2 2026-10-21"
+   "last_commit": "6c7b8ea3 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -3703,7 +3701,7 @@
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 20624,
+   "bytes": 20488,
    "lines": 252,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3720,7 +3718,26 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "1857c829 2026-10-22"
+   "last_commit": "d8ab97cb 2026-10-23"
+  },
+  {
+   "path": "skills/hep-statistics/references/pdf-fit-statistics.md",
+   "owner": "hep-statistics",
+   "bytes": 7739,
+   "lines": 121,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/scripts/hessian_profiling.py",
+    "skills/hep-statistics/scripts/pdf_reweighting.py",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-theory"
+   ],
+   "last_commit": "6c7b8ea3 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -3730,6 +3747,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/likelihood-fitting.md",
     "skills/hep-statistics/scripts/roofit_fit_check.py",
@@ -3741,8 +3759,8 @@
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
    "owner": "hep-statistics",
-   "bytes": 13126,
-   "lines": 231,
+   "bytes": 13294,
+   "lines": 233,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
@@ -3763,7 +3781,7 @@
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "e03c0396 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
@@ -3783,8 +3801,8 @@
   {
    "path": "skills/hep-statistics/references/time-series-inference.md",
    "owner": "hep-statistics",
-   "bytes": 20210,
-   "lines": 246,
+   "bytes": 20878,
+   "lines": 252,
    "linked_from_skill_md": true,
    "cited_by": [
     "examples/multi-era-fit/run.py",
@@ -3792,6 +3810,7 @@
     "profiles/theory/heliospheric-modulation/index.md",
     "profiles/theory/heliospheric-modulation/models/heliospheric-modulation-models.md",
     "profiles/theory/heliospheric-modulation/profile.json",
+    "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -3807,7 +3826,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "fcc1034c 2026-10-22"
+   "last_commit": "d8ab97cb 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
@@ -3858,6 +3877,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
@@ -3879,10 +3899,42 @@
    "last_commit": "4cedacd8 2026-10-17"
   },
   {
+   "path": "skills/hep-theory/references/cosmic-ray-new-physics.md",
+   "owner": "hep-theory",
+   "bytes": 7764,
+   "lines": 99,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+    "skills/hep-theory/references/cosmic-ray-propagation.md",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e70b1a84 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "owner": "hep-theory",
+   "bytes": 23808,
+   "lines": 283,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-propagation.md",
+    "skills/hep-theory/references/solar-modulation-models.md",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e70b1a84 2026-10-23"
+  },
+  {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 20712,
-   "lines": 236,
+   "bytes": 21125,
+   "lines": 240,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",
@@ -3898,17 +3950,21 @@
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/astroparticle-essentials.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "skills/hep-theory/references/dark-matter-phenomenology.md",
     "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/references/nuclear-cross-sections.md",
+    "skills/hep-theory/references/solar-modulation-models.md",
     "skills/hep-theory/scripts/lepton_energy_losses.py",
     "tests/skills/hep_theory/test_charge_sign_modulation_th3.py",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py",
     "tests/skills/test_one_owner_per_topic_x2.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "930ba0b2 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/dark-matter-phenomenology.md",
@@ -3919,6 +3975,8 @@
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/astroparticle-essentials.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "skills/hep-theory/references/light-nuclei-coalescence.md",
     "skills/hep-theory/scripts/dm_direct_rate.py",
     "tests/skills/hep_theory/test_dark_matter_phenomenology.py"
@@ -3929,17 +3987,56 @@
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
    "owner": "hep-theory",
-   "bytes": 5886,
-   "lines": 77,
+   "bytes": 6128,
+   "lines": 79,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/eic/modules/placement-inventory.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/scripts/dis_kinematics.py",
     "tests/skills/hep_theory/test_dis_kinematics.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "f046cc69 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/dis-structure-functions.md",
+   "owner": "hep-theory",
+   "bytes": 13112,
+   "lines": 196,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/exclusive-and-gpd.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/higher-order-predictions.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
+    "skills/hep-theory/references/polarized-dis.md",
+    "skills/hep-theory/references/small-x-and-saturation.md",
+    "skills/hep-theory/scripts/structure_functions_lo.py",
+    "skills/hep-theory/scripts/sum_rules.py",
+    "tests/skills/hep_theory/test_hadron_structure_th14.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "9648218d 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/drell-yan.md",
+   "owner": "hep-theory",
+   "bytes": 10949,
+   "lines": 150,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
+    "skills/hep-theory/references/sidis-and-tmd.md",
+    "skills/hep-theory/scripts/drell_yan_lo.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "9648218d 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -3960,17 +4057,87 @@
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
-   "path": "skills/hep-theory/references/higher-order-predictions.md",
+   "path": "skills/hep-theory/references/exclusive-and-gpd.md",
    "owner": "hep-theory",
-   "bytes": 4153,
+   "bytes": 6936,
+   "lines": 102,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/scripts/exclusive_kinematics.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "2414de9a 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/fragmentation-functions.md",
+   "owner": "hep-theory",
+   "bytes": 3877,
+   "lines": 62,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/sidis-and-tmd.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "bd9d753e 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/global-fits-theory-inputs.md",
+   "owner": "hep-theory",
+   "bytes": 4947,
+   "lines": 76,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-statistics/references/pdf-fit-statistics.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-statistics"
+   ],
+   "last_commit": "6c7b8ea3 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/hadron-structure-essentials.md",
+   "owner": "hep-theory",
+   "bytes": 6785,
    "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/exclusive-and-gpd.md",
+    "skills/hep-theory/references/fragmentation-functions.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
+    "skills/hep-theory/references/polarized-dis.md",
+    "skills/hep-theory/references/sidis-and-tmd.md",
+    "skills/hep-theory/references/small-x-and-saturation.md",
+    "tests/skills/hep_theory/test_hadron_structure_th14.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "6c7b8ea3 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/higher-order-predictions.md",
+   "owner": "hep-theory",
+   "bytes": 4431,
+   "lines": 70,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c0 2026-10-07"
+   "last_commit": "bb6cb81e 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/light-nuclei-coalescence.md",
@@ -3981,6 +4148,7 @@
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/astroparticle-essentials.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
     "skills/hep-theory/scripts/coalescence.py",
     "tests/skills/hep_theory/test_light_nuclei_coalescence.py"
    ],
@@ -4038,6 +4206,7 @@
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-measurement/references/correction-chain.md",
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "tests/skills/hep_theory/test_nuclear_cross_sections_th1.py"
    ],
    "cited_by_other_skills": [
@@ -4045,6 +4214,29 @@
     "hep-measurement"
    ],
    "last_commit": "151889fb 2026-10-17"
+  },
+  {
+   "path": "skills/hep-theory/references/nuclear-parton-effects.md",
+   "owner": "hep-theory",
+   "bytes": 11054,
+   "lines": 146,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-statistics/references/pdf-fit-statistics.md",
+    "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/pdfs-and-lhapdf.md",
+    "skills/hep-theory/references/polarized-dis.md",
+    "skills/hep-theory/references/small-x-and-saturation.md",
+    "skills/hep-theory/scripts/nuclear_combination.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-statistics"
+   ],
+   "last_commit": "f046cc69 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/nuclear-physics-essentials.md",
@@ -4079,16 +4271,33 @@
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",
    "owner": "hep-theory",
-   "bytes": 6047,
-   "lines": 80,
+   "bytes": 6488,
+   "lines": 87,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
+    "skills/hep-theory/references/dis-structure-functions.md",
+    "skills/hep-theory/references/drell-yan.md",
+    "skills/hep-theory/references/fragmentation-functions.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/references/particle-physics-essentials.md",
     "skills/hep-theory/scripts/pdf_uncertainty.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6164b848 2026-10-13"
+   "last_commit": "f046cc69 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/polarized-dis.md",
+   "owner": "hep-theory",
+   "bytes": 7554,
+   "lines": 120,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/hadron-structure-essentials.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "9648218d 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/recasting-toolchain.md",
@@ -4133,6 +4342,36 @@
    "last_commit": "195e4d1e 2026-10-13"
   },
   {
+   "path": "skills/hep-theory/references/sidis-and-tmd.md",
+   "owner": "hep-theory",
+   "bytes": 9165,
+   "lines": 152,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/exclusive-and-gpd.md",
+    "skills/hep-theory/references/fragmentation-functions.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/scripts/sidis_kinematics.py",
+    "skills/hep-theory/scripts/tmd_gaussian.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "bd9d753e 2026-10-23"
+  },
+  {
+   "path": "skills/hep-theory/references/small-x-and-saturation.md",
+   "owner": "hep-theory",
+   "bytes": 6874,
+   "lines": 112,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/references/exclusive-and-gpd.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "skills/hep-theory/scripts/dipole_lo.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "2414de9a 2026-10-23"
+  },
+  {
    "path": "skills/hep-theory/references/smeft-and-eft.md",
    "owner": "hep-theory",
    "bytes": 3421,
@@ -4145,6 +4384,23 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "fa29fcf3 2026-10-13"
+  },
+  {
+   "path": "skills/hep-theory/references/solar-modulation-models.md",
+   "owner": "hep-theory",
+   "bytes": 6447,
+   "lines": 74,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/references/cosmic-ray-new-physics.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+    "skills/hep-theory/references/cosmic-ray-propagation.md",
+    "skills/hep-theory/scripts/bartels_rotation.py",
+    "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e70b1a84 2026-10-23"
   }
  ],
  "overlap_pairs": [],
@@ -4207,6 +4463,11 @@
    "skills/hep-statistics/references/core-stats-commands.md",
    "skills/hep-statistics/references/core-stats-guide.md"
   ],
+  "cosmic": [
+   "skills/hep-theory/references/cosmic-ray-new-physics.md",
+   "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "skills/hep-theory/references/cosmic-ray-propagation.md"
+  ],
   "debugging": [
    "skills/hep-computing/references/crash-and-memory-debugging.md",
    "skills/hep-computing/references/root-debugging.md"
@@ -4219,6 +4480,11 @@
    "skills/hep-detector/references/ground-based-detection-arrays.md",
    "skills/hep-detector/references/space-based-direct-detection.md"
   ],
+  "dis": [
+   "skills/hep-theory/references/dis-kinematics.md",
+   "skills/hep-theory/references/dis-structure-functions.md",
+   "skills/hep-theory/references/polarized-dis.md"
+  ],
   "engineering": [
    "skills/hep-computing/references/engineering-playbook.md",
    "skills/hep-computing/references/loop-engineering.md",
@@ -4226,6 +4492,7 @@
   ],
   "essential": [
    "skills/hep-theory/references/astroparticle-essentials.md",
+   "skills/hep-theory/references/hadron-structure-essentials.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md",
    "skills/hep-theory/references/particle-physics-essentials.md"
   ],
@@ -4240,6 +4507,10 @@
   "figure": [
    "skills/hep-authoring/references/diagram-figure-style.md",
    "skills/hep-authoring/references/figures-and-tables.md"
+  ],
+  "function": [
+   "skills/hep-theory/references/dis-structure-functions.md",
+   "skills/hep-theory/references/fragmentation-functions.md"
   ],
   "guideline": [
    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -4289,6 +4560,7 @@
   ],
   "nuclear": [
    "skills/hep-theory/references/nuclear-cross-sections.md",
+   "skills/hep-theory/references/nuclear-parton-effects.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md"
   ],
   "numerical": [
@@ -4299,7 +4571,12 @@
    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
   ],
+  "phenomenology": [
+   "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "skills/hep-theory/references/dark-matter-phenomenology.md"
+  ],
   "physic": [
+   "skills/hep-theory/references/cosmic-ray-new-physics.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md",
    "skills/hep-theory/references/particle-physics-essentials.md"
   ],
@@ -4315,6 +4592,11 @@
   "quality": [
    "skills/hep-computing/references/risk-and-quality.md",
    "skills/hep-computing/references/task-quality-checklist.md"
+  ],
+  "ray": [
+   "skills/hep-theory/references/cosmic-ray-new-physics.md",
+   "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+   "skills/hep-theory/references/cosmic-ray-propagation.md"
   ],
   "reconstruction": [
    "skills/hep-detector/references/event-reconstruction.md",
@@ -4343,7 +4625,9 @@
   ],
   "statistic": [
    "skills/hep-authoring/references/diagrams-statistics.md",
-   "skills/hep-authoring/references/statistics-and-ml-papers.md"
+   "skills/hep-authoring/references/statistics-and-ml-papers.md",
+   "skills/hep-statistics/references/astroparticle-statistics.md",
+   "skills/hep-statistics/references/pdf-fit-statistics.md"
   ],
   "statistical": [
    "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -4354,6 +4638,10 @@
    "skills/hep-ml/references/evaluation-strategy.md",
    "skills/hep-ml/references/parallelism-strategy.md"
   ],
+  "structure": [
+   "skills/hep-theory/references/dis-structure-functions.md",
+   "skills/hep-theory/references/hadron-structure-essentials.md"
+  ],
   "style": [
    "skills/hep-authoring/references/diagram-figure-style.md",
    "skills/hep-authoring/references/reviewer-style-assessment.md",
@@ -4361,7 +4649,8 @@
   ],
   "system": [
    "skills/hep-detector/references/detector-systems-overview.md",
-   "skills/hep-detector/references/muon-systems.md"
+   "skills/hep-detector/references/muon-systems.md",
+   "skills/hep-detector/references/system-design-workflow.md"
   ],
   "task": [
    "skills/hep-computing/references/task-authoring-guide.md",

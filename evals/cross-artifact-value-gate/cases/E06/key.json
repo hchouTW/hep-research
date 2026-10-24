@@ -1,0 +1,21 @@
+{
+ "kind": "error",
+ "category": "C03",
+ "planter": "ai",
+ "summary": "The per-bin selection efficiency, which is a function of true rigidity, is divided out of the reco-binned counts before unfolding instead of from the unfolded truth-bin counts.",
+ "code_change": "analyse(): s and var are divided by eff_sel_hat (and eff_sel_hat**2) before unfold(); denom no longer contains eff_sel_hat.",
+ "description_change": "recipe.json: step 'efficiency' moved before 'unfold'; response artifacts: correction_space of selection_efficiency changed to space 'reco'.",
+ "affected": [
+  "efficiency",
+  "unfold",
+  "selection_efficiency",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

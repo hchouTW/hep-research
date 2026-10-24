@@ -1,0 +1,961 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "ams-like-v1-design-report",
+ "artifact_type": "communication",
+ "objective": "detector system design: communication written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "design-spec.v1.json",
+   "sha256": "6f181c634612149f9a781b5a419378e51b028194d3afbcf28f4621ae6962e5ac",
+   "artifact_type": "design-spec",
+   "artifact_id": "ams-like-v1-spec-v1",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-CC-L.json",
+   "sha256": "e4faedd15b98bd5c35065cd20a18d0cd3d8146e57a58f07a2a1c54a1c291aa7a",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-CC-L",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-CC-P.json",
+   "sha256": "abcfea6e4994303d5e82f8c80099c81cde7c9bc5abc3d0b0f1dddcc7ad85ff8f",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-CC-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-CC-S.json",
+   "sha256": "fabea775840c6c3a23bbb91a1d922b71d7f027275aa8d4c97a67641f633cb332",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-CC-S",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-MASS-L.json",
+   "sha256": "ae0bdcf93738127d80d39bca6ef48eac7bc15eda7127cea9fa00a5257739ba91",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-MASS-L",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-MASS-P.json",
+   "sha256": "1c5a30c4183b890f974b79bbf254a6d7c9ecfc6d8aa6c3d23ec44eed38425f85",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-MASS-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-MASS-S.json",
+   "sha256": "852879e93afe2a523f0676d5ab31acdfda7c77c0469716a7a8ff68f13c6b1647",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-MASS-S",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-L.json",
+   "sha256": "0e351db2af0631539f7f89b2f08655381c5d9787d65781d1e3e8f38255765d16",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-TRK-L",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-P.json",
+   "sha256": "4cd932ff636b0366f61a90fdb857eb0974f078dab86cc93c24ed2207dfa9ed66",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-TRK-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-S.json",
+   "sha256": "fa03c800db52c819f7bb8e38046abc266b379317f831171e4b6f5c5c569344c8",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-TRK-S",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "reports/design-report.md"
+  }
+ ],
+ "status": [
+  "unvalidated",
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "claims": [
+   {
+    "text": "ams-like-v1:REQ-TRK-001 for ams-like-v1:cand-L: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:REQ-TRK-001 for ams-like-v1:cand-P: fail (bound.excludes)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:REQ-TRK-001 for ams-like-v1:cand-S: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:REQ-CC-001 for ams-like-v1:cand-L: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:REQ-CC-001 for ams-like-v1:cand-P: fail (bound.excludes)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:REQ-CC-001 for ams-like-v1:cand-S: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:CON-MASS-001 for ams-like-v1:cand-L: pass (provisional) (estimate.decides)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:CON-MASS-001 for ams-like-v1:cand-P: pass (provisional) (estimate.decides)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "ams-like-v1:CON-MASS-001 for ams-like-v1:cand-S: pass (provisional) (estimate.decides)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   }
+  ],
+  "sources_read": [],
+  "limitations": [
+   "derived by contracts/design.py; verdicts guard against oversight, not deliberate forgery (LIM-02)",
+   "the review axis is advisory: only a valid human design-baseline record sets it (LIM-01)"
+  ],
+  "design_report": {
+   "design_id": "ams-like-v1",
+   "note": "derived by contracts/design.py from the artifacts; verdicts guard against oversight and shortcuts, not deliberate forgery (LIM-02), and authorize nothing",
+   "adequacy": {
+    "version": "1.1.0",
+    "state": "initial-default",
+    "frozen": false,
+    "provisional_pass": true
+   },
+   "status": "ok",
+   "current_spec": "design-spec.v1.json",
+   "spec_version": 1,
+   "gate_flags": [
+    "gate.H1_missing",
+    "gate.H2_missing",
+    "gate.H3_missing"
+   ],
+   "gates": [
+    {
+     "category": "design-scope",
+     "clear": false,
+     "records": [],
+     "content": null
+    },
+    {
+     "category": "requirements-baseline",
+     "clear": false,
+     "records": [],
+     "content": null
+    },
+    {
+     "category": "architecture-selection",
+     "clear": false,
+     "records": []
+    }
+   ],
+   "candidates": [
+    {
+     "effective_candidate": "0e69672e662c8e1d33564030a9045f2b440cc92147bfb1d41d43e58d71051940",
+     "candidates": [
+      "ams-like-v1:cand-L"
+     ],
+     "screened_out": false,
+     "screened_out_reasons": [],
+     "at_risk": []
+    },
+    {
+     "effective_candidate": "5fcb43056cb57ecebc4a5c3dc8eac1b01e28fe6a4b3869127f55b45d9dc0e665",
+     "candidates": [
+      "ams-like-v1:cand-P"
+     ],
+     "screened_out": true,
+     "screened_out_reasons": [
+      "ams-like-v1:REQ-TRK-001 fails",
+      "ams-like-v1:REQ-CC-001 fails"
+     ],
+     "at_risk": []
+    },
+    {
+     "effective_candidate": "a2820642576cce42bb41d99bb88017f8dbb48e0cd25d70f2c2562acc92e9dd21",
+     "candidates": [
+      "ams-like-v1:cand-S"
+     ],
+     "screened_out": false,
+     "screened_out_reasons": [],
+     "at_risk": []
+    }
+   ],
+   "requirements": [
+    {
+     "id": "ams-like-v1:REQ-TRK-001",
+     "kind": "driving",
+     "quantity": "momentum-resolution-core",
+     "comparator": "<=",
+     "target": 0.5,
+     "unit": "1",
+     "matrix": [
+      {
+       "effective_candidate": "0e69672e662c8e1d33564030a9045f2b440cc92147bfb1d41d43e58d71051940",
+       "candidates": [
+        "ams-like-v1:cand-L"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-TRK-L",
+         "file": "evaluations/CALC-TRK-L.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-TRK-L"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-TRK-L",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-L"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "momentum-resolution-core at F3 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "next-study"
+      },
+      {
+       "effective_candidate": "5fcb43056cb57ecebc4a5c3dc8eac1b01e28fe6a4b3869127f55b45d9dc0e665",
+       "candidates": [
+        "ams-like-v1:cand-P"
+       ],
+       "result": "fail",
+       "codes": [
+        "bound.excludes"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-TRK-P",
+         "file": "evaluations/CALC-TRK-P.json",
+         "row": 10,
+         "verdict": "fail",
+         "code": "bound.excludes",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-TRK-P"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "ams-like-v1:CALC-TRK-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-P"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-TRK-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-P"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "none: excluded by an optimistic bound; change the candidate or the requirement"
+       ],
+       "screened_out": true
+      },
+      {
+       "effective_candidate": "a2820642576cce42bb41d99bb88017f8dbb48e0cd25d70f2c2562acc92e9dd21",
+       "candidates": [
+        "ams-like-v1:cand-S"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-TRK-S",
+         "file": "evaluations/CALC-TRK-S.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-TRK-S"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-TRK-S",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-S"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "momentum-resolution-core at F3 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "next-study"
+      }
+     ]
+    },
+    {
+     "id": "ams-like-v1:REQ-CC-001",
+     "kind": "driving",
+     "quantity": "charge-confusion-rate",
+     "comparator": "<=",
+     "target": 0.05,
+     "unit": "1",
+     "matrix": [
+      {
+       "effective_candidate": "0e69672e662c8e1d33564030a9045f2b440cc92147bfb1d41d43e58d71051940",
+       "candidates": [
+        "ams-like-v1:cand-L"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-CC-L",
+         "file": "evaluations/CALC-CC-L.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "charge-confusion-rate",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-CC-L"
+          },
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-TRK-L"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-CC-L",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "charge-confusion-rate",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-CC-L"
+           },
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-L"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02)",
+        "charge-confusion-rate at F4 or above (compliance threshold)",
+        "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-L, now F1)",
+        "rigidity-scale-offset at F5 or above (required for compliance, ADQ-02)"
+       ],
+       "proposed_disposition": "next-study"
+      },
+      {
+       "effective_candidate": "5fcb43056cb57ecebc4a5c3dc8eac1b01e28fe6a4b3869127f55b45d9dc0e665",
+       "candidates": [
+        "ams-like-v1:cand-P"
+       ],
+       "result": "fail",
+       "codes": [
+        "bound.excludes"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-CC-P",
+         "file": "evaluations/CALC-CC-P.json",
+         "row": 10,
+         "verdict": "fail",
+         "code": "bound.excludes",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "charge-confusion-rate",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-CC-P"
+          },
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-TRK-P"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "ams-like-v1:CALC-CC-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "charge-confusion-rate",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-CC-P"
+           },
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-P"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-CC-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "charge-confusion-rate",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-CC-P"
+           },
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-P"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "none: excluded by an optimistic bound; change the candidate or the requirement"
+       ],
+       "screened_out": true
+      },
+      {
+       "effective_candidate": "a2820642576cce42bb41d99bb88017f8dbb48e0cd25d70f2c2562acc92e9dd21",
+       "candidates": [
+        "ams-like-v1:cand-S"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-CC-S",
+         "file": "evaluations/CALC-CC-S.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "charge-confusion-rate",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-CC-S"
+          },
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-TRK-S"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-CC-S",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "charge-confusion-rate",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-CC-S"
+           },
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-TRK-S"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02)",
+        "charge-confusion-rate at F4 or above (compliance threshold)",
+        "momentum-resolution-core at F3 or above (in the chain of ams-like-v1:CALC-CC-S, now F1)",
+        "rigidity-scale-offset at F5 or above (required for compliance, ADQ-02)"
+       ],
+       "proposed_disposition": "next-study"
+      }
+     ]
+    }
+   ],
+   "constraints": [
+    {
+     "id": "ams-like-v1:CON-MASS-001",
+     "kind": "hard",
+     "quantity": "mass-budget",
+     "comparator": "<=",
+     "target": 3000.0,
+     "unit": "kg",
+     "subsystems": [
+      "DES-TRK-001",
+      "DES-MAG-001"
+     ],
+     "matrix": [
+      {
+       "effective_candidate": "0e69672e662c8e1d33564030a9045f2b440cc92147bfb1d41d43e58d71051940",
+       "candidates": [
+        "ams-like-v1:cand-L"
+       ],
+       "result": "pass",
+       "codes": [
+        "estimate.decides"
+       ],
+       "provisional": true,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-MASS-L",
+         "file": "evaluations/CALC-MASS-L.json",
+         "row": 16,
+         "verdict": "pass",
+         "code": "estimate.decides",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "mass-budget",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-MASS-L"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "ams-like-v1:CALC-MASS-L",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-MASS-L"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-MASS-L",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-MASS-L"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": []
+      },
+      {
+       "effective_candidate": "5fcb43056cb57ecebc4a5c3dc8eac1b01e28fe6a4b3869127f55b45d9dc0e665",
+       "candidates": [
+        "ams-like-v1:cand-P"
+       ],
+       "result": "pass",
+       "codes": [
+        "estimate.decides"
+       ],
+       "provisional": true,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-MASS-P",
+         "file": "evaluations/CALC-MASS-P.json",
+         "row": 16,
+         "verdict": "pass",
+         "code": "estimate.decides",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "mass-budget",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-MASS-P"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "ams-like-v1:CALC-MASS-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-MASS-P"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-MASS-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-MASS-P"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": []
+      },
+      {
+       "effective_candidate": "a2820642576cce42bb41d99bb88017f8dbb48e0cd25d70f2c2562acc92e9dd21",
+       "candidates": [
+        "ams-like-v1:cand-S"
+       ],
+       "result": "pass",
+       "codes": [
+        "estimate.decides"
+       ],
+       "provisional": true,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "ams-like-v1:CALC-MASS-S",
+         "file": "evaluations/CALC-MASS-S.json",
+         "row": 16,
+         "verdict": "pass",
+         "code": "estimate.decides",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "mass-budget",
+           "fidelity": "F1",
+           "evaluation": "ams-like-v1:CALC-MASS-S"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "ams-like-v1:CALC-MASS-S",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-MASS-S"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "ams-like-v1:CALC-MASS-S",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "ams-like-v1:CALC-MASS-S"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": []
+      }
+     ]
+    }
+   ],
+   "orphan_runs": [],
+   "unavailable": [],
+   "stale_evaluations": [],
+   "comparison_basis": {
+    "declared": true,
+    "holds": true,
+    "quantity": "mass-budget",
+    "coverage_cl": 0.95,
+    "pairs": [
+     {
+      "candidates": [
+       [
+        "ams-like-v1:cand-L"
+       ],
+       [
+        "ams-like-v1:cand-S"
+       ]
+      ],
+      "evaluations": [
+       "ams-like-v1:CALC-MASS-L",
+       "ams-like-v1:CALC-MASS-S"
+      ],
+      "difference": 5.0,
+      "uncertainty_one_sided": 46.233628726298946,
+      "item_level": true,
+      "shared_items": [
+       "DES-MAG-001"
+      ],
+      "tolerance": 119.875,
+      "holds": true
+     }
+    ],
+    "note": "candidates are compared at equal mass; the magnet is the same 0.14 T permanent magnet in every candidate (the outer tracker planes sit outside it, as in the AMS-02 layout), so its catalog mass is shared and cancels; the uniform-field resolution model belongs to the optimistic F1 bound, not to the magnet's mass",
+    "reason": null
+   },
+   "ranking": {
+    "status": "refused",
+    "reason": "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
+   },
+   "pareto": {
+    "status": "refused",
+    "axes": [
+     "expected-precision",
+     "mass-budget"
+    ],
+    "reason": "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
+   },
+   "errors": [],
+   "review": {
+    "reviewed": false,
+    "record": null,
+    "records": [],
+    "note": "advisory: the actor is self-declared; formal approval is a trusted gate outside the agent (LIM-01)"
+   },
+   "baseline": "draft",
+   "omitted_from_rendering": []
+  }
+ }
+}

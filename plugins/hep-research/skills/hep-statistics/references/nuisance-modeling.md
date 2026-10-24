@@ -67,11 +67,9 @@ Frequentist constraint terms are auxiliary measurements, not priors: `shape-limi
 channels is one parameter. A model card (`contracts/schemas/statistical_model.json`, nested in a statistical-result)
 records channels, samples, constraints with their `aux_id` and the toy ensemble; the contract refuses a duplicated
 auxiliary measurement, and `<plugin root>/adapters/pyhf-combine/assets/model_card.py` builds the pyhf workspace and runs
-Asimov closure (an omitted signal contamination of a control region is detected there). Across files, the opt-in
-check `<plugin root>/contracts/analysis_check.py freeze --mode model`, then `check`, asks whether each pairing is one the
-converter supports (`contracts/semantics/model_pairings.json`; anything else is unsupported), and whether an
-observation bound to two constraints (`observes` bindings: item and pointer) enters one evaluation twice. It is a
-diagnostic in shadow mode: it authorizes nothing, and adapter output confirms structure, never independence.
+Asimov closure (an omitted signal contamination of a control region is detected there). Adapter output confirms
+structure, never independence. (The cross-artifact check's model-card suite, which compared cards across files, was
+removed in 0.28.0.)
 
 Combine (documentation for the recommended tag v11.1.0, read 2026-10-03). Execution scope: Combine 11.1.0 has run one
 synthetic counting datacard (`adapters/pyhf-combine/assets/combine_datacard_template.txt`, `AsymptoticLimits`, against
@@ -103,7 +101,9 @@ hi/lo = 1.1/0.9):
 | asymmetric 1.3/0.95, `code1` | 19.4936 | 22.8035 | 2.0525 |
 
 At `theta = +-1` and beyond the two codes agree exactly. For a nearly symmetric variation the limit moves by 0.05%;
-for an asymmetric one by 3%. The difference grows with the asymmetry and with how far the fit pulls the nuisance.
+for an asymmetric one by 3%. The difference grows with the asymmetry of the variation, not with the pull: it is
+confined to `0 < |theta| < 1`, vanishes at `theta = 0` and for `|theta| >= 1`, and peaks near `|theta| ~ 0.3` (for
+1.3/0.95 the `code4` yield factor there is about 1.5% below `code1`).
 
 ## Two-point and one-sided systematics
 

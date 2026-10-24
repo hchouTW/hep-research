@@ -1,0 +1,260 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "dispm-prediction-fl-toy-grid",
+ "artifact_type": "prediction",
+ "objective": "F_L at O(alpha_s) and LO F_2 on SYNTHETIC toy densities (demonstration of the machinery, not a statement about any nucleon)",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:dis-parton-model",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "profiles": {
+   "theory:dis-parton-model": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-23",
+  "evidence_ids": [
+   "dispm:C01",
+   "dispm:C02",
+   "dispm:C03",
+   "dispm:C04"
+  ]
+ },
+ "inputs": [
+  {
+   "ref": "derivations/theory-spec.json",
+   "artifact_type": "theory-spec",
+   "artifact_id": "dispm-theory-spec-fl-alpha-s",
+   "status": [
+    "synthetic",
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "observable": {
+   "quantity": "dispm:structure-function",
+   "process": "neutral-current deep-inelastic lepton-nucleon scattering, photon exchange: F_L (O(alpha_s)) and F_2 (O(alpha_s^0))",
+   "variables": [
+    {
+     "name": "x",
+     "unit": "1",
+     "points": [
+      0.001,
+      0.01,
+      0.05,
+      0.1,
+      0.3,
+      0.6
+     ]
+    },
+    {
+     "name": "Q2",
+     "unit": "GeV^2",
+     "points": [
+      10.0,
+      100.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "inclusive structure functions at the stated (x, Q^2) points; no final-state selection",
+    "fiducial": false
+   },
+   "level": "dispm:inclusive",
+   "frame": "not-applicable (invariant structure functions)",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": "not-applicable",
+    "convention": "absolute, dimensionless structure functions: no luminosity, exposure or unit-area normalization enters (the vocabulary has no 'none' kind)"
+   },
+   "bin_semantics": "point",
+   "unit": "1",
+   "conventions": {
+    "unit_system": "natural-HEP: Q^2 in GeV^2; x, F_2, F_L and alpha_s are dimensionless",
+    "energy_variable": "Bjorken x = Q^2/(2 M nu) and Q^2 = -q^2 (PDG Sec. 18.1)",
+    "scales": "mu_R = mu_F = Q [dispm:C04]; alpha_s(Q^2) is an input per Q^2 point (toy values in the benchmark, not run)",
+    "mass_approximation": "massless quarks (n_f effectively massless flavours); target mass neglected (O(M^2/Q^2) dropped, PDG Eq. 18.21)",
+    "exchanged_bosons": "photon only (F_2^gamma of PDG Eq. 18.18); no Z or W exchange",
+    "heavy_quark_scheme": "zero-mass: all n_f flavours massless (toy n_f = 4); no heavy-quark mass effects",
+    "target_normalization": "per nucleon: structure functions of one nucleon; the toy densities describe one invented nucleon",
+    "dispm:observable": "F_2(x, Q^2) at O(alpha_s^0) = x sum_q e_q^2 (q + qbar) [dispm:C01]; F_L(x, Q^2) at O(alpha_s^1) = F_2 - 2 x F_1, in the Altarelli-Martinelli form derived in derivations/derivation-record.md",
+    "dispm:parton_densities": "number densities q(x), qbar(x), g(x) (not momentum densities x f); convolution C (x) f = int_x^1 dy/y C(y) f(x/y) [dispm:C02]; in this profile they are SYNTHETIC Beta-form toys"
+   },
+   "validity_range": {
+    "x": [
+     0.001,
+     0.6
+    ],
+    "Q2": [
+     10.0,
+     100.0
+    ]
+   }
+  },
+  "theory_spec_ref": "derivations/theory-spec.json",
+  "derivation_status": "perturbative-argument",
+  "parameter_point": {
+   "toy_inputs": "benchmarks/toy-closed-form.json (SYNTHETIC)",
+   "alpha_s_at_Q2": {
+    "10.0": 0.25,
+    "100.0": 0.18
+   },
+   "n_f": 4,
+   "sum_e2": 1.1111111111111112,
+   "mu_R": "Q",
+   "mu_F": "Q"
+  },
+  "representation": "symbolic",
+  "expression": "F_L(x, Q^2) = (alpha_s(Q^2)/(4 pi)) x^2 int_x^1 dz/z^3 [ 4 C_F F_2(z) + 8 sum_q e_q^2 (1 - x/z) z g(z) ], C_F = 4/3; F_2(z) = z sum_q e_q^2 (q(z) + qbar(z))",
+  "point_values": {
+   "about": "the expression evaluated at the toy points (SYNTHETIC); one row per (x, Q^2)",
+   "rows": [
+    {
+     "x": 0.001,
+     "q2_gev2": 10.0,
+     "alpha_s": 0.25,
+     "F2": 1.1735853815471122,
+     "FL": 0.35304305722720036,
+     "FL_quadrature_error": 3.9195652617912065e-15
+    },
+    {
+     "x": 0.01,
+     "q2_gev2": 10.0,
+     "alpha_s": 0.25,
+     "F2": 0.7732809758653713,
+     "FL": 0.20411718588387495,
+     "FL_quadrature_error": 2.2661559948967685e-15
+    },
+    {
+     "x": 0.05,
+     "q2_gev2": 10.0,
+     "alpha_s": 0.25,
+     "F2": 0.5579338506259269,
+     "FL": 0.10102699299297588,
+     "FL_quadrature_error": 5.948422442468273e-15
+    },
+    {
+     "x": 0.1,
+     "q2_gev2": 10.0,
+     "alpha_s": 0.25,
+     "F2": 0.4469606745261674,
+     "FL": 0.05652408470154315,
+     "FL_quadrature_error": 6.275434028151577e-16
+    },
+    {
+     "x": 0.3,
+     "q2_gev2": 10.0,
+     "alpha_s": 0.25,
+     "F2": 0.21187517983259463,
+     "FL": 0.009235207905767501,
+     "FL_quadrature_error": 1.0253140454183352e-16
+    },
+    {
+     "x": 0.6,
+     "q2_gev2": 10.0,
+     "alpha_s": 0.25,
+     "F2": 0.04679346942176047,
+     "FL": 0.000654743596686754,
+     "FL_quadrature_error": 7.269114162675215e-18
+    },
+    {
+     "x": 0.001,
+     "q2_gev2": 100.0,
+     "alpha_s": 0.18,
+     "F2": 1.1735853815471122,
+     "FL": 0.25419100120358423,
+     "FL_quadrature_error": 2.8220869884896684e-15
+    },
+    {
+     "x": 0.01,
+     "q2_gev2": 100.0,
+     "alpha_s": 0.18,
+     "F2": 0.7732809758653713,
+     "FL": 0.14696437383638997,
+     "FL_quadrature_error": 1.6316323163256733e-15
+    },
+    {
+     "x": 0.05,
+     "q2_gev2": 100.0,
+     "alpha_s": 0.18,
+     "F2": 0.5579338506259269,
+     "FL": 0.07273943495494263,
+     "FL_quadrature_error": 4.2828641585771564e-15
+    },
+    {
+     "x": 0.1,
+     "q2_gev2": 100.0,
+     "alpha_s": 0.18,
+     "F2": 0.4469606745261674,
+     "FL": 0.04069734098511107,
+     "FL_quadrature_error": 4.518312500269135e-16
+    },
+    {
+     "x": 0.3,
+     "q2_gev2": 100.0,
+     "alpha_s": 0.18,
+     "F2": 0.21187517983259463,
+     "FL": 0.006649349692152601,
+     "FL_quadrature_error": 7.382261127012014e-17
+    },
+    {
+     "x": 0.6,
+     "q2_gev2": 100.0,
+     "alpha_s": 0.18,
+     "F2": 0.04679346942176047,
+     "FL": 0.00047141538961446286,
+     "FL_quadrature_error": 5.233762197126155e-18
+    }
+   ],
+   "checks": {
+    "FL_non_negative": true,
+    "FL_not_above_F2": true,
+    "FL_vanishes_as_alpha_s_to_0": true,
+    "convolution_route_equals_AM_form": true,
+    "quadrature_error_below_tolerance": true
+   }
+  },
+  "uncertainties": [
+   {
+    "name": "quadrature error estimate of F_L (adaptive, relative tolerance 1e-13)",
+    "kind": "numerical",
+    "correlation": "unknown",
+    "gaussian": false,
+    "values": [
+     3.9195652617912065e-15,
+     2.2661559948967685e-15,
+     5.948422442468273e-15,
+     6.275434028151577e-16,
+     1.0253140454183352e-16,
+     7.269114162675215e-18,
+     2.8220869884896684e-15,
+     1.6316323163256733e-15,
+     4.2828641585771564e-15,
+     4.518312500269135e-16,
+     7.382261127012014e-17,
+     5.233762197126155e-18
+    ]
+   }
+  ],
+  "allowed_transformations": [
+   "re-evaluation with other densities and alpha_s values (predict.py --config)",
+   "never compare with data: the inputs are synthetic"
+  ]
+ }
+}

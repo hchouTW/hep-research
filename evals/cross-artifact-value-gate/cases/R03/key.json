@@ -1,0 +1,15 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "Efficiency correction and exposure division are merged into one division by the effective exposure (efficiencies x acceptance x livetime x cutoff fraction); the product is unchanged.",
+ "code_change": "analyse(): eff_expo = eff_trig_hat * eff_sel_hat * expo; denom = eff_expo * WIDTH.",
+ "description_change": "recipe.json: steps 'efficiency' and 'exposure' replaced by one step 'effective-exposure' (divide_effective_exposure).",
+ "affected": [
+  "efficiency",
+  "exposure",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2"
+ ]
+}

@@ -75,6 +75,8 @@ EXTENSION_SCHEMAS = {
     "ml-artifact": "ext_ml_artifact.json", "computational-run": "ext_computational_run.json",
     "communication": "ext_communication.json", "dataset-record": "ext_dataset_record.json",
     "literature-record": "ext_literature_record.json",
+    "design-spec": "ext_design_spec.json", "design-candidate": "ext_design_candidate.json",
+    "design-evaluation": "ext_design_evaluation.json",
 }
 # Statuses that must survive every handoff: a consumer of such an input carries the label.
 STICKY_STATUSES = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]
@@ -1169,7 +1171,8 @@ def _term_ok(vocab: Vocabulary, name: str, term) -> bool:
 def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report) -> None:
     conv: Any = ext.get("conventions") if isinstance(ext.get("conventions"), dict) else {}
     listed = set(ext.get("inapplicable") or [])
-    core_keys = sorted(vocab.core("convention_keys"))
+    # conditional keys (contracts 3.10.0) are required only by the module that names them, not by every derivation
+    core_keys = sorted(vocab.core("convention_keys") - vocab.core("conditional_convention_keys"))
     absent = [k for k in core_keys if k not in listed and (conv.get(k) is None or (isinstance(conv.get(k), str)
                                                                                   and not conv[k].strip()))]
     if absent:
@@ -1445,6 +1448,15 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
     if "efficiency" in bare and any(c.endswith("_efficiency") for c in bare):
         rep.add("error", f"{x}.corrections", "measurement.correction_category_repeated",
                 "a bare 'efficiency' next to a '<x>_efficiency' factor counts the efficiency twice")
+    elif len({n for n, b in zip(normed, bare) if b == "efficiency"}) > 1 and len(set(normed)) == len(normed):
+        # The same total efficiency under two namespaces ('efficiency' and '<ns>:efficiency'): _correction_classes
+        # folds both into one class, but the error above needs a '_efficiency' suffix and the repeated-category error
+        # keeps the namespace. A warning, not an error, so no artifact changes outcome (an error would be a contracts
+        # major, docs/maintenance.md "Schema migration").
+        both = sorted({c for c, b in zip(cats, bare) if b == "efficiency"})
+        rep.add("warning", f"{x}.corrections", "measurement.efficiency_counted_twice_namespaced",
+                f"categories {both} are the same efficiency under different namespaces: it is counted twice; keep one, "
+                "or factorize it (trigger_efficiency, selection_efficiency, ...)")
     included = obs.get("included_corrections") if isinstance(obs.get("included_corrections"), list) else []
     chain = {_norm_id(c.get("effect_id", "")) for c in corrs} | set(normed)
     for item in included:

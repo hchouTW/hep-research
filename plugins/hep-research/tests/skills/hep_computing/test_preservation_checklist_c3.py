@@ -15,7 +15,7 @@ class PreservationChecklist(unittest.TestCase):
 
     def test_every_required_item_is_listed(self):
         for item in ("environment_manifest.py", "input_manifest", "recipe", "analysis_bundle_v2", "semantic lock",
-                     "--snapshots", "result_binding", "re-fold", "rehears"):
+                     "--snapshots", "computational-run", "re-fold", "rehears"):
             with self.subTest(item=item):
                 self.assertIn(item, self.text)
 

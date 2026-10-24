@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-022",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S2",
  "ledger": [
   "ML-K05"
@@ -44,9 +46,15 @@
   "artifact_types": [
    "ml-artifact"
   ],
-  "extension_keys": [
-   "domain_shift"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.domain_shift",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "record domain_shift.outcome and, if the shift is not corrected, carry it as a nuisance in the downstream fit; validate the artifact again with a release that has the fix",
  "references": [

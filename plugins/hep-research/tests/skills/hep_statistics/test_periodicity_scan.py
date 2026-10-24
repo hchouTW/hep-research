@@ -102,6 +102,54 @@ class Power(unittest.TestCase):
         self.assertEqual(code, 2, out)
 
 
+@unittest.skipUnless(HAVE, "NumPy and SciPy needed")
+class NullFitOption(unittest.TestCase):
+    """sci-fix PERIODICITY-REFIT: the red-noise p refits the null by default; --null-fit once keeps the single-level
+    numbers of releases 0.14.0-0.23.0 (values pinned from release 0.23.0, a53af7e0: a reproducibility check, not an
+    oracle); the white null is unchanged."""
+    PINNED = {"white": (0.43137254901960786, None), "ar1": (0.9607843137254902, 0.31566059439045313),
+              "ou": (1.0, 1.4232384641644635)}
+
+    def series(self):
+        rng = np.random.default_rng(42)
+        t = np.sort(rng.uniform(0, 100, 60))
+        e = 0.5 + rng.random(60)
+        y = rng.normal(0, e) + np.cumsum(rng.normal(size=60)) * 0.3
+        return t, y, e, np.linspace(0.01, 0.5, 80)
+
+    def test_once_reproduces_release_0_23_0(self):
+        import periodicity_scan as ps
+        t, y, e, f = self.series()
+        for null, (p, par) in self.PINNED.items():
+            with self.subTest(null=null):
+                out = ps.scan(t, y, e, f, [0.02, 0.4], null, 50, 7, "once")
+                self.assertEqual(out["global"]["p"], p)
+                if par is not None:
+                    self.assertEqual(out["null_model"]["phi" if null == "ar1" else "tau"], par)
+        white = ps.scan(t, y, e, f, [0.02, 0.4], "white", 50, 7)  # the default: one level for white
+        self.assertEqual(white["global"]["p"], self.PINNED["white"][0])
+        self.assertEqual(white["global"]["null_fit"], "not-applicable")
+
+    def test_cli_default_refits_and_records_it(self):
+        doc = dict(irregular_series(60, 9), frequencies={"min": 0.01, "max": 0.5, "n": 40})
+        code, out = run(doc, "--null", "ar1", "--surrogates", "20", "--seed", "3", "--inner-surrogates", "9")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(out["global"]["null_fit"], "refit")
+        self.assertEqual(out["global"]["inner_surrogates"], 9)
+        self.assertIn("null_fit", out["defaults_used"])
+        self.assertNotIn("inner_surrogates", out["defaults_used"])
+        self.assertTrue(out["null_model"]["bias_corrected"])
+        code, out = run(doc, "--null", "ou", "--surrogates", "20", "--seed", "3", "--null-fit", "once")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(out["global"]["null_fit"], "once")
+        self.assertIn("anti-conservative", out["global"]["calibration_note"])
+        code, out = run(doc, "--null", "ar1", "--surrogates", "20", "--seed", "3", "--inner-surrogates", "0")
+        self.assertEqual(code, 2, out)
+        code, out = run(doc, "--null", "ar1", "--surrogates", "1000", "--seed", "3", "--inner-surrogates", "5000")
+        self.assertEqual(code, 2, out)  # 5.0e6 surrogate series > the 4e6 cap
+        self.assertIn("--allow-outside-validated-range", out["error"])
+
+
 @unittest.skipUnless(HAVE and SLOW, "slow: set HEP_SLOW_TESTS=1")
 class NullCalibrationSlow(unittest.TestCase):
     def test_global_p_uniform_under_white_noise(self):

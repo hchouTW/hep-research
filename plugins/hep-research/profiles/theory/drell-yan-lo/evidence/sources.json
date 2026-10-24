@@ -1,0 +1,38 @@
+[
+ {
+  "id": "dylo:S01",
+  "title": "Cross-Section Formulae for Specific Processes (Review of Particle Physics, section 51)",
+  "authors": "H. Baer and R.N. Cahn (revised August 2019); in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+  "year": 2026,
+  "identifiers": {"dois": [], "arxiv_ids": [], "inspire_record_id": null,
+                  "url": "https://pdg.lbl.gov/2026/reviews/rpp2026-rev-cross-section-formulae.pdf"},
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-23",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Read on 2026-10-23 from a downloaded copy of the 2026 PDF (page footer '1st June, 2026') and its text extraction: Sec. 51.2, Eqs. (51.2)-(51.3) on page 1, and Sec. 51.6, Eqs. (51.39)-(51.42) on page 7."
+ },
+ {
+  "id": "dylo:S02",
+  "title": "Interpretation of Angular Distributions of Z-boson Production at Colliders",
+  "authors": "J.-C. Peng, W.-C. Chang, R.E. McClellan and O. Teryaev",
+  "year": 2016,
+  "identifiers": {"dois": ["10.1016/j.physletb.2016.05.035"], "arxiv_ids": ["1511.08932"], "inspire_record_id": null,
+                  "url": "https://arxiv.org/abs/1511.08932v3"},
+  "tier": 2,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-23",
+  "publication_date": "2016-05-17 (arXiv v3)",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Peng, Chang, McClellan and Teryaev",
+  "notes": "Read in full on 2026-10-23 from the arXiv v3 PDF and its text extraction. Used: Eqs. (1)-(10) on pages 1-3 and the statement that at leading order in alpha_s the quark axis lies in the hadron plane (phi1 = 0) on page 4. v3 has no Eq. (11): lambda and nu for both channels are in Eq. (10). The paper's fitted channel mixtures and A2/A0 values come from fits to collider data and are not used. Published as Phys. Lett. B 758 (2016) 384 (journal reference and DOI confirmed at INSPIRE-HEP on 2026-10-23)."
+ }
+]

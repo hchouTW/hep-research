@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.5.0"
+CONTRACTS_VERSION = "3.12.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -125,6 +125,67 @@ CONTRACTS_VERSION = "3.5.0"
 # by advisory-named shared functions), written by contracts/trace.py, so a sci-fix advisory can tell whether the
 # affected code was loaded for an artifact. No capability: provenance has no additionalProperties limit, so a 3.4
 # reader accepts and ignores both, and an artifact without them reads exactly as in 3.4.0.
+# 3.6.0 (independent review; docs/dev/independent-review-spec.md sections 5.1, 5.3, 6.10, 7.6 and A8) adds the
+# optional expert slot of round 1: the review_config field expert ({"model": M}), the review_record role expert (a
+# record with claims, verdicts and findings but no skim, carry_forward or resolves, checked by contracts.review
+# record_rules and receipt_codes with the reason code finding_without_verdict), and the optional round_started data
+# key expert {slot_id, model}. A configuration, log or record without them reads exactly as in 3.5.0. No capability:
+# like every review file they live under <project>/reviews/, never in an artifacts_dir, and no artifact type,
+# vocabulary term or envelope field changes; a 3.5 driver refuses a configuration with expert as config_out_of_range
+# and a record with role expert as schema_invalid instead of misreading either.
+# 3.7.0 (cross-artifact check architecture Phase 0, release R1; docs/dev/cross-artifact-check/decision-phase0.md)
+# moves the rule registry to registry_version 1.1.0: each new or changed rule records source_sha256, the
+# function-level source digest of its implementation, and contracts/rule_registry.py fails when the code changes
+# without a new rule version; V-case parts gain the slices P0-P2 and work packages P<phase>.<nn> and WP-R. The
+# analysis check dispatches rules by (rule_id, version) and names its plugin_release in the report's assessment. No
+# artifact type, vocabulary term, envelope field or capability changes: the registry, the check report and the
+# bundle live outside an artifacts_dir, and a 3.6 reader refuses a 1.1.0 registry (schema enum) instead of misreading it.
+# 3.8.0 (cross-artifact check Phase 2, releases R2 and R3 shipped together; docs/dev/cross-artifact-check/m2a-design.md)
+# adds check-context 1.1.0 (no 'required'; paired with 1.1.0 suites), result binding 1.1.0 (campaigns[].inputs), the
+# rule registry 1.2.0 (keyed by rule_id and version, retired versions kept), SemVer pre-release suite versions, the
+# effect catalog 1.1.0 (description_required) and the stable 1.1.0 suites, now the default. The measurement
+# vocabulary response_corrections gains cutoff_transmission, survival and fragmentation_feeddown (catalog effects it
+# lacked). No artifact type, envelope field or capability changes. A 3.7 reader refuses a 1.1.0 check context, a 1.1.0
+# result binding and a 1.2.0 registry as invalid input instead of misreading them (refusal-matrix.md).
+# 3.9.0 (cross-artifact check value gate Shrink, architecture section 13.4; docs/dev/cross-artifact-check/
+# decision-value-gate.md and refusal-matrix.md) removes sidecar formats: the result binding
+# (contracts/schemas/result_binding.json), the model-card pairing contract (contracts/semantics/model_pairings.json and
+# its schema), model-only analysis bundles (mode "model") and the model-card and run-lineage suites. Readers refuse
+# them with the reason (bundle.removed, definition.suite_removed, permit.report_post_execution_removed). No artifact
+# type, vocabulary term, envelope field or capability changes; check reports are pre-execution only.
+# 3.10.0 (hadron structure, hep-theory Th14) adds 13 core convention keys (target_normalization, exchanged_bosons,
+# electroweak_scheme, em_coupling, structure_function_signs, heavy_quark_scheme, factorization_scheme,
+# target_mass_treatment, polarization_convention, xF_definition, rapidity_frame, azimuth_convention, log_accuracy) and
+# the core vocabulary conditional_convention_keys listing them: the theory-spec completeness warning
+# (theory.conventions_incomplete) skips them; the module that names a key requires it. Additive: a 3.9 reader warns on
+# the new keys and its comparison gate treats them as not comparable. No artifact type, envelope field or capability
+# changes.
+# 3.11.0 (detector system design spec, M0; docs/architecture.md section 4) adds the artifact types design-spec,
+# design-candidate and design-evaluation (contracts/schemas/ext_design_*.json; verdicts derived only by
+# contracts/design.py with the adequacy table contracts/rules/design_adequacy.json), the core vocabulary subsystem_roles,
+# the optional computational-run fields argv and script_sha256, tool contract 1.1.0 (positional arguments, config-file
+# fields and the per-operation design block; contract_version 1.0.0 or 1.1.0) and decision record 1.1.0 (the six design
+# categories, the seen marker 'not-applicable' and dispositions[], design categories only; record_version 1.0.0 or
+# 1.1.0; contracts/lineage.py). No capability is added (the 2.13.0 literature-record precedent): a 3.10 reader refuses
+# the new types, roles, run fields, sidecar versions and categories through the schema enums and additionalProperties
+# instead of misreading them, and every 3.10 artifact, 1.0.0 tool contract and 1.0.0 decision record keeps its outcome.
+# Detector design M1 extends the unreleased 3.11.0 (OQ-03): the tool contract 1.1.0 design block also has an
+# uncertainty location and the expressions budget, object, zip, config (a generated config file) and span; no
+# artifact field changes.
+# Detector design M2 extends it again (OQ-03): the envelope inputs[].binding ("parameters", TRC-06), the
+# computational-run parameter_digest (INC-02), the evaluation model_envelope (FID-05), the design-block keys
+# upstream_directions and the expression input_artifact, and the geometry mapping table
+# (contracts/rules/design_geometry.json, contracts/schemas/design_geometry.json). A 3.10 reader refuses the binding
+# value (schema enum) instead of reading a parameter-bound input as a stale hash.
+# Detector design M3 extends it again (OQ-03): the dataset-record optional design_measurement (F5), decision record
+# 1.1.0 artifacts[] binding "parameters" with parameter_digest (measurement-acceptance only, DEC-06), and the
+# expression parameters_all (CHN-14).
+# Detector design M4 extends it once more (OQ-03): the computational-run optional scan_summary (OQ-18, AGG-08) and the
+# design-spec comparison_basis.pareto_axes (CHN-06, RPT-07).
+# 3.12.0 (minor; detector design follow-ups of the M3 reviews): design-spec requirements[].covered_by (a derived
+# requirement names the driving one whose H4 disposition covers it, MAT-04 d) and constraints[].subsystems (the scope a
+# hard constraint covers; a candidate lacking one cannot pass it); adequacy table 1.1.0 upstream_value_checks (the
+# measured curvature offset must cover the offset a charge-confusion requirement assumes, ADQ-02).
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

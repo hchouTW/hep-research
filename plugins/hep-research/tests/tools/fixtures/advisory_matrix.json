@@ -1,0 +1,453 @@
+{
+ "_note": "Acceptance matrix of the shipped advisories (sci-fix improvement plan A1, PR-5). Synthetic extensions; every expected verdict is written by hand from the advisory's applies_to, never taken from the tool. with_trace adds provenance.code_paths = [] (an artifact of contracts 3.5.0 or later). A null negative means no field can tell (match []).",
+ "SFA-2026-001": {
+  "outputs_only": true
+ },
+ "SFA-2026-014": {
+  "outputs_only": true
+ },
+ "SFA-2026-015": {
+  "outputs_only": true
+ },
+ "SFA-2026-016": {
+  "outputs_only": true
+ },
+ "SFA-2026-017": {
+  "outputs_only": true
+ },
+ "SFA-2026-018": {
+  "outputs_only": true
+ },
+ "SFA-2026-019": {
+  "outputs_only": true
+ },
+ "SFA-2026-030": {
+  "outputs_only": true
+ },
+ "SFA-2026-036": {
+  "outputs_only": true
+ },
+ "SFA-2026-037": {
+  "outputs_only": true
+ },
+ "SFA-2026-038": {
+  "outputs_only": true
+ },
+ "SFA-2026-002": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.12.0",
+  "out_of_range": "0.18.0",
+  "positive": {
+   "splits": {
+    "grouping_key": "run",
+    "overlap_check": {
+     "tool": "check_split_integrity.py",
+     "result": "pass"
+    }
+   }
+  },
+  "negative": {
+   "splits": {
+    "grouping_key": "run"
+   }
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-003": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.12.0",
+  "out_of_range": "0.18.0",
+  "positive": {
+   "calibration": {
+    "method": "isotonic"
+   }
+  },
+  "negative": {
+   "splits": {
+    "grouping_key": "run"
+   }
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-005": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.6.0",
+  "out_of_range": "0.6.11",
+  "positive": {
+   "significance": {
+    "local_p": 0.01
+   }
+  },
+  "negative": {
+   "fit_status": "ok"
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-008": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.3.0",
+  "out_of_range": "0.4.0",
+  "positive": {
+   "construction": "feldman-cousins"
+  },
+  "negative": {
+   "fit_status": "ok"
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-009": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.3.0",
+  "out_of_range": "0.4.0",
+  "positive": {
+   "significance": {
+    "z": 3.1
+   }
+  },
+  "negative": {
+   "fit_status": "ok"
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-011": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.3.0",
+  "out_of_range": "0.4.0",
+  "positive": {
+   "results": {
+    "upper": 4.2
+   }
+  },
+  "negative": {
+   "fit_status": "ok"
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-007": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.6.0",
+  "out_of_range": "0.6.11",
+  "positive": {
+   "sampler": {
+    "name": "emcee"
+   }
+  },
+  "negative": {
+   "fit_status": "ok"
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-004": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.6.0",
+  "out_of_range": "0.6.11",
+  "positive": {
+   "fit_status": "ok"
+  },
+  "negative": null,
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-006": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.6.0",
+  "out_of_range": "0.6.11",
+  "positive": {
+   "fit_status": "ok"
+  },
+  "negative": null,
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-010": {
+  "artifact_type": "statistical-result",
+  "in_range": "0.3.0",
+  "out_of_range": "0.4.0",
+  "positive": {
+   "fit_status": "ok"
+  },
+  "negative": null,
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-020": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "splits": {
+    "grouping_key": "run",
+    "manifest": "splits.json"
+   }
+  },
+  "negative": {
+   "splits": {
+    "grouping_key": "run"
+   }
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  },
+  "before_field": {
+   "contract_version": "2.4.0",
+   "extension": {
+    "splits": {
+     "grouping_key": "run"
+    }
+   },
+   "expect": "possibly affected (no trace)"
+  }
+ },
+ "SFA-2026-021": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "calibration": {
+    "method": "platt"
+   }
+  },
+  "negative": {
+   "splits": {
+    "grouping_key": "run"
+   }
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-022": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "domain_shift": {
+    "outcome": "no-shift"
+   }
+  },
+  "negative": {
+   "splits": {
+    "grouping_key": "run"
+   }
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-024": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "weights": {
+    "policy": "signed"
+   }
+  },
+  "negative": {
+   "splits": {
+    "grouping_key": "run"
+   }
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-023": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "model_hash": "abc"
+  },
+  "negative": null,
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-025": {
+  "artifact_type": "ml-artifact",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "model_hash": "abc"
+  },
+  "negative": null,
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-031": {
+  "artifact_type": "computational-run",
+  "in_range": "0.3.0",
+  "out_of_range": "0.4.0",
+  "positive": {
+   "tools": [
+    {
+     "name": "slurm",
+     "version": "23"
+    },
+    {
+     "name": "hep-research core/partition runner",
+     "version": "abc"
+    }
+   ]
+  },
+  "negative": {
+   "tools": [
+    {
+     "name": "hadd",
+     "version": "6.32"
+    }
+   ]
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-032": {
+  "artifact_type": "communication",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "occurrences": [
+    {
+     "id": "o1"
+    }
+   ]
+  },
+  "negative": {
+   "claims": []
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-034": {
+  "artifact_type": "communication",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "occurrences": [
+    {
+     "id": "o1"
+    }
+   ]
+  },
+  "negative": {
+   "claims": []
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-035": {
+  "artifact_type": "communication",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "occurrences": [
+    {
+     "id": "o1"
+    }
+   ]
+  },
+  "negative": {
+   "claims": []
+  },
+  "expect": {
+   "positive_in_range": "affected",
+   "positive_in_range_with_trace": "affected",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-033": {
+  "artifact_type": "communication",
+  "in_range": "0.9.0",
+  "out_of_range": "0.10.0",
+  "positive": {
+   "claims": []
+  },
+  "negative": null,
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ }
+}

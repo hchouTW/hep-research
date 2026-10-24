@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-030",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S2",
  "ledger": [
   "BLINDING-SCANNER"
@@ -42,12 +44,14 @@
   "trigger": "a sealed value in a UTF-16 or Latin-1 log, in a figure drawn with fill_between, stackplot, hist2d, pcolormesh, imshow or text; or a short sealed value (0, 3, 0.5, 100) next to run names, versions or dates"
  },
  "applies_to": {
-  "artifact_types": [
-   "measurement-spec"
-  ],
-  "extension_keys": [
-   "blinding"
-  ]
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-computing/scripts/audit_blinded_outputs.py",
+    "contracts/scan_verdict.py"
+   ],
+   "how_to_recognize": "the blinding audit's JSON report (stdout, or --report FILE) and scan verdicts; the scanner writes no artifact, and a measurement-spec does not record that it ran"
+  }
  },
  "remedy": "rescan the outputs and figures of the blinded analysis with a release that has the fix (audit_blinded_outputs.py); a new hit means a blinded value was exposed and goes to the custodian",
  "references": [

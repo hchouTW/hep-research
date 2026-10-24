@@ -1,0 +1,185 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "spectrometer-demo-cand-P",
+ "artifact_type": "design-candidate",
+ "objective": "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers",
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "candidate_id": "spectrometer-demo:cand-P",
+  "design_id": "spectrometer-demo",
+  "description": "probe: deliberately too-short lever arm",
+  "subsystems": {
+   "DES-TRK-001": {
+    "role": "tracking",
+    "technology": "silicon microstrip",
+    "parameters": {
+     "layer_positions_m": {
+      "value": [
+       0.0,
+       0.075,
+       0.15,
+       0.225,
+       0.3
+      ],
+      "unit": "m",
+      "source": "fixture proposal",
+      "status": "proposal"
+     },
+     "point_resolution_um": {
+      "value": 10.0,
+      "unit": "um",
+      "source": "fixture proposal",
+      "status": "proposal"
+     },
+     "layer_x_over_x0": {
+      "value": [
+       0.01,
+       0.01,
+       0.01,
+       0.01,
+       0.01
+      ],
+      "unit": "1",
+      "source": "fixture proposal",
+      "status": "proposal"
+     },
+     "passive_x_over_x0": {
+      "value": 0.03,
+      "unit": "1",
+      "source": "fixture proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-MAG-001"
+    ],
+    "calibration": {
+     "method": "track-based alignment with cosmic and beam-like control samples",
+     "control_samples": [
+      "synthetic control sample"
+     ]
+    }
+   },
+   "DES-MAG-001": {
+    "role": "bending",
+    "technology": "permanent magnet",
+    "parameters": {
+     "field_T": {
+      "value": 0.5,
+      "unit": "T",
+      "source": "fixture proposal",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "field map from Hall-probe survey",
+     "control_samples": [
+      "synthetic control sample"
+     ]
+    }
+   }
+  },
+  "budgets": {
+   "mass": {
+    "DES-TRK-001": {
+     "allocation": 180.0,
+     "estimate": 150.0,
+     "uncertainty": 30.0,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 2400.0,
+     "estimate": 2000.0,
+     "uncertainty": 400.0,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "power": {
+    "DES-TRK-001": {
+     "allocation": 150.0,
+     "estimate": 125.0,
+     "uncertainty": 25.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "W",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "channel_count": {
+    "DES-TRK-001": {
+     "allocation": 120000.0,
+     "estimate": 100000.0,
+     "uncertainty": 20000.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "1",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    }
+   },
+   "data_rate": {
+    "DES-TRK-001": {
+     "allocation": 3.0,
+     "estimate": 2.5,
+     "uncertainty": 0.5,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "Mbit/s",
+     "basis": "estimate",
+     "source": "fixture engineering estimate",
+     "fidelity": "F1"
+    }
+   }
+  }
+ }
+}

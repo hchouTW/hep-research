@@ -35,6 +35,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SHINGLE = 8
 CONTAINMENT = 0.15  # also list a pair when this share of the smaller file's shingles is in the other
 RECORDS = {"CHANGELOG.md", "VALIDATION.md"}
+MAINTENANCE_LISTS = {"tools/wiring_known_gaps.json"}  # lists pages to check them, does not cite them
 MAX_GROUP = 4       # a name token shared by more files than this is a topic word, not a family
 ROUTING_SOFT_BYTES = 4096
 REFERENCE_SOFT_BYTES = 24576
@@ -59,10 +60,11 @@ def corpus(root: Path) -> dict[str, str]:
     out = {}
     for p in root.rglob("*"):
         rel = p.relative_to(root)
-        # docs/ (the inventory itself, maintenance maps), the change records and the release manifests (which list
-        # every file) are not citations
+        # docs/ (the inventory itself, maintenance maps), the change records, the release manifests (which list
+        # every file) and the wiring lint's known gaps are not citations
         if (p.is_file() and p.suffix in (".md", ".json", ".py") and "__pycache__" not in p.parts
-                and rel.parts[0] not in ("docs", "release-manifests") and rel.as_posix() not in RECORDS):
+                and rel.parts[0] not in ("docs", "release-manifests")
+                and rel.as_posix() not in RECORDS | MAINTENANCE_LISTS):
             try:
                 out[p.relative_to(root).as_posix()] = p.read_text(encoding="utf-8")
             except UnicodeDecodeError:

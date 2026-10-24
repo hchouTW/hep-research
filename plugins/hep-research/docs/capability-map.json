@@ -151,14 +151,19 @@
   },
   {
    "id": "detector-design",
-   "capability": "Detector design principles and a sourced detector atlas",
+   "capability": "Detector design principles, a sourced detector atlas, and the system design loop (derived verdicts)",
    "owner": "hep-detector",
    "state": "tool",
    "v1": true,
    "items": [
     "D6",
     "D13",
-    "D14"
+    "D14",
+    "DSD-M0",
+    "DSD-M1",
+    "DSD-M2",
+    "DSD-M3",
+    "DSD-M4"
    ]
   },
   {
@@ -295,7 +300,7 @@
   },
   {
    "id": "cosmic-ray-propagation",
-   "capability": "Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation",
+   "capability": "Cosmic-ray propagation models, narrow secondary-ratio and antiproton predictions, solar modulation; codes, cross-section nuisances, global-fit structure and new-physics interpretation guidance",
    "owner": "hep-theory",
    "state": "tool",
    "v1": true,
@@ -304,7 +309,8 @@
     "Th2",
     "Th3",
     "Th6",
-    "Th11"
+    "Th11",
+    "Th13"
    ]
   },
   {
@@ -492,7 +498,9 @@
    "state": "none",
    "v1": false,
    "cases": [
-    "th-heavyion-1"
+    "th-heavyion-1",
+    "th14-heavyion-1",
+    "th16-qgp-1"
    ]
   },
   {
@@ -516,6 +524,39 @@
    ]
   },
   {
+   "id": "hadron-models",
+   "capability": "Model calculations of PDFs, TMDs and GPDs (quark models, chiral quark soliton, AdS/QCD)",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th14-hadmodels-1"
+   ],
+   "note": "results may be cited inputs with source and status, as alternative-model objects"
+  },
+  {
+   "id": "quarkonium-production",
+   "capability": "Quarkonium production and absorption (NRQCD, J/psi in pA and eA)",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th14-quarkonium-1"
+   ],
+   "note": "only its distinction from Drell-Yan is stated"
+  },
+  {
+   "id": "jets-in-dis",
+   "capability": "Jets and jet substructure in lepton-hadron scattering, resolved-photon photoproduction",
+   "owner": "hep-theory",
+   "state": "none",
+   "v1": false,
+   "cases": [
+    "th14-jetsdis-1"
+   ],
+   "note": "jet-algorithm conventions and selections go to hep-measurement"
+  },
+  {
    "id": "neutrino-oscillations",
    "capability": "Neutrino-oscillation probabilities, including matter effects",
    "owner": "hep-theory",
@@ -536,6 +577,97 @@
     "Th5"
    ],
    "note": "in v1 since Th5 (batch D); halo and cross-section inputs from the user"
+  },
+  {
+   "id": "dis-structure-functions",
+   "capability": "Unpolarized inclusive DIS structure functions and cross sections (LO from user-supplied parton values, sum-rule integrals; beyond LO as rules)",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th14"
+   ]
+  },
+  {
+   "id": "drell-yan",
+   "capability": "Drell-Yan cross sections (LO, photon exchange), x_F and rapidity-frame conversions, angular coefficients and frames, Lam-Tung combination",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th15"
+   ]
+  },
+  {
+   "id": "nuclear-parton-effects",
+   "capability": "Nuclear targets: per-nucleon conventions, isospin combination, nuclear PDF sets and baselines, member-by-member nuclear ratios; mechanism models as rules",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th16"
+   ]
+  },
+  {
+   "id": "polarized-dis",
+   "capability": "Polarized DIS: g_1, g_2, asymmetries and depolarization factors, first-moment sum rules, factorization-scheme dependence of Delta Sigma",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th17"
+   ]
+  },
+  {
+   "id": "sidis-and-tmd",
+   "capability": "SIDIS kinematics and Trento conventions, fragmentation functions, TMD factorization rules, Gaussian-ansatz TMD shapes, Sivers sign change, Drell-Yan q_T",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th18"
+   ]
+  },
+  {
+   "id": "small-x-saturation",
+   "capability": "Small-x physics: dipole picture with LO photon wave functions, GBW saturation model, BK/JIMWLK and BFKL conventions as rules",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th19"
+   ]
+  },
+  {
+   "id": "exclusive-and-gpd",
+   "capability": "Exclusive processes and GPDs (DVCS kinematics, azimuthal conventions, GPD properties and sum rules) and diffractive DIS kinematics; GPD extraction outside the tool",
+   "owner": "hep-theory",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "Th20"
+   ]
+  },
+  {
+   "id": "pdf-reweighting-and-profiling",
+   "capability": "Bayesian reweighting of PDF/nPDF/FF replica sets and linear Hessian profiling of published sets with new data; t0 chi2 for multiplicative uncertainties",
+   "owner": "hep-statistics",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "S12"
+   ]
+  },
+  {
+   "id": "global-pdf-fits",
+   "capability": "Specification and review of global PDF/nPDF/FF fits (theory inputs, chi2 forms, tolerances, closure tests); executing a full fit needs external software",
+   "owner": "hep-statistics",
+   "state": "documentation",
+   "v1": true,
+   "items": [
+    "S13"
+   ],
+   "note": "documentation until a software plan ships an executable fit"
   }
  ]
 }

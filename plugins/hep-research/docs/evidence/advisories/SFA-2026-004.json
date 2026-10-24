@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-004",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S1",
  "ledger": [
   "F01"
@@ -42,9 +44,9 @@
   "artifact_types": [
    "statistical-result"
   ],
-  "extension_keys": [
-   "likelihood"
-  ]
+  "match": [],
+  "match_basis": "result_artifact.py writes the statistical-result from the JSON a core/stats CLI printed in another process, and no field names the likelihood code (a Poisson-domain fit); every listed key is one each such result carries",
+  "no_trace": "possibly-affected"
  },
  "remedy": "refit with a release that has the fix (0.6.11 or later); a result whose fit now reports a boundary or a failure needs its model reviewed",
  "references": [

@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-014",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S1",
  "ledger": [
   "TH9-MASSES"
@@ -27,9 +29,7 @@
    "database_specific": {
     "introduced_commit": "351029c0bfdd9c1ae90596a4de0d42f435303f7e",
     "fixed_commit": "2391008579c952d3f4308a191900f7bfa3885abb",
-    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)",
-    "no_artifact": true,
-    "outputs": "skills/hep-detector/scripts/pid_separation_power.py prints JSON on stdout (mode, species_a and species_b with mass_gev, observable, n_sigma) and writes no artifact; cherenkov_angle.py output (expected_photons, photon_regime) used the same mass table"
+    "introduced_basis": "the defective code is in the script as first released (hep-research 0.3.0, commit 351029c0)"
    }
   }
  ],
@@ -42,14 +42,14 @@
   "trigger": "a species given by name (e, p, d, He3, He4) rather than by an explicit mass"
  },
  "applies_to": {
-  "artifact_types": [
-   "response",
-   "computational-run"
-  ],
-  "extension_keys": [
-   "parametrization",
-   "tools"
-  ]
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-detector/scripts/pid_separation_power.py",
+    "skills/hep-detector/scripts/cherenkov_angle.py"
+   ],
+   "how_to_recognize": "JSON on stdout: pid_separation_power.py with mode, species_a and species_b (mass_gev), observable, n_sigma; cherenkov_angle.py with expected_photons and photon_regime (it used the same mass table)"
+  }
  },
  "remedy": "no action is needed for design estimates; rerun with a release that has the fix where a result quotes more than 8 significant digits",
  "references": [

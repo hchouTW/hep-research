@@ -552,6 +552,51 @@ bad["statres_v26_model_sha256_malformed.json"] = (statres_v26(likelihood={"form"
 
 
 # Valid (no error) but not usable as a final result: the validator reports these codes as `unresolved`.
+
+# contracts 3.11.0, detector system design (ART-05): one valid and several invalid fixtures per design type
+def design(atype, mutate=None):
+    """A design-spec, design-candidate or design-evaluation at the current contract version; `mutate` edits the
+    extension in place to make one defect."""
+    from contracts import CONTRACTS_VERSION
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from design_fixtures import NS, budgets, magnet_subsystem, spec_ext, tracker_subsystem
+    if atype == "design-spec":
+        ext = spec_ext(1)
+    elif atype == "design-candidate":
+        ext = {"candidate_id": f"{NS}:cand-A", "design_id": NS, "description": "SYNTHETIC structural fixture",
+               "subsystems": {"DES-TRK-001": tracker_subsystem(9, 1.0), "DES-MAG-001": magnet_subsystem()},
+               "budgets": budgets(400.0, 9)}
+    else:
+        ext = {"evaluation_id": f"{NS}:CALC-TRK-A", "candidate": f"{NS}:cand-A", "figure_of_merit": "momentum-resolution-core",
+               "denominator": {"rigidity_GV": 1000.0, "species": "proton"}, "value": 0.49, "unit": "1",
+               "bound": "optimistic", "fidelity": "F1", "run_ref": "runs/CALC-TRK-A.computational-run.json",
+               "parameter_refs": ["DES-MAG-001.parameters.field_T", "DES-TRK-001.parameters.layer_positions_m"],
+               "validity": {"assumptions": ["uniform field"], "in_domain": True}}
+    d = envelope(atype, ext, "hep-detector", status=("synthetic",))
+    d.update(contract_version=CONTRACTS_VERSION, versions={"plugin": "0.36.0", "contracts": CONTRACTS_VERSION, "profiles": {}})
+    if mutate:
+        mutate(d["extension"])
+    return d
+
+
+VALID["design_spec.json"] = design("design-spec")
+VALID["design_candidate.json"] = design("design-candidate")
+VALID["design_evaluation.json"] = design("design-evaluation")
+bad["design_spec_requirement_no_denominator.json"] = (design("design-spec", lambda e: e["requirements"][0].pop("denominator")),
+                                                      ["schema.required"])
+bad["design_spec_denominator_no_tolerance.json"] = (
+    design("design-spec", lambda e: e["requirements"][0]["denominator"]["rigidity_GV"].pop("tolerance")), ["schema.required"])
+bad["design_candidate_no_calibration.json"] = (design("design-candidate", lambda e: e["subsystems"]["DES-TRK-001"].pop("calibration")),
+                                               ["schema.required"])
+bad["design_candidate_screened_out_written.json"] = (design("design-candidate", lambda e: e.update(screened_out=True)),
+                                                     ["schema.additional"])
+bad["design_candidate_unknown_role.json"] = (design("design-candidate", lambda e: e["subsystems"]["DES-MAG-001"].update(role="magnet")),
+                                             ["vocab.unknown_term"])
+bad["design_evaluation_bound_mixed.json"] = (design("design-evaluation", lambda e: e.update(bound="mixed")), ["schema.enum"])
+bad["design_evaluation_fidelity_f6.json"] = (design("design-evaluation", lambda e: e.update(fidelity="F6")), ["schema.enum"])
+bad["design_evaluation_verdict_written.json"] = (design("design-evaluation", lambda e: e.update(verdict="pass")),
+                                                 ["schema.additional"])
+
 UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", significance=dict(SCAN)), ["stats.lee_missing"])}
 d = communication_rich(); d["extension"]["claims"][0]["text"] = "The ratio establishes a deviation (synthetic fixture)."; d["extension"]["claims"][0]["assessment"]["currency"] = "stale"
 d["extension"]["claims"][1]["evidence"] = []; del d["extension"]["claims"][1]["assessment"]; d["extension"]["claims"][1]["unresolved_inputs"] = ["the illustration artifact is not yet written"]
@@ -714,6 +759,11 @@ ML_V28_UNRESOLVED = {
 }
 for _name, (_fn, _codes) in ML_V28_UNRESOLVED.items():
     UNRESOLVED[f"ml_v28_{_name}.json"] = (ml_v28(_fn), _codes)
+WARNING["measurement_v26_efficiency_counted_twice_namespaced.json"] = (
+    measurement_v26(lambda d, e: e.update(corrections=[{"effect_id": "total-eff", "category": "efficiency", "applied_in": "estimator"},
+                                                       {"effect_id": "profile-eff", "category": "synthetic-ns:efficiency",
+                                                        "applied_in": "estimator"}])),
+    ["measurement.efficiency_counted_twice_namespaced"])
 WARNING["ml_v28_framework_version_missing.json"] = (ml_v28(lambda e: e["environment"].pop("torch_version")),
                                                     ["ml.framework_version_missing"])
 WARNING["ml_v28_weights_not_split.json"] = (ml_v28(lambda e: (e["weights"].pop("training"), e["weights"].pop("evaluation"))),
@@ -726,9 +776,10 @@ WARNING["ml_v28_environment_free_text.json"] = (ml_v28(_sub("environment", preci
                                                 ["ml.precision_free_text", "ml.device_free_text"])
 
 
-# Independent review filter records (contracts 3.4.0; docs/dev/independent-review-spec.md section 5.5): sidecar
-# records, not artifacts, so they live in contracts/fixtures/review/ and are checked by contracts.review
-# (filter_record_rules); cases.json lists each invalid record's codes.
+# Independent review filter records (contracts 3.4.0; docs/dev/independent-review-spec.md section 5.5) and expert
+# records (contracts 3.6.0; section 7.6): sidecar records, not artifacts, so they live in contracts/fixtures/review/
+# and are checked by contracts.review (filter_record_rules, or record_rules with role expert); cases.json lists each
+# invalid record's codes.
 REVIEW_OUT = ROOT / "contracts" / "fixtures" / "review"
 
 
@@ -749,7 +800,31 @@ def filter_record(mutate=None) -> dict:
     return doc
 
 
+def expert_record(mutate=None) -> dict:
+    h = "0123456789abcdef" * 4
+    doc = {"packet_sha256": h, "dispatch_nonce": "synthetic-nonce", "instructions_sha256": h, "role": "expert",
+           "reviewer": {"identity": "synthetic-expert-agent", "context": "fresh", "model": "synthetic-model",
+                        "host": "synthetic-host", "slot_id": "S7"},
+           "isolation": {"saw_prior_conversation": False, "host_injected": [], "instruction_files_seen": "unknown"},
+           "paths_read": [{"path": "packet/document.md", "sha256": h}],
+           "evidence": [{"id": "E1", "basis": "exhaustive", "script": "work/check.py", "script_sha256": h,
+                         "range": "synthetic: the regime the statement covers", "output_files": [{"path": "work/out.txt", "sha256": h}]},
+                        {"id": "E2", "basis": "internal", "units": ["U0020"]}],
+           "claims": [{"id": "C1", "units": ["U0004", "U0005"], "summary": "synthetic: a general statement"}],
+           "verdicts": [{"claim_id": "C1", "verdict": "unsupported", "rationale": "synthetic: false in one regime",
+                         "evidence_ids": ["E1", "E2"], "finding_ids": ["F1"], "refutation_attempts": []}],
+           "findings": [{"id": "F1", "kind": "other", "severity": "high", "units": ["U0004", "U0005"],
+                         "value": "synthetic value", "correction": "synthetic correction",
+                         "description": "synthetic: false in one regime", "fix": "synthetic fix"}],
+           "limitations": SYN}
+    if mutate:
+        mutate(doc)
+    return doc
+
+
 REVIEW_VALID = {"filter_record.json": filter_record(),
+                "expert_record.json": expert_record(),
+                "expert_record_nothing_found.json": expert_record(lambda d: d.update(claims=[], verdicts=[], findings=[])),
                 "filter_record_all_kept.json": filter_record(lambda d: d.update(decisions=[
                     {"finding_id": "P00000001", "decision": "keep", "reason": "synthetic"}]))}
 REVIEW_INVALID = {
@@ -765,6 +840,18 @@ REVIEW_INVALID = {
     "filter_record_reviewer_identity_in_decision.json": (filter_record(lambda d: d["decisions"][0].update(slot_id="S1")),
                                                          ["schema_invalid"]),
     "filter_record_wrong_role.json": (filter_record(lambda d: d.update(role="reviewer")), ["schema_invalid"]),
+    "expert_record_finding_without_verdict.json": (expert_record(lambda d: d["verdicts"][0].update(
+        verdict="unresolved", finding_ids=[])), ["finding_without_verdict"]),
+    "expert_record_with_skim.json": (expert_record(lambda d: d.update(skim=[{"unit": "U0004", "mark": "ok"}])),
+                                     ["schema_invalid"]),
+    "expert_record_with_carry_forward.json": (expert_record(lambda d: d.update(carry_forward=[
+        {"ref": "CF1", "status": "reopened"}])), ["schema_invalid"]),
+    "expert_record_no_findings_key.json": (expert_record(lambda d: d.pop("findings")), ["schema_invalid"]),
+    "expert_record_self_citation.json": (expert_record(lambda d: d["evidence"][1].update(units=["U0006"])),
+                                         ["self_citation"]),
+    "expert_record_verdict_without_finding.json": (expert_record(lambda d: (d["verdicts"][0].update(finding_ids=[]),
+                                                                            d.update(findings=[]))),
+                                                   ["verdict_without_finding"]),
 }
 
 

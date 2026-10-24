@@ -1,7 +1,11 @@
 """Chain rules of the counting-chain suite (v6.3 C16): one function per rule, each turning one obligation into one
 outcome {state, reason, evidence, declaration_based, declarations}. Reason codes per state are registered in
 contracts/rules/registry.json; a rule the suite names but this module does not implement leaves its obligations
-unverified (check.rule_not_run), and so does a rule that fails while running."""
+unverified (check.rule_not_run), and so does a rule that fails while running.
+
+Version guard (P3): rules are dispatched by (rule_id, version). An obligation whose rule_version this checker does not
+implement is never evaluated with another version's code: it stays unverified (check.rule_not_run). A fix that
+changes an outcome is a new version, registered with its own source digest (contracts/rule_registry.py)."""
 from __future__ import annotations
 
 import math
@@ -11,8 +15,7 @@ from contracts.analysis_checks.instances import build_view
 from contracts.analysis_checks.obligations import corrections as spec_corrections
 from contracts.analysis_checks.scope import compare_scopes
 from contracts.effect_catalog import classify
-from contracts.analysis_checks import model as model_rules  # noqa: E402  (model imports this module lazily)
-from contracts.analysis_checks import runs as run_rules  # noqa: E402  (runs imports this module lazily)
+from contracts.validate import NORMALIZATION_CORRECTIONS
 
 
 def outcome(state: str, reason: str, message: str = "", evidence=(), declarations=(), **extra) -> dict:
@@ -292,6 +295,60 @@ def _key_for(env: Env, step: dict, category: str) -> dict:
     return next(iter(effects.values()), {}) if len(effects) == 1 else {}
 
 
+def r_real_undescribed(ob: dict, env: Env) -> dict:
+    """R-REAL, the other direction (G1, DR-8): an effect a step applies is described by the spec. background is
+    described only by a non-empty backgrounds block (no_backgrounds_reason with an applied background contradicts it);
+    a normalization effect (exposure, luminosity, livetime) by the observable's normalization kind, as the
+    measurement contract has it (validate.NORMALIZATION_CORRECTIONS: a correction next to it would count it twice);
+    another effect by a spec correction of exactly that category (a class name describes no member) that applies to
+    the instance. Effects the catalog marks description_required false (bin_width) are not judged."""
+    eff, inst_id = ob["subject"]["effect"], ob["subject"]["instance"]
+    view = env.views.get(inst_id) or {}
+    ops = {o.get("operator_id"): o for o in env.coverage_of(inst_id).get("operators", [])}
+    steps = [s.get("step_id") for s in view.get("steps", [])
+             if eff in set((ops.get(s.get("operator")) or {}).get("covers", []))
+             | {m for cc in ((ops.get(s.get("operator")) or {}).get("class_coverage") or {}).values() for m in (cc or {}).get("members") or []}]
+    ev = [{"instance": inst_id, "step": st} for st in steps]
+    entry = next((e for e in env.catalog.get("effects", []) if e.get("effect_id") == eff), None)
+    if entry is None:
+        return outcome("unsupported", "check.unknown_effect", f"{eff!r} is not a catalog effect", ev)
+    if "description_required" not in entry:
+        return outcome("unverified", "check.catalog_incomplete",
+                       "the catalog does not say whether this effect needs a description (catalog 1.1.0)", ev)
+    if entry["description_required"] is not True:
+        return outcome("not_applicable", "check.description_not_required", f"the catalog needs no spec description of {eff!r}", ev)
+    ext = (env.spec.get("extension") or {}) if isinstance(env.spec, dict) else {}
+    spec = env.ctx.get("spec")
+    if eff == "background":
+        if isinstance(ext.get("backgrounds"), list) and ext["backgrounds"]:
+            return outcome("satisfied", "check.effect_described", "the spec's backgrounds block describes it",
+                           ev + [{"item": spec, "pointer": "/extension/backgrounds"}])
+        if ext.get("no_backgrounds_reason"):
+            return outcome("violated", "check.description_contradicted",
+                           f"steps {steps} subtract a background the spec says it has none of (no_backgrounds_reason)", ev)
+        return outcome("violated", "check.undescribed_correction",
+                       f"steps {steps} subtract a background that no backgrounds block describes", ev)
+    norm = ((ext.get("observable") or {}).get("normalization") or {}) if isinstance(ext.get("observable"), dict) else {}
+    if eff in NORMALIZATION_CORRECTIONS and isinstance(norm, dict) and norm.get("kind") == NORMALIZATION_CORRECTIONS[eff]:
+        return outcome("satisfied", "check.effect_described", f"the observable's {norm.get('kind')!r} normalization describes it",
+                       ev + [{"item": spec, "pointer": "/extension/observable/normalization"}])
+    unbound, decls = False, []
+    for c in env.corrections.values():
+        if str(c.get("category")) != eff:
+            continue
+        app, d = applicability(env, c, inst_id)
+        if app == "yes":
+            return outcome("satisfied", "check.effect_described", f"spec correction {c['effect_id']!r} describes it",
+                           ev + correction_evidence(env, c["effect_id"]), d)
+        unbound |= app == "unbound"
+        decls += d
+    if unbound:
+        return outcome("unverified", "check.applicability_unbound",
+                       f"a spec correction of {eff!r} is bound to no instance (no target_scope or instance_mapping)", ev)
+    return outcome("violated", "check.undescribed_correction",
+                   f"steps {steps} apply {eff!r}, which no spec correction describes for this instance", ev, decls)
+
+
 # --- R-STAGE ----------------------------------------------------------------------------------------------------
 def r_stage_position(ob: dict, env: Env) -> dict:
     eid, inst_id = ob["subject"]["correction"], ob["subject"]["instance"]
@@ -356,15 +413,20 @@ def applications(env: Env, path: list[str], effect: str) -> tuple[list[dict], bo
 
 
 def _exclusion(env: Env, a: str, b: str) -> tuple[str, list[str]]:
-    """('exclusive' | 'contradiction' | 'none', declaration ids) from partition_exclusive declarations."""
+    """('exclusive' | 'contradiction' | 'none', declaration ids) from partition_exclusive declarations. Every
+    declaration naming both scopes is read, so declaration order never decides (G17): one contradicting declaration
+    gives a contradiction, listing every contradicting id."""
+    found: dict[str, list[str]] = {"contradiction": [], "exclusive": []}
     for d in env.decls("partition_exclusive"):
         subs = (d.get("content") or {}).get("subsets") or []
         scopes = [s.get("scope") for s in subs if isinstance(s, dict)]
         if a in scopes and b in scopes:
             sel = {s.get("scope"): s.get("selection") for s in subs if isinstance(s, dict)}
-            if sel.get(a) is not None and sel.get(a) == sel.get(b):
-                return "contradiction", [d["declaration_id"]]
-            return "exclusive", [d["declaration_id"]]
+            same = sel.get(a) is not None and sel.get(a) == sel.get(b)
+            found["contradiction" if same else "exclusive"].append(d["declaration_id"])
+    for rel in ("contradiction", "exclusive"):
+        if found[rel]:
+            return rel, sorted(found[rel])
     return "none", []
 
 
@@ -479,7 +541,9 @@ def r_comp_factor_values(ob: dict, env: Env) -> dict:
         return outcome("unverified", "check.factor_values_incomplete", "the factor lists are empty or differ in bin count", ev)
     if not all(math.isfinite(x) for a in arrays.values() for x in a):
         return outcome("unverified", "check.factor_values_incomplete", "a factor value is not a finite number", ev)
-    tol = float((doc.get("tolerance") or {}).get("relative", 1e-9))
+    tol, basis = _factor_tolerance(doc, comp, arrays)
+    if "tolerance" in doc:
+        basis += "; the table's own tolerance is not used"
     failed = []
     for k in range(n):
         prod = 1.0
@@ -489,10 +553,37 @@ def r_comp_factor_values(ob: dict, env: Env) -> dict:
         if abs(parent - prod) > tol * max(abs(parent), abs(prod), 1e-300):
             failed.append(k)
     bins = {"evaluated": n, "failed": len(failed), "first_failures": failed[:5]}
+    tolerance = {"relative": tol, "basis": basis}
     if failed:
         return outcome("violated", "check.factor_values_inconsistent",
-                       f"{len(failed)} of {n} bins break {comp_id} beyond relative tolerance {tol}", ev, bins=bins)
-    return outcome("satisfied", "check.factor_values_consistent", f"all {n} bins agree within {tol}", ev, bins=bins)
+                       f"{len(failed)} of {n} bins break {comp_id} beyond relative tolerance {tol:.3g} ({basis})", ev,
+                       bins=bins, tolerance=tolerance)
+    return outcome("satisfied", "check.factor_values_consistent", f"all {n} bins agree within {tol:.3g} ({basis})", ev,
+                   bins=bins, tolerance=tolerance)
+
+
+DEFAULT_FACTOR_TOLERANCE = 1e-9
+
+
+def _significant_digits(x) -> int:
+    """Significant digits of a number as written (its shortest repr; trailing zeros are not significant)."""
+    import decimal
+    return len(decimal.Decimal(repr(x) if isinstance(x, float) else str(x)).normalize().as_tuple().digits)
+
+
+def _factor_tolerance(doc: dict, comp: dict, arrays: dict) -> tuple[float, str]:
+    """The relative tolerance of a factor relation (DR-6, G4): never the table's own 'tolerance'. Undeclared it is
+    1e-9. A table declaring significant_digits d, which every value of the relation honours, gets sum|power| * u
+    with u = 0.5 * 10**(1 - d), the parent's power counting 1: rounding each value to d digits moves
+    parent / prod(child**power) by at most 1 - (1 - u)**sum|power| <= sum|power| * u. A declaration the values
+    contradict (a value with more digits) is not used."""
+    d = doc.get("significant_digits")
+    if not (isinstance(d, int) and not isinstance(d, bool) and 1 <= d <= 17):
+        return DEFAULT_FACTOR_TOLERANCE, "default: no significant_digits declared"
+    if any(_significant_digits(x) > d for a in arrays.values() for x in a):
+        return DEFAULT_FACTOR_TOLERANCE, f"default: a value has more than the declared {d} significant digits"
+    total = 1 + sum(abs(ch["power"]) for ch in comp["children"])
+    return max(DEFAULT_FACTOR_TOLERANCE, total * 0.5 * 10.0 ** (1 - d)), f"{d} declared significant digits, sum|power| {total}"
 
 
 # --- R-RESP -----------------------------------------------------------------------------------------------------
@@ -701,7 +792,10 @@ def r_ratio_correlation(ob: dict, env: Env) -> dict:
     if relation not in RELATIONS:
         return outcome("unsupported", "check.correlation_relation_unsupported", f"relation {relation!r} is not supported", ev)
     operands = {(rr.get(k) or {}).get("root") for k in ("numerator", "denominator")}
+    # every complete record is read, so item order never decides (G3): one contradicting record gives a violation
     incomplete = False
+    agree: list[tuple[str, object]] = []
+    contra: list[tuple[str, object]] = []
     for iid, it in sorted(env.items.items()):
         doc = it.get("doc")
         if it.get("role") != "validation-record" or not isinstance(doc, dict) or (doc.get("claim") or {}).get("effect") != effect:
@@ -710,12 +804,15 @@ def r_ratio_correlation(ob: dict, env: Env) -> dict:
         if not operands <= subjects or not all(doc.get(k) for k in ("method", "tolerance", "scope")):
             incomplete = True
             continue
-        if doc["claim"].get("relation") != relation:
-            return outcome("violated", "check.correlation_contradicted",
-                           f"validation record {iid!r} finds {doc['claim'].get('relation')!r}, the spec claims {relation!r}",
-                           ev + [{"item": iid, "pointer": "/claim"}])
-        return outcome("satisfied", "check.correlation_evidenced", f"validation record {iid!r} binds both operands",
-                       ev + [{"item": iid, "pointer": "/subjects"}])
+        (agree if doc["claim"].get("relation") == relation else contra).append((iid, doc["claim"].get("relation")))
+    if contra:
+        found = ", ".join(f"{iid!r} finds {rel!r}" for iid, rel in contra)
+        return outcome("violated", "check.correlation_contradicted", f"validation record {found}, the spec claims {relation!r}",
+                       ev + [{"item": iid, "pointer": "/claim"} for iid, _ in contra])
+    if agree:
+        ids = ", ".join(repr(iid) for iid, _ in agree)
+        return outcome("satisfied", "check.correlation_evidenced", f"validation record {ids} binds both operands",
+                       ev + [{"item": iid, "pointer": "/subjects"} for iid, _ in agree])
     for d in env.decls("correlation"):
         c = d.get("content") or {}
         if c.get("ratio_root") == rid and c.get("effect") == effect and c.get("relation") == relation:
@@ -730,28 +827,81 @@ def r_ratio_correlation(ob: dict, env: Env) -> dict:
 
 
 RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
-         "r-real.description": r_real_description, "r-stage.position": r_stage_position,
+         "r-real.description": r_real_description, "r-real.undescribed": r_real_undescribed, "r-stage.position": r_stage_position,
          "r-rep.repetition": r_rep_repetition, "r-comp.composition": r_comp_composition,
          "r-comp.factor_values": r_comp_factor_values, "r-resp.response_use": r_resp_response_use,
          "r-ratio.operands": r_ratio_operands, "r-ratio.cancellation": r_ratio_cancellation,
          "r-ratio.correlation": r_ratio_correlation}
 
-RULES.update(model_rules.RULES)  # model-card/v1 (contracts.analysis_checks.model)
-RULES.update(run_rules.RULES)  # run-lineage/v1 (contracts.analysis_checks.runs)
+
+# The version each implementation is (P3). A fixed rule is a new version and its old code is gone: an obligation of a
+# suite that names the old version stays unverified (check.rule_not_run) and is reproduced with the release that has it.
+# 1.1.0 (release R2): r-rep.repetition and r-ratio.correlation read every matching declaration or record (G3, G17).
+# r-comp.factor_values 1.1.0: the tolerance comes from declared significant digits, never the table (G4, DR-6).
+# The model-card (r-model.*, r-aux.use, r-share.*) and run-lineage (r-run.*) rules were removed in 0.28.0 (value gate
+# Shrink, docs/dev/cross-artifact-check/decision-value-gate.md); their versions stay listed as retired in the registry.
+VERSIONS = {"r-rep.repetition": "1.1.0", "r-ratio.correlation": "1.1.0", "r-comp.factor_values": "1.1.0"}
+
+# (rule_id, version) -> implementation
+IMPLEMENTED = {(rid, VERSIONS.get(rid, "1.0.0")): fn for rid, fn in RULES.items()}
+
+
+def implemented_versions(rule_id: str) -> list[str]:
+    return sorted(v for r, v in IMPLEMENTED if r == rule_id)
+
+
+def _dispatch(ob: dict, rules: dict | None):
+    """(function, None) or (None, why not). A rules dict keyed by rule_id (a test double) is used as given."""
+    rid, ver = str(ob.get("rule_id")), str(ob.get("rule_version"))
+    if rules is not None:
+        fn = rules.get(rid)
+        return (fn, None) if fn is not None else (None, f"rule {rid!r} is not implemented by this checker")
+    fn = IMPLEMENTED.get((rid, ver))
+    if fn is not None:
+        return fn, None
+    have = implemented_versions(rid)
+    if not have:
+        return None, f"rule {rid!r} is not implemented by this checker"
+    return None, f"rule {rid!r} version {ver!r} is not implemented by this checker (it implements {have}): never evaluated with another version"
+
+
+class _CoverageReads(Env):
+    """The evaluator's Env: records the tables whose coverage the rule being evaluated reads (A3). Rules name Env, not
+    this class, so their source digests do not change."""
+
+    coverage_read: set[str]
+
+    def coverage_of(self, inst_id: str) -> dict:
+        recipe = self.recipe_of(self.insts.get(inst_id, {}))
+        self.coverage_read.add(str((recipe.get("semantics") or {}).get("table_id")))
+        return super().coverage_of(inst_id)
+
+
+def _bundle_coverage_flag(res: dict, env: _CoverageReads) -> dict:
+    """A3 (DR-1 split, V88), check-context 1.1.0: a satisfied or not-applicable outcome that read a coverage contract
+    the bundle supplied (agent-writable, not the plugin's) is declaration-based; state and reason are unchanged."""
+    bundled = sorted(t for t in env.coverage_read if ((env.view.get("coverage") or {}).get(t) or {}).get("source") == "bundle")
+    if not bundled or res.get("state") not in ("satisfied", "not_applicable"):
+        return res
+    decls = sorted(set(res.get("declarations") or []) | {f"coverage-contract:{t}" for t in bundled})
+    return dict(res, declarations=decls, declaration_based=True)
 
 
 def evaluate(view: dict, obligations: list[dict], rules: dict | None = None) -> list[dict]:
-    rules = RULES if rules is None else rules
-    env = Env(view)
+    env = _CoverageReads(view)
+    flag_bundle_coverage = (env.ctx.get("context_version") or "1.0.0") != "1.0.0"  # A3 from check-context 1.1.0
     out = []
     for ob in obligations:
-        fn = rules.get(str(ob.get("rule_id")))
+        fn, why = _dispatch(ob, rules)
+        env.coverage_read = set()
         if fn is None:
-            res = outcome("unverified", "check.rule_not_run", f"rule {ob.get('rule_id')!r} is not implemented by this checker")
+            res = outcome("unverified", "check.rule_not_run", why)
         else:
             try:
                 res = fn(ob, env)
             except Exception as exc:  # a failing rule is visible and never a pass
                 res = outcome("unverified", "check.rule_not_run", f"the rule failed: {type(exc).__name__}: {exc}")
+        if flag_bundle_coverage:
+            res = _bundle_coverage_flag(res, env)
         out.append(dict(res, obligation_id=ob["obligation_id"], rule_id=ob["rule_id"]))
     return out

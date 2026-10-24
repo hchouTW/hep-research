@@ -1,0 +1,81 @@
+{
+ "id": "theory:drell-yan-lo",
+ "kind": "theory-domain",
+ "version": "0.1.0",
+ "scope": "LO Drell-Yan cross section d2sigma/dM dy for photon exchange, derived from PDG Eqs. 51.3 and 51.40 (analytic derivation, Jacobian checked numerically on synthetic toy densities), and the lepton angular coefficients lambda, nu at O(alpha_s) in the quark-axis picture of Peng, Chang, McClellan and Teryaev (Eqs. 1-10): Eq. 5 and Eqs. 6-7 reproduced in SymPy, the Lam-Tung relation 1 - lambda - 2 nu = 0 for a coplanar quark axis (perturbative argument at O(alpha_s), coplanarity cited), and the per-channel closed forms checked against the published Eq. 10.",
+ "exclusions": [
+  "Z exchange and gamma-Z interference (a = 0); W production",
+  "NLO corrections to the cross section, qT resummation, intrinsic transverse momentum, Boer-Mulders and other TMD effects",
+  "Lam-Tung violation beyond O(alpha_s) (only its sign, 1 - lambda - 2 nu >= 0 within the quark-axis representation, is derived)",
+  "Fits of channel mixtures or A2/A0 to measured distributions; any comparison with data",
+  "Any experiment, detector, data or blinding field"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=3.10,<4.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-computing",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/drell-yan-lo.md",
+  "derivation": "derivations/derivation-record.md",
+  "theory_spec": "derivations/theory-spec.json",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "dylo"
+ ],
+ "vocabulary_extensions": {
+  "quantity_types": [
+   "dylo:angular-coefficient"
+  ],
+  "conventions": [
+   "dylo:angular_distribution",
+   "dylo:channel_mixture"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "dylo",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "lo-cross-section",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "SymPy: colour average, Jacobian dx1 dx2 = dtau dy and the delta-function integration give d2sigma/dM dy = (8 pi alpha^2/(9 M s)) sum e_q^2 [q1 qbar2 + qbar1 q2] (analytic derivation); numerical box integral against the parton integral on SYNTHETIC toy densities (relative tolerance 1e-8)",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_prediction.py",
+    "tests/test_missing_dependency.py"
+   ]
+  },
+  {
+   "name": "angular-coefficients-and-lam-tung",
+   "status": "tested-in-declared-environment",
+   "scope": "SymPy: Peng et al. Eq. 4 into Eq. 2 gives Eq. 5; A_0..A_7 (Eq. 6) and lambda, mu, nu (Eq. 7) read off; 1 - lambda - 2 nu = 4 (A0 - A2)/(2 + A0), >= 0 within the quark-axis representation and = 0 for phi1 = 0 (Lam-Tung, perturbative argument at O(alpha_s), coplanarity cited); Eqs. 8-9 give Eq. 10 for both channels; channel mixtures are exact cross-section-weighted A_i averages (analytic derivation)",
+   "tests": [
+    "tests/test_derivation.py"
+   ]
+  },
+  {
+   "name": "published-closed-form-benchmark",
+   "status": "tested-in-declared-environment",
+   "scope": "lambda and nu of the q qbar and q g channels at 7 qT/Q values against the published closed form, Peng et al. Eq. 10 (benchmarks/peng-eq10.json, relative tolerance 1e-12); the benchmark follows the same route as the profile, so it checks algebra and transcription, not the physics of Eq. 9",
+   "tests": [
+    "tests/test_benchmark.py",
+    "tests/test_artifacts.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  }
+ ]
+}

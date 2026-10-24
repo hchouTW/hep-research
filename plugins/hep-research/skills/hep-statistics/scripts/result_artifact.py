@@ -38,6 +38,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -55,6 +56,7 @@ FIT_STATUS = {"ok": "converged", "incomplete": "converged-with-warnings", "faile
 PARADIGMS = ("frequentist", "bayesian", "likelihood-only")
 DIAGNOSE_STATUS = {"converged": "ok", "not-converged": "failed", "incomplete": "incomplete"}  # bayes_diagnostics.py
 LABELS = ("synthetic", "asimov", "observed", "preliminary", "unvalidated", "user-supplied")
+PATH_RE = re.compile(r"^(?!/)(?!.*\.\./).+\.py$")  # the envelope schema's provenance.code_paths pattern
 
 
 def effective_status(cli, a: argparse.Namespace) -> str:
@@ -124,6 +126,19 @@ def _numeric(v, depth: int = 0) -> bool:
     return depth < 2 and isinstance(v, list) and bool(v) and all(_numeric(x, depth + 1) for x in v)
 
 
+def _trace(cli: dict) -> dict:
+    """This writer's execution trace joined with the one the core/stats CLI printed (`trace`): the CLI ran in another
+    process, so without it the artifact would not show which core/stats code produced the numbers. Entries that are
+    not plugin-relative .py paths or tags are dropped."""
+    own = trace.provenance()
+    child = cli.get("trace") if isinstance(cli.get("trace"), dict) else {}
+    for key, pattern in (("code_paths", PATH_RE), ("code_tags", trace.TAG)):
+        values = child.get(key) if isinstance(child.get(key), list) else []
+        own[key] = sorted(set(own[key]) | {v for v in values if isinstance(v, str) and pattern.match(v)},
+                          key=lambda v: v.encode("utf-8"))
+    return own
+
+
 def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
     status = effective_status(cli, a)
     if a.coverage_check == "not-checked" and (a.coverage_value is not None or a.coverage_n_toys is not None):
@@ -183,7 +198,7 @@ def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
             "objective": a.objective, "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"],
                          "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {}},
-            "provenance": {"producer_skill": "hep-statistics", **trace.provenance(), "created": a.created, "evidence_ids": []},
+            "provenance": {"producer_skill": "hep-statistics", **_trace(cli), "created": a.created, "evidence_ids": []},
             "inputs": [], "outputs": [], "status": labels, "unresolved_inputs": [],
             "required_capabilities": ["stats:result-semantics"], "extension": ext}
 

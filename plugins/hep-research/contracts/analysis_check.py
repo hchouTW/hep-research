@@ -13,20 +13,32 @@ load_subject(bundle_path, root): the check view (items, context, lock, tables, c
 input diagnostics, each of kind input-invalid (schema, references, digests, a frozen file missing) or
 dependency-missing (a definition the check needs is not available).
 
+Snapshots are on by default (D11b): freeze stores the pinned definitions in <root>/.hep-research/snapshots/ and
+records the bundle in <root>/.hep-research/bundles.json; check reproduces a drifted subject from that store when it
+exists. 'snapshots gc' lists (dry run) or deletes (--apply) only snapshots no indexed bundle references.
+
+Removed in 0.28.0 (value gate Shrink, docs/dev/cross-artifact-check/decision-value-gate.md): the model-card and
+run-lineage suites, model-only bundles (--mode model), result bindings (--results) and the project blinding block
+(--project). A context or bundle that names them is refused with that reason; reproduce such reports with 0.27.x.
+
 Usage: python3 contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json --context CONTEXT.json --out FILE
-                                            [--snapshots DIR] [--mode chain|model]
+                                            [--snapshots DIR | --no-snapshots]
        python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT] [--snapshots DIR]
-                                            [--exceptions FILE] [--results BINDING] [--project DIR]
+                                            [--exceptions FILE]
        python3 contracts/analysis_check.py summary REPORT [--cursor N] [--max-bytes N]
+       python3 contracts/analysis_check.py snapshots gc --root DIR [--apply]
 Exit codes of check: 0 inputs valid and the suite complete and consistent; 1 a violation, or invalid schema,
 references or digests of an input already read; 2 usage error or an unreadable top-level input; 3 otherwise
-incomplete or a required dependency missing (precedence 2 > 1 > 3 > 0). freeze: 0 written, 1 refused, 2 bad usage.
+incomplete, a required dependency missing, or definitions that differ from the semantic lock (precedence
+2 > 1 > 3 > 0); the status is 'complete' only with exit 0 (P6). freeze: 0 written, 1 refused, 2 bad usage.
+snapshots gc: 0 done, 1 refused (an indexed bundle is unreadable), 2 bad usage.
 A report is a diagnostic: it authorizes nothing (HC-05), and it is never written into the bundle it examines.
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -35,7 +47,7 @@ if __package__ in (None, ""):
 
 from contracts.analysis_bundle import BundleRefused, _no_duplicates, _read, item_digest  # noqa: E402
 from contracts.analysis_checks import obligations as obl  # noqa: E402
-from contracts.analysis_checks.context import check_context  # noqa: E402
+from contracts.analysis_checks.context import check_context, input_findings, version_findings  # noqa: E402
 from contracts.analysis_checks.lock import build_lock  # noqa: E402
 from contracts.effect_catalog import load_catalog  # noqa: E402
 from contracts.release_manifest import canonical_sha256  # noqa: E402
@@ -45,14 +57,15 @@ from core.protected.identity import plugin_release  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FORMAT2 = "hep-research-analysis-bundle/2"
 ROLES2 = ("measurement-spec", "recipe", "semantics-table", "calibration", "tool-contract", "environment-lock", "review",
-          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record", "model-card")
+          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record")
 MODE_ROLES = {"chain": {"exactly_one": ("measurement-spec", "environment-lock", "context", "semantic-lock"),
-                       "at_least_one": ("recipe",)},
-              # model-only diagnostics (O13): a model and a root intent; nothing is fabricated to fill a chain's roles
-              "model": {"exactly_one": ("context", "semantic-lock"), "at_least_one": ("model-card",)}}
+                       "at_least_one": ("recipe",)}}
+# Removed in 0.28.0 (value gate Shrink, decision-value-gate.md; architecture section 13.4): refused with this reason
+REMOVED_SUITES = ("model-card", "run-lineage")
+REMOVED = ("removed in hep-research 0.28.0 (cross-artifact check Shrink: model-card, run-lineage, model-only bundles "
+           "and result bindings); reproduce it with 0.27.x")
 SUITE_DIR = ROOT / "contracts" / "rules" / "suites"
 COVERAGE_DIR = ROOT / "contracts" / "semantics" / "coverage"
-PAIRINGS = ROOT / "contracts" / "semantics" / "model_pairings.json"
 REGISTRY = ROOT / "contracts" / "rules" / "registry.json"
 CONTEXT_REF, LOCK_REF = "check-context.json", "semantic-lock.json"
 CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__init__.py",
@@ -60,8 +73,10 @@ CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__ini
                  "contracts/analysis_checks/context.py", "contracts/analysis_checks/obligations.py",
                  "contracts/analysis_checks/lock.py", "contracts/analysis_checks/rules.py",
                  "contracts/analysis_checks/outcomes.py", "contracts/analysis_checks/readers.py",
-                 "contracts/analysis_checks/model.py", "contracts/analysis_checks/runs.py",
                  "contracts/effect_catalog.py", "contracts/recipe_semantics.py")
+# the code the obligation generator runs: the generator itself and the catalog it resolves
+GENERATOR_FILES = ("contracts/analysis_checks/obligations.py", "contracts/effect_catalog.py")
+STATE_DIR = ".hep-research"
 
 
 class UsageError(ValueError):
@@ -74,11 +89,29 @@ def _file_sha(rel: str) -> str | None:
 
 
 def generator_code_digest() -> str | None:
-    return _file_sha("contracts/analysis_checks/obligations.py")
+    files = {f: _file_sha(f) for f in GENERATOR_FILES}
+    return canonical_sha256(files) if all(files.values()) else None
+
+
+def _loaded_plugin_files() -> set[str]:
+    """Plugin modules (contracts/, core/) loaded in this process: the code a check actually ran."""
+    out = set()
+    for mod in list(sys.modules.values()):
+        f = getattr(mod, "__file__", None)
+        if not f:
+            continue
+        try:
+            rel = Path(f).resolve().relative_to(ROOT).as_posix()
+        except ValueError:
+            continue
+        if rel.endswith(".py") and rel.split("/", 1)[0] in ("contracts", "core"):
+            out.add(rel)
+    return out
 
 
 def checker_identity() -> dict:
-    files = {f: _file_sha(f) for f in CHECKER_FILES}
+    """The digests of the checker's files and of every other plugin module loaded at run time (G10)."""
+    files = {f: _file_sha(f) for f in sorted(set(CHECKER_FILES) | _loaded_plugin_files())}
     return {"files": files, "digest": canonical_sha256(files)}
 
 
@@ -134,17 +167,11 @@ def _view(items: dict, context: dict) -> tuple[dict, list[dict]]:
             diags.append({"kind": "dependency-missing", "code": "definition.coverage_missing",
                           "message": f"no operator coverage contract for table '{tid}'"})
     view = {"items": items, "context": context, "tables": tables, "coverage": coverage, "catalog": load_catalog()}
-    if any(it.get("role") == "model-card" for it in items.values()):
-        try:
-            view["pairings"] = json.loads(PAIRINGS.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            diags.append({"kind": "dependency-missing", "code": "definition.pairings_missing",
-                          "message": "the model-card pairing contract is not installed"})
     return view, diags
 
 
 JSON_ROLES = ("measurement-spec", "recipe", "semantics-table", "response", "dataset-record", "context", "semantic-lock",
-              "coverage-contract", "validation-record", "model-card")
+              "coverage-contract", "validation-record")
 SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json",
           "validation-record": "validation_record.json"}
 
@@ -153,40 +180,100 @@ def _is_json(ref) -> bool:
     return str(ref).lower().endswith(".json")
 
 
-def shape_diagnostics(items: dict) -> list[dict]:
+def shape_diagnostics(items: dict, context_version="1.0.0") -> list[dict]:
     """Input-invalid diagnostics for item documents the rules read, checked against their schemas; a document that
-    fails is set to None so no rule or generator reads it (the check reports the input, never a traceback)."""
+    fails is set to None so no rule or generator reads it (the check reports the input, never a traceback). Only the
+    input checks the context version enables run (P3)."""
+    from contracts.analysis_checks.context import input_check_enabled
+    on = lambda name: input_check_enabled(context_version, name)  # noqa: E731
     diags = []
     for iid, it in sorted(items.items()):
         role, doc = it.get("role"), it.get("doc")
         if role in JSON_ROLES and _is_json(it.get("ref")) and doc is None:
             continue  # unreadable: verify reports the frozen file
-        if role in JSON_ROLES and not isinstance(doc, dict):
+        if role in JSON_ROLES and not isinstance(doc, dict) and on("item.not_an_object"):
             diags.append({"kind": "input-invalid", "code": "item.not_an_object", "message": f"{iid}: a {role} is a JSON object"})
             it["doc"] = None
-        elif role == "model-card":
-            from contracts.analysis_checks.model import card_shape
-            problems = card_shape(doc)
-            if problems:
-                diags.append({"kind": "input-invalid", "code": "item.schema:model-card", "message": f"{iid}: " + "; ".join(problems[:5])})
-                it["doc"] = None
-        elif role in SHAPES:
+        elif role in SHAPES and on("item.schema"):
             res = validate(doc, SHAPES[role])
             if not res.ok:
                 diags.append({"kind": "input-invalid", "code": f"item.schema:{role}",
                               "message": f"{iid}: " + "; ".join(f"{f.path}: {f.code}" for f in res.errors[:5])})
                 it["doc"] = None
-        elif role == "measurement-spec":
+        elif role == "calibration" and isinstance(doc, dict) and on("calibration.shape") and _is_factor_table(doc):
+            problems = factor_table_shape(doc)
+            if problems:
+                diags.append({"kind": "input-invalid", "code": "calibration.shape", "message": f"{iid}: " + "; ".join(problems[:5])})
+                it["doc"] = None
+        elif role == "measurement-spec" and isinstance(doc, dict):
             corr = (doc.get("extension") or {}).get("corrections") if isinstance(doc.get("extension"), dict) else None
-            if corr is not None and not (isinstance(corr, list) and all(isinstance(c, dict) for c in corr)):
+            if not on("spec.bad_corrections"):
+                pass
+            elif corr is not None and not (isinstance(corr, list) and all(isinstance(c, dict) for c in corr)):
                 diags.append({"kind": "input-invalid", "code": "spec.bad_corrections", "message": f"{iid}: corrections are objects"})
                 it["doc"] = None
                 continue
-            ids = [c.get("effect_id") for c in corr or []]
+            ids = [c.get("effect_id") for c in corr or []] if on("spec.duplicate_effect_id") and isinstance(corr, list) else []
             for d in sorted({str(x) for x in ids if ids.count(x) > 1}):
                 diags.append({"kind": "input-invalid", "code": "spec.duplicate_effect_id",
                               "message": f"{iid}: effect_id {d!r} names two corrections"})
+    if on("coverage.duplicate_contract"):
+        by_table: dict = {}
+        for iid, it in sorted(items.items()):
+            if it.get("role") == "coverage-contract" and isinstance(it.get("doc"), dict):
+                by_table.setdefault(str(it["doc"].get("table_id")), []).append((iid, canonical_sha256(it["doc"])))
+        for tid, docs in sorted(by_table.items()):
+            if len({sha for _, sha in docs}) > 1:
+                diags.append({"kind": "input-invalid", "code": "coverage.duplicate_contract",
+                              "message": f"table {tid!r} has {len(docs)} different bundle coverage contracts: "
+                                         f"{[i for i, _ in docs]} (no first-wins)"})
+                for iid, _ in docs:
+                    items[iid]["doc"] = None
     return diags
+
+
+def _is_factor_table(doc: dict) -> bool:
+    return "factor_table_version" in doc or "factors" in doc
+
+
+def _finite(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+
+
+def factor_table_shape(doc: dict) -> list[str]:
+    """Shape of a factor-table calibration (check-context 1.1.0, G16): factors maps an effect to exactly one of
+    values (a non-empty list of finite numbers), scalar (a finite number) or by_scope (scope -> such a list); an
+    optional tolerance is {"relative": a finite number >= 0} (r-comp.factor_values 1.1.0 does not use it); optional
+    significant_digits is an integer 1..17 (DR-6)."""
+    out = []
+    if doc.get("factor_table_version") != "1.0.0":
+        out.append("factor_table_version is '1.0.0'")
+    factors = doc.get("factors")
+    if not isinstance(factors, dict) or not factors:
+        return out + ["factors is a non-empty object"]
+    finite_list = lambda v: isinstance(v, list) and bool(v) and all(_finite(x) for x in v)  # noqa: E731
+    for name, entry in sorted(factors.items()):
+        forms = [k for k in ("values", "scalar", "by_scope") if isinstance(entry, dict) and k in entry]
+        if len(forms) != 1:
+            out.append(f"factors.{name}: exactly one of values, scalar, by_scope")
+        elif forms[0] == "values" and not finite_list(entry["values"]):
+            out.append(f"factors.{name}.values: a non-empty list of finite numbers")
+        elif forms[0] == "scalar" and not _finite(entry["scalar"]):
+            out.append(f"factors.{name}.scalar: a finite number")
+        elif forms[0] == "by_scope" and not (isinstance(entry["by_scope"], dict) and entry["by_scope"]
+                                              and all(finite_list(v) for v in entry["by_scope"].values())):
+            out.append(f"factors.{name}.by_scope: scope -> a non-empty list of finite numbers")
+    if "tolerance" in doc:
+        tol = doc["tolerance"]
+        rel = tol.get("relative") if isinstance(tol, dict) else None
+        if not (isinstance(tol, dict) and set(tol) == {"relative"} and isinstance(rel, (int, float)) and _finite(rel)
+                and rel >= 0):
+            out.append("tolerance is {\"relative\": a finite number >= 0}")
+    if "significant_digits" in doc:
+        d = doc["significant_digits"]
+        if not (isinstance(d, int) and not isinstance(d, bool) and 1 <= d <= 17):
+            out.append("significant_digits is an integer from 1 to 17")
+    return out
 
 
 def draft_view(root, items: list, context: dict, files: dict | None = None) -> dict:
@@ -260,6 +347,57 @@ def snapshot_lookup(store):
     return lookup
 
 
+def default_snapshot_store(root) -> Path:
+    return Path(root).resolve() / STATE_DIR / "snapshots"
+
+
+def record_bundle(root, bundle_path, bundle: dict) -> None:
+    """Add a frozen bundle to <root>/.hep-research/bundles.json, the index 'snapshots gc' keeps alive."""
+    root = Path(root).resolve()
+    index_path = root / STATE_DIR / "bundles.json"
+    index: dict = {"index_version": "1.0.0", "bundles": []}
+    if index_path.is_file():
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    try:
+        ref = Path(bundle_path).resolve().relative_to(root).as_posix()
+    except ValueError:
+        ref = str(Path(bundle_path).resolve())
+    entry = {"path": ref, "bundle_digest": bundle.get("bundle_digest")}
+    if entry not in index["bundles"]:
+        index["bundles"].append(entry)
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = index_path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(index, indent=1) + "\n", encoding="utf-8")
+    tmp.replace(index_path)
+
+
+def snapshots_gc(root, apply: bool = False) -> dict:
+    """Snapshots no indexed bundle references: listed (dry run) or deleted (apply). An indexed bundle that cannot be
+    read, or whose semantic lock cannot be read, refuses the whole run: nothing is deleted on a guess."""
+    root = Path(root).resolve()
+    store = default_snapshot_store(root)
+    index_path = root / STATE_DIR / "bundles.json"
+    keep: set[str] = set()
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.is_file() else {"bundles": []}
+        for entry in index["bundles"]:
+            p = Path(entry["path"])
+            bundle = json.loads((p if p.is_absolute() else root / p).read_text(encoding="utf-8"))
+            lock_item = next(it for it in bundle["items"] if it["role"] == "semantic-lock")
+            lock = json.loads(_read(root, lock_item["ref"]).decode("utf-8"))
+            keep |= {d["digest"] for d in lock.get("definitions", []) if d.get("digest")}
+            keep |= {m["closure_digest"] for m in lock.get("member_sets", []) if m.get("closure_digest")}
+    except (OSError, ValueError, KeyError, TypeError, StopIteration, BundleRefused) as exc:
+        return {"status": "refused", "error": f"an indexed bundle cannot be read: {exc}", "deleted": [], "unreferenced": []}
+    stored = sorted(p.stem for p in store.glob("*.json")) if store.is_dir() else []
+    unreferenced = [d for d in stored if d not in keep]
+    if apply:
+        for d in unreferenced:
+            (store / f"{d}.json").unlink()
+    return {"status": "deleted" if apply else "dry-run", "kept": len(stored) - len(unreferenced),
+            "unreferenced": unreferenced, "deleted": unreferenced if apply else []}
+
+
 def _registry_doc():
     try:
         return json.loads(REGISTRY.read_text(encoding="utf-8"))
@@ -267,10 +405,22 @@ def _registry_doc():
         return None
 
 
-def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain", snapshots=None) -> dict:
+DEFAULT = "default"
+
+
+def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain", snapshots=DEFAULT) -> dict:
+    """snapshots: a store folder, DEFAULT (<root>/.hep-research/snapshots/) or None (no snapshots)."""
     root = Path(root).resolve()
+    if snapshots == DEFAULT:
+        snapshots = default_snapshot_store(root)
     if not isinstance(items, list) or not items:
         raise BundleRefused("bundle.no_items", "a bundle needs its items")
+    if mode != "chain" or any(isinstance(it, dict) and it.get("role") == "model-card" for it in items):
+        raise BundleRefused("bundle.removed", f"model-only bundles and model-card items were {REMOVED}")
+    if isinstance(context, dict):
+        gone = sorted({str(x.get("id")) for x in context_suites(context) if isinstance(x, dict) and x.get("id") in REMOVED_SUITES})
+        if gone:
+            raise BundleRefused("bundle.removed", f"suites {gone} were {REMOVED}")
     for it in items:
         if not (isinstance(it, dict) and it.get("role") in ROLES2 and it.get("role") not in ("context", "semantic-lock")
                 and isinstance(it.get("id"), str) and isinstance(it.get("ref"), str)):
@@ -288,11 +438,17 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
     rep = validate(context, "check_context.json")
     if not rep.ok:
         raise BundleRefused("bundle.context_schema", "; ".join(f"{f.path}: {f.code}" for f in rep.errors))
+    pairing = version_findings(context)
+    if pairing:
+        raise BundleRefused("bundle.context_version", "; ".join(f"{f['where']}: {f['message']}" for f in pairing))
+    bad_input = input_findings(context)
+    if bad_input:
+        raise BundleRefused("bundle.context_input", "; ".join(f"{f['where']}: {f['message']}" for f in bad_input))
     try:
         view = draft_view(root, items, context)
     except (UnicodeError, ValueError) as exc:
         raise BundleRefused("bundle.bad_json", f"an item is not readable JSON: {exc}") from None
-    shapes = shape_diagnostics(view["items"])
+    shapes = shape_diagnostics(view["items"], context.get("context_version"))
     if shapes:
         raise BundleRefused("bundle.item_schema", "; ".join(d["message"] for d in shapes))
     roles = {it["id"]: it["role"] for it in items}
@@ -306,6 +462,9 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
     for s in suites:
         if s.get("mode", "chain") != mode:
             raise BundleRefused("bundle.suite_mode", f"suite {s.get('suite_id')!r} checks {s.get('mode')} bundles, not {mode}")
+        if not obl.generator_supported(s):
+            raise BundleRefused("bundle.generator_unsupported", f"suite {s.get('suite_id')!r} names generator "
+                                f"{s.get('generator')!r}, which this checker does not implement")
     full = dict(context, obligations=obl.generate_all(suites, view))
     view["context"] = full
     view["suites"] = suites
@@ -330,6 +489,8 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
 
 def _roles_ok(roles: list, mode: str) -> None:
     need = MODE_ROLES.get(mode)
+    if mode == "model":
+        raise BundleRefused("bundle.removed", f"mode 'model' was {REMOVED}")
     if need is None:
         raise BundleRefused("bundle.mode", f"mode {mode!r} is not supported")
     for r in need["exactly_one"]:
@@ -390,7 +551,8 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
             except (BundleRefused, UnicodeError, ValueError):
                 pass  # reported by verify as a missing or changed frozen file
         items[it["id"]] = rec
-    diags += shape_diagnostics(items)
+    ctx_doc: dict = next((i["doc"] for i in items.values() if i.get("role") == "context" and isinstance(i.get("doc"), dict)), {})
+    diags += shape_diagnostics(items, ctx_doc.get("context_version"))
     ctx_items = [i for i in items.values() if i.get("role") == "context"]
     lock_items = [i for i in items.values() if i.get("role") == "semantic-lock"]
     context = ctx_items[0]["doc"] if ctx_items and isinstance(ctx_items[0]["doc"], dict) else {}
@@ -399,6 +561,8 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
         rep = validate(doc, name)
         for f in rep.errors:
             diags.append({"kind": "input-invalid", "code": f"{name.split('.')[0]}.{f.code}", "message": f"{f.path}: {f.message}"})
+    diags += [{"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"}
+              for f in version_findings(context) + input_findings(context)]
     view, more = _view(items, context)
     diags += more
     view.update(bundle=bundle, lock=lock, bundle_verified=ver["status"], root=str(root))
@@ -409,12 +573,20 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
             diags.append({"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"})
     view["suite"], view["suites"] = None, []
     for k, s in enumerate(context_suites(context) if isinstance(context, dict) else []):
+        if s.get("id") in REMOVED_SUITES:
+            diags.append({"kind": "dependency-missing", "code": "definition.suite_removed",
+                          "message": f"suite {s.get('id')!r} was {REMOVED}"})
+            continue
         try:
             loaded = load_suite(str(s.get("id")), str(s.get("version")))
         except (OSError, ValueError):
             diags.append({"kind": "dependency-missing", "code": "definition.suite_missing",
                           "message": f"suite {s.get('id')!r} version {s.get('version')!r} is not installed"})
             continue
+        if not obl.generator_supported(loaded):
+            diags.append({"kind": "dependency-missing", "code": "definition.generator_unsupported",
+                          "message": f"suite {s.get('id')!r} names generator {loaded.get('generator')!r}, which this "
+                                     "checker does not implement: its inventory is not regenerated"})
         view["suites"].append(loaded)
         if k == 0:
             view["suite"] = loaded
@@ -429,6 +601,8 @@ def check_inventory(view: dict) -> list[dict]:
     frozen = (view.get("context") or {}).get("obligations") or {}
     if view.get("suite") is None or len(view.get("suites") or []) != len(context_suites(view.get("context") or {})):
         return []
+    if not all(obl.generator_supported(s) for s in view["suites"]):
+        return []  # generator guard: reported as dependency-missing by load_subject
     return obl.check_inventory(frozen, obl.generate_all(view["suites"], view))
 
 
@@ -451,13 +625,6 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
             if f.severity in ("error", "warning"):
                 out.append({"entry": "contracts/validate.py", "item": spec_id, **f.as_dict(), "maps_to": map_legacy(f.as_dict())})
     for iid, it in sorted(view["items"].items()):
-        if it.get("role") == "model-card" and isinstance(it.get("doc"), dict):
-            from contracts.schema import Report
-            from contracts.validate import check_model_card
-            rep = Report()
-            check_model_card(it["doc"], "frequentist", rep, "$")
-            for f in rep.findings:
-                out.append({"entry": "contracts/validate.py", "item": iid, **f.as_dict(), "maps_to": map_legacy(f.as_dict())})
         if it.get("role") == "recipe" and isinstance(it.get("doc"), dict):
             res = check_recipe(it["doc"], view.get("tables", {}), [], None)
             for f in res["findings"]:
@@ -466,18 +633,12 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
 
 
 def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=None, settings: dict | None = None,
-             rules: dict | None = None, snapshots=None, exceptions: list | None = None, now: str | None = None,
-             results: dict | None = None, blinding: dict | None = None) -> dict:
-    """results: a result binding (contracts/schemas/result_binding.json) for a post-execution assessment (run-lineage/v1,
-    M2c); blinding: the project's blinding block, for the allowed_outputs matching rule (m2c-proposal.md)."""
+             rules: dict | None = None, snapshots=None, exceptions: list | None = None, now: str | None = None) -> dict:
+    """A pre-execution assessment: result bindings (run-lineage) were removed in 0.28.0."""
     from contracts.analysis_checks.lock import compare, rebuild
     from contracts.analysis_checks.outcomes import formal_view, summarize
     from contracts.analysis_checks.rules import evaluate as run_rules
-    if results is not None:
-        rb = validate(results, "result_binding.json")
-        diags = list(diags) + [{"kind": "input-invalid", "code": f"result_binding.{f.code}", "message": f"{f.path}: {f.message}"}
-                               for f in rb.errors]
-    view = dict(view, results=results, blinding=blinding)
+
     lock_diff = compare(view.get("lock") or {}, current_lock(view)) if view.get("suite") else []
     installed_diff, source = list(lock_diff), "installed"
     missing: list[str] = []
@@ -490,8 +651,6 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
         if defs is not None and not missing:
             view = dict(view, coverage=defs["coverage"], catalog=defs["catalog"], suites=defs["suites"],
                         suite=defs["suites"][0] if defs["suites"] else None)
-            if defs.get("pairings") is not None:
-                view["pairings"] = defs["pairings"]
             locked_registry = next((d["digest"] for d in (view.get("lock") or {}).get("definitions", [])
                                     if d["kind"] == "rule-registry"), None)
             lock_diff = compare(view.get("lock") or {}, build_lock(view.get("suite") or {}, generator_code_digest() or "",
@@ -525,13 +684,15 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     assessment = {"subject": bundle.get("bundle_digest"), "suite": {"id": suite.get("suite_id"), "version": suite.get("version")},
                   "suites": [{"id": s.get("suite_id"), "version": s.get("version")} for s in view.get("suites") or []],
                   "rules": rules_used, "registry": registry_digest(), "checker": checker["digest"],
-                  "readers": lock.get("readers"), "settings": settings}
+                  "readers": lock.get("readers"), "settings": settings, "plugin_release": dict(plugin_release())}
     decl_ids = {d for o in outcomes for d in o.get("declarations", [])}
+    # P6: a missing dependency or definitions that differ from the lock never leave the status complete (exit 3)
+    blocked = bool(lock_diff) or any(d["kind"] == "dependency-missing" for d in diags)
     report = {
         "report_version": REPORT_VERSION, "kind": "analysis-check-report",
         "status": ("invalid" if not input_valid else "inconsistent" if summary["consistency"] == "inconsistent"
                    else "complete" if summary["coverage"]["value"] == "complete" and summary["consistency"] == "consistent"
-                   else "incomplete"),
+                   and not blocked else "incomplete"),
         "subject_digest": bundle.get("bundle_digest"), "assessment_id": canonical_sha256(assessment),
         "assessment": assessment, "inventory_digest": inv.get("digest"), "suite": assessment["suite"],
         "checker": checker, "input_validity": "valid" if input_valid else "invalid",
@@ -543,13 +704,8 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
                          for d in (view.get("context") or {}).get("declarations", []) if d.get("declaration_id") in decl_ids],
         "context_findings": view.get("context_findings", []),
         "legacy_findings": legacy_findings(view, vocab) if view.get("items") else [],
-        "execution_evidence_level": evidence_levels(view, outcomes, results),
-        "phase": "post-execution" if results is not None else "pre-execution",
-        "result_binding": None if results is None else {
-            "sha256": canonical_sha256(results),
-            "results": [{"root": r.get("root"), "sha256": r.get("sha256")} for r in results.get("results", []) if isinstance(r, dict)],
-            "execution_bundles": sorted({str(c["execution_bundle_sha256"]) for c in results.get("campaigns", [])
-                                         if isinstance(c, dict) and c.get("execution_bundle_sha256")})},
+        "execution_evidence_level": "not checked: run lineage was removed in 0.28.0 (pre-execution report)",
+        "phase": "pre-execution",
         "validation_status": sorted(set(((view.get("items", {}).get((view.get("context") or {}).get("spec")) or {})
                                           .get("doc") or {}).get("status") or [])),
         "scope_delta": scope_delta(previous, bundle.get("bundle_digest"), obligations) if previous else None,
@@ -563,24 +719,6 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     return report
 
 
-def evidence_levels(view: dict, outcomes: list[dict], results: dict | None):
-    """The execution evidence level behind each root's conclusions (C9): a string before execution or without the
-    run-lineage suite; after execution, per root, declared or campaign-recorded (trusted-submitter is reserved)."""
-    selected = any((s or {}).get("suite_id") == "run-lineage" for s in view.get("suites") or [])
-    if results is None or not selected:
-        return ("not checked: run lineage needs a result binding (pre-execution)" if selected else
-                "not checked: the selected suites have no run lineage (run-lineage/v1, M2c)")
-    levels = {}
-    for o in outcomes:
-        if o["rule_id"] == "r-run.campaign":
-            root = o["obligation_id"].split(":", 1)[1]
-            levels[root] = o.get("level") or "declared"
-    return levels
-
-
-# model cards (model-card/v1): the legacy card rule and the new rule that decides the same question
-MODEL_AGREEMENT = {"stats.duplicate_auxiliary": "r-aux.use", "stats.model_unconstrained_parameter": "r-model.pairing",
-                   "stats.model_poi_mismatch": "r-model.pairing"}
 L2_REPEAT_ERRORS = {"semantics.repeated_correction"}
 L2_REPEAT_CONSERVATIVE = {"semantics.repeat_undetermined", "semantics.repeat_distinct_instance"}
 
@@ -594,15 +732,7 @@ def difference_review(view: dict, report: dict) -> dict:
     finding and the new repetition outcome on the same recipe's instances say the same: violated with violated,
     undetermined with unverified), new-decides (an undetermined L2 repetition that the new suite decides as violated
     from data flow), new-only (a new violation with no legacy error on the items it rests on: a cross-artifact
-    finding). For model cards, a legacy check_model_card error and a new violation of the rule that decides the same
-    question (MODEL_AGREEMENT) on the same model 'agree'; other legacy card findings are artifact-local."""
-    model_of = {m.get("item"): m.get("model_id") for m in (view.get("context") or {}).get("models", []) if isinstance(m, dict)}
-    violated_on: dict[tuple, bool] = {}
-    for o in report.get("obligations", []):
-        if o["state"] == "violated":
-            for e in o.get("evidence", []):
-                if "model" in e:
-                    violated_on[(o["rule_id"], e["model"])] = True
+    finding)."""
     insts_of: dict[str, set] = {}
     for i in (view.get("context") or {}).get("recipe_instances", []):
         insts_of.setdefault(i.get("recipe"), set()).add(i.get("instance_id"))
@@ -616,8 +746,7 @@ def difference_review(view: dict, report: dict) -> dict:
     for f in report.get("legacy_findings", []):
         code, cls = f.get("code"), "unclassified"
         if f.get("entry") == "contracts/validate.py":
-            rule = MODEL_AGREEMENT.get(code)
-            cls = "agrees" if rule and violated_on.get((rule, model_of.get(f.get("item")))) else "artifact-local"
+            cls = "artifact-local"
         elif f.get("entry") == "contracts/recipe_semantics.py":
             states = set().union(*(rep_state.get(i, set()) for i in insts_of.get(f.get("item"), ())))
             if code in L2_REPEAT_ERRORS:
@@ -634,11 +763,6 @@ def difference_review(view: dict, report: dict) -> dict:
             continue
         recipes = {r for r, insts in insts_of.items() for e in o.get("evidence", []) if e.get("instance") in insts}
         cls = "agrees" if o["rule_id"] == "r-rep.repetition" and recipes & legacy_items else "new-only"
-        models = {e["model"] for e in o.get("evidence", []) if "model" in e}
-        legacy_model = {model_of.get(f.get("item")) for f in report.get("legacy_findings", [])
-                        if MODEL_AGREEMENT.get(f.get("code")) == o["rule_id"]}
-        if models & legacy_model:
-            cls = "agrees"
         rows.append({"side": "new", "obligation_id": o["obligation_id"], "code": o["reason"], "class": cls})
     counts: dict[str, int] = {}
     for r in rows:
@@ -689,11 +813,12 @@ def scope_delta(previous: dict, subject: str | None, obligations: list[dict]) ->
 
 
 def exit_code(report: dict) -> int:
-    """1 for a violation or invalid inputs, 3 for an incomplete check or a missing dependency, 0 when complete and
-    consistent (2, a usage error, is decided before a report exists)."""
+    """1 for a violation or invalid inputs, 3 for an incomplete check, a missing dependency or definitions that differ
+    from the semantic lock, 0 when complete and consistent (2, a usage error, is decided before a report exists)."""
     if report["input_validity"] == "invalid" or report["consistency"] == "inconsistent":
         return 1
-    if any(d["kind"] == "dependency-missing" for d in report["input_diagnostics"]) or report["coverage"]["value"] != "complete":
+    if (any(d["kind"] == "dependency-missing" for d in report["input_diagnostics"]) or report["lock_differences"]
+            or report["coverage"]["value"] != "complete"):
         return 3
     return 0
 
@@ -709,11 +834,6 @@ NEXT_STEPS = {
     "check.semantics_unreproducible": "re-freeze against the current definitions (a new subject) or restore them",
     "check.rule_not_run": "use a checker that implements this rule",
     "check.input_invalid": "fix the input diagnostics first",
-    "check.aux_unbound": "bind the constraint's auxiliary measurement to its observation (an observes binding: item and pointer)",
-    "check.aux_repeat_unknown": "bind every other constraint of the evaluation to its observation",
-    "check.aux_overlap_unknown": "bind each constraint to a component pointer that does not contain another",
-    "check.model_root_incomplete": "name an evaluation of the context and the card's POI",
-    "check.share_unbound": "name members that exist in the evaluation's model cards",
 }
 
 
@@ -762,22 +882,29 @@ def main(argv=None) -> int:
     f.add_argument("--items", type=Path, required=True)
     f.add_argument("--context", type=Path, required=True)
     f.add_argument("--out", type=Path, required=True)
-    f.add_argument("--snapshots", type=Path, help="store the pinned definitions content-addressed here (D11b)")
-    f.add_argument("--mode", choices=sorted(MODE_ROLES), default="chain", help="bundle mode (model: model-only diagnostics)")
+    f.add_argument("--snapshots", type=Path, help="store the pinned definitions content-addressed here (D11b; default "
+                   "<root>/.hep-research/snapshots)")
+    f.add_argument("--no-snapshots", action="store_true", help="store no snapshots")
+    f.add_argument("--mode", default="chain", help=argparse.SUPPRESS)  # 'model' was removed in 0.28.0: refused with the reason
     c = sub.add_parser("check")
     c.add_argument("bundle", type=Path)
     c.add_argument("--root", type=Path, required=True)
     c.add_argument("--out", type=Path)
     c.add_argument("--previous", type=Path)
     c.add_argument("--profiles-from", type=Path, help="project config whose profiles extend the vocabulary of the legacy L1 run")
-    c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since freezing")
+    c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since "
+                   "freezing (default <root>/.hep-research/snapshots when it exists)")
     c.add_argument("--exceptions", type=Path, help="scoped exceptions (JSON list): judged and listed, never change a state")
-    c.add_argument("--results", type=Path, help="a result binding: assess after execution (run-lineage/v1)")
-    c.add_argument("--project", type=Path, help="project folder or config whose blinding block applies (allowed_outputs)")
+    c.add_argument("--results", type=Path, help=argparse.SUPPRESS)  # removed in 0.28.0: refused with the reason
+    c.add_argument("--project", type=Path, help=argparse.SUPPRESS)  # removed in 0.28.0: refused with the reason
     s = sub.add_parser("summary")
     s.add_argument("report", type=Path)
     s.add_argument("--cursor", type=int, default=0)
     s.add_argument("--max-bytes", type=int, default=SUMMARY_BYTES)
+    g = sub.add_parser("snapshots")
+    g.add_argument("action", choices=["gc"])
+    g.add_argument("--root", type=Path, required=True)
+    g.add_argument("--apply", action="store_true", help="delete (default: dry run, list only)")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
@@ -792,14 +919,24 @@ def main(argv=None) -> int:
                 raise UsageError(f"{args.out} is where freeze writes the context or lock")
             if not args.out.parent.is_dir():
                 raise UsageError(f"{args.out.parent} is not a directory")
+            if args.no_snapshots and args.snapshots is not None:
+                raise UsageError("--snapshots and --no-snapshots exclude each other")
+            store = None if args.no_snapshots else (args.snapshots or DEFAULT)
             try:
-                doc = freeze(args.root, args.analysis, items, context, mode=args.mode, snapshots=args.snapshots)
+                doc = freeze(args.root, args.analysis, items, context, mode=args.mode, snapshots=store)
             except BundleRefused as exc:
                 print(json.dumps({"status": "refused", "code": exc.code, "error": str(exc)}, indent=1))
                 return 1
             args.out.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+            record_bundle(args.root, args.out, doc)
             print(json.dumps({"status": "frozen", "bundle_digest": doc["bundle_digest"], "out": str(args.out)}, indent=1))
             return 0
+        if args.cmd == "snapshots":
+            if not args.root.is_dir():
+                raise UsageError(f"{args.root} is not a directory")
+            res = snapshots_gc(args.root, apply=args.apply)
+            print(json.dumps(res, indent=1))
+            return 1 if res["status"] == "refused" else 0
         if args.cmd == "summary":
             report = json.loads(args.report.read_text(encoding="utf-8"))
             if not (isinstance(report, dict) and isinstance(report.get("obligations"), list)):
@@ -815,13 +952,8 @@ def main(argv=None) -> int:
         exceptions = json.loads(args.exceptions.read_text(encoding="utf-8")) if args.exceptions else None
         if exceptions is not None and not isinstance(exceptions, list):
             raise UsageError(f"{args.exceptions} is not a JSON list of exceptions")
-        results = json.loads(args.results.read_text(encoding="utf-8")) if args.results else None
-        if results is not None and not isinstance(results, dict):
-            raise UsageError(f"{args.results} is not a result binding")
-        blinding = None
-        if args.project is not None:
-            cfg_path = args.project / "hep-research.project.json" if args.project.is_dir() else args.project
-            blinding = (json.loads(cfg_path.read_text(encoding="utf-8")) or {}).get("blinding") or {"blinded": [], "allowed_outputs": []}
+        if args.results is not None or args.project is not None:
+            raise UsageError(f"--results and --project (result bindings, run lineage) were {REMOVED}")
         view, diags = load_subject(args.bundle, args.root)
         if args.out is not None:
             refs = {(Path(args.root).resolve() / it.get("ref", "")).resolve() for it in view["bundle"].get("items", [])
@@ -835,8 +967,10 @@ def main(argv=None) -> int:
     except (OSError, ValueError, TypeError) as exc:
         print(json.dumps({"status": "usage", "error": str(exc)}, indent=1))
         return 2
-    report = evaluate(view, diags, previous, vocab, snapshots=getattr(args, "snapshots", None), exceptions=exceptions,
-                      results=results, blinding=blinding)
+    store = args.snapshots
+    if store is None and default_snapshot_store(args.root).is_dir():
+        store = default_snapshot_store(args.root)
+    report = evaluate(view, diags, previous, vocab, snapshots=store, exceptions=exceptions)
     if args.out is not None:
         args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=1))

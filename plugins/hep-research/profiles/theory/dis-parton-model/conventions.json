@@ -1,0 +1,23 @@
+{
+ "unit_system": "natural-HEP: Q^2 in GeV^2; x, F_2, F_L and alpha_s are dimensionless",
+ "hbar_c_one": true,
+ "metric_signature": "not-applicable (no amplitude is computed; Q^2 = -q^2 > 0 as in PDG Sec. 18.1)",
+ "coupling_normalization": "alpha_s = g_s^2/(4 pi); coefficient functions expanded in a_s = alpha_s/(4 pi), C_L,a = sum_n a_s^n c_L,a^(n) [dispm:C04]",
+ "renormalization_scheme": "MS-bar as stated by Moch, Vermaseren and Vogt; the O(alpha_s) F_L coefficient functions used here are scheme independent [dispm:C04]",
+ "scales": "mu_R = mu_F = Q [dispm:C04]; alpha_s(Q^2) is an input per Q^2 point (toy values in the benchmark, not run)",
+ "energy_variable": "Bjorken x = Q^2/(2 M nu) and Q^2 = -q^2 (PDG Sec. 18.1)",
+ "frame": "not-applicable (Lorentz-invariant structure functions)",
+ "angle_definition": "not-applicable (no angular variable)",
+ "spin_treatment": "unpolarized lepton and nucleon",
+ "mass_approximation": "massless quarks (n_f effectively massless flavours); target mass neglected (O(M^2/Q^2) dropped, PDG Eq. 18.21)",
+ "target_normalization": "per nucleon: structure functions of one nucleon; the toy densities describe one invented nucleon",
+ "exchanged_bosons": "photon only (F_2^gamma of PDG Eq. 18.18); no Z or W exchange",
+ "em_coupling": "not-applicable (F_2 and F_L are defined without alpha; no cross section is computed)",
+ "structure_function_signs": "not-applicable (no xF_3 term for photon exchange)",
+ "heavy_quark_scheme": "zero-mass: all n_f flavours massless (toy n_f = 4); no heavy-quark mass effects",
+ "factorization_scheme": "MS-bar [dispm:C04]; at O(alpha_s) the F_L result does not depend on it",
+ "target_mass_treatment": "neglected",
+ "log_accuracy": "not-applicable (fixed order, no resummation)",
+ "dispm:observable": "F_2(x, Q^2) at O(alpha_s^0) = x sum_q e_q^2 (q + qbar) [dispm:C01]; F_L(x, Q^2) at O(alpha_s^1) = F_2 - 2 x F_1, in the Altarelli-Martinelli form derived in derivations/derivation-record.md",
+ "dispm:parton_densities": "number densities q(x), qbar(x), g(x) (not momentum densities x f); convolution C (x) f = int_x^1 dy/y C(y) f(x/y) [dispm:C02]; in this profile they are SYNTHETIC Beta-form toys"
+}

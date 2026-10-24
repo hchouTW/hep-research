@@ -1,0 +1,159 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "fixture-synthetic-design-spec",
+ "artifact_type": "design-spec",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.36.0",
+  "contracts": "3.12.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "design_id": "spectrometer-demo",
+  "spec_version": 1,
+  "objectives": [
+   {
+    "id": "spectrometer-demo:PHY-001",
+    "description": "SYNTHETIC: charge-separated proton spectrum to 1 TV",
+    "observable": "proton and antiproton flux versus rigidity",
+    "range": "10 GV to 1000 GV",
+    "precision_goal": "statistics-limited at 1000 GV"
+   }
+  ],
+  "requirements": [
+   {
+    "id": "spectrometer-demo:REQ-TRK-001",
+    "parents": [
+     "spectrometer-demo:PHY-001"
+    ],
+    "quantity": "momentum-resolution-core",
+    "comparator": "<=",
+    "target": 0.6,
+    "unit": "1",
+    "denominator": {
+     "rigidity_GV": {
+      "value": 1000.0
+     },
+     "species": {
+      "value": "proton",
+      "tolerance": 0.0
+     }
+    },
+    "kind": "driving",
+    "allocation": "spectrometer-demo:ALC-TRK-001",
+    "verification": {
+     "method": "analysis then simulation"
+    }
+   },
+   {
+    "id": "spectrometer-demo:REQ-CC-001",
+    "parents": [
+     "spectrometer-demo:PHY-001",
+     "spectrometer-demo:REQ-TRK-001"
+    ],
+    "quantity": "charge-confusion-rate",
+    "comparator": "<=",
+    "target": 0.05,
+    "unit": "1",
+    "denominator": {
+     "rigidity_GV": {
+      "value": 1000.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "proton",
+      "tolerance": 0.0
+     },
+     "charge_sign": {
+      "value": "positive",
+      "tolerance": 0.0
+     },
+     "curvature_offset_per_GV": {
+      "value": 0.0,
+      "tolerance": 0.0
+     }
+    },
+    "kind": "driving",
+    "allocation": "spectrometer-demo:ALC-CC-001",
+    "verification": {
+     "method": "simulation validated with data"
+    }
+   }
+  ],
+  "allocations": [
+   {
+    "id": "spectrometer-demo:ALC-TRK-001",
+    "requirement": "spectrometer-demo:REQ-TRK-001",
+    "rule": "quadrature",
+    "independent": true,
+    "items": [
+     {
+      "name": "intrinsic",
+      "value": 0.4
+     },
+     {
+      "name": "scattering",
+      "value": 0.05
+     },
+     {
+      "name": "alignment",
+      "value": 0.25
+     }
+    ],
+    "margin": 0.1
+   },
+   {
+    "id": "spectrometer-demo:ALC-CC-001",
+    "requirement": "spectrometer-demo:REQ-CC-001",
+    "rule": "linear",
+    "items": [
+     {
+      "name": "core",
+      "value": 0.01
+     },
+     {
+      "name": "tails",
+      "value": 0.03
+     }
+    ],
+    "margin": 0.01
+   }
+  ],
+  "constraints": [
+   {
+    "id": "spectrometer-demo:CON-MASS-001",
+    "type": "mass",
+    "hardness": "hard",
+    "quantity": "mass-budget",
+    "comparator": "<=",
+    "target": 7500.0,
+    "unit": "kg",
+    "denominator": {},
+    "subsystems": [
+     "DES-TRK-001",
+     "DES-MAG-001"
+    ]
+   }
+  ],
+  "comparison_basis": {
+   "quantity": "mass-budget",
+   "tolerance_relative": 0.05,
+   "note": "candidates are compared at equal mass"
+  }
+ }
+}

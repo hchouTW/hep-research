@@ -1,0 +1,14 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "cutoff_fraction is vectorized with numpy (same criterion: CUTOFF_FACTOR x cutoff < bin lower edge); the geomagnetic selection definition is reworded.",
+ "code_change": "cutoff_fraction(): boolean mask over (bin, cutoff) times weights, summed per bin.",
+ "description_change": "measurement spec: geomagnetic selection definition 'lower edge of the rigidity bin above 1.2 x the maximum cutoff'.",
+ "affected": [
+  "exposure",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2"
+ ]
+}

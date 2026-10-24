@@ -4068,6 +4068,380 @@
    ]
   },
   {
+   "id": "th13-codes-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "GALPROP quotes D0 at 4 GV and a USINE fit quotes K0 at 1 GV in kpc^2/Myr; put both diffusion coefficients in one set of conventions before I compare the transport parameters.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "conventions",
+    "cosmic-ray propagation"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-xs-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "B/C 預測用的二次產生截面有好幾套參數化，差異多大？截面不確定度要怎麼當成 model alternatives 帶進理論預測？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "model alternatives"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-mod-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請把電荷符號依賴的太陽調制模型預測對齊到逐 Bartels rotation 的通量時間分箱，並說明這個近似的適用範圍。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-dm-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give me the predicted dark-matter annihilation contribution to the cosmic antiproton flux, with propagation-model and halo-profile model alternatives as theory uncertainties.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "theory uncertainties",
+    "model alternatives"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-mod-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which solar modulation model should predict the positron-to-electron ratio across the last polarity reversal, and where does the force-field approximation break down?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "solar modulation"
+   ],
+   "set": "Th13"
+  },
+  {
+   "id": "th13-fit-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Profile the cross-section nuisance parameters in my propagation fit to Li, Be and B ratios and give the interval on delta.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters"
+   ],
+   "not": "hep-theory",
+   "set": "Th13"
+  },
+  {
+   "id": "th14-sigmar-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the DIS neutral-current reduced cross section sigma_r for e- p at HERA kinematics from my parton values, with the gamma-Z conventions written out.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "DIS",
+    "conventions"
+   ],
+   "set": "Th14"
+  },
+  {
+   "id": "th14-cc-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用我給的部分子分布值算 e+ p 帶電流的 F_2 與 xF_3，並說明電子極化怎麼進入截面。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14"
+  },
+  {
+   "id": "th14-sumrule-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check that my tabulated PDFs satisfy the momentum and valence-number sum rules at Q^2 = 10 GeV^2, with the small-x extrapolation shown separately.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "PDFs"
+   ],
+   "set": "Th14"
+  },
+  {
+   "id": "th14-reco-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Reconstruct x and Q^2 with the electron method in my DIS events and give the resolution in each bin.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "reconstruction",
+    "resolution"
+   ],
+   "not": "hep-theory",
+   "set": "Th14"
+  },
+  {
+   "id": "th14-heavyion-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Predict J/psi suppression in Pb-Pb collisions from the quark-gluon plasma melting picture.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
+   "id": "th14-hadmodels-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute the proton's Sivers function in the chiral quark soliton model and give me its x dependence.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
+   "id": "th14-quarkonium-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Give the NRQCD prediction for J/psi production in p-Pb collisions including nuclear absorption.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
+   "id": "th14-jetsdis-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute dijet cross sections in resolved-photon photoproduction at an electron-ion collider.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th14",
+   "limited_support": true
+  },
+  {
+   "id": "th15-dy-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give the LO Drell-Yan cross section d2sigma/dM dx_F for p p at 120 GeV beam energy on a fixed target, with the x_F definition and rapidity frame stated.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "Drell-Yan",
+    "cross sections"
+   ],
+   "set": "Th15"
+  },
+  {
+   "id": "th15-pd-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Predict the pd/pp Drell-Yan cross-section ratio at E906 kinematics and say how it depends on dbar/ubar.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "Drell-Yan"
+   ],
+   "set": "Th15"
+  },
+  {
+   "id": "th15-frames-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請把 Collins-Soper 座標系的 lambda、mu、nu 轉到 helicity 座標系，並檢查 Lam-Tung 關係與不隨座標系改變的組合。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th15"
+  },
+  {
+   "id": "th15-qt-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "I need the O(alpha_s) Drell-Yan q_T distribution at q_T of order M, with the scale envelope as theory uncertainty.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "Drell-Yan",
+    "theory uncertainties"
+   ],
+   "set": "Th15"
+  },
+  {
+   "id": "th16-npdf-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Apply the nPDF correction to my p-Pb Drell-Yan prediction and give the nuclear ratio with its uncertainty from the nPDF set's own error members.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "nPDFs",
+    "Drell-Yan"
+   ],
+   "set": "Th16"
+  },
+  {
+   "id": "th16-pernucleon-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "鉛靶的 F_2 要用每核子還是每原子核來寫？x 可以大於 1 嗎？請說明慣例。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th16"
+  },
+  {
+   "id": "th16-qgp-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Compute the jet quenching parameter of the quark-gluon plasma in Pb-Pb collisions.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th16",
+   "limited_support": true
+  },
+  {
+   "id": "th17-bjorken-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Evaluate the Bjorken sum rule with its alpha_s corrections at Q^2 = 5 GeV^2 and compare it with my integral of g_1^p - g_1^n; which approximations and validity domain apply?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "approximations and validity domains"
+   ],
+   "set": "Th17"
+  },
+  {
+   "id": "th17-scheme-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "AB 與 MS-bar 方案的 Delta Sigma 可以直接比較嗎？請說明極化 DIS 的因子化方案慣例。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th17"
+  },
+  {
+   "id": "th18-sivers-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Predict the Sivers asymmetry at COMPASS kinematics in a Gaussian TMD model and state the azimuthal-angle conventions and the sign change relative to Drell-Yan.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "TMDs",
+    "conventions"
+   ],
+   "set": "Th18"
+  },
+  {
+   "id": "th18-qt-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How should I predict the Drell-Yan distribution at q_T -> 0, and which TMD prescriptions count as model alternatives?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "Drell-Yan",
+    "model alternatives"
+   ],
+   "set": "Th18"
+  },
+  {
+   "id": "th18-pht-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Reconstruct the hadron transverse momentum relative to the virtual photon in my SIDIS events and give its resolution.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "reconstruction",
+    "resolution"
+   ],
+   "not": "hep-theory",
+   "set": "Th18"
+  },
+  {
+   "id": "th19-sat-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Predict the saturation signal in e Au scattering at the EIC with a dipole model, and treat nPDF shadowing as a model alternative.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "small-x",
+    "model alternatives"
+   ],
+   "set": "Th19"
+  },
+  {
+   "id": "th19-dipole-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用 GBW dipole 模型算 x = 1e-3、Q^2 = 10 GeV^2 的 F_2 與 F_L，並說明參數來源與 x 變數的慣例。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "Th19"
+  },
+  {
+   "id": "th20-dvcs-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute t_min and the skewness for my DVCS beam-spin asymmetry bins and convert the azimuthal angle between the BMK and Trento conventions.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "GPDs",
+    "conventions"
+   ],
+   "set": "Th20"
+  },
+  {
+   "id": "th20-extract-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit Compton form factors to my DVCS asymmetries with a likelihood and give intervals on them.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "likelihoods"
+   ],
+   "not": "hep-theory",
+   "set": "Th20"
+  },
+  {
+   "id": "s12-reweight-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Reweight the NNPDF replicas for dbar/ubar with the pd/pp Drell-Yan ratio and tell me the effective number of replicas left.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "PDF reweighting"
+   ],
+   "set": "S12"
+  },
+  {
+   "id": "s12-profile-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Do a Hessian profiling of EPPS21 with my new p-Pb data and report the penalty term and the reduced gluon uncertainty.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "profiling"
+   ],
+   "set": "S12"
+  },
+  {
+   "id": "s13-fit-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run a global PDF fit from scratch with my DIS and Drell-Yan data and give me the PDF uncertainty bands.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "PDF fits"
+   ],
+   "set": "S13"
+  },
+  {
+   "id": "s13-inputs-1",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "全域 PDF 擬合要用哪些理論設定：階數、重夸克方案、運動學截斷與 alpha_s 要怎麼一致地寫進規格？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "not": "hep-statistics",
+   "set": "S13"
+  },
+  {
    "id": "c-th-rare-1",
    "lang": "en",
    "kind": "direct",
@@ -4949,6 +5323,52 @@
     "hep-authoring"
    ],
    "note": "for a comparison with published data, hep-statistics comes before hep-citations"
+  },
+  {
+   "id": "dsd-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compare three spectrometer layouts against my momentum-resolution and charge-confusion requirements at 1 TV and tell me which ones are excluded and what evidence is still missing.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ],
+   "set": "DSD"
+  },
+  {
+   "id": "dsd-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請為這個磁譜儀設計建立需求、候選方案與評估，並由程式推導每個需求是否符合（design principles and trade-offs）。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ],
+   "set": "DSD"
+  },
+  {
+   "id": "dsd-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Define the physics goals and the precision we need on the antiproton-to-proton ratio before we choose a detector layout.",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "observable definition"
+   ],
+   "not": "hep-detector",
+   "set": "DSD"
+  },
+  {
+   "id": "dsd-neighbor-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "用 Asimov 資料估計這兩個偵測器方案的預期測量精度（expected precision），nuisance 參數要怎麼放？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "toys and Asimov datasets"
+   ],
+   "not": "hep-detector",
+   "set": "DSD"
   },
   {
    "id": "j13",

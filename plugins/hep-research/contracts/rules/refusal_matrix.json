@@ -1,6 +1,6 @@
 {
  "matrix_version": "1.0.0",
- "$comment": "v6.3 D09 reader refusal matrix: what each old entry point does with each new format. 'current' is tested on this tree (tests/contracts/test_v63_d09.py); 'release_0_11_0' was measured on the 0.11.0 release tree (docs/dev/v6.3/refusal-matrix.md). A row that accepts or exposes is a release blocker until a real refusal exists.",
+ "$comment": "v6.3 D09 reader refusal matrix: what each old entry point does with each new format. 'current' is tested on this tree (tests/contracts/test_analysis_check_shadow_and_refusal.py); 'release_0_11_0' was measured on the 0.11.0 release tree (docs/dev/cross-artifact-check/refusal-matrix.md). A row that accepts or exposes is a release blocker until a real refusal exists.",
  "rows": [
   {
    "format": "analysis bundle 2.0.0",

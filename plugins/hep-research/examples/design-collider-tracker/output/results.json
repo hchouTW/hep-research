@@ -1,0 +1,242 @@
+{
+ "label": "SYNTHETIC design study (illustrative collider; not CMS or any real detector)",
+ "design_id": "collider-tracker-v1",
+ "evaluations": {
+  "cand-A": {
+   "resolution": 0.014096342606950083,
+   "ecal": 0.005723635208501674
+  },
+  "cand-B": {
+   "resolution": 0.027688752751034808,
+   "ecal": 0.009539392014169458
+  },
+  "cand-P": {
+   "resolution": 0.09128772337758312,
+   "ecal": 0.009539392014169458
+  }
+ },
+ "verdicts": {
+  "REQ-TRK-001 cand-A": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ]
+  },
+  "REQ-TRK-001 cand-B": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ]
+  },
+  "REQ-TRK-001 cand-P": {
+   "result": "fail",
+   "codes": [
+    "bound.excludes"
+   ],
+   "missing_evidence": [
+    "none: excluded by an optimistic bound; change the candidate or the requirement"
+   ]
+  },
+  "REQ-ECAL-001 cand-A": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
+    "calorimeter-energy-resolution at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-ECAL-001 cand-B": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
+    "calorimeter-energy-resolution at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-ECAL-001 cand-P": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
+    "calorimeter-energy-resolution at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-HCAL-001 cand-A": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "hadronic-energy-resolution at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-HCAL-001 cand-B": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "hadronic-energy-resolution at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-HCAL-001 cand-P": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "hadronic-energy-resolution at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-TRG-001 cand-A": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "trigger-efficiency at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-TRG-001 cand-B": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "trigger-efficiency at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-TRG-001 cand-P": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "trigger-efficiency at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-PU-001 cand-A": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "pileup-robustness at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-PU-001 cand-B": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "pileup-robustness at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-PU-001 cand-P": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "pileup-robustness at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-CONT-001 cand-A": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "shower-containment at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-CONT-001 cand-B": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "shower-containment at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-CONT-001 cand-P": {
+   "result": "inconclusive",
+   "codes": [
+    "capability.unavailable"
+   ],
+   "missing_evidence": [
+    "shower-containment at F4 or above (compliance threshold)"
+   ]
+  },
+  "CON-MASS-001 cand-A": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "CON-MASS-001 cand-B": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "CON-MASS-001 cand-P": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  }
+ },
+ "unavailable": [
+  "collider-tracker-v1:EST-CONT-A",
+  "collider-tracker-v1:EST-CONT-B",
+  "collider-tracker-v1:EST-CONT-P",
+  "collider-tracker-v1:EST-HCAL-A",
+  "collider-tracker-v1:EST-HCAL-B",
+  "collider-tracker-v1:EST-HCAL-P",
+  "collider-tracker-v1:EST-PU-A",
+  "collider-tracker-v1:EST-PU-B",
+  "collider-tracker-v1:EST-PU-P",
+  "collider-tracker-v1:EST-TRG-A",
+  "collider-tracker-v1:EST-TRG-B",
+  "collider-tracker-v1:EST-TRG-P"
+ ],
+ "gate_flags": [
+  "gate.H1_missing",
+  "gate.H2_missing",
+  "gate.H3_missing"
+ ],
+ "comparison_basis": {
+  "declared": true,
+  "holds": false,
+  "reason": "a difference with its uncertainty exceeds the tolerance"
+ },
+ "ranking": "refused",
+ "pass": {
+  "no_design_errors": true,
+  "probe_fails_resolution": true,
+  "reasonable_inconclusive": true,
+  "unavailable_listed": true,
+  "unavailable_in_h3_record": true,
+  "equal_mass_basis_checked": true,
+  "no_ranking_claimed": true,
+  "no_pareto_claimed": true
+ },
+ "note": "verdicts derived by contracts/design.py; F1 analysis can exclude but not approve; quantities without an evaluator are recorded, never estimated"
+}

@@ -3,8 +3,768 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.38.0 (2026-10-24)
 
+Minor release, contracts 3.12.0. It ships the maintainer's decisions on the four spec questions left open by the M3
+independent reviews of the detector system design loop, and automates CHN-16 (calibration residuals into the
+measurement-spec) (#271).
+
+**Before you upgrade:**
+- **design-spec (contracts 3.12.0):** a derived requirement must name in `covered_by` the driving requirement whose H4
+  disposition covers it, and a hard constraint must list its `subsystems`; a 0.37.0 design-spec without them now gives
+  `design.derived_uncovered` or `design.constraint_scope_missing`. Write a new spec version with the fields.
+- A candidate that lacks a subsystem in a hard constraint's scope can no longer pass it (`chain.incomplete`).
+- **Adequacy table 1.1.0:** charge-confusion compliance counts a rigidity-scale-offset evaluation only when the measured
+  offset covers the offset the requirement assumes; an exactly zero assumed offset (tolerance 0) can never be covered,
+  so declare a realistic tolerance.
+- New subcommand `evaluate_design.py calibration` (CHN-16).
+
+Contracts 3.12.0 (minor; no capability added).
+
+- Detector system design, follow-ups of the M3 reviews (decided by the maintainer): a derived requirement names in
+  `covered_by` the driving requirement whose H4 disposition covers it (`design.derived_uncovered` otherwise; its
+  inconclusive rows open that driving requirement at H4 and the report proposes the disposition "under" it); a hard
+  constraint lists the subsystems it covers (`subsystems`, `design.constraint_scope_missing` otherwise; a candidate
+  lacking one cannot pass it: `chain.incomplete` with the subsystem listed; the report shows the scope); adequacy table
+  1.1.0 `upstream_value_checks`: a rigidity-scale-offset upstream counts for charge-confusion compliance only when
+  |measured - assumed| + z sigma stays within the offset tolerance the requirement assumes (ADQ-02 value check);
+  Example A states in its comparison basis note that the magnet is the same in every candidate (the outer planes sit
+  outside it), so its mass is shared. Both examples now declare the constraint scope and Example B the covering driving
+  requirement of its four derived requirements. CHN-16 automated: `evaluate_design.py calibration` propagates a
+  candidate's calibration residual (rigidity scale or curvature offset parameter) through
+  `propagate_scale_distortion.py` into yield shifts, up/down variations and covariance blocks (its run records the
+  residual's parameter digest for incremental reruns) and writes a new measurement-spec version carrying them as a
+  shape systematic for the Asimov fit; a subsystem without a calibration control sample is refused.
+  `tests/skills/hep_detector/test_design_followups.py`.
+
+## 0.37.0 (2026-10-24)
+
+Minor release, contracts 3.11.0. It ships the detector system design loop of hep-detector (spec v2, milestones M0-M4,
+#265-#269): design-spec, design-candidate and design-evaluation artifacts; verdicts, maturity, staleness, screening,
+comparison basis, ranking and Pareto front derived by `contracts/design.py`, never written by hand; evaluations at
+F1-F5 run from tool contracts by `skills/hep-detector/scripts/evaluate_design.py`; review gates H1-H4.
+
+**Before you upgrade:**
+- **Contracts 3.11.0:** three new artifact types (design-spec, design-candidate, design-evaluation); envelope
+  `inputs[].binding: "parameters"` (a 3.10 reader refuses it rather than misreading a parameter-bound input as a stale
+  hash); decision record 1.1.0 (design categories, `{"state": "not-applicable"}`, `dispositions[]`); tool contract
+  1.1.0 design blocks; new optional fields on computational-run (`argv`, `script_sha256`, `parameter_digest`,
+  `scan_summary`) and dataset-record (`design_measurement`).
+- The design adequacy table (`contracts/rules/design_adequacy.json`) is an initial default until physics review: every
+  pass is reported as provisional.
+- The review axis is advisory: only a valid human design-baseline (H4) record sets it, and the actor kind is
+  self-declared.
+- Routing: no skill description changed; the routing contract and the static case set name the system design
+  workflow under hep-detector (static routing passes; no live routing run for this release).
+
+Contracts 3.11.0 (minor; no capability added).
+
+- Detector system design, milestone M4 (design space): `evaluate_design.py scan` (OQ-18: a subcommand of
+  evaluate_design.py) runs a figure of merit of one candidate over a parameter grid in a scratch copy and stores every
+  point in one summary computational-run (`scan_summary`, new optional field of the computational-run extension) with
+  the local elasticities at the candidate's own values; it writes no evaluation, is exempt from the orphan-run rule,
+  and an evaluation that names a scan summary as its run is `design.scan_point_not_expanded` (AGG-08: unexpanded points
+  support no verdict). `evaluate_design.py expand` turns one point into a candidate derived from the scanned one, to be
+  evaluated and compared like any candidate (RSK-04: only points that enter comparison are expanded). Pareto front
+  (`comparison_basis.pareto_axes`, new optional field of the design-spec extension; must include expected-precision,
+  CHN-00): computed only when the basis holds and every surviving candidate has a non-optimistic evaluation per axis
+  with the same fidelity vector and denominator (CHN-06, RPT-07); a candidate is dominated only beyond the combined
+  1-sigma uncertainties; refused with every reason otherwise; never a global optimum. Both examples declare the axes and
+  show the refusal (no expected-precision evaluations yet). `tests/skills/hep_detector/test_design_m4.py`.
+- Detector system design, milestone M3 (engineering and review): the review axis (only a valid human design-baseline
+  H4 record sets it: exact artifacts = the derived report and the evaluations it used, the report equal to the one
+  recomputed now apart from the frozen MAT-05 exclusions, a disposition for every inconclusive driving requirement;
+  the derivation says `baseline: draft` or `baselined`); F5 measurements (`evaluate_design.py f5` from a dataset-record's
+  new optional `design_measurement`; decided only after a human `measurement-acceptance` record approves the dataset
+  as it is and binds the candidate by the digest of the measured configuration, decision record artifacts may carry
+  `binding: parameters` with a `parameter_digest`; a configuration that differs from the candidate is
+  domain.mismatch); stale evaluations are no longer compared with their study or dataset (ART-61); budget coupling
+  between subsystems (expression `parameters_all`, `design_estimates.py material-sum`, figure of merit
+  `material-budget`; CHN-14); calibratability (`design.calibration_incomplete` without a control sample; CHN-16); the
+  calorimeter design contract (`calorimeter_resolution` evaluate, optimistic; tool contract 1.1.0) and adequacy rows
+  recorded as unavailable (hadronic energy resolution, trigger efficiency, pileup robustness). Example B
+  `examples/design-collider-tracker` (synthetic-collider profile; tracking and ECAL only; the rest
+  capability.unavailable, listed in the report and in an agent-prepared H3 record that a human must sign). Both
+  examples' derived reports went through the hep-authoring independent review (agent review: advisory, not a review
+  record by a reviewer other than the author in the sense of O04/O14). Open item OQ-15 is now complete (review axis,
+  dispositions and F5 approval). From that review: a budget item cancels in the comparison basis only when both
+  candidates carry the same subsystem (identical merged definition) with the same budget row (ART-15; Example A's
+  shared magnet cancels and its equal-mass basis holds; Example B's lighter 2.0 T solenoid and coarser ECAL now carry
+  their own masses and its basis does not hold), a refused ranking lists every reason (RPT-07), dispositions are
+  proposed only for candidates that survive screening (a screened-out candidate and a derived requirement say why they
+  have none; H4 asks dispositions for those candidates only), H4 sets the review axis only when no earlier gate flag
+  is open (interpretation: H4 follows H1-H3), charge-confusion compliance also needs a rigidity-scale-offset
+  evaluation (adequacy row; the missing-for-compliance list names each required upstream with its own compliance
+  fidelity, F5 for the offset), decision records are named relative to the decisions folder's parent (no host path
+  in a report), the basis names the F1 evaluations it uses (chosen by id) and how their uncertainty is formed, an
+  unqualified F4 study or a stale or mismatched evaluation no longer counts toward the compliance threshold, and the
+  rendering states the baseline state, that the H4 actor kind is self-declared (advisory, LIM-01), that screening
+  comes from the verdicts, and "orphan runs: none". The reviews closed after three rounds with the maintainer's
+  decision to close the escalated findings; follow-ups for the spec owner: a quantitative check of the
+  rigidity-scale-offset evaluation against the assumed curvature offset, dispositions for derived requirements, the
+  subsystem scope of hard constraints, and whether Example A should model a field length per candidate.
+- Detector system design, milestone M2 (fidelity and sensitivity): parameter-level invalidation (envelope
+  `inputs[].binding: "parameters"`, `contracts/dependencies.py` warns instead of stale, `contracts/design.py` compares
+  `parameter_digest`: an evaluation goes stale only when a parameter it read changes; a forged digest is a contract
+  mismatch); `evaluate_design.py` writes parameter-bound evaluations, `run --replace` (stale only), `--digest-only`,
+  `--input-artifact`, and new subcommands `response` (F3 response assembly and a parametrized `response` artifact for
+  forward folding), `geometry` (the Geant4 study geometry from the mapping table `contracts/rules/design_geometry.json`)
+  and `f4` (an F4 evaluation from a study record, optionally re-issued by `check_geant4_study.py label --upgrade`).
+  `design_estimates.py` gains `infield-acceptance` (F2 seeded helix Monte Carlo through offset apertures),
+  `response-assembly` (F3) and `precision-from-result` (F3 expected-precision write-back from an Asimov
+  statistical-result); a design contract for `toy_spectrometer.py` resolution (F2). design.py: F4 checks (upgraded
+  study record, geometry digest, observable, value from the record, tail sources, model envelope compared end by
+  end), the CHN-06 ranking on expected precision (refused unless the basis holds and the chains are non-optimistic
+  with one fidelity vector and denominator), the missing-evidence list now names lower-fidelity entries of the same
+  figure of merit. `run_workflow.py` records `argv`, `script_sha256`, `versions.plugin_release`, the NumPy version and
+  an optional `parameter_digest`, and `--incremental` skips unchanged steps (never with an unknown release digest).
+  Adequacy table: the four ADQ-07 rows (survival probability with its data validation, tracking and selection
+  efficiency, rigidity scale and offset, low-rigidity bias; OQ-09); the acceptance minimum uncertainty 1% (OQ-05,
+  provisional). Open items: OQ-03 (the binding field, the run's parameter_digest, the design-block keys
+  `upstream_directions` and `input_artifact`, and the evaluation's `model_envelope` extend the unreleased 3.11.0),
+  OQ-08 (the geometry mapping lives in `contracts/rules/`, the spec's alternative location, because it describes no
+  command-line tool and every file in `contracts/tool_contracts/` is checked against a tool's `--help`), OQ-09, OQ-11
+  (composites declare their own uncertainty). Physics note: two apertures in a uniform field have a charge-symmetric
+  acceptance (Liouville and time reversal); a dog-leg needs at least three.
+- Detector system design, milestone M1 (analytic MVP, F1 end to end):
+  `skills/hep-detector/scripts/evaluate_design.py` (`run`: one design-evaluation from the tool contract that computes
+  the figure of merit at the requested fidelity, its inputs recomputed from the candidate, denominator and upstream
+  evaluations by `contracts/design.py`, the output, computational-run with `argv`, `script_sha256`,
+  `versions.plugin_release` and generated config files, and a `capability.unavailable` evaluation when no evaluator
+  exists; `budget`; `plan`; `report`: the design report as a `communication` artifact with a Markdown rendering,
+  derived by design.py, `--omit` hides an evaluation from the rendering only) and
+  `skills/hep-detector/scripts/design_estimates.py` (`budget-sum`, `straight-line-acceptance` of coaxial apertures,
+  `pid-rejection` from a separation power and a working-point efficiency). Design contracts (tool contract 1.1.0) for
+  `multiple_scattering` (Gluckstern MDR as an estimate with a 12% relative uncertainty; positional stack file
+  generated from the candidate), `cherenkov_angle` and `pid_separation_power` (TOF; separation power, optimistic),
+  `design_estimates` and the exact-fit MDR of `tracker_resolution` (optimistic). The tool contract design block gains
+  the expressions `budget`, `object`, `zip`, `config`, `span` and species constants by `of`, and an `uncertainty`
+  location; `contracts/design.py` checks generated config files against the run's input_manifest (ART-72) and the
+  uncertainty against the contract, and checks the comparison basis only among candidates not screened out.
+  Reference `skills/hep-detector/references/system-design-workflow.md` (usage levels L0-L2, stages D0-D4, verdict
+  codes), linked from `detector-design-principles.md` (registered as a hub). Example A
+  `examples/design-space-spectrometer` (AMS-like, public facts from the `experiment:ams-02` ledger: ams02:C93, C94,
+  C112, C175): the M0 verdicts reproduced through evaluate_design.py, equal-mass basis checked, ranking not given.
+  Routing set DSD (4 cases); capability `detector-design` extended (items DSD-M0, DSD-M1; OQ-17). Open items: OQ-01
+  (entry under hep-detector with a hub link), OQ-04 (no candidate ranking in the first release), OQ-17, OQ-20 (public
+  profile only).
+- Detector system design, milestone M0 (verdict rules first; spec 1.0 of the Detector System Design Architecture v2):
+  three artifact types `design-spec`, `design-candidate` and `design-evaluation`
+  (`contracts/schemas/ext_design_*.json`) and the core vocabulary `subsystem_roles`; `contracts/design.py` derives
+  compliance verdicts (the 18-row single-evaluation table RUL-01..RUL-18, row 18 proven unreachable by exhaustive
+  enumeration), bound combination (CMB-*), per-requirement aggregation (AGG-*), maturity axes, staleness from
+  `contracts/dependencies.py`, candidate screening, the comparison basis and the gate flags H1-H3, from the artifacts
+  and the tool contracts only; the adequacy table `contracts/rules/design_adequacy.json` (initial default, every pass
+  reported provisional until physics review). Tool contract 1.1.0 (positional arguments, config-file fields, the
+  per-operation `design` block; `contract_version` 1.0.0 or 1.1.0) with design contracts for `tracker_resolution`
+  momentum (optimistic only above the crossover rigidity, otherwise an estimate) and `charge_confusion_rate`
+  gaussian-core (optimistic, zero curvature offset, upstream resolution a lower bound). Decision record 1.1.0 (six
+  design categories, the seen marker `not-applicable` with its input-closure check, `dispositions[]`; `lineage.py
+  decision` needs `--exposure` only without the marker). computational-run gains the optional `argv` and
+  `script_sha256`. A SYNTHETIC three-candidate spectrometer project (`contracts/fixtures/design/spectrometer`,
+  regenerated by `tests/contracts/design_fixtures.py`): the probe fails resolution (`bound.excludes`), the two
+  reasonable candidates are inconclusive on resolution and charge confusion (`bound.direction`) with the missing F3,
+  F4 and data-validation evidence listed. No skill entry point or `evaluate_design.py` yet (M1).
+  Open items resolved with the spec's recommendations: OQ-02 (3.11.0), OQ-03 (one 3.11.0 note, extended by later
+  milestones before a release), OQ-05 (passes provisional before freezing), OQ-06 (design-block and uncertainty key
+  names in docs/architecture.md section 4), OQ-07 (fields read by gates or verdict rules are required), OQ-11
+  (all-estimate chains feed central values; the composite declares its own uncertainty), OQ-12 (an excluded-adverse or
+  orphan-run requirement is never pass; a fail stays fail with the code added), OQ-13 (`--decisions DIR`), OQ-15
+  (schema, lineage, the not-applicable validator and H1-H3 flags now; review axis, dispositions and F5 approval in
+  M3), OQ-16 (`tests/contracts/test_design_*.py`), OQ-19 (abstract factor states). Interpretation: the adequacy
+  table's "with" conditions (e.g. data validation for charge confusion) are required upstreams once an evaluation's
+  chain reaches the compliance threshold, so an F1 evaluation is still judged by its bound.
+
+## 0.36.0 (2026-10-24)
+
+Minor release, contracts 3.10.0 (unchanged). It completes the hadron-structure plan with its seventh module: PDF,
+nPDF and FF fits on the hep-statistics side (S12 reweighting and profiling, S13 global-fit specification and review)
+and their theory inputs in hep-theory.
+
+**Before you upgrade:**
+- **Routing:** the hep-statistics description names PDF reweighting/profiling and PDF fits and no longer lists
+  "asymptotics" or "(saying if no shipped tool covers it)" (unpinned phrases). Static routing passes; the live routing
+  run is pending the maintainer's approval.
+- `covariance_fit.py` has a new multiplicative mode `t0` (`t0_prediction`, `t0_iterations`); existing modes are
+  unchanged.
+- Executing a complete global PDF fit is not provided (`global-pdf-fits` is documentation only).
+
+- hep-statistics and hep-theory, hadron structure phase 7 (S12, S13, global fits):
+  `skills/hep-statistics/references/pdf-fit-statistics.md` (chi2 and multiplicative uncertainties, tolerances, Hessian
+  and replica uncertainties, reweighting, profiling, impact studies, review checklist) and
+  `skills/hep-theory/references/global-fits-theory-inputs.md`; new scripts
+  `skills/hep-statistics/scripts/pdf_reweighting.py` and `skills/hep-statistics/scripts/hessian_profiling.py`;
+  `covariance_fit.py` gains the `t0` multiplicative mode (fixed prior prediction, optional iterations). Capabilities
+  `pdf-reweighting-and-profiling` (S12, tool) and `global-pdf-fits` (S13, documentation: no fit is executed). The
+  hep-statistics description names PDF reweighting/profiling and PDF fits; "asymptotics" and "(saying if no shipped
+  tool covers it)" were trimmed (unpinned). Live routing pending approval. Routing set S12-S13 (4 cases).
+
+## 0.35.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the sixth module of hep-theory's hadron-structure plan: small-x
+physics and saturation (Th19), and exclusive processes, GPDs and diffractive DIS (Th20).
+
+**Before you upgrade:** nothing to migrate. `dipole_lo.py` needs SciPy (core stack); `exclusive_kinematics.py angles`
+rejects an off-shell recoil.
+
+- hep-theory, hadron structure phase 6 (Th19 small x, Th20 exclusive processes and GPDs):
+  `skills/hep-theory/references/small-x-and-saturation.md` (dipole factorization, GBW model, BK/JIMWLK and running
+  coupling as rules, nuclei, status labels) and `references/exclusive-and-gpd.md` (DVCS kinematics, BMK and Trento
+  azimuths, GPD properties and sum rules, diffractive DIS); sources read in full text 2026-10-23. New scripts
+  `skills/hep-theory/scripts/dipole_lo.py` (SciPy, core stack) and `skills/hep-theory/scripts/exclusive_kinematics.py`;
+  `sum_rules.py` GPD rules (`gpd-integral:<F>`, `gpd-ji`). Capabilities `small-x-saturation` (Th19) and
+  `exclusive-and-gpd` (Th20); routing cases (4).
+
+## 0.34.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the fifth module of hep-theory's hadron-structure plan: SIDIS,
+fragmentation functions and TMDs (Th18), with a Gaussian-ansatz TMD theory profile.
+
+**Before you upgrade:** nothing to migrate. `profiles/registry.json` lists one more theory profile and is close to its
+3072-byte budget.
+
+- hep-theory, hadron structure phase 5 (Th18, SIDIS and TMDs): `skills/hep-theory/references/sidis-and-tmd.md` (Trento
+  conventions, SIDIS structure functions, collinear SIDIS at LO, TMD factorization rules, Gaussian ansatz, Sivers sign
+  change, Drell-Yan q_T) and `references/fragmentation-functions.md` (sum rule, flavour assumptions, sets, spin and TMD
+  FFs); sources read in full text 2026-10-23. New scripts `skills/hep-theory/scripts/sidis_kinematics.py` and
+  `skills/hep-theory/scripts/tmd_gaussian.py`; `sum_rules.py ff-momentum`. Capability `sidis-and-tmd` (Th18); routing
+  set Th18 (3 cases).
+- Theory-domain profile `theory:tmd-gaussian-lo` (Gaussian-ansatz SIDIS F_UU,T and Cahn term, Sivers asymmetry with
+  the SIDIS -> Drell-Yan sign change as a cited rule, Drell-Yan q_T shape; benchmark Anselmino et al. Eqs. 38-39 and
+  64-67), registered in `profiles/registry.json`.
+
+## 0.33.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the fourth module of hep-theory's hadron-structure plan:
+polarized DIS (Th17), and the first two hadron-structure theory-domain profiles (DIS parton model with the O(alpha_s)
+F_L; LO Drell-Yan with the O(alpha_s) angular coefficients and Lam-Tung).
+
+**Before you upgrade:** nothing to migrate. `profiles/registry.json` lists two more theory profiles.
+
+- hep-theory, hadron structure phase 4 (Th17, polarized DIS): `skills/hep-theory/references/polarized-dis.md` (g_1, g_2,
+  asymmetries and depolarization factors, Bjorken, Ellis-Jaffe, Burkhardt-Cottingham and ELT sum rules, MS-bar/AB/JET
+  schemes of Delta Sigma; sources read in full text 2026-10-23) and polarized rules in `sum_rules.py` (`g1-moment:p|n`,
+  `bjorken-lo`, `ellis-jaffe:p|n`). Capability `polarized-dis` (Th17); routing set Th17 (2 cases).
+- Theory-domain profiles `theory:dis-parton-model` (LO F_2 and the O(alpha_s) F_L derived in SymPy from the Moch,
+  Vermaseren, Vogt coefficient functions; synthetic only) and `theory:drell-yan-lo` (LO cross section; O(alpha_s)
+  angular coefficients and the Lam-Tung relation from Peng et al.'s quark-axis representation; benchmark Peng et al.
+  Eq. 10), registered in `profiles/registry.json`.
+
+## 0.32.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the third module of hep-theory's hadron-structure plan: nuclear
+targets and nuclear PDFs (Th16).
+
+**Before you upgrade:** nothing to migrate. `nuclear_combination.py combine` requires `"grid_kind": "bound-proton"` in
+its parton file and refuses average-nucleon grids; `ratio` refuses a replica set over an external proton set and needs
+the set's `prescription` for replica sets.
+
+- hep-theory, hadron structure phase 3 (Th16, nuclear targets): `skills/hep-theory/references/nuclear-parton-effects.md`
+  (per-nucleon conventions, isospin combination, isoscalar and deuteron corrections, the conventions of EPPS21,
+  nNNPDF3.0, nCTEQ15 and nCTEQ15HQ, member-by-member nuclear ratios, nuclear effects by x region, non-nPDF effects;
+  sources read in full text 2026-10-23), an nPDF section in `pdfs-and-lhapdf.md`, and
+  `skills/hep-theory/scripts/nuclear_combination.py` (`combine`, `ratio`, `convert`). Capability
+  `nuclear-parton-effects` (Th16); routing set Th16 (3 cases).
+
+## 0.31.0 (2026-10-23)
+
+Minor release, contracts 3.10.0 (unchanged). It adds the second module of hep-theory's hadron-structure plan:
+Drell-Yan (Th15).
+
+**Before you upgrade:** nothing to migrate. `drell_yan_lo.py xsec` implements photon exchange only and refuses Z
+exchange; its `frames` subcommand refuses angular parameters outside the allowed domain (exit 1).
+
+- hep-theory, hadron structure phase 2 (Th15, Drell-Yan): `skills/hep-theory/references/drell-yan.md` (LO cross
+  section derived from PDG 2026 cross-section formulae; x_F definitions and rapidity frames; angular coefficients,
+  Collins-Soper and helicity frames, frame-invariant combinations, Lam-Tung; NLO and resummation as rules; sources read
+  in full text 2026-10-23) and `skills/hep-theory/scripts/drell_yan_lo.py` (`xsec` for photon exchange, Z exchange
+  refused; `convert`, `frames`, `lam-tung`, `coefficients`). Capability `drell-yan` (Th15); routing set Th15 (4 cases).
+
+## 0.30.0 (2026-10-23)
+
+Minor release, contracts 3.10.0. It adds the first module of hep-theory's hadron-structure plan: unpolarized inclusive
+DIS (Th14), with an entry page for the hadron-structure modules that follow.
+
+**Before you upgrade:**
+- **Contracts 3.10.0 (additive):** 13 new core convention keys for hadron-structure predictions, also listed in the new
+  core vocabulary `conditional_convention_keys`; the theory-spec completeness warning skips them. A 3.9 reader warns
+  on the new keys and its comparison gate treats them as not comparable.
+- **Routing:** the hep-theory description names hadron structure (DIS, Drell-Yan, nPDFs, TMDs, small-x, GPDs) and no
+  longer lists "units", "couplings", "scales" or "(its HEPData, CSV or FITS table)". Static routing passes; the live
+  routing run is pending the maintainer's approval.
+- **New out-of-v1 notices:** model calculations of PDFs, TMDs and GPDs (`hadron-models`), quarkonium production
+  (`quarkonium-production`), jets in lepton-hadron scattering (`jets-in-dis`).
+
+- hep-theory, hadron structure phase 1 (Th14, unpolarized inclusive DIS): new entry page
+  `skills/hep-theory/references/hadron-structure-essentials.md` (registered hub; modules B-H marked planned) and
+  `skills/hep-theory/references/dis-structure-functions.md` (NC photon, gamma-Z and Z, CC, neutrino; LO quark-parton
+  model; heavy-quark schemes and thresholds, Georgi-Politzer target-mass corrections and higher twist as rules); sources
+  read in full text 2026-10-23 (PDG 2026 Structure Functions review, Schienbein et al. 2008). New scripts
+  `skills/hep-theory/scripts/structure_functions_lo.py` (LO F_2, xF_3, sigma_r and d2sigma/dx dy, dx dQ^2 from
+  user-supplied parton values; every electroweak, sign and target convention an input; exit 2 on unusable input) and
+  `skills/hep-theory/scripts/sum_rules.py` (momentum, number, Adler and GLS LO integrals with a convergence estimate and
+  the extrapolations outside the table reported separately). Tests on constructed inputs only; they do not establish
+  physical validity.
+- Contracts vocabulary: 13 new core convention keys (`target_normalization`, `exchanged_bosons`, `electroweak_scheme`,
+  `em_coupling`, `structure_function_signs`, `heavy_quark_scheme`, `factorization_scheme`, `target_mass_treatment`,
+  `polarization_convention`, `xF_definition`, `rapidity_frame`, `azimuth_convention`, `log_accuracy`); additive, the
+  contracts version moves to 3.10.0 at release. **Before you upgrade:** an older reader warns on these keys and its
+  comparison gate treats them as not comparable.
+- Capability map: `dis-structure-functions` (Th14, tool, in v1); out-of-v1 notices `hadron-models`,
+  `quarkonium-production`, `jets-in-dis` with routing cases. Routing: the hep-theory description names hadron
+  structure (DIS, Drell-Yan, nPDFs, TMDs, small-x, GPDs); "units", "couplings", "scales" and the "(its HEPData, CSV or
+  FITS table)" parenthesis were trimmed (unpinned phrases). Static routing check passes; the live routing run is
+  pending the maintainer's approval (paid calls). Routing set Th14 (8 cases).
+
+## 0.29.0 (2026-10-23)
+
+Minor release, contracts 3.9.0 (unchanged). It adds hep-theory's cosmic-ray phenomenology (Th13) with every source read
+in full text, and architecture step 1: a wiring lint that keeps each skill's hand-kept lists in step.
+
+**Before you upgrade:**
+- **Removed:** `skills/hep-measurement/references/data-pipelines.md`, a pointer since 0.7.0; its content is in
+  hep-computing's `analysis-data-pipelines.md`.
+- **New static check `wiring`** (`tools/check_wiring.py`): a reference page not reachable from its skill's Resources
+  table, entry routing part or a registered hub, a wrong README count or a misfiled CLI script now fails
+  `run_all_checks.py --part static`. Adding a topic: `docs/maintenance.md`, "Adding a topic".
+- **Routing:** the hep-theory description names cosmic-ray propagation and solar modulation (live routing on the 82
+  cases that involve hep-theory: Claude 76/82, no regression against main; Codex 79/82).
+- **CI:** the AMS-optionality job runs only the plan's modules in its suites (CI plan 1.1.0).
+- **Budgets:** Resources tables may be 1.5-3 KB; the SKILL.md test limit is the budget's 12,288 B.
+
+Sources (Th13): the three cosmic-ray pages' sources, first read through a summarizing fetch, were re-read in full text
+(49 arXiv PDFs at the cited versions, the ICRC proceedings, the two Bartels sources) and every attribution, locator and
+number was checked; about 30 statements were corrected (wrong locators, overstated or misread findings, author
+initials and order) and the pages now carry the read level "full text, 2026-10-23" (VALIDATION TH13-SOURCES, ledger
+`documentation_fixes` TH13-SOURCES). The DRAGON2 D_pp prefactor and beta^eta form, previously "not read", are now cited
+(App. C.8-C.9); the "factor 2" LIS claim from an unopened 2005 paper was dropped. Journal references and all 16 DOIs on the
+sources list were then confirmed at arXiv, INSPIRE-HEP and Crossref. Closed afterwards: the HAWC diffusion
+coefficient (Table 1) and the Wilcox L and R tilt-model assumptions (the observatory's page) are now cited, the
+antiproton "no newer determination" search is refreshed (2026-10-23), the 2021 AAfrag comparison is cited, and the
+opt12/opt22 origin and Weinrich label differences between papers are noted. The Planck 2018 annihilation bound
+(Sect. 7.9, Eq. 89c) is cited on the new-physics page, and Usoskin et al. 2005 (read from the authors' copy) again
+supports the LIS factor-2 and linear-conversion statements (App. A, Eq. A4); no listed source remains unread.
+
+Routing (T2): the hep-theory description names "cosmic-ray propagation and solar modulation" (1,020 of 1,024
+characters; room made by dropping three phrases no routing case pins: "importing", "truncation", "and its global
+analyses"). A new English case `th13-mod-2` (solar modulation) and the trigger term "cosmic-ray propagation" on
+`th13-codes-1` pin it; 425 routing cases. Live routing (decision D7) on the 82 cases that involve hep-theory: Claude
+76/82 (the misses are cases that missed before the change; a control on main shows no regression), Codex 79/82
+(`evals/routing/README.md`).
+
+CI: the AMS-optionality job is selected like the units shards. A pull request's plan (`tools/ci_plan.py`, plan 1.1.0)
+lists `ams_optional_modules`, the selected test modules that are in that check's suites; the part runs when the list is
+not empty, and `tools/check_ams_optional.py --plan` reruns only those modules (its fixed steps, a few seconds, always
+run; an unselected suite is reported as skipped). Before, a bounded pull request never ran this check at all, even
+when it changed modules in its suites, and a full one ran all of it. Profile changes name `part:ams-optional` in the
+impact map, so they run every suite, and so do full plans and changes to `check_ams_optional.py` (now CI tooling). The
+gate (`tools/reconcile_check_runs.py --plan`) fails an AMS-optionality run that did not run exactly the planned modules.
+
+Removed: `skills/hep-measurement/references/data-pipelines.md`, a "(moved)" pointer since 0.7.0 (its removal release
+0.29.0 was recorded in `tools/wiring_known_gaps.json`). The three hep-computing links to it now point to
+`analysis-data-pipelines.md` (where the material moved) or, for the physics rules, to hep-measurement's
+`analysis-design.md` and `weights-normalization.md`; the hep-measurement README counts twelve references.
+
+Budget decisions D1-D3 and the last routing gaps of architecture step 1 (B4b):
+
+- hep-authoring: the papers guide's "Reference files" section is now "Reference index" (same bytes), so the entry
+  routing part names the reference index (2,377 -> 2,512 B), and the index is a registered hub. The 17 hep-authoring
+  pages it routes to are reachable; `tools/wiring_known_gaps.json` lists no gap.
+- D1: the Resources table limit (B-02, `tests/skills/test_routing_tables.py`) is 1.5-3 KB, up from 2.5 KB; B-03
+  (SKILL.md plus entry reference, 25,600 B) stays the binding budget.
+- D2: one SKILL.md size limit: the routing-table test reads `skill_bytes_target` (12,288 B) from
+  `tools/measure_entrypoints.py` instead of its own 11,264 B, and honours `tools/budget_exceptions.json` waivers up to
+  the 16,384 B hard limit; `docs/maintenance.md` says so.
+- D3: B-03 margin restored to about 0.9 KB in the two skills that were at the limit (hep-measurement 11 -> 935 B,
+  hep-statistics 19 -> 904 B). hep-measurement's guide condenses its script, asset and example lines (details stay
+  in each script's `--help` and the README) and drops two lines that repeated SKILL.md (the blinding invariant) and its
+  own handoff table; hep-statistics' core/stats guide keeps short fit-verdict and toy-tail rules and moves their
+  detail to "Conventions in detail" in `core-stats-commands.md`.
+
+Theory (Th13): cosmic-ray propagation and astroparticle phenomenology in hep-theory. Guidance on three pages and one
+helper script; no propagation code is run and no fit to real data is tested.
+
+- **`skills/hep-theory/references/cosmic-ray-phenomenology.md`**, the second propagation page: GALPROP, DRAGON2 and
+  USINE and their diffusion-coefficient conventions (reference rigidity, beta^eta, units) and the reacceleration
+  relation D_pp D_xx; transport degeneracies, benchmark families and halo-height determinations; the production
+  cross-section sets (Webber family, Silberberg-Tsao, GALPROP opt12/opt22, the DRAGON2 recipe, renormalized OPT sets)
+  with the sizes of their differences, the nuisance schemes in use (normalization-slope-shape with Gaussian priors,
+  per-element normalization and slope with flat priors, sets as model alternatives), antiproton and secondary e+-
+  production alternatives; the nuisance blocks hep-theory supplies to a global fit and how they travel in the
+  theory-spec and prediction artifacts (statistics stay in hep-statistics). Sources: about 50, read 2026-10-20
+  through a summarizing fetch, so under hep-citations' rule they are unverified (snippet level) until re-read in the
+  primary source; the pages say so, and the unverified items are listed.
+- **`references/solar-modulation-models.md`**: energy-dependent, empirically modified, charge-sign and drift
+  (extended force-field) and numerical models; LIS dependence and recalibration of phi series; heliospheric inputs
+  (tilt-angle models, averaging window, lag); polarity definition; aligning a model with monthly or Bartels-rotation
+  data.
+- **`references/cosmic-ray-new-physics.md`**: dark matter to antiprotons (how L, halo profile, local density,
+  transport family and modulation move a signal; the reassessed antiproton excess as an example block) and to
+  positrons, pulsars, and the checks before stating an interpretation. Interpreting an excess with a dark-matter
+  model and global fits that run a propagation code stay outside v1.
+- **`skills/hep-theory/scripts/bartels_rotation.py`**: dates to Bartels rotation numbers and back (27-day rotations from
+  1832-02-08, WDC Kp/Ap format description; rotation 2426 = 2011-05-15 checked against the Caltech ACE table), and
+  rotation averages of a daily heliospheric input with a declared lag and minimum coverage (exit 3 below it); dates
+  must be YYYY-MM-DD (timestamps refused), a byte-order mark is accepted.
+- Wiring: hep-theory Resources row and README; pointers from `cosmic-ray-propagation.md`; capability map
+  (`cosmic-ray-propagation` gains Th13) and matrix row; five routing cases (set Th13); tests `test_bartels_rotation.py`,
+  `test_cosmic_ray_phenomenology_th13.py` and the CLI-robustness inventory entry.
+
+Maintenance (architecture step 1): a wiring lint for adding a topic. No schema, contracts, file moves or description
+changes.
+
+- **`tools/check_wiring.py`** (static check `wiring`): every reference page one step from its skill's Resources table
+  or entry routing part, or two steps through a registered hub page (R1; a "(moved)" pointer page is exempt until
+  its recorded removal release); `NO_INPUT_FILE` reasons are strings and name no script that reads a file argument
+  (R2); README counts match their files (R3); with `--since REV`, added pages and scripts are named under
+  Unreleased and a new capability id has a matrix row (R4). Report mode: exit 1 only on a gap not listed in
+  **`tools/wiring_known_gaps.json`** (hubs, pointer releases, README count patterns and the existing gaps; it only
+  shrinks). Tests in `tests/tools/test_check_wiring.py`; checklist "Adding a topic" in `docs/maintenance.md`.
+  `tools/reference_inventory.py` does not count the known-gaps file as citing the pages it lists.
+- Routing fixes that add no SKILL.md or entry-reference bytes (B4a): hub pages registered (hep-theory
+  `cosmic-ray-propagation.md`, so the two Th13 pages it links are reachable; hep-ml `deep-learning-guide.md`;
+  hep-computing `agile-development-guide.md`, `task-authoring-guide.md`, `batch-scheduling.md`; hep-detector
+  `detector-simulation.md`; hep-authoring `academic-papers-guide.md`, `academic-diagrams-guide.md`), and README counts
+  corrected (hep-computing 35 references and 18 helpers, hep-ml 42, hep-statistics 13 references). The 17 hep-authoring
+  pages reached only through its reference index stay known gaps until that index is one step away (a Resources or
+  entry-reference change, pending the budget decisions).
+- CLI dictionary (R2): three scripts that read a file named by an argument move from `NO_INPUT_FILE` to
+  `MISSING_FILE_ARGS`, so a missing file is tested: `tag_and_probe_efficiency.py` (`--probes`, `--bins`; it already
+  refused with a JSON status), `estimate_training_memory.py` (a plan file; JSON status `rejected` with `--json`) and
+  `solar_modulation_force_field.py` (`--lis-table`), which now prints every invalid-input error as a JSON object with
+  status `failed` and `error_kind` `invalid-input` on stdout (usage still on stderr, exit 2); its CLI-contract case
+  gains a malformed-table check.
+
+## 0.28.0 (2026-10-23)
+
+Minor release, contracts 3.9.0. It completes the cross-artifact check's Shrink by removing the suites that 0.27.0
+deprecated.
+
+**Before you upgrade:**
+- **Removed:** `model-card` and `run-lineage`, model-only bundles (`--mode model`) and result bindings (`--results`,
+  `--project`).
+- **Refusals:** a context, bundle, CLI option or report that uses them is refused with the reason. Reproduce such
+  reports with 0.27.x.
+- **Remaining:** the check runs `counting-chain` (frozen) and `ratio-subset`, and stays experimental and advisory.
+
+- **Cross-artifact check: `model-card` and `run-lineage` removed (value gate Shrink, architecture section 13.4).**
+  - **Removed:**
+    - `contracts/analysis_checks/model.py` and `runs.py`, and their suites (every version);
+    - the model-card pairing contract and the result-binding schema;
+    - model-only bundles (`--mode model`), `check --results` and `--project`;
+    - the permit's post-execution checks.
+  - **Reports:** they are now always pre-execution.
+  - **Readers refuse the removed formats** with the reason, and every refusal names 0.27.x as the release that still
+    reads them (`docs/dev/cross-artifact-check/refusal-matrix.md`):
+    - `bundle.removed` at freeze;
+    - `definition.suite_removed` at check;
+    - a usage error for `--results` and `--project`;
+    - `permit.report_post_execution_removed` for a post-execution report.
+  - **Registry:** the 9 rule versions are retired. Their V-case parts are `not-run` with the removal recorded.
+  - **Docs:** the skill references no longer teach them. Preservation now asks for the run and merge records.
+  - **Kept:** `counting-chain` (frozen), `ratio-subset`, `custody.py`, and the separate pyhf SR/CR model-card adapter.
+
+## 0.27.0 (2026-10-23)
+
+Minor release; contracts unchanged (3.8.0). It deprecates two suites of the experimental cross-artifact analysis check
+after the value gate's Shrink decision.
+- **Deprecated:** `model-card` and `run-lineage`, together with `--mode model`, `--results` and the result binding.
+  They are removed in 0.28.0, so reproduce such reports with 0.26.x or 0.27.x.
+- **Kept:** `counting-chain` (frozen) and `ratio-subset`.
+
+- **Cross-artifact check shrunk: `model-card` and `run-lineage` are deprecated (value gate Shrink).**
+  - **Measurement:** the value gate, re-measured on 0.26.0, still found no error the checker catches that the
+    closure tests and contract checks miss (I = 0 of 28, AI-planted; `docs/dev/cross-artifact-check/
+    decision-value-gate.md`).
+  - **Decision:** the maintainer chose the architecture's Shrink.
+    - `counting-chain` is kept but frozen (no new rules).
+    - `ratio-subset` is kept.
+    - `model-card` and `run-lineage` (with `--mode model`, `--results` and the result binding) are deprecated now and
+      removed in the next minor release.
+  - **Notice:** the check CLI prints a deprecation note on stderr when a context selects them; reports are unchanged.
+    The registry marks their rules `deprecated`.
+  - **Reproducing reports:** reproduce such reports with 0.26.x.
+  - **Unchanged:** `custody.py` stays under the assurance-plane exemption. Every rule stays in shadow mode, and the
+    check stays experimental.
+## 0.26.0 (2026-10-23)
+
+Minor release, contracts 3.8.0: the cross-artifact analysis check's Phase 2 (releases R2 and R3 together) and
+selective pull-request CI. The check stays experimental and in shadow mode; reports are advisory.
+
+**Before you upgrade**
+- **The stable 1.1.0 suites are now the default.**
+- **1.0.0 suites:** they give `check.rule_not_run` for every fixed rule:
+  - `r-rep.repetition`, `r-ratio.correlation` and `r-comp.factor_values`;
+  - `r-aux.use`;
+  - `r-run.binding`, `r-run.blinding` and `r-run.campaign`.
+
+  So a 1.0.0 counting-chain, ratio-subset, model-card or run-lineage check is `incomplete`. **Reproduce 1.0.0 results
+  with hep-research 0.25.x.**
+- **Converting frozen work:** convert a frozen 1.0.0 context with
+  `contracts/migrate.py --convert check-context=context-1.0.0-to-1.1.0`. A context with `required: false` is refused
+  and needs manual completion.
+- **Bundles frozen with 0.25.x:** they show lock differences (rule registry, effect catalog) and are reproduced from
+  their snapshots (`--snapshots`).
+- **Spec vocabulary:** `response_corrections` gains `cutoff_transmission`, `survival` and `fragmentation_feeddown`
+  (additive). Under the 1.1.0 rules every correction a recipe step applies must be described in the spec (only
+  `bin_width` is exempt).
+- **AMS-02 example:** the flux-ratio example spec now describes the corrections its recipe applies.
+- **Older readers:** a 0.25.x reader refuses check-context 1.1.0, result binding 1.1.0 and registry 1.2.0 as invalid
+  input.
+
+- **Cross-artifact check, release R3: stable 1.1.0 suites, the new default.**
+  - **Suites:** `counting-chain`, `ratio-subset`, `model-card` and `run-lineage` 1.1.0 carry every R2 and R3 rule fix.
+    `check-report` accepts them and refuses the `1.1.0-dev.N` pre-releases.
+  - **Conversion:** `migrate.py context-1.0.0-to-1.1.0` now moves a context to 1.1.0.
+  - **1.0.0 suites:** they still give `check.rule_not_run` for every fixed rule. Reproduce 1.0.0 results with
+    hep-research 0.25.x.
+- **Cross-artifact check: full mutation testing (V76), and the report check refuses hand-edited states.**
+  - **Operators:** all nine mutation operators (relabel, rename, copy, copy+perturb, drop, loosen, toggle-optional,
+    reorder, edit-report) run on the chain, reduced, ratio and model cases. Every invariant holds.
+  - **Report check:** edit-report showed that `permit.py` accepted a report whose failing states were edited to
+    satisfied with a recomputed summary. The report check now also requires each obligation's state to match its
+    reason code under the rule's outcome contract (`permit.report_inconsistent`).
+  - **Remaining gap:** an edit that also uses valid reason codes needs the report to be re-judged (the assurance plane,
+    design only).
+- **Cross-artifact check, release R3: a correction a step applies must be in the spec (G1, DR-8, V86), and the factor
+  obligation no longer depends on the mapping key (G14, V87).** The new rule `r-real.undescribed` runs on generator
+  `counting-chain-obligations` 1.1.0 and the effect catalog 1.1.0, in the suites `1.1.0-dev.5`.
+  - **Rule:** every effect a recipe step applies must be described:
+    - background by a non-empty `backgrounds` block (`no_backgrounds_reason` with an applied background contradicts it);
+    - exposure, luminosity and livetime by the observable's normalization kind;
+    - any other effect by a spec correction of exactly that category;
+    - `bin_width` needs nothing.
+  - **Scope:** per the maintainer's decision, every catalog effect except `bin_width` is `description_required`.
+  - **G14:** the generator builds the factor obligation for a table bound under the composition's parent or any child
+    key.
+  - **Catalog compatibility:** coverage contracts written for catalog 1.0.0 still read; the version check is now SemVer
+    compatibility, not equality.
+  - **Vocabulary:** `response_corrections` gains `cutoff_transmission`, `survival` and `fragmentation_feeddown`.
+  - **AMS example:** the AMS-02 flux-ratio example spec now describes the livetime, cutoff fraction, survival and (exact
+    zero) fragmentation feed-down corrections its recipe applies; its artifacts are regenerated.
+  - **Lock pins:** bundles frozen against catalog 1.0.0 show a catalog lock difference and are reproduced from their
+    snapshots.
+- **CI plan: a changed test helper selects the tests that import it.** A non-test `.py` file under `tests/` (for
+  example `analysis_check_cases.py`) now selects every test module that imports it by name. The impact map listed
+  the helper but not all of its importers, so three of them would have been skipped. A helper that no test module
+  imports by name gives the full run.
+- **CI: pull requests run only the checks their changes need.** A new `plan` job (`tools/ci_plan.py`) maps the
+  changed files through the impact map in `contracts/rules/registry.json` to test modules and check parts. Each checks
+  job runs `run_all_checks.py --plan`, and a job with nothing selected skips installing and still writes its record.
+  The `checks-complete` gate recomputes the plan, and `reconcile_check_runs.py --plan` fails a run made under another
+  plan, a part whose selection disagrees with the plan, or shards that do not cover exactly the selected modules.
+  - **Full-run fallback:** a file outside the plugin, CI tooling, a path no impact group covers, or an unreadable
+    diff gives the full run. Pushes to main, the weekly and manual runs stay full.
+  - **Example:** a cross-artifact rule fix like #228 runs 12–18 test modules and the static part instead of every
+    module and the AMS-optional part.
+  - **Limit:** `check_ams_optional.py` now has its own 1200 s limit (it had reached 600 s on CI runners).
+  - **Tests:** `tests/tools/test_ci_plan.py`.
+- **Cross-artifact check: Phase 2 may start.** The maintainer changed the value gate's decision from Stop to
+  Continue (`docs/dev/cross-artifact-check/decision-value-gate.md`). The measurement is unchanged (no incremental
+  detection in 28 AI-planted errors) and the gate is not passed, so every rule stays in shadow mode and the check
+  stays experimental until Phase 2 releases its fixes. No behavior change.
+- **Cross-artifact check, release R2 formats (Phase 2).** check-context 1.1.0 removes `required` from roots and ratio
+  roots (DR-2: deferral only through an exception) and is paired with suites at or above 1.1.0 (`bundle.context_version`
+  at freeze, input-invalid at check); a 1.0.0 context keeps the 1.0.x suites. Every suite exists as the pre-release
+  `1.1.0-dev.1` with the 1.0.0 rules, so outcomes do not change. `contracts/semver.py` reads SemVer pre-releases
+  (`parse_full`, `is_prerelease`, `precedence`) while `parse` and ranges stay release-only. The rule registry schema
+  1.2.0 keys rules by (rule_id, version) and keeps retired versions listed. `migrate.py` converts a frozen context with
+  `context-1.0.0-to-1.1.0` (V90) and refuses a deferred root. V77-V90 are registered. A 0.25.1 reader refuses a 1.1.0
+  bundle as invalid input.
+- **Cross-artifact check, input checks of check-context 1.1.0.** A 1.1.0 context is input-invalid (refused at freeze)
+  for a malformed factor table or tolerance (`calibration.shape`, G16), two different bundle coverage contracts for one
+  table (`coverage.duplicate_contract`, G15), a shared parameter inside one model (`context.shared_within_model`,
+  G12), and a blank or placeholder root unit (`context.unit_placeholder`, G22). 1.0.0 contexts are not judged by
+  these checks. Probes G2, G12, G15, G16 and G22 now pass; V78, V80, V81, V89 and the G16 part of V79 pass.
+- **Cross-artifact check, first rule fixes: outcomes no longer depend on input order (G3, G17, V77).**
+  `r-ratio.correlation` 1.1.0 reads every complete validation record for a claim, so one contradicting record gives
+  `violated` whatever the item IDs (1.0.0 took the first record by ID). `r-rep.repetition` 1.1.0 reads every
+  `partition_exclusive` declaration naming both scopes, so one contradicting declaration gives
+  `check.exclusion_contradiction` and every such declaration is listed. Rules are dispatched by a per-rule version
+  table; the rule registry moves to 1.2.0, with the two 1.0.0 entries marked `retired` beside the new `changed` 1.1.0
+  entries. The fixed rules ship in the pre-release suites `1.1.0-dev.2`, and `migrate.py context-1.0.0-to-1.1.0` now
+  moves each suite to the newest installed 1.1.0 version. **The stable 1.0.0 suites now give `check.rule_not_run` for
+  these two rules** (P3: an old version is never run with new code), so a 1.0.0 counting-chain or ratio-subset check is
+  `incomplete`. To reproduce a 1.0.0 result, use hep-research 0.25.x (release R1). Measured on the Phase 0 comparison
+  set (403 obligations): on 1.0.0 only the 96 `r-rep.repetition` and 3 `r-ratio.correlation` obligations change, all to
+  `rule_not_run`; on dev.2 only G3 changes (both orders are now `violated`).
+- **Cross-artifact check: a factor table no longer chooses its own tolerance (G4, DR-6, V79).**
+  `r-comp.factor_values` 1.1.0 ignores the table's `tolerance`. The relative tolerance is 1e-9 unless the table
+  declares `significant_digits` d (an integer from 1 to 17; shape-checked for 1.1.0 contexts) and every value of the
+  relation has at most d significant digits. It is then Σ|power| · ½·10^(1−d), counting the parent's power as 1, which
+  bounds the effect of rounding every value to d digits. A declaration that the values contradict is not used. Each
+  outcome reports the tolerance it used and its basis. The rule ships in the suites `1.1.0-dev.3`, and the 1.0.0
+  suites give `check.rule_not_run` for it. On the Phase 0 comparison set, on dev.3 only the G4 case changes (a
+  tolerance of 0.6 no longer hides 3.0 against 1.0 × 2.0); on 1.0.0, the 4 `r-comp.factor_values` obligations also
+  become `rule_not_run`.
+- **Cross-artifact check: a copied observation file is the same observation (G5, DR-3, V85).** `r-aux.use` 1.1.0
+  identifies an auxiliary observation by its source identity plus pointer instead of the item ID. The source identity
+  is an artifact envelope's `artifact_id`, or otherwise the item's frozen canonical digest (the bytes for a non-JSON
+  file). A copy bound under a second aux_id is therefore `check.aux_repeated`. Values are never compared, so a copy with
+  one key added is still a different source (a known limitation). The rule ships in `1.1.0-dev.3` (the model-card suite);
+  the 1.0.0 suite gives `check.rule_not_run` for it.
+- **Cross-artifact check: blinding by lineage and the project's blinded list; declarations stay flagged (G7, G13, G8,
+  A3; DR-7, DR-9, DR-1; V83, V84, V88).**
+  - **G13, `r-run.blinding` 1.1.0:** blinding applies when the spec's flag says so or when the project's `blinded`
+    list names the spec's `artifact_id`.
+  - **G7, `r-run.blinding` 1.1.0:** a blinded result is permitted by the lineage of the run that produced it, never
+    by its own status label. Every data leaf must be a dataset record with dataset status `synthetic` or
+    `simulated`; otherwise the project's `allowed_outputs` must name the result.
+    - No data leaf gives `check.lineage_no_data`.
+    - A leaf without a dataset status gives `check.lineage_status_unknown`.
+    - A result no run produced, including a campaign result until G6, gives `check.blinding_label_only`.
+    - All three are unverified.
+  - **G8, `r-run.binding` 1.1.0:** the binding's own `asserted_by.kind: person` no longer removes the declaration
+    flag.
+  - **A3, check-context 1.1.0:** an outcome that read a coverage contract supplied by the bundle is
+    declaration-based (`coverage-contract:<table_id>`).
+  - **G6, `r-run.campaign` 1.1.0 and result binding 1.1.0 (V82):** each campaign in the binding lists its `inputs`
+    with their sources. It is campaign-recorded only when every input matches its source and at least one is an
+    analysis item.
+    - A digest mismatch gives `check.closure_mismatch` (violated).
+    - Missing inputs or no analysis item is unverified.
+    - Campaign results are judged for blinding through these inputs.
+    - An installed 0.25.1 refuses a 1.1.0 binding as invalid input.
+  - **Suites:** these rules ship in `1.1.0-dev.4`. The 1.0.0 suites give `check.rule_not_run` for the three run rules.
+
+## 0.25.1 (2026-10-22)
+
+Patch release: the cross-artifact check's value gate and the owner's Stop decision; no artifact contract change
+(contracts 3.7.0) and no behavior change.
+
+- **The cross-artifact analysis check is experimental.** Its value gate (`docs/dev/cross-artifact-check/
+  decision-value-gate.md`; harness in the repository's `evals/cross-artifact-value-gate/`) found that it caught none
+  of 28 AI-planted errors that closure tests and contract checks missed. The owner chose to stop: the checker code is
+  frozen, no suites are added, and the README, the skill references that teach `freeze` and `check`, and
+  `review_measurement_spec.py --check-bundle` now say it is experimental. Behavior is unchanged.
+
+## 0.25.0 (2026-10-22)
+
+Phase 0 of the cross-artifact check architecture (`docs/dev/cross-artifact-check/`, release R1): foundations of the
+opt-in analysis check. No rule outcome changes: the same 403 obligations over 22 cases give the same state and
+reason as on 0.24.1. Every rule stays in shadow mode.
+
+- **Rules run only at their own version.** The check dispatches rules by (rule_id, version); an obligation whose rule
+  version this checker does not implement is unverified (`check.rule_not_run`) instead of being evaluated with other
+  code. Suites name a supported obligation generator (freeze refuses another one, `bundle.generator_unsupported`),
+  and input checks are enabled per check-context version.
+- **Rule registry 1.1.0.** Each rule version records the source digest of its code (`source_sha256`);
+  `rule_registry.py check` fails when the code changes without a new version. New V cases V72–V76.
+- **The status agrees with the exit code.** A report with a missing dependency or with definitions that differ from
+  its semantic lock is never `complete` and exits 3.
+- **Snapshots are on by default.** `freeze` stores the pinned definitions in `<root>/.hep-research/snapshots/` and
+  lists the bundle in `<root>/.hep-research/bundles.json` (`--no-snapshots` turns this off); `check` uses that store;
+  `analysis_check.py snapshots gc` deletes only unreferenced snapshots (dry run unless `--apply`). Bundles frozen
+  earlier without snapshots now report `lock_differences` (the registry changed) and are reproduced with the
+  release that froze them.
+- **Report identity.** The checker identity covers every plugin module loaded at run time; the generator digest
+  covers the generator, the model-card subjects and the effect catalog; `assessment.plugin_release` names the
+  release.
+- **`permit.py check-report` refuses more without a rerun:** `permit.report_dependency_missing`,
+  `permit.report_lock_differences`, `permit.report_prerelease_suite`, `permit.report_inventory_mismatch` (a report
+  whose obligations or suites are not the bundle's frozen inventory).
+- **Renamed code-name identifiers** (DR-15): `docs/dev/v6.3/` is now `docs/dev/cross-artifact-check/` (a forwarding
+  README stays at the old path), the `test_v63_*` modules are `test_analysis_check_*` and `tests/core/test_evidence_query`,
+  done with `tools/rename_analysis_check_ids.py`.
+- **Records:** the architecture (English and Chinese), `decision-architecture.md` (DR-1 to DR-15),
+  `decision-value-gate.md` (thresholds proposed, to be confirmed before measuring), `decision-phase0.md`,
+  `g21-classification.md`; gap probes G1–G22 (`tests/contracts/test_cross_artifact_check_gap_probes.py`).
+
+## 0.24.1 (2026-10-22)
+
+Patch release: sci-fix evidence and tooling after the improvement plan; no artifact contract change (contracts 3.6.0).
+Statistical-results record which core/stats code produced them; every ledger oracle runs weekly with all its backends;
+three C3 entries gain an oracle that does not come from a transcribed formula.
+
+- **Statistical-results show which core/stats code produced them.** The seven core/stats CLIs add `trace`
+  (`code_paths`, `code_tags`) to their JSON result, and `result_artifact.py`, which wraps that output from another
+  process, joins it to the artifact's `provenance` (entries that are not plugin-relative `.py` paths or tags are
+  dropped). A future advisory about core/stats code can then decide new statistical-results from the trace. Evidence:
+  VALIDATION SCIFIX-TRACE-FORWARD.
+- **Every oracle of the sci-fix ledger runs weekly, with all its backends and no skip allowed.** A new
+  `ledger-evidence` job in `statistics-validation` (weekly, on demand, on a release tag) runs
+  `run_required_backends.py --from-ledger --no-skips` with pyhf, ArviZ and pdg; locally all 56 nodes pass. TH9-MASSES's
+  PDG cross-check, which no venv had run, passes on both its parent and its fix (it checks the bundled constants, which
+  the fix did not change), so it cannot show the defect: the entry stays D1 with that reason. Evidence: VALIDATION
+  SCIFIX-EVIDENCE-CI.
+- **Sci-fix evidence: oracles whose expected values do not come from a transcribed formula (no behavior change).**
+  DR-WP1-01 gains a Geant4 11.4.3 G4Cerenkov oracle (proton and alpha photon counts frozen with the version stated),
+  DR-WP1-02 the Gaussian limit of the Gaisser-Hillas profile at large X_max (arXiv:1811.04660v2 eq. (3.1), p. 5), and
+  DR-WP2-06-CALO a toy truth-recovery study over three term sets (PDG RPP 2024 Statistics sec. 40.2); each fails on
+  its entry's parent by assertion and passes on the fix. The transcription gap is closed for the three; DR-WP1-01
+  moves from D0 to D1. DR-WP2-06-MS keeps the gap: no qualifying source was found, and the grade is left to the
+  maintainer. New source scifix:S13 and claims scifix:C31, C32 (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES).
+
+## 0.24.0 (2026-10-22)
+
+- **Independent review: an optional expert slot in round 1, a per-review configuration file, and reviewer identity
+  removed from the filter packet (contracts 3.6.0).** All three are off unless asked for; without them every
+  allocation, event, packet and report is unchanged bit for bit (the P1 end-to-end review is byte-identical).
+  `start --expert-model M` (config `expert`) adds one round-1 slot: an agent of M reads the whole document as a domain
+  expert and reports only substantive physics, statistics or method errors (a general statement false in some regime,
+  inconsistent reasoning, treatments called equivalent that are not, statements the plugin's own tools contradict),
+  never style. In two evaluation runs the substantive errors no reviewer found were such whole-page reasoning errors.
+  It is dispatched with the other round-1 slots, has no canaries (the R0 self-check, the read rules and the copy guard
+  are its controls), at most two attempts, never escalates, and writes `review_record.json` with the new role
+  `expert`: claims, verdicts and findings in the reviewers' shape and evidence bases, no skim, deep list or
+  carry-forward; receipt applies the reviewer rules minus coverage, controls and re-review, accepts any evidence basis,
+  and adds `finding_without_verdict`. Its findings go to the filter, arbitration, dispose and the report like any
+  other; a changed one is rechecked by the design lens in round 2. Being evaluated, not yet recommended. `start
+  --own-config` writes the review's configuration to `reviews/<id>/review-config.json` (recorded in `round_started`
+  as `config_file`; observe and `check` watch it) instead of the shared file, so concurrent reviews can use different
+  settings and no unfinished review blocks another's options. The filter packet's `correction`, `description` and
+  `fix` now have the raising slot's id, its reported identity and the model names replaced by `[redacted]`, with the
+  counts in the private `filter_ids.json` and the report. Contracts 3.6.0: the config field, the record role and the
+  optional `round_started` key (fixtures, templates and example artifacts carry the new version string only).
+  Evidence: VALIDATION REVIEW-EXPERT-SLOT.
+- **Advisories: OSV timestamps, waivers, regression links; schemas for the ledger and the advisories (sci-fix
+  improvement plan C1, C2, C6; F-13, F-17, F-18, F-22).** Advisories carry OSV `published` (first commit, UTC) and
+  `modified`. `scifix_advisories.py check` warns, never fails, when an advisory was introduced by another advisory's
+  fix commit, until the ledger records the link: CANONICAL-KEY-ZERO-FRACTION is a regression of ML-SPLITS,
+  SAMPLE-NAME-DOT-SEGMENTS of ML-CALIBRATION (`regression_of`). Every S1 and S2 entry is named by an advisory or states
+  an `advisory_waiver` (seven do: CLS-LOGINTERP, the three triage status fixes, the three scan fixes).
+  `docs/evidence/advisories/README.md` records that SFA-2026-012, -013 and -026 to -029 were never published.
+  `docs/evidence/schemas/` holds JSON schemas of the ledger and of format /2 advisories, checked in the tests. The
+  normalisation rule of C1 (a property or exhaustive test, and the callers listed in the PR) is in
+  `docs/maintenance.md`. Evidence: VALIDATION SCIFIX-PLAN-C1-C2-C6.
+
+- **Sci-fix ledger report: transcription rule, structured S3 sources, per-entry sign-off (sci-fix improvement plan
+  B2, B5, B7; F-08, F-15, F-16).** `tools/scifix_ledger.py report` lists, read-only: entries below their severity's
+  minimum (27), C3 entries whose oracles all compute their expected value from a formula transcribed into the
+  repository (DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO, DR-WP2-06-MS; each now says so in `gaps`, grades unchanged until
+  the maintainer decides), S1 entries without a sign-off (18: none is signed yet), and S3 entries below their minimum
+  (5). Every independence record states `expected_from`; documentation fixes list `sources` (the three whose ledger
+  text never itemized them, and the two internal-only warning fixes, state the gap). Evidence: VALIDATION
+  SCIFIX-PLAN-B2-B5-B7.
+- **Validator: the same efficiency under two namespaces now warns.** A measurement spec listing a bare `efficiency`
+  next to `<ns>:efficiency` (or `<ns>:efficiency` next to `<other-ns>:efficiency`) counted the efficiency twice and
+  passed with no finding. It now gets the warning `measurement.efficiency_counted_twice_namespaced`; the existing
+  `measurement.correction_category_repeated` errors are unchanged, so no artifact changes outcome (no contracts
+  change). `correction-chain.md` says what the validator catches and what it cannot (a profile term with another
+  name).
+- **periodicity_scan.py: the red-noise p-value refits the null on every surrogate (sci-fix PERIODICITY-REFIT, S1,
+  advisory SFA-2026-038).** Since 0.14.0 the AR(1) and OU surrogates used phi (or tau) estimated once from the data;
+  the lag-1 estimate is biased low on short series, and the global p was anti-conservative (no-signal AR(1) toys,
+  n = 50, phi = 0.9: 0.147 rejected at alpha = 0.05 and 0.253 at 0.1; n = 100, phi = 0.9: 0.077 and 0.163). The
+  default is now a double parametric bootstrap (`--null-fit refit`, `--inner-surrogates`, default 199) with the
+  first-order bias-corrected lag-1 estimate for AR(1); on the same toys every rejection fraction lies within two
+  binomial sigma of alpha or below it. `--null-fit once` reproduces the old numbers for the same seed and is labeled
+  anti-conservative. The white null is unchanged. Output gains `global.p_single_level`, `global.null_fit` and, with
+  the refit, `global.inner_surrogates`; a refit costs N x (M + 1) surrogate series (new cap 4e6). The docstring's
+  "conservative" wording and `time-series-inference.md` now state the measured calibration.
+- **Fifteen references corrected after review batch 1 and the expert-slot tests (54 issues; VALIDATION
+  REVIEW-REFS-4).** Substantive: the track-fit chi^2 uses the measurement covariance (the fitted-residual covariance is
+  singular) and the biased residual is positively correlated with the measurement (`core-detector-equations.md`,
+  `performance-metrics-and-residual-diagnostics.md`); QGSP_BIC and FTFP_BERT coincide for pions below 12 GeV and
+  nucleons from 1.5 to 12 GeV, and the Geant4 convergence gate and scope check are described as what they enforce
+  (`geant4-study-protocol.md`, rules G4R-BIC-RANGE and G4R-HP-NEUTRON); era mixing is exact only when every
+  era-varying factor is inside the response or the weights (`response-and-forward-folding.md`). Also one-sided p-values,
+  the Chernoff condition and the Braun et al. background (`astroparticle-statistics.md`), and 13 earlier expert-slot
+  findings in ten references (code1/code4 differences, charge-sign comparisons, harmonic trials, unipolar anode
+  signals, induced-charge sign, angle-dependent most probable value, electron-only E/p symmetry, tag-and-probe shapes,
+  Bayesian vs profile intervals, Z_A for discovery, non-nested trigger bootstrap). The independent-review reference now
+  recommends `--expert-model` with the strongest model alongside the lens slots, and an Opus filter over Sonnet.
+  Guidance only.
 - **Five more references corrected after the first live review with the 0.23.0 options (42 issues; VALIDATION
   REVIEW-REFS-3).** Ignoring a positive correlation overstates the uncertainty of a difference or ratio, not only
   understates it (`statistical-inference-for-physics.md`); geomagnetic cutoff deliverables use the backtraced maximum
@@ -33,6 +793,28 @@ Software checks establish contract consistency only, not physical validity.
   must change an affected file against the release before it, and an `introduced` release that already held one
   states `introduced_basis` (added to SFA-2026-002 and -003); an unknown artifact type is a problem. Scan verdicts
   are unchanged in this step.
+- **Release manifests of 0.3.0 and 0.4.0, backfilled (sci-fix improvement plan C4, F-20).** `release_manifest.py
+  backfill --commit SHA` records a release made before manifests existed, by today's identity rules, marked
+  `backfilled` with its full commit and the generator; `check-published` checks it against its tag, or its commit when
+  the release was never tagged (0.4.0, `9870a35a`), and treats it as published. The advisories whose range ends
+  before 0.5.0 (SFA-2026-008 to -011, -030, -031) now resolve against the 0.3.0 manifest, and `check` confirms that
+  0.4.0 changed their files.
+- **hep-computing: run the advisory scan when work resumes on an older project (plan C3, F-21).** A rule in the
+  skill's reference index (`engineering-playbook.md`): when a project's artifacts predate the newest fixed release of
+  an advisory, or an advisory is still open, run `tools/scifix_advisories.py scan` and report its three classes
+  (affected, possibly affected, output that is no artifact) with each remedy; read-only, no recomputation.
+- **Advisories format /2: match what an artifact can show, and say "possibly affected (no trace)" when it cannot
+  (sci-fix ADVISORY-MATCH-V2, S2; plan A1 change 1).** `applies_to.match` replaces `extension_keys`: groups of
+  conditions on any envelope path (`exists`, `eq`, `in`, `regex`; `[*]` expands lists), undecided when the artifact
+  predates the field (`unknown_before`) or the execution trace, and `match: []` with `match_basis` when no field can
+  show the affected code ran. Every group must discriminate; the frozen allowlist is gone. All 31 advisories are
+  rewritten: ten list outputs only (the blinding scanner, the five detector scripts, `anisotropy.py`,
+  `estimate_training_memory.py`), which no artifact can show; six cannot be decided from any field (SFA-2026-004, 006,
+  010: the statistical-result writer wraps a core/stats CLI's output; 023, 025: required ml-artifact keys; 033: required
+  claims), so their artifacts in range are now possibly affected (no trace) instead of affected; the others match on
+  fields the affected code writes (SFA-2026-020 only from contracts 2.5.0, when its fields appeared; 031 on the
+  partition runner's tool name). The number of findings on old artifacts does not drop: what changes is that a
+  finding says what it rests on. The scan still reads `/1` for one release. Evidence: VALIDATION SCIFIX-ADVISORY-V2.
 - **Envelope execution trace: `provenance.code_paths` and `code_tags` (contracts 3.5.0, minor; sci-fix improvement
   plan A1 change 2, maintainer decision 2026-10-22).** Twelve artifact writers add the plugin `.py` files their process
   had loaded and the tags advisory-named shared functions set (`core/trace.py`, imported as `contracts.trace`; tags cleared per envelope), so a
@@ -61,6 +843,29 @@ Software checks establish contract consistency only, not physical validity.
   (0.10.0). Seven entries graded D2 whose later oracle tests were never run on the parent (FC-MONOTONE, POISSON-SF,
   COV-NOREPAIR, POISSON-500, ROBUST-MALFORMED, BLINDING-SCANNER, ROBUST-CAMPAIGN) state it in `gaps`; their grades
   are unchanged until the D-scope rule. Evidence: VALIDATION SCIFIX-PLAN-P0-CHECK.
+- **Sci-fix ledger: located sources in the evidence ledger format, and evidence that runs (plan B1 and B4; F-10,
+  F-12).** The *Sources read for locators* table is now `docs/evidence/scifix-sources.json` and
+  `scifix-claims.json` (11 sources, 27 located claims, checked by `core/evidence/ledger.py`, index
+  `scifix-index.md`), and each of the 15 `locator` records names its `source_id` and `locator_id`; the source must
+  have been read at `page` or `full-text`. arXiv:2109.07851 (ML-NEGWEIGHTS), cited only in prose, was read
+  (v2, 2026-10-22, page level): eq. (2.2) is in Sec. 2, p. 3, not in Sec. 2.2 as the ledger and
+  `hep_metrics.cell_resample` said; the citation is corrected and the grade (C3) stands. Each of the 60
+  `independence` records states `requires: {"core", "backend"}`, found by hiding each package in turn; every backend
+  is locked by a required CI gate. `run_required_backends.py --from-ledger` runs the 52 oracle nodes (24 modules,
+  16 not in its `MODULES`) one by one and classifies each failure: a missing core dependency is an environment error,
+  a missing backend is unverified, anything else means the evidence does not hold; with `--no-skips` an unverified
+  or skipped node fails too. Evidence: VALIDATION SCIFIX-PLAN-B1-B4.
+- **Sci-fix ledger: the D axis is data, and D2 covers every oracle (plan B3 and B6; F-11, F-14, F-23; maintainer
+  decision 2026-10-22).** Each entry records its commits (parent, fix, follow-ups; full hashes), its per-test parent
+  records (outcome on the parent and the fix, failure kind, environment, adaptation, VALIDATION section, what the test
+  needs) and its mutants; `evidence_tests` lists the test nodes used. D2 now needs a parent failure of every oracle
+  node named by the entry's independence records (at most D1 when only other regression tests have one), D3 also a
+  killed revert mutant, and the ledger test recomputes both. The oracle nodes without a record were run on their
+  parent and fix commits in detached worktrees: many test functions, arguments or outputs that are new in the fix,
+  so they cannot reach the parent's code, and some pass on the parent. 22 grades fall (13 S1 and 9 S2 entries now
+  D1 or D0, each with a `gaps` line); none rises. ML-SMALL is split into ML-SMALL-C10, -C24, -C25 and -C26 (K13
+  corrected a test and left the ledger; the old id stays in `superseded`), and SFA-2026-025 names the four. No code
+  changes; no released number changes. Evidence: VALIDATION SCIFIX-PLAN-B3-B6.
 
 ## 0.23.0 (2026-10-22)
 
@@ -673,7 +1478,6 @@ been run for the new descriptions and routing tables (gate G2).
 - `validate_covariance.py` and `validate_response.py` label their CLI output `[General method]`, as the core/stats
   guide says (follow-up to the F-15 audit).
 
-
 Upgrade plan v1.3, batch A (Th9, Th7, D7, D1, M5, Th3, ML2, Com1, Com3, X3, X1, X2): test bed, foundations and scope
 (VALIDATION UPGRADE-A). Contracts stay 2.11.0 with one additive optional field (M5, gate G4); no version bump.
 
@@ -715,7 +1519,6 @@ Upgrade plan v1.3, batch A (Th9, Th7, D7, D1, M5, Th3, ML2, Com1, Com3, X3, X1, 
   an error.
 - Routing cases: 282 (23 new).
 
-
 Upgrade plan v1.3, batch B (C1, M1, D9, D5, D10, D11, M7, D8, M3, D6, S1, S6, ML1, ML3, S11, and the first part of
 E-3): tools needed before a detector-configuration change (VALIDATION UPGRADE-B). Contracts stay 2.11.0 with additive
 changes behind gate G4 (one effect, one composition, optional spec fields); no version bump.
@@ -746,7 +1549,6 @@ changes behind gate G4 (one effect, one composition, optional spec fields); no v
 - Example `examples/multi-era-fit/` (E-3, first part): the chain above on two synthetic eras with a layer added
   midway; joint-fit coverage 0.689 over 1,000 toys; S1 catches a 5% offset in one era.
 - Routing cases: 312 (30 new).
-
 
 Upgrade plan v1.3, batch C (Th1, D4, D3, D2, M4, E-1, Th8, M8, M10, Th4, Th10, Th12, S2 with the E-3 projection, S7,
 S8, ML4, ML3 extensions, S11 extensions, C7, Com6, Com7, D13, D14, E-2, E-4) (VALIDATION UPGRADE-C). Contracts stay
@@ -783,7 +1585,6 @@ profile kind); no version bump.
 - Examples: `examples/bc-fragmentation/` (E-1), `examples/pbar-p-curvature-offset/` (E-2),
   `examples/analysis-to-paper/` (E-4); `examples/multi-era-fit/` gains the S2 projection check (new keys only).
 - Routing cases: 356 (44 new; `th-scope-2` becomes a direct case).
-
 
 Upgrade plan v1.3, batch D (S3, S4, S5, S9, S10, M2, M6, M9, Th2, Th5, Th6, Th11, C2, C3, C4, C5, C6, Com2, Com4,
 Com5, D12, and the D13 expansion) (VALIDATION UPGRADE-D). Contracts stay 2.11.0; no version bump. Two new optional

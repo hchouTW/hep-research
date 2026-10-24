@@ -1,0 +1,19 @@
+{
+ "kind": "error",
+ "category": "C05",
+ "planter": "ai",
+ "summary": "The exposure is converted to cm^2 sr s for the analysis, but the flux roots are still declared and plotted in 1/(m2 sr s GV), so every flux value is 1e4 too small for its declared unit.",
+ "code_change": "build_world stores 'exposure': expo * 1e4 (comment: cm^2 sr s).",
+ "description_change": "measurement spec: normalization convention now 'exposure = acceptance x livetime x cutoff fraction per period, in cm^2 sr s'; context roots still 1/(m2 sr s GV).",
+ "affected": [
+  "exposure",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

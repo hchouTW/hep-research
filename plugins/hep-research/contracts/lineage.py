@@ -14,9 +14,20 @@ check_decision(decision, exposure) verifies the binding against the current reco
 edited history does) and refuses a decision that predates entries it claims to have seen, or postdates entries it
 leaves out ('seen' understated). Given base_dir (the CLI passes the decision record's folder, or --artifacts-root), it
 also opens each artifacts[].ref (relative refs resolve against base_dir, absolute ones are used as they are) and
-compares its file SHA-256 with artifacts[].sha256: a different hash is lineage.artifact_mismatch, a ref that is not a
+compares its file SHA-256 with artifacts[].sha256 (except an entry of a 1.1.0 measurement-acceptance record bound by
+binding "parameters", whose parameter_digest contracts/design.py compares, DEC-06): a different hash is lineage.artifact_mismatch, a ref that is not a
 readable file lineage.artifact_missing or lineage.artifact_unreadable, all errors (as a missing exposure record is).
 Without base_dir (an in-memory record with no location) artifacts are not opened.
+
+Decision record 1.1.0 (contracts 3.11.0, detector system design DEC-03..DEC-16): the six design categories
+(DESIGN_CATEGORIES) need at least one artifact; only they may carry dispositions[] or the seen marker
+{"state": "not-applicable"}, and a 1.0.0 record uses none of the 1.1.0 additions (lineage.needs_1_1_0). A record with the
+marker needs no exposure record, but its input closure is checked (check_not_applicable, DEC-15): the closure of each
+artifacts[].ref from contracts/dependencies.py (validate_dependencies 'checked') is opened and the marker is refused
+(lineage.not_applicable_refused) when it holds a dataset-record with extension.status published or preliminary, an
+artifact whose status includes observed, an external input, or a protected input (a path under the enclosing project
+configuration's agent_policy protected_paths or protected_inputs); without base_dir the closure cannot be read and the
+marker is refused (lineage.closure_unchecked).
 
 derive_exposure(record) is the only mapping to the envelope data_exposure: no record, an unreadable or invalid record
 is {"state": "unknown", "basis": "none"} (never unexposed); a valid record is {"state": "exposed"} when any entry up to
@@ -25,7 +36,8 @@ Exposure only grows: entries are never removed, so a new session or a new record
 protected mode load_exposure() reads the record only as a protected input (custodian-written).
 
 Usage: python3 contracts/lineage.py exposure RECORD [--previous FILE] [--record-ref REF] [--through N]
-       python3 contracts/lineage.py decision DECISION --exposure RECORD [--artifacts-root DIR]
+       python3 contracts/lineage.py decision DECISION [--exposure RECORD] [--artifacts-root DIR]
+       (--exposure is required unless the record's seen is the 1.1.0 not-applicable marker)
 Exit codes: 0 valid, 1 invalid, 2 unreadable input. Output: JSON {"status", "findings", ...}; exposure also prints the
 derived data_exposure, decision the exposure at decision time.
 """
@@ -44,6 +56,10 @@ from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
 
 EXPOSING = frozenset({"signal-region", "unblinded-result", "sealed-value"})
+DESIGN_CATEGORIES = frozenset({"design-scope", "requirements-baseline", "architecture-selection", "design-baseline",
+                               "requirement-change", "measurement-acceptance"})
+NOT_APPLICABLE = {"state": "not-applicable"}
+PROJECT_CONFIG = "hep-research.project.json"
 UNKNOWN = {"state": "unknown", "basis": "none"}
 
 
@@ -145,17 +161,106 @@ def check_artifacts(dec: dict, base_dir: Path, rep: Report) -> None:
         except OSError as exc:
             rep.add("error", f"{where}.ref", "lineage.artifact_unreadable", f"cannot read {path}: {exc}")
             continue
-        if actual != art["sha256"]:
+        if actual != art["sha256"] and art.get("binding") != "parameters":  # DEC-06: digest checked by design.py
             rep.add("error", f"{where}.sha256", "lineage.artifact_mismatch",
                     f"{art['ref']}: file SHA-256 {actual} differs from the record")
+
+
+def _protected_paths(base_dir: Path) -> list[Path]:
+    """Protected paths of the project configuration enclosing base_dir (agent_policy protected_paths and
+    protected_inputs), resolved against the configuration's folder."""
+    for d in [base_dir, *base_dir.parents][:6]:
+        cfg = d / PROJECT_CONFIG
+        if cfg.is_file():
+            try:
+                doc = json.loads(cfg.read_text(encoding="utf-8"))
+            except (OSError, ValueError, UnicodeDecodeError):
+                return []
+            pol = doc.get("agent_policy") if isinstance(doc, dict) else None
+            if not isinstance(pol, dict):
+                return []
+            raw = list(pol.get("protected_paths") or []) + [v for v in (pol.get("protected_inputs") or {}).values()
+                                                             if isinstance(v, str)]
+            return [(d / r).resolve() for r in raw if isinstance(r, str)]
+    return []
+
+
+def check_not_applicable(dec: dict, base_dir: Path | None, rep: Report) -> None:
+    """DEC-15: the not-applicable marker is refused when the input closure of artifacts[] holds experimental,
+    observed, external or protected data (see the module docstring)."""
+    if base_dir is None:
+        rep.add("error", "$.seen", "lineage.closure_unchecked",
+                "the not-applicable marker needs the artifacts' folder: an unread closure cannot be ruled out")
+        return
+    from contracts.dependencies import validate_dependencies  # lazy: dependencies imports the validator stack
+    base = Path(base_dir).resolve()
+    protected = _protected_paths(base)
+    for i, art in enumerate(dec["artifacts"]):
+        where = f"$.artifacts[{i}]"
+        path = (base / art["ref"]).resolve()
+        if not path.is_file():
+            continue  # check_artifacts already reports it
+        deps = validate_dependencies(path, base)
+        if deps.get("protected") and deps["status"] == "error" and not deps["checked"]:
+            rep.add("error", where, "lineage.not_applicable_refused",
+                    "protected use refused reading the closure: it cannot be ruled out")
+            continue
+        closure = [path] + [(base / c).resolve() for c in deps["checked"]]
+        for f in deps["findings"]:
+            if f["code"] == "dependency.external_unresolved":
+                rep.add("error", where, "lineage.not_applicable_refused", f"external input in the closure: {f['path']}")
+            elif f["code"] == "dependency.outside_root":
+                rep.add("error", where, "lineage.not_applicable_refused", f"input outside the folder: {f['path']}")
+        for src in closure:
+            if any(src == p or p in src.parents for p in protected):
+                rep.add("error", where, "lineage.not_applicable_refused", f"protected input {src}")
+                continue
+            try:
+                doc = json.loads(src.read_text(encoding="utf-8"))
+            except (OSError, ValueError, UnicodeDecodeError):
+                rep.add("error", where, "lineage.not_applicable_refused", f"unreadable input {src}")
+                continue
+            if not isinstance(doc, dict):
+                continue
+            ext: dict = doc["extension"] if isinstance(doc.get("extension"), dict) else {}
+            if doc.get("artifact_type") == "dataset-record" and ext.get("status") in ("published", "preliminary"):
+                rep.add("error", where, "lineage.not_applicable_refused",
+                        f"{src.name} is experimental data (dataset-record status {ext.get('status')})")
+            if "observed" in (doc.get("status") or []):
+                rep.add("error", where, "lineage.not_applicable_refused", f"{src.name} carries 'observed'")
+
+
+def check_version_use(dec: dict, rep: Report) -> None:
+    """1.1.0 additions only in 1.1.0 records and only for design categories (DEC-04, DEC-11, DEC-13, DEC-14)."""
+    design = dec["category"] in DESIGN_CATEGORIES
+    marker = dec["seen"] == NOT_APPLICABLE
+    if dec["record_version"] == "1.0.0" and (design or marker or "dispositions" in dec):
+        rep.add("error", "$.record_version", "lineage.needs_1_1_0",
+                "design categories, the not-applicable marker and dispositions need record_version 1.1.0")
+    if not design and marker:
+        rep.add("error", "$.seen", "lineage.not_applicable_not_design", "only design records may mark seen not-applicable")
+    if not design and "dispositions" in dec:
+        rep.add("error", "$.dispositions", "lineage.dispositions_not_design", "only design records carry dispositions")
+    bound = [a for a in dec["artifacts"] if "binding" in a or "parameter_digest" in a]
+    if bound and (dec["category"] != "measurement-acceptance" or dec["record_version"] != "1.1.0"
+                  or any(a.get("binding") != "parameters" or "parameter_digest" not in a for a in bound)):
+        rep.add("error", "$.artifacts", "lineage.binding_not_allowed",
+                "only a 1.1.0 measurement-acceptance record binds candidates by binding 'parameters' with a parameter_digest")
+    if design and not dec["artifacts"]:
+        rep.add("error", "$.artifacts", "lineage.design_no_artifacts", "a design record lists at least one artifact")
 
 
 def check_decision(dec, exposure=None, base_dir: Path | None = None) -> Report:
     rep = validate(dec, "decision_record.json")
     if not rep.ok:
         return rep
+    check_version_use(dec, rep)
     if base_dir is not None:
         check_artifacts(dec, base_dir, rep)
+    if dec["seen"] == NOT_APPLICABLE:  # DEC-14..DEC-16: no exposure applies; the closure is checked instead
+        if rep.ok:
+            check_not_applicable(dec, base_dir, rep)
+        return rep
     if exposure is None:
         rep.add("error", "$.seen", "lineage.exposure_unchecked", "no exposure record: what had been seen is not verified")
         return rep
@@ -184,7 +289,8 @@ def check_decision(dec, exposure=None, base_dir: Path | None = None) -> Report:
 
 def decision_exposure(dec: dict, exposure: dict | None, record_ref: str | None = None) -> dict:
     """What had been seen when the decision was made, as a data_exposure (unknown unless the decision checks)."""
-    if exposure is None or not check_decision(dec, exposure).ok:
+    if exposure is None or not isinstance(dec.get("seen"), dict) or "through_seq" not in dec["seen"] \
+            or not check_decision(dec, exposure).ok:
         return dict(UNKNOWN)
     return derive_exposure(exposure, record_ref, dec["seen"]["through_seq"])
 
@@ -199,7 +305,8 @@ def main(argv=None) -> int:
     p.add_argument("--through", type=int)
     p = sub.add_parser("decision")
     p.add_argument("decision", type=Path)
-    p.add_argument("--exposure", type=Path, required=True)
+    p.add_argument("--exposure", type=Path,
+                   help="the exposure record; required unless seen is the not-applicable marker (1.1.0)")
     p.add_argument("--artifacts-root", dest="artifacts_root", type=Path,
                    help="folder that relative artifacts[].ref resolve against (default: the decision record's folder)")
     try:
@@ -215,6 +322,9 @@ def main(argv=None) -> int:
         return 2
     base = None
     if args.cmd == "decision":
+        if other is None and not (isinstance(first, dict) and first.get("seen") == NOT_APPLICABLE):
+            print(json.dumps({"status": "unreadable", "error": "--exposure is required unless seen is not-applicable"}))
+            return 2
         base = args.artifacts_root if args.artifacts_root is not None else args.decision.resolve().parent
         if not base.is_dir():
             print(json.dumps({"status": "unreadable", "error": f"--artifacts-root {base} is not a folder"}))

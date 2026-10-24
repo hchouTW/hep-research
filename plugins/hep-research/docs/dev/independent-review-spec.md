@@ -8,6 +8,8 @@ Baseline: hep-research 0.21.0, contracts 3.2.0 (rechecked 2026-10-21; the design
 
 > Amendment (contracts 3.4.0, 2026-10-22): two optional settings from the P3 tuning run (`p3-tune`), both off unless the configuration names them. `lens_models` fixes the model of a lens's lens slot (§5.1, A2). `filter` adds one filtering pass over the accepted round-1 findings (§5.5, §6.9, §7.5, A8). Without them every rule below is unchanged, bit for bit.
 
+> Amendment (contracts 3.6.0, 2026-10-22): three changes from the first live runs with the 3.4.0 options, all off unless asked for. `start --own-config` gives a review its own configuration file, so concurrent reviews can use different settings (§2, §3, §5.1, §7.3, A1); no schema change. The filter packet's free text no longer names the reviewer: the raising slot's id, its identity and the model names are removed (§5.2). `expert` adds one expert slot to round 1, an agent that reads the whole document for substantive physics, statistics and method errors (§5.1, §5.2, §5.3, §6.10, §7.6, A8): in two evaluation runs the substantive errors no reviewer found were whole-page reasoning errors, a general statement false in some regime, while reviewers check claim by claim inside a scope. The expert slot is being evaluated and is not yet recommended. Without these options every rule below is unchanged, bit for bit.
+
 ## Purpose of the final edition
 
 This is the final design after ten real review rounds. The last round, on the 12th edition, gave these results:
@@ -61,19 +63,19 @@ Main changes from the 12th edition:
 
 | Component | Location | Contents |
 |---|---|---|
-| Contract | `contracts/review.py`, `contracts/schemas/review_*.json` | Seven schemas: config, unit table, packet manifest, review record, event, head and observation; since contracts 3.4.0 an eighth, the filter record (§5.5). **The state-transition table and state computation** are pure functions shared by the process driver and `check`, so there are not two implementations that can drift apart. `check` only reads files and produces nothing. |
+| Contract | `contracts/review.py`, `contracts/schemas/review_*.json` | Seven schemas: config, unit table, packet manifest, review record, event, head and observation; since contracts 3.4.0 an eighth, the filter record (§5.5); contracts 3.6.0 adds the `expert` config field and the record role `expert` (§6.10). **The state-transition table and state computation** are pure functions shared by the process driver and `check`, so there are not two implementations that can drift apart. `check` only reads files and produces nothing. |
 | Process driver | `skills/hep-authoring/scripts/review.py` | The commands in the table below, plus sentence splitting, scope assignment, sampling, unit mapping, diff, the canary generator and the instruction-file generator |
 | Lens table | `skills/hep-authoring/assets/review-lenses.json` | Scope rules, canary types and witness rules, and the matching skill review points |
 | Host notes table | `skills/hep-authoring/assets/review-hosts.json` | Isolation preconditions, how to obtain the session start time, the instruction files and settings to record, and the host's shared directories |
 | Review procedure | `skills/hep-authoring/references/independent-review.md` | Procedures for the author, reviewer and arbiter agents |
-| Configuration | `<project>/reviews/review-config.json` | Follows the `review_config` schema |
+| Configuration | `<project>/reviews/review-config.json`, or (contracts 3.6.0) the review's own `<project>/reviews/<review-id>/review-config.json` when it was started with `--own-config` | Follows the `review_config` schema |
 | Private directory | Default `$XDG_STATE_HOME/hep-research/reviews/`, or `~/.local/state/hep-research/reviews/` when that variable is unset | Canaries, witnesses, sampling seeds and the slot mapping table |
 
 **Commands**
 
 | Command | Purpose |
 |---|---|
-| `start DOC [--supersede ID --reason TEXT] [--lens-model LENS=MODEL ...] [--filter-model M]` | Start a review: split sentences, assign scope, sample, and allocate slots and models. `--lens-model` (repeatable) and `--filter-model` set `lens_models` and `filter` in the configuration (§5.1); start refuses them when the change would alter a configuration that another unfinished review uses |
+| `start DOC [--supersede ID --reason TEXT] [--lens-model LENS=MODEL ...] [--filter-model M] [--expert-model M] [--own-config]` | Start a review: split sentences, assign scope, sample, and allocate slots and models. `--lens-model` (repeatable), `--filter-model` and `--expert-model` set `lens_models`, `filter` and `expert` in the configuration (§5.1); start refuses them when the change would alter the shared configuration that another unfinished review uses. With `--own-config` (contracts 3.6.0) the review gets its own configuration file instead: the shared file (or the defaults) with the options and `--models` applied, written to the review directory and recorded in `round_started` (`config_file`); the shared file is not changed, so no other review is affected |
 | `next` | Run observe, then decide, and print the next action |
 | `dispatch SLOT` | Build this attempt's packet with its canaries, seed and instruction file, validate the example, produce the dispatch message, and write a `dispatched` event |
 | `returned SLOT` | Run by the author agent when the host reports that an agent has finished |
@@ -105,6 +107,7 @@ decide can also print two actions that **do not map to a command**: `await` mean
 <project>/reviews/
   review-config.json
   <review-id>/
+    review-config.json         only for a review started with --own-config (contracts 3.6.0)
     review_log.jsonl
     review_head.json
     units/round-<n>.json
@@ -130,7 +133,7 @@ decide can also print two actions that **do not map to a command**: `await` mean
     sample_seed
 ```
 
-- `slot_id` is a randomly assigned label (S1, S2, …). Directory names reveal neither the role nor how slots relate to each other. There are three roles: lens, shadow and arbiter; with a `filter` in the configuration, a fourth, filter (§6.9).
+- `slot_id` is a randomly assigned label (S1, S2, …). Directory names reveal neither the role nor how slots relate to each other. There are three roles: lens, shadow and arbiter; with a `filter` in the configuration, a fourth, filter (§6.9); with an `expert` in the configuration, a fifth, expert (§6.10).
 - `packet_sha256` is the sha256 of `manifest.json`.
 
 ## 4. Units, scope and sampling
@@ -208,11 +211,13 @@ The report records the share of substantive units, and P3 calibrates it.
 | `private_dir` | see §2 | must be outside the project tree and the host's shared directories | — |
 | `lens_models` | empty | lens name → model; every model must be in `models[]`, every lens in the lens table (or `extra_lenses`) | Contracts 3.4.0. P3 tuning: design-lens slots run by Haiku missed their canaries in 8 of 9 attempts, so 4 of 5 were exhausted. Recommended: the strongest model in `models[]` on the design lens (A2) |
 | `filter` | absent | `{"model": M}`; any model name | Contracts 3.4.0. P3 tuning: one Opus filtering pass raised precision from 0.53 to 0.88 at about 2% of the review's token cost (§6.9) |
+| `expert` | absent | `{"model": M}`; any model name | Contracts 3.6.0. Two evaluation runs: the substantive errors no reviewer found were whole-page reasoning errors (§6.10). A prospective test on five references (VALIDATION REVIEW-REFS-4): 9 of 9 findings upheld, 4 substantive, 3 raised by no lens slot. Recommended alongside the lens slots and `filter` |
 
 - Python rules check the allowed ranges. Any out-of-range value triggers `config_out_of_range`.
 - When any quality threshold is **looser than its default** (the last column above gives the loose direction), a `weak_config` warning is raised and written into the report. For example, setting `unresolved_max_ratio` to 0.49 triggers it even though 0.49 is inside the allowed range.
 - Every value marked "provisional" is on the P3 calibration list. The report prints the full configuration actually used.
-- `lens_models` and `filter` are not quality thresholds: they never trigger `weak_config`. A `lens_models` model outside `models[]`, or a key that is not a lens name, is `config_out_of_range`. Without either field the configuration is read exactly as in contracts 3.3.0.
+- `lens_models`, `filter` and `expert` are not quality thresholds: they never trigger `weak_config`. A `lens_models` model outside `models[]`, or a key that is not a lens name, is `config_out_of_range`. Without these fields the configuration is read exactly as in contracts 3.3.0.
+- **Where the configuration lives** (contracts 3.6.0): every review records the configuration it uses in `round_started` (`config`, `config_sha256`). By default that is the shared `<project>/reviews/review-config.json`. A review started with `--own-config` records `config_file`, its own `<project>/reviews/<review-id>/review-config.json`; observe then compares that file, not the shared one, with `config_sha256` (`config_changed`, §7.3), re-review rounds keep it, and `check` treats it as one of the review's files (`artifacts_changed`, §7.4). It copies `private_dir` from the shared file, so the private directory is found the same way. Its configuration never changes the shared file, and an unfinished review with its own file never blocks a change of the shared file.
 
 ### 5.2 Packets
 
@@ -242,6 +247,8 @@ The report records the share of substantive units, and P3 calibrates it.
 
   Arbitration slots **can see the verdicts under arbitration**; arbitration cannot work otherwise. Apart from that, like every other slot, they see no verdict unrelated to their items.
 - **The filter slot** (§6.9) gets `manifest.json`, `instructions.md`, `document.md` (this round's document without canaries), `units.json` (no lens scope, no roles), `scope.json` (`slot_id`, `lens` null, `role` `filter`, `finding_ids[]`) and **`findings.json`**: every pooled finding with `id`, `kind`, `severity`, `units[]`, `unit_texts`, `value`, `correction`, `description` and `fix`. The ids are random (`P` plus hex digits, new for every attempt) and the order is shuffled with the attempt seed. The packet carries **no reviewer identity**: no slot id, lens, role or model of the slot that raised a finding, no reviewer name and no finding id from the reviewer's record. The mapping from random ids to findings stays in the private directory (`filter_ids.json`).
+- **Identity scrub of the filter packet** (contracts 3.6.0). A finding's free text (`correction`, `description`, `fix`) may name its reviewer. Before the packet is written, each of these fields has the following replaced by `[redacted]`: the slot id of the slot that raised the finding (exact case), the identity its record reports, and every model name of the configuration (`models[]`, `lens_models`, `filter`, `expert`) and of the record's `reviewer.model` (both without regard to case). A term matches only as a whole token, never inside a longer word or number, and identity and model strings shorter than 3 characters are left alone; longer terms are replaced first, so an identity that contains the slot id goes whole. `value` and `unit_texts` quote the document and are not changed. The counts per finding and in total (`slot_id`, `identity`, `model`) are written to `filter_ids.json` in the private directory, and the report prints the totals. Lens names and other self-descriptions ("as the facts reviewer") are not removed (§10).
+- **The expert slot** (§6.10, contracts 3.6.0) gets `manifest.json`, `instructions.md`, `document.md` (this round's document without canaries), `units.json` (no lens scope, no roles) and `scope.json` (`slot_id`, `lens` null, `role` `expert`, `max_units_per_claim`). There is no skim or deep list: its scope is the whole document.
 - **No slot's packet contains**:
   - the dispatch message;
   - the hash of the original document;
@@ -256,7 +263,7 @@ The report records the share of substantive units, and P3 calibrates it.
 | Field | Contents |
 |---|---|
 | `packet_sha256`, `dispatch_nonce`, `instructions_sha256` | Filled in using the methods in the instruction file |
-| `role` | `reviewer` or `arbiter` |
+| `role` | `reviewer`, `arbiter` or (contracts 3.6.0) `expert` |
 | `reviewer` | `identity`, `context` (`fresh` or `human`), `model`, `host`, `slot_id`. **Self-reported** |
 | `isolation` | `saw_prior_conversation`, `host_injected[]`, and `instruction_files_seen[]` or `unknown`. **Self-reported** |
 | `reads[]` | Optional: a `$ref` to the traceability schema's `read_event`, recording the read level of literature sources; hep-citations owns the semantics |
@@ -295,7 +302,7 @@ All field names use `slot_id` and `carry_forward` consistently; no other spellin
 
 | Event | Key fields |
 |---|---|
-| `round_started` | round, `source_sha256`, unit-table hash, `config_sha256`, slots and models, author identity |
+| `round_started` | round, `source_sha256`, unit-table hash, `config_sha256`, slots and models, author identity; contracts 3.6.0, optional: `config_file` (the review's own configuration file, §5.1) and, in round 1 only, `expert` (`slot_id`, `model`) |
 | `observed` | observation time; the delivered document's sha256; the config's sha256 and range-check result; host precondition results (including the session start time and the settings' modification time); hashes of instruction files and settings; shared-directory check results; whether mutated canary text appears in the delivered document; the current document's `changed` and `removed` units relative to this round's unit table; git HEAD |
 | `dispatched` | slot_id, attempt, `packet_sha256`, nonce, `instructions_sha256`, deadline, this attempt's canary commitment and seed commitment (each a salted hash), and the attempt start time |
 | `returned` | slot_id, attempt |
@@ -354,7 +361,7 @@ Only the slot's **latest attempt** is considered.
 
 Precedence when determining state: `exhausted` > `rejected`/`withdrawn` > `accepted` > `submitted` > `returned-empty` > `overdue` > `dispatched` > `none`.
 
-The filter slot (§6.9) has at most min(2, `max_attempts_per_slot`) attempts.
+The filter slot (§6.9) and the expert slot (§6.10) each have at most min(2, `max_attempts_per_slot`) attempts.
 
 ### 6.3 Finding states
 
@@ -399,7 +406,7 @@ When an arbitration slot becomes `exhausted`, its items become `unresolved` dire
 | 13 | The delivered document differs from this round's `source_sha256` | Below the round limit: `rereview`; at the limit: `escalate` |
 | 14 | None of the above | `close`: run the pre-close check (§6.7). If it passes, produce the report and write `closed`. If not, write `change_reverted`, and the next decide returns to row 12 |
 
-- Arbitration slots and the filter slot go through rows 4 to 8 like any other slot. Row 9 covers only lens and shadow slots; an exhausted filter slot is never escalated (§6.9). When an arbitration slot becomes `exhausted`, its arbitration items become `unresolved`, and row 11 handles them.
+- Arbitration slots, the filter slot and the expert slot go through rows 4 to 8 like any other slot. Row 9 covers only lens and shadow slots; an exhausted filter slot (§6.9) or expert slot (§6.10) is never escalated. When an arbitration slot becomes `exhausted`, its arbitration items become `unresolved`, and row 11 handles them.
 - When `receive` receives an arbitration record, it automatically writes `arbitration_resolved` and updates the states of findings and verdicts.
 - The P1 exhaustive test enumerates every combination of slot, arbitration-item and finding states and confirms three things:
   - every combination maps to a row;
@@ -444,6 +451,17 @@ With `filter: {"model": M}` in the configuration, one agent of model M judges th
 - **Flow**: `next` prints `filter`; `filter` writes `filter_needed` and creates the filter slot (role `filter`, the configured model); rows 4 to 8 dispatch, receive, withdraw and re-dispatch it like any other slot, with at most min(2, `max_attempts_per_slot`) attempts. When it is exhausted, the filter is not applied: nothing escalates, the report says so, and the review goes on unfiltered.
 - **Result**: the decisions are advice. `next` attaches them to the `dispose` action (`filter`: finding → decision, reason, duplicate_of). The report lists the kept findings first and the dropped findings in a separate section with their reasons (A8). Nothing is deleted.
 - **Only round 1**: re-review rounds have no filtering pass; their findings are few and concern the author's own changes.
+
+### 6.10 Expert slot (contracts 3.6.0, optional)
+
+With `expert: {"model": M}` in the configuration (`start --expert-model M`), round 1 has one more slot: one agent of model M reads the whole document as a domain expert and reports only substantive physics, statistics or method errors: a general statement false in some regime it covers, internally inconsistent reasoning, two treatments called equivalent when they are not, and statements the plugin's own tools, benchmarks or references contradict. It reports no style, wording or single local value. Reason: in two evaluation runs the substantive errors no reviewer found were whole-page reasoning errors, and reviewers check claim by claim inside a scope. The slot is being evaluated and is not yet recommended.
+
+- **Allocation**: at `start`, after the lens and shadow slots, as the plan entry `("expert", None)`; it takes a random label from the same shuffle (so its label says nothing about its role) and the configured model. `round_started` of round 1 records `expert` (`slot_id`, `model`) and lists the slot in `slots`. Without `expert` the plan, the labels and the models are unchanged, bit for bit.
+- **Where it sits**: it is a round-1 slot and is dispatched with the other round-1 slots (row 7 lists them all at once); rows 4 to 8 receive, withdraw and re-dispatch it like any other slot. Its accepted findings and verdicts are ordinary round-1 findings and verdicts: they enter the filtering pass (§6.9), conflict items (an expert verdict `unsupported` on units a lens judged `supported`; the item's lenses then include `expert`, so the arbiter needs external evidence), dispose and the report.
+- **Only round 1**: re-review rounds have no expert slot. A finding of the expert slot disposed as changed is confirmed or reopened in the next round by the **design** lens slot (it covers every substantive unit) through `carry_forward`; without a design lens slot it is listed for dispose as removed (A4.3). Its verdicts are not carried forward.
+- **Canaries: none.** A canary is a single mutated value; the expert is told to ignore single local values, so a canary would either be missed by a good expert (rejecting it) or pull it back into claim-by-claim checking, which is what the slot exists to avoid. Its isolation controls are the reviewers': the R0 isolation self-check (`prior_conversation`), the read rules with the forbidden paths, and the copy guard at receipt (a record that cites a copy or version of the document is `read_outside_packet`). The report states that the slot has no quality control beyond receipt.
+- **Attempts**: at most min(2, `max_attempts_per_slot`). When it is exhausted nothing escalates (row 9 covers lens and shadow slots only): the review goes on without it and the report says so.
+- **Record**: `review_record.json` with role `expert`: `claims`, `verdicts` and `findings` as for a reviewer, with the same finding shape and evidence bases, and no `skim`, `carry_forward` or `resolves`. Every error is one claim (1 to `max_units_per_claim` contiguous units where the page states it most directly), one verdict (`unsupported` or `partially-supported`) with evidence, and one finding listed by that verdict. Finding nothing is a valid record with no claims. Receipt: §7.6.
 
 ## 7. Rules
 
@@ -499,7 +517,7 @@ Skim, deep and canary rules do not apply to arbitration slots.
 
 | Code | Condition | Fix |
 |---|---|---|
-| `config_changed` | The config differs from the one recorded for this round | Restore the config, or restart with `start --supersede` |
+| `config_changed` | The config differs from the one recorded for this round (the review's own file for a review started with `--own-config`) | Restore the config, or restart with `start --supersede` |
 | `config_out_of_range` | A config value is outside its allowed range | Fix the config. If it was changed after the review started, use `start --supersede` |
 | `canary_in_deliverable` | The full text of a mutated unit appears in the delivered document | Delete it |
 | `isolation_precondition` | A host precondition does not hold (§A7) | Configure it per the host table. If a restart is needed, restart the host and then run `next` |
@@ -516,7 +534,7 @@ If the session start time cannot be obtained, `isolation_not_yet_effective` is n
 | `log_broken` | Hash chain, head or event transitions are invalid | fail |
 | `not_closed` | The review has not reached `closed` | incomplete |
 | `changed_after_close` | After close, the delivered document's hash differs from the one recorded in `closed` | fail |
-| `artifacts_changed` | A received packet, unit table or sidecar has been modified | fail |
+| `artifacts_changed` | A received packet, unit table or sidecar has been modified, or (contracts 3.6.0) the review's own configuration file | fail |
 | `finding_open` | A finding is still `open`, `reopened` or `declined-pending` | incomplete |
 | `uphold_not_honored` | After an arbitration uphold-finding, the author still declined | fail |
 | `adopted_unverified` | A finding was disposed as changed or partially-changed with `adopted-unverified` | warning; all are listed in the report |
@@ -539,6 +557,21 @@ Contracts 3.4.0. Skim, deep, canary and evidence rules do not apply.
 
 A decision outside `keep` and `drop`, or a blank reason, is `schema_invalid`.
 
+### 7.6 Receipt rules (expert slot)
+
+Contracts 3.6.0. The reviewer rules of §7.1 apply, except those for coverage, controls and re-review, which have nothing to check in a slot without a skim or deep list, canaries or `carry_forward`: `deep_missing`, `skim_missing`, `unresolved_dominant`, `canary_missed`, `carry_forward_missing`, and the duplicate-ratio part of `refutation_weak`.
+
+| Code | Condition |
+|---|---|
+| Common | `schema_invalid`, `packet_mismatch`, `dispatch_mismatch`, `prior_conversation`, `read_outside_packet`, `file_hash_mismatch`, `output_mismatch`, `instructions_changed` (as in §7.1; the forbidden paths and the copy guard are the same) |
+| `same_identity` | The expert's identity is the same as the author's |
+| `finding_shape`, `claim_shape`, `self_citation`, `verdict_without_finding` | As in §7.1 |
+| `refutation_weak` | A `supported` verdict (the expert need not write any) has no refutation attempt with a target |
+| `basis_missing` | A verdict that is not `unresolved` cites no evidence at all. Any basis counts, as for the design and bypass lenses: an inconsistency inside the page is shown by other units (`internal`); the instructions ask for external evidence (a counter-example script, a plugin tool's output, a located source) where it exists |
+| `finding_without_verdict` | A finding that no `partially-supported` or `unsupported` verdict lists: every expert finding must carry its evidence through its verdict |
+
+A record with role other than `expert`, or with `skim`, `carry_forward` or `resolves`, is `schema_invalid`.
+
 ## 8. Automation
 
 ### A1. Process
@@ -557,6 +590,7 @@ A decision outside `keep` and `drop`, or a blank reason, is `schema_invalid`.
 
   Because every attempt regenerates its canaries, packets cannot all be built at `start`.
 - If the delivered document already has an unfinished review, `start` refuses to run unless `--supersede` is given.
+- With `--own-config` (contracts 3.6.0), `start` writes the review's configuration to `<project>/reviews/<review-id>/review-config.json` before `round_started` and records it there (`config_file`); see §5.1.
 - The author agent's loop is: run `next`, do the action it prints, run `next` again, and repeat until `stop`. When the host reports that an agent has finished, run `returned`.
 - **The dispatch message is always two lines**:
 
@@ -573,6 +607,7 @@ A decision outside `keep` and `drop`, or a blank reason, is `schema_invalid`.
 - Fixed lenses: `facts`, `design`, `sources`, `bypass`. Domain lenses are added automatically by keyword. The author can only add lenses with `extra_lenses`, never remove them.
 - Each lens has one shadow slot. Arbitration slots are created as needed.
 - Models are assigned in rotation. Where possible, a shadow uses a different model from its main lens, and an arbiter uses a different model from both parties under arbitration.
+- **Expert slot (contracts 3.6.0)**: with `expert` in the configuration, round 1 has one expert slot of the configured model, labelled from the same shuffle as the other slots (§6.10).
 - **Per-lens model (contracts 3.4.0)**: `lens_models` (set with `start --lens-model LENS=MODEL`) fixes the model of that lens's **lens slot** in every round, re-review rounds included. Its shadow keeps the rotation; when the rotation would give the shadow the lens slot's fixed model and `models[]` has another, the shadow takes the next model in the rotation. Lenses not named, and every allocation without `lens_models`, are unchanged bit for bit. Recommendation from the P3 tuning run: put the strongest model of `models[]` on the design lens (`--lens-model design=<strongest>`), since Haiku missed the design canaries (repeated values and terms) in 8 of 9 attempts.
 
 ### A3. Recomputation and verification
@@ -693,7 +728,8 @@ Instruction files and settings are recorded once at each `dispatched` and once a
   - the witnesses, in two parts: original right and new wrong;
   - the slots with `canary_shortfall` or `no_control`;
 - shadow review results;
-- with a `filter` configured (contracts 3.4.0): the filtering pass (slot, model, attempts and reasons, applied or not applied, kept and dropped counts); then the findings it kept, with its reasons, and the findings it did not judge, followed by a separate section of the findings it dropped, with its reasons and `duplicate_of`. Nothing is deleted;
+- with a `filter` configured (contracts 3.4.0): the filtering pass (slot, model, attempts and reasons, applied or not applied, kept and dropped counts, and since contracts 3.6.0 the counts of reviewer identity strings removed from the findings' free text); then the findings it kept, with its reasons, and the findings it did not judge, followed by a separate section of the findings it dropped, with its reasons and `duplicate_of`. Nothing is deleted;
+- with an `expert` configured (contracts 3.6.0): the expert slot (slot, model, attempts and reasons, accepted or not applied, its findings) and the statement that it carries no canaries; with `--own-config`, the review's configuration file in the configuration table;
 - each finding's disposition, and whether the author verified it;
 - arbitration conclusions, `change_reverted`, `change_confirmed`, `change_rejected`, `late` and `returned-empty`;
 - the list of tool outputs the host saved automatically during attempts;
@@ -738,7 +774,7 @@ The arbiter's instruction file contains only the rules that apply under §7.2, p
 
 A human uses `resolve` to handle escalated items and may choose to give a final sign-off. This mechanism does not write attestations. The attestation reviewer role is a free string, and the plugin's `contracts/schemas/attestation.json` notes that "reviewer roles are assigned under Q-06", which is still undecided.
 
-This mechanism also does not settle the v6.3 open conditions O04 ("reviewers other than the author") and O14 ("which reviewer roles may accept reports as evidence"), which are listed in `docs/dev/v6.3/custodian-gate-requirement.md:42-43`. A closed agent review does not by itself meet the "a review record exists" criterion of `docs/dev/v6.3/decision-enforce.md:20`; whether it can is a maintainer decision. The terms "review packet" and "shadow" here are unrelated to `docs/dev/v6.3/review-packet.md` (a human review of the G-ENFORCE inputs) and `docs/dev/v6.3/shadow-review.md` (a difference review between check suites).
+This mechanism also does not settle the v6.3 open conditions O04 ("reviewers other than the author") and O14 ("which reviewer roles may accept reports as evidence"), which are listed in `docs/dev/cross-artifact-check/custodian-gate-requirement.md:42-43`. A closed agent review does not by itself meet the "a review record exists" criterion of `docs/dev/cross-artifact-check/decision-enforce.md:20`; whether it can is a maintainer decision. The terms "review packet" and "shadow" here are unrelated to `docs/dev/cross-artifact-check/review-packet.md` (a human review of the G-ENFORCE inputs) and `docs/dev/cross-artifact-check/shadow-review.md` (a difference review between check suites).
 
 ### Plugin registration and ownership
 
@@ -823,7 +859,8 @@ Guarding against these needs something the author cannot change: external custod
 - For slots dispatched in parallel, the tool outputs the host saves automatically fall in the same time window, and the mechanism cannot tell which slot a file belongs to. A reviewer may read another slot's tool output during its attempt.
 - A reviewer's identity is a self-reported name, so `same_identity` and `arbiter_identity` catch only identical names.
 - The filtering pass (§6.9) is checked only for structure: one decision per finding, a reason, and a consistent `duplicate_of`. Whether a decision is right is not checked, which is why it is advice and nothing is deleted. In the P3 tuning run it lost 4 minor real issues out of 17.
-- The filter packet hides who raised a finding, but a reviewer may still name itself in a finding's free text.
+- The filter packet hides who raised a finding, and since contracts 3.6.0 the raising slot's id, its reported identity and the model names are removed from a finding's free text (§5.2). A reviewer can still describe itself in other words (its lens, "as the facts reviewer"), and a model name or identity shorter than 3 characters is not removed.
+- The expert slot (§6.10) has no canaries: receipt checks the structure, evidence and isolation of its record, not whether it read the whole page or how many errors it missed. An expert that finds nothing writes a valid record.
 
 ## 11. Implementation order
 
@@ -949,7 +986,8 @@ Start P1 in the order of §11. When P1 is done, use its end-to-end example to re
 | Packet `units.json` | The allow-list in §5.2, with no hashes |
 | `scope.json`, `items.json` | See §5.2 |
 | `canary.json` (private) | Per canary: `unit`, `original`, `mutated`, `old_key`, `new_key`, `witness_right`, `witness_wrong` |
-| `slots.json` (private) | Mapping of `slot_id` to role (lens, shadow, arbiter, filter) and model |
-| `filter_ids.json` (private, contracts 3.4.0) | Per filter attempt: `ids`, random finding id → finding reference (`<round>/<slot_id>/<finding id>`) |
+| `slots.json` (private) | Mapping of `slot_id` to role (lens, shadow, arbiter, filter, expert) and model |
+| `filter_ids.json` (private, contracts 3.4.0) | Per filter attempt: `ids`, random finding id → finding reference (`<round>/<slot_id>/<finding id>`); since contracts 3.6.0 also `scrubbed`: `total` and per random id (`findings`) the counts of removed `slot_id`, `identity` and `model` strings |
+| `<review-id>/review-config.json` (contracts 3.6.0) | Only for a review started with `--own-config`: its configuration (§5.1) |
 | Packet `findings.json` (filter slot) | See §5.2 |
 | `sample_seed` (private) | The round seed and each attempt's seed |

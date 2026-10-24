@@ -98,13 +98,18 @@ is part of the null hypothesis and is stated.
 
 **Known or unknown period.** A period with a physical reason to test (the ~27-day solar rotation and its harmonics, an
 orbital or attitude period of the instrument) is tested alone, for example by folding the series at that period
-(epoch folding) against the same red-noise null: one trial, no search penalty, provided the period is fixed before the
-series is examined (a period read off the same series is a search and pays the trials). A periodogram search
+(epoch folding) against the same red-noise null: one trial, no search penalty, only for a single period fixed before
+the series is examined and tested with one statistic in one series (a period read off the same series is a search and
+pays the trials). Each harmonic tested separately, a period window (the recurrence near 27 days is seen anywhere from
+about 25 to 29 days) and each rigidity bin or species add trials. A periodogram search
 (Lomb-Scargle for uneven sampling and gaps) is for a genuinely unknown or approximate period and pays the trials
 below. Comparing the amplitude and phase of the same candidate period between species of opposite charge sign (a
-particle and its antiparticle, protons and electrons) separates a drift-related heliospheric effect from an
-instrumental or environmental artefact, which affects both signs alike; the comparison is a joint fit with the shared
-normalization and its covariance, not two separate significances.
+particle and its antiparticle, protons and electrons) separates charge-sign-dependent effects from
+charge-sign-independent ones, not physics from artefacts: drifts are charge-sign dependent, but so are a periodic
+curvature-scale or alignment drift and charge confusion, which shift the two signs oppositely; diffusive and
+convective modulation (which carry most of the 27-day signal) and charge-symmetric instrumental effects act on both
+signs alike. Instrumental causes are excluded by their own monitors, not by this comparison; the comparison is a
+joint fit with the shared normalization and its covariance, not two separate significances.
 
 **Test.** At the Fourier frequencies `f_j` of a Gaussian stationary series, the periodogram ordinates are approximately
 independent and distributed as `S(f_j) chi2_2 / 2` (Brockwell and Davis 1991, Ch. 10). The local test compares each
@@ -126,9 +131,15 @@ ordinate with the fitted red-noise spectrum: `2 I(f_j) / S_hat(f_j)` against `ch
 - **Shipped tool.** `<plugin root>/skills/hep-statistics/scripts/periodicity_scan.py` runs a weighted generalized
   Lomb-Scargle periodogram of one series with a band-maximum global p from surrogates under a declared white, AR(1)
   or OU null. Its red-noise surrogates are a constant mean plus a red process with `phi` (or `tau`) from the lag-1
-  autocorrelation and the series' total variance, estimated once and not refitted per surrogate; they have no trend,
-  no measurement term `e ~ N(0, C)` (only the white null adds `N(0, sigma_i^2)`) and no cross-rigidity correlation.
-  Its p-value is therefore not the one against the null above; report it as such, or run the full toys yourself.
+  autocorrelation (for AR(1), with the first-order small-sample correction) and the series' total variance. By
+  default (`--null-fit refit`, since the fix PERIODICITY-REFIT) the null is refitted on every surrogate and the p is
+  a double parametric bootstrap; on no-signal toys (400 per configuration, AR(1) and OU, n = 50 and 100) every
+  rejection fraction at alpha = 0.01, 0.05 and 0.1 lies within two binomial sigma of alpha or below it. With
+  `--null-fit once` (the only method of releases 0.14.0 to 0.23.0) the null is estimated once: on short red series
+  that p is anti-conservative (AR(1), n = 50, phi = 0.9: 0.147 rejected at alpha = 0.05, 0.253 at 0.1). The
+  surrogates have no trend, no measurement term `e ~ N(0, C)` (only the white null adds `N(0, sigma_i^2)`) and no
+  cross-rigidity correlation, so the p-value is not the one against the full null above; report it as such, or run
+  the full toys yourself.
 
 ## Trials across periods and energy bins
 
@@ -205,11 +216,6 @@ responses, acceptances and collection times, and one spectrum is fitted to all o
   them, use parametrized forward folding: fold `Phi(theta)` through each era's response
   (hep-detector, response and forward folding) and fit `theta` with `covariance_fit.py fit --allow-plugin` and a
   plug-in model, or with the pyhf adapter (one channel per era).
-- **Model-card diagnostic (opt-in).** When the joint fit is described by model cards, freeze them with
-  `python3 <plugin root>/contracts/analysis_check.py freeze ... --mode model` and run `check`: the model-card suite
-  reports whether each auxiliary measurement is used once (`r-aux.use`) and whether parameters shared across eras are
-  declared as shared (`r-share.parameters`). The rules run in shadow mode: the report is a diagnostic and never
-  changes a fit's status.
 - **Report.** The per-era and joint results, the split-consistency p-values, the era-nuisance scheme, and the joint
   fit's parameter covariance; closure on synthetic eras before data.
 

@@ -8,7 +8,7 @@ invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point: invariants, workflow, context resolution, resources, handoffs |
-| `references/` | thirteen method references, routed from `hep-measurement-guide.md` (`data-pipelines.md` is a pointer: the code-level pipeline material moved to hep-computing's `analysis-data-pipelines.md`) |
+| `references/` | twelve method references, routed from `hep-measurement-guide.md` (the code-level pipeline material is hep-computing's `analysis-data-pipelines.md`) |
 | `scripts/` | eighteen command-line helpers (acceptance from generation records, anisotropy in right ascension, systematic variations, yield and systematics tables, counting reference, blinded-bin masking, analysis-change and spec review, collection time, cosmic-ray helpers, spectral-variable transformation, isotope fractions) |
 | `assets/` | the `measurement-spec` template and its field guide, a synthetic cosmic-ray worked spec, the systematics ledger (CSV), the report template, the measurement-review template and a synthetic review example, a synthetic cosmic-ray spectrum example |
 

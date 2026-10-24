@@ -1,0 +1,13 @@
+{
+ "kind": "error",
+ "category": "C11",
+ "planter": "ai",
+ "summary": "The custodian masking step is run for period 1 only (period 2 assumed masked upstream); the unmasked period-2 helium signal-region histogram is then written to results.json, publishing the blinded count.",
+ "code_change": "main(): custodian loop over list(PERIODS)[:1]; observed_counts written as plain float lists for every species and period (so the unmasked period-2 helium array serializes).",
+ "description_change": "measurement spec: blinding mask region text now '60-100 GV, period 1 (period 2 masked upstream)'.",
+ "affected": [
+  "helium-p2",
+  "flux-helium-p2",
+  "ratio-p2"
+ ]
+}

@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-036",
+ "published": "2026-10-21T20:26:57Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S1",
  "ledger": [
   "ANISO-WEIGHTED-COV"
@@ -26,9 +28,7 @@
    ],
    "database_specific": {
     "fixed_commit": "3c10ac23ff7627385e08fd3c2d57f169bd129231",
-    "introduced_commit": "f79b4c5ff0621cd7ed9b571f43a3aedb0dae8a56",
-    "no_artifact": true,
-    "outputs": "skills/hep-measurement/scripts/anisotropy.py harmonic with --exposure-map prints JSON on stdout (harmonic, upper_limit, label, warnings) and writes no artifact"
+    "introduced_commit": "f79b4c5ff0621cd7ed9b571f43a3aedb0dae8a56"
    }
   }
  ],
@@ -41,12 +41,13 @@
   "trigger": "an exposure map whose relative exposure is not constant in right ascension; without a map, with a uniform map and for the solar, sidereal and anti-sidereal checks the numbers are unchanged"
  },
  "applies_to": {
-  "artifact_types": [
-   "computational-run"
-  ],
-  "extension_keys": [
-   "tools"
-  ]
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-measurement/scripts/anisotropy.py"
+   ],
+   "how_to_recognize": "anisotropy.py harmonic with --exposure-map: JSON on stdout with harmonic, upper_limit, label and warnings"
+  }
  },
  "remedy": "rerun anisotropy.py harmonic with the same events and exposure map on a release that has the fix and replace the Rayleigh probability and the upper limits; the script's JSON is not an envelope artifact, so the scan finds only computational-run records that list it as a tool, and other results that quote its numbers need a manual check",
  "references": [

@@ -1,0 +1,46 @@
+{
+ "label": "theory:tmd-gaussian-lo Gaussian TMD convolutions, Cahn and Sivers terms (SymPy 1.14.0)",
+ "status": {
+  "steps": "analytic-derivation within the Gaussian ansatz and O(k/Q) kinematics",
+  "physics": "heuristic-argument (the Gaussian ansatz with constant widths is a model)",
+  "sivers_sign_change": "cited (time reversal, Trento Eq. 14), applied here"
+ },
+ "order": "leading order in alpha_s, leading power in k/Q for F_UU,T and the Sivers term, O(k/Q) for the Cahn cos(phi_h) term; no TMD evolution",
+ "environment": {
+  "python": "3.13.2",
+  "sympy": "1.14.0",
+  "interpreter": "from skills/hep-computing/scripts/find_python.py"
+ },
+ "assumptions": [
+  "Gaussian k_perp and p_perp dependence with flavour-independent constant widths (Eqs. 34-35)",
+  "p_perp = P_T - z k_perp at O(k/Q) (Eq. 29), x = x_B, z = z_h",
+  "Sivers function Delta^N f = 2 N_q(x) h'(k) f(x, k), h' = sqrt(2e) (k/M') exp(-k^2/M'^2) (Eqs. 63, 68)",
+  "one-photon exchange; massless partons; target mass and gamma = 2Mx/Q neglected",
+  "Drell-Yan q_T shape: convolution of two Gaussian TMD PDFs, no soft factor, no evolution"
+ ],
+ "results": {
+  "cahn:mean_k_along_hadron": "P*kperp2*z/(kperp2*z**2 + pperp2)",
+  "sivers:asymmetry": "sqrt(2)*Mprime2**(3/2)*N*P*kperp2*z*(kperp2*z**2 + pperp2)*exp((Mprime2*kperp2**2*z**4 + 2*Mprime2*kperp2*pperp2*z**2 + Mprime2*pperp2**2 - 2*P**2*kperp2**2*z**2 + kperp2**2*pperp2*z**2 + kperp2*pperp2**2)/(2*(kperp2*z**2 + pperp2)*(Mprime2*kperp2*z**2 + Mprime2*pperp2 + kperp2*pperp2)))/(Mprime2*kperp2*z**2 + pperp2*(Mprime2 + kperp2))**2",
+  "F_UU_T": "x sum e_q^2 f_q(x) D_q(z) exp(-P^2/<P_T^2>)/(pi <P_T^2>), <P_T^2> = <p^2> + z^2 <k^2>",
+  "dy_shape": "exp(-q_T^2/<q_T^2>)/(pi <q_T^2>), <q_T^2> = <k1^2> + <k2^2>"
+ },
+ "checks": {
+  "normalization:gaussian_unit_normalization": true,
+  "normalization:bacchetta_D1_z2_normalization": true,
+  "sidis:anselmino_form_gives_gaussian_with_PT2_eq39": true,
+  "sidis:bacchetta_form_equals_anselmino_with_pperp2_z2_kT2": true,
+  "sidis:integral_over_PhT_is_collinear_x_f_D": true,
+  "cahn:cahn_eq32_reproduces_eq38_cos_phi_h_term": true,
+  "cahn:depolarization_eq2_9_at_gamma_0": true,
+  "cahn:depolarization_eq2_11_at_gamma_0": true,
+  "cahn:bacchetta_eq4_20_reproduces_eq38_bracket": true,
+  "sivers:phi_S_integral_is_pi_cos_phi_minus_phi_h": true,
+  "sivers:eq58_with_eq63_reproduces_eqs64_to_67": true,
+  "sivers:bacchetta_eq4_11_with_trento_eq4_gives_same_asymmetry": true,
+  "drell_yan:two_gaussians_convolve_to_width_sum": true,
+  "drell_yan:qT_shape_unit_normalized": true,
+  "sivers_sign:dy_sivers_function_is_minus_sidis": true,
+  "sivers_sign:dy_delta_N_is_minus_sidis": true,
+  "sivers_sign:trento_eq4_round_trip": true
+ }
+}

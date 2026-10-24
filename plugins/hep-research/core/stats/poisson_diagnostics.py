@@ -50,6 +50,7 @@ import random
 import sys
 from statistics import NormalDist
 
+from core import trace
 from core.stats import _poisson
 from core.stats._linalg import bisect
 from core.stats._poisson import MAX_MEAN  # one limit for core/stats; the numerics below stay accurate up to it
@@ -511,7 +512,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2
     result["status"] = "ok"
-    print(json.dumps(result, indent=2))
+    print(json.dumps({**result, "trace": trace.provenance()}, indent=2))
     return 0
 
 

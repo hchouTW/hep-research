@@ -1,0 +1,17 @@
+{
+ "kind": "error",
+ "category": "C12",
+ "planter": "ai",
+ "summary": "The selection-efficiency uncertainty, from independent binomial control samples per bin, is propagated as fully correlated across bins.",
+ "code_change": "analyse(): sel = outer(v, v) with v = flux * sigma_sel / eff_sel_hat instead of diag(v**2).",
+ "description_change": "measurement spec: systematic selection_efficiency applied_via now 'covariance (fully correlated across bins, per species)'.",
+ "affected": [
+  "selection_efficiency",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2",
+  "ratio-p1",
+  "ratio-p2"
+ ]
+}

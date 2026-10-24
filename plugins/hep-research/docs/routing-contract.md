@@ -11,7 +11,7 @@ Choose the primary skill by the **deliverable**, never by an experiment, model, 
 | Skill | Direct (primary) | Neighboring (routes elsewhere) | Negative (not this plugin, or not this skill) |
 |---|---|---|---|
 | hep-measurement | "Design the selection and background estimate for my flux measurement"; "Review this measurement spec"; "Which systematics should I evaluate?" | "What is the tracker resolution?" → hep-detector; "Set a CLs limit" → hep-statistics | "Fix the segfault in my analysis code" → hep-computing |
-| hep-detector | "Measure the trigger efficiency with tag-and-probe"; "Build the response matrix"; "RICH velocity resolution vs charge" | "Unfold with this matrix" → hep-statistics | "Design the full measurement" → hep-measurement |
+| hep-detector | "Measure the trigger efficiency with tag-and-probe"; "Build the response matrix"; "RICH velocity resolution vs charge"; "Compare these spectrometer layouts against my resolution and charge-confusion requirements"; "Set up the design loop: requirements, candidates, evaluations, derived compliance matrix" | "Unfold with this matrix" → hep-statistics; "Expected precision of each design with Asimov data" → hep-statistics; "Physics goals of the design" → hep-measurement | "Design the full measurement" → hep-measurement |
 | hep-theory | "Derive the tree-level cross section with these conventions"; "Compare my model with the published flux"; "Recast this search for my model" | "Fit my model's coupling to the data" → hep-statistics after the prediction; "Fold my prediction through the response" → hep-detector | "Write the paper section" → hep-authoring |
 | hep-statistics | "Feldman–Cousins interval for zero observed events"; "Combine these two measurements with shared systematics"; "Bayesian posterior with these priors" | "Which correlation should I assume?" → evidence owner (hep-measurement / hep-detector / hep-theory) | "Choose my selection cuts" → hep-measurement |
 | hep-computing | "Memory leak in my ROOT macro"; "Batch submission with resubmission and merge"; "Convergence study of this integral" | "Is this result physically right?" → owning physics skill | General non-physics software questions outside research code: no special handling |
@@ -90,8 +90,8 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 
 - hep-measurement: measurement-design, cosmic-ray-flux, systematic-scaling, collection-time, spectral-transform, acceptance-from-generation
 - hep-detector: response-folding, resolution-efficiency, fast-spectrometer-simulation, scale-distortion, response-construction, species-migration, multisample-pid, stability-monitoring, detector-design, geomagnetic-backtracing, full-detector-simulation
-- hep-statistics: fits-and-limits, covariance-and-combinations, unfolding, bayesian, time-series, split-consistency, roofit-status
-- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology
+- hep-statistics: fits-and-limits, covariance-and-combinations, unfolding, bayesian, time-series, split-consistency, roofit-status, pdf-reweighting-and-profiling, global-pdf-fits
+- hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology, dis-structure-functions, drell-yan, nuclear-parton-effects, polarized-dis, sidis-and-tmd, small-x-saturation, exclusive-and-gpd
 - hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring
 - hep-ml: ml-training, bdt-pipeline, ml-eras
 - hep-citations: literature-verification
@@ -107,6 +107,9 @@ Outside v1 (the closest owner answers with the limited-support notice):
 - Heavy-ion physics (quark-gluon plasma, collective flow) (heavy-ions) → hep-theory
 - Nuclear-structure calculations (shell model, density functionals) (nuclear-structure) → hep-theory
 - Full relic-density Boltzmann solvers (relic-density-solvers) → hep-theory
+- Model calculations of PDFs, TMDs and GPDs (quark models, chiral quark soliton, AdS/QCD) (hadron-models) → hep-theory
+- Quarkonium production and absorption (NRQCD, J/psi in pA and eA) (quarkonium-production) → hep-theory
+- Jets and jet substructure in lepton-hadron scattering, resolved-photon photoproduction (jets-in-dis) → hep-theory
 <!-- /v1-scope -->
 
 ## Handoff chains (must terminate)

@@ -27,7 +27,7 @@ from this marketplace stays installed but no longer receives updates through it 
 Checks: `python3 plugins/hep-research/tools/run_all_checks.py`
 
 Design and decision records of the v6.3 analysis-check programme:
-[`plugins/hep-research/docs/dev/v6.3/`](plugins/hep-research/docs/dev/v6.3/README.md).
+[`plugins/hep-research/docs/dev/cross-artifact-check/`](plugins/hep-research/docs/dev/cross-artifact-check/README.md).
 
 Live routing evaluation (paid model calls, outside the plugin): [`evals/routing/`](evals/routing/README.md).
 

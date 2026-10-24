@@ -66,6 +66,13 @@ in the matrix element alone while keeping the PDF fixed.
   alternative prescription; it is not the set's own asymmetric rule (`unverified` as a recommendation of any
   collaboration: no source opened states it).
 
+## Nuclear sets
+
+A nuclear PDF set carries its own proton baseline, error type, tolerance and confidence level (for example a Hessian
+set quoted at 90% CL next to a replica set at 68%): use them as the set documents, never another proton set's
+baseline. Nuclear ratios are formed member by member before the set's rule is applied. Details, the per-nucleon
+conventions and the sets read so far: [nuclear targets](nuclear-parton-effects.md).
+
 ## LHAPDF (guide, not run here)
 
 Typical Python use: `pset = lhapdf.getPDFSet(name)`, `pdfs = pset.mkPDFs()`, evaluate the observable on every

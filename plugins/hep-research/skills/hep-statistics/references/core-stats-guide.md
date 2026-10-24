@@ -66,20 +66,13 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
   and is labeled `outside-validated-range`, which the publication gate refuses without a validation record. The
   other caps protect numerical accuracy or are handled by partitioning; a toy loop whose estimated runtime exceeds
   10 s prints the estimate to stderr first.
-- **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
-  `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
-  at most 1e-5 (stricter than iminuit's default; [details](core-stats-commands.md#conventions-in-detail)); otherwise `failed` with reasons (`invalid_domain`,
-  `hessian_not_positive_definite`, `gradient_not_small`, `max_iterations`, `line_search_stalled`). A best fit on the
-  boundary `mu = 0` is checked by the KKT condition (the profile rises into `mu > 0`), not by an interior Hessian. A
-  conditional NLL below the global one by more than 1e-4 triggers a global refit from the conditional point and, if
-  it remains, a recorded failure, never a silently clipped `q`. Results carry `fit_diagnostics` (fits, failures and
-  reasons for the observed data and for toys) and `status`: `failed` (exit 1) when a fit on the data failed,
-  `incomplete` (exit 3) when only toy fits failed; failed toys are counted, never dropped, and toy p-values then
-  carry the range `[k/N, (k+F)/N]`.
-- **Toy tails** (`tail_estimation.py`, helper, no CLI). A toy p-value is k exceedances of N toys. Outputs carry
-  `toy_tail`: k, N, the estimate k/N (None at k = 0), the Clopper-Pearson interval at 68.27%, and at k = 0 a one-sided
-  95% upper bound `1 - 0.05^(1/N)` (0.0295 for N = 100); the legacy `p_value_toys` and binomial-error fields are None
-  where they would claim p = 0 or an error of 0. Exact Poisson tails stay in log space (`log_p_value_exact_poisson`).
+- **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The fits of `shape-limit`, `shape-gof` and `contour` are
+  `converged` only with a finite NLL, a positive-definite Hessian and EDM at most 1e-5, else `failed` with reasons
+  ([details](core-stats-commands.md#conventions-in-detail)); `failed` (exit 1) when a fit on the data failed,
+  `incomplete` (exit 3) when only toy fits failed; failed toys are counted, never dropped.
+- **Toy tails** (`tail_estimation.py`, helper, no CLI). A toy p-value is k exceedances of N toys, with its
+  Clopper-Pearson interval, and at k = 0 a one-sided 95% upper bound `1 - 0.05^(1/N)`, never p = 0
+  ([details](core-stats-commands.md#conventions-in-detail)).
 - **Toy ensembles** (`toy_ensemble.py`, helper, no CLI): every toy study states its ensemble, counts every toy's
   outcome and never pools ensembles; details in the [command reference](core-stats-commands.md#toy-ensembles).
 - **Broken power law** (`broken_power_law.py`, helper, no CLI): one parametrization for `covariance_fit.py` and
@@ -123,6 +116,9 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `combine_measurements.py` (needs NumPy): GLS combination once the combination plan accepts the inputs (example: `skills/hep-statistics/assets/combine.example.json`); `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples agree, shared blocks subtracted, said when undeclared; `build_covariance.py`: a `[Proposal]` covariance from declared correlation models and a length scan. Both import NumPy (and SciPy) at run time.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
 - `result_artifact.py`: a `statistical-result` artifact from a tool's output, with its status label.
+- `pdf_reweighting.py`: Bayesian reweighting of a PDF replica set (NNPDF and Giele-Keller weights, N_eff);
+  `hessian_profiling.py`: linear Hessian profiling of a Hessian set with new data; [PDF fits](pdf-fit-statistics.md).
+  NumPy at run time.
 - `roofit_fit_check.py` (needs PyROOT): fit status (status 0, covQual 3, EDM below `--edm-max`), `weighted`, `toys` (pulls), `crosscheck` (against core/stats); [RooFit and RooStats](roofit-and-roostats-methods.md).
 - `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure (M5 scaling
   classes) and the reach; outputs are labeled `projection` and fail the publication gate.

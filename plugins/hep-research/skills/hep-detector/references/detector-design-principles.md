@@ -60,6 +60,10 @@ acceptance for which source distribution. Compare layouts at equal cost or mass 
 5. **Record the decision**: layouts compared, figures of merit, the requirement each met or missed, and the
    assumptions (field map, material, alignment) that the conclusion depends on.
 
+A full design study runs this ladder as a loop of design-spec, candidate and evaluation artifacts whose verdicts are
+derived by a program, not declared: see the [system design workflow](system-design-workflow.md) (usage levels, stages,
+`evaluate_design.py`).
+
 ## Failure modes
 
 - Quoting a resolution without its momentum, angle or species.

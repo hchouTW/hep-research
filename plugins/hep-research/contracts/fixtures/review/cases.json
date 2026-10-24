@@ -1,10 +1,30 @@
 {
  "note": "SYNTHETIC structural fixture; values are placeholders, not physics",
  "valid": [
+  "expert_record.json",
+  "expert_record_nothing_found.json",
   "filter_record.json",
   "filter_record_all_kept.json"
  ],
  "invalid": {
+  "expert_record_finding_without_verdict.json": [
+   "finding_without_verdict"
+  ],
+  "expert_record_no_findings_key.json": [
+   "schema_invalid"
+  ],
+  "expert_record_self_citation.json": [
+   "self_citation"
+  ],
+  "expert_record_verdict_without_finding.json": [
+   "verdict_without_finding"
+  ],
+  "expert_record_with_carry_forward.json": [
+   "schema_invalid"
+  ],
+  "expert_record_with_skim.json": [
+   "schema_invalid"
+  ],
   "filter_record_blank_reason.json": [
    "schema_invalid"
   ],

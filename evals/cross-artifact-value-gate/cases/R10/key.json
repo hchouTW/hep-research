@@ -1,0 +1,12 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "The period average is computed as the exposure-weighted mean of the per-period fluxes, which equals the sum of efficiency-corrected counts over the summed exposure x bin width; the spec states the definition.",
+ "code_change": "run_analysis: average = sum(exposure_p * flux_p) / sum(exposure_p).",
+ "description_change": "measurement spec: normalization convention appends 'the period average is the exposure-weighted mean of the per-period fluxes'.",
+ "affected": [
+  "exposure",
+  "trigger_efficiency",
+  "selection_efficiency"
+ ]
+}

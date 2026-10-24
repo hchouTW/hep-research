@@ -1,0 +1,1652 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "collider-tracker-v1-design-report",
+ "artifact_type": "communication",
+ "objective": "detector system design: communication written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "design-spec.v1.json",
+   "sha256": "1bc2a94047deb91d1d0b8b07361faae0829a0173ae08e6e105d9d53c6d99a20c",
+   "artifact_type": "design-spec",
+   "artifact_id": "collider-tracker-v1-spec-v1",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-ECAL-A.json",
+   "sha256": "f753cdf15bf8a02cb642ab8958bd4935fb363615f830d07c1588c89055cb9ef2",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-ECAL-A",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-ECAL-B.json",
+   "sha256": "8f431ff311d57847a37aec588154d99e3d04239a09f00c8ce0039b0edd06f93e",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-ECAL-B",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-ECAL-P.json",
+   "sha256": "26087de8332cc16ac9833c12259ae8bbcf60ebfbc899fb06c8fa59c19ec5929c",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-ECAL-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-MASS-A.json",
+   "sha256": "3558471af564acc10f84d5c3ae17d3b9577a6a24deb12168e529c338ed2e6587",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-MASS-A",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-MASS-B.json",
+   "sha256": "211f1254dcc6cd709688714e3cee7dabe186f33e8f58587e82a84a25cc5888e1",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-MASS-B",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-MASS-P.json",
+   "sha256": "1dfa57c8b04b3b13958db8aec2127105ac4de9ad9535cd6c1b03919fbc558d73",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-MASS-P",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-A.json",
+   "sha256": "dd081d5b5fc3276e6df85e3db488e8a5c79d68cc1211e5fec9639db72a95adac",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-TRK-A",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-B.json",
+   "sha256": "f25e63346402f3543a77a9b17729effc0169dec0741bbd4099d2c7356c789cc1",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-TRK-B",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-P.json",
+   "sha256": "06da108052f54ec658af1c97ed26e0a244eda5f40a9f99b982b6d5ac051c0b51",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "collider-tracker-v1-CALC-TRK-P",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "reports/design-report.md"
+  }
+ ],
+ "status": [
+  "unvalidated",
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "claims": [
+   {
+    "text": "collider-tracker-v1:REQ-TRK-001 for collider-tracker-v1:cand-A: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-TRK-001 for collider-tracker-v1:cand-B: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-TRK-001 for collider-tracker-v1:cand-P: fail (bound.excludes)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-ECAL-001 for collider-tracker-v1:cand-A: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-ECAL-001 for collider-tracker-v1:cand-B: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-ECAL-001 for collider-tracker-v1:cand-P: inconclusive (bound.direction)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-HCAL-001 for collider-tracker-v1:cand-A: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-HCAL-001 for collider-tracker-v1:cand-B: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-HCAL-001 for collider-tracker-v1:cand-P: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-TRG-001 for collider-tracker-v1:cand-A: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-TRG-001 for collider-tracker-v1:cand-B: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-TRG-001 for collider-tracker-v1:cand-P: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-PU-001 for collider-tracker-v1:cand-A: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-PU-001 for collider-tracker-v1:cand-B: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-PU-001 for collider-tracker-v1:cand-P: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-CONT-001 for collider-tracker-v1:cand-A: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-CONT-001 for collider-tracker-v1:cand-B: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:REQ-CONT-001 for collider-tracker-v1:cand-P: inconclusive (capability.unavailable)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:CON-MASS-001 for collider-tracker-v1:cand-A: pass (provisional) (estimate.decides)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:CON-MASS-001 for collider-tracker-v1:cand-B: pass (provisional) (estimate.decides)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   },
+   {
+    "text": "collider-tracker-v1:CON-MASS-001 for collider-tracker-v1:cand-P: pass (provisional) (estimate.decides)",
+    "result_ref": "design-spec.v1.json",
+    "status": [
+     "unvalidated",
+     "synthetic"
+    ]
+   }
+  ],
+  "sources_read": [],
+  "limitations": [
+   "derived by contracts/design.py; verdicts guard against oversight, not deliberate forgery (LIM-02)",
+   "the review axis is advisory: only a valid human design-baseline record sets it (LIM-01)"
+  ],
+  "design_report": {
+   "design_id": "collider-tracker-v1",
+   "note": "derived by contracts/design.py from the artifacts; verdicts guard against oversight and shortcuts, not deliberate forgery (LIM-02), and authorize nothing",
+   "adequacy": {
+    "version": "1.1.0",
+    "state": "initial-default",
+    "frozen": false,
+    "provisional_pass": true
+   },
+   "status": "ok",
+   "current_spec": "design-spec.v1.json",
+   "spec_version": 1,
+   "gate_flags": [
+    "gate.H1_missing",
+    "gate.H2_missing",
+    "gate.H3_missing"
+   ],
+   "gates": [
+    {
+     "category": "design-scope",
+     "clear": false,
+     "records": [],
+     "content": null
+    },
+    {
+     "category": "requirements-baseline",
+     "clear": false,
+     "records": [],
+     "content": null
+    },
+    {
+     "category": "architecture-selection",
+     "clear": false,
+     "records": [
+      {
+       "file": "decisions/h3-prepared.json",
+       "valid": false,
+       "findings": []
+      }
+     ]
+    }
+   ],
+   "candidates": [
+    {
+     "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+     "candidates": [
+      "collider-tracker-v1:cand-A"
+     ],
+     "screened_out": false,
+     "screened_out_reasons": [],
+     "at_risk": []
+    },
+    {
+     "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+     "candidates": [
+      "collider-tracker-v1:cand-B"
+     ],
+     "screened_out": false,
+     "screened_out_reasons": [],
+     "at_risk": []
+    },
+    {
+     "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+     "candidates": [
+      "collider-tracker-v1:cand-P"
+     ],
+     "screened_out": true,
+     "screened_out_reasons": [
+      "collider-tracker-v1:REQ-TRK-001 fails"
+     ],
+     "at_risk": []
+    }
+   ],
+   "requirements": [
+    {
+     "id": "collider-tracker-v1:REQ-TRK-001",
+     "kind": "driving",
+     "quantity": "momentum-resolution-core",
+     "comparator": "<=",
+     "target": 0.03,
+     "unit": "1",
+     "matrix": [
+      {
+       "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+       "candidates": [
+        "collider-tracker-v1:cand-A"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-TRK-A",
+         "file": "evaluations/CALC-TRK-A.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-TRK-A"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-TRK-A",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-TRK-A"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "momentum-resolution-core at F3 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "next-study"
+      },
+      {
+       "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+       "candidates": [
+        "collider-tracker-v1:cand-B"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-TRK-B",
+         "file": "evaluations/CALC-TRK-B.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-TRK-B"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-TRK-B",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-TRK-B"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "momentum-resolution-core at F3 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "next-study"
+      },
+      {
+       "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+       "candidates": [
+        "collider-tracker-v1:cand-P"
+       ],
+       "result": "fail",
+       "codes": [
+        "bound.excludes"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-TRK-P",
+         "file": "evaluations/CALC-TRK-P.json",
+         "row": 10,
+         "verdict": "fail",
+         "code": "bound.excludes",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "momentum-resolution-core",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-TRK-P"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-TRK-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-TRK-P"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-TRK-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "momentum-resolution-core",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-TRK-P"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "none: excluded by an optimistic bound; change the candidate or the requirement"
+       ],
+       "screened_out": true
+      }
+     ]
+    },
+    {
+     "id": "collider-tracker-v1:REQ-ECAL-001",
+     "kind": "driving",
+     "quantity": "calorimeter-energy-resolution",
+     "comparator": "<=",
+     "target": 0.02,
+     "unit": "1",
+     "matrix": [
+      {
+       "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+       "candidates": [
+        "collider-tracker-v1:cand-A"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-ECAL-A",
+         "file": "evaluations/CALC-ECAL-A.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "calorimeter-energy-resolution",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-ECAL-A"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-ECAL-A",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "calorimeter-energy-resolution",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-ECAL-A"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
+        "calorimeter-energy-resolution at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "next-study"
+      },
+      {
+       "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+       "candidates": [
+        "collider-tracker-v1:cand-B"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-ECAL-B",
+         "file": "evaluations/CALC-ECAL-B.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "calorimeter-energy-resolution",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-ECAL-B"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-ECAL-B",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "calorimeter-energy-resolution",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-ECAL-B"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
+        "calorimeter-energy-resolution at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "next-study"
+      },
+      {
+       "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+       "candidates": [
+        "collider-tracker-v1:cand-P"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "bound.direction"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-ECAL-P",
+         "file": "evaluations/CALC-ECAL-P.json",
+         "row": 11,
+         "verdict": "inconclusive",
+         "code": "bound.direction",
+         "bound": "optimistic",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "calorimeter-energy-resolution",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-ECAL-P"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-ECAL-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "calorimeter-energy-resolution",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-ECAL-P"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "calorimeter-calibration-plan at F4 or above or calorimeter-constant-term-measurement at F4 or above (required for compliance, ADQ-02)",
+        "calorimeter-energy-resolution at F4 or above (compliance threshold)"
+       ],
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
+      }
+     ]
+    },
+    {
+     "id": "collider-tracker-v1:REQ-HCAL-001",
+     "kind": "derived",
+     "quantity": "hadronic-energy-resolution",
+     "comparator": "<=",
+     "target": 0.15,
+     "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-ECAL-001",
+     "matrix": [
+      {
+       "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+       "candidates": [
+        "collider-tracker-v1:cand-A"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-HCAL-A",
+         "file": "evaluations/EST-HCAL-A.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "hadronic-energy-resolution",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-HCAL-A"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes hadronic-energy-resolution at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "hadronic-energy-resolution at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
+      },
+      {
+       "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+       "candidates": [
+        "collider-tracker-v1:cand-B"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-HCAL-B",
+         "file": "evaluations/EST-HCAL-B.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "hadronic-energy-resolution",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-HCAL-B"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes hadronic-energy-resolution at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "hadronic-energy-resolution at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
+      },
+      {
+       "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+       "candidates": [
+        "collider-tracker-v1:cand-P"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-HCAL-P",
+         "file": "evaluations/EST-HCAL-P.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "hadronic-energy-resolution",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-HCAL-P"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes hadronic-energy-resolution at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "hadronic-energy-resolution at F4 or above (compliance threshold)"
+       ],
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001",
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
+      }
+     ]
+    },
+    {
+     "id": "collider-tracker-v1:REQ-TRG-001",
+     "kind": "derived",
+     "quantity": "trigger-efficiency",
+     "comparator": ">=",
+     "target": 0.95,
+     "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-TRK-001",
+     "matrix": [
+      {
+       "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+       "candidates": [
+        "collider-tracker-v1:cand-A"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-TRG-A",
+         "file": "evaluations/EST-TRG-A.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "trigger-efficiency",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-TRG-A"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes trigger-efficiency at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "trigger-efficiency at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
+      },
+      {
+       "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+       "candidates": [
+        "collider-tracker-v1:cand-B"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-TRG-B",
+         "file": "evaluations/EST-TRG-B.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "trigger-efficiency",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-TRG-B"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes trigger-efficiency at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "trigger-efficiency at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
+      },
+      {
+       "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+       "candidates": [
+        "collider-tracker-v1:cand-P"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-TRG-P",
+         "file": "evaluations/EST-TRG-P.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "trigger-efficiency",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-TRG-P"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes trigger-efficiency at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "trigger-efficiency at F4 or above (compliance threshold)"
+       ],
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001",
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
+      }
+     ]
+    },
+    {
+     "id": "collider-tracker-v1:REQ-PU-001",
+     "kind": "derived",
+     "quantity": "pileup-robustness",
+     "comparator": "<=",
+     "target": 0.05,
+     "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-TRK-001",
+     "matrix": [
+      {
+       "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+       "candidates": [
+        "collider-tracker-v1:cand-A"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-PU-A",
+         "file": "evaluations/EST-PU-A.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "pileup-robustness",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-PU-A"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes pileup-robustness at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "pileup-robustness at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
+      },
+      {
+       "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+       "candidates": [
+        "collider-tracker-v1:cand-B"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-PU-B",
+         "file": "evaluations/EST-PU-B.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "pileup-robustness",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-PU-B"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes pileup-robustness at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "pileup-robustness at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001"
+      },
+      {
+       "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+       "candidates": [
+        "collider-tracker-v1:cand-P"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-PU-P",
+         "file": "evaluations/EST-PU-P.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "pileup-robustness",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-PU-P"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes pileup-robustness at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "pileup-robustness at F4 or above (compliance threshold)"
+       ],
+       "disposition_under": "collider-tracker-v1:REQ-TRK-001",
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
+      }
+     ]
+    },
+    {
+     "id": "collider-tracker-v1:REQ-CONT-001",
+     "kind": "derived",
+     "quantity": "shower-containment",
+     "comparator": ">=",
+     "target": 0.95,
+     "unit": "1",
+     "covered_by": "collider-tracker-v1:REQ-ECAL-001",
+     "matrix": [
+      {
+       "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+       "candidates": [
+        "collider-tracker-v1:cand-A"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-CONT-A",
+         "file": "evaluations/EST-CONT-A.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "shower-containment",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-CONT-A"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes shower-containment at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "shower-containment at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
+      },
+      {
+       "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+       "candidates": [
+        "collider-tracker-v1:cand-B"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-CONT-B",
+         "file": "evaluations/EST-CONT-B.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "shower-containment",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-CONT-B"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes shower-containment at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "shower-containment at F4 or above (compliance threshold)"
+       ],
+       "proposed_disposition": "accept-risk",
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001"
+      },
+      {
+       "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+       "candidates": [
+        "collider-tracker-v1:cand-P"
+       ],
+       "result": "inconclusive",
+       "codes": [
+        "capability.unavailable"
+       ],
+       "provisional": false,
+       "missing_evaluations": false,
+       "used": [],
+       "skipped": [
+        {
+         "evaluation": "collider-tracker-v1:EST-CONT-P",
+         "file": "evaluations/EST-CONT-P.json",
+         "row": 1,
+         "verdict": "inconclusive",
+         "code": "capability.unavailable",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "shower-containment",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:EST-CONT-P"
+          }
+         ],
+         "reasons": [
+          "no evaluator computes shower-containment at F1"
+         ]
+        }
+       ],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": "undetermined",
+        "lowest_chain_fidelity": null,
+        "participating": [],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": [
+        "shower-containment at F4 or above (compliance threshold)"
+       ],
+       "disposition_under": "collider-tracker-v1:REQ-ECAL-001",
+       "screened_out": true,
+       "disposition_note": "none: the candidate is screened out"
+      }
+     ]
+    }
+   ],
+   "constraints": [
+    {
+     "id": "collider-tracker-v1:CON-MASS-001",
+     "kind": "hard",
+     "quantity": "mass-budget",
+     "comparator": "<=",
+     "target": 25000.0,
+     "unit": "kg",
+     "subsystems": [
+      "DES-TRK-001",
+      "DES-MAG-001",
+      "DES-ECAL-001"
+     ],
+     "matrix": [
+      {
+       "effective_candidate": "ffbf637b41dbb190b5ef9974b7e011dfb8ce184a34d422cc52734a05e8bf0d83",
+       "candidates": [
+        "collider-tracker-v1:cand-A"
+       ],
+       "result": "pass",
+       "codes": [
+        "estimate.decides"
+       ],
+       "provisional": true,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-MASS-A",
+         "file": "evaluations/CALC-MASS-A.json",
+         "row": 16,
+         "verdict": "pass",
+         "code": "estimate.decides",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "mass-budget",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-MASS-A"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-MASS-A",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-MASS-A"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-MASS-A",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-MASS-A"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": []
+      },
+      {
+       "effective_candidate": "456ca8fb24b3f41c57a1829b1b649bbd7a7a76874962cca3a5401f82beec18f0",
+       "candidates": [
+        "collider-tracker-v1:cand-B"
+       ],
+       "result": "pass",
+       "codes": [
+        "estimate.decides"
+       ],
+       "provisional": true,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-MASS-B",
+         "file": "evaluations/CALC-MASS-B.json",
+         "row": 16,
+         "verdict": "pass",
+         "code": "estimate.decides",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "mass-budget",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-MASS-B"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-MASS-B",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-MASS-B"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-MASS-B",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-MASS-B"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": []
+      },
+      {
+       "effective_candidate": "d57b6ff5e73e6f0cb1f23596156f2856c5e76483a4528747b105fb37a913942f",
+       "candidates": [
+        "collider-tracker-v1:cand-P"
+       ],
+       "result": "pass",
+       "codes": [
+        "estimate.decides"
+       ],
+       "provisional": true,
+       "missing_evaluations": false,
+       "used": [
+        {
+         "evaluation": "collider-tracker-v1:CALC-MASS-P",
+         "file": "evaluations/CALC-MASS-P.json",
+         "row": 16,
+         "verdict": "pass",
+         "code": "estimate.decides",
+         "bound": "estimate",
+         "fidelity_vector": [
+          {
+           "figure_of_merit": "mass-budget",
+           "fidelity": "F1",
+           "evaluation": "collider-tracker-v1:CALC-MASS-P"
+          }
+         ],
+         "reasons": []
+        }
+       ],
+       "skipped": [],
+       "conflict_inspect": [],
+       "maturity": {
+        "fidelity_axis": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-MASS-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-MASS-P"
+           }
+          ]
+         }
+        ],
+        "lowest_chain_fidelity": "F1",
+        "participating": [
+         {
+          "evaluation": "collider-tracker-v1:CALC-MASS-P",
+          "fidelity_vector": [
+           {
+            "figure_of_merit": "mass-budget",
+            "fidelity": "F1",
+            "evaluation": "collider-tracker-v1:CALC-MASS-P"
+           }
+          ]
+         }
+        ],
+        "review_axis": "not-reviewed",
+        "status_axis": [
+         "synthetic"
+        ]
+       },
+       "missing_evidence": []
+      }
+     ]
+    }
+   ],
+   "orphan_runs": [],
+   "unavailable": [
+    "collider-tracker-v1:EST-CONT-A",
+    "collider-tracker-v1:EST-CONT-B",
+    "collider-tracker-v1:EST-CONT-P",
+    "collider-tracker-v1:EST-HCAL-A",
+    "collider-tracker-v1:EST-HCAL-B",
+    "collider-tracker-v1:EST-HCAL-P",
+    "collider-tracker-v1:EST-PU-A",
+    "collider-tracker-v1:EST-PU-B",
+    "collider-tracker-v1:EST-PU-P",
+    "collider-tracker-v1:EST-TRG-A",
+    "collider-tracker-v1:EST-TRG-B",
+    "collider-tracker-v1:EST-TRG-P"
+   ],
+   "stale_evaluations": [],
+   "comparison_basis": {
+    "declared": true,
+    "holds": false,
+    "quantity": "mass-budget",
+    "coverage_cl": 0.95,
+    "pairs": [
+     {
+      "candidates": [
+       [
+        "collider-tracker-v1:cand-B"
+       ],
+       [
+        "collider-tracker-v1:cand-A"
+       ]
+      ],
+      "evaluations": [
+       "collider-tracker-v1:CALC-MASS-B",
+       "collider-tracker-v1:CALC-MASS-A"
+      ],
+      "difference": 5020.0,
+      "uncertainty_one_sided": 2343.267621427414,
+      "item_level": true,
+      "shared_items": [],
+      "tolerance": 999.5,
+      "holds": false
+     }
+    ],
+    "note": "candidates are compared at equal mass",
+    "reason": "a difference with its uncertainty exceeds the tolerance"
+   },
+   "ranking": {
+    "status": "refused",
+    "reason": "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07); collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)",
+     "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
+   },
+   "pareto": {
+    "status": "refused",
+    "axes": [
+     "expected-precision",
+     "mass-budget"
+    ],
+    "reason": "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07); collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)",
+    "reasons": [
+     "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)",
+     "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B have no non-optimistic, current expected-precision evaluation (CHN-06)"
+    ]
+   },
+   "errors": [],
+   "review": {
+    "reviewed": false,
+    "record": null,
+    "records": [],
+    "note": "advisory: the actor is self-declared; formal approval is a trusted gate outside the agent (LIM-01)"
+   },
+   "baseline": "draft",
+   "omitted_from_rendering": []
+  }
+ }
+}

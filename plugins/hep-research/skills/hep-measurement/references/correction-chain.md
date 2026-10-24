@@ -28,8 +28,12 @@ Write the efficiency as conditional factors, each with its denominator:
 or in the order the selection is applied; what matters is that each factor's denominator is the numerator of the
 previous one. In the spec, give each factor its own category (`trigger_efficiency`, `reconstruction_efficiency`,
 `selection_efficiency`, `identification_efficiency`, or a profile's `<ns>:<term>`); a bare `efficiency` next to any of
-them is the same efficiency counted twice. Validation rejects it only when the other category's name (after the
-namespace) ends in `_efficiency`: a bare `efficiency` next to `<ns>:trigger` or `<ns>:efficiency` passes unflagged.
+them is the same efficiency counted twice. Validation rejects it when the other category's name (after the
+namespace) ends in `_efficiency` (`measurement.correction_category_repeated`), and warns when the same `efficiency`
+appears under two namespaces, such as `efficiency` next to `<ns>:efficiency`
+(`measurement.efficiency_counted_twice_namespaced`, a warning so older specs keep their outcome). It cannot tell that
+a profile term with another name is an efficiency: a bare `efficiency` next to `<ns>:trigger` passes unflagged, so
+check such pairs by reading the profile's definition.
 
 **Factorization bias.** With each denominator the previous numerator, the product equals the total identically (the
 chain rule; no independence is needed). It is biased when a factor is measured on another population (a separate

@@ -153,7 +153,7 @@ last-verified dates; never quote a limit from memory.
 A generic starting skeleton (no copyrighted class file) is
 `../assets/paper/paper-skeleton.tex` with `../assets/paper/references.bib`.
 
-## Reference files
+## Reference index
 
 Which file to read for each topic: [reference index](papers-review-modes-and-reference-index.md#reference-files).
 

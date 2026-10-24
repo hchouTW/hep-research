@@ -1,5 +1,5 @@
 {
- "contract_version": "3.5.0",
+ "contract_version": "3.12.0",
  "artifact_id": "synthetic-e4-mu",
  "artifact_type": "statistical-result",
  "objective": "SYNTHETIC signal strength from a Barlow-Beeston template fit",
@@ -8,8 +8,8 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.23.0",
-  "contracts": "3.5.0",
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

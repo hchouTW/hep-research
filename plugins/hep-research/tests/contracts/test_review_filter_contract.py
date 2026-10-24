@@ -124,6 +124,14 @@ class RecordRuleTests(unittest.TestCase):
         self.assertEqual([c for c, _ in R.filter_receipt_codes(None, ctx)], ["schema_invalid"])
 
 
+def fixture_rules(name: str, record: dict) -> list:
+    """The context-free rules of a review fixture: filter records (filter_record*.json) by filter_record_rules,
+    expert records (expert_record*.json, contracts 3.6.0) by record_rules with role expert."""
+    if name.startswith("expert_record"):
+        return R.record_rules(record, "expert")
+    return R.filter_record_rules(record)
+
+
 class FixtureTests(unittest.TestCase):
     cases = json.loads((FIX / "cases.json").read_text(encoding="utf-8"))
 
@@ -131,13 +139,13 @@ class FixtureTests(unittest.TestCase):
         self.assertTrue(self.cases["valid"])
         for name in self.cases["valid"]:
             with self.subTest(name=name):
-                self.assertEqual(R.filter_record_rules(json.loads((FIX / "valid" / name).read_text())), [])
+                self.assertEqual(fixture_rules(name, json.loads((FIX / "valid" / name).read_text())), [])
 
     def test_invalid_fixtures_fail_with_their_codes(self):
         self.assertTrue(self.cases["invalid"])
         for name, codes in self.cases["invalid"].items():
             with self.subTest(name=name):
-                got = {c for c, _ in R.filter_record_rules(json.loads((FIX / "invalid" / name).read_text()))}
+                got = {c for c, _ in fixture_rules(name, json.loads((FIX / "invalid" / name).read_text()))}
                 self.assertEqual(got, set(codes))
 
     def test_every_fixture_is_listed_and_synthetic(self):

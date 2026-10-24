@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-023",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S1",
  "ledger": [
   "ML-DOMAIN"
@@ -68,9 +70,9 @@
   "artifact_types": [
    "ml-artifact"
   ],
-  "extension_keys": [
-   "training_domain"
-  ]
+  "match": [],
+  "match_basis": "training_domain is required in every ml-artifact, and write_ml_artifact.py runs apart from check_surrogate_domain.py, train_classifier.py and inference.py, so no field shows which domain method ran",
+  "no_trace": "possibly-affected"
  },
  "remedy": "retrain (the checkpoint stores the domain model) or rerun check_surrogate_domain.py and inference.py with a release that has the fix; rows newly flagged were extrapolations",
  "references": [

@@ -1,5 +1,5 @@
 {
- "contract_version": "1.0.0",
+ "contract_version": "1.1.0",
  "tool_id": "pid-separation-power",
  "entry": "skills/hep-detector/scripts/pid_separation_power.py",
  "operations": [
@@ -234,6 +234,89 @@
     "writes_files": false,
     "network": false,
     "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "pid-separation-power",
+      "better": "larger",
+      "unit": "1",
+      "bound": "optimistic",
+      "denominator": {
+       "momentum_GeV": "number",
+       "species": "string",
+       "background_species": "string",
+       "separation_convention": "string"
+      },
+      "value": {
+       "path": "n_sigma"
+      },
+      "inputs": [
+       {
+        "input": "mode",
+        "from": {
+         "const": "tof"
+        }
+       },
+       {
+        "input": "species",
+        "from": {
+         "list": [
+          {
+           "species": "tool_name"
+          },
+          {
+           "species": "tool_name",
+           "of": "background_species"
+          }
+         ]
+        }
+       },
+       {
+        "input": "momentum",
+        "from": {
+         "denominator": "momentum_GeV"
+        }
+       },
+       {
+        "input": "path",
+        "from": {
+         "parameter": {
+          "role": "tof",
+          "name": "path_m",
+          "unit": "m"
+         }
+        }
+       },
+       {
+        "input": "time_resolution",
+        "from": {
+         "parameter": {
+          "role": "tof",
+          "name": "time_resolution_ps",
+          "unit": "ps"
+         }
+        }
+       },
+       {
+        "input": "convention",
+        "from": {
+         "denominator": "separation_convention"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status",
+       "threshold"
+      ],
+      "required_upstreams": [],
+      "assumptions": [
+       "TOF timing resolution only: no momentum, path-length or start-time errors"
+      ],
+      "note": "ADQ-05: optimistic (TOF uses only the timing resolution); the time-of-flight mode is the one mapped for design evaluations"
+     }
+    ]
    }
   }
  ]

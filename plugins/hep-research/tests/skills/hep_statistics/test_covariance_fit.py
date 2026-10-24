@@ -235,6 +235,57 @@ class T19Multiplicative(unittest.TestCase):
         with self.assertRaises(cf.CovFitError):
             cf.fit(self.Y, self.STAT, "constant", multiplicative={"relative_cov": self.REL.tolist()})
 
+    def test_t0_oracle(self):
+        # S12/S13: the t0 prescription (Ball et al., arXiv:0912.2276v2, Sec. 6) scales the multiplicative covariance
+        # with a fixed prior prediction t0, so the fit is GLS with C = C_add + rel * t0 t0^T
+        t0 = [1.1, 1.1]
+        c = self.STAT + 0.04 * np.outer(t0, t0)
+        w = np.linalg.solve(c, np.ones(2))
+        r = cf.fit(self.Y, self.STAT, "constant", start=[1.2],
+                   multiplicative={"relative_cov": self.REL.tolist(), "mode": "t0", "t0_prediction": t0,
+                                   "t0_iterations": 0})
+        self.assertAlmostEqual(r["theta"][0], w @ self.Y / w.sum(), delta=1e-6)
+        self.assertAlmostEqual(r["theta_errors"][0], 1 / math.sqrt(w.sum()), delta=1e-5)  # depends on t0
+        self.assertFalse(r["logdet"])
+        self.assertEqual(r["multiplicative_mode"], "t0")
+
+    def test_t0_iteration_matters_for_separate_normalizations(self):
+        # review: with a common normalization and a constant model the GLS central value does not depend on t0 (Ball
+        # et al. Eq. 81); with separate normalizations it does, and the iteration converges to a self-consistent t0
+        rel = np.diag([0.04, 0.04]).tolist()
+        r0 = cf.fit(self.Y, self.STAT, "constant", start=[1.2],
+                    multiplicative={"relative_cov": rel, "mode": "t0", "t0_prediction": [1.5, 1.0], "t0_iterations": 0})
+        r5 = cf.fit(self.Y, self.STAT, "constant", start=[1.2],
+                    multiplicative={"relative_cov": rel, "mode": "t0", "t0_prediction": [1.5, 1.0], "t0_iterations": 5})
+        self.assertGreater(abs(r0["theta"][0] - r5["theta"][0]), 1e-3)
+        th = r5["theta"][0]
+        r_fix = cf.fit(self.Y, self.STAT, "constant", start=[1.2],
+                       multiplicative={"relative_cov": rel, "mode": "t0", "t0_prediction": [th, th], "t0_iterations": 0})
+        self.assertAlmostEqual(r_fix["theta"][0], th, delta=1e-5)  # fixed point
+
+    def test_t0_iterated_from_the_data_fit_is_unbiased(self):
+        rng = np.random.default_rng(8)
+        est = []
+        for _ in range(1000):
+            norm = 1 + 0.2 * rng.standard_normal()
+            y = norm * (1.0 + np.array([0.15, 0.10]) * rng.standard_normal(2))
+            start = self.run_mode("data", y)["theta"][0]  # the biased first fit, then iterate t0 (Ball et al. Sec. 6.3)
+            r = cf.fit(y, self.STAT, "constant", start=[1.2],
+                       multiplicative={"relative_cov": self.REL.tolist(), "mode": "t0",
+                                       "t0_prediction": [start, start], "t0_iterations": 3})
+            est.append(r["theta"][0])
+        v = np.array(est)
+        b, se = v.mean() - 1.0, v.std() / math.sqrt(len(v))
+        self.assertLess(abs(b), 4 * se)
+
+    def test_t0_needs_its_prediction(self):
+        with self.assertRaises(cf.CovFitError):
+            cf.fit(self.Y, self.STAT, "constant", multiplicative={"relative_cov": self.REL.tolist(), "mode": "t0"})
+        for bad in ({"t0_iterations": True}, {"t0_iterations": 1, "_t0_inner": True}):
+            with self.assertRaises(cf.CovFitError):
+                cf.fit(self.Y, self.STAT, "constant", multiplicative={"relative_cov": self.REL.tolist(), "mode": "t0",
+                                                                      "t0_prediction": [1.0, 1.0], **bad})
+
 
 class PluginModelF09(unittest.TestCase):
     """F-09: a plugin model runs user code, so it runs only with --allow-plugin; its path is resolved relative to the

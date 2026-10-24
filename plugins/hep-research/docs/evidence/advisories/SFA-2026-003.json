@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-003",
+ "published": "2026-10-20T09:43:20Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S2",
  "ledger": [
   "SAMPLE-NAME-DOT-SEGMENTS"
@@ -42,9 +44,15 @@
   "artifact_types": [
    "ml-artifact"
   ],
-  "extension_keys": [
-   "calibration"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.calibration",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "validate the artifact again with a release that has the fix (python3 <plugin root>/contracts/validate.py <artifacts_dir>)",
  "references": [

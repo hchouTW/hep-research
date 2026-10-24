@@ -13,7 +13,7 @@ in that order, so a single run and a partitioned run give the same floating-poin
 core/partition: `partial` writes the JSON a local_partition.py worker writes to {out} (a list of records and a list of
 sources), local_partition.py merges the chunks with `--rule records=concat --rule sources=concat`, and `finalize`
 deduplicates and sums the merged records, recording the merge inputs (chunks merged and expected, the source digests)
-so that a later run-lineage result binding can show the merge was complete.
+so that the merge can later be shown complete.
 
 Assumptions: the key identifies a time slice uniquely; identical copies of a slice are the same slice; the summed
 columns are additive (counts, live times, sums of weights), never means, medians or rates.

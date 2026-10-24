@@ -6,7 +6,12 @@ without its registry entry, then run Path B, Path C, the registry validator and 
 Each test module runs in its own process, up to --jobs at a time (default 1), slowest first
 (tools/module_timings.json); the suite results are the same as one 'unittest discover' per suite.
 
-Usage: python3 tools/check_ams_optional.py [--keep] [--jobs N]
+With --plan FILE (a pull request's CI plan, tools/ci_plan.py) only the suite modules the plan lists under
+ams_optional_modules run, as the units shards run only the plan's modules; a suite with none selected is reported as
+skipped. The registry validator, Path B and Path C and the two profile suites (a few seconds) always run. The output
+names the modules that ran (modules_run), which the gate compares with the plan.
+
+Usage: python3 tools/check_ams_optional.py [--keep] [--jobs N] [--plan FILE]
 """
 from __future__ import annotations
 
@@ -37,6 +42,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 AMS = "experiment:ams-02"
+# the generic suites rerun without the AMS-02 profile: a folder under tests/, or an explicit list of modules
+SUITES = {"tests_core": "tests/core", "tests_contracts": "tests/contracts",
+          "tests_hep_statistics": "tests/skills/hep_statistics", "tests_hep_computing": "tests/skills/hep_computing",
+          "tests_paths_b_c": ["tests.examples.test_collider_angular", "tests.examples.test_qed_prediction"]}
 
 
 def run(name, cmd, cwd, timeout=1800):
@@ -52,8 +61,31 @@ def suite_modules(top: Path, suite: str) -> list[str]:
     return sorted(".".join(p.relative_to(top).with_suffix("").parts) for p in (top / suite).rglob("test_*.py"))
 
 
-def merge_suite(name: str, rows: list[dict]) -> dict:
-    """One result per suite, as 'unittest discover' gave: fail when any of its modules failed."""
+def suite_table(top: Path = ROOT) -> dict[str, list[str]]:
+    """Suite name -> its test modules in the tree at top."""
+    return {name: (list(src) if isinstance(src, list) else suite_modules(top, src)) for name, src in SUITES.items()}
+
+
+def all_modules(top: Path = ROOT) -> list[str]:
+    """Every test module this check reruns (what tools/ci_plan.py intersects a plan's modules with)."""
+    return sorted({m for mods in suite_table(top).values() for m in mods})
+
+
+def load_selection(path: Path) -> tuple[dict, list[str]]:
+    """The plan at path (digest checked by tools/ci_plan.py) and the suite modules it selects for this check."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("ci_plan", ROOT / "tools" / "ci_plan.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    plan = mod.load_plan(path)
+    return plan, list(plan["ams_optional_modules"])
+
+
+def merge_suite(name: str, rows: list[dict], selected: bool = True) -> dict:
+    """One result per suite, as 'unittest discover' gave: fail when any of its modules failed (or it has none). A suite
+    the CI plan selects no module of is skipped (selected False)."""
+    if not selected:
+        return {"name": name, "exit_code": 0, "status": "skip", "modules": 0, "reason": "no module selected by the CI plan"}
     bad = [r for r in rows if r["status"] != "pass"]
     return {"name": name, "exit_code": max((r["exit_code"] or 1 for r in bad), default=0),
             "status": "fail" if bad or not rows else "pass", "modules": len(rows),
@@ -69,6 +101,14 @@ def main(argv=None) -> int:
             jobs = max(1, int(args[i + 1]))
         except (IndexError, ValueError):
             print("--jobs wants a positive integer", file=sys.stderr)
+            return 2
+    plan, chosen = None, None
+    if "--plan" in args:
+        i = args.index("--plan")
+        try:
+            plan, chosen = load_selection(Path(args[i + 1]))
+        except (IndexError, OSError, ValueError, KeyError) as exc:
+            print(f"--plan wants a CI plan file: {exc}", file=sys.stderr)
             return 2
     tmp = Path(tempfile.mkdtemp(prefix="hep research no ams "))  # a path with spaces on purpose
     dst = tmp / "hep-research"
@@ -89,10 +129,9 @@ def main(argv=None) -> int:
         ("path_b", None, [py, "examples/collider-angular/run.py", "--out", str(out / "b")], dst),
         ("path_c", None, [py, "examples/qed-prediction/run.py", "--out", str(out / "c")], dst),
     ]
-    suites = {"tests_core": suite_modules(dst, "tests/core"), "tests_contracts": suite_modules(dst, "tests/contracts"),
-              "tests_hep_statistics": suite_modules(dst, "tests/skills/hep_statistics"),
-              "tests_hep_computing": suite_modules(dst, "tests/skills/hep_computing"),
-              "tests_paths_b_c": ["tests.examples.test_collider_angular", "tests.examples.test_qed_prediction"]}
+    suites = suite_table(dst)
+    if chosen is not None:
+        suites = {suite: [m for m in modules if m in set(chosen)] for suite, modules in suites.items()}
     for suite, modules in suites.items():
         tasks += [(m, suite, [py, "-m", "unittest", m], dst) for m in modules]
     for prof in ("experiments/synthetic-collider", "theory/qed-benchmark"):
@@ -108,9 +147,12 @@ def main(argv=None) -> int:
     checks = [{"name": "ams_profile_absent", "status": "pass" if not (dst / "profiles" / "experiments" / "ams-02").exists()
                and AMS not in (dst / "profiles" / "registry.json").read_text() else "fail"}]
     checks += [r for t, r in zip(tasks, rows) if t[1] is None]
-    checks += [merge_suite(suite, [r for t, r in zip(tasks, rows) if t[1] == suite]) for suite in suites]
-    ok = all(c["status"] == "pass" for c in checks)
-    print(json.dumps({"ok": ok, "copy": str(dst), "checks": checks}, indent=1))
+    checks += [merge_suite(suite, [r for t, r in zip(tasks, rows) if t[1] == suite], chosen is None or bool(suites[suite]))
+               for suite in suites]
+    ok = all(c["status"] in ("pass", "skip") for c in checks)
+    selection = {"plan_sha256": plan["plan_sha256"], "full": plan["full"]} if plan else None
+    print(json.dumps({"ok": ok, "copy": str(dst), "selection": selection,
+                      "modules_run": sorted(t[0] for t in tasks if t[1] is not None), "checks": checks}, indent=1))
     if "--keep" not in args:
         shutil.rmtree(tmp, ignore_errors=True)
     return 0 if ok else 1

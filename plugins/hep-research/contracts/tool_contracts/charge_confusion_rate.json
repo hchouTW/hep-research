@@ -1,0 +1,173 @@
+{
+ "contract_version": "1.1.0",
+ "tool_id": "charge-confusion-rate",
+ "entry": "skills/hep-detector/scripts/charge_confusion_rate.py",
+ "operations": [
+  {
+   "operation_id": "gaussian-core",
+   "summary": "Gaussian-core charge-confusion reference Phi(-|1/R| / sigma(1/R)) at the bin edges: a lower bound that ignores the non-Gaussian tails that dominate real confusion, not an estimate",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--edges",
+      "input": "edges"
+     },
+     {
+      "flag": "--sigma-inv-r",
+      "input": "sigma_inv_r"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "edges",
+     "kind": "rigidity",
+     "unit": "GV",
+     "required": true,
+     "constraint": "increasing bin edges, > 0"
+    },
+    {
+     "name": "sigma_inv_r",
+     "kind": "inverse-rigidity",
+     "unit": "1/GV",
+     "required": true,
+     "constraint": "curvature (1/R) resolution per bin, one positive value per bin"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "bins[].lower_bound_at_low_edge",
+     "kind": "probability",
+     "unit": "1"
+    },
+    {
+     "name": "bins[].lower_bound_at_high_edge",
+     "kind": "probability",
+     "unit": "1"
+    },
+    {
+     "name": "status_label",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"rejected\", ...} with the error"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "charge-confusion-rate",
+      "better": "smaller",
+      "unit": "1",
+      "bound": "optimistic",
+      "denominator": {
+       "rigidity_GV": "number",
+       "species": "string",
+       "charge_sign": "string",
+       "curvature_offset_per_GV": "number"
+      },
+      "value": {
+       "path": "bins.0.lower_bound_at_low_edge"
+      },
+      "operation_args": [
+       "gaussian-core"
+      ],
+      "inputs": [
+       {
+        "input": "edges",
+        "from": {
+         "list": [
+          {
+           "denominator": "rigidity_GV"
+          },
+          {
+           "product": [
+            {
+             "denominator": "rigidity_GV"
+            },
+            {
+             "const": 2
+            }
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "input": "sigma_inv_r",
+        "from": {
+         "quotient": [
+          {
+           "upstream": "momentum-resolution-core"
+          },
+          {
+           "denominator": "rigidity_GV"
+          }
+         ]
+        },
+        "direction": "order-preserving"
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "validity": [
+       {
+        "denominator": "curvature_offset_per_GV",
+        "min": 0,
+        "max": 0,
+        "note": "no curvature offset: an offset from weak alignment modes pushes the core value for one charge sign below the no-offset value (ADQ-05)"
+       },
+       {
+        "upstream_bound": "momentum-resolution-core",
+        "in": [
+         "optimistic"
+        ],
+        "note": "the upstream curvature resolution must itself be a lower bound, i.e. above the crossover rigidity"
+       }
+      ],
+      "required_upstreams": [
+       "momentum-resolution-core"
+      ],
+      "assumptions": [
+       "Gaussian curvature core only",
+       "no curvature offset",
+       "sigma(1/R) at the denominator rigidity"
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

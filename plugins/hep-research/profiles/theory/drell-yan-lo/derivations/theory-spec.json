@@ -1,0 +1,188 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "dylo-theory-spec-lo-and-lam-tung",
+ "artifact_type": "theory-spec",
+ "objective": "Theory spec of the LO Drell-Yan cross section and the O(alpha_s) angular coefficients with the Lam-Tung relation in theory:drell-yan-lo",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:drell-yan-lo",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "profiles": {
+   "theory:drell-yan-lo": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-23",
+  "evidence_ids": [
+   "dylo:C01",
+   "dylo:C02",
+   "dylo:C03",
+   "dylo:C04",
+   "dylo:C05",
+   "dylo:C06",
+   "dylo:C07"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "dylo-lo-drell-yan-and-alpha-s-angular-coefficients",
+   "description": "LO Drell-Yan d2sigma/dM dy = (8 pi alpha^2/(9 M s)) sum e_q^2 [q1 qbar2 + qbar1 q2] (photon exchange) from PDG Eqs. 51.3 and 51.40, and the lepton angular coefficients lambda, nu at O(alpha_s) from the quark-axis picture of Peng et al. (Eqs. 2-10), with the Lam-Tung relation 1 - lambda - 2 nu = 0 for a coplanar quark axis",
+   "family": "drell-yan"
+  },
+  "domain_profile": "theory:drell-yan-lo",
+  "assumptions": [
+   "photon exchange only (a = 0); massless quarks and leptons; unpolarized hadrons; N_c = 3",
+   "LO parton-model factorization (PDG Eq. 51.40); time reversal relates q qbar -> l+ l- to Eq. 51.3",
+   "angular coefficients at O(alpha_s): one emitted parton, no intrinsic transverse momentum",
+   "phi1 = 0 at O(alpha_s) (quark axis in the hadron plane): cited from Peng et al., not derived here",
+   "<sin^2 theta1> = r^2/(1 + r^2) for q qbar (exact) and 5 r^2/(1 + 5 r^2) for q g (approximate, Peng et al.)",
+   "channel mixture: A_i averaged with the angle-integrated cross-section fractions f_c of the channels in the same (qT, Q) bin (exact; equal to event fractions only with full angular acceptance)"
+  ],
+  "conventions": {
+   "unit_system": "natural-HEP: M, sqrt(s) in GeV; d2sigma/dM dy in GeV^-3, or in nb/GeV through 4 pi alpha^2/3 = 86.8 nb GeV^2 [dylo:C01]; lambda, mu, nu, A_n dimensionless",
+   "hbar_c_one": true,
+   "metric_signature": "not-applicable (no amplitude is computed; the partonic cross section is taken from PDG Eq. 51.3)",
+   "coupling_normalization": "alpha = e^2/(4 pi) (QED); alpha_s enters only as the order O(alpha_s) of the gamma* g and gamma* q channels: lambda and nu at that order do not depend on the value of alpha_s",
+   "renormalization_scheme": "not-applicable (LO cross section; the O(alpha_s) angular coefficients are ratios with no scheme-dependent input at this order)",
+   "scales": "not-applicable (no scale-dependent quantity is evaluated)",
+   "energy_variable": "dilepton mass M (Q in Peng et al.), hadronic s, tau = M^2/s; qT/Q for the angular coefficients",
+   "frame": "Collins-Soper frame: dilepton rest frame, z axis bisecting the two hadron momenta, x axis in the hadron plane (Peng et al. Fig. 1) [dylo:C03]",
+   "angle_definition": "theta, phi: polar and azimuthal angles of the negative lepton in the Collins-Soper frame; theta1, phi1: those of the quark axis z'; theta0: angle between the negative lepton and z' [dylo:C03, C04]",
+   "spin_treatment": "unpolarized hadrons; spin-averaged partons, summed lepton spins",
+   "mass_approximation": "massless quarks and leptons",
+   "exchanged_bosons": "photon only: a = 0 in Peng et al. Eq. 2 for all numbers (Z exchange and gamma-Z interference excluded)",
+   "em_coupling": "alpha of PDG Eq. 51.3; whether alpha(0) or a running alpha is meant is not stated in the passage read; no numerical alpha is used (results in units of 4 pi alpha^2/3)",
+   "factorization_scheme": "not-applicable (LO parton model, PDG Eq. 51.40; no coefficient functions)",
+   "rapidity_frame": "hadronic centre-of-mass frame, +z along hadron 1; y = (1/2) ln(x1/x2), x1 = (M/sqrt(s)) e^y from hadron 1",
+   "xF_definition": "not-applicable (xF is not used)",
+   "azimuth_convention": "Collins-Soper phi of the negative lepton measured from the hadron plane (Peng et al. Fig. 1)",
+   "log_accuracy": "not-applicable (fixed order, no qT resummation)",
+   "dylo:angular_distribution": "d sigma/d Omega propto 1 + lambda cos^2 theta + mu sin 2theta cos phi + (nu/2) sin^2 theta cos 2phi (Peng et al. Eq. 1, note nu/2) [dylo:C03]",
+   "dylo:channel_mixture": "q g fraction f = angle-integrated cross-section fraction of the q g channel in the same (qT, Q) bin (an event fraction only with full angular acceptance); A_i^mix = sum_c f_c A_i^c exactly, equivalently lambda_mix = sum f_c lambda_c/(3 + lambda_c) / sum f_c/(3 + lambda_c) (derived in derive.py); a linear average of lambda or nu is wrong"
+  },
+  "order": "d2sigma/dM dy at O(alpha^2 alpha_s^0) (LO); lambda, nu and the Lam-Tung relation at O(alpha_s^1)",
+  "parameters": {
+   "N_c": 3,
+   "toy_cross_section_check": "benchmarks/toy-lo-cross-section.json (SYNTHETIC)",
+   "published_benchmark": "benchmarks/peng-eq10.json"
+  },
+  "scales": "not-applicable",
+  "derivation_status": "perturbative-argument",
+  "validity_domain": {
+   "cross_section": "photon exchange, M well below the Z mass and above resonance regions; LO only",
+   "angular_coefficients": "O(alpha_s), qT > 0 generated by one hard emission; at small qT intrinsic transverse momentum and resummation (not included) matter; beyond O(alpha_s) non-coplanar emissions violate Lam-Tung (1 - lambda - 2 nu >= 0)",
+   "qg_channel": "Eq. 9 is an approximation whose accuracy depends on the parton distributions (Peng et al.)"
+  },
+  "checks_run": [
+   {
+    "name": "colour average: sigma(q qbar -> l+ l-) = e_q^2 4 pi alpha^2/(9 s_hat) from PDG Eq. 51.3 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "Jacobian |d(x1, x2)/d(tau, y)| = 1 and the map inverts (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "delta-function integration gives d2sigma/dM dy = (8 pi alpha^2/(9 M s)) e_q^2 L(M^2/s, y) (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "numerical: the formula integrated over an (M, y) box equals the parton integral over the matching (x1, x2) region, SYNTHETIC toy densities",
+    "result": "pass",
+    "tolerance": 1e-08
+   },
+   {
+    "name": "Peng Eq. 4 substituted into Eq. 2 reproduces Eq. 5 identically (SymPy normal form modulo sin^2 + cos^2 = 1)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "matching Eq. 3 to Eq. 5 gives A_0..A_7 of Eq. 6; Eq. 3 against Eq. 1 gives Eq. 7 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "1 - lambda - 2 nu = 4 (A0 - A2)/(2 + A0); phi1 = 0 gives A0 = A2 and Lam-Tung; A0 - A2 = 2 sin^2 theta1 sin^2 phi1 >= 0 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "Eqs. 8 and 9 in Eq. 7 reproduce Peng Eq. 10 for both channels (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "channel mixture: A_i terms of Eq. 3 integrate to zero over the sphere, 1 + cos^2 to 16 pi/3; the cross-section-weighted sum of channel distributions is Eq. 3 with the weighted A_i, i.e. lambda_mix = sum f lambda/(3 + lambda) / sum f/(3 + lambda) (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "limits: qT -> 0 gives lambda = 1, nu = 0; qT -> infinity gives lambda = -1/3 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "published closed form (Peng Eq. 10) against the profile's numbers, 2 channels x 7 qT/Q values",
+    "result": "pass",
+    "tolerance": 1e-12
+   },
+   {
+    "name": "units: lambda, mu, nu dimensionless; cross section in (4 pi alpha^2/3) GeV^-3",
+    "result": "pass",
+    "tolerance": "exact"
+   }
+  ],
+  "checks_not_run": [
+   "independent check of Peng Eq. 9 (q g channel): cited approximation, not recomputed from the matrix element",
+   "derivation of phi1 = 0 at O(alpha_s): cited, not derived",
+   "comparison with measured lambda, nu or cross sections (no data in this profile)",
+   "Z exchange, NLO cross section, qT resummation, intrinsic transverse momentum"
+  ],
+  "references_read": [
+   {
+    "citation": "H. Baer and R.N. Cahn, 'Cross-Section Formulae for Specific Processes', in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+    "location": "Sec. 51.2 Eq. (51.3) p. 1; Sec. 51.6 Eq. (51.40) and Eqs. (51.41)-(51.42) p. 7",
+    "date_read": "2026-10-23"
+   },
+   {
+    "citation": "J.-C. Peng, W.-C. Chang, R.E. McClellan and O. Teryaev, 'Interpretation of Angular Distributions of Z-boson Production at Colliders', arXiv:1511.08932v3 (2016)",
+    "location": "Eq. (1) p. 1; Eqs. (2)-(7) p. 2; remarks after Eq. (7) and Eqs. (8)-(10) p. 3; coplanarity at leading order alpha_s, p. 4",
+    "date_read": "2026-10-23"
+   }
+  ],
+  "derivation_record": "derivations/derivation-record.md",
+  "inapplicable": [
+   "metric_signature",
+   "renormalization_scheme",
+   "scales",
+   "factorization_scheme",
+   "xF_definition",
+   "log_accuracy"
+  ],
+  "neglected": [
+   "Z exchange and gamma-Z interference (a = 0)",
+   "O(alpha_s) corrections to the cross section",
+   "O(alpha_s^2) non-coplanar emissions (Lam-Tung violation)",
+   "intrinsic transverse momentum",
+   "qT resummation"
+  ]
+ }
+}

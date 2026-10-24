@@ -1,0 +1,84 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "ams-like-v1-CALC-MASS-P-run",
+ "artifact_type": "computational-run",
+ "objective": "detector system design: computational-run written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "c1e3554b9fa75ec32b798c0abb9c33a41fae8add5937ba928e965d02df39d9f4",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-P",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "outputs/CALC-MASS-P.json"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "candidates/cand-P.json",
+    "sha256": "c1e3554b9fa75ec32b798c0abb9c33a41fae8add5937ba928e965d02df39d9f4"
+   }
+  ],
+  "tools": [
+   {
+    "name": "design-estimates",
+    "version": "0.38.0"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-detector/scripts/design_estimates.py budget-sum --estimates 2000.0 150.0 --uncertainties 100.0 7.5 --rule linear --status synthetic"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "platform": "macOS-26.5"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "outputs/CALC-MASS-P.json": "ce4aa5944a0de55d31db9d899ae4d08ec806dbc6ff8686b62c9d20c5868afcb2"
+  },
+  "argv": [
+   "python3",
+   "skills/hep-detector/scripts/design_estimates.py",
+   "budget-sum",
+   "--estimates",
+   "2000.0",
+   "150.0",
+   "--uncertainties",
+   "100.0",
+   "7.5",
+   "--rule",
+   "linear",
+   "--status",
+   "synthetic"
+  ],
+  "script_sha256": {
+   "skills/hep-detector/scripts/design_estimates.py": "a38665c9dab73d6138fb938b849e662411a021fd3cdffacfa3b73f2b880a84ab"
+  }
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "kind": "error",
+ "category": "C04",
+ "planter": "ai",
+ "summary": "The flux is divided by a log-centred bin width R_c x dlnR instead of the true bin width dR, so the result is no longer the bin average it is declared to be (a few-percent bias in the wide bins).",
+ "code_change": "New constant DR = CENTER * diff(log(EDGES)); analyse() denom and the period average use DR instead of WIDTH (the truth stays integral / WIDTH).",
+ "description_change": "measurement spec: normalization convention text appends 'bin width R_c x dlnR (log-centred)'; bin_semantics still bin-averaged.",
+ "affected": [
+  "bin-width",
+  "bin_width",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

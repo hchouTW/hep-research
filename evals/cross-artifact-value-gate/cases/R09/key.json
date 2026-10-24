@@ -1,0 +1,10 @@
+{
+ "kind": "refactor",
+ "planter": "ai",
+ "summary": "TF_REL is renamed TF_REL_UNC and the spec's background-uncertainty text is generated from it with reworded, equivalent wording.",
+ "code_change": "TF_REL -> TF_REL_UNC everywhere; uncertainty string built with f'{TF_REL_UNC:.0%}'.",
+ "description_change": "measurement spec: background uncertainty text reworded (10% relative on the transfer factor, fully correlated across bins).",
+ "affected": [
+  "background"
+ ]
+}

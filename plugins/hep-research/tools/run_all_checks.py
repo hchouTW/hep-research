@@ -3,7 +3,7 @@
 
 Usage: python3 tools/run_all_checks.py [--out DIR] [--no-cli] [--module-timeout S] [--jobs N]
                                        [--part all|units|checks|static|ams-optional] [--shard K/N]
-                                       [--write-timings FILE] [--summary FILE]
+                                       [--plan FILE] [--write-timings FILE] [--summary FILE]
 Writes DIR/check-run-<UTC timestamp>.json when --out is given; always prints the summary.
 Exit 0 when nothing failed (skips are reported, not hidden), 1 otherwise.
 Each test module runs in its own process with a timeout (default 600 s, or HEP_MODULE_TIMEOUT): a module that
@@ -17,7 +17,10 @@ the AMS-02 profile), so CI can run the two in parallel jobs.
 Every check records its seconds; a units run records its plan (the full module list with its digest and the modules
 of this shard), which tools/reconcile_check_runs.py checks across shards. --extra NAME (with --part units) runs only
 the modules tools/optional_modules.json lists for an optional extra: the CI optional jobs on pull requests; pushes to
-main and the weekly run keep the full suite, and tools/optional_selection.py verify checks the list against them. Failed test ids and traceback tails are
+main and the weekly run keep the full suite, and tools/optional_selection.py verify checks the list against them.
+--plan FILE (a pull request's CI plan, tools/ci_plan.py): units shards split only the modules the plan selects, and a
+part the plan does not select runs nothing but still writes its record (selection.selected false), so the gate can tell
+a skipped part from a lost one; every record names the plan's digest. Failed test ids and traceback tails are
 printed, and written as Markdown to --summary FILE (CI passes $GITHUB_STEP_SUMMARY).
 Passing checks shows software consistency only, not physical validity or statistical coverage.
 """
@@ -57,6 +60,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 MODULE_TIMEOUT = float(os.environ.get("HEP_MODULE_TIMEOUT", "600"))  # seconds per test module or check
+# check_ams_optional.py reruns the generic suites in a copy of the tree: about 190 s locally, 7-10 min on CI runners
+AMS_OPTIONAL_TIMEOUT = 1200.0
 TIMINGS = ROOT / "tools" / "module_timings.json"
 OPTIONAL_MODULES = ROOT / "tools" / "optional_modules.json"
 SLOW_MODULE_SECONDS = 60.0  # a fast-tier module above this belongs in the slow tier (HEP_SLOW_TESTS=1)
@@ -163,16 +168,20 @@ def extra_modules(extra: str, every: list[str], path: Path | None = None) -> lis
 
 
 def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1, shard: tuple[int, int] | None = None,
-                  extra: str | None = None) -> dict:
+                  extra: str | None = None, selected: list[str] | None = None) -> dict:
+    """selected: the modules a CI plan selects (tools/ci_plan.py); the shards split these instead of every module."""
     timings = load_timings()
     every = test_modules()
+    pool = every if selected is None else sorted(set(selected) & set(every))
     if extra:
         modules = extra_modules(extra, every)
     else:
-        modules = shard_modules(every, *shard, timings) if shard else list(every)
+        modules = shard_modules(pool, *shard, timings) if shard else list(pool)
     plan = {"all_modules": every, "all_modules_sha256": modules_digest(every), "modules": sorted(modules),
             "shard": f"{shard[0]}/{shard[1]}" if shard else "1/1", "extra": extra,
             "timings_sha256": hashlib.sha256(json.dumps(timings, sort_keys=True).encode()).hexdigest()}
+    if selected is not None:
+        plan["selected_modules"] = pool
     modules = slowest_first(modules, timings)  # a long module started last would hold up the whole run
     start = time.monotonic()
     with ThreadPoolExecutor(max_workers=max(1, jobs)) as pool:
@@ -314,6 +323,7 @@ STATIC_SCRIPTS = [  # (name, command after the interpreter): the static checks o
     ("ownership", ["tools/check_ownership.py"]),
     ("retired_names", ["tools/check_retired_names.py"]),
     ("reference_inventory", ["tools/reference_inventory.py", "--check"]),
+    ("wiring", ["tools/check_wiring.py"]),
     ("packaging_scan", ["tools/check_packaging.py"]),
     ("host_neutral", ["tools/check_host_neutral.py"]),
     ("instruction_text", ["tools/check_instruction_text.py"]),
@@ -324,11 +334,21 @@ STATIC_SCRIPTS = [  # (name, command after the interpreter): the static checks o
 HOST_CHECKS = ["claude-plugin-validate", "codex-plugin-load"]
 
 
-def planned_scripts(part: str, py: str, jobs: int, no_cli: bool) -> list[tuple[str, list[str]]]:
-    """The check scripts a run of this part executes, in order (profile suites and host checks are added by main)."""
+def _ci_plan():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("ci_plan", ROOT / "tools" / "ci_plan.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def planned_scripts(part: str, py: str, jobs: int, no_cli: bool, plan: Path | None = None) -> list[tuple[str, list[str]]]:
+    """The check scripts a run of this part executes, in order (profile suites and host checks are added by main). With
+    a CI plan, the AMS-optionality check runs only the modules the plan selects for it."""
     out = []
     if part in ("all", "checks", "ams-optional"):
-        out.append(("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(jobs)]))
+        out.append(("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(jobs)]
+                    + (["--plan", str(plan.resolve())] if plan else [])))
     if part in ("all", "checks", "static"):
         for name, args in STATIC_SCRIPTS:
             out.append((name, [py, *args] + (["--no-cli"] if name == "measure_entrypoints" and no_cli else [])))
@@ -362,6 +382,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--extra", metavar="NAME",
                     help="run only the test modules listed for this optional extra in tools/optional_modules.json (the "
                          "modules with tests that run only when the extra is installed); with --part units")
+    ap.add_argument("--plan", type=Path, metavar="FILE",
+                    help="a CI plan (tools/ci_plan.py): run only what it selects; unselected parts write an empty record")
     ap.add_argument("--summary", type=Path, metavar="FILE",
                     help="append a Markdown summary (status and seconds per check, failed tests with traceback tails, "
                          "slowest modules) to FILE, e.g. $GITHUB_STEP_SUMMARY")
@@ -380,15 +402,29 @@ def main(argv=None) -> int:
         return 2
     py = sys.executable
     t = opts.module_timeout
+    ci_plan, selection = None, None
+    if opts.plan:
+        if opts.part not in ("units", "static", "ams-optional") or opts.extra:
+            print("--plan applies to --part units, static or ams-optional, without --extra", file=sys.stderr)
+            return 2
+        try:
+            ci_plan = _ci_plan().load_plan(opts.plan)
+        except (OSError, ValueError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        chosen = opts.part == "units" or opts.part in ci_plan["parts"]
+        selection = {"plan_sha256": ci_plan["plan_sha256"], "full": ci_plan["full"], "selected": chosen}
     try:
-        units = [run_unittests(opts.module_timeout, opts.jobs, opts.shard, opts.extra)] if opts.part in ("all", "units") else []
+        units = [run_unittests(opts.module_timeout, opts.jobs, opts.shard, opts.extra,
+                               ci_plan["modules"] if ci_plan else None)] if opts.part in ("all", "units") else []
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 2
-    static = opts.part in ("all", "checks", "static")
+    run_part = selection is None or selection["selected"]
+    static = opts.part in ("all", "checks", "static") and run_part
     checks = units + (run_profile_tests() if static else [])
-    for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli):
-        checks.append(run_script(name, cmd, timeout=t))
+    for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli, opts.plan) if run_part else []:
+        checks.append(run_script(name, cmd, timeout=max(t, AMS_OPTIONAL_TIMEOUT) if name == "ams_optional" else t))
     if static:
         checks += [host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
                    codex_load() if not opts.no_cli else {"name": "codex-plugin-load", "status": "skip", "reason": "--no-cli"}]
@@ -410,6 +446,7 @@ def main(argv=None) -> int:
         "part": opts.part,
         "shard": f"{opts.shard[0]}/{opts.shard[1]}" if opts.shard else None,
         "extra": opts.extra,
+        "selection": selection,
         "counts": {s: sum(1 for c in checks if c["status"] == s) for s in ("pass", "fail", "skip")},
         "checks": checks,
         "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind.",

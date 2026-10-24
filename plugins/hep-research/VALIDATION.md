@@ -2020,6 +2020,194 @@ regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings an
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail, 2 skipped; 4510 tests, 4288 pass, 0 failures, 222 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
+## EFFICIENCY-NAMESPACED (2026-10-22, E2): same efficiency counted twice under a namespace
+
+Found after 0.23.0, unfixed until now: a measurement spec listing a bare `efficiency` next to `<ns>:efficiency` (or
+two namespaced `<ns>:efficiency` terms) passed with no finding. The bare-efficiency error needs the other name to end
+in `_efficiency`, and the repeated-category error compares names with the namespace kept, while
+`_correction_classes` folds both into one class. Decision: no contracts major, so a new warning
+`measurement.efficiency_counted_twice_namespaced` (the existing errors unchanged and not doubled by it).
+`correction-chain.md` now describes the behavior (a profile term with another name, such as `<ns>:trigger`, still
+passes unflagged: the validator cannot tell it is an efficiency); reference inventory regenerated.
+
+| Evidence test (file::Class::method) | Kind | Parent `a53af7e0` | Fix |
+|---|---|---|---|
+| `tests/contracts/test_measurement_contract.py::MeasurementRules::test_namespaced_efficiency_next_to_bare_efficiency_warns` | behavioral (warning on 3 pairs, no finding on 2 single-efficiency chains, error unchanged on 3) | fail (3 of 3 warning subtests) | pass |
+| `tests/contracts/test_theory_contract.py` warning-fixture test on the new fixture `warning/measurement_v26_efficiency_counted_twice_namespaced.json` | fixture | fail (no warning) | pass |
+
+Outcome check: every JSON artifact in the plugin with an `artifact_type` (360 files: fixtures, examples, assets,
+profiles), validated plain and strict before and after the change: identical `ok` and identical findings for all 720
+validations, so no shipped artifact gains the new warning. Fixtures regenerated with `make_fixtures.py`: only the new
+warning fixture and its `cases.json` entry change; the verdict snapshot (`gate_verdicts.json`) gains its entry
+(valid, default and strict), no other entry moves.
+
+## PERIODICITY-REFIT (2026-10-22, E2): periodicity_scan.py red-noise null refitted per surrogate (sci-fix, S1)
+
+Found after 0.23.0: the AR(1)/OU surrogates of `periodicity_scan.py` (added in 0.14.0, `2cd78747`) used phi (or
+tau) and the variance estimated once from the observed series, and the docstring called the result conservative.
+Measured first, with a criterion fixed before the run: no-signal toys, 400 per configuration (AR(1) on t = 0..n-1
+with phi 0.3, 0.7, 0.9; OU on sorted uniform times with lag-1 correlation 0.5 and 0.8; n = 50, 100, 200; errors 1;
+grid 1/T to 0.5 in ceil(2.5 n) steps, whole band), 199 surrogates, seeded; rejection fraction r(alpha) for alpha
+0.01, 0.05, 0.1 with binomial errors; anti-conservative beyond errors when r > alpha + 2 sqrt(alpha (1 - alpha) / 400).
+
+Pre-fix method (a), the 0.23.0 `scan()` itself (r +- binomial error; `!` beyond the criterion):
+
+| Configuration | alpha 0.01 | alpha 0.05 | alpha 0.1 |
+|---|---|---|---|
+| AR(1) n 50, phi 0.3 / 0.7 / 0.9 | 0.005 / 0.007 / 0.018 | 0.052 / 0.065 / **0.147 +- 0.018 !** | 0.092 / **0.142 +- 0.017 !** / **0.253 +- 0.022 !** |
+| AR(1) n 100, phi 0.3 / 0.7 / 0.9 | 0.005 / 0.003 / 0.007 | 0.030 / 0.045 / **0.077 +- 0.013 !** | 0.075 / 0.113 / **0.163 +- 0.018 !** |
+| AR(1) n 200, phi 0.3 / 0.7 / 0.9 | 0.013 / 0.010 / 0.010 | 0.043 / 0.043 / 0.060 | 0.072 / 0.098 / 0.107 |
+| OU n 50, 0.5 / 0.8 | 0.000 / 0.005 | 0.015 / 0.045 | 0.050 / 0.117 |
+| OU n 100, 0.5 / 0.8 | 0.005 / 0.005 | 0.015 / 0.033 | 0.050 / 0.095 |
+| OU n 200, 0.5 / 0.8 | 0.003 / 0.005 | 0.020 / 0.035 | 0.035 / 0.083 |
+
+(a) is anti-conservative beyond errors in 5 cells (short, strongly red AR(1) series: the lag-1 estimate is biased low,
+mean 0.80 for phi 0.9 at n = 50, so the surrogates are too white); OU is calibrated or conservative. Variant (b), a
+double parametric bootstrap that refits the null on each outer surrogate (prepivoting, arXiv:2208.02028v1 section
+3.2.2), measured in a separate vectorized implementation on the same toys (199 x 199), removed most of it but not all
+(AR(1) n 50, phi 0.9: 0.072 at 0.05 and 0.142 at 0.1, still beyond the criterion; 4 cells). With the first-order
+bias-corrected lag-1 estimate phi + (1 + 4 phi)/n in both levels (exploration on the six worst configurations) no
+cell exceeded it, but for OU it was conservative (0.025 at 0.05, n = 50), so the fix uses the correction for ar1 only.
+
+Decision: (a) is anti-conservative beyond errors, so the refit is the default (`--null-fit refit`, `--inner-surrogates`
+default 199); `--null-fit once` keeps the 0.14.0-0.23.0 numbers for the same seed (checked on all 4000 shared toys
+and pinned in `test_periodicity_scan.py::NullFitOption`) and carries a `calibration_note`. The default after the fix,
+`scan()` itself on the same toys (400 toys for n = 50 and 100, 200 toys for n = 200; no cell beyond the criterion):
+
+| Configuration | alpha 0.01 | alpha 0.05 | alpha 0.1 |
+|---|---|---|---|
+| AR(1) n 50, phi 0.3 / 0.7 / 0.9 | 0.007 / 0.015 / 0.010 | 0.058 / 0.060 / 0.043 | 0.122 +- 0.016 / 0.098 / 0.117 |
+| AR(1) n 100, phi 0.3 / 0.7 / 0.9 | 0.010 / 0.000 / 0.005 | 0.048 / 0.048 / 0.037 | 0.100 / 0.100 / 0.095 |
+| AR(1) n 200 (200 toys), phi 0.3 / 0.7 / 0.9 | 0.005 / 0.010 / 0.015 | 0.045 / 0.060 / 0.050 | 0.105 / 0.105 / 0.090 |
+| OU n 50, 0.5 / 0.8 | 0.010 / 0.007 | 0.048 / 0.052 | 0.085 / 0.113 |
+| OU n 100, 0.5 / 0.8 | 0.010 / 0.013 | 0.048 / 0.052 | 0.090 / 0.107 |
+| OU n 200 (200 toys), 0.5 / 0.8 | 0.010 / 0.000 | 0.045 / 0.065 | 0.085 / 0.125 +- 0.023 |
+
+Cost: N x (M + 1) surrogate series (new cap 4e6); about 0.2 s for n = 100, N = M = 199 (E2, this machine). The study scripts
+(`calib.py`, `calib_final.py`) ran outside the plugin; the slow tier below reruns its discriminating part.
+
+Evidence (`tests/skills/hep_statistics/test_periodicity_refit_null.py`; parent tree `a53af7e0` adapted by adding only
+this test module, whose `scan()` call passes the inner count only where `scan()` has it):
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `test_periodicity_refit_null.py::RefitCalibration::test_size_is_at_most_alpha_on_short_red_series` | analytic (locator: arXiv:2208.02028v1 p. 8, Theorem 3.2 p. 15); negative control | fail: 0.113 > 0.103 at 0.05, 0.207 > 0.173 at 0.1 | pass: 0.047, 0.080; control 0.193 > 0.173 | no | E2, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1 |
+| `test_periodicity_refit_null.py::RefitCalibration::test_size_does_not_depend_on_phi` | invariant (pivotality) | fail: 0.107 > 0.104 | pass: 0.033 | no | E2 |
+| `test_periodicity_refit_null.py::IndependentDoubleBootstrap::test_module_p_matches_the_double_bootstrap_of_the_source` | independent implementation (locator: arXiv:2208.02028v1 section 3.2.2, pp. 14-15) | fail: 0.5145 vs 0.8015 | pass: 0.7985 vs 0.8015 | no | E2 |
+| `test_periodicity_refit_null.py::RefitCalibrationSlow::test_ar1_size_at_most_alpha` | analytic; negative control | fail: AR(1) n 50 phi 0.9: 0.110 at 0.05, 0.198 at 0.1 | pass (9 cells) | slow tier, run with HEP_SLOW_TESTS=1 | E2 |
+| `test_periodicity_refit_null.py::RefitCalibrationSlow::test_ou_size_at_most_alpha` | analytic (calibration check, not discriminating: OU was not anti-conservative) | pass | pass | slow tier, run | E2 |
+
+Tolerances were fixed before the first run (3 binomial sigma per cell; 0.05 for the implementation comparison, about 4
+combined Monte Carlo sigma at N = 1999, inner 199). One change after the first fix run: the negative control was
+asserted at alpha 0.05 and 0.1, and at 0.05 it gave 0.093, above alpha but below the 3-sigma bound of 150 toys; it is
+now asserted at 0.1 only (0.193 > 0.173). The checks of the fix itself were not changed. Mutants of `scan()` against
+the three fast tests: M1 default reverted to `once` killed (3 tests), M2 no bias correction killed (3), M3 inner
+surrogates from the data's fit (no refit) killed (independent implementation), M5 correction sign flipped killed
+(independent implementation), M4 prepivot count `<` instead of `<=` survived (a tie rule below the Monte Carlo
+tolerance). Also passing with HEP_SLOW_TESTS=1: `test_periodicity_scan.py::NullCalibrationSlow` (white-noise p
+uniform; AR(1) phi 0.7 n 100 rejects 0.05 +- 0.02, now with the refit). Ledger PERIODICITY-REFIT (C3, D3);
+advisory SFA-2026-038 (introduced 0.14.0, no fixed event yet). Docstring, `time-series-inference.md`, the
+hep-statistics README and the capability matrix state the measured calibration; reference inventory regenerated.
+
+## SCIFIX-TRACE-FORWARD (2026-10-22, CI lock venv; branch `scifix/trace-forwarding` from main)
+
+| Check | Result |
+|---|---|
+| `poisson_diagnostics.py fc-interval --n 3 --b 1.0` output | `trace.code_paths`: core/__init__.py, core/stats/__init__.py, core/stats/_linalg.py, core/stats/_poisson.py, core/stats/poisson_diagnostics.py, core/trace.py |
+| `tests/contracts/test_trace.py::TraceForwarding` (the CLI trace reaches the statistical-result, sorted, valid; malformed entries and a non-object trace are dropped) | pass |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock (before the rebase on main) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4906 tests, 4655 pass, 0 failures, 251 skipped |
+| ruff, mypy on `core/` and `contracts/` | clean |
+
+## SCIFIX-EVIDENCE-CI (2026-10-22, CI lock venv plus pyhf 0.7.6, ArviZ 0.23.4, pdg 2026.0, SQLAlchemy 2.1.5, typing_extensions 4.16.0; branch `scifix/evidence-ci-pdg` from main `f238ef3e`, 0.24.0)
+
+| Check | Result |
+|---|---|
+| `run_required_backends.py --from-ledger --require pyhf==0.7.6,arviz==0.23.4,pdg==2026.0 --no-skips` (the new weekly `ledger-evidence` job, run locally) | exit 0; 56 nodes in 25 modules: 56 pass, 0 environment errors, 0 unverified, 0 do not hold, 0 skipped |
+| `tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package` (TH9-MASSES) on parent `84c0a68c` and fix `23910085`, each in a detached worktree with the current test file copied in, CI lock plus pdg 2026.0 | pass on both: `core/constants` exists on the parent and the fix does not change it, so the oracle cannot show the defect; parent record updated (was skip), TH9-MASSES stays D1 |
+## SCIFIX-TRANSCRIPTION-ORACLES (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; Geant4 11.4.3 native build; branch `scifix/transcription-oracles` from main `f238ef3e`)
+
+The transcription report (`tools/scifix_ledger.py report`) listed four C3 entries whose independence records all
+take their expected values from formulas transcribed into the repository: DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO and
+DR-WP2-06-MS. One oracle whose expected value comes from elsewhere was added to each of the first three; none was
+found for DR-WP2-06-MS. Tolerances were fixed in the docstrings before the first run; all three new tests passed on
+their first run on this branch and none was changed afterwards.
+
+**What was read (2026-10-22).** arXiv:1811.04660v2 (scifix:S07), p. 5: eq. (3.1), the Gaisser-Hillas function in
+R = sqrt(lambda/|X0'|), L = sqrt(|X0'| lambda), X0' = X0 - Xmax, and the sentence below it ("a Gaussian with standard
+deviation L, multiplied by a term that distorts it, with the asymmetry governed by R"): claim scifix:C31. PDG RPP
+2024, 40. Statistics (rev. August 2023, G. Cowan), new source scifix:S13, read at page level: sec. 40.2 p. 2
+(consistency, bias) and sec. 40.2.3 (least squares, linear model, eqs. (40.21)-(40.23)): claim scifix:C32. PDG RPP
+2024, 34. Passage of Particles Through Matter (scifix:S01), p. 16: eq. (34.16) and the text below it (no numerical
+accuracy; "for large Z and small x the beta-dependence is not well represented"). Geant4 11.4.3 sources:
+`G4Cerenkov::GetAverageNumberOfPhotons` (Rfact = 369.81/(eV cm), yield proportional to charge^2), the OpNovice2
+example, and TestEm5 `Run::ComputeMscHighland` (13.6 MeV z sqrt(t)(1 + 0.038 ln t)/(beta p c), without z^2/beta^2
+in the logarithm).
+
+**Oracles.**
+
+- DR-WP1-01, `CherenkovChargeTests::test_yield_matches_geant4_cerenkov_for_protons_and_alphas`
+  (independent implementation, basis third-party, `expected_from` third-party-definition). Geant4 11.4.3 OpNovice2,
+  built from the release's example source against the local install; the only change prints the integer total of
+  Cerenkov photons (output only). Box of G4_Galactic (no energy loss, delta rays or hadronic interactions) with a
+  constant RINDEX 1.05 over 2.0-2.5 eV, world G4_AIR without RINDEX, primary from x = -999.95 mm along +x (path
+  199.995 cm), `/gun/momentumAmp`, 2000 events per row, seeds 1101-1601. Totals frozen in the test: p 40 GeV/c
+  6836393, alpha 25183431; 20 GeV/c 6728768, 18180150; 12 GeV/c 6465855, 1616253. The script with N0 = 369.81 x 0.5
+  per cm gives 3419.60 / 12587.20, 3364.23 / 9092.12, 3232.99 / 807.47 against the Geant4 means 3418.20 / 12591.72,
+  3364.38 / 9090.08, 3232.93 / 808.13 (largest offset 1.8 Poisson sigma; tolerance 5 sigma plus 1e-6). On the parent
+  the He4 yield has no z^2 and is 4 times low.
+- DR-WP1-02, `GaisserHillasPropertyTests::test_profile_reaches_the_gaussian_limit_at_large_x_max`
+  (analytic, basis locator S07/C31, `expected_from` general-result). For x_max 1e12 and 1e15, lambda 20, 60, 300
+  (R = 1.4e-7 to 1.7e-5) and t = +-0.5 to +-3: |ln N + t^2/2| <= (2/3)|t|^3 R + 2 eps |t|/R + 1e-12 (the leading
+  distortion t^3 R/3 bounded for |tR| <= 1/2, plus the fix's rounding). The parent's form misses by up to 8e-4.
+- DR-WP2-06-CALO, `ScriptPhysicsOracleTests::test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets`
+  (analytic, basis locator S13/C32, `expected_from` general-result). Term sets (a, b, c) = (0.10, 0.20, 0.0070),
+  (0.05, 0.10, 0.010), (0.15, 0.30, 0.020), 2000 toys each, 2% relative scatter, no per-point errors: real terms in
+  at least 99% of the toys and each mean within 0.003 truth + 5 Monte Carlo sigma. The expected values are the toys'
+  truth; the generator uses the same E9 model as the fit, so a mistranscribed model would cancel here, but the
+  defect (the weighting) does not.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_geant4_cerenkov_for_protons_and_alphas` (DR-WP1-01, `4aebc0be` / `70f7fbcb`) | independent implementation (third-party: Geant4 11.4.3) | fail (assertion, 3 of 3 subtests: He4 201.87 against 808.13 at 12 GeV/c, 2273.03 against 9090.08, 3146.80 against 12591.72) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_reaches_the_gaussian_limit_at_large_x_max` (DR-WP1-02, `70f7fbcb` / `0f3a2e3f`) | analytic (general result, locator S07 eq. (3.1) p. 5) | fail (assertion, 27 of 48 subtests: all 24 at x_max 1e15, 3 at 1e12; up to 7.9e-4 against bounds of 2e-8 to 1e-5) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_recovers_the_truth_for_several_term_sets` (DR-WP2-06-CALO, `f6a64702` / `6c793363`) | analytic (general result, locator S13 sec. 40.2 p. 2) | fail (assertion: 446 of 2000 toys without a real term for (0.10, 0.20, 0.0070), limit 20; the other two sets pass) | pass | no | CI lock |
+
+Method as in SCIFIX-PLAN-B3-B6: a detached worktree of the source repository per commit (removed after the run), the
+current test file copied in under the test folder and file name of that commit, with the skill folder name mapped
+to the one of that commit (`docs/maintenance.md`), no other change; each node run alone with `python -m unittest`.
+
+**Grades.** DR-WP1-01: C3 kept, the transcription gap closed; D0 -> D1 (the new oracle fails on the parent by
+assertion, the two older oracle nodes still error there, so D2 is out of reach under the D-scope rule). DR-WP1-02:
+C3 D2 kept, gap closed. DR-WP2-06-CALO: C3 D1 kept (the closure oracle still passes on the parent), gap closed.
+DR-WP2-06-MS: C3 D0 unchanged; its gap now says what was searched. No printed crossover, MDR or beta(R) value for a
+stated stack was found; Geant4's TestEm5 Highland value uses the older logarithm without z^2/beta^2, and its
+simulated angle could be compared only with a tolerance on the beta dependence that no located source gives (PDG
+2024 states none), so it was not run as evidence. The maintainer decides between more evidence and a lower grade.
+
+## CROSS-ARTIFACT-PHASE0 (2026-10-22, Python 3.13.2 on macOS arm64; branch `feat/cross-artifact-phase0` from main `460919eb`, 0.24.1, unreleased)
+
+Phase 0 (release R1) of `docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md`; gate record
+`docs/dev/cross-artifact-check/decision-phase0.md`.
+
+| Check | Result |
+|---|---|
+| Suite 1.0.0 outcomes, main 0.24.1 against this branch | 22 cases (positive, chain, ratio, model, run chain, run campaign and every probe variant), 403 obligations: identical (obligation, state, reason); both outcome files SHA-256 `00655e16…` |
+| `rule_registry.py check` | pass: registry 1.1.0, 23 rules with current source digests, 76 V cases, 85 V parts passing (V72–V76 new) |
+| Analysis-check tests (`test_analysis_check_*`, formerly `test_v63_*`) | 227 pass (205 existing, 22 new in `test_analysis_check_foundations`) |
+| Gap probes `test_cross_artifact_check_gap_probes` | G10, G11, G18, G19, G20 pass; 15 expected failures (G1–G8 except G9, G12–G17, G22), each checked to fail by assertion for its stated reason; G9 and G21 skipped with reason |
+| Rename (WP-R) `rename_analysis_check_ids.py --verify` | ok: no leftovers, 169 registry test IDs resolve, stub present, derived-file checks pass; a second `--apply` changes nothing; 23 moves |
+| Full suite before the rename (`0c1dd20c`) | 26 pass, 1 fail (`unittest`: `test_subprocess_timeouts`, six new calls without timeout); 4955 tests |
+| Full suite after the rename (`cecc4dcb`) | the same failure plus `test_preservation_checklist_c3` (`--snapshots` wording, in `unittest` and `ams_optional`): a documentation edit of that commit, not the rename; skipped sets identical (187) |
+| Full suite on the branch head (`890f8481`, both fixed) | 27 pass, 0 fail; 4955 tests in 410 modules, 0 failures, 187 skipped |
+| ruff 0.16.10, mypy 2.4.0 (CI pins) on `core/` and `contracts/` | pass |
+
+Changed assertions of existing tests (registry 1.1.0): `test_analysis_check_rule_registry` expects V01–V76
+(was V01–V71) and 76 V cases in the CLI count (was 71); `test_complete_new_rule_is_accepted` registers an
+implementation and source digest for its hypothetical rule, which registry 1.1.0 requires.
+
+Not run: the slow tier, live routing (no skill text changed except one reference's wording), the value gate
+(Phase 1). Skipped tests are unverified, not passed.
+
 ## SCIFIX-PLAN-A2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; worktree branch `scifix/pr-1-identity-runtime-dir` from main `a53af7e0`)
 
 Sci-fix improvement plan v3, PR-1 (A2; findings F-03, F-25). `core/protected/identity.py` gains
@@ -2037,6 +2225,70 @@ verdict. Guard semantics are unchanged: identical means the same code.
 
 Not changed: `.pyc` files stay outside the identity (F-25); a full fix (no bytecode, or hash-based `.pyc`) needs its
 own assessment.
+## SCIFIX-PLAN-C3-C4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-9-scan-surface` from main `168ede40`)
+## SCIFIX-PLAN-C1-C2-C6 (2026-10-22, CI lock venv; branch `scifix/pr-8-governance` from main `bc8ac2e6`)
+
+Sci-fix improvement plan v3, PR-8 (C1, C2, C6).
+
+| Check | Result |
+|---|---|
+| Regression warning on the shipped advisories before `regression_of` | 2: SFA-2026-002 introduced by `811f02b6` (the fix of SFA-2026-020), SFA-2026-003 by `f7846755` (the fix of SFA-2026-021); recorded, then 0 warnings |
+| S1 and S2 entries without an advisory | 7, each with `advisory_waiver`: CLS-LOGINTERP (example script only, commit `6e7274c3`), CLI-MISSING-INPUT-EXIT2, ADAPTER-MISSING-DEPENDENCY, PYHF-REJECTED-STATUS (status of input that produced no result; 0.23.0 release check), SCAN-VERDICT-ORDER, SCAN-MISSING-MARKER, ADVISORY-MATCH-V2 (shadow-mode report) |
+| Missing advisory numbers | SFA-2026-012, -013, -026 to -029: no commit ever held or mentioned them (`git log --all`); README, no tombstones |
+| `published` | the UTC time of the commit that added each advisory (SFA-2026-001 to -003 2026-10-20T09:43:20Z; -004 to -035 2026-10-20T14:31:42Z; -036 2026-10-21T20:26:57Z; -037 2026-10-22T00:37:17Z; -038 2026-10-22T01:47:39Z) |
+| Schemas | the ledger and all 32 advisories validate; broken copies are refused (11 cases); only implemented keywords, no `$ref` |
+| New tests (`test_scifix_advisories`: timestamps, regression warning; `test_scifix_ledger`: waivers, regression_of; `test_scifix_schemas`) | pass |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock (before the rebase on main) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4863 tests, 4612 pass, 0 failures, 251 skipped |
+
+## SCIFIX-PLAN-C3-C4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-9-scan-surface`, stacked on `scifix/pr-5-advisory-v2`)
+
+Sci-fix improvement plan v3, PR-9 parts C3 and C4.
+
+| Check | Result |
+|---|---|
+| `release_manifest.py backfill --commit hep-research--v0.3.0` | 955 files, digest `d75dbfdd1d3091df…`, commit `351029c0bfdd…` (the root import) |
+| `release_manifest.py backfill --commit 9870a35a` (0.4.0, never tagged: the merge of PR #6, whose `plugin.json` says 0.4.0) | 1013 files, digest `a755680f6011b12f…`, commit `9870a35ab49e…` |
+| `check-published` on the branch | pass; both backfilled manifests identical to their tag or commit; no pending tags; no unrecorded tags left |
+| `scifix_advisories.py check` with the two manifests | 0 problems; the fixed-release rule now also checks 0.4.0 against 0.3.0 for SFA-2026-008 to -011, -030, -031 (all changed) |
+| `tests/tools/test_release_manifest.py` (new: backfill from an untagged commit, checked against it, its record may not change, a short commit is refused) | pass, 10 tests |
+| C3: `check_routing_static.py`, `check_ownership.py`, `measure_entrypoints.py` after the reference-index rule | pass; reference inventory regenerated |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock, after the rebase on main `168ede40` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4856 tests, 4605 pass, 0 failures, 251 skipped |
+
+Not run: live routing for the C3 rule (maintainer decision 2026-10-22: the reference-index option, no paid run). The
+rule sits in a reference, not in the SKILL.md body, so it triggers only when the reference is read.
+
+## SCIFIX-ADVISORY-V2 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-5-advisory-v2`, stacked on `scifix/pr-4-execution-trace`)
+
+Sci-fix improvement plan v3, PR-5 (A1 change 1), sci-fix ADVISORY-MATCH-V2 (S2, C2, D2). Fix `5cb720b8`, parent
+`c3d9208a` (PR-4's head) in a detached worktree with the fix commit's `tests/tools/test_scifix_advisories.py` and
+`tests/tools/fixtures/advisory_matrix.json` copied in; the worktree was removed after the run.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/tools/test_scifix_advisories.py::ThreeValuedMatch::test_every_match_of_up_to_two_groups_of_up_to_two_conditions` | exhaustive (156 matches and `[]`) | error (`match_verdict` absent: the /1 scan has no undecided state) | pass | no | CI lock |
+| `tests/tools/test_scifix_advisories.py::AcceptanceMatrix::test_every_advisory_cell_by_cell` | behavioral (31 advisories, hand-written verdicts) | fail by assertion for 11 advisories: SFA-2026-001, 002, 004, 006, 010, 020, 023, 025, 030, 031, 033 | pass | no | CI lock |
+
+The acceptance matrix (`tests/tools/fixtures/advisory_matrix.json`) gives, per advisory, synthetic artifacts in and out
+of range, with and without a trace, positive and negative, and for SFA-2026-020 one written under contracts 2.4.0,
+before its fields existed; every verdict is written by hand from the advisory's `applies_to`. A mutation check (two
+expectations altered) made the matrix test fail for exactly those two advisories. The plan's two `hadd` jobs of F-01
+(0.12.0 and 0.21.0, digest-consistent) get no finding from any shipped advisory.
+
+Migration of the 31 advisories (each read against the code that writes the artifact):
+
+| Class | Advisories | Basis |
+|---|---|---|
+| outputs only (`artifact_types: []`) | 001, 030 (blinding scanner), 014 to 019 (detector scripts), 036 (`anisotropy.py`), 037 (`estimate_training_memory.py`) | the affected code prints a report and writes no artifact, and no artifact writer imports it within the range (checked: the writers' imports) |
+| `match: []`, possibly affected (no trace) | 004, 006, 010 | `result_artifact.py` writes the statistical-result from a core/stats CLI's JSON printed in another process; no field names the code (the listed keys were required, or do not show it) |
+| `match: []` | 023, 025 (ml-artifact), 033 (communication) | the keys were required in every artifact of the type; the affected scripts run apart from the writer |
+| discriminating fields | 002, 020 (`splits.overlap_check.tool` matching `check_split_integrity`, or `splits.manifest`; 020 `unknown_before` 2.5.0, when they appeared), 003, 021 (`calibration`), 005, 009 (`significance`), 007 (`convergence`, `sampler`), 008 (`construction`), 011 (`results`), 022 (`domain_shift`), 024 (`weights`), 032, 034, 035 (`occurrences`), 031 (`tools[*].name` equal to `hep-research core/partition runner`, the name in 0.3.0's `batch_campaign.py`, plus `local_partition.py` outputs) | each top-level key existed in the extension schema at every release tag in the advisory's range (checked against the tags) |
+
+Full gate: `run_all_checks.py --no-cli --jobs 4`, CI lock, branch head: 25 pass, 0 fail, 2 skipped (CLI host
+checks); 4828 tests, 4579 pass, 0 failures, 249 skipped.
+
+Expected effect, as the plan states: findings on old artifacts do not drop. The six `match: []` advisories now say
+"possibly affected (no trace)" where they said "affected"; the outputs-only ones no longer match any artifact.
+
 ## SCIFIX-PLAN-A1-TRACE (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; E2 venv for fixtures and examples; branch `scifix/pr-4-execution-trace`, stacked on `scifix/pr-3-scan-order`)
 
 Sci-fix improvement plan v3, PR-4: A1 change 2 (contracts 3.5.0, `contracts/trace.py`, maintainer decision
@@ -2058,6 +2310,210 @@ worktree with the fix commit's `tests/tools/test_scifix_advisories.py` copied in
 Limit found while implementing: `result_artifact.py`, the statistical-result writer, wraps the JSON a core/stats CLI
 printed in another process, so its `code_paths` never shows `core/stats/*`; an advisory about core/stats code must
 match on fields the CLI output carries, or say that no field shows it (plan PR-5).
+## SCIFIX-PLAN-B2-B5-B7 (2026-10-22, CI lock venv; branch `scifix/pr-7b-ledger-report` from main `40a21d1a`)
+
+Sci-fix improvement plan v3, the rest of PR-7: B2 (report only), B5, B7.
+
+| Check | Result |
+|---|---|
+| `expected_from` of the 64 independence records (classified by hand from each record's detail) | third-party-definition 29, transcribed-formula 15, exhaustive 15, printed 4, general-result 1 (PERIODICITY-REFIT's size = alpha); DR-WP2-06-CALO's `numpy.linalg.lstsq` record is transcribed-formula (a third-party solver fitting the repository's model) |
+| C3 entries with transcribed formulas only | DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO, DR-WP2-06-MS (the plan expected DR-WP1-02 and DR-WP2-06-MS); `gaps` added, grades unchanged |
+| `tools/scifix_ledger.py report` | 27 entries below their minimum; 18 S1 entries without `review`; 5 S3 entries below their minimum: DR-REFS, ML-REFS, REVIEW-REFS (sources never itemized in the ledger; not transcribed here), REVIEW-CODE-WARN-TAIL and -MANIFEST (internal only) |
+| `documentation_fixes` | `sources_with_locators` text kept as `note`; `sources` itemized where the ledger named them (REVIEW-REFS-2, -3, REVIEW-CODE-WARN-NEGW, STATUS-REFUSED-MEANING and the two internal-only entries) |
+| `tests/tools/test_scifix_ledger.py` (new: expected_from and the transcription report, S3 sources, review format and report) | pass, 21 tests |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock | 25 pass, 0 fail, 2 skipped (CLI host checks); 4855 tests, 4604 pass, 0 failures, 251 skipped |
+
+Not done: no S1 entry is signed off (a person's act); the sources of DR-REFS, ML-REFS and REVIEW-REFS are not
+itemized from their VALIDATION records.
+
+## SCIFIX-PLAN-B3-B6 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0, mpmath 1.3.0, no pyhf, ArviZ, pdg or torch; E2v: NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, pyhf 0.7.6, PyTorch 2.14.1, no ArviZ or pdg; branch `scifix/pr-7-d-axis`, stacked on `scifix/pr-6-evidence-sources`)
+
+Sci-fix improvement plan v3, PR-7 parts B3 and B6 (F-11, F-14, F-23). Maintainer decisions of 2026-10-22, now in
+`docs/maintenance.md`: D2 needs a parent record (fails on the parent, passes on the fix) for every oracle node named
+by the entry's `independence` records, at most D1 when only other regression tests have one (the D-scope rule); D3
+also needs a killed `revert` mutant.
+
+**B3, the D axis as data.** Each ledger entry now has `commits` (parent, fix, follow_up; 40-hex, resolved with
+`git rev-parse` in the source repository from the short hashes in its note, its VALIDATION section or its
+advisory's `fixed_commit`; where none names the parent it is the fix's first parent, and the ANISO-CL-RANGE fix
+`1853e619` is the commit whose message names the entry), `parent_records` (133: 87 transcribed from the sections
+they name, 46 from the reruns below; each with `requires`, found by hiding one package at a time as in
+SCIFIX-PLAN-B1-B4, or copied from the node's independence record) and `mutants` (46, transcribed). Rows
+transcribed: every parent failure the sections record by assertion or by an exception they name as the defect
+itself; rows whose parent failure was an import error or a function, argument or output key new in the fix are
+left out unless the node is an oracle (then recorded as `error`); the core/stats guide tests (a module list) are
+left out. A failure on the parent is `error` when the test could not reach the parent's code. `evidence_tests` is
+now the list of nodes used (independence and parent-record nodes); files without a recorded node
+(`test_properties.py`, `test_published_tables.py`, `test_constant_literals.py` and others) left the lists.
+`tests/tools/test_scifix_ledger.py` recomputes D2 and D3 from the records.
+
+**Reruns.** Every oracle node without a parent record was run on its parent and fix commit: a detached worktree of
+the source repository per commit (`git worktree add --detach`, removed after the run), the current test file (and
+its fixtures or test helpers) copied in, skill and test folder names mapped to those of the commit where they
+differ (`docs/maintenance.md`), each node run alone with `python -m unittest`. Adaptations, all within the
+adapted-parent rule: F01-F03 add `core/stats/fit_diagnostics.py` and `tail_estimation.py` from the fix (new modules);
+ROBUST-CAMPAIGN guards the import of `SubmitAmbiguous`, `SubmitRefused` (added after the fix). For F02 and F03 the
+adapted run is not a valid record: the added modules hold the oracles' code under test, so the unadapted run
+(import error) is recorded. Where an entry then had no valid parent failure at all, the fix commit's own changed
+test files were run on its parent the same way (the SCIFIX-PARENT-RECORDS method; 5 fix commits).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/examples/test_stats_benchmarks.py::PublishedLikelihood::test_crossing_at_zero_events_is_ln_20_for_any_background` (CLS-LOGINTERP, `90388aa0` / `99a18fd8`) | symbolic | error (AttributeError: `_crossing` is new in the fix) | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T01LikelihoodDomain::test_lnl_against_scipy_and_sympy_poisson` (F01, `1d42271a` / `9f1ee4a9`) | independent implementation, symbolic | fail (assertion: ln L at mu = -1 is 0.0, not below -1e300; adapted, adds new modules) | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_clopper_pearson_against_scipy` (F02) | independent implementation | error (import: `tail_estimation` is new in the fix); adapted: pass, the added module is the code under test | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_extreme_exact_tail_in_log_space` (F02) | independent implementation | error (as above); adapted: pass | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T02T03ToyTails::test_zero_exceedance_bound_solves_the_binomial_equation_symbolically` (F02) | symbolic | error (as above); adapted: pass | pass | no | CI lock |
+| `tests/core/test_stats_p0_regressions.py::T04AnalyticOracle::test_converged_fits_match_a_third_party_minimum` (F03) | independent implementation | error (as above; `newton_fit` in the new `fit_diagnostics`); adapted: pass | pass | no | CI lock |
+| `tests/skills/hep_statistics/test_bayes_diagnostics.py::Diagnostics::test_ar1_bulk_ess` (BAYES-T24, `bb0774f0` / `d161b3b7`) | analytic | pass | pass | no | CI lock |
+| `tests/core/test_stats_counting_asymptotic_oracles.py::T09ExactCounting::test_monotone_upper_end_against_an_independent_envelope` (FC-MONOTONE, `b3734189` / `04338bbf`) | independent implementation | error (TypeError: `fc_interval`'s `monotone` argument is new in the fix) | pass | no | CI lock |
+| `tests/core/test_stats_poisson.py::FeldmanCousinsTests::test_monotone_construction_matches_entries_where_the_plain_one_dips` (FC-MONOTONE, current test; confirms SCIFIX-PARENT-RECORDS) | published | fail (assertion: 1.08 != 1.26 at (0.9, 0, 2.0)) | pass | no | CI lock |
+| `tests/core/test_stats_poisson.py::UpperTailTests::test_matches_third_party_and_symbolic_tails` (POISSON-SF, `04338bbf` / `a2adc126`) | independent implementation, symbolic | error (AttributeError: `poisson_sf` is new in the fix) | pass | no | CI lock |
+| `tests/core/test_stats_linalg.py::EigenvalueOracleTests::test_verdict_matches_the_eigenvalues_at_any_scale` (COV-NOREPAIR, `a2adc126` / `6a81109c`) | independent implementation | error (import: `core.stats._linalg` is new in the fix and is the code under test) | pass | no | CI lock |
+| `tests/core/test_stats_linalg.py::ExhaustiveDefinitenessTests::test_verdict_over_every_rational_unit_diagonal_3x3` (COV-NOREPAIR) | exhaustive | error (as above) | pass | no | CI lock |
+| `tests/core/test_stats_poisson.py::MeanLimitTests::test_ends_beyond_500_against_third_party_and_symbolic_poisson_cdfs` (POISSON-500, `6a81109c` / `b7b7825a`) | independent implementation, symbolic | fail (assertion, 5 subtests: upper end 0.799 of the SciPy root) | pass | no | CI lock |
+| `tests/core/test_constants.py::PdgPackageTests::test_bundled_masses_equal_the_package` (TH9-MASSES, `84c0a68c` / `23910085`) | published | skip (pdg not installed) | skip | yes | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::SpeciesMassPropertyTests::test_binding_energies_agree_with_ame2020_and_the_pre_fix_table_does_not` (TH9-MASSES) | published | fail (assertion: d binding residual 5.7 eV against 1.42 eV, the pre-fix table) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_helium_yield_scales_with_z_squared` (TH9-MASSES) | analytic | fail (assertion: 68.07557497 against 68.07557493, tolerance 1e-9) | pass | no | CI lock |
+| same test (DR-WP1-01, `4aebc0be` / `70f7fbcb`) | analytic | error (KeyError: the CLI has no `charge` output on the parent) | fail (assertion: the same 4e-8 offset; it passes from TH9's fix `23910085` on) | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::CherenkovChargeTests::test_yield_matches_the_frank_tamm_spectrum_integrated_in_wavelength` (DR-WP1-01) | independent implementation | error (import: `core.constants`, added after the fix) | error (same) | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::GaisserHillasPropertyTests::test_profile_against_high_precision_and_the_old_form` (DR-WP1-02, `70f7fbcb` / `0f3a2e3f`) | analytic, independent implementation | fail (assertion, 73 subtests: ratio 1.000003 against a 1e-10 tolerance) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_toy_study_unweighted_fit_is_unbiased_and_matches_weighted_lstsq` (DR-WP2-06-CALO, `f6a64702` / `6c793363`) | independent implementation | fail (assertion: the fitted squared terms differ from weighted lstsq at rtol 1e-10) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_calorimeter_fit_closure_and_energy_scale_covariance` (DR-WP2-06-CALO) | analytic | pass | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::PidElectronAndUnitTests::test_water_uses_the_pdg_mean_excitation_energy` (DR-WP2-06-PID) | published, analytic | fail (assertion: 2.0506 against 2.0390, I = 75 eV) | pass | no | CI lock |
+| `tests/skills/hep_detector/test_hep_detector_audit.py::ScriptPhysicsOracleTests::test_crossover_and_mdr_with_beta_of_rigidity_against_their_closed_forms` (DR-WP2-06-MS) | analytic, independent implementation | error (TypeError, 45 subtests: `summarize`'s `mass_gev` argument is new in the fix) | pass | no | CI lock |
+| `tests/core/test_blinding.py::RenderingOracleTests::test_every_claimed_rendering_is_found_in_every_claimed_encoding` (BLINDING-SCANNER, `d7148901` / `b6334c04`) | independent implementation | error (AttributeError: `_significant_digits`, added later) | fail (assertion, 420 subtests: the test reads the later rounding-zeros rule) | no | CI lock |
+| `tests/core/test_partition_safety.py::IndependentClosureTests::test_merged_campaign_equals_the_closed_form` (ROBUST-CAMPAIGN, `f5070718` / `f7b677c9`) | independent implementation | pass (import guarded) | pass (import guarded) | no | CI lock |
+| `tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2NumbersGenerated::test_tokens_equal_the_numbers_put_into_generated_passages` (RC-A2, `2b439e74` / `ffd7804e`) | independent implementation | error (import: `communication_lib.numbers`, added later) | fail (assertion: the test reads the later tokenizer) | no | CI lock |
+| same test (RC-A3, `ffd7804e` / `dc97a00c`) | independent implementation | fail (assertion) | pass | no | CI lock |
+| `tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_no_rule_classification_exhaustively_against_integer_arithmetic` (RC-A5, `111585dd` / `7e0ee239`) | exhaustive | error (import: `_rounds_somehow` is new in the fix) | pass | no | CI lock |
+| `tests/skills/hep_authoring/test_review_fixes2.py::ReviewFixes2Rounding::test_rounding_rules_exhaustively_against_integer_arithmetic` (RC-A6) | exhaustive | error (TypeError: the parent's `_round` returns None for the rule form `decimals:n:mode`, new in the fix) | pass | no | CI lock |
+| `tests/skills/hep_ml/test_audit_split_tools.py::GroupKeyTests::test_numeric_forms_of_an_integer_are_one_group_exhaustively` (ML-SPLITS, `2b439e74` / `811f02b6`) | exhaustive | error (import: `canonical_key` is new in the fix; the test calls it) | pass | no | CI lock |
+| `tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_event_id_check_is_exhaustively_right_over_all_subset_pairs` (ML-CALIBRATION, `811f02b6` / `f7846755`) | exhaustive | pass | pass | no | CI lock |
+| `tests/skills/hep_ml/test_audit_calibration_identity.py::SampleIdentityPropertyTests::test_validator_names_one_sample_under_every_spelling_of_its_path` (ML-CALIBRATION) | independent implementation | fail (assertion, 5725 subtests) | pass | no | CI lock |
+| `tests/skills/hep_ml/test_domain_shift_report.py::ShiftCarriedByNuisance::test_fit_against_pyhf` (ML-K05, `879e0733` / `7b32b109`) | independent implementation | error (TypeError: `shape_model`'s `b_up` argument is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_flag_rates_match_the_split_conformal_rank` (ML-DOMAIN, `50d3e922` / `7011baaf`) | analytic | error (AttributeError: `DomainModel` is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_domain_method.py::DomainModelTests::test_false_positive_interval_is_the_beta_quantile_clopper_pearson` (ML-DOMAIN) | independent implementation | error (KeyError: `false_positive_rate_interval_68` is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_asimov_against_pyhf` (ML-NEGWEIGHTS, `153307a6` / `ef5d068f`) | analytic | pass | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_metric_layer.py::MetricTests::test_cell_resampling_matches_a_brute_force_reading_of_eq_2_2` (ML-NEGWEIGHTS) | independent implementation | error (AttributeError: `cell_resample` is new in the fix) | pass | no | E2v |
+| `tests/skills/hep_ml/test_audit_small_corrections.py::SmallSeedComparisonTests::test_student_t_quantile_against_scipy_and_the_published_table` (ML-SMALL-C10, `f5cc59a7` / `fd637dcc`) | independent implementation | error (AttributeError: `student_t_quantile` is new in the fix) | pass | no | CI lock |
+
+**Fix commits' own test files on their parents** (paths as at the fix commit, mapped to today's; only the rows
+that decide a record are listed; the rest pass on both or need code new in the fix):
+
+| Fix commit | Result |
+|---|---|
+| `70f7fbcb` (DR-WP1-01) | no valid parent failure: the z^2 test (KeyError `charge`), the `mass:charge` species syntax and `--rigidity` are all new in the fix; 1 test passes on both |
+| `ffd7804e` (RC-A2) | `test_communication_audit.py::ManuscriptOccurrences::test_value_not_in_passage_is_an_error_compared_as_a_number` fails by assertion on the parent, passes on the fix; `test_review_fixes2.py` does not import on the parent; 21 pass on both |
+| `7e0ee239` (RC-A5, RC-A6) | `ReviewFixes2Rounding::test_no_rule_accepts_only_a_rounding_of_the_source` (RC-A5) and `::test_default_rounding_is_half_up_and_half_even_is_opt_in` (RC-A6) fail by assertion on the parent, pass on the fix; two tests raise InvalidOperation (RC-A15, not a ledger entry), one needs `_rounds_somehow`; 16 pass on both |
+| `7b32b109` (ML-K05) | `tests/contracts/test_ml_mutation_probe.py::MutationProbe` `test_legacy_artifacts_keep_their_outcome_and_strict_reports`, `test_report_silent_count`, `test_rows_reach_their_level_natively` fail by assertion on the parent (row M25, the domain-shift record), pass on the fix; 2 pass on both (E2v) |
+| `7011baaf` (ML-DOMAIN) | `DomainModelTests::test_cli_groups_and_categorical`, `TrainingAndInferenceTests::test_inference_flags_the_broken_constraint_and_scores_no_non_finite_row` and `test_training_pipeline.py::TrainClassifierPipelineTests::test_inference_flags_and_rejects_out_of_domain` fail by assertion on the parent, pass on the fix; 9 need `DomainModel` or other code new in the fix; 19 pass on both (E2v) |
+
+**Grade changes (axis D), recomputed from the records:**
+
+| Entry | Severity | D before | D now | Reason |
+|---|---|---|---|---|
+| CLS-LOGINTERP | S1 | D2 | D1 | symbolic oracle (n = 0, ln 20) errors on the parent |
+| F02 | S1 | D2 | D1 | its three oracles test `tail_estimation`, new in the fix |
+| F03 | S2 | D2 | D1 | its oracle tests `newton_fit`, new in the fix |
+| BAYES-T24 | S1 | D3 | D1 | the analytic AR(1) oracle passes on the parent |
+| FC-MONOTONE | S1 | D2 | D1 | the envelope oracle errors on the parent (`monotone` argument new) |
+| POISSON-SF | S1 | D2 | D1 | the oracle errors on the parent (`poisson_sf` new) |
+| COV-NOREPAIR | S1 | D2 | D1 | both oracles import `_linalg`, new in the fix |
+| TH9-MASSES | S1 | D2 | D1 | the PDG oracle skips without pdg (no record) |
+| DR-WP1-01 | S1 | D2 | D0 | no test reaches the parent's code (no charge input before the fix) |
+| DR-WP2-06-CALO | S1 | D3 | D1 | the closure oracle passes on the parent |
+| DR-WP2-06-MS | S1 | D3 | D0 | the oracle errors on the parent (`mass_gev` argument new); no other record |
+| BLINDING-SCANNER | S2 | D2 | D1 | the rendering oracle errors on the parent and fails on the fix |
+| ROBUST-CAMPAIGN | S2 | D2 | D1 | the closed-form oracle passes on the parent |
+| RC-A2 | S2 | D2 | D1 | the oracle errors on the parent and fails on the fix |
+| RC-A5 | S2 | D2 | D1 | the exhaustive oracle errors on the parent |
+| RC-A6 | S2 | D2 | D1 | the exhaustive oracle errors on the parent (rule form new) |
+| ML-SPLITS | S2 | D2 | D1 | the exhaustive oracle calls `canonical_key`, new in the fix |
+| ML-CALIBRATION | S2 | D2 | D1 | the event-id oracle passes on the parent |
+| ML-K05 | S2 | D2 | D1 | the oracle errors on the parent (`b_up` argument new) |
+| ML-DOMAIN | S1 | D3 | D1 | both oracles error on the parent; no revert mutant recorded |
+| ML-NEGWEIGHTS | S1 | D3 | D1 | the Asimov oracle passes on the parent, the eq. 2.2 oracle errors; no revert mutant recorded |
+| ANISO-WEIGHTED-COV | S1 | D3 | D1 | three of five oracles test `harmonic_covariance` or `AnisotropicNull`, new in the fix |
+| ML-SMALL (C2, D2) | S2 | D2 | split | ML-SMALL-C10 C2 D1 (t-quantile oracle errors on the parent); -C24 C1 D0 (its only record errors: the `n_baseline` output is new); -C25 C1 D2; -C26 C1 D2 |
+
+Unchanged: F01, POISSON-500, DR-WP1-02, DR-WP2-06-PID, RC-A3 (D2, every oracle fails on the parent by assertion);
+BLINDING-ROUNDING-ZEROS, CANONICAL-KEY-ZERO-FRACTION, SAMPLE-NAME-DOT-SEGMENTS (D3, revert killed); the entries
+without oracle nodes or with recorded oracles (ROBUST-MALFORMED, ANISO-CL-RANGE, the six triage entries, the two scan
+entries) D2. None was raised. The ledger now has 44 entries: D3 3, D2 17, D1 21, D0 3; 24 are below their
+severity's minimum on axis D (S1 13, S2 11), each with a `gaps` line. The F-23 note of ROBUST-MALFORMED is
+withdrawn: it has no oracle node, and its regression tests' records hold.
+
+**B6, one fix per entry.** ML-SMALL is a tombstone in the new top-level `superseded` list. Its four code fixes
+(CHANGELOG 0.10.0 ML audit, "Small corrections"; the `### ML-SMALL` subsection of SCIFIX-PARENT-RECORDS; commit
+`fd637dcc`) are entries of their own: C10 the small-seed comparison (`compare_model_runs.py`; follow-up `db40e842`,
+after `fd637dcc` over-corrected), C24 the sculpting baseline, C25 the constant training feature, C26 `model_hash`.
+K13 corrected a test, not code, and left the ledger (the tombstone says so). SFA-2026-025 names the four entries;
+`scifix_advisories.py check`: 31 advisories, 0 problems.
+
+**Not converted** (in `gaps`): mutants that VALIDATION records only as a count (F03 5, BLINDING-SCANNER 9,
+ROBUST-CAMPAIGN 3, RC-A2 7, RC-A5 4, ML-SPLITS 4, ML-CALIBRATION 5, ML-K05 5, the former ML-SMALL 4); the
+functions of the mutants of BAYES-T24, DR-WP2-06-CALO and -MS, ML-DOMAIN and ML-NEGWEIGHTS (the file is the
+advisory's; `killed_by` names the class or module VALIDATION names); the parent record of
+`FeldmanCousinsTests::test_full_published_tables`, a test no longer present under that name.
+
+| Check | Result |
+|---|---|
+| `tests/tools/test_scifix_ledger.py` (18 tests; 8 new in `StructuredDiscrimination`, each rule with a synthetic ledger that obeys it and ones that break it) | pass |
+| Same with `sci-fixes.json` and SFA-2026-025 reverted to the branch's parent | fail: 45 failures, 16 errors (subtests) |
+| Same with the new records but the old D grades | fail: 3 (the D2 rule on every lowered entry; the D3 rule on ML-DOMAIN and ML-NEGWEIGHTS) |
+| `tools/scifix_advisories.py check` | 31 advisories, 0 problems |
+| `tools/check_retired_names.py` | ok |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock | 25 pass, 0 fail, 2 skipped (CLI host checks); 4834 tests, 4585 pass, 0 failures, 249 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+The first gate run failed only the README size statement (31.0 MB said, 34.5 MB measured, just beyond the 10%
+margin with this change); the statement now says about 2400 files, 34.5 MB.
+
+Added at the rebase onto main after #206: PERIODICITY-REFIT (S1, D3 unchanged) gains `commits` (parent `a53af7e0`
+as its record states, fix `573f093a`), three parent records (the three fast oracle and invariant tests fail by
+assertion on the parent, E2) and four killed mutants (M1, the revert of the default, among them), transcribed from
+VALIDATION PERIODICITY-REFIT; M4 survived and stays in its gaps.
+
+Added at the rebase onto main (after PR-5 merged): ADVISORY-MATCH-V2 (S2) D2 → D1. Its exhaustive oracle
+errors on the parent (`match_verdict` is new in the fix), which the D-scope rule does not count; the acceptance matrix
+fails there by assertion but is behavioral. Fix `5cb720b8` (PR-5 rebased before merging; was `cc7357ba`), parent `c3d9208a`.
+
+## SCIFIX-PLAN-B1-B4 (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, SymPy 1.14.0, mpmath 1.3.0, no pyhf, ArviZ, pdg or torch; E2: NumPy 2.5.3, SciPy 1.18.1, pyhf 0.7.6, PyTorch 2.14.1, no ArviZ or pdg; branch `scifix/pr-6-evidence-sources`, stacked on `scifix/pr-4-execution-trace`)
+
+Sci-fix improvement plan v3, PR-6 (B1, B4; F-10, F-12). Counts recomputed on the branch: 40 ledger entries, 60
+`independence` records, 15 of them `locator`, 52 distinct oracle nodes in 24 modules, 16 of which are not in
+`run_required_backends.py` `MODULES`.
+
+B1: the *Sources read for locators* table of SCIFIX-LEDGER-REVIEW is now `docs/evidence/scifix-sources.json`
+(scifix:S01-S11) and `scifix-claims.json` (scifix:C01-C27, one per locator; index `scifix-index.md`). The PDG
+chapter 35 row became two sources (2024 and 2025 editions, S02 and S03); Gaisser and Hillas 1977 is `not-opened`
+(S10, cited by no claim); the cosmic-ray review's "does not state the form" is an `absence_search` claim (C26). The
+FC-MONOTONE published record points at Table IV, p. 37 (C21), the table read with its page; Table VI has no page in
+the reading record and is not claimed. arXiv:2109.07851 (S11, ML-NEGWEIGHTS) was read on 2026-10-22: the v2 abstract
+page and pp. 1-5 of the v2 PDF (page level). Eq. (2.2), w_i -> (sum_C w_j / sum_C |w_j|) |w_i| for every event in a
+cell grown around a negative-weight seed until its summed weight is non-negative, is in Sec. 2 "Cell Resampling",
+p. 3, and p. 4 applies the steps successively to each negative-weight event: this supports the brute-force oracle
+(C27), so the basis holds and the grade stays C3. Sec. 2.2 is the nearest-neighbour search (p. 9); the ledger detail
+and the `hep_metrics.cell_resample` docstring cited "sect. 2.2" and are corrected.
+
+B4: each record's `requires` was found by hiding one package at a time (a meta-path blocker plus a patched
+`importlib.util.find_spec`, also in subprocesses) and running all 52 nodes in E2: hiding numpy changes 27 nodes,
+scipy 22, sympy 11, mpmath 12 (sympy needs mpmath), pyhf 3, torch and matplotlib 0; ArviZ and pdg (not in E2) come
+from the nodes' own guards (one node each).
+
+| Check | Result |
+|---|---|
+| `core/evidence/ledger.py --namespace scifix --strict --today 2026-10-22` | pass: 11 sources, 27 claims, 0 errors, 0 warnings; 1 note (S10 cited by no claim) |
+| `core/evidence/render_index.py` on `scifix-index.md` | in sync |
+| `run_required_backends.py --from-ledger --no-skips`, CI lock | exit 1: 47 pass, 5 unverified (backend missing: pyhf 3, ArviZ 1, pdg 1), 0 environment errors, 0 do not hold, 0 skipped |
+| Same without `--no-skips`, CI lock | exit 0, same classes |
+| `run_required_backends.py --from-ledger --no-skips`, E2 | exit 1: 50 pass, 2 unverified (ArviZ 1, pdg 1), 0 environment errors, 0 do not hold, 0 skipped |
+| Backends in `requires` (pyhf, arviz, pdg) against the required gates' `--require` | each locked: pyhf and arviz by `stats-backends`, pdg by `pdg-cross-check` |
+| New tests (5 in `test_scifix_ledger`, 3 in `test_run_required_backends`) with the ledger and the tool reverted | fail: 5 failures and 14 errors (subtests); with `scifix-sources.json` removed as well, 1 failure and 4 errors |
+| Same on the change | pass: `test_scifix_ledger` 10 tests, `test_run_required_backends` 6 tests |
+| `run_all_checks.py --no-cli --jobs 4`, CI lock | 23 pass, 2 fail, 2 skipped (CLI); 4822 tests, 4572 pass, 1 failure, 249 skipped. Both failures are `retired_names` on the 11 `changelog.name` values of the 0.10.0 detector and ML audits, which spell the retired skill names and which `8f8c66f9` (PR-2) added; a `git archive` of this branch's parent fails the same way |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
 ## SCIFIX-SCAN-VERDICT-ORDER (2026-10-22, CI lock venv: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch; branch `scifix/pr-3-scan-order`, stacked on `scifix/pr-2-advisory-check`)
 
@@ -2096,6 +2552,535 @@ plan was written on 0.22.0: 31 advisories, 39 ledger entries, 8 documentation fi
 | `run_all_checks.py --no-cli --jobs 4`, CI lock, worktree head | 23 pass, 2 fail, 2 skipped (CLI host checks); 4804 tests, 4554 pass, 1 failure, 249 skipped. Both failures were one defect: the audit names first written into `changelog` spelled two retired skill names (`check_retired_names.py`); renamed to `audit DR-WP1 to DR-WP4` and `ML audit (ML-C, ML-K, ML-R items)`, then `check_retired_names.py` and the three affected test modules rerun: pass |
 
 Scan verdicts are unchanged by this step (the separate listing of advisories without artifacts is plan PR-3).
+
+## REVIEW-EXPERT-SLOT (2026-10-22, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `feat/review-config-expert` from main `f016edce`, unreleased)
+
+Three changes to the independent review, contracts 3.6.0 (spec sections 5.1, 5.2, 5.3, 6.10, 7.6, A8). `start
+--own-config` gives a review its own configuration file (`reviews/<id>/review-config.json`, recorded in
+`round_started` as `config_file`), so concurrent reviews can use different settings; no schema change. The filter
+packet's free text (`correction`, `description`, `fix`) has the raising slot's id, its record identity and the model
+names replaced by `[redacted]`, with counts in the private `filter_ids.json` and the report. `start --expert-model M`
+adds one expert slot to round 1 (role `expert` in `review_record`, config `expert`, receipt code
+`finding_without_verdict`): whole document, no canaries, at most two attempts, never escalated, findings handled like
+any other. Synthetic data only; no live agent run.
+
+| Check | Result |
+|---|---|
+| New tests: `tests/contracts/test_review_expert_contract.py` (18), `tests/skills/hep_authoring/test_review_expert_slot.py` (23) | 41 pass. Covered: an end-to-end review with `--own-config`, the expert slot and the filter (expert rejected once with `finding_without_verdict`, then accepted; the filter over the expert's and a lens's findings; the expert finding changed and confirmed by the design lens in round 2; no expert slot in round 2; close, `check` exit 0); the expert packet's files, scope, units and instructions (no other slot id, no canary, valid example); scrubbed filter packet (slot ids, identities and model names in any case gone, a lowercase look-alike kept, `value` and `unit_texts` untouched, counts 3/2/2 in `filter_ids.json` and the report); receipt codes `finding_without_verdict`, `basis_missing`, `finding_shape`, `verdict_without_finding`, `self_citation`, `read_outside_packet` (the delivered document and a copy elsewhere in the project), `prior_conversation`, `same_identity`, `schema_invalid` (skim, wrong role); an empty expert record accepted; exhaustion after two attempts not escalated; returned-empty through row 5; `check --record-only --role expert`; an expert-only dispatch (start, dispatch and receive only the expert slot); a conflict item between an expert and a lens verdict with lenses including `expert` and its arbiter dispatched; own-config: shared file unchanged, concurrent reviews with different settings, the shared-file refusal naming only shared-config reviews, own config without a shared file, observe and `repair config_changed` on the own file, `check` `artifacts_changed` on an edited own file; the spec 6.10 and 7.6 text against the code; fold, snapshot (kind `expert`), attempt limit, transitions, carry-forward to the design lens (and to dispose without one), an exhaustive decide test over two review slots and the expert slot; fixtures in `contracts/fixtures/review/` (2 valid, 6 invalid expert records); unchanged behaviour without the options |
+| Unchanged without the options | the P1 end-to-end review (`run_e2e`): review and private directories byte-identical to main `f016edce` (174 files, sha256 per file), checked after every step and on the final tree; reviewer and arbiter instruction files keep their role row (the `expert` role is not offered to them) |
+| `run_all_checks.py --no-cli --jobs 6`, E2 (NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4885 tests in 407 modules, 4751 pass, 0 failures, 134 skipped |
+| Same with the CI lock (NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4885 tests, 4659 pass, 0 failures, 226 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| Contracts 3.6.0 bump | fixtures (`make_fixtures.py`), templates, theory-profile artifacts and examples regenerated (E2; `bc-propagation-fit` with the CI lock): version strings and the hashes that cover them only; `unfolding-coverage` drifted at 1e-14 and was restored |
+| Packaging | the README size statement moved from 31.0 to 34.5 MB (about 2400 files): main was already 34.4 MB, at the edge of the 10% margin, and this branch's files crossed it |
+
+Both gate runs were on the final tree except this section and the CHANGELOG entry. Not run: a live agent review with
+the expert slot, so whether it finds the whole-page errors the reviewers missed is not shown here; the reference
+describes it without recommending it. Skipped tests are unverified, not passed.
+
+## HADRON-PHASE7 (2026-10-23; branch `feat/hadron-phase7-fits`)
+
+Hadron-structure plan, phase 7 (S12 PDF reweighting and profiling, S13 global fits), macOS, Python 3.13 with NumPy and
+SciPy; constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: Ball et al. arXiv:1012.0836v4 (Nucl. Phys. B 849 (2011) 112; errata B 854, 855),
+arXiv:1108.1758v2 (Nucl. Phys. B 855 (2012) 608), arXiv:0912.2276v2 (JHEP 05 (2010) 075); Giele and Keller
+arXiv:hep-ph/9803393v1 (Phys. Rev. D 58 (1998) 094023); Watt and Thorne arXiv:1205.4024v2 (JHEP 08 (2012) 052);
+Paukkunen and Zurita arXiv:1402.6623v3 (JHEP 12 (2014) 100); PDG 2026 Structure Functions Sec. 18.3. Journal references
+confirmed at INSPIRE-HEP.
+
+| Check | Result |
+|---|---|
+| `test_pdf_reweighting.py` (NNPDF and Giele-Keller weights and N_eff against hand values, Kish ESS, movement toward a synthetic truth, low-N_eff warning, Hessian-generated replicas only with GK weights and chi2/Delta chi^2, a one-point zero-chi2 case, refusals) | pass |
+| `test_hessian_profiling.py` (w_min, profiled central value and uncertainty against the exact stacked weighted least squares on a linear toy; the no-information limit; dynamic tolerance withholds the verdict; refusals incl. an odd eigenvector-member count) | pass |
+| `test_covariance_fit.py` t0 (GLS oracle for value and error; the central value's independence of t0 for one common normalization; iteration to a self-consistent t0 for separate normalizations; guards) | pass |
+| `run_all_checks.py --part static`, `check_layering.py`, `check_wiring.py`, `check_routing_static.py` (453 cases) | pass |
+
+Independent review (a read-only agent with the sources): no wrong formula. Fixed with tests that failed first: a
+dynamic tolerance gave wrong profiled uncertainties and a misleading verdict; Hessian-generated replicas were reweighted
+without the chi2/Delta chi^2 rescaling (Paukkunen and Zurita, Eq. 5.2); the t0 tests could not tell whether t0 was used
+or iterated (with one common normalization the central value does not depend on t0); an NNPDF weight could be NaN. The
+hep-statistics description now names PDF reweighting/profiling and PDF fits. Not run: live routing for the 4 S12-S13
+cases and the description change (paid; pending approval).
+
+## HADRON-PHASE6 (2026-10-23; branch `feat/hadron-phase6-smallx-gpd`)
+
+Hadron-structure plan, phase 6 (Th19 small x and saturation, Th20 exclusive processes and GPDs), macOS, Python 3.13
+with SciPy (core stack); constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: Golec-Biernat and Wusthoff arXiv:hep-ph/9807513v1 (Phys. Rev. D 59 (1998)
+014017); Kowalski and Teaney arXiv:hep-ph/0304189 (Phys. Rev. D 68 (2003) 114005); Albacete and Kovchegov
+arXiv:0704.0612 (Phys. Rev. D 75 (2007) 125021); Belitsky, Mueller, Kirchner arXiv:hep-ph/0112108 (Nucl. Phys. B 629
+(2002) 323); Ji arXiv:hep-ph/9603249v1 (Phys. Rev. Lett. 78 (1997) 610); Collins arXiv:hep-ph/9709499v2 (Phys. Rev. D
+57 (1998) 3051); PDG 2026 Structure Functions Secs. 18.2.2, 18.5, 18.6.1. Journal references from arXiv.
+
+| Check | Result |
+|---|---|
+| `test_dipole_lo.py` (K_0, K_1 against their integral representation to 1e-10; sigma_hat small- and large-r limits; sigma_L against its analytic colour-transparency limit for m = 0, 2e-3, which pins the 6 alpha/4 pi^2 prefactor and the d^2 r measure; the mass-modified x as GBW Eq. 21; positivity and convergence; alpha cancels in F_2; refusals of a fit's x-variable mismatch and x above the declared limit; rejections) | pass |
+| `test_exclusive_kinematics.py` (t_min against four-vector arithmetic with the photon along q; both xi forms; phi_BMK and phi_Trento on constructed events and phi_Trento = pi - phi_BMK; beta x_P = x; rejections incl. an off-shell recoil) | pass |
+| `test_sum_rules.py` GPD rules (form-factor and Ji integrals of a forward toy built from PDG Eq. 18.36, Beta-function values) | pass |
+| `run_all_checks.py --part static`, `check_layering.py`, `check_wiring.py` | pass |
+
+Independent review (a read-only agent with the sources): no wrong formula; it rederived phi_Trento = pi - phi_BMK and
+reproduced F_L/F_2 = 0.194 at Q^2 = 10 GeV^2 with the GBW no-charm parameters. Fixed: BMK section citations (Sec. 4);
+the normalization test above (the earlier dipole tests could not catch a prefactor error); a crash on a charge such as
+2/0 and duplicate flavours; an off-shell recoil accepted; the convergence report now varies r_max and r_min at fixed
+nodes; Eq. 21 applies to every flavour; Ji Eq. 13 cited for J = (A + B)/2; GPD table conventions documented. Deferred:
+no upper |t| bound in `dvcs`, no M_X <= W - M check in `diffractive`, an xi-dependent GPD toy. Not run: live routing for
+the 4 Th19-Th20 cases (paid; pending).
+
+## HADRON-PHASE5 (2026-10-23; branch `feat/hadron-phase5-tmd`)
+
+Hadron-structure plan, phase 5 (Th18 SIDIS and TMDs, fragmentation functions, profile `theory:tmd-gaussian-lo`),
+macOS (Darwin 25.5.0), the interpreter from `find_python.py` (a miniconda Python 3.13.2: SymPy 1.14.0, SciPy 1.17.1,
+NumPy 2.4.4); constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: Trento conventions arXiv:hep-ph/0410050v2 (Phys. Rev. D 70 (2004) 117504);
+Bacchetta et al. arXiv:hep-ph/0611265v2 (JHEP 02 (2007) 093); Anselmino et al. arXiv:hep-ph/0501196v2 (Phys. Rev. D
+71 (2005) 074006); Collins arXiv:hep-ph/0204004v3 (Phys. Lett. B 536 (2002) 43); PDG 2026 Fragmentation Functions
+(revised August 2023). Journal references confirmed at arXiv.
+
+| Check | Result |
+|---|---|
+| `test_sidis_kinematics.py` (invariants and Trento phi_h against events built from an explicit right-handed basis, boost along the beam, mirror reflection, spin flip, classification, rejections incl. spacelike vectors) | pass |
+| `test_tmd_gaussian.py` (F_UU,T against a direct numerical Eq. 4.1 convolution with Bacchetta's D(z, k_T^2) normalization, d^2 P_hT integral, Drell-Yan width and normalization, Sivers sign, rejections) | pass |
+| `test_sum_rules.py` FF momentum rule (Beta-function toys; malformed hadron columns rejected) | pass |
+| `theory:tmd-gaussian-lo` 0.1.0: `python3 -m unittest discover -s tests -t tests` in the profile (SymPy: Anselmino Eqs. 34-39 and the Cahn term Eq. 38, Bacchetta's convolution convention giving the same F_UU,T, the Sivers asymmetry Eqs. 58, 63-68; the Anselmino and Trento azimuths shown to coincide; the Drell-Yan q_T convolution derived here) | 37 run, 37 pass; `sidis-unpolarized-and-cahn` and `sivers-asymmetry` `tested-in-declared-environment` in the environment above; the benchmark (Anselmino Eqs. 38-39, 64-67 against the profile's own quadrature at 4 points, 1e-7) follows the paper's route and checks algebra and transcription, not physics; the Drell-Yan sign change is a cited rule (Trento Eq. 14) |
+| `run_all_checks.py --part static`, `check_layering.py`, `check_wiring.py` | pass |
+
+Independent reviews (read-only agents with the sources): pages and scripts, no wrong formula; fixed a dropped malformed
+FF column, spacelike vectors accepted, the multiplicity's gamma -> 0 assumption, the hadron sum in Eq. 2.18, |q_T|
+labelling, the Boer-Mulders sign change (now cited from Bacchetta et al. Sec. 3.3), FF notation. Profile: physics
+correct; the frame mapping was closed, independence wording, benchmark label and conventions keys corrected, a
+circular sign "check" turned into a declaration. Not run: live routing for the 3 Th18 cases (paid; pending).
+
+## HADRON-PHASE4 (2026-10-23; branch `feat/hadron-phase4-pol`)
+
+Hadron-structure plan, phase 4 (Th17 polarized DIS and the first two theory-domain profiles), macOS (Darwin 25.5.0)
+arm64, interpreter from `find_python.py` (a miniconda Python 3.13.2, SymPy 1.14.0, SciPy
+1.17.1, NumPy 2.4.4); constructed inputs only (software checks; no physical validity).
+
+Sources read in full text 2026-10-23: PDG 2026 Structure Functions Eqs. 18.6, 18.13-18.22; Kuhn, Chen, Leader
+arXiv:0812.3535v1 (Secs. 1.1, 2.1, 2.2, 3.1); Moch, Vermaseren, Vogt arXiv:hep-ph/0411112 (Eqs. 1-3; Phys. Lett. B 606
+(2005) 123, DOI confirmed at INSPIRE-HEP); Peng et al. arXiv:1511.08932v3 (Eqs. 1-10; Phys. Lett. B 758 (2016) 384,
+confirmed at INSPIRE-HEP); PDG 2026 Cross-Section Formulae Eqs. 51.3, 51.40.
+
+| Check | Result |
+|---|---|
+| `test_sum_rules.py`, polarized rules (g_1 moments of p and n, Bjorken at LO, Ellis-Jaffe values for p and n, an independent anchor through Kuhn-Chen-Leader Eq. 43 from a_3, a_8, a_0, charm helicity columns, rejections) | pass (11 tests in the file) |
+| `theory:dis-parton-model` 0.1.0: `python3 -m unittest discover -s tests -t tests` in the profile (SymPy change of variables from the Moch-Vermaseren-Vogt coefficient functions to the Altarelli-Martinelli form, negative tests for a wrong C_F and a dropped <e^2>, gluon-only and quark-only hand values pinning 8 sum e_q^2 and 16/3, quadrature against the exact closed form within 1e-10 with a 4-128 node convergence study) | 35 run, 35 pass; capabilities `demonstrated-on-synthetic-data` (no published F_L benchmark read) |
+| `theory:drell-yan-lo` 0.1.0: same command in the profile (LO cross section in SymPy and against the shipped `drell_yan_lo.py xsec` to 1e-12; Peng Eq. 4 into Eq. 2 reproduces Eq. 5; Eqs. 6-7; Lam-Tung for phi_1 = 0; channel mixing derived as the cross-section-fraction average of A_i; benchmark Peng Eq. 10, 2 channels x 7 q_T/Q x lambda, nu, relative 1e-12) | 40 run, 40 pass; capabilities `angular-coefficients-and-lam-tung` and `published-closed-form-benchmark` `tested-in-declared-environment` in the environment above; the LO cross section `demonstrated-on-synthetic-data` |
+| `run_all_checks.py --part static` (profile tests included as `profile-tests:theory:*`), `check_layering.py`, `check_wiring.py` | pass |
+
+The benchmark follows the paper's own route (Eqs. 8-9 into the A_i relations), so it checks the algebra and the
+transcription, not the physics of Eqs. 8-9. Independent reviews (read-only agents with the sources): polarized page and
+rules, no wrong formula; fixed section citations, the unsourced a_8 = 3F - D (now "not verified"), charm columns that
+were ignored, `--gA`/`--a8` accepted with other rules. Profiles: the channel-mixing "alternative" (a linear average of
+lambda, nu stored as a model uncertainty) was wrong and is removed, the A-average now derived; the Lam-Tung sign is
+stated within the quark-axis representation; two hard-coded "checks" became declarations; an independent LO
+normalization and a quark-only F_L hand value added. Not run: live routing for the 2 Th17 cases (paid; pending).
+
+## HADRON-PHASE3 (2026-10-23; branch `feat/hadron-phase3-nuclear`)
+
+Hadron-structure plan, phase 3 (Th16, nuclear targets), macOS 26.5 arm64, Python 3.13, constructed inputs only
+(software checks; no physical validity). Sources read in full text 2026-10-23: PDG 2026 Structure Functions Sec. 18.3;
+Klasen and Paukkunen arXiv:2311.00450; EPPS21 arXiv:2112.12462v2; nNNPDF3.0 arXiv:2201.12363v2; nCTEQ15
+arXiv:1509.00792; nCTEQ15HQ arXiv:2204.09982 (the plan named arXiv:2105.09873, a different nCTEQ paper; PDG's
+reference [134] gives 2204.09982). Authors and journal references confirmed at arXiv.
+
+| Check | Result |
+|---|---|
+| `test_nuclear_combination.py` (free-proton limit, isoscalar symmetry, factor A and a lead value, x conversion; member-by-member ratio against a hand value and against divided bands on a correlated toy; replica headline by prescription; refusals for different sets, mixed error types or CL, baseline mismatch, unpaired members, replica over external proton, average-nucleon grids; rejections) | pass |
+
+Independent review (a read-only agent with all six sources): no wrong formula. Fixed before the commit, each code fix
+with a test that failed first: an average-nucleon grid could be combined again (now refused; the input declares
+`grid_kind`); a replica set could be paired with an external proton set (refused); the replica headline was the mean
+and standard deviation where nNNPDF3.0 prescribes the median and central 68% interval (the prescription is now an
+input); `convert` accepted x_A > 1, M_A < M_N and negative values, `ratio` negative denominators. Page fixes: the
+nNNPDF3.0 baseline is an NNPDF3.1-methodology variant, not NNPDF4.0; EPPS21's proton pairing (Eq. 40) spelled out;
+sets have no support above x_N = 1; isoscalar-corrected data need theory at Z = A/2; nCTEQ15HQ states no tolerance;
+locators corrected. Not run: live routing for the 3 Th16 cases (paid; pending approval).
+
+## HADRON-PHASE2 (2026-10-23; branch `feat/hadron-phase2-dy`)
+
+Hadron-structure plan, phase 2 (Th15, Drell-Yan), macOS 26.5 arm64, Python 3.13, constructed inputs only (software
+checks; no physical validity). Sources read in full text 2026-10-23: PDG 2026 "Cross-Section Formulae" (Eqs. 51.2,
+51.3, 51.25, 51.40; it has no explicit Drell-Yan formula), Peng et al. arXiv:1511.08932v3 (Eqs. 1-7), Aad et al.
+arXiv:1606.00689v1 (Sec. 1, Eqs. 1-5), Faccioli et al. arXiv:1006.2738v1 (Eqs. 18-22, 25-31) and arXiv:1005.2601v1
+(Eq. 8); journal references confirmed at arXiv, first author of 1606.00689 at INSPIRE-HEP. Derived here and marked so:
+the LO cross section from Eq. 51.3, the colour average and Eq. 51.40; the x_F definitions and Jacobians; the lab shift;
+the lepton-swap behaviour; the exact non-negativity condition of the angular distribution.
+
+| Check | Result |
+|---|---|
+| `test_drell_yan_lo.py` (hand value; normalization against PDG's 86.8 nb / s within 2e-3, independent of the code's constant; Jacobians and x_F against four-vectors; round trips; fixed-target lab shift; y symmetry; LO scaling; closed-form y integral within 1e-6; pd/pp response to dbar/ubar; 13 refusals and rejections) | pass |
+| `test_dy_angular_frames.py` (rotation angle against boosted axes; Eq. 21 against a direct numerical rotation, 1e-9; HX -> CS sign end to end on boosted axes; invariants and round trip; Lam-Tung frame independence; allowed domain against a 300-point sphere scan) | pass |
+
+Independent review (a read-only agent; both PDFs, an independent derivation and an end-to-end frame check): no wrong
+formula or number. Fixed before the commit, each with a test that failed first: the allowed-domain check used only the
+Eq. 22 bounds and accepted distributions negative on part of the sphere (now also W >= 0 through the eigenvalues of
+I + M; the scan showed that neither condition implies the other); two point specifications, beams with no
+centre-of-mass frame (an uncaught division by zero) and a resonance window with LO > HI were accepted. Page fixes: Peng
+et al. apply non-coplanarity to the collider data only; the lepton swap flips A_7 as well; mu(-y) = -mu(y) only for
+symmetric beams; at q_T = 0 and y < 0 the HX axis is antiparallel to the CS axis; Peng et al. Eq. 7 cited for the
+A_i relations. Not run: live routing for the 4 Th15 cases (paid; pending approval).
+
+## HADRON-PHASE1 (2026-10-23; branch `feat/hadron-phase1-dis` from main `4ff6ee6a`)
+
+Hadron-structure plan, phase 1 (Th14, unpolarized inclusive DIS), macOS 26.5 arm64, Python 3.13 (miniconda), on
+constructed inputs only: these are software checks and establish no physical validity.
+
+Sources read in full text 2026-10-23: PDG 2026 "Structure Functions" review (pages 1-16, Eqs. 18.1-18.25) and
+Schienbein et al., arXiv:0709.1775v2 (Eq. 3, Sec. 2.2, Sec. 4, App. A). Derived here and marked so on the page: the
+polarization dependence through lambda -> P_e (NC) and eta^CC = 2 (1 +/- P_e) eta_W (CC), d2sigma/dx dQ^2 =
+(y / Q^2) d2sigma/dx dy, the Adler and GLS LO integrands from Eq. 18.19, the boson-gluon-fusion threshold.
+
+| Check | Result |
+|---|---|
+| `test_structure_functions_lo.py` (photon hand value, charge symmetry with antiquarks, e+/e- xF_3 sign, polarized NC through charge times P_e, photon limit of gamma-Z, CC normalization against the parton form G_F^2/(2 pi x) prop^2 x[(ubar+cbar)+(1-y)^2(d+s)], CC polarization scaling, nucleus limits, 13 rejections; relative 1e-12) | pass |
+| `test_sum_rules.py` (momentum, number, Adler, GLS on Beta-function toys within 5e-4; exact power-law extrapolation; divergence and an un-runnable check reported as incomplete; violation exit 1) | pass |
+| `test_hadron_structure_th14.py` (conditional convention keys skipped by `theory.conventions_incomplete`, page format) | pass |
+| `run_all_checks.py --no-cli --jobs 6` | 5033 tests, 4843 pass, 187 skipped; the 3 failures and the `reference_inventory` fail were the stale inventory, regenerated and rerun (pass) |
+| `run_all_checks.py --part static`, `check_wiring.py --since 4ff6ee6a`, `check_routing_static.py` (433 cases), ruff 0.16.10 and mypy 2.4.0 on core and contracts | pass |
+
+Independent review (a read-only agent that did not write the material, checking against both source PDFs and an
+independent recalculation): no wrong formula, sign, normalization, coupling or W assignment. Fixed before the commit
+with a test that failed first: a requested sum-rule check that could not run exited 0 (now incomplete, exit 3);
+G_F, M_Z, M_W <= 0 and sin^2 theta_W outside (0, 1) were accepted (now rejected); the page did not say that the TMC
+review defines F_L^TMC = r^2 F_2^TMC - 2x F_1^TMC. Wording fixed: GM-VFNS variant names are not in the PDG text;
+"at large Q^2" restored; the Kretzer-Reno attribution of Eq. 23; the hadronic threshold marked as derived. Deferred:
+`--s` silently overrides beam energies; negative parton values are accepted without a warning.
+
+Contracts: the 13 new keys are core `convention_keys` and also `conditional_convention_keys`, which
+`theory.conventions_incomplete` skips, so existing theory-specs gain no warning. Not run: the live routing run for the
+description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
+`tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
+
+## 0.38.0 release check (2026-10-24, E2 and the CI lock)
+
+Release branch `release/0.38.0` from main `38cbff8e` (main CI green). It ships #271: the maintainer's decisions on the
+four spec questions of the M3 reviews (derived requirements `covered_by`, hard-constraint `subsystems`, the ADQ-02
+offset value check, Example A's basis note) and the CHN-16 automation (`evaluate_design.py calibration`); contracts
+3.12.0, adequacy table 1.1.0. The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.38.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.38.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5244 tests in 437 modules, 5108 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5244 tests, 5016 pass, 0 failures, 228 skipped |
+
+## 0.37.0 release check (2026-10-24, E2 and the CI lock)
+
+Release branch `release/0.37.0` from main `6aaef412` (main CI green). It ships #265-#269: the hep-detector system
+design loop (detector system design spec v2, milestones M0-M4; contracts 3.11.0). The ams02-research companion needs
+no change (it requires hep-research >=0.11.0).
+
+What changed in the release branch: version 0.37.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.37.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5234 tests in 436 modules, 5098 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5234 tests, 5006 pass, 0 failures, 228 skipped |
+
+## 0.36.0 release check (2026-10-24, E2 and the CI lock)
+
+Release branch `release/0.36.0` from main `01b66bc2` (main CI green). It ships #263: hadron structure phase 7
+(S12 PDF reweighting and profiling, S13 global fits, `covariance_fit.py` t0 mode; VALIDATION HADRON-PHASE7), the last
+phase of the hadron-structure plan. Minor release with no contract change (contracts 3.10.0). The ams02-research
+companion needs no change.
+
+What changed in the release branch: version 0.36.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.36.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5104 tests in 427 modules, 4968 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5104 tests, 4876 pass, 0 failures, 228 skipped |
+
+## 0.35.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.35.0` from main `f09c69d0` (main CI green). It ships #261: hep-theory hadron structure
+phase 6 (Th19 small x, Th20 exclusive processes and GPDs; VALIDATION HADRON-PHASE6). Minor release with no contract
+change (contracts 3.10.0). The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.35.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.35.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5091 tests in 425 modules, 4955 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5091 tests, 4863 pass, 0 failures, 228 skipped |
+
+## 0.34.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.34.0` from main `9f627aaf` (main CI green). It ships #259: hep-theory hadron structure
+phase 5 (Th18 SIDIS and TMDs, fragmentation functions; profile `theory:tmd-gaussian-lo`; VALIDATION HADRON-PHASE5).
+Minor release with no contract change (contracts 3.10.0). The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.34.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.34.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5077 tests in 423 modules, 4941 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5077 tests, 4849 pass, 0 failures, 228 skipped |
+
+## 0.33.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.33.0` from main `10d02330` (main CI green). It ships #257: hep-theory hadron structure
+phase 4 (Th17 polarized DIS; profiles `theory:dis-parton-model` and `theory:drell-yan-lo`; VALIDATION HADRON-PHASE4).
+Minor release with no contract change (contracts 3.10.0). The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.33.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.33.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 28 pass, 0 fail, 2 skipped (CLI host checks); 5066 tests in 421 modules, 4930 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 28 pass, 0 fail, 2 skipped; 5066 tests, 4838 pass, 0 failures, 228 skipped |
+
+## 0.32.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.32.0` from main `a022d0c1` (main CI green). It ships #255: hep-theory hadron structure
+phase 3 (Th16, nuclear targets: `nuclear-parton-effects.md`, nPDF section of `pdfs-and-lhapdf.md`,
+`nuclear_combination.py`; VALIDATION HADRON-PHASE3). Minor release with no contract change (contracts 3.10.0). The
+ams02-research companion needs no change.
+
+What changed in the release branch: version 0.32.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.32.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 26 pass, 0 fail, 2 skipped (CLI host checks); 5062 tests in 421 modules, 4926 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 26 pass, 0 fail, 2 skipped; 5062 tests, 4834 pass, 0 failures, 228 skipped |
+
+## 0.31.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.31.0` from main `81ea0cf8` (main CI green). It ships #253: hep-theory hadron structure
+phase 2 (Th15, Drell-Yan: `drell-yan.md`, `drell_yan_lo.py`; VALIDATION HADRON-PHASE2). Minor release with no contract
+change (contracts 3.10.0). The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.31.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is now `0.31.0`; examples regenerated
+with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` drifted at 1e-14 and was restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 26 pass, 0 fail, 2 skipped (CLI host checks); 5053 tests in 420 modules, 4917 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 26 pass, 0 fail, 2 skipped; 5053 tests, 4825 pass, 0 failures, 228 skipped |
+
+## 0.30.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.30.0` from main `ea8d15ad` (main CI green). It ships #251: hep-theory hadron structure
+phase 1 (Th14, unpolarized inclusive DIS: `hadron-structure-essentials.md`, `dis-structure-functions.md`,
+`structure_functions_lo.py`, `sum_rules.py`; VALIDATION HADRON-PHASE1). Minor release with contracts 3.10.0 (additive:
+13 core convention keys and the `conditional_convention_keys` vocabulary). The ams02-research companion (requires
+hep-research `>=0.11.0`, profile contracts `>=2.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.30.0:** both manifests, `pyproject.toml`, the README, three assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **Contracts 3.10.0:** `CONTRACTS_VERSION` with its history comment, `contracts/vocab/core.json`, the two pinned
+  tests, the fixtures (contract version only).
+- **CHANGELOG:** `Unreleased` is now `0.30.0`, with an upgrade summary.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change; `unfolding-coverage` drifted at 1e-14 and was restored.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 26 pass, 0 fail, 2 skipped (CLI host checks); 5034 tests in 418 modules, 4898 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 26 pass, 0 fail, 2 skipped; 5034 tests, 4806 pass, 0 failures, 228 skipped |
+
+## 0.29.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.29.0` from main `eba95d89` (main CI green). It ships #240-#249: hep-theory Th13 (cosmic-ray
+propagation, cross sections, solar modulation, new-physics interpretation, `bartels_rotation.py`) with every source read
+in full text (TH13-SOURCES); architecture step 1, the wiring lint `tools/check_wiring.py` with no known gap left; the
+AMS-optionality CI job selected per module (plan 1.1.0); decisions D1-D3 and T2 with its live routing evaluation (D7);
+the `data-pipelines.md` pointer removed. Minor release with no contract change (contracts 3.9.0). The ams02-research
+companion (requires hep-research `>=0.11.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.29.0:** both manifests, `pyproject.toml`, the README, two assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **CHANGELOG:** `Unreleased` is now `0.29.0`, with an upgrade summary.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change; `unfolding-coverage` drifted at 1e-14 and was restored.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 26 pass, 0 fail, 2 skipped (CLI host checks); 5013 tests in 415 modules, 4877 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 26 pass, 0 fail, 2 skipped; 5013 tests, 4785 pass, 0 failures, 228 skipped |
+
+## 0.28.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.28.0` from main `f1daac78` (main CI green). It ships #238: the `model-card` and
+`run-lineage` suites, model-only bundles and result bindings are removed (value gate Shrink, architecture section
+13.4 steps 2 and 3), and readers refuse them with the reason. Minor release, contracts 3.9.0: sidecar formats are
+removed, with no artifact type, vocabulary term, envelope field or capability change. The ams02-research companion
+(requires hep-research `>=0.11.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.28.0:** both manifests, `pyproject.toml`, the README, the assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **Contracts 3.9.0:** `contracts/__init__.py` (with its comment), `contracts/vocab/core.json`, the two pinned tests,
+  the templates, and the fixtures (`make_fixtures.py`, E2; only the version pairs change).
+- **CHANGELOG:** `Unreleased` is now `0.28.0`.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change; `unfolding-coverage` drifted at 1e-14 and was restored.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4979 tests in 412 modules, 4843 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4979 tests, 4751 pass, 0 failures, 228 skipped |
+
+## 0.27.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.27.0` from main `568a7356` (main CI green). It ships:
+- #235: the value gate re-measured on 0.26.0 (I = 0 of 28);
+- #236: the Shrink decision, which deprecates the `model-card` and `run-lineage` suites (registry lifecycle
+  `deprecated`, a CLI notice on stderr).
+
+Minor release with no contract change (contracts 3.8.0). The ams02-research companion (requires hep-research
+`>=0.11.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.27.0:** both manifests, `pyproject.toml`, the README, two assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **CHANGELOG:** `Unreleased` is now `0.27.0`.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change; `unfolding-coverage` drifted at 1e-14 and was restored.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 5026 tests in 414 modules, 4889 pass, 0 failures, 137 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 5026 tests, 4797 pass, 0 failures, 229 skipped |
+
+## 0.26.0 release check (2026-10-23, E2 and the CI lock)
+
+Release branch `release/0.26.0` from main `8f03228b` (main CI green). It ships:
+- #225: the value-gate decision changed to Continue;
+- #226 to #228: R2 formats, the 1.1.0 input checks, and the rule fixes G3, G17, G4 and G5;
+- #229 and #230: selective pull-request CI;
+- #231: the run-lineage fixes G6, G7, G8, G13 and A3;
+- #232 and #233: R3, with G1 under the broad scope, G14, catalog 1.1.0, the stable 1.1.0 suites, full mutation
+  testing and the report-check fix.
+
+Minor release, contracts 3.8.0:
+- check-context 1.1.0, result binding 1.1.0, registry 1.2.0 and catalog 1.1.0;
+- three terms added to the `response_corrections` vocabulary;
+- no artifact type, envelope field or capability change.
+
+The ams02-research companion (requires hep-research `>=0.11.0`) needs no change.
+
+What changed in the release branch:
+- **Version 0.26.0:** both manifests, `pyproject.toml`, the README, the assets, and the theory-profile scripts
+  (profile artifacts regenerated).
+- **Contracts 3.8.0:** `contracts/__init__.py` (with its comment), `contracts/vocab/core.json`, the two pinned tests,
+  the templates, and the fixtures (`make_fixtures.py`, E2; only the version pairs change).
+- **CHANGELOG:** `Unreleased` is now `0.26.0`, with a "Before you upgrade" summary.
+- **Examples:** regenerated with E2 (`bc-propagation-fit` with the CI lock). Only version strings and the hashes that
+  cover them change. `unfolding-coverage` drifted at 1e-14 and was restored; `stats-benchmarks` has no generator.
+- **Reference inventory:** regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 5024 tests in 414 modules, 4887 pass, 0 failures, 137 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 5024 tests, 4795 pass, 0 failures, 229 skipped |
+
+## 0.25.1 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.25.1` from main `ed1f19d9` (#222 architecture clean-up edition; #223 value gate of the
+cross-artifact check, AI-planted, I = 0 of 28, outcome Stop chosen by the maintainer, checker marked experimental;
+main CI green). Patch release, contracts 3.7.0 unchanged; no behavior change; no ledger entry or advisory changes
+release (none is unreleased). The ams02-research companion (requires hep-research `>=0.11.0`) needs no change.
+
+What changed: version 0.25.1 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.25.1`. Examples regenerated (E2;
+`bc-propagation-fit` with the CI lock): only version strings and the hashes that cover them change;
+`unfolding-coverage` drifted at 1e-14 and was restored.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4955 tests in 410 modules, 4819 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4955 tests, 4727 pass, 0 failures, 228 skipped |
+
+## 0.25.0 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.25.0` from main `0414f783` (#220 cross-artifact check Phase 0, release R1: version guard,
+rule source digests and registry 1.1.0, P6, default snapshots, cheap check-report refusals, the code-name rename;
+main CI green). Minor release, contracts 3.7.0 (registry 1.1.0; no artifact type, vocabulary term, envelope field or
+capability change); no ledger entry or advisory changes release (none is unreleased). The ams02-research companion
+(requires hep-research `>=0.11.0`) needs no change.
+
+What changed: version 0.25.0 in both manifests, `pyproject.toml`, the README, the assets and the theory-profile
+scripts (profile artifacts regenerated); contracts 3.7.0 in `contracts/__init__.py` (with its comment),
+`contracts/vocab/core.json`, the two pinned tests, the templates and the fixtures (`make_fixtures.py`, E2); CHANGELOG
+`Unreleased` is `0.25.0`. Examples regenerated (E2; `bc-propagation-fit` with the CI lock): only version strings and
+the hashes that cover them change; `unfolding-coverage` drifted at 1e-14 and was restored. Reference inventory
+regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4955 tests in 410 modules, 4819 pass, 0 failures, 136 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4955 tests, 4727 pass, 0 failures, 228 skipped |
+
+## 0.24.1 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.24.1` from main `a183b6ba` (#216 weekly ledger-evidence job and TH9-MASSES PDG record; #217
+core/stats trace forwarding; #218 oracles not from transcribed formulas for DR-WP1-01, DR-WP1-02, DR-WP2-06-CALO,
+DR-WP2-06-MS kept C3 by maintainer decision; main CI green on all three). Patch release, contracts 3.6.0 unchanged; no
+ledger entry or advisory changes release (none is unreleased). The ams02-research companion (requires hep-research
+`>=0.11.0`) needs no change.
+
+What changed: version 0.24.1 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.24.1`. Examples regenerated (E2; `bc-propagation-fit`
+with the CI lock): only version strings and the hashes that cover them change. Reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4909 tests in 408 modules, 4775 pass, 0 failures, 134 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4909 tests, 4658 pass, 0 failures, 251 skipped |
+
+## 0.24.0 release check (2026-10-22, E2 and the CI lock)
+
+Release branch `release/0.24.0` from main `d0a9f799` (#201 REVIEW-REFS-3; #202-#205 and #207-#212 the sci-fix
+improvement plan, contracts 3.5.0, advisory format /2; #206 PERIODICITY-REFIT and the namespaced-efficiency warning;
+#213 expert slot, per-review configuration and filter-packet scrub, contracts 3.6.0; #214 REVIEW-REFS-4). Minor
+release. The ams02-research companion (requires hep-research `>=0.11.0`, profile contracts `>=2.0`) needs no change.
+
+What changed: version 0.24.0 in both manifests, `pyproject.toml`, the README, the two assets and the theory-profile
+scripts (profile artifacts regenerated); CHANGELOG `Unreleased` is `0.24.0`; the four unreleased ledger entries
+(SCAN-VERDICT-ORDER, SCAN-MISSING-MARKER, ADVISORY-MATCH-V2, PERIODICITY-REFIT) record release 0.24.0; advisory
+SFA-2026-038 (PERIODICITY-REFIT) gets its `fixed` event 0.24.0. Examples regenerated (E2; `bc-propagation-fit` with
+the CI lock): only version strings and the hashes that cover them change (`unfolding-coverage` left as committed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail, 2 skipped (CLI host checks); 4904 tests in 408 modules, 4770 pass, 0 failures, 134 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 25 pass, 0 fail, 2 skipped; 4904 tests, 4678 pass, 0 failures, 226 skipped |
 
 ## 0.23.0 release check (2026-10-22, E2 and the CI lock)
 
@@ -2510,6 +3495,85 @@ scikit-learn 1.9.1.
 | `tools/reference_inventory.py --check` | pass (218 references) |
 | touched modules (tail_extrapolation, train_bdt, train_bdt_extensions, write_ml_artifact) | E2: 56 run, OK, 25 skipped; CI venv: 56 run, OK, 1 skipped |
 | `run_all_checks.py --no-cli --jobs 6`, E2, at `33bd6464` | 25 pass, 0 fail, 2 skipped (CLI host checks); 4515 tests in 383 modules, 4384 pass, 0 failures, 131 skipped; profile tests all pass |
+
+## TH13-SOURCES (2026-10-23; branch `fix/th13-source-verification` from main `1c82b194`)
+
+The Th13 pages (`cosmic-ray-phenomenology.md`, `solar-modulation-models.md`, `cosmic-ray-new-physics.md`) had been
+written from a summarizing fetch (2026-10-20), which hep-citations counts as a search snippet. Every cited source was
+re-read in full text on 2026-10-23: 49 arXiv PDFs at the versions cited (export.arxiv.org, generic User-Agent), the
+PoS(ICRC2025)234 PDF, the WDC Kp/Ap format description and the Caltech ACE Bartels table; Usoskin et al. 2005 (JGR,
+paywalled) was not opened. Five independent read-only agents checked every attribution, locator, number and paper
+characterization against the texts (about 165 statements); each correction below was rechecked against its quoted
+passage before the edit. Severity S3 (guidance), ledger `documentation_fixes` TH13-SOURCES.
+
+| Page | Statements | Corrected |
+|---|---|---|
+| phenomenology, propagation codes | 25 | GALPROP 90 equations are the framework up to v56, v57 adds data (Porter et al. 2022, Sec. 2, abstract); w taken as 1, only V_A^2/w enters (SM98 Sec. 2); DRAGON2 D_pp prefactor and beta^eta form found (App. C.9 Eq. C.27, App. C.8 Eq. C.23), removed from the "not verified" list; SM98 locator Sec. 3.2 |
+| phenomenology, cross sections | 53 | opt12 has null Fe to Li and undershoots Fe to Be, B (Maurin et al. 2022, Sec. 3.2.2, Table 1); opt12 is Korsmeier and Cuoco's default, not GALPROP's; the 3% is the Si-to-Fe progenitor change; "can reach" 20-50%; Evoli et al. 2019 claim is in Sec. V (the abstract reads the other way); Korsmeier and Cuoco A for Li, Be, B profiled, not flat priors; source-term uncertainty "up to" +-20%; Orusa et al. cross section is p + p to e+-, AAfrag 2021 version |
+| phenomenology, fits and metadata | 5 + 49 rows | Cuoco et al. 2019 significance without vs with correlations; first authors M.-J. Zhao, Y.-C. Ding; S. Della Torre (not Boschini) first author of arXiv:1612.08445; D'Angelo, Oliva, Masi order |
+| solar modulation | 29 | Gieseler et al.: phi depends on LIS, energy range and magnetic epoch (not cycle phase); Tomassetti et al.: the +-0.8-month systematic is inside the +-1.2 and the fit is in Sec. 3; the LIS-dependence claim now rests on Usoskin et al. 2017 Sec. 6.3 (the unopened 2005 paper's "factor 2" and "linear conversion" dropped); Bartels epoch and 2426 = 2011-05-15 confirmed (270 Caltech rows, 0 mismatches) |
+| new physics | 32 | L scaling in Calore et al. Sec. 4; BIG to QUAINT shift (Sec. 5.1) vs shape (Sec. 5.2); Cuoco et al. 2017 Delta chi^2 = 25 without systematics; Cuoco et al. 2019: fell to 3 sigma with updated cross sections, correlations matter more; Di Mauro et al. 2016 "comparable or stronger"; Hooper et al. 2009 "could plausibly"; Profumo et al. 2018 radially dependent diffusion (not two-zone); Manconi et al. 1 sigma band of simulated populations |
+
+Journal references: the five not printed in the PDFs or found in citing papers (Evoli et al. 2020, Maurin et al.
+2022, Orusa et al. 2022, Tomassetti et al. 2017, Ding et al. 2021) were then confirmed at three primary records (arXiv
+journal-ref/DOI, INSPIRE-HEP publication info, Crossref), and all 16 DOIs on the list resolve at Crossref to the cited
+paper (first author and title); Maurin et al. (A&A 668, A7) and Ding et al. (JCAP 09 (2021) 005) gained their volume
+and article. Not changed: the instrument name
+in one collaboration title stays replaced (layering rule). The source texts stay outside the repository.
+A separate read-only agent then checked the whole diff against the source texts: one overstatement (the Usoskin et
+al. 2017 series comparison: three causes, not the LIS alone), one locator (Delta chi^2 = 25 is in the letter's main
+text) and five precision points (DRAGON2's Alfvenic option, 15-21 times, list locators, versions, "slightly") were
+fixed before the commit.
+Follow-ups the same day: the HAWC D100 = (4.5 +- 1.2) x 10^27 cm^2/s (arXiv:1711.06223, Table 1 and text, joint fit);
+the Wilcox L and R model assumptions from http://wso.stanford.edu/Tilts.html (page updated 2025-10-23); the antiproton
+source-term search rerun at INSPIRE-HEP (title queries, date after 2025-06) and the arXiv API (abstract query, newest
+first): nothing peer-reviewed after the cited work (a p-He measurement conference paper, 2025, is data, not a source
+determination); AAfrag 2021 = Koldobskiy et al., arXiv:2110.00496v2 (PRD 104 (2021) 123027, INSPIRE); Genolini et al.
+2018 Sec. II.B ties opt12/opt22 to WKS93/TS98 where Maurin et al. 2022 Sec. 2.3 names WNEW 1998/YIELDX 2000; Maurin
+et al. 2022's reference list labels the Weinrich 2020 papers the other way round. Last two items: Usoskin et al.
+2005 read from the authors' institutional copy (https://cosmicrays.oulu.fi/phi/2005JA011250.pdf; App. A: LIS models
+differ by a factor of 2 at low energy, Fig. A1; linear phi conversions "only an approximation", Eq. A4), and its claim
+restored with those locators; the Planck 2018 limit read in arXiv:1807.06209v4 (Sect. 7.9: p_ann < 3.2e-28 cm^3 s^-1
+GeV^-1, 95%, TT,TE,EE+lowE+lensing+BAO, Eq. 89c; Fig. 46) and cited. No listed source remains unread.
+
+## REVIEW-REFS-4 (2026-10-22; branch `fix/review-refs-4` from main `c2fc9f5c`)
+
+Five references were the documents of review batch 1 (`--models sonnet,haiku --lens-model design=sonnet
+--filter-model opus`), run with a prospective expert-slot test (`--own-config --expert-model opus`, a separate review
+of the same text) and an out-of-driver Sonnet filter on the same pooled findings; all outside the repository. A blind
+Opus adjudicator per document judged the pooled findings of both arms: 41 issues upheld (4 substantive), none named
+that no finding raised. Scores: lens slots 79 findings, precision 0.65; kept by the Opus filter 42, precision 0.92 (2
+issues lost, minor and trivial); kept by the Sonnet filter 53, precision 0.69; expert slot 9 findings, 9 upheld, 4
+substantive, 3 of them raised by no lens slot, at about 10% of the lens slots' tokens. The receipt check rejected 2 of 5
+Opus filter attempts with `read_outside_packet` (recursive greps over the mechanism files; one read the installed copy
+of the page); both retries were accepted. The 16 findings of the earlier retrospective expert-slot test were rechecked
+against the current text of ten references: 13 fixed here, 3 already fixed. Each change was rechecked against its source
+before the edit; for a partly correct finding only the upheld part changed. Severity S3, ledger `documentation_fixes`
+REVIEW-REFS-4.
+
+| Reference | Issues | Main changes | Sources (locators) |
+|---|---|---|---|
+| hep-detector `performance-metrics-and-residual-diagnostics.md` | 8 | biased residual positively correlated (C = V_pred, substantive); its covariance singular, fit chi^2 with V_meas and n - n_par; unbiased residual: the exclusive prediction is uncorrelated; pull width 1 needs the right covariance, not Gaussian errors; purity with correct identity; acceptance vs geometric factor; calorimeter residual coverage; escaped table pipes | least-squares algebra (straight-line toy, expert record); `skills/hep-detector/references/*` technology files |
+| hep-detector `geant4-study-protocol.md` | 8 | QGSP_BIC/FTFP_BERT coincide for pions below 12 GeV and nucleons 1.5-12 GeV (substantive); the convergence gate uses the finest supplied runs and the scope check ignores the observable and an omitted thickness (substantive); output hashes checked for presence only; _HPT/_AllHP and Shielding lists use ParticleHP; t_max correlation conservative only for rho >= 0; scan step limit; vacuous Done-when | `check_geant4_study.py` HADRONIC table (75-80), `convergence()`, `scope_within()`; `contracts/validate.py _scope_inside`; `contracts/dependencies.py`; `geant4-physics-rules.json`; `adapters/geant4/assets/geant4_run.py` 457, 469; Var(t) cross term |
+| hep-detector `response-and-forward-folding.md` | 7 | era mixing exact only when every era-varying factor is in R_t or w_tj; A*eps*T or stacking for selected-normalized eras (substantive); "pass" allows unresolved findings; `--strict`; `periods` vs the `mixing` record; species "outside" wording; test citation; S1/S6 labels | `mix_period_responses.py`, `species_response.py`, `contracts/validate.py`, `response_adapter.py` runs on a fixture copy; 2x2 counterexample (expert record) |
+| hep-detector `core-detector-equations.md` | 10 | track-fit chi^2 uses the measurement covariance (substantive); Bethe range 0.1 < beta*gamma < 1000 and units; exact TOF difference, 1/p^2 asymptotic; delta omitted by `pid_separation_power.py` only; labels used; purity renamed; E1 wording; "single home" narrowed | PDG RPP 2024 chapter 34 (text after eq. 34.5); `geant4_benchmarks.py` 143-159; `pid_separation_power.py` 244-248; TOF recomputation |
+| hep-statistics `astroparticle-statistics.md` | 8 | one-sided p-values (two-sided 1.33e-2); mixture needs the spectral index fixed too (Davies); Braun et al. used a flux-model background; alpha = t_on/t_off; RA scrambling needs uniform RA acceptance; sqrt(2) sentence; RooFit pointer; internal reference removed | `li_ma_significance.py` run; arXiv:0801.1604 Eq. 6 |
+| ten references (retrospective expert findings) | 13 | `nuisance-modeling.md` code1/code4 difference; `time-series-inference.md` charge-sign comparison and harmonic trials; `front-end-electronics-and-signal-processing.md` unipolar anode signals, induced-charge sign; `calibration-and-alignment.md` most probable value vs angle, electron-only E/p symmetry; `triggers-luminosity-pileup.md` tag-and-probe shapes, reweighting check; `statistical-inference-for-physics.md` Bayesian vs profile intervals; `analysis-design.md` Z_A for discovery, non-nested trigger bootstrap | pyhf code1/code4 run; PDG RPP 2024 eq. 34.12; Z_A computation; trigger-efficiency algebra |
+
+Also: the G4R-BIC-RANGE and G4R-HP-NEUTRON `concern` strings in `geant4-physics-rules.json` (text only), the
+reference inventory, and the hep-authoring `independent-review.md` recommendation of `--expert-model` (with the strongest
+model, alongside the lens slots and `--filter-model`) and of an Opus over a Sonnet filter.
+
+Code follow-ups (not changed here): `convergence()` should use the declared values and require a run for each;
+`scope_within()` and `_scope_inside()` should compare the observable and an omitted thickness; `dependencies.py`
+should compare output hashes with the files; an unresolved `mc_stat` on an unfolding response could fail the gate;
+`mix_period_responses.py` could warn on acceptance x time weights for selected-normalized eras.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 venv | 25 pass, 0 fail, 2 skipped (CLI host checks) |
+| `run_all_checks.py --no-cli --jobs 6`, CI lock venv | 25 pass, 0 fail, 2 skipped (CLI host checks) |
+| `unittest discover -s tests/skills`, E2 | 2297 tests, OK (74 skipped) |
 
 ## REVIEW-REFS-3 (2026-10-22; branch `fix/live-reference-issues` from main `a53af7e0`)
 

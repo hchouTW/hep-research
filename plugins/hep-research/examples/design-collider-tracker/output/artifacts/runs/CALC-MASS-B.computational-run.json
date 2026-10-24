@@ -1,0 +1,86 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "collider-tracker-v1-CALC-MASS-B-run",
+ "artifact_type": "computational-run",
+ "objective": "detector system design: computational-run written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-B.json",
+   "sha256": "427a2eca2b75c0ba842d91dbb2701d952f690201ee1c7b6444b75ce6e8ff59c8",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-B",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "outputs/CALC-MASS-B.json"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "candidates/cand-B.json",
+    "sha256": "427a2eca2b75c0ba842d91dbb2701d952f690201ee1c7b6444b75ce6e8ff59c8"
+   }
+  ],
+  "tools": [
+   {
+    "name": "design-estimates",
+    "version": "0.38.0"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-detector/scripts/design_estimates.py budget-sum --estimates 7000.0 9000.0 1480.0 --uncertainties 350.0 450.0 74.0 --rule linear --status synthetic"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "platform": "macOS-26.5"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "outputs/CALC-MASS-B.json": "e6cdaad088a557234f1c92eaccddbe064381bdf330ca16e0b7f073ea3287715d"
+  },
+  "argv": [
+   "python3",
+   "skills/hep-detector/scripts/design_estimates.py",
+   "budget-sum",
+   "--estimates",
+   "7000.0",
+   "9000.0",
+   "1480.0",
+   "--uncertainties",
+   "350.0",
+   "450.0",
+   "74.0",
+   "--rule",
+   "linear",
+   "--status",
+   "synthetic"
+  ],
+  "script_sha256": {
+   "skills/hep-detector/scripts/design_estimates.py": "a38665c9dab73d6138fb938b849e662411a021fd3cdffacfa3b73f2b880a84ab"
+  }
+ }
+}

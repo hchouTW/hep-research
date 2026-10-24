@@ -1,0 +1,288 @@
+{
+ "contract_version": "1.1.0",
+ "tool_id": "multiple-scattering",
+ "entry": "skills/hep-detector/scripts/multiple_scattering.py",
+ "operations": [
+  {
+   "operation_id": "resolution",
+   "summary": "Highland scattering, material budget, the scattering and intrinsic (Gluckstern) terms of sigma(R)/R, their crossover and the MDR from a JSON material stack",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "positionals": [
+     {
+      "position": 0,
+      "input": "stack"
+     }
+    ],
+    "options": [
+     {
+      "flag": "--rigidity",
+      "input": "rigidity"
+     },
+     {
+      "flag": "--beta",
+      "input": "beta"
+     },
+     {
+      "flag": "--charge",
+      "input": "charge"
+     },
+     {
+      "flag": "--mass",
+      "input": "mass"
+     },
+     {
+      "flag": "--species",
+      "input": "species"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "stack",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "JSON stack description",
+     "fields": [
+      {
+       "field": "field_tesla",
+       "kind": "magnetic-field",
+       "unit": "T",
+       "constraint": "> 0"
+      },
+      {
+       "field": "lever_arm_m",
+       "kind": "length",
+       "unit": "m",
+       "constraint": "> 0"
+      },
+      {
+       "field": "point_resolution_um",
+       "kind": "length",
+       "unit": "um",
+       "constraint": "> 0"
+      },
+      {
+       "field": "layers",
+       "kind": "parameter",
+       "unit": "n/a",
+       "constraint": "[{name, material, x_over_x0, measuring}]"
+      }
+     ]
+    },
+    {
+     "name": "rigidity",
+     "kind": "rigidity",
+     "unit": "GV",
+     "required": false,
+     "constraint": "rigidity at which to evaluate, > 0",
+     "default": 100.0
+    },
+    {
+     "name": "beta",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "fixed beta; excludes --mass"
+    },
+    {
+     "name": "charge",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "charge number z",
+     "default": 1.0
+    },
+    {
+     "name": "mass",
+     "kind": "mass",
+     "unit": "GeV",
+     "required": false,
+     "constraint": "mass, beta derived; excludes --species"
+    },
+    {
+     "name": "species",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "a species name or mass:charge"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "maximum_detectable_rigidity_gv",
+     "kind": "rigidity",
+     "unit": "GV"
+    },
+    {
+     "name": "mdr_intrinsic_only_gv",
+     "kind": "rigidity",
+     "unit": "GV"
+    },
+    {
+     "name": "total_relative_resolution",
+     "kind": "relative-resolution",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the computation failed or the stack's content is invalid (JSON with ok false)"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument, or a stack file that is missing or unreadable (JSON with error_kind invalid-input)"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   },
+   "design": {
+    "fidelity": "F1",
+    "figures_of_merit": [
+     {
+      "id": "maximum-detectable-rigidity",
+      "better": "larger",
+      "unit": "GV",
+      "bound": "estimate",
+      "denominator": {
+       "species": "string",
+       "mdr_definition": "string"
+      },
+      "value": {
+       "by_denominator": "mdr_definition",
+       "paths": {
+        "total": "maximum_detectable_rigidity_gv",
+        "intrinsic": "mdr_intrinsic_only_gv"
+       }
+      },
+      "uncertainty": {
+       "relative": 0.12,
+       "coverage": 0.6827,
+       "interval": "central",
+       "distribution": "gaussian"
+      },
+      "inputs": [
+       {
+        "input": "stack",
+        "from": {
+         "config": {
+          "object": {
+           "field_tesla": {
+            "parameter": {
+             "role": "bending",
+             "name": "field_T",
+             "unit": "T"
+            }
+           },
+           "lever_arm_m": {
+            "span": {
+             "parameter": {
+              "role": "tracking",
+              "name": "layer_positions_m",
+              "unit": "m"
+             }
+            }
+           },
+           "point_resolution_um": {
+            "parameter": {
+             "role": "tracking",
+             "name": "point_resolution_um",
+             "unit": "um"
+            }
+           },
+           "layers": {
+            "list": [
+             {
+              "zip": {
+               "name": {
+                "const": "measuring layer"
+               },
+               "material": {
+                "const": "declared"
+               },
+               "x_over_x0": {
+                "parameter": {
+                 "role": "tracking",
+                 "name": "layer_x_over_x0",
+                 "unit": "1"
+                }
+               },
+               "measuring": {
+                "const": true
+               }
+              }
+             },
+             {
+              "object": {
+               "name": {
+                "const": "passive material"
+               },
+               "material": {
+                "const": "declared"
+               },
+               "x_over_x0": {
+                "parameter": {
+                 "role": "tracking",
+                 "name": "passive_x_over_x0",
+                 "unit": "1"
+                }
+               },
+               "measuring": {
+                "const": false
+               }
+              }
+             }
+            ]
+           }
+          }
+         }
+        }
+       },
+       {
+        "input": "species",
+        "from": {
+         "species": "tool_name"
+        }
+       }
+      ],
+      "free_inputs": [
+       "status"
+      ],
+      "required_upstreams": [],
+      "assumptions": [
+       "Gluckstern intrinsic term for equally spaced layers (overstated by 5.4% at N = 4)",
+       "uniform field over the lever arm",
+       "Highland constant without its log term"
+      ],
+      "note": "ADQ-05: with Gluckstern (N < 10) the intrinsic term is too large and the MDR too low, so the operation is an estimate whose 12% relative uncertainty covers the Gluckstern bias"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -117,6 +117,7 @@ from pathlib import Path
 from statistics import NormalDist
 from typing import Any
 
+from core import trace
 from core.stats import _caps, _validate
 from core.stats._linalg import bisect, cholesky, solve
 from core.stats._poisson import MAX_MEAN, ppf
@@ -1984,7 +1985,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     result.setdefault("status", "ok")
     result.update(_caps.report())
-    print(json.dumps(result, indent=2))
+    print(json.dumps({**result, "trace": trace.provenance()}, indent=2))
     return {"ok": 0, "failed": 1, "incomplete": 3}[result["status"]]
 
 

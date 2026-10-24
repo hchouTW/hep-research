@@ -1,6 +1,8 @@
 {
- "format": "hep-research-scifix-advisory/1",
+ "format": "hep-research-scifix-advisory/2",
  "id": "SFA-2026-008",
+ "published": "2026-10-20T14:31:42Z",
+ "modified": "2026-10-22T02:56:00Z",
  "severity": "S1",
  "ledger": [
   "FC-MONOTONE"
@@ -43,9 +45,15 @@
   "artifact_types": [
    "statistical-result"
   ],
-  "extension_keys": [
-   "construction"
-  ]
+  "match": [
+   [
+    {
+     "path": "extension.construction",
+     "op": "exists"
+    }
+   ]
+  ],
+  "no_trace": "possibly-affected"
  },
  "remedy": "recompute Feldman-Cousins intervals with a release that has the fix (0.4.0 or later); only results with construction 'feldman-cousins' are concerned",
  "references": [

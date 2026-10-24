@@ -1,0 +1,186 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "dispm-theory-spec-fl-alpha-s",
+ "artifact_type": "theory-spec",
+ "objective": "Theory spec of LO F_2 and the O(alpha_s) longitudinal structure function F_L in theory:dis-parton-model (synthetic-only profile)",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:dis-parton-model",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "profiles": {
+   "theory:dis-parton-model": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-23",
+  "evidence_ids": [
+   "dispm:C01",
+   "dispm:C02",
+   "dispm:C03",
+   "dispm:C04"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "dispm-lo-parton-model-fl-alpha-s",
+   "description": "LO quark-parton-model F_2 (photon exchange) and the O(alpha_s) longitudinal structure function from the LO coefficient functions, in the Altarelli-Martinelli form: F_L(x, Q^2) = (alpha_s(Q^2)/(4 pi)) x^2 int_x^1 dz/z^3 [ 4 C_F F_2(z) + 8 sum_q e_q^2 (1 - x/z) z g(z) ], C_F = 4/3; F_2(z) = z sum_q e_q^2 (q(z) + qbar(z))",
+   "family": "dis-structure-functions"
+  },
+  "domain_profile": "theory:dis-parton-model",
+  "assumptions": [
+   "photon exchange only; massless quarks, n_f effectively massless flavours (zero-mass scheme)",
+   "leading twist: power corrections and target-mass corrections O(M^2/Q^2) dropped (PDG Eq. 18.21)",
+   "x^-1 F_L = C_L,ns (x) q_ns + <e^2> (C_L,q (x) q_s + C_L,g (x) g) with the O(alpha_s) coefficients of Moch, Vermaseren and Vogt (c_ns = 4 C_F x, c_ps = 0, c_g = 8 n_f x (1 - x)), mu_R = mu_F = Q",
+   "q_ns = sum (e_i^2 - <e^2>)(q_i + qbar_i): the non-singlet combination that reproduces LO F_2 (identified by this profile; the paper does not write it out)",
+   "parton densities and alpha_s are inputs; in this profile they are SYNTHETIC toys, not evolved in Q^2"
+  ],
+  "conventions": {
+   "unit_system": "natural-HEP: Q^2 in GeV^2; x, F_2, F_L and alpha_s are dimensionless",
+   "hbar_c_one": true,
+   "metric_signature": "not-applicable (no amplitude is computed; Q^2 = -q^2 > 0 as in PDG Sec. 18.1)",
+   "coupling_normalization": "alpha_s = g_s^2/(4 pi); coefficient functions expanded in a_s = alpha_s/(4 pi), C_L,a = sum_n a_s^n c_L,a^(n) [dispm:C04]",
+   "renormalization_scheme": "MS-bar as stated by Moch, Vermaseren and Vogt; the O(alpha_s) F_L coefficient functions used here are scheme independent [dispm:C04]",
+   "scales": "mu_R = mu_F = Q [dispm:C04]; alpha_s(Q^2) is an input per Q^2 point (toy values in the benchmark, not run)",
+   "energy_variable": "Bjorken x = Q^2/(2 M nu) and Q^2 = -q^2 (PDG Sec. 18.1)",
+   "frame": "not-applicable (Lorentz-invariant structure functions)",
+   "angle_definition": "not-applicable (no angular variable)",
+   "spin_treatment": "unpolarized lepton and nucleon",
+   "mass_approximation": "massless quarks (n_f effectively massless flavours); target mass neglected (O(M^2/Q^2) dropped, PDG Eq. 18.21)",
+   "target_normalization": "per nucleon: structure functions of one nucleon; the toy densities describe one invented nucleon",
+   "exchanged_bosons": "photon only (F_2^gamma of PDG Eq. 18.18); no Z or W exchange",
+   "em_coupling": "not-applicable (F_2 and F_L are defined without alpha; no cross section is computed)",
+   "structure_function_signs": "not-applicable (no xF_3 term for photon exchange)",
+   "heavy_quark_scheme": "zero-mass: all n_f flavours massless (toy n_f = 4); no heavy-quark mass effects",
+   "factorization_scheme": "MS-bar [dispm:C04]; at O(alpha_s) the F_L result does not depend on it",
+   "target_mass_treatment": "neglected",
+   "log_accuracy": "not-applicable (fixed order, no resummation)",
+   "dispm:observable": "F_2(x, Q^2) at O(alpha_s^0) = x sum_q e_q^2 (q + qbar) [dispm:C01]; F_L(x, Q^2) at O(alpha_s^1) = F_2 - 2 x F_1, in the Altarelli-Martinelli form derived in derivations/derivation-record.md",
+   "dispm:parton_densities": "number densities q(x), qbar(x), g(x) (not momentum densities x f); convolution C (x) f = int_x^1 dy/y C(y) f(x/y) [dispm:C02]; in this profile they are SYNTHETIC Beta-form toys"
+  },
+  "order": "F_L at O(alpha_s^1) (its leading order, absolute order alpha_s^1); F_2 at O(alpha_s^0)",
+  "parameters": {
+   "C_F": "4/3",
+   "n_f": 4,
+   "charges": {
+    "u": "2/3",
+    "d": "-1/3",
+    "s": "-1/3",
+    "c": "2/3"
+   },
+   "toy_densities": "benchmarks/toy-closed-form.json (SYNTHETIC)"
+  },
+  "scales": {
+   "mu_R": "Q",
+   "mu_F": "Q",
+   "source": "dispm:C04"
+  },
+  "derivation_status": "perturbative-argument",
+  "validity_domain": {
+   "kinematics": "Q^2 >> M^2 (leading twist), W^2 well above the resonance region; x not so small that small-x resummation matters, not so large that target-mass and higher-twist terms do (no numerical bound is derived here)",
+   "order": "F_L at its leading order only: NLO and NNLO coefficient functions (Moch, Vermaseren and Vogt Eqs. 4-10) are not included",
+   "inputs": "synthetic toy densities and toy alpha_s values; the numbers say nothing about a real nucleon"
+  },
+  "checks_run": [
+   {
+    "name": "change of variables z = x/y in int_x^1 dy/y C(y) f(x/y) gives int_x^1 dz/z C(x/z) f(z) (SymPy, generic C and f; manual substitution and Integral.transform)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "flavour algebra: q_ns + <e^2> q_s = sum e^2 (q + qbar), q_ns flavour-traceless, n_f = 3..6; <e^2> = 5/18 for n_f = 4, 6 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "coefficient-function route equals the Altarelli-Martinelli integrand identically (SymPy, generic F_2 and g)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "known limit: F_L linear in alpha_s, F_L = 0 at alpha_s = 0 (SymPy and numerical)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "positivity: integrand non-negative on x <= z <= 1 for non-negative densities, so F_L >= 0 (SymPy); F_L >= 0 on every toy point",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "F_L <= F_2 on every toy point (numerical; a property of the toy, not proven in general)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "adaptive quadrature against the exact SymPy closed form, 6 x points on SYNTHETIC Beta-form densities",
+    "result": "pass",
+    "tolerance": 1e-10
+   },
+   {
+    "name": "convergence study: Gauss-Legendre rule in ln z with 4..128 nodes converges to the closed form (error at 128 nodes below tolerance; stored in derivations/derivation.json)",
+    "result": "pass",
+    "tolerance": 1e-10
+   },
+   {
+    "name": "convolution route in the original variable y (no change of variables) equals the Altarelli-Martinelli form numerically",
+    "result": "pass",
+    "tolerance": 1e-10
+   },
+   {
+    "name": "units: x, Q^2-independent toy densities, F_2, F_L and alpha_s dimensionless",
+    "result": "pass",
+    "tolerance": "exact"
+   }
+  ],
+  "checks_not_run": [
+   "comparison with any published F_L value or table (none was read; the profile is synthetic-only)",
+   "comparison with measured F_L or F_2",
+   "NLO/NNLO coefficient functions, DGLAP evolution of the densities, heavy-quark mass effects, target-mass and higher-twist corrections",
+   "formal proof of the factorization formula (cited, not derived)"
+  ],
+  "references_read": [
+   {
+    "citation": "E.C. Aschenauer, R.S. Thorne and R. Yoshida, 'Structure Functions', in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+    "location": "Eq. (18.17) p. 4; Sec. 18.2.1 Eq. (18.18) p. 5; Sec. 18.2.2 Eqs. (18.21)-(18.22) p. 7",
+    "date_read": "2026-10-23"
+   },
+   {
+    "citation": "S. Moch, J.A.M. Vermaseren and A. Vogt, 'The Longitudinal Structure Function at the Third Order', arXiv:hep-ph/0411112v2, Phys. Lett. B 606 (2005) 123",
+    "location": "Eqs. (1)-(3) and surrounding text (printed pp. 1-2); <e^k> definition below Eq. (11) (p. 3)",
+    "date_read": "2026-10-23"
+   }
+  ],
+  "derivation_record": "derivations/derivation-record.md",
+  "inapplicable": [
+   "metric_signature",
+   "frame",
+   "angle_definition",
+   "em_coupling",
+   "structure_function_signs",
+   "log_accuracy"
+  ],
+  "neglected": [
+   "O(alpha_s^2) and higher coefficient functions",
+   "power corrections O(M^2/Q^2)",
+   "heavy-quark masses",
+   "Z exchange and gamma-Z interference",
+   "Q^2 evolution of the toy densities"
+  ]
+ }
+}

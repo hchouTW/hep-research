@@ -1,5 +1,5 @@
 {
- "plugin_version": "0.23.0",
+ "plugin_version": "0.38.0",
  "profile": {
   "id": "experiment:eic",
   "version": "0.1.0"
@@ -92,10 +92,13 @@
   "profiles/registry.json",
   "profiles/theory/cr-secondary-antiprotons/profile.json",
   "profiles/theory/cr-secondary-ratio/profile.json",
+  "profiles/theory/dis-parton-model/profile.json",
+  "profiles/theory/drell-yan-lo/profile.json",
   "profiles/theory/heliospheric-modulation/profile.json",
   "profiles/theory/higgs-bb-width/profile.json",
   "profiles/theory/qcd-r-ratio/profile.json",
-  "profiles/theory/qed-benchmark/profile.json"
+  "profiles/theory/qed-benchmark/profile.json",
+  "profiles/theory/tmd-gaussian-lo/profile.json"
  ],
  "foreign_profile_files_read": [],
  "pass": true,

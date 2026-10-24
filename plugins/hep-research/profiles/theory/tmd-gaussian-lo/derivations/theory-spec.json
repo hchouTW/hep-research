@@ -1,0 +1,197 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "tmdg-theory-spec-gaussian-tmd-lo",
+ "artifact_type": "theory-spec",
+ "objective": "Theory spec of Gaussian-ansatz TMDs at leading order without evolution (SIDIS F_UU,T, Cahn, Sivers, Drell-Yan q_T, Sivers sign change) in theory:tmd-gaussian-lo",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:tmd-gaussian-lo",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "profiles": {
+   "theory:tmd-gaussian-lo": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-23",
+  "evidence_ids": [
+   "tmdg:C01",
+   "tmdg:C02",
+   "tmdg:C03",
+   "tmdg:C04",
+   "tmdg:C05",
+   "tmdg:C06",
+   "tmdg:C07",
+   "tmdg:C08"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "tmdg-gaussian-tmd-lo",
+   "description": "Gaussian-ansatz TMD distribution and fragmentation functions with constant, flavour-independent widths, at leading order in alpha_s and without evolution: SIDIS F_UU,T with <P_T^2> = <p_perp^2> + z^2 <k_perp^2>, the Cahn cos(phi_h) term at O(k/Q), the Sivers asymmetry in the Gaussian Sivers model, the Drell-Yan q_T shape with <q_T^2> = <k1^2> + <k2^2>, and the SIDIS -> Drell-Yan Sivers sign change",
+   "family": "tmd-phenomenology"
+  },
+  "domain_profile": "theory:tmd-gaussian-lo",
+  "assumptions": [
+   "Gaussian k_perp and p_perp dependence, constant flavour-independent widths (Anselmino et al. Eqs. 34-35): a model, so the physics status is heuristic-argument",
+   "P_hT = z k_perp + p_perp, x = x_B, z = z_h at O(k_perp/Q) (Eq. 29); Cahn term kept at O(k_perp/Q)",
+   "one-photon exchange; massless partons; gamma = 2Mx/Q -> 0",
+   "Sivers function 2 N_q(x) h'(k) f(x, k), h' = sqrt(2e)(k/M') exp(-k^2/M'^2) (Eqs. 63, 68)",
+   "f_1T^perp,DY = -f_1T^perp,SIDIS (Trento Eq. 14): cited, not derived",
+   "Drell-Yan q_T: tree-level convolution of two Gaussian TMD PDFs, no soft factor"
+  ],
+  "conventions": {
+   "unit_system": "natural-HEP: transverse momenta in GeV, Gaussian widths <k_perp^2>, <p_perp^2>, M'^2 in GeV^2; F_UU,T and the q_T shape per GeV^2; asymmetries dimensionless",
+   "hbar_c_one": true,
+   "metric_signature": "not-applicable (no amplitude is computed)",
+   "coupling_normalization": "alpha_s = g_s^2/(4 pi); not used: leading order in alpha_s, no alpha_s-dependent factor",
+   "em_coupling": "alpha = e^2/(4 pi) enters only common prefactors (2 pi alpha^2 ...) that cancel in the shapes and ratios; no value of alpha is used",
+   "renormalization_scheme": "not-applicable (no loop correction)",
+   "scales": "not-applicable (no TMD evolution: widths are constants, independent of Q^2, x, z and flavour)",
+   "energy_variable": "SIDIS: x_B, Q^2, y, z_h, P_hT (hadron transverse momentum relative to the virtual photon); Drell-Yan: dilepton q_T",
+   "frame": "SIDIS: gamma* - nucleon frame (Trento conventions): virtual photon along +z, nucleon P = P0(1, 0, 0, -1), incoming lepton l = E(1, sin theta, 0, cos theta) with a positive x component, lepton plane = x-z plane (Anselmino et al. p. 2); any frame reached from the target rest frame by a boost along q-hat; Drell-Yan: hadronic centre-of-mass frame for q_T",
+   "angle_definition": "phi_h, phi_S: azimuths of P_hT and S_T about the photon axis, measured from the lepton plane; phi: azimuth of the quark k_perp",
+   "spin_treatment": "unpolarized for F_UU,T, the Cahn term and Drell-Yan q_T; transversely polarized nucleon (S_T) for the Sivers term",
+   "mass_approximation": "massless partons; target and hadron masses neglected (gamma = 2Mx/Q -> 0 in Bacchetta et al. Eqs. 2.8-2.11)",
+   "target_normalization": "per nucleon",
+   "exchanged_bosons": "photon only (one-photon exchange in SIDIS; virtual photon in Drell-Yan)",
+   "factorization_scheme": "not-applicable (tree-level TMD parton model, no evolution or soft factor)",
+   "target_mass_treatment": "neglected",
+   "polarization_convention": "Sivers function: Delta^N f_{q/p^up}(x, k) S_T . (P-hat x k-hat) (Anselmino et al. Eqs. 48-50) = -(2|k_T|/M) f_1T^perp (x, k_T^2) (Trento Eq. 4); Drell-Yan f_1T^perp = - SIDIS f_1T^perp (Trento Eq. 14)",
+   "azimuth_convention": "Trento conventions (Trento Eq. 16; Bacchetta et al. Eq. 2.3) for phi_h and phi_S. Anselmino et al. use the same angles: with l_x > 0, P_T = P_T(cos phi_h, sin phi_h, 0) and S_T = |S_T|(cos phi_S, sin phi_S, 0) (pp. 2, 6, 11), Trento Eq. 16 gives cos phi_h and sin phi_h unchanged (mapping in derivations/derivation-record.md, step 5)",
+   "log_accuracy": "not-applicable (no resummation)",
+   "xF_definition": "not-applicable",
+   "rapidity_frame": "not-applicable (no rapidity dependence modelled)",
+   "tmdg:gaussian_ansatz": "f_q(x, k) = f_q(x) exp(-k^2/<k_perp^2>)/(pi <k_perp^2>), D_q(z, p) = D_q(z) exp(-p^2/<p_perp^2>)/(pi <p_perp^2>), p = hadron transverse momentum relative to the fragmenting quark, P_hT = z k + p at O(k/Q) (Anselmino et al. Eqs. 29, 34-35); constant, flavour-independent widths",
+   "tmdg:fragmentation_normalization": "Anselmino: int d^2p D(z, p) = D(z) (Eq. 37). Bacchetta: D_1(z) = z^2 int d^2k_T D_1(z, k_T^2), k_T the quark relative to the hadron, hadron relative to quark = -z k_T (Eq. 3.41), so <p_perp^2> = z^2 <k_T^2>"
+  },
+  "order": "leading order in alpha_s; leading power in k_perp/Q for F_UU,T, the Sivers term and Drell-Yan, O(k_perp/Q) for the Cahn term; no TMD evolution",
+  "parameters": {
+   "kperp2_gev2": 0.25,
+   "pperp2_gev2": 0.2,
+   "Mprime2_gev2": 0.36,
+   "widths_note": "fitted values of Anselmino et al. (Eq. 47, Table I) used as ILLUSTRATIVE settings; collinear values, N_q and Drell-Yan widths SYNTHETIC",
+   "inputs": "benchmarks/toy-inputs.json"
+  },
+  "scales": "not-applicable",
+  "derivation_status": "heuristic-argument",
+  "validity_domain": {
+   "kinematics": "P_hT ~ k_perp << Q (the paper's validity statement: corrections O(k_perp^2/Q^2) small); no matching to the large-P_hT collinear region",
+   "model": "constant Gaussian widths independent of x, z, Q^2 and flavour; no evolution; the derivations are exact within this model (analytic-derivation per step in derivations/derivation.json)",
+   "sivers_sign": "applies to TMDs with the SIDIS and Drell-Yan Wilson lines (Trento Eq. 14)"
+  },
+  "checks_run": [
+   {
+    "name": "Gaussian normalizations, including D_1(z) = z^2 int d^2k_T D_1(z, k_T^2) (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "SIDIS convolution gives the Gaussian in P_hT with <P_T^2> = <p_perp^2> + z^2 <k_perp^2> (Anselmino form) and the same F_UU,T from the Bacchetta convolution with <p_perp^2> = z^2 <k_T^2> (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "d^2P_hT integral of F_UU,T = x sum e^2 f D (Bacchetta Eq. 4.21) (SymPy and numerical)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "Eq. 32 with Eq. 33 reproduces the Cahn term of Eq. 38; Bacchetta Eq. 4.20 with Eqs. 2.9 and 2.11 at gamma = 0 gives the same bracket (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "Eq. 58 with Eqs. 63, 68 reproduces Eqs. 64-67; Bacchetta Eq. 4.11 with Trento Eq. 4 gives the same asymmetry (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "Drell-Yan: two Gaussians convolve to width <k1^2> + <k2^2>, unit normalization (SymPy and numerical)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "Trento Eq. 4 round trip between Delta^N f and f_1T^perp (SymPy); the Drell-Yan sign (Trento Eq. 14) is applied as a cited rule, not checked",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "closed forms against 2D adaptive quadrature of the defining integrals (toy inputs)",
+    "result": "pass",
+    "tolerance": 1e-08
+   },
+   {
+    "name": "published closed forms (Anselmino et al. Eqs. 38-39 and 64-67) against the profile's quadrature of its transcription of the same integrands at 4 (z, P_T) points (same route as the paper: checks algebra and transcription, not physics)",
+    "result": "pass",
+    "tolerance": 1e-07
+   },
+   {
+    "name": "frame map: Anselmino et al. (q along +z, P along -z, l_x > 0; pp. 2, 6, 11) inserted in Trento Eq. 16 gives the same phi_h and phi_S (by hand, recorded in derivation-record.md)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "limits: Cahn ratio 1 and Sivers asymmetry 0 at P_hT = 0",
+    "result": "pass",
+    "tolerance": "exact"
+   }
+  ],
+  "checks_not_run": [
+   "TMD evolution, the soft factor and the matching to collinear factorization at large P_hT",
+   "an independent derivation of the Sivers sign change (cited from the Trento conventions)",
+   "a Drell-Yan Sivers asymmetry formula: no source read gives one, so only the sign of the Sivers function is propagated",
+   "comparison with measured multiplicities, asymmetries or q_T spectra"
+  ],
+  "references_read": [
+   {
+    "citation": "M. Anselmino, M. Boglione, U. D'Alesio, A. Kotzinian, F. Murgia, A. Prokudin, 'The role of Cahn and Sivers effects in deep inelastic scattering', arXiv:hep-ph/0501196v2",
+    "location": "Eqs. (29), (32)-(39) pp. 6-7; Eq. (47) p. 9; Eqs. (48)-(58) pp. 10-12; Eqs. (63)-(68), Table I pp. 12-14",
+    "date_read": "2026-10-23"
+   },
+   {
+    "citation": "A. Bacchetta, M. Diehl, K. Goeke, A. Metz, P.J. Mulders, M. Schlegel, 'Semi-inclusive deep inelastic scattering at small transverse momentum', arXiv:hep-ph/0611265v2",
+    "location": "Eqs. (2.3), (2.7)-(2.15) PDF pp. 4-6; Eq. (3.41) PDF p. 14; Eqs. (4.1), (4.2), (4.11) PDF pp. 18-19; Eq. (4.20) PDF p. 20; Eq. (4.21) PDF p. 21",
+    "date_read": "2026-10-23"
+   },
+   {
+    "citation": "A. Bacchetta, U. D'Alesio, M. Diehl, C.A. Miller, 'Single-spin asymmetries: the Trento conventions', arXiv:hep-ph/0410050v2",
+    "location": "Eqs. (2)-(4) pp. 1-2; Eq. (14) p. 3",
+    "date_read": "2026-10-23"
+   }
+  ],
+  "derivation_record": "derivations/derivation-record.md",
+  "inapplicable": [
+   "metric_signature",
+   "coupling_normalization",
+   "renormalization_scheme",
+   "scales",
+   "factorization_scheme",
+   "log_accuracy",
+   "xF_definition",
+   "rapidity_frame"
+  ],
+  "neglected": [
+   "TMD evolution",
+   "flavour, x and z dependence of the widths",
+   "O(k_perp^2/Q^2) kinematic terms",
+   "Boer-Mulders and Collins contributions",
+   "target and hadron masses"
+  ]
+ }
+}

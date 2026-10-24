@@ -34,8 +34,8 @@ short-timescale transients (Forbush decreases, SEP events), all flagged in
 during such a transient. Energies, mass and LIS parameters must be finite and positive; phi finite and
 nonnegative; charge a positive integer. NaN or inf input exits 2.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
-Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
-3 incomplete or inconclusive.
+Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed or missing file: a JSON
+error with status failed and error_kind invalid-input on stdout, the usage on stderr); 3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py --modulate --energy 1.0 --mass 0.938272 --charge 1 --phi 0.5 --lis-normalization 1e4 --lis-index 2.7
      python3 <plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py --demodulate --energy 1.0 --mass 0.938272 --charge 1 --phi 0.5 --toa-flux 123.4
 """
@@ -206,9 +206,18 @@ def force_field(value, kind, mass, charge, phi_gv, mode, lis=None, toa_flux=None
     return out
 
 
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--modulate', action='store_true',
                       help='forward model: LIS (power law or table) -> predicted TOA flux')

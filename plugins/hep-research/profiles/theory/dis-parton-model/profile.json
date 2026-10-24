@@ -1,0 +1,75 @@
+{
+ "id": "theory:dis-parton-model",
+ "kind": "theory-domain",
+ "version": "0.1.0",
+ "scope": "LO quark-parton-model F_2 for photon exchange (PDG Eq. 18.18) and the O(alpha_s) longitudinal structure function F_L from the LO coefficient functions of Moch, Vermaseren and Vogt (Eqs. 1-3), rewritten in the Altarelli-Martinelli form by a SymPy change of variables (perturbative argument at O(alpha_s), mu_R = mu_F = Q). SYNTHETIC ONLY: no published F_L value was read, so the numerical work is demonstrated on synthetic toy densities with an analytic closed-form check, not on a published benchmark.",
+ "exclusions": [
+  "Any published or measured F_L or F_2 value; no comparison with data",
+  "NLO and NNLO coefficient functions, DGLAP evolution, parton-distribution sets",
+  "Heavy-quark mass effects, target-mass and higher-twist corrections, small-x resummation",
+  "Z and W exchange, gamma-Z interference, xF_3, polarized structure functions",
+  "Any experiment, detector, data or blinding field"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=3.10,<4.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-computing",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/dis-parton-model.md",
+  "derivation": "derivations/derivation-record.md",
+  "theory_spec": "derivations/theory-spec.json",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "dispm"
+ ],
+ "vocabulary_extensions": {
+  "quantity_types": [
+   "dispm:structure-function"
+  ],
+  "levels": [
+   "dispm:inclusive"
+  ],
+  "conventions": [
+   "dispm:observable",
+   "dispm:parton_densities"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "dispm",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "fl-alpha-s-derivation",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "SymPy: change of variables in the convolution, flavour algebra (non-singlet plus singlet), and the O(alpha_s) coefficient functions rewritten identically as the Altarelli-Martinelli integrand; positivity and alpha_s -> 0 limit (perturbative argument at O(alpha_s), not formal proof)",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_missing_dependency.py"
+   ]
+  },
+  {
+   "name": "fl-f2-toy-prediction",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "F_2 and F_L on a 6 x 2 grid of (x, Q^2) for SYNTHETIC Beta-form densities and toy alpha_s values; adaptive quadrature against the exact SymPy closed form (relative tolerance 1e-10) with a Gauss-Legendre convergence study. Analytic check only: no published F_L benchmark was read",
+   "tests": [
+    "tests/test_prediction.py",
+    "tests/test_artifacts.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{"$comment": "Owner: hep-detector. contracts 3.11.0, detector system design spec ART-60..ART-64: one evaluation per candidate x figure of merit x fidelity. fidelity, bound and parameter_refs are set by the tool contract of the operation the producing computational-run (run_ref) executed, and value equals the number in that run's output file; contracts/design.py checks all of them (design.contract_mismatch) and does not trust validity (FID-10). An F0 evaluation is labelled heuristic-argument; an unavailable evaluation carries no value and no run. The envelope inputs bind every candidate file of the derived_from chain, the run and the upstream evaluations.",
+ "type": "object",
+ "required": ["evaluation_id", "candidate", "figure_of_merit", "denominator", "bound", "fidelity"],
+ "additionalProperties": false,
+ "properties": {
+  "evaluation_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}:(CALC|SIM|MEAS|EST)-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+  "candidate": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}:[A-Za-z0-9][A-Za-z0-9._-]*$"},
+  "figure_of_merit": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+  "denominator": {"type": "object", "additionalProperties": {"type": ["number", "string"]}},
+  "value": {"type": "number"},
+  "unit": {"type": "string", "minLength": 1},
+  "bound": {"type": "string", "enum": ["optimistic", "conservative", "estimate"]},
+  "fidelity": {"type": "string", "enum": ["F0", "F1", "F2", "F3", "F4", "F5"]},
+  "uncertainty": {"$comment": "OQ-06: minus/plus half-widths at the declared coverage; interval central (two-sided) or one-sided; distribution gaussian (coverage may be converted), non-gaussian, or exact (counting quantities: Clopper-Pearson or another exact interval)",
+   "type": "object", "required": ["minus", "plus", "coverage", "interval", "distribution"], "additionalProperties": false,
+   "properties": {
+    "minus": {"type": "number", "minimum": 0},
+    "plus": {"type": "number", "minimum": 0},
+    "coverage": {"type": "number", "exclusiveMinimum": 0},
+    "interval": {"type": "string", "enum": ["central", "one-sided"]},
+    "distribution": {"type": "string", "enum": ["gaussian", "non-gaussian", "exact"]}}},
+  "validity": {"$comment": "informational only (FID-10): design.py rechecks the validity domain from the contract",
+   "type": "object", "additionalProperties": false, "properties": {
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "in_domain": {"type": "boolean"}}},
+  "run_ref": {"type": "string", "minLength": 1},
+  "parameter_refs": {"type": "array", "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"}},
+  "parameter_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "unavailable": {"$comment": "capability.unavailable (RUL-01, ART-63): no evaluator for this figure of merit at this fidelity; bound estimate, no value, no run",
+   "type": "boolean"},
+  "derivation": {"$comment": "F0 only: heuristic-argument (FID-01)", "type": "string", "x-vocab": "derivation_statuses"},
+  "study_ref": {"$comment": "F4: the Geant4 study record (a computational-run)", "type": "string", "minLength": 1},
+  "model_envelope": {"$comment": "F4 (FID-05): the two ends of the spread between physics lists; not a sigma, each end is compared with the target on its own",
+   "type": "array", "minItems": 2, "items": {"type": "number"}},
+  "dataset_ref": {"$comment": "F5: the user-supplied dataset-record", "type": "string", "minLength": 1},
+  "note": {"type": "string"}
+ }
+}

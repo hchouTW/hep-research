@@ -1,0 +1,98 @@
+{
+ "label": "theory:drell-yan-lo LO cross section, angular coefficients and Lam-Tung at O(alpha_s) (SymPy 1.14.0)",
+ "status": {
+  "lo_cross_section": "analytic-derivation",
+  "angular_structure_eqs_5_to_7": "analytic-derivation",
+  "lam_tung_and_eq10": "perturbative-argument",
+  "channel_mixture": "analytic-derivation"
+ },
+ "order": "cross section at O(alpha^2 alpha_s^0); lambda, nu at O(alpha_s) (single emission, phi1 = 0 cited)",
+ "environment": {
+  "python": "3.13.2",
+  "sympy": "1.14.0",
+  "interpreter": "from skills/hep-computing/scripts/find_python.py"
+ },
+ "assumptions": [
+  "photon exchange only (a = 0 in Peng Eq. 2 for the numbers; a kept symbolic in the algebra)",
+  "massless quarks and leptons; unpolarized hadrons; N_c = 3; LO parton model (PDG Eq. 51.40)",
+  "time reversal: q qbar -> l+ l- and l+ l- -> q qbar share the spin- and colour-summed |M|^2",
+  "phi1 = 0 at O(alpha_s): cited from Peng et al., not derived here",
+  "<sin^2 theta1> of the q g channel (Peng Eq. 9) is an approximation per Peng et al.; Eq. 8 exact",
+  "no intrinsic transverse momentum; no resummation; channels mixed by angle-integrated cross-section fraction"
+ ],
+ "results": {
+  "lo": {
+   "sigma_hat_qqbar_to_ll": "4*pi*alpha**2*e_q**2/(9*s_hat)",
+   "jacobian": "-1",
+   "d2sigma_dM_dy": "8*pi*alpha**2*e_q**2*L(M**2/s, y)/(9*M*s)"
+  },
+  "angular": {
+   "read_off_A": {
+    "A0": "sin(theta1)**2",
+    "A1": "sin(theta1)*cos(phi1)*cos(theta1)",
+    "A2": "(1 - 2*sin(phi1)**2)*sin(theta1)**2",
+    "A3": "a*sin(theta1)*cos(phi1)",
+    "A4": "a*cos(theta1)",
+    "A5": "sin(phi1)*sin(theta1)**2*cos(phi1)",
+    "A6": "sin(phi1)*sin(theta1)*cos(theta1)",
+    "A7": "a*sin(phi1)*sin(theta1)"
+   },
+   "lambda_mu_nu": {
+    "lambda": "(2 - 3*A0)/(A0 + 2)",
+    "mu": "2*A1/(A0 + 2)",
+    "nu": "2*A2/(A0 + 2)"
+   },
+   "one_minus_lambda_minus_2nu": "4*(A0 - A2)/(A0 + 2)"
+  },
+  "alpha_s_channels": {
+   "qqbar": {
+    "sin2_theta1": "r**2/(r**2 + 1)",
+    "lambda": "(2 - r**2)/(3*r**2 + 2)",
+    "nu": "2*r**2/(3*r**2 + 2)",
+    "nu_limit_qT_to_oo": "2/3"
+   },
+   "qg": {
+    "sin2_theta1": "5*r**2/(5*r**2 + 1)",
+    "lambda": "(2 - 5*r**2)/(15*r**2 + 2)",
+    "nu": "10*r**2/(15*r**2 + 2)",
+    "nu_limit_qT_to_oo": "2/3"
+   }
+  },
+  "channel_mixture": {
+   "A_mix": "A_i = sum_c (sigma_c/sigma) A_i^c, sigma_c angle-integrated in the same (qT, Q) bin",
+   "lambda_mix": "sum_c f_c lambda_c/(3 + lambda_c) / sum_c f_c/(3 + lambda_c)",
+   "nu_mix": "sum_c f_c nu_c/(3 + lambda_c) / sum_c f_c/(3 + lambda_c)"
+  }
+ },
+ "checks": {
+  "lo:colour_average_gives_one_ninth_of_e_q2_4pi_alpha2_over_3s": true,
+  "lo:jacobian_dx1dx2_equals_dtau_dy": true,
+  "lo:tau_y_map_inverts": true,
+  "lo:d2sigma_dM_dy_matches_8_pi_alpha2_over_9Ms": true,
+  "lo:nb_factor_8pi_alpha2_over_9_is_two_thirds_of_4pi_alpha2_over_3": true,
+  "angular:eq4_into_eq2_reproduces_eq5": true,
+  "angular:eq3_vs_eq5_gives_eq6": true,
+  "angular:eq3_vs_eq1_gives_eq7": true,
+  "angular:lam_tung_violation_is_4_A0_minus_A2_over_2_plus_A0": true,
+  "angular:phi1_zero_gives_A0_equals_A2": true,
+  "angular:lam_tung_holds_for_coplanar_quark_axis": true,
+  "angular:A0_minus_A2_is_2_sin2theta1_sin2phi1_nonnegative": true,
+  "angular:parity_parameter_a_absent_from_A0_A1_A2_A5_A6": true,
+  "alpha_s:qqbar_lambda_matches_peng_eq10": true,
+  "alpha_s:qqbar_nu_matches_peng_eq10": true,
+  "alpha_s:qqbar_lam_tung_zero": true,
+  "alpha_s:qqbar_limit_qT_to_0_lambda_1_nu_0": true,
+  "alpha_s:qqbar_limit_qT_to_oo_lambda_minus_one_third": true,
+  "alpha_s:qg_lambda_matches_peng_eq10": true,
+  "alpha_s:qg_nu_matches_peng_eq10": true,
+  "alpha_s:qg_lam_tung_zero": true,
+  "alpha_s:qg_limit_qT_to_0_lambda_1_nu_0": true,
+  "alpha_s:qg_limit_qT_to_oo_lambda_minus_one_third": true,
+  "mixture:A_terms_integrate_to_zero": true,
+  "mixture:unpolarized_term_integrates_to_16pi_over_3": true,
+  "mixture:distribution_normalized_to_sigma_c": true,
+  "mixture:sigma_weighted_sum_equals_A_average": true,
+  "mixture:lambda_form_with_3_plus_lambda_weights": true,
+  "mixture:linear_lambda_average_differs": true
+ }
+}

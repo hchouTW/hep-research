@@ -1,0 +1,201 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "tmdg-prediction-sidis-fuut",
+ "artifact_type": "prediction",
+ "objective": "SIDIS F_UU,T and Cahn ratio versus P_hT in the Gaussian ansatz (synthetic collinear inputs)",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:tmd-gaussian-lo",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "profiles": {
+   "theory:tmd-gaussian-lo": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-23",
+  "evidence_ids": [
+   "tmdg:C01",
+   "tmdg:C02",
+   "tmdg:C03",
+   "tmdg:C04",
+   "tmdg:C05",
+   "tmdg:C06",
+   "tmdg:C07",
+   "tmdg:C08"
+  ]
+ },
+ "inputs": [
+  {
+   "ref": "derivations/theory-spec.json",
+   "artifact_type": "theory-spec",
+   "artifact_id": "tmdg-theory-spec-gaussian-tmd-lo",
+   "status": [
+    "synthetic",
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "observable": {
+   "quantity": "tmdg:structure-function",
+   "process": "SIDIS l N -> l h X, one-photon exchange: F_UU,T",
+   "variables": [
+    {
+     "name": "PhT",
+     "unit": "GeV",
+     "points": [
+      0.0,
+      0.1,
+      0.2,
+      0.4,
+      0.6,
+      0.8,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "leading-power TMD region, no cuts",
+    "fiducial": false
+   },
+   "level": "tmdg:leading-power-tmd",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": "not-applicable",
+    "convention": "absolute structure function per GeV^2 of P_hT; no luminosity enters"
+   },
+   "bin_semantics": "point",
+   "unit": "GeV^-2",
+   "conventions": {
+    "unit_system": "natural-HEP: transverse momenta in GeV, Gaussian widths <k_perp^2>, <p_perp^2>, M'^2 in GeV^2; F_UU,T and the q_T shape per GeV^2; asymmetries dimensionless",
+    "frame": "SIDIS: gamma* - nucleon frame (Trento conventions): virtual photon along +z, nucleon P = P0(1, 0, 0, -1), incoming lepton l = E(1, sin theta, 0, cos theta) with a positive x component, lepton plane = x-z plane (Anselmino et al. p. 2); any frame reached from the target rest frame by a boost along q-hat; Drell-Yan: hadronic centre-of-mass frame for q_T",
+    "angle_definition": "phi_h, phi_S: azimuths of P_hT and S_T about the photon axis, measured from the lepton plane; phi: azimuth of the quark k_perp",
+    "azimuth_convention": "Trento conventions (Trento Eq. 16; Bacchetta et al. Eq. 2.3) for phi_h and phi_S. Anselmino et al. use the same angles: with l_x > 0, P_T = P_T(cos phi_h, sin phi_h, 0) and S_T = |S_T|(cos phi_S, sin phi_S, 0) (pp. 2, 6, 11), Trento Eq. 16 gives cos phi_h and sin phi_h unchanged (mapping in derivations/derivation-record.md, step 5)",
+    "exchanged_bosons": "photon only (one-photon exchange in SIDIS; virtual photon in Drell-Yan)",
+    "mass_approximation": "massless partons; target and hadron masses neglected (gamma = 2Mx/Q -> 0 in Bacchetta et al. Eqs. 2.8-2.11)",
+    "tmdg:gaussian_ansatz": "f_q(x, k) = f_q(x) exp(-k^2/<k_perp^2>)/(pi <k_perp^2>), D_q(z, p) = D_q(z) exp(-p^2/<p_perp^2>)/(pi <p_perp^2>), p = hadron transverse momentum relative to the fragmenting quark, P_hT = z k + p at O(k/Q) (Anselmino et al. Eqs. 29, 34-35); constant, flavour-independent widths",
+    "tmdg:fragmentation_normalization": "Anselmino: int d^2p D(z, p) = D(z) (Eq. 37). Bacchetta: D_1(z) = z^2 int d^2k_T D_1(z, k_T^2), k_T the quark relative to the hadron, hadron relative to quark = -z k_T (Eq. 3.41), so <p_perp^2> = z^2 <k_T^2>"
+   },
+   "validity_range": {
+    "PhT": [
+     0.0,
+     1.0
+    ]
+   }
+  },
+  "theory_spec_ref": "derivations/theory-spec.json",
+  "derivation_status": "heuristic-argument",
+  "representation": "symbolic",
+  "parameter_point": {
+   "x": 0.1,
+   "z": 0.4,
+   "kperp2_gev2": 0.25,
+   "pperp2_gev2": 0.2,
+   "flavours": [
+    {
+     "name": "u",
+     "charge": "2/3",
+     "f": 0.6,
+     "D": 0.5
+    },
+    {
+     "name": "d",
+     "charge": "-1/3",
+     "f": 0.35,
+     "D": 0.2
+    },
+    {
+     "name": "ubar",
+     "charge": "-2/3",
+     "f": 0.1,
+     "D": 0.2
+    },
+    {
+     "name": "dbar",
+     "charge": "1/3",
+     "f": 0.12,
+     "D": 0.5
+    }
+   ],
+   "cahn": {
+    "y": 0.5,
+    "Q_gev": 2.0,
+    "phi_h": 0.0
+   }
+  },
+  "expression": "F_UU,T = x sum e_q^2 f_q(x) D_q(z) exp(-P_hT^2/<P_T^2>)/(pi <P_T^2>), <P_T^2> = <p_perp^2> + z^2 <k_perp^2>; Cahn ratio [1 + (1-y)^2 - 4 (2-y) sqrt(1-y) <k_perp^2> z P_hT cos(phi_h)/(<P_T^2> Q)]/[1 + (1-y)^2]",
+  "point_values": {
+   "PT2_width_gev2": 0.24000000000000002,
+   "collinear_F_UU_T": 0.01566666666666667,
+   "rows": [
+    {
+     "PhT_gev": 0.0,
+     "F_UU_T": 0.020778562014775227,
+     "F_UU_T_quadrature": 0.020778562014775237,
+     "cahn_ratio": 1.0
+    },
+    {
+     "PhT_gev": 0.1,
+     "F_UU_T": 0.01993057761846081,
+     "F_UU_T_quadrature": 0.019930577618460812,
+     "cahn_ratio": 0.9292893218813452
+    },
+    {
+     "PhT_gev": 0.2,
+     "F_UU_T": 0.017588673015013524,
+     "F_UU_T_quadrature": 0.017588673015013535,
+     "cahn_ratio": 0.8585786437626904
+    },
+    {
+     "PhT_gev": 0.4,
+     "F_UU_T": 0.010668069447265947,
+     "F_UU_T_quadrature": 0.010668069447265949,
+     "cahn_ratio": 0.717157287525381
+    },
+    {
+     "PhT_gev": 0.6,
+     "F_UU_T": 0.004636323870010878,
+     "F_UU_T_quadrature": 0.004636323870010878,
+     "cahn_ratio": 0.5757359312880714
+    },
+    {
+     "PhT_gev": 0.8,
+     "F_UU_T": 0.0014437662002335907,
+     "F_UU_T_quadrature": 0.0014437662002335914,
+     "cahn_ratio": 0.43431457505076193
+    },
+    {
+     "PhT_gev": 1.0,
+     "F_UU_T": 0.0003221477834750114,
+     "F_UU_T_quadrature": 0.00032214778347501127,
+     "cahn_ratio": 0.2928932188134524
+    }
+   ],
+   "checks": {
+    "F_UU_T_closed_form_equals_quadrature": true,
+    "F_UU_T_integrates_to_collinear": true,
+    "cahn_ratio_one_at_PhT_0": true
+   }
+  },
+  "uncertainties": [],
+  "allowed_transformations": [
+   "re-evaluation with other inputs (predict.py --config)",
+   "never compare with data: collinear inputs are synthetic"
+  ]
+ }
+}

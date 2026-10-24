@@ -1,0 +1,56 @@
+{
+ "format": "hep-research-scifix-advisory/2",
+ "id": "SFA-2026-038",
+ "published": "2026-10-22T01:47:39Z",
+ "modified": "2026-10-22T08:41:57Z",
+ "severity": "S1",
+ "ledger": [
+  "PERIODICITY-REFIT"
+ ],
+ "summary": "periodicity_scan.py drew its AR(1) and OU red-noise surrogates from parameters estimated once from the observed series; on short, strongly red series the lag-1 estimate is biased low and the global p-value was too small (anti-conservative), so a red-noise periodicity could be reported as significant.",
+ "affected": [
+  {
+   "paths": [
+    "skills/hep-statistics/scripts/periodicity_scan.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.14.0"
+      },
+      {
+       "fixed": "0.24.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_commit": "2cd78747827062d7ec31128b9cea00e31a473c8a",
+    "fixed_commit": "573f093a7db4434d650fded6a34ad6080d864e75"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "global.p and the verdict of periodicity_scan.py with --null ar1 or --null ou"
+  ],
+  "bias": "no-signal AR(1) toys with 199 surrogates rejected 0.147 at alpha 0.05 and 0.253 at alpha 0.1 for n = 50, phi = 0.9, and 0.077 and 0.163 for n = 100, phi = 0.9 (binomial errors about 0.015); n = 200 and the OU null were calibrated or conservative; the white null is unaffected",
+  "trigger": "a red-noise null (ar1 or ou) on a short series (about 100 points or fewer) with strong autocorrelation (lag-1 about 0.7 or more)"
+ },
+ "applies_to": {
+  "artifact_types": [],
+  "outputs": {
+   "producer": [
+    "skills/hep-statistics/scripts/periodicity_scan.py"
+   ],
+   "how_to_recognize": "periodicity_scan.py with --null ar1 or ou: JSON on stdout with best, band, global {p, surrogates, statistic} and null_model {kind, phi | tau, variance}; the fixed code adds global.null_fit, and null_fit once reproduces the old p"
+  }
+ },
+ "remedy": "rerun periodicity_scan.py with --null ar1 or ou on a release that has the fix (the default --null-fit refit) for any result quoted against red noise; --null-fit once reproduces the old p-value for comparison",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/573f093a7db4434d650fded6a34ad6080d864e75",
+  "https://arxiv.org/abs/2208.02028v1"
+ ]
+}

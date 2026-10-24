@@ -1,0 +1,76 @@
+{
+ "contract_version": "3.12.0",
+ "artifact_id": "ams-like-v1-CALC-TRK-P",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.12.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "c1e3554b9fa75ec32b798c0abb9c33a41fae8add5937ba928e965d02df39d9f4",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-P",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-TRK-P.computational-run.json",
+   "sha256": "05c99d275195da0882998bed48a076eff910feb408ca701441dd5843b7f3a5ff",
+   "artifact_type": "computational-run",
+   "artifact_id": "ams-like-v1-CALC-TRK-P-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "ams-like-v1:CALC-TRK-P",
+  "candidate": "ams-like-v1:cand-P",
+  "figure_of_merit": "momentum-resolution-core",
+  "denominator": {
+   "rigidity_GV": 1000.0,
+   "species": "proton"
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 5.663090414912533,
+  "unit": "1",
+  "run_ref": "runs/CALC-TRK-P.computational-run.json",
+  "parameter_refs": [
+   "DES-MAG-001.parameters.field_T",
+   "DES-TRK-001.parameters.layer_positions_m",
+   "DES-TRK-001.parameters.layer_x_over_x0",
+   "DES-TRK-001.parameters.passive_x_over_x0",
+   "DES-TRK-001.parameters.point_resolution_um"
+  ],
+  "parameter_digest": "e8948621f793e32d06535af9667757788e5d999cb90d865b014a4148b62f3cac",
+  "validity": {
+   "assumptions": [
+    "uniform field over the lever arm",
+    "lambda = 0 (p = p_T), normal incidence",
+    "Gaussian point errors",
+    "no misalignment",
+    "material spread uniformly along the track"
+   ],
+   "in_domain": true
+  }
+ }
+}

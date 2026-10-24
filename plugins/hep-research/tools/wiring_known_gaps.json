@@ -1,0 +1,144 @@
+{
+ "_doc": "Known gaps of tools/check_wiring.py, its registered hub pages, pointer pages with their removal release and the README count patterns. 'gaps' only shrinks: a finding not listed is a new gap (exit 1); delete an entry once its gap is fixed. A hub is a page that routes within one topic and is itself one step from SKILL.md; pages it links count as reachable. Maintenance file: no paper titles.",
+ "hubs": {
+  "hep-authoring": [
+   "references/academic-papers-guide.md",
+   "references/academic-diagrams-guide.md",
+   "references/papers-review-modes-and-reference-index.md"
+  ],
+  "hep-computing": [
+   "references/agile-development-guide.md",
+   "references/task-authoring-guide.md",
+   "references/batch-scheduling.md"
+  ],
+  "hep-detector": [
+   "references/detector-simulation.md",
+   "references/detector-design-principles.md"
+  ],
+  "hep-ml": [
+   "references/deep-learning-guide.md"
+  ],
+  "hep-theory": [
+   "references/cosmic-ray-propagation.md",
+   "references/hadron-structure-essentials.md"
+  ]
+ },
+ "pointers": {},
+ "readme_counts": {
+  "hep-authoring": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-citations": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-computing": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py",
+     "scripts/*.sh",
+     "scripts/*.C"
+    ]
+   }
+  ],
+  "hep-detector": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-measurement": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-ml": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-statistics": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ],
+  "hep-theory": [
+   {
+    "row": "references/",
+    "globs": [
+     "references/*.md"
+    ]
+   },
+   {
+    "row": "scripts/",
+    "globs": [
+     "scripts/*.py"
+    ]
+   }
+  ]
+ },
+ "gaps": []
+}

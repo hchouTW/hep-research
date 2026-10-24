@@ -1,0 +1,21 @@
+{
+ "kind": "error",
+ "category": "C01",
+ "planter": "ai",
+ "summary": "The acceptance shape (acceptance relative to its plateau) is divided out as an extra per-bin 'geometric efficiency' although the exposure already contains the full acceptance, so the acceptance energy dependence is corrected twice.",
+ "code_change": "run_analysis multiplies the selection efficiency passed to analyse() by acceptance(sp)/acc_max, while w['exposure'] still equals acceptance x livetime x cutoff fraction.",
+ "description_change": "recipe.json gains a step 'acceptance' (operator correct_efficiency) before 'exposure'; the spec's acceptance correction notes now say the acceptance shape is corrected in the estimator and its absolute value enters the exposure.",
+ "affected": [
+  "acceptance",
+  "efficiency",
+  "exposure",
+  "proton-p1",
+  "proton-p2",
+  "helium-p1",
+  "helium-p2",
+  "flux-proton-p1",
+  "flux-proton-p2",
+  "flux-helium-p1",
+  "flux-helium-p2"
+ ]
+}

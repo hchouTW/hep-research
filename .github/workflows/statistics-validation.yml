@@ -13,6 +13,9 @@
 #                     PDG Table 40.4, the slow toy-CLs checks, the anisotropy coverage with a modulated exposure),
 #                     with HEP_SLOW_TESTS=1; any skip fails the job
 #                     (tools/run_required_backends.py --no-skips; docs/maintenance.md, evidence that skips is unverified)
+#   ledger-evidence   every oracle node of the sci-fix ledger (docs/evidence/sci-fixes.json independence records),
+#                     run node by node with all their backends (pyhf, ArviZ, pdg); a missing core dependency, a
+#                     failure or any skip fails the job (run_required_backends.py --from-ledger --no-skips)
 name: statistics-validation
 on:
   schedule:
@@ -59,6 +62,28 @@ jobs:
         env:
           HEP_SLOW_TESTS: "1"
         run: python tools/run_required_backends.py --require numpy,scipy,sympy --no-skips --modules tests.core.test_published_tables,tests.core.test_stats_poisson,tests.core.test_stats_likelihood_limits,tests.skills.hep_measurement.test_anisotropy_weighted_covariance
+
+  ledger-evidence:
+    # 56 nodes in 25 modules, about 6 min on the E2 workstation (2026-10-22)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install the pinned set with every backend the ledger's oracles need
+        run: python -m pip install -r requirements-ci.lock "pyhf==0.7.6" "arviz==0.23.4" "pdg==2026.0" "SQLAlchemy==2.1.5" "typing_extensions==4.16.0"
+      - name: Every oracle node of the ledger, no skip allowed
+        run: |
+          mkdir -p ../../check-runs
+          python tools/run_required_backends.py --from-ledger --require pyhf==0.7.6,arviz==0.23.4,pdg==2026.0 --no-skips --out ../../check-runs/ledger-evidence.json
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: ledger-evidence
+          path: check-runs/
 
   published:
     runs-on: ubuntu-latest

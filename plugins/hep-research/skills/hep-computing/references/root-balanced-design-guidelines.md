@@ -5,9 +5,10 @@ directory ownership), RDataFrame and TTree/RNTuple patterns, histograms and plot
 hep-computing reference shares. General C++ design (classes, structs, RAII, ownership, const, templates, tests) is the
 checklist in [C++ guidelines](cpp-balanced-design-guidelines.md); Python is in
 [Python guidelines](python-balanced-design-guidelines.md) and [Python HEP coding](python-hep-coding-patterns.md),
-Bash in [Bash guidelines](bash-balanced-design-guidelines.md). Not the statistical treatment of pipelines: see
-[Data pipelines](../../hep-measurement/references/data-pipelines.md). Follow established repository conventions when
-they intentionally differ from this reference.
+Bash in [Bash guidelines](bash-balanced-design-guidelines.md). Not the physics rules a pipeline implements: see
+[analysis design](../../hep-measurement/references/analysis-design.md#event-and-object-definitions) and
+[weights and normalization](../../hep-measurement/references/weights-normalization.md). Follow established repository
+conventions when they intentionally differ from this reference.
 
 Conventions used in every example, decided once here (and in the C++ guidelines, which link back):
 
