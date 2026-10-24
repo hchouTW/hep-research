@@ -23,7 +23,7 @@
    },
    {
     "path": "output/convergence-sp.json",
-    "sha256": "50d05559a82839c30fa28962b50a44ecae8a17fb8ab72214812bf7a739d33c5a"
+    "sha256": "18f0b7340f7e4fc2c2d94567492184cc5802955d6ac15ff09a4868b1179e9f6e"
    },
    {
     "path": "output/variations-sp.json",
@@ -142,7 +142,7 @@
       "verdict": "pass"
      }
     ],
-    "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+    "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
    },
    "declared_scope": {
     "beta_gamma": 0.4719,
@@ -256,7 +256,7 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "4b68e49d29007c1d"
+    "version": "ac1d7e4a0906f131"
    },
    {
     "name": "geant4_benchmarks.py",

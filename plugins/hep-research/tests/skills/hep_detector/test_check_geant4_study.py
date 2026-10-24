@@ -183,11 +183,22 @@ class RunGate(_Tmp):
     def test_an_unresolved_difference_does_not_pass(self):
         sp = self.study()
         args = ["--summary", f"nominal={self.summary('n', 0.01, 0.1050, 0.003)}",
-                "--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.003)}"]
+                "--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.003)}",
+                "--summary", f"scan={self.summary('b', 0.1, 0.1056, 0.003)}"]
         code, out = run("run", "--spec", sp, *args)
         row = next(o for o in out["convergence"]["parameters"][0]["observables"] if o["observable"] == "mean_deposit_MeV")
         self.assertEqual(row["verdict"], "unresolved")
         self.assertEqual(out["convergence"]["gate"], "fail")
+
+    def test_a_missing_declared_value_makes_the_gate_incomplete(self):
+        """D11 (A1.16): the finest declared cut has no summary; the gate does not pass on the coarser two."""
+        sp = self.study()
+        args = ["--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.0003)}",
+                "--summary", f"scan={self.summary('b', 0.1, 0.1056, 0.0003)}"]
+        code, out = run("run", "--spec", sp, *args)
+        self.assertEqual((code, out["convergence"]["gate"]), (3, "incomplete"), out)
+        p = out["convergence"]["parameters"][0]
+        self.assertEqual((p["reason"], p["missing_values"]), ("missing-scan-value", [0.01]))
 
     def test_too_few_events_reports_the_n_needed(self):
         sp = self.study()

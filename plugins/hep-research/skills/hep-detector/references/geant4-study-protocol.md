@@ -90,10 +90,10 @@ coverage. The items say when to look and where, not which list to use.
 - **Convergence (hard gate).** Scan the production cut (and the step limit when one is used). Between the two finest
   settings of each declared scan, every declared observable (mean deposit, tail fraction, most probable value) must
   change by no more than its relative tolerance, and the standard error of the change must be at most half of it.
-  `check_geant4_study.py run` applies this to the two finest declared values *among the supplied run summaries*: it
-  does not require a summary for every declared value, so a missing finest run lets the gate pass on coarser ones.
-  Supply a run for every declared value and check that `two_finest` in the gate output are the two finest declared. It is the only check that catches a cut that is too coarse: no reference
-  benchmark sees it, because the reference does not depend on the cut.
+  `check_geant4_study.py run` requires a run summary for every declared value (otherwise the gate is `incomplete`,
+  reason `missing-scan-value`, with the missing values listed) and compares the two finest *declared* values. It is
+  the only check that catches a cut that is too coarse: no reference benchmark sees it, because the reference does
+  not depend on the cut.
 - **Event count.** Estimate it from a trial run. `check_geant4_study.py summarize` gives seeded-bootstrap standard
   errors, and `run` reports the events needed as N (SE/target)^2. The delta-ray tail makes means converge slowly: in
   the official TestEm5 run 0 (5 GeV pi+, 20 um Si, 1e5 events) the error on the primary's leakage is about 8 % of the

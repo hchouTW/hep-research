@@ -292,5 +292,38 @@ class Isolation(unittest.TestCase):
                                          spec_v1_oracle(sim, set(targets)))
 
 
+CHECK = PLUGIN / "skills" / "hep-detector" / "scripts" / "check_geant4_study.py"
+J14 = PLUGIN / "examples" / "geant4-thin-silicon"
+
+
+class ScanCompleteness(unittest.TestCase):
+    """geant4-gate-scan-completeness (D11, A1.16): every declared scan value needs a summary, else the gate is
+    incomplete (exit 3); 'the two finest' are the two finest declared values."""
+
+    def gate(self, cuts: list[float]) -> tuple[int, dict]:
+        """J14's MPV study (declared cuts 0.1, 0.03, 0.01 mm; 0.01 mm is the nominal run) with the given summaries."""
+        args = []
+        for c in cuts:
+            args += ["--summary", "nominal=recorded/summaries/mpv-nominal.json" if c == 0.01 else
+                     f"scan=recorded/summaries/mpv-cut-{c}.json"]
+        p = subprocess.run([sys.executable, "-B", str(CHECK), "run", "--spec", "study-mpv.json", *args],
+                           capture_output=True, text=True, timeout=600, cwd=J14)
+        return p.returncode, json.loads(p.stdout)
+
+    def test_every_subset_of_the_declared_values(self):
+        """Exhaustive over the non-empty subsets of the three declared cuts: only the full set gives J14's pass."""
+        import itertools
+        declared = [0.1, 0.03, 0.01]
+        for n in (1, 2, 3):
+            for cuts in itertools.combinations(declared, n):
+                code, out = self.gate(list(cuts))
+                with self.subTest(cuts=cuts):
+                    self.assertEqual(code, 0 if n == 3 else 3, out.get("convergence"))
+
+    def test_the_two_finest_are_declared_values(self):
+        code, out = self.gate([0.1, 0.03, 0.01])
+        self.assertEqual(out["convergence"]["parameters"][0]["two_finest"], [0.01, 0.03])
+
+
 if __name__ == "__main__":
     unittest.main()

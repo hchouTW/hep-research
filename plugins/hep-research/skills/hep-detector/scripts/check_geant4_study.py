@@ -15,8 +15,9 @@ Subcommands:
               the deposits of every slab.
   run         run records against the spec (physics, gun, geometry, spec hash, data paths and dataset hashes), the
               statistical target (bootstrap SE, not only rms/sqrt(N); too few events gives the N needed), and the
-              convergence gate (hard): across each declared cut or step-limit scan, every declared observable changes
-              by no more than its tolerance between the two finest settings, with the difference resolved (SE of the
+              convergence gate (hard): every declared value of each cut or step-limit scan needs a run summary (a
+              missing one makes the gate incomplete, exit 3), and every declared observable changes by no more than
+              its tolerance between the two finest declared settings, with the difference resolved (SE of the
               difference <= tolerance / 2). This is the only place a too-coarse cut is caught.
   variations  a variation table: each variation's model assignment for the particle and energy (EM constructor and
               fluctuation model for EM observables; the hadronic model in use for hadronic ones); a variation that
@@ -337,16 +338,24 @@ def convergence(study: dict, sums: list[dict]) -> dict:
     plan = get(study, "convergence_plan") or {}
     tol = plan.get("tolerance_relative") or {}
     out, ok = [], True
+    trace.tag("geant4-convergence-complete")
     for p in plan.get("parameters", []):
         key = p["name"].split(".")[-1]
         pts = sorted((s for s in sums if s["settings"].get(key) is not None and s.get("role") in ("scan", "nominal")
                       and s["settings"].get(key) in p["values"]), key=lambda s: s["settings"][key])
         vals = sorted({s["settings"][key] for s in pts})
-        if len(vals) < 2:
-            out.append({"parameter": p["name"], "verdict": "not-run", "reason": "fewer than two scanned values"})
+        declared = sorted(p["values"])
+        missing = [v for v in declared if v not in vals]
+        if missing:  # D11: every declared value needs a scan or nominal summary (A1.16)
+            out.append({"parameter": p["name"], "verdict": "incomplete", "reason": "missing-scan-value",
+                        "missing_values": missing, "values": vals, "declared_values": declared})
             ok = False
             continue
-        finest = [next(s for s in pts if s["settings"][key] == v) for v in vals[:2]]
+        if len(declared) < 2:
+            out.append({"parameter": p["name"], "verdict": "not-run", "reason": "fewer than two declared values"})
+            ok = False
+            continue
+        finest = [next(s for s in pts if s["settings"][key] == v) for v in declared[:2]]  # the two finest declared
         rows = []
         for o in plan.get("observables", []):
             a, b = finest[0]["observables"].get(o), finest[1]["observables"].get(o)
@@ -361,11 +370,14 @@ def convergence(study: dict, sums: list[dict]) -> dict:
             ok = ok and v == "pass"
             rows.append({"observable": o, "finest": vals[0], "next": vals[1], "relative_change": diff,
                          "se_of_change": se, "tolerance": t, "verdict": v})
-        out.append({"parameter": p["name"], "values": vals, "two_finest": vals[:2], "observables": rows,
+        out.append({"parameter": p["name"], "values": vals, "two_finest": declared[:2], "observables": rows,
                     "verdict": "pass" if all(r["verdict"] == "pass" for r in rows) else "fail"})
-    return {"gate": "pass" if ok and out else "fail", "parameters": out,
-            "rule": "between the two finest settings of each declared scan, every declared observable changes by at "
-                    "most its relative tolerance and the SE of the change is at most half the tolerance"}
+    verdicts = {p["verdict"] for p in out}
+    gate = "pass" if ok and out else ("incomplete" if verdicts <= {"pass", "incomplete"} and out else "fail")
+    return {"gate": gate, "parameters": out,
+            "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); "
+                    "between the two finest declared settings every declared observable changes by at most its "
+                    "relative tolerance and the SE of the change is at most half the tolerance"}
 
 
 def stat_target(study: dict, nominal: dict | None) -> dict:
@@ -406,6 +418,8 @@ def cmd_run(args) -> tuple[str, dict]:
     if args.out:
         write_json(args.out, doc)
     ok = not problems and stat["verdict"] in ("pass", "not-checked") and conv["gate"] == "pass"
+    if not ok and not problems and stat["verdict"] in ("pass", "not-checked") and conv["gate"] == "incomplete":
+        return "incomplete", doc
     return ("ok" if ok else "failed"), doc
 
 

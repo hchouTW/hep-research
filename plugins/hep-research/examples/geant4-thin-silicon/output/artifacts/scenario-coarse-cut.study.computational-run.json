@@ -23,7 +23,7 @@
    },
    {
     "path": "output/scenarios/coarse-cut.convergence.json",
-    "sha256": "afdacc7f58b532f0a98cb1fa9a6881d881b5097fb7c3e239f0243234d80c94a1"
+    "sha256": "bd31467aa5fb002e652b863563c03bace04c0ac8637c3a43dc4629832d2e895b"
    },
    {
     "path": "output/variations-mpv.json",
@@ -208,7 +208,7 @@
       "verdict": "fail"
      }
     ],
-    "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+    "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
    },
    "declared_scope": {
     "energy_MeV": [
@@ -351,7 +351,7 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "4b68e49d29007c1d"
+    "version": "ac1d7e4a0906f131"
    },
    {
     "name": "geant4_benchmarks.py",

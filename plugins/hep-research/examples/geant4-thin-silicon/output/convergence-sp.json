@@ -27,7 +27,7 @@
     "verdict": "pass"
    }
   ],
-  "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
  },
  "record_problems": [],
  "statistical_target": {
