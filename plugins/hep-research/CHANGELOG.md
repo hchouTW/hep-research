@@ -6,8 +6,8 @@ Software checks establish contract consistency only, not physical validity.
 ## Unreleased
 
 Geant4 program, stage A1 (correctness fixes; spec `docs/dev/geant4-architecture/geant4-program.md`, approved
-2026-10-24). Contracts CV-A1 (sci-fix, minor): the new rules are gated at `GEANT4_A1_FROM` and apply under `--strict`
-to older records that carry `validated-in-scope`. `CORE_VERSION` 1.1.0.
+2026-10-24). Contracts CV-A1 (sci-fix) shares the unreleased contracts 3.13.0 with stage C1: the new rules apply
+natively from 3.13.0, and under `--strict` to older records that carry `validated-in-scope`. `CORE_VERSION` 1.1.0.
 
 **Before you upgrade:** Geant4 study records written from 0.20.0 to 0.38.x with `validated-in-scope` can fail
 `validate.py --strict` (advisories SFA-2026-039, SFA-2026-040): regenerate them with this version, then redo their F4
@@ -38,6 +38,40 @@ stopping-power, range, thin-layer and longitudinal-profile benchmarks, and `nega
   `validated-in-scope`; detection limits 0.0715 (MPV, was 0.0827) and 0.0394 (stopping power), caught in both
   directions. Test fixes: the J14 replay cache is forgotten at module teardown (D10); the study-spec benchmark enum and
   grades (D8).
+
+Geant4 program stage C1 (automated candidate generation at F1), contracts 3.13.0 (CV-C1; the number is the stage's
+placeholder and is fixed at release in merge order with CV-A1).
+
+**Before you upgrade:**
+- New subcommands `evaluate_design.py search` and `expand --search`; `expand` now takes `--scan` or `--search`.
+- An evaluation whose `run_ref` names a search run is the error `design.search_point_not_expanded`.
+
+Contracts 3.13.0 (minor; no capability added).
+
+- `search_summary` in `ext_computational_run.json` (declared with hep-computing's agreement), with its field rules in
+  `contracts/schemas/design_search_summary.json` and cross-field checks in `contracts/validate.py` (front and finalist
+  indices name recorded points, finalists kept inline, a points file listed in `output_hashes`, no verdict, ranking or
+  recommendation), applied from `SEARCH_SUMMARY_FROM` (3.13.0) on or in strict mode; `contracts/design.py` exempts a
+  search run from the orphan-run rule and refuses an evaluation that names one (`design.search_point_not_expanded`,
+  a new code rather than reusing `design.scan_point_not_expanded`). The search spec schema
+  `contracts/schemas/design_search_spec.json` (`design-search-spec/1`; not an artifact).
+- hep-detector: `evaluate_design.py search` builds the genome of a base candidate's slots and free parameters inside
+  the role rules (`assets/design-search/roles.json` 1.0.0: tracking, bending, tof, calorimetry-em, rich; the
+  materials table `materials.json` 1.0.0 dumped from Geant4 11.4.3 NIST materials), decodes it into overrides on the
+  base candidate (an independent candidate when a subsystem is dropped), skips invalid designs (spacing, envelope,
+  overlap, nesting), computes F1 search values in process with the tool contracts' tools (`main(argv)`, the same
+  arguments as `run`), runs NSGA-II from Sobol designs and the designer's proposals (`proposer: llm`) with the exact
+  hypervolume as the stopping rule (`scripts/design_search_lib/`, standard library, bit-for-bit reproducible), fixes
+  up to `finalists.max` finalists from distinct topologies, checks them and a sample of points against `run`
+  (relative difference at most 1e-12, else nothing is written), and records one `runs/SEARCH-*.computational-run.json`.
+  It writes no candidate, evaluation, verdict or ranking. `expand --search` turns a finalist (only) into a candidate
+  that must reproduce the point's effective digest; `run`, `budget` and `report` then treat it like any candidate.
+- `multiple_scattering.py`, `pid_separation_power.py`, `cherenkov_angle.py` and `calorimeter_resolution.py`: `main()`
+  takes `argv` (no change to `--help`, the tool contracts or the outputs).
+- `references/system-design-workflow.md`: section "D2 Automated candidate generation" (when to search, the search spec,
+  search values versus evaluations, `expand --search`, the winner's curse, the designer's limits, what the reply
+  states); capability `detector-design` item DSD-SEARCH; routing case `dsd-direct-3` (no description change).
+- Closure tests (gate G-C1): DTLZ2, plane placement, structure choice on Example A, reproducibility, consistency.
 
 ## 0.38.0 (2026-10-24)
 

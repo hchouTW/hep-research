@@ -111,6 +111,10 @@
     "pattern": "^[0-9a-f]{64}$"
    }
   },
+  "search_summary": {
+   "$comment": "CV-C1 (geant4 program C1.6; declared with hep-computing's agreement): written only by evaluate_design.py search: the search spec and design-spec hashes, the optimizer and seed, the distinct designs evaluated with their search values, the non-binding search front, the hypervolume history and the finalists. The field rules are contracts/schemas/design_search_summary.json, applied by contracts/validate.py from SEARCH_SUMMARY_FROM on (or strict); exempt from the orphan-run rule; a search value is not an evaluation and supports no verdict until its point is expanded into a candidate and evaluated",
+   "type": "object"
+  },
   "scan_summary": {
    "$comment": "3.11.0 (detector design M4, AGG-08, OQ-18): written only by evaluate_design.py scan: the points of a parameter scan of one candidate and figure of merit (parameters, value, uncertainty, bound per point) and the local sensitivities; exempt from the orphan-run rule; a point is not an evaluation and supports no verdict until it is expanded into a candidate and evaluated",
    "type": "object",

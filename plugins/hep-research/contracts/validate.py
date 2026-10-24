@@ -303,6 +303,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
             _study_upgrade(doc, ext, status, rep, a1=_geant4_a1(doc, status, strict))
         if isinstance(ext.get("simulation"), dict) and (strict or _at_least(doc.get("contract_version"), GEANT4_A1_FROM)):
             _evidence_role(ext["simulation"], rep)
+        if "search_summary" in ext and (strict or _at_least(doc.get("contract_version"), SEARCH_SUMMARY_FROM)):
+            _search_summary(doc, ext, rep)
     elif t == "ml-artifact":
         if not ext.get("splits", {}).get("grouping_key"):
             rep.add("error", "$.extension.splits.grouping_key", "ml.no_grouping", "splits need a grouping key (leakage control)")
@@ -369,6 +371,48 @@ GEANT4_BENCHMARKS: dict[str, dict[str, Any]] = {
     "published-data": {"class": "interface", "kinds": (), "scope": ()},
 }
 GEANT4_UPGRADING_CLASSES = ("reference", "setup-matched")
+
+# CV-C1 (geant4 program C1.6): the search_summary rules of a search run apply natively from this contract version. The
+# number is the placeholder of the stage; it is fixed at release in merge order (all CV-* numbers are >= 3.13.0).
+SEARCH_SUMMARY_FROM = "3.13.0"
+
+
+def _search_summary(doc: dict, ext: dict, rep: Report) -> None:
+    """CV-C1: the search_summary of evaluate_design.py search (contracts/schemas/design_search_summary.json) and its
+    cross-field rules: every front and finalist index names a point, a finalist is on the record before any expand,
+    a points file is listed with its hash in output_hashes, and a search run declares no evaluation of its own."""
+    s = ext.get("search_summary")
+    if not isinstance(s, dict):
+        rep.add("error", "$.extension.search_summary", "search.malformed", "search_summary is an object")
+        return
+    before = len(rep.errors)
+    validate(s, "design_search_summary.json", None, rep, "$.extension.search_summary")
+    if len(rep.errors) > before:
+        return
+    indices = [p["index"] for p in s["points"]]
+    if len(set(indices)) != len(indices):
+        rep.add("error", "$.extension.search_summary.points", "search.point_duplicate", "point indices are unique")
+    pf = s.get("points_file")
+    known = set(indices)
+    if isinstance(pf, dict):
+        if (ext.get("output_hashes") or {}).get(pf["ref"]) != pf["sha256"]:
+            rep.add("error", "$.extension.search_summary.points_file", "search.points_file_unlisted",
+                    "the points file is listed with its sha256 in output_hashes")
+        known |= set(range(pf["count"]))
+    for key in ("front", "finalists"):
+        for k, item in enumerate(s[key]):
+            idx = item["index"] if isinstance(item, dict) else item
+            if idx not in known:
+                rep.add("error", f"$.extension.search_summary.{key}[{k}]", "search.unknown_point",
+                        f"{key} names point {idx}, which the search did not record")
+    for k, f in enumerate(s["finalists"]):
+        if f["index"] not in set(indices):
+            rep.add("error", f"$.extension.search_summary.finalists[{k}]", "search.finalist_not_inline",
+                    "a finalist's point is kept in points (expand reads it from there)")
+    if any(k in ext for k in ("verdict", "ranking", "pareto")) or any(
+            k in s for k in ("verdict", "verdicts", "ranking", "pareto", "recommended")):
+        rep.add("error", "$.extension.search_summary", "search.verdict_written",
+                "a search proposes candidates only: verdicts, ranking and Pareto fronts are derived by contracts/design.py")
 
 
 def _bench(name) -> dict[str, Any]:

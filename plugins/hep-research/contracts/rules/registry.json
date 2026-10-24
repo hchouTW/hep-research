@@ -3567,7 +3567,11 @@
     "tests/skills/hep_detector/test_design_m2.py",
     "examples/design-collider-tracker/**",
     "tests/skills/hep_detector/test_design_m3.py",
-    "tests/examples/test_design_collider_tracker.py"
+    "tests/examples/test_design_collider_tracker.py",
+    "skills/hep-detector/scripts/design_search_lib/**",
+    "skills/hep-detector/assets/design-search/**",
+    "tests/skills/hep_detector/test_design_search.py",
+    "tests/skills/hep_detector/test_design_search_lib.py"
    ],
    "checks": [
     "tests.contracts.test_design_verdicts",
@@ -3583,7 +3587,10 @@
     "tests.skills.hep_detector.test_design_m2",
     "tests.skills.hep_computing.test_workflow_c6",
     "tests.skills.hep_detector.test_design_m3",
-    "tests.examples.test_design_collider_tracker"
+    "tests.examples.test_design_collider_tracker",
+    "tests.skills.hep_detector.test_design_search",
+    "tests.skills.hep_detector.test_design_search_lib",
+    "tests.contracts.test_design_search_contract"
    ],
    "not_available": [],
    "full": false

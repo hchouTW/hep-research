@@ -50,6 +50,20 @@ Subcommands:
   supports no verdict. Operations with required upstreams are not scanned.
 - expand (M4): one scan point as a candidate derived from the scanned one (overrides of the scanned parameters), to be
   evaluated with run like any candidate; only expanded points enter comparison.
+- search (C1, contracts 3.13.0 search_summary): automated candidate generation at F1 from a search spec
+  (design-search-spec/1, --spec, in the artifacts_dir; contracts/schemas/design_search_spec.json): the genome of the
+  base candidate's slots and free parameters within the role rules (assets/design-search/roles.json, materials.json),
+  Sobol designs plus the designer's proposals (proposer llm), NSGA-II with constrained domination and the exact WFG
+  hypervolume (design_search_lib/), F1 search values computed in this process by the tool contracts' tools with the
+  arguments contracts/design.py recomputes (main(argv)), the non-binding search front and up to finalists.max
+  finalists, and a consistency check of the finalists and a sample of points against run (relative difference at most
+  1e-12). Stored as runs/SEARCH-*.computational-run.json (search_summary; large point sets in a .points.jsonl listed in
+  output_hashes). It writes no candidate and no evaluation, no verdict and no ranking; the run is exempt from the
+  orphan-run rule and an evaluation that names it is design.search_point_not_expanded.
+- expand --search (C1): one finalist of a search as a candidate, decoded from its genome as the search decoded it
+  (overrides on the base candidate, or an independent candidate when a subsystem is dropped; the effective digest
+  must equal the point's); other points are refused. Then run, budget and report as for any candidate; report lists
+  each expanded finalist's search value minus its official evaluation (search_minus_official, a diagnostic).
 - plan: the suggested next evaluations, per requirement and candidate, from the derived state (RES-04): missing
   evaluations, missing evidence for compliance, stale evaluations, missing gates. Suggestions only.
 - report: the design report, a communication artifact derived by contracts/design.py (producer_skill hep-detector):
@@ -62,8 +76,9 @@ Decision records live outside the artifacts_dir (--decisions). This script does 
 envelopes' created date is SOURCE_DATE_EPOCH when that is set (reproducible reruns), else today.
 Output JSON: status (ok, failed, rejected), status_label (--status of run and budget, else unvalidated), and the
 subcommand's fields.
-Exit codes: 0 ok; 1 the tool failed, gave no value, or the evaluation has a design error (nothing written); 2 invalid
-input or a missing file (JSON with error on stdout).
+Exit codes: 0 ok; 1 the tool failed, gave no value, or the evaluation has a design error (nothing written); for search,
+an in-process search value that differs from run beyond 1e-12 (nothing written); 2 invalid input or a missing file
+(JSON with error on stdout).
 Usage:
   evaluate_design.py run --artifacts DIR --candidate ID (--requirement ID | --figure-of-merit FOM [--denominator K=V ...])
       [--fidelity F1] [--tool TOOL:OP] [--upstream REL ...] [--input-artifact REL ...] [--id EVAL-ID] [--replace]
@@ -81,6 +96,8 @@ Usage:
   evaluate_design.py scan --artifacts DIR --candidate ID --figure-of-merit FOM [--denominator K=V ...] [--fidelity F1]
       --vary SID.parameters.NAME=V1,V2,... [--vary ...] --id SCAN-ID [--max-points N] [--status LABEL]
   evaluate_design.py expand --artifacts DIR --scan REL --point K --candidate-id NAME
+  evaluate_design.py search --artifacts DIR --spec REL --id SEARCH-ID [--max-evaluations N] [--status LABEL]
+  evaluate_design.py expand --artifacts DIR --search REL --point K --candidate-id NAME
   evaluate_design.py plan --artifacts DIR [--decisions DIR]
   evaluate_design.py report --artifacts DIR [--decisions DIR] [--omit EVALUATION ...] [--name NAME]
 """
@@ -90,6 +107,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import math
 import os
 import platform
 import re
@@ -263,6 +281,42 @@ def remove_stale(proj: design.Project, eid: str) -> list[str]:
     return gone
 
 
+def tool_arguments(op: dict, fd: dict, prep: design.Prepared, status: str, config_file) -> list[str]:
+    """The tool's arguments after the script, from the inputs contracts/design.py recomputed (T-58): operation
+    arguments, positionals, then options in the contract's order. config_file(name, content) stores a config-file
+    input and returns its argv token. Shared by run and the in-process search values (C1.4), so both call the tool
+    with the same arguments."""
+    args_out: list[str] = list(fd.get("operation_args", []))
+    by_input = {m["input"]: prep.expected[m["input"]] for m in fd["inputs"] if m["input"] in prep.expected}
+    for pos in sorted(op["invocation"].get("positionals", []), key=lambda x: x["position"]):
+        val = by_input.get(pos["input"])
+        if isinstance(val, design.ConfigValue):
+            args_out.append(config_file(pos["input"], dict(val)))
+        elif val is not None:
+            args_out.append(token(val))
+    for o in op["invocation"]["options"]:
+        name = o["input"]
+        if name in by_input:
+            val = by_input[name]
+            if val is True:
+                args_out.append(o["flag"])
+            elif val is not False:
+                args_out += [o["flag"]] + [token(x) for x in design.flat(val)]
+        elif name == "status" and "status" in fd.get("free_inputs", []):
+            args_out += [o["flag"], status]
+    return args_out
+
+
+def tool_result(fd: dict, prep: design.Prepared, den: dict, output):
+    """(value, value path, derived bound, validity-domain reasons, uncertainty) of a tool output, as the verdict rules
+    derive them (ART-40, CMB, FID-10)."""
+    value, path = design.output_value(fd, den, output)
+    own, _ = design.own_bound(fd, prep, den, output)
+    bound = design.combine_bounds(own, prep.directions)
+    domain = design.validity_reasons(fd, prep, den, output)
+    return value, path, bound, domain, design.output_uncertainty(fd, output, value)
+
+
 def run_evaluation(args, digest_only: bool = False) -> dict:
     proj = load_project(args)
     cpath = proj.candidates.get(args.candidate)
@@ -334,28 +388,14 @@ def run_evaluation(args, digest_only: bool = False) -> dict:
                 "tool": f"{contract['tool_id']}:{op['operation_id']}", "parameter_refs": sorted(prep.refs),
                 "parameter_digest": proj.parameter_digest(args.candidate, prep.refs),
                 "upstreams": [{"ref": u.rel, "sha256": proj.sha[u.path]} for u in ev.upstreams]}
-    # argv: interpreter, script, operation arguments, positionals, then options in the contract's order
-    args_out: list[str] = list(fd.get("operation_args", []))
     manifest = [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels]
-    by_input = {m["input"]: prep.expected[m["input"]] for m in fd["inputs"] if m["input"] in prep.expected}
-    for pos in sorted(op["invocation"].get("positionals", []), key=lambda x: x["position"]):
-        val = by_input.get(pos["input"])
-        if isinstance(val, design.ConfigValue):
-            rel = w.json(f"configs/{eid}.{pos['input']}.json", dict(val))
-            manifest.append({"path": rel, "sha256": sha256(proj.root / rel)})
-            args_out.append(rel)
-        elif val is not None:
-            args_out.append(token(val))
-    for o in op["invocation"]["options"]:
-        name = o["input"]
-        if name in by_input:
-            val = by_input[name]
-            if val is True:
-                args_out.append(o["flag"])
-            elif val is not False:
-                args_out += [o["flag"]] + [token(x) for x in design.flat(val)]
-        elif name == "status" and "status" in fd.get("free_inputs", []):
-            args_out += [o["flag"], args.status]
+
+    def config_file(name: str, val: dict) -> str:
+        rel = w.json(f"configs/{eid}.{name}.json", val)
+        manifest.append({"path": rel, "sha256": sha256(proj.root / rel)})
+        return rel
+    # argv: interpreter, script, operation arguments, positionals, then options in the contract's order
+    args_out = tool_arguments(op, fd, prep, args.status, config_file)
     argv = ["python3", contract["entry"], *args_out]
     proc = subprocess.run([sys.executable, "-B", str(PLUGIN / contract["entry"]), *args_out], capture_output=True,
                           cwd=str(proj.root), timeout=TOOL_TIMEOUT_S)
@@ -367,7 +407,7 @@ def run_evaluation(args, digest_only: bool = False) -> dict:
         w.undo()
         return {"status": "failed", "exit": 1, "error": f"{contract['entry']} exited {proc.returncode}",
                 "tool_output": output, "stderr": proc.stderr.decode("utf-8", "replace")[-2000:]}
-    value, path = design.output_value(fd, den, output)
+    value, path, bound, domain, unc = tool_result(fd, prep, den, output)
     if value is None:
         w.undo()
         return {"status": "failed", "exit": 1, "error": f"the tool gave no number at {path!r} for this denominator",
@@ -384,14 +424,10 @@ def run_evaluation(args, digest_only: bool = False) -> dict:
     run_rel = w.json(f"runs/{eid}.computational-run.json",
                      envelope("computational-run", f"{ns}-{eid}-run", run_ext, run_inputs, [{"ref": out_rel}],
                               statuses(run_inputs, args.status)))
-    own, _ = design.own_bound(fd, prep, den, output)
-    bound = design.combine_bounds(own, prep.directions)
-    domain = design.validity_reasons(fd, prep, den, output)
     ext.update(value=value, unit=fd["unit"], bound=bound if bound != "mixed" else "estimate", run_ref=run_rel,
                parameter_refs=sorted(prep.refs), parameter_digest=proj.parameter_digest(args.candidate, prep.refs),
                validity={"assumptions": list(fd.get("assumptions", [])), "in_domain": not domain},
                fidelity=op["design"]["fidelity"])
-    unc = design.output_uncertainty(fd, output, value)
     if unc is not None:
         ext["uncertainty"] = unc
     ev_inputs = base_inputs + [w.input_ref(run_rel)] + [w.input_ref(r) for r in up_rels] + extra_inputs
@@ -900,6 +936,1115 @@ def expand(args) -> dict:
                     f" --fidelity {summary['fidelity']} (and every other evaluation the comparison needs)"}
 
 
+# ---------------------------------------------------------------- automated candidate generation (C1)
+
+SEARCH_ASSETS = PLUGIN / "skills" / "hep-detector" / "assets" / "design-search"
+SEARCH_LIB = Path(__file__).resolve().parent / "design_search_lib"
+MAX_OBJECTIVES = 4  # exact WFG hypervolume; more objectives are expressed as constraints (section C.4.4)
+CONSISTENCY_TOL = 1e-12  # in-process search value against evaluate_design.py run (C1.4)
+SEARCH_NOTE = ("search values are not evaluations: they take part in no aggregation and support no verdict; the "
+               "search front is non-binding and no optimum is claimed; expand a finalist (expand --search) and "
+               "evaluate it with run and budget, then derive verdicts and comparison with report")
+
+
+def search_lib():
+    """The standard-library searcher (design_search_lib: sobol, nsga2, hypervolume), imported on first use."""
+    scripts = str(SEARCH_LIB.parent)
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    from design_search_lib import hypervolume, nsga2, sobol
+    return hypervolume, nsga2, sobol
+
+
+def canonical(obj) -> str:
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def load_asset(name: str, key: str, version: str) -> tuple[dict, str]:
+    path = SEARCH_ASSETS / name
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    if doc.get(key) != version:
+        raise UsageError(f"the search spec names {key} {version}, the shipped {name} is {doc.get(key)}: a different "
+                         "version is a new search spec")
+    return doc, sha256(path)
+
+
+class InProcessTools:
+    """C1.4: the F1 tool scripts imported once and called through main(argv) in this process, with stdout captured
+    and SystemExit caught; config-file inputs go to a scratch folder."""
+
+    def __init__(self, scratch: Path):
+        self.scratch, self.modules, self.calls, self.seconds = scratch, {}, 0, 0.0
+
+    def config_file(self, name: str, val: dict) -> str:
+        path = self.scratch / f"{name}.json"
+        path.write_text(json.dumps(val, indent=1) + "\n", encoding="utf-8")
+        return str(path)
+
+    def call(self, entry: str, argv: list[str]) -> tuple[int, dict | None]:
+        import contextlib
+        import importlib.util
+        import io
+        import time
+        mod = self.modules.get(entry)
+        if mod is None:
+            spec = importlib.util.spec_from_file_location(f"_design_search_tool_{len(self.modules)}", PLUGIN / entry)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            self.modules[entry] = mod
+        out, err = io.StringIO(), io.StringIO()
+        t0 = time.perf_counter()
+        try:
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                code = mod.main(argv)
+        except SystemExit as exc:
+            code = exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 2)
+        self.seconds += time.perf_counter() - t0
+        self.calls += 1
+        try:
+            output = json.loads(out.getvalue())
+        except ValueError:
+            output = None
+        return int(code or 0), output if isinstance(output, dict) else None
+
+
+def resolve_target(proj: design.Project, spec_ext: dict, t: dict, kind: str) -> dict:
+    """An objective or constraint of the search spec: its figure of merit, denominator, F1 operation (and the
+    upstream operation a chained figure of merit needs), direction, threshold and reference point."""
+    req = None
+    if t.get("requirement"):
+        req = next((r for r in spec_ext["requirements"] + spec_ext["constraints"]
+                    if r["id"] == t["requirement"] or r["id"].endswith(":" + t["requirement"])), None)
+        if req is None:
+            raise UsageError(f"{kind} {t['requirement']!r}: no requirement or constraint of that id in the current "
+                             "design-spec")
+        fom, den = req["quantity"], {k: v["value"] for k, v in req["denominator"].items()}
+        comparator, target = req["comparator"], req["target"]
+        label = req["id"].split(":", 1)[-1]
+    else:
+        if not t.get("figure_of_merit"):
+            raise UsageError(f"a search {kind} names a requirement or a figure_of_merit")
+        fom, den = t["figure_of_merit"], dict(t.get("denominator") or {})
+        comparator, target = t.get("comparator"), t.get("target")
+        label = fom
+        if kind == "constraint" and (comparator is None or target is None):
+            raise UsageError(f"constraint {fom}: give a requirement, or comparator and target")
+    if proj.fom_rules(fom) is None:
+        raise UsageError(f"{kind} {label}: {fom!r} is not a figure of merit of the adequacy table")
+    hit = choose_operation(proj, fom, "F1", t.get("tool"))
+    if hit is None:
+        raise UsageError(f"{kind} {label}: no F1 tool contract computes {fom} (capability.unavailable cannot be "
+                         "searched on)")
+    contract, op, fd = hit
+    if set(den) != set(fd["denominator"]):
+        raise UsageError(f"{kind} {label}: the denominator needs exactly {sorted(fd['denominator'])}")
+    up = None
+    ups = fd.get("required_upstreams", [])
+    if len(ups) > 1:
+        raise UsageError(f"{kind} {label}: {fom} needs {len(ups)} upstreams; the search chains one")
+    if ups:
+        uhit = choose_operation(proj, ups[0], "F1", t.get("upstream_tool"))
+        if uhit is None or uhit[2].get("required_upstreams"):
+            raise UsageError(f"{kind} {label}: its upstream {ups[0]} has no F1 operation without upstreams")
+        up = {"figure_of_merit": ups[0], "hit": uhit, "tool": f"{uhit[0]['tool_id']}:{uhit[1]['operation_id']}",
+              "denominator": {k: den[k] for k in uhit[2]["denominator"] if k in den}}
+        if set(up["denominator"]) != set(uhit[2]["denominator"]):
+            raise UsageError(f"{kind} {label}: the denominator lacks fields of its upstream {ups[0]}")
+    out = {"label": label, "figure_of_merit": fom, "denominator": den, "requirement": req["id"] if req else None,
+           "tool": f"{contract['tool_id']}:{op['operation_id']}", "hit": hit, "upstream": up, "better": fd["better"],
+           "comparator": comparator, "target": target}
+    if kind == "objective":
+        if comparator == "range":
+            raise UsageError(f"objective {label}: a range requirement cannot be an objective; make it a constraint")
+        ref = t.get("reference_point")
+        if ref is None and isinstance(target, (int, float)) and target != 0:
+            ref = target * 1.1 if fd["better"] == "smaller" else target / 1.1  # section C.4.7
+        if not isinstance(ref, (int, float)) or ref == 0:
+            raise UsageError(f"objective {label}: no threshold to place the reference point at; declare a non-zero "
+                             "reference_point")
+        out["reference_point"] = float(ref)
+    return out
+
+
+def violation_of(t: dict, value) -> float:
+    """Normalised shortfall of a constraint on its search value; a missing value counts 1."""
+    if value is None:
+        return 1.0
+    comp, target = t["comparator"], t["target"]
+    if comp == "range":
+        lo, hi = target
+        scale = max(abs(hi - lo), 1e-300)
+        return max(0.0, (lo - value) / scale) + max(0.0, (value - hi) / scale)
+    scale = max(abs(target), 1e-300)
+    if comp in ("<=", "<"):
+        return max(0.0, (value - target) / scale)
+    return max(0.0, (target - value) / scale)
+
+
+class SearchSpace:
+    """The genome of a search spec (section C.4.5): slots (base subsystems and the subsystems the search may add), their
+    enable bits and parent slots, and the parameters the role rules let the search change; the decoder (genome ->
+    design-candidate as overrides on the base candidate, or an independent candidate when a subsystem is dropped),
+    repair and the violation measure."""
+
+    def __init__(self, proj: design.Project, spec: dict, roles: dict, materials: dict, search_id: str):
+        self.proj, self.spec, self.search_id = proj, spec, search_id
+        self.rules, self.mothers = roles["roles"], set(roles.get("mothers", []))
+        self.rules_version, self.rel_unc = roles["rules_version"], roles.get("budget_relative_uncertainty", 0.25)
+        self.materials = materials["materials"]
+        self.base = spec["base_candidate"]
+        if self.proj.candidates.get(self.base) is None or self.proj.candidate_chain(self.base) is None:
+            raise UsageError(f"base candidate {self.base} (with its bases) is not in the artifacts_dir")
+        self.ns = self.base.split(":", 1)[0]
+        self.design_id = proj.docs[proj.candidates[self.base]]["extension"]["design_id"]
+        self.base_subs = json.loads(json.dumps(proj.effective(self.base)))
+        self.base_budgets = json.loads(json.dumps(proj.effective_budgets(self.base)))
+        self.envelope = (spec.get("envelope") or {}).get("length_m")
+        self.regenerate = list(spec.get("regenerate_budgets") or [])
+        for sid in self.regenerate:
+            if sid not in self.base_subs:
+                raise UsageError(f"regenerate_budgets names {sid}, which the base candidate does not have")
+        self.genes: list[dict] = []
+        self.slots: list[dict] = []
+        self._build()
+
+    # -- building the genome
+    def _gene(self, gene: dict) -> int:
+        self.genes.append(gene)
+        return len(self.genes) - 1
+
+    def _rule(self, role: str) -> dict:
+        from contracts.vocab import Vocabulary
+        if role not in self.rules:
+            raise UsageError(f"role {role!r} has no realization rule in roles.json (rules {self.rules_version})")
+        if not Vocabulary().has("subsystem_roles", role):
+            raise UsageError(f"role {role!r} is not in the subsystem_roles vocabulary")
+        return self.rules[role]
+
+    def _param_genes(self, slot: dict, name: str, rule_def: dict, free: dict | None) -> None:
+        kind = (free or {}).get("kind") or rule_def["kind"]
+        where = f"{slot['sid']}.parameters.{name}"
+        if kind != rule_def["kind"]:
+            raise UsageError(f"{where}: kind {kind} differs from the role rule's {rule_def['kind']}")
+        entry: dict = {"name": name, "kind": kind, "unit": rule_def["unit"]}
+        if kind == "categorical":
+            choices = list((free or {}).get("choices") or rule_def["choices"])
+            if not set(choices) <= set(rule_def["choices"]):
+                raise UsageError(f"{where}: choices {choices} outside the role rule's {rule_def['choices']}")
+            if name.endswith("material") and not set(choices) <= set(self.materials):
+                raise UsageError(f"{where}: a material outside materials.json")
+            entry.update(choices=choices, gene=self._gene({"name": where, "type": "cat", "n": len(choices),
+                                                           "choices": choices}))
+        else:
+            lo, hi = (free or {}).get("range") or rule_def["range"]
+            rlo, rhi = rule_def["range"]
+            if not (rlo <= lo <= hi <= rhi):
+                raise UsageError(f"{where}: range [{lo}, {hi}] outside the role rule's [{rlo}, {rhi}] or reversed")
+            if kind == "positions":
+                nlo, nhi = (free or {}).get("n") or rule_def["n"]
+                rnlo, rnhi = rule_def["n"]
+                if not (rnlo <= nlo <= nhi <= rnhi):
+                    raise UsageError(f"{where}: n [{nlo}, {nhi}] outside the role rule's [{rnlo}, {rnhi}]")
+                spacing = (free or {}).get("min_spacing_m", rule_def["min_spacing_m"])
+                if spacing < rule_def["min_spacing_m"]:
+                    raise UsageError(f"{where}: min_spacing_m {spacing} below the role rule's {rule_def['min_spacing_m']}")
+                if (nhi - 1) * spacing > hi - lo:
+                    raise UsageError(f"{where}: {nhi} planes at {spacing} m spacing do not fit in [{lo}, {hi}]")
+                entry.update(range=[lo, hi], n=[nlo, nhi], min_spacing=spacing,
+                             n_gene=self._gene({"name": where + ".n", "type": "int", "lo": nlo, "hi": nhi})
+                             if nlo < nhi else None,
+                             genes=[self._gene({"name": f"{where}[{i}]", "type": "real", "lo": lo, "hi": hi})
+                                    for i in range(nhi)])
+            elif kind == "integer":
+                entry.update(range=[int(lo), int(hi)], gene=self._gene({"name": where, "type": "int", "lo": int(lo),
+                                                                        "hi": int(hi)}))
+            else:
+                entry.update(range=[lo, hi], gene=self._gene({"name": where, "type": "real", "lo": lo, "hi": hi}))
+        slot["params"][name] = entry
+
+    def _build(self) -> None:
+        free: dict[str, dict[str, dict]] = {}
+        for fp in self.spec.get("free_parameters", []):
+            sid, _, name = fp["ref"].partition(".parameters.")
+            if name in free.setdefault(sid, {}):
+                raise UsageError(f"free_parameters names {fp['ref']} twice")
+            free[sid][name] = fp
+        slot_spec = {}
+        for role, val in (self.spec.get("slots") or {}).items():
+            rng, ids = (val, []) if isinstance(val, list) else (val["range"], list(val.get("ids") or []))
+            if len(rng) != 2 or rng[0] > rng[1]:
+                raise UsageError(f"slots.{role}: [min, max] with min <= max")
+            if rng[1] > 1:
+                raise UsageError(f"slots.{role}: at most one subsystem per role (main's granularity: one subsystem per "
+                                 "role, planes as array parameters)")
+            slot_spec[role] = (rng[0], rng[1], ids)
+        roles_in_base: dict[str, list[str]] = {}
+        for sid in sorted(self.base_subs):
+            roles_in_base.setdefault(self.base_subs[sid]["role"], []).append(sid)
+        for sid in sorted(self.base_subs):
+            role = self.base_subs[sid]["role"]
+            slot = {"sid": sid, "role": role, "base": True, "enable_gene": None, "parent_gene": None, "parent_options":
+                    [None], "params": {}, "always": True}
+            if role in slot_spec:
+                lo, hi, _ = slot_spec[role]
+                if len(roles_in_base[role]) > hi:
+                    raise UsageError(f"slots.{role}: the base candidate already has {len(roles_in_base[role])}")
+                if lo == 0:
+                    slot["always"] = False
+                    slot["enable_gene"] = self._gene({"name": f"{sid}.enabled", "type": "bit"})
+            for name, fp in sorted(free.pop(sid, {}).items()):
+                rule = self._rule(role)
+                if name not in rule["parameters"]:
+                    raise UsageError(f"{fp['ref']}: the role rule of {role} does not let the search change {name}")
+                if name not in self.base_subs[sid]["parameters"] and name not in rule.get("new_subsystem", {}):
+                    raise UsageError(f"{fp['ref']}: not a parameter of the base candidate")
+                self._param_genes(slot, name, rule["parameters"][name], fp)
+            self._check_per_layer(slot)
+            self.slots.append(slot)
+        for role in sorted(slot_spec):
+            lo, hi, ids = slot_spec[role]
+            rule = self._rule(role)
+            for k in range(hi - len(roles_in_base.get(role, []))):
+                sid = ids[k] if k < len(ids) else f"DES-{rule['code']}-S{k + 1:02d}"
+                if sid in self.base_subs:
+                    raise UsageError(f"slots.{role}: id {sid} is already a subsystem of the base candidate")
+                slot = {"sid": sid, "role": role, "base": False, "enable_gene": None, "parent_gene": None,
+                        "parent_options": [None], "params": {}, "always": len(roles_in_base.get(role, [])) + k < lo}
+                if not slot["always"]:
+                    slot["enable_gene"] = self._gene({"name": f"{sid}.enabled", "type": "bit"})
+                for name in sorted(rule["parameters"]):
+                    self._param_genes(slot, name, rule["parameters"][name], free.get(sid, {}).pop(name, None))
+                free.pop(sid, None)
+                self.slots.append(slot)
+        if free:
+            raise UsageError(f"free_parameters name subsystems that are neither in the base candidate nor slots the "
+                             f"search may add: {sorted(free)}")
+        for slot in self.slots:  # parent slots: a daughter of an enabled bending or calorimetry slot (section C.4.5)
+            if slot["base"]:
+                continue
+            opts = [None] + [s["sid"] for s in self.slots if s is not slot and s["role"] in self.mothers]
+            if len(opts) > 1:
+                slot["parent_options"] = opts
+                slot["parent_gene"] = self._gene({"name": f"{slot['sid']}.parent", "type": "cat", "n": len(opts),
+                                                  "choices": [o or "-1" for o in opts]})
+        if not self.genes:
+            raise UsageError("the search spec frees no parameter and no slot: nothing to search")
+
+    def _check_per_layer(self, slot: dict) -> None:
+        pos = next((p for p in slot["params"].values() if p["kind"] == "positions"), None)
+        if pos is None:
+            return
+        base_n = len(self.base_subs[slot["sid"]]["parameters"].get(pos["name"], {}).get("value") or [])
+        if pos["n"] == [base_n, base_n]:
+            return
+        rule = self.rules[slot["role"]]
+        derived = set(rule.get("derived", {})) if self._has_sensor(slot) else set()
+        for name in rule.get("per_layer", []):
+            par = self.base_subs[slot["sid"]]["parameters"].get(name)
+            if par is None or name in derived or not isinstance(par.get("value"), list):
+                continue
+            vals = par["value"]
+            if any(v != vals[0] for v in vals):
+                raise UsageError(f"{slot['sid']}.parameters.{name} differs between planes and the number of planes is "
+                                 "free: free the sensor material and thickness (derived per plane) or fix n")
+
+    def _has_sensor(self, slot: dict) -> bool:
+        return not slot["base"] or bool({"sensor_material", "sensor_thickness_um"} & set(slot["params"]))
+
+    # -- genomes
+    def default_genome(self) -> list:
+        """The base candidate's values (a disabled added slot with the role rule's new-subsystem values)."""
+        g: list = [None] * len(self.genes)
+        for slot in self.slots:
+            if slot["enable_gene"] is not None:
+                g[slot["enable_gene"]] = slot["base"]
+            if slot["parent_gene"] is not None:
+                g[slot["parent_gene"]] = 0
+            defaults = self.rules[slot["role"]].get("new_subsystem", {})
+            for name, p in slot["params"].items():
+                base = (self.base_subs.get(slot["sid"], {}).get("parameters") or {}).get(name)
+                val = base["value"] if base is not None and slot["base"] else defaults.get(name)
+                self._set_param(g, p, val)
+        return g
+
+    def _set_param(self, g: list, p: dict, val) -> None:
+        if p["kind"] == "categorical":
+            g[p["gene"]] = p["choices"].index(val) if val in p["choices"] else 0
+        elif p["kind"] == "positions":
+            vals = sorted(float(v) for v in (val if isinstance(val, list) else []))
+            n = min(max(len(vals), p["n"][0]), p["n"][1])
+            if p["n_gene"] is not None:
+                g[p["n_gene"]] = n
+            lo, hi = p["range"]
+            extra = [lo + (hi - lo) * (i + 0.5) / len(p["genes"]) for i in range(len(p["genes"]))]
+            vals = (vals + extra)[:len(p["genes"])]
+            for k, gi in enumerate(p["genes"]):
+                g[gi] = vals[k]
+        else:
+            g[p["gene"]] = float(val) if p["kind"] == "continuous" else int(val)
+
+    def proposal_genome(self, prop: dict) -> list:
+        """A designer's seed design (proposer llm): the default genome with the slots and parameters it names."""
+        g = self.default_genome()
+        by_sid = {s["sid"]: s for s in self.slots}
+        for key, on in (prop.get("enabled") or {}).items():
+            hits = [s for s in self.slots if s["sid"] == key or s["role"] == key]
+            if not hits or any(s["enable_gene"] is None and bool(on) != s["always"] for s in hits):
+                raise UsageError(f"proposal {prop['id']}: enabled.{key} names no slot the search may switch")
+            for s in hits:
+                if s["enable_gene"] is not None:
+                    g[s["enable_gene"]] = bool(on)
+        for sid, parent in (prop.get("parent") or {}).items():
+            s = by_sid.get(sid)
+            if s is None or s["parent_gene"] is None or parent not in s["parent_options"]:
+                raise UsageError(f"proposal {prop['id']}: parent.{sid} = {parent} is not a parent the search allows")
+            g[s["parent_gene"]] = s["parent_options"].index(parent)
+        for ref, val in (prop.get("parameters") or {}).items():
+            sid, _, name = ref.partition(".parameters.")
+            p = (by_sid.get(sid) or {}).get("params", {}).get(name)
+            if p is None:
+                raise UsageError(f"proposal {prop['id']}: {ref} is not a free parameter of the search")
+            self._set_param(g, p, val)
+        return g
+
+    def repair(self, g: list) -> tuple[list, list[str]]:
+        """Clip to range, reset impossible parents, sort plane positions and push them apart to the minimum spacing
+        (section C.4.5); returns the repaired genome and what was repaired."""
+        g, notes = list(g), []
+        for k, gene in enumerate(self.genes):
+            t = gene["type"]
+            if t in ("real", "int"):
+                v = min(max(g[k], gene["lo"]), gene["hi"])
+                v = int(round(v)) if t == "int" else float(v)
+                if v != g[k]:
+                    notes.append(f"range: {gene['name']} clipped to {v}")
+                g[k] = v
+            elif t == "cat":
+                if not isinstance(g[k], int) or not 0 <= g[k] < gene["n"]:
+                    notes.append(f"range: {gene['name']} reset")
+                    g[k] = 0
+            else:
+                g[k] = bool(g[k])
+        enabled = {s["sid"]: self._enabled(s, g) for s in self.slots}
+        roles = {s["sid"]: s["role"] for s in self.slots}
+        for s in self.slots:
+            if s["parent_gene"] is None:
+                continue
+            parent = s["parent_options"][g[s["parent_gene"]]]
+            if parent is not None and (not enabled.get(parent) or roles[parent] not in self.mothers):
+                g[s["parent_gene"]] = 0
+        for s in self.slots:
+            for p in s["params"].values():
+                if p["kind"] != "positions":
+                    continue
+                n = g[p["n_gene"]] if p["n_gene"] is not None else p["n"][0]
+                lo, hi = p["range"]
+                sp = p["min_spacing"]
+                x = sorted(g[gi] for gi in p["genes"][:n])
+                for i in range(1, n):
+                    x[i] = max(x[i], x[i - 1] + sp)
+                if n and x[-1] > hi:
+                    x[-1] = hi
+                    for i in range(n - 2, -1, -1):
+                        x[i] = min(x[i], x[i + 1] - sp)
+                x = [min(max(v, lo), hi) for v in x]
+                for gi, v in zip(p["genes"][:n], x):
+                    g[gi] = v
+        return g, notes
+
+    def _enabled(self, slot: dict, g: list) -> bool:
+        return slot["always"] if slot["enable_gene"] is None else bool(g[slot["enable_gene"]])
+
+    def values(self, g: list) -> dict:
+        out = {}
+        for s in self.slots:
+            params = {}
+            for name, p in s["params"].items():
+                if p["kind"] == "categorical":
+                    params[name] = p["choices"][g[p["gene"]]]
+                elif p["kind"] == "positions":
+                    n = g[p["n_gene"]] if p["n_gene"] is not None else p["n"][0]
+                    params[name] = [g[gi] for gi in p["genes"][:n]]
+                else:
+                    params[name] = g[p["gene"]]
+            out[s["sid"]] = {"enabled": self._enabled(s, g), "params": params,
+                             "parent": s["parent_options"][g[s["parent_gene"]]] if s["parent_gene"] is not None else None}
+        return out
+
+    def genome_dict(self, g: list) -> dict:
+        return {gene["name"]: (gene["choices"][g[k]] if gene["type"] == "cat" else g[k])
+                for k, gene in enumerate(self.genes)}
+
+    def genome_from_dict(self, d: dict) -> list:
+        g = []
+        for gene in self.genes:
+            if gene["name"] not in d:
+                raise UsageError(f"the point's genome lacks {gene['name']}: the search spec changed")
+            v = d[gene["name"]]
+            g.append(gene["choices"].index(v) if gene["type"] == "cat" else v)
+        return g
+
+    # -- decoding
+    def _material(self, name: str) -> dict:
+        m = self.materials.get(name)
+        if m is None:
+            raise UsageError(f"material {name!r} is not in materials.json")
+        return m
+
+    def _sensor(self, slot: dict, params: dict) -> tuple[str, float]:
+        rule = self.rules[slot["role"]]
+        defaults = rule.get("new_subsystem", {})
+        old = self.base_subs.get(slot["sid"], {}).get("parameters", {}) if slot["base"] else {}
+        mat = params.get("sensor_material", (old.get("sensor_material") or {}).get("value",
+                                                                                    defaults.get("sensor_material")))
+        thick = params.get("sensor_thickness_um", (old.get("sensor_thickness_um") or {}).get(
+            "value", defaults.get("sensor_thickness_um")))
+        return str(mat), float(thick)
+
+    def _derived(self, slot: dict, params: dict, n: int | None) -> dict:
+        """Per-plane x/X0 from sensor material and thickness (role rule 'derived'), and per-plane arrays of the base
+        resized when the number of planes changes."""
+        out: dict = {}
+        rule = self.rules[slot["role"]]
+        if "layer_x_over_x0" in rule.get("derived", {}) and self._has_sensor(slot) and n is not None:
+            mat, thick = self._sensor(slot, params)
+            out["layer_x_over_x0"] = [thick * 1e-4 / self._material(mat)["radiation_length_cm"]] * n
+        if slot["base"] and n is not None:
+            for name in rule.get("per_layer", []):
+                par = self.base_subs[slot["sid"]]["parameters"].get(name)
+                if name in out or par is None or not isinstance(par.get("value"), list) or len(par["value"]) == n:
+                    continue
+                out[name] = [par["value"][0]] * n
+        return out
+
+    def _budget_rows(self, slot: dict, params: dict) -> dict:
+        rule = self.rules[slot["role"]]
+        model, inp = rule["budget_model"], rule["budget_model"]["inputs"]
+        name = model["name"]
+        if name == "planes-density-volume":
+            n = len(params["layer_positions_m"])
+            mat, thick = self._sensor(slot, params)
+            dens = self._material(mat)["density_g_cm3"] * 1000.0
+            mass = n * inp["plane_area_m2"] * thick * 1e-6 * dens * (1 + inp["support_mass_factor"])
+            channels = n * inp["readout_sides"] * math.sqrt(inp["plane_area_m2"]) / (inp["strip_pitch_um"] * 1e-6)
+        elif name == "magnet-placeholder":
+            mass, channels = inp["mass_per_tesla_kg"] * params["field_T"], 0.0
+        elif name == "tof-planes":
+            dens = self._material(inp["scintillator_material"])["density_g_cm3"] * 1000.0
+            mass = params["n_layers"] * inp["plane_area_m2"] * params["scintillator_thickness_cm"] * 0.01 * dens
+            channels = float(params["n_layers"] * inp["paddles_per_layer"] * 2)
+        elif name == "calorimeter-block":
+            m = self._material(params["absorber_material"])
+            mass = inp["block_area_m2"] * params["depth_X0"] * m["radiation_length_cm"] * 0.01 * m["density_g_cm3"] * 1000
+            channels = inp["block_area_m2"] / inp["cell_size_m"] ** 2
+        elif name == "rich-block":
+            mass, channels = inp["block_area_m2"] * inp["areal_mass_kg_m2"], inp["block_area_m2"] / inp["pixel_size_m"] ** 2
+        else:
+            raise UsageError(f"unknown budget model {name!r} in roles.json")
+        power = (inp["power_per_tesla_W"] * params["field_T"] if name == "magnet-placeholder"
+                 else channels * inp["power_per_channel_W"])
+        data = 0.0 if name == "magnet-placeholder" else channels * inp["data_per_channel_Mbit_s"]
+        src = (f"role rule {slot['role']} budget model {name} (roles.json {self.rules_version}): {model['description']}; "
+               "assumed model inputs, not a design")
+        rows = {}
+        for q, unit, est in (("mass", "kg", mass), ("power", "W", power), ("channel_count", "1", channels),
+                             ("data_rate", "Mbit/s", data)):
+            rows[q] = {"estimate": float(est), "uncertainty": float(est) * self.rel_unc, "unit": unit,
+                       "basis": "estimate", "source": src, "fidelity": "F1"}
+        return rows
+
+    def decode(self, g: list, source: str, cid: str) -> tuple[dict, dict]:
+        """The design-candidate extension of genome g (parameters with this source, status proposal), and facts about
+        it: topology, dropped subsystems, parents, extents."""
+        vals = self.values(g)
+        subs = json.loads(json.dumps(self.base_subs))
+        overrides: dict = {}
+        rows: dict = {}
+        dropped = [s["sid"] for s in self.slots if s["base"] and not vals[s["sid"]]["enabled"]]
+        topo = []
+        for s in self.slots:
+            st = vals[s["sid"]]
+            if not st["enabled"]:
+                continue
+            rule = self.rules.get(s["role"], {})
+            units = {n: p["unit"] for n, p in s["params"].items()}
+            n_planes = next((len(v) for k, v in st["params"].items() if s["params"][k]["kind"] == "positions"), None)
+            if n_planes is None and s["base"]:
+                pos = (subs[s["sid"]]["parameters"].get("layer_positions_m") or {}).get("value")
+                n_planes = len(pos) if isinstance(pos, list) and s["role"] == "tracking" and self._has_sensor(s) else None
+            params = dict(st["params"])
+            der = self._derived(s, params, n_planes)
+            units.update({k: (rule.get("derived", {}).get(k) or {}).get("unit")
+                          or subs.get(s["sid"], {}).get("parameters", {}).get(k, {}).get("unit", "1") for k in der})
+            params.update(der)
+            new = {k: {"value": v, "unit": units[k], "source": source, "status": "proposal"} for k, v in params.items()}
+            if s["base"]:
+                old = subs[s["sid"]]["parameters"]
+                changed = {k: p for k, p in new.items()
+                           if k not in old or old[k].get("value") != p["value"] or old[k].get("unit") != p["unit"]}
+                if changed:
+                    overrides[s["sid"]] = {"parameters": changed}
+                    old.update(changed)
+                if s["sid"] in self.regenerate:
+                    for q, row in self._budget_rows(s, {k: v["value"] for k, v in old.items()}).items():
+                        rows.setdefault(q, {})[s["sid"]] = row
+            else:
+                sub = {"role": s["role"], "technology": rule["technology"], "parameters": new,
+                       "interfaces": [st["parent"]] if st["parent"] else [],
+                       "calibration": json.loads(json.dumps(rule["calibration"]))}
+                overrides[s["sid"]] = sub
+                subs[s["sid"]] = sub
+                for q, row in self._budget_rows(s, params).items():
+                    rows.setdefault(q, {})[s["sid"]] = row
+            topo.append(f"{s['sid']}:{s['role']}" + (f"[N={n_planes}]" if n_planes is not None else ""))
+        topology = "+".join(sorted(topo + [f"{sid}:{sub['role']}" for sid, sub in sorted(subs.items())
+                                           if sid not in vals and sid not in dropped]))
+        ext: dict = {"candidate_id": cid, "design_id": self.design_id}
+        if dropped:
+            for sid in dropped:
+                subs.pop(sid)
+            for sub in subs.values():
+                if sub.get("interfaces"):
+                    sub["interfaces"] = [i for i in sub["interfaces"] if i not in dropped]
+            budgets = {q: {sid: r for sid, r in rows_.items() if sid not in dropped}
+                       for q, rows_ in json.loads(json.dumps(self.base_budgets)).items()}
+            for q, rows_ in rows.items():
+                budgets.setdefault(q, {}).update(rows_)
+            ext.update(description=f"{source}: an independent copy of {self.base} without {', '.join(dropped)} "
+                                   "(a dropped subsystem cannot be an override)", subsystems=subs)
+            if any(budgets.values()):
+                ext["budgets"] = {q: r for q, r in budgets.items() if r}
+        else:
+            ext.update(description=f"{source}: overrides on {self.base}", derived_from=self.base, overrides=overrides)
+            if rows:
+                ext["budgets"] = rows
+        facts = {"topology": topology, "dropped": dropped, "values": vals, "subsystems": subs}
+        return ext, facts
+
+    def violation(self, facts: dict) -> tuple[float, list[str]]:
+        """v = sum of normalised violations (section C.4.5): spacing shortfall / minimum spacing, length outside the
+        envelope / envelope length, overlap length / envelope length (or the union of the two extents), and the
+        number of daughters nested deeper than one level."""
+        v, why = 0.0, []
+        vals = facts["values"]
+        length = self.envelope
+        extents = []
+        for s in self.slots:
+            st = vals[s["sid"]]
+            if not st["enabled"]:
+                continue
+            for name, p in s["params"].items():
+                if p["kind"] != "positions":
+                    continue
+                x = sorted(st["params"][name])
+                for a, b in zip(x, x[1:]):
+                    short = p["min_spacing"] - (b - a)
+                    if short > 1e-12 * max(1.0, p["min_spacing"]):
+                        v += short / p["min_spacing"] if p["min_spacing"] > 0 else 1.0
+                        why.append(f"spacing: {s['sid']}.{name} planes {a:.6g} and {b:.6g} closer than {p['min_spacing']}")
+                if length:
+                    out = sum(max(0.0, -z) + max(0.0, z - length) for z in x)
+                    if out > 0:
+                        v += out / length
+                        why.append(f"envelope: {s['sid']}.{name} reaches outside [0, {length}] m")
+            ext = self.rules.get(s["role"], {}).get("extent")
+            if ext:
+                p = st["params"]
+                if s["base"]:  # a base slot decodes only its free parameters: the others keep the base value
+                    p = {**{k: q.get("value") for k, q in self.base_subs[s["sid"]]["parameters"].items()}, **p}
+                need = [ext["front"]] + ([ext["depth_x0"], ext["material"]] if "depth_x0" in ext
+                                         else [ext["length_cm"]])
+                if any(p.get(k) is None for k in need):
+                    continue
+                front = p[ext["front"]]
+                if "depth_x0" in ext:
+                    size = p[ext["depth_x0"]] * self._material(p[ext["material"]])["radiation_length_cm"] * 0.01 / \
+                        ext["absorber_fraction"]
+                else:
+                    size = p[ext["length_cm"]] * 0.01 + ext["expansion_m"]
+                extents.append((s["sid"], st["parent"], front, front + size))
+                if length and (front < 0 or front + size > length):
+                    v += (max(0.0, -front) + max(0.0, front + size - length)) / length
+                    why.append(f"envelope: {s['sid']} extends outside [0, {length}] m")
+        for i, (sa, pa, a0, a1) in enumerate(extents):
+            for sb, pb, b0, b1 in extents[i + 1:]:
+                if pa == sb or pb == sa:
+                    continue
+                ov = min(a1, b1) - max(a0, b0)
+                if ov > 0:
+                    v += ov / (length or (max(a1, b1) - min(a0, b0)))
+                    why.append(f"overlap: {sa} and {sb} overlap by {ov:.6g} m")
+        for s in self.slots:
+            parent = vals[s["sid"]]["parent"]
+            if vals[s["sid"]]["enabled"] and parent and vals.get(parent, {}).get("parent"):
+                v += 1.0
+                why.append(f"nesting: {s['sid']} is a daughter of a daughter ({parent})")
+        return v, why
+
+
+def search_value(proj: design.Project, tools: InProcessTools, cid: str, t: dict) -> dict:
+    """C1.4: one F1 search value of candidate cid (already in proj) for target t, computed in this process by the
+    tool contract's tool with the arguments contracts/design.py recomputes, the upstream first for a chained figure
+    of merit. No formula of its own; a value outside the tool's validity domain carries in_domain false."""
+    contract, op, fd = t["hit"]
+    ns = cid.split(":", 1)[0]
+    ups = []
+    if t.get("upstream"):
+        u = search_value(proj, tools, cid, dict(t["upstream"], upstream=None))
+        if u.get("value") is None:
+            return {"value": None, "error": f"upstream {t['upstream']['figure_of_merit']}: {u.get('error')}"}
+        uext = {"evaluation_id": f"{ns}:CALC-search-upstream", "candidate": cid,
+                "figure_of_merit": t["upstream"]["figure_of_merit"], "denominator": t["upstream"]["denominator"],
+                "value": u["value"], "bound": u["bound"], "fidelity": "F1"}
+        if u.get("uncertainty"):
+            uext["uncertainty"] = u["uncertainty"]
+        ue = design.Evaluation(proj.root / "evaluations/CALC-search-upstream.json",
+                               "evaluations/CALC-search-upstream.json", {"extension": uext, "inputs": []})
+        ue.bound = u["derived_bound"]
+        ue.better = (proj.registry.fom_design(t["upstream"]["figure_of_merit"]) or {}).get("better")
+        ups.append(ue)
+    ev = design.Evaluation(proj.root / "evaluations/CALC-search.json", "evaluations/CALC-search.json",
+                           {"extension": {"evaluation_id": f"{ns}:CALC-search", "candidate": cid,
+                                          "figure_of_merit": t["figure_of_merit"], "denominator": t["denominator"],
+                                          "bound": "estimate", "fidelity": "F1", "unit": fd["unit"]}, "inputs": []})
+    ev.upstreams = ups
+    prep = design.prepare(proj, ev, fd)
+    if prep.errors or prep.invalid:
+        return {"value": None, "error": "; ".join(prep.errors + prep.invalid)}
+    argv = tool_arguments(op, fd, prep, "unvalidated", tools.config_file)
+    code, output = tools.call(contract["entry"], argv)
+    if code != 0 or output is None:
+        return {"value": None, "error": f"{contract['entry']} exited {code}: {(output or {}).get('error', '')}".strip()}
+    value, path, bound, domain, unc = tool_result(fd, prep, t["denominator"], output)
+    if value is None:
+        return {"value": None, "error": f"the tool gave no number at {path!r}"}
+    out = {"value": value, "bound": bound if bound != "mixed" else "estimate", "derived_bound": bound,
+           "in_domain": not domain}
+    if unc is not None:
+        out["uncertainty"] = unc
+    return out
+
+
+def search_design(args) -> dict:
+    """C1.6: S1 (structure and parameter search on in-process F1 search values: Sobol designs and the designer's
+    proposals, then NSGA-II) and S3 (finalists), recorded as one computational-run with a search_summary. Writes no
+    design-candidate and no evaluation."""
+    import random
+    import tempfile
+    HV, NSGA2, SOBOL = search_lib()
+    proj = load_project(args)
+    if not re.match(r"^SEARCH-[A-Za-z0-9][A-Za-z0-9._-]*$", args.id):
+        raise UsageError(f"--id {args.id!r}: a search id is SEARCH- followed by letters, digits, '.', '_' or '-'")
+    run_rel = f"runs/{args.id}.computational-run.json"
+    points_rel = f"runs/{args.id}.points.jsonl"
+    if (proj.root / run_rel).exists() or (proj.root / points_rel).exists():
+        raise UsageError(f"{run_rel} exists: a new search is a new --id")
+    spec_path = proj.root / args.spec
+    if not spec_path.is_file():
+        raise UsageError(f"--spec {args.spec} is not a file in the artifacts_dir")
+    try:
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise UsageError(f"--spec {args.spec} is not readable JSON: {exc}") from None
+    from contracts.schema import validate as schema_validate
+    rep = schema_validate(spec, "design_search_spec.json")
+    if not rep.ok:
+        raise UsageError("the search spec fails design-search-spec/1: " + "; ".join(
+            f"{f.path}: {f.message}" for f in rep.errors[:8]))
+    spec_sha = sha256(spec_path)
+    cur = current_spec(proj, None)
+    cur_rel = next(proj.rel(p) for p, d in proj.docs.items() if d is cur)
+    if proj.resolve(spec["design_spec"]["path"]) != proj.resolve(cur_rel) or \
+            spec["design_spec"]["sha256"] != sha256(proj.root / cur_rel):
+        raise UsageError(f"the search spec names {spec['design_spec']['path']} ({spec['design_spec']['sha256'][:12]}), "
+                         f"the current design-spec is {cur_rel} ({sha256(proj.root / cur_rel)[:12]}): a requirement "
+                         "change is a new design-spec version and a new search")
+    if (spec.get("budget") or {}).get("geant4", 0) != 0:
+        raise UsageError("budget.geant4 > 0: Geant4 search values arrive with C2; this search runs at F1 only")
+    if len(spec["objectives"]) > MAX_OBJECTIVES:
+        raise UsageError(f"{len(spec['objectives'])} objectives: at most {MAX_OBJECTIVES} (exact hypervolume); express "
+                         "the rest as constraints")
+    roles, roles_sha = load_asset("roles.json", "rules_version", spec["rules_version"])
+    materials, materials_sha = load_asset("materials.json", "materials_version", spec["materials_version"])
+    space = SearchSpace(proj, spec, roles, materials, args.id)
+    spec_ext = cur["extension"]
+    objectives = [resolve_target(proj, spec_ext, t, "objective") for t in spec["objectives"]]
+    constraints = [resolve_target(proj, spec_ext, t, "constraint") for t in spec.get("constraints") or []]
+    seen: dict[str, int] = {}
+    for t in objectives + constraints:
+        n = seen.get(t["label"], 0)
+        seen[t["label"]] = n + 1
+        if n:
+            t["label"] = f"{t['label']}#{n + 1}"
+    budget = spec["budget"]["evaluations"]
+    max_evals = min(budget, args.max_evaluations) if args.max_evaluations else budget
+    opt = spec["optimizer"]
+    settings = {"seed": opt["seed"], "population": opt["population"], "generations": opt["generations"],
+                "eta_c": opt.get("eta_c", 15.0), "eta_m": opt.get("eta_m", 20.0),
+                "p_crossover": opt.get("p_crossover", 0.9), "p_mutation": opt.get("p_mutation", 1.0 / len(space.genes)),
+                "window": (spec.get("stopping") or {}).get("hypervolume_window"),
+                "min_improvement": (spec.get("stopping") or {}).get("min_improvement", 0.0)}
+    if len(space.genes) > 128:
+        raise UsageError(f"{len(space.genes)} genes exceed the 128 Sobol dimensions shipped")
+    proposals = []
+    for prop in spec.get("proposals") or []:
+        g0 = space.proposal_genome(prop)
+        g1, notes = space.repair(g0)
+        proposals.append((prop, g1, notes))
+    if len(proposals) > opt["population"]:
+        raise UsageError("more proposals than the population size")
+    sign = [1.0 if t["better"] == "smaller" else -1.0 for t in objectives]
+    scale = [abs(t["reference_point"]) for t in objectives]
+    ref = [s * t["reference_point"] / a for s, t, a in zip(sign, objectives, scale)]
+    cid = f"{space.ns}:search-point"
+    cpath = proj.root / ".search" / "search-point.json"
+    points: list[dict] = []
+    cache: dict[str, int] = {}
+    counts = {"F1": 0, "invalid": 0}
+    proposal_of: dict[int, str] = {}
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tools = InProcessTools(Path(tmp))
+
+        def new_point(g: list, proposer: str) -> int:
+            ext0, facts0 = space.decode(g, f"search {args.id}", cid)
+            key = canonical({"subsystems": {sid: {"role": s["role"], "interfaces": s.get("interfaces", []),
+                                                  "parameters": {n: [p["value"], p["unit"]]
+                                                                 for n, p in s["parameters"].items()}}
+                                            for sid, s in facts0["subsystems"].items()
+                                            if sid not in facts0["dropped"]},
+                             "budgets": ext0.get("budgets")})
+            if key in cache:
+                return cache[key]
+            k = len(points)
+            ext, facts = space.decode(g, f"search {args.id} point {k}", cid)
+            proj.docs[cpath] = {"artifact_type": "design-candidate", "extension": ext}
+            proj.candidates[cid] = cpath
+            point = {"index": k, "effective_digest": proj.effective_digest(cid), "topology": facts["topology"],
+                     "genome": space.genome_dict(g), "proposer": proposer, "values": {}, "violation": 0.0}
+            v, why = space.violation(facts)
+            vals: dict = {}
+            if v > 0:  # C1.3: an invalid design is not evaluated; it competes through its violation
+                counts["invalid"] += 1
+                point["evaluated"] = False
+            else:
+                for t in objectives + constraints:
+                    r = search_value(proj, tools, cid, t)
+                    r.pop("derived_bound", None)
+                    vals[t["label"]] = r
+                for t in objectives:
+                    if vals[t["label"]].get("value") is None:
+                        v += 1.0
+                        why.append(f"no search value for {t['label']}: {vals[t['label']].get('error')}")
+                for t in constraints:
+                    cv = violation_of(t, vals[t["label"]].get("value"))
+                    if cv > 0:
+                        v += cv
+                        why.append(f"constraint {t['label']} not met on its search value"
+                                   + ("" if vals[t["label"]].get("value") is not None
+                                      else f" (no value: {vals[t['label']].get('error')})"))
+            point.update(values=vals, violation=v)
+            if why:
+                point["reasons"] = why
+            points.append(point)
+            cache[key] = k
+            return k
+
+        def objective_vector(k: int) -> list[float]:
+            vals = points[k]["values"]
+            out = []
+            for s, t, a in zip(sign, objectives, scale):
+                x = (vals.get(t["label"]) or {}).get("value")
+                out.append(s * x / a if x is not None else math.inf)
+            return out
+
+        def evaluate(g: list):
+            counts["F1"] += 1
+            k = new_point(g, "random")
+            return NSGA2.Individual(genome=g, objectives=objective_vector(k), violation=points[k]["violation"], key=k)
+
+        def hv_of(pop: list) -> float:
+            return HV.hypervolume([i.objectives for i in pop if i.violation == 0], ref)
+
+        try:
+            for prop, g, notes in proposals:  # recorded first, as proposer llm; the population evaluates them again
+                k = new_point(g, "llm")
+                proposal_of.setdefault(k, prop["id"])
+                if notes:
+                    points[k].setdefault("repairs", []).extend(notes)
+            sob = SOBOL.Sobol(len(space.genes)).points(1, opt["population"] - len(proposals))
+            initial = [g for _, g, _ in proposals] + [NSGA2.from_unit(space.genes, u) for u in sob]
+            result = NSGA2.run(space.genes, initial, evaluate, lambda g: space.repair(g)[0], hv_of, settings, max_evals)
+        finally:
+            proj.docs.pop(cpath, None)
+            proj.candidates.pop(cid, None)
+        seconds_per_call = tools.seconds / tools.calls if tools.calls else None
+        tool_calls = tools.calls
+    feasible = [p["index"] for p in points if p["violation"] == 0]
+    if feasible:
+        vecs = {k: objective_vector(k) for k in feasible}
+        front = [k for k in feasible if not any(HV.dominates(vecs[j], vecs[k]) for j in feasible if j != k)]
+    else:
+        vmin = min((p["violation"] for p in points), default=0.0)
+        front = [p["index"] for p in points if p["violation"] == vmin]
+    inds = [NSGA2.Individual(genome=[], objectives=objective_vector(k), violation=points[k]["violation"], key=k)
+            for k in front]
+    NSGA2.crowding(inds, list(range(len(inds))))
+    order = sorted(inds, key=lambda i: (-i.crowding, i.key))
+    finalists, topologies = [], set()
+    for ind in order:
+        topo = points[ind.key]["topology"]
+        if spec["finalists"].get("distinct_topologies", True) and topo in topologies:
+            continue
+        topologies.add(topo)
+        finalists.append(ind.key)
+        if len(finalists) >= spec["finalists"]["max"]:
+            break
+    finalists.sort()
+    def all_values(p: dict) -> bool:
+        return all((p["values"].get(t["label"]) or {}).get("value") is not None for t in objectives + constraints)
+    rng = random.Random(opt["seed"] + 1)
+    pool = [p["index"] for p in points if p["violation"] == 0 and p["index"] not in finalists and all_values(p)]
+    n_sample = min(spec.get("consistency_samples", 20), len(pool))
+    sample = sorted(rng.sample(pool, n_sample)) if n_sample else []
+    checked = [k for k in finalists if all_values(points[k])] + sample  # an invalid design has no value to compare
+    consistency = consistency_check(args, proj, space, objectives + constraints, points, checked)
+    if consistency["max_relative_difference"] is not None and consistency["max_relative_difference"] > CONSISTENCY_TOL:
+        return {"status": "failed", "exit": 1, "error": "an in-process search value differs from evaluate_design.py run "
+                f"beyond {CONSISTENCY_TOL} (C1.4); nothing was written", "consistency": consistency}
+    front_hv = None
+    if len(objectives) <= 3 or len(front) <= 1000:
+        front_hv = HV.hypervolume([objective_vector(k) for k in front if points[k]["violation"] == 0], ref)
+    for k, pid in proposal_of.items():
+        points[k]["proposal"] = pid
+    w = Writer(proj)
+    inline_max = spec.get("inline_points_max", 2000)
+    keep = set(front) | set(finalists) | set(sample)
+    summary_points = points if len(points) <= inline_max else [p for p in points if p["index"] in keep]
+    output_hashes = {}
+    points_file = None
+    if summary_points is not points:
+        body = "".join(json.dumps(p, sort_keys=True) + "\n" for p in points)
+        w.write(points_rel, body.encode("utf-8"))
+        output_hashes[points_rel] = sha256(proj.root / points_rel)
+        points_file = {"ref": points_rel, "sha256": output_hashes[points_rel], "count": len(points)}
+    chain_rels = [proj.rel(p) for p in proj.candidate_chain(space.base)]
+    inputs = [w.input_ref(cur_rel)] + [dict(w.input_ref(r), binding="parameters") for r in chain_rels]
+    script = "skills/hep-detector/scripts/evaluate_design.py"
+    assets = [("skills/hep-detector/assets/design-search/roles.json", roles_sha),
+              ("skills/hep-detector/assets/design-search/materials.json", materials_sha),
+              ("skills/hep-detector/assets/design-search/sobol_joe_kuo.txt",
+               sha256(SEARCH_ASSETS / "sobol_joe_kuo.txt"))]
+    used_tools = sorted({t["hit"][0]["entry"] for t in objectives + constraints}
+                        | {t["upstream"]["hit"][0]["entry"] for t in objectives + constraints if t.get("upstream")})
+    lib = sorted(f"skills/hep-detector/scripts/design_search_lib/{p.name}" for p in SEARCH_LIB.glob("*.py"))
+    argv = ["python3", script, "search", "--spec", args.spec, "--id", args.id] + (
+        ["--max-evaluations", str(args.max_evaluations)] if args.max_evaluations else [])
+
+    def public(t: dict) -> dict:
+        out = {k: t[k] for k in ("label", "figure_of_merit", "denominator", "requirement", "tool", "better",
+                                 "comparator", "target") if t.get(k) is not None}
+        if t.get("reference_point") is not None:
+            out["reference_point"] = t["reference_point"]
+        if t.get("upstream"):
+            out["upstream"] = {"figure_of_merit": t["upstream"]["figure_of_merit"], "tool": t["upstream"]["tool"],
+                               "denominator": t["upstream"]["denominator"]}
+        return out
+    summary = {
+        "search_id": args.id, "search_spec": args.spec, "search_spec_sha256": spec_sha, "design_spec": cur_rel,
+        "design_spec_sha256": sha256(proj.root / cur_rel), "base_candidate": space.base,
+        "base_candidate_chain": [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels],
+        "rules_version": spec["rules_version"], "rules_sha256": roles_sha,
+        "materials_version": spec["materials_version"], "materials_sha256": materials_sha,
+        "objectives": [public(t) for t in objectives], "constraints": [public(t) for t in constraints],
+        "reference_point_normalised": ref,
+        "budget": {"evaluations": budget, "geant4": 0, "max_evaluations": max_evals},
+        "optimizer": {"name": "nsga2", "implementation": "evaluate_design.py search (design_search_lib.nsga2)",
+                      "backend": None, "seed": opt["seed"],
+                      "config": {k: v for k, v in settings.items() if k != "seed"},
+                      "initialisation": {"sobol_skip": 1, "proposals": len(proposals)},
+                      "generations_run": result["generations"], "stopped": result["stopped"]},
+        "levels": ["F1"],
+        "genome": [{k: v for k, v in g.items()} for g in space.genes],
+        "evaluated": {"F1": counts["F1"], "geant4": 0, "distinct_designs": len(points),
+                      "topologies": len({p["topology"] for p in points}), "invalid_not_evaluated": counts["invalid"],
+                      "tool_calls": tool_calls},
+        "points": summary_points, "front": sorted(front),
+        "hypervolume": [{"generation": g_, "value": v_} for g_, v_ in result["hypervolume"]],
+        "front_hypervolume": front_hv,
+        "finalists": [{"index": k, "fixed_before": "expand", "topology": points[k]["topology"]} for k in finalists],
+        "proposals": [{"id": prop["id"], "reason": prop["reason"],
+                       "index": next((k for k, pid in proposal_of.items() if pid == prop["id"]), None)}
+                      for prop, _, _ in proposals],
+        "consistency": consistency, "seeds": {"optimizer": opt["seed"], "geant4_search": []},
+        "timing": {"seconds_per_tool_call": seconds_per_call},
+        "note": SEARCH_NOTE}
+    if points_file:
+        summary["points_file"] = points_file
+    ext = {"input_manifest": [{"path": args.spec, "sha256": spec_sha}, {"path": cur_rel, "sha256": sha256(proj.root / cur_rel)}]
+           + [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels]
+           + [{"path": p, "sha256": h} for p, h in assets],
+           "tools": [{"name": "evaluate_design.search", "version": plugin_version()}]
+           + [{"name": Path(e).stem, "version": plugin_version()} for e in used_tools],
+           "commands": [" ".join(argv)],
+           "environment": {"python": platform.python_version(), "platform": platform.platform(terse=True)},
+           "seeds": {"optimizer": opt["seed"]}, "tolerances": {"consistency_relative": CONSISTENCY_TOL},
+           "exit_status": 0, "output_hashes": output_hashes, "argv": argv,
+           "script_sha256": {p: sha256(PLUGIN / p) for p in [script, *lib, *used_tools]},
+           "search_summary": summary}
+    run_doc = envelope("computational-run", f"{space.ns}-{args.id}", ext, inputs,
+                       [{"ref": points_rel}] if points_file else [], statuses(inputs, args.status))
+    w.json(run_rel, run_doc)
+    from contracts.validate import validate_artifact
+    rep = validate_artifact(json.loads((proj.root / run_rel).read_text(encoding="utf-8")))
+    if not rep.ok:
+        w.undo()
+        return {"status": "failed", "exit": 1, "error": "the search run fails contract validation",
+                "findings": [f.as_dict() for f in rep.errors]}
+    return {"status": "ok", "exit": 0, "search": run_rel,
+            "search_size": {"evaluations": counts["F1"], "distinct_designs": len(points),
+                            "topologies": summary["evaluated"]["topologies"]},
+            "stopped": result["stopped"], "front": len(front),
+            "finalists": [{"index": k, "topology": points[k]["topology"], "violation": points[k]["violation"],
+                           "values": {lab: v.get("value") for lab, v in points[k]["values"].items()}} for k in finalists],
+            "consistency": {"checked": consistency["checked"],
+                            "max_relative_difference": consistency["max_relative_difference"]},
+            "next": [f"evaluate_design.py expand --artifacts DIR --search {run_rel} --point {k} --candidate-id NAME"
+                     for k in finalists],
+            "note": SEARCH_NOTE + "; state the search size and that the finalists are not confirmed in the reply"}
+
+
+def expanded_candidate(space: SearchSpace, point: dict, short: str, inputs: list) -> dict:
+    ext, _ = space.decode(space.genome_from_dict(point["genome"]), f"search {space.search_id} point {point['index']}",
+                          f"{space.ns}:{short}")
+    return envelope("design-candidate", f"{space.ns}-{short}", ext, inputs, [], statuses(inputs, "unvalidated"))
+
+
+def consistency_check(args, proj: design.Project, space: SearchSpace, targets: list[dict], points: list[dict],
+                      indices: list[int]) -> dict:
+    """C1.4: the in-process search values of the finalists and a sample of points recomputed with run (a subprocess
+    of the tool, exactly as an official evaluation) in a scratch copy of the artifacts_dir."""
+    import shutil
+    import tempfile
+    rows, worst = [], None
+    if not indices:
+        return {"checked": 0, "max_relative_difference": None, "tolerance": CONSISTENCY_TOL, "points": []}
+    with tempfile.TemporaryDirectory() as tmp:
+        work = Path(tmp) / "artifacts"
+        shutil.copytree(proj.root, work, ignore=shutil.ignore_patterns("reports", "*.jsonl"))
+        for k in indices:
+            point = points[k]
+            short = f"consistency-{k}"
+            base_rel = proj.rel(proj.candidates[space.base])
+            doc = expanded_candidate(space, point, short, [dict(Writer(proj).input_ref(base_rel), binding="parameters")])
+            (work / "candidates").mkdir(exist_ok=True)
+            (work / "candidates" / f"{short}.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+            diffs = {}
+            for j, t in enumerate(targets):
+                cid = f"{space.ns}:{short}"
+                common = dict(artifacts=work, candidate=cid, requirement=None, fidelity="F1", input_artifact=None,
+                              replace=False, status="unvalidated")
+                ups = []
+                if t.get("upstream"):
+                    u = run_evaluation(argparse.Namespace(
+                        **common, figure_of_merit=t["upstream"]["figure_of_merit"],
+                        denominator=[f"{a}={b}" for a, b in t["upstream"]["denominator"].items()],
+                        tool=t["upstream"]["tool"], upstream=None, id=f"CALC-cons-{k}-{j}-up"))
+                    if u.get("status") != "ok":
+                        diffs[t["label"]] = {"error": u.get("error")}
+                        continue
+                    ups = [u["evaluation"]]
+                r = run_evaluation(argparse.Namespace(
+                    **common, figure_of_merit=t["figure_of_merit"],
+                    denominator=[f"{a}={b}" for a, b in t["denominator"].items()], tool=t["tool"],
+                    upstream=ups or None, id=f"CALC-cons-{k}-{j}"))
+                mine = (point["values"].get(t["label"]) or {}).get("value")
+                if r.get("status") != "ok" or mine is None:
+                    diffs[t["label"]] = {"in_process": mine, "run": r.get("value"), "error": r.get("error")}
+                    worst = math.inf
+                    continue
+                d = abs(mine - r["value"]) / max(abs(r["value"]), 1e-300)
+                worst = d if worst is None else max(worst, d)
+                diffs[t["label"]] = {"in_process": mine, "run": r["value"], "relative_difference": d}
+            rows.append({"index": k, "values": diffs})
+    return {"checked": len(indices), "max_relative_difference": worst, "tolerance": CONSISTENCY_TOL, "points": rows}
+
+
+def expand_search(args) -> dict:
+    """C1.7: one finalist of a search as a design-candidate, decoded from its genome exactly as the search decoded it
+    (the effective digest must agree): derived from the base candidate when it only changes parameters or adds
+    subsystems, an independent candidate when it drops one. Points that are not finalists are refused (RSK-04)."""
+    proj = load_project(args)
+    run_path = proj.resolve(args.search)
+    run = proj.docs.get(run_path)
+    summary = ((run or {}).get("extension") or {}).get("search_summary")
+    if not summary or not design.is_search_run(run or {}):
+        raise UsageError(f"--search {args.search} is not a search summary run in the artifacts_dir")
+    if args.point not in {f["index"] for f in summary["finalists"]}:
+        raise UsageError(f"--point {args.point} is not a finalist of {args.search} (finalists: "
+                         f"{', '.join(str(f['index']) for f in summary['finalists']) or 'none'}): only finalists are "
+                         "expanded (RSK-04)")
+    point = next((p for p in summary["points"] if p["index"] == args.point), None)
+    if point is None:
+        raise UsageError(f"the search run lacks the record of finalist {args.point}")
+    short = args.candidate_id
+    if not re.match(r"^[A-Za-z0-9][A-Za-z0-9._-]*$", short):
+        raise UsageError(f"--candidate-id {short!r}: letters, digits, '.', '_' or '-'")
+    rel = f"candidates/{short}.json"
+    spec_path = proj.root / summary["search_spec"]
+    if not spec_path.is_file() or sha256(spec_path) != summary["search_spec_sha256"]:
+        raise UsageError(f"the search spec {summary['search_spec']} is missing or changed since the search")
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    roles, roles_sha = load_asset("roles.json", "rules_version", summary["rules_version"])
+    materials, materials_sha = load_asset("materials.json", "materials_version", summary["materials_version"])
+    if (roles_sha, materials_sha) != (summary["rules_sha256"], summary["materials_sha256"]):
+        raise UsageError("the role rules or the materials table changed since the search: rerun the search")
+    space = SearchSpace(proj, spec, roles, materials, summary["search_id"])
+    w = Writer(proj)
+    base_rel = proj.rel(proj.candidates[space.base])
+    inputs = [dict(w.input_ref(base_rel), binding="parameters"), w.input_ref(args.search)]
+    doc = expanded_candidate(space, point, short, inputs)
+    cid = doc["extension"]["candidate_id"]
+    if cid in proj.candidates:
+        raise UsageError(f"candidate {cid} exists: choose another --candidate-id")
+    w.json(rel, doc)
+    from contracts.validate import validate_artifact
+    rep = validate_artifact(json.loads((proj.root / rel).read_text(encoding="utf-8")))
+    if not rep.ok:
+        w.undo()
+        return {"status": "failed", "exit": 1, "error": "the candidate fails contract validation",
+                "findings": [f.as_dict() for f in rep.errors]}
+    check = design.Project(proj.root, None)
+    design.check_calibration(check)
+    design.check_budgets(check)
+    errors = [e for e in check.errors if e["path"] == rel]
+    if check.effective_digest(cid) != point["effective_digest"]:
+        errors.append({"code": "design.contract_mismatch", "message": "the expanded candidate's effective digest "
+                       "differs from the point's: the base candidate changed since the search; rerun the search"})
+    if errors:
+        w.undo()
+        return {"status": "failed", "exit": 1, "error": "the expanded candidate fails its design checks",
+                "design_errors": errors}
+    nxt = []
+    for t in summary["objectives"] + summary.get("constraints", []):
+        q = next((q for q, f in BUDGET_FOMS.items() if f == t["figure_of_merit"]), None)
+        if q:
+            nxt.append(f"evaluate_design.py budget --artifacts DIR --candidate {cid} --quantity {q}")
+        elif t.get("requirement"):
+            nxt.append(f"evaluate_design.py run --artifacts DIR --candidate {cid} --requirement {t['requirement']}")
+        else:
+            dens = " ".join(f"--denominator {a}={b}" for a, b in t["denominator"].items())
+            nxt.append(f"evaluate_design.py run --artifacts DIR --candidate {cid} --figure-of-merit "
+                       f"{t['figure_of_merit']} {dens}".rstrip())
+    nxt.append("evaluate_design.py plan / report --artifacts DIR (every other evaluation the comparison needs)")
+    return {"status": "ok", "exit": 0, "candidate": cid, "file": rel,
+            "kind": "derived" if "derived_from" in doc["extension"] else "independent (a subsystem is dropped)",
+            "effective_digest": point["effective_digest"], "search_values": {
+                lab: v.get("value") for lab, v in point["values"].items()},
+            "next": nxt, "note": "the search values are not evaluations; report the expanded candidate's evaluations "
+                                 "(report lists search value minus official value, search_minus_official, per finalist)"}
+
+
 def plan(args) -> dict:
     """RES-04: suggestions for the next evaluations from the derived state."""
     full = design.derive(args.artifacts, args.decisions)
@@ -1051,7 +2196,15 @@ def report(args) -> dict:
     md_rel = f"reports/{name}.md"
     if (proj.root / md_rel).exists() or (proj.root / f"reports/{name}.json").exists():
         raise UsageError(f"reports/{name} exists: choose another --name")
-    w.write(md_rel, render(full, args.omit or []).encode("utf-8"))
+    design.analyze_evaluations(proj)
+    gaps = search_minus_official(proj)
+    text = render(full, args.omit or [])
+    if gaps:
+        text += "\n## Search values against official evaluations\n\n" + "".join(
+            f"- {g['candidate']} ({g['search']} point {g['point']}), {g['figure_of_merit']}: search value "
+            f"{g['search_value']:.6g}, official {g['evaluation']} {g['official_value']:.6g} "
+            f"(search minus official {g['search_minus_official']:.6g}); search values decide nothing\n" for g in gaps)
+    w.write(md_rel, text.encode("utf-8"))
     slim = design.report_payload(full)
     ext = {"claims": claims, "sources_read": [], "limitations": [
         "derived by contracts/design.py; verdicts guard against oversight, not deliberate forgery (LIM-02)",
@@ -1065,8 +2218,45 @@ def report(args) -> dict:
         w.undo()
         return {"status": "failed", "exit": 1, "error": "the report fails contract validation",
                 "findings": [f.as_dict() for f in rep.errors]}
-    return {"status": "ok", "exit": 0, "report": rel, "rendering": md_rel, "gate_flags": full.get("gate_flags"),
-            "design_status": full.get("status"), "design_errors": full.get("errors")}
+    out = {"status": "ok", "exit": 0, "report": rel, "rendering": md_rel, "gate_flags": full.get("gate_flags"),
+           "design_status": full.get("status"), "design_errors": full.get("errors")}
+    if gaps:
+        out["search_minus_official"] = gaps
+    return out
+
+
+def search_minus_official(proj: design.Project) -> list[dict]:
+    """Section C.4.6: for each candidate expanded from a search finalist, its search value minus the official
+    evaluation of the same figure of merit and denominator (a diagnostic of the winner's curse and of model
+    differences; it decides nothing)."""
+    out = []
+    for cid, cpath in sorted(proj.candidates.items()):
+        doc = proj.docs[cpath]
+        m = re.match(r"^search (SEARCH-[A-Za-z0-9._-]+) point (\d+):", doc["extension"].get("description", ""))
+        run = next((proj.docs.get(proj.resolve(i["ref"])) for i in doc.get("inputs") or []
+                    if isinstance(i, dict) and design.is_search_run(proj.docs.get(proj.resolve(str(i.get("ref"))), {}))),
+                   None)
+        if not m or run is None:
+            continue
+        s = run["extension"]["search_summary"]
+        point = next((p for p in s["points"] if p["index"] == int(m.group(2))), None)
+        if point is None or point["effective_digest"] != proj.effective_digest(cid):
+            continue
+        for t in s.get("objectives", []) + s.get("constraints", []):
+            sv = (point["values"].get(t["label"]) or {}).get("value")
+            for ev in sorted(proj.evals.values(), key=lambda e: e.rel):
+                ext = ev.ext
+                if (ext.get("candidate") != cid or ext.get("figure_of_merit") != t["figure_of_merit"] or ev.errors
+                        or ev.stale or ext.get("unavailable") or not isinstance(ext.get("value"), (int, float))
+                        or not all(design.close(ext.get("denominator", {}).get(k), v)
+                                   for k, v in t["denominator"].items())):
+                    continue
+                if sv is not None:
+                    out.append({"candidate": cid, "search": m.group(1), "point": int(m.group(2)),
+                                "figure_of_merit": t["figure_of_merit"], "search_value": sv, "evaluation": ev.eid,
+                                "fidelity": ev.fidelity, "official_value": ext["value"],
+                                "search_minus_official": sv - ext["value"]})
+    return out
 
 
 def main(argv=None) -> int:
@@ -1156,9 +2346,19 @@ def main(argv=None) -> int:
     p.add_argument("--max-points", dest="max_points", type=int, default=200)
     p.add_argument("--id", required=True, help="SCAN-... (file runs/<id>.computational-run.json)")
     p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
-    p = sub.add_parser("expand", help="one scan point as a derived candidate, to evaluate and compare (M4)")
+    p = sub.add_parser("search", help="automated candidate generation at F1: search values, search front, finalists "
+                                      "(C1); writes no candidate and no evaluation")
     p.add_argument("--artifacts", type=Path, required=True)
-    p.add_argument("--scan", required=True, help="the scan summary run (runs/SCAN-....computational-run.json)")
+    p.add_argument("--spec", required=True, help="the search spec file (design-search-spec/1) in the artifacts_dir")
+    p.add_argument("--id", required=True, help="SEARCH-... (file runs/<id>.computational-run.json)")
+    p.add_argument("--max-evaluations", dest="max_evaluations", type=int,
+                   help="safety cap on the evaluations (default: the search spec's budget)")
+    p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
+    p = sub.add_parser("expand", help="one scan point or search finalist as a candidate, to evaluate and compare "
+                                      "(M4, C1)")
+    p.add_argument("--artifacts", type=Path, required=True)
+    p.add_argument("--scan", help="the scan summary run (runs/SCAN-....computational-run.json)")
+    p.add_argument("--search", help="the search run (runs/SEARCH-....computational-run.json); only finalists expand")
     p.add_argument("--point", type=int, required=True)
     p.add_argument("--candidate-id", dest="candidate_id", required=True, help="name of the new candidate (no namespace)")
     for name in ("plan", "report"):
@@ -1196,8 +2396,14 @@ def main(argv=None) -> int:
             out = calibration(args)
         elif args.command == "scan":
             out = scan(args)
+        elif args.command == "search":
+            if args.max_evaluations is not None and args.max_evaluations < 1:
+                raise UsageError("--max-evaluations is a positive number")
+            out = search_design(args)
         elif args.command == "expand":
-            out = expand(args)
+            if bool(args.scan) == bool(args.search):
+                raise UsageError("give exactly one of --scan or --search")
+            out = expand_search(args) if args.search else expand(args)
         elif args.command == "plan":
             out = plan(args)
         else:
