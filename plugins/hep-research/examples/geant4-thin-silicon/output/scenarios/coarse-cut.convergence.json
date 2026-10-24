@@ -1,34 +1,59 @@
 {
  "convergence": {
   "gate": "fail",
+  "multiplicity": 3,
   "parameters": [
    {
     "observables": [
      {
+      "dof": 29.043490458573274,
       "finest": 0.3,
+      "margin": 0.008143286478794707,
       "next": 1.0,
       "observable": "mean_deposit_MeV",
-      "relative_change": -0.015519646772418646,
-      "se_of_change": 0.002657277327272158,
+      "reason": "beyond-tolerance",
+      "relative_change": -0.01965471593566611,
+      "se_of_change": 0.0006765080570759165,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
       "tolerance": 0.01,
+      "tolerance_mode": "relative",
       "verdict": "fail"
      },
      {
+      "dof": 29.995418813003774,
       "finest": 0.3,
+      "margin": 0.0025276903243270955,
       "next": 1.0,
       "observable": "mpv_deposit_MeV",
-      "relative_change": -0.01413921265578822,
-      "se_of_change": 0.006296806236142746,
+      "reason": "within-tolerance",
+      "relative_change": -0.012565626214915273,
+      "se_of_change": 0.002890928336592931,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
       "tolerance": 0.02,
+      "tolerance_mode": "relative",
       "verdict": "pass"
      },
      {
+      "dof": 29.98285533655686,
       "finest": 0.3,
+      "margin": 0.0607209664635289,
       "next": 1.0,
       "observable": "tail_fraction",
-      "relative_change": -0.15855106888361042,
-      "se_of_change": 0.03263479306271383,
+      "reason": "beyond-tolerance",
+      "relative_change": -0.1813650195623823,
+      "se_of_change": 0.009254574361696907,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
       "tolerance": 0.1,
+      "tolerance_mode": "relative",
       "verdict": "fail"
      }
     ],
@@ -44,7 +69,7 @@
     "verdict": "fail"
    }
   ],
-  "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
  },
  "record_problems": [],
  "statistical_target": {
@@ -53,22 +78,164 @@
  },
  "summaries": [
   {
-   "path": "recorded/summaries/mpv-cut-1.0.json",
+   "legacy": false,
+   "observables": {
+    "deposit_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00017327178775274806,
+     "status": "ok",
+     "value": 0.08529151653614221
+    },
+    "loss_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00017138206597816082,
+     "status": "ok",
+     "value": 0.08529260532341804
+    },
+    "mean_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.10828695083323613,
+     "method": "batch means of block means",
+     "n": 1200000,
+     "se": 4.68651156313989e-05,
+     "status": "ok",
+     "value": 0.1082869508332361
+    },
+    "mpv_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "merged_check": {
+      "bound": 0.008072394865191984,
+      "relative_difference": 0.002300312390919268
+     },
+     "merged_mode": 0.08509576968272621,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00017327178775274697,
+     "status": "ok",
+     "value": 0.0852915165361422
+    },
+    "mpv_loss_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00017138206597816082,
+     "status": "ok",
+     "value": 0.08529260532341804
+    },
+    "tail_fraction": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.028754166666666667,
+     "k": 34505,
+     "low_count": false,
+     "method": "batch means of block proportions",
+     "n": 1200000,
+     "se": 0.00018590307610070293,
+     "status": "ok",
+     "value": 0.028754166666666667
+    }
+   },
+   "path": "recorded/blocks/mpv-cut-1.0.json",
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-1.0",
-    "sha256": "41e617b98d62842236c5a18dd0c2bbcccf4e738160c3b27c537c7ce72cd629f8"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-cut-1.0.computational-run.json",
+    "sha256": "e8a734df3f0c7bb46069812fcc577225272f4cdb4da061c09d850cfef4fa5a8a"
    },
-   "sha256": "0cb0838ae92ebf0348dffc613c219327131cb530f7035050de1cc8085843ea91"
+   "sha256": "7d577a989a4175edfaa55d60810bc5614607d2684fbb6f872f0e0307986f31c5"
   },
   {
-   "path": "recorded/summaries/mpv-cut-0.3.json",
+   "legacy": false,
+   "observables": {
+    "deposit_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.0001754265432678153,
+     "status": "ok",
+     "value": 0.08421977522004577
+    },
+    "loss_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00017464470047840063,
+     "status": "ok",
+     "value": 0.08421827741500792
+    },
+    "mean_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.10615860157506941,
+     "method": "batch means of block means",
+     "n": 1200000,
+     "se": 5.630495725519901e-05,
+     "status": "ok",
+     "value": 0.1061586015750694
+    },
+    "mpv_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "merged_check": {
+      "bound": 0.008156486069966131,
+      "relative_difference": 0.002265233079974214
+     },
+     "merged_mode": 0.08441098577734184,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.0001754265432678153,
+     "status": "ok",
+     "value": 0.08421977522004577
+    },
+    "mpv_loss_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "estimator": "mean of the three-point parabola modes of the block histograms",
+     "fallback_blocks": 0,
+     "method": "mean of the three-point parabola modes of the block histograms",
+     "se": 0.00017464470047840063,
+     "status": "ok",
+     "value": 0.08421827741500792
+    },
+    "tail_fraction": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.023539166666666667,
+     "k": 28247,
+     "low_count": false,
+     "method": "batch means of block proportions",
+     "n": 1200000,
+     "se": 0.00019040295963308198,
+     "status": "ok",
+     "value": 0.023539166666666667
+    }
+   },
+   "path": "recorded/blocks/mpv-cut-0.3.json",
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-0.3",
-    "sha256": "4c835d3b0458b34fb1444b2a56c6f613d40c2f6e479d3cfc5170560df88e9940"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.3.computational-run.json",
+    "sha256": "d009b7a54e81537a016e23bd5d325c1d0602db2cac63e6e48f2162d69765f054"
    },
-   "sha256": "e4657e00321c1ce3ed0b1b20b930ff3f5e691ecd54c32a881517cefd93ce9801"
+   "sha256": "d40d0c109e0e7a62e2298672db0e2d4c4c104dab8f3fc062ffaccbc9f28c90fc"
   }
  ]
 }

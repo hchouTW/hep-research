@@ -449,5 +449,47 @@
    "positive_out_of_range": null,
    "negative_in_range": null
   }
+ },
+ "SFA-2026-039": {
+  "artifact_type": "computational-run",
+  "in_range": "0.30.0",
+  "out_of_range": "0.19.0",
+  "positive": {
+   "study": {
+    "benchmarks": []
+   }
+  },
+  "negative": {
+   "simulation": {
+    "events": 1
+   }
+  },
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
+ },
+ "SFA-2026-040": {
+  "artifact_type": "computational-run",
+  "in_range": "0.30.0",
+  "out_of_range": "0.19.0",
+  "positive": {
+   "study": {
+    "benchmarks": []
+   }
+  },
+  "negative": {
+   "simulation": {
+    "events": 1
+   }
+  },
+  "expect": {
+   "positive_in_range": "possibly affected (no trace)",
+   "positive_in_range_with_trace": "possibly affected (no trace)",
+   "positive_out_of_range": null,
+   "negative_in_range": null
+  }
  }
 }

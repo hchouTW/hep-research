@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 39,
-   "bytes": 527569,
+   "bytes": 531431,
    "uncited": 0
   },
   "hep-measurement": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 198146,
+   "bytes": 198483,
    "uncited": 0
   },
   "hep-theory": {
@@ -2081,8 +2081,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 21051,
-   "lines": 240,
+   "bytes": 24689,
+   "lines": 277,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2098,7 +2098,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "d2f2f7a3 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2417,7 +2417,7 @@
   {
    "path": "skills/hep-detector/references/system-design-workflow.md",
    "owner": "hep-detector",
-   "bytes": 21852,
+   "bytes": 22076,
    "lines": 263,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2426,7 +2426,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "60d48920 2026-10-24"
+   "last_commit": "01849545 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
@@ -3603,8 +3603,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14463,
-   "lines": 145,
+   "bytes": 14800,
+   "lines": 148,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3623,7 +3623,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "6c7b8ea3 2026-10-23"
+   "last_commit": "e7692a77 2026-10-24"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",

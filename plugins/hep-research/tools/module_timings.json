@@ -399,6 +399,15 @@
   "tests.tools.test_scifix_ledger": 0.1,
   "tests.tools.test_statistics_evidence": 0.1,
   "tests.tools.test_subprocess_timeouts": 2.5,
-  "tests.tools.test_validate_skill_bundle": 0.2
+  "tests.tools.test_validate_skill_bundle": 0.2,
+  "tests.adapters.test_summary_from_csv": 0.4,
+  "tests.contracts.test_geant4_a1": 45.0,
+  "tests.core.test_simulation_stats": 1.5,
+  "tests.skills.hep_detector.test_design_f4_label": 14.0,
+  "tests.contracts.test_design_search_contract": 1.0,
+  "tests.skills.hep_detector.test_design_search": 20.0,
+  "tests.skills.hep_detector.test_design_search_lib": 3.0,
+  "tests.core.test_simulation_toys": 0.1,
+  "tests.core.test_simulation_s1_evidence": 2.0
  }
 }

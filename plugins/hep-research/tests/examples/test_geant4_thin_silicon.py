@@ -23,6 +23,42 @@ def load():
     return mod
 
 
+def _number(x):
+    if isinstance(x, bool):
+        return None
+    if isinstance(x, (int, float)):
+        return float(x)
+    if isinstance(x, str):
+        try:
+            return float(x.rstrip(",;.)").lstrip("("))
+        except ValueError:
+            return None
+    return None
+
+
+def differences(a, b, written: set, path="$", sibling=None) -> list[str]:
+    """Where a replayed JSON value a and the committed b differ beyond spec A.4.3 (numbers within relative 1e-9; a
+    sha256 may differ when its sibling path or ref names a file the replay writes)."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        if set(a) != set(b):
+            return [f"{path}: keys {sorted(set(a) ^ set(b))}"]
+        ref = next((a.get(k) for k in ("path", "ref") if isinstance(a.get(k), str)), None)
+        return [d for k in a for d in differences(a[k], b[k], written, f"{path}.{k}", ref if k == "sha256" else None)]
+    if isinstance(a, list) and isinstance(b, list):
+        if len(a) != len(b):
+            return [f"{path}: length {len(a)} != {len(b)}"]
+        return [d for i, (x, y) in enumerate(zip(a, b)) for d in differences(x, y, written, f"{path}[{i}]")]
+    if a == b:
+        return []
+    x, y = _number(a), _number(b)
+    if x is not None and y is not None and abs(x - y) <= 1e-9 * max(abs(x), abs(y), 1e-300):
+        return []
+    if isinstance(a, str) and isinstance(b, str) and len(a) == len(b) == 64 and sibling is not None and any(
+            sibling.endswith(w) for w in written):
+        return []
+    return [f"{path}: {a!r} != {b!r}"]
+
+
 class J14Replay(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -41,10 +77,15 @@ class J14Replay(unittest.TestCase):
         self.assertEqual(self.code, 0, self.r["pass"])
         self.assertTrue(all(self.r["pass"].values()), self.r["pass"])
 
-    def test_reproduces_the_committed_output_byte_for_byte(self):
+    def test_reproduces_the_committed_output(self):
+        """Replay reproducibility of the Geant4 program (spec A.4.3): decisions, labels and every string identical,
+        numbers within relative 1e-9 (the batch-means statistics go through lgamma and the incomplete beta, whose last
+        bits differ between C libraries). A sha256 may differ only where it hashes a file the replay itself writes
+        (that file is compared here under the same rule); hashes of inputs must match. Non-JSON files byte for byte."""
         committed = EXAMPLE / "output"
         files = sorted(p.relative_to(committed) for p in committed.rglob("*") if p.is_file())
         self.assertEqual(files, sorted(p.relative_to(self.out) for p in self.out.rglob("*") if p.is_file()))
+        written = {str(rel) for rel in files}
         for rel in files:
             with self.subTest(file=str(rel)):
                 new, old = (self.out / rel).read_bytes(), (committed / rel).read_bytes()
@@ -55,9 +96,11 @@ class J14Replay(unittest.TestCase):
                     for doc in (a, b):
                         if isinstance(doc, dict) and isinstance(doc.get("versions"), dict):
                             doc["versions"].pop("plugin_release", None)
-                    self.assertEqual(a, b)
-                else:
+                    self.assertEqual(differences(a, b, written), [])
+                elif rel.suffix != ".md":
                     self.assertEqual(new, old)
+                else:  # the report prints rounded numbers: compare it after rounding to 1e-9 relative
+                    self.assertEqual(differences(new.decode().split(), old.decode().split(), written), [])
 
     def test_only_the_reissued_study_records_are_validated_in_scope(self):
         upgraded = set()

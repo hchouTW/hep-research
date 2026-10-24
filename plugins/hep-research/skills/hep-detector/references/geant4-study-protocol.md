@@ -87,20 +87,34 @@ coverage. The items say when to look and where, not which list to use.
 
 ## 4. The convergence gate and the event count
 
-- **Convergence (hard gate).** Scan the production cut (and the step limit when one is used). Between the two finest
-  settings of each declared scan, every declared observable (mean deposit, tail fraction, most probable value) must
-  change by no more than its relative tolerance, and the standard error of the change must be at most half of it.
-  `check_geant4_study.py run` applies this to the two finest declared values *among the supplied run summaries*: it
-  does not require a summary for every declared value, so a missing finest run lets the gate pass on coarser ones.
-  Supply a run for every declared value and check that `two_finest` in the gate output are the two finest declared. It is the only check that catches a cut that is too coarse: no reference
-  benchmark sees it, because the reference does not depend on the cut.
-- **Event count.** Estimate it from a trial run. `check_geant4_study.py summarize` gives seeded-bootstrap standard
-  errors, and `run` reports the events needed as N (SE/target)^2. The delta-ray tail makes means converge slowly: in
-  the official TestEm5 run 0 (5 GeV pi+, 20 um Si, 1e5 events) the error on the primary's leakage is about 8 % of the
-  mean energy loss. Do not take rms/sqrt(N) of a mean energy loss at face value.
-- **Observables for the gate.** `summarize` computes the thin-layer set by default (mean deposit, most probable
-  deposit and loss, tail fraction); for thick absorbers ask for what the study measures with `--observables`
-  (`leakage_fraction`, `rear_leakage_fraction`, `albedo_fraction`, `lateral_leakage_fraction`) and `--slab all`.
+- **Statistics** (contracts CV-A1). Each evidence point is one logical run with seed S = H(study_id, role, point_id)
+  (`core/simulation/seeds.py`), split by event number into K >= 16 blocks declared in the spec (`blocks.K`); its run
+  summary (`simulation-summary/1`, `adapters/geant4/assets/summary_from_csv.py`) holds per-block accumulators of the
+  spec's `observables` (estimator mean, proportion, mode or quantile). Values and SEs are batch means over the blocks
+  (SE on K - 1 degrees of freedom; a proportion with an empty block or fewer than 100 counts uses exact intervals);
+  the most probable value is the mean of three-point parabola modes of the block histograms. Choose the bin width
+  and the events per block with bias toys before the first evidence run (95 % upper bound of the bias <= tol/10).
+  Events must not share state (biasing breaks it); weights other than 1 are refused.
+- **Convergence (hard gate).** Scan the production cut (and the step limit when one is used). `check_geant4_study.py
+  run` requires a run summary for every declared value (otherwise `incomplete`, reason `missing-scan-value`) and
+  compares the two finest *declared* values with an equivalence test for every declared observable (tolerance
+  `relative` from `tolerance_relative`, or `absolute` from the observable's `tolerance`): pass when |diff| +
+  t_0.95(nu) se <= tol and both points meet the se target tol / (4 sqrt 2); fail when |diff| - t_(1-0.05/m)(nu) se >
+  tol (m = parameters x observables); anything else is `incomplete` (exit 3). Expect it: about 19 % of point pairs
+  miss a target under the two-stage design below, and at a true difference equal to the tolerance about 90 % are
+  unresolved; given that both points met the target, the pass rate there is 0.054, slightly above 0.05. It is the
+  only check that catches a cut that is too coarse: no reference benchmark sees it.
+- **Event count and stopping rule** (D6). Decide the stopping rule, scan grid, K, the event counts and how an
+  unresolved result is handled in the study spec before the first evidence run. Each point gets a trial run (role
+  `trial`, K_trial = 16, N_trial declared); its evidence run then has N = N_trial (SE_trial / target)^2 F_0.95(K - 1,
+  K_trial - 1) events, rounded up to a multiple of K. A point that still misses its target is `incomplete`: never add
+  events, rerun with another seed or refine the scan because of a result (optional stopping biases the evidence).
+  With n points that need a target all meet it with probability about 0.9^n.
+- **Shared evidence** (D7). One run often serves several decisions (the nominal feeds the gate, the statistical
+  target, the benchmark and the variations); `label` lists such runs in `extension.study.evidence_overlap`, and they
+  are not independent evidence.
+- **Observables for the gate.** Declare in `observables` what the study measures (thin layers: mean deposit, most
+  probable deposit and loss, tail fraction; thick absorbers: leakage fractions from the leakage-by-face columns).
   `geant4_run.py scan` gives every point its own seeds, so the SE of a difference is that of independent samples.
 
 ## 5. The validation ladder and verified pitfalls
@@ -149,14 +163,34 @@ material dump; constants from `core/constants`.
 | `multiple-scattering` | sanity | Highland, RPP 2024 Eq. 34.16, through `multiple_scattering.py`; RPP gives no numerical accuracy |
 | `em-shower-shape` | sanity | t_max, RPP 2024 Eq. 34.36 (not applicable when the stack does not contain t_max) |
 | `shower-containment` | sanity | rear leakage against the gamma-function profile, RPP 2024 Eqs. 34.34-34.36 (a fit to EGS4 showers, 1-100 GeV; b = 0.5 by default): never validation; a reference for leakage needs published data (`published-data`) |
-| `longitudinal-profile` | reference | the shower maximum t_max = (alpha - 1)/beta of a Gamma fit to per-layer mean deposits against the same fit to published test-beam data (config `published`: alpha, beta with uncertainties and source; their correlation is not used, which is conservative only for a non-negative correlation, the usual case for a Gamma fit; a negative one understates the t_max uncertainty); `systematic_relative` covers stated differences between the planar model and the measurement (readout window, beam spot, upstream material). First reference: a W/Si forward-calorimeter prototype test beam, JINST 19 (2024) P07006 (arXiv:2311.07413), Table 3 |
+| `longitudinal-profile` | setup-matched | the shower maximum t_max = (alpha - 1)/beta of a Gamma fit to per-layer mean deposits against the same fit to published test-beam data (config `published`: alpha, beta with uncertainties and source; their correlation is not used, which is conservative only for a non-negative correlation, the usual case for a Gamma fit; a negative one understates the t_max uncertainty); `systematic_relative` covers stated differences between the planar model and the measurement (readout window, beam spot, upstream material). First reference: a W/Si forward-calorimeter prototype test beam, JINST 19 (2024) P07006 (arXiv:2311.07413), Table 3 |
 | `published-data` | interface | handed to hep-statistics |
 
-Each reference benchmark has a tolerance (reference accuracy + k SE + binning) and a detection limit (tolerance +
-|observed offset| + 2 SE), and reruns on a negative control: a Geant4 run with an error of that size injected on the
-Geant4 side (for example the density raised by the detection limit while the reference keeps the spec density). The
-control must fail; gross controls (multiple scattering off) do not count. A benchmark whose control is not caught is
-not evidence for its scope.
+The grade is the benchmark's validation class in the contracts table (`contracts.validate.GEANT4_BENCHMARKS`, contracts
+CV-A1): a study record that declares another grade, or names a benchmark not in the table, is refused. Only reference
+and setup-matched benchmarks can upgrade a study: reference against a physics model or thin-target measurement on an
+isolated target, setup-matched against a published measurement of the same configuration (isolated, target hash
+equal to the measured one).
+
+**Configuration and isolation** (CV-A1). `geant4_benchmarks.py` derives each benchmark's configuration from the
+spec/1 of the run record its setting names (`run_record`), never from user input: the target is `target_slabs`
+(absorbers included; by default the measured slab; `longitudinal-profile` lists its whole sampling stack), the target
+hash (`hash_scheme: spec-v1`) is the sha256 of the target's placements in order with thickness, transverse size,
+material and declared composition (numbers as `float.hex()`), and the target is `isolated` when the world is vacuum
+(`G4_Galactic` or density below 1e-20 g/cm3) and every other placement belongs to it, otherwise `embedded`. A counted
+benchmark must be isolated; `contracts/dependencies.py` re-derives the configuration from the run record and refuses a
+mismatch. Limits: J14's recorded CSVs are reduced, so their hashes are not the run records' `output_hashes`; the
+configuration describes the run record the setting names; the geometry of negative-control runs is not checked
+separately.
+
+Each reference or setup-matched benchmark has a tolerance (reference accuracy + k SE + binning, SE by batch means)
+and a detection limit DL = tolerance + |observed offset| + t_0.977(nu) SE of the shift, and reruns on negative
+controls: Geant4 runs with an error of that size injected on the Geant4 side (for example the density raised and
+lowered by the detection limit while the reference keeps the spec density). A control is judged on the observable:
+shift = (control - nominal) / reference; it is caught when its benchmark verdict fails and at the claimed limit when
+|shift| <= 1.1 DL. Controls in both directions are needed for a two-sided claim; one direction narrows it
+(`detection_limit_sign`). A single miss is recorded, never rerun with another seed; gross controls (multiple
+scattering off) do not count. A benchmark whose control is not caught is not evidence for its scope.
 
 ## 6. Variations
 
@@ -215,12 +249,15 @@ execution layer. Its records are always `unvalidated`.
   `--timeout 3540`), `chunk` (a `local_partition.py` worker writing
   additive sums and `{"csv": [...]}` for `--rule csv=concat`), `summarize` (means after the merge, duplicate check,
   agreement with a single run), `reduce` (a gzip copy of chosen columns for replay) and `oracle` (runs
-  `geant4_benchmarks.py` through a subprocess).
+  `geant4_benchmarks.py` through a subprocess); `run --evidence-role --point-id --logical-run-seed` records what the
+  run is for and its seed scheme.
+- `assets/summary_from_csv.py`: the run summary (`simulation-summary/1`, K blocks) of a logical run from its CSVs and
+  the study spec's observables, validated before it is written.
 - `assets/geant4_verify.py overlaps|budget|balance|mirror|datapaths`: the implementation checks, each able to write a
   record that lists the checked run as an input.
 
-The hep-detector side never imports the adapter: `scripts/check_geant4_study.py` (`spec`, `summarize`, `run`,
-`variations`, `label`) and `scripts/geant4_benchmarks.py` (`run`, `reference`) read the files it writes. A worked
+The hep-detector side never imports the adapter: `scripts/check_geant4_study.py` (`spec`, `run`, `variations`,
+`label`) and `scripts/geant4_benchmarks.py` (`run`, `reference`) read the files it writes. A worked
 journey with real runs, negative-control scenarios and an offline replay is
 [examples/geant4-thin-silicon](../../../examples/geant4-thin-silicon/run.py).
 

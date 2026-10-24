@@ -44,7 +44,7 @@
    "skills/hep-detector/scripts/build_response.py"
   ],
   "code_tags": [],
-  "created": "2026-10-21",
+  "created": "2026-10-24",
   "evidence_ids": []
  },
  "inputs": [
@@ -52,8 +52,8 @@
    "ref": "output/artifacts/runs/mpv-nominal.computational-run.json",
    "artifact_type": "computational-run",
    "artifact_id": "geant4-run-mpv-nominal",
-   "version": "3.0.1",
-   "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099",
+   "version": "3.13.0",
+   "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de",
    "status": [
     "unvalidated"
    ]
@@ -104,7 +104,7 @@
   ],
   "underflow_overflow": "explicit_bins",
   "intended_use": "forward_folding",
-  "conditions": "built by build_response.py from truth-reco.csv: 5000 events, 96 with truth outside the truth axis (not used)",
+  "conditions": "built by build_response.py from truth-reco.csv: 5000 events, 115 with truth outside the truth axis (not used)",
   "provenance": "matched truth/reco sample supplied by the user",
   "form": "matrix",
   "matrix": [
@@ -121,7 +121,7 @@
     1.0,
     0.0,
     0.0,
-    0.000724112961622013,
+    0.0,
     0.0
    ],
    [
@@ -129,24 +129,24 @@
     0.0,
     1.0,
     0.0,
-    0.000724112961622013,
-    0.0024937655860349127
+    0.0014094432699083862,
+    0.004889975550122249
    ],
    [
     0.0,
     0.0,
     0.0,
     1.0,
-    0.0,
-    0.00997506234413965
+    0.0028188865398167725,
+    0.007334963325183374
    ],
    [
     0.0,
     0.0,
     0.0,
     0.0,
-    0.998551774076756,
-    0.0798004987531172
+    0.9957716701902748,
+    0.02689486552567237
    ],
    [
     0.0,
@@ -154,7 +154,7 @@
     0.0,
     0.0,
     0.0,
-    0.9077306733167082
+    0.960880195599022
    ]
   ],
   "underflow": [
@@ -174,12 +174,12 @@
    0.0
   ],
   "generated_per_truth_bin": [
-   130.0,
-   774.0,
-   1248.0,
-   970.0,
-   1381.0,
-   401.0
+   147.0,
+   806.0,
+   1165.0,
+   939.0,
+   1419.0,
+   409.0
   ],
   "build_diagnostics": {
    "mc_uncertainty": [
@@ -196,7 +196,7 @@
      0.0,
      0.0,
      0.0,
-     0.0007238507443540917,
+     0.0,
      0.0
     ],
     [
@@ -204,8 +204,24 @@
      0.0,
      0.0,
      0.0,
-     0.0007238507443540917,
-     0.002490654211665448
+     0.0009959243016626365,
+     0.0034492703913819507
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0014074553376497588,
+     0.0042192832559152646
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.001722555061096672,
+     0.007999317167378953
     ],
     [
      0.0,
@@ -213,23 +229,7 @@
      0.0,
      0.0,
      0.0,
-     0.004962593359956539
-    ],
-    [
-     0.0,
-     0.0,
-     0.0,
-     0.0,
-     0.001023308574199339,
-     0.013532299879532798
-    ],
-    [
-     0.0,
-     0.0,
-     0.0,
-     0.0,
-     0.0,
-     0.014452234339307667
+     0.009586747844868636
     ]
    ],
    "mc_uncertainty_method": "delta-method weighted multinomial",
@@ -252,8 +252,8 @@
    "residual": "difference",
    "resolution": [
     {
-     "n": 130,
-     "sum_w": 130.0,
+     "n": 147,
+     "sum_w": 147.0,
      "median": 0.0,
      "sigma68": 0.0,
      "mad": 0.0,
@@ -262,8 +262,8 @@
      "tail_definition": "|r - median| > 3 sigma68"
     },
     {
-     "n": 774,
-     "sum_w": 774.0,
+     "n": 806,
+     "sum_w": 806.0,
      "median": 0.0,
      "sigma68": 0.0,
      "mad": 0.0,
@@ -272,8 +272,8 @@
      "tail_definition": "|r - median| > 3 sigma68"
     },
     {
-     "n": 1248,
-     "sum_w": 1248.0,
+     "n": 1165,
+     "sum_w": 1165.0,
      "median": 0.0,
      "sigma68": 0.0,
      "mad": 0.0,
@@ -282,8 +282,8 @@
      "tail_definition": "|r - median| > 3 sigma68"
     },
     {
-     "n": 970,
-     "sum_w": 970.0,
+     "n": 939,
+     "sum_w": 939.0,
      "median": 0.0,
      "sigma68": 0.0,
      "mad": 0.0,
@@ -292,8 +292,8 @@
      "tail_definition": "|r - median| > 3 sigma68"
     },
     {
-     "n": 1381,
-     "sum_w": 1381.0,
+     "n": 1419,
+     "sum_w": 1419.0,
      "median": 0.0,
      "sigma68": 0.0,
      "mad": 0.0,
@@ -302,8 +302,8 @@
      "tail_definition": "|r - median| > 3 sigma68"
     },
     {
-     "n": 401,
-     "sum_w": 401.0,
+     "n": 409,
+     "sum_w": 409.0,
      "median": 0.0,
      "sigma68": 0.0,
      "mad": 0.0,
@@ -313,12 +313,12 @@
     }
    ],
    "effective_entries": [
-    130.0,
-    774.0,
-    1248.0,
-    970.0,
-    1381.0,
-    401.0
+    147.0,
+    806.0,
+    1165.0,
+    939.0,
+    1419.0,
+    409.0
    ],
    "empty_truth_bins": []
   },
@@ -331,12 +331,12 @@
    "kind": "generated_counts",
    "weighted": false,
    "events_per_truth_bin": [
-    130,
-    774,
-    1248,
-    970,
-    1381,
-    401
+    147,
+    806,
+    1165,
+    939,
+    1419,
+    409
    ]
   },
   "variable_conversion": "deposit = energy loss minus the energy carried out of the slab by secondaries"

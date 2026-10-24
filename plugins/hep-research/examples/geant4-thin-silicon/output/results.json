@@ -34,7 +34,8 @@
    "convergence gate not passed: physics.default_cut_mm fail"
   ],
   "density-10": [
-   "stopping-power failed: relative difference +0.09709 beyond the tolerance 0.03329 (Bethe mean rate, PDG RPP 2024, Passage of particles through ...)",
+   "stopping-power: negative controls in one direction only: the detection limit is claimed for sign - only",
+   "stopping-power failed: relative difference +0.09709 beyond the tolerance 0.03342 (Bethe mean rate, PDG RPP 2024, Passage of particles through ...)",
    "no reference benchmark is validation evidence for this study (R5 not met)"
   ],
   "dump-reference": [
@@ -45,9 +46,9 @@
   "mpv": {
    "benchmarks": {
     "thin-layer-mpv": {
-     "detection_limit": 0.0826757688364182,
+     "detection_limit": 0.06995854203702802,
      "negative_control": "caught",
-     "relative_difference": 0.01421145035666392,
+     "relative_difference": 0.014862741643394815,
      "validation_evidence": true,
      "verdict": "pass"
     },
@@ -74,9 +75,9 @@
   "sp": {
    "benchmarks": {
     "stopping-power": {
-     "detection_limit": 0.03776020023771021,
+     "detection_limit": 0.03940428593124131,
      "negative_control": "caught",
-     "relative_difference": -0.0018499429437011151,
+     "relative_difference": -0.0018499429437009848,
      "validation_evidence": true,
      "verdict": "pass"
     }

@@ -2,22 +2,27 @@
  "benchmarks": [
   {
    "benchmark": "stopping-power",
-   "bootstrap": {
-    "resamples": 200,
-    "seed": 1
-   },
-   "csv": "../../recorded/events/sp-density-10.csv.gz",
    "energy_MeV": 100.0,
    "material": "Si_study",
-   "negative_control": {
-    "csv": "../../recorded/events/sp-control.csv.gz",
-    "injected": "silicon density x 1.038 on the Geant4 side (reference keeps 2.329 g/cm3)",
-    "injected_relative": 0.038,
-    "run_record": "../../recorded/runs/sp-control.computational-run.json"
-   },
+   "negative_controls": [
+    {
+     "injected": "silicon density x 1.038 on the Geant4 side (reference keeps 2.329 g/cm3)",
+     "injected_relative": 0.038,
+     "run_record": "../../recorded/runs/sp-control.computational-run.json",
+     "summary": "../../recorded/blocks/sp-control.json"
+    },
+    {
+     "injected": "silicon density x 0.960 on the Geant4 side (reference keeps 2.329 g/cm3)",
+     "injected_relative": -0.04,
+     "run_record": "../../recorded/runs/sp-control-minus.computational-run.json",
+     "summary": "../../recorded/blocks/sp-control-minus.json"
+    }
+   ],
+   "observable": "loss_transmitted_MeV",
    "particle": "proton",
    "run_record": "../../recorded/runs/sp-density-10.computational-run.json",
    "slab": "Si",
+   "summary": "../../recorded/blocks/sp-density-10.json",
    "thickness_mm": 0.3,
    "tolerance": {
     "k_sigma": 3,

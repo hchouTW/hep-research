@@ -31,9 +31,28 @@
     "tail_estimation",
     "toy_ensemble",
     "broken_power_law",
-    "change_point"
+    "change_point",
+    "distributions",
+    "batch_means",
+    "decisions"
    ],
    "source": "experiment-neutral implementations; imports packaged"
+  },
+  "simulation": {
+   "steward": "hep-detector",
+   "status": "implemented",
+   "purpose": "Simulation runs (Geant4 program A1.4, A1.5): the seed hash H of logical runs, jobs and events, and building, merging and reading of simulation-summary/1 run summaries (per-block accumulators); no schema validation (callers use contracts.schema)",
+   "consumers": [
+    "skills/hep-detector/scripts/check_geant4_study.py",
+    "adapters/geant4/assets/geant4_run.py",
+    "adapters/geant4/assets/summary_from_csv.py"
+   ],
+   "files": [
+    "seeds",
+    "summary",
+    "estimates"
+   ],
+   "source": "new in this plugin (Geant4 program, stage A1, 2026-10-24)"
   },
   "blinding": {
    "steward": "hep-computing",

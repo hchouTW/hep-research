@@ -1,0 +1,252 @@
+{
+ "K": 16,
+ "factor": 2.403447071495341,
+ "runs": {
+  "mpv-control": {
+   "events": 1200000,
+   "logical_run_seed": 181086610,
+   "point_id": "density-plus",
+   "role": "control"
+  },
+  "mpv-control-minus": {
+   "events": 1200000,
+   "logical_run_seed": 1257075004,
+   "point_id": "density-minus",
+   "role": "control"
+  },
+  "mpv-cut-0.03": {
+   "events": 1200000,
+   "logical_run_seed": 1071817300,
+   "point_id": "cut-0.03",
+   "role": "scan"
+  },
+  "mpv-cut-0.03-trial": {
+   "events": 64000,
+   "logical_run_seed": 548043847,
+   "plan_for": "mpv-cut-0.03",
+   "planned": {
+    "events": 1200000,
+    "factor": 2.403447071495341,
+    "min_block_events": 75000,
+    "per_observable": {
+     "mean_deposit_MeV": 164080.53281977915,
+     "mpv_deposit_MeV": 709707.2827119371,
+     "tail_fraction": 413768.29545384157
+    },
+    "trial_events": 64000
+   },
+   "point_id": "cut-0.03",
+   "role": "trial"
+  },
+  "mpv-cut-0.1": {
+   "events": 1200000,
+   "logical_run_seed": 1944420098,
+   "point_id": "cut-0.1",
+   "role": "scan"
+  },
+  "mpv-cut-0.1-trial": {
+   "events": 64000,
+   "logical_run_seed": 1728963600,
+   "plan_for": "mpv-cut-0.1",
+   "planned": {
+    "events": 1200000,
+    "factor": 2.403447071495341,
+    "min_block_events": 75000,
+    "per_observable": {
+     "mean_deposit_MeV": 306125.45444541244,
+     "mpv_deposit_MeV": 209514.57389895307,
+     "tail_fraction": 692073.7239738236
+    },
+    "trial_events": 64000
+   },
+   "point_id": "cut-0.1",
+   "role": "trial"
+  },
+  "mpv-cut-0.3": {
+   "events": 1200000,
+   "logical_run_seed": 155793019,
+   "point_id": "cut-0.3",
+   "role": "scan"
+  },
+  "mpv-cut-0.3-trial": {
+   "events": 64000,
+   "logical_run_seed": 2039761618,
+   "plan_for": "mpv-cut-0.3",
+   "planned": {
+    "events": 1200000,
+    "factor": 2.403447071495341,
+    "min_block_events": 75000,
+    "per_observable": {
+     "mean_deposit_MeV": 161424.3078684018,
+     "mpv_deposit_MeV": 490753.5414950377,
+     "tail_fraction": 319761.7696392791
+    },
+    "trial_events": 64000
+   },
+   "point_id": "cut-0.3",
+   "role": "trial"
+  },
+  "mpv-cut-1.0": {
+   "events": 1200000,
+   "logical_run_seed": 56911034,
+   "point_id": "cut-1.0",
+   "role": "scan"
+  },
+  "mpv-cut-1.0-trial": {
+   "events": 64000,
+   "logical_run_seed": 973683432,
+   "plan_for": "mpv-cut-1.0",
+   "planned": {
+    "events": 1200000,
+    "factor": 2.403447071495341,
+    "min_block_events": 75000,
+    "per_observable": {
+     "mean_deposit_MeV": 141399.85864921522,
+     "mpv_deposit_MeV": 341186.9833420757,
+     "tail_fraction": 176499.8193504341
+    },
+    "trial_events": 64000
+   },
+   "point_id": "cut-1.0",
+   "role": "trial"
+  },
+  "mpv-em-option0": {
+   "events": 1200000,
+   "logical_run_seed": 1970805002,
+   "point_id": "em-option0",
+   "role": "variation"
+  },
+  "mpv-em-option3": {
+   "events": 1200000,
+   "logical_run_seed": 78803273,
+   "point_id": "em-option3",
+   "role": "variation"
+  },
+  "mpv-ftfp-bert-emz": {
+   "events": 1200000,
+   "logical_run_seed": 889273785,
+   "point_id": "ftfp-bert-emz",
+   "role": "variation"
+  },
+  "mpv-nominal": {
+   "events": 1200000,
+   "logical_run_seed": 1209848005,
+   "point_id": "cut-0.01",
+   "role": "nominal"
+  },
+  "mpv-nominal-trial": {
+   "events": 64000,
+   "logical_run_seed": 892612549,
+   "plan_for": "mpv-nominal",
+   "planned": {
+    "events": 1200000,
+    "factor": 2.403447071495341,
+    "min_block_events": 75000,
+    "per_observable": {
+     "mean_deposit_MeV": 135982.82313263367,
+     "mpv_deposit_MeV": 540477.7962612617,
+     "mpv_loss_MeV": 67430.02151708833,
+     "tail_fraction": 546526.6222720561
+    },
+    "trial_events": 64000
+   },
+   "point_id": "cut-0.01",
+   "role": "trial"
+  },
+  "mpv-pai": {
+   "events": 1200000,
+   "logical_run_seed": 71692329,
+   "point_id": "pai",
+   "role": "variation"
+  },
+  "sp-control": {
+   "events": 30000,
+   "legacy_seeds": [
+    1402,
+    50
+   ],
+   "point_id": "control",
+   "role": "control"
+  },
+  "sp-control-minus": {
+   "events": 30000,
+   "logical_run_seed": 1544776484,
+   "point_id": "density-minus",
+   "role": "control"
+  },
+  "sp-cut-0.03": {
+   "events": 17760,
+   "logical_run_seed": 1432185908,
+   "point_id": "cut-0.03",
+   "role": "scan"
+  },
+  "sp-cut-0.03-trial": {
+   "events": 16000,
+   "logical_run_seed": 1123030259,
+   "plan_for": "sp-cut-0.03",
+   "planned": {
+    "events": 17760,
+    "factor": 2.403447071495341,
+    "min_block_events": 1,
+    "per_observable": {
+     "mean_deposit_MeV": 17751.280765018993
+    },
+    "trial_events": 16000
+   },
+   "point_id": "cut-0.03",
+   "role": "trial"
+  },
+  "sp-cut-0.1": {
+   "events": 16000,
+   "logical_run_seed": 331608760,
+   "point_id": "cut-0.1",
+   "role": "scan"
+  },
+  "sp-cut-0.1-trial": {
+   "events": 16000,
+   "logical_run_seed": 1459932335,
+   "plan_for": "sp-cut-0.1",
+   "planned": {
+    "events": 16000,
+    "factor": 2.403447071495341,
+    "min_block_events": 1,
+    "per_observable": {
+     "mean_deposit_MeV": 9436.47611854627
+    },
+    "trial_events": 16000
+   },
+   "point_id": "cut-0.1",
+   "role": "trial"
+  },
+  "sp-density-10": {
+   "events": 30000,
+   "legacy_seeds": [
+    1402,
+    40
+   ],
+   "point_id": "density-10",
+   "role": "control"
+  },
+  "sp-em-option0": {
+   "events": 30000,
+   "logical_run_seed": 1459193557,
+   "point_id": "em-option0",
+   "role": "variation"
+  },
+  "sp-em-option3": {
+   "events": 30000,
+   "logical_run_seed": 1671981734,
+   "point_id": "em-option3",
+   "role": "variation"
+  },
+  "sp-nominal": {
+   "events": 30000,
+   "legacy_seeds": [
+    1402,
+    1
+   ],
+   "point_id": "cut-0.01",
+   "role": "nominal"
+  }
+ }
+}

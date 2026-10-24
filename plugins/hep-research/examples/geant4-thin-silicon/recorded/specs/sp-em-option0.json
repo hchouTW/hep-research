@@ -60,8 +60,8 @@
   "events": 30000,
   "run_manager": "serial",
   "seeds": [
-   1402,
-   30
+   277129845,
+   1248318244
   ]
  },
  "schema": "layered_sim.spec/1",

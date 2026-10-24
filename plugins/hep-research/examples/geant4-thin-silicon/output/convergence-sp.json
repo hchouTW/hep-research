@@ -1,16 +1,25 @@
 {
  "convergence": {
   "gate": "pass",
+  "multiplicity": 1,
   "parameters": [
    {
     "observables": [
      {
+      "dof": 29.04036956449648,
       "finest": 0.01,
+      "margin": 0.006227424947280746,
       "next": 0.03,
       "observable": "mean_deposit_MeV",
-      "relative_change": -7.08727349259099e-05,
-      "se_of_change": 0.0015021314019439602,
+      "reason": "within-tolerance",
+      "relative_change": 0.0009413283862099695,
+      "se_of_change": 0.001666371284308104,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
       "tolerance": 0.01,
+      "tolerance_mode": "relative",
       "verdict": "pass"
      }
     ],
@@ -27,45 +36,117 @@
     "verdict": "pass"
    }
   ],
-  "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
  },
  "record_problems": [],
  "statistical_target": {
-  "estimate": "seeded bootstrap of this run (200 resamples); N_needed = N (SE/target)^2, assuming SE ~ 1/sqrt(N); the delta-ray tail makes means converge slowly",
+  "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
   "events": 30000,
   "events_needed": null,
   "observable": "mean_deposit_MeV",
-  "relative_se": 0.0011110094049006192,
+  "relative_se": 0.0012797255588406428,
   "target": 0.005,
   "verdict": "pass"
  },
  "summaries": [
   {
-   "path": "recorded/summaries/sp-nominal.json",
+   "legacy": false,
+   "observables": {
+    "loss_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.40816909748617003,
+     "method": "batch means of block means",
+     "n": 30000,
+     "se": 0.0005502650775337826,
+     "status": "ok",
+     "value": 0.40816909748617003
+    },
+    "mean_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.40350491055306337,
+     "method": "batch means of block means",
+     "n": 30000,
+     "se": 0.0005163755471524626,
+     "status": "ok",
+     "value": 0.4035049105530633
+    }
+   },
+   "path": "recorded/blocks/sp-nominal.json",
    "role": "nominal",
    "run_record": {
     "artifact_id": "geant4-run-sp-nominal",
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-nominal.computational-run.json",
     "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
    },
-   "sha256": "732a1cb86d38408b0ee174ca53325a141067a3785132c1fe4a276c734b754668"
+   "sha256": "b0d9ad5bff454ab031f587d98ce866639e2a90c2a8189a1e3a7a976cd43c7ab1"
   },
   {
-   "path": "recorded/summaries/sp-cut-0.1.json",
+   "legacy": false,
+   "observables": {
+    "loss_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.40764193885105626,
+     "method": "batch means of block means",
+     "n": 16000,
+     "se": 0.0004645762732692673,
+     "status": "ok",
+     "value": 0.40764193885105626
+    },
+    "mean_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.40455024877052503,
+     "method": "batch means of block means",
+     "n": 16000,
+     "se": 0.0004635398453410344,
+     "status": "ok",
+     "value": 0.404550248770525
+    }
+   },
+   "path": "recorded/blocks/sp-cut-0.1.json",
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-sp-cut-0.1",
-    "sha256": "acb4821425ea9e513f2c7bdcacb6af1d2d1027d751e5e70a8c55ada6d0947e51"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.1.computational-run.json",
+    "sha256": "84c721bd0620f65764a9fc939f2fd552911af3b35b5977d3b8b110c94b044c8e"
    },
-   "sha256": "b99cacd01ba19118bc0d1bc6ef59c5e8b469ce908d8dd07ea0fadfff5b0f9ecb"
+   "sha256": "601d90dfcb85210cf49c491f18eddf3d8c4937961fdff4a49523d275eadabe76"
   },
   {
-   "path": "recorded/summaries/sp-cut-0.03.json",
+   "legacy": false,
+   "observables": {
+    "loss_transmitted_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.4072677699385698,
+     "method": "batch means of block means",
+     "n": 17760,
+     "se": 0.0005388647106530756,
+     "status": "ok",
+     "value": 0.40726776993856983
+    },
+    "mean_deposit_MeV": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.403125437135884,
+     "method": "batch means of block means",
+     "n": 17760,
+     "se": 0.00042966649202609645,
+     "status": "ok",
+     "value": 0.403125437135884
+    }
+   },
+   "path": "recorded/blocks/sp-cut-0.03.json",
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-sp-cut-0.03",
-    "sha256": "a7f098b024cb6c7b065cf7d2f669ebdebb6364fc27fbfb9101dbc825272ef2db"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.03.computational-run.json",
+    "sha256": "ef58069b6421e92c51bce906f5fa30b52f618da965dada7a0545738506001885"
    },
-   "sha256": "2cb93445da1eeb04860a23d6c4c9eb0a53839ff752c32b6b30fc2f69df577269"
+   "sha256": "225b53022cfa31ef4ea1f7c15052779d8df3873276432b1bcbcce8b7f1762c81"
   }
  ]
 }

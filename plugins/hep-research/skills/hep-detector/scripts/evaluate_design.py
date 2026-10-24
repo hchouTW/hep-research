@@ -29,8 +29,11 @@ Subcommands:
 - geometry (M2, ART-33..ART-35): the geometry file of a Geant4 study generated from the candidate with the mapping
   table contracts/rules/design_geometry.json (the fields, the parameters read and their digest); sets the candidate's
   geometry_ref. f4 (ART-31, ART-32): an F4 evaluation from a study record (re-issued first by check_geant4_study.py
-  label --upgrade with --label-spec/--label-benchmarks/--label-convergence); value, statistical uncertainty and model
-  envelope from the record; bound optimistic for resolution and confusion unless every tail source was simulated.
+  label --upgrade with --label-spec/--label-benchmarks/--label-convergence, and the run records, reference records and
+  variation table passed on with --label-run-record/--label-reference-record/--label-variations); value, statistical
+  uncertainty and model envelope from the record; bound optimistic for resolution and confusion unless every tail
+  source was simulated. A refused upgrade, or a validated-in-scope record without results.<fom>, is incomplete (exit 3)
+  with the reasons; label's own exit 1, 2, 3 map to failed, rejected, incomplete.
 - f5 (M3, FID-01, FID-06, FID-07): an F5 evaluation from a user-supplied dataset-record's design_measurement, bound
   to the dataset by hash and to the candidate by the digest of the measured configuration's parameters; it decides only
   after a human measurement-acceptance record approves the dataset and covers the candidate.
@@ -85,8 +88,8 @@ Usage:
       [--id EVAL-ID] [--replace] [--status LABEL]
   evaluate_design.py geometry --artifacts DIR --candidate ID --figure-of-merit FOM --denominator K=V ... --id STUDY-ID
   evaluate_design.py f4 --artifacts DIR --candidate ID (--requirement ID | --figure-of-merit FOM --denominator K=V ...)
-      --study REL --id SIM-ID [--label-spec S --label-benchmarks B --label-convergence C [--label-project-root R]]
-      [--status LABEL]
+      --study REL --id SIM-ID [--label-spec S --label-benchmarks B --label-convergence C [--label-project-root R]
+      [--label-run-record REL ...] [--label-reference-record REL ...] [--label-variations REL]] [--status LABEL]
   evaluate_design.py f5 --artifacts DIR --candidate ID --dataset REL --id MEAS-ID
   evaluate_design.py calibration --artifacts DIR --candidate ID --residual SID.parameters.NAME --mode MODE --model REL
       --id CAL-ID [--measurement-spec REL --out-spec REL] [--status LABEL]
@@ -534,16 +537,34 @@ def geometry(args) -> dict:
 def f4(args) -> dict:
     """ART-31, ART-32 (M2): an F4 evaluation from a Geant4 study record in the artifacts_dir; with --label-spec,
     --label-benchmarks and --label-convergence the record is first re-issued by check_geant4_study.py label
-    --upgrade. Value, statistical uncertainty and model envelope are the record's; the bound follows FID-03."""
+    --upgrade (run records, reference records and the variation table passed on unchanged). Value, statistical
+    uncertainty and model envelope are the record's; the bound follows FID-03. A1.17: label exits 0 when it wrote a
+    record (granted or refused upgrade) and 2 on unusable input; its exit 1, 2, 3 map to failed, rejected,
+    incomplete, and a refused upgrade or a validated record without results.<fom> is incomplete (exit 3)."""
     proj = load_project(args)
     if args.label_spec:
         cmd = [sys.executable, "-B", str(PLUGIN / "skills/hep-detector/scripts/check_geant4_study.py"), "label",
                "--spec", args.label_spec, "--benchmarks", args.label_benchmarks, "--convergence", args.label_convergence,
                "--project-root", str(args.label_project_root or proj.root), "--upgrade", "--write", str(proj.root / args.study)]
+        for flag, values in (("--run-record", args.label_run_record), ("--reference-record", args.label_reference_record),
+                             ("--variations", [args.label_variations] if args.label_variations else [])):
+            for v in values or []:
+                cmd += [flag, v]
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=TOOL_TIMEOUT_S)
         if p.returncode != 0:
-            return {"status": "failed", "exit": 1, "error": "check_geant4_study.py label --upgrade refused the study",
+            status = {1: "failed", 3: "incomplete"}.get(p.returncode, "rejected")
+            return {"status": status, "exit": {"failed": 1, "incomplete": 3}.get(status, 2),
+                    "error": f"check_geant4_study.py label --upgrade exited {p.returncode}",
                     "label_output": p.stdout[-3000:]}
+        try:
+            upgrade = json.loads(p.stdout).get("upgrade")
+        except ValueError:
+            upgrade = None
+        if upgrade != "re-issued as validated-in-scope":
+            return {"status": "incomplete", "exit": 3, "reason": "upgrade-refused",
+                    "refused": (upgrade or {}).get("refused") if isinstance(upgrade, dict) else upgrade,
+                    "note": "the study record was written unvalidated; an F4 evaluation needs a validated-in-scope "
+                            "study (contracts/design.py check_f4)"}
         proj = load_project(args)
     study_path = proj.resolve(args.study)
     study = proj.docs.get(study_path)
@@ -565,6 +586,10 @@ def f4(args) -> dict:
     block = (study.get("extension") or {}).get("study") or {}
     result = (block.get("results") or {}).get(fom)
     if not isinstance(result, dict) or not isinstance(result.get("value"), (int, float)):
+        if "validated-in-scope" in (study.get("status") or []):
+            return {"status": "incomplete", "exit": 3, "reason": "results-missing",
+                    "note": f"the validated-in-scope study record reports no results.{fom}.value (ART-36): a study "
+                            "that measures the figure of merit writes it (Geant4 program stage B2)"}
         raise UsageError(f"the study record reports no results.{fom}.value (ART-36)")
     mapping = design.load_json(design.GEOMETRY_FILE)
     fom_map = mapping["figures_of_merit"].get(fom) or {}
@@ -2288,6 +2313,11 @@ def main(argv=None) -> int:
     p.add_argument("--label-benchmarks", dest="label_benchmarks")
     p.add_argument("--label-convergence", dest="label_convergence")
     p.add_argument("--label-project-root", dest="label_project_root")
+    p.add_argument("--label-run-record", dest="label_run_record", action="append",
+                   help="a run record passed on to label as --run-record (repeatable)")
+    p.add_argument("--label-reference-record", dest="label_reference_record", action="append",
+                   help="a reference dataset-record passed on to label as --reference-record (repeatable)")
+    p.add_argument("--label-variations", dest="label_variations", help="the variation table passed on to label")
     p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
     p = sub.add_parser("f5", help="an F5 evaluation from a user-supplied dataset-record (FID-06, FID-07)")
     p.add_argument("--artifacts", type=Path, required=True)

@@ -538,14 +538,20 @@ class Oracle(_Tmp):
     recorded proton run (stopping power against Bethe) and its negative control."""
 
     def config(self, csv):
+        """The stopping-power benchmark on a block summary made from the CSV with summary_from_csv.py (CV-A1), with
+        J14's two recorded controls."""
         rec = J14 / "recorded"
+        summ = self.d / (csv.name.split(".")[0] + ".summary.json")
+        code, out = run(asset("summary_from_csv.py"), "--csv", csv, "--observables", J14 / "study-sp.json",
+                        "--block-size", "1875", "--blocks", "16", "--run-record",
+                        rec / "runs" / "sp-nominal.computational-run.json", "--out", summ)
+        self.assertEqual(code, 0, out)
+        ctrl = json.loads((rec / "control-sp.json").read_text(encoding="utf-8"))["controls"]
         cfg = {"schema": "geant4-benchmarks/1", "study_spec": str(J14 / "study-sp.json"), "benchmarks": [
-            {"benchmark": "stopping-power", "csv": str(csv), "particle": "proton", "energy_MeV": 100.0,
-             "material": "Si_study", "slab": "Si", "thickness_mm": 0.3, "bootstrap": {"resamples": 50, "seed": 1},
+            {"benchmark": "stopping-power", "summary": str(summ), "observable": "loss_transmitted_MeV",
+             "particle": "proton", "energy_MeV": 100.0, "material": "Si_study", "slab": "Si", "thickness_mm": 0.3,
              "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3},
-             "negative_control": {"csv": str(rec / "events" / "sp-control.csv.gz"),
-                                  **json.loads((rec / "control-sp.json").read_text(encoding="utf-8"))}}]}
-        cfg["benchmarks"][0]["negative_control"].pop("detection_limit_relative", None)
+             "negative_controls": [{"summary": str(rec / "blocks" / f"{rid}.json"), **c} for rid, c in sorted(ctrl.items())]}]}
         return self.write("cfg.json", cfg)
 
     def test_recorded_output_passes_and_a_tampered_one_fails(self):

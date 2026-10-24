@@ -17,79 +17,86 @@
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-nominal.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099"
+    "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de"
    },
    {
     "artifact_id": "geant4-run-mpv-control",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-control.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "d8b3a8f4148fb2dbf6af77b71c69ba4a71900f6e647ccb4e18cacceee350648b"
+    "sha256": "93c8e7e0c8ab97516a4c3bbfdc472d41725fb15e93240b3cbff9119384f21331"
+   },
+   {
+    "artifact_id": "geant4-run-mpv-control-minus",
+    "artifact_type": "computational-run",
+    "ref": "output/artifacts/runs/mpv-control-minus.computational-run.json",
+    "role": "Geant4 run",
+    "sha256": "6c21725a46dd47849c58a2c4a9f26339c541b6ad87bfbf87257ccf094a36cbaf"
    },
    {
     "artifact_id": "geant4-run-mpv-cut-0.1",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-cut-0.1.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "ed00d3638b857f1a4d4624e5d2e787a5cf0d581b6abb27d4ce974764ea1fd2a6"
+    "sha256": "96facb7a65866ce91287245668378e7077b22650c6de84e80fdb5888e01fb2f4"
    },
    {
     "artifact_id": "geant4-run-mpv-cut-0.03",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-cut-0.03.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "5c9759084290a3cb5842f6484d874328a2ca33d3764a6f6bb17bb173df74414d"
+    "sha256": "25f688156c994c37a3d9e37c9d069bff5b7aa33a39051ec0a98846ab6e28b430"
    },
    {
     "artifact_id": "geant4-run-mpv-em-option0",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-em-option0.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "0615b7624edd11fcbc9d62ad4865ed3ad44bb500df84c0839f56eb7d919953fa"
+    "sha256": "37516c3959d18290557d9b86d6d276b124e9db7a5ed6f5a008b8948ffd4814c0"
    },
    {
     "artifact_id": "geant4-run-mpv-em-option3",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-em-option3.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "d63a26d3ee1ba488d2c6087508c164f7bdc36bfa6f1013eb089898bccdb058f7"
+    "sha256": "8645ac3572f8e1996bed9bc33212650f5ee0fe2a4364b5ba8704730e0f30a59d"
    },
    {
     "artifact_id": "geant4-run-mpv-pai",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-pai.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "bd26fe837e39394da79827914b244b4a87734a9f36b3e02b0a7663b51736f48d"
+    "sha256": "9213458e0ccc693e74f9bf4ade75b8f25e4325b1d643d0ed30238163c00422f9"
    },
    {
     "artifact_id": "geant4-run-mpv-ftfp-bert-emz",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/mpv-ftfp-bert-emz.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "ad511f00dfd64bda7f93b476479cfe55119979ad2b76135e0382b24a289e3cab"
+    "sha256": "10af85470cf5787e8451f1d126b5d73e2b67fd3368f7a4d4a8a7d26f919d3853"
    }
   ],
   "exit_status": 0,
   "input_manifest": [
    {
     "path": "study-mpv.json",
-    "sha256": "4050caad4ef48fa009ea7b871865559bbc489bd4c836e6ae4b737275c519a24f"
+    "sha256": "7eb05e8b73a86e783800d92a1d831674711d4104101184be9eebcbf05f7f2191"
    },
    {
     "path": "output/benchmarks-mpv.json",
-    "sha256": "fd71ae0557d8b7d5609e379fd8dcf2d1f699971098c40c18bb94c6e4fab633a7"
+    "sha256": "9c364977cd931a98b1b119f02eed1dd1fcdfdd82c82e3365531fc06510a20b80"
    },
    {
     "path": "output/convergence-mpv.json",
-    "sha256": "8ff5763a626407365b5bbbed5ba723294cc264bac3766610e54942e08879d886"
+    "sha256": "28e3ed345d219f11fd3d99da6e5bc63894ce0eb3d413282d8601f4decf33e781"
    },
    {
     "path": "output/variations-mpv.json",
-    "sha256": "e1b656522fdbfbcc3b0294933d169ccc7709def8d460ed27761a90cb588a1970"
+    "sha256": "cfabb2871bb60cf394df07e1578b0d6a709fc56a4af1612daddd5b030ad3920d"
    },
    {
-    "path": "specs/mpv-mu10GeV.json",
-    "sha256": "68a609c08013b21280f3e4330619216080942f9e54330b5754cceb5e13ad9456"
+    "path": "recorded/specs/mpv-nominal.json",
+    "sha256": "f244513f9c268fe9d53c0b5031b42b5eb4ceb227975ea5be51288ef420e8c19c"
    }
   ],
   "output_hashes": {},
@@ -98,15 +105,25 @@
    "benchmarks": [
     {
      "benchmark": "thin-layer-mpv",
-     "deposit_minus_loss_relative": 0.0015604862756076893,
-     "detection_limit_relative": 0.0826757688364182,
-     "estimator": "least-squares parabola vertex through the fullest bin and two bins on each side, bin width 0.002 MeV, bins from 0",
-     "geant4": 0.08487795698924731,
-     "geant4_se": 0.0005283350951568302,
+     "configuration": "isolated",
+     "configuration_basis": {
+      "artifact_id": "geant4-run-mpv-nominal",
+      "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+      "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de"
+     },
+     "configuration_gap": null,
+     "detection_limit_relative": 0.06995854203702802,
+     "estimator": "mean of the three-point parabola modes of the K block histograms (bin width 0.002 MeV, bins from the observable declaration), batch-means SE",
+     "geant4": 0.08493246265845779,
+     "geant4_dof": 15,
+     "geant4_se": 0.00024094404767510298,
      "grade": "reference",
+     "hash_scheme": "spec-v1",
      "inputs": {
-      "csv": "../recorded/events/mpv-nominal.csv.gz",
-      "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
+      "csv": null,
+      "observable": "loss_transmitted_MeV",
+      "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+      "summary": "../recorded/blocks/mpv-nominal.json"
      },
      "landau": {
       "beta_gamma": 95.63942246882289,
@@ -115,16 +132,51 @@
       "kappa": 1.1013920613450275e-06,
       "xi_MeV": 0.005348088408125617
      },
-     "most_probable_deposit_MeV": 0.08501040787623065,
+     "mpv_checks": {
+      "fallback_blocks": 0,
+      "merged_check": {
+       "bound": 0.01168800867977108,
+       "relative_difference": 0.002507821747613136
+      },
+      "merged_mode": 0.08472
+     },
      "negative_control": {
       "at_claimed_detection_limit": true,
-      "csv": "../recorded/events/mpv-control.csv.gz",
-      "injected": "silicon density x 1.083 on the Geant4 side (reference keeps 2.329 g/cm3)",
-      "injected_relative": 0.083,
-      "relative_difference": 0.09977568431244103,
-      "run_record": "../recorded/runs/mpv-control.computational-run.json",
-      "status": "caught",
-      "verdict_on_control": "fail"
+      "controls": [
+       {
+        "at_claimed_detection_limit": true,
+        "csv": null,
+        "detection_limit_relative": 0.06995854203702802,
+        "injected": "silicon density x 1.069 on the Geant4 side (reference keeps 2.329 g/cm3)",
+        "injected_relative": 0.069,
+        "relative_difference": 0.08606803226563212,
+        "run_record": "../recorded/runs/mpv-control.computational-run.json",
+        "se_of_shift": 0.004583493094079355,
+        "shift": 0.07120529062223731,
+        "sign": "+",
+        "status": "caught",
+        "summary": "../recorded/blocks/mpv-control.json",
+        "verdict_on_control": "fail"
+       },
+       {
+        "at_claimed_detection_limit": true,
+        "csv": null,
+        "detection_limit_relative": 0.06793162748330063,
+        "injected": "silicon density x 0.931 on the Geant4 side (reference keeps 2.329 g/cm3)",
+        "injected_relative": -0.069,
+        "relative_difference": -0.05542934573762228,
+        "run_record": "../recorded/runs/mpv-control-minus.computational-run.json",
+        "se_of_shift": 0.003606878552015016,
+        "shift": -0.0702920873810171,
+        "sign": "-",
+        "status": "caught",
+        "summary": "../recorded/blocks/mpv-control-minus.json",
+        "verdict_on_control": "fail"
+       }
+      ],
+      "detection_limit_relative": 0.06995854203702802,
+      "detection_limit_sign": "+-",
+      "status": "caught"
      },
      "reference": {
       "source": "most probable energy loss Delta_p, PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf), eq. 34.12 (j = 0.200), delta(beta gamma) from Sternheimer parameters in the study spec (PDG Atomic and Nuclear Properties, silicon, 2024 edition: density 2.329 g/cm3, A 28.0855(3) g/mol (Z/A = 14/28.0855), I 173.0 eV, Sternheimer coefficients a, k, x0, x1, Cbar, delta0 from the header of MUE/muE_silicon_Si.txt (refdata/pdg-silicon-2024.json); never from the Geant4 material dump)",
@@ -132,9 +184,11 @@
       "version": "RPP 2024"
      },
      "reference_value": 0.08368862031620586,
-     "relative_difference": 0.01421145035666392,
+     "relative_difference": 0.014862741643394815,
+     "relative_se": 0.002879053887669904,
      "scope": {
-      "detection_limit_relative": 0.0826757688364182,
+      "detection_limit_relative": 0.06995854203702802,
+      "detection_limit_sign": "+-",
       "energy_MeV": 10000.0,
       "material": "Si_study",
       "observable": "most probable energy loss of transmitted primaries (MeV)",
@@ -142,32 +196,46 @@
       "thickness_mm": 0.3
      },
      "selection": {
-      "ended_in_hadronic_process": 0,
-      "events": 60000,
+      "blocks": 16,
+      "events": 1200000,
       "excluded": 0,
       "excluded_fraction": 0.0,
-      "used": 60000
+      "used": 1200000
      },
      "statistic": "most probable energy loss of transmitted primaries (MeV)",
+     "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
+     "target_slabs": [
+      "Si"
+     ],
      "tolerance": {
       "parts": {
        "binning": 0.006898790624199416,
        "k_sigma": 3,
-       "mc_statistics": 0.01893931671333292,
+       "mc_statistics": 0.008637161663009712,
        "reference_accuracy": 0.03
       },
-      "total": 0.05583810733753233
+      "total": 0.04553595228720913
      },
      "validation_evidence": true,
-     "verdict": "pass"
+     "verdict": "pass",
+     "world_material": "G4_Galactic"
     },
     {
      "benchmark": "thin-layer-width",
+     "configuration": "isolated",
+     "configuration_basis": {
+      "artifact_id": "geant4-run-mpv-nominal",
+      "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+      "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de"
+     },
      "geant4": 0.028,
      "grade": "sanity",
+     "hash_scheme": "spec-v1",
      "inputs": {
-      "csv": "../recorded/events/mpv-nominal.csv.gz",
-      "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
+      "csv": null,
+      "observable": "deposit_transmitted_MeV",
+      "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+      "summary": "../recorded/blocks/mpv-nominal.json"
      },
      "plausibility_window": "0.5 to 3 x the Landau width (thin layers are wider than 4 xi, RPP 2024)",
      "reference": {
@@ -185,47 +253,77 @@
       "thickness_mm": 0.3
      },
      "selection": {
-      "ended_in_hadronic_process": 0,
-      "events": 60000,
+      "blocks": 16,
+      "events": 1200000,
       "excluded": 0,
       "excluded_fraction": 0.0,
-      "used": 60000
+      "used": 1200000
      },
      "statistic": "FWHM of the deposit distribution (MeV)",
+     "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
+     "target_slabs": [
+      "Si"
+     ],
      "validation_evidence": false,
-     "verdict": "plausible"
+     "verdict": "plausible",
+     "world_material": "G4_Galactic"
     }
    ],
    "convergence": {
     "gate": "pass",
+    "multiplicity": 3,
     "parameters": [
      {
       "observables": [
        {
+        "dof": 28.418811322944666,
         "finest": 0.01,
+        "margin": 0.009136215656244891,
         "next": 0.03,
         "observable": "mean_deposit_MeV",
-        "relative_change": 0.0010122140872702824,
-        "se_of_change": 0.0026243396119204334,
+        "reason": "within-tolerance",
+        "relative_change": -0.00011145556536878697,
+        "se_of_change": 0.0004424750380684859,
+        "se_targets_met": {
+         "finest": true,
+         "next": true
+        },
         "tolerance": 0.01,
+        "tolerance_mode": "relative",
         "verdict": "pass"
        },
        {
+        "dof": 29.492223761604308,
         "finest": 0.01,
+        "margin": 0.010707173574975457,
         "next": 0.03,
         "observable": "mpv_deposit_MeV",
-        "relative_change": 0.005101985384749215,
-        "se_of_change": 0.008071008757945997,
+        "reason": "within-tolerance",
+        "relative_change": 0.0029264494455806733,
+        "se_of_change": 0.0037489143851187493,
+        "se_targets_met": {
+         "finest": true,
+         "next": true
+        },
         "tolerance": 0.02,
+        "tolerance_mode": "relative",
         "verdict": "pass"
        },
        {
+        "dof": 29.99965718916874,
         "finest": 0.01,
+        "margin": 0.07798536924738116,
         "next": 0.03,
         "observable": "tail_fraction",
-        "relative_change": 0.0575730735163863,
-        "se_of_change": 0.042274889186150195,
+        "reason": "within-tolerance",
+        "relative_change": 0.006465608915734432,
+        "se_of_change": 0.009161241091662027,
+        "se_targets_met": {
+         "finest": true,
+         "next": true
+        },
         "tolerance": 0.1,
+        "tolerance_mode": "relative",
         "verdict": "pass"
        }
       ],
@@ -242,7 +340,7 @@
       "verdict": "pass"
      }
     ],
-    "rule": "between the two finest settings of each declared scan, every declared observable changes by at most its relative tolerance and the SE of the change is at most half the tolerance"
+    "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
    },
    "declared_scope": {
     "energy_MeV": [
@@ -251,19 +349,34 @@
     ],
     "material": "Si_study",
     "observable": "most probable energy loss",
+    "observable_kind": "most-probable-value",
     "particle": "mu-",
     "thickness_mm": [
      0.3,
      0.3
     ]
    },
+   "evidence_overlap": [
+    {
+     "decisions": [
+      "benchmark:thin-layer-mpv",
+      "benchmark:thin-layer-width",
+      "convergence",
+      "statistical-target",
+      "variations"
+     ],
+     "run": "geant4-run-mpv-nominal"
+    }
+   ],
+   "evidence_overlap_version": 1,
    "gaps": [],
    "highest_usable_label": "validated-in-scope",
    "phase2_upgrade_eligible_scopes": [
     {
      "benchmark": "thin-layer-mpv",
      "scope": {
-      "detection_limit_relative": 0.0826757688364182,
+      "detection_limit_relative": 0.06995854203702802,
+      "detection_limit_sign": "+-",
       "energy_MeV": 10000.0,
       "material": "Si_study",
       "observable": "most probable energy loss of transmitted primaries (MeV)",
@@ -273,17 +386,17 @@
     }
    ],
    "statistical_target": {
-    "estimate": "seeded bootstrap of this run (200 resamples); N_needed = N (SE/target)^2, assuming SE ~ 1/sqrt(N); the delta-ray tail makes means converge slowly",
-    "events": 60000,
+    "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
+    "events": 1200000,
     "events_needed": null,
     "observable": "mpv_loss_MeV",
-    "relative_se": 0.006224644346985895,
+    "relative_se": 0.0028368899256344497,
     "target": 0.01,
     "verdict": "pass"
    },
    "variations": {
     "domain": "em",
-    "envelope_relative": 0.008882181482382366,
+    "envelope_relative": 0.007942835190786415,
     "nominal": {
      "model_assignment": {
       "domain": "em",
@@ -291,8 +404,9 @@
       "fluctuation_model": "Urban",
       "known": true
      },
-     "summary": "recorded/summaries/mpv-nominal.json",
-     "value": 0.08487795698924731
+     "run_record_id": "geant4-run-mpv-nominal",
+     "summary": "recorded/blocks/mpv-nominal.json",
+     "value": 0.08493246265845779
     },
     "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
     "observable": "mpv_loss_MeV",
@@ -311,12 +425,13 @@
        "fluctuation_model": "Urban",
        "known": true
       },
-      "relative_to_nominal": 0.008882181482382366,
+      "relative_to_nominal": -0.003302507805765821,
       "resolved": false,
-      "se": 0.0009726356768136352,
-      "se_of_relative_difference": 0.013040707564557214,
-      "summary": "recorded/summaries/mpv-em-option0.json",
-      "value": 0.08563185840707965,
+      "run_record_id": "geant4-run-mpv-em-option0",
+      "se": 0.00024300898956226884,
+      "se_of_relative_difference": 0.00402919659630951,
+      "summary": "recorded/blocks/mpv-em-option0.json",
+      "value": 0.08465197253756532,
       "variation": "em-option0"
      },
      {
@@ -333,12 +448,13 @@
        "fluctuation_model": "Urban",
        "known": true
       },
-      "relative_to_nominal": 0.00190734100865149,
-      "resolved": false,
-      "se": 0.0006949890357379464,
-      "se_of_relative_difference": 0.010285482353135115,
-      "summary": "recorded/summaries/mpv-em-option3.json",
-      "value": 0.08503984819734346,
+      "relative_to_nominal": -0.007942835190786415,
+      "resolved": true,
+      "run_record_id": "geant4-run-mpv-em-option3",
+      "se": 0.00020302812186565565,
+      "se_of_relative_difference": 0.0037097533286868743,
+      "summary": "recorded/blocks/mpv-em-option3.json",
+      "value": 0.08425785810521404,
       "variation": "em-option3"
      },
      {
@@ -355,12 +471,13 @@
        "fluctuation_model": "Urban",
        "known": true
       },
-      "relative_to_nominal": 0.0043239769668421005,
+      "relative_to_nominal": -0.0037928210646785148,
       "resolved": false,
-      "se": 0.0005306540583341415,
-      "se_of_relative_difference": 0.008822316577291692,
-      "summary": "recorded/summaries/mpv-pai.json",
-      "value": 0.08524496732026143,
+      "run_record_id": "geant4-run-mpv-pai",
+      "se": 0.00018502107804560609,
+      "se_of_relative_difference": 0.0035768123423378676,
+      "summary": "recorded/blocks/mpv-pai.json",
+      "value": 0.08461032902501177,
       "variation": "pai"
      },
      {
@@ -378,12 +495,13 @@
        "known": true
       },
       "reason": "same model for this particle and energy: a false zero difference, not a systematic",
-      "relative_to_nominal": 0.0039510396400223545,
+      "relative_to_nominal": -0.0019483123935723737,
       "resolved": false,
-      "se": 0.0006709992237991147,
-      "se_of_relative_difference": 0.010061932319748664,
-      "summary": "recorded/summaries/mpv-ftfp-bert-emz.json",
-      "value": 0.08521331316187594,
+      "run_record_id": "geant4-run-mpv-ftfp-bert-emz",
+      "se": 0.00020478575500319462,
+      "se_of_relative_difference": 0.0037231219294421615,
+      "summary": "recorded/blocks/mpv-ftfp-bert-emz.json",
+      "value": 0.08476698768884369,
       "variation": "ftfp-bert-emz"
      }
     ]
@@ -399,11 +517,11 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "3392f2d777ed165e"
+    "version": "3d83fbeae3e5beb1"
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "937542edeac13a78"
+    "version": "598fd74b5fa67608"
    }
   ]
  },
@@ -413,17 +531,39 @@
  "provenance": {
   "code_paths": [
    "contracts/__init__.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
    "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
    "core/__init__.py",
    "core/constants/__init__.py",
    "core/constants/physical.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/simulation/__init__.py",
+   "core/simulation/estimates.py",
+   "core/simulation/summary.py",
+   "core/stats/__init__.py",
+   "core/stats/_linalg.py",
+   "core/stats/_poisson.py",
+   "core/stats/batch_means.py",
+   "core/stats/decisions.py",
+   "core/stats/distributions.py",
+   "core/stats/poisson_diagnostics.py",
+   "core/stats/tail_estimation.py",
    "core/status.py",
    "core/trace.py",
    "skills/hep-detector/scripts/check_geant4_study.py",
    "skills/hep-detector/scripts/geant4_benchmarks.py"
   ],
   "code_tags": [],
-  "created": "2026-10-21",
+  "created": "2026-10-24",
   "evidence_ids": [],
   "producer_skill": "hep-detector"
  },

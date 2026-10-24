@@ -5,22 +5,27 @@
    "binning": {
     "bin_width_MeV": 0.002
    },
-   "bootstrap": {
-    "resamples": 200,
-    "seed": 1
-   },
-   "csv": "../recorded/events/mpv-nominal.csv.gz",
    "energy_MeV": 10000.0,
    "material": "Si_study",
-   "negative_control": {
-    "csv": "../recorded/events/mpv-control.csv.gz",
-    "injected": "silicon density x 1.083 on the Geant4 side (reference keeps 2.329 g/cm3)",
-    "injected_relative": 0.083,
-    "run_record": "../recorded/runs/mpv-control.computational-run.json"
-   },
+   "negative_controls": [
+    {
+     "injected": "silicon density x 1.069 on the Geant4 side (reference keeps 2.329 g/cm3)",
+     "injected_relative": 0.069,
+     "run_record": "../recorded/runs/mpv-control.computational-run.json",
+     "summary": "../recorded/blocks/mpv-control.json"
+    },
+    {
+     "injected": "silicon density x 0.931 on the Geant4 side (reference keeps 2.329 g/cm3)",
+     "injected_relative": -0.069,
+     "run_record": "../recorded/runs/mpv-control-minus.computational-run.json",
+     "summary": "../recorded/blocks/mpv-control-minus.json"
+    }
+   ],
+   "observable": "loss_transmitted_MeV",
    "particle": "mu-",
    "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
    "slab": "Si",
+   "summary": "../recorded/blocks/mpv-nominal.json",
    "thickness_mm": 0.3,
    "tolerance": {
     "k_sigma": 3,
@@ -29,19 +34,13 @@
   },
   {
    "benchmark": "thin-layer-width",
-   "binning": {
-    "bin_width_MeV": 0.002
-   },
-   "bootstrap": {
-    "resamples": 200,
-    "seed": 1
-   },
-   "csv": "../recorded/events/mpv-nominal.csv.gz",
    "energy_MeV": 10000.0,
    "material": "Si_study",
+   "observable": "deposit_transmitted_MeV",
    "particle": "mu-",
    "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
    "slab": "Si",
+   "summary": "../recorded/blocks/mpv-nominal.json",
    "thickness_mm": 0.3
   }
  ],

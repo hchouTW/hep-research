@@ -1,0 +1,586 @@
+{
+ "merge": {
+  "count_if": "sum",
+  "events": "sum",
+  "hist": "hist",
+  "max": "max",
+  "min": "min",
+  "n": "sum",
+  "overflow": "sum",
+  "sum": "sum",
+  "sumsq": "sum",
+  "underflow": "sum"
+ },
+ "observables": [
+  {
+   "bins": {
+    "hi": 1000.0,
+    "lo": 0.0,
+    "width": 1000.0
+   },
+   "blocks": [
+    {
+     "block": 0,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.825279432,
+     "min": 0.3192342245,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 833.515649508,
+     "sumsq": 381.50681819839286,
+     "underflow": 0
+    },
+    {
+     "block": 1,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8718545752,
+     "min": 0.3147017189,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 828.9026322862,
+     "sumsq": 377.54056435951844,
+     "underflow": 0
+    },
+    {
+     "block": 2,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9990830953,
+     "min": 0.3080207771,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 831.2654811285,
+     "sumsq": 379.5267075865852,
+     "underflow": 0
+    },
+    {
+     "block": 3,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 1.102673203,
+     "min": 0.3139135731,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 839.8395164165,
+     "sumsq": 389.5565399184963,
+     "underflow": 0
+    },
+    {
+     "block": 4,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.801541465,
+     "min": 0.311632575,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 825.1724001811,
+     "sumsq": 372.71275413738914,
+     "underflow": 0
+    },
+    {
+     "block": 5,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9857004398,
+     "min": 0.2895054221,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 835.1829866762,
+     "sumsq": 383.4694466787812,
+     "underflow": 0
+    },
+    {
+     "block": 6,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9679071923,
+     "min": 0.3172781287,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 835.8895400298,
+     "sumsq": 384.41280262673746,
+     "underflow": 0
+    },
+    {
+     "block": 7,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8474742919,
+     "min": 0.322713407,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 831.1599945951,
+     "sumsq": 380.0859106506867,
+     "underflow": 0
+    },
+    {
+     "block": 8,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.7869123459,
+     "min": 0.3036463873,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 835.8175221864,
+     "sumsq": 383.786726651623,
+     "underflow": 0
+    },
+    {
+     "block": 9,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8620430359,
+     "min": 0.2993281287,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 834.671497915,
+     "sumsq": 382.43404661914974,
+     "underflow": 0
+    },
+    {
+     "block": 10,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8392117428,
+     "min": 0.3117507194,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 829.1799261392,
+     "sumsq": 377.45275679994916,
+     "underflow": 0
+    },
+    {
+     "block": 11,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.825160842,
+     "min": 0.3203027019,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 832.5140911531,
+     "sumsq": 380.0081786604151,
+     "underflow": 0
+    },
+    {
+     "block": 12,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8828896214,
+     "min": 0.3091422993,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 834.3200038828,
+     "sumsq": 382.58562495713215,
+     "underflow": 0
+    },
+    {
+     "block": 13,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8201136212,
+     "min": 0.3044805985,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 832.3640409086,
+     "sumsq": 380.3358393708567,
+     "underflow": 0
+    },
+    {
+     "block": 14,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.748360602,
+     "min": 0.3102319367,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 833.8745082083,
+     "sumsq": 381.46693109515684,
+     "underflow": 0
+    },
+    {
+     "block": 15,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8444275475,
+     "min": 0.3153728248,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 834.8190479347,
+     "sumsq": 382.7398637168824,
+     "underflow": 0
+    }
+   ],
+   "name": "mean_deposit_MeV",
+   "selection": [],
+   "source_column": "edep_Si_MeV",
+   "thresholds": []
+  },
+  {
+   "bins": {
+    "hi": 1000.0,
+    "lo": 0.0,
+    "width": 1000.0
+   },
+   "blocks": [
+    {
+     "block": 0,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8261084825,
+     "min": 0.3192342245,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 841.3450517481,
+     "sumsq": 390.1859393849416,
+     "underflow": 0
+    },
+    {
+     "block": 1,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9185172423,
+     "min": 0.3147017189,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 836.8706879247,
+     "sumsq": 386.09830684739507,
+     "underflow": 0
+    },
+    {
+     "block": 2,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 1.196158653,
+     "min": 0.3080207771,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 837.8652035004,
+     "sumsq": 387.0083809317175,
+     "underflow": 0
+    },
+    {
+     "block": 3,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 1.102673203,
+     "min": 0.3139135731,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 847.7104091112,
+     "sumsq": 397.84037689866034,
+     "underflow": 0
+    },
+    {
+     "block": 4,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8411251007,
+     "min": 0.311632575,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 833.0311182921,
+     "sumsq": 380.95154704329303,
+     "underflow": 0
+    },
+    {
+     "block": 5,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9857004398,
+     "min": 0.2895054221,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 842.3925381303,
+     "sumsq": 391.20267013816374,
+     "underflow": 0
+    },
+    {
+     "block": 6,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9679071923,
+     "min": 0.3172781287,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 843.7665164064,
+     "sumsq": 392.79564362768673,
+     "underflow": 0
+    },
+    {
+     "block": 7,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.867139674,
+     "min": 0.322713407,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 838.470367802,
+     "sumsq": 387.7424050213963,
+     "underflow": 0
+    },
+    {
+     "block": 8,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8224703107,
+     "min": 0.3036463873,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 845.8170764224,
+     "sumsq": 394.5087059670444,
+     "underflow": 0
+    },
+    {
+     "block": 9,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8621248722,
+     "min": 0.2993281287,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 844.3804778011,
+     "sumsq": 392.6855058711985,
+     "underflow": 0
+    },
+    {
+     "block": 10,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8392117428,
+     "min": 0.3117507194,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 836.6555079928,
+     "sumsq": 385.4436593207403,
+     "underflow": 0
+    },
+    {
+     "block": 11,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8901329227,
+     "min": 0.3203027019,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 841.5692181781,
+     "sumsq": 389.3307093385459,
+     "underflow": 0
+    },
+    {
+     "block": 12,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9913935287,
+     "min": 0.3091422993,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 842.665060518,
+     "sumsq": 391.5142819316341,
+     "underflow": 0
+    },
+    {
+     "block": 13,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9696561644,
+     "min": 0.3044805985,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 841.1581405642,
+     "sumsq": 389.80899050730346,
+     "underflow": 0
+    },
+    {
+     "block": 14,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.8280408436,
+     "min": 0.3102319367,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 843.0382747187,
+     "sumsq": 391.3315498178058,
+     "underflow": 0
+    },
+    {
+     "block": 15,
+     "count_if": [],
+     "events": 1875,
+     "hist": [
+      1875
+     ],
+     "max": 0.9176044391,
+     "min": 0.3153728248,
+     "n": 1875,
+     "overflow": 0,
+     "sum": 844.1385145212,
+     "sumsq": 392.9334358811729,
+     "underflow": 0
+    }
+   ],
+   "name": "loss_transmitted_MeV",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "column": "primary_end_process",
+     "op": "==",
+     "value": "Transportation"
+    }
+   ],
+   "source_column": "primary_eloss_MeV",
+   "thresholds": []
+  }
+ ],
+ "run": {
+  "block_size": 1875,
+  "blocks": 16,
+  "csv": [
+   {
+    "name": "sp-density-10.csv",
+    "sha256": "f557487551830808f7bbdc70af43801f0e0e72eaa9d9a91c761a59d29614284c"
+   }
+  ],
+  "data_path_problems": [],
+  "datasets_content_match": true,
+  "events_ignored": 0,
+  "events_in_blocks": 30000,
+  "evidence_role": "control",
+  "first_event": 0,
+  "producer": {
+   "code_paths": [
+    "adapters/geant4/assets/g4common.py",
+    "adapters/geant4/assets/summary_from_csv.py",
+    "contracts/__init__.py",
+    "contracts/schema.py",
+    "contracts/trace.py",
+    "core/__init__.py",
+    "core/simulation/__init__.py",
+    "core/simulation/summary.py",
+    "core/status.py",
+    "core/trace.py"
+   ],
+   "code_tags": [],
+   "name": "python-csv",
+   "version": "1.0.0"
+  },
+  "run_id": "geant4-run-sp-density-10",
+  "run_record": {
+   "artifact_id": "geant4-run-sp-density-10",
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-density-10.computational-run.json",
+   "sha256": "3df4a381c6b1d0538b6c71d537a8592e5df557fd03ea1493466b4a4aa2eca048"
+  },
+  "seed_scheme": "legacy",
+  "seeding": "stream",
+  "settings": {
+   "default_cut_mm": 0.01,
+   "em_constructor": "G4EmStandardPhysics_option4",
+   "energy_MeV": 100.0,
+   "particle": "proton",
+   "reference_list": null,
+   "step_limit_mm": 0.0,
+   "ui_commands": []
+  },
+  "spec_sha256": "47644b7c9b6bb2495adb30a7c58447d5f6409e5e48fb69f8cf0d721398100637",
+  "weight_column": "absent"
+ },
+ "summary_version": "simulation-summary/1"
+}

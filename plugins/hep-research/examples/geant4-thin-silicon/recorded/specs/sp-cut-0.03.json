@@ -57,11 +57,11 @@
   ]
  },
  "run": {
-  "events": 30000,
+  "events": 17760,
   "run_manager": "serial",
   "seeds": [
-   1402,
-   11
+   834184368,
+   643049405
   ]
  },
  "schema": "layered_sim.spec/1",

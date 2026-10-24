@@ -3,24 +3,63 @@
   {
    "benchmark": "stopping-power",
    "beta_gamma": 0.47383208519543973,
-   "detection_limit_relative": 0.03776020023771021,
-   "geant4": 13.605636582872332,
-   "geant4_se": 0.016082562570711636,
-   "grade": "reference",
-   "inputs": {
-    "csv": "../recorded/events/sp-nominal.csv.gz",
-    "run_record": "../recorded/runs/sp-nominal.computational-run.json"
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-sp-nominal",
+    "run_record": "../recorded/runs/sp-nominal.computational-run.json",
+    "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
    },
-   "mean_deposit_over_mean_loss": 0.9885729052938294,
+   "configuration_gap": null,
+   "detection_limit_relative": 0.03940428593124131,
+   "estimator": "batch means of block means",
+   "geant4": 13.605636582872334,
+   "geant4_dof": 15,
+   "geant4_se": 0.01834216925112609,
+   "grade": "reference",
+   "hash_scheme": "spec-v1",
+   "inputs": {
+    "csv": null,
+    "observable": "loss_transmitted_MeV",
+    "run_record": "../recorded/runs/sp-nominal.computational-run.json",
+    "summary": "../recorded/blocks/sp-nominal.json"
+   },
    "negative_control": {
     "at_claimed_detection_limit": true,
-    "csv": "../recorded/events/sp-control.csv.gz",
-    "injected": "silicon density x 1.038 on the Geant4 side (reference keeps 2.329 g/cm3)",
-    "injected_relative": 0.038,
-    "relative_difference": 0.036212073161258074,
-    "run_record": "../recorded/runs/sp-control.computational-run.json",
-    "status": "caught",
-    "verdict_on_control": "fail"
+    "controls": [
+     {
+      "at_claimed_detection_limit": true,
+      "csv": null,
+      "detection_limit_relative": 0.03911765729340986,
+      "injected": "silicon density x 1.038 on the Geant4 side (reference keeps 2.329 g/cm3)",
+      "injected_relative": 0.038,
+      "relative_difference": 0.036212073161258074,
+      "run_record": "../recorded/runs/sp-control.computational-run.json",
+      "se_of_shift": 0.0015276268004426248,
+      "shift": 0.03812122159725576,
+      "sign": "+",
+      "status": "caught",
+      "summary": "../recorded/blocks/sp-control.json",
+      "verdict_on_control": "fail"
+     },
+     {
+      "at_claimed_detection_limit": true,
+      "csv": null,
+      "detection_limit_relative": 0.03940428593124131,
+      "injected": "silicon density x 0.960 on the Geant4 side (reference keeps 2.329 g/cm3)",
+      "injected_relative": -0.04,
+      "relative_difference": -0.04156097251946652,
+      "run_record": "../recorded/runs/sp-control-minus.computational-run.json",
+      "se_of_shift": 0.00168006432432569,
+      "shift": -0.03976814871880141,
+      "sign": "-",
+      "status": "caught",
+      "summary": "../recorded/blocks/sp-control-minus.json",
+      "verdict_on_control": "fail"
+     }
+    ],
+    "detection_limit_relative": 0.03940428593124131,
+    "detection_limit_sign": "+-",
+    "status": "caught"
    },
    "reference": {
     "source": "Bethe mean rate, PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf), eq. 34.5, with I, Z/A, density and Sternheimer parameters from the study spec (PDG Atomic and Nuclear Properties, silicon, 2024 edition: density 2.329 g/cm3, A 28.0855(3) g/mol (Z/A = 14/28.0855), I 173.0 eV, Sternheimer coefficients a, k, x0, x1, Cbar, delta0 from the header of MUE/muE_silicon_Si.txt (refdata/pdg-silicon-2024.json); never from the Geant4 material dump)",
@@ -28,9 +67,11 @@
     "version": "RPP 2024"
    },
    "reference_value": 13.630852882979829,
-   "relative_difference": -0.0018499429437011151,
+   "relative_difference": -0.0018499429437009848,
+   "relative_se": 0.0013481301767398677,
    "scope": {
-    "detection_limit_relative": 0.03776020023771021,
+    "detection_limit_relative": 0.03940428593124131,
+    "detection_limit_sign": "+-",
     "energy_MeV": 100.0,
     "material": "Si_study",
     "observable": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
@@ -38,13 +79,17 @@
     "thickness_mm": 0.3
    },
    "selection": {
-    "ended_in_hadronic_process": 0,
+    "blocks": 16,
     "events": 30000,
     "excluded": 0,
     "excluded_fraction": 0.0,
     "used": 30000
    },
    "statistic": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
+   "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
+   "target_slabs": [
+    "Si"
+   ],
    "thin_slab_approximation": {
     "bethe_at_entry": 13.610500974233627,
     "bethe_at_mean_energy": 13.630852882979829,
@@ -54,13 +99,14 @@
     "parts": {
      "binning": 0.0,
      "k_sigma": 3,
-     "mc_statistics": 0.003546154376405457,
+     "mc_statistics": 0.004044390530219603,
      "reference_accuracy": 0.03
     },
-    "total": 0.03354615437640546
+    "total": 0.0340443905302196
    },
    "validation_evidence": true,
-   "verdict": "pass"
+   "verdict": "pass",
+   "world_material": "G4_Galactic"
   }
  ],
  "constants": {

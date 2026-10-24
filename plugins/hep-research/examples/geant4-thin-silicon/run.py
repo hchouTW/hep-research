@@ -11,8 +11,16 @@ records become evidence records referenced by hash; the coarse-cut scenario's up
 - study-sp.json: mean stopping power of 100 MeV protons (stopping-power reference benchmark against Bethe), cut scan,
   variations EM option 0 and 3.
 Reference inputs (density, Z/A, I, Sternheimer parameters) come from the PDG silicon tables (refdata/), never from the
-Geant4 material dump. Negative controls: each reference benchmark reruns on a Geant4 run whose silicon density is
-raised by the claimed detection limit (the reference keeps 2.329 g/cm3), and must fail.
+Geant4 material dump. Negative controls (A1.10): each reference benchmark reruns on Geant4 runs whose silicon density
+is raised and lowered by the claimed detection limit (the reference keeps 2.329 g/cm3); each must fail, and its
+shift of the observable must sit at the detection limit.
+Statistics (contracts CV-A1, Geant4 program A1.5-A1.9): every run is one logical run with seed S = H(study_id, role,
+point_id) (core/simulation/seeds.py) and is summarised in K = 16 blocks (simulation-summary/1, recorded/blocks/,
+written by adapters/geant4/assets/summary_from_csv.py with the study spec's observables); each point with an se target
+(the scan points, the nominal) first gets a trial run of N_TRIAL events, and its event count is N = N_trial
+(SE_trial / target)^2 F_0.95(15, 15), rounded up to a multiple of K; a point that then misses its target is incomplete
+and is never topped up. Three stopping-power runs (sp-nominal, sp-control, sp-density-10) were not re-recorded: their
+blocks are cut from the recorded per-event CSVs, and they keep their legacy seed pairs.
 Negative-control scenarios, each written as a study record that lists its gaps:
   coarse-cut      the MPV study with a scan of 1.0 and 0.3 mm only: stopped by the convergence gate;
   density-10      the stopping-power benchmark on a run with the silicon density 10 % too high: caught;
@@ -23,8 +31,10 @@ Modes:
     literature record, report and checks from recorded/ and writes them to --out (default output/); the result is
     byte-identical to the committed output/ (tests/examples/test_geant4_thin_silicon.py).
   live (--live, needs HEP_GEANT4_LIVE_TEST=1 and HEP_GEANT4_CONFIG naming a JSON {"build_record", "layered_sim"}):
-    runs every Geant4 run in --work (outside the plugin), then rewrites --recorded (default recorded/: run records with
-    ~ paths, reduced gzip CSVs of the benchmark runs, run summaries, effective specs, the build record) and replays.
+    runs every Geant4 run in --work (outside the plugin): trial runs first, then the evidence runs with the planned
+    event counts, then the controls at the planned detection limits; rewrites --recorded (default recorded/: run
+    records with ~ paths, block summaries, effective specs, the build record, plan.json) and replays. Per-event CSVs
+    are not committed, except the first 5000 events of mpv-nominal (the response check) and the three legacy runs.
 Usage (from the plugin root): python3 examples/geant4-thin-silicon/run.py [--out DIR] [--recorded DIR]
        HEP_GEANT4_LIVE_TEST=1 HEP_GEANT4_CONFIG=cfg.json python3 examples/geant4-thin-silicon/run.py --live --work DIR [--recorded DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Standard library only.
@@ -44,7 +54,12 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[1]
+sys.path.insert(0, str(PLUGIN))
+from core.simulation.seeds import H, job_seeds  # noqa: E402
+from core.stats.distributions import f_ppf  # noqa: E402
+
 RUN = PLUGIN / "adapters" / "geant4" / "assets" / "geant4_run.py"
+SUMMARY = PLUGIN / "adapters" / "geant4" / "assets" / "summary_from_csv.py"
 CHECK = PLUGIN / "skills" / "hep-detector" / "scripts" / "check_geant4_study.py"
 BENCH = PLUGIN / "skills" / "hep-detector" / "scripts" / "geant4_benchmarks.py"
 LIT = PLUGIN / "skills" / "hep-citations" / "scripts" / "manage_literature.py"
@@ -53,30 +68,46 @@ VALIDATE = PLUGIN / "contracts" / "validate.py"
 DEPS = PLUGIN / "contracts" / "dependencies.py"
 DETR = PLUGIN / "skills" / "hep-detector" / "scripts" / "build_response.py"
 RESP = PLUGIN / "contracts" / "response_adapter.py"
-CREATED = "2026-10-21"
+CREATED = "2026-10-24"
 REDUCED = ["event", "primary_eloss_MeV", "edep_Si_MeV", "primary_fate", "primary_end_process"]
 LABEL = "ILLUSTRATIVE (journey J14): Geant4 outputs are unvalidated; names no experiment"
-# run id: (base spec, events, seeds, changes as dotted spec keys, role, keep the reduced CSV)
+K = 16
+F_TWO_STAGE = f_ppf(0.95, K - 1, K - 1)  # A1.9 with the maintainer's choice F_0.95 (about 2.40)
+N_TRIAL = {"mpv": 64000, "sp": 16000}
+# A1.7 design (bias toys, Moyal with 1.5 xi checked against the recorded 60k-event histogram; VALIDATION
+# GEANT4-CORRECTNESS): with 2 keV bins the mean of block modes has a relative bias of about +0.0017 at B = 34158, too
+# close to tol/10 = 0.002; at B = 75000 it is +0.00144 (95 % upper bound 0.00151), so every point of the MPV study has
+# at least K x 75000 events
+MIN_BLOCK_EVENTS = {"mpv": 75000, "sp": 1}
 CUTS = (0.1, 0.03)
 COARSE = (1.0, 0.3)
+BASE = {"mpv": "mpv-mu10GeV.json", "sp": "sp-p100MeV.json"}
+STUDY_ID = {"mpv": "j14-mpv-mu10gev-si300um", "sp": "j14-sp-p100mev-si300um"}
+LEGACY = {"sp-nominal": [1402, 1], "sp-control": [1402, 50], "sp-density-10": [1402, 40]}  # not re-recorded
+RESPONSE_EVENTS = 5000
 
 
 def run_table() -> dict[str, dict]:
+    """run id -> study, evidence role, point id, spec changes (dotted keys), whether it gets a trial run."""
     t = {}
-    for study, base, n, seed in (("mpv", "mpv-mu10GeV.json", 60000, 1401), ("sp", "sp-p100MeV.json", 30000, 1402)):
-        t[f"{study}-nominal"] = {"base": base, "events": n, "seeds": [seed, 1], "set": {}, "csv": True}
-        for k, cut in enumerate(CUTS + (COARSE if study == "mpv" else ())):
-            t[f"{study}-cut-{cut}"] = {"base": base, "events": n, "seeds": [seed, 10 + k], "csv": False,
+    for study in ("mpv", "sp"):
+        t[f"{study}-nominal"] = {"study": study, "role": "nominal", "point": "cut-0.01", "set": {}, "trial": True}
+        for cut in CUTS + (COARSE if study == "mpv" else ()):
+            t[f"{study}-cut-{cut}"] = {"study": study, "role": "scan", "point": f"cut-{cut}", "trial": True,
                                        "set": {"physics.default_cut_mm": cut, "physics.regions.0.cut_mm": cut}}
         for name, em in (("em-option0", "G4EmStandardPhysics"), ("em-option3", "G4EmStandardPhysics_option3")):
-            t[f"{study}-{name}"] = {"base": base, "events": n, "seeds": [seed, 20 + len(name)], "csv": False,
+            t[f"{study}-{name}"] = {"study": study, "role": "variation", "point": name, "trial": False,
                                     "set": {"physics.em_constructor": em}}
-        t[f"{study}-density-10"] = {"base": base, "events": n, "seeds": [seed, 40], "csv": study == "sp",
-                                    "set": {"materials.0.density_g_cm3": round(2.329 * 1.10, 6)}}
-    t["mpv-pai"] = {"base": "mpv-mu10GeV.json", "events": 60000, "seeds": [1401, 30], "csv": False,
+    t["sp-density-10"] = {"study": "sp", "role": "control", "point": "density-10", "trial": False,
+                          "set": {"materials.0.density_g_cm3": round(2.329 * 1.10, 6)}}
+    t["mpv-pai"] = {"study": "mpv", "role": "variation", "point": "pai", "trial": False,
                     "set": {"ui_commands": ["/process/em/AddPAIRegion all SiRegion PAI"]}}
-    t["mpv-ftfp-bert-emz"] = {"base": "mpv-mu10GeV.json", "events": 60000, "seeds": [1401, 31], "csv": False,
+    t["mpv-ftfp-bert-emz"] = {"study": "mpv", "role": "variation", "point": "ftfp-bert-emz", "trial": False,
                               "set": {"physics.reference_list": "FTFP_BERT_EMZ", "physics.em_constructor": None}}
+    for rid in LEGACY:
+        t.setdefault(rid, {"study": "sp", "role": "control", "point": rid[3:], "set": {}, "trial": False})
+        t[rid].update(legacy=True, trial=False)
+    t["sp-nominal"]["role"] = "nominal"
     return t
 
 
@@ -113,57 +144,159 @@ def write(path: Path, doc) -> None:
     path.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def study_spec(study: str) -> dict:
+    return json.loads((HERE / f"study-{study}.json").read_text(encoding="utf-8"))
+
+
+def se_targets(study: str, role: str) -> dict:
+    """The relative se targets of a point (A1.8, A1.9): tol / (4 sqrt 2) for each convergence observable on scan and
+    nominal points, and the statistical target on the nominal."""
+    s = study_spec(study)
+    tol = s["convergence_plan"]["tolerance_relative"]
+    out = {o: tol[o] / (4 * math.sqrt(2)) for o in s["convergence_plan"]["observables"]}
+    if role == "nominal":
+        st = s["statistical_target"]
+        out[st["observable"]] = min(out.get(st["observable"], math.inf), st["relative_se"])
+    return out
+
+
+def planned_events(trial: dict, study: str, role: str, n_trial: int) -> dict:
+    """A1.9: N = N_trial (SE_trial / target)^2 F_0.95(K - 1, K_trial - 1), the largest over the point's targets,
+    rounded up to a multiple of K (never below N_trial)."""
+    need = {}
+    for o, target in se_targets(study, role).items():
+        e = trial["observables"][o]
+        rel = e["se"] / abs(e["value"])
+        need[o] = n_trial * (rel / target) ** 2 * F_TWO_STAGE
+    n = max(n_trial, K * MIN_BLOCK_EVENTS[study], math.ceil(max(need.values()) / K) * K)
+    return {"events": n, "per_observable": need, "factor": F_TWO_STAGE, "trial_events": n_trial,
+            "min_block_events": MIN_BLOCK_EVENTS[study]}
+
+
 # --------------------------------------------------------------------------------------------------------- live
 def live(work: Path, rec_dir: Path) -> None:
     if os.environ.get("HEP_GEANT4_LIVE_TEST") != "1" or not os.environ.get("HEP_GEANT4_CONFIG"):
         raise SystemExit("--live needs HEP_GEANT4_LIVE_TEST=1 and HEP_GEANT4_CONFIG")
     cfg = json.loads(Path(os.path.expanduser(os.environ["HEP_GEANT4_CONFIG"])).read_text(encoding="utf-8"))
     build, exe = os.path.expanduser(cfg["build_record"]), os.path.expanduser(cfg["layered_sim"])
+    keep = {name: (rec_dir / "runs" / f"{name}.computational-run.json").read_bytes() for name in LEGACY}
+    keep_csv = {name: (rec_dir / "events" / f"{name}.csv.gz").read_bytes() for name in LEGACY}
+    keep_specs = {name: (rec_dir / "specs" / f"{name}.json").read_bytes() for name in LEGACY}
+    keep_legacy_summaries = {f.name: f.read_bytes() for f in (rec_dir / "summaries").glob("*.json")}  # 0.38.0 records
+    old_control = json.loads((rec_dir / "control-sp.json").read_text(encoding="utf-8"))
+    old_control = (old_control.get("controls") or {}).get("sp-control", old_control)  # this format, or the 0.38.0 one
+    legacy_control = {"injected_relative": old_control.get("injected_relative"),
+                      "injected": old_control.get("injected")}
     if rec_dir.exists():
         shutil.rmtree(rec_dir)
     (rec_dir / "build").mkdir(parents=True)
     shutil.copyfile(build, rec_dir / "build" / "geant4-build.computational-run.json")
+    for name in LEGACY:
+        for sub, data, ext in (("runs", keep, ".computational-run.json"), ("events", keep_csv, ".csv.gz"),
+                               ("specs", keep_specs, ".json")):
+            (rec_dir / sub).mkdir(parents=True, exist_ok=True)
+            (rec_dir / sub / f"{name}{ext}").write_bytes(data[name])
+    for name, data in keep_legacy_summaries.items():  # geant4-run-summary/1 of the 0.38.0 runs, kept for old records
+        (rec_dir / "summaries").mkdir(parents=True, exist_ok=True)
+        (rec_dir / "summaries" / name).write_bytes(data)
+    for study in BASE:  # the study spec names the nominal's effective spec; until that run, the template stands in
+        nominal_spec = rec_dir / "specs" / f"{study}-nominal.json"
+        if not nominal_spec.exists():
+            nominal_spec.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(HERE / "specs" / BASE[study], nominal_spec)
     table = run_table()
-    plan = {}
+    plan: dict = {"factor": F_TWO_STAGE, "K": K, "runs": {}}
 
-    def one(rid: str, spec: dict) -> None:
-        sp = rec_dir / "specs" / f"{rid}.json"
-        write(sp, spec)
-        rec = rec_dir / "runs" / f"{rid}.computational-run.json"
-        call(RUN, "run", "--spec", sp, "--exe", exe, "--build-record", build, "--work", work, "--run-id", rid,
-             "--record", rec, "--created", CREATED, cwd=PLUGIN)
-        csv = work / rid / "events.csv"
-        call(CHECK, "summarize", "--record", rec, "--csv", csv, "--slab", "Si", "--out",
-             rec_dir / "summaries" / f"{rid}.json", cwd=PLUGIN)
-        if table.get(rid, {}).get("csv", True):
-            call(RUN, "reduce", "--csv", csv, "--columns", *REDUCED, "--out", rec_dir / "events" / f"{rid}.csv.gz",
-                 cwd=PLUGIN)
-        plan[rid] = spec.get("_plan", {})
+    def nominal_events(study: str) -> int:
+        row = table[f"{study}-nominal"]
+        if row.get("legacy"):
+            return json.loads(keep[f"{study}-nominal"])["extension"]["simulation"]["events"]
+        return row["events"]["events"]
 
-    def spec_for(row: dict) -> dict:
-        spec = json.loads((HERE / "specs" / row["base"]).read_text(encoding="utf-8"))
-        spec["run"]["events"], spec["run"]["seeds"] = row["events"], row["seeds"]
+    def spec_for(row: dict, events: int, s: int) -> dict:
+        spec = json.loads((HERE / "specs" / BASE[row["study"]]).read_text(encoding="utf-8"))
+        spec["run"]["events"], spec["run"]["seeds"] = events, list(job_seeds(s, 0))
         for k, v in row["set"].items():
             set_key(spec, k, v)
         return spec
+
+    def summarise(rid: str, csv: Path, rec: Path, study: str, role: str, events: int, s: int | None) -> dict:
+        out = rec_dir / "blocks" / f"{rid}.json"
+        args = ["--csv", csv, "--observables", HERE / f"study-{study}.json", "--block-size", events // K,
+                "--blocks", K, "--run-record", rec, "--out", out, "--evidence-role", role]
+        args += ["--logical-run-seed", s, "--seed-scheme", "hash-v1"] if s else ["--seed-scheme", "legacy"]
+        call(SUMMARY, *args, cwd=PLUGIN)
+        return json.loads(out.read_text(encoding="utf-8"))
+
+    def one(rid: str, row: dict, role: str, point: str, events: int, keep_events: int = 0) -> Path:
+        s = H(STUDY_ID[row["study"]], role, point)
+        sp = rec_dir / "specs" / f"{rid}.json"
+        write(sp, spec_for(row, events, s))
+        rec = rec_dir / "runs" / f"{rid}.computational-run.json"
+        call(RUN, "run", "--spec", sp, "--exe", exe, "--build-record", build, "--work", work, "--run-id", rid,
+             "--record", rec, "--created", CREATED, "--evidence-role", role, "--point-id", point,
+             "--logical-run-seed", s, cwd=PLUGIN)
+        csv = work / rid / "events.csv"
+        summarise(rid, csv, rec, row["study"], role, events, s)
+        if keep_events:
+            lines = csv.read_text(encoding="utf-8").splitlines()
+            cols = lines[1].split(",")
+            idx = [cols.index(c) for c in REDUCED]
+            body = [",".join(ln.split(",")[i] for i in idx) for ln in lines[2:2 + keep_events]]
+            (rec_dir / "events").mkdir(parents=True, exist_ok=True)
+            (rec_dir / "events" / f"{rid}.csv.gz").write_bytes(gzip.compress(
+                ("\n".join([lines[0], ",".join(REDUCED), *body]) + "\n").encode(), mtime=0))
+        plan["runs"][rid] = {"role": role, "point_id": point, "logical_run_seed": s, "events": events}
+        return rec
+
+    # 1. trial runs, then the planned event counts (A1.9)
     for rid, row in table.items():
-        one(rid, spec_for(row))
-    # negative controls at the claimed detection limit, from the nominal benchmark of each study
+        if row.get("trial"):
+            trial_rid = f"{rid}-trial"
+            one(trial_rid, row, "trial", row["point"], N_TRIAL[row["study"]])
+            _, tr = call(CHECK, "run", "--spec", HERE / f"study-{row['study']}.json", "--summary",
+                         f"trial={rec_dir / 'blocks' / f'{trial_rid}.json'}", ok=(0, 1, 3), cwd=HERE)
+            row["events"] = planned_events(tr["summaries"][0], row["study"], row["role"], N_TRIAL[row["study"]])
+            plan["runs"][trial_rid]["plan_for"] = rid
+            plan["runs"][trial_rid]["planned"] = row["events"]
+    # 2. evidence runs (variations take the nominal's event count; legacy runs are only summarised)
+    for rid, row in table.items():
+        study = row["study"]
+        if row.get("legacy"):
+            n = json.loads(keep[rid])["extension"]["simulation"]["events"]
+            csv = work / f"{rid}.csv"
+            csv.parent.mkdir(parents=True, exist_ok=True)
+            csv.write_bytes(gzip.decompress(keep_csv[rid]))
+            summarise(rid, csv, rec_dir / "runs" / f"{rid}.computational-run.json", study, row["role"],
+                      n - n % K, None)
+            plan["runs"][rid] = {"role": row["role"], "point_id": row["point"], "legacy_seeds": LEGACY[rid],
+                                 "events": n}
+            continue
+        n = nominal_events(study) if row["role"] == "variation" else row["events"]["events"]
+        one(rid, row, row["role"], row["point"], n, RESPONSE_EVENTS if rid == "mpv-nominal" else 0)
+    # 3. negative controls at the planned detection limit, both directions (A1.10)
     for study, bench in (("mpv", "thin-layer-mpv"), ("sp", "stopping-power")):
         cfg_path = rec_dir / f"dl-{study}.config.json"
         write(cfg_path, bench_config(study, rec_dir, nominal_only=True, root=rec_dir, study_dir=HERE))
         _, res = call(BENCH, "run", "--config", cfg_path, ok=(0, 1, 3))
-        dl = next(b for b in res["benchmarks"] if b["benchmark"] == bench)["detection_limit_relative"]
-        inj = math.ceil(dl * 1000) / 1000
-        row = dict(table[f"{study}-nominal"], seeds=[table[f"{study}-nominal"]["seeds"][0], 50], csv=True,
-                   set={"materials.0.density_g_cm3": round(2.329 * (1 + inj), 6)})
-        table[f"{study}-control"] = row
-        one(f"{study}-control", spec_for(row))
-        write(rec_dir / f"control-{study}.json", {"detection_limit_relative": dl, "injected_relative": inj,
-                                                  "injected": f"silicon density x {1 + inj:.3f} on the Geant4 side "
-                                                              "(reference keeps 2.329 g/cm3)"})
         cfg_path.unlink()
-    write(rec_dir / "live.json", {"created": CREATED, "runs": sorted(table), "work": str(work).replace(
+        b = next(x for x in res["benchmarks"] if x["benchmark"] == bench)
+        dl = b["negative_control"]["planned_detection_limit_relative"]
+        inj = math.ceil(dl * 1000) / 1000
+        n = nominal_events(study)
+        controls = {}
+        for sign, rid in ((+1, f"{study}-control"), (-1, f"{study}-control-minus")):
+            if rid in LEGACY:  # recorded before CV-A1 at the then-claimed detection limit; kept, not re-recorded
+                controls[rid] = dict(legacy_control)
+                continue
+            row = {"study": study, "set": {"materials.0.density_g_cm3": round(2.329 * (1 + sign * inj), 6)}}
+            one(rid, row, "control", f"density-{'plus' if sign > 0 else 'minus'}", n)
+            controls[rid] = {"injected_relative": sign * inj,
+                             "injected": f"silicon density x {1 + sign * inj:.3f} on the Geant4 side (reference keeps "
+                                         "2.329 g/cm3)"}
+        write(rec_dir / f"control-{study}.json", {"planned_detection_limit_relative": dl, "controls": controls})
+    write(rec_dir / "plan.json", plan)
+    write(rec_dir / "live.json", {"created": CREATED, "runs": sorted(plan["runs"]), "work": str(work).replace(
         str(Path.home()), "~"), "hosts_contacted": [], "note": "Geant4 runs need no network; the build record lists "
                                                                "the hosts its build contacted"})
 
@@ -174,35 +307,37 @@ def bench_config(study: str, rec_dir: Path, nominal_only=False, main="nominal", 
     root = root or HERE
     rel = os.path.relpath(rec_dir, root)
     spec_rel = os.path.relpath((study_dir or rec_dir.parent) / f"study-{study}.json", root)
-    common = {"material": "Si_study", "slab": "Si", "thickness_mm": 0.3, "bootstrap": {"resamples": 200, "seed": 1}}
+    common = {"material": "Si_study", "slab": "Si", "thickness_mm": 0.3}
     out = []
     ctrl = None if nominal_only else json.loads((rec_dir / f"control-{study}.json").read_text(encoding="utf-8"))
     if study == "mpv":
-        b = {"benchmark": "thin-layer-mpv", "particle": "mu-", "energy_MeV": 10000.0,
-             "binning": {"bin_width_MeV": 0.002}, "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3},
+        width = next(o for o in study_spec("mpv")["observables"] if o["name"] == "loss_transmitted_MeV")["bins"]["width"]
+        b = {"benchmark": "thin-layer-mpv", "particle": "mu-", "energy_MeV": 10000.0, "observable": "loss_transmitted_MeV",
+             "binning": {"bin_width_MeV": width}, "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3},
              **common}
         w = {"benchmark": "thin-layer-width", "particle": "mu-", "energy_MeV": 10000.0,
-             "binning": {"bin_width_MeV": 0.002}, **common}
+             "observable": "deposit_transmitted_MeV", **common}
         main_rows = [b, w]
     else:
         b = {"benchmark": "stopping-power", "particle": "proton", "energy_MeV": 100.0,
-             "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3}, **common}
+             "observable": "loss_transmitted_MeV", "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3},
+             **common}
         main_rows = [b]
     for r in main_rows:
-        r["csv"] = f"{rel}/events/{study}-{main}.csv.gz"
+        r["summary"] = f"{rel}/blocks/{study}-{main}.json"
         r["run_record"] = f"{rel}/runs/{study}-{main}.computational-run.json"
         if ctrl and r["benchmark"] != "thin-layer-width":
-            r["negative_control"] = {"csv": f"{rel}/events/{study}-control.csv.gz",
-                                     "run_record": f"{rel}/runs/{study}-control.computational-run.json",
-                                     "injected": ctrl["injected"], "injected_relative": ctrl["injected_relative"]}
+            r["negative_controls"] = [{"summary": f"{rel}/blocks/{rid}.json",
+                                       "run_record": f"{rel}/runs/{rid}.computational-run.json", **c}
+                                      for rid, c in sorted(ctrl["controls"].items())]
         out.append(r)
     return {"schema": "geant4-benchmarks/1", "study_spec": spec_rel, "benchmarks": out}
 
 
 def summaries(study: str, cuts) -> list[str]:
-    args = ["--summary", f"nominal=recorded/summaries/{study}-nominal.json"]
+    args = ["--summary", f"nominal=recorded/blocks/{study}-nominal.json"]
     for c in cuts:
-        args += ["--summary", f"scan=recorded/summaries/{study}-cut-{c}.json"]
+        args += ["--summary", f"scan=recorded/blocks/{study}-cut-{c}.json"]
     return args
 
 
@@ -253,11 +388,11 @@ def _replay(here: Path) -> dict:
         bcode, bench = call(BENCH, "run", "--config", f"{o}/benchmarks-{study}.config.json", "--out",
                             f"{o}/benchmarks-{study}.json", ok=(0, 1, 3))
         var_args = [a for v in variations[study] for a in ("--variation",
-                                                         f"{v}=recorded/summaries/{study}-{v}.json")]
+                                                         f"{v}=recorded/blocks/{study}-{v}.json")]
         call(CHECK, "variations", "--spec", f"study-{study}.json", "--nominal",
-             f"recorded/summaries/{study}-nominal.json", *var_args, "--out", f"{o}/variations-{study}.json")
+             f"recorded/blocks/{study}-nominal.json", *var_args, "--out", f"{o}/variations-{study}.json")
         runs = [f"{o}/artifacts/runs/{study}-{r}.computational-run.json"
-                for r in ["nominal", "control", *[f"cut-{c}" for c in CUTS], *variations[study]]]
+                for r in ["nominal", "control", "control-minus", *[f"cut-{c}" for c in CUTS], *variations[study]]]
         _, lab = call(CHECK, "label", "--spec", f"study-{study}.json", "--benchmarks", f"{o}/benchmarks-{study}.json",
                       "--convergence", f"{o}/convergence-{study}.json", "--variations", f"{o}/variations-{study}.json",
                       *[a for r in runs for a in ("--run-record", r)], "--project-root", ".",
@@ -292,11 +427,11 @@ def _replay(here: Path) -> dict:
     coarse = json.loads((here / "study-mpv.json").read_text(encoding="utf-8"))
     coarse["study_id"] = "j14-scenario-coarse-cut"
     coarse["convergence_plan"]["parameters"][0]["values"] = list(COARSE)
-    coarse["physics"]["layered_sim_spec"] = os.path.relpath(here / "specs" / "mpv-mu10GeV.json", scen)
+    coarse["physics"]["layered_sim_spec"] = os.path.relpath(here / "recorded" / "specs" / "mpv-nominal.json", scen)
     coarse["citations"]["literature_record"] = "../artifacts/geant4.literature-record.json"
     write(scen / "coarse-cut.study.json", coarse)
     _, cc = call(CHECK, "run", "--spec", f"{o}/scenarios/coarse-cut.study.json", "--summary",
-                 "scan=recorded/summaries/mpv-cut-1.0.json", "--summary", "scan=recorded/summaries/mpv-cut-0.3.json",
+                 "scan=recorded/blocks/mpv-cut-1.0.json", "--summary", "scan=recorded/blocks/mpv-cut-0.3.json",
                  "--out", f"{o}/scenarios/coarse-cut.convergence.json", ok=(1,))
     _, lc = call(CHECK, "label", "--spec", f"{o}/scenarios/coarse-cut.study.json", "--benchmarks",
                  f"{o}/benchmarks-mpv.json", "--convergence", f"{o}/scenarios/coarse-cut.convergence.json",

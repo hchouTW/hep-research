@@ -104,6 +104,43 @@
    "mean_deposit_MeV": 0.01
   }
  },
+ "observables": [
+  {
+   "name": "mean_deposit_MeV",
+   "source_column": "edep_Si_MeV",
+   "bins": {
+    "lo": 0.0,
+    "hi": 1000.0,
+    "width": 1000.0
+   },
+   "estimator": "mean"
+  },
+  {
+   "name": "loss_transmitted_MeV",
+   "source_column": "primary_eloss_MeV",
+   "bins": {
+    "lo": 0.0,
+    "hi": 1000.0,
+    "width": 1000.0
+   },
+   "estimator": "mean",
+   "selection": [
+    {
+     "column": "primary_fate",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "column": "primary_end_process",
+     "op": "==",
+     "value": "Transportation"
+    }
+   ]
+  }
+ ],
+ "blocks": {
+  "K": 16
+ },
  "statistical_target": {
   "observable": "mean_deposit_MeV",
   "relative_se": 0.005

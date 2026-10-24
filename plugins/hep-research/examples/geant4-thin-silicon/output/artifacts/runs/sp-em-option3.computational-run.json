@@ -5,34 +5,34 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.0.1",
+ "contract_version": "3.13.0",
  "extension": {
   "commands": [
-   "~/Workspace/geant4-work/sim-a/layered_sim-build/layered_sim sp-em-option3/spec.json"
+   "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-em-option3/spec.json"
   ],
   "environment": {
    "G4FORCE_RUN_MANAGER_TYPE": "unset",
    "dataset_variables": "all unset except the build record's",
-   "work": "~/Workspace/geant4-work/j14"
+   "work": "~/Workspace/geant4-work/j14-a1-75k"
   },
   "exit_status": 0,
   "input_manifest": [
    {
     "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/sp-em-option3.json",
-    "sha256": "ca2e3c5ef17889ff3b1a34bd7576e59d360c89f03503c96cd1ce7e2f2af33a69"
+    "sha256": "db988cea23f9cd424deb9712a32c56f68dc8d0211de807b9e8e167e4944f53c6"
    }
   ],
   "output_hashes": {
    "sp-em-option3/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
-   "sp-em-option3/events.csv": "e634d0b31afa3387d9dfa9be63022c1061facefb811bdede51aa817c7de3ecee",
+   "sp-em-option3/events.csv": "16dd557622a7724ffbc405a7e3500631ada0cdf6ba54735ad996f3b638284774",
    "sp-em-option3/log.txt": "81f98c2b14d295b8782e0e5caee143e1c015671a12efbe2e33a896df05f111ea",
    "sp-em-option3/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
-   "sp-em-option3/spec.json": "cbfd4bcca465c11e6714d8bc11093fdc80376dd3c04d5698fa0861aaa655bdef"
+   "sp-em-option3/spec.json": "35ca8e2d92cad38f14d8b7fa870d46c42c461ddab877d088492baa6cae7da34e"
   },
   "seeds": {
    "layered_sim": [
-    1402,
-    30
+    1005194603,
+    209207244
    ]
   },
   "simulation": {
@@ -164,6 +164,7 @@
     }
    ],
    "events": 30000,
+   "evidence_role": "variation",
    "first_event": 0,
    "geant4": {
     "build_record_sha256": "ce63f78f1d5f2e3b1316b7588e6522a4f78e16c7485f26de83da3306d0133c7b",
@@ -201,6 +202,7 @@
     "particle": "proton",
     "world_fraction": -0.499
    },
+   "logical_run_seed": 1671981734,
    "material_dump_sha256": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
    "materials": [
     {
@@ -226,33 +228,35 @@
      }
     ]
    },
+   "point_id": "em-option3",
    "program": {
     "name": "layered_sim",
-    "path": "~/Workspace/geant4-work/sim-a/layered_sim-build/layered_sim",
-    "sha256": "a69ffad7c003aad9038ace4224986fdedae2e4f14fa4c90ef8f8ddd21aa8f55e",
+    "path": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim",
+    "sha256": "d39225ea24707abf12b9f7e95eaa5462dad425007130687bd0aea2bd4941189d",
     "sources_sha256": {
-     "Actions.cc": "082d5c4d8bd4d4a40dccd06ac99d078becd88b49203316a0dbd457ce4cb6aae2",
-     "Actions.hh": "a427019d3586eadabe360cc0a6394acbb3ac3055373784da88fdfb69de1a49e6",
+     "Actions.cc": "77b6897e5361d82f5aecb9d5c87f6dd1258fc29213d236aab8a2579b6a7cec0a",
+     "Actions.hh": "c262db4accfec25005e04a7493bbe6dcc592693c0fbc810bf2e19f0ff03e750e",
      "CMakeLists.txt": "c39c94494a6757d4edb1f9759c575f7716cfa737d7c855225ba1abb254fa547a",
-     "Detector.cc": "dad2d2dba8529a258d0cdb9512fded8e1020ffc70f2a710a8a48da689f4b198d",
+     "Detector.cc": "1a1904fc6188241afa1b8362a7c0812cad2846d8fe08a850648a8c7dbf349f8d",
      "Detector.hh": "8e9d4b447e349ba92bf0a1c2ccc14fe3964952c28a3e6b4d94b5e813fb7a583e",
      "MiniJson.hh": "a924f06c6bc56c81024fa5e2502ae4537ef9bafccfebdb4ed7723cbcebd7aa1d",
      "Physics.cc": "7c5ae08d22657219c9d2805ffc7f9cf2cb93c1aef1d729c92c88bbf43dbbb213",
      "Physics.hh": "f7912e1814bf5ef100ca9da5009ca4e1f1796fc488217dd20033541f00cd9619",
-     "Spec.cc": "d6c03b36353da6f67f2d3b0710818aae017c03bfd9c8590d5944b5a8665d6e79",
-     "Spec.hh": "816c021bd69e33f2437ebeb39c9984acf1e61e7ae181f98f71d833e5c56e73ee",
+     "Spec.cc": "7367bd44ab61539f7dea5a48957705215778a1c284cd19a8976987332bf78330",
+     "Spec.hh": "cf97b8ff7c2f61230f222707a256929808ba6dc2ce3026acaf7b61c069f7ef36",
      "layered_sim.cc": "4bd235e47166edf49cd284545d6999c58eb3b586f8e882ccc9832dc7167fc421"
     }
    },
    "random": {
     "engine": "MixMaxRng",
     "seeds": [
-     1402,
-     30
+     1005194603,
+     209207244
     ]
    },
    "run_manager": "serial",
-   "spec_sha256": "ec39b4950b82ca23744c14f3d1fe6f5e3613001408cfdc198e88cd9ea4d173ea",
+   "seed_scheme": "hash-v1",
+   "spec_sha256": "c3b53d67113b90c55d36706824a4d67f3fee029538513ee045ccd53ab35b6849",
    "step_limits": {},
    "threads": 1,
    "ui_commands": []
@@ -265,7 +269,7 @@
    },
    {
     "name": "layered_sim",
-    "version": "a69ffad7c003aad9"
+    "version": "d39225ea24707abf"
    }
   ]
  },
@@ -273,7 +277,22 @@
  "objective": "Geant4 layered_sim run sp-em-option3: proton 100.0 MeV, 30000 events (a completed run, not a validated result)",
  "outputs": [],
  "provenance": {
-  "created": "2026-10-21",
+  "code_paths": [
+   "adapters/geant4/assets/g4common.py",
+   "adapters/geant4/assets/geant4_build.py",
+   "adapters/geant4/assets/geant4_run.py",
+   "contracts/__init__.py",
+   "contracts/trace.py",
+   "core/__init__.py",
+   "core/simulation/__init__.py",
+   "core/simulation/seeds.py",
+   "core/status.py",
+   "core/trace.py"
+  ],
+  "code_tags": [
+   "geant4-seed-hash"
+  ],
+  "created": "2026-10-24",
   "evidence_ids": [],
   "producer_skill": "hep-detector"
  },
@@ -282,8 +301,8 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.0.1",
-  "plugin": "0.18.1",
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
   "profiles": {}
  }
 }

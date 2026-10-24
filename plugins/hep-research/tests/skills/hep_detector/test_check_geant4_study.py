@@ -68,9 +68,9 @@ class _Tmp(unittest.TestCase):
                "spec_sha256": None, "data_path_problems": [], "datasets_content_match": True,
                "bootstrap": {"resamples": 200, "seed": 1}, "mpv_bin_MeV": 0.002,
                "observables": {"mean_deposit_MeV": {"value": mean, "se": se},
-                               "mpv_deposit_MeV": {"value": mpv, "se": 0.0005},
+                               "mpv_deposit_MeV": {"value": mpv, "se": 0.0002},
                                "mpv_loss_MeV": {"value": mpv, "se": 0.0005},
-                               "tail_fraction": {"value": tail, "se": 0.0007}}}
+                               "tail_fraction": {"value": tail, "se": 0.0004}}}
         return self.write(f"{name}.summary.json", doc)
 
 
@@ -134,46 +134,20 @@ class Spec(_Tmp):
                 self.assertIn(r["source"]["version"], ("11.4.3", "RPP 2024"))
 
 
-class Summarize(_Tmp):
-    def test_leakage_observables_by_face(self):
-        cols = ["event", "primary_ekin_MeV", "primary_fate", "edep_A_MeV", "edep_B_MeV", "edep_world_MeV",
-                "leak_gamma_MeV", "leak_e_MeV", "leak_nu_MeV", "leak_other_MeV", "leak_rear_MeV", "leak_front_MeV",
-                "leak_lateral_MeV"]
-        rows = [f"{i},1000,0,30,20,0,600,350,0,0,940,8,2" for i in range(40)]
-        csv = self.d / "e.csv"
-        csv.write_text("# SIMULATION\n" + ",".join(cols) + "\n" + "\n".join(rows) + "\n")
-        rec = self.write("rec.json", {"artifact_id": "geant4-run-x", "extension": {"simulation": {
-            "physics": {"default_cut_mm": 0.7, "em_constructor": "G4EmStandardPhysics_option4"},
-            "gun": {"particle": "e-", "energy_MeV": 1000.0}}}})
-        code, out = run("summarize", "--record", rec, "--csv", csv, "--slab", "all", "--out", self.d / "s.json",
-                        "--bootstrap", 20, "--observables", "mean_deposit_MeV", "leakage_fraction",
-                        "rear_leakage_fraction", "albedo_fraction", "lateral_leakage_fraction")
-        self.assertEqual(code, 0, out)
-        o = out["observables"]
-        self.assertAlmostEqual(o["mean_deposit_MeV"]["value"], 50.0)
-        self.assertAlmostEqual(o["leakage_fraction"]["value"], 0.95)
-        self.assertAlmostEqual(o["rear_leakage_fraction"]["value"], 0.94)
-        self.assertAlmostEqual(o["albedo_fraction"]["value"], 0.008)
-        self.assertNotIn("tail_fraction", o)  # only what was asked for
-        code, out = run("summarize", "--record", rec, "--csv", csv, "--slab", "all", "--out", self.d / "s.json",
-                        "--observables", "no_such")
-        self.assertEqual(code, 2, out)
-
-
 class RunGate(_Tmp):
     def test_converged_scan_passes(self):
         sp = self.study()
-        args = ["--summary", f"nominal={self.summary('n', 0.01, 0.1050, 0.0003)}",
-                "--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.0003)}",
-                "--summary", f"scan={self.summary('b', 0.1, 0.1056, 0.0003)}"]
+        args = ["--summary", f"nominal={self.summary('n', 0.01, 0.1050, 0.0001)}",
+                "--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.0001)}",
+                "--summary", f"scan={self.summary('b', 0.1, 0.1056, 0.0001)}"]
         code, out = run("run", "--spec", sp, *args)
         self.assertEqual(out["convergence"]["gate"], "pass", out)
 
     def test_too_coarse_cut_fails_the_gate(self):
         sp = self.study()
-        args = ["--summary", f"nominal={self.summary('n', 0.01, 0.1050, 0.0003)}",
-                "--summary", f"scan={self.summary('a', 0.03, 0.1090, 0.0003)}",
-                "--summary", f"scan={self.summary('b', 0.1, 0.1120, 0.0003)}"]
+        args = ["--summary", f"nominal={self.summary('n', 0.01, 0.1050, 0.0001)}",
+                "--summary", f"scan={self.summary('a', 0.03, 0.1090, 0.0001)}",
+                "--summary", f"scan={self.summary('b', 0.1, 0.1120, 0.0001)}"]
         code, out = run("run", "--spec", sp, *args)
         self.assertEqual(code, 1, out)
         self.assertEqual(out["convergence"]["gate"], "fail")
@@ -183,11 +157,22 @@ class RunGate(_Tmp):
     def test_an_unresolved_difference_does_not_pass(self):
         sp = self.study()
         args = ["--summary", f"nominal={self.summary('n', 0.01, 0.1050, 0.003)}",
-                "--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.003)}"]
+                "--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.003)}",
+                "--summary", f"scan={self.summary('b', 0.1, 0.1056, 0.003)}"]
         code, out = run("run", "--spec", sp, *args)
         row = next(o for o in out["convergence"]["parameters"][0]["observables"] if o["observable"] == "mean_deposit_MeV")
         self.assertEqual(row["verdict"], "unresolved")
-        self.assertEqual(out["convergence"]["gate"], "fail")
+        self.assertEqual(out["convergence"]["gate"], "incomplete")  # A1.8: unresolved is incomplete, not fail
+
+    def test_a_missing_declared_value_makes_the_gate_incomplete(self):
+        """D11 (A1.16): the finest declared cut has no summary; the gate does not pass on the coarser two."""
+        sp = self.study()
+        args = ["--summary", f"scan={self.summary('a', 0.03, 0.1052, 0.0001)}",
+                "--summary", f"scan={self.summary('b', 0.1, 0.1056, 0.0001)}"]
+        code, out = run("run", "--spec", sp, *args)
+        self.assertEqual((code, out["convergence"]["gate"]), (3, "incomplete"), out)
+        p = out["convergence"]["parameters"][0]
+        self.assertEqual((p["reason"], p["missing_values"]), ("missing-scan-value", [0.01]))
 
     def test_too_few_events_reports_the_n_needed(self):
         sp = self.study()
@@ -196,11 +181,11 @@ class RunGate(_Tmp):
         doc["observables"]["mpv_loss_MeV"]["se"] = 0.003  # 3.6 % against a 1 % target
         nominal.write_text(json.dumps(doc))
         code, out = run("run", "--spec", sp, "--summary", f"nominal={nominal}")
-        self.assertEqual(code, 1, out)
+        self.assertNotEqual(code, 0, out)
         st = out["statistical_target"]
-        self.assertEqual(st["verdict"], "fail")
+        self.assertEqual(st["verdict"], "target-missed")  # A1.9: incomplete, never topped up
         self.assertGreater(st["events_needed"], 10000)
-        self.assertIn("bootstrap", st["estimate"])
+        self.assertIn("not topped up", st["estimate"])
 
     def test_a_record_that_disagrees_with_the_spec_fails(self):
         sp = self.study()

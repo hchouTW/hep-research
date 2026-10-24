@@ -153,6 +153,8 @@ MISSING_FILE_ARGS = {
     "adapters/geant4/assets/geant4_run.py": ["run", "--spec", M, "--exe", M, "--build-record", M, "--work", OUT,
                                              "--run-id", "r", "--record", OUT],
     "adapters/geant4/assets/geant4_verify.py": ["balance", "--run-record", M, "--tolerance-mev", "0.001"],
+    "adapters/geant4/assets/summary_from_csv.py": ["--csv", M, "--observables", M, "--block-size", "10", "--blocks",
+                                                   "16", "--run-record", M, "--out", OUT],
     "skills/hep-detector/scripts/check_geant4_study.py": ["spec", "--spec", M],
     "skills/hep-detector/scripts/geant4_benchmarks.py": ["run", "--config", M],
     "adapters/hepdata/assets/hepdata_export.py": ["--artifact", M, "--out", OUT],

@@ -32,7 +32,7 @@
  "materials": [
   {
    "a_g_mole": 28.0855,
-   "density_g_cm3": 2.522307,
+   "density_g_cm3": 2.489701,
    "name": "Si_study",
    "source": "PDG Atomic and Nuclear Properties, silicon (2024): A = 28.0855(3) g/mol, density 2.329 g/cm3",
    "z": 14
@@ -57,11 +57,11 @@
   ]
  },
  "run": {
-  "events": 60000,
+  "events": 1200000,
   "run_manager": "serial",
   "seeds": [
-   1401,
-   50
+   873112160,
+   788934939
   ]
  },
  "schema": "layered_sim.spec/1",
