@@ -13,6 +13,7 @@ branch `worktree-geant4-architecture`, based on `main` at `9f08796` (0.23.0 plus
 |---|---|
 | `geant4-program.md` | **The consolidated document** (Traditional Chinese original): Part 1 plan (§P), Part 2 task A (§A), Part 3 task B (§B), Part 4 task C (§C), Part 5 design rationale (§R) |
 | `geant4-program.en.md` | English translation with the same parts, sections, tables, checkboxes and numbers; if they disagree, the Chinese wins until the English is corrected |
+| `review-2026-10-24-main-0.38.md` | Review record (Chinese) of the document against `main` 0.38.0, which shipped the detector system design loop; lists findings and a proposed re-plan; the document has not yet been revised accordingly |
 | `gate_operating_characteristics.py` | Convergence-gate operating characteristics, two-stage factors, Welch degrees of freedom (§A.8, §A.9, §A Appendix B). Needs numpy and scipy; a design aid, not plugin code |
 | `j15_design_estimates.py` | J15 design numbers (§B Appendix A). Standard library; scipy optional |
 | `design_search_closure.py` | Reference values of task C's plane-placement closure test (§C Appendix A). Standard library |
