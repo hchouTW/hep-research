@@ -1,0 +1,372 @@
+--- a/plugins/hep-research/contracts/validate.py
++++ b/plugins/hep-research/contracts/validate.py
+@@ -297,7 +297,8 @@
+         if ext.get("exit_status", 0) != 0 and "failed" not in status:
+             rep.add("error", "$.status", "status.failed_unlabeled", "non-zero exit status must carry 'failed'")
+         if strict or _at_least(doc.get("contract_version"), GEANT4_UPGRADE_FROM):
+-            _study_upgrade(doc, ext, status, rep)
++            _study_upgrade(doc, ext, status, rep, table=strict or _at_least(doc.get("contract_version"),
++                                                                             GEANT4_TABLE_FROM))
+     elif t == "ml-artifact":
+         if not ext.get("splits", {}).get("grouping_key"):
+             rep.add("error", "$.extension.splits.grouping_key", "ml.no_grouping", "splits need a grouping key (leakage control)")
+@@ -344,15 +345,43 @@
+ 
+ RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
+ GEANT4_UPGRADE_FROM = "3.1.0"  # Geant4 phase-2 rules (study record upgrade, evidence records) apply from this version
+-
+-
+-def _scope_inside(declared: dict, bench: dict) -> list[str]:
+-    """Where a declared scope leaves a benchmark's scope (particle, material, energy and thickness ranges)."""
++GEANT4_TABLE_FROM = "3.6.0"  # PROTOTYPE (proposal 4.1/4.2): grades and kinds from GEANT4_BENCHMARKS, kind in the scope
++# PROTOTYPE (proposal 4.1): benchmark -> (grade, observable kinds it supports); the record never declares either.
++GEANT4_BENCHMARKS = {
++    "stopping-power": ("reference", ("stopping-power",)),
++    "range": ("reference", ("range",)),
++    "thin-layer-mpv": ("reference", ("most-probable-value",)),
++    "thin-layer-width": ("sanity", ("thin-layer-width",)),
++    "multiple-scattering": ("sanity", ()),
++    "em-shower-shape": ("sanity", ()),
++    "shower-containment": ("sanity", ()),
++    "longitudinal-profile": ("reference", ("shower-shape",)),
++    "published-data": ("interface", ()),
++}
++# the dimensions compared per benchmark (proposal 4.2); longitudinal-profile: particle and energy only
++SCOPE_DIMENSIONS = ("particle", "material", "energy_MeV", "thickness_mm")
++SCOPE_DIMENSIONS_BY_BENCHMARK = {"longitudinal-profile": ("particle", "energy_MeV")}
++
++
++def _scope_inside(declared: dict, bench: dict, benchmark: str | None = None, kinds: bool = False) -> list[str]:
++    """Where a declared scope leaves a benchmark's scope (particle, material, energy and thickness ranges; a scalar is
++    [v, v]). With kinds (contracts 3.6.0), the declared observable_kind must be one the benchmark supports
++    (GEANT4_BENCHMARKS), and longitudinal-profile compares particle and energy only."""
+     out = []
++    dims = SCOPE_DIMENSIONS_BY_BENCHMARK.get(benchmark, SCOPE_DIMENSIONS) if kinds else SCOPE_DIMENSIONS
++    if kinds:
++        supported = GEANT4_BENCHMARKS.get(benchmark, (None, ()))[1]
++        kind = declared.get("observable_kind")
++        if kind is None:
++            out.append("the declared scope has no observable_kind")
++        elif kind not in supported:
++            out.append(f"observable kind {kind!r} is not one {benchmark} supports {list(supported)}")
+     for k in ("particle", "material"):
+-        if declared.get(k) is not None and bench.get(k) is not None and declared[k] != bench[k]:
++        if k in dims and declared.get(k) is not None and bench.get(k) is not None and declared[k] != bench[k]:
+             out.append(f"{k} {declared[k]!r} is not the benchmark's {bench[k]!r}")
+     for k in ("energy_MeV", "thickness_mm"):
++        if k not in dims:
++            continue
+         d, b = declared.get(k), bench.get(k)
+         if b is None or d is None:
+             if d is not None:
+@@ -365,6 +394,12 @@
+     return out
+ 
+ 
++def scope_outside(declared: dict, bench: dict, benchmark: str) -> list[str]:
++    """Public (proposal 4.2): where a declared Geant4 study scope leaves a benchmark result's scope, kind included.
++    Used by hep-detector's check_geant4_study.py label; the contract applies the same function."""
++    return _scope_inside(declared, bench, benchmark, kinds=True)
++
++
+ SIMULATED_LEVELS = ("detector", "particle-fiducial")
+ 
+ 
+@@ -392,9 +427,27 @@
+                 "'validated-in-scope' needs an input study record that carries it (a status is never upgraded by hand)")
+ 
+ 
+-def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report) -> None:
++def _benchmark_table(study, rep: Report) -> None:
++    """3.6.0 (PROTOTYPE, proposal 4.1): every embedded benchmark result is in GEANT4_BENCHMARKS and its grade is the
++    table's; a record that declares another grade is refused."""
++    for i, b in enumerate(study.get("benchmarks", []) if isinstance(study, dict) else []):
++        if not isinstance(b, dict):
++            continue
++        name = b.get("benchmark")
++        if name not in GEANT4_BENCHMARKS:
++            rep.add("error", f"$.extension.study.benchmarks[{i}].benchmark", "geant4.benchmark_unknown",
++                    f"benchmark {name!r} is not in the contracts table ({sorted(GEANT4_BENCHMARKS)})")
++        elif b.get("grade") != GEANT4_BENCHMARKS[name][0]:
++            rep.add("error", f"$.extension.study.benchmarks[{i}].grade", "geant4.benchmark_grade_mismatch",
++                    f"{name} is graded {GEANT4_BENCHMARKS[name][0]!r} by the contracts, not {b.get('grade')!r}")
++
++
++def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report, table: bool = False) -> None:
+     """3.1.0 Geant4 phase 2: evidence records need their capability, and a record with Geant4 study material that
+-    carries validated-in-scope must show the evidence for it."""
++    carries validated-in-scope must show the evidence for it. 3.6.0 (table): grades and kinds come from
++    GEANT4_BENCHMARKS, never from the record."""
++    if table:
++        _benchmark_table(ext.get("study"), rep)
+     ev = ext.get("evidence_records")
+     if ev and "core:evidence-records" not in (doc.get("required_capabilities") or []):
+         rep.add("error", "$.required_capabilities", "evidence.capability_not_declared",
+@@ -416,7 +469,8 @@
+     if (study.get("convergence") or {}).get("gate") != "pass":
+         rep.add("error", "$.extension.study.convergence", "geant4.upgrade_unconverged",
+                 "validated-in-scope needs a passed convergence gate")
+-    good = [b for b in study.get("benchmarks", []) if isinstance(b, dict) and b.get("grade") == "reference"
++    good = [b for b in study.get("benchmarks", []) if isinstance(b, dict)
++            and ((GEANT4_BENCHMARKS.get(b.get("benchmark"), (None,))[0] if table else b.get("grade")) == "reference")
+             and b.get("verdict") == "pass" and b.get("validation_evidence") is True
+             and (b.get("negative_control") or {}).get("status") == "caught"]
+     if not good:
+@@ -424,7 +478,7 @@
+                 "validated-in-scope needs a passed reference benchmark whose negative control was caught")
+         return
+     declared = study.get("declared_scope") or {}
+-    misses = [_scope_inside(declared, b.get("scope") or {}) for b in good]
++    misses = [_scope_inside(declared, b.get("scope") or {}, b.get("benchmark"), kinds=table) for b in good]
+     if not declared or all(misses):
+         detail = "; ".join(m for ms in misses for m in ms) or "no declared scope"
+         rep.add("error", "$.extension.study.declared_scope", "geant4.upgrade_scope_outside",
+--- a/plugins/hep-research/skills/hep-detector/scripts/check_geant4_study.py
++++ b/plugins/hep-research/skills/hep-detector/scripts/check_geant4_study.py
+@@ -56,6 +56,7 @@
+ import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV reader and bootstrap for both scripts)
+ from contracts import CONTRACTS_VERSION  # noqa: E402
+ from contracts import trace  # noqa: E402
++from contracts.validate import scope_outside  # noqa: E402  (PROTOTYPE 4.2: one scope implementation)
+ from core.status import add_status_argument, exit_code  # noqa: E402
+ 
+ STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
+@@ -479,20 +480,6 @@
+         raise StudyError(f"{path} is outside the project root {root}") from exc
+ 
+ 
+-def scope_within(declared: dict, bench: dict) -> list[str]:
+-    out = []
+-    for k in ("particle", "material", "observable"):
+-        if declared.get(k) is not None and bench.get(k) is not None and k != "observable" and declared[k] != bench[k]:
+-            out.append(f"declared {k} {declared[k]} is not the benchmark's {bench[k]}")
+-    for k, bk in (("energy_MeV", "energy_MeV"), ("thickness_mm", "thickness_mm")):
+-        d, b = declared.get(k), bench.get(bk)
+-        if isinstance(d, list) and b is not None:
+-            lo, hi = d
+-            if lo < b * (1 - 1e-9) or hi > b * (1 + 1e-9):
+-                out.append(f"declared {k} {d} is larger than the benchmarked {b}")
+-    return out
+-
+-
+ def cmd_label(args) -> tuple[str, dict]:
+     spec_path = Path(args.spec)
+     study = load_study(spec_path)
+@@ -532,11 +519,13 @@
+                         "Geant4 papers, version and documents from one, never from memory (R8)")
+     if not any(b.get("validation_evidence") for b in bench.get("benchmarks", [])):
+         gaps.append("no reference benchmark is validation evidence for this study (R5 not met)")
+-    declared = get(study, "validation_plan.scope") or {}
++    declared = dict(get(study, "validation_plan.scope") or {})
++    if get(study, "observable.kind") is not None:  # PROTOTYPE 4.2: the controlled kind joins the declared scope
++        declared["observable_kind"] = get(study, "observable.kind")
+     eligible = []
+     for b in bench.get("benchmarks", []):
+         if b.get("validation_evidence"):
+-            outside = scope_within(declared, b["scope"])
++            outside = scope_outside(declared, b["scope"], b["benchmark"])
+             if outside:
+                 gaps += [f"{b['benchmark']}: {o}" for o in outside]
+             elif conv.get("convergence", {}).get("gate") == "pass":
+--- a/plugins/hep-research/skills/hep-detector/scripts/geant4_benchmarks.py
++++ b/plugins/hep-research/skills/hep-detector/scripts/geant4_benchmarks.py
+@@ -66,6 +66,7 @@
+ 
+ import argparse
+ import gzip
++import hashlib
+ import json
+ import math
+ import random
+@@ -79,6 +80,7 @@
+ sys.path.insert(0, str(PLUGIN))
+ from core import constants as K  # noqa: E402
+ from core.status import add_status_argument, exit_code  # noqa: E402
++from contracts.validate import GEANT4_BENCHMARKS as BENCHMARK_TABLE  # noqa: E402  (PROTOTYPE 4.1: kinds)
+ 
+ STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
+             "validated-in-scope", "projection", "outside-validated-range")
+@@ -650,6 +652,50 @@
+     return bench_published(b, rows)
+ 
+ 
++SINGLE_SLAB = ("stopping-power", "range", "thin-layer-mpv", "thin-layer-width")
++
++
++def target_configuration(b: dict, cfg_dir: Path) -> dict:
++    """PROTOTYPE (proposal 4.3): configuration (isolated / embedded) and target_geometry_sha256 from the run record's
++    effective geometry (extension.simulation.geometry), never from the config. isolated: no field and every placement
++    other than the world belongs to the benchmark's target (single-slab benchmarks: the placements of the named slab;
++    longitudinal-profile: the placements whose edep_copy<i>_MeV columns the config lists). Placement order is
++    layered_sim's: layers, then repeats, then slabs (Detector.cc), so copy i is the i-th placement."""
++    name = b["benchmark"]
++    if not b.get("run_record"):
++        return {"configuration": None, "configuration_basis": "no run_record in the config: geometry unknown"}
++    rec = json.loads((cfg_dir / b["run_record"]).read_text(encoding="utf-8"))
++    sim = (rec.get("extension") or {}).get("simulation") or {}
++    geo = sim.get("geometry")
++    if not isinstance(geo, dict):
++        return {"configuration": None, "configuration_basis": "the run record has no simulation.geometry"}
++    placements = [{"copy": 0, "name": s.get("name"), "material": s.get("material"), "thickness_mm": s.get("thickness_mm"),
++                   "shift_mm": s.get("shift_mm", 0.0), "layer": li, "repeat": r}
++                  for li, layer in enumerate(geo.get("layers", [])) for r in range(int(layer.get("repeat", 1)))
++                  for s in layer.get("slabs", [])]
++    for i, p in enumerate(placements):
++        p["copy"] = i
++    if name in SINGLE_SLAB:
++        target = [p for p in placements if p["name"] == b.get("slab")]
++    elif name == "longitudinal-profile":
++        cols = {x.get("column") for x in b.get("layers", [])}
++        target = [p for p in placements if f"edep_copy{p['copy']}_MeV" in cols]
++    else:
++        return {"configuration": None, "configuration_basis": f"proposal 4.3 defines no target for {name}"}
++    # layered_sim (spec/1) has no field: absence of a field key is read as no field (no effective-field record exists)
++    field = sim.get("field") or geo.get("field")
++    isolated = not field and bool(target) and len(target) == len(placements)
++    mats = {p["material"] for p in target}
++    canon = {"lateral_mm": geo.get("lateral_mm"),
++             "placements": [{k: p[k] for k in ("name", "material", "thickness_mm", "shift_mm")} for p in target],
++             "materials": sorted((m for m in sim.get("materials", []) if m.get("name") in mats),
++                                 key=lambda m: m.get("name"))}
++    return {"configuration": "isolated" if isolated else "embedded",
++            "target_geometry_sha256": hashlib.sha256(json.dumps(canon, sort_keys=True).encode()).hexdigest(),
++            "configuration_basis": {"run_record": b["run_record"], "placements": len(placements),
++                                    "target_placements": [p["copy"] for p in target], "field": bool(field)}}
++
++
+ def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
+     name = b.get("benchmark")
+     if name not in GRADES:
+@@ -664,8 +710,9 @@
+     grade = GRADES[name]
+     out = {"benchmark": name, "grade": grade, **res,
+            "scope": {"particle": b["particle"], "energy_MeV": b["energy_MeV"], "material": b.get("material"),
+-                     "thickness_mm": b.get("thickness_mm"), "observable": res.get("statistic")},
+-           "inputs": {"csv": b["csv"], "run_record": b.get("run_record")}}
++                     "thickness_mm": b.get("thickness_mm"), "observable": res.get("statistic"),
++                     "observable_kinds": list(BENCHMARK_TABLE[name][1])},
++           "inputs": {"csv": b["csv"], "run_record": b.get("run_record")}, **target_configuration(b, cfg_dir)}
+     if grade == "reference" and res["verdict"] in ("pass", "fail"):
+         nc = b.get("negative_control")
+         if not nc:
+--- a/plugins/hep-research/skills/hep-detector/assets/geant4-study-spec.schema.json
++++ b/plugins/hep-research/skills/hep-detector/assets/geant4-study-spec.schema.json
+@@ -397,6 +397,8 @@
+          "thin-layer-width",
+          "multiple-scattering",
+          "em-shower-shape",
++         "shower-containment",
++         "longitudinal-profile",
+          "published-data"
+         ]
+        },
+--- a/plugins/hep-research/tests/contracts/test_geant4_upgrade.py
++++ b/plugins/hep-research/tests/contracts/test_geant4_upgrade.py
+@@ -82,6 +82,51 @@
+         both = self.mutate(lambda d: (d["extension"].pop("evidence_records"), d.pop("required_capabilities")))
+         self.assertIn("geant4.upgrade_without_evidence_records", both)
+ 
++    def strict_errors(self, fn, version=None):
++        d = copy.deepcopy(self.doc)
++        fn(d)
++        if version:
++            d["contract_version"] = d["versions"]["contracts"] = version
++            return errors(d)
++        return sorted({f.code for f in validate_artifact(d, strict=True).errors})
++
++    def test_prototype_table_kind_and_grade(self):
++        """PROTOTYPE (proposal 4.1, 4.2; gated at 3.6.0 or --strict)."""
++        from contracts.validate import GEANT4_BENCHMARKS, scope_outside
++        study = lambda d: d["extension"]["study"]  # noqa: E731
++        bench = lambda d: next(b for b in study(d)["benchmarks"] if b["benchmark"] == "thin-layer-mpv")  # noqa: E731
++        # kind mismatch: an MPV benchmark cannot validate a stopping-power claim
++        kind = lambda d: study(d)["declared_scope"].__setitem__("observable_kind", "stopping-power")  # noqa: E731
++        self.assertIn("geant4.upgrade_scope_outside", self.strict_errors(kind))
++        self.assertIn("geant4.upgrade_scope_outside", self.strict_errors(kind, "3.6.0"))
++        self.assertNotIn("geant4.upgrade_scope_outside", self.strict_errors(kind, "3.5.0"))
++        # a declared scope without a kind (0.21.0 records) is refused
++        self.assertIn("geant4.upgrade_scope_outside",
++                      self.strict_errors(lambda d: study(d)["declared_scope"].pop("observable_kind")))
++        # a self-declared grade that disagrees with the table
++        sanity = lambda d: next(b for b in study(d)["benchmarks"] if b["benchmark"] == "thin-layer-width") \
++            .__setitem__("grade", "reference")  # noqa: E731
++        self.assertIn("geant4.benchmark_grade_mismatch", self.strict_errors(sanity))
++        self.assertIn("geant4.benchmark_unknown",
++                      self.strict_errors(lambda d: bench(d).__setitem__("benchmark", "my-benchmark")))
++        # renaming the MPV result to a sanity benchmark removes the reference evidence even with grade 'reference'
++        ren = lambda d: (bench(d).__setitem__("benchmark", "thin-layer-width"))  # noqa: E731
++        codes = self.strict_errors(ren)
++        self.assertIn("geant4.upgrade_without_reference_benchmark", codes)
++        # scalars as [v, v]; longitudinal-profile compares particle and energy only
++        self.assertEqual(scope_outside({"observable_kind": "range", "energy_MeV": 100.0}, {"energy_MeV": [90, 110]},
++                                       "range"), [])
++        self.assertTrue(scope_outside({"observable_kind": "range", "energy_MeV": [80, 100]}, {"energy_MeV": 100.0},
++                                      "range"))
++        self.assertEqual(scope_outside({"observable_kind": "shower-shape", "particle": "e-", "energy_MeV": 1e5,
++                                        "material": "W", "thickness_mm": [3, 3]},
++                                       {"particle": "e-", "energy_MeV": 1e5, "material": None}, "longitudinal-profile"),
++                         [])
++        # the tool's GRADES equals the contracts table
++        sys.path.insert(0, str(PLUGIN / "skills" / "hep-detector" / "scripts"))
++        import geant4_benchmarks as G
++        self.assertEqual(G.GRADES, {k: v[0] for k, v in GEANT4_BENCHMARKS.items()})
++
+     def test_older_contract_versions_keep_their_outcome(self):
+         d = copy.deepcopy(self.doc)
+         d["contract_version"] = d["versions"]["contracts"] = "3.0.1"
+--- a/plugins/hep-research/tests/skills/hep_detector/test_geant4_benchmarks.py
++++ b/plugins/hep-research/tests/skills/hep_detector/test_geant4_benchmarks.py
+@@ -161,7 +161,10 @@
+         self.assertEqual(set(b["reference"]), {"source", "version", "validity"})
+         self.assertEqual(set(b["tolerance"]["parts"]), {"reference_accuracy", "mc_statistics", "k_sigma", "binning"})
+         self.assertEqual(set(b["scope"]) - {"detection_limit_relative"},
+-                         {"particle", "energy_MeV", "material", "thickness_mm", "observable"})
++                         {"particle", "energy_MeV", "material", "thickness_mm", "observable", "observable_kinds"})
++        self.assertEqual(b["scope"]["observable_kinds"], ["stopping-power"])
++        # PROTOTYPE 4.3: no run_record in this config, so the configuration cannot be derived
++        self.assertIsNone(b["configuration"])
+ 
+ 
+ class ThinLayer(_Cfg):
+@@ -263,6 +266,41 @@
+     unittest.main()
+ 
+ 
++class TargetConfiguration(unittest.TestCase):
++    """PROTOTYPE (proposal 4.3): configuration and target hash from a SYNTHETIC run record's geometry."""
++    def setUp(self):
++        self.t = tempfile.TemporaryDirectory()
++        self.d = Path(self.t.name)
++
++    def tearDown(self):
++        self.t.cleanup()
++
++    def record(self, layers):
++        rec = {"extension": {"simulation": {"geometry": {"lateral_mm": 10.0, "layers": layers},
++                                            "materials": [{"name": "Si", "density_g_cm3": 2.329}]}}}
++        (self.d / "run.json").write_text(json.dumps(rec))
++        return "run.json"
++
++    def test_single_slab_isolated_and_embedded(self):
++        si = {"name": "Si", "material": "Si", "thickness_mm": 0.3}
++        one = G.target_configuration({"benchmark": "thin-layer-mpv", "slab": "Si",
++                                      "run_record": self.record([{"repeat": 1, "slabs": [si]}])}, self.d)
++        self.assertEqual(one["configuration"], "isolated")
++        cu = {"name": "Cu", "material": "Cu", "thickness_mm": 1.0}
++        two = G.target_configuration({"benchmark": "thin-layer-mpv", "slab": "Si",
++                                      "run_record": self.record([{"repeat": 1, "slabs": [cu, si]}])}, self.d)
++        self.assertEqual(two["configuration"], "embedded")
++        self.assertEqual(one["target_geometry_sha256"], two["target_geometry_sha256"])
++
++    def test_longitudinal_profile_lists_only_the_readout_copies(self):
++        """The literal target (the listed edep_copy columns) leaves the absorbers out: a sampling stack is embedded."""
++        w, si = {"name": "W", "material": "Si", "thickness_mm": 3.5}, {"name": "Si", "material": "Si", "thickness_mm": 0.3}
++        rr = self.record([{"repeat": 5, "slabs": [w, si]}])
++        cols = [{"t": i, "column": f"edep_copy{2 * i + 1}_MeV"} for i in range(5)]
++        self.assertEqual(G.target_configuration({"benchmark": "longitudinal-profile", "layers": cols,
++                                                 "run_record": rr}, self.d)["configuration"], "embedded")
++
++
+ class LongitudinalProfile(_Cfg):
+     """longitudinal-profile: Gamma fit of per-layer means against a published fit (SYNTHETIC profiles)."""
+     LAYERS = [t for t in range(1, 21) if t not in (5, 7, 10)]
