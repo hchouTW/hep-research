@@ -1,0 +1,85 @@
+{
+ "format": "hep-research-scifix-advisory/2",
+ "id": "SFA-2026-040",
+ "published": "2026-10-24T03:05:00Z",
+ "modified": "2026-10-24T03:05:00Z",
+ "severity": "S2",
+ "ledger": [
+  "GEANT4-GRADE-TABLE",
+  "GEANT4-SETUP-MATCHED-CLASS",
+  "GEANT4-SCOPE-KIND",
+  "GEANT4-SCOPE-MISSING-DIMENSION",
+  "GEANT4-ISOLATION",
+  "GEANT4-GATE-IUT",
+  "GEANT4-GATE-SCAN-COMPLETENESS",
+  "GEANT4-CONTROL-SHIFT",
+  "GEANT4-DETECTION-LIMIT"
+ ],
+ "summary": "A Geant4 study record could be re-issued validated-in-scope on evidence that does not support it: a benchmark grade declared by the record, a scope that did not compare the observable or left dimensions undeclared, a target that was not isolated, a convergence gate without an equivalence test or with the finest scan value missing, and negative controls compared across units in one direction.",
+ "affected": [
+  {
+   "paths": [
+    "contracts/validate.py",
+    "contracts/dependencies.py",
+    "skills/hep-detector/scripts/check_geant4_study.py",
+    "skills/hep-detector/scripts/geant4_benchmarks.py"
+   ],
+   "ranges": [
+    {
+     "type": "SEMVER",
+     "events": [
+      {
+       "introduced": "0.20.0"
+      }
+     ]
+    }
+   ],
+   "database_specific": {
+    "introduced_basis": "contracts 3.1.0 (Geant4 phase 2) made a study record re-issued validated-in-scope possible; it was first released in 0.20.0, and the affected scripts existed before without any record able to carry the label",
+    "fixed_commit": "3710ac62e694706fb68e93c30e094b54a987864e"
+   }
+  }
+ ],
+ "impact": {
+  "observables": [
+   "the validated-in-scope label of Geant4 study records and its scope",
+   "the convergence gate verdict and the detection limits of their benchmarks",
+   "whether an F4 design evaluation counts (contracts/design.py takes only validated-in-scope studies)"
+  ],
+  "bias": "the gate passed about 50 % of the time at a true change equal to the tolerance (now 0.05); a study that passed an MPV benchmark could label any observable or undeclared range validated-in-scope; a missing finest scan point let the gate pass on coarser ones",
+  "trigger": "validated-in-scope study records whose scope, benchmarks or scan differ from what their evidence covers; J14's own decisions are unchanged"
+ },
+ "applies_to": {
+  "artifact_types": [
+   "computational-run",
+   "design-evaluation"
+  ],
+  "match": [
+   [
+    {
+     "path": "extension.study",
+     "op": "exists"
+    },
+    {
+     "path": "provenance.code_paths[*]",
+     "op": "regex",
+     "value": "check_geant4_study\\.py$",
+     "unknown_before": "3.5.0"
+    }
+   ],
+   [
+    {
+     "path": "extension.fidelity",
+     "op": "eq",
+     "value": "F4"
+    }
+   ]
+  ],
+  "match_basis": "a Geant4 study record carries extension.study and, from contracts 3.5.0, the check_geant4_study.py trace (a study record without validated-in-scope is listed too: its label was not upgraded, but its benchmarks and gate may still be affected); an F4 design-evaluation is built on such a record. A simulated dataset-record shows no field that tells whether its input study was affected: check its input study record instead",
+  "no_trace": "possibly-affected"
+ },
+ "remedy": "regenerate the study records with this version (check_geant4_study.py run and label --upgrade on run summaries from adapters/geant4/assets/summary_from_csv.py); after a study is re-issued, redo its F4 evaluations with evaluate_design.py f4 --replace (the old ones become stale once the study's hash changes); rerun contracts/dependencies.py on simulated dataset-records that use the study",
+ "references": [
+  "https://github.com/hchouTW/hep-research/commit/3710ac62e694706fb68e93c30e094b54a987864e"
+ ]
+}

@@ -2756,6 +2756,86 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## GEANT4-CORRECTNESS (2026-10-24, E2v: Python 3.13 miniconda with SciPy 1.17.1, Geant4 11.4.3; branch `worktree-geant4-a1`)
+
+Geant4 program stage A1 (spec `docs/dev/geant4-architecture/geant4-program.md` Part 2, approved 2026-10-24; §P.7 items
+2-15 as recommended). Thirteen ledger entries, two documentation entries, advisories SFA-2026-039 (S1) and
+SFA-2026-040 (S2). Contracts CV-A1 is gated at `GEANT4_A1_FROM` = 3.13.0 as a placeholder: the number is fixed at the
+release in merge order (stage C1, PR #275, takes 3.13.0 if it merges first); until then the rules apply under
+`--strict`, where the regenerated J14 records pass.
+
+| Entry | Severity | C | D | Parent -> fix |
+|---|---|---|---|---|
+| GEANT4-GRADE-TABLE | S2 | C2 | D2 | `91ea6fda` -> `c6a6ef7b` |
+| GEANT4-SETUP-MATCHED-CLASS | S2 | C2 | D2 | `c6a6ef7b` -> `68e74877` |
+| GEANT4-SCOPE-KIND | S2 | C2 | D2 | `68e74877` -> `c8c877a7` |
+| GEANT4-SCOPE-MISSING-DIMENSION | S2 | C2 | D2 | `c8c877a7` -> `65423ff0` |
+| GEANT4-ISOLATION | S2 | C2 | D1 | `65423ff0` -> `97c68cc6` |
+| GEANT4-GATE-SCAN-COMPLETENESS | S2 | C2 | D2 | `97c68cc6` -> `aeae0875` |
+| GEANT4-GATE-IUT | S2 | C2 | D1 | `48244412` -> `3710ac62` |
+| GEANT4-BATCH-MEANS-SE | S1 | C2 | D1 | `48244412` -> `3710ac62` |
+| GEANT4-LOW-COUNT-EXACT | S1 | C2 | D1 | `48244412` -> `3710ac62` |
+| GEANT4-MPV-ESTIMATOR | S1 | C2 | D1 | `48244412` -> `3710ac62` |
+| GEANT4-CONTROL-SHIFT | S2 | C1 | D1 | `48244412` -> `3710ac62` |
+| GEANT4-DETECTION-LIMIT | S2 | C1 | D1 | `48244412` -> `3710ac62` |
+| DESIGN-F4-LABEL-PASSTHROUGH | S4 | C1 | D2 | `aeae0875` -> `ced5a53e` |
+
+**Discrimination.** Each evidence test was run on the parent and the fix commit (trees from `git archive`, the final
+evidence test files copied in, no other adaptation):
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/contracts/test_geant4_a1.py::BenchmarkGradeTable::test_every_benchmark_and_declared_grade` | exhaustive | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::BenchmarkGradeTable::test_a_self_declared_reference_grade_does_not_upgrade` | regression | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::SetupMatchedClass::test_longitudinal_profile_takes_only_the_setup_matched_grade` | exhaustive | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::ScopeKind::test_every_declared_kind_against_the_mpv_benchmark` | exhaustive | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::ScopeKind::test_every_upgrading_benchmark_and_kind` | regression | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::ScopeDimensions::test_each_dimension_missing_inside_or_outside` | exhaustive | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::ScopeDimensions::test_a_scope_that_declares_only_the_kind_is_outside` | regression | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::Isolation::test_missing_or_embedded_configuration_is_refused` | regression | error (error) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::Isolation::test_setup_matched_needs_the_measured_target_hash` | regression | error (error) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::Isolation::test_dependencies_re_derive_the_configuration_from_the_run_record` | regression | error (error) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::Isolation::test_configuration_against_an_independent_implementation` | exhaustive | error (error) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::ScanCompleteness::test_every_subset_of_the_declared_values` | exhaustive | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::GateIUT::test_the_rule_on_cases_where_the_old_gate_decided_otherwise` | regression | fail (assertion) | pass | no | E2v |
+| `tests/contracts/test_geant4_a1.py::GateIUT::test_pass_probability_against_the_normal_closed_form` | analytic | pass | pass | no | E2v |
+| `tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance` | regression | pass | pass | no | E2v |
+| `tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones` | regression | pass | pass | no | E2v |
+| `tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex` | regression | pass | pass | no | E2v |
+| `tests/skills/hep_detector/test_geant4_benchmarks.py::StoppingPower::test_both_directions_validate_the_detection_limit` | regression | error (error) | pass | no | E2v |
+| `tests/core/test_simulation_stats.py::Decisions::test_welch_and_detection_limit` | regression | pass | pass | no | E2v |
+| `tests/skills/hep_detector/test_design_f4_label.py::F4LabelPassthrough::test_b_a_refused_upgrade_is_incomplete_with_the_reasons` | regression | fail (assertion) | pass | no | E2v |
+| `tests/skills/hep_detector/test_design_f4_label.py::F4LabelPassthrough::test_c_an_upgrade_without_results_is_incomplete` | regression | error (error) | pass | no | E2v |
+
+The entries of D3-D5 share the wiring commit `3710ac62` (one summary-based rewrite carries them; the spec's §H.1
+records it). Their tests either need the summary interface new in that commit (parent error) or test core functions
+added in the foundation commit `8765fd92` (parent pass), so they are D1 and say so in `gaps`. No mutants were run (no
+entry claims D3). The S1 entries are C2, below the S1 minimum C3, and need the maintainer's `review` sign-off.
+
+**Slow tier (HEP_SLOW_TESTS=1, `tests/core/test_simulation_toys.py`).** Gate toys (1e4 per cell) reproduce the A1.8
+operating-characteristics table to 3 sigma_MC in every cell (TOST-only and two-stage columns); coverage toys of nominal
+90 % batch-means intervals (2000 toys, K = 16) pass for mean, proportion, quantile and mode, and coverage_gate does not
+fail; the detection-limit power at the claimed limit is >= 0.977 - 3 sigma_MC. **The MPV bias toy fails:** at J14's
+block size B = 34158 with 2 keV bins, 1000 Moyal toys (1.5 xi, shape checked against the recorded 60k-event Geant4
+histogram near the peak, 10-20 % flat normalisation) give a 95 % upper bound of the relative bias of 0.00209 against
+tol/10 = 0.002 for `mpv_deposit_MeV` (it meets the benchmark's tol/10 = 0.003); two earlier 200-toy runs at B = 30000
+gave 0.0018 and 0.00203. The criterion is unchanged; the design decision (more events per block, other binning, or a
+stated bound) is the maintainer's, and gate G-A1 is not met until then.
+
+**J14 regeneration (A1.13, live).** layered_sim rebuilt from the adapter sources (sha256 d39225ea) against the
+recorded Geant4 11.4.3 build. Trial runs fixed N with F_0.95(15, 15) and the A1.7 design minimum B >= 30000: MPV
+nominal 546,528 events (driven by tail_fraction), scans 480,000-709,712; stopping-power scans 16,000 and 17,760.
+sp-nominal, sp-control and sp-density-10 were not re-recorded (blocks cut from their CSVs, legacy seeds). Results: both
+convergence gates pass (MPV: mean deposit -0.00025 +- 0.00073, MPV deposit -0.0001 +- 0.0041, tail fraction
++0.005 +- 0.012; SP: +0.0009 +- 0.0017); statistical targets met; thin-layer-mpv rel +0.0137, DL 0.0715 (0.0827 before),
+controls +0.063 and -0.071 caught at the limit; stopping-power rel -0.0019, DL 0.0394, controls +0.038 (legacy) and
+-0.040 caught; both studies re-issued validated-in-scope and pass `--strict` and dependencies.py. recorded/ 2,620,784
+bytes (largest file 316,443). MPV per-execution check: 0 fallback blocks, |block mean - merged mode| 0.28 % against the
+bound 1.28 %.
+
+Not run: the independent new-problem agent run and the `review.py` Markdown review of §A.8; the external source for
+GEANT4-STOPPING-RULE (gap); the contracts version bump (at release).
+
 ## 0.38.0 release check (2026-10-24, E2 and the CI lock)
 
 Release branch `release/0.38.0` from main `38cbff8e` (main CI green). It ships #271: the maintainer's decisions on the

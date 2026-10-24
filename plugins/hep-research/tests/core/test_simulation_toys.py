@@ -148,10 +148,12 @@ class CoverageToys(unittest.TestCase):
 @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
 class MpvBiasToys(unittest.TestCase):
     def test_j14_design_point(self):
-        """B = 30000, 2 keV bins, K = 16, Moyal(mode 0.085 MeV, 1.5 xi with xi = 5.35 keV): 95 % upper bound of the
-        relative bias of the mean of block modes <= 0.002 (tol/10 for mpv_deposit_MeV, tol 0.02)."""
+        """J14's realised MPV block size B = 546528 / 16 = 34158, 2 keV bins, K = 16, Moyal(mode 0.085 MeV, 1.5 xi
+        with xi = 5.35 keV): 95 % upper bound of the relative bias of the mean of block modes <= 0.002 (tol/10 for
+        mpv_deposit_MeV, tol 0.02). 1000 toys: at the design minimum B = 30000 the bias sits close to the bound and
+        200 toys gave upper bounds of 0.0018 and 0.00203 in two runs (VALIDATION GEANT4-CORRECTNESS)."""
         rng = random.Random(91)
-        mode, xi, w, b, k, toys = 0.085, 1.5 * 0.00535, 0.002, 30000, 16, 200
+        mode, xi, w, b, k, toys = 0.085, 1.5 * 0.00535, 0.002, 34158, 16, 1000
         est = []
         for _ in range(toys):
             hists = []

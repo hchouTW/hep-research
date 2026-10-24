@@ -3,6 +3,42 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Geant4 program, stage A1 (correctness fixes; spec `docs/dev/geant4-architecture/geant4-program.md`, approved
+2026-10-24). Contracts CV-A1 (sci-fix, minor): the new rules are gated at `GEANT4_A1_FROM` and apply under `--strict`
+to older records that carry `validated-in-scope`. `CORE_VERSION` 1.1.0.
+
+**Before you upgrade:** Geant4 study records written from 0.20.0 to 0.38.x with `validated-in-scope` can fail
+`validate.py --strict` (advisories SFA-2026-039, SFA-2026-040): regenerate them with this version, then redo their F4
+design evaluations with `evaluate_design.py f4 --replace`. `check_geant4_study.py summarize` is retired: write run
+summaries with `adapters/geant4/assets/summary_from_csv.py` (study spec `observables` and `blocks`); `run` still reads
+the legacy `geant4-run-summary/1` for old records. Benchmark configs name a `summary` and an `observable` for the
+stopping-power, range, thin-layer and longitudinal-profile benchmarks, and `negative_controls` in both directions.
+
+- Benchmark classes come from the contracts table `GEANT4_BENCHMARKS` (`geant4-grade-table`); `longitudinal-profile`
+  is setup-matched (`geant4-setup-matched-class`). The scope check compares the controlled observable kind
+  (`geant4-scope-kind`) and every scope dimension of the benchmark (`geant4-scope-missing-dimension`); a counted
+  benchmark needs an isolated target whose configuration and `spec-v1` target hash `geant4_benchmarks.py` derives from
+  the named run record and `contracts/dependencies.py` re-derives (`geant4-isolation`).
+- The convergence gate needs every declared scan value (`geant4-gate-scan-completeness`) and is an equivalence test
+  (`geant4-gate-iut`): unresolved or a missed se target is `incomplete` (exit 3), not `failed`.
+- Batch-means SEs over K blocks replace the bootstrap (`geant4-batch-means-se`), exact intervals at low counts
+  (`geant4-low-count-exact`), the MPV is the mean of three-point block modes (`geant4-mpv-estimator`); negative
+  controls are judged on the observable in both directions (`geant4-control-shift`) with DL = tol + |rel| +
+  t_0.977 se (`geant4-detection-limit`). New core modules `core/stats/distributions.py`, `batch_means.py`,
+  `decisions.py`, `core/simulation/seeds.py`, `summary.py`, `estimates.py`; schemas `simulation_summary.json`,
+  `simulation_observables.json`.
+- Run records carry `evidence_role`, `point_id`, `logical_run_seed` and `seed_scheme` (seed hash H); a study refuses a
+  repeated S; study records list `evidence_overlap`. The protocol states the stopping rule (`geant4-stopping-rule`)
+  and the evidence correlation (`geant4-evidence-overlap`).
+- `evaluate_design.py f4` passes `--label-run-record`, `--label-reference-record` and `--label-variations` to `label`
+  and reports a refused upgrade or missing results as `incomplete` (`design-f4-label-passthrough`).
+- J14 (`examples/geant4-thin-silicon`) re-recorded live with trial runs and planned event counts; both studies keep
+  `validated-in-scope`; detection limits 0.0715 (MPV, was 0.0827) and 0.0394 (stopping power), caught in both
+  directions. Test fixes: the J14 replay cache is forgotten at module teardown (D10); the study-spec benchmark enum and
+  grades (D8).
+
 ## 0.38.0 (2026-10-24)
 
 Minor release, contracts 3.12.0. It ships the maintainer's decisions on the four spec questions left open by the M3

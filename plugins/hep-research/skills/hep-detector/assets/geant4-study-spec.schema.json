@@ -429,6 +429,8 @@
          "thin-layer-width",
          "multiple-scattering",
          "em-shower-shape",
+         "shower-containment",
+         "longitudinal-profile",
          "published-data"
         ]
        },

@@ -5104,6 +5104,908 @@
      ]
     }
    ]
+  },
+  {
+   "id": "GEANT4-GRADE-TABLE",
+   "title": "Geant4 benchmark class taken from the contracts table, not declared by the study record",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_geant4_a1.py::BenchmarkGradeTable::test_a_self_declared_reference_grade_does_not_upgrade",
+    "tests/contracts/test_geant4_a1.py::BenchmarkGradeTable::test_every_benchmark_and_declared_grade"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "validate.py --strict on the J14 validated study record with an added benchmark of each name and grade; the self-declared 'reference' grade of a sanity benchmark no longer upgrades (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/contracts/test_geant4_a1.py::BenchmarkGradeTable::test_every_benchmark_and_declared_grade",
+     "basis": "exhaustive",
+     "detail": "every benchmark of the A1.1 table (but longitudinal-profile) and an unknown one x 5 declared grades through validate.py --strict; expected classes transcribed from program spec docs/dev/geant4-architecture/geant4-program.md A1.1",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "91ea6fdaea160c311ad6dd3b9184a28ec07ebeae",
+    "fix": "c6a6ef7b65c3124ec5389041ca7bd45cd84eb83c",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_geant4_a1.py::BenchmarkGradeTable::test_every_benchmark_and_declared_grade",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_geant4_a1.py::BenchmarkGradeTable::test_a_self_declared_reference_grade_does_not_upgrade",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-SETUP-MATCHED-CLASS",
+   "title": "longitudinal-profile is a setup-matched benchmark, not a reference one",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_geant4_a1.py::SetupMatchedClass::test_longitudinal_profile_takes_only_the_setup_matched_grade"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "a Gamma-fit t_max against one test-beam measurement validates that configuration only (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/contracts/test_geant4_a1.py::SetupMatchedClass::test_longitudinal_profile_takes_only_the_setup_matched_grade",
+     "basis": "exhaustive",
+     "detail": "the 5 declared grades of longitudinal-profile through validate.py --strict; class from program spec docs/dev/geant4-architecture/geant4-program.md A1.1",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "c6a6ef7b65c3124ec5389041ca7bd45cd84eb83c",
+    "fix": "68e74877f74e91ae353bdabfbee107767e2b6a70",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_geant4_a1.py::SetupMatchedClass::test_longitudinal_profile_takes_only_the_setup_matched_grade",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-SCOPE-KIND",
+   "title": "a Geant4 study scope is checked by its controlled observable kind",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_geant4_a1.py::ScopeKind::test_every_declared_kind_against_the_mpv_benchmark",
+    "tests/contracts/test_geant4_a1.py::ScopeKind::test_every_upgrading_benchmark_and_kind"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "a study that passed an MPV benchmark could label any observable validated-in-scope (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/contracts/test_geant4_a1.py::ScopeKind::test_every_declared_kind_against_the_mpv_benchmark",
+     "basis": "exhaustive",
+     "detail": "the 17 kinds of the study-spec enum and a missing kind against thin-layer-mpv; supported kinds from the A1.1 table",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "68e74877f74e91ae353bdabfbee107767e2b6a70",
+    "fix": "c8c877a7d38aedf5906e28cc83d2f78032e825da",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_geant4_a1.py::ScopeKind::test_every_declared_kind_against_the_mpv_benchmark",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_geant4_a1.py::ScopeKind::test_every_upgrading_benchmark_and_kind",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-SCOPE-MISSING-DIMENSION",
+   "title": "every scope dimension of a Geant4 benchmark must be declared and inside",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_geant4_a1.py::ScopeDimensions::test_a_scope_that_declares_only_the_kind_is_outside",
+    "tests/contracts/test_geant4_a1.py::ScopeDimensions::test_each_dimension_missing_inside_or_outside"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "a dimension missing from the declaration was unconstrained (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/contracts/test_geant4_a1.py::ScopeDimensions::test_each_dimension_missing_inside_or_outside",
+     "basis": "exhaustive",
+     "detail": "each of the 4 dimensions of thin-layer-mpv absent, inside (scalar and range) or outside (set, range, scalar): the stated finite case set",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "c8c877a7d38aedf5906e28cc83d2f78032e825da",
+    "fix": "65423ff09d8a3a8a92c35a0d7091f4c6debdde8b",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_geant4_a1.py::ScopeDimensions::test_each_dimension_missing_inside_or_outside",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_geant4_a1.py::ScopeDimensions::test_a_scope_that_declares_only_the_kind_is_outside",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-ISOLATION",
+   "title": "a counted Geant4 benchmark needs an isolated target, derived from its run record and re-derived by dependencies.py",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_geant4_a1.py::Isolation::test_configuration_against_an_independent_implementation",
+    "tests/contracts/test_geant4_a1.py::Isolation::test_dependencies_re_derive_the_configuration_from_the_run_record",
+    "tests/contracts/test_geant4_a1.py::Isolation::test_missing_or_embedded_configuration_is_refused",
+    "tests/contracts/test_geant4_a1.py::Isolation::test_setup_matched_needs_the_measured_target_hash"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
+   ],
+   "note": "validate.py --strict refuses missing, embedded or mismatched configurations; dependencies.py refuses a record whose run record re-derives otherwise (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/contracts/test_geant4_a1.py::Isolation::test_configuration_against_an_independent_implementation",
+     "basis": "exhaustive",
+     "detail": "4 worlds x 4 placements (16 configurations): configuration and spec-v1 hash from geant4_benchmarks.py against an implementation written from the A1.3 text",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "65423ff09d8a3a8a92c35a0d7091f4c6debdde8b",
+    "fix": "97c68cc6aba0af6f5bd9856cee5912d96d7cf33c",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_geant4_a1.py::Isolation::test_missing_or_embedded_configuration_is_refused",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_geant4_a1.py::Isolation::test_setup_matched_needs_the_measured_target_hash",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_geant4_a1.py::Isolation::test_dependencies_re_derive_the_configuration_from_the_run_record",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_geant4_a1.py::Isolation::test_configuration_against_an_independent_implementation",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-GATE-SCAN-COMPLETENESS",
+   "title": "the Geant4 convergence gate needs every declared scan value; the two finest are declared values",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_geant4_a1.py::ScanCompleteness::test_every_subset_of_the_declared_values"
+   ],
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "a missing finest run let the gate pass on coarser ones (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/contracts/test_geant4_a1.py::ScanCompleteness::test_every_subset_of_the_declared_values",
+     "basis": "exhaustive",
+     "detail": "the 7 non-empty subsets of J14's three declared cuts through check_geant4_study.py run",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "97c68cc6aba0af6f5bd9856cee5912d96d7cf33c",
+    "fix": "aeae08751206573768f6e7ed63887cbc812a2673",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_geant4_a1.py::ScanCompleteness::test_every_subset_of_the_declared_values",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-GATE-IUT",
+   "title": "the Geant4 convergence gate is an equivalence test; unresolved is incomplete",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/contracts/test_geant4_a1.py::GateIUT::test_pass_probability_against_the_normal_closed_form",
+    "tests/contracts/test_geant4_a1.py::GateIUT::test_the_rule_on_cases_where_the_old_gate_decided_otherwise"
+   ],
+   "oracle_kinds": [
+    "analytic"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
+   ],
+   "note": "check_geant4_study.py run on legacy summaries where the old rule (|diff| <= tol, se <= tol/2) and A1.8 disagree; slow-tier gate toys reproduce the A1.8 operating characteristics (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/contracts/test_geant4_a1.py::GateIUT::test_pass_probability_against_the_normal_closed_form",
+     "basis": "third-party",
+     "detail": "the pass probability Phi((tol - z se - d)/se) - Phi((-tol + z se - d)/se) with Phi from math.erf against the decision on normal draws",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "general-result"
+    }
+   ],
+   "commits": {
+    "parent": "48244412df055ff233eea767a4e309ce60c1af14",
+    "fix": "3710ac62e694706fb68e93c30e094b54a987864e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_geant4_a1.py::GateIUT::test_the_rule_on_cases_where_the_old_gate_decided_otherwise",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_geant4_a1.py::GateIUT::test_pass_probability_against_the_normal_closed_form",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-BATCH-MEANS-SE",
+   "title": "Geant4 study SEs from batch means over K blocks instead of a seeded bootstrap",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+    "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
+    "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance",
+    "tests/core/test_simulation_stats.py::Distributions::test_t_and_f_quantiles_against_scipy"
+   ],
+   "oracle_kinds": [
+    "independent-implementation"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "correctness C2 is below the S1 minimum C3: a second independent oracle kind, an invariant test and a negative control emulating the pre-fix estimator are missing",
+    "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
+   ],
+   "note": "SE = sd(block estimates)/sqrt(K) on K-1 dof; slow-tier coverage toys per estimator class (mean, proportion, quantile, mode) through toy_ensemble.coverage_gate (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_simulation_stats.py::Distributions::test_t_and_f_quantiles_against_scipy",
+     "basis": "third-party",
+     "detail": "scipy.stats.t and f quantiles behind the batch-means t intervals",
+     "requires": {
+      "core": [
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    }
+   ],
+   "commits": {
+    "parent": "48244412df055ff233eea767a4e309ce60c1af14",
+    "fix": "3710ac62e694706fb68e93c30e094b54a987864e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-LOW-COUNT-EXACT",
+   "title": "exact intervals for Geant4 study counts below 100 or with an empty block",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+    "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
+    "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance",
+    "tests/core/test_simulation_stats.py::BatchMeans::test_rate_ratio_interval_against_scipy"
+   ],
+   "oracle_kinds": [
+    "independent-implementation"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "correctness C2 is below the S1 minimum C3: a second independent oracle kind, an invariant test and a negative control emulating the pre-fix estimator are missing",
+    "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
+   ],
+   "note": "Clopper-Pearson and Garwood reuse tail_estimation and poisson_diagnostics (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_rate_ratio_interval_against_scipy",
+     "basis": "third-party",
+     "detail": "scipy.stats.beta quantiles for the conditional-binomial rate ratio",
+     "requires": {
+      "core": [
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    }
+   ],
+   "commits": {
+    "parent": "48244412df055ff233eea767a4e309ce60c1af14",
+    "fix": "3710ac62e694706fb68e93c30e094b54a987864e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-MPV-ESTIMATOR",
+   "title": "Geant4 MPV as the mean of three-point block modes instead of a five-point fit with bootstrap SE",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "evidence_tests": [
+    "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+    "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
+    "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance"
+   ],
+   "oracle_kinds": [
+    "analytic"
+   ],
+   "correctness": "C2",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "correctness C2 is below the S1 minimum C3: a second independent oracle kind, an invariant test and a negative control emulating the pre-fix estimator are missing",
+    "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
+   ],
+   "note": "the A1.7 bias toys (slow tier) at J14's block size bound the bias below tol/10 (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+     "basis": "exhaustive",
+     "detail": "the vertex of exact quadratics at 4 positions, the edge and tie cases",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "48244412df055ff233eea767a4e309ce60c1af14",
+    "fix": "3710ac62e694706fb68e93c30e094b54a987864e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-CONTROL-SHIFT",
+   "title": "Geant4 negative controls judged on the observable shift, in both directions",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_simulation_stats.py::Decisions::test_welch_and_detection_limit",
+    "tests/skills/hep_detector/test_geant4_benchmarks.py::StoppingPower::test_both_directions_validate_the_detection_limit"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "correctness C1 is below the S2 minimum C2: no independent oracle kind is recorded",
+    "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
+   ],
+   "note": "tests/skills/hep_detector/test_geant4_benchmarks.py (both directions validate, one narrows the claim) (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [],
+   "commits": {
+    "parent": "48244412df055ff233eea767a4e309ce60c1af14",
+    "fix": "3710ac62e694706fb68e93c30e094b54a987864e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_geant4_benchmarks.py::StoppingPower::test_both_directions_validate_the_detection_limit",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::Decisions::test_welch_and_detection_limit",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "GEANT4-DETECTION-LIMIT",
+   "title": "Geant4 detection limit with the t_0.977 quantile of the shift's SE",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_simulation_stats.py::Decisions::test_welch_and_detection_limit",
+    "tests/skills/hep_detector/test_geant4_benchmarks.py::StoppingPower::test_both_directions_validate_the_detection_limit"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D1",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "correctness C1 is below the S2 minimum C2: no independent oracle kind is recorded",
+    "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
+   ],
+   "note": "slow-tier detection-limit toys: power at the limit >= 0.977 - 3 sigma_MC (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [],
+   "commits": {
+    "parent": "48244412df055ff233eea767a4e309ce60c1af14",
+    "fix": "3710ac62e694706fb68e93c30e094b54a987864e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_geant4_benchmarks.py::StoppingPower::test_both_directions_validate_the_detection_limit",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_simulation_stats.py::Decisions::test_welch_and_detection_limit",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
+  },
+  {
+   "id": "DESIGN-F4-LABEL-PASSTHROUGH",
+   "title": "evaluate_design.py f4 passes run records to label and reports a refused upgrade or missing results as incomplete",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S4",
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_design_f4_label.py::F4LabelPassthrough::test_b_a_refused_upgrade_is_incomplete_with_the_reasons",
+    "tests/skills/hep_detector/test_design_f4_label.py::F4LabelPassthrough::test_c_an_upgrade_without_results_is_incomplete"
+   ],
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "robust-fix: label's outcome reported faithfully (VALIDATION GEANT4-CORRECTNESS)",
+   "independence": [],
+   "commits": {
+    "parent": "aeae08751206573768f6e7ed63887cbc812a2673",
+    "fix": "ced5a53e42f2fa58399e2dd8194046d6a2f12b1e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_design_f4_label.py::F4LabelPassthrough::test_b_a_refused_upgrade_is_incomplete_with_the_reasons",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_design_f4_label.py::F4LabelPassthrough::test_c_an_upgrade_without_results_is_incomplete",
+     "parent": "error",
+     "fix": "pass",
+     "failure": "error",
+     "env": "E2v",
+     "adapted_parent": false,
+     "validation": "GEANT4-CORRECTNESS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": []
   }
  ],
  "documentation_fixes": [
@@ -5410,6 +6312,46 @@
    ],
    "gaps": [],
    "note": "yes for every arXiv source (full text at the cited version, 2026-10-23) and the Bartels and ICRC sources; each correction rechecked against its quoted passage; journal references and all 16 DOIs confirmed at arXiv, INSPIRE-HEP and Crossref (2026-10-23); Usoskin et al. 2005 read from the authors' institutional copy and the Planck 2018 limit (arXiv:1807.06209v4 Sect. 7.9) read, 2026-10-23"
+  },
+  {
+   "id": "GEANT4-STOPPING-RULE",
+   "title": "Geant4 study protocol states the stopping rule: no top-up, no reseeding",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/geant4-study-protocol.md",
+     "locator": "section 4, event count and stopping rule",
+     "read": "2026-10-24"
+    }
+   ],
+   "gaps": [
+    "one external source on optional stopping, located and verified through hep-citations, is missing (internal sources only, maintainer decision 2026-10-22)"
+   ],
+   "note": "D6: the stopping rule, scan grid, K, event counts and the handling of unresolved results are fixed in the study spec before the first evidence run"
+  },
+  {
+   "id": "GEANT4-EVIDENCE-OVERLAP",
+   "title": "Geant4 study records disclose runs shared by several decisions",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/geant4-study-protocol.md",
+     "locator": "section 4, shared evidence",
+     "read": "2026-10-24"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/check_geant4_study.py",
+     "locator": "evidence_overlap",
+     "read": "2026-10-24"
+    }
+   ],
+   "gaps": [
+    "internal sources only (maintainer decision 2026-10-22)"
+   ],
+   "note": "D7: extension.study.evidence_overlap lists the runs that serve more than one decision"
   }
  ],
  "superseded": [

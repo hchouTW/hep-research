@@ -55,6 +55,15 @@ class GradesMatchTheContracts(unittest.TestCase):
         from contracts.validate import GEANT4_BENCHMARKS
         self.assertEqual(G.GRADES, {k: v["class"] for k, v in GEANT4_BENCHMARKS.items()})
 
+    def test_study_spec_enums_follow_the_table(self):
+        """D8 (A1.12): the study spec's benchmark names and grades are the table's names and classes."""
+        sys.path.insert(0, str(PLUGIN))
+        from contracts.validate import GEANT4_BENCHMARKS
+        schema = json.loads((ASSETS / "geant4-study-spec.schema.json").read_text(encoding="utf-8"))
+        item = schema["properties"]["validation_plan"]["properties"]["benchmarks"]["items"]["properties"]
+        self.assertEqual(sorted(item["name"]["enum"]), sorted(GEANT4_BENCHMARKS))
+        self.assertEqual(sorted(item["grade"]["enum"]), sorted({v["class"] for v in GEANT4_BENCHMARKS.values()}))
+
 
 class Reference(unittest.TestCase):
     def test_k_constant_from_core_constants(self):
