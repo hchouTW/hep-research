@@ -502,7 +502,7 @@ def cmd_label(args) -> tuple[str, dict]:
     var = load_json(args.variations) if args.variations else None
     gaps = list(bench.get("gaps", []))
     for b in bench.get("benchmarks", []):
-        if b.get("grade") == "reference" and b.get("verdict") == "fail":
+        if b.get("grade") in B.UPGRADING and b.get("verdict") == "fail":
             gaps.append(f"{b['benchmark']} failed: relative difference {b['relative_difference']:+.4g} beyond the "
                         f"tolerance {b['tolerance']['total']:.4g} ({b['reference']['source'][:60]}...)")
     if conv.get("convergence", {}).get("gate") != "pass":

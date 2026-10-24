@@ -403,6 +403,7 @@
        "grade": {
         "enum": [
          "reference",
+         "setup-matched",
          "sanity",
          "interface"
         ]

@@ -228,7 +228,7 @@ class Shower(_Cfg):
                                                           "critical_energy_MeV": 10.0}]))
         self.assertEqual(out["benchmarks"][0]["verdict"], "not-applicable", out)
         self.assertTrue(any("not contained" in g for g in out["gaps"]))
-        self.assertTrue(any("no reference benchmark" in g for g in out["gaps"]))
+        self.assertTrue(any("no reference or setup-matched benchmark" in g for g in out["gaps"]))
 
 
 class Containment(_Cfg):
@@ -313,7 +313,7 @@ class LongitudinalProfile(_Cfg):
         code, out = run("run", "--config", self.config([self.bench(good, negative_control={
             "csv": bad, "injected": "depth scale x 1.12 (SYNTHETIC)", "injected_relative": 0.12})]))
         r = out["benchmarks"][0]
-        self.assertEqual((code, r["grade"], r["verdict"]), (0, "reference", "pass"), out)
+        self.assertEqual((code, r["grade"], r["verdict"]), (0, "setup-matched", "pass"), out)
         self.assertAlmostEqual(r["reference_value"], 4.42 / 0.5, places=12)
         self.assertAlmostEqual(r["reference_se"], math.hypot(0.11 / 0.5, 4.42 * 0.01 / 0.25), places=12)
         self.assertAlmostEqual(r["tolerance"]["parts"]["reference_accuracy"], r["reference_se"] / r["reference_value"]

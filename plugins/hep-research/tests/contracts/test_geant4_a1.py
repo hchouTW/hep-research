@@ -70,5 +70,20 @@ class BenchmarkGradeTable(unittest.TestCase):
         self.assertEqual(strict_exit(doc), 1)
 
 
+class SetupMatchedClass(unittest.TestCase):
+    """geant4-setup-matched-class (D2): longitudinal-profile compares with one published measurement of one
+    configuration, so its class is setup-matched (A1.1), not reference."""
+
+    def test_longitudinal_profile_takes_only_the_setup_matched_grade(self):
+        base = j14_record()
+        extra = copy.deepcopy(next(b for b in base["extension"]["study"]["benchmarks"]
+                                   if b["benchmark"] == "thin-layer-width"))
+        for grade in GRADES:
+            doc = copy.deepcopy(base)
+            doc["extension"]["study"]["benchmarks"].append(dict(extra, benchmark="longitudinal-profile", grade=grade))
+            with self.subTest(grade=grade):
+                self.assertEqual(strict_exit(doc), 0 if grade == SPEC_CLASS["longitudinal-profile"] else 1)
+
+
 if __name__ == "__main__":
     unittest.main()

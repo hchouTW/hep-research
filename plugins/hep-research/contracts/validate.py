@@ -358,10 +358,10 @@ GEANT4_BENCHMARKS = {
     "multiple-scattering": {"class": "sanity", "kinds": ()},
     "em-shower-shape": {"class": "sanity", "kinds": ()},
     "shower-containment": {"class": "sanity", "kinds": ()},
-    "longitudinal-profile": {"class": "reference", "kinds": ("shower-maximum",)},
+    "longitudinal-profile": {"class": "setup-matched", "kinds": ("shower-maximum",)},
     "published-data": {"class": "interface", "kinds": ()},
 }
-GEANT4_UPGRADING_CLASSES = ("reference",)
+GEANT4_UPGRADING_CLASSES = ("reference", "setup-matched")
 
 
 def _geant4_a1(doc: dict, status: set, strict: bool) -> bool:

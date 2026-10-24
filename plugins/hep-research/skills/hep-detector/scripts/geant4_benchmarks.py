@@ -9,8 +9,10 @@ Geant4 material dump is never read: an error in the spec must not enter the refe
 does not import the adapter and does not need Geant4. See <plugin root>/skills/hep-detector/references/
 geant4-study-protocol.md.
 
-Grades: `reference` benchmarks use an independent source that states its accuracy and are the only validation
-evidence; `sanity` benchmarks are plausibility checks; `interface` hands a comparison to hep-statistics.
+Grades (the validation classes of the contracts table, contracts.validate.GEANT4_BENCHMARKS): `reference` benchmarks
+use an independent source that states its accuracy, on an isolated target; `setup-matched` benchmarks compare with a
+published measurement of the same configuration (target hash equal to the measured one, isolated); these two are the
+only validation evidence; `sanity` benchmarks are plausibility checks; `interface` hands a comparison to hep-statistics.
   stopping-power    (reference) mean energy loss of transmitted primaries (E_in - E_exit), as linear dE/dx, against
                     the Bethe mean rate (PDG RPP 2024 eq. 34.5, valid 0.1 <~ beta gamma <~ 1000 to a few percent)
                     at the mean energy in the slab; non-transmitted primaries and primaries that ended in a process
@@ -33,7 +35,7 @@ evidence; `sanity` benchmarks are plausibility checks; `interface` hands a compa
                     (RPP 2024 Eqs. 34.34-34.36, b = 0.5 by default; config keys depth_x0, critical_energy_MeV, b):
                     the profile is a fit to EGS4 showers (1-100 GeV), so this is never validation; a reference for
                     leakage needs published data (published-data).
-  longitudinal-profile (reference) shower maximum t_max = (alpha - 1) / beta of the per-layer mean deposits of a
+  longitudinal-profile (setup-matched) shower maximum t_max = (alpha - 1) / beta of the per-layer mean deposits of a
                     sampling calorimeter, from the fit dQ/dt = Q_E beta (beta t)^(alpha-1) e^(-beta t) / Gamma(alpha)
                     + Q0 (weighted least squares, layers and their depths t from the config key layers), against the
                     same fit to published test-beam data (config key published: alpha and beta with their uncertainties
@@ -91,7 +93,9 @@ J_LANDAU = 0.200  # PDG RPP 2024 eq. 34.12
 TRUNC_98 = 0.8673  # RMS of a unit Gaussian truncated to its central 98 %
 GRADES = {"stopping-power": "reference", "range": "reference", "thin-layer-mpv": "reference",
           "thin-layer-width": "sanity", "multiple-scattering": "sanity", "em-shower-shape": "sanity",
-          "shower-containment": "sanity", "longitudinal-profile": "reference", "published-data": "interface"}
+          "shower-containment": "sanity", "longitudinal-profile": "setup-matched",
+          "published-data": "interface"}
+UPGRADING = ("reference", "setup-matched")  # the classes that are validation evidence (contracts table)
 RPP = "PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf)"
 HADRONIC_END = ("Inelastic", "hadElastic", "nCapture", "CoulombScat")
 
@@ -666,7 +670,7 @@ def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
            "scope": {"particle": b["particle"], "energy_MeV": b["energy_MeV"], "material": b.get("material"),
                      "thickness_mm": b.get("thickness_mm"), "observable": res.get("statistic")},
            "inputs": {"csv": b["csv"], "run_record": b.get("run_record")}}
-    if grade == "reference" and res["verdict"] in ("pass", "fail"):
+    if grade in UPGRADING and res["verdict"] in ("pass", "fail"):
         nc = b.get("negative_control")
         if not nc:
             out["negative_control"] = {"status": "missing"}
@@ -684,7 +688,7 @@ def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
                                        "run_record": nc.get("run_record")}
         out["scope"]["detection_limit_relative"] = res["detection_limit_relative"]
     nc_ok = out.get("negative_control", {}).get("status") == "caught"
-    out["validation_evidence"] = grade == "reference" and res["verdict"] == "pass" and nc_ok
+    out["validation_evidence"] = grade in UPGRADING and res["verdict"] == "pass" and nc_ok
     return out
 
 
@@ -700,7 +704,7 @@ def cmd_run(args) -> tuple[str, dict]:
         r = run_benchmark(b, study, cfg_dir)
         results.append(r)
         nc = r.get("negative_control", {})
-        if r["grade"] == "reference":
+        if r["grade"] in UPGRADING:
             if r["verdict"] == "not-applicable":
                 gaps.append(f"{r['benchmark']}: not applicable ({r.get('reason', 'outside validity')})")
             elif nc.get("status") == "missing":
@@ -716,9 +720,9 @@ def cmd_run(args) -> tuple[str, dict]:
                                                                              else ""))
     if not results:
         raise BenchmarkError("the config lists no benchmarks")
-    if not any(r["grade"] == "reference" for r in results):
-        gaps.append("no reference benchmark in the config: nothing here is validation evidence")
-    ref = [r for r in results if r["grade"] == "reference"]
+    if not any(r["grade"] in UPGRADING for r in results):
+        gaps.append("no reference or setup-matched benchmark in the config: nothing here is validation evidence")
+    ref = [r for r in results if r["grade"] in UPGRADING]
     failed = [r["benchmark"] for r in ref if r["verdict"] == "fail" or r.get("negative_control", {}).get("status")
               == "not-caught"]
     status = "failed" if failed else ("incomplete" if any(r["verdict"] == "not-applicable" for r in ref) else "ok")
