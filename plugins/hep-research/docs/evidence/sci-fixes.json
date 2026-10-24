@@ -5678,7 +5678,12 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "review": {
+    "by": "maintainer (hchouTW)",
+    "date": "2026-10-24",
+    "scope": "whole entry"
+   }
   },
   {
    "id": "GEANT4-LOW-COUNT-EXACT",
@@ -5778,7 +5783,12 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "review": {
+    "by": "maintainer (hchouTW)",
+    "date": "2026-10-24",
+    "scope": "whole entry"
+   }
   },
   {
    "id": "GEANT4-MPV-ESTIMATOR",
@@ -5878,7 +5888,12 @@
      }
     }
    ],
-   "mutants": []
+   "mutants": [],
+   "review": {
+    "by": "maintainer (hchouTW)",
+    "date": "2026-10-24",
+    "scope": "whole entry"
+   }
   },
   {
    "id": "GEANT4-CONTROL-SHIFT",

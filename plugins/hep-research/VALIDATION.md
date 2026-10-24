@@ -2820,7 +2820,7 @@ below 0.75 at n = 20, p = 0.05); GEANT4-MPV-ESTIMATOR C3 (numpy.polyfit through 
 elimination in exact rationals over every count triple 0..12; translation and scaling invariants; negative control:
 on J14's expected peak the pre-fix five-point fit is biased above tol/10 = 0.002 at every bin phase, about +0.0032,
 the three-point vertex about +0.0010). These tests pass on the parent too (the core functions predate the wiring
-commit), so the S1 entries stay D1. Each S1 entry awaits the maintainer's `review` sign-off (`{by, date, scope}`).
+commit), so the S1 entries stay D1. The maintainer signed off all three on 2026-10-24 (`review`, scope: whole entry).
 
 **Slow tier (HEP_SLOW_TESTS=1, `tests/core/test_simulation_toys.py`).** Gate toys (1e4 per cell) reproduce the A1.8
 operating-characteristics table to 3 sigma_MC in every cell (TOST-only and two-stage columns); coverage toys of nominal
