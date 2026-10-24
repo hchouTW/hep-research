@@ -150,8 +150,9 @@ MISSING_FILE_ARGS = {
     "adapters/geomagnetic-backtracing/assets/otso_cutoff.py": ["dipole-check", "--replay", M],
     "adapters/geant4/assets/geant4_build.py": ["check", "--record", M],
     "adapters/geant4/assets/geant4_examples.py": ["extract", "--example", "B1", "--out-file", M],
-    "adapters/geant4/assets/geant4_run.py": ["run", "--spec", M, "--exe", M, "--build-record", M, "--work", OUT,
-                                             "--run-id", "r", "--record", OUT],
+    "adapters/geant4/assets/geant4_run.py": [["run", "--spec", M, "--exe", M, "--build-record", M, "--work", OUT,
+                                              "--run-id", "r", "--record", OUT], ["check-spec", "--spec", M],
+                                             ["from-geometry", "--geometry", M, "--profile", M, "--out", OUT]],
     "adapters/geant4/assets/geant4_verify.py": ["balance", "--run-record", M, "--tolerance-mev", "0.001"],
     "adapters/geant4/assets/summary_from_csv.py": ["--csv", M, "--observables", M, "--block-size", "10", "--blocks",
                                                    "16", "--run-record", M, "--out", OUT],
@@ -210,7 +211,13 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-ml/scripts/profile_dataloader.py": "a synthetic dataset, no input",
     "skills/hep-ml/scripts/serving_capacity.py": "numbers on the command line",
     "adapters/geant4/assets/g4common.py": "shared helpers of the geant4 adapter scripts; only --help",
+    "adapters/geant4/assets/element_spec.py": "element_sim spec rules imported by geant4_run.py; only --help",
 }
+def argv_sets(entry) -> list[list[str]]:
+    """The argv sets of a MISSING_FILE_ARGS entry: one list, or a list of lists (Geant4 program B1.6)."""
+    return entry if entry and isinstance(entry[0], list) else [entry]
+
+
 SCRIPTS = sorted(os.path.relpath(p, ROOT) for p in glob.glob(str(ROOT / "skills/*/scripts/*.py"))
                  + glob.glob(str(ROOT / "adapters/*/assets/*.py")))
 
@@ -237,14 +244,16 @@ class CliRobustnessTests(unittest.TestCase):
                 self.assertTrue(res.stdout.strip())
 
     def test_missing_input_file_is_a_short_error(self):
-        for script, args in sorted(MISSING_FILE_ARGS.items()):
-            with self.subTest(script=script):
-                res = run(script, args)
-                text = (res.stdout + res.stderr).strip()
-                self.assertNotEqual(res.returncode, 0, text[-400:])
-                self.assertNotIn("Traceback", text)
-                if len(text.splitlines()) > 6:  # a JSON error report may span lines; anything else must be short
-                    json.loads(res.stdout)
+        for script, entry in sorted(MISSING_FILE_ARGS.items()):
+            # an entry is one argv set, or several (a script whose subcommands read different files, Geant4 B1.6)
+            for args in argv_sets(entry):
+                with self.subTest(script=script, args=args[:1]):
+                    res = run(script, args)
+                    text = (res.stdout + res.stderr).strip()
+                    self.assertNotEqual(res.returncode, 0, text[-400:])
+                    self.assertNotIn("Traceback", text)
+                    if len(text.splitlines()) > 6:  # a JSON error report may span lines; anything else must be short
+                        json.loads(res.stdout)
 
 
 HC = "skills/hep-computing/scripts/"

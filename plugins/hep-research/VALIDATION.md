@@ -2756,6 +2756,72 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## GEANT4-ELEMENT (2026-10-24, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b1` from main `14e45d13`)
+
+Geant4 program stage B1 (spec §B.5): geant4 adapter 0.3.0, `element_sim` and `simroot` (built by `geant4_run.py
+build-sim --program element_sim`, Release; a second build with `-DELEMENT_SIM_TEST_HOOKS=ON` adds two test-only UI
+commands), `geant4_run.py check-spec` and `from-geometry`, `geant4_verify.py field`, `core/simulation/helix.py`. No
+contracts bump. Scripts and outputs: `~/Workspace/hep-research-tasks/geant4-program/b1/` (`gb1a/`, `gb1b.py`,
+`field_check.py`, `mt_check.py`, `budget_balance.py`, `g5_b1.sh`, `gb1b-*.json`, `g5_scan_k*.json`); runs in
+`~/Workspace/geant4-work/sim-b1/`. Every geometry is invented (J15 is SYNTHETIC).
+
+| Check | Result |
+|---|---|
+| G-B1a: `G4RootAnalysisReader` on an MT-merged (4 threads), compressed file with I, D and S columns (`gb1a/trial.cc`) | 1000 event rows read back with every value equal, string columns included; a row the MT master fills in a merged ntuple is lost (Geant4 warns "Ntuple 0 does not exist"), so element_sim has worker 0 (the only thread in serial mode) fill the `run` and `processes` rows; strings stay in the file (no JSON side file) |
+| J15 geometry (§B.4.1, 112 placements, geantino along the axis, 10,000 overlap test points) | `geant4_verify.py overlaps`: no overlap report, every placement checked at construction; `budget`: the geantino path lengths `plen_<element>_mm` equal the thicknesses, sum t/X0 18.518 from both (calorimeter 18.41 X0 plus 11.32 % X0 in front, as §B Appendix A) |
+| Energy balance (1 GeV e- and e+ on 10 x (2 mm Pb + 5 mm PVT), option 4, 200 events each) | worst per-event residual 1.9e-5 MeV (e-) and 4.5e-5 MeV (e+) against the declared 1e-3 MeV; E_in = calorimeter deposits + leakage by face to the same precision; `--inject omit-positron-mass` (e+) and `double-count-leakage` fail in every event |
+| B1.7 deterministic field check, J15, charged geantinos 0.6, 1, 10, 100, 1000 GV x (normal, 50 mrad against the bend, +-50 mrad non-bending), 200 plane entries per run | nominal (delta intersection 1e-5 mm, max step 10 mm): largest in-plane deviation 0.054 um (limit 0.5 um), TOF-layer times within 4e-6 ps (limit 1 ps), largest x - x_face 5e-10 um. Grid, every point reported: delta intersection 1e-3 / 1e-4 / 1e-5 / 1e-6 mm gives 4.1 / 0.26 / 0.054 / 0.0058 um (1e-3 mm fails the 0.5 um criterion, the others pass; the two finest differ by at most 0.05 um, limit 0.2 um); max step 100 / 30 / 10 / 3 mm gives 0.013 / 0.040 / 0.054 / 0.036 um; delta one step and epsilon at 1/10: unchanged. Two field regions (0.5 T and 0.3 T): 0.056 um. Negative control, Geant4-side B x (1 +- 1e-4) checked against the nominal field: 13.4 um, caught in both directions |
+| G-B1b, consistency of the two backends on the observables both produce (tolerances and se targets declared in `gb1b.py` before the runs, m = 3, se_diff <= tol/4; trial 160,000 muons / 8,000 electrons, final 512,000 / 20,000 with the two-stage factor) | J14 slab (10 GeV mu-, 300 um Si_study, option 4, cut 0.03 mm; layered_sim per-event, element_sim per-event, different S): mean deposit 0.105372 against 0.105500 MeV, relative -0.0012, se 0.0009, tol 0.01: pass; most probable deposit 0.084332 against 0.084372 MeV, -0.0005, se 0.0045, tol 0.02: pass. Calorimeter (1 GeV e-, 10 x (2 mm Pb + 5 mm PVT)): total leakage fraction (rear + front + lateral over E_in; world faces for layered_sim, calorimeter mother faces for element_sim) 0.70185 against 0.70088, absolute +0.0010, se 0.0010, tol 0.005: pass |
+| Per-event invariance (J15, 1 GV protons, crossings level, observables): serial, MT 2 and 4 threads; 4 jobs of 10 events | event-file `content_sha256` identical for all five; CSV rows identical; summary integers identical and floats within 1e-12 |
+| Field managers per thread (test build, 4 threads) | five distinct field-manager addresses (master and four workers) |
+| Probe | every region's B, accuracy parameters, driver `G4InterpolationDriver<G4DormandPrince745, true>` and stepper `G4DormandPrince745` recorded and equal to the spec; the field block changes the tree-v1 target hash of the field element; layered_sim runs give the same probe as before (no field, no `fields` key) |
+| Crossings | rows of secondary charged tracks with their parent; the primary's rows equal those of a primary-only recording (test build) |
+| simroot | info, dump and hash at levels summary, crossings and hits; process numbers sorted by name; events ntuple equals the CSV; deposits summed per event equal the CSV's element totals; the same file twice is refused (duplicate key, exit 2); hits level above `max_events_hits` exits 2; an interrupted run (timeout) is incomplete, exit 3, no record |
+| from-geometry | `evaluate_design.py geometry` on a J15 candidate (Example A's candidate with the J15 layout) and the J15 profile rebuild the hand-written §B.4.1 spec element by element, including field, physics, source, run and output; the same inputs give byte-identical specs; changing one layer position changes only that plane, changing the field only the field; unknown mapping version or geometry kind, a missing template and a derived spec failing check-spec exit 2 |
+| Event-file size (J15, 1 GV protons, crossings level, compression 1) | 322 kB for 100 events (about 3.2 kB per event compressed; §B.1.4 estimated 4-8 kB before compression) |
+| Offline and live tests | `tests/adapters/test_geant4_element.py`: 22 offline, 8 live (`HEP_GEANT4_LIVE_TEST=1`, config with `element_sim` and `element_sim_test_hooks`), all pass; `tests/adapters/test_geant4.py` and `test_g4sim.py` offline and live pass with the rebuilt layered_sim |
+
+Decisions and deviations, recorded here:
+- The `run` and `processes` rows are filled by worker 0, not the master (G-B1a). The event file's column lists are
+  stored as strings in the `run` row so that simroot binds the columns without guessing.
+- A source `cycle` (energy and direction per event, i mod n) is added to the gun so that the field check runs its 20
+  trajectories in one run; `gps` and `event-file` are refused (interface only).
+- Primary path lengths per element (`plen_<element>_mm`) are added to the CSV and the events ntuple: the material
+  budget check and B2's `material-definition` need them.
+- `seeds` of an element_sim spec must be the job seeds of its `logical_run_seed` (check-spec refuses others).
+- Per-ntuple file sizes are not recorded (the reader does not give them); the file size, rows and per-ntuple hashes
+  are.
+- The derived thickness and positions are rounded to 1 nm in `from-geometry`, so a float rounding of x/X0 cannot
+  reach the spec; the radiation length that converts x/X0 is the profile template's, with its source.
+- `contracts/schema.py`: an adapter schema's `$ref` to a sibling file resolves next to it (the realization schema
+  reuses the spec schema's definitions).
+- The calorimeter leakage columns are the net outflow per face: energy carried back into the calorimeter mother is
+  subtracted from the face it enters through, except the primary's first entry (in J15, backsplash returned by TOF2
+  would otherwise count both as leakage and as deposit). In a vacuum world nothing re-enters, so layered_sim's
+  world-face leakage and element_sim's agree in meaning there (G-B1b rerun after the change: the same numbers).
+- An element_sim run stopped by a timeout or by SIGKILL, SIGTERM or SIGINT is incomplete (exit 3, no record); a crash
+  or a Geant4 fatal exception (SIGABRT, SIGSEGV) is a failed run with a record. The run record's `spec_sha256` of an
+  element_sim run is the sha256 of the spec file element_sim read, the same as the event file's run row.
+- Not done in B1: the §A.8 new-problem agent run and the `review.py` Markdown review are done once for task B's
+  Markdown in B3 (B3.8); a C++ `-ffp-contract=off` build is not needed by B1 (no portable random numbers in
+  element_sim).
+
+Independent review (a code-review agent that did not write the change, given the working tree and §B.5): eight
+findings, all fixed before the final runs and covered by tests: event numbers past 2^31 - 1 would wrap in the event
+file's 32-bit columns (refused by check-spec and element_sim); a crash was reported as an interrupted run (now failed);
+the run record's spec hash differed from the event file's (now the same bytes); leakage counted energy that came back
+(now net outflow); a field region on a repeated element crashed the field check (refused by check-spec); simroot
+joined files of different logical runs (the run rows must agree in seed, column map, program, sources and Geant4
+version); the column-order test could not see a C++ reordering (a live test compares the CSV header with
+`element_spec.csv_columns`); a geometry file that is not an object gave a traceback (exit 2 now). The live tests and
+G-B1b were rerun on the fixed build.
+
+G5: element_sim, simroot and the SimProbe field section are written from the Geant4 API; no example code (B5 or any
+other) was copied or adapted. Evidence: the 13 new or changed C++ files against all 5,657 `.cc`, `.hh`, `.icc` files of
+the Geant4 11.4.3 examples tree, normalized lines: 0 shared runs of 3 or 4 consecutive lines (`g5_scan_k3.json`,
+`g5_scan_k4.json`; the positive control of GEANT4-A8-CHECKS gives 51). Reviewer confirmation: pending (the
+maintainer's to record).
+
 ## GEANT4-A8-CHECKS (2026-10-24, E2; branch `worktree-geant4-a8` from main `263eff50`)
 
 The §A.8 items left open by stages A1, C1 and A2, and the G5 evidence. Material in

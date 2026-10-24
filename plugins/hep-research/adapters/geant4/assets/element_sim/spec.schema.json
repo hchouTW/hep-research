@@ -1,0 +1,588 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "element_sim.spec/1",
+ "title": "element_sim run spec",
+ "description": "Input of adapters/geant4/assets/element_sim (Geant4 program B1.1). Validated by geant4_run.py check-spec (element_spec.py): this schema first, then the cross-field rules (no overlapping elements, daughters inside their mother, unique names, roles compatible with materials, no overlapping or nested field regions, the hits-level event limit). Box elements only, with their centres in world coordinates (daughters included) and one level of nesting; numbers in mm, MeV, tesla.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "world",
+  "elements",
+  "physics",
+  "source",
+  "run"
+ ],
+ "properties": {
+  "schema": {
+   "const": "element_sim.spec/1"
+  },
+  "note": {
+   "type": "string"
+  },
+  "world": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "material",
+    "half_mm"
+   ],
+   "properties": {
+    "material": {
+     "type": "string",
+     "minLength": 1
+    },
+    "half_mm": {
+     "$ref": "#/$defs/positive3"
+    }
+   }
+  },
+  "materials": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/material"
+   }
+  },
+  "elements": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "$ref": "#/$defs/element"
+   }
+  },
+  "field": {
+   "$ref": "#/$defs/field"
+  },
+  "physics": {
+   "$ref": "#/$defs/physics"
+  },
+  "ui_commands": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^/"
+   }
+  },
+  "source": {
+   "$ref": "#/$defs/source"
+  },
+  "run": {
+   "$ref": "#/$defs/run"
+  },
+  "output": {
+   "$ref": "#/$defs/output"
+  },
+  "provenance": {
+   "$ref": "#/$defs/provenance"
+  }
+ },
+ "$defs": {
+  "number3": {
+   "type": "array",
+   "minItems": 3,
+   "maxItems": 3,
+   "items": {
+    "type": "number"
+   }
+  },
+  "positive3": {
+   "type": "array",
+   "minItems": 3,
+   "maxItems": 3,
+   "items": {
+    "type": "number",
+    "exclusiveMinimum": 0
+   }
+  },
+  "name": {
+   "type": "string",
+   "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+  },
+  "material": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "density_g_cm3"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "minLength": 1,
+     "description": "not starting with G4_ (those are NIST materials)"
+    },
+    "z": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "a_g_mole": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "components": {
+     "type": "array",
+     "minItems": 2,
+     "description": "a mixture by mass fraction, built in the order listed (g4sim SimMaterials.hh); fractions sum to 1",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "material",
+       "mass_fraction"
+      ],
+      "properties": {
+       "material": {
+        "type": "string",
+        "minLength": 1
+       },
+       "mass_fraction": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 1
+       }
+      }
+     }
+    },
+    "density_g_cm3": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "state": {
+     "enum": [
+      "solid",
+      "liquid",
+      "gas"
+     ]
+    },
+    "temperature_K": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "pressure_Pa": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "source": {
+     "type": "string"
+    }
+   }
+  },
+  "element": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "material",
+    "centre_mm",
+    "half_mm",
+    "role"
+   ],
+   "properties": {
+    "name": {
+     "$ref": "#/$defs/name"
+    },
+    "material": {
+     "type": "string",
+     "minLength": 1
+    },
+    "centre_mm": {
+     "$ref": "#/$defs/number3",
+     "description": "world coordinates of the first copy's centre, also for a daughter (element_sim converts to mother coordinates when placing)"
+    },
+    "half_mm": {
+     "$ref": "#/$defs/positive3"
+    },
+    "mother": {
+     "type": "string",
+     "minLength": 1,
+     "description": "world (default) or one element whose mother is the world (one level of nesting)"
+    },
+    "role": {
+     "enum": [
+      "passive",
+      "tracker-plane",
+      "tof-layer",
+      "calorimeter",
+      "calorimeter-active",
+      "calorimeter-passive"
+     ]
+    },
+    "repeat": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "count",
+      "pitch_mm"
+     ],
+     "description": "copies 0 .. count-1 at centre_mm + k pitch_mm (the calorimeter's sampling layers)",
+     "properties": {
+      "count": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 10000
+      },
+      "pitch_mm": {
+       "$ref": "#/$defs/number3"
+      }
+     }
+    },
+    "shift_mm": {
+     "$ref": "#/$defs/number3",
+     "description": "added to every copy's centre (negative controls of the overlap check only)"
+    }
+   }
+  },
+  "field": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "regions"
+   ],
+   "properties": {
+    "regions": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "element",
+       "b_tesla"
+      ],
+      "properties": {
+       "element": {
+        "type": "string",
+        "minLength": 1,
+        "description": "the element the uniform field is attached to (SetFieldManager(fm, true): it and its daughters)"
+       },
+       "b_tesla": {
+        "$ref": "#/$defs/number3"
+       }
+      }
+     }
+    },
+    "stepper": {
+     "enum": [
+      "DormandPrince745"
+     ]
+    },
+    "driver": {
+     "enum": [
+      "InterpolationDriver"
+     ]
+    },
+    "delta_chord_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "delta_one_step_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "delta_intersection_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "min_epsilon_step": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "max_epsilon_step": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "max_step_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0,
+     "description": "G4UserLimits on the field elements and their daughters (G4StepLimiterPhysics is added with a field)"
+    }
+   }
+  },
+  "physics": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "default_cut_mm"
+   ],
+   "properties": {
+    "reference_list": {
+     "type": "string",
+     "minLength": 1
+    },
+    "em_constructor": {
+     "type": "string",
+     "minLength": 1
+    },
+    "decay": {
+     "type": "boolean"
+    },
+    "default_cut_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "regions": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "name",
+       "elements",
+       "cut_mm"
+      ],
+      "properties": {
+       "name": {
+        "$ref": "#/$defs/name"
+       },
+       "elements": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "type": "string",
+         "minLength": 1
+        }
+       },
+       "cut_mm": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       }
+      }
+     }
+    },
+    "justification": {
+     "type": "string"
+    }
+   }
+  },
+  "source": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "type"
+   ],
+   "properties": {
+    "type": {
+     "enum": [
+      "gun",
+      "gps",
+      "event-file"
+     ],
+     "description": "gps and event-file define the interface only (exit 2 if used, Geant4 program R.10.2)"
+    },
+    "particle": {
+     "type": "string",
+     "minLength": 1
+    },
+    "energy_MeV": {
+     "type": "number",
+     "exclusiveMinimum": 0,
+     "description": "kinetic energy"
+    },
+    "ekin_per_nucleon_MeV": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "position_mm": {
+     "$ref": "#/$defs/number3"
+    },
+    "direction": {
+     "$ref": "#/$defs/number3"
+    },
+    "cycle": {
+     "type": "array",
+     "minItems": 1,
+     "maxItems": 1000,
+     "description": "event i uses entry i mod n (energy and direction; the rest of the gun is shared): several fixed trajectories in one run, e.g. the deterministic field check",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "energy_MeV",
+       "direction"
+      ],
+      "properties": {
+       "energy_MeV": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "direction": {
+        "$ref": "#/$defs/number3"
+       }
+      }
+     }
+    }
+   }
+  },
+  "run": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "events",
+    "seeds",
+    "seeding",
+    "logical_run_seed"
+   ],
+   "properties": {
+    "events": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 2000000000
+    },
+    "first_event": {
+     "type": "integer",
+     "minimum": 0,
+     "maximum": 2000000000
+    },
+    "chunk": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "seeds": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "integer",
+      "minimum": 1
+     }
+    },
+    "run_manager": {
+     "enum": [
+      "serial",
+      "mt"
+     ]
+    },
+    "threads": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 256
+    },
+    "seeding": {
+     "const": "per-event",
+     "description": "element_sim supports per-event seeding only (A2.2)"
+    },
+    "logical_run_seed": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 2147483647
+    }
+   }
+  },
+  "output": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "overlap_test_points": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "observables": {
+     "type": "array",
+     "description": "simulation-observables/1 (contracts/schemas/simulation_observables.json); with blocks"
+    },
+    "blocks": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "blocks",
+      "block_size"
+     ],
+     "properties": {
+      "blocks": {
+       "type": "integer",
+       "minimum": 2
+      },
+      "block_size": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "first_event": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    },
+    "debug_observable_dump": {
+     "type": "boolean"
+    },
+    "event_file": {
+     "type": "object",
+     "additionalProperties": false,
+     "properties": {
+      "level": {
+       "enum": [
+        "none",
+        "summary",
+        "crossings",
+        "hits"
+       ]
+      },
+      "compression": {
+       "type": "integer",
+       "minimum": 0,
+       "maximum": 9
+      },
+      "max_events_hits": {
+       "type": "integer",
+       "minimum": 1
+      }
+     }
+    }
+   }
+  },
+  "provenance": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "generator",
+    "geometry",
+    "realization",
+    "candidate",
+    "parameter_digest"
+   ],
+   "description": "written by geant4_run.py from-geometry (omitted in a hand-written spec)",
+   "properties": {
+    "generator": {
+     "type": "string",
+     "minLength": 1
+    },
+    "geometry": {
+     "$ref": "#/$defs/file_ref"
+    },
+    "realization": {
+     "$ref": "#/$defs/file_ref"
+    },
+    "candidate": {
+     "type": "string",
+     "minLength": 1
+    },
+    "parameter_digest": {
+     "type": "string",
+     "minLength": 1
+    },
+    "mapping_version": {
+     "type": "string",
+     "minLength": 1
+    }
+   }
+  },
+  "file_ref": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "sha256"
+   ],
+   "properties": {
+    "path": {
+     "type": "string",
+     "minLength": 1
+    },
+    "sha256": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    }
+   }
+  }
+ }
+}

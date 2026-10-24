@@ -9,7 +9,8 @@ namespaced extensions (see contracts.vocab).
 
 Anything else in a schema is documentation and is ignored. Findings are returned,
 never raised, so callers can report every problem at once. A schema outside
-contracts/schemas (an adapter's) is validated by passing its absolute path as the name.
+contracts/schemas (an adapter's) is validated by passing its absolute path as the name; its "$ref" to another file names a
+sibling file next to it when one exists, else a file in contracts/schemas.
 """
 from __future__ import annotations
 
@@ -85,6 +86,9 @@ def _type_ok(value, t) -> bool:
 def _resolve(ref: str, doc_name: str) -> tuple[dict, str]:
     file_part, _, frag = ref.partition("#")
     name = file_part or doc_name
+    sibling = Path(doc_name).parent / file_part if file_part and Path(doc_name).is_absolute() else None
+    if sibling is not None and sibling.is_file():  # an adapter's schema: a sibling file next to it, else contracts'
+        name = str(sibling)
     node = load_schema(name)
     for key in [k for k in frag.split("/") if k]:
         node = node[key]

@@ -129,6 +129,46 @@ outputs are unchanged: the 26 recorded J14 specs give bit-identical CSVs with th
   `check_geant4_study.py spec --effective-config` takes the thin-layer rule's minimum thickness from the geometry
   tree. `geant4_verify.py` counts placements and takes thicknesses from the tree when there is one.
 
+Geant4 program stage B1 (`element_sim`, event files and geometry derivation): geant4 adapter 0.3.0, no contracts
+bump (VALIDATION GEANT4-ELEMENT). layered_sim is unchanged and gives the same probe without a field.
+
+**Before you upgrade:**
+- `geant4_run.py`'s `SIM_SOURCES` is a map per program (`layered_sim`, `element_sim`, `simroot`, `g4sim`); a
+  layered_sim run record keeps the same `sources_sha256` keys. Records name adapter 0.3.0.
+- `geant4_run.py run` decides the program by the spec's `schema`; `build-sim --program element_sim` builds
+  element_sim and simroot.
+- `contracts/schema.py`: a `$ref` to another file from an adapter's schema (validated by absolute path) names the
+  sibling file when one exists, else a file in `contracts/schemas/` as before.
+
+- `adapters/geant4/assets/element_sim/`: the box-element program `element_sim` (spec `element_sim.spec/1`, schema
+  `spec.schema.json`): elements given by world-coordinate centres and half-lengths, one level of nesting, repeated
+  copies, roles (`passive`, `tracker-plane`, `tof-layer`, `calorimeter`, `calorimeter-active`,
+  `calorimeter-passive`); uniform field regions with the stepper and driver built explicitly (`G4DormandPrince745` in
+  `G4InterpolationDriver`), thread-local field managers attached with `SetFieldManager(fm, true)`, the maximum step on
+  the field element and its daughters, `G4StepLimiterPhysics` with a field; a gun source (with an optional cycle of
+  energies and directions; `gps` and `event-file` refused); per-event seeding only. Per event: deposits per element,
+  primary path length per element (`plen_<element>_mm`), energy leaving the world (`escape_world_MeV`), the energy
+  leaving the calorimeter mother by face (`leak_rear_MeV`, `leak_front_MeV`, `leak_lateral_MeV`), the first entry of
+  every charged track into each tracker plane and TOF layer, and at level `hits` every step with a deposit. The same
+  three boundary artifacts as layered_sim; the column map may name `root` columns (`ntuple`).
+- Per-event ROOT file `events.root` (`element_sim.events/1`; levels `summary`, `crossings`, `hits`, the last limited
+  by `max_events_hits`), written through Geant4's bundled g4tools (ROOT is not needed), merged by the MT master,
+  never committed; the run record keeps its path, file sha256, `content_sha256` and rows per ntuple. A killed or
+  timed-out element_sim run is incomplete (exit 3) and writes no record.
+- `adapters/geant4/assets/simroot/`: `simroot info | dump | hash` reads event files with `G4RootAnalysisReader`
+  (several files as one logical run, rows sorted by key, processes deduplicated, a duplicate key refused);
+  `content_sha256` does not depend on threads or the split into jobs.
+- `geant4_run.py check-spec` (schema and cross-field rules of `element_spec.py`) and `from-geometry`
+  (`design-geometry/1` from `evaluate_design.py geometry` plus an `element_sim.realization/1` profile, schema
+  `realization.schema.json`, mapping 1.0.0, to an `element_sim.spec/1`; byte-identical for the same inputs, with both
+  inputs named by sha256 in `provenance`).
+- `geant4_verify.py field`: the deterministic field check of charged geantinos against the analytic helix of the new
+  `core/simulation/helix.py` (in-plane distance and TOF-layer time); `budget` and `balance` read element_sim runs
+  (`balance --inject double-count-leakage` is element_sim's negative control).
+- `g4sim/SimProbe.hh` records, for a field manager with a field, the field's class and value, the accuracy
+  parameters and the actual driver and stepper classes, and lists the distinct field managers with the volume each
+  was attached to; the field block enters the tree-v1 target hash.
+
 ## 0.38.0 (2026-10-24)
 
 Minor release, contracts 3.12.0. It ships the maintainer's decisions on the four spec questions left open by the M3

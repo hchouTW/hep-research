@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the layered_sim Geant4 program from a JSON spec and record each run (WP1 M2).
+"""Run the layered_sim and element_sim Geant4 programs from a JSON spec and record each run (WP1 M2, Geant4 program B1).
 
 Purpose: one recorded Geant4 run per spec: per-event CSV, log, material dump and data-path record in a work folder,
 and a computational-run record with a `simulation` block (Geant4 version and commit, datasets with the paths
@@ -15,8 +15,19 @@ Method: the spec is validated here first (spec.schema.json; exit 2 on any proble
 <work>/<run-id>/, and layered_sim runs with every Geant4 dataset variable unset except those of the build record (so
 Geant4's automatic data search cannot silently pick another copy). After the run the data-path record is compared
 with the build record: a resolved path or content hash that differs makes the run `failed`.
+From adapter 0.3.0 (Geant4 program B1) a spec whose schema is element_sim.spec/1 runs element_sim (box elements, one
+level of nesting, uniform field regions, plane crossings of every charged track, calorimeter leakage, per-event
+seeding only) with the same boundary artifacts, plus the per-event ROOT file events.root at event-file level summary
+or above, recorded by path, file sha256 and simroot's content_sha256 (the files are never committed); a run that is
+killed or times out is incomplete (exit 3).
 Subcommands:
-  build-sim  configure and build layered_sim against the installation of a build record
+  build-sim  configure and build layered_sim (default) or, with --program element_sim, element_sim and simroot
+  check-spec validate an element_sim.spec/1 (element_sim/spec.schema.json and the cross-field rules of
+             element_spec.py): {ok, problems}, exit 0 or 2; no Geant4 needed
+  from-geometry  a design-geometry/1 file (evaluate_design.py geometry) and an element_sim.realization/1 profile ->
+             an element_sim.spec/1 (mapping 1.0.0; deterministic: the same inputs give a byte-identical spec whose
+             provenance names both by sha256); exit 2 on an unknown kind or version, a missing template or a derived
+             spec that fails check-spec
   run        one spec -> <work>/<run-id>/ (events.csv, materials.json, datapaths.json, log.txt, spec.json) and --record
   scan       base spec + parameter grid -> specs and a workflow.json for skills/hep-computing/scripts/run_workflow.py
              (point k gets seeds [s0, s1 + k] unless the grid scans run.seeds; from adapter 0.2.0 a base spec without
@@ -37,9 +48,11 @@ Subcommands:
   reduce     a gzip-compressed copy (mtime 0, byte-reproducible) of chosen columns of a run's CSV, for replay
   oracle     run hep-detector's geant4_benchmarks.py on a recorded run through a subprocess (never imported)
 Usage (from the plugin root):
-  python3 adapters/geant4/assets/geant4_run.py build-sim --build-record BUILD.json --work DIR
+  python3 adapters/geant4/assets/geant4_run.py build-sim --build-record BUILD.json --work DIR [--program element_sim]
+  python3 adapters/geant4/assets/geant4_run.py check-spec --spec SPEC.json
+  python3 adapters/geant4/assets/geant4_run.py from-geometry --geometry studies/G.geometry.json --profile PROFILE.json --out SPEC.json
   python3 adapters/geant4/assets/geant4_run.py run --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --run-id ID --record OUT.json
-      [--evidence-role ROLE --point-id ID [--logical-run-seed S]]
+      [--evidence-role ROLE --point-id ID [--logical-run-seed S]] [--simroot SIMROOT]
   python3 adapters/geant4/assets/geant4_run.py scan --base SPEC.json --grid GRID.json --exe EXE --build-record BUILD.json --out-dir DIR --events-per-second R [--seeding per-event|stream]
   python3 adapters/geant4/assets/geant4_run.py chunk --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --start A --stop B --seed S --id ID --out OUT.json
   python3 adapters/geant4/assets/geant4_run.py summarize --merged MERGED.json [--work DIR] [--single-record RUN.json]
@@ -47,8 +60,8 @@ Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_run.py oracle --benchmark-config CONFIG.json [--out OUT.json]
 Every subcommand takes --status LABEL (default unvalidated), echoed as status_label.
 Output JSON: status, status_label, inputs, defaults_used, and the subcommand's result.
-Exit codes: 0 ok; 1 the run failed (layered_sim error, data-path mismatch, benchmark failed); 2 bad input; 3 Geant4,
-cmake or layered_sim missing. Standard library only.
+Exit codes: 0 ok; 1 the run failed (program error, data-path mismatch, benchmark failed); 2 bad input; 3 Geant4,
+cmake or the program missing, or an element_sim run interrupted (incomplete). Standard library only.
 """
 from __future__ import annotations
 
@@ -60,6 +73,7 @@ import json
 import math
 import os
 import shutil
+import signal
 import subprocess
 import sys
 from pathlib import Path
@@ -75,18 +89,52 @@ from contracts.validate import geant4_spec_v1, geant4_tree_v1  # noqa: E402
 from core.simulation import estimates as ESTIMATES, summary as SUMMARY  # noqa: E402
 from core.simulation.seeds import job_seeds, logical_run_seed  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
+import element_spec as ES  # noqa: E402
 
-# every source file of the layered_sim build, as paths under assets/ (adapter 0.2.0: the g4sim/ group was added and
-# MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths)
-ADAPTER_VERSION = "0.2.0"
+# every source file of each program's build, as paths under assets/, per program (adapter 0.2.0: the g4sim/ group was
+# added and MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths;
+# adapter 0.3.0: a map per program instead of one flat tuple, the keys of a layered_sim record are unchanged)
+ADAPTER_VERSION = "0.3.0"
 SCHEMAS = ASSETS / "schemas"
 STRING_COLUMNS = ("primary_end_process",)  # the only non-numeric CSV column (output.schema.json)
 A2_OUTPUTS = ("summary.json", "column_map.json", "probe.json", "observables_dump.csv")  # adapter 0.2.0
-SIM_SOURCES = tuple(f"layered_sim/{s}" for s in (
-    "CMakeLists.txt", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Physics.hh", "Physics.cc", "Actions.hh",
-    "Actions.cc", "layered_sim.cc")) + tuple(f"g4sim/{s}" for s in (
+SIM_SOURCES = {
+    "layered_sim": tuple(f"layered_sim/{s}" for s in (
+        "CMakeLists.txt", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Physics.hh", "Physics.cc", "Actions.hh",
+        "Actions.cc", "layered_sim.cc")),
+    "element_sim": tuple(f"element_sim/{s}" for s in (
+        "CMakeLists.txt", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Field.hh", "Field.cc", "Actions.hh",
+        "Actions.cc", "EventFile.hh", "EventFile.cc", "element_sim.cc")),
+    "simroot": ("simroot/simroot.cc",),
+    "g4sim": tuple(f"g4sim/{s}" for s in (
         "MiniJson.hh", "SimHash.hh", "SimSeed.hh", "SimSummary.hh", "SimObservables.hh", "SimProbe.hh", "SimCsv.hh",
-        "SimMaterials.hh", "SimPhysics.hh"))
+        "SimMaterials.hh", "SimPhysics.hh")),
+}
+PROGRAM_GROUPS = {"layered_sim": ("layered_sim", "g4sim"), "element_sim": ("element_sim", "simroot", "g4sim")}
+PROGRAMS = {"layered_sim.spec/1": "layered_sim", "element_sim.spec/1": "element_sim"}
+
+
+def program_sources(program: str) -> dict[str, str]:
+    """{path under assets/: sha256} of every source file a program's build compiles (with the g4sim headers)."""
+    return {s: sha256_file(ASSETS / s) for g in PROGRAM_GROUPS[program] for s in SIM_SOURCES[g]}
+
+
+def program_of(spec) -> str:
+    """layered_sim or element_sim, by the spec's schema (SpecError for anything else)."""
+    name = PROGRAMS.get(spec.get("schema")) if isinstance(spec, dict) else None
+    if not name:
+        raise SpecError(f"schema must be one of {sorted(PROGRAMS)}")
+    return name
+
+
+def validate_any(spec: dict) -> str:
+    """Validate a spec of either program; returns the program."""
+    name = program_of(spec)
+    if name == "element_sim":
+        ES.validate_spec(spec)
+    else:
+        validate_spec(spec)
+    return name
 BENCHMARKS = PLUGIN / "skills" / "hep-detector" / "scripts" / "geant4_benchmarks.py"
 STEP_LIMIT_S = 3600  # skills/hep-computing/scripts/run_workflow.py STEP_TIMEOUT_S
 STATES = ("solid", "liquid", "gas")
@@ -374,27 +422,73 @@ def _load_build(path) -> dict:
     return rec
 
 
+def event_file_block(run_dir: Path, run_id: str, level: str, simroot: Path | None, problems: list) -> dict | None:
+    """B1.4: what the run record keeps of element_sim's events.root (never committed): its path, file sha256 (the
+    bytes include the write time), simroot's content_sha256 and the rows and hash of each ntuple, the file size."""
+    if level == "none":
+        return None
+    f = run_dir / "events.root"
+    if not f.is_file():
+        problems.append(f"output.event_file.level is {level} but element_sim wrote no events.root")
+        return None
+    block = {"path": tilde(f), "ref": f"{run_id}/events.root", "sha256": sha256_file(f), "size_bytes": f.stat().st_size,
+             "level": level, "event_file_version": "element_sim.events/1", "committed": False}
+    if simroot is None or not simroot.is_file():
+        problems.append("simroot not found: the event file's content_sha256 cannot be computed (--simroot)")
+        return block
+    p = subprocess.run([str(simroot), "hash", str(f)], capture_output=True, text=True, timeout=3600)
+    try:
+        doc = json.loads(p.stdout)
+    except ValueError:
+        doc = {}
+    if p.returncode != 0 or doc.get("status") != "ok":
+        problems.append(f"simroot hash failed on events.root (exit {p.returncode}): {doc.get('error')}")
+        return block
+    block.update(content_sha256=doc["content_sha256"], ntuples=doc["ntuples"],
+                 simroot={"path": tilde(simroot), "sha256": sha256_file(simroot)})
+    return block
+
+
 def run_one(spec: dict, exe: Path, build: dict, build_path: Path, work: Path, run_id: str, timeout: float,
-            overrides: dict[str, str]) -> tuple[str, dict, dict]:
-    """Run layered_sim; returns (status, summary, record)."""
+            overrides: dict[str, str], simroot: Path | None = None) -> tuple[str, dict, dict]:
+    """Run layered_sim or element_sim (by the spec's schema); returns (status, summary, record). An element_sim run
+    that is killed or exceeds the timeout is incomplete: its event file is not closed."""
+    program = program_of(spec)
+    element = program == "element_sim"
     run_dir = work / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    eff = effective_spec(spec)
+    eff = json.loads(json.dumps(spec)) if element else effective_spec(spec)  # element_sim names its own outputs
     (run_dir / "spec.json").write_text(json.dumps(eff, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     env = data_env(build)
     env.update(overrides)
+    sources = program_sources(program)
+    if element:
+        env["ELEMENT_SIM_SOURCES_SHA256"] = sha256_json(sources)
     log = run_dir / "log.txt"
+    interrupted = None
     with log.open("w", encoding="utf-8") as fh:
-        p = subprocess.run([str(exe), str(run_dir / "spec.json")], cwd=run_dir, stdout=fh, stderr=subprocess.STDOUT,
-                           env=env, timeout=timeout)
+        try:
+            p = subprocess.run([str(exe), str(run_dir / "spec.json")], cwd=run_dir, stdout=fh, stderr=subprocess.STDOUT,
+                               env=env, timeout=timeout)
+            code = p.returncode
+        except subprocess.TimeoutExpired:
+            if not element:
+                raise
+            code, interrupted = -1, f"element_sim exceeded the timeout of {timeout} s"
+    if element and code in (-signal.SIGKILL, -signal.SIGTERM, -signal.SIGINT) and not interrupted:
+        interrupted = f"element_sim was stopped (signal {-code})"  # a crash (SIGABRT, SIGSEGV) is a failed run
+    if interrupted:
+        return "incomplete", {"error": interrupted + ": the run and its event file are incomplete",
+                              "run_dir": tilde(run_dir)}, {}
     text = log.read_text(encoding="utf-8", errors="replace")
-    status_line = next((ln for ln in reversed(text.splitlines()) if ln.startswith("LAYERED_SIM_STATUS ")), None)
+    tag = "ELEMENT_SIM_STATUS " if element else "LAYERED_SIM_STATUS "
+    status_line = next((ln for ln in reversed(text.splitlines()) if ln.startswith(tag)), None)
     sim_status = json.loads(status_line.split(" ", 1)[1]) if status_line else {"status": "failed",
-                                                                                "error": f"no status line (exit {p.returncode})"}
-    if p.returncode == 2 or sim_status.get("status") == "rejected":
+                                                                                "error": f"no status line (exit {code})"}
+    if code == 2 or sim_status.get("status") == "rejected":
         return "rejected", {"error": sim_status.get("error"), "log": tilde(log)}, {}
-    problems = [] if p.returncode == 0 and sim_status.get("status") == "ok" else [
-        f"layered_sim exit {p.returncode}: {sim_status.get('error')}"]
+    problems = [] if code == 0 and sim_status.get("status") == "ok" else [
+        f"{program} exit {code}: {sim_status.get('error')}"]
     datapaths = json.loads((run_dir / "datapaths.json").read_text(encoding="utf-8")) \
         if (run_dir / "datapaths.json").is_file() else {}
     rows, dp_problems = compare_datapaths(datapaths, build, work / ".dataset-hash-cache.json") if datapaths else ([], [])
@@ -405,24 +499,21 @@ def run_one(spec: dict, exe: Path, build: dict, build_path: Path, work: Path, ru
         if (run_dir / name).is_file():
             outputs[f"{run_id}/{name}"] = sha256_file(run_dir / name)
     if "events.csv" not in " ".join(outputs) and not problems:
-        problems.append("layered_sim wrote no events.csv")
+        problems.append(f"{program} wrote no events.csv")
     b = build["extension"]["build"]
     run = spec["run"]
-    sources = {s: sha256_file(ASSETS / s) for s in SIM_SOURCES}
     a2 = boundary_artifacts(spec, run_dir, work, build_path, sources, problems)
     if a2.get("inconsistent"):
         return "rejected", {"error": a2["inconsistent"], "run_dir": tilde(run_dir)}, {}
-    ok = not problems
     sim = {
         "geant4": {"version": datapaths.get("geant4_version"), "tag": b["tag"], "commit": b["commit"],
                    "build_record_sha256": sha256_file(build_path)},
-        "program": {"name": "layered_sim", "path": tilde(exe), "sha256": sha256_file(exe), "adapter": ADAPTER_VERSION,
+        "program": {"name": program, "path": tilde(exe), "sha256": sha256_file(exe), "adapter": ADAPTER_VERSION,
                     "sources_sha256": sources},
         "datasets": rows, "data_path_problems": dp_problems,
         "physics": spec["physics"], "ui_commands": spec.get("ui_commands", []),
         "cuts": {"default_mm": spec["physics"]["default_cut_mm"], "regions": spec["physics"].get("regions", [])},
-        "step_limits": {k: spec["physics"][k] for k in ("step_limit_mm", "min_ekin_MeV") if k in spec["physics"]},
-        "gun": spec["gun"], "geometry": spec["geometry"], "materials": spec.get("materials", []),
+        "materials": spec.get("materials", []),
         "spec_sha256": sha256_json(spec),
         "material_dump_sha256": outputs.get(f"{run_id}/materials.json"),
         "random": {"engine": "MixMaxRng", "seeds": run["seeds"]},
@@ -433,12 +524,28 @@ def run_one(spec: dict, exe: Path, build: dict, build_path: Path, work: Path, ru
         "seeding": run.get("seeding", "stream"),
         **{k: v for k, v in a2.items() if k != "inconsistent"},
     }
+    if element:  # the bytes element_sim read and hashed into the event file's run row
+        sim["spec_sha256"] = sha256_file(run_dir / "spec.json")
+        sim.update(source=spec["source"], world=spec["world"], elements=spec["elements"],
+                   field=spec.get("field"), logical_run_seed=run["logical_run_seed"],
+                   step_limits={"field_max_step_mm": (spec.get("field") or {}).get("max_step_mm", 10.0)}
+                   if spec.get("field") else {})
+        if spec.get("provenance"):
+            sim["spec_provenance"] = spec["provenance"]
+        level = ((spec.get("output") or {}).get("event_file") or {}).get("level", "none")
+        ef = event_file_block(run_dir, run_id, level, simroot or exe.parent / "simroot", problems)
+        if ef:
+            sim["event_file"] = ef
+    else:
+        sim.update(gun=spec["gun"], geometry=spec["geometry"],
+                   step_limits={k: spec["physics"][k] for k in ("step_limit_mm", "min_ekin_MeV") if k in spec["physics"]})
+    ok = not problems
     return ("ok" if ok else "failed"), {"run_dir": tilde(run_dir), "problems": problems, "outputs": outputs}, \
-        {"simulation": sim, "outputs": outputs, "exit": p.returncode, "ok": ok}
+        {"simulation": sim, "outputs": outputs, "exit": code, "ok": ok}
 
 
 def build_effective_config(probe: dict, spec: dict, build_path: Path, sources: dict) -> dict:
-    """The effective config of a run (A2.4; schemas/effective_config.schema.json) from layered_sim's probe.json:
+    """The effective config of a run (A2.4; schemas/effective_config.schema.json) from the program's probe.json:
     the probe's geometry with its tree-v1 hashes (contracts.validate.geant4_tree_v1), its other sections, the seeding,
     the backend and the build record it ran against; config_sha256 over everything else."""
     run = spec["run"]
@@ -449,7 +556,7 @@ def build_effective_config(probe: dict, spec: dict, build_path: Path, sources: d
                                                             "recorded")}
     ec = {"engine": "geant4", "engine_version": probe.get("engine_version", ""),
           "probe_version": probe.get("probe_version", ""),
-          "backend": {"name": "layered_sim", "version": ADAPTER_VERSION, "sources_sha256": sha256_json(sources)},
+          "backend": {"name": program_of(spec), "version": ADAPTER_VERSION, "sources_sha256": sha256_json(sources)},
           "source": "probe" if recorded else "declared", "recorded": recorded,
           "seeding": {"mode": run.get("seeding", "stream"), "logical_run_seed": run.get("logical_run_seed")},
           "geometry": {"tree": tree, "tree_sha256": hashes.get("tree_sha256"),
@@ -478,7 +585,7 @@ def store_effective_config(ec: dict, work: Path) -> Path:
 def consistency(spec: dict, ec: dict) -> str | None:
     """A2.6: the configuration decision (isolated or embedded) via spec-v1 (from spec/1) and via tree-v1 (from the
     effective config) must agree for every slab alone and for all slabs together; None, or what disagrees."""
-    if not ec.get("recorded"):
+    if not ec.get("recorded") or program_of(spec) != "layered_sim":  # spec-v1 describes layered_sim geometry only
         return None
     names = []
     for layer in spec["geometry"]["layers"]:
@@ -501,7 +608,7 @@ def boundary_artifacts(spec: dict, run_dir: Path, work: Path, build_path: Path, 
     summary = run_dir / "summary.json"
     if (spec.get("output") or {}).get("observables"):
         if not summary.is_file():
-            problems.append("output.observables is declared but layered_sim wrote no summary.json")
+            problems.append(f"output.observables is declared but {program_of(spec)} wrote no summary.json")
         else:
             rep = validate(json.loads(summary.read_text(encoding="utf-8")), "simulation_summary.json")
             if not rep.ok:
@@ -515,7 +622,7 @@ def boundary_artifacts(spec: dict, run_dir: Path, work: Path, build_path: Path, 
         out["column_map"] = {"ref": f"{run_dir.name}/column_map.json", "sha256": sha256_file(cmap)}
     probe_path = run_dir / "probe.json"
     if not probe_path.is_file():
-        problems.append("layered_sim wrote no probe.json")
+        problems.append(f"{program_of(spec)} wrote no probe.json")
         return out
     probe = json.loads(probe_path.read_text(encoding="utf-8"))
     if probe.get("random_state_unchanged") is not True:
@@ -559,23 +666,28 @@ def complete_summary(run_dir: Path, run_id: str, sim: dict, outputs: dict) -> No
 
 def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: Path, result: dict, work: Path,
                      created: str, argv: list[str] | None = None) -> dict:
-    """The computational-run record of one layered_sim run; from adapter 0.2.0 also argv (the command actually run,
-    interpreter first), script_sha256 (this script, keyed as it appears in argv) and versions.plugin_release
-    (contracts/identity.py), as run_workflow.py writes them."""
+    """The computational-run record of one layered_sim or element_sim run; from adapter 0.2.0 also argv (the
+    command actually run, interpreter first), script_sha256 (this script, keyed as it appears in argv) and
+    versions.plugin_release (contracts/identity.py), as run_workflow.py writes them."""
     sim = result["simulation"]
     complete_summary(work / run_id, run_id, sim, result["outputs"])
+    program = sim["program"]["name"]
+    src = spec.get("gun") or spec.get("source") or {}
+    energy = f"{src['energy_MeV']} MeV" if "energy_MeV" in src else (
+        f"{src['ekin_per_nucleon_MeV']} MeV/nucleon" if "ekin_per_nucleon_MeV" in src else
+        f"{len(src.get('cycle', []))} cycled energies")
     rec = record_skeleton(f"geant4-run-{run_id}",
-                          f"Geant4 layered_sim run {run_id}: {spec['gun']['particle']} {spec['gun']['energy_MeV']} MeV, "
+                          f"Geant4 {program} run {run_id}: {src.get('particle')} {energy}, "
                           f"{sim['events']} events (a completed run, not a validated result)", created,
                           ["unvalidated"] if result["ok"] else ["unvalidated", "failed"])
     rec["extension"] = {
         "input_manifest": [{"path": tilde(spec_path), "sha256": sha256_file(spec_path)}],
         "tools": [{"name": "Geant4", "version": f"{sim['geant4']['tag']} ({sim['geant4']['commit']})"},
-                  {"name": "layered_sim", "version": sim["program"]["sha256"][:16]}],
+                  {"name": program, "version": sim["program"]["sha256"][:16]}],
         "commands": [f"{tilde(exe)} {run_id}/spec.json"],
         "environment": {"work": tilde(work), "dataset_variables": "all unset except the build record's",
                         "G4FORCE_RUN_MANAGER_TYPE": "unset"},
-        "seeds": {"layered_sim": sim["random"]["seeds"]}, "tolerances": {},
+        "seeds": {program: sim["random"]["seeds"]}, "tolerances": {},
         "exit_status": 0 if result["ok"] else 1, "output_hashes": result["outputs"], "simulation": sim}
     if argv:
         rec["extension"]["argv"] = list(argv)
@@ -591,8 +703,8 @@ def _evidence_fields(sim: dict, args) -> None:
     for key in ("evidence_role", "point_id", "logical_run_seed"):
         if getattr(args, key, None) is not None:
             sim[key] = getattr(args, key)
-    if getattr(args, "logical_run_seed", None) is not None:
-        sim["seed_scheme"] = "hash-v1"
+    if getattr(args, "logical_run_seed", None) is not None or sim.get("program", {}).get("name") == "element_sim":
+        sim["seed_scheme"] = "hash-v1"  # element_sim: always per-event with the spec's logical-run seed
     elif getattr(args, "evidence_role", None) is not None:
         sim["seed_scheme"] = "legacy"
 
@@ -604,27 +716,31 @@ def cmd_build_sim(args) -> tuple[str, dict]:
     g4dir = install_prefix(build) / "lib" / "cmake" / "Geant4"
     if not g4dir.is_dir():
         return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)}"}
-    bld = expand(str(args.work)) / "layered_sim-build"
+    program = args.program
+    bld = expand(str(args.work)) / f"{program}-build"
     log = bld / "build.log"
     bld.mkdir(parents=True, exist_ok=True)
     codes = []
     with log.open("w", encoding="utf-8") as fh:
-        for cmd in (["cmake", "-S", str(ASSETS / "layered_sim"), "-B", str(bld), f"-DGeant4_DIR={g4dir}",
+        for cmd in (["cmake", "-S", str(ASSETS / program), "-B", str(bld), f"-DGeant4_DIR={g4dir}",
                      "-DCMAKE_BUILD_TYPE=Release"], ["cmake", "--build", str(bld), "--parallel", str(args.jobs)]):
             codes.append(subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT, timeout=3600).returncode)
             if codes[-1]:
                 break
-    exe = bld / "layered_sim"
-    if any(codes) or not exe.is_file():
-        return "failed", {"error": "layered_sim did not build", "log": tilde(log), "exit_codes": codes}
-    return "ok", {"exe": tilde(exe), "sha256": sha256_file(exe),
-                  "sources_sha256": {s: sha256_file(ASSETS / s) for s in SIM_SOURCES}}
+    exe = bld / program
+    built = [exe] + ([bld / "simroot"] if program == "element_sim" else [])
+    if any(codes) or not all(f.is_file() for f in built):
+        return "failed", {"error": f"{program} did not build", "log": tilde(log), "exit_codes": codes}
+    out = {"exe": tilde(exe), "sha256": sha256_file(exe), "sources_sha256": program_sources(program)}
+    if program == "element_sim":
+        out["simroot"] = {"path": tilde(bld / "simroot"), "sha256": sha256_file(bld / "simroot")}
+    return "ok", out
 
 
 def _exe(path: str) -> Path:
     exe = expand(path)
     if not exe.is_file():
-        raise FileNotFoundError(f"layered_sim executable {tilde(exe)} not found (build it with build-sim)")
+        raise FileNotFoundError(f"executable {tilde(exe)} not found (build it with build-sim)")
     return exe
 
 
@@ -641,7 +757,7 @@ def _overrides(items) -> dict[str, str]:
 def cmd_run(args) -> tuple[str, dict]:
     spec_path = expand(str(args.spec))
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
-    validate_spec(spec)
+    program = validate_any(spec)
     build_path = expand(str(args.build_record))
     build = _load_build(build_path)
     try:
@@ -649,15 +765,20 @@ def cmd_run(args) -> tuple[str, dict]:
     except FileNotFoundError as exc:
         return "missing-dependency", {"error": str(exc)}
     work = expand(str(args.work)).resolve()
+    if program == "element_sim" and args.logical_run_seed is not None \
+            and args.logical_run_seed != spec["run"]["logical_run_seed"]:
+        raise SpecError(f"--logical-run-seed {args.logical_run_seed} is not the spec's run.logical_run_seed "
+                        f"{spec['run']['logical_run_seed']}")
     if args.logical_run_seed is not None:  # A1.4: a single job of logical run S has the seed pair (H(S,0,0), H(S,0,1))
         first = int(spec["run"].get("first_event", 0))
         want = list(job_seeds(args.logical_run_seed, first))
         if list(spec["run"].get("seeds") or []) != want:
             raise SpecError(f"run.seeds {spec['run'].get('seeds')} are not the job seeds {want} of logical run seed "
                             f"{args.logical_run_seed} starting at event {first} (core/simulation/seeds.py)")
+    simroot = expand(args.simroot) if args.simroot else None
     status, summary, result = run_one(spec, exe, build, build_path, work, args.run_id, args.timeout,
-                                      _overrides(args.data_override))
-    if status == "rejected":
+                                      _overrides(args.data_override), simroot)
+    if status in ("rejected", "incomplete"):  # no record of a refused or interrupted run
         return status, summary
     _evidence_fields(result["simulation"], args)
     created = args.created or datetime.date.today().isoformat()
@@ -665,6 +786,29 @@ def cmd_run(args) -> tuple[str, dict]:
     write_run_record(record_path, args.run_id, spec_path, spec, exe, result, work, created, args.argv_run)
     summary["record"] = tilde(record_path)
     return status, summary
+
+
+def cmd_check_spec(args) -> tuple[str, dict]:
+    """B1.6: an element_sim.spec/1 against the schema and the cross-field rules; no Geant4 needed."""
+    path = expand(str(args.spec))
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    problems = ES.check_spec(spec)
+    return ("ok" if not problems else "rejected"), {"ok": not problems, "problems": problems,
+                                                    "spec": {"path": tilde(path), "sha256": sha256_file(path)}}
+
+
+def cmd_from_geometry(args) -> tuple[str, dict]:
+    """B1.8: the element_sim.spec/1 of a design-geometry/1 file and a realization profile (deterministic)."""
+    gpath, ppath = expand(str(args.geometry)), expand(str(args.profile))
+    geometry = json.loads(gpath.read_text(encoding="utf-8"))
+    profile = json.loads(ppath.read_text(encoding="utf-8"))
+    spec = ES.from_geometry(geometry, ES.file_ref(gpath), profile, ES.file_ref(ppath))
+    out = expand(str(args.out))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(ES.canonical(spec), encoding="utf-8")
+    return "ok", {"spec": tilde(out), "sha256": sha256_file(out), "elements": len(spec["elements"]),
+                  "provenance": spec["provenance"],
+                  "note": "derived from the candidate's geometry file; never edit it by hand (regenerate instead)"}
 
 
 def _set(doc: dict, dotted: str, value):
@@ -676,7 +820,7 @@ def _set(doc: dict, dotted: str, value):
 
 def cmd_scan(args) -> tuple[str, dict]:
     base = json.loads(expand(str(args.base)).read_text(encoding="utf-8"))
-    validate_spec(base)
+    validate_any(base)
     grid = json.loads(expand(str(args.grid)).read_text(encoding="utf-8"))
     params = grid.get("parameters")
     if not isinstance(params, dict) or not params or not all(isinstance(v, list) and v for v in params.values()):
@@ -706,7 +850,7 @@ def cmd_scan(args) -> tuple[str, dict]:
             s_point = spec["run"]["logical_run_seed"]
             spec["run"]["seeds"] = list(job_seeds(s_point, spec["run"].get("first_event", 0)))
             evidence = ["--evidence-role", args.role, "--point-id", sid, "--logical-run-seed", str(s_point)]
-        validate_spec(spec)
+        validate_any(spec)
         est = spec["run"]["events"] / args.events_per_second
         if est > STEP_LIMIT_S:
             refused.append({"id": sid, "estimated_s": est})
@@ -739,12 +883,14 @@ def read_csv(path: Path) -> tuple[list[str], list[list[str]]]:
     return cols, [ln.split(",") for ln in lines[2:] if ln]
 
 
-SUMMED = ("edep_", "chlen_", "plen_", "leak_", "killed_", "exit_ekin_MeV", "primary_eloss_MeV")
+SUMMED = ("edep_", "chlen_", "plen_", "leak_", "killed_", "exit_ekin_MeV", "primary_eloss_MeV", "escape_world_MeV")
 
 
 def cmd_chunk(args) -> tuple[str, dict]:
     spec = json.loads(expand(str(args.spec)).read_text(encoding="utf-8"))
-    validate_spec(spec)
+    program = validate_any(spec)
+    if program == "element_sim" and args.logical_run_seed != spec["run"]["logical_run_seed"]:
+        raise SpecError("an element_sim chunk needs --logical-run-seed equal to the spec's run.logical_run_seed")
     if not 0 <= args.start < args.stop:
         raise SpecError("--start/--stop must give a non-empty range")
     build_path = expand(str(args.build_record))
@@ -757,6 +903,8 @@ def cmd_chunk(args) -> tuple[str, dict]:
     seeds = list(job_seeds(args.logical_run_seed, args.start)) if args.logical_run_seed is not None else \
         [max(1, args.seed), args.start + 1]  # A1.4: the job starting at event e has (H(S, e, 0), H(S, e, 1))
     spec["run"].update(events=args.stop - args.start, first_event=args.start, chunk=chunk_no, seeds=seeds)
+    if program == "element_sim":
+        ES.validate_spec(spec)
     work = expand(str(args.work)).resolve()
     status, summary, result = run_one(spec, exe, build, build_path, work, args.id, args.timeout, {})
     if status != "ok":
@@ -910,6 +1058,13 @@ def main(argv=None) -> int:
     p.add_argument("--build-record", required=True)
     p.add_argument("--work", required=True)
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
+    p.add_argument("--program", choices=("layered_sim", "element_sim"), default="layered_sim",
+                   help="which program to build (element_sim also builds simroot)")
+    p = sub.add_parser("check-spec", help="validate an element_sim.spec/1 (schema and cross-field rules)")
+    p.add_argument("--spec", required=True)
+    p = sub.add_parser("from-geometry", help="design-geometry/1 + realization profile -> element_sim.spec/1")
+    for name in ("--geometry", "--profile", "--out"):
+        p.add_argument(name, required=True)
     p = sub.add_parser("run", help="run one spec and write its record")
     for name, req in (("--spec", True), ("--exe", True), ("--build-record", True), ("--work", True),
                       ("--run-id", True), ("--record", True), ("--created", False)):
@@ -922,6 +1077,7 @@ def main(argv=None) -> int:
     p.add_argument("--point-id", help="the evidence point of the study this run is")
     p.add_argument("--logical-run-seed", type=int, help="S = H(study_id, role, point_id); run.seeds must be its job "
                                                         "seeds (seed_scheme hash-v1)")
+    p.add_argument("--simroot", help="the simroot executable for an element_sim event file (default: next to --exe)")
     p = sub.add_parser("scan", help="spec grid -> workflow.json for run_workflow.py")
     for name in ("--base", "--grid", "--exe", "--build-record", "--out-dir"):
         p.add_argument(name, required=True)
@@ -958,10 +1114,11 @@ def main(argv=None) -> int:
     args.argv_run = [sys.executable, str(Path(__file__).resolve()), *(sys.argv[1:] if argv is None else argv)]
     inputs = {k: v for k, v in vars(args).items() if k not in ("status", "argv_run")}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "role", "status") if hasattr(args, k)
-                and f"--{k}" not in given]
-    handlers = {"build-sim": cmd_build_sim, "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk,
-                "summarize": cmd_summarize, "reduce": cmd_reduce, "oracle": cmd_oracle}
+    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "role", "program", "status")
+                if hasattr(args, k) and f"--{k}" not in given]
+    handlers = {"build-sim": cmd_build_sim, "check-spec": cmd_check_spec, "from-geometry": cmd_from_geometry,
+                "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk, "summarize": cmd_summarize, "reduce": cmd_reduce,
+                "oracle": cmd_oracle}
     try:
         status, doc = handlers[args.command](args)
     except (SpecError, FileNotFoundError, KeyError, json.JSONDecodeError, IsADirectoryError) as exc:
