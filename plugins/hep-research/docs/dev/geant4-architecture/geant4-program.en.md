@@ -1,6 +1,6 @@
 # Geant4 simulation studies, the J15 minimal spectrometer and automated generation of design candidates: consolidated document
 
-> Document type: consolidated plan, implementation specs and design rationale (for the implementing agent, reviewers and the maintainer). Status: awaiting the user's and the maintainer's approval
+> Document type: consolidated plan, implementation specs and design rationale (for the implementing agent, reviewers and the maintainer). Status: spec approved by the maintainer on 2026-10-24; §P.7 items 2–15 decided as recommended; D0 (item 1) still open
 > Baseline: hep-research `main` at `5584927` (0.38.0), contracts 3.12.0, adapter geant4 0.1.0 (unchanged since `9f08796`), Geant4 11.4.3
 > Date: 2026-10-24
 > Language: English translation of the Traditional Chinese original [`geant4-program.md`](geant4-program.md), with the same content. If they disagree, the Chinese wins and the English is corrected at the same time
@@ -370,6 +370,8 @@ Calls across adapters and skills always go through subprocesses and JSON files (
 | 13 | Classification of CV-C1 and CV-C2 | minor | C1, C2 |
 | 14 | Whether the Bayesian-optimisation backend (Ax/BoTorch) is listed as a tested tool | list as optional | C3 |
 | 15 | New CI impact groups (`adapters/geant4/**`, `core/stats/**`, `core/simulation/**`) | add them, to avoid full CI runs | A1 |
+
+**Decided (2026-10-24):** the maintainer decided items 2–15 as in the "Recommendation" column; item 1 (D0) is still open (issue #273), so G-D0 has not passed.
 
 ### §P.7.1 D0: the path by which a detector-level Geant4 study becomes F4
 
@@ -3237,6 +3239,7 @@ Ordered by date, and within a day by Parts 1, 2, 3, 4, 5.
 | 2026-10-24 | Part 5 | Aligned with the re-plan: only passages conflicting with main's design loop changed; §R.1 (relation to main's design loop) added; the model-to-model (surrogate) class moved out of B2 and deferred (§R.7.1, §R.7.5, §R.10.1) |
 | 2026-10-24 | Part 5 | Reorganised: this part states only the current reasons; the §R.13 decision log moved to §H.5 and §R.14 superseded designs to §H.4 |
 | 2026-10-24 | Whole document | Reorganisation: history moved to Part 6; the review record `review-2026-10-24-main-0.38.md` folded into §H.2 and the file removed; Part 5's former last section, "relation to main's detector system design loop", moved to §R.1 and the following sections shifted by one (now §R.0–§R.15); the front matter gains a per-stage reading index and a global glossary; the body states only the current specification |
+| 2026-10-24 | Part 1 | Spec approved by the maintainer and §P.7 items 2–15 decided as recommended; D0 still open; spec merged into `main` |
 
 ---
 

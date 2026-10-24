@@ -13,8 +13,9 @@ together with the program plan, the design rationale and the full revision and r
 `worktree-geant4-architecture`, planned against `main` at `5584927` (0.38.0, contracts 3.12.0), which is merged into
 the branch.
 
-**Status (2026-10-24):** awaiting the user's and the maintainer's approval, including decision D0 (how a
-detector-level Geant4 study qualifies as F4, §P.7.1; issue #273); do not start implementation before that.
+**Status (2026-10-24):** spec approved by the maintainer; §P.7 items 2–15 decided as recommended. Decision D0 (how a
+detector-level Geant4 study qualifies as F4, §P.7.1; issue #273) is still open, so B3 and C2's F4 confirmation do not
+start (G-D0).
 
 ## Files
 
