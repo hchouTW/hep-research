@@ -2847,7 +2847,7 @@ whitespace, as the schema says); canonical ties were counted more than once. All
 fixed build.
 
 G5: the new C++ (`g4sim/`, the layered_sim changes) is written from the Geant4 API; no example code was copied or
-adapted. Reviewer confirmation: pending (maintainer).
+adapted. Reviewer confirmation: confirmed by the maintainer on 2026-10-24 (evidence: GEANT4-A8-CHECKS).
 
 ## GEANT4-CORRECTNESS (2026-10-24, E2v: Python 3.13 miniconda with SciPy 1.17.1, Geant4 11.4.3; branch `worktree-geant4-a1`)
 
