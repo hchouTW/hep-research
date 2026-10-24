@@ -59,7 +59,8 @@ Subcommands:
   orphan-run rule and an evaluation that names it is design.search_point_not_expanded.
 - expand --search (C1): one finalist of a search as a candidate, decoded from its genome as the search decoded it
   (overrides on the base candidate, or an independent candidate when a subsystem is dropped; the effective digest
-  must equal the point's); other points are refused. Then run, budget and report as for any candidate.
+  must equal the point's); other points are refused. Then run, budget and report as for any candidate; report lists
+  each expanded finalist's search value minus its official evaluation (search_minus_official, a diagnostic).
 - plan: the suggested next evaluations, per requirement and candidate, from the derived state (RES-04): missing
   evaluations, missing evidence for compliance, stale evaluations, missing gates. Suggestions only.
 - report: the design report, a communication artifact derived by contracts/design.py (producer_skill hep-detector):
@@ -2011,8 +2012,8 @@ def expand_search(args) -> dict:
             "kind": "derived" if "derived_from" in doc["extension"] else "independent (a subsystem is dropped)",
             "effective_digest": point["effective_digest"], "search_values": {
                 lab: v.get("value") for lab, v in point["values"].items()},
-            "next": nxt, "note": "the search values are not evaluations; report the expanded candidate's evaluations, "
-                                 "and record search value minus official value (search_minus_official) per finalist"}
+            "next": nxt, "note": "the search values are not evaluations; report the expanded candidate's evaluations "
+                                 "(report lists search value minus official value, search_minus_official, per finalist)"}
 
 
 def plan(args) -> dict:
@@ -2166,7 +2167,15 @@ def report(args) -> dict:
     md_rel = f"reports/{name}.md"
     if (proj.root / md_rel).exists() or (proj.root / f"reports/{name}.json").exists():
         raise UsageError(f"reports/{name} exists: choose another --name")
-    w.write(md_rel, render(full, args.omit or []).encode("utf-8"))
+    design.analyze_evaluations(proj)
+    gaps = search_minus_official(proj)
+    text = render(full, args.omit or [])
+    if gaps:
+        text += "\n## Search values against official evaluations\n\n" + "".join(
+            f"- {g['candidate']} ({g['search']} point {g['point']}), {g['figure_of_merit']}: search value "
+            f"{g['search_value']:.6g}, official {g['evaluation']} {g['official_value']:.6g} "
+            f"(search minus official {g['search_minus_official']:.6g}); search values decide nothing\n" for g in gaps)
+    w.write(md_rel, text.encode("utf-8"))
     slim = design.report_payload(full)
     ext = {"claims": claims, "sources_read": [], "limitations": [
         "derived by contracts/design.py; verdicts guard against oversight, not deliberate forgery (LIM-02)",
@@ -2180,8 +2189,45 @@ def report(args) -> dict:
         w.undo()
         return {"status": "failed", "exit": 1, "error": "the report fails contract validation",
                 "findings": [f.as_dict() for f in rep.errors]}
-    return {"status": "ok", "exit": 0, "report": rel, "rendering": md_rel, "gate_flags": full.get("gate_flags"),
-            "design_status": full.get("status"), "design_errors": full.get("errors")}
+    out = {"status": "ok", "exit": 0, "report": rel, "rendering": md_rel, "gate_flags": full.get("gate_flags"),
+           "design_status": full.get("status"), "design_errors": full.get("errors")}
+    if gaps:
+        out["search_minus_official"] = gaps
+    return out
+
+
+def search_minus_official(proj: design.Project) -> list[dict]:
+    """Section C.4.6: for each candidate expanded from a search finalist, its search value minus the official
+    evaluation of the same figure of merit and denominator (a diagnostic of the winner's curse and of model
+    differences; it decides nothing)."""
+    out = []
+    for cid, cpath in sorted(proj.candidates.items()):
+        doc = proj.docs[cpath]
+        m = re.match(r"^search (SEARCH-[A-Za-z0-9._-]+) point (\d+):", doc["extension"].get("description", ""))
+        run = next((proj.docs.get(proj.resolve(i["ref"])) for i in doc.get("inputs") or []
+                    if isinstance(i, dict) and design.is_search_run(proj.docs.get(proj.resolve(str(i.get("ref"))), {}))),
+                   None)
+        if not m or run is None:
+            continue
+        s = run["extension"]["search_summary"]
+        point = next((p for p in s["points"] if p["index"] == int(m.group(2))), None)
+        if point is None or point["effective_digest"] != proj.effective_digest(cid):
+            continue
+        for t in s.get("objectives", []) + s.get("constraints", []):
+            sv = (point["values"].get(t["label"]) or {}).get("value")
+            for ev in sorted(proj.evals.values(), key=lambda e: e.rel):
+                ext = ev.ext
+                if (ext.get("candidate") != cid or ext.get("figure_of_merit") != t["figure_of_merit"] or ev.errors
+                        or ev.stale or ext.get("unavailable") or not isinstance(ext.get("value"), (int, float))
+                        or not all(design.close(ext.get("denominator", {}).get(k), v)
+                                   for k, v in t["denominator"].items())):
+                    continue
+                if sv is not None:
+                    out.append({"candidate": cid, "search": m.group(1), "point": int(m.group(2)),
+                                "figure_of_merit": t["figure_of_merit"], "search_value": sv, "evaluation": ev.eid,
+                                "fidelity": ev.fidelity, "official_value": ext["value"],
+                                "search_minus_official": sv - ext["value"]})
+    return out
 
 
 def main(argv=None) -> int:

@@ -6,7 +6,8 @@ Read only the section of the current stage. The principles behind it (requiremen
 trade-offs) are in [detector design principles](detector-design-principles.md).
 
 Contents: [Usage levels](#usage-levels) · [Artifacts](#artifacts) · [D0 Framing](#d0-framing) ·
-[D1 Allocation](#d1-allocation) · [D2 Exploration loop](#d2-exploration-loop) · [D3 Convergence](#d3-convergence) ·
+[D1 Allocation](#d1-allocation) · [D2 Exploration loop](#d2-exploration-loop) ·
+[D2 Automated candidate generation](#d2-automated-candidate-generation) · [D3 Convergence](#d3-convergence) ·
 [D4 Review](#d4-review) · [Verdicts and reason codes](#verdicts-and-reason-codes) · [Never](#never)
 
 ## Usage levels
@@ -90,6 +91,49 @@ Goal: candidates screened against the requirements at the lowest adequate fideli
 
 Gate H3 (`architecture-selection`): the candidates entering convergence plus every `capability.unavailable`
 evaluation; each listed candidate needs a screening-level or unavailable evaluation for every requirement.
+
+## D2 Automated candidate generation
+
+Use `search` at L2 when there are more parameters or topologies than can be compared by hand (which subsystems,
+how many planes, where they sit). It only proposes candidates; `contracts/design.py` still derives every verdict.
+
+1. Design brief (you): from the current design-spec, list the candidate roles, two to six seed topologies with a
+   physics reason each, and the search ranges, all inside the role rules
+   (`assets/design-search/roles.json`: per role the parameters the search may change, their ranges, the derived
+   per-plane x/X0, the calibration template and an assumed budget model; `materials.json`: Geant4 NIST values).
+2. Search spec (`design-search-spec/1`, `contracts/schemas/design_search_spec.json`; a JSON file in the
+   artifacts_dir): `design_spec` (path and sha256 of the current version), `base_candidate`, up to four `objectives`
+   and any `constraints` (a requirement or constraint id, or a figure of merit with its denominator; each needs an
+   F1 tool contract, so a `capability.unavailable` quantity cannot be one), `free_parameters` (`ref`, `range`,
+   `kind`: `positions` with `n` and `min_spacing_m`, `integer`, `categorical`), `slots` (roles the search may add or
+   drop, at most one subsystem per role), optional `envelope`, `regenerate_budgets`, `rules_version`,
+   `materials_version`, `budget`, `optimizer` (`nsga2`, population, generations, seed), `stopping`, `finalists`,
+   and your seed designs as `proposals` (each with its `reason`).
+
+   ```sh
+   python3 <plugin root>/skills/hep-detector/scripts/evaluate_design.py search --artifacts A \
+       --spec search/SEARCH-1.spec.json --id SEARCH-1
+   python3 <plugin root>/skills/hep-detector/scripts/evaluate_design.py expand --artifacts A \
+       --search runs/SEARCH-1.computational-run.json --point K --candidate-id cand-K
+   ```
+
+3. `search` decodes each genome into overrides on the base candidate (an independent candidate when it drops a
+   subsystem), skips invalid designs (spacing, envelope, overlap, nesting; they compete through their violation),
+   computes F1 search values in process with the tool contracts' own tools, runs NSGA-II from Sobol designs and your
+   proposals (flagged `proposer: llm`), and fixes the finalists before any official evaluation. It writes only
+   `runs/SEARCH-*.computational-run.json` (`search_summary`): the search size (designs, topologies), the search
+   front, the finalists, and a check that the finalists' search values equal `run`'s.
+4. Search values are not evaluations: they inherit the F1 bound (mostly optimistic), support no verdict and are
+   never reported as performance. `expand --search` accepts only finalists; then `run`, `budget`, `plan` and
+   `report` as for any candidate; `report` lists each expanded finalist's search value minus its official value.
+   Explain a large gap.
+5. The best of many noisy or optimistic values is optimistic in expectation (winner's curse): never reselect among
+   finalists after seeing official results, list every finalist, and add budget only as a new search (new id).
+   A requirement change is a new design-spec version and a new search.
+
+You may not invent parameters outside the role rules, skip the validity checks, edit any output, or report search
+values or rank finalists yourself. The reply states the search size, that the search front is non-binding, which
+finalists have official evaluations, and that nothing is confirmed above F1 and no optimum is claimed.
 
 ## D3 Convergence
 
@@ -194,6 +238,7 @@ pass). Codes the report uses:
 | `capability.unavailable` | no evaluator at that fidelity | record it; never estimate a number |
 | `design.derived_uncovered`, `design.constraint_scope_missing` (error) | a derived requirement without a driving `covered_by`; a hard constraint without `subsystems` | complete the design-spec (a new version) |
 | `design.scan_point_not_expanded` (error) | an evaluation that names a scan summary as its run | `expand` the point and evaluate the new candidate |
+| `design.search_point_not_expanded` (error) | an evaluation that names a search summary as its run | `expand --search` a finalist and evaluate the new candidate |
 | `design.contract_mismatch` (error) | an evaluation, run, output, config file, geometry or study that does not match its contract or candidate | regenerate it with `evaluate_design.py`; never edit it |
 
 The adequacy table is an initial default until physics review: every pass is reported as provisional.
@@ -203,6 +248,7 @@ The adequacy table is an initial default until physics review: every pass is rep
 - Write or edit a verdict, a maturity, a stale marker, `screened_out` or `at-risk` into any file.
 - Fill in fidelity, bound, parameter_refs or a value by hand; edit an evaluation, run or output after it is written.
 - Put a number on a figure of merit without an evaluator (`capability.unavailable` instead).
+- Report a search value as a result, or write the search population as candidates (only expanded finalists are).
 - Rank candidates or draw a Pareto front without a holding `comparison_basis` and non-optimistic evaluations of the
   same fidelity vector and denominator; claim a global optimum.
 - Treat a decision record written by an agent as approval: gates need a human actor.

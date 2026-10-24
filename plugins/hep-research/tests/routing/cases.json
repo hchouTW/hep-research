@@ -5347,6 +5347,17 @@
    "set": "DSD"
   },
   {
+   "id": "dsd-direct-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Generate candidate spectrometer layouts automatically from my design-spec (how many tracking planes, where they sit, whether to add a time-of-flight system) and give me the few worth evaluating, without claiming an optimum.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ],
+   "set": "DSD"
+  },
+  {
    "id": "dsd-neighbor-1",
    "lang": "en",
    "kind": "neighboring",

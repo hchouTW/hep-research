@@ -2756,6 +2756,35 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## DESIGN-SEARCH-F1 (2026-10-24, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `worktree-geant4-c1` from main `55849275`, unreleased)
+
+Geant4 program stage C1 (automated candidate generation at F1), contracts 3.13.0 (CV-C1 placeholder). Environment
+(section P.10.2): isolated worktree, branch `worktree-geant4-c1` (pushed from the agent worktree), base `55849275` =
+the spec's baseline; C1 has no prerequisite stage; the `file:line` citations of Part 4 (`contracts/design.py` 65,
+252-260, 384-394, 988-1062, 1369-1508, 1655-1683, 1949-2051; `evaluate_design.py` 462-560, 754-875, 837-875;
+`contracts/schema.py` 61-63; the `main()` lines 192, 364, 453, 218, 282 of the five F1 tools; `geant4_verify.py` 132;
+`system-design-workflow.md` 3-4, 149-150, 203-207) were rechecked on the base and all match. Synthetic projects only
+(Example A and the design fixture); no Geant4 run except one geantino run to dump the materials table.
+
+| Check | Result |
+|---|---|
+| Closure, DTLZ2 (3 objectives, 12 variables, searcher called directly, 200 x 100 = 2 x 10^4 evaluations, seed 12345; `test_design_search_lib.py`) | search-front hypervolume 0.978 of the true r^3 - pi/6 at r = 1.1 (pass condition >= 0.95); the final population alone reaches 0.904 |
+| Closure, plane placement (N = 6, lever arm 1 m, measurement term only, minimum spacing L/32, 5000 evaluations through `search`) | A = 47.65 at (0, 0.496, 0.527, 0.558, 0.969, 1.0), from the exact rational oracle of section C Appendix A; pass condition A <= 47.66 x 1.01; equal spacing 66.96; the tool's search value gives the same A to 1e-9 |
+| Closure, structure choice (Example A's design-spec, cand-S without its magnet, 0-1 bending slot) | every design without field has violation > 0; every feasible front design has the magnet and >= 3 planes; the report's verdict on each expanded finalist is not `fail` exactly when it was feasible on its search value |
+| Closure, reproducibility | two runs of the same spec and seed: identical `search_summary` (timing excepted) and identical points file |
+| Consistency (C1.4): in-process F1 values of finalists and sampled points against `evaluate_design.py run` | relative difference 0 for tracker_resolution, design_estimates budget-sum, charge_confusion_rate (chained), pid_separation_power, cherenkov_angle, calorimeter_resolution (tolerance 1e-12) |
+| Search spec and cross-field rules; role rules and decoding; validity (range, spacing, envelope, overlap, nesting); summary schema and gating; orphan exemption; `design.search_point_not_expanded`; `expand --search` (finalists only) then `run`, `budget`, `report` (verdicts as usual, ranking refused without expected precision, search minus official listed) | `tests/skills/hep_detector/test_design_search.py` 29 tests, `test_design_search_lib.py` 10, `tests/contracts/test_design_search_contract.py` 10: pass |
+| `materials.json` against the Geant4 11.4.3 dump it was taken from (`HEP_DESIGN_SEARCH_MATERIALS_DUMP`) | equal |
+| Cost of an in-process F1 call (Example A, 3000 evaluations) | 0.5 ms per tool call; 12.5 s for 3000 evaluations with four calls each |
+| Existing design tests (`tests/contracts/test_design_*.py`, `tests/skills/hep_detector/test_design_*.py`, `test_evaluate_design.py`, both design examples) | pass unchanged |
+| `check_wiring.py`, `check_layering.py --strict`, `check_ownership.py`, `capability_map.py --check`, `check_routing_static.py` (458 cases), `measure_entrypoints.py` (hep-detector quick load 24669 B), `reference_inventory.py --check` | pass |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` (the CI pins) | clean |
+| Contracts 3.13.0 bump | fixtures, design fixture, templates, theory-profile artifacts and 13 examples regenerated with E2: version strings and the hashes that cover them only |
+
+`run_all_checks.py` results for E2 and the CI lock are in the stage report. Not done in this stage: the independent
+new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
+manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
+
 ## 0.38.0 release check (2026-10-24, E2 and the CI lock)
 
 Release branch `release/0.38.0` from main `38cbff8e` (main CI green). It ships #271: the maintainer's decisions on the

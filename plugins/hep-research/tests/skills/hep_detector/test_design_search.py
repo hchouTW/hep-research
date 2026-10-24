@@ -239,6 +239,9 @@ class SharedSearch(unittest.TestCase):
             self.assertEqual(r["value"], point["values"]["CON-MASS-001"]["value"])
             code, r = ev(art, "report", "--name", "after-search")
             self.assertEqual(code, 0, r)
+            gaps = {g["figure_of_merit"]: g for g in r["search_minus_official"]}  # section C.4.6 diagnostic
+            self.assertEqual(set(gaps), {"momentum-resolution-core", "mass-budget"})
+            self.assertTrue(all(g["search_minus_official"] == 0.0 and g["point"] == fin for g in gaps.values()))
             d = design.derive(art)
             row = next(m for item in d["requirements"] if item["id"].endswith("REQ-TRK-001")
                        for m in item["matrix"] if f"{NS_A}:cand-F" in m["candidates"])
