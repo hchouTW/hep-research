@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 #include "Detector.hh"
+#include "G4AccumulableManager.hh"
 #include "G4Event.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleGun.hh"
@@ -14,15 +15,16 @@
 #include "G4SystemOfUnits.hh"
 #include "G4Threading.hh"
 #include "G4Track.hh"
+#include "G4RunManager.hh"
 #include "G4VProcess.hh"
+#include "SimCsv.hh"
+#include "SimObservables.hh"
+#include "SimProbe.hh"
+#include "SimSeed.hh"
+
+using g4sim::Fmt;
 
 namespace {
-
-std::string Fmt(double x) {
-  char buf[40];
-  std::snprintf(buf, sizeof buf, "%.10g", x);
-  return buf;
-}
 
 bool IsNeutrino(int pdg) {
   int a = std::abs(pdg);
@@ -62,7 +64,46 @@ std::string ThreadCsvPath(const Spec& spec, int thread) {
   return spec.run_manager == "mt" ? spec.csv + ".thread" + std::to_string(thread) : spec.csv;
 }
 
+std::string ThreadDumpPath(const Spec& spec, int thread) {
+  return spec.run_manager == "mt" ? spec.dump_out + ".thread" + std::to_string(thread) : spec.dump_out;
+}
+
+RunFlags& Flags() {
+  static RunFlags flags;
+  return flags;
+}
+
+#ifdef LAYERED_SIM_TEST_HOOKS
+std::atomic<bool>& TestRandomGun() {
+  static std::atomic<bool> on{false};
+  return on;
+}
+#endif
+
+SummaryAccumulable::SummaryAccumulable(const Spec& spec)
+    : G4VAccumulable("layered_sim_summary"),
+      fAcc(spec.observables.empty() ? g4sim::SummaryAccumulator()
+                                    : g4sim::SummaryAccumulator(spec.observables, spec.block_size, spec.blocks,
+                                                                spec.block_first_event)) {}
+
+void SummaryAccumulable::Merge(const G4VAccumulable& other) {
+  fAcc.Merge(static_cast<const SummaryAccumulable&>(other).fAcc);
+}
+
+RunAction::RunAction(const Spec& spec, const Detector& det) : fSpec(spec), fDet(det), fSummary(spec) {
+  if (!fSpec.observables.empty()) G4AccumulableManager::Instance()->Register(&fSummary);
+}
+
+void RunAction::WriteProbe() const {
+  g4sim::ProbeResult res = g4sim::RunProbe("layered_sim: master BeginOfRunAction");
+  std::ofstream(fSpec.probe_out) << res.json;
+  if (!res.error.empty()) Flags().probeBadGeometry = true;
+  if (!res.randomUnchanged) Flags().probeRandomChanged = true;
+}
+
 void RunAction::BeginOfRunAction(const G4Run*) {
+  if (!fSpec.observables.empty()) G4AccumulableManager::Instance()->Reset();
+  if (G4Threading::IsMasterThread()) WriteProbe();  // once per run, master only (A2.4)
   bool mt = fSpec.run_manager == "mt";
   if (mt && G4Threading::IsMasterThread()) return;  // workers write; the master merges after the run
   fOut.open(ThreadCsvPath(fSpec, G4Threading::G4GetThreadId()));
@@ -70,10 +111,31 @@ void RunAction::BeginOfRunAction(const G4Run*) {
   auto cols = CsvColumns(fSpec, fDet);
   for (std::size_t i = 0; i < cols.size(); ++i) fOut << (i ? "," : "") << cols[i];
   fOut << "\n";
+  if (fSpec.debug_observable_dump) {
+    fDump.open(ThreadDumpPath(fSpec, G4Threading::G4GetThreadId()));
+    fDump << "# OBSERVABLE DUMP\nevent";
+    for (const auto& c : g4sim::NeededColumns(fSpec.observables)) fDump << "," << c;
+    fDump << "\n";
+  }
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
   if (fOut.is_open()) fOut.close();
+  if (fDump.is_open()) fDump.close();
+  if (fSpec.observables.empty()) return;
+  if (G4Threading::IsWorkerThread()) {
+    G4AccumulableManager::Instance()->Merge();  // into the master's accumulable
+  } else if (!Flags().weightRejected && !Flags().summaryError) {
+    WriteSummary();  // serial, or the MT master after every worker merged
+  }
+}
+
+void RunAction::WriteSummary() {
+  std::string run = "{\"seeding\": " + g4sim::JsonQuote(fSpec.seeding) +
+                    (fSpec.seeding == "per-event" ? ", \"logical_run_seed\": " + std::to_string(fSpec.logical_run_seed)
+                                                  : std::string()) +
+                    ", \"weight_column\": \"unit\"}";
+  std::ofstream(fSpec.summary_out) << fSummary.Acc().Json(run, "{\"name\": \"layered_sim\", \"version\": \"0.2.0\"}");
 }
 
 void EventAction::BeginOfEventAction(const G4Event*) {
@@ -102,6 +164,71 @@ void EventAction::EndOfEventAction(const G4Event* event) {
     << Fmt(r.exitDir.x()) << "," << Fmt(r.exitDir.y()) << "," << Fmt(r.exitDir.z()) << "," << r.fate << ","
     << Fmt(r.endX / mm) << "," << (r.endProcess.empty() ? "none" : r.endProcess) << "," << r.nGamma << ","
     << r.nElectron << "," << r.nPositron << "," << r.nOther << "\n";
+  if (fSpec.observables.empty()) return;
+
+  // the run summary (A2.3): every column of the CSV row at full precision, accumulated into its block
+  if (v->GetWeight() != 1. || r.nonUnitWeight) {
+    Flags().weightRejected = true;
+    G4RunManager::GetRunManager()->AbortRun(true);
+    return;
+  }
+  if (fCols.empty()) {
+    fCols = CsvColumns(fSpec, fDet);
+    fNeeded = g4sim::NeededColumns(fSpec.observables);
+  }
+  const auto& cols = fCols;
+  g4sim::Row row;
+  std::size_t k = 0;
+  auto put = [&](double x) { row[cols[k++]] = g4sim::Cell::Number(x); };
+  long number = fSpec.first_event + event->GetEventID();
+  put(static_cast<double>(number));
+  put(fSpec.chunk);
+  put(v->GetWeight());
+  put(p->GetPDGcode());
+  put(p->GetKineticEnergy() / MeV);
+  put(v->GetX0() / mm);
+  put(v->GetY0() / mm);
+  put(v->GetZ0() / mm);
+  put(d.x());
+  put(d.y());
+  put(d.z());
+  for (std::size_t i = 0; i < r.edep.size(); ++i) {
+    put(r.edep[i] / MeV);
+    put(r.chlen[i] / mm);
+    put(r.plen[i] / mm);
+  }
+  for (double e : r.edepInst) put(e / MeV);
+  for (double x : {r.edepWorld / MeV, r.leakGamma / MeV, r.leakE / MeV, r.leakNu / MeV, r.leakOther / MeV,
+                   r.leakRear / MeV, r.leakFront / MeV, r.leakLateral / MeV, r.killedBooked / MeV,
+                   r.killedUnbooked / MeV, static_cast<double>(r.killedEplus), r.exitEkin / MeV,
+                   (p->GetKineticEnergy() - r.exitEkin) / MeV, r.exitDir.x(), r.exitDir.y(), r.exitDir.z(),
+                   static_cast<double>(r.fate), r.endX / mm})
+    put(x);
+  row[cols[k++]] = g4sim::Cell::Text(r.endProcess.empty() ? "none" : r.endProcess);
+  for (long n : {r.nGamma, r.nElectron, r.nPositron, r.nOther}) put(static_cast<double>(n));
+  try {
+    fRun->Summary().Acc().Fill(number, row);
+  } catch (const g4sim::SummaryError& e) {
+    G4cerr << "layered_sim: " << e.what() << G4endl;
+    Flags().summaryError = true;
+    G4RunManager::GetRunManager()->AbortRun(true);
+    return;
+  }
+  std::ofstream& dump = fRun->Dump();
+  if (dump.is_open()) {
+    dump << number;
+    for (const auto& c : fNeeded) {
+      const g4sim::Cell& cell = row.at(c);
+      if (cell.isNumber) {
+        char buf[40];
+        std::snprintf(buf, sizeof buf, "%.17g", cell.num);
+        dump << "," << buf;
+      } else {
+        dump << "," << cell.str;
+      }
+    }
+    dump << "\n";
+  }
 }
 
 void SteppingAction::UserSteppingAction(const G4Step* step) {
@@ -110,6 +237,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
   const G4StepPoint* pre = step->GetPreStepPoint();
   const G4StepPoint* post = step->GetPostStepPoint();
   double w = track->GetWeight();
+  if (w != 1.) r.nonUnitWeight = true;
   double edep = step->GetTotalEnergyDeposit() * w;
   bool primary = track->GetTrackID() == 1;
   int idx = fDet.SlabIndex(pre->GetTouchableHandle()->GetVolume()->GetLogicalVolume());
@@ -182,6 +310,17 @@ PrimaryGenerator::PrimaryGenerator(const Spec& spec, const Detector& det)
 PrimaryGenerator::~PrimaryGenerator() { delete fGun; }
 
 void PrimaryGenerator::GeneratePrimaries(G4Event* event) {
+  // per-event: reseed before any random draw of this event (A2.2); event i is the global event number
+  if (fSpec.seeding == "per-event") g4sim::ReseedEvent(fSpec.logical_run_seed, fSpec.first_event + event->GetEventID());
+#ifdef LAYERED_SIM_TEST_HOOKS
+  if (TestRandomGun()) {
+    double half = 0.25 * fSpec.lateral_mm * mm;
+    fGun->SetParticlePosition(G4ThreeVector(fSpec.gun_world_fraction * fDet.WorldXLength(),
+                                            (2 * G4UniformRand() - 1) * half, (2 * G4UniformRand() - 1) * half));
+    fGun->GeneratePrimaryVertex(event);
+    return;
+  }
+#endif
   fGun->SetParticlePosition(G4ThreeVector(fSpec.gun_world_fraction * fDet.WorldXLength(), 0, 0));
   fGun->GeneratePrimaryVertex(event);
 }

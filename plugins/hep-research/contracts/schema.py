@@ -1,13 +1,15 @@
 """Minimal JSON-Schema-subset validator (standard library only).
 
 Supported keywords: type, required, properties, additionalProperties (bool or schema),
-enum, const, items, minItems, minLength, pattern, minimum, exclusiveMinimum, anyOf,
+enum, const, items, minItems, maxItems, minLength, pattern, minimum, exclusiveMinimum,
+maximum, exclusiveMaximum, anyOf, oneOf (exactly one form matches), not,
 $ref ("#/$defs/x", "other.json", "other.json#/$defs/x"), and the custom keyword
 "x-vocab": "<vocabulary name>" whose value(s) must be core terms or registered
 namespaced extensions (see contracts.vocab).
 
 Anything else in a schema is documentation and is ignored. Findings are returned,
-never raised, so callers can report every problem at once.
+never raised, so callers can report every problem at once. A schema outside
+contracts/schemas (an adapter's) is validated by passing its absolute path as the name.
 """
 from __future__ import annotations
 
@@ -58,9 +60,9 @@ class Report:
 # Keywords validate() implements, and keywords it reads only as annotations or as $ref targets. A schema keyword outside
 # both sets would be ignored silently (for example oneOf or maxItems); tests/contracts/test_schema_keywords.py checks
 # every schema under contracts/schemas/ against them.
-SUPPORTED_KEYWORDS = frozenset({"$ref", "anyOf", "type", "const", "enum", "minLength", "pattern", "minimum",
-                                "exclusiveMinimum", "x-vocab", "required", "properties", "additionalProperties",
-                                "minItems", "items"})
+SUPPORTED_KEYWORDS = frozenset({"$ref", "anyOf", "oneOf", "not", "type", "const", "enum", "minLength", "pattern",
+                                "minimum", "exclusiveMinimum", "maximum", "exclusiveMaximum", "x-vocab", "required",
+                                "properties", "additionalProperties", "minItems", "maxItems", "items"})
 ANNOTATION_KEYWORDS = frozenset({"$schema", "$id", "$comment", "$defs", "title", "description", "examples", "default"})
 
 _cache: dict[str, dict] = {}
@@ -115,6 +117,16 @@ def validate(value, schema: dict | str, vocab=None, report: Report | None = None
                        "value matches none of the allowed forms"
                        + (f" (first form: {first.message})" if first else ""))
 
+    if "oneOf" in schema:
+        matched = [i for i, sub in enumerate(schema["oneOf"]) if validate(value, sub, vocab, Report(), path, doc_name).ok]
+        if len(matched) != 1:
+            report.add("error", path, "schema.one_of",
+                       f"value must match exactly one of {len(schema['oneOf'])} forms; it matches {len(matched)}"
+                       + (f" (forms {matched})" if matched else ""))
+
+    if "not" in schema and validate(value, schema["not"], vocab, Report(), path, doc_name).ok:
+        report.add("error", path, "schema.not", "value matches a form it must not match")
+
     t = schema.get("type")
     if t is not None and not _type_ok(value, t):
         report.add("error", path, "schema.type", f"expected {t}, got {type(value).__name__}")
@@ -134,6 +146,10 @@ def validate(value, schema: dict | str, vocab=None, report: Report | None = None
             report.add("error", path, "schema.minimum", f"{value} < {schema['minimum']}")
         if "exclusiveMinimum" in schema and value <= schema["exclusiveMinimum"]:
             report.add("error", path, "schema.exclusive_minimum", f"{value} <= {schema['exclusiveMinimum']}")
+        if "maximum" in schema and value > schema["maximum"]:
+            report.add("error", path, "schema.maximum", f"{value} > {schema['maximum']}")
+        if "exclusiveMaximum" in schema and value >= schema["exclusiveMaximum"]:
+            report.add("error", path, "schema.exclusive_maximum", f"{value} >= {schema['exclusiveMaximum']}")
     if "x-vocab" in schema and vocab is not None:
         for item in (value if isinstance(value, list) else [value]):
             if isinstance(item, str) and not vocab.has(schema["x-vocab"], item):
@@ -161,6 +177,8 @@ def validate(value, schema: dict | str, vocab=None, report: Report | None = None
     if isinstance(value, list):
         if len(value) < schema.get("minItems", 0):
             report.add("error", path, "schema.min_items", f"needs at least {schema['minItems']} item(s)")
+        if "maxItems" in schema and len(value) > schema["maxItems"]:
+            report.add("error", path, "schema.max_items", f"allows at most {schema['maxItems']} item(s)")
         if "items" in schema:
             for i, item in enumerate(value):
                 validate(item, schema["items"], vocab, report, f"{path}[{i}]", doc_name)

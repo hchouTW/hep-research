@@ -89,12 +89,24 @@ coverage. The items say when to look and where, not which list to use.
 
 - **Statistics** (contracts CV-A1). Each evidence point is one logical run with seed S = H(study_id, role, point_id)
   (`core/simulation/seeds.py`), split by event number into K >= 16 blocks declared in the spec (`blocks.K`); its run
-  summary (`simulation-summary/1`, `adapters/geant4/assets/summary_from_csv.py`) holds per-block accumulators of the
-  spec's `observables` (estimator mean, proportion, mode or quantile). Values and SEs are batch means over the blocks
+  summary (`simulation-summary/1`; from geant4 adapter 0.2.0 written by `layered_sim` itself from `output.observables`
+  and `output.blocks`, merged across threads, with `adapters/geant4/assets/summary_from_csv.py` as its test oracle and
+  the producer for older runs) holds per-block accumulators of the spec's `observables` (estimator mean, proportion,
+  mode or quantile). New studies seed per event (`run.seeding: per-event`, the default of `geant4_run.py scan`): event
+  i starts from (H(S, i, 0), H(S, i, 1)), so a logical run gives the same events for any split into jobs and threads;
+  reproduce such an event from (S, i), not from Geant4's stored random status. Values and SEs are batch means over the blocks
   (SE on K - 1 degrees of freedom; a proportion with an empty block or fewer than 100 counts uses exact intervals);
   the most probable value is the mean of three-point parabola modes of the block histograms. Choose the bin width
   and the events per block with bias toys before the first evidence run (95 % upper bound of the bias <= tol/10).
-  Events must not share state (biasing breaks it); weights other than 1 are refused.
+  Events must not share state (biasing breaks it); weights other than 1 are refused (`layered_sim` exits 2 when a
+  weighted event meets a declared observable).
+- **Boundary artifacts** (A2.6, D9). The study scripts read only what a run hands over: the run summary, the column
+  map (`column_map.json`, `simulation-columns/1`: per column a semantic name, unit and definition) and the effective
+  config (what Geant4 resolved: geometry tree, materials, EM parameters, cuts per couple, hadronic models with their
+  energy ranges, run manager; stored once per content hash). They name semantic columns only (`primary.energy_loss`,
+  `energy_deposit.<slab>`); runs before adapter 0.2.0 resolve them through
+  `assets/geant4-columns-legacy.json`. The thin-layer rule takes the minimum thickness from the effective config when
+  one is given (`check_geant4_study.py spec --effective-config`), else from spec/1.
 - **Convergence (hard gate).** Scan the production cut (and the step limit when one is used). `check_geant4_study.py
   run` requires a run summary for every declared value (otherwise `incomplete`, reason `missing-scan-value`) and
   compares the two finest *declared* values with an equivalence test for every declared observable (tolerance
@@ -172,12 +184,18 @@ and setup-matched benchmarks can upgrade a study: reference against a physics mo
 isolated target, setup-matched against a published measurement of the same configuration (isolated, target hash
 equal to the measured one).
 
-**Configuration and isolation** (CV-A1). `geant4_benchmarks.py` derives each benchmark's configuration from the
-spec/1 of the run record its setting names (`run_record`), never from user input: the target is `target_slabs`
-(absorbers included; by default the measured slab; `longitudinal-profile` lists its whole sampling stack), the target
-hash (`hash_scheme: spec-v1`) is the sha256 of the target's placements in order with thickness, transverse size,
-material and declared composition (numbers as `float.hex()`), and the target is `isolated` when the world is vacuum
-(`G4_Galactic` or density below 1e-20 g/cm3) and every other placement belongs to it, otherwise `embedded`. A counted
+**Configuration and isolation** (CV-A1). `geant4_benchmarks.py` derives each benchmark's configuration from the run
+record its setting names (`run_record`), never from user input: the target is `target_slabs` (absorbers included; by
+default the measured slab; `longitudinal-profile` lists its whole sampling stack). For records before geant4 adapter
+0.2.0 the target hash (`hash_scheme: spec-v1`) is the sha256 of the target's placements in order with thickness,
+transverse size, material and declared composition from spec/1 (numbers as `float.hex()`); records from 0.2.0 use
+`tree-v1`, the same idea over the effective config's geometry tree (solid, resolved composition and density,
+transform, field; names and copy numbers excluded and hashed separately in `naming_sha256`; daughters in canonical
+order; transforms relative to the first target placement), so the same target built by two programs has one hash.
+Hashes compare only within one scheme. The target is `isolated` when the world is vacuum (`G4_Galactic` or density
+below 1e-20 g/cm3), no field is attached and every other placement belongs to it, otherwise `embedded`;
+`geant4_run.py` refuses a run whose spec-v1 and tree-v1 decisions differ, and a run whose probe recorded nothing
+(`recorded: false`) cannot upgrade. A counted
 benchmark must be isolated; `contracts/dependencies.py` re-derives the configuration from the run record and refuses a
 mismatch. Limits: J14's recorded CSVs are reduced, so their hashes are not the run records' `output_hashes`; the
 configuration describes the run record the setting names; the geometry of negative-control runs is not checked
@@ -246,13 +264,19 @@ execution layer. Its records are always `unvalidated`.
   log, material dump, data-path record and a record with a `simulation` block; a data path or content hash that
   differs from the build record makes the run `failed`), `scan` (a parameter grid as a `workflow.json` for
   `skills/hep-computing/scripts/run_workflow.py`; a step estimated above 3600 s is refused, and each step runs with
-  `--timeout 3540`), `chunk` (a `local_partition.py` worker writing
-  additive sums and `{"csv": [...]}` for `--rule csv=concat`), `summarize` (means after the merge, duplicate check,
-  agreement with a single run), `reduce` (a gzip copy of chosen columns for replay) and `oracle` (runs
-  `geant4_benchmarks.py` through a subprocess); `run --evidence-role --point-id --logical-run-seed` records what the
-  run is for and its seed scheme.
+  `--timeout 3540`; specs it writes seed per event by default), `chunk` (a `local_partition.py` worker writing
+  additive sums, `{"csv": [...]}` for `--rule csv=concat` and, with observables, `{"summaries": [...]}` for
+  `--rule summaries=concat`), `summarize` (from the chunks' summaries when they have them, reading no CSV; for older
+  partitions means after the merge, duplicate check, agreement with a single run), `reduce` (a gzip copy of chosen
+  columns for replay) and `oracle` (runs `geant4_benchmarks.py` through a subprocess); `run --evidence-role
+  --point-id --logical-run-seed` records what the run is for and its seed scheme. From adapter 0.2.0 every run record
+  also carries the summary, column map and effective config (hash and reference), `argv`, `script_sha256` and
+  `versions.plugin_release`.
 - `assets/summary_from_csv.py`: the run summary (`simulation-summary/1`, K blocks) of a logical run from its CSVs and
-  the study spec's observables, validated before it is written.
+  the study spec's observables, validated before it is written (the test oracle of `layered_sim`'s own summary).
+- `assets/g4sim/`: the headers shared by the adapter's programs (seed hash, per-event seeding, summary accumulators,
+  the effective-config probe, materials, physics lists, CSV helpers); `g4sim/selftest.cc` checks the Geant4-free ones
+  against their Python references (`tests/adapters/test_g4sim.py`).
 - `assets/geant4_verify.py overlaps|budget|balance|mirror|datapaths`: the implementation checks, each able to write a
   record that lists the checked run as an input.
 

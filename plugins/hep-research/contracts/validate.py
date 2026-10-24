@@ -469,6 +469,183 @@ def geant4_spec_v1(sim: dict, target_slabs) -> dict:
                                                      .encode("utf-8")).hexdigest()}
 
 
+def _sha_json(doc) -> str:
+    return hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def _geometry_tree(effective_config: dict) -> dict:
+    geo = (effective_config.get("geometry") or {}).get("tree") if isinstance(effective_config, dict) else None
+    if not isinstance(geo, dict) or not isinstance(geo.get("placements"), list) or not geo["placements"]:
+        raise ValueError("the effective config has no geometry tree (geometry.tree with placements; a probe that "
+                         "recorded nothing cannot derive a configuration)")
+    return geo
+
+
+def _mat_physics(m: dict | None) -> dict | None:
+    """Material physics content (tree-v1): composition and density as resolved, never the material or element name."""
+    if m is None:
+        return None
+    return {"density_g_cm3": m.get("density_g_cm3"), "state": m.get("state"), "temperature_K": m.get("temperature_K"),
+            "pressure_Pa": m.get("pressure_Pa"), "mean_excitation_energy_eV": m.get("mean_excitation_energy_eV"),
+            "elements": sorted(([e.get("z"), e.get("a_g_mole"), e.get("mass_fraction")] for e in m.get("elements") or []),
+                               key=lambda x: json.dumps(x))}
+
+
+_IDENTITY = ["0x1.0000000000000p+0", "0x0.0p+0", "0x0.0p+0", "0x0.0p+0", "0x1.0000000000000p+0", "0x0.0p+0",
+             "0x0.0p+0", "0x0.0p+0", "0x1.0000000000000p+0"]
+
+
+def _rot(r) -> list[float]:
+    return [float.fromhex(x) for x in (r or _IDENTITY)]
+
+
+def _matmul(a: list[float], b: list[float]) -> list[float]:
+    return [sum(a[3 * i + k] * b[3 * k + j] for k in range(3)) for i in range(3) for j in range(3)]
+
+
+def _apply(r: list[float], v: list[float]) -> list[float]:
+    return [sum(r[3 * i + k] * v[k] for k in range(3)) for i in range(3)]
+
+
+def _transpose(r: list[float]) -> list[float]:
+    return [r[3 * j + i] for i in range(3) for j in range(3)]
+
+
+def geant4_tree_v1(effective_config: dict, target_slabs) -> dict:
+    """CV-A1 (A1.3) with A2.4's tree-v1: configuration and target hash of a Geant4 run from its effective config's
+    geometry tree (the flat list a g4sim probe records: logical volumes, placements with their mother logical volume,
+    materials as resolved; numbers as float.hex() strings). Physics content only: solid type and parameters, material
+    composition and density, transform relative to the mother, attached field; volume, material and element names and
+    copy numbers are not hashed (they go into naming_sha256). Daughters of one mother are in canonical order (by
+    translation, then solid, then material, compared as hex strings; full ties by copy number, counted in
+    canonical_ties). The target is the set of placements whose logical volume is named in target_slabs (outermost
+    only, each with its subtree), in canonical order, with transforms relative to the first of them in that order
+    (quantized to 1 nm and 1e-12, so the rounding of the subtraction cannot matter), so moving the whole target leaves
+    the hash unchanged; tree_sha256 hashes the whole tree the same way. isolated: the
+    world material is vacuum (density < 1e-20 g/cm3, as G4_Galactic), no field is attached anywhere, and every
+    placement other than the world lies in a target subtree; otherwise embedded. With target_slabs None only the tree
+    hashes are returned. Raises ValueError on a missing tree or a target that names no placement."""
+    geo = _geometry_tree(effective_config)
+    lvs = {lv["id"]: lv for lv in geo.get("logical_volumes") or []}
+    mats = {m["name"]: m for m in geo.get("materials") or []}
+    daughters: dict = {}
+    roots = []
+    for p in geo["placements"]:
+        if p.get("mother_logical") is None:
+            roots.append(p)
+        else:
+            daughters.setdefault(p["mother_logical"], []).append(p)
+    if len(roots) != 1:
+        raise ValueError(f"the geometry tree needs exactly one world placement, found {len(roots)}")
+    targets = set(target_slabs or [])
+    names = {lvs[p["logical"]]["name"] for p in geo["placements"] if p.get("mother_logical") is not None}
+    if target_slabs is not None and (not targets or not targets <= names):
+        raise ValueError(f"target slabs {sorted(targets)} are not all placements of the run ({sorted(names)})")
+    ties, counting = [0], [True]
+
+    def lv_physics(p) -> dict:
+        lv = lvs[p["logical"]]
+        solid = {k: v for k, v in (lv.get("solid") or {}).items() if k != "gap"}
+        return {"solid": solid, "material": _mat_physics(mats.get(lv.get("material"))), "field": lv.get("field"),
+                "kind": p.get("kind"), "replication": p.get("replication")}
+
+    def ordered(ps: list) -> list:
+        def key(p):
+            ph = lv_physics(p)
+            return (json.dumps(p.get("translation_mm")), json.dumps(ph["solid"], sort_keys=True),
+                    json.dumps(ph["material"], sort_keys=True))
+        out = sorted(ps, key=lambda p: (key(p), p.get("copy_number", 0)))
+        if counting[0]:  # counted once, while the whole tree is built
+            ties[0] += sum(1 for a, b in zip(out, out[1:]) if key(a) == key(b))
+        return out
+
+    def node(p, translation, rotation) -> dict:
+        return {**lv_physics(p), "translation_mm": translation, "rotation": rotation,
+                "daughters": [node(d, d.get("translation_mm"), d.get("rotation"))
+                              for d in ordered(daughters.get(p["logical"], []))]}
+
+    def naming(p) -> list:
+        return [[p.get("name"), p.get("copy_number"), lvs[p["logical"]]["name"]]] + [
+            x for d in ordered(daughters.get(p["logical"], [])) for x in naming(d)]
+
+    world = roots[0]
+    tree = node(world, world.get("translation_mm"), world.get("rotation"))
+    counting[0] = False
+    if target_slabs is None:  # the tree hashes only (the effective config's geometry block)
+        return {"hash_scheme": "tree-v1", "tree_sha256": _sha_json(tree), "naming_sha256": _sha_json(naming(world)),
+                "canonical_ties": ties[0]}
+    # target instances with their global transforms (outermost target placements only)
+    found, outside = [], [0]
+
+    def walk(p, t, r, inside):
+        lp = [float.fromhex(x) for x in p.get("translation_mm") or ["0x0.0p+0"] * 3]
+        gt = [a + b for a, b in zip(t, _apply(r, lp))]
+        gr = _matmul(r, _rot(p.get("rotation")))
+        is_target = p is not world and lvs[p["logical"]]["name"] in targets and not inside
+        if is_target:
+            found.append((p, gt, gr))
+        elif p is not world and not inside:
+            outside[0] += 1
+        for d in daughters.get(p["logical"], []):
+            walk(d, gt, gr, inside or is_target)
+    walk(world, [0.0, 0.0, 0.0], _rot(None), False)
+
+    def rel(item, ref) -> dict:
+        # quantized (translations to 1 nm, rotation elements to 1e-12) so that the rounding of the subtraction does not
+        # make a moved target look different
+        p, gt, gr = item
+        _, rt, rr = ref
+        inv = _transpose(rr)
+        t = [float(round(x * 1e6)) / 1e6 + 0.0 for x in _apply(inv, [a - b for a, b in zip(gt, rt)])]
+        r = [float(round(x * 1e12)) / 1e12 + 0.0 for x in _matmul(inv, gr)]
+        rh = None if [x.hex() for x in r] == _IDENTITY else [x.hex() for x in r]
+        return node(p, [x.hex() for x in t], rh)
+    # the reference is the target placement with the smallest global translation, compared numerically (an order
+    # a common shift of the whole target keeps)
+    by_abs = sorted(found, key=lambda it: (tuple(it[1]), it[0].get("copy_number", 0)))
+    target_nodes = sorted((rel(it, by_abs[0]) for it in by_abs),
+                          key=lambda n: json.dumps(n, sort_keys=True))
+    wmat = mats.get(lvs[world["logical"]].get("material")) or {}
+    density = float.fromhex(wmat["density_g_cm3"]) if isinstance(wmat.get("density_g_cm3"), str) else None
+    vacuum = density is not None and density < VACUUM_DENSITY_G_CM3
+    field = bool((geo.get("global_field") or {}).get("present")) or any(
+        (lv.get("field") or {}).get("present") for lv in lvs.values())
+    isolated = vacuum and outside[0] == 0 and not field
+    return {"configuration": "isolated" if isolated else "embedded", "hash_scheme": "tree-v1",
+            "target_slabs": sorted(targets), "world_material": wmat.get("name"),
+            "target_geometry_sha256": _sha_json(target_nodes), "tree_sha256": _sha_json(tree),
+            "naming_sha256": _sha_json(naming(world)), "canonical_ties": ties[0]}
+
+
+def geant4_tree_thickness_mm(effective_config: dict) -> dict:
+    """{logical volume name: thickness along x in mm} of every box placed below the world (twice its x half-length,
+    A2.6: the thin-layer rule's minimum thickness from the effective config's geometry tree)."""
+    geo = _geometry_tree(effective_config)
+    lvs = {lv["id"]: lv for lv in geo.get("logical_volumes") or []}
+    out: dict = {}
+    for p in geo["placements"]:
+        if p.get("mother_logical") is None:
+            continue
+        lv = lvs[p["logical"]]
+        par = (lv.get("solid") or {}).get("parameters") or {}
+        if (lv.get("solid") or {}).get("type") == "G4Box" and "half_x_mm" in par:
+            out[lv["name"]] = 2 * float.fromhex(par["half_x_mm"])
+    return out
+
+
+def geant4_configuration(sim: dict, target_slabs, hash_scheme: str) -> dict:
+    """The configuration of a run record's extension.simulation by the given scheme: spec-v1 from spec/1 (records
+    before A2 and every A1 record), tree-v1 from the effective config's geometry (records from adapter 0.2.0)."""
+    if hash_scheme == "spec-v1":
+        return geant4_spec_v1(sim, target_slabs)
+    if hash_scheme == "tree-v1":
+        ec = (sim or {}).get("effective_config")
+        if not isinstance(ec, dict):
+            raise ValueError("the run record has no extension.simulation.effective_config (tree-v1 needs adapter 0.2.0)")
+        return geant4_tree_v1(ec, target_slabs)
+    raise ValueError(f"unknown hash_scheme {hash_scheme!r} (one of {list(GEANT4_HASH_SCHEMES)})")
+
+
 def _configuration(b: dict, i: int, rep: Report) -> None:
     """CV-A1 (A1.3): a counted reference benchmark ran on an isolated target with its configuration derived from a
     named run record; a counted setup-matched one also has the target hash and scheme of its measured configuration."""

@@ -1,8 +1,8 @@
 {
  "id": "adapter:geant4",
- "version": "0.1.0",
+ "version": "0.2.0",
  "status": "demonstrated-on-synthetic-data",
- "purpose": "Run Geant4 correctly for research: a pinned, recorded build from source (geant4_build.py), the official examples B1, B4a, TestEm3 and TestEm5 compared with their reference outputs by the statistical meaning of each printed quantity (geant4_examples.py), a layered-slab simulation program driven by a JSON spec with per-event CSV output (layered_sim, geant4_run.py with scan, partition chunks, reduce and an oracle that calls hep-detector's geant4_benchmarks.py), and four implementation checks (geant4_verify.py: overlaps, material budget, energy balance, mirror). Every record is unvalidated: a run that completes is verification at most; hep-detector decides physics. Optional, required by no skill",
+ "purpose": "Run Geant4 correctly for research: a pinned, recorded build from source (geant4_build.py), the official examples B1, B4a, TestEm3 and TestEm5 compared with their reference outputs by the statistical meaning of each printed quantity (geant4_examples.py), a layered-slab simulation program driven by a JSON spec with per-event CSV output (layered_sim, geant4_run.py with scan, partition chunks, reduce and an oracle that calls hep-detector's geant4_benchmarks.py), and four implementation checks (geant4_verify.py: overlaps, material budget, energy balance, mirror). From 0.2.0 (Geant4 program A2) the shared headers g4sim/ (seed hash, per-event seeding, run summary accumulators, the effective-config probe, materials, physics lists, CSV helpers) and three boundary artifacts per run: the run summary (simulation-summary/1, summary.json, merged across threads), the column map (simulation-columns/1, column_map.json) and the effective config (stored once per content hash, with the tree-v1 geometry hashes); summary_from_csv.py stays as the summary's test oracle. Every record is unvalidated: a run that completes is verification at most; hep-detector decides physics. Optional, required by no skill",
  "tools": [
   {
    "name": "Geant4 build and official examples (geant4_build.py, geant4_examples.py): Geant4 11.4.3 from https://github.com/Geant4/geant4 (tag v11.4.3), Geant4 Software License 1.0",
@@ -12,10 +12,11 @@
    ]
   },
   {
-   "name": "layered_sim, geant4_run.py and geant4_verify.py (this plugin's code; links against the user's Geant4 installation)",
+   "name": "layered_sim, the g4sim headers, geant4_run.py, geant4_verify.py and summary_from_csv.py (this plugin's code; layered_sim links against the user's Geant4 installation)",
    "status": "demonstrated-on-synthetic-data",
    "tested_versions": [
-    "layered_sim built against Geant4 11.4.3 on E2 (2026-10-21): mirror runs of TestEm3 run 0 (10000 events) and TestEm5 run 0 (1e5 events) agree with the local examples; overlap, material-budget and energy-balance checks pass and their five negative tests are caught; a cut scan under run_workflow.py and a four-chunk local_partition.py run agree with a single run; the runs are of invented layouts (synthetic geometries), so the status stays demonstrated-on-synthetic-data"
+    "layered_sim built against Geant4 11.4.3 on E2 (2026-10-21): mirror runs of TestEm3 run 0 (10000 events) and TestEm5 run 0 (1e5 events) agree with the local examples; overlap, material-budget and energy-balance checks pass and their five negative tests are caught; a cut scan under run_workflow.py and a four-chunk local_partition.py run agree with a single run; the runs are of invented layouts (synthetic geometries), so the status stays demonstrated-on-synthetic-data",
+    "adapter 0.2.0 built against Geant4 11.4.3 on E2 (2026-10-24): the 26 recorded J14 specs give events.csv files bit-identical to the pre-A2 build (gate G-A2) and every probe left the random-engine state unchanged; per-event seeding gives bit-identical events for 1, 2 and 4 threads and 1, 2 and 4 jobs, also with a random gun in a test build; the summary written by layered_sim equals core/simulation/summary.py recomputed from the per-event dump (integers identical, floats within 1e-12); a weighted run with observables exits 2; the probe called before BeamOn records nothing (VALIDATION GEANT4-SUMMARY); the layouts are invented, so the status stays demonstrated-on-synthetic-data"
    ]
   }
  ],
@@ -29,8 +30,18 @@
   "assets/geant4_examples.py",
   "assets/geant4_run.py",
   "assets/geant4_verify.py",
+  "assets/summary_from_csv.py",
+  "assets/g4sim/MiniJson.hh",
+  "assets/g4sim/SimHash.hh",
+  "assets/g4sim/SimSeed.hh",
+  "assets/g4sim/SimSummary.hh",
+  "assets/g4sim/SimObservables.hh",
+  "assets/g4sim/SimProbe.hh",
+  "assets/g4sim/SimCsv.hh",
+  "assets/g4sim/SimMaterials.hh",
+  "assets/g4sim/SimPhysics.hh",
+  "assets/g4sim/selftest.cc",
   "assets/layered_sim/CMakeLists.txt",
-  "assets/layered_sim/MiniJson.hh",
   "assets/layered_sim/Spec.hh",
   "assets/layered_sim/Spec.cc",
   "assets/layered_sim/Detector.hh",
@@ -43,9 +54,12 @@
   "assets/layered_sim/spec.schema.json",
   "assets/layered_sim/output.schema.json",
   "assets/layered_sim/mirror_testem3.json",
-  "assets/layered_sim/mirror_testem5_run0.json"
+  "assets/layered_sim/mirror_testem5_run0.json",
+  "assets/schemas/effective_config.schema.json",
+  "assets/schemas/column_map.schema.json"
  ],
  "tests": [
+  "../../tests/adapters/test_g4sim.py",
   "../../tests/adapters/test_geant4.py"
  ],
  "owner_skill": "hep-detector",

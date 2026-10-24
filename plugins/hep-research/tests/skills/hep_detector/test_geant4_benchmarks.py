@@ -27,10 +27,13 @@ COLS = ["event", "primary_eloss_MeV", "edep_Si_MeV", "primary_fate", "primary_en
         "exit_dz"]
 K = 16
 FINE = {"lo": 0.0, "hi": 0.4, "width": 0.004}
-DECL = [{"name": "loss_transmitted_MeV", "source_column": "primary_eloss_MeV", "selection": G.TRANSMITTED,
+# the transmitted selection on layered_sim's CSV columns (the script names it by semantic columns, G.TRANSMITTED)
+TRANSMITTED = [{"column": "primary_fate", "op": "==", "value": 1},
+               {"column": "primary_end_process", "op": "==", "value": "Transportation"}]
+DECL = [{"name": "loss_transmitted_MeV", "source_column": "primary_eloss_MeV", "selection": TRANSMITTED,
          "bins": FINE},
-        {"name": "deposit_transmitted_MeV", "source_column": "edep_Si_MeV", "selection": G.TRANSMITTED, "bins": FINE},
-        {"name": "deposit_as_loss_MeV", "source_column": "edep_Si_MeV", "selection": G.TRANSMITTED, "bins": FINE}]
+        {"name": "deposit_transmitted_MeV", "source_column": "edep_Si_MeV", "selection": TRANSMITTED, "bins": FINE},
+        {"name": "deposit_as_loss_MeV", "source_column": "edep_Si_MeV", "selection": TRANSMITTED, "bins": FINE}]
 
 
 def silicon(origin="independent"):

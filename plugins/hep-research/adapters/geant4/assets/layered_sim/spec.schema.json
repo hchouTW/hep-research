@@ -375,6 +375,18 @@
     "threads": {
      "type": "integer",
      "minimum": 1
+    },
+    "seeding": {
+     "enum": [
+      "stream",
+      "per-event"
+     ],
+     "description": "adapter 0.2.0: stream (default, the existing behaviour: one MixMaxRng stream seeded by seeds) or per-event (event i reseeds with (H(S, i, 0), H(S, i, 1)) at the start of GeneratePrimaries, g4sim/SimSeed.hh; needs logical_run_seed)"
+    },
+    "logical_run_seed": {
+     "type": "integer",
+     "minimum": 1,
+     "description": "adapter 0.2.0: S of the logical run (core/simulation/seeds.py)"
     }
    }
   },
@@ -390,6 +402,40 @@
     "per_instance": {
      "type": "boolean",
      "description": "also one deposit column per placed slab copy (edep_copy<i>_MeV)"
+    },
+    "observables": {
+     "$ref": "simulation_observables.json",
+     "description": "adapter 0.2.0: the observables layered_sim accumulates per block into summary.json (simulation-observables/1; needs blocks)"
+    },
+    "blocks": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "blocks",
+      "block_size"
+     ],
+     "properties": {
+      "blocks": {
+       "type": "integer",
+       "minimum": 1,
+       "description": "K"
+      },
+      "block_size": {
+       "type": "integer",
+       "minimum": 1,
+       "description": "B (events per block)"
+      },
+      "first_event": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "the logical run's first event (default 0)"
+      }
+     },
+     "description": "adapter 0.2.0: event i (counted from first_event) belongs to block floor(i / B); events with i >= K B are ignored and counted"
+    },
+    "debug_observable_dump": {
+     "type": "boolean",
+     "description": "adapter 0.2.0, tests only: observables_dump.csv lists the observables' columns per event as %.17g (the CSV is unchanged)"
     }
    }
   }

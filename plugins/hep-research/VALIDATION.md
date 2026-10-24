@@ -2756,6 +2756,60 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## GEANT4-SUMMARY (2026-10-24, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-a2` from main `dd531e74`)
+
+Geant4 program stage A2 (spec `docs/dev/geant4-architecture/geant4-program.md` §A.6): geant4 adapter 0.2.0, shared
+headers `g4sim/` and three boundary artifacts per run (run summary, column map, effective config). No contracts bump.
+layered_sim was built from these sources against the recorded installation (Release, no `-ffp-contract=off`, as
+before); a second build with `-DLAYERED_SIM_TEST_HOOKS=ON` adds the two test-only UI commands. Scripts in
+`~/Workspace/hep-research-tasks/geant4-program/` (`a2_gate.py`, `a2_smoke.py`, `a2_negatives.py`,
+`a2_thin_layer.py`, `a2_checks.sh`); outputs in `~/Workspace/geant4-work/a2-*`.
+
+| Check | Result |
+|---|---|
+| G-A2 regression: every recorded J14 spec (26 in `recorded/specs/`, the spec's 18 plus A1's trials and the two `*-control-minus`; `mpv-density-10` does not exist, `sp-density-10` does) run with the reference build (sources of main after A1, sha256 d39225ea, the binary the A1 records name) and the A2 build (sha256 e6d3134d) on the same host | 26/26 `events.csv` bit-identical; 23 also equal the committed records' hashes; sp-nominal, sp-control and sp-density-10 were recorded with the older `sim-a` build (a69ffad7), where reference and A2 agree with each other |
+| Probe leaves the random state unchanged (engine `put()` before and after, every run) | 26/26 `random_state_unchanged: true`; probe recorded in state GeomClosed for every run |
+| Probe before BeamOn (`/layered_sim/test/probeAfterInitialize`, test build) | `recorded: false`, state Idle; the run's own probe recorded |
+| Per-event seeding, 4000 events, K = 8, J14 MPV observables: serial, MT 2 and 4 threads, 2 serial jobs, 4 jobs of 2 threads | dumps and CSV rows bit-identical across the five layouts; summary integers identical, floats within 1e-12 |
+| The same with a random gun (`/layered_sim/test/randomGun`: GeneratePrimaries draws y and z) | identical across the five layouts; gun positions vary per event |
+| A2.9 oracle: the summary layered_sim writes against `core/simulation/summary.py` recomputed from the `%.17g` dump | every layout: integers identical, sum and sumsq within 1e-12 relative |
+| Event weight != 1 with observables (secondary biasing of muIoni in SiRegion) | layered_sim exits 2 (`rejected`), no summary.json; without observables the same run is `ok` |
+| tree-v1 against spec-v1 on the A2 runs (targets: each slab and all slabs) | same isolation decision for all 26; a deliberately inconsistent probe (air where spec/1 says vacuum, fake program) is refused, exit 2 |
+| Effective configs stored once per content | the 26 J14 runs share 14 configs (for example mpv-nominal, mpv-nominal-trial and sp-nominal: same geometry, physics and seeding mode); mpv-pai has its own through the PAI regions the probe records (`em_parameters.extra`; an earlier probe without them gave mpv-pai the nominal's config, which is why they are recorded) |
+| Thin-layer rule from the effective config (`check_geant4_study.py spec --effective-config`, J14 MPV and SP studies) | minimum thickness 0.3 mm from the tree (0.3 mm from spec/1); same applicable rules, none fired, same exit |
+| `g4sim` self-tests (`tests/adapters/test_g4sim.py`, the system compiler) | H equals `core/simulation/seeds.py` on 206 vectors; the hex format equals `float.hex()` on 316 bit patterns including 0.0, -0.0, subnormals, inf, -inf and nan; SplitMix64 bit-identical; Box-Muller within 1e-12; SimSummary equals `core/simulation/summary.py` with numeric and string selections, merged from three accumulators too |
+
+Decisions and deviations, recorded here:
+- The canonical tree-v1 form and its hashes are computed in Python (`contracts.validate.geant4_tree_v1`) from the
+  flat tree the probe writes, one implementation for every program (the spec puts the hash in `SimProbe.hh`).
+  Target-relative transforms are quantized to 1 nm and 1e-12 so that a moved target does not change its hash
+  through the rounding of the subtraction.
+- `oneOf` and `not` are implemented in `contracts/schema.py` (not rewritten in `spec.schema.json`).
+- The run record carries the effective config's reference, hash and geometry block (tree and hashes); the full
+  content is in `effective_configs/<config_sha256>.json` under the work folder. Committed J14 records are not
+  regenerated in A2 and stay spec-v1.
+- The EM constructor is not named by the probe (`G4EmParameters` records parameters, not the constructor): the EM
+  model assignment of variations stays `source: declared`; the hadronic one reads the probe first.
+- The study scripts name semantic columns; runs before 0.2.0 resolve them through
+  `skills/hep-detector/assets/geant4-columns-legacy.json` (data). `geant4_run.py summarize` keeps its CSV path for
+  partitions made before 0.2.0.
+- Not done in A2: GDML (off in the plugin's build), per-copy parameterisation details (recorded as a gap), the
+  gamma-nuclear sub-process of `G4GammaGeneralProcess` (no accessor; recorded as a gap).
+
+Independent review (a code-review agent that did not write the change, given the diff and §A.6): eight findings, all
+fixed before the final gate and covered by tests: the tree-v1 reference placement chosen by hex-string order (a
+moved repeated target changed its hash; now numeric); the probe-first hadronic assignment refused energies at the top
+of a transition (edge convention aligned with the declared table); `summarize` crashed on summaries that do not merge
+or have one block (caught; K >= 2 required); an observable with a string source column, `contains` on a number, or
+blocks starting after the run crashed layered_sim in the event loop (refused in `validate_spec` and `Spec.cc`, and
+caught in the event loop, exit 2); the neutron general process branch of the probe was unreachable (it derives from
+`G4HadronicProcess` in 11.4; tested first now); `config_sha256` used JSON with whitespace (now sorted keys, no
+whitespace, as the schema says); canonical ties were counted more than once. All checks above were rerun on the
+fixed build.
+
+G5: the new C++ (`g4sim/`, the layered_sim changes) is written from the Geant4 API; no example code was copied or
+adapted. Reviewer confirmation: pending (maintainer).
+
 ## GEANT4-CORRECTNESS (2026-10-24, E2v: Python 3.13 miniconda with SciPy 1.17.1, Geant4 11.4.3; branch `worktree-geant4-a1`)
 
 Geant4 program stage A1 (spec `docs/dev/geant4-architecture/geant4-program.md` Part 2, approved 2026-10-24; §P.7 items

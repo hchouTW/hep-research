@@ -1,0 +1,387 @@
+{
+ "note": "Column map (simulation-columns/1) of layered_sim's per-event CSV for runs made before geant4 adapter 0.2.0, which wrote no column_map.json (Geant4 program A2.6, D9): the study scripts read semantic names only and resolve them through a run's column map, or through this one for older runs. <slab> stands for a slab name and <i> for a copy number. Data, not code: written from the column map layered_sim 0.2.0 writes, whose CSV columns are unchanged from 0.1.0.",
+ "column_map_version": "simulation-columns/1",
+ "producer": "layered_sim (before adapter 0.2.0)",
+ "columns": [
+  {
+   "semantic": "event_number",
+   "column": "event",
+   "unit": "1",
+   "definition": "global event number (first_event + Geant4 event ID)",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "chunk_index",
+   "column": "chunk",
+   "unit": "1",
+   "definition": "chunk number of the job",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "event_weight",
+   "column": "weight",
+   "unit": "1",
+   "definition": "primary vertex weight",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.pdg_code",
+   "column": "primary_pdg",
+   "unit": "1",
+   "definition": "PDG code of the primary",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.kinetic_energy",
+   "column": "primary_ekin_MeV",
+   "unit": "MeV",
+   "definition": "primary kinetic energy",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.position.x",
+   "column": "primary_x_mm",
+   "unit": "mm",
+   "definition": "gun position x",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.position.y",
+   "column": "primary_y_mm",
+   "unit": "mm",
+   "definition": "gun position y",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.position.z",
+   "column": "primary_z_mm",
+   "unit": "mm",
+   "definition": "gun position z",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.direction.x",
+   "column": "primary_dx",
+   "unit": "1",
+   "definition": "primary direction cosine x",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.direction.y",
+   "column": "primary_dy",
+   "unit": "1",
+   "definition": "primary direction cosine y",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.direction.z",
+   "column": "primary_dz",
+   "unit": "1",
+   "definition": "primary direction cosine z",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "energy_deposit.<slab>",
+   "column": "edep_<slab>_MeV",
+   "unit": "MeV",
+   "definition": "weighted energy deposit summed over the copies of slab <slab>",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "charged_track_length.<slab>",
+   "column": "chlen_<slab>_mm",
+   "unit": "mm",
+   "definition": "track length of charged particles in slab <slab>",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary_path_length.<slab>",
+   "column": "plen_<slab>_mm",
+   "unit": "mm",
+   "definition": "path length of the primary in slab <slab>",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "energy_deposit.copy<i>",
+   "column": "edep_copy<i>_MeV",
+   "unit": "MeV",
+   "definition": "deposit in one placed slab copy (output.per_instance)",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "energy_deposit.world",
+   "column": "edep_world_MeV",
+   "unit": "MeV",
+   "definition": "deposit in the world volume",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "leakage.gamma",
+   "column": "leak_gamma_MeV",
+   "unit": "MeV",
+   "definition": "kinetic energy of photons leaving the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "leakage.electron",
+   "column": "leak_e_MeV",
+   "unit": "MeV",
+   "definition": "kinetic energy of e-+ leaving the world, plus 2 m_e c^2 for an e+",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "leakage.neutrino",
+   "column": "leak_nu_MeV",
+   "unit": "MeV",
+   "definition": "neutrinos leaving the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "leakage.other",
+   "column": "leak_other_MeV",
+   "unit": "MeV",
+   "definition": "every other particle leaving the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "leakage.rear",
+   "column": "leak_rear_MeV",
+   "unit": "MeV",
+   "definition": "all leakage through the +x end face of the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "leakage.front",
+   "column": "leak_front_MeV",
+   "unit": "MeV",
+   "definition": "all leakage through the -x end face of the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "leakage.lateral",
+   "column": "leak_lateral_MeV",
+   "unit": "MeV",
+   "definition": "all leakage through the y and z faces of the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "killed.booked",
+   "column": "killed_booked_MeV",
+   "unit": "MeV",
+   "definition": "kinetic energy at the start of the step in which G4UserSpecialCuts killed a track",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "killed.unbooked",
+   "column": "killed_unbooked_MeV",
+   "unit": "MeV",
+   "definition": "kinetic energy of secondaries killed at stacking",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "killed.positrons",
+   "column": "killed_eplus",
+   "unit": "1",
+   "definition": "number of killed e+",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.exit_kinetic_energy",
+   "column": "exit_ekin_MeV",
+   "unit": "MeV",
+   "definition": "primary kinetic energy when it leaves the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.energy_loss",
+   "column": "primary_eloss_MeV",
+   "unit": "MeV",
+   "definition": "primary kinetic energy minus exit_ekin_MeV",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.exit_direction.x",
+   "column": "exit_dx",
+   "unit": "1",
+   "definition": "primary direction cosine x when it leaves the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.exit_direction.y",
+   "column": "exit_dy",
+   "unit": "1",
+   "definition": "primary direction cosine y when it leaves the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.exit_direction.z",
+   "column": "exit_dz",
+   "unit": "1",
+   "definition": "primary direction cosine z when it leaves the world",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.fate",
+   "column": "primary_fate",
+   "unit": "1",
+   "definition": "+1 transmitted (left going +x), -1 reflected, 0 stopped or absorbed",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.end_position.x",
+   "column": "primary_end_x_mm",
+   "unit": "mm",
+   "definition": "x where the primary ended or left",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "primary.end_process",
+   "column": "primary_end_process",
+   "unit": "",
+   "definition": "process that ended the primary (Transportation when it left the world; none if it never ended)",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "secondaries.gamma",
+   "column": "n_sec_gamma",
+   "unit": "1",
+   "definition": "number of secondary photons",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "secondaries.electron",
+   "column": "n_sec_electron",
+   "unit": "1",
+   "definition": "number of secondary electrons",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "secondaries.positron",
+   "column": "n_sec_positron",
+   "unit": "1",
+   "definition": "number of secondary positrons",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  },
+  {
+   "semantic": "secondaries.other",
+   "column": "n_sec_other",
+   "unit": "1",
+   "definition": "number of other secondaries",
+   "file": "csv",
+   "operation": {
+    "kind": "rename"
+   }
+  }
+ ]
+}

@@ -4,8 +4,15 @@
 // Order of set-up (Geant4 11.4): detector, physics list (its EM constructors call G4EmParameters::SetDefaults, so the
 // /process/em, /process/msc and /process/eLoss commands exist only from here on), actions, then the spec's UI commands
 // verbatim, then /run/initialize, the optional /geometry/test/run, the material dump, BeamOn, and the data-path record.
-// Exit codes: 0 ok; 1 the run failed (a Geant4 fatal exception aborts with its own code); 2 the spec was refused.
-// Output files are named by the spec; stdout carries the Geant4 log and, last, one line "LAYERED_SIM_STATUS {json}".
+// Exit codes: 0 ok; 1 the run failed (a Geant4 fatal exception aborts with its own code; the probe changed the random
+// state); 2 the spec was refused (also: an observable names a column the CSV does not have, an event weight other than
+// 1 while the summary accumulates, an infinite or NaN number in the geometry).
+// Output files are named by the spec; next to the CSV the program also writes column_map.json (simulation-columns/1),
+// probe.json (the effective-config probe, g4sim/SimProbe.hh), and with output.observables summary.json
+// (simulation-summary/1) and, with output.debug_observable_dump, observables_dump.csv. stdout carries the Geant4 log
+// and, last, one line "LAYERED_SIM_STATUS {json}". A build with -DLAYERED_SIM_TEST_HOOKS=ON adds the UI command
+// /layered_sim/test/probeAfterInitialize (tests only): the probe also runs after /run/initialize, before BeamOn, and
+// writes probe.test.json, which must say recorded: false.
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -31,7 +38,15 @@
 #include "MiniJson.hh"
 #include "Physics.hh"
 #include "Randomize.hh"
+#include "SimCsv.hh"
+#include "SimObservables.hh"
+#include "SimSummary.hh"
 #include "Spec.hh"
+#ifdef LAYERED_SIM_TEST_HOOKS
+#include "G4UIcmdWithoutParameter.hh"
+#include "G4UImessenger.hh"
+#include "SimProbe.hh"
+#endif
 
 namespace {
 
@@ -105,31 +120,119 @@ void WriteMaterials(const Detector& det, const std::string& path) {
   o << "]}\n";
 }
 
-// worker CSVs joined in event order (MT): the header of the first file, then every row sorted by event number
-void MergeThreadCsv(const Spec& spec) {
-  std::vector<std::pair<long, std::string>> rows;
-  std::string header;
-  for (int t = 0; t < spec.threads; ++t) {
-    std::string path = ThreadCsvPath(spec, t);
-    std::ifstream in(path);
-    if (!in) continue;
-    std::string line;
-    int n = 0;
-    while (std::getline(in, line)) {
-      if (++n <= 2) {  // line 1 is "# SIMULATION", line 2 the column names
-        if (n == 2 && header.empty()) header = "# SIMULATION\n" + line + "\n";
-        continue;
-      }
-      rows.emplace_back(std::stol(line.substr(0, line.find(','))), line);
-    }
-    in.close();
-    std::remove(path.c_str());
+// Semantic name, unit and operational definition of a CSV column (simulation-columns/1; output.schema.json).
+struct ColumnInfo {
+  std::string semantic, unit, definition;
+};
+
+ColumnInfo Describe(const std::string& c, const std::vector<std::string>& slabs) {
+  static const std::map<std::string, ColumnInfo> fixed = {
+      {"event", {"event_number", "1", "global event number (first_event + Geant4 event ID)"}},
+      {"chunk", {"chunk_index", "1", "chunk number of the job"}},
+      {"weight", {"event_weight", "1", "primary vertex weight"}},
+      {"primary_pdg", {"primary.pdg_code", "1", "PDG code of the primary"}},
+      {"primary_ekin_MeV", {"primary.kinetic_energy", "MeV", "primary kinetic energy"}},
+      {"primary_x_mm", {"primary.position.x", "mm", "gun position x"}},
+      {"primary_y_mm", {"primary.position.y", "mm", "gun position y"}},
+      {"primary_z_mm", {"primary.position.z", "mm", "gun position z"}},
+      {"primary_dx", {"primary.direction.x", "1", "primary direction cosine x"}},
+      {"primary_dy", {"primary.direction.y", "1", "primary direction cosine y"}},
+      {"primary_dz", {"primary.direction.z", "1", "primary direction cosine z"}},
+      {"edep_world_MeV", {"energy_deposit.world", "MeV", "deposit in the world volume"}},
+      {"leak_gamma_MeV", {"leakage.gamma", "MeV", "kinetic energy of photons leaving the world"}},
+      {"leak_e_MeV", {"leakage.electron", "MeV", "kinetic energy of e-+ leaving the world, plus 2 m_e c^2 for an e+"}},
+      {"leak_nu_MeV", {"leakage.neutrino", "MeV", "neutrinos leaving the world"}},
+      {"leak_other_MeV", {"leakage.other", "MeV", "every other particle leaving the world"}},
+      {"leak_rear_MeV", {"leakage.rear", "MeV", "all leakage through the +x end face of the world"}},
+      {"leak_front_MeV", {"leakage.front", "MeV", "all leakage through the -x end face of the world"}},
+      {"leak_lateral_MeV", {"leakage.lateral", "MeV", "all leakage through the y and z faces of the world"}},
+      {"killed_booked_MeV", {"killed.booked", "MeV",
+                             "kinetic energy at the start of the step in which G4UserSpecialCuts killed a track"}},
+      {"killed_unbooked_MeV", {"killed.unbooked", "MeV", "kinetic energy of secondaries killed at stacking"}},
+      {"killed_eplus", {"killed.positrons", "1", "number of killed e+"}},
+      {"exit_ekin_MeV", {"primary.exit_kinetic_energy", "MeV", "primary kinetic energy when it leaves the world"}},
+      {"primary_eloss_MeV", {"primary.energy_loss", "MeV", "primary kinetic energy minus exit_ekin_MeV"}},
+      {"exit_dx", {"primary.exit_direction.x", "1", "primary direction cosine x when it leaves the world"}},
+      {"exit_dy", {"primary.exit_direction.y", "1", "primary direction cosine y when it leaves the world"}},
+      {"exit_dz", {"primary.exit_direction.z", "1", "primary direction cosine z when it leaves the world"}},
+      {"primary_fate", {"primary.fate", "1", "+1 transmitted (left going +x), -1 reflected, 0 stopped or absorbed"}},
+      {"primary_end_x_mm", {"primary.end_position.x", "mm", "x where the primary ended or left"}},
+      {"primary_end_process", {"primary.end_process", "", "process that ended the primary (Transportation when it "
+                                                          "left the world; none if it never ended)"}},
+      {"n_sec_gamma", {"secondaries.gamma", "1", "number of secondary photons"}},
+      {"n_sec_electron", {"secondaries.electron", "1", "number of secondary electrons"}},
+      {"n_sec_positron", {"secondaries.positron", "1", "number of secondary positrons"}},
+      {"n_sec_other", {"secondaries.other", "1", "number of other secondaries"}},
+  };
+  auto it = fixed.find(c);
+  if (it != fixed.end()) return it->second;
+  for (const auto& s : slabs) {
+    if (c == "edep_" + s + "_MeV")
+      return {"energy_deposit." + s, "MeV", "weighted energy deposit summed over the copies of slab " + s};
+    if (c == "chlen_" + s + "_mm")
+      return {"charged_track_length." + s, "mm", "track length of charged particles in slab " + s};
+    if (c == "plen_" + s + "_mm") return {"primary_path_length." + s, "mm", "path length of the primary in slab " + s};
   }
-  std::sort(rows.begin(), rows.end());
-  std::ofstream out(spec.csv);
-  out << header;
-  for (const auto& r : rows) out << r.second << "\n";
+  if (c.rfind("edep_copy", 0) == 0)
+    return {"energy_deposit." + c.substr(5, c.size() - 9), "MeV", "deposit in one placed slab copy"};
+  return {c, "", ""};
 }
+
+void WriteColumnMap(const Spec& spec, const Detector& det) {
+  using g4sim::JsonQuote;
+  auto cols = CsvColumns(spec, det);
+  std::map<std::string, std::string> units;
+  std::ofstream o(spec.column_map_out);
+  o << "{\"column_map_version\": \"simulation-columns/1\", \"producer\": \"layered_sim\", \"columns\": [";
+  for (std::size_t i = 0; i < cols.size(); ++i) {
+    ColumnInfo d = Describe(cols[i], det.SlabNames());
+    units[cols[i]] = d.unit;
+    o << (i ? ", " : "") << "{\"semantic\": " << JsonQuote(d.semantic) << ", \"column\": " << JsonQuote(cols[i])
+      << ", \"unit\": " << JsonQuote(d.unit) << ", \"definition\": " << JsonQuote(d.definition)
+      << ", \"file\": \"csv\", \"operation\": {\"kind\": \"rename\"}}";
+  }
+  for (const auto& obs : spec.observables) {
+    o << ", {\"semantic\": " << JsonQuote("observable." + obs.name) << ", \"column\": " << JsonQuote(obs.name)
+      << ", \"unit\": " << JsonQuote(units[obs.source_column]) << ", \"definition\": "
+      << JsonQuote("per-block accumulators of " + obs.source_column + " over the events the selection keeps")
+      << ", \"file\": \"summary\", \"operation\": {\"kind\": " << (obs.selection.empty() ? "\"rename\"" : "\"filter\"")
+      << ", \"source_column\": " << JsonQuote(obs.source_column) << ", \"selection\": [";
+    for (std::size_t c = 0; c < obs.selection.size(); ++c) {
+      const auto& sel = obs.selection[c];
+      o << (c ? ", " : "") << "{\"column\": " << JsonQuote(sel.column) << ", \"op\": " << JsonQuote(sel.op)
+        << ", \"value\": " << (sel.value.isNumber ? g4sim::JsonNum(sel.value.num) : JsonQuote(sel.value.str)) << "}";
+    }
+    o << "]}}";
+  }
+  o << "]}\n";
+}
+
+#ifdef LAYERED_SIM_TEST_HOOKS
+// Tests only: /layered_sim/test/probeAfterInitialize asks for the probe after /run/initialize, before BeamOn;
+// /layered_sim/test/randomGun makes GeneratePrimaries draw the gun position from G4UniformRand.
+class TestMessenger : public G4UImessenger {
+ public:
+  TestMessenger()
+      : fProbe(new G4UIcmdWithoutParameter("/layered_sim/test/probeAfterInitialize", this)),
+        fGun(new G4UIcmdWithoutParameter("/layered_sim/test/randomGun", this)) {
+    fProbe->SetGuidance("tests only: run the probe after /run/initialize (it must write recorded: false)");
+    fGun->SetGuidance("tests only: GeneratePrimaries draws the gun's y and z from G4UniformRand");
+  }
+  ~TestMessenger() override {
+    delete fProbe;
+    delete fGun;
+  }
+  void SetNewValue(G4UIcommand* cmd, G4String) override {
+    if (cmd == fProbe) requested = true;
+    if (cmd == fGun) TestRandomGun() = true;
+  }
+  bool requested = false;
+
+ private:
+  G4UIcmdWithoutParameter* fProbe;
+  G4UIcmdWithoutParameter* fGun;
+};
+#endif
 
 }  // namespace
 
@@ -168,6 +271,9 @@ int main(int argc, char** argv) {
   rm->SetUserInitialization(new ActionInitialization(spec, *det));
 
   G4UImanager* ui = G4UImanager::GetUIpointer();
+#ifdef LAYERED_SIM_TEST_HOOKS
+  TestMessenger testHooks;
+#endif
   for (const auto& cmd : spec.ui_commands) {
     int code = ui->ApplyCommand(cmd);
     std::cout << "LAYERED_SIM_UI " << Quote(cmd) << " " << code << std::endl;
@@ -182,14 +288,35 @@ int main(int argc, char** argv) {
     ui->ApplyCommand("/geometry/test/resolution " + std::to_string(spec.overlap_test_points));
     ui->ApplyCommand("/geometry/test/run");
   }
+  {
+    auto cols = CsvColumns(spec, *det);
+    for (const auto& c : g4sim::NeededColumns(spec.observables))
+      if (std::find(cols.begin(), cols.end(), c) == cols.end())
+        return Status("rejected", "output.observables names column " + c + ", which the CSV does not have");
+  }
+#ifdef LAYERED_SIM_TEST_HOOKS
+  if (testHooks.requested) {
+    std::string dir = spec.probe_out.substr(0, spec.probe_out.size() - std::string("probe.json").size());
+    std::ofstream(dir + "probe.test.json") << g4sim::RunProbe("test hook: after /run/initialize, before BeamOn").json;
+  }
+#endif
   WriteMaterials(*det, spec.materials_out);
   rm->BeamOn(static_cast<int>(spec.events));
-  if (spec.run_manager == "mt") MergeThreadCsv(spec);
+  if (spec.run_manager == "mt") {
+    g4sim::MergeThreadFiles(spec.csv, spec.threads, 2);  // line 1 "# SIMULATION", line 2 the column names
+    if (spec.debug_observable_dump) g4sim::MergeThreadFiles(spec.dump_out, spec.threads, 2);
+  }
+  WriteColumnMap(spec, *det);
 
   std::ofstream dp(spec.datapaths_out);
   dp << "{\"geant4_version\": " << Quote(G4Version) << ", \"before_initialization\": " << EnvJson(envBefore)
      << ", \"after_run\": " << EnvJson(DataEnv()) << "}\n";
   dp.close();
   delete rm;
+  if (Flags().weightRejected)
+    return Status("rejected", "an event has weight != 1 while output.observables accumulates the run summary (A2.3)");
+  if (Flags().summaryError) return Status("rejected", "an event could not be accumulated into the run summary");
+  if (Flags().probeBadGeometry) return Status("rejected", "the probe found an infinite or NaN number in the geometry");
+  if (Flags().probeRandomChanged) return Status("failed", "the probe changed the random-engine state");
   return Status("ok", "");
 }

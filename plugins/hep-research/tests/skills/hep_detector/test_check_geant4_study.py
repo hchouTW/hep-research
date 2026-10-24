@@ -295,5 +295,63 @@ class StudyRecord(unittest.TestCase):
         self.assertEqual(out["highest_usable_label"], "unvalidated")
 
 
+class EffectiveConfigInputs(unittest.TestCase):
+    """Geant4 program A2.4/A2.6: the hadronic model assignment reads the probe first (the declared table otherwise;
+    both present and different is an error), and the thin-layer rule reads the minimum thickness from the effective
+    config's geometry tree when one is given."""
+
+    @staticmethod
+    def config(models, recorded=True):
+        h = float.hex
+        return {"recorded": recorded, "sections": {"geant4": {"hadronic": [
+            {"particle": "proton", "process": "protonInelastic", "via": None,
+             "models": [{"name": n, "min_MeV": h(lo), "max_MeV": h(hi)} for n, lo, hi in models]}]}}}
+
+    def setUp(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        import check_geant4_study as C
+        self.C = C
+        self.ftfp_bert = [("FTFP", 3000.0, 1e8), ("BertiniCascade", 0.0, 6000.0)]
+
+    def test_probe_first_with_the_declared_table_as_fallback(self):
+        settings = {"reference_list": "FTFP_BERT", "particle": "proton", "energy_MeV": 4000.0, "ui_commands": []}
+        ma = self.C.model_assignment(settings, "hadronic", self.config(self.ftfp_bert))
+        self.assertEqual((ma["model"], ma["source"]), ("BERT/FTFP", "probe"))
+        self.assertNotIn("source", self.C.model_assignment(settings, "hadronic"))  # declared
+        self.assertNotIn("source", self.C.model_assignment(settings, "hadronic",
+                                                           self.config(self.ftfp_bert, recorded=False)))
+        for e, want in ((1000.0, "BERT"), (3000.0, "BERT"), (4500.0, "BERT/FTFP"), (6000.0, "BERT/FTFP"),
+                        (10000.0, "FTFP")):
+            self.assertEqual(self.C.probe_hadronic_model(self.config(self.ftfp_bert), "proton", e), want)
+        # the edge convention agrees with the declared table at every FTFP_BERT boundary (review finding)
+        for e in (3000.0, 6000.0, 12000.0, 25000.0):
+            s = {**settings, "energy_MeV": e}
+            self.assertEqual(self.C.model_assignment(s, "hadronic", self.config(self.ftfp_bert))["model"],
+                             self.C.model_assignment(s, "hadronic")["model"])
+
+    def test_probe_and_declaration_disagreeing_is_an_error(self):
+        settings = {"reference_list": "FTFP_BERT", "particle": "proton", "energy_MeV": 1000.0, "ui_commands": []}
+        with self.assertRaises(self.C.StudyError):
+            self.C.model_assignment(settings, "hadronic", self.config([("Binary Cascade", 0.0, 6000.0)]))
+
+    def test_thin_layer_rule_reads_the_geometry_tree(self):
+        h = float.hex
+        ec = {"recorded": True, "geometry": {"tree": {
+            "logical_volumes": [{"id": 0, "name": "World", "solid": {"type": "G4Box", "parameters": {
+                "half_x_mm": h(1.0), "half_y_mm": h(1.0), "half_z_mm": h(1.0)}}, "material": "V"},
+                {"id": 1, "name": "Si", "solid": {"type": "G4Box", "parameters": {
+                    "half_x_mm": h(0.025), "half_y_mm": h(1.0), "half_z_mm": h(1.0)}}, "material": "S"}],
+            "placements": [{"name": "World", "copy_number": 0, "logical": 0, "mother_logical": None},
+                           {"name": "Si", "copy_number": 0, "logical": 1, "mother_logical": 0}]}}}
+        study = {"physics": {"layered_sim": {"geometry": {"layers": [{"slabs": [{"name": "Si", "thickness_mm": 0.3}]}]},
+                                             "physics": {"em_constructor": "G4EmStandardPhysics_option4"}}}}
+        self.assertEqual(self.C.derived(study)["min_thickness_mm"], 0.3)
+        self.assertNotIn("min_thickness_basis", self.C.derived(study))  # spec/1: output unchanged
+        d = self.C.derived(study, ec)
+        self.assertEqual((d["min_thickness_mm"], d["min_thickness_basis"]), (0.05, "effective config"))
+        with self.assertRaises(self.C.StudyError):
+            self.C.derived(study, {"recorded": False})
+
+
 if __name__ == "__main__":
     unittest.main()

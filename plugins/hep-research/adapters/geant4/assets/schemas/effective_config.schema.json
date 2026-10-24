@@ -1,0 +1,152 @@
+{
+ "$comment": "Effective config of a Geant4 run (geant4 adapter 0.2.0, Geant4 program A2.4; owner adapters/geant4, versioned by probe_version). Written by geant4_run.py from the probe layered_sim (g4sim/SimProbe.hh) records on the master at the start of the run; stored once per content hash as effective_configs/<config_sha256>.json. Numbers inside geometry and sections are strings in the format of Python's float.hex(). config_sha256 is the sha256 of the JSON (sorted keys, no whitespace) of the document without config_sha256. Validated by the adapter's scripts with contracts.schema.validate.",
+ "type": "object",
+ "required": [
+  "engine",
+  "engine_version",
+  "probe_version",
+  "backend",
+  "source",
+  "recorded",
+  "config_sha256",
+  "seeding",
+  "geometry",
+  "environment_ref",
+  "sections"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "engine": {
+   "const": "geant4"
+  },
+  "engine_version": {
+   "type": "string",
+   "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  },
+  "probe_version": {
+   "type": "string",
+   "pattern": "^g4sim-probe/[0-9]+$"
+  },
+  "backend": {
+   "type": "object",
+   "required": [
+    "name",
+    "version",
+    "sources_sha256"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "type": "string",
+     "minLength": 1
+    },
+    "version": {
+     "type": "string",
+     "minLength": 1
+    },
+    "sources_sha256": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$",
+     "description": "sha256 of the JSON of the run record's program.sources_sha256 map"
+    }
+   }
+  },
+  "source": {
+   "enum": [
+    "probe",
+    "declared"
+   ]
+  },
+  "recorded": {
+   "type": "boolean",
+   "description": "false: the probe did not run in state G4State_GeomClosed with couples; the run cannot upgrade"
+  },
+  "config_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "seeding": {
+   "type": "object",
+   "required": [
+    "mode"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "mode": {
+     "enum": [
+      "stream",
+      "per-event"
+     ]
+    },
+    "logical_run_seed": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    }
+   }
+  },
+  "geometry": {
+   "type": "object",
+   "required": [
+    "tree",
+    "tree_sha256",
+    "naming_sha256",
+    "hash_scheme",
+    "gdml_sha256"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "tree": {
+     "type": [
+      "object",
+      "null"
+     ],
+     "description": "the probe's flat list: logical_volumes, placements (with mother_logical), materials, global_field, units"
+    },
+    "tree_sha256": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "naming_sha256": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "canonical_ties": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "hash_scheme": {
+     "const": "tree-v1"
+    },
+    "gdml_sha256": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   }
+  },
+  "environment_ref": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$",
+   "description": "sha256 of the build record (dataset paths and content hashes are recorded there once)"
+  },
+  "sections": {
+   "type": "object",
+   "required": [
+    "geant4"
+   ],
+   "properties": {
+    "geant4": {
+     "type": "object",
+     "description": "the probe's other sections: em_parameters, cuts, hadronic, general_processes, biasing, run_manager, application_state, couples, random_state_unchanged"
+    }
+   }
+  }
+ }
+}

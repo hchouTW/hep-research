@@ -19,21 +19,26 @@ Subcommands:
   build-sim  configure and build layered_sim against the installation of a build record
   run        one spec -> <work>/<run-id>/ (events.csv, materials.json, datapaths.json, log.txt, spec.json) and --record
   scan       base spec + parameter grid -> specs and a workflow.json for skills/hep-computing/scripts/run_workflow.py
-             (point k gets seeds [s0, s1 + k] unless the grid scans run.seeds);
+             (point k gets seeds [s0, s1 + k] unless the grid scans run.seeds; from adapter 0.2.0 a base spec without
+             run.seeding gets per-event seeding with run.logical_run_seed H(grid name, point id), --seeding stream
+             keeps the stream);
              a step whose estimated time (events / --events-per-second) exceeds 3600 s is refused: partition it
   chunk      a local_partition.py worker: events [start, stop) with the chunk's seed (with --logical-run-seed S the
              job seeds H(S, start, 0), H(S, start, 1), core/simulation/seeds.py); writes additive sums only
              (n_events, sum_*, sumsq_*) plus {"csv": [{path, sha256}], "records": [...]} for --rule csv=concat
-  summarize  means and standard errors from a merged partition result (non-additive quantities after the merge);
-             with --work, the chunk CSVs are checked against the merged hashes and for duplicate event numbers;
-             with --single-record, each mean is compared with one unpartitioned run (|z| <= --z-max, default 3)
+  summarize  from adapter 0.2.0 (chunks with output.observables carry their summaries; merge with
+             --rule summaries=concat): the summaries merged block by block and each observable's batch-means mean and
+             SE, reading no CSV (A2.6); for older partitions, means and standard errors from the additive sums
+             (non-additive quantities after the merge); with --work, the chunk CSVs are checked against the merged
+             hashes and for duplicate event numbers; with --single-record, each mean is compared with one
+             unpartitioned run (|z| <= --z-max, default 3)
   reduce     a gzip-compressed copy (mtime 0, byte-reproducible) of chosen columns of a run's CSV, for replay
   oracle     run hep-detector's geant4_benchmarks.py on a recorded run through a subprocess (never imported)
 Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_run.py build-sim --build-record BUILD.json --work DIR
   python3 adapters/geant4/assets/geant4_run.py run --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --run-id ID --record OUT.json
       [--evidence-role ROLE --point-id ID [--logical-run-seed S]]
-  python3 adapters/geant4/assets/geant4_run.py scan --base SPEC.json --grid GRID.json --exe EXE --build-record BUILD.json --out-dir DIR --events-per-second R
+  python3 adapters/geant4/assets/geant4_run.py scan --base SPEC.json --grid GRID.json --exe EXE --build-record BUILD.json --out-dir DIR --events-per-second R [--seeding per-event|stream]
   python3 adapters/geant4/assets/geant4_run.py chunk --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --start A --stop B --seed S --id ID --out OUT.json
   python3 adapters/geant4/assets/geant4_run.py summarize --merged MERGED.json [--work DIR] [--single-record RUN.json]
   python3 adapters/geant4/assets/geant4_run.py reduce --csv EVENTS.csv --columns C1 C2 ... --out OUT.csv.gz
@@ -47,6 +52,7 @@ from __future__ import annotations
 
 import datetime
 import gzip
+import hashlib
 import itertools
 import json
 import math
@@ -60,11 +66,24 @@ sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from g4common import (ASSETS, DATA_VARS, PLUGIN, JsonArgumentParser, SpecError, build_record_ok, data_env,  # noqa: E402
                       expand, install_prefix, record_skeleton, sha256_file, sha256_json, tilde, write_json)
-from core.simulation.seeds import job_seeds  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
+from contracts.schema import validate  # noqa: E402
+from contracts.validate import geant4_spec_v1, geant4_tree_v1  # noqa: E402
+from core.simulation import estimates as ESTIMATES, summary as SUMMARY  # noqa: E402
+from core.simulation.seeds import H, job_seeds  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
-SIM_SOURCES = ("CMakeLists.txt", "MiniJson.hh", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Physics.hh",
-               "Physics.cc", "Actions.hh", "Actions.cc", "layered_sim.cc")
+# every source file of the layered_sim build, as paths under assets/ (adapter 0.2.0: the g4sim/ group was added and
+# MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths)
+ADAPTER_VERSION = "0.2.0"
+SCHEMAS = ASSETS / "schemas"
+STRING_COLUMNS = ("primary_end_process",)  # the only non-numeric CSV column (output.schema.json)
+A2_OUTPUTS = ("summary.json", "column_map.json", "probe.json", "observables_dump.csv")  # adapter 0.2.0
+SIM_SOURCES = tuple(f"layered_sim/{s}" for s in (
+    "CMakeLists.txt", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Physics.hh", "Physics.cc", "Actions.hh",
+    "Actions.cc", "layered_sim.cc")) + tuple(f"g4sim/{s}" for s in (
+        "MiniJson.hh", "SimHash.hh", "SimSeed.hh", "SimSummary.hh", "SimObservables.hh", "SimProbe.hh", "SimCsv.hh",
+        "SimMaterials.hh", "SimPhysics.hh"))
 BENCHMARKS = PLUGIN / "skills" / "hep-detector" / "scripts" / "geant4_benchmarks.py"
 STEP_LIMIT_S = 3600  # skills/hep-computing/scripts/run_workflow.py STEP_TIMEOUT_S
 STATES = ("solid", "liquid", "gas")
@@ -204,7 +223,14 @@ def validate_spec(spec: dict) -> None:
     if not -0.5 <= f < 0:
         raise SpecError("gun.world_fraction must be in [-0.5, 0): the gun starts upstream, inside the world")
     run = spec["run"]
-    _keys(run, "run", ("events", "first_event", "chunk", "seeds", "run_manager", "threads"), ("events", "seeds"))
+    _keys(run, "run", ("events", "first_event", "chunk", "seeds", "run_manager", "threads", "seeding",
+                       "logical_run_seed"), ("events", "seeds"))
+    if run.get("seeding", "stream") not in ("stream", "per-event"):
+        raise SpecError("run.seeding must be stream or per-event")
+    if "logical_run_seed" in run:
+        _int(run["logical_run_seed"], "run.logical_run_seed", 1)
+    if run.get("seeding") == "per-event" and "logical_run_seed" not in run:
+        raise SpecError("run.seeding per-event needs run.logical_run_seed (S, core/simulation/seeds.py)")
     _int(run["events"], "run.events", 1)
     _int(run.get("first_event", 0), "run.first_event", 0)
     if not isinstance(run["seeds"], list) or len(run["seeds"]) != 2:
@@ -215,7 +241,64 @@ def validate_spec(spec: dict) -> None:
         raise SpecError("run.run_manager must be serial or mt")
     _int(run.get("threads", 1), "run.threads", 1)
     out = spec.get("output", {})
-    _keys(out, "output", ("overlap_test_points", "per_instance"))
+    _keys(out, "output", ("overlap_test_points", "per_instance", "observables", "blocks", "debug_observable_dump"))
+    if ("observables" in out) != ("blocks" in out):
+        raise SpecError("output.observables and output.blocks go together")
+    if "observables" in out:
+        rep = validate(out["observables"], "simulation_observables.json")
+        if not rep.ok:
+            raise SpecError("output.observables is not a simulation-observables/1 declaration: "
+                            + "; ".join(f"{f.path} {f.message}" for f in rep.errors)[:400])
+        names = [o["name"] for o in out["observables"]]
+        if len(set(names)) != len(names):
+            raise SpecError(f"output.observables: names must be unique ({names})")
+        cols = set(csv_columns(spec))
+        for o in out["observables"]:
+            needed = {o["source_column"], *(c["column"] for c in o.get("selection") or [])}
+            if needed - cols:
+                raise SpecError(f"output.observables {o['name']}: columns {sorted(needed - cols)} are not CSV columns")
+            if o["source_column"] in STRING_COLUMNS:
+                raise SpecError(f"output.observables {o['name']}: source_column {o['source_column']} is not numeric")
+            for c in o.get("selection") or []:
+                if c["op"] in ("contains", "!contains") and (c["column"] not in STRING_COLUMNS
+                                                             or not isinstance(c["value"], str)):
+                    raise SpecError(f"output.observables {o['name']}: {c['op']} needs a string column and a string "
+                                    "value (the C++ and Python summaries agree only there)")
+            n = (o["bins"]["hi"] - o["bins"]["lo"]) / o["bins"]["width"]
+            if round(n) < 1 or abs(n - round(n)) > 1e-9 * max(1.0, n):
+                raise SpecError(f"output.observables {o['name']}: (hi - lo) / width must be a positive integer")
+        b = out["blocks"]
+        _keys(b, "output.blocks", ("blocks", "block_size", "first_event"), ("blocks", "block_size"))
+        _int(b["blocks"], "output.blocks.blocks", 2)  # batch means need at least two blocks
+        _int(b["block_size"], "output.blocks.block_size", 1)
+        _int(b.get("first_event", 0), "output.blocks.first_event", 0)
+        if b.get("first_event", 0) > run.get("first_event", 0):
+            raise SpecError("output.blocks.first_event (the logical run's first event) is after run.first_event")
+    if not isinstance(out.get("debug_observable_dump", False), bool):
+        raise SpecError("output.debug_observable_dump must be true or false")
+    if out.get("debug_observable_dump") and "observables" not in out:
+        raise SpecError("output.debug_observable_dump needs output.observables")
+
+
+def csv_columns(spec: dict) -> list[str]:
+    """The per-event CSV columns of a spec (layered_sim Actions.cc CsvColumns; output.schema.json)."""
+    names, placements = [], 0
+    for layer in spec["geometry"]["layers"]:
+        placements += layer.get("repeat", 1) * len(layer["slabs"])
+        for s in layer["slabs"]:
+            if s["name"] not in names:
+                names.append(s["name"])
+    cols = ["event", "chunk", "weight", "primary_pdg", "primary_ekin_MeV", "primary_x_mm", "primary_y_mm",
+            "primary_z_mm", "primary_dx", "primary_dy", "primary_dz"]
+    for n in names:
+        cols += [f"edep_{n}_MeV", f"chlen_{n}_mm", f"plen_{n}_mm"]
+    if (spec.get("output") or {}).get("per_instance"):
+        cols += [f"edep_copy{i}_MeV" for i in range(placements)]
+    return cols + ["edep_world_MeV", "leak_gamma_MeV", "leak_e_MeV", "leak_nu_MeV", "leak_other_MeV", "leak_rear_MeV",
+                   "leak_front_MeV", "leak_lateral_MeV", "killed_booked_MeV", "killed_unbooked_MeV", "killed_eplus",
+                   "exit_ekin_MeV", "primary_eloss_MeV", "exit_dx", "exit_dy", "exit_dz", "primary_fate",
+                   "primary_end_x_mm", "primary_end_process", "n_sec_gamma", "n_sec_electron", "n_sec_positron",
+                   "n_sec_other"]
 
 
 def effective_spec(spec: dict) -> dict:
@@ -315,19 +398,23 @@ def run_one(spec: dict, exe: Path, build: dict, build_path: Path, work: Path, ru
     problems += dp_problems
     overlaps = text.count("GeomVol1002")
     outputs = {}
-    for name in ("spec.json", "events.csv", "materials.json", "datapaths.json", "log.txt"):
+    for name in ("spec.json", "events.csv", "materials.json", "datapaths.json", "log.txt") + A2_OUTPUTS:
         if (run_dir / name).is_file():
             outputs[f"{run_id}/{name}"] = sha256_file(run_dir / name)
     if "events.csv" not in " ".join(outputs) and not problems:
         problems.append("layered_sim wrote no events.csv")
-    ok = not problems
     b = build["extension"]["build"]
     run = spec["run"]
+    sources = {s: sha256_file(ASSETS / s) for s in SIM_SOURCES}
+    a2 = boundary_artifacts(spec, run_dir, work, build_path, sources, problems)
+    if a2.get("inconsistent"):
+        return "rejected", {"error": a2["inconsistent"], "run_dir": tilde(run_dir)}, {}
+    ok = not problems
     sim = {
         "geant4": {"version": datapaths.get("geant4_version"), "tag": b["tag"], "commit": b["commit"],
                    "build_record_sha256": sha256_file(build_path)},
-        "program": {"name": "layered_sim", "path": tilde(exe), "sha256": sha256_file(exe),
-                    "sources_sha256": {s: sha256_file(ASSETS / "layered_sim" / s) for s in SIM_SOURCES}},
+        "program": {"name": "layered_sim", "path": tilde(exe), "sha256": sha256_file(exe), "adapter": ADAPTER_VERSION,
+                    "sources_sha256": sources},
         "datasets": rows, "data_path_problems": dp_problems,
         "physics": spec["physics"], "ui_commands": spec.get("ui_commands", []),
         "cuts": {"default_mm": spec["physics"]["default_cut_mm"], "regions": spec["physics"].get("regions", [])},
@@ -340,13 +427,114 @@ def run_one(spec: dict, exe: Path, build: dict, build_path: Path, work: Path, ru
         "run_manager": run.get("run_manager", "serial"), "threads": run.get("threads", 1),
         "overlap_reports": overlaps,
         "data_overrides": {k: tilde(v) for k, v in overrides.items()},
+        "seeding": run.get("seeding", "stream"),
+        **{k: v for k, v in a2.items() if k != "inconsistent"},
     }
     return ("ok" if ok else "failed"), {"run_dir": tilde(run_dir), "problems": problems, "outputs": outputs}, \
         {"simulation": sim, "outputs": outputs, "exit": p.returncode, "ok": ok}
 
 
+def build_effective_config(probe: dict, spec: dict, build_path: Path, sources: dict) -> dict:
+    """The effective config of a run (A2.4; schemas/effective_config.schema.json) from layered_sim's probe.json:
+    the probe's geometry with its tree-v1 hashes (contracts.validate.geant4_tree_v1), its other sections, the seeding,
+    the backend and the build record it ran against; config_sha256 over everything else."""
+    run = spec["run"]
+    recorded = bool(probe.get("recorded"))
+    tree = probe.get("geometry") if recorded else None
+    hashes = geant4_tree_v1({"geometry": {"tree": tree}}, None) if tree else {}
+    sections = {k: v for k, v in probe.items() if k not in ("geometry", "probe_version", "engine", "engine_version",
+                                                            "recorded")}
+    ec = {"engine": "geant4", "engine_version": probe.get("engine_version", ""),
+          "probe_version": probe.get("probe_version", ""),
+          "backend": {"name": "layered_sim", "version": ADAPTER_VERSION, "sources_sha256": sha256_json(sources)},
+          "source": "probe" if recorded else "declared", "recorded": recorded,
+          "seeding": {"mode": run.get("seeding", "stream"), "logical_run_seed": run.get("logical_run_seed")},
+          "geometry": {"tree": tree, "tree_sha256": hashes.get("tree_sha256"),
+                       "naming_sha256": hashes.get("naming_sha256"), "hash_scheme": "tree-v1", "gdml_sha256": None,
+                       **({"canonical_ties": hashes["canonical_ties"]} if hashes else {})},
+          "environment_ref": sha256_file(build_path), "sections": {"geant4": sections}}
+    ec["config_sha256"] = hashlib.sha256(json.dumps(ec, sort_keys=True, separators=(",", ":"))
+                                         .encode("utf-8")).hexdigest()  # sorted keys, no whitespace (the schema)
+    return ec
+
+
+def store_effective_config(ec: dict, work: Path) -> Path:
+    """effective_configs/<config_sha256>.json under the work folder, written once per content hash; an existing file
+    with other content under that name is an error."""
+    path = work / "effective_configs" / f"{ec['config_sha256']}.json"
+    body = json.dumps(ec, indent=1, sort_keys=True) + "\n"
+    if path.is_file():
+        if json.loads(path.read_text(encoding="utf-8")) != ec:
+            raise SpecError(f"{tilde(path)} exists with other content")
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(body, encoding="utf-8")
+    return path
+
+
+def consistency(spec: dict, ec: dict) -> str | None:
+    """A2.6: the configuration decision (isolated or embedded) via spec-v1 (from spec/1) and via tree-v1 (from the
+    effective config) must agree for every slab alone and for all slabs together; None, or what disagrees."""
+    if not ec.get("recorded"):
+        return None
+    names = []
+    for layer in spec["geometry"]["layers"]:
+        names += [s["name"] for s in layer["slabs"] if s["name"] not in names]
+    sim = {"geometry": spec["geometry"], "materials": spec.get("materials", [])}
+    for target in [[n] for n in names] + ([names] if len(names) > 1 else []):
+        a, b = geant4_spec_v1(sim, target), geant4_tree_v1(ec, target)
+        if a["configuration"] != b["configuration"]:
+            return (f"target {target}: spec-v1 gives {a['configuration']}, tree-v1 gives {b['configuration']}; "
+                    "the effective config and spec/1 disagree")
+    return None
+
+
+def boundary_artifacts(spec: dict, run_dir: Path, work: Path, build_path: Path, sources: dict,
+                       problems: list) -> dict:
+    """A2.3-A2.5: the summary, column map and effective config of a finished run, checked and hashed for the run
+    record's extension.simulation; problems (a file that does not validate, a probe that changed the random state)
+    are appended to `problems`; {"inconsistent": why} when spec-v1 and tree-v1 disagree (the caller rejects)."""
+    out: dict = {}
+    summary = run_dir / "summary.json"
+    if (spec.get("output") or {}).get("observables"):
+        if not summary.is_file():
+            problems.append("output.observables is declared but layered_sim wrote no summary.json")
+        else:
+            rep = validate(json.loads(summary.read_text(encoding="utf-8")), "simulation_summary.json")
+            if not rep.ok:
+                problems.append("summary.json does not validate: " + "; ".join(f.message for f in rep.errors)[:300])
+            out["summary"] = {"ref": f"{run_dir.name}/summary.json", "sha256": sha256_file(summary)}
+    cmap = run_dir / "column_map.json"
+    if cmap.is_file():
+        rep = validate(json.loads(cmap.read_text(encoding="utf-8")), str(SCHEMAS / "column_map.schema.json"))
+        if not rep.ok:
+            problems.append("column_map.json does not validate: " + "; ".join(f.message for f in rep.errors)[:300])
+        out["column_map"] = {"ref": f"{run_dir.name}/column_map.json", "sha256": sha256_file(cmap)}
+    probe_path = run_dir / "probe.json"
+    if not probe_path.is_file():
+        problems.append("layered_sim wrote no probe.json")
+        return out
+    probe = json.loads(probe_path.read_text(encoding="utf-8"))
+    if probe.get("random_state_unchanged") is not True:
+        problems.append("the probe changed the random-engine state")
+    ec = build_effective_config(probe, spec, build_path, sources)
+    rep = validate(ec, str(SCHEMAS / "effective_config.schema.json"))
+    if not rep.ok:
+        problems.append("the effective config does not validate: " + "; ".join(f.message for f in rep.errors)[:300])
+    why = consistency(spec, ec)
+    if why:
+        return {"inconsistent": why}
+    stored = store_effective_config(ec, work)
+    out["effective_config"] = {"config_sha256": ec["config_sha256"], "ref": str(stored.relative_to(work)),
+                               "recorded": ec["recorded"], "source": ec["source"], "geometry": ec["geometry"]}
+    return out
+
+
 def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: Path, result: dict, work: Path,
-                     created: str) -> dict:
+                     created: str, argv: list[str] | None = None) -> dict:
+    """The computational-run record of one layered_sim run; from adapter 0.2.0 also argv (the command actually run,
+    interpreter first), script_sha256 (this script, keyed as it appears in argv) and versions.plugin_release
+    (contracts/identity.py), as run_workflow.py writes them."""
     sim = result["simulation"]
     rec = record_skeleton(f"geant4-run-{run_id}",
                           f"Geant4 layered_sim run {run_id}: {spec['gun']['particle']} {spec['gun']['energy_MeV']} MeV, "
@@ -361,6 +549,10 @@ def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: 
                         "G4FORCE_RUN_MANAGER_TYPE": "unset"},
         "seeds": {"layered_sim": sim["random"]["seeds"]}, "tolerances": {},
         "exit_status": 0 if result["ok"] else 1, "output_hashes": result["outputs"], "simulation": sim}
+    if argv:
+        rec["extension"]["argv"] = list(argv)
+        rec["extension"]["script_sha256"] = {a: sha256_file(Path(a)) for a in argv if a.endswith(".py") and Path(a).is_file()}
+    rec["versions"]["plugin_release"] = plugin_release()
     write_json(path, rec)
     return rec
 
@@ -398,7 +590,7 @@ def cmd_build_sim(args) -> tuple[str, dict]:
     if any(codes) or not exe.is_file():
         return "failed", {"error": "layered_sim did not build", "log": tilde(log), "exit_codes": codes}
     return "ok", {"exe": tilde(exe), "sha256": sha256_file(exe),
-                  "sources_sha256": {s: sha256_file(ASSETS / "layered_sim" / s) for s in SIM_SOURCES}}
+                  "sources_sha256": {s: sha256_file(ASSETS / s) for s in SIM_SOURCES}}
 
 
 def _exe(path: str) -> Path:
@@ -442,7 +634,7 @@ def cmd_run(args) -> tuple[str, dict]:
     _evidence_fields(result["simulation"], args)
     created = args.created or datetime.date.today().isoformat()
     record_path = expand(str(args.record))
-    write_run_record(record_path, args.run_id, spec_path, spec, exe, result, work, created)
+    write_run_record(record_path, args.run_id, spec_path, spec, exe, result, work, created, args.argv_run)
     summary["record"] = tilde(record_path)
     return status, summary
 
@@ -473,8 +665,10 @@ def cmd_scan(args) -> tuple[str, dict]:
             _set(spec, n, v)
         if "run.seeds" not in params:  # independent samples per point: the convergence gate's SE assumes them
             spec["run"]["seeds"] = [spec["run"]["seeds"][0], spec["run"]["seeds"][1] + k]
-        validate_spec(spec)
         sid = f"{grid.get('name', 'scan')}-{k:03d}"
+        if args.seeding == "per-event" and "seeding" not in base["run"]:  # A2.2: new studies seed per event
+            spec["run"].update(seeding="per-event", logical_run_seed=H(grid.get("name", "scan"), sid))
+        validate_spec(spec)
         est = spec["run"]["events"] / args.events_per_second
         if est > STEP_LIMIT_S:
             refused.append({"id": sid, "estimated_s": est})
@@ -531,7 +725,7 @@ def cmd_chunk(args) -> tuple[str, dict]:
         return status, summary
     created = args.created or datetime.date.today().isoformat()
     rec_path = work / "records" / f"{args.id}.computational-run.json"
-    write_run_record(rec_path, args.id, expand(str(args.spec)), spec, exe, result, work, created)
+    write_run_record(rec_path, args.id, expand(str(args.spec)), spec, exe, result, work, created, args.argv_run)
     cols, rows = read_csv(work / args.id / "events.csv")
     sums = {"n_events": len(rows)}
     for i, c in enumerate(cols):
@@ -540,14 +734,54 @@ def cmd_chunk(args) -> tuple[str, dict]:
             sums[f"sum_{c}"] = math.fsum(vals)
             sums[f"sumsq_{c}"] = math.fsum(v * v for v in vals)
     sums["csv"] = [{"path": f"{args.id}/events.csv", "sha256": sha256_file(work / args.id / "events.csv")}]
+    if (work / args.id / "summary.json").is_file():  # adapter 0.2.0: merge with --rule summaries=concat
+        sums["summaries"] = [{"path": f"{args.id}/summary.json", "sha256": sha256_file(work / args.id / "summary.json")}]
     sums["records"] = [{"path": f"records/{args.id}.computational-run.json", "sha256": sha256_file(rec_path)}]
     write_json(expand(str(args.out)), sums)
     return "ok", {"chunk": args.id, "n_events": len(rows)}
 
 
+def summarize_summaries(res: dict, work: Path) -> tuple[str, dict]:
+    """A2.6: the chunks' run summaries (simulation-summary/1) merged block by block (core/simulation/summary.py) and
+    each declared observable estimated from the merged summary (core/simulation/estimates.py, mean unless the
+    summary was declared otherwise); no CSV is read. Every summary must match its merged hash."""
+    docs, problems = [], []
+    for c in res["summaries"]:
+        f = work / c["path"]
+        if not f.is_file() or sha256_file(f) != c["sha256"]:
+            problems.append(f"{c['path']}: missing or changed since the merge")
+            continue
+        docs.append(json.loads(f.read_text(encoding="utf-8")))
+    if not docs:
+        return "failed", {"source": "summaries", "problems": problems or ["no summary to merge"]}
+    try:
+        merged = SUMMARY.merge(docs)
+    except (ValueError, IndexError, KeyError) as exc:
+        return "rejected", {"source": "summaries", "error": f"the chunk summaries do not merge: {exc}"}
+    out = {}
+    for o in merged["observables"]:
+        try:
+            r = ESTIMATES.estimate(merged, {"name": o["name"], "estimator": "mean"})
+            out[o["name"]] = {"mean": r["value"], "se": r["se"], "dof": r["dof"], "n": r["n"]}
+        except ValueError as exc:  # SummaryError, BatchMeansError (fewer than 2 usable blocks)
+            out[o["name"]] = {"error": str(exc)}
+    run = merged["run"]
+    if run["events_in_blocks"] + run["events_ignored"] != res.get("n_events", run["events_in_blocks"]
+                                                                  + run["events_ignored"]):
+        problems.append(f"the summaries hold {run['events_in_blocks'] + run['events_ignored']} events, "
+                        f"the merge {res.get('n_events')}")
+    return ("ok" if not problems else "failed"), {
+        "source": "summaries", "summaries": len(docs), "events_in_blocks": run["events_in_blocks"],
+        "events_ignored": run["events_ignored"], "observables": out, "problems": problems}
+
+
 def cmd_summarize(args) -> tuple[str, dict]:
     merged = json.loads(expand(str(args.merged)).read_text(encoding="utf-8"))
     res = merged.get("merged", merged)
+    if res.get("summaries"):
+        if not args.work:
+            raise SpecError("--work (the chunk work folder) is needed to read the chunks' summaries")
+        return summarize_summaries(res, expand(str(args.work)))
     n = res.get("n_events")
     if not isinstance(n, (int, float)) or n < 2:
         raise SpecError("the merged result needs n_events >= 2")
@@ -655,6 +889,9 @@ def main(argv=None) -> int:
         p.add_argument(name, required=True)
     p.add_argument("--events-per-second", type=float, required=True)
     p.add_argument("--created")
+    p.add_argument("--seeding", choices=("per-event", "stream"), default="per-event",
+                   help="seeding of the written specs when the base spec states none (default per-event: point k gets "
+                        "run.logical_run_seed H(grid name, point id))")
     p = sub.add_parser("chunk", help="local_partition.py worker")
     for name in ("--spec", "--exe", "--build-record", "--work", "--id", "--out"):
         p.add_argument(name, required=True)
@@ -678,9 +915,11 @@ def main(argv=None) -> int:
     for sp in sub.choices.values():
         add_status_argument(sp)
     args = ap.parse_args(argv)
-    inputs = {k: v for k, v in vars(args).items() if k != "status"}
+    args.argv_run = [sys.executable, str(Path(__file__).resolve()), *(sys.argv[1:] if argv is None else argv)]
+    inputs = {k: v for k, v in vars(args).items() if k not in ("status", "argv_run")}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "status") if hasattr(args, k) and f"--{k}" not in given]
+    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "status") if hasattr(args, k)
+                and f"--{k}" not in given]
     handlers = {"build-sim": cmd_build_sim, "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk,
                 "summarize": cmd_summarize, "reduce": cmd_reduce, "oracle": cmd_oracle}
     try:

@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "MiniJson.hh"
+#include "SimObservables.hh"
 
 using minijson::JsonError;
 using minijson::Value;
@@ -142,6 +143,11 @@ Spec ReadSpec(const std::string& path) {
   s.threads = static_cast<int>(optNumber(r, "threads", 1, "run"));
   if (s.events < 1) throw JsonError("run.events must be at least 1");
   if (s.run_manager != "serial" && s.run_manager != "mt") throw JsonError("run.run_manager must be serial or mt");
+  s.seeding = optString(r, "seeding", "stream", "run");
+  if (s.seeding != "stream" && s.seeding != "per-event") throw JsonError("run.seeding must be stream or per-event");
+  s.logical_run_seed = static_cast<long long>(optNumber(r, "logical_run_seed", 0, "run"));
+  if (s.seeding == "per-event" && s.logical_run_seed < 1)
+    throw JsonError("run.seeding per-event needs run.logical_run_seed (a positive integer)");
 
   const Value& o = root.at("output", "spec");
   s.csv = o.at("csv", "output").string("output.csv");
@@ -149,6 +155,35 @@ Spec ReadSpec(const std::string& path) {
   s.datapaths_out = o.at("datapaths", "output").string("output.datapaths");
   s.overlap_test_points = static_cast<int>(optNumber(o, "overlap_test_points", 0, "output"));
   s.per_instance = optBool(o, "per_instance", false, "output");
+  if (o.has("observables") != o.has("blocks"))
+    throw JsonError("output.observables and output.blocks go together");
+  if (o.has("observables")) {
+    s.observables = g4sim::ParseObservables(o.obj.at("observables"), "output.observables");
+    const Value& b = o.obj.at("blocks");
+    s.blocks = static_cast<long>(b.at("blocks", "output.blocks").number("output.blocks.blocks"));
+    s.block_size = static_cast<long>(b.at("block_size", "output.blocks").number("output.blocks.block_size"));
+    s.block_first_event = static_cast<long>(optNumber(b, "first_event", 0, "output.blocks"));
+    if (s.blocks < 2 || s.block_size < 1 || s.block_first_event < 0)
+      throw JsonError("output.blocks: blocks at least 2, block_size positive and first_event not negative");
+    if (s.block_first_event > s.first_event)
+      throw JsonError("output.blocks.first_event (the logical run's first event) is after run.first_event");
+    for (const auto& ob : s.observables) {
+      if (ob.source_column == "primary_end_process")
+        throw JsonError("output.observables " + ob.name + ": source_column " + ob.source_column + " is not numeric");
+      for (const auto& c : ob.selection)
+        if ((c.op == "contains" || c.op == "!contains") && (c.column != "primary_end_process" || c.value.isNumber))
+          throw JsonError("output.observables " + ob.name + ": " + c.op + " needs a string column and a string value");
+    }
+  }
+  s.debug_observable_dump = optBool(o, "debug_observable_dump", false, "output");
+  if (s.debug_observable_dump && s.observables.empty())
+    throw JsonError("output.debug_observable_dump needs output.observables");
+  std::size_t slash = s.csv.rfind('/');
+  std::string dir = slash == std::string::npos ? "" : s.csv.substr(0, slash + 1);
+  s.summary_out = dir + "summary.json";
+  s.column_map_out = dir + "column_map.json";
+  s.probe_out = dir + "probe.json";
+  s.dump_out = dir + "observables_dump.csv";
 
   std::set<std::string> names;
   for (const auto& n : s.slabNames()) names.insert(n);

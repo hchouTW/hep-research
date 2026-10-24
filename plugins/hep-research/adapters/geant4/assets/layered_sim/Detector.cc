@@ -13,25 +13,11 @@
 #include "G4Region.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4UserLimits.hh"
+#include "SimMaterials.hh"
 
 Detector::Detector(const Spec& spec) : fSpec(spec), fNames(spec.slabNames()) {}
 
-G4Material* Detector::Material(const std::string& name) {
-  if (auto* m = G4Material::GetMaterial(name, false)) return m;
-  for (const auto& d : fSpec.materials) {
-    if (d.name != name) continue;
-    G4State state = d.state == "gas" ? kStateGas : d.state == "liquid" ? kStateLiquid : kStateSolid;
-    double t = d.temperature_K > 0 ? d.temperature_K * kelvin : NTP_Temperature;
-    double p = d.pressure_Pa > 0 ? d.pressure_Pa * pascal : CLHEP::STP_Pressure;
-    if (d.components.empty())
-      return new G4Material(d.name, d.z, d.a_g_mole * g / mole, d.density_g_cm3 * g / cm3, state, t, p);
-    auto* mix = new G4Material(d.name, d.density_g_cm3 * g / cm3, static_cast<G4int>(d.components.size()), state, t, p);
-    for (const auto& [component, fraction] : d.components) mix->AddMaterial(Material(component), fraction);
-    return mix;
-  }
-  if (auto* m = G4NistManager::Instance()->FindOrBuildMaterial(name, false)) return m;
-  throw std::runtime_error("unknown material " + name + " (not defined in the spec and not a NIST name)");
-}
+G4Material* Detector::Material(const std::string& name) { return g4sim::BuildMaterial(name, fSpec.materials); }
 
 G4VPhysicalVolume* Detector::Construct() {
   // one logical volume per slab name; a name used twice must keep its material and thickness
