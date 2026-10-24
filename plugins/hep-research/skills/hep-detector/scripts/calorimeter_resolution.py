@@ -279,7 +279,7 @@ def _unreadable(path, exc):
     return 2
 
 
-def main():
+def main(argv=None):
     parser = JsonArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -297,7 +297,7 @@ def main():
     parser.add_argument('--status', choices=STATUSES, default=None,
                         help="status label of the inputs, echoed as status (default: the input file's status, "
                              'else unvalidated)')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     status = args.status or 'unvalidated'
     if args.evaluate:

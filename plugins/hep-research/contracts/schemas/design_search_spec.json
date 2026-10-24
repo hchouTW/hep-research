@@ -1,0 +1,80 @@
+{
+ "$comment": "Owner: hep-detector (contracts CV-C1; geant4 program C1.1, section C.4.4). design-search-spec/1: the search spec of evaluate_design.py search, hashed before the first evaluation and recorded in the search_summary. Only keywords contracts/schema.py implements: the limit of 4 objectives, the upper bounds of ranges and slot counts, and the cross-field rules (a requirement exists in the design-spec, a figure of merit is in the adequacy table, a parameter ref exists in the base candidate or the role rules, a role is in subsystem_roles and the role rules, ranges lie inside the role rules) are checked in Python (evaluate_design.py check_search_spec).",
+ "type": "object",
+ "required": ["search_spec_version", "design_spec", "base_candidate", "objectives", "free_parameters", "rules_version",
+              "materials_version", "budget", "optimizer", "finalists"],
+ "additionalProperties": false,
+ "properties": {
+  "search_spec_version": {"const": 1},
+  "description": {"type": "string"},
+  "design_spec": {"type": "object", "required": ["path", "sha256"], "additionalProperties": false, "properties": {
+   "path": {"type": "string", "minLength": 1},
+   "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
+  "base_candidate": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}:[A-Za-z0-9][A-Za-z0-9._-]*$"},
+  "objectives": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/target"}},
+  "constraints": {"type": "array", "items": {"$ref": "#/$defs/target"}},
+  "free_parameters": {"type": "array", "items": {"$ref": "#/$defs/free_parameter"}},
+  "slots": {"$comment": "roles whose subsystems the search may add or remove: [min, max] or {range, ids}; at most one subsystem per role (main's granularity), checked in Python",
+   "type": "object", "additionalProperties": {"anyOf": [
+    {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 0}},
+    {"type": "object", "required": ["range"], "additionalProperties": false, "properties": {
+     "range": {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 0}},
+     "ids": {"type": "array", "items": {"type": "string", "pattern": "^DES-[A-Za-z0-9][A-Za-z0-9._-]*$"}}}}]}},
+  "envelope": {"type": "object", "required": ["length_m"], "additionalProperties": false, "properties": {
+   "length_m": {"type": "number", "exclusiveMinimum": 0}}},
+  "regenerate_budgets": {"$comment": "base subsystems whose budget rows the role-rule model replaces (default: none; a subsystem the search adds always gets model rows)",
+   "type": "array", "items": {"type": "string", "pattern": "^DES-"}},
+  "rules_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+  "materials_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+  "budget": {"type": "object", "required": ["evaluations"], "additionalProperties": false, "properties": {
+   "evaluations": {"type": "integer", "minimum": 1},
+   "geant4": {"$comment": "Geant4 search values arrive in C2; C1 accepts only 0", "type": "integer", "minimum": 0}}},
+  "optimizer": {"type": "object", "required": ["name", "population", "generations", "seed"], "additionalProperties": false,
+   "properties": {
+    "name": {"enum": ["nsga2"]},
+    "population": {"type": "integer", "minimum": 4},
+    "generations": {"type": "integer", "minimum": 0},
+    "eta_c": {"type": "number", "minimum": 0},
+    "eta_m": {"type": "number", "minimum": 0},
+    "p_crossover": {"type": "number", "minimum": 0},
+    "p_mutation": {"$comment": "per gene; default 1 / number of genes", "type": "number", "minimum": 0},
+    "seed": {"type": "integer", "minimum": 0}}},
+  "stopping": {"type": "object", "additionalProperties": false, "properties": {
+   "hypervolume_window": {"type": "integer", "minimum": 1},
+   "min_improvement": {"$comment": "relative hypervolume improvement over the window", "type": "number", "minimum": 0},
+   "reference_point": {"$comment": "'auto': each objective's threshold moved towards worse by a factor 1.1; an objective without a threshold declares reference_point itself",
+    "const": "auto"}}},
+  "finalists": {"type": "object", "required": ["max"], "additionalProperties": false, "properties": {
+   "max": {"type": "integer", "minimum": 1},
+   "distinct_topologies": {"type": "boolean"}}},
+  "proposals": {"$comment": "seed designs written by the designer (proposer llm); they take the same decoding, validity and evaluation as random designs",
+   "type": "array", "items": {"type": "object", "required": ["id", "reason"], "additionalProperties": false, "properties": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "reason": {"type": "string", "minLength": 1},
+    "enabled": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "parent": {"type": "object", "additionalProperties": {"type": "string"}},
+    "parameters": {"type": "object"}}}},
+  "consistency_samples": {"$comment": "points recomputed with evaluate_design.py run besides the finalists (default 20)",
+   "type": "integer", "minimum": 0},
+  "inline_points_max": {"$comment": "above this many distinct designs the points go to a JSON Lines file (default 2000)",
+   "type": "integer", "minimum": 1}
+ },
+ "$defs": {
+  "target": {"type": "object", "additionalProperties": false, "properties": {
+   "requirement": {"$comment": "a requirement or constraint id of the design-spec (with or without the design_id namespace)", "type": "string", "minLength": 1},
+   "figure_of_merit": {"type": "string", "minLength": 1},
+   "denominator": {"type": "object"},
+   "tool": {"$comment": "TOOL:OPERATION when several F1 operations compute the figure of merit", "type": "string"},
+   "upstream_tool": {"type": "string"},
+   "reference_point": {"type": "number"},
+   "comparator": {"enum": ["<=", ">="]},
+   "target": {"type": "number"}}},
+  "free_parameter": {"type": "object", "required": ["ref"], "additionalProperties": false, "properties": {
+   "ref": {"type": "string", "pattern": "^DES-[A-Za-z0-9][A-Za-z0-9._-]*\\.parameters\\.[A-Za-z0-9_]+$"},
+   "kind": {"enum": ["continuous", "integer", "categorical", "positions"]},
+   "range": {"type": "array", "minItems": 2, "items": {"type": "number"}},
+   "choices": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+   "n": {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 1}},
+   "min_spacing_m": {"type": "number", "minimum": 0}}}
+ }
+}

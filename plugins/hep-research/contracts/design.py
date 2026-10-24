@@ -55,7 +55,7 @@ if __package__ in (None, ""):
 
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from contracts.validate import STICKY_STATUSES, validate_artifact  # noqa: E402
+from contracts.validate import SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, validate_artifact  # noqa: E402
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_DIR = PLUGIN_ROOT / "contracts" / "tool_contracts"
@@ -862,6 +862,10 @@ def check_contract(proj: Project, ev: Evaluation) -> None:
         ev.err("design.scan_point_not_expanded", f"{run_ref} is a scan summary: expand the point into a candidate "
                "(evaluate_design.py expand) and evaluate that candidate")
         return
+    if is_search_run(run):  # CV-C1: a search value is not an evaluation until its point is expanded
+        ev.err("design.search_point_not_expanded", f"{run_ref} is a search summary: expand a finalist into a "
+               "candidate (evaluate_design.py expand --search) and evaluate that candidate")
+        return
     argv = rext.get("argv")
     if not isinstance(argv, list) or not argv:
         ev.err("design.contract_mismatch", f"{run_ref} records no argv (ART-70)")
@@ -1652,15 +1656,23 @@ def check_budgets(proj: Project) -> None:
                                    f"{cid} {q}.{sid}: uncertainty {item['uncertainty']} below the {basis} minimum {need:g}")
 
 
+def is_search_run(run: dict) -> bool:
+    """CV-C1: a computational-run that carries the search_summary of evaluate_design.py search (contract version
+    SEARCH_SUMMARY_FROM or later)."""
+    return bool((run.get("extension") or {}).get("search_summary")) and _at_least(run.get("contract_version"),
+                                                                                   SEARCH_SUMMARY_FROM)
+
+
 def orphan_runs(proj: Project) -> tuple[list[dict], dict]:
-    """AGG-08: design runs (their script has a contract with a design block) that no evaluation's run_ref names."""
+    """AGG-08: design runs (their script has a contract with a design block) that no evaluation's run_ref names. Scan
+    summaries (M4) and search summaries (CV-C1) are exempt: their points are not evaluations."""
     referenced = {proj.resolve(e.ext["run_ref"]) for e in proj.evals.values() if e.ext.get("run_ref")}
     out, index = [], {}
     for p in proj.runs:
         doc = proj.docs[p]
         rext = doc.get("extension") or {}
         argv = rext.get("argv")
-        if p in referenced or not isinstance(argv, list) or rext.get("scan_summary"):
+        if p in referenced or not isinstance(argv, list) or rext.get("scan_summary") or is_search_run(doc):
             continue
         script = next((a for a in argv if isinstance(a, str) and a.endswith(".py")), "")
         c = proj.registry.by_script(script)
