@@ -1,0 +1,137 @@
+{
+ "schema": "geant4-study-spec/1",
+ "study_id": "j15-ladder",
+ "label": "SYNTHETIC J15 verification ladder (journey J15): verification only, always unvalidated",
+ "geant4": {
+  "version": "11.4.3",
+  "documentation": [
+   {
+    "name": "Geant4 upstream source, tag v11.4.3",
+    "version": "11.4.3",
+    "relied_on": true
+   }
+  ]
+ },
+ "geometry_source": {
+  "kind": "design",
+  "description": "cand-N6 through from-geometry",
+  "uses_replicas": false
+ },
+ "materials": [
+  {
+   "name": "G4_Si",
+   "z": 14,
+   "a_g_mole": 28.0855,
+   "density_g_cm3": 2.329,
+   "radiation_length_mm": 93.7,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, silicon_Si: density 2.329 g/cm3, A 28.0855(3), X0 9.370 cm",
+   "reference_origin": "independent"
+  },
+  {
+   "name": "G4_Pb",
+   "z": 82,
+   "a_g_mole": 207.2,
+   "density_g_cm3": 11.35,
+   "radiation_length_mm": 5.612,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, lead_Pb: density 11.35 g/cm3, X0 0.5612 cm",
+   "reference_origin": "independent"
+  },
+  {
+   "name": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "density_g_cm3": 1.032,
+   "radiation_length_mm": 425.4,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, polyvinyltoluene: density 1.032 g/cm3, X0 42.54 cm",
+   "reference_origin": "independent"
+  },
+  {
+   "name": "Pb_ctl",
+   "z": 82,
+   "a_g_mole": 207.2,
+   "density_g_cm3": 11.35,
+   "reference_source": "the control's claimed (independent) density",
+   "reference_origin": "independent"
+  }
+ ],
+ "reproducibility": {
+  "data_paths_recorded": true,
+  "build_record": "~/Workspace/geant4-work/records/geant4-build-a.computational-run.json"
+ },
+ "downstream_use": {
+  "kind": "other",
+  "note": "verification carrier of J15 (B3.2); never F4"
+ },
+ "observable": {
+  "name": "verification ladder",
+  "kind": "other",
+  "definition": "the checks of B3.2",
+  "unit": "1"
+ },
+ "particle": {
+  "name": "proton",
+  "energy_MeV": 433.0
+ },
+ "physics": {
+  "element_sim_spec": "../../specs/N6-TRK1-nominal.spec.json",
+  "justification": [
+   {
+    "choice": "as the F4 studies",
+    "reason": "the ladder verifies their setup",
+    "source": "B3.2"
+   }
+  ]
+ },
+ "convergence_plan": {
+  "parameters": [],
+  "observables": []
+ },
+ "statistical_target": {
+  "observable": "none",
+  "relative_se": 1.0
+ },
+ "validation_plan": {
+  "benchmarks": [
+   {
+    "name": "field-propagation",
+    "grade": "verification"
+   },
+   {
+    "name": "field-propagation-muon",
+    "grade": "sanity"
+   },
+   {
+    "name": "material-definition",
+    "grade": "verification"
+   },
+   {
+    "name": "reco-closure",
+    "grade": "verification"
+   },
+   {
+    "name": "sampling-fraction",
+    "grade": "sanity"
+   },
+   {
+    "name": "tof-beta",
+    "grade": "verification"
+   },
+   {
+    "name": "tof-layer-consistency",
+    "grade": "verification"
+   }
+  ],
+  "scope": {
+   "particle": "proton",
+   "energy_MeV": [
+    433.0,
+    433.0
+   ],
+   "material": "G4_Si",
+   "observable": "verification ladder"
+  }
+ },
+ "variation_plan": {
+  "observable": "none",
+  "model_assignment_checked": false,
+  "variations": []
+ }
+}

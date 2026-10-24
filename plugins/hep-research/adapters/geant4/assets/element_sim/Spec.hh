@@ -34,6 +34,7 @@ struct FieldDef {
   std::string stepper = "DormandPrince745", driver = "InterpolationDriver";
   double delta_chord_mm = 0.25, delta_one_step_mm = 0.01, delta_intersection_mm = 1e-5;
   double min_epsilon_step = 5e-5, max_epsilon_step = 1e-3, max_step_mm = 10.;
+  double max_track_time_ns = 0.;  // > 0: tracks in a field element older than this are killed (loopers); 0: none
 };
 
 struct CutRegionDef {

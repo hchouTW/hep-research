@@ -1,0 +1,90 @@
+{
+ "domain": "em",
+ "envelope_relative": 0.02590254142038102,
+ "nominal": {
+  "model_assignment": {
+   "domain": "em",
+   "em_constructor": "G4EmStandardPhysics_option4",
+   "fluctuation_model": "Urban",
+   "known": true
+  },
+  "run_record_id": "geant4-reco-N6-TRK1-nominal-off",
+  "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-TRK1-nominal-off/summary_r000.json",
+  "value": 0.01818013528981194
+ },
+ "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
+ "observable": "core",
+ "variations": [
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysicsSS",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": -0.02590254142038102,
+   "resolved": false,
+   "run_record_id": "geant4-reco-N6-TRK1-ss-off",
+   "se": 0.00021426954750928886,
+   "se_of_relative_difference": 0.016214492817312787,
+   "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-TRK1-ss-off/summary_r000.json",
+   "value": 0.017709223582439454,
+   "variation": "ss"
+  },
+  {
+   "listed": false,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "reason": "same model for this particle and energy: a false zero difference, not a systematic",
+   "relative_to_nominal": -0.011151350766970328,
+   "resolved": false,
+   "run_record_id": "geant4-reco-N6-TRK1-qgsp-bic-off",
+   "se": 0.00026261639947823117,
+   "se_of_relative_difference": 0.018239158183514122,
+   "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-TRK1-qgsp-bic-off/summary_r000.json",
+   "value": 0.01797740222420427,
+   "variation": "qgsp-bic"
+  },
+  {
+   "listed": false,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "reason": "same model for this particle and energy: a false zero difference, not a systematic",
+   "relative_to_nominal": 0.05054331919466823,
+   "resolved": true,
+   "run_record_id": "geant4-reco-N6-TRK1-air-off",
+   "se": 0.00027161316642596776,
+   "se_of_relative_difference": 0.018633538532908285,
+   "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-TRK1-air-off/summary_r000.json",
+   "value": 0.019099019670767155,
+   "variation": "air"
+  }
+ ]
+}

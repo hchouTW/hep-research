@@ -1,0 +1,21 @@
+{
+ "record_version": "1.1.0",
+ "decision_id": "j15-v1-requirements-baseline",
+ "analysis": "j15-v1",
+ "decision": "the four driving requirements, their allocations and the equal-mass comparison basis are the baseline",
+ "category": "requirements-baseline",
+ "actor": {
+  "kind": "agent",
+  "id": "prepared by an agent: NEEDS A HUMAN SIGNATURE"
+ },
+ "time": "2026-10-24T12:00:00Z",
+ "seen": {
+  "state": "not-applicable"
+ },
+ "artifacts": [
+  {
+   "ref": "design-spec.v1.json",
+   "sha256": "431c5ff4cedccc924a1e7bb537b243557bd86a3b1fd311d4716e80f848654415"
+  }
+ ]
+}

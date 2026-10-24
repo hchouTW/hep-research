@@ -1,0 +1,85 @@
+{
+ "artifact_id": "geant4-verify-material-budget-N6-geantino",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "commands": [
+   "geant4_verify.py material-budget"
+  ],
+  "environment": {},
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/N6-geantino.computational-run.json",
+    "sha256": "c2a68f3ed1e31be58c7157c9f264c5de78ddd87585daf8f810eba5d12d1fa0ba"
+   }
+  ],
+  "output_hashes": {},
+  "seeds": {},
+  "tolerances": {
+   "tolerance_relative": 1e-06
+  },
+  "tools": [
+   {
+    "name": "geant4_verify.py",
+    "version": "50cfe683fb8f1d58"
+   }
+  ],
+  "verification": {
+   "check": "material-budget",
+   "geometry_source": "effective config",
+   "note": "X0 and lambda_I come from the Geant4 material dump: closure of the application, never a reference",
+   "problems": [],
+   "scan_x_over_X0": 18.518130700272295,
+   "scan_x_over_lambda_I": 0.9664159764456676,
+   "spec_x_over_X0": 18.518130700272295,
+   "spec_x_over_lambda_I": 0.9664159764456676,
+   "tolerance_relative": 1e-06
+  }
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-run-N6-geantino",
+   "artifact_type": "computational-run",
+   "ref": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/N6-geantino.computational-run.json",
+   "sha256": "c2a68f3ed1e31be58c7157c9f264c5de78ddd87585daf8f810eba5d12d1fa0ba",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
+ "objective": "Implementation check 'material-budget' of geant4-run-N6-geantino (verification, not validation)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "adapters/geant4/assets/g4common.py",
+   "adapters/geant4/assets/geant4_verify.py",
+   "contracts/__init__.py",
+   "contracts/trace.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/simulation/__init__.py",
+   "core/simulation/helix.py",
+   "core/status.py",
+   "core/trace.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

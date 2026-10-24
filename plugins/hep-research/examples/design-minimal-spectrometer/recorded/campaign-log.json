@@ -1,0 +1,101 @@
+[
+ {
+  "study": "ladder mu 1 GV",
+  "trial_events": 1600,
+  "planned_events": 4000
+ },
+ {
+  "study": "ladder mu 10 GV",
+  "trial_events": 1600,
+  "planned_events": 4000
+ },
+ {
+  "study": "ladder mu 100 GV",
+  "trial_events": 1600,
+  "planned_events": 50720
+ },
+ {
+  "ladder": {
+   "items": [
+    {
+     "check": "overlap",
+     "class": "implementation",
+     "verdict": "ok",
+     "control": {
+      "injected": "Si2 moved onto Si1",
+      "caught": true,
+      "by": "geant4_run.py check-spec (refused before a run)"
+     }
+    },
+    {
+     "check": "energy balance (e- 1 GeV)",
+     "class": "implementation",
+     "verdict": "ok",
+     "worst_residual_MeV": null,
+     "control": {
+      "injected": "double-count-leakage",
+      "caught": true
+     }
+    },
+    {
+     "check": "energy balance (e+ 1 GeV)",
+     "class": "implementation",
+     "verdict": "ok",
+     "worst_residual_MeV": null,
+     "control": {
+      "injected": "omit-positron-mass",
+      "caught": true
+     }
+    },
+    {
+     "check": "material budget (geantino path lengths)",
+     "class": "implementation",
+     "verdict": "ok",
+     "x_over_x0_total": null
+    }
+   ],
+   "controls": [
+    [
+     "field-propagation",
+     "Geant4-side B x 1.0001",
+     true
+    ],
+    [
+     "field-propagation",
+     "Geant4-side B x 0.9999",
+     true
+    ],
+    [
+     "material-definition",
+     "Pb density x 1.05 in the spec, 11.35 g/cm3 in the study",
+     true
+    ],
+    [
+     "field-propagation-muon",
+     "Geant4-side B x 1.01 at 10 GV",
+     true
+    ],
+    [
+     "reco-closure",
+     "reconstruction B x 1.05 (field_scale_global)",
+     true
+    ],
+    [
+     "tof-beta",
+     "+100 ps on one TOF2 layer",
+     true
+    ],
+    [
+     "tof-layer-consistency",
+     "+100 ps on one TOF2 layer",
+     true
+    ],
+    [
+     "sampling-fraction",
+     "PVT density x 1.2",
+     true
+    ]
+   ]
+  }
+ }
+]

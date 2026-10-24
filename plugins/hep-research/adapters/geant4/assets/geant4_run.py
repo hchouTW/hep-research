@@ -25,7 +25,7 @@ Subcommands:
   check-spec validate an element_sim.spec/1 (element_sim/spec.schema.json and the cross-field rules of
              element_spec.py): {ok, problems}, exit 0 or 2; no Geant4 needed
   from-geometry  a design-geometry/1 file (evaluate_design.py geometry) and an element_sim.realization/1 profile ->
-             an element_sim.spec/1 (mapping 1.0.0; deterministic: the same inputs give a byte-identical spec whose
+             an element_sim.spec/1 (mapping 1.0.0 or 1.1.0; deterministic: the same inputs give a byte-identical spec whose
              provenance names both by sha256); exit 2 on an unknown kind or version, a missing template or a derived
              spec that fails check-spec
   run        one spec -> <work>/<run-id>/ (events.csv, materials.json, datapaths.json, log.txt, spec.json) and --record
@@ -95,7 +95,7 @@ import simreco_spec as RS  # noqa: E402
 # every source file of each program's build, as paths under assets/, per program (adapter 0.2.0: the g4sim/ group was
 # added and MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths;
 # adapter 0.3.0: a map per program instead of one flat tuple, the keys of a layered_sim record are unchanged)
-ADAPTER_VERSION = "0.4.0"
+ADAPTER_VERSION = "0.4.1"
 SCHEMAS = ASSETS / "schemas"
 STRING_COLUMNS = ("primary_end_process",)  # the only non-numeric CSV column (output.schema.json)
 A2_OUTPUTS = ("summary.json", "column_map.json", "probe.json", "observables_dump.csv")  # adapter 0.2.0

@@ -1,0 +1,289 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "multiple-scattering-reference",
+   "canonical_ties": 0,
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-msref-1gv-nominal",
+    "run_record": "../../proj/artifacts/runs/msref-1gv-nominal.computational-run.json",
+    "sha256": "c619df266b4b9b7453742a56dfe6089bd0d9182eb30f921bfa8e1c87e3a16a56"
+   },
+   "configuration_gap": null,
+   "geant4": 0.0008350520647324336,
+   "geant4_dof": 15,
+   "grade": "reference",
+   "hash_scheme": "tree-v1",
+   "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+   "negative_control": {
+    "at_claimed_detection_limit": true,
+    "controls": [
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-1gv-density-plus.crossings.csv",
+      "detection_limit_relative": 0.08086765304006459,
+      "injected": "slab density x 1.13",
+      "injected_relative": 0.1299999999999999,
+      "injection_in_run": 0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-1gv-density-plus.computational-run.json",
+      "se_of_shift": 0.010814823420224214,
+      "shift": 0.07280808073517159,
+      "sign": "+",
+      "status": "caught"
+     },
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-1gv-density-minus.crossings.csv",
+      "detection_limit_relative": 0.08075950454344658,
+      "injected": "slab density x 0.87",
+      "injected_relative": -0.13,
+      "injection_in_run": -0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-1gv-density-minus.computational-run.json",
+      "se_of_shift": 0.010764371763132491,
+      "shift": -0.0695379342661927,
+      "sign": "-",
+      "status": "caught"
+     }
+    ],
+    "detection_limit_relative": 0.08086765304006459,
+    "detection_limit_sign": "+-",
+    "status": "caught"
+   },
+   "reference": {
+    "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+    "validity": "as declared",
+    "version": "1991"
+   },
+   "reference_value": 0.0008502461110064238,
+   "relative_difference": -0.017870174385161586,
+   "relative_se": 0.006814288858865224,
+   "scope": {
+    "material": [
+     "G4_Si"
+    ],
+    "particle": [
+     "proton"
+    ],
+    "rigidity_GV": 1.0,
+    "thickness_x0": 0.0032017075773745998
+   },
+   "selection": {
+    "blocks": 16,
+    "events": 8000
+   },
+   "statistic": "core width of the projected exit angle (rad), central 98 %",
+   "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+   "target_slabs": [
+    "Plane",
+    "Slab"
+   ],
+   "tolerance": {
+    "parts": {
+     "binning": 0.0,
+     "k_sigma": 3.0,
+     "mc_statistics": 0.02044286657659567,
+     "reference_accuracy": 0.02
+    },
+    "total": 0.04044286657659567
+   },
+   "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+   "validation_evidence": true,
+   "verdict": "pass",
+   "world_material": "G4_Galactic"
+  },
+  {
+   "benchmark": "multiple-scattering-reference",
+   "canonical_ties": 0,
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-msref-100gv-nominal",
+    "run_record": "../../proj/artifacts/runs/msref-100gv-nominal.computational-run.json",
+    "sha256": "3fd0dd8e70c68d44c59278a5744a3aa781e4e68c20600b77b428f3ff29902e0d"
+   },
+   "configuration_gap": null,
+   "geant4": 5.960009288440414e-06,
+   "geant4_dof": 15,
+   "grade": "reference",
+   "hash_scheme": "tree-v1",
+   "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+   "negative_control": {
+    "at_claimed_detection_limit": false,
+    "controls": [
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-100gv-density-plus.crossings.csv",
+      "detection_limit_relative": 0.0628496800727933,
+      "injected": "slab density x 1.13",
+      "injected_relative": 0.1299999999999999,
+      "injection_in_run": 0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-100gv-density-plus.computational-run.json",
+      "se_of_shift": 0.008915982888257661,
+      "shift": 0.06314203214223732,
+      "sign": "+",
+      "status": "caught"
+     },
+     {
+      "at_claimed_detection_limit": false,
+      "crossings": "../msref/msref-100gv-density-minus.crossings.csv",
+      "detection_limit_relative": 0.06300011678977513,
+      "injected": "slab density x 0.87",
+      "injected_relative": -0.13,
+      "injection_in_run": -0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-100gv-density-minus.computational-run.json",
+      "se_of_shift": 0.00898773349195976,
+      "shift": -0.08143277098550092,
+      "sign": "-",
+      "status": "caught"
+     }
+    ],
+    "detection_limit_relative": 0.06300011678977513,
+    "detection_limit_sign": "+-",
+    "status": "caught"
+   },
+   "reference": {
+    "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+    "validity": "as declared",
+    "version": "1991"
+   },
+   "reference_value": 5.994243543652734e-06,
+   "relative_difference": -0.005711188570002301,
+   "relative_se": 0.00619234432513264,
+   "scope": {
+    "material": [
+     "G4_Si"
+    ],
+    "particle": [
+     "proton"
+    ],
+    "rigidity_GV": 100.0,
+    "thickness_x0": 0.0032017075773745998
+   },
+   "selection": {
+    "blocks": 16,
+    "events": 8000
+   },
+   "statistic": "core width of the projected exit angle (rad), central 98 %",
+   "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+   "target_slabs": [
+    "Plane",
+    "Slab"
+   ],
+   "tolerance": {
+    "parts": {
+     "binning": 0.0,
+     "k_sigma": 3.0,
+     "mc_statistics": 0.018577032975397922,
+     "reference_accuracy": 0.02
+    },
+    "total": 0.038577032975397926
+   },
+   "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+   "validation_evidence": true,
+   "verdict": "pass",
+   "world_material": "G4_Galactic"
+  },
+  {
+   "benchmark": "multiple-scattering-reference",
+   "canonical_ties": 0,
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-msref-500gv-nominal",
+    "run_record": "../../proj/artifacts/runs/msref-500gv-nominal.computational-run.json",
+    "sha256": "f8b597a4b29a44f67db3a4c141177fb83263ab8e8dc9c1f2d4542fd710c6a0ac"
+   },
+   "configuration_gap": null,
+   "geant4": 1.1845882739955688e-06,
+   "geant4_dof": 15,
+   "grade": "reference",
+   "hash_scheme": "tree-v1",
+   "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+   "negative_control": {
+    "at_claimed_detection_limit": true,
+    "controls": [
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-500gv-density-plus.crossings.csv",
+      "detection_limit_relative": 0.07568120977651287,
+      "injected": "slab density x 1.13",
+      "injected_relative": 0.1299999999999999,
+      "injection_in_run": 0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-500gv-density-plus.computational-run.json",
+      "se_of_shift": 0.010723819864383394,
+      "shift": 0.0667627311024806,
+      "sign": "+",
+      "status": "caught"
+     },
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-500gv-density-minus.crossings.csv",
+      "detection_limit_relative": 0.07314724018048668,
+      "injected": "slab density x 0.87",
+      "injected_relative": -0.13,
+      "injection_in_run": -0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-500gv-density-minus.computational-run.json",
+      "se_of_shift": 0.009504160338739286,
+      "shift": -0.06674164365587945,
+      "sign": "-",
+      "status": "caught"
+     }
+    ],
+    "detection_limit_relative": 0.07568120977651287,
+    "detection_limit_sign": "+-",
+    "status": "caught"
+   },
+   "reference": {
+    "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+    "validity": "as declared",
+    "version": "1991"
+   },
+   "reference_value": 1.1987923558263232e-06,
+   "relative_difference": -0.011848658995630257,
+   "relative_se": 0.0071658897137681435,
+   "scope": {
+    "material": [
+     "G4_Si"
+    ],
+    "particle": [
+     "proton"
+    ],
+    "rigidity_GV": 500.0,
+    "thickness_x0": 0.0032017075773745998
+   },
+   "selection": {
+    "blocks": 16,
+    "events": 8000
+   },
+   "statistic": "core width of the projected exit angle (rad), central 98 %",
+   "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+   "target_slabs": [
+    "Plane",
+    "Slab"
+   ],
+   "tolerance": {
+    "parts": {
+     "binning": 0.0,
+     "k_sigma": 3.0,
+     "mc_statistics": 0.02149766914130443,
+     "reference_accuracy": 0.02
+    },
+    "total": 0.04149766914130443
+   },
+   "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+   "validation_evidence": true,
+   "verdict": "pass",
+   "world_material": "G4_Galactic"
+  }
+ ],
+ "constants": {
+  "K_MeV_mol_cm2": 0.3070749269094836,
+  "m_e_MeV": 0.51099895069,
+  "source": "core/constants (CODATA 2022)"
+ },
+ "failed": [],
+ "gaps": [
+  "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)"
+ ],
+ "note": "reference inputs come from the study spec; the Geant4 material dump is never read",
+ "status": "ok",
+ "status_label": "unvalidated"
+}

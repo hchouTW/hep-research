@@ -222,6 +222,39 @@ GEANT4-F4). `CORE_VERSION` stays 1.1.0 (new `core.stats.decisions.change`, `core
   CV-B2 scope keys, `element_sim_spec`, the kinds `tracking-resolution` and `charge-confusion`, and material `z`,
   `a_g_mole`, `radiation_length_mm`.
 
+Geant4 program stage B3 (the J15 design project): journey J15, `examples/design-minimal-spectrometer`, geant4
+adapter 0.4.1 (VALIDATION GEANT4-J15). No contracts bump.
+
+**Before you upgrade:**
+- simreco's strip digitization draws a random strip-grid phase per plane and event, and gives hits the
+  sharing-aware resolution sqrt((p - w)^3 / 12 p) (it was p / sqrt 12); `simreco_spec.check` refuses a digitization
+  finer than the declared point resolution. Reconstructions with noise-digitization differ from 0.4.0.
+- simreco's shower containment is the calorimeter's total deposit over the incident kinetic energy (it was 1 - net
+  face leakage / E0, which upstream secondaries pushed above 1).
+
+- `examples/design-minimal-spectrometer/` (J15): design-spec `j15-v1`, candidates `cand-N6`, `cand-N4`, `cand-N8`,
+  realization profile (mapping 1.1.0), H1 and H2 decision records prepared by an agent and marked as needing a human
+  signature; F1 and F2 evaluations checked against section B.4.2; `live.py` runs the Geant4 campaign (six tracking
+  studies, charge confusion at 500 GV, shower containment with a four-point production-cut scan, the verification
+  ladder, the multiple-scattering reference at 1, 100 and 500 GV) and writes `recorded/` (run records gzip-compressed,
+  1.8 MB); `run.py` replays it offline (labels re-issued through the qualification path, F4 evaluations, report);
+  `tests/examples/test_design_minimal_spectrometer.py`. The 1 GV resolution studies of all three candidates qualify
+  and two pass `REQ-TRK-001` decisively; the 100 GV studies are refused (a reference control beyond its detection
+  limit, recorded and not rerun); charge confusion is not qualifiable before D0-b; shower containment has no reference.
+- element_sim: `field.max_track_time_ns` (spec and realization profile) kills tracks older than that in a field
+  element (a looper in a vacuum field region never triggers Geant4's looper killer under a step limit).
+- simreco: a test-only `tof.test_layer_offset_ps` (the negative control of the TOF bookkeeping benchmarks); a
+  counting interval's lower side stops at zero after the replica spread is added.
+- `geant4_benchmarks.py`: a reference benchmark whose control is caught but not at its claimed detection limit is a
+  gap again (it raised a KeyError for detector benchmarks).
+- `geant4_benchmarks.py --help` lists the detector benchmarks' config keys; the Geant4 study protocol says to declare a
+  reference control with the injection Geant4 realizes, warns about single scattering's cost with a thick
+  calorimeter and says to validate the whole artifacts_dir; the design workflow says `geometry` writes `geometry_ref`
+  into the candidate (from the B3.9 independent-agent run).
+- J15's `live.py export` writes `~` for the home directory in the recorded files and rewrites the sha256 citations
+  of the files it changes (the packaging scan refuses private paths).
+- Docs: J15 in `docs/researcher-journeys.md`, `docs/maintenance.md`, the capability map and matrix; routing case `j15`.
+
 ## 0.38.0 (2026-10-24)
 
 Minor release, contracts 3.12.0. It ships the maintainer's decisions on the four spec questions left open by the M3

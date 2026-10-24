@@ -1,0 +1,267 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-spec-v1",
+ "artifact_type": "design-spec",
+ "objective": "SYNTHETIC design study (journey J15, minimal spectrometer; names no experiment)",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0"
+ },
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "design_id": "j15-v1",
+  "spec_version": 1,
+  "objectives": [
+   {
+    "id": "j15-v1:PHY-001",
+    "description": "SYNTHETIC: charge-separated proton spectrum",
+    "observable": "proton flux versus rigidity",
+    "range": "1 GV to 500 GV",
+    "precision_goal": "illustrative (journey J15)"
+   }
+  ],
+  "requirements": [
+   {
+    "id": "j15-v1:REQ-TRK-001",
+    "parents": [
+     "j15-v1:PHY-001"
+    ],
+    "quantity": "momentum-resolution-core",
+    "comparator": "<=",
+    "target": 0.03,
+    "unit": "1",
+    "kind": "driving",
+    "denominator": {
+     "rigidity_GV": {
+      "value": 1.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "proton",
+      "tolerance": 0.0
+     }
+    },
+    "allocation": "j15-v1:ALC-TRK-001",
+    "verification": {
+     "method": "analysis, then Geant4 simulation through the F4 qualification path"
+    }
+   },
+   {
+    "id": "j15-v1:REQ-TRK-002",
+    "parents": [
+     "j15-v1:PHY-001"
+    ],
+    "quantity": "momentum-resolution-core",
+    "comparator": "<=",
+    "target": 0.12,
+    "unit": "1",
+    "kind": "driving",
+    "denominator": {
+     "rigidity_GV": {
+      "value": 100.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "proton",
+      "tolerance": 0.0
+     }
+    },
+    "allocation": "j15-v1:ALC-TRK-002",
+    "verification": {
+     "method": "analysis, then Geant4 simulation through the F4 qualification path"
+    }
+   },
+   {
+    "id": "j15-v1:REQ-CC-001",
+    "parents": [
+     "j15-v1:PHY-001"
+    ],
+    "quantity": "charge-confusion-rate",
+    "comparator": "<=",
+    "target": 0.02,
+    "unit": "1",
+    "kind": "driving",
+    "denominator": {
+     "rigidity_GV": {
+      "value": 500.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "proton",
+      "tolerance": 0.0
+     },
+     "charge_sign": {
+      "value": "positive",
+      "tolerance": 0.0
+     },
+     "curvature_offset_per_GV": {
+      "value": 0.0,
+      "tolerance": 2e-05
+     }
+    },
+    "allocation": "j15-v1:ALC-CC-001",
+    "verification": {
+     "method": "simulation validated with data"
+    }
+   },
+   {
+    "id": "j15-v1:REQ-CAL-001",
+    "parents": [
+     "j15-v1:PHY-001"
+    ],
+    "quantity": "shower-containment",
+    "comparator": ">=",
+    "target": 0.95,
+    "unit": "1",
+    "kind": "driving",
+    "denominator": {
+     "energy_GeV": {
+      "value": 10.0,
+      "tolerance": 0.0
+     },
+     "species": {
+      "value": "e-",
+      "tolerance": 0.0
+     }
+    },
+    "allocation": "j15-v1:ALC-CAL-001",
+    "verification": {
+     "method": "Geant4 simulation"
+    }
+   }
+  ],
+  "allocations": [
+   {
+    "id": "j15-v1:ALC-TRK-001",
+    "requirement": "j15-v1:REQ-TRK-001",
+    "rule": "quadrature",
+    "independent": true,
+    "items": [
+     {
+      "name": "multiple scattering",
+      "value": 0.025
+     },
+     {
+      "name": "intrinsic",
+      "value": 0.005
+     },
+     {
+      "name": "alignment",
+      "value": 0.008
+     }
+    ],
+    "margin": 0.003
+   },
+   {
+    "id": "j15-v1:ALC-TRK-002",
+    "requirement": "j15-v1:REQ-TRK-002",
+    "rule": "quadrature",
+    "independent": true,
+    "items": [
+     {
+      "name": "intrinsic",
+      "value": 0.09
+     },
+     {
+      "name": "multiple scattering",
+      "value": 0.02
+     },
+     {
+      "name": "alignment",
+      "value": 0.05
+     }
+    ],
+    "margin": 0.01
+   },
+   {
+    "id": "j15-v1:ALC-CC-001",
+    "requirement": "j15-v1:REQ-CC-001",
+    "rule": "linear",
+    "items": [
+     {
+      "name": "Gaussian core",
+      "value": 0.01
+     },
+     {
+      "name": "non-Gaussian tails",
+      "value": 0.008
+     }
+    ],
+    "margin": 0.002
+   },
+   {
+    "id": "j15-v1:ALC-CAL-001",
+    "requirement": "j15-v1:REQ-CAL-001",
+    "rule": "linear",
+    "items": [
+     {
+      "name": "rear leakage",
+      "value": 0.03
+     },
+     {
+      "name": "lateral and albedo",
+      "value": 0.015
+     }
+    ],
+    "margin": 0.005
+   }
+  ],
+  "constraints": [
+   {
+    "id": "j15-v1:CON-MASS-001",
+    "type": "mass",
+    "hardness": "hard",
+    "quantity": "mass-budget",
+    "comparator": "<=",
+    "target": 2500.0,
+    "unit": "kg",
+    "denominator": {},
+    "subsystems": [
+     "DES-TRK-001",
+     "DES-MAG-001",
+     "DES-TOF-001",
+     "DES-CAL-001"
+    ]
+   },
+   {
+    "id": "j15-v1:CON-CHAN-001",
+    "type": "channel-count",
+    "hardness": "soft",
+    "quantity": "channel-count-budget",
+    "comparator": "<=",
+    "target": 20000.0,
+    "unit": "1",
+    "denominator": {},
+    "subsystems": [
+     "DES-TRK-001",
+     "DES-MAG-001",
+     "DES-TOF-001",
+     "DES-CAL-001"
+    ]
+   }
+  ],
+  "comparison_basis": {
+   "quantity": "mass-budget",
+   "tolerance_relative": 0.05,
+   "pareto_axes": [
+    "expected-precision",
+    "mass-budget"
+   ],
+   "note": "candidates are compared at equal mass: they differ only in the number of 0.3 mm silicon planes (3 kg each, SYNTHETIC), so magnet, TOF and calorimeter items are shared and cancel"
+  }
+ }
+}

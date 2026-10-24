@@ -1,0 +1,178 @@
+{
+ "convergence": {
+  "gate": "incomplete",
+  "multiplicity": 1,
+  "parameters": [
+   {
+    "observables": [
+     {
+      "dof": 28.712687550193834,
+      "finest": 0.35,
+      "margin": null,
+      "next": 0.7,
+      "observable": "core",
+      "reason": "se-target-missed",
+      "relative_change": 0.004742684124121504,
+      "se_of_change": 0.022847055088643334,
+      "se_targets_met": {
+       "finest": false,
+       "next": true
+      },
+      "tolerance": 0.1,
+      "tolerance_mode": "relative",
+      "verdict": "unresolved"
+     }
+    ],
+    "parameter": "physics.default_cut_mm",
+    "two_finest": [
+     0.35,
+     0.7
+    ],
+    "values": [
+     0.35,
+     0.7
+    ],
+    "verdict": "incomplete"
+   }
+  ],
+  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
+ },
+ "record_problems": [],
+ "statistical_target": {
+  "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
+  "events": 5728,
+  "events_needed": null,
+  "observable": "core",
+  "relative_se": 0.014343319955301964,
+  "target": 0.02,
+  "verdict": "pass"
+ },
+ "summaries": [
+  {
+   "legacy": false,
+   "observables": {
+    "beta": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 1.8941494858246185e-05,
+     "method": "batch means of block means",
+     "n": 5585,
+     "se": 0.00038593944799418756,
+     "status": "ok",
+     "value": 1.5820422332764065e-05
+    },
+    "core": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.08722708627060685,
+     "full_sample_mean": -0.0011059925093632413,
+     "method": "batch means of block Gaussian-core widths (iterative +-2 sigma truncation, truncation-corrected)",
+     "n": 5585,
+     "se": 0.0012401949360658596,
+     "status": "ok",
+     "truncation_sigma": 2.0,
+     "value": 0.08646498439208458
+    },
+    "pull": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.018925916612552465,
+     "method": "batch means of block means",
+     "n": 5585,
+     "se": 0.012858433130918622,
+     "status": "ok",
+     "value": -0.019062200446650857
+    },
+    "residual": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.0015109098939726268,
+     "method": "batch means of block means",
+     "n": 5585,
+     "se": 0.001087709427227245,
+     "status": "ok",
+     "value": -0.0015227273906223409
+    },
+    "tofdt": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -3.9665194865856352,
+     "method": "batch means of block means",
+     "n": 5585,
+     "se": 1.7912590686471692,
+     "status": "ok",
+     "value": -3.94927307672959
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-TRK100-nominal-off/summary_r000.json",
+   "role": "nominal",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-TRK100-nominal-off"
+   },
+   "sha256": "902cd7d886ae0df91e2a8f129abd28eac7af42e6ccad9eb7db58483a2da92335"
+  },
+  {
+   "legacy": false,
+   "observables": {
+    "beta": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.00036648875856223087,
+     "method": "batch means of block means",
+     "n": 5553,
+     "se": 0.0004402737885909997,
+     "status": "ok",
+     "value": 0.0003671897778255019
+    },
+    "core": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.08599788701230895,
+     "full_sample_mean": 0.0002386729857820448,
+     "method": "batch means of block Gaussian-core widths (iterative +-2 sigma truncation, truncation-corrected)",
+     "n": 5553,
+     "se": 0.00153766032503897,
+     "status": "ok",
+     "truncation_sigma": 2.0,
+     "value": 0.08687506050085333
+    },
+    "pull": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.010618821373961883,
+     "method": "batch means of block means",
+     "n": 5553,
+     "se": 0.006711877268978535,
+     "status": "ok",
+     "value": -0.010578476137945337
+    },
+    "residual": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.0007470892349235738,
+     "method": "batch means of block means",
+     "n": 5553,
+     "se": 0.0005853184402327765,
+     "status": "ok",
+     "value": -0.0007452104504730622
+    },
+    "tofdt": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 1.4554955170354702,
+     "method": "batch means of block means",
+     "n": 5553,
+     "se": 1.894049780239752,
+     "status": "ok",
+     "value": 1.459164271465517
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-TRK100-scan-off/summary_r000.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-TRK100-scan-off"
+   },
+   "sha256": "8b1bbd628285708294744d2ef2901827e3ba5e03d0037e4301836b90b555267c"
+  }
+ ]
+}

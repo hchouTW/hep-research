@@ -1,0 +1,160 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-cand-N4",
+ "artifact_type": "design-candidate",
+ "objective": "SYNTHETIC design study (journey J15, minimal spectrometer; names no experiment)",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0"
+ },
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "candidate_id": "j15-v1:cand-N4",
+  "design_id": "j15-v1",
+  "description": "four planes over the same 0.80 m",
+  "derived_from": "j15-v1:cand-N6",
+  "overrides": {
+   "DES-TRK-001": {
+    "parameters": {
+     "layer_positions_m": {
+      "value": [
+       0.0,
+       0.266667,
+       0.533333,
+       0.8
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_x_over_x0": {
+      "value": [
+       0.0032017075773745998,
+       0.0032017075773745998,
+       0.0032017075773745998,
+       0.0032017075773745998
+      ],
+      "unit": "1",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_aperture_radius_m": {
+      "value": [
+       0.1,
+       0.1,
+       0.1,
+       0.1
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_lateral_offset_m": {
+      "value": [
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     }
+    }
+   }
+  },
+  "budgets": {
+   "mass": {
+    "DES-TRK-001": {
+     "allocation": 13.2,
+     "estimate": 12.0,
+     "uncertainty": 2.4,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "SYNTHETIC example estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 440.0,
+     "estimate": 400.0,
+     "uncertainty": 80.0,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "SYNTHETIC example estimate",
+     "fidelity": "F1"
+    },
+    "DES-TOF-001": {
+     "allocation": 22.0,
+     "estimate": 20.0,
+     "uncertainty": 4.0,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "SYNTHETIC example estimate",
+     "fidelity": "F1"
+    },
+    "DES-CAL-001": {
+     "allocation": 1650.0,
+     "estimate": 1500.0,
+     "uncertainty": 75.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    }
+   },
+   "channel_count": {
+    "DES-TRK-001": {
+     "allocation": 8800.0,
+     "estimate": 8000.0,
+     "uncertainty": 400.0,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    },
+    "DES-TOF-001": {
+     "allocation": 17.6,
+     "estimate": 16.0,
+     "uncertainty": 0.8,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    },
+    "DES-CAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 5.0,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    }
+   }
+  },
+  "geometry_ref": "studies/G-N4-TRK100.geometry.json"
+ }
+}

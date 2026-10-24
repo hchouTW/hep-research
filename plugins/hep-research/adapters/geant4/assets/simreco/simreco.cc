@@ -62,6 +62,7 @@ struct Spec {
   long long seed = 0;
   int replica = 0;
   double sigma_y_mm = 0.01, sigma_z_mm = 0.03, sigma_t_ns = 0.1;
+  double test_tof_offset_ns = 0;  // TEST ONLY: the negative control of the TOF bookkeeping benchmarks (B3.2)
   double offset_per_GV = 0, field_scale_global = 0;
   double sampling_fraction = 0, mip_active_MeV = 0;
   bool ms = true;
@@ -69,6 +70,7 @@ struct Spec {
   std::vector<Plane> trackers, tofs;
   std::vector<FieldRegion> field;
   std::vector<std::string> calo_active_columns;
+  std::vector<std::string> calo_columns;  // every calorimeter element's deposit (containment)
   std::map<int, Particle> particles;
   std::set<std::string> tails;
   double align_sigma_y = 0, align_sigma_z = 0, align_sigma_rot = 0, align_residual_y = 0, align_residual_z = 0,
@@ -99,7 +101,11 @@ Spec Read(const std::string& path) {
   const Value& pr = u.at("point_resolution_um", "reco");
   s.sigma_y_mm = pr.at("bending", "point_resolution_um").number("bending") * 1e-3;
   s.sigma_z_mm = pr.at("non_bending", "point_resolution_um").number("non_bending") * 1e-3;
-  if (u.has("tof")) s.sigma_t_ns = u.obj.at("tof").at("sigma_t_ps", "tof").number("sigma_t_ps") * 1e-3;
+  if (u.has("tof")) {
+    s.sigma_t_ns = u.obj.at("tof").at("sigma_t_ps", "tof").number("sigma_t_ps") * 1e-3;
+    if (u.obj.at("tof").has("test_layer_offset_ps"))
+      s.test_tof_offset_ns = u.obj.at("tof").at("test_layer_offset_ps", "tof").number("test_layer_offset_ps") * 1e-3;
+  }
   s.offset_per_GV = Num(u, "curvature_offset_per_GV", 0, "reco");
   s.field_scale_global = Num(u, "field_scale_global", 0, "reco");
   if (u.has("calorimeter")) {
@@ -161,6 +167,9 @@ Spec Read(const std::string& path) {
                        fv.at("bz_tesla", "field").number("bz_tesla")});
   for (const auto& c : g.at("calorimeter_active_columns", "geometry").array("calorimeter_active_columns"))
     s.calo_active_columns.push_back(c.string("calorimeter_active_columns"));
+  if (g.has("calorimeter_columns"))
+    for (const auto& c : g.at("calorimeter_columns", "geometry").array("calorimeter_columns"))
+      s.calo_columns.push_back(c.string("calorimeter_columns"));
   for (const auto& pv : r.at("particles", "spec").array("particles"))
     s.particles[static_cast<int>(pv.at("pdg", "particle").number("pdg"))] = {
         pv.at("mass_GeV", "particle").number("mass_GeV"), pv.at("charge", "particle").number("charge")};
@@ -242,6 +251,14 @@ double BzAt(const Spec& s, double x, const std::vector<double>& delta) {
   for (std::size_t r = 0; r < s.field.size(); ++r)
     if (x >= s.field[r].lo && x <= s.field[r].hi) return s.field[r].bz * (1 + delta[r]);
   return 0.;
+}
+
+// the position resolution of the strip digitization: outside the sharing band (width w around each boundary) the
+// cluster sits at the strip centre (uniform error over p - w), inside it the charge-weighted position is exact
+// (linear sharing): sigma^2 = (p - w)^3 / (12 p)
+inline double StripSigma(double pitch, double sharing) {
+  double q = std::max(pitch - std::min(sharing, pitch), 0.0);
+  return std::sqrt(q * q * q / (12.0 * pitch));
 }
 
 struct Measured {
@@ -377,6 +394,11 @@ int main(int argc, char** argv) {
       h.x_over_x0 = pl.x_over_x0;
       double yt = c.y + ay[k] - arot[k] * (c.z - pl.centre_z), zt = c.z + az[k] + arot[k] * (c.y - pl.centre_y);
       if (digi) {
+        // the strip grid's phase is random per plane and event: tracks illuminate a sensor uniformly and the grids
+        // of different planes are not aligned to each other, so a fixed pencil beam must not see the same
+        // quantization in every event (that would make the digitization error a common offset, not a measurement
+        // error: J15 at 100 GV)
+        double phase_y = uni.Uniform() * s.strips.pitch_y, phase_z = uni.Uniform() * s.strips.pitch_z;
         if (uni.Uniform() >= s.strips.efficiency) continue;
         auto cluster = [&](double u, double centre, double pitch) {
           // two strips share the charge linearly within the sharing width around a strip boundary
@@ -399,10 +421,10 @@ int main(int argc, char** argv) {
           double sq = (k0 ? q0 : 0) + (k1 ? q1 : 0);
           return ((k0 ? q0 * c0 : 0) + (k1 ? q1 * c1 : 0)) / sq;
         };
-        h.y = cluster(yt, pl.centre_y, s.strips.pitch_y);
-        h.z = cluster(zt, pl.centre_z, s.strips.pitch_z);
-        h.sigma_y = s.strips.pitch_y / std::sqrt(12.0);
-        h.sigma_z = s.strips.pitch_z / std::sqrt(12.0);
+        h.y = cluster(yt, pl.centre_y + phase_y, s.strips.pitch_y);
+        h.z = cluster(zt, pl.centre_z + phase_z, s.strips.pitch_z);
+        h.sigma_y = StripSigma(s.strips.pitch_y, s.strips.sharing);
+        h.sigma_z = StripSigma(s.strips.pitch_z, s.strips.sharing);
       } else {
         h.y = yt + s.sigma_y_mm * rng.Next();
         h.z = zt + s.sigma_z_mm * rng.Next();
@@ -431,8 +453,8 @@ int main(int argc, char** argv) {
           h.x_over_x0 = pl.x_over_x0;
           h.y = pl.centre_y + (2 * uni.Uniform() - 1) * pl.half_y;
           h.z = pl.centre_z + (2 * uni.Uniform() - 1) * pl.half_z;
-          h.sigma_y = digi ? s.strips.pitch_y / std::sqrt(12.0) : s.sigma_y_mm;
-          h.sigma_z = digi ? s.strips.pitch_z / std::sqrt(12.0) : s.sigma_z_mm;
+          h.sigma_y = digi ? StripSigma(s.strips.pitch_y, s.strips.sharing) : s.sigma_y_mm;
+          h.sigma_z = digi ? StripSigma(s.strips.pitch_z, s.strips.sharing) : s.sigma_z_mm;
           cand[k].push_back(h);
           candTrack[k].push_back(-1);
         }
@@ -570,7 +592,7 @@ int main(int argc, char** argv) {
       double tl[4], xl[4];
       for (int k = 0; k < 4; ++k) {
         const Crossing* c = tofc[s.tofs[k].id];
-        tl[k] = c->t + s.sigma_t_ns * rng.Next();
+        tl[k] = c->t + (k == 2 ? s.test_tof_offset_ns : 0.) + s.sigma_t_ns * rng.Next();
         xl[k] = c->x;
       }
       double pTot = rig_true * std::fabs(part.charge);
@@ -611,15 +633,20 @@ int main(int argc, char** argv) {
     for (const auto& c : s.calo_active_columns) eact += std::stod(v[ix[c]]);
     double ecal = s.sampling_fraction > 0 ? eact / s.sampling_fraction : 0;
     double emip = s.mip_active_MeV > 0 ? eact / s.mip_active_MeV : 0;
-    // shower containment (B2.3): 1 - (rear + front + lateral leakage of the calorimeter mother) / incident energy
+    // shower containment (B2.3): the calorimeter's total deposit (every calorimeter element) over the incident
+    // kinetic energy; not 1 - net leakage / E0: the net leakage per face subtracts energy that enters through a face
+    // other than the primary's first entry, so photons radiated upstream (TOF, silicon) count as negative front
+    // leakage and that ratio exceeds 1 (J15, 10 GeV electrons). The rear-leakage fraction is the rear face's net
+    // outflow over E0 (little enters through the rear face)
     double contain = 0, rear = 0;
-    if (ix.count("leak_rear_MeV") && ix.count("primary_ekin_MeV")) {
+    if (ix.count("primary_ekin_MeV")) {
       double e0 = std::stod(v[ix["primary_ekin_MeV"]]) + (pdg == -11 ? 2e3 * part.mass : 0.);  // an e+ annihilates
-      double lr = std::stod(v[ix["leak_rear_MeV"]]), lf = std::stod(v[ix["leak_front_MeV"]]),
-             ll = std::stod(v[ix["leak_lateral_MeV"]]);
+      double dep = 0;
+      for (const auto& c : s.calo_columns)
+        if (ix.count(c)) dep += std::stod(v[ix[c]]);
       if (e0 > 0) {
-        contain = 1 - (lr + lf + ll) / e0;
-        rear = lr / e0;
+        contain = dep / e0;
+        if (ix.count("leak_rear_MeV")) rear = std::stod(v[ix["leak_rear_MeV"]]) / e0;
       }
     }
     std::vector<double> row = {static_cast<double>(event), static_cast<double>(s.replica), static_cast<double>(pdg),
@@ -665,7 +692,7 @@ int main(int argc, char** argv) {
     std::string run = "{\"seeding\": \"per-event\", \"logical_run_seed\": " + std::to_string(s.seed) +
                       ", \"weight_column\": \"unit\", \"replica\": " + std::to_string(s.replica) +
                       ", \"tail_sources_simulated\": " + tails + "}";
-    std::ofstream(s.out_summary) << acc.Json(run, "{\"name\": \"simreco\", \"version\": \"0.4.0\"}");
+    std::ofstream(s.out_summary) << acc.Json(run, "{\"name\": \"simreco\", \"version\": \"0.4.1\"}");
   }
   std::cout << "SIMRECO_EVENTS " << nevents << "\nSIMRECO_TAILS " << tails << std::endl;
   return Status("ok", "");

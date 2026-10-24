@@ -232,7 +232,7 @@ class Declaration(unittest.TestCase):
         # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset; adapter
         # 0.3.0 (B1.9): also every file under element_sim/ and simroot/, and element_spec.py; 0.4.0 (B2.9): every file
         # under simreco/ and simreco_spec.py
-        self.assertEqual(doc["version"], "0.4.0")
+        self.assertEqual(doc["version"], "0.4.1")
         on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas", "element_sim", "simroot", "simreco")
                    for p in (ASSETS / d).iterdir() if p.is_file()}
         self.assertLessEqual(on_disk | {"assets/summary_from_csv.py", "assets/element_spec.py",

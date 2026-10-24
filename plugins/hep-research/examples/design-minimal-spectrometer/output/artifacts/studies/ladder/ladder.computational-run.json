@@ -1,0 +1,693 @@
+{
+ "artifact_id": "j15-ladder-study",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "commands": [
+   "check_geant4_study.py label --write"
+  ],
+  "environment": {},
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "studies/ladder/study.json",
+    "sha256": "06400f34fdc04d18ec8c914c29490bbb42c13f75f1495ccd85481825dfbe482b"
+   },
+   {
+    "path": "studies/ladder/bench.results.json",
+    "sha256": "f8feb4c6602c49c0715caa69d98ba0940826f4207b5b57bf587c69feb62f6029"
+   },
+   {
+    "path": "studies/ladder/convergence.json",
+    "sha256": "6a39cf7d1ab0bae1a51aac16f60bdac8ea70574466e0108e00bbdd1b6cd1a73e"
+   },
+   {
+    "path": "specs/N6-TRK1-nominal.spec.json",
+    "sha256": "948579e75cce934587460b5c2e5e7964efbab36fd0e2ae4745fdbc744bcd04e4"
+   },
+   {
+    "path": "j15.realization.json",
+    "sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+   }
+  ],
+  "output_hashes": {},
+  "seeds": {},
+  "study": {
+   "benchmarks": [
+    {
+     "benchmark": "field-propagation",
+     "compared": 5000,
+     "geant4": 0.004160571549505221,
+     "grade": "verification",
+     "max_dt_ps": 1.751363498669889e-06,
+     "problems": [],
+     "reference": {
+      "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+      "validity": "deterministic: charged geantinos have no interactions",
+      "version": "exact"
+     },
+     "reference_value": 0.0,
+     "scope": {
+      "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+     },
+     "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+     "tolerance": {
+      "in_plane_um": 0.5,
+      "time_ps": 1.0
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "material-definition",
+     "grade": "verification",
+     "problems": [],
+     "reference": {
+      "source": "the study spec's independent material sources and the candidate's declared x/X0",
+      "validity": "verification of the realized geometry",
+      "version": "as declared"
+     },
+     "rows": [
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si1",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si2",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si3",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si4",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si5",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si6",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      }
+     ],
+     "scope": {
+      "geometry_sha256": "6c0b91376e36efca776fb5c1c8d3566c85aa7be2a334940dc399fb147f10700c",
+      "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+     },
+     "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+     "tolerance": {
+      "density_relative": 0.001,
+      "relative": 0.02
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "field-propagation-muon",
+     "entries": 4000,
+     "geant4": -8.357834884426557e-05,
+     "grade": "sanity",
+     "reference": {
+      "source": "plane-averaged true 1/R (B2.1)",
+      "validity": "sanity",
+      "version": "-"
+     },
+     "reference_value": 0.0,
+     "scope": {},
+     "sd": 0.014682283286508554,
+     "se": 0.00023214728218594788,
+     "statistic": "mean relative inverse-rigidity residual of muons",
+     "tolerance": {
+      "absolute": 0.003
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "field-propagation-muon",
+     "entries": 4000,
+     "geant4": -0.00012743851107816106,
+     "grade": "sanity",
+     "reference": {
+      "source": "plane-averaged true 1/R (B2.1)",
+      "validity": "sanity",
+      "version": "-"
+     },
+     "reference_value": 0.0,
+     "scope": {},
+     "sd": 0.018201588990357745,
+     "se": 0.00028779239121887515,
+     "statistic": "mean relative inverse-rigidity residual of muons",
+     "tolerance": {
+      "absolute": 0.003
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "field-propagation-muon",
+     "entries": 50720,
+     "geant4": -0.00045257710431789386,
+     "grade": "sanity",
+     "reference": {
+      "source": "plane-averaged true 1/R (B2.1)",
+      "validity": "sanity",
+      "version": "-"
+     },
+     "reference_value": 0.0,
+     "scope": {},
+     "sd": 0.08691727483206409,
+     "se": 0.00038593705519476693,
+     "statistic": "mean relative inverse-rigidity residual of muons",
+     "tolerance": {
+      "absolute": 0.003
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "reco-closure",
+     "entries": 8000,
+     "geant4": 0.9978043630408748,
+     "grade": "verification",
+     "problems": [],
+     "pull_mean": 0.013431276383804655,
+     "pull_width": 0.9978043630408748,
+     "pull_width_mc_sigma": 0.007905694150420948,
+     "reference": {
+      "source": "the truth of the simulated charged geantinos",
+      "validity": "closure of the fit; no physics",
+      "version": "exact"
+     },
+     "reference_value": 1.0,
+     "residual_mean": 0.011631545335214067,
+     "scope": {
+      "particle": "chargedgeantino",
+      "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+      "rigidity_GV": 1000.0
+     },
+     "statistic": "pull width and bias of the signed inverse rigidity",
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "tof-beta",
+     "entries": 12486,
+     "geant4": 0.0003534387987459364,
+     "grade": "verification",
+     "reference": {
+      "source": "kinematics along the true trajectory",
+      "validity": "bookkeeping verification (no physics control on the Geant4 side)",
+      "version": "-"
+     },
+     "reference_value": 0.0,
+     "scope": {},
+     "sd": 0.016757169710592046,
+     "se": 0.00014996468608538508,
+     "statistic": "mean relative beta residual",
+     "tolerance": {
+      "absolute": 0.002
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "tof-layer-consistency",
+     "entries": 12486,
+     "geant4": -0.528943721946913,
+     "grade": "verification",
+     "reference": {
+      "source": "inter-layer path / (beta c), widths sqrt(2) sigma_t",
+      "validity": "bookkeeping verification",
+      "version": "-"
+     },
+     "reference_value": 0.0,
+     "scope": {},
+     "sd": 142.60013161498478,
+     "se": 1.27616920653722,
+     "statistic": "two-layer time-difference residual (ps)",
+     "tolerance": {
+      "absolute": 10.0
+     },
+     "validation_evidence": false,
+     "verdict": "pass",
+     "width": {
+      "expected": 141.4213562373095,
+      "geant4": 142.60013161498478,
+      "relative": 0.008335200630499084,
+      "tolerance_relative": 0.1
+     }
+    },
+    {
+     "benchmark": "sampling-fraction",
+     "geant4": 0.2679804877561994,
+     "grade": "sanity",
+     "plausibility_window": "within 10% of the reference",
+     "reference": {
+      "source": "ionization dE/dx of 1 GeV (kinetic) muons, PDG 2024 muon tables muE_lead_Pb.txt (1.270 MeV cm2/g) and muE_polyvinyltoluene.txt (2.066 MeV cm2/g), read 2026-10-24: 0.5 cm x 1.032 x 2.066 / (that + 0.2 cm x 11.35 x 1.270) = 0.270",
+      "validity": "sanity",
+      "version": "-"
+     },
+     "reference_value": 0.27,
+     "relative_difference": -0.0074796749770392745,
+     "scope": {},
+     "se": 0.00027492218786844024,
+     "statistic": "sampling fraction sum(active) / sum(active + passive)",
+     "validation_evidence": false,
+     "verdict": "plausible"
+    }
+   ],
+   "convergence": {
+    "gate": "not-run",
+    "parameters": []
+   },
+   "declared_scope": {
+    "energy_MeV": [
+     433.0,
+     433.0
+    ],
+    "material": "G4_Si",
+    "observable": "verification ladder",
+    "observable_kind": "other",
+    "particle": "proton"
+   },
+   "evidence_overlap": [],
+   "evidence_overlap_version": 1,
+   "gaps": [
+    "no reference or setup-matched benchmark in the config: nothing here is validation evidence",
+    "convergence gate not passed: ",
+    "no variation table",
+    "no reference benchmark is validation evidence for this study (R5 not met)"
+   ],
+   "highest_usable_label": "unvalidated",
+   "phase2_upgrade_eligible_scopes": [],
+   "statistical_target": null,
+   "variations": null
+  },
+  "tolerances": {
+   "convergence": {}
+  },
+  "tools": [
+   {
+    "name": "check_geant4_study.py",
+    "version": "dedc2c52621c0505"
+   },
+   {
+    "name": "geant4_benchmarks.py",
+    "version": "42dde9ff11e315fe"
+   }
+  ]
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-run-ladder-overlap-test",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-overlap-test.computational-run.json",
+   "sha256": "d1c449e2e525e77e107e8faa6d1c9321cad623b382b70edf5aed411076a2a208",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-balance-e-",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-balance-e-.computational-run.json",
+   "sha256": "298c2950cffd1fc64e5b59d3097fb288e667fd263ae027ae97f651a838ed4e45",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-balance-e+",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-balance-e+.computational-run.json",
+   "sha256": "1d28d0fae5c540b5b822cc0192a3a8e2541a825f54660ffca480182ea0ef2cf9",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-geantino-pb-control",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-geantino-pb-control.computational-run.json",
+   "sha256": "9455f57fdd495e735cc2329ad163b7ae09884f6d7156899cf1f627962f50f51b",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-field-plus",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-field-plus.computational-run.json",
+   "sha256": "f7c22c35c257c59749b4b02071d3b2d5f7c832769015c7412d960498168da502",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-field-minus",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-field-minus.computational-run.json",
+   "sha256": "c13ce5a23e2a5c70646900482c3a9a16377c3a43bf69dacff1e0b5235d95b88c",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-mu1-trial",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu1-trial.computational-run.json",
+   "sha256": "035267afb941ec4d6a628493e98ec52018603ebc5f3a4c113167aef34cd8fbfa",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-mu1-trial-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu1-trial-reco.computational-run.json",
+   "sha256": "8f5dfc1569bfbe007773e5682c03c2bea574f2cef72be15f8aa4e2bf0d2b8c9f",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-mu1",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu1.computational-run.json",
+   "sha256": "4f089b40bb72ea5cffc37f9e700b6917a0e6e343d8d852647ab68a3ec7aaef09",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-mu1-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu1-reco.computational-run.json",
+   "sha256": "2ee11fba11b3d80e8dc38a5ded83513832fae8c9c07bda93c0d5e4a0a20612b9",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-mu10-trial",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu10-trial.computational-run.json",
+   "sha256": "510108e006b31a603db5fdd709085f8caf0e09fbf7ac31b58453774d2d11fac7",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-mu10-trial-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu10-trial-reco.computational-run.json",
+   "sha256": "da96493e1c648d4cce5ffdbef80b96ca07159d4e8a42683a8031eccd67f6193f",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-mu10",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu10.computational-run.json",
+   "sha256": "42df804a8b51bf36df8dd50be9be835f28e67f4a6c3caf9dc66dc027df44a662",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-mu10-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu10-reco.computational-run.json",
+   "sha256": "effedf543fc64a2f516b685e7b4263c4d104a23d20557118b5ca475e7577664f",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-mu10-field-control",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu10-field-control.computational-run.json",
+   "sha256": "c458cd1b76be850aac7ddf8959b89b8ead2d88a362154c60a157ab7aa59451c2",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-mu10-field-control-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu10-field-control-reco.computational-run.json",
+   "sha256": "2c6a7a5e163959ca0e68ff1f64c2c2581670974ce3267a1a093dc6399ec3ef3b",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-mu100-trial",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu100-trial.computational-run.json",
+   "sha256": "ec26c111d0187f0bc9c810e15f7d1574d2e8187cba9bd92ed2b399330da51a4a",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-mu100-trial-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu100-trial-reco.computational-run.json",
+   "sha256": "2a62581ca72010d2fbe8d61fbd533bce1112ae700174993a314de9551853b3e5",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-mu100",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu100.computational-run.json",
+   "sha256": "d254b69ddae349e5b37d1ac9fc8e86a8dd1b987d7fd72520c086c35cda632f74",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-mu100-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-mu100-reco.computational-run.json",
+   "sha256": "abdbe1aea7eabc21167db77a099830c8a2c37103d73bbc28ef27be624107e7e0",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-ladder-closure-control-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-closure-control-reco.computational-run.json",
+   "sha256": "4468fbcba1e70e5d22ead54d42bded959c087ac9c29e82211c1ec893b1d74004",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-TRK1-nominal-off-tofoffset",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-TRK1-nominal-off-tofoffset.computational-run.json",
+   "sha256": "2dc045f595733e60b99d99da3df06e6d78709426af8320b2f114ef74670d37a3",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-sf",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-sf.computational-run.json",
+   "sha256": "cc6e6487fd755d7b7186b18eb156d48864eac947fde79161bd1a8774cf7aca35",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-ladder-sf-pvt-control",
+   "artifact_type": "computational-run",
+   "ref": "runs/ladder-sf-pvt-control.computational-run.json",
+   "sha256": "478da38d68142fadd13c405e9c162467ecae7761ef2df7008036b2c8225079b0",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-geantino",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-geantino.computational-run.json",
+   "sha256": "c2a68f3ed1e31be58c7157c9f264c5de78ddd87585daf8f810eba5d12d1fa0ba",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-chargedgeantino",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-chargedgeantino.computational-run.json",
+   "sha256": "f985758674f44905839defa755ddbac613993b661863b170ea2bbc47115da855",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-closure",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-closure.computational-run.json",
+   "sha256": "ce29194cc7aabd140a59d569c4e3eb5de4eb9b8239c1ea0a3b28e8ba6e259046",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-closure-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-closure-reco.computational-run.json",
+   "sha256": "4fc1d040a8c2c80426c3a56ba60702a8c8e95ade8011213f619d2aa8bcee04df",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-verify-overlaps-ladder-overlap-test",
+   "artifact_type": "computational-run",
+   "ref": "checks/ladder-overlaps.computational-run.json",
+   "sha256": "a0b79b7708a791ad53b2144161f38907b82179511a70a884a61feed054617859",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-verify-energy-balance-ladder-balance-e-",
+   "artifact_type": "computational-run",
+   "ref": "checks/ladder-balance-e-.computational-run.json",
+   "sha256": "aec460b931704669d79a51273b4ba9c3c59ff68a01e22cecb4418f588577f06d",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-verify-energy-balance-ladder-balance-e+",
+   "artifact_type": "computational-run",
+   "ref": "checks/ladder-balance-e+.computational-run.json",
+   "sha256": "7337a5d96142ffb56ad74622a50b1e4846d269c6027012f499c3997940392a3d",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-verify-material-budget-N6-geantino",
+   "artifact_type": "computational-run",
+   "ref": "checks/ladder-budget.computational-run.json",
+   "sha256": "843062e0ea630d6ca902087188950859384cfd668f5cf87c1aeaf4bb50add6a8",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  }
+ ],
+ "objective": "Geant4 study record: verification ladder for proton 433.0 MeV; benchmarks, convergence and scope embedded (unvalidated in phase 1)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/simulation/__init__.py",
+   "core/simulation/estimates.py",
+   "core/simulation/helix.py",
+   "core/simulation/summary.py",
+   "core/stats/__init__.py",
+   "core/stats/_linalg.py",
+   "core/stats/_poisson.py",
+   "core/stats/batch_means.py",
+   "core/stats/decisions.py",
+   "core/stats/distributions.py",
+   "core/stats/poisson_diagnostics.py",
+   "core/stats/tail_estimation.py",
+   "core/status.py",
+   "core/trace.py",
+   "skills/hep-detector/scripts/check_geant4_study.py",
+   "skills/hep-detector/scripts/geant4_benchmarks.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

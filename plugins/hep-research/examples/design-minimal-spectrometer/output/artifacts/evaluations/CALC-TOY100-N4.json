@@ -1,0 +1,92 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-CALC-TOY100-N4",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N4.json",
+   "sha256": "9d51bc09b36df5e4b9ae18ccaf7a1402e641fabf1249ccf39425d6db0cf1602b",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N4",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-TOY100-N4.computational-run.json",
+   "sha256": "086f0360cfc48ea05f35182d2fb8690ed7c3a723c9bfac73dfa80ff8369854da",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-v1-CALC-TOY100-N4-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:CALC-TOY100-N4",
+  "candidate": "j15-v1:cand-N4",
+  "figure_of_merit": "momentum-resolution-core",
+  "denominator": {
+   "rigidity_GV": 100.0,
+   "species": "proton"
+  },
+  "bound": "estimate",
+  "fidelity": "F2",
+  "value": 0.0997190545553518,
+  "unit": "1",
+  "run_ref": "runs/CALC-TOY100-N4.computational-run.json",
+  "parameter_refs": [
+   "DES-MAG-001.parameters.field_T",
+   "DES-TRK-001.parameters.layer_positions_m",
+   "DES-TRK-001.parameters.layer_x_over_x0",
+   "DES-TRK-001.parameters.passive_x_over_x0",
+   "DES-TRK-001.parameters.point_resolution_um"
+  ],
+  "parameter_digest": "62147d6996ee501e2419f2383f698c12a1655e0ccc9b48f4a8ec989f35efcfa3",
+  "validity": {
+   "assumptions": [
+    "Gaussian smearing in 1/R",
+    "Gluckstern intrinsic term (equally spaced layers)",
+    "Highland scattering without the log term",
+    "uniform field"
+   ],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 0.02492976363883795,
+   "plus": 0.02492976363883795,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

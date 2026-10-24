@@ -1,0 +1,106 @@
+{
+ "geometry": {
+  "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/studies/G-N8-TRK100.geometry.json",
+  "sha256": "82f4998cbb2a89d220efba5b8b336b2a682691489d07d320e56b3209eb0a4f97"
+ },
+ "reco_record": {
+  "artifact_id": "geant4-reco-N8-TRK100-nominal-on",
+  "sha256": "490d156722b5ddfc581e2db130fb1f81de19ec11e036cdf930fe2396953b1654"
+ },
+ "results": {
+  "momentum-resolution-core": {
+   "denominator": {
+    "rigidity_GV": 100.0,
+    "species": "proton"
+   },
+   "dof": 15,
+   "estimator": {
+    "name": "gaussian-core",
+    "observable": "core",
+    "truncation_sigma": 2.0
+   },
+   "model_envelope": [
+    0.0974620404779663,
+    0.09761011056279845
+   ],
+   "model_envelope_annotation": {
+    "ends": {
+     "hi": {
+      "se": 0.0010462106036411276,
+      "variation": "emy"
+     },
+     "lo": {
+      "se": 0.0011302659849496504,
+      "variation": "qgsp-bic"
+     }
+    },
+    "variations": {
+     "emy": {
+      "se": 0.0010462106036411276,
+      "value": 0.09761011056279845
+     },
+     "nominal": {
+      "se": 0.0009481113484580471,
+      "value": 0.09752082231601225
+     },
+     "qgsp-bic": {
+      "se": 0.0011302659849496504,
+      "value": 0.0974620404779663
+     }
+    }
+   },
+   "replica_spread": 0.0008622723709031832,
+   "replica_values": [
+    0.09679329289001018,
+    0.09745319203177126,
+    0.09742138084666706,
+    0.09812337608739713,
+    0.09654771632869781,
+    0.09668989901756334,
+    0.09631478785516068,
+    0.0981419338740751,
+    0.09758071774947451,
+    0.09682363694815875,
+    0.0969922622423973,
+    0.09932537808995652,
+    0.0975124555202665,
+    0.09610534350425233,
+    0.09732537190297452,
+    0.09774887153877419,
+    0.09876399387772081,
+    0.09864023718724547,
+    0.09770210121167103,
+    0.0984104976160105
+   ],
+   "replicas": 20,
+   "se": 0.0009481113484580471,
+   "statistical_uncertainty": 0.0009808080614191123,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.0021849808811767973,
+    "plus": 0.0021849808811767973
+   },
+   "uncertainty_components": {
+    "replica_spread": {
+     "half_width": 0.001418311836700146,
+     "sd": 0.0008622723709031832
+    },
+    "statistical": {
+     "method": "t_0.95(K-1) x batch-means SE over K blocks",
+     "minus": 0.0016620869366505448,
+     "plus": 0.0016620869366505448
+    }
+   },
+   "value": 0.09752082231601225
+  }
+ },
+ "schema": "f4-results/1",
+ "tail_sources_simulated": [
+  "alignment",
+  "calibration-non-uniformity",
+  "noise-digitization",
+  "pattern-recognition"
+ ]
+}

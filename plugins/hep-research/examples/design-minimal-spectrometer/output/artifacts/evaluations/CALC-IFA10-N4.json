@@ -1,0 +1,92 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-CALC-IFA10-N4",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N4.json",
+   "sha256": "9d51bc09b36df5e4b9ae18ccaf7a1402e641fabf1249ccf39425d6db0cf1602b",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N4",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-IFA10-N4.computational-run.json",
+   "sha256": "dc90958b967ffed8a873753d82a56bd628b446b5513f0c2e5caa8b894b3a2226",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-v1-CALC-IFA10-N4-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:CALC-IFA10-N4",
+  "candidate": "j15-v1:cand-N4",
+  "figure_of_merit": "geometric-acceptance",
+  "denominator": {
+   "rigidity_GV": 10.0,
+   "species": "proton",
+   "charge_sign": "positive"
+  },
+  "bound": "estimate",
+  "fidelity": "F2",
+  "value": 0.0014705710557623146,
+  "unit": "m2 sr",
+  "run_ref": "runs/CALC-IFA10-N4.computational-run.json",
+  "parameter_refs": [
+   "DES-MAG-001.parameters.field_T",
+   "DES-TRK-001.parameters.aperture_radius_tolerance_m",
+   "DES-TRK-001.parameters.layer_aperture_radius_m",
+   "DES-TRK-001.parameters.layer_lateral_offset_m",
+   "DES-TRK-001.parameters.layer_positions_m"
+  ],
+  "parameter_digest": "6a364312383d1e1fba8fd19308989e48bb872ba0e26e5a56180f7ee414be6ca8",
+  "validity": {
+   "assumptions": [
+    "uniform field along y over the whole stack",
+    "circular apertures",
+    "geometry only: no material, nuclear interactions or detection efficiency"
+   ],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 6.1029263638280214e-05,
+   "plus": 6.1029263638280214e-05,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

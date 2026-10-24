@@ -1,0 +1,49 @@
+{
+ "field_tesla": 0.5,
+ "lever_arm_m": 0.8,
+ "point_resolution_um": 10.0,
+ "layers": [
+  {
+   "name": "measuring layer",
+   "material": "declared",
+   "x_over_x0": 0.0032017075773745998,
+   "measuring": true
+  },
+  {
+   "name": "measuring layer",
+   "material": "declared",
+   "x_over_x0": 0.0032017075773745998,
+   "measuring": true
+  },
+  {
+   "name": "measuring layer",
+   "material": "declared",
+   "x_over_x0": 0.0032017075773745998,
+   "measuring": true
+  },
+  {
+   "name": "measuring layer",
+   "material": "declared",
+   "x_over_x0": 0.0032017075773745998,
+   "measuring": true
+  },
+  {
+   "name": "measuring layer",
+   "material": "declared",
+   "x_over_x0": 0.0032017075773745998,
+   "measuring": true
+  },
+  {
+   "name": "measuring layer",
+   "material": "declared",
+   "x_over_x0": 0.0032017075773745998,
+   "measuring": true
+  },
+  {
+   "name": "passive material",
+   "material": "declared",
+   "x_over_x0": 0.0,
+   "measuring": false
+  }
+ ]
+}

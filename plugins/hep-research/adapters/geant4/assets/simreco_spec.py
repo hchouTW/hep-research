@@ -43,6 +43,13 @@ def tails_on(spec: dict) -> list[str]:
     return [n for n in TAIL_SOURCES if (t.get(n) or {}).get("on")]
 
 
+def strip_sigma(pitch: float, sharing: float) -> float:
+    """The strip digitization's position resolution (simreco StripSigma): sigma^2 = (p - w)^3 / (12 p), the cluster at
+    the strip centre outside the sharing band w, exact inside it (linear sharing)."""
+    q = max(pitch - min(sharing, pitch), 0.0)
+    return (q ** 3 / (12.0 * pitch)) ** 0.5
+
+
 def _inert_tails(spec: dict, element_spec: dict | None) -> list[str]:
     """A tail source switched on must act: it is then listed as simulated and an F4 value becomes an estimate
     (FID-03), so a stage with zero widths is refused rather than counted."""
@@ -65,6 +72,15 @@ def _inert_tails(spec: dict, element_spec: dict | None) -> list[str]:
     n = t.get("noise-digitization") or {}
     if "noise-digitization" in on and not ("pitch_y_um" in n and "pitch_z_um" in n):
         out.append("tail source noise-digitization needs pitch_y_um and pitch_z_um (the strip digitization)")
+    elif "noise-digitization" in on:  # a strip pitch finer than the declared resolution would improve the measurement
+        pr = spec.get("point_resolution_um") or {}
+        w = n.get("sharing_um", 10.0)
+        for axis, key in (("bending", "pitch_y_um"), ("non_bending", "pitch_z_um")):
+            res = strip_sigma(n[key], w)
+            if isinstance(pr.get(axis), (int, float)) and res < pr[axis] * (1 - 1e-9):
+                out.append(f"tail source noise-digitization: {key} {n[key]} with sharing {w} um gives a {axis} "
+                           f"resolution {res:.3g} um, finer than the declared {pr[axis]} um: a tail stage must not "
+                           "improve the measurement")
     p = t.get("pattern-recognition") or {}
     if "pattern-recognition" in on and "window_mm" not in p:
         out.append("tail source pattern-recognition needs window_mm (the association window)")
@@ -159,7 +175,10 @@ def effective(reco: dict, element_spec: dict, replica: int, io: dict, bending_um
     active = [f"edep_{e['name']}_MeV" for e in element_spec["elements"] if e["role"] == "calorimeter-active"]
     return {"schema": "simreco.effective/1", "reco": reco, "replica": replica,
             "logical_run_seed": element_spec["run"]["logical_run_seed"],
-            "geometry": {"planes": planes, "field_regions": regions, "calorimeter_active_columns": active},
+            "geometry": {"planes": planes, "field_regions": regions, "calorimeter_active_columns": active,
+                         "calorimeter_columns": [f"edep_{e['name']}_MeV" for e in element_spec["elements"]
+                                                 if e["role"] in ("calorimeter", "calorimeter-active",
+                                                                  "calorimeter-passive")]},
             "particles": particle_table(element_spec["source"].get("particle", "")), "io": io}
 
 
@@ -258,6 +277,8 @@ def fom_result(fom: str, summaries: list[dict], decl: dict, denominator: dict) -
     out["uncertainty_components"] = {"statistical": {"minus": minus, "plus": plus, "method": stat_desc},
                                      "replica_spread": {"sd": s_rep, "half_width": Z95 * s_rep}}
     minus, plus = math.hypot(minus, Z95 * s_rep), math.hypot(plus, Z95 * s_rep)
+    if rule["counting"]:  # a proportion cannot go below zero: the lower side stops at the value
+        minus = min(minus, value)
     out["uncertainty"] = {"minus": minus, "plus": plus, "coverage": COVERAGE, "interval": "central",
                           "distribution": "exact" if rule["counting"] else "non-gaussian"}
     return out

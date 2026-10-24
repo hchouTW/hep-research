@@ -1,0 +1,201 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "material-definition",
+   "grade": "verification",
+   "problems": [],
+   "reference": {
+    "source": "the study spec's independent material sources and the candidate's declared x/X0",
+    "validity": "verification of the realized geometry",
+    "version": "as declared"
+   },
+   "rows": [
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si1",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si2",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si3",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si4",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    }
+   ],
+   "scope": {
+    "geometry_sha256": "958cf577c3e5b80e756fff9924e55de6cb0fb207ad959b4e5757c450427896ac",
+    "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+   },
+   "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+   "tolerance": {
+    "density_relative": 0.001,
+    "relative": 0.01
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "field-propagation",
+   "compared": 4000,
+   "geant4": 0.004346476870864535,
+   "grade": "verification",
+   "max_dt_ps": 1.8111707689172363e-06,
+   "problems": [],
+   "reference": {
+    "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+    "validity": "deterministic: charged geantinos have no interactions",
+    "version": "exact"
+   },
+   "reference_value": 0.0,
+   "scope": {
+    "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+   },
+   "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+   "tolerance": {
+    "in_plane_um": 0.5,
+    "time_ps": 1.0
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "reco-closure",
+   "entries": 8000,
+   "geant4": 0.9941833811876684,
+   "grade": "verification",
+   "problems": [],
+   "pull_mean": 0.012919978327502255,
+   "pull_width": 0.9941833811876684,
+   "pull_width_mc_sigma": 0.007905694150420948,
+   "reference": {
+    "source": "the truth of the simulated charged geantinos",
+    "validity": "closure of the fit; no physics",
+    "version": "exact"
+   },
+   "reference_value": 1.0,
+   "residual_mean": 0.012233404198737934,
+   "scope": {
+    "particle": "chargedgeantino",
+    "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+    "rigidity_GV": 1000.0
+   },
+   "statistic": "pull width and bias of the signed inverse rigidity",
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "multiple-scattering-reference",
+   "canonical_ties": 0,
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-msref-1gv-nominal",
+    "run_record": "../../proj/artifacts/runs/msref-1gv-nominal.computational-run.json",
+    "sha256": "c619df266b4b9b7453742a56dfe6089bd0d9182eb30f921bfa8e1c87e3a16a56"
+   },
+   "configuration_gap": null,
+   "geant4": 0.0008350520647324336,
+   "geant4_dof": 15,
+   "grade": "reference",
+   "hash_scheme": "tree-v1",
+   "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+   "negative_control": {
+    "at_claimed_detection_limit": true,
+    "controls": [
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-1gv-density-plus.crossings.csv",
+      "detection_limit_relative": 0.08086765304006459,
+      "injected": "slab density x 1.13",
+      "injected_relative": 0.1299999999999999,
+      "injection_in_run": 0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-1gv-density-plus.computational-run.json",
+      "se_of_shift": 0.010814823420224214,
+      "shift": 0.07280808073517159,
+      "sign": "+",
+      "status": "caught"
+     },
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-1gv-density-minus.crossings.csv",
+      "detection_limit_relative": 0.08075950454344658,
+      "injected": "slab density x 0.87",
+      "injected_relative": -0.13,
+      "injection_in_run": -0.1299999999999999,
+      "run_record": "../../proj/artifacts/runs/msref-1gv-density-minus.computational-run.json",
+      "se_of_shift": 0.010764371763132491,
+      "shift": -0.0695379342661927,
+      "sign": "-",
+      "status": "caught"
+     }
+    ],
+    "detection_limit_relative": 0.08086765304006459,
+    "detection_limit_sign": "+-",
+    "status": "caught"
+   },
+   "reference": {
+    "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+    "validity": "as declared",
+    "version": "1991"
+   },
+   "reference_value": 0.0008502461110064238,
+   "relative_difference": -0.017870174385161586,
+   "relative_se": 0.006814288858865224,
+   "scope": {
+    "material": [
+     "G4_Si"
+    ],
+    "particle": [
+     "proton"
+    ],
+    "rigidity_GV": 1.0,
+    "thickness_x0": 0.0032017075773745998
+   },
+   "selection": {
+    "blocks": 16,
+    "events": 8000
+   },
+   "statistic": "core width of the projected exit angle (rad), central 98 %",
+   "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+   "target_slabs": [
+    "Plane",
+    "Slab"
+   ],
+   "tolerance": {
+    "parts": {
+     "binning": 0.0,
+     "k_sigma": 3.0,
+     "mc_statistics": 0.02044286657659567,
+     "reference_accuracy": 0.02
+    },
+    "total": 0.04044286657659567
+   },
+   "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+   "validation_evidence": true,
+   "verdict": "pass",
+   "world_material": "G4_Galactic"
+  }
+ ],
+ "constants": {
+  "K_MeV_mol_cm2": 0.3070749269094836,
+  "m_e_MeV": 0.51099895069,
+  "source": "core/constants (CODATA 2022)"
+ },
+ "failed": [],
+ "gaps": [],
+ "note": "reference inputs come from the study spec; the Geant4 material dump is never read",
+ "status": "ok",
+ "status_label": "unvalidated"
+}

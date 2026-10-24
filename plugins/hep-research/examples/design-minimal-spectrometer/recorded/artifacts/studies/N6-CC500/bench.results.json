@@ -1,0 +1,138 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "material-definition",
+   "grade": "verification",
+   "problems": [],
+   "reference": {
+    "source": "the study spec's independent material sources and the candidate's declared x/X0",
+    "validity": "verification of the realized geometry",
+    "version": "as declared"
+   },
+   "rows": [
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si1",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si2",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si3",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si4",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si5",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si6",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    }
+   ],
+   "scope": {
+    "geometry_sha256": "2948a7c4c50ce1a17bc1ef96ce117663385dd761ef1aa95d4c6250da18badbff",
+    "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+   },
+   "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+   "tolerance": {
+    "density_relative": 0.001,
+    "relative": 0.01
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "field-propagation",
+   "compared": 5000,
+   "geant4": 0.004160571549505221,
+   "grade": "verification",
+   "max_dt_ps": 1.751363498669889e-06,
+   "problems": [],
+   "reference": {
+    "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+    "validity": "deterministic: charged geantinos have no interactions",
+    "version": "exact"
+   },
+   "reference_value": 0.0,
+   "scope": {
+    "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+   },
+   "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+   "tolerance": {
+    "in_plane_um": 0.5,
+    "time_ps": 1.0
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "reco-closure",
+   "entries": 8000,
+   "geant4": 0.9978043630408748,
+   "grade": "verification",
+   "problems": [],
+   "pull_mean": 0.013431276383804655,
+   "pull_width": 0.9978043630408748,
+   "pull_width_mc_sigma": 0.007905694150420948,
+   "reference": {
+    "source": "the truth of the simulated charged geantinos",
+    "validity": "closure of the fit; no physics",
+    "version": "exact"
+   },
+   "reference_value": 1.0,
+   "residual_mean": 0.011631545335214067,
+   "scope": {
+    "particle": "chargedgeantino",
+    "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+    "rigidity_GV": 1000.0
+   },
+   "statistic": "pull width and bias of the signed inverse rigidity",
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "ms-tail-reference",
+   "grade": "reference",
+   "reason": "no published tail reference configured (D0-b): charge confusion cannot qualify",
+   "reference": {
+    "source": "none",
+    "validity": "-",
+    "version": "-"
+   },
+   "scope": {},
+   "statistic": "fraction of projected angles beyond 3 theta0",
+   "validation_evidence": false,
+   "verdict": "not-applicable"
+  }
+ ],
+ "constants": {
+  "K_MeV_mol_cm2": 0.3070749269094836,
+  "m_e_MeV": 0.51099895069,
+  "source": "core/constants (CODATA 2022)"
+ },
+ "failed": [],
+ "gaps": [
+  "ms-tail-reference: not applicable (no published tail reference configured (D0-b): charge confusion cannot qualify)"
+ ],
+ "note": "reference inputs come from the study spec; the Geant4 material dump is never read",
+ "status": "incomplete",
+ "status_label": "unvalidated"
+}

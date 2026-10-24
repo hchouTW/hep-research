@@ -1,0 +1,597 @@
+{
+ "artifact_id": "j15-N6-CC500-study",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "commands": [
+   "check_geant4_study.py label --write"
+  ],
+  "environment": {},
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "studies/N6-CC500/study.json",
+    "sha256": "799d7f21ab265af3e9759f3ef72e4d502a58db341dd7925d277bfbc10e712a4f"
+   },
+   {
+    "path": "studies/N6-CC500/bench.results.json",
+    "sha256": "0919fc332b6eac584b3c7d2c01638e5648716559934a7e268459eddbd5058031"
+   },
+   {
+    "path": "studies/N6-CC500/convergence.json",
+    "sha256": "53bf3a030984e863bc3468b5445930f701ac1d1d2f60607880cfbe712f2e85a6"
+   },
+   {
+    "path": "studies/N6-CC500/variations.json",
+    "sha256": "b490a896ae9f0698ab66c2ba74d486fb29af810b48a16b082345eccfbf8b1cf1"
+   },
+   {
+    "path": "studies/N6-CC500/f4-results.json",
+    "sha256": "8b9abfe8d6d9ab58167027a8d67531ef188edec6ed4c596addedbcb538eb9875"
+   },
+   {
+    "path": "studies/G-N6-CC500.geometry.json",
+    "sha256": "2948a7c4c50ce1a17bc1ef96ce117663385dd761ef1aa95d4c6250da18badbff"
+   },
+   {
+    "path": "specs/N6-CC500-nominal.spec.json",
+    "sha256": "9cb2676ef5d09f0cd9ae12bb91108b727b97dd78ee821b7e3d094e75d6b8071e"
+   },
+   {
+    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/j15.realization.json",
+    "sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+   }
+  ],
+  "output_hashes": {},
+  "seeds": {},
+  "study": {
+   "benchmarks": [
+    {
+     "benchmark": "material-definition",
+     "grade": "verification",
+     "problems": [],
+     "reference": {
+      "source": "the study spec's independent material sources and the candidate's declared x/X0",
+      "validity": "verification of the realized geometry",
+      "version": "as declared"
+     },
+     "rows": [
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si1",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si2",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si3",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si4",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si5",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si6",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      }
+     ],
+     "scope": {
+      "geometry_sha256": "2948a7c4c50ce1a17bc1ef96ce117663385dd761ef1aa95d4c6250da18badbff",
+      "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+     },
+     "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+     "tolerance": {
+      "density_relative": 0.001,
+      "relative": 0.01
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "field-propagation",
+     "compared": 5000,
+     "geant4": 0.004160571549505221,
+     "grade": "verification",
+     "max_dt_ps": 1.751363498669889e-06,
+     "problems": [],
+     "reference": {
+      "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+      "validity": "deterministic: charged geantinos have no interactions",
+      "version": "exact"
+     },
+     "reference_value": 0.0,
+     "scope": {
+      "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+     },
+     "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+     "tolerance": {
+      "in_plane_um": 0.5,
+      "time_ps": 1.0
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "reco-closure",
+     "entries": 8000,
+     "geant4": 0.9978043630408748,
+     "grade": "verification",
+     "problems": [],
+     "pull_mean": 0.013431276383804655,
+     "pull_width": 0.9978043630408748,
+     "pull_width_mc_sigma": 0.007905694150420948,
+     "reference": {
+      "source": "the truth of the simulated charged geantinos",
+      "validity": "closure of the fit; no physics",
+      "version": "exact"
+     },
+     "reference_value": 1.0,
+     "residual_mean": 0.011631545335214067,
+     "scope": {
+      "particle": "chargedgeantino",
+      "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+      "rigidity_GV": 1000.0
+     },
+     "statistic": "pull width and bias of the signed inverse rigidity",
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "ms-tail-reference",
+     "grade": "reference",
+     "reason": "no published tail reference configured (D0-b): charge confusion cannot qualify",
+     "reference": {
+      "source": "none",
+      "validity": "-",
+      "version": "-"
+     },
+     "scope": {},
+     "statistic": "fraction of projected angles beyond 3 theta0",
+     "validation_evidence": false,
+     "verdict": "not-applicable"
+    }
+   ],
+   "convergence": {
+    "gate": "pass",
+    "multiplicity": 1,
+    "parameters": [
+     {
+      "observables": [
+       {
+        "dof": 29.82697337794788,
+        "finest": 0.35,
+        "margin": 0.07484015780049896,
+        "next": 0.7,
+        "observable": "core",
+        "reason": "within-tolerance",
+        "relative_change": 0.0009008437437687228,
+        "se_of_change": 0.014290387737971928,
+        "se_targets_met": {
+         "finest": true,
+         "next": true
+        },
+        "tolerance": 0.1,
+        "tolerance_mode": "relative",
+        "verdict": "pass"
+       }
+      ],
+      "parameter": "physics.default_cut_mm",
+      "two_finest": [
+       0.35,
+       0.7
+      ],
+      "values": [
+       0.35,
+       0.7
+      ],
+      "verdict": "pass"
+     }
+    ],
+    "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
+   },
+   "declared_scope": {
+    "energy_MeV": [
+     499062.60826430883,
+     499062.60826430883
+    ],
+    "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d",
+    "geometry_sha256": "2948a7c4c50ce1a17bc1ef96ce117663385dd761ef1aa95d4c6250da18badbff",
+    "material": "G4_Si",
+    "observable": "charge-confusion-rate",
+    "observable_kind": "charge-confusion",
+    "particle": "proton",
+    "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b",
+    "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+    "rigidity_GV": [
+     500.0,
+     500.0
+    ],
+    "thickness_x0": [
+     0.0032017075773745998,
+     0.0032017075773745998
+    ]
+   },
+   "evidence_overlap": [
+    {
+     "decisions": [
+      "convergence",
+      "statistical-target",
+      "variations"
+     ],
+     "run": "geant4-reco-N6-CC500-nominal-off"
+    }
+   ],
+   "evidence_overlap_version": 1,
+   "gaps": [
+    "ms-tail-reference: not applicable (no published tail reference configured (D0-b): charge confusion cannot qualify)",
+    "no reference benchmark is validation evidence for this study (R5 not met)",
+    "qualification (charge-confusion): ms-tail-reference: verdict 'not-applicable'; negative control not caught; not validation evidence; particle: the benchmark states none; material: the benchmark states none; thickness_x0: the benchmark states none; rigidity_GV: the benchmark states none"
+   ],
+   "geometry": {
+    "path": "studies/G-N6-CC500.geometry.json",
+    "sha256": "2948a7c4c50ce1a17bc1ef96ce117663385dd761ef1aa95d4c6250da18badbff"
+   },
+   "highest_usable_label": "unvalidated",
+   "phase2_upgrade_eligible_scopes": [],
+   "results": {
+    "charge-confusion-rate": {
+     "counts": {
+      "interval": [
+       0.0466720038719699,
+       0.05341023095911062
+      ],
+      "k": 580,
+      "method": "Clopper-Pearson (replica 0)",
+      "n": 11610
+     },
+     "denominator": {
+      "charge_sign": "positive",
+      "curvature_offset_per_GV": 0.0,
+      "rigidity_GV": 500.0,
+      "species": "proton"
+     },
+     "estimator": {
+      "name": "proportion",
+      "observable": "flip"
+     },
+     "model_envelope": [
+      0.03360996112879524,
+      0.038391937120787686
+     ],
+     "model_envelope_annotation": {
+      "ends": {
+       "hi": {
+        "se": 0.029754954769751808,
+        "variation": "emy"
+       },
+       "lo": {
+        "se": 0.02315697590394906,
+        "variation": "nominal"
+       }
+      },
+      "variations": {
+       "emy": {
+        "se": 0.029754954769751808,
+        "value": 0.038391937120787686
+       },
+       "nominal": {
+        "se": 0.02315697590394906,
+        "value": 0.03360996112879524
+       }
+      }
+     },
+     "replica_spread": 0.025795250796574392,
+     "replica_values": [
+      0.04996979189591596,
+      0.010766674160213811,
+      0.07052582474744187,
+      0.07871105051572472,
+      0.005942640599431574,
+      0.013949981538896457,
+      0.0426186820760354,
+      0.011373072685588235,
+      0.012833097659615683,
+      0.007321274763135229,
+      0.035141340096941136,
+      0.021358750602266358,
+      0.08785034806236355,
+      0.007493540051679587,
+      0.054492818437564663,
+      0.029017645639212886,
+      0.03255976491349775,
+      0.008527131782945736,
+      0.06072268873741693,
+      0.031023103610017276
+     ],
+     "replicas": 20,
+     "uncertainty": {
+      "coverage": 0.9,
+      "distribution": "exact",
+      "interval": "central",
+      "minus": 0.03360996112879524,
+      "plus": 0.042569710480881685
+     },
+     "uncertainty_components": {
+      "replica_spread": {
+       "half_width": 0.04242941183086824,
+       "sd": 0.025795250796574392
+      },
+      "statistical": {
+       "method": "Clopper-Pearson 90 % interval of replica 0's counts, its distances from replica 0's proportion applied around the replica mean",
+       "minus": 0.00328492980589401,
+       "plus": 0.0034532972812467075
+      }
+     },
+     "value": 0.03360996112879524
+    }
+   },
+   "statistical_target": {
+    "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
+    "events": 11968,
+    "events_needed": null,
+    "observable": "flip",
+    "relative_se": 0.08775404842640917,
+    "target": 0.2,
+    "verdict": "pass"
+   },
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "variations": {
+    "domain": "em",
+    "envelope_relative": 0.002194721879409046,
+    "nominal": {
+     "model_assignment": {
+      "domain": "em",
+      "em_constructor": "G4EmStandardPhysics_option4",
+      "fluctuation_model": "Urban",
+      "known": true
+     },
+     "run_record_id": "geant4-reco-N6-CC500-nominal-off",
+     "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CC500-nominal-off/summary_r000.json",
+     "value": 0.4260609332197854
+    },
+    "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
+    "observable": "core",
+    "variations": [
+     {
+      "listed": true,
+      "model_assignment": {
+       "domain": "em",
+       "em_constructor": "G4EmStandardPhysics_option3",
+       "fluctuation_model": "Urban",
+       "known": true
+      },
+      "nominal_model_assignment": {
+       "domain": "em",
+       "em_constructor": "G4EmStandardPhysics_option4",
+       "fluctuation_model": "Urban",
+       "known": true
+      },
+      "relative_to_nominal": -0.002194721879409046,
+      "resolved": false,
+      "run_record_id": "geant4-reco-N6-CC500-emy-off",
+      "se": 0.003194626000422772,
+      "se_of_relative_difference": 0.012888184471002777,
+      "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CC500-emy-off/summary_r000.json",
+      "value": 0.4251258479676865,
+      "variation": "emy"
+     }
+    ]
+   }
+  },
+  "tolerances": {
+   "convergence": {
+    "core": 0.1
+   }
+  },
+  "tools": [
+   {
+    "name": "check_geant4_study.py",
+    "version": "dedc2c52621c0505"
+   },
+   {
+    "name": "geant4_benchmarks.py",
+    "version": "42dde9ff11e315fe"
+   }
+  ]
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-run-N6-CC500-nominal",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-nominal.computational-run.json",
+   "sha256": "d590ea5c5237e5d018814e0311a7f9a2c39fbb217c62e2622da726c54ec427c5",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-CC500-scan",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-scan.computational-run.json",
+   "sha256": "d2d1e1767497d460c11f60766777685de3292e20b88f21fa84277d4c0279fee3",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-CC500-var-emy",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-var-emy.computational-run.json",
+   "sha256": "edd04bd585680b5388a73696edd82f3439cd93e764078580d8a571e00394d4e2",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-CC500-nominal-off",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-nominal-off.computational-run.json",
+   "sha256": "bba438be5929ef3f43b59b342ea1e2aaa2ddf347bbb6b38564789a1670dafe9c",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-CC500-scan-off",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-scan-off.computational-run.json",
+   "sha256": "e797c164edbb59db24d18c545b9d57dc0940f60a933e5d70bdd2986029a300b5",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-CC500-emy-off",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-emy-off.computational-run.json",
+   "sha256": "6c7d7f53c9b3803f030b8d81613dfa21a40f6a648d2fd7de74117b8149d18cf8",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-CC500-nominal-on",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-nominal-on.computational-run.json",
+   "sha256": "601770497e5c2b961edd93678248cc4f11c7e7bcab13e0e37aae40437b7fe8f2",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-CC500-emy-on",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-CC500-emy-on.computational-run.json",
+   "sha256": "a8d843675059532ebdb61d08a943f886ced3e14bceb1a74a2dd5939fce4cbdf7",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-geantino",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-geantino.computational-run.json",
+   "sha256": "c2a68f3ed1e31be58c7157c9f264c5de78ddd87585daf8f810eba5d12d1fa0ba",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-chargedgeantino",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-chargedgeantino.computational-run.json",
+   "sha256": "f985758674f44905839defa755ddbac613993b661863b170ea2bbc47115da855",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N6-closure",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-closure.computational-run.json",
+   "sha256": "ce29194cc7aabd140a59d569c4e3eb5de4eb9b8239c1ea0a3b28e8ba6e259046",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N6-closure-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-closure-reco.computational-run.json",
+   "sha256": "4fc1d040a8c2c80426c3a56ba60702a8c8e95ade8011213f619d2aa8bcee04df",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  }
+ ],
+ "objective": "Geant4 study record: charge-confusion-rate for proton 499062.60826430883 MeV; benchmarks, convergence and scope embedded (unvalidated in phase 1)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/simulation/__init__.py",
+   "core/simulation/estimates.py",
+   "core/simulation/helix.py",
+   "core/simulation/summary.py",
+   "core/stats/__init__.py",
+   "core/stats/_linalg.py",
+   "core/stats/_poisson.py",
+   "core/stats/batch_means.py",
+   "core/stats/decisions.py",
+   "core/stats/distributions.py",
+   "core/stats/poisson_diagnostics.py",
+   "core/stats/tail_estimation.py",
+   "core/status.py",
+   "core/trace.py",
+   "skills/hep-detector/scripts/check_geant4_study.py",
+   "skills/hep-detector/scripts/geant4_benchmarks.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

@@ -1,0 +1,83 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-CALC-SLA10-N8",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N8.json",
+   "sha256": "ae69d6d64d209136fa9765b6f914f6d093a56f3e5d361e1f437e568b81eeca69",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N8",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-SLA10-N8.computational-run.json",
+   "sha256": "2952b387aefa152f9eb08a3c3eb3562b5c258e2531bee343f44fef0c6181dbaf",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-v1-CALC-SLA10-N8-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:CALC-SLA10-N8",
+  "candidate": "j15-v1:cand-N8",
+  "figure_of_merit": "geometric-acceptance",
+  "denominator": {
+   "rigidity_GV": 10.0,
+   "species": "proton",
+   "charge_sign": "positive"
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 0.001495667310470862,
+  "unit": "m2 sr",
+  "run_ref": "runs/CALC-SLA10-N8.computational-run.json",
+  "parameter_refs": [
+   "DES-TRK-001.parameters.layer_aperture_radius_m",
+   "DES-TRK-001.parameters.layer_lateral_offset_m",
+   "DES-TRK-001.parameters.layer_positions_m"
+  ],
+  "parameter_digest": "2d57607374fab85421587d0589a939c72cb318083cd62ab329c86671f92154f1",
+  "validity": {
+   "assumptions": [
+    "straight-line limit: no bending, no nuclear interactions, full detection efficiency",
+    "isotropic flux",
+    "circular coaxial apertures"
+   ],
+   "in_domain": true
+  }
+ }
+}

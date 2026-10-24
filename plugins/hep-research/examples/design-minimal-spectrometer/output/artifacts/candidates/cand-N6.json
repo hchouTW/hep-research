@@ -1,0 +1,339 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-cand-N6",
+ "artifact_type": "design-candidate",
+ "objective": "SYNTHETIC design study (journey J15, minimal spectrometer; names no experiment)",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0"
+ },
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "candidate_id": "j15-v1:cand-N6",
+  "design_id": "j15-v1",
+  "description": "nominal: six planes over 0.80 m (section B.4.1)",
+  "subsystems": {
+   "DES-TRK-001": {
+    "role": "tracking",
+    "technology": "single-sided silicon strip planes (0.3 mm)",
+    "parameters": {
+     "layer_positions_m": {
+      "value": [
+       0.0,
+       0.16,
+       0.32,
+       0.48,
+       0.64,
+       0.8
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "point_resolution_um": {
+      "value": 10.0,
+      "unit": "um",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_x_over_x0": {
+      "value": [
+       0.0032017075773745998,
+       0.0032017075773745998,
+       0.0032017075773745998,
+       0.0032017075773745998,
+       0.0032017075773745998,
+       0.0032017075773745998
+      ],
+      "unit": "1",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "passive_x_over_x0": {
+      "value": 0.0,
+      "unit": "1",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_material": {
+      "value": "G4_Si",
+      "unit": "n/a",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_transverse_half_m": {
+      "value": [
+       0.1,
+       0.1
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_aperture_radius_m": {
+      "value": [
+       0.1,
+       0.1,
+       0.1,
+       0.1,
+       0.1,
+       0.1
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_lateral_offset_m": {
+      "value": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "aperture_radius_tolerance_m": {
+      "value": 0.001,
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-MAG-001",
+     "DES-TOF-001"
+    ],
+    "calibration": {
+     "method": "track-based alignment",
+     "control_samples": [
+      "cosmic-ray muons",
+      "high-rigidity protons"
+     ]
+    }
+   },
+   "DES-MAG-001": {
+    "role": "bending",
+    "technology": "uniform-field dipole (field only; no magnet material, README)",
+    "parameters": {
+     "field_T": {
+      "value": 0.5,
+      "unit": "T",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "field_extent_m": {
+      "value": [
+       -0.02,
+       0.82
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "field map before integration",
+     "control_samples": [
+      "field map"
+     ]
+    }
+   },
+   "DES-TOF-001": {
+    "role": "tof",
+    "technology": "two unsegmented plastic-scintillator layers per station",
+    "parameters": {
+     "layer_positions_m": {
+      "value": [
+       -0.305,
+       -0.285,
+       0.995,
+       1.015
+      ],
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "layer_thickness_m": {
+      "value": 0.01,
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "time_resolution_ps": {
+      "value": 100.0,
+      "unit": "ps",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TRK-001"
+    ],
+    "calibration": {
+     "method": "time offsets and walk from through-going muons",
+     "control_samples": [
+      "cosmic-ray muons"
+     ]
+    }
+   },
+   "DES-CAL-001": {
+    "role": "calorimetry-em",
+    "technology": "Pb / plastic-scintillator sampling calorimeter",
+    "parameters": {
+     "front_position_m": {
+      "value": 1.05,
+      "unit": "m",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "depth_x0": {
+      "value": 18.406642,
+      "unit": "1",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "sampling_layers": {
+      "value": 50,
+      "unit": "1",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "passive_material": {
+      "value": "G4_Pb",
+      "unit": "n/a",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "passive_thickness_mm": {
+      "value": 2.0,
+      "unit": "mm",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "active_material": {
+      "value": "G4_PLASTIC_SC_VINYLTOLUENE",
+      "unit": "n/a",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     },
+     "active_thickness_mm": {
+      "value": 5.0,
+      "unit": "mm",
+      "source": "example proposal (SYNTHETIC)",
+      "status": "proposal"
+     }
+    },
+    "interfaces": [
+     "DES-TOF-001"
+    ],
+    "calibration": {
+     "method": "energy scale from minimum-ionizing muons",
+     "control_samples": [
+      "cosmic-ray muons",
+      "test-beam electrons"
+     ]
+    }
+   }
+  },
+  "budgets": {
+   "mass": {
+    "DES-TRK-001": {
+     "allocation": 19.8,
+     "estimate": 18.0,
+     "uncertainty": 3.5999999999999996,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "SYNTHETIC example estimate",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 440.0,
+     "estimate": 400.0,
+     "uncertainty": 80.0,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "SYNTHETIC example estimate",
+     "fidelity": "F1"
+    },
+    "DES-TOF-001": {
+     "allocation": 22.0,
+     "estimate": 20.0,
+     "uncertainty": 4.0,
+     "unit": "kg",
+     "basis": "estimate",
+     "source": "SYNTHETIC example estimate",
+     "fidelity": "F1"
+    },
+    "DES-CAL-001": {
+     "allocation": 1650.0,
+     "estimate": 1500.0,
+     "uncertainty": 75.0,
+     "unit": "kg",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    }
+   },
+   "channel_count": {
+    "DES-TRK-001": {
+     "allocation": 13200.0,
+     "estimate": 12000.0,
+     "uncertainty": 600.0,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    },
+    "DES-MAG-001": {
+     "allocation": 0.0,
+     "estimate": 0.0,
+     "uncertainty": 0.0,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    },
+    "DES-TOF-001": {
+     "allocation": 17.6,
+     "estimate": 16.0,
+     "uncertainty": 0.8,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    },
+    "DES-CAL-001": {
+     "allocation": 110.0,
+     "estimate": 100.0,
+     "uncertainty": 5.0,
+     "unit": "1",
+     "basis": "catalog",
+     "source": "SYNTHETIC example: catalog values of comparable components",
+     "fidelity": "F1"
+    }
+   }
+  },
+  "geometry_ref": "studies/G-N6-CAL10.geometry.json"
+ }
+}

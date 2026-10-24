@@ -1,0 +1,102 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-SIM-N4-TRK100",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N4.json",
+   "sha256": "9d51bc09b36df5e4b9ae18ccaf7a1402e641fabf1249ccf39425d6db0cf1602b",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N4",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "studies/N4-TRK100/study.computational-run.json",
+   "sha256": "b0d8bb3c26e7ad2d282f6605d424f0ef5d42ae956d75571804fa2878987436d6",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-N4-TRK100-study",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "unvalidated",
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:SIM-N4-TRK100",
+  "candidate": "j15-v1:cand-N4",
+  "figure_of_merit": "momentum-resolution-core",
+  "denominator": {
+   "rigidity_GV": 100.0,
+   "species": "proton"
+  },
+  "value": 0.11338809278302535,
+  "unit": "1",
+  "bound": "estimate",
+  "fidelity": "F4",
+  "study_ref": "studies/N4-TRK100/study.computational-run.json",
+  "parameter_refs": [
+   "DES-CAL-001.parameters.active_material",
+   "DES-CAL-001.parameters.active_thickness_mm",
+   "DES-CAL-001.parameters.depth_x0",
+   "DES-CAL-001.parameters.front_position_m",
+   "DES-CAL-001.parameters.passive_material",
+   "DES-CAL-001.parameters.passive_thickness_mm",
+   "DES-CAL-001.parameters.sampling_layers",
+   "DES-MAG-001.parameters.field_T",
+   "DES-MAG-001.parameters.field_extent_m",
+   "DES-TOF-001.parameters.layer_positions_m",
+   "DES-TOF-001.parameters.layer_thickness_m",
+   "DES-TOF-001.parameters.time_resolution_ps",
+   "DES-TRK-001.parameters.layer_material",
+   "DES-TRK-001.parameters.layer_positions_m",
+   "DES-TRK-001.parameters.layer_transverse_half_m",
+   "DES-TRK-001.parameters.layer_x_over_x0",
+   "DES-TRK-001.parameters.passive_x_over_x0",
+   "DES-TRK-001.parameters.point_resolution_um"
+  ],
+  "parameter_digest": "555473c33d7137580b26ae9a1c36b5731cd3ad800738668c9ddf522ed44009da",
+  "uncertainty": {
+   "minus": 0.005071961667077111,
+   "plus": 0.005071961667077111,
+   "coverage": 0.9,
+   "interval": "central",
+   "distribution": "non-gaussian"
+  },
+  "geometry_ref": "studies/G-N4-TRK100.geometry.json",
+  "model_envelope": [
+   0.11338809278302535,
+   0.11503123463324924
+  ]
+ }
+}

@@ -1,0 +1,243 @@
+{
+ "schema": "geant4-study-spec/1",
+ "study_id": "j15-N6-TRK100",
+ "label": "SYNTHETIC J15 F4 study (journey J15; names no experiment)",
+ "geant4": {
+  "version": "11.4.3",
+  "documentation": [
+   {
+    "name": "Geant4 upstream source, tag v11.4.3",
+    "version": "11.4.3",
+    "relied_on": true
+   }
+  ]
+ },
+ "geometry_source": {
+  "kind": "design",
+  "description": "derived by geant4_run.py from-geometry from studies/G-N6-TRK100.geometry.json and j15.realization.json",
+  "uses_replicas": false
+ },
+ "materials": [
+  {
+   "name": "G4_Si",
+   "z": 14,
+   "a_g_mole": 28.0855,
+   "density_g_cm3": 2.329,
+   "radiation_length_mm": 93.7,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, silicon_Si: density 2.329 g/cm3, A 28.0855(3), X0 9.370 cm",
+   "reference_origin": "independent"
+  },
+  {
+   "name": "G4_Pb",
+   "z": 82,
+   "a_g_mole": 207.2,
+   "density_g_cm3": 11.35,
+   "radiation_length_mm": 5.612,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, lead_Pb: density 11.35 g/cm3, X0 0.5612 cm",
+   "reference_origin": "independent"
+  },
+  {
+   "name": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "density_g_cm3": 1.032,
+   "radiation_length_mm": 425.4,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, polyvinyltoluene: density 1.032 g/cm3, X0 42.54 cm",
+   "reference_origin": "independent"
+  }
+ ],
+ "reproducibility": {
+  "data_paths_recorded": true,
+  "build_record": "~/Workspace/geant4-work/records/geant4-build-a.computational-run.json"
+ },
+ "downstream_use": {
+  "kind": "other",
+  "note": "F4 evaluation of momentum-resolution-core (journey J15)"
+ },
+ "observable": {
+  "name": "momentum-resolution-core",
+  "kind": "tracking-resolution",
+  "domain": "em",
+  "definition": "Gaussian core width of (1/R_reco - 1/R_true) R_true of selected tracks",
+  "unit": "1"
+ },
+ "particle": {
+  "name": "proton",
+  "energy_MeV": 99066.12958626528
+ },
+ "physics": {
+  "element_sim_spec": "../../specs/N6-TRK100-nominal.spec.json",
+  "justification": [
+   {
+    "choice": "FTFP_BERT_EMZ",
+    "reason": "EM option 4 for multiple scattering and showers; FTFP_BERT the default hadronic list",
+    "source": "geant4:source/physics_lists/lists (reference list factory)"
+   },
+   {
+    "choice": "production cut",
+    "reason": "converged in this study's cut scan",
+    "source": "convergence gate of this study"
+   }
+  ]
+ },
+ "convergence_plan": {
+  "parameters": [
+   {
+    "name": "physics.default_cut_mm",
+    "values": [
+     0.35,
+     0.7
+    ]
+   }
+  ],
+  "observables": [
+   "core"
+  ],
+  "tolerance_relative": {
+   "core": 0.1
+  }
+ },
+ "observables": [
+  {
+   "name": "core",
+   "source_column": "inv_rig_res",
+   "estimator": "gaussian-core",
+   "bins": {
+    "lo": -2.0,
+    "hi": 2.0,
+    "width": 0.002
+   },
+   "selection": [
+    {
+     "column": "selected",
+     "op": "==",
+     "value": 1
+    }
+   ]
+  },
+  {
+   "name": "pull",
+   "source_column": "rho_pull",
+   "bins": {
+    "lo": -10,
+    "hi": 10,
+    "width": 0.05
+   },
+   "selection": [
+    {
+     "column": "selected",
+     "op": "==",
+     "value": 1
+    }
+   ]
+  },
+  {
+   "name": "residual",
+   "source_column": "inv_rig_res",
+   "bins": {
+    "lo": -2.0,
+    "hi": 2.0,
+    "width": 0.002
+   },
+   "selection": [
+    {
+     "column": "selected",
+     "op": "==",
+     "value": 1
+    }
+   ]
+  },
+  {
+   "name": "beta",
+   "source_column": "beta_res",
+   "bins": {
+    "lo": -0.5,
+    "hi": 0.5,
+    "width": 0.0005
+   },
+   "selection": [
+    {
+     "column": "selected",
+     "op": "==",
+     "value": 1
+    }
+   ]
+  },
+  {
+   "name": "tofdt",
+   "source_column": "tof2_layer_resid_ps",
+   "bins": {
+    "lo": -2000,
+    "hi": 2000,
+    "width": 5
+   },
+   "selection": [
+    {
+     "column": "selected",
+     "op": "==",
+     "value": 1
+    }
+   ]
+  }
+ ],
+ "blocks": {
+  "K": 16
+ },
+ "statistical_target": {
+  "observable": "core",
+  "relative_se": 0.02
+ },
+ "validation_plan": {
+  "benchmarks": [
+   {
+    "name": "material-definition",
+    "grade": "verification"
+   },
+   {
+    "name": "field-propagation",
+    "grade": "verification"
+   },
+   {
+    "name": "reco-closure",
+    "grade": "verification"
+   },
+   {
+    "name": "multiple-scattering-reference",
+    "grade": "reference"
+   }
+  ],
+  "scope": {
+   "particle": "proton",
+   "energy_MeV": [
+    99066.12958626528,
+    99066.12958626528
+   ],
+   "observable": "momentum-resolution-core",
+   "material": "G4_Si",
+   "thickness_x0": [
+    0.0032017075773745998,
+    0.0032017075773745998
+   ],
+   "rigidity_GV": [
+    100.0,
+    100.0
+   ],
+   "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d",
+   "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+   "geometry_sha256": "e6093e9c4cdfacacb434eedf19d809fb233397901f37be234f6b6555911c2b7c",
+   "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+  }
+ },
+ "variation_plan": {
+  "observable": "core",
+  "model_assignment_checked": true,
+  "variations": [
+   {
+    "name": "emy",
+    "change": "reference list FTFP_BERT_EMY: Urban multiple scattering for protons (option 3, isWVI false) instead of WentzelVI (option 4), Geant4 11.4.3 G4EmBuilder::ConstructCharged"
+   },
+   {
+    "name": "qgsp-bic",
+    "change": "reference list QGSP_BIC_EMZ: Binary cascade for nucleons below 1.5 GeV (G4R-BIC-RANGE)"
+   }
+  ]
+ }
+}
