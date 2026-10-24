@@ -6382,12 +6382,16 @@
      "citation": "skills/hep-detector/references/geant4-study-protocol.md",
      "locator": "section 4, event count and stopping rule",
      "read": "2026-10-24"
+    },
+    {
+     "kind": "external",
+     "citation": "R. de Heide and P. D. Grünwald, Why optional stopping can be a problem for Bayesians, Psychon. Bull. Rev. 28 (2021) 795-812, doi:10.3758/s13423-020-01803-x, arXiv:1708.08278v5",
+     "locator": "Sec. 5.2 (Frequentist optional stopping under H0), p. 20 of arXiv v5: keeping the Type I error guarantee under optional stopping \"is not possible with most classical p-value based hypothesis tests\"",
+     "read": "2026-10-24"
     }
    ],
-   "gaps": [
-    "one external source on optional stopping, located and verified through hep-citations, is missing (internal sources only, maintainer decision 2026-10-22)"
-   ],
-   "note": "D6: the stopping rule, scan grid, K, event counts and the handling of unresolved results are fixed in the study spec before the first evidence run"
+   "gaps": [],
+   "note": "D6: the stopping rule, scan grid, K, event counts and the handling of unresolved results are fixed in the study spec before the first evidence run; external source located through hep-citations and read in full text at arXiv v5 (2026-10-24), journal reference and DOI confirmed at Crossref (2026-10-24): a test that stops when it sees a significant result loses its frequentist error guarantee, which is why the protocol fixes the event count before the first evidence run and never tops up"
   },
   {
    "id": "GEANT4-EVIDENCE-OVERLAP",

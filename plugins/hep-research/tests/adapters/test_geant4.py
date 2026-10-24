@@ -7,6 +7,7 @@ imports or needs Geant4. Set HEP_GEANT4_LIVE_TEST=1 and HEP_GEANT4_CONFIG (a JSO
 to rerun the live tests. All geometries are invented (SYNTHETIC) except the two example mirrors."""
 import ast
 import gzip
+import hashlib
 import json
 import os
 import shutil
@@ -137,6 +138,10 @@ if obs:
     json.dump(doc, open(os.path.join(out_dir, "summary.json"), "w"))
 print("LAYERED_SIM_STATUS {\"status\": \"ok\"}")
 '''
+
+
+def sha256(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def run(script, *args, env=None, cwd=None, timeout=600):
@@ -611,11 +616,28 @@ class BoundaryArtifacts(_Tmp):
         for k in ("summary", "column_map", "effective_config"):
             self.assertIn(k, sim)
         self.assertEqual(sim["summary"]["sha256"], ext["output_hashes"]["r1/summary.json"])
+        summ = json.loads((self.d / "work" / "r1" / "summary.json").read_text(encoding="utf-8"))
+        self.assertEqual(summ["run"]["run_record"], {"artifact_id": "geant4-run-r1"})
+        self.assertEqual(summ["run"]["settings"]["particle"], sim["gun"]["particle"])
+        self.assertTrue(summ["run"]["datasets_content_match"])
+        self.assertEqual(sim["summary"]["sha256"], sha256(self.d / "work" / "r1" / "summary.json"))
         ec = sim["effective_config"]
         stored = json.loads((self.d / "work" / ec["ref"]).read_text(encoding="utf-8"))
         self.assertEqual(stored["config_sha256"], ec["config_sha256"])
         self.assertEqual(stored["seeding"], {"mode": "per-event", "logical_run_seed": 12345})
         self.assertTrue(any(k.startswith("g4sim/") for k in sim["program"]["sources_sha256"]))
+
+    def test_the_study_check_reads_the_layered_sim_summary(self):
+        """Found by the A8 new-problem run: the study check read run fields only summary_from_csv.py wrote."""
+        s = a2_spec()
+        self.assertEqual(self.go(s)[0], 0)
+        sys.path.insert(0, str(PLUGIN / "skills" / "hep-detector" / "scripts"))
+        import check_geant4_study as C
+        study = {"physics": {"layered_sim": s}, "observables": json.loads(json.dumps(OBS)), "blocks": {"K": 4},
+                 "convergence_plan": {}}
+        summ = C.load_summary(str(self.d / "work" / "r1" / "summary.json"), study)
+        self.assertEqual(summ["run_record"]["artifact_id"], "geant4-run-r1")
+        self.assertEqual(C.check_records(study, [summ]), [])
 
     def test_an_effective_config_is_stored_once_per_content(self):
         s1, s2 = a2_spec(), a2_spec()
@@ -694,7 +716,7 @@ class BoundaryArtifacts(_Tmp):
         base = self.write("base.json", spec())
         grid = self.write("grid.json", {"name": "cuts", "parameters": {"physics.default_cut_mm": [1.0, 0.1]}})
         sys.path.insert(0, str(PLUGIN))
-        from core.simulation.seeds import H
+        from core.simulation.seeds import logical_run_seed
         for seeding, want in (("per-event", "per-event"), ("stream", None)):
             out_dir = self.d / f"scan-{seeding}"
             code, out = run(asset("geant4_run.py"), "scan", "--base", base, "--grid", grid, "--exe", self.fake_exe(),
@@ -704,7 +726,37 @@ class BoundaryArtifacts(_Tmp):
             s0 = json.loads((out_dir / "specs" / "cuts-000.json").read_text(encoding="utf-8"))
             self.assertEqual(s0["run"].get("seeding"), want)
             if want:
-                self.assertEqual(s0["run"]["logical_run_seed"], H("cuts", "cuts-000"))
+                self.assertEqual(s0["run"]["logical_run_seed"], logical_run_seed("cuts", "scan", "cuts-000"))
+
+    def test_scan_gives_each_point_its_own_seed_when_the_base_seeds_per_event(self):
+        """Review finding (A8): a base spec with per-event seeding gave every point the base's S."""
+        rec, _ = self.fake_install()
+        base_spec = spec()
+        base_spec["run"].update(seeding="per-event", logical_run_seed=12345)
+        base = self.write("base-pe.json", base_spec)
+        grid = self.write("grid.json", {"name": "cuts", "parameters": {"physics.default_cut_mm": [1.0, 0.1]}})
+        out_dir = self.d / "scan-pe"
+        code, out = run(asset("geant4_run.py"), "scan", "--base", base, "--grid", grid, "--exe", self.fake_exe(),
+                        "--build-record", rec, "--out-dir", out_dir, "--events-per-second", "1000", "--study-id", "st")
+        self.assertEqual(code, 0, out)
+        seeds = [json.loads((out_dir / "specs" / f"cuts-00{k}.json").read_text(encoding="utf-8"))["run"]["logical_run_seed"]
+                 for k in (0, 1)]
+        sys.path.insert(0, str(PLUGIN))
+        from core.simulation.seeds import logical_run_seed
+        self.assertEqual(seeds, [logical_run_seed("st", "scan", f"cuts-00{k}") for k in (0, 1)])
+        self.assertNotEqual(seeds[0], seeds[1])
+        # the workflow step passes the point's S, role and id, so its run record is hash-v1 (review finding, A8)
+        step = json.loads((out_dir / "workflow.json").read_text(encoding="utf-8"))["steps"][0]
+        argv = step["argv"]
+        self.assertEqual(argv[argv.index("--logical-run-seed") + 1], str(seeds[0]))
+        self.assertEqual((argv[argv.index("--evidence-role") + 1], argv[argv.index("--point-id") + 1]),
+                         ("scan", "cuts-000"))
+        code, out = run(PLUGIN / "skills" / "hep-computing" / "scripts" / "run_workflow.py", out_dir / "workflow.json",
+                        "--work", out_dir, "--created", "2026-10-24")
+        self.assertEqual(code, 0, out)
+        sim = json.loads((out_dir / "records" / "cuts-000.computational-run.json").read_text(encoding="utf-8"))[
+            "extension"]["simulation"]
+        self.assertEqual((sim["seed_scheme"], sim["logical_run_seed"]), ("hash-v1", seeds[0]))
 
     def test_verify_reads_the_geometry_tree(self):
         self.assertEqual(self.go(a2_spec())[0], 0)

@@ -2756,6 +2756,45 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## GEANT4-A8-CHECKS (2026-10-24, E2; branch `worktree-geant4-a8` from main `263eff50`)
+
+The §A.8 items left open by stages A1, C1 and A2, and the G5 evidence. Material in
+`~/Workspace/hep-research-tasks/geant4-program/a8/` (problem statements, grading scripts, review project).
+
+**New problems run by agents that did not write the code** (`PROBLEMS.md`, fixed before the runs; each agent got only
+its problem text, in its own worktree at main 263eff50; graded from the files):
+
+| Problem | Result | Problems the agent found |
+|---|---|---|
+| S (A1 + A2): stopping power of 150 MeV protons in 2 mm Al as a study evidence point, live Geant4 | S1-S6 pass (`grade_s.py`): per-event seeding with S = H(study_id, role, point_id), K = 16, 37,200 events from a 3,200-event trial; layered_sim's summary validates; effective config recorded; benchmark tree-v1 isolated, verdict pass, relative difference -0.00116, tolerance 0.0313; report claims no validation | `check_geant4_study.py run` refused layered_sim's own summary (it read run fields only `summary_from_csv.py` wrote): **fixed**, `geant4_run.py` completes the summary's run block; the study spec had no place for the stopping rule: **fixed**, optional `stopping_rule`; `HEP_GEANT4_CONFIG` is read only by tests (follow-up) |
+| F (C1): F1 search on the collider-tracker example (not used by the C1 tests) | F1-F5 pass (`grade_f.py`): search record and spec, `validate.py` ok; 3 finalists expanded and evaluated (9 evaluations); report lists the search size and every finalist, no search value as a result; the grader's rerun on a fresh copy gives the same search summary except timing | a fixed base parameter outside its role-rule range and a constant constraint are accepted silently (follow-up). The harness refused the agent's report file; the grader saved the text the agent returned, unchanged |
+
+**`review.py` Markdown reviews** (0.22.0 mechanism, `--lens-model design=opus --filter-model opus`, models opus and
+sonnet, own configuration; reports `reviews/<id>/report.md`, advisory only):
+
+| Document | Rounds | Agents | Outcome |
+|---|---|---|---|
+| `geant4-study-protocol.md` (A1 + A2), R8e77b3c0a5 | 2 | 23 | round 1: 26 findings kept after the filter and one arbitration, all disposed (22 changed with code or text, 1 partially changed, 3 adopted); round 2: further findings; one round-2 slot exhausted its attempts and is escalated: **open, waiting for a human `resolve`** |
+| `system-design-workflow.md` (C1), Rf2030b632a | 3 | 25 | rounds 1-2: 53 findings disposed (text corrected; code gaps partially changed with the follow-up issue); round 3: one slot exhausted its attempts and is escalated: **open, waiting for a human `resolve`** |
+
+Code changed from the reviews and the problems: `geant4_run.py scan` gives every point its own S also when the base
+spec declares per-event seeding, derives S = H(study_id, role, point id) (`--study-id`, `--role`) and passes S, role
+and point id to `run` (records are hash-v1); `check_geant4_study.py` matches the hadronic table by exact list name
+and takes the EM constructor from the suffix or the list itself (Geant4 11.4.3 sources: option 4 in the
+QGSP_BIC_HP family, GS in FTFP_BERT_TRV, LBE ignores suffixes); `convergence_plan.observables` accepts any declared
+observable (leakage gates); rule `G4R-DATASETS` tested a field that does not exist and now applies. Each with a test.
+Findings that need contract or design-code changes are listed in the follow-up issue and stated as limits in the text.
+The last-round findings were applied to the plugin copies after the reviews' final rounds and were not re-reviewed.
+
+**GEANT4-STOPPING-RULE**: external source added (de Heide and Grünwald, Psychon. Bull. Rev. 28 (2021) 795-812,
+arXiv:1708.08278v5 Sec. 5.2 p. 20, read in full text; DOI confirmed at Crossref), gap closed.
+
+**G5 evidence**: every new or changed C++ file of A2 (`g4sim/`, `layered_sim/`) against all 5,657 `.cc`, `.hh`, `.icc`
+files of the Geant4 11.4.3 examples tree, normalized lines (whitespace and comments removed, trivial lines skipped):
+0 shared runs of 3 or 4 consecutive lines; a reformatted copy of B1's RunAction.cc gives 51 (positive control).
+Script and outputs: `g5_scan.py`, `g5_scan_k3.json`, `g5_scan_k4.json`, `g5_control.json`. The reviewer's
+confirmation is the maintainer's to record.
+
 ## GEANT4-SUMMARY (2026-10-24, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-a2` from main `dd531e74`)
 
 Geant4 program stage A2 (spec `docs/dev/geant4-architecture/geant4-program.md` §A.6): geant4 adapter 0.2.0, shared
@@ -2904,8 +2943,8 @@ recorded/ 2,630,783 bytes with the legacy summaries (largest file 316,443). MPV 
 mode| 0.25 % against the bound 1.17 %. A first live recording at B >= 30000 (546,528 events) passed every criterion
 too and was replaced by this one for the bias design.
 
-Not run: the independent new-problem agent run and the `review.py` Markdown review of §A.8; the external source for
-GEANT4-STOPPING-RULE (gap); the contracts version bump (at release).
+Not run here: the independent new-problem agent run and the `review.py` Markdown review of §A.8, and the external
+source for GEANT4-STOPPING-RULE (all done later, GEANT4-A8-CHECKS); the contracts version bump (at release).
 
 ## DESIGN-SEARCH-F1 (2026-10-24, Python 3.13.2 on macOS 26.5 arm64; E2 venv and the CI lock venv; branch `worktree-geant4-c1` from main `55849275`, unreleased)
 

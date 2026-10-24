@@ -119,6 +119,16 @@ def parse_quantity(text: str, category: str) -> float:
     return float(m.group(1)) * UNITS[category][m.group(2)]
 
 
+def run_settings(sim: dict) -> dict:
+    """The settings block of a run summary's run (what hep-detector's study check compares with the study spec),
+    from a run record's extension.simulation."""
+    phys, gun = sim.get("physics") or {}, sim.get("gun") or {}
+    return {"default_cut_mm": phys.get("default_cut_mm"), "step_limit_mm": phys.get("step_limit_mm", 0.0),
+            "em_constructor": phys.get("em_constructor"), "reference_list": phys.get("reference_list"),
+            "ui_commands": sim.get("ui_commands", []), "particle": gun.get("particle"),
+            "energy_MeV": gun.get("energy_MeV")}
+
+
 def write_json(path: Path, doc) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

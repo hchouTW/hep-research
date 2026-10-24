@@ -73,6 +73,22 @@ Contracts 3.13.0 (minor; no capability added).
   states); capability `detector-design` item DSD-SEARCH; routing case `dsd-direct-3` (no description change).
 - Closure tests (gate G-C1): DTLZ2, plane placement, structure choice on Example A, reproducibility, consistency.
 
+Geant4 program §A.8 checks for stages A1, C1 and A2 (VALIDATION GEANT4-A8-CHECKS): new problems run by agents that
+did not write the code, `review.py` reviews of the Geant4 study protocol and the design workflow, and the fixes they
+led to.
+
+- layered_sim's own `summary.json` is now completed by `geant4_run.py` with the run fields hep-detector's study check
+  reads (run id, role, seed scheme, spec hash, settings, dataset checks), so `check_geant4_study.py run` accepts it.
+- `geant4_run.py scan`: S = H(study_id, role, point id) (`--study-id`, default the grid name; `--role`, default
+  scan) for every point, also when the base spec declares per-event seeding; the workflow step passes S, role and point
+  id to `run`, so the run records are hash-v1.
+- `check_geant4_study.py`: the hadronic model table matches exact list names (a variant is unknown); the EM
+  constructor comes from the suffix or the list itself (QGSP_BIC_HP family option 4, FTFP_BERT_TRV GS, LBE ignores
+  suffixes); the study spec's `convergence_plan.observables` accepts any declared observable; optional `stopping_rule`.
+- Rule `G4R-DATASETS` now applies (it tested a field that does not exist).
+- The protocol and design workflow state the limits the reviews found; the code gaps are in a follow-up issue.
+- Sci-fix ledger: GEANT4-STOPPING-RULE has its external source (gap closed).
+
 Geant4 program stage A2 (shared headers and boundary artifacts): geant4 adapter 0.2.0. No contracts bump (the new
 schema keywords are used by no contract schema; tree-v1 was already a CV-A1 hash scheme). Existing spec/1 files and
 outputs are unchanged: the 26 recorded J14 specs give bit-identical CSVs with the new build (gate G-A2).

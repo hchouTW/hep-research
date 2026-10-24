@@ -20,8 +20,10 @@ Subcommands:
   run        one spec -> <work>/<run-id>/ (events.csv, materials.json, datapaths.json, log.txt, spec.json) and --record
   scan       base spec + parameter grid -> specs and a workflow.json for skills/hep-computing/scripts/run_workflow.py
              (point k gets seeds [s0, s1 + k] unless the grid scans run.seeds; from adapter 0.2.0 a base spec without
-             run.seeding gets per-event seeding with run.logical_run_seed H(grid name, point id), --seeding stream
-             keeps the stream);
+             run.seeding, and every point of a base spec that declares per-event seeding, gets per-event seeding with
+             its own run.logical_run_seed S = H(study_id, role, point id), study_id from --study-id (default the grid
+             name) and role from --role (default scan), unless the grid scans run.logical_run_seed; --seeding stream
+             keeps the stream for a base without run.seeding);
              a step whose estimated time (events / --events-per-second) exceeds 3600 s is refused: partition it
   chunk      a local_partition.py worker: events [start, stop) with the chunk's seed (with --logical-run-seed S the
              job seeds H(S, start, 0), H(S, start, 1), core/simulation/seeds.py); writes additive sums only
@@ -65,12 +67,13 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from g4common import (ASSETS, DATA_VARS, PLUGIN, JsonArgumentParser, SpecError, build_record_ok, data_env,  # noqa: E402
-                      expand, install_prefix, record_skeleton, sha256_file, sha256_json, tilde, write_json)
+                      expand, install_prefix, record_skeleton, run_settings, sha256_file, sha256_json, tilde,
+                      write_json)
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.schema import validate  # noqa: E402
 from contracts.validate import geant4_spec_v1, geant4_tree_v1  # noqa: E402
 from core.simulation import estimates as ESTIMATES, summary as SUMMARY  # noqa: E402
-from core.simulation.seeds import H, job_seeds  # noqa: E402
+from core.simulation.seeds import job_seeds, logical_run_seed  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 # every source file of the layered_sim build, as paths under assets/ (adapter 0.2.0: the g4sim/ group was added and
@@ -530,12 +533,37 @@ def boundary_artifacts(spec: dict, run_dir: Path, work: Path, build_path: Path, 
     return out
 
 
+def complete_summary(run_dir: Path, run_id: str, sim: dict, outputs: dict) -> None:
+    """The run fields of layered_sim's summary.json that only the run record knows (A2.3): run_id, evidence role,
+    logical-run seed and scheme, spec hash, settings, data-path problems, dataset content match and the run record's
+    id, as summary_from_csv.py writes them, so that hep-detector's study check reads this summary like any other.
+    The producer stays layered_sim; the summary's hash in the record and outputs is the completed file's."""
+    if "summary" not in sim:
+        return
+    path = run_dir / "summary.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    run = doc["run"]
+    run.update({k: v for k, v in {
+        "run_id": f"geant4-run-{run_id}", "evidence_role": sim.get("evidence_role"),
+        "logical_run_seed": sim.get("logical_run_seed", run.get("logical_run_seed")),
+        "seed_scheme": sim.get("seed_scheme"), "spec_sha256": sim.get("spec_sha256"), "settings": run_settings(sim),
+        "data_path_problems": sim.get("data_path_problems", []),
+        "datasets_content_match": all(d.get("content_match") for d in sim.get("datasets", [])),
+        "run_record": {"artifact_id": f"geant4-run-{run_id}"}}.items() if v is not None})
+    run["completed_by"] = {"name": "geant4_run.py", "adapter": ADAPTER_VERSION}
+    write_json(path, doc)
+    digest = sha256_file(path)
+    sim["summary"]["sha256"] = digest
+    outputs[f"{run_id}/summary.json"] = digest
+
+
 def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: Path, result: dict, work: Path,
                      created: str, argv: list[str] | None = None) -> dict:
     """The computational-run record of one layered_sim run; from adapter 0.2.0 also argv (the command actually run,
     interpreter first), script_sha256 (this script, keyed as it appears in argv) and versions.plugin_release
     (contracts/identity.py), as run_workflow.py writes them."""
     sim = result["simulation"]
+    complete_summary(work / run_id, run_id, sim, result["outputs"])
     rec = record_skeleton(f"geant4-run-{run_id}",
                           f"Geant4 layered_sim run {run_id}: {spec['gun']['particle']} {spec['gun']['energy_MeV']} MeV, "
                           f"{sim['events']} events (a completed run, not a validated result)", created,
@@ -666,8 +694,18 @@ def cmd_scan(args) -> tuple[str, dict]:
         if "run.seeds" not in params:  # independent samples per point: the convergence gate's SE assumes them
             spec["run"]["seeds"] = [spec["run"]["seeds"][0], spec["run"]["seeds"][1] + k]
         sid = f"{grid.get('name', 'scan')}-{k:03d}"
-        if args.seeding == "per-event" and "seeding" not in base["run"]:  # A2.2: new studies seed per event
-            spec["run"].update(seeding="per-event", logical_run_seed=H(grid.get("name", "scan"), sid))
+        per_event = base["run"].get("seeding") == "per-event" or (args.seeding == "per-event"
+                                                                  and "seeding" not in base["run"])
+        if per_event and "run.logical_run_seed" not in params:  # A2.2: every point its own S, also when the base
+            spec["run"].update(seeding="per-event",  # declares per-event; S = H(study_id, role, point_id)
+                               logical_run_seed=logical_run_seed(args.study_id or grid.get("name", "scan"),
+                                                                 args.role, sid))
+        evidence = []
+        if spec["run"].get("seeding") == "per-event" and "logical_run_seed" in spec["run"]:
+            # the run record carries the point's S, role and id (seed_scheme hash-v1), and run.seeds are its job seeds
+            s_point = spec["run"]["logical_run_seed"]
+            spec["run"]["seeds"] = list(job_seeds(s_point, spec["run"].get("first_event", 0)))
+            evidence = ["--evidence-role", args.role, "--point-id", sid, "--logical-run-seed", str(s_point)]
         validate_spec(spec)
         est = spec["run"]["events"] / args.events_per_second
         if est > STEP_LIMIT_S:
@@ -682,7 +720,7 @@ def cmd_scan(args) -> tuple[str, dict]:
                                f"specs/{sid}.json", "--exe", tilde(expand(args.exe)), "--build-record",
                                tilde(expand(str(args.build_record))), "--work", "runs", "--run-id", sid, "--record",
                                f"records/{sid}.computational-run.json", "--created", args.created or
-                               datetime.date.today().isoformat(), "--timeout", str(STEP_LIMIT_S - 60)]})
+                               datetime.date.today().isoformat(), "--timeout", str(STEP_LIMIT_S - 60), *evidence]})
     if refused:
         return "rejected", {"error": f"{len(refused)} step(s) would exceed {STEP_LIMIT_S} s: partition them with "
                                      "local_partition.py and the chunk subcommand", "refused": refused}
@@ -891,7 +929,9 @@ def main(argv=None) -> int:
     p.add_argument("--created")
     p.add_argument("--seeding", choices=("per-event", "stream"), default="per-event",
                    help="seeding of the written specs when the base spec states none (default per-event: point k gets "
-                        "run.logical_run_seed H(grid name, point id))")
+                        "run.logical_run_seed S = H(study_id, role, point id))")
+    p.add_argument("--study-id", help="the study's study_id for S (default: the grid name)")
+    p.add_argument("--role", default="scan", help="the evidence role of the points for S (default scan)")
     p = sub.add_parser("chunk", help="local_partition.py worker")
     for name in ("--spec", "--exe", "--build-record", "--work", "--id", "--out"):
         p.add_argument(name, required=True)
@@ -918,7 +958,7 @@ def main(argv=None) -> int:
     args.argv_run = [sys.executable, str(Path(__file__).resolve()), *(sys.argv[1:] if argv is None else argv)]
     inputs = {k: v for k, v in vars(args).items() if k not in ("status", "argv_run")}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "status") if hasattr(args, k)
+    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "role", "status") if hasattr(args, k)
                 and f"--{k}" not in given]
     handlers = {"build-sim": cmd_build_sim, "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk,
                 "summarize": cmd_summarize, "reduce": cmd_reduce, "oracle": cmd_oracle}

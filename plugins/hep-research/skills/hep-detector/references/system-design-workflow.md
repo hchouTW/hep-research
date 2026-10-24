@@ -8,7 +8,8 @@ trade-offs) are in [detector design principles](detector-design-principles.md).
 Contents: [Usage levels](#usage-levels) · [Artifacts](#artifacts) · [D0 Framing](#d0-framing) ·
 [D1 Allocation](#d1-allocation) · [D2 Exploration loop](#d2-exploration-loop) ·
 [D2 Automated candidate generation](#d2-automated-candidate-generation) · [D3 Convergence](#d3-convergence) ·
-[D4 Review](#d4-review) · [Verdicts and reason codes](#verdicts-and-reason-codes) · [Never](#never)
+[D4 Review](#d4-review) · [Engineering couplings and calibration](#engineering-couplings-and-calibration) ·
+[Verdicts and reason codes](#verdicts-and-reason-codes) · [Never](#never)
 
 ## Usage levels
 
@@ -27,12 +28,14 @@ Three artifact types (contracts 3.11.0), all in the project's artifacts_dir; dec
 
 | Type | One file per | Holds |
 |---|---|---|
-| `design-spec` | version (never modified: a change is a new file `design-spec.vN.json`) | goals (`PHY-*`), requirements (`REQ-*`) with comparator, target, unit, denominator (each value with a tolerance), kind (driving or derived), allocation and verification; allocations (`ALC-*`, quadrature only with declared independence); constraints (`CON-*`, hard or soft); `comparison_basis` |
+| `design-spec` | version (never modified: a change is a new file `design-spec.vN.json`) | goals (`objectives`, ids `PHY-*`), requirements (`REQ-*`) with comparator, target, unit, denominator (each value with a tolerance), kind (driving or derived), allocation and verification; allocations (`ALC-*`, quadrature only with declared independence; a correlation matrix is accepted
+but not yet used in the sum, so do not rely on it); constraints (`CON-*`, hard or soft); `comparison_basis` |
 | `design-candidate` | candidate | subsystems keyed by `DES-*` id: role (core `subsystem_roles`), technology, parameters (value, unit, source, status), interfaces, calibration (required); budgets per subsystem for mass, power, channel count, data rate; `derived_from` plus `overrides` for a variant |
-| `design-evaluation` | candidate x figure of merit x fidelity | written only by `evaluate_design.py`: value, bound, fidelity, uncertainty, parameter_refs, run_ref, all set from the tool contract and the tool output |
+| `design-evaluation` | candidate x figure of merit x fidelity | written by `evaluate_design.py` (F0 heuristic arguments are written by hand and accepted by `design.py`): value, bound, fidelity, uncertainty, parameter_refs, run_ref, set from the tool contract and the tool output; exceptions: F3 expected precision from its input statistical-result, F4 from the study record (`study_ref`, bound from the tail-source rule), F5 from the dataset record's `design_measurement` (`dataset_ref`) |
 
-Ids are namespaced by the spec's `design_id` (`<design_id>:REQ-TRK-001`). Parameters cite their source: a public
-fact through a profile's evidence ledger claim id, otherwise `proposal` or `user-supplied-internal`.
+Ids are namespaced by the spec's `design_id` (`<design_id>:REQ-TRK-001`). Parameters cite their source and carry a status: the
+source is a profile's evidence ledger claim id for a public fact, otherwise free text; the status is an evidence status
+(`proposal`, `user-supplied-internal`, `general-method`, `derived-result`, ...).
 
 ## D0 Framing
 
@@ -54,11 +57,14 @@ Goal: driving requirements a design can be checked against.
   curvature offset for charge confusion; the MDR definition, intrinsic or total; the separation convention for PID;
   the working-point efficiency for a rejection). The denominator fields follow the tool contract of that figure of
   merit; `contracts/design.py` refuses a requirement whose denominator lacks a field the adequacy table needs.
-- Each driving requirement has an allocation (budget items, `quadrature` with `independent: true` or a correlation
-  matrix, else `linear`) and a margin.
+- Each driving requirement has an allocation (budget items, `quadrature` with `independent: true`, else `linear`;
+  a correlation matrix is accepted but not yet used in the sum) and a margin.
 - Declare `comparison_basis` (for example equal mass within 5%): without it no comparison or ranking is given. A budget
   item cancels in the difference only when both candidates carry the same subsystem with the same budget row.
-- Gate H2 (`requirements-baseline`).
+- Gate H2 (`requirements-baseline`): the report flags `gate.H2_missing` until a human `requirements-baseline` record
+  lists exactly the current design-spec, every driving requirement has a denominator and an allocation with a
+  margin, and `comparison_basis` is declared (the tool checks that an allocation and a margin exist, not that the
+  allocation is the requirement's own or that the margin is positive: check both).
 
 ## D2 Exploration loop
 
@@ -82,7 +88,10 @@ Goal: candidates screened against the requirements at the lowest adequate fideli
    evaluation (no value). Shipped F1 operations: momentum resolution and MDR (`tracker_resolution`), MDR with the
    Gluckstern estimate (`multiple_scattering`), Gaussian-core charge confusion (`charge_confusion_rate`), TOF and
    RICH separation power (`pid_separation_power`, `cherenkov_angle`), rejection from a separation power and a
-   working-point efficiency, straight-line acceptance of coaxial apertures and budget sums (`design_estimates`).
+   working-point efficiency, straight-line acceptance of coaxial apertures and budget sums including the material
+   budget (`design_estimates`), calorimeter energy resolution (`calorimeter_resolution`). Survival probability and expected
+   precision have F1 screening in the adequacy table but no F1 operation (expected precision is F3 only): a
+   default-fidelity `run` writes a `capability.unavailable` record for them.
 3. `evaluate_design.py plan` lists what is missing; `evaluate_design.py report` derives the compliance matrix.
 4. Screening is derived: a candidate whose hard constraint or driving requirement fails is screened out; an F0
    estimate only raises an `at-risk` flag.
@@ -105,10 +114,14 @@ how many planes, where they sit). It only proposes candidates; `contracts/design
    artifacts_dir): `design_spec` (path and sha256 of the current version), `base_candidate`, up to four `objectives`
    and any `constraints` (a requirement or constraint id, or a figure of merit with its denominator; each needs an
    F1 tool contract, so a `capability.unavailable` quantity cannot be one), `free_parameters` (`ref`, `range`,
-   `kind`: `positions` with `n` and `min_spacing_m`, `integer`, `categorical`), `slots` (roles the search may add or
-   drop, at most one subsystem per role), optional `envelope`, `regenerate_budgets`, `rules_version`,
-   `materials_version`, `budget`, `optimizer` (`nsga2`, population, generations, seed), `stopping`, `finalists`,
-   and your seed designs as `proposals` (each with its `reason`).
+   `kind`: `positions` with `n` and `min_spacing_m`, `continuous`, `integer`, `categorical` with `choices`). Required:
+   `search_spec_version`, `design_spec`, `base_candidate`, `objectives`, `free_parameters`, `rules_version`,
+   `materials_version`, `budget`, `optimizer` (`nsga2`, population, generations, seed) and `finalists`. Optional: `constraints`,
+   `slots` (roles the search may add or drop, at most one subsystem per role), `envelope` (without it the
+   envelope check is off: give it whenever the design-spec has an envelope constraint), `regenerate_budgets`
+   (replaces the base subsystems' budget rows by the role-rule model, which changes the budget basis),
+   `stopping`, `description`, `consistency_samples`, `inline_points_max`, and your seed designs as `proposals`
+   (each with its `reason`; the tool checks only that it is not empty, so give the physics reason).
 
    ```sh
    python3 <plugin root>/skills/hep-detector/scripts/evaluate_design.py search --artifacts A \
@@ -146,7 +159,7 @@ Higher fidelity, each through `evaluate_design.py`:
 | F2 | `run --fidelity F2` | `toy_spectrometer.py` resolution (config generated from the candidate; an estimate); in-field acceptance toy (`design_estimates.py infield-acceptance`: exact helices through offset apertures, seeded) |
 | F3 | `response --upstream <core evaluation>` | resolution core with the candidate's alignment term and declared tail, and a parametrized `response` (forward folding) bound to it; assembled from an F1 core it stays optimistic |
 | F3 | `run --figure-of-merit expected-precision --fidelity F3 --upstream <resolution> --upstream <charge confusion> --input-artifact <statistical-result>` | the expected precision written back from the hep-statistics Asimov fit (status asimov, `results.expected_relative_uncertainty`); its bound and fidelity vector follow the whole chain |
-| F4 | `geometry --figure-of-merit F --denominator ... --id G`, then the Geant4 study, then `f4 --study <record> --id SIM-...` | the geometry file of the study is generated from the candidate (`contracts/rules/design_geometry.json`) and sets `geometry_ref`; only a record re-issued `validated-in-scope` by `check_geant4_study.py label --upgrade` (`f4 --label-spec ... --label-run-record R ...`, with `--label-reference-record` and `--label-variations` passed on too) counts as F4; a refused upgrade, or a validated record without `results.<figure of merit>`, makes `f4` incomplete (exit 3) with the reasons; without alignment, calibration non-uniformity, noise and digitization and pattern recognition simulated a resolution or confusion rate stays optimistic; the physics-list spread is a model envelope whose ends are compared separately |
+| F4 | `geometry --figure-of-merit F --denominator ... --id G`, then the Geant4 study, then `f4 --study <record> --id SIM-...` | the geometry file of the study is generated from the candidate (`contracts/rules/design_geometry.json`) and sets `geometry_ref`; only a record re-issued `validated-in-scope` by `check_geant4_study.py label --upgrade` (`f4 --label-spec S --label-benchmarks B --label-convergence C --label-run-record R ...`, with `--label-reference-record` and `--label-variations` passed on too) counts as F4; a refused upgrade, or a validated record without `results.<figure of merit>`, makes `f4` incomplete (exit 3) with the reasons; without alignment, calibration non-uniformity, noise and digitization and pattern recognition simulated a resolution or confusion rate stays optimistic; the physics-list spread is a model envelope whose ends are compared separately |
 
 - The adequacy table gives per figure of merit the compliance fidelity (resolution F3; charge confusion F4 with tails
   validated by data; PID rejection F4; acceptance F2 in-field) and the upstreams compliance needs. An F1 result can
@@ -160,8 +173,9 @@ Higher fidelity, each through `evaluate_design.py`:
 - A hard constraint lists the subsystems it covers (`subsystems`); a candidate that lacks one cannot pass it
   (`chain.incomplete`, the subsystem listed as missing), and the report shows the scope.
 - Charge-confusion compliance needs a rigidity-scale-offset evaluation whose measured offset covers the offset the
-  requirement assumes: |measured - assumed| + z sigma within the assumed tolerance (an exactly zero assumed offset can
-  never be covered: declare a realistic tolerance).
+  requirement assumes: |measured - assumed| + z sigma within the assumed tolerance (a zero or omitted tolerance is covered only
+  by a measured offset exactly equal to the assumed one with no uncertainty, which no real measurement gives:
+  declare a realistic tolerance; an offset evaluation without an uncertainty counts with sigma 0, so give it one).
 - The report ranks candidates on expected precision only when the comparison basis holds and every candidate that
   survives screening has a non-optimistic expected-precision evaluation with the same fidelity vector and
   denominator; otherwise it states every reason the ranking is refused. A ranking is never a global optimum.
@@ -181,7 +195,10 @@ upstreams are not scanned: scan their upstream figure of merit.
 
 Reruns. Evaluations bind the candidate by the parameters they read (`binding: parameters`, `parameter_digest`): a
 change to another parameter leaves them current, a change to a parameter they read makes them stale (and everything
-downstream of them). Rerun a stale one with `--replace` (a current one is never replaced). For a whole chain use
+downstream of them). Rerun a stale one with `--replace` (`run` and `budget`; `response --replace` currently stops on its existing
+  response file, so rerun a response under a new id; a current one is never
+  replaced); `f4`, `f5` and `calibration` have no `--replace`, so a stale F4 or F5 evaluation or a calibration is
+  rerun under a new id. For a whole chain use
 `hep-computing/scripts/run_workflow.py --incremental` with one step per evaluation: give each step a
 `parameter_digest` command (the same `evaluate_design.py` call with `--digest-only`) that replaces the candidate
 file in its skip key, and a step id different from the evaluation id (run_workflow writes
@@ -190,7 +207,8 @@ environment and inputs are unchanged; never when the release digest is unknown.
 
 ## D4 Review
 
-- The compliance matrix, the risk table and the maturity per requirement come from `evaluate_design.py report`; no
+- The compliance matrix with its proposed dispositions, the at-risk flags of screening and the maturity per
+  requirement come from `evaluate_design.py report`; no
   verdict is written by hand.
 - Independent review of the derived report: hep-authoring (`references/independent-review.md`); a closed agent review
   is advisory input to the human reviewer, not a review record by a reviewer other than the author.
@@ -201,8 +219,10 @@ environment and inputs are unchanged; never when the release digest is unknown.
   the report then says `baseline: baselined`. The axis is advisory: the actor is self-declared, and formal approval
   is a trusted gate outside the agent. An infeasible design is an allowed outcome; return to D1 or stop.
 - Measurements (F5): a prototype or test-beam dataset-record carries a `design_measurement` (figure of merit,
-  denominator, value, uncertainty, and the configuration it was measured in). `evaluate_design.py f5 --dataset ...`
-  writes the evaluation; it decides only after a human `measurement-acceptance` record lists the dataset and binds the
+  denominator, value, uncertainty, and the configuration it was measured in; an empty configuration binds
+  nothing, so list the configuration parameters). `evaluate_design.py f5 --dataset ...`
+  writes the evaluation; it decides only after a `measurement-acceptance` record by a human (as for every gate, `actor.kind`
+  is declared by the writer and trusted, not verified by the tool) lists the dataset and binds the
   candidate by the digest of those configuration parameters (`binding: parameters`, `parameter_digest`); a measured
   configuration that differs from the candidate is `domain.mismatch`.
 
@@ -216,8 +236,8 @@ environment and inputs are unchanged; never when the release digest is unknown.
   expected precision as nuisances: `evaluate_design.py calibration --candidate C --residual SID.parameters.NAME
   --mode scale|inverse-offset --model <spectrum model> --id CAL-... --measurement-spec <spec> --out-spec <new spec>`
   runs `propagate_scale_distortion.py` on the candidate's residual (binned yield shifts, up/down variations and
-  covariance blocks; its run records the residual's parameter digest, so `run_workflow.py --incremental` reruns it
-  only when the residual changes) and writes a new measurement-spec version with that shape systematic; the
+  covariance blocks; its run records the residual's parameter digest; `calibration` has no `--digest-only` and no
+  `--replace`, so a rerun needs a new `--id`) and writes a new measurement-spec version with that shape systematic; the
   hep-statistics Asimov fit then gives its effect on the expected precision.
 
 ## Verdicts and reason codes
@@ -229,13 +249,18 @@ pass). Codes the report uses:
 | Code | Meaning | Next step |
 |---|---|---|
 | `bound.excludes` | an optimistic bound misses the target: fail | change the candidate or the requirement |
-| `bound.direction` | the bound cannot decide (an optimistic bound meets the target) | higher fidelity |
+| `bound.direction` | the bound cannot decide (an optimistic bound meets the target, or a conservative bound misses it) | higher fidelity |
+| `bound.confirms` | a conservative bound meets the target: pass | none |
+| `bound.mixed` | one evaluation's own bound and its upstreams' bounds combine to both optimistic and conservative, or a non-monotonic input meets a bound that is not an estimate | evaluate with consistent bounds |
+| `rule.unmatched` | no verdict rule matches the evaluation's state | report it; never decide by hand |
 | `fidelity.insufficient` | below the screening or compliance fidelity | higher fidelity |
-| `estimate.decides`, `margin.within_uncertainty`, `uncertainty.missing` | an estimate clears the target at the coverage CL, straddles it, or has no usable uncertainty | more precise evidence |
-| `chain.incomplete`, `domain.mismatch`, `budget.incomplete` | a required upstream, the validity domain or a budget row is missing | supply it |
-| `evidence.stale`, `evidence.unresolved`, `evidence.invalid` | an input changed, is unbound or invalid | rerun with a new evaluation id |
-| `evidence.conflict`, `evidence.excluded_adverse`, `evidence.orphan_run` | contradicting evidence, unfavorable evidence excluded, a run without its evaluation | inspect the contracts and validity domains |
-| `capability.unavailable` | no evaluator at that fidelity | record it; never estimate a number |
+| `estimate.decides`, `margin.within_uncertainty`, `uncertainty.missing` | an estimate decides (pass or fail) at the coverage CL, straddles the target, or has no usable uncertainty | decided pass: none; decided fail: change the candidate or the requirement; otherwise more precise evidence |
+| `chain.incomplete`, `domain.mismatch`, `budget.incomplete` | a required upstream is missing or fails its check, or a hard constraint's subsystem is absent; a validity condition fails, the denominator differs from the requirement's, or the measured or simulated configuration differs from the candidate; a budget row is missing or lacks an estimate or an uncertainty | supply or correct it |
+| `evidence.stale`, `evidence.unresolved`, `evidence.invalid` | an input changed, is unbound or invalid | stale: rerun with `--replace` (same id) for `run` and `budget`, else under a new id; unresolved or invalid: fix the input, then rerun under a new id |
+| `evidence.conflict`, `evidence.excluded_adverse`, `evidence.orphan_run` | contradicting evidence (also several evaluations of one requirement that disagree), unfavorable evidence excluded, a run without its evaluation | inspect the contracts and validity domains |
+| `evidence.unreviewed` | an F5 evaluation no `measurement-acceptance` record has approved | the human acceptance record |
+| `capability.unavailable` | no evaluator at that fidelity | record it; never estimate a number; it never replaces an available lower-fidelity evaluation: run the screening fidelity first (`design.py`
+does not yet flag such a record, so the report can otherwise propose accept-risk) |
 | `design.derived_uncovered`, `design.constraint_scope_missing` (error) | a derived requirement without a driving `covered_by`; a hard constraint without `subsystems` | complete the design-spec (a new version) |
 | `design.scan_point_not_expanded` (error) | an evaluation that names a scan summary as its run | `expand` the point and evaluate the new candidate |
 | `design.search_point_not_expanded` (error) | an evaluation that names a search summary as its run | `expand --search` a finalist and evaluate the new candidate |
@@ -256,7 +281,9 @@ The adequacy table is an initial default until physics review: every pass is rep
 <!-- example -->
 Example: `examples/design-space-spectrometer` designs an AMS-like space spectrometer (public facts from the
 `experiment:ams-02` profile ledger) with three candidates at F1: the probe with a too-short lever arm fails the
-resolution requirement, the two reasonable candidates are inconclusive on resolution and charge confusion, and the
+resolution and charge-confusion requirements, the two reasonable candidates are inconclusive on resolution and charge
+confusion (its REQ-CC-001 declares a zero offset tolerance, so charge confusion cannot reach compliance there
+with any real offset measurement), and the
 equal-mass basis holds for the two that survive screening; ranking and Pareto front are refused until expected-precision
 evaluations exist.
 <!-- /example -->

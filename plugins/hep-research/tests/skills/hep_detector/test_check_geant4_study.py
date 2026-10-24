@@ -334,6 +334,35 @@ class EffectiveConfigInputs(unittest.TestCase):
         with self.assertRaises(self.C.StudyError):
             self.C.model_assignment(settings, "hadronic", self.config([("Binary Cascade", 0.0, 6000.0)]))
 
+    def test_em_constructor_follows_the_physics_list_factory(self):
+        """Review finding (A8): the suffix alone does not decide the EM constructor (Geant4 11.4.3 lists)."""
+        em = self.C.em_constructor_of
+        self.assertEqual(em("FTFP_BERT"), "G4EmStandardPhysics")
+        self.assertEqual(em("FTFP_BERT_EMZ"), "G4EmStandardPhysics_option4")
+        self.assertEqual(em("QGSP_BIC_HP"), "G4EmStandardPhysics_option4")  # registers option 4 itself
+        self.assertEqual(em("QGSP_BIC_HP_EMY"), "G4EmStandardPhysics_option3")
+        self.assertEqual(em("FTFP_BERT_TRV"), "G4EmStandardPhysicsGS")
+        self.assertEqual(em("FTFP_BERT_EM0"), "G4EmStandardPhysics")
+        self.assertEqual(em("LBE_EMZ"), em("LBE"))  # the factory ignores an EM suffix on LBE
+        ma = lambda ref: self.C.model_assignment({"reference_list": ref, "particle": "e-", "energy_MeV": 100.0,
+                                                  "ui_commands": []}, "em")["em_constructor"]
+        self.assertEqual(ma("FTFP_BERT_EMZ"), ma("QGSP_BIC_HP"))  # same EM model: no EM variation
+
+    def test_hadronic_table_matches_exact_list_names(self):
+        """Review finding (A8): FTFP_BERT_ATL moves the transition, QGSP_BIC_AllHP uses ParticleHP: not in the table."""
+        s = {"particle": "proton", "energy_MeV": 8000.0, "ui_commands": []}
+        self.assertTrue(self.C.model_assignment({**s, "reference_list": "FTFP_BERT_EMZ"}, "hadronic")["known"])
+        for ref in ("FTFP_BERT_ATL", "QGSP_BIC_AllHP", "QGSP_BIC_HP"):
+            self.assertFalse(self.C.model_assignment({**s, "reference_list": ref}, "hadronic")["known"], ref)
+
+    def test_datasets_rule_applies_to_a_reference_list(self):
+        """Review finding (A8): G4R-DATASETS tested physics.layered_sim.reference_list, a field that does not exist."""
+        rule = next(r for r in self.C.load_rules(self.C.RULES) if r["id"] == "G4R-DATASETS")
+        study = {"physics": {"layered_sim": {"physics": {"reference_list": "FTFP_BERT"}}},
+                 "reproducibility": {"data_paths_recorded": False}}
+        self.assertTrue(self.C.holds(rule["condition"], study))
+        self.assertFalse(self.C.holds(rule["requires"], study))
+
     def test_thin_layer_rule_reads_the_geometry_tree(self):
         h = float.hex
         ec = {"recorded": True, "geometry": {"tree": {
