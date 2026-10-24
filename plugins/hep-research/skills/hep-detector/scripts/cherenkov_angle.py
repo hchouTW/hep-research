@@ -215,7 +215,7 @@ def _fail(message, kind='failed'):
     return 1
 
 
-def main():
+def main(argv=None):
     parser = JsonArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--index', type=float, required=True,
@@ -244,7 +244,7 @@ def main():
                              'delta/sqrt(sigma_A^2 + sigma_B^2)')
     parser.add_argument('--status', choices=STATUSES, default='unvalidated',
                         help='status label of the inputs, echoed as status (default unvalidated)')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # F-06: defaults are reported in defaults_used; a defaulted detector parameter is also a warning
     defaults_used = {}

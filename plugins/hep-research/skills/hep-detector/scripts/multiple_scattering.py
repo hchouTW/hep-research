@@ -361,7 +361,7 @@ def _unreadable(path, exc):
     return 2
 
 
-def main():
+def main(argv=None):
     parser = JsonArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('stack', help='JSON stack description (see <plugin root>/skills/hep-detector/assets/detector-stack.example.json)')
@@ -378,7 +378,7 @@ def main():
     parser.add_argument('--status', choices=STATUSES, default=None,
                         help="status label of the inputs, echoed as status (default: the input file's status, "
                              'else unvalidated)')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     try:
         _positive(args.rigidity, 'rigidity')
         charge, mass = (1 if args.charge is None else args.charge), args.mass

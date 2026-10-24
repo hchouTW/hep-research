@@ -450,7 +450,7 @@ def _fail(message, kind='failed'):
     return 1
 
 
-def main():
+def main(argv=None):
     parser = JsonArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--mode', choices=('tof', 'dedx', 'velocity'), required=True)
@@ -476,7 +476,7 @@ def main():
                              'delta/sqrt(sigma_A^2 + sigma_B^2)')
     parser.add_argument('--status', choices=STATUSES, default='unvalidated',
                         help='status label of the inputs, echoed as status (default unvalidated)')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # F-06: a parameter left out takes its default, which is reported in defaults_used; a defaulted detector parameter
     # of the chosen mode is also a warning (the default describes no particular detector)
