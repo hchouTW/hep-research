@@ -39,6 +39,15 @@ def run(*args):
     return p.returncode, json.loads(p.stdout)
 
 
+class GradesMatchTheContracts(unittest.TestCase):
+    def test_grades_are_the_contracts_table_classes(self):
+        """CV-A1 (A1.1): the tool's GRADES name the same benchmarks as contracts.validate.GEANT4_BENCHMARKS and give
+        each its class; the contract decides, the tool only reports."""
+        sys.path.insert(0, str(PLUGIN))
+        from contracts.validate import GEANT4_BENCHMARKS
+        self.assertEqual(G.GRADES, {k: v["class"] for k, v in GEANT4_BENCHMARKS.items()})
+
+
 class Reference(unittest.TestCase):
     def test_k_constant_from_core_constants(self):
         self.assertAlmostEqual(G.K_BETHE, 0.307075, delta=2e-6)  # PDG Table 34.1: 0.307 075 MeV mol^-1 cm^2

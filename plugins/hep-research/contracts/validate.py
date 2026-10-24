@@ -299,7 +299,7 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         if ext.get("exit_status", 0) != 0 and "failed" not in status:
             rep.add("error", "$.status", "status.failed_unlabeled", "non-zero exit status must carry 'failed'")
         if strict or _at_least(doc.get("contract_version"), GEANT4_UPGRADE_FROM):
-            _study_upgrade(doc, ext, status, rep)
+            _study_upgrade(doc, ext, status, rep, a1=_geant4_a1(doc, status, strict))
     elif t == "ml-artifact":
         if not ext.get("splits", {}).get("grouping_key"):
             rep.add("error", "$.extension.splits.grouping_key", "ml.no_grouping", "splits need a grouping key (leakage control)")
@@ -346,6 +346,53 @@ def _literature_semantics(ext: dict, rep: Report) -> None:
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
 GEANT4_UPGRADE_FROM = "3.1.0"  # Geant4 phase-2 rules (study record upgrade, evidence records) apply from this version
+GEANT4_A1_FROM = "3.13.0"  # CV-A1 (Geant4 correctness sci-fix): benchmark table, kind and per-benchmark scope, isolation
+# CV-A1: benchmark -> validation class (the value a record's grade must have), the observable kinds it supports and its
+# scope dimensions (categorical or interval). Only reference and setup-matched benchmarks upgrade; the record never
+# declares a class, kind or dimension. Entries are added in later contract versions.
+GEANT4_BENCHMARKS = {
+    "stopping-power": {"class": "reference", "kinds": ("stopping-power",)},
+    "range": {"class": "reference", "kinds": ("range",)},
+    "thin-layer-mpv": {"class": "reference", "kinds": ("most-probable-value",)},
+    "thin-layer-width": {"class": "sanity", "kinds": ("thin-layer-width",)},
+    "multiple-scattering": {"class": "sanity", "kinds": ()},
+    "em-shower-shape": {"class": "sanity", "kinds": ()},
+    "shower-containment": {"class": "sanity", "kinds": ()},
+    "longitudinal-profile": {"class": "reference", "kinds": ("shower-maximum",)},
+    "published-data": {"class": "interface", "kinds": ()},
+}
+GEANT4_UPGRADING_CLASSES = ("reference",)
+
+
+def _geant4_a1(doc: dict, status: set, strict: bool) -> bool:
+    """CV-A1 rules apply natively from GEANT4_A1_FROM; an older record is constrained only under --strict, and then
+    only when it carries validated-in-scope."""
+    return _at_least(doc.get("contract_version"), GEANT4_A1_FROM) or (strict and "validated-in-scope" in status)
+
+
+def _benchmark_table(study, rep: Report) -> None:
+    """CV-A1 (D2): every embedded benchmark result names a benchmark of GEANT4_BENCHMARKS and its grade (and class,
+    when given) is the table's class; a record that declares another is refused."""
+    for i, b in enumerate(study.get("benchmarks", []) if isinstance(study, dict) else []):
+        if not isinstance(b, dict):
+            continue
+        name = b.get("benchmark")
+        if name not in GEANT4_BENCHMARKS:
+            rep.add("error", f"$.extension.study.benchmarks[{i}].benchmark", "geant4.benchmark_unknown",
+                    f"benchmark {name!r} is not in the contracts table ({sorted(GEANT4_BENCHMARKS)})")
+            continue
+        cls = GEANT4_BENCHMARKS[name]["class"]
+        for key in ("grade", "class"):
+            if (key == "grade" or key in b) and b.get(key) != cls:
+                rep.add("error", f"$.extension.study.benchmarks[{i}].{key}", "geant4.benchmark_class_mismatch",
+                        f"{name} has the class {cls!r} in the contracts table, not {b.get(key)!r}")
+
+
+def _upgrading(b: dict, a1: bool) -> bool:
+    """Whether a benchmark result can count for an upgrade: by the table's class under CV-A1, else by its own grade."""
+    if a1:
+        return (GEANT4_BENCHMARKS.get(b.get("benchmark")) or {}).get("class") in GEANT4_UPGRADING_CLASSES
+    return b.get("grade") == "reference"
 
 
 def _scope_inside(declared: dict, bench: dict) -> list[str]:
@@ -394,9 +441,12 @@ def _simulated_dataset(doc: dict, ext: dict, status: set, rep: Report) -> None:
                 "'validated-in-scope' needs an input study record that carries it (a status is never upgraded by hand)")
 
 
-def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report) -> None:
+def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report, a1: bool = False) -> None:
     """3.1.0 Geant4 phase 2: evidence records need their capability, and a record with Geant4 study material that
-    carries validated-in-scope must show the evidence for it."""
+    carries validated-in-scope must show the evidence for it. CV-A1 (a1): classes come from GEANT4_BENCHMARKS, never
+    from the record."""
+    if a1:
+        _benchmark_table(ext.get("study"), rep)
     ev = ext.get("evidence_records")
     if ev and "core:evidence-records" not in (doc.get("required_capabilities") or []):
         rep.add("error", "$.required_capabilities", "evidence.capability_not_declared",
@@ -418,7 +468,7 @@ def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report) -> None:
     if (study.get("convergence") or {}).get("gate") != "pass":
         rep.add("error", "$.extension.study.convergence", "geant4.upgrade_unconverged",
                 "validated-in-scope needs a passed convergence gate")
-    good = [b for b in study.get("benchmarks", []) if isinstance(b, dict) and b.get("grade") == "reference"
+    good = [b for b in study.get("benchmarks", []) if isinstance(b, dict) and _upgrading(b, a1)
             and b.get("verdict") == "pass" and b.get("validation_evidence") is True
             and (b.get("negative_control") or {}).get("status") == "caught"]
     if not good:
