@@ -155,5 +155,142 @@ class ScopeDimensions(unittest.TestCase):
         self.assertEqual(strict_exit(doc), 1)
 
 
+DEPS = PLUGIN / "contracts" / "dependencies.py"
+BENCH = PLUGIN / "skills" / "hep-detector" / "scripts" / "geant4_benchmarks.py"
+
+
+def spec_v1_oracle(sim: dict, targets: set) -> tuple[str, str]:
+    """Independent implementation of the A1.3 text (program spec, "spec-v1 normal form" and "isolated"), written
+    from the spec, not from contracts.validate: (configuration, target hash)."""
+    import hashlib
+    geo, mats = sim["geometry"], {m["name"]: m for m in sim.get("materials", [])}
+    placed = []
+    for layer in geo["layers"]:
+        placed += list(layer["slabs"]) * layer.get("repeat", 1)
+    rows = []
+    for s in placed:
+        if s["name"] in targets:
+            m = {k: v for k, v in mats.get(s["material"], {}).items() if k not in ("name", "source")}
+            num = (lambda x: float(x).hex() if isinstance(x, (int, float)) and not isinstance(x, bool) else x)
+            rows.append({"name": s["name"], "material": s["material"], "thickness_mm": num(s["thickness_mm"]),
+                         "lateral_mm": num(geo["lateral_mm"]), "shift_mm": num(s.get("shift_mm", 0.0)),
+                         "composition": {k: num(v) for k, v in m.items()}})
+    world = geo["world"]["material"]
+    vacuum = world == "G4_Galactic" or mats.get(world, {}).get("density_g_cm3", 1.0) < 1e-20
+    isolated = vacuum and all(s["name"] in targets for s in placed)
+    return ("isolated" if isolated else "embedded",
+            hashlib.sha256(json.dumps(rows, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
+
+
+def run_cli(script: Path, *args) -> tuple[int, dict]:
+    p = subprocess.run([sys.executable, "-B", str(script), *map(str, args)], capture_output=True, text=True,
+                       timeout=600)
+    try:
+        return p.returncode, json.loads(p.stdout)
+    except ValueError:
+        return p.returncode, {"raw": p.stdout[-500:], "stderr": p.stderr[-500:]}
+
+
+class Isolation(unittest.TestCase):
+    """geant4-isolation (A1.3): a counted reference benchmark needs an isolated target whose configuration is derived
+    from a named run record; a setup-matched one also the measured target hash; dependencies.py re-derives."""
+
+    def counted(self, doc):
+        return next(b for b in doc["extension"]["study"]["benchmarks"] if b["benchmark"] == "thin-layer-mpv")
+
+    def test_missing_or_embedded_configuration_is_refused(self):
+        cases = {"no configuration": lambda b: [b.pop(k, None) for k in ("configuration", "configuration_basis",
+                                                                          "target_geometry_sha256", "hash_scheme")],
+                 "embedded": lambda b: b.update(configuration="embedded"),
+                 "no hash": lambda b: b.pop("target_geometry_sha256"),
+                 "unknown scheme": lambda b: b.update(hash_scheme="spec-v0")}
+        for name, tamper in cases.items():
+            doc = j14_record()
+            tamper(self.counted(doc))
+            with self.subTest(name):
+                self.assertEqual(strict_exit(doc), 1)
+
+    def test_setup_matched_needs_the_measured_target_hash(self):
+        doc = j14_record()
+        b = self.counted(doc)
+        b.update(benchmark="longitudinal-profile", grade="setup-matched")
+        scope = doc["extension"]["study"]["declared_scope"]
+        scope.update(observable_kind="shower-maximum", target_geometry_sha256=b["target_geometry_sha256"],
+                     hash_scheme=b["hash_scheme"])
+        b["scope"].update(target_geometry_sha256=b["target_geometry_sha256"], hash_scheme=b["hash_scheme"])
+        for measured, ok in ((b["target_geometry_sha256"], True), ("0" * 64, False), (None, False)):
+            d = copy.deepcopy(doc)
+            cb = self.counted_by_name(d, "longitudinal-profile")
+            if measured is not None:
+                cb["measured_configuration"] = {"target_geometry_sha256": measured, "hash_scheme": b["hash_scheme"]}
+            with self.subTest(measured=measured):
+                self.assertEqual(strict_exit(d), 0 if ok else 1)
+
+    @staticmethod
+    def counted_by_name(doc, name):
+        return next(b for b in doc["extension"]["study"]["benchmarks"] if b["benchmark"] == name)
+
+    def test_dependencies_re_derive_the_configuration_from_the_run_record(self):
+        """The record says isolated, but the evidence run record it names ran in an air world: re-derived embedded."""
+        import hashlib
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "j14"
+            shutil.copytree(j14_output(), root / "output")
+            shutil.copytree(PLUGIN / "examples" / "geant4-thin-silicon" / "recorded", root / "recorded")
+            rec_path = root / "output" / RECORD
+            self.assertEqual(run_cli(DEPS, rec_path, "--root", root)[0], 0, "J14's record must pass first")
+            doc = json.loads(rec_path.read_text(encoding="utf-8"))
+            basis = self.counted(doc)["configuration_basis"]
+            ev = next(r for r in doc["extension"]["evidence_records"] if r["artifact_id"] == basis["artifact_id"])
+            run_path = root / "output" / "artifacts" / ev["ref"].split("artifacts/", 1)[1]
+            run = json.loads(run_path.read_text(encoding="utf-8"))
+            run["extension"]["simulation"]["geometry"]["world"]["material"] = "G4_AIR"
+            run_path.write_text(json.dumps(run, indent=1), encoding="utf-8")
+            sha = hashlib.sha256(run_path.read_bytes()).hexdigest()
+            ev["sha256"], basis["sha256"] = sha, sha
+            rec_path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+            self.assertEqual(run_cli(DEPS, rec_path, "--root", root)[0], 1)
+
+    def test_configuration_against_an_independent_implementation(self):
+        """Exhaustive over world (G4_Galactic, a declared vacuum, a declared gas, G4_AIR) x placements (the target
+        alone, an absorber outside the target, the absorber inside the target, two repeats): configuration and
+        target hash from geant4_benchmarks.py against spec_v1_oracle."""
+        si = {"name": "Si_study", "z": 14, "a_g_mole": 28.0855, "density_g_cm3": 2.329}
+        worlds = {"G4_Galactic": [], "Vac": [{"name": "Vac", "z": 1, "a_g_mole": 1.008, "density_g_cm3": 1e-25}],
+                  "Gas": [{"name": "Gas", "z": 1, "a_g_mole": 1.008, "density_g_cm3": 1e-5}], "G4_AIR": []}
+        layouts = {"target alone": ([[{"name": "Si", "material": "Si_study", "thickness_mm": 0.3}]], 1, ["Si"]),
+                   "absorber outside": ([[{"name": "Si", "material": "Si_study", "thickness_mm": 0.3},
+                                          {"name": "Ab", "material": "G4_W", "thickness_mm": 3.5}]], 1, ["Si"]),
+                   "absorber inside": ([[{"name": "Si", "material": "Si_study", "thickness_mm": 0.3},
+                                         {"name": "Ab", "material": "G4_W", "thickness_mm": 3.5}]], 1, ["Si", "Ab"]),
+                   "two repeats": ([[{"name": "Si", "material": "Si_study", "thickness_mm": 0.3},
+                                     {"name": "Ab", "material": "G4_W", "thickness_mm": 3.5}]], 2, ["Si", "Ab"])}
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            for world, extra in worlds.items():
+                for lname, (slabs, rep, targets) in layouts.items():
+                    sim = {"geometry": {"lateral_mm": 10.0, "world": {"material": world, "scale": 1.2},
+                                        "layers": [{"repeat": rep, "slabs": s} for s in slabs]},
+                           "materials": [si, *extra]}
+                    (d / "run.json").write_text(json.dumps({"artifact_type": "computational-run", "artifact_id": "r",
+                                                            "extension": {"simulation": sim}}))
+                    (d / "events.csv").write_text("# SIMULATION\nevent,primary_eloss_MeV,edep_Si_MeV,primary_fate,"
+                                                  "primary_end_process\n0,1.0,1.0,1,Transportation\n"
+                                                  "1,1.1,1.0,1,Transportation\n")
+                    (d / "study.json").write_text(json.dumps({"materials": [dict(si, z_over_a=0.4985)]}))
+                    (d / "cfg.json").write_text(json.dumps({"schema": "geant4-benchmarks/1", "study_spec": "study.json",
+                                                            "benchmarks": [{"benchmark": "published-data",
+                                                                            "csv": "events.csv", "column": "edep_Si_MeV",
+                                                                            "particle": "mu-", "energy_MeV": 1000.0,
+                                                                            "run_record": "run.json",
+                                                                            "target_slabs": targets}]}))
+                    code, out = run_cli(BENCH, "run", "--config", d / "cfg.json")
+                    b = out["benchmarks"][0]
+                    with self.subTest(world=world, layout=lname):
+                        self.assertEqual((b["configuration"], b["target_geometry_sha256"]),
+                                         spec_v1_oracle(sim, set(targets)))
+
+
 if __name__ == "__main__":
     unittest.main()

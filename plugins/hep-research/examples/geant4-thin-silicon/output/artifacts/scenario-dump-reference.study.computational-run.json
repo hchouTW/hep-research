@@ -19,7 +19,7 @@
    },
    {
     "path": "output/benchmarks-sp.json",
-    "sha256": "a05e11bbc89f4c79e71fc8e5834dce3b5bd446e0d730915be614c268aca4f5af"
+    "sha256": "ca5f5323d178c1b14fd3404d6585ec1848cb2772cc66a88ac73c492592b821ae"
    },
    {
     "path": "output/convergence-sp.json",
@@ -41,10 +41,18 @@
     {
      "benchmark": "stopping-power",
      "beta_gamma": 0.47383208519543973,
+     "configuration": "isolated",
+     "configuration_basis": {
+      "artifact_id": "geant4-run-sp-nominal",
+      "run_record": "../recorded/runs/sp-nominal.computational-run.json",
+      "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
+     },
+     "configuration_gap": null,
      "detection_limit_relative": 0.03776020023771021,
      "geant4": 13.605636582872332,
      "geant4_se": 0.016082562570711636,
      "grade": "reference",
+     "hash_scheme": "spec-v1",
      "inputs": {
       "csv": "../recorded/events/sp-nominal.csv.gz",
       "run_record": "../recorded/runs/sp-nominal.computational-run.json"
@@ -83,6 +91,10 @@
       "used": 30000
      },
      "statistic": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
+     "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
+     "target_slabs": [
+      "Si"
+     ],
      "thin_slab_approximation": {
       "bethe_at_entry": 13.610500974233627,
       "bethe_at_mean_energy": 13.630852882979829,
@@ -98,7 +110,8 @@
       "total": 0.03354615437640546
      },
      "validation_evidence": true,
-     "verdict": "pass"
+     "verdict": "pass",
+     "world_material": "G4_Galactic"
     }
    ],
    "convergence": {
@@ -247,7 +260,7 @@
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "fde8ed0c8f3448f5"
+    "version": "478357ecf2ebe1e0"
    }
   ]
  },

@@ -50,6 +50,7 @@ JSON file is an error (artifacts_dir.not_artifact), another file a warning; the 
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
@@ -366,6 +367,79 @@ GEANT4_BENCHMARKS = {
     "published-data": {"class": "interface", "kinds": (), "scope": ()},
 }
 GEANT4_UPGRADING_CLASSES = ("reference", "setup-matched")
+GEANT4_HASH_SCHEMES = ("spec-v1", "tree-v1")
+VACUUM_DENSITY_G_CM3 = 1e-20  # a world material below this density is vacuum (A1.3), like G4_Galactic
+
+
+def _hexed(v):
+    """Numbers as float.hex() (spec-v1 normal form), recursively; booleans and strings unchanged."""
+    if isinstance(v, bool) or isinstance(v, str) or v is None:
+        return v
+    if isinstance(v, (int, float)):
+        return float(v).hex()
+    if isinstance(v, dict):
+        return {k: _hexed(x) for k, x in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [_hexed(x) for x in v]
+    return v
+
+
+def geant4_spec_v1(sim: dict, target_slabs) -> dict:
+    """CV-A1 (A1.3): configuration and target hash of a layered_sim run from its run record's extension.simulation
+    (spec/1 geometry and materials), never from user input. The target is the named slabs (absorbers included); the
+    spec-v1 normal form lists the target's placements in order (repeats one by one) with thickness, transverse size,
+    material name and declared composition, numbers as float.hex(); the hash is the sha256 of its JSON (sorted keys,
+    no whitespace). isolated: the world is vacuum (G4_Galactic or density < 1e-20 g/cm3) and every placement other
+    than the world belongs to the target (spec/1 has no field); otherwise embedded. Raises ValueError on a target
+    that names no placement."""
+    geo = sim.get("geometry") if isinstance(sim, dict) else None
+    if not isinstance(geo, dict) or not isinstance(geo.get("layers"), list):
+        raise ValueError("the run record has no extension.simulation.geometry.layers (spec/1)")
+    mats = {m["name"]: m for m in sim.get("materials") or [] if isinstance(m, dict) and "name" in m}
+    placements = [s for layer in geo["layers"] for _ in range(int(layer.get("repeat", 1)))
+                  for s in layer.get("slabs") or []]
+    names = {s.get("name") for s in placements}
+    targets = set(target_slabs or [])
+    if not targets or not targets <= names:
+        raise ValueError(f"target slabs {sorted(targets)} are not all placements of the run ({sorted(names)})")
+
+    def entry(s):
+        comp = {k: v for k, v in mats.get(s.get("material"), {}).items() if k not in ("name", "source")}
+        return {"name": s.get("name"), "material": s.get("material"), "thickness_mm": s.get("thickness_mm"),
+                "lateral_mm": geo.get("lateral_mm"), "shift_mm": s.get("shift_mm", 0.0), "composition": comp}
+    normal = [_hexed(entry(s)) for s in placements if s.get("name") in targets]
+    world = (geo.get("world") or {}).get("material")
+    vacuum = world == "G4_Galactic" or (world in mats and isinstance(mats[world].get("density_g_cm3"), (int, float))
+                                        and mats[world]["density_g_cm3"] < VACUUM_DENSITY_G_CM3)
+    isolated = vacuum and names <= targets and not sim.get("field")
+    return {"configuration": "isolated" if isolated else "embedded", "hash_scheme": "spec-v1",
+            "target_slabs": sorted(targets), "world_material": world,
+            "target_geometry_sha256": hashlib.sha256(json.dumps(normal, sort_keys=True, separators=(",", ":"))
+                                                     .encode("utf-8")).hexdigest()}
+
+
+def _configuration(b: dict, i: int, rep: Report) -> None:
+    """CV-A1 (A1.3): a counted reference benchmark ran on an isolated target with its configuration derived from a
+    named run record; a counted setup-matched one also has the target hash and scheme of its measured configuration."""
+    where = f"$.extension.study.benchmarks[{i}]"
+    basis = b.get("configuration_basis")
+    if not isinstance(basis, dict) or not basis.get("artifact_id") or not basis.get("sha256"):
+        rep.add("error", f"{where}.configuration_basis", "geant4.configuration_missing",
+                f"{b.get('benchmark')} counts for the upgrade but names no run record its configuration is derived from")
+        return
+    if b.get("configuration") != "isolated":
+        rep.add("error", f"{where}.configuration", "geant4.benchmark_not_isolated",
+                f"{b.get('benchmark')} counts for the upgrade but its target is {b.get('configuration')!r}, not isolated")
+    sha, scheme = b.get("target_geometry_sha256"), b.get("hash_scheme")
+    if not (isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{64}", sha)) or scheme not in GEANT4_HASH_SCHEMES:
+        rep.add("error", f"{where}.target_geometry_sha256", "geant4.configuration_missing",
+                f"{b.get('benchmark')} needs target_geometry_sha256 and a hash_scheme of {list(GEANT4_HASH_SCHEMES)}")
+    if (GEANT4_BENCHMARKS.get(b.get("benchmark")) or {}).get("class") == "setup-matched":
+        m = b.get("measured_configuration") or {}
+        if m.get("target_geometry_sha256") != sha or m.get("hash_scheme") != scheme:
+            rep.add("error", f"{where}.measured_configuration", "geant4.setup_mismatch",
+                    f"{b.get('benchmark')} is setup-matched: its target hash and scheme ({sha}, {scheme}) must equal "
+                    f"the measured configuration's ({m.get('target_geometry_sha256')}, {m.get('hash_scheme')})")
 
 
 def _geant4_a1(doc: dict, status: set, strict: bool) -> bool:
@@ -535,6 +609,10 @@ def _study_upgrade(doc: dict, ext: dict, status: set, rep: Report, a1: bool = Fa
         rep.add("error", "$.extension.study.benchmarks", "geant4.upgrade_without_reference_benchmark",
                 "validated-in-scope needs a passed reference benchmark whose negative control was caught")
         return
+    if a1:
+        for i, b in enumerate(study.get("benchmarks", [])):
+            if any(b is g for g in good):
+                _configuration(b, i, rep)
     declared = study.get("declared_scope") or {}
     misses = [_scope_inside(declared, b.get("scope") or {}, b.get("benchmark"), a1) for b in good]
     if not declared or all(misses):

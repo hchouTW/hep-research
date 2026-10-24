@@ -52,7 +52,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from contracts import revocation as rv  # noqa: E402
-from contracts.validate import STICKY_STATUSES, validate_artifact  # noqa: E402
+from contracts.validate import STICKY_STATUSES, geant4_spec_v1, validate_artifact  # noqa: E402
 from core.protected.guard import ProtectedUseRefused, guard, protected_main  # noqa: E402
 from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
@@ -196,6 +196,7 @@ class _Checker:
             else:
                 self.artifact(src, sdoc, trail + (src,))
         self.evidence(path, doc, trail)
+        self.configuration(path, doc)
 
     def simulated(self, doc: dict, sdoc: dict, ref: str, where: str):
         """3.2.0: the inputs of a simulated dataset-record are Geant4 run records (extension.simulation) or a study
@@ -255,6 +256,43 @@ class _Checker:
             self.checked.append(str(src.relative_to(self.root)))
             if src not in trail and len(trail) < MAX_DEPTH:
                 self.artifact(src, sdoc, trail + (src,))
+
+
+    def configuration(self, path: Path, doc: dict):
+        """CV-A1 (A1.3): a benchmark of a study record that states its configuration is re-derived from the run
+        record named by its configuration_basis, which must be one of the record's evidence records or inputs (same id
+        and sha256): configuration, hash_scheme and target hash must equal what contracts.validate.geant4_spec_v1
+        gives."""
+        ext = doc.get("extension") or {}
+        study = ext.get("study")
+        records = [r for key in (ext.get("evidence_records"), doc.get("inputs")) if isinstance(key, list) for r in key]
+        if not isinstance(study, dict):
+            return
+        for i, b in enumerate(study.get("benchmarks") or []):
+            basis = b.get("configuration_basis") if isinstance(b, dict) else None
+            if not isinstance(basis, dict):
+                continue
+            where = f"{path.relative_to(self.root)}:$.extension.study.benchmarks[{i}].configuration_basis"
+            rec = next((r for r in records if isinstance(r, dict) and r.get("artifact_id") == basis.get("artifact_id")
+                        and r.get("sha256") == basis.get("sha256")), None)
+            if rec is None:
+                self.add("error", where, "geant4.configuration_unlinked",
+                         f"the run record {basis.get('artifact_id')!r} ({basis.get('sha256')}) the configuration is "
+                         "derived from is not an evidence record or input of this study")
+                continue
+            src = self.resolve(rec.get("ref", ""), where)
+            if src is None or not src.is_file():
+                continue  # reported by evidence()
+            try:
+                sdoc = json.loads(src.read_text(encoding="utf-8"))
+                conf = geant4_spec_v1((sdoc.get("extension") or {}).get("simulation") or {}, b.get("target_slabs"))
+            except (ValueError, OSError) as exc:
+                self.add("error", where, "geant4.configuration_mismatch", f"cannot re-derive the configuration: {exc}")
+                continue
+            diff = [k for k in ("configuration", "hash_scheme", "target_geometry_sha256") if conf[k] != b.get(k)]
+            if diff:
+                self.add("error", where, "geant4.configuration_mismatch",
+                         f"{b.get('benchmark')}: {', '.join(f'{k} {b.get(k)!r} (re-derived {conf[k]!r})' for k in diff)}")
 
 
 def _dataset_status(doc: dict):

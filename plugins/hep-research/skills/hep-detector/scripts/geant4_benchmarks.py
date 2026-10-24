@@ -54,12 +54,20 @@ Input: a benchmark config JSON (schema geant4-benchmarks/1; paths relative to th
    "energy_MeV", "thickness_mm", "tolerance": {"reference_accuracy_relative", "k_sigma"}, "bootstrap": {"resamples",
    "seed"}, "binning": {"bin_width_MeV"}, "negative_control": {"csv", "run_record", "injected", "injected_relative"},
    "reference_table" (range), "column"/"published" (published-data), "layers" [{"t", "column"}], "published"
-   {"alpha", "beta", "source"}, "systematic_relative" (longitudinal-profile)}]}
+   {"alpha", "beta", "source"}, "systematic_relative" (longitudinal-profile), "target_slabs" (the slabs of the target,
+   absorbers included; default the measured slab; required for longitudinal-profile), "measured_configuration"
+   {"target_geometry_sha256", "hash_scheme"} (setup-matched: the configuration the measurement was made on)}]}
+Configuration (contracts CV-A1): each result carries configuration (isolated or embedded), target_geometry_sha256,
+hash_scheme spec-v1, target_slabs and configuration_basis, derived from the spec/1 of the run record its setting names
+(contracts.validate.geant4_spec_v1), never from user input; a reference or setup-matched benchmark is validation
+evidence only on an isolated target (vacuum world, every placement in the target) with a run record, and a
+setup-matched one only when its target hash equals the measured configuration's (otherwise configuration_gap).
 Usage: geant4_benchmarks.py run --config CONFIG.json [--out OUT.json] [--status LABEL]
        geant4_benchmarks.py reference --study-spec SPEC.json --material NAME --particle P --energy-mev E [--thickness-mm T]
 Output JSON: status, status_label, inputs, defaults_used, benchmarks [{benchmark, grade, reference {source, version,
 validity}, scope {particle, energy_MeV, material, thickness_mm, observable}, statistic, geant4, reference_value,
 relative_difference, tolerance {total, parts}, detection_limit_relative, verdict, negative_control {...},
+configuration, target_geometry_sha256, hash_scheme, target_slabs, configuration_basis, configuration_gap,
 validation_evidence}], gaps.
 Exit codes: 0 every benchmark ran and no reference benchmark failed; 1 a reference benchmark failed or its negative
 control was not caught; 2 bad input; 3 incomplete (a benchmark not applicable or missing data). Standard library only.
@@ -68,6 +76,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import json
 import math
 import random
@@ -79,6 +88,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
+from contracts.validate import geant4_spec_v1  # noqa: E402  (CV-A1: one configuration derivation)
 from core import constants as K  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
@@ -654,6 +664,31 @@ def evaluate(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
     return bench_published(b, rows)
 
 
+def configuration(b: dict, cfg_dir: Path) -> dict:
+    """CV-A1 (A1.3): configuration, target hash (hash_scheme spec-v1) and its basis, derived from the spec/1 of the
+    run record the setting names (run_record), never from user input. The target is target_slabs (absorbers
+    included), by default the measured slab; longitudinal-profile must list its whole sampling stack."""
+    rr = b.get("run_record")
+    if not rr:
+        return {"configuration": None, "configuration_gap": "no run_record: the configuration cannot be derived"}
+    path = cfg_dir / rr
+    raw = path.read_bytes()
+    rec = json.loads(raw.decode("utf-8"))
+    targets = b.get("target_slabs") or ([b["slab"]] if b.get("slab") and b["benchmark"] != "longitudinal-profile"
+                                        else None)
+    if not targets:
+        raise BenchmarkError(f"{b['benchmark']}: target_slabs (the slabs of the target, absorbers included) is required")
+    try:
+        conf = geant4_spec_v1((rec.get("extension") or {}).get("simulation") or {}, targets)
+    except ValueError as exc:
+        raise BenchmarkError(f"{b['benchmark']}: {exc}") from exc
+    out = {**conf, "configuration_basis": {"run_record": rr, "artifact_id": rec.get("artifact_id"),
+                                           "sha256": hashlib.sha256(raw).hexdigest()}}
+    if "measured_configuration" in b:
+        out["measured_configuration"] = b["measured_configuration"]
+    return out
+
+
 def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
     name = b.get("benchmark")
     if name not in GRADES:
@@ -670,6 +705,8 @@ def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
            "scope": {"particle": b["particle"], "energy_MeV": b["energy_MeV"], "material": b.get("material"),
                      "thickness_mm": b.get("thickness_mm"), "observable": res.get("statistic")},
            "inputs": {"csv": b["csv"], "run_record": b.get("run_record")}}
+    conf = configuration(b, cfg_dir)
+    out.update({k: v for k, v in conf.items() if k != "configuration_gap"})
     if grade in UPGRADING and res["verdict"] in ("pass", "fail"):
         nc = b.get("negative_control")
         if not nc:
@@ -688,7 +725,18 @@ def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
                                        "run_record": nc.get("run_record")}
         out["scope"]["detection_limit_relative"] = res["detection_limit_relative"]
     nc_ok = out.get("negative_control", {}).get("status") == "caught"
-    out["validation_evidence"] = grade in UPGRADING and res["verdict"] == "pass" and nc_ok
+    m = conf.get("measured_configuration") or {}
+    matched = grade != "setup-matched" or (m.get("target_geometry_sha256") == conf.get("target_geometry_sha256")
+                                           and m.get("hash_scheme") == conf.get("hash_scheme"))
+    if grade in UPGRADING:
+        out["configuration_gap"] = (conf.get("configuration_gap") or
+                                    (None if conf["configuration"] == "isolated" else
+                                     f"the target {conf['target_slabs']} is embedded (world {conf['world_material']}, "
+                                     "other placements or a field): only an isolated target validates") or
+                                    (None if matched else "setup-matched: the target hash differs from the measured "
+                                                          "configuration (measured_configuration)"))
+    out["validation_evidence"] = (grade in UPGRADING and res["verdict"] == "pass" and nc_ok
+                                  and not out.get("configuration_gap"))
     return out
 
 
@@ -712,6 +760,8 @@ def cmd_run(args) -> tuple[str, dict]:
             elif nc.get("status") == "not-caught":
                 gaps.append(f"{r['benchmark']}: negative control ({nc.get('injected')}) not caught: no discriminating "
                             "power at the claimed detection limit")
+            elif r.get("configuration_gap"):
+                gaps.append(f"{r['benchmark']}: {r['configuration_gap']}")
             elif not nc.get("at_claimed_detection_limit"):
                 gaps.append(f"{r['benchmark']}: negative control injected {nc.get('injected_relative')} is not at the "
                             f"claimed detection limit {r['detection_limit_relative']:.4g}")

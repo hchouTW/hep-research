@@ -2,12 +2,20 @@
  "benchmarks": [
   {
    "benchmark": "thin-layer-mpv",
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-mpv-nominal",
+    "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+    "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099"
+   },
+   "configuration_gap": null,
    "deposit_minus_loss_relative": 0.0015604862756076893,
    "detection_limit_relative": 0.0826757688364182,
    "estimator": "least-squares parabola vertex through the fullest bin and two bins on each side, bin width 0.002 MeV, bins from 0",
    "geant4": 0.08487795698924731,
    "geant4_se": 0.0005283350951568302,
    "grade": "reference",
+   "hash_scheme": "spec-v1",
    "inputs": {
     "csv": "../recorded/events/mpv-nominal.csv.gz",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
@@ -53,6 +61,10 @@
     "used": 60000
    },
    "statistic": "most probable energy loss of transmitted primaries (MeV)",
+   "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
+   "target_slabs": [
+    "Si"
+   ],
    "tolerance": {
     "parts": {
      "binning": 0.006898790624199416,
@@ -63,12 +75,20 @@
     "total": 0.05583810733753233
    },
    "validation_evidence": true,
-   "verdict": "pass"
+   "verdict": "pass",
+   "world_material": "G4_Galactic"
   },
   {
    "benchmark": "thin-layer-width",
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-mpv-nominal",
+    "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
+    "sha256": "9e7fd394a6fe6b7e41d15842e44fb1742ab6c0a3c55dd7baa3cf069916401099"
+   },
    "geant4": 0.028,
    "grade": "sanity",
+   "hash_scheme": "spec-v1",
    "inputs": {
     "csv": "../recorded/events/mpv-nominal.csv.gz",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json"
@@ -96,8 +116,13 @@
     "used": 60000
    },
    "statistic": "FWHM of the deposit distribution (MeV)",
+   "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
+   "target_slabs": [
+    "Si"
+   ],
    "validation_evidence": false,
-   "verdict": "plausible"
+   "verdict": "plausible",
+   "world_material": "G4_Galactic"
   }
  ],
  "constants": {

@@ -83,6 +83,17 @@ class _Cfg(unittest.TestCase):
         p.write_bytes(gzip.compress(text.encode(), mtime=0)) if gz else p.write_text(text)
         return p.name
 
+    def run_record(self, name="run.json", world="G4_Galactic", others=()):
+        """A SYNTHETIC layered_sim run record: one 0.3 mm Si slab (plus other slabs), in the given world."""
+        slabs = [{"name": "Si", "material": "Si_study", "thickness_mm": 0.3, "sensitive": True}]
+        slabs += [{"name": o, "material": "G4_Al", "thickness_mm": 1.0} for o in others]
+        sim = {"geometry": {"lateral_mm": 10.0, "layers": [{"repeat": 1, "slabs": slabs}],
+                            "world": {"material": world, "scale": 1.2}},
+               "materials": [{"name": "Si_study", "z": 14, "a_g_mole": 28.0855, "density_g_cm3": 2.329}]}
+        (self.d / name).write_text(json.dumps({"artifact_type": "computational-run", "artifact_id": name[:-5],
+                                               "extension": {"simulation": sim}}))
+        return name
+
     def protons(self, scale=1.0, n=4000, seed=1, deposit=0.95, extra=()):
         mass, z = G.particle_props("proton")
         mean = G.bethe(100.0, mass, z, silicon()) * 2.329 * 0.03 * scale
@@ -101,10 +112,45 @@ class _Cfg(unittest.TestCase):
     def sp(self, csv, control=None, inj=None):
         b = {"benchmark": "stopping-power", "csv": csv, "particle": "proton", "energy_MeV": 100.0,
              "material": "Si_study", "slab": "Si", "thickness_mm": 0.3, "bootstrap": {"resamples": 40, "seed": 1},
-             "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3}}
+             "tolerance": {"reference_accuracy_relative": 0.03, "k_sigma": 3}, "run_record": self.run_record()}
         if control:
             b["negative_control"] = {"csv": control, "injected": f"density x {1 + inj}", "injected_relative": inj}
         return b
+
+
+class Configuration(_Cfg):
+    """CV-A1 (A1.3): configuration and target hash from the named run record; only an isolated target validates."""
+
+    def good(self, **kw):
+        dl = 0.05
+        b = self.sp(self.csv("good", self.protons()), self.csv("bad", self.protons(scale=1.2, seed=2)), dl)
+        b.update(kw)
+        return b
+
+    def test_isolated_target_with_its_hash(self):
+        code, out = run("run", "--config", self.config([self.good()]))
+        b = out["benchmarks"][0]
+        self.assertEqual((b["configuration"], b["hash_scheme"], b["target_slabs"]), ("isolated", "spec-v1", ["Si"]))
+        self.assertRegex(b["target_geometry_sha256"], "^[0-9a-f]{64}$")
+        self.assertEqual(b["configuration_basis"]["artifact_id"], "run")
+        self.assertNotIn("configuration_gap", {k for k, v in b.items() if v})
+
+    def test_embedded_target_or_no_run_record_is_no_evidence(self):
+        cases = {"air world": self.good(run_record=self.run_record("air.json", world="G4_AIR")),
+                 "other slab": self.good(run_record=self.run_record("two.json", others=("Al",))),
+                 "no run record": {k: v for k, v in self.good().items() if k != "run_record"}}
+        for name, b in cases.items():
+            with self.subTest(name):
+                code, out = run("run", "--config", self.config([b]))
+                r = out["benchmarks"][0]
+                self.assertFalse(r["validation_evidence"])
+                self.assertTrue(r["configuration_gap"])
+                self.assertTrue(any(r["configuration_gap"] in g for g in out["gaps"]), out["gaps"])
+
+    def test_the_absorber_named_as_target_is_isolated_again(self):
+        b = self.good(run_record=self.run_record("two.json", others=("Al",)), target_slabs=["Si", "Al"])
+        r = run("run", "--config", self.config([b]))[1]["benchmarks"][0]
+        self.assertEqual(r["configuration"], "isolated")
 
 
 class StoppingPower(_Cfg):

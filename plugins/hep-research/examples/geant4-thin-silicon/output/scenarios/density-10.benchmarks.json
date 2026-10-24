@@ -3,10 +3,18 @@
   {
    "benchmark": "stopping-power",
    "beta_gamma": 0.47383208519543973,
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-sp-density-10",
+    "run_record": "../../recorded/runs/sp-density-10.computational-run.json",
+    "sha256": "3df4a381c6b1d0538b6c71d537a8592e5df557fd03ea1493466b4a4aa2eca048"
+   },
+   "configuration_gap": null,
    "detection_limit_relative": 0.13258186067424738,
    "geant4": 14.956526848479669,
    "geant4_se": 0.016420615340717,
    "grade": "reference",
+   "hash_scheme": "spec-v1",
    "inputs": {
     "csv": "../../recorded/events/sp-density-10.csv.gz",
     "run_record": "../../recorded/runs/sp-density-10.computational-run.json"
@@ -45,6 +53,10 @@
     "used": 30000
    },
    "statistic": "mean energy loss of transmitted primaries / thickness (MeV/cm); deposit is not energy loss",
+   "target_geometry_sha256": "3a2550c7a927c56c8a4925495dbe28e4e648dd941a37f226e768a9cae2d2ada0",
+   "target_slabs": [
+    "Si"
+   ],
    "thin_slab_approximation": {
     "bethe_at_entry": 13.610500974233627,
     "bethe_at_mean_energy": 13.632877846910775,
@@ -60,7 +72,8 @@
     "total": 0.033293668812365916
    },
    "validation_evidence": false,
-   "verdict": "fail"
+   "verdict": "fail",
+   "world_material": "G4_Galactic"
   }
  ],
  "constants": {

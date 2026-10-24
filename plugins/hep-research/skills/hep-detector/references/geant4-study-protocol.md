@@ -158,6 +158,17 @@ and setup-matched benchmarks can upgrade a study: reference against a physics mo
 isolated target, setup-matched against a published measurement of the same configuration (isolated, target hash
 equal to the measured one).
 
+**Configuration and isolation** (CV-A1). `geant4_benchmarks.py` derives each benchmark's configuration from the
+spec/1 of the run record its setting names (`run_record`), never from user input: the target is `target_slabs`
+(absorbers included; by default the measured slab; `longitudinal-profile` lists its whole sampling stack), the target
+hash (`hash_scheme: spec-v1`) is the sha256 of the target's placements in order with thickness, transverse size,
+material and declared composition (numbers as `float.hex()`), and the target is `isolated` when the world is vacuum
+(`G4_Galactic` or density below 1e-20 g/cm3) and every other placement belongs to it, otherwise `embedded`. A counted
+benchmark must be isolated; `contracts/dependencies.py` re-derives the configuration from the run record and refuses a
+mismatch. Limits: J14's recorded CSVs are reduced, so their hashes are not the run records' `output_hashes`; the
+configuration describes the run record the setting names; the geometry of negative-control runs is not checked
+separately.
+
 Each reference benchmark has a tolerance (reference accuracy + k SE + binning) and a detection limit (tolerance +
 |observed offset| + 2 SE), and reruns on a negative control: a Geant4 run with an error of that size injected on the
 Geant4 side (for example the density raised by the detection limit while the reference keeps the spec density). The
