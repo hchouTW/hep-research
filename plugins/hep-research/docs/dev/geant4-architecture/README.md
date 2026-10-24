@@ -19,6 +19,7 @@ detector-level Geant4 study qualifies as F4, §P.7); do not start implementation
 | `geant4-program.md` | **The consolidated document** (Traditional Chinese original): Part 1 plan (§P), Part 2 task A (§A), Part 3 task B (§B), Part 4 task C (§C), Part 5 design rationale (§R) |
 | `geant4-program.en.md` | English translation with the same parts, sections, tables, checkboxes and numbers; if they disagree, the Chinese wins until the English is corrected |
 | `review-2026-10-24-main-0.38.md` | Review record (Chinese) of the document against `main` 0.38.0, which shipped the detector system design loop; lists findings and the re-plan; the document was revised accordingly on the same day |
+| `decision-d0-f4-qualification.md` | Decision record D0 for the maintainer: how a detector-level Geant4 study qualifies as F4 (options, the qualification path, sub-decisions D0-a to D0-d); open |
 | `gate_operating_characteristics.py` | Convergence-gate operating characteristics, two-stage factors, Welch degrees of freedom (§A.8, §A.9, §A Appendix B). Needs numpy and scipy; a design aid, not plugin code |
 | `j15_design_estimates.py` | J15 design numbers (§B Appendix A). Standard library; scipy optional |
 | `design_search_closure.py` | Reference values of task C's plane-placement closure test (§C Appendix A). Standard library |
