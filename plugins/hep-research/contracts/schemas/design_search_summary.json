@@ -1,0 +1,58 @@
+{
+ "$comment": "Owner: contracts (content proposed by hep-detector); declared in ext_computational_run.json with hep-computing's agreement (geant4 program CV-C1, section C.4.9). The search_summary of a search run written by evaluate_design.py search: the declarations made before the first evaluation, the distinct designs evaluated with their search values, the non-binding search front, the hypervolume history and the finalists. Search values are not evaluations: the run is exempt from the orphan-run rule and an evaluation that names it as its run is design.search_point_not_expanded (contracts/design.py). Applied from contracts SEARCH_SUMMARY_FROM (contracts/validate.py) on, or in strict mode.",
+ "type": "object",
+ "required": ["search_spec_sha256", "points", "front", "finalists"],
+ "properties": {
+  "search_id": {"type": "string", "pattern": "^SEARCH-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+  "search_spec": {"type": "string"},
+  "search_spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "design_spec": {"type": "string"},
+  "design_spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "base_candidate": {"type": "string"},
+  "base_candidate_chain": {"type": "array", "items": {"type": "object", "required": ["path", "sha256"]}},
+  "rules_version": {"type": "string"},
+  "rules_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "materials_version": {"type": "string"},
+  "materials_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "objectives": {"type": "array", "items": {"type": "object", "required": ["label", "figure_of_merit"]}},
+  "constraints": {"type": "array", "items": {"type": "object", "required": ["label", "figure_of_merit"]}},
+  "budget": {"type": "object"},
+  "optimizer": {"type": "object", "required": ["name", "implementation", "seed"], "properties": {
+   "name": {"type": "string"},
+   "implementation": {"type": "string"},
+   "backend": {"type": ["string", "null"]},
+   "seed": {"type": "integer"},
+   "config": {"type": "object"}}},
+  "levels": {"type": "array", "minItems": 1, "items": {"enum": ["F1", "geant4"]}},
+  "genome": {"type": "array", "items": {"type": "object", "required": ["name", "type"]}},
+  "evaluated": {"type": "object", "properties": {
+   "F1": {"type": "integer", "minimum": 0},
+   "geant4": {"type": "integer", "minimum": 0},
+   "distinct_designs": {"type": "integer", "minimum": 0},
+   "topologies": {"type": "integer", "minimum": 0}}},
+  "points": {"$comment": "every distinct design evaluated, or (with points_file) the front, the finalists and the consistency sample",
+   "type": "array", "items": {"type": "object", "required": ["index", "effective_digest", "genome", "proposer", "values",
+                                                             "violation"], "properties": {
+    "index": {"type": "integer", "minimum": 0},
+    "effective_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "topology": {"type": "string"},
+    "genome": {"type": "object"},
+    "proposer": {"enum": ["random", "llm"]},
+    "values": {"type": "object"},
+    "violation": {"type": "number", "minimum": 0}}}},
+  "points_file": {"type": "object", "required": ["ref", "sha256", "count"], "properties": {
+   "ref": {"type": "string", "minLength": 1},
+   "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+   "count": {"type": "integer", "minimum": 0}}},
+  "front": {"$comment": "the search front: non-dominated on search values; non-binding, not the Pareto front of contracts/design.py",
+   "type": "array", "items": {"type": "integer", "minimum": 0}},
+  "hypervolume": {"type": "array", "items": {"type": "object", "required": ["generation", "value"]}},
+  "finalists": {"type": "array", "items": {"type": "object", "required": ["index", "fixed_before"], "properties": {
+   "index": {"type": "integer", "minimum": 0},
+   "fixed_before": {"const": "expand"}}}},
+  "consistency": {"type": "object"},
+  "seeds": {"type": "object", "properties": {"geant4_search": {"type": "array", "items": {"type": "integer"}}}},
+  "timing": {"type": "object"},
+  "note": {"type": "string"}
+ }
+}
