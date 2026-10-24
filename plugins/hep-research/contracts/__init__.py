@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.12.0"
+CONTRACTS_VERSION = "3.13.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -186,6 +186,13 @@ CONTRACTS_VERSION = "3.12.0"
 # requirement names the driving one whose H4 disposition covers it, MAT-04 d) and constraints[].subsystems (the scope a
 # hard constraint covers; a candidate lacking one cannot pass it); adequacy table 1.1.0 upstream_value_checks (the
 # measured curvature offset must cover the offset a charge-confusion requirement assumes, ADQ-02).
+# 3.13.0 (minor; CV-C1 of the Geant4 program, automated candidate generation): the computational-run optional
+# search_summary of evaluate_design.py search (declared in ext_computational_run.json with hep-computing's agreement;
+# field rules contracts/schemas/design_search_summary.json, applied from validate.SEARCH_SUMMARY_FROM or strict); the
+# search spec schema design_search_spec.json (not an artifact); contracts/design.py exempts a search run from the
+# orphan-run rule and refuses an evaluation that names one as its run (design.search_point_not_expanded). No
+# capability: a 3.12 reader sees an unknown optional object and misreads no field. The number is the stage's
+# placeholder (CV-C1); it is fixed at release in merge order with the other CV-* changes.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})
