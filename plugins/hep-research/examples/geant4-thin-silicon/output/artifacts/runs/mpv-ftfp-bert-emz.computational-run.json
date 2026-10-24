@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.12.0",
+ "contract_version": "3.13.0",
  "extension": {
   "commands": [
    "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-ftfp-bert-emz/spec.json"
@@ -13,21 +13,21 @@
   "environment": {
    "G4FORCE_RUN_MANAGER_TYPE": "unset",
    "dataset_variables": "all unset except the build record's",
-   "work": "~/Workspace/geant4-work/j14-a1"
+   "work": "~/Workspace/geant4-work/j14-a1-75k"
   },
   "exit_status": 0,
   "input_manifest": [
    {
     "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/mpv-ftfp-bert-emz.json",
-    "sha256": "7fbd7c3e2d4215e9081781804dac15d0c25ea05b94f5e94945d905c2bd7bc63a"
+    "sha256": "dce92a9abb060cd6ff43b6483b69c8ce1e7222fc1aa0679911498433dd469177"
    }
   ],
   "output_hashes": {
    "mpv-ftfp-bert-emz/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
-   "mpv-ftfp-bert-emz/events.csv": "4e7505ae19c243b87a09a7fc6982ddf1ee8825f86cd08ffc97e88366653d24de",
+   "mpv-ftfp-bert-emz/events.csv": "24bf5474d7c8e2269c0d2edd33dfeb7deea887a8934249dfd13cd727afefd42d",
    "mpv-ftfp-bert-emz/log.txt": "f3426359e240751fd0771756d3e956e8b58fbaa761f32a0d35d2e889b2325918",
    "mpv-ftfp-bert-emz/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
-   "mpv-ftfp-bert-emz/spec.json": "96e69575b8e8dad45440cbbea32d35cfa6c431b3d37a0c7c331b2ed08657c10b"
+   "mpv-ftfp-bert-emz/spec.json": "cbd9a45ae3f09bf3b34e00847f9438a91a28c2afde48ba13380b1566d0dbe562"
   },
   "seeds": {
    "layered_sim": [
@@ -163,7 +163,7 @@
      "version": "2.0"
     }
    ],
-   "events": 546528,
+   "events": 1200000,
    "evidence_role": "variation",
    "first_event": 0,
    "geant4": {
@@ -256,7 +256,7 @@
    },
    "run_manager": "serial",
    "seed_scheme": "hash-v1",
-   "spec_sha256": "1eb408df8284e1f6ec8bef5d03588f4dd65945cbc815eaf0f487b9e6ad38ed0b",
+   "spec_sha256": "22d41859ec8d053000594fca50b2df86798c380ab162442896fb747fbd517f8b",
    "step_limits": {},
    "threads": 1,
    "ui_commands": []
@@ -274,7 +274,7 @@
   ]
  },
  "inputs": [],
- "objective": "Geant4 layered_sim run mpv-ftfp-bert-emz: mu- 10000.0 MeV, 546528 events (a completed run, not a validated result)",
+ "objective": "Geant4 layered_sim run mpv-ftfp-bert-emz: mu- 10000.0 MeV, 1200000 events (a completed run, not a validated result)",
  "outputs": [],
  "provenance": {
   "code_paths": [
@@ -301,7 +301,7 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.12.0",
+  "contracts": "3.13.0",
   "plugin": "0.38.0",
   "profiles": {}
  }

@@ -6,14 +6,14 @@
    {
     "observables": [
      {
-      "dof": 29.8411615358764,
+      "dof": 28.418811322944666,
       "finest": 0.01,
-      "margin": 0.008516795302374657,
+      "margin": 0.009136215656244891,
       "next": 0.03,
       "observable": "mean_deposit_MeV",
       "reason": "within-tolerance",
-      "relative_change": -0.00024867011173919677,
-      "se_of_change": 0.0007272454674976006,
+      "relative_change": -0.00011145556536878697,
+      "se_of_change": 0.0004424750380684859,
       "se_targets_met": {
        "finest": true,
        "next": true
@@ -23,14 +23,14 @@
       "verdict": "pass"
      },
      {
-      "dof": 26.802300353584208,
+      "dof": 29.492223761604308,
       "finest": 0.01,
-      "margin": 0.012916316886126857,
+      "margin": 0.010707173574975457,
       "next": 0.03,
       "observable": "mpv_deposit_MeV",
       "reason": "within-tolerance",
-      "relative_change": -9.763953032115456e-05,
-      "se_of_change": 0.00410042920907144,
+      "relative_change": 0.0029264494455806733,
+      "se_of_change": 0.0037489143851187493,
       "se_targets_met": {
        "finest": true,
        "next": true
@@ -40,14 +40,14 @@
       "verdict": "pass"
      },
      {
-      "dof": 29.998663435212002,
+      "dof": 29.99965718916874,
       "finest": 0.01,
-      "margin": 0.07493653752109582,
+      "margin": 0.07798536924738116,
       "next": 0.03,
       "observable": "tail_fraction",
       "reason": "within-tolerance",
-      "relative_change": 0.004965133619199673,
-      "se_of_change": 0.011841609322937395,
+      "relative_change": 0.006465608915734432,
+      "se_of_change": 0.009161241091662027,
       "se_targets_met": {
        "finest": true,
        "next": true
@@ -75,10 +75,10 @@
  "record_problems": [],
  "statistical_target": {
   "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
-  "events": 546528,
+  "events": 1200000,
   "events_needed": null,
   "observable": "mpv_loss_MeV",
-  "relative_se": 0.0033746507331898633,
+  "relative_se": 0.0028368899256344497,
   "target": 0.01,
   "verdict": "pass"
  },
@@ -92,9 +92,9 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00028541461796440247,
+     "se": 0.00023882814692204903,
      "status": "ok",
-     "value": 0.08485792935082861
+     "value": 0.08495551028981488
     },
     "loss_transmitted_MeV": {
      "blocks": 16,
@@ -102,19 +102,19 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.0002862989614551863,
+     "se": 0.00024094404767510298,
      "status": "ok",
-     "value": 0.0848381015076379
+     "value": 0.08493246265845779
     },
     "mean_deposit_MeV": {
      "blocks": 16,
      "dof": 15,
-     "full_sample": 0.10541913866301064,
+     "full_sample": 0.10544888820394804,
      "method": "batch means of block means",
-     "n": 546528,
-     "se": 5.616745672858187e-05,
+     "n": 1200000,
+     "se": 2.8843324557108926e-05,
      "status": "ok",
-     "value": 0.10541913866301064
+     "value": 0.10544888820394806
     },
     "mpv_deposit_MeV": {
      "blocks": 16,
@@ -122,14 +122,14 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "merged_check": {
-      "bound": 0.010745009652116468,
-      "relative_difference": 0.002694880542778199
+      "bound": 0.009635877473831773,
+      "relative_difference": 0.002391997950996371
      },
-     "merged_mode": 0.08462986198243413,
+     "merged_mode": 0.08475278180938559,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00028541461796440144,
+     "se": 0.00023882814692204773,
      "status": "ok",
-     "value": 0.0848579293508286
+     "value": 0.08495551028981488
     },
     "mpv_loss_MeV": {
      "blocks": 16,
@@ -137,21 +137,21 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.0002862989614551863,
+     "se": 0.00024094404767510298,
      "status": "ok",
-     "value": 0.0848381015076379
+     "value": 0.08493246265845779
     },
     "tail_fraction": {
      "blocks": 16,
      "dof": 15,
-     "full_sample": 0.019645836992798173,
-     "k": 10737,
+     "full_sample": 0.0197175,
+     "k": 23661,
      "low_count": false,
      "method": "batch means of block proportions",
-     "n": 546528,
-     "se": 0.00016423279743149664,
+     "n": 1200000,
+     "se": 0.0001271232633079959,
      "status": "ok",
-     "value": 0.019645836992798173
+     "value": 0.0197175
     }
    },
    "path": "recorded/blocks/mpv-nominal.json",
@@ -159,9 +159,9 @@
    "run_record": {
     "artifact_id": "geant4-run-mpv-nominal",
     "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-nominal.computational-run.json",
-    "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
+    "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de"
    },
-   "sha256": "da15c1104f966c491bcbfd906601128f40616e9331b03df2b869a9a87d6ee158"
+   "sha256": "bd542e903e0c70880678474f4b7685718678582e7cda3a798cfc49d4efa2fba0"
   },
   {
    "legacy": false,
@@ -172,9 +172,9 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00014116790153122002,
+     "se": 0.00021294776748545502,
      "status": "ok",
-     "value": 0.08413343091607482
+     "value": 0.0845666920630825
     },
     "loss_transmitted_MeV": {
      "blocks": 16,
@@ -182,19 +182,19 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00014698641407004859,
+     "se": 0.00020609753487244237,
      "status": "ok",
-     "value": 0.08410514333335373
+     "value": 0.08453787238940717
     },
     "mean_deposit_MeV": {
      "blocks": 16,
      "dof": 15,
-     "full_sample": 0.10562951243373193,
+     "full_sample": 0.10565268709193298,
      "method": "batch means of block means",
-     "n": 692080,
-     "se": 6.178119501937448e-05,
+     "n": 1200000,
+     "se": 3.2115960390292e-05,
      "status": "ok",
-     "value": 0.10562951243373193
+     "value": 0.10565268709193298
     },
     "mpv_deposit_MeV": {
      "blocks": 16,
@@ -202,14 +202,14 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "merged_check": {
-      "bound": 0.007349794502023818,
-      "relative_difference": 0.0017925418522282191
+      "bound": 0.009045275590267677,
+      "relative_difference": 0.0018002824206586443
      },
-     "merged_mode": 0.08428451443569554,
+     "merged_mode": 0.08441472172351885,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00014116790153122002,
+     "se": 0.0002129477674854541,
      "status": "ok",
-     "value": 0.08413343091607482
+     "value": 0.0845666920630825
     },
     "mpv_loss_MeV": {
      "blocks": 16,
@@ -217,21 +217,21 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00014698641407004859,
+     "se": 0.00020609753487244237,
      "status": "ok",
-     "value": 0.08410514333335373
+     "value": 0.08453787238940717
     },
     "tail_fraction": {
      "blocks": 16,
      "dof": 15,
-     "full_sample": 0.01993266674372905,
-     "k": 13795,
+     "full_sample": 0.020001666666666668,
+     "k": 24002,
      "low_count": false,
      "method": "batch means of block proportions",
-     "n": 692080,
-     "se": 0.00016378999839676228,
+     "n": 1200000,
+     "se": 0.00011206396982676166,
      "status": "ok",
-     "value": 0.01993266674372905
+     "value": 0.020001666666666668
     }
    },
    "path": "recorded/blocks/mpv-cut-0.1.json",
@@ -239,9 +239,9 @@
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-0.1",
     "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.1.computational-run.json",
-    "sha256": "019677c398b65ea715e8335ed00ee446752acaca9b2f936fee013532d760a07b"
+    "sha256": "96facb7a65866ce91287245668378e7077b22650c6de84e80fdb5888e01fb2f4"
    },
-   "sha256": "cbf7da0c871e7ed5eb902ceafd0dc1ba025e0b4150d42d6434d218a55030f44c"
+   "sha256": "dc627b38564009c70c8bd8223d21b25e4a3501106cdcda05dd2137c088955014"
   },
   {
    "legacy": false,
@@ -252,9 +252,9 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00019908310077863255,
+     "se": 0.0002093000005854368,
      "status": "ok",
-     "value": 0.08486621564826463
+     "value": 0.08470761772887575
     },
     "loss_transmitted_MeV": {
      "blocks": 16,
@@ -262,19 +262,19 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00020057231106518017,
+     "se": 0.00020358380961439578,
      "status": "ok",
-     "value": 0.08485108742493278
+     "value": 0.08467268820227077
     },
     "mean_deposit_MeV": {
      "blocks": 16,
      "dof": 15,
-     "full_sample": 0.1054453597724076,
+     "full_sample": 0.10546064237946863,
      "method": "batch means of block means",
-     "n": 709712,
-     "se": 5.220875288976812e-05,
+     "n": 1200000,
+     "se": 3.668192592618206e-05,
      "status": "ok",
-     "value": 0.10544535977240763
+     "value": 0.10546064237946862
     },
     "mpv_deposit_MeV": {
      "blocks": 16,
@@ -282,14 +282,14 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "merged_check": {
-      "bound": 0.00870212829873333,
-      "relative_difference": 0.0022242788197071365
+      "bound": 0.008945134298900669,
+      "relative_difference": 0.0006940865684290892
      },
-     "merged_mode": 0.08467786845895343,
+     "merged_mode": 0.0846488640892786,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00019908310077863166,
+     "se": 0.00020930000058543634,
      "status": "ok",
-     "value": 0.08486621564826463
+     "value": 0.08470761772887575
     },
     "mpv_loss_MeV": {
      "blocks": 16,
@@ -297,21 +297,21 @@
      "estimator": "mean of the three-point parabola modes of the block histograms",
      "fallback_blocks": 0,
      "method": "mean of the three-point parabola modes of the block histograms",
-     "se": 0.00020057231106518017,
+     "se": 0.00020358380961439578,
      "status": "ok",
-     "value": 0.08485108742493278
+     "value": 0.08467268820227077
     },
     "tail_fraction": {
      "blocks": 16,
      "dof": 15,
-     "full_sample": 0.01954877471425029,
-     "k": 13874,
+     "full_sample": 0.01959083333333333,
+     "k": 23509,
      "low_count": false,
      "method": "batch means of block proportions",
-     "n": 709712,
-     "se": 0.0001631401960474235,
+     "n": 1200000,
+     "se": 0.00012669425869069672,
      "status": "ok",
-     "value": 0.01954877471425029
+     "value": 0.01959083333333333
     }
    },
    "path": "recorded/blocks/mpv-cut-0.03.json",
@@ -319,9 +319,9 @@
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-0.03",
     "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.03.computational-run.json",
-    "sha256": "e3c610960b119f028a7a5fc11b710560b628a07dd345bd1689afb36d6b2075f4"
+    "sha256": "25f688156c994c37a3d9e37c9d069bff5b7aa33a39051ec0a98846ab6e28b430"
    },
-   "sha256": "0d8c9bb056f10d7cf1d9b66f0053b8f88f84f13d1bf0c293ae880fd4705c1bfa"
+   "sha256": "85160a039fa530374e40266ee8bb5567ff5c1a09c042ac97460890ab207f255a"
   }
  ]
 }

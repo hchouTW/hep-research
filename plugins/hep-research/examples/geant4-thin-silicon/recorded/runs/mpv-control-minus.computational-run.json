@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.12.0",
+ "contract_version": "3.13.0",
  "extension": {
   "commands": [
    "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-control-minus/spec.json"
@@ -13,21 +13,21 @@
   "environment": {
    "G4FORCE_RUN_MANAGER_TYPE": "unset",
    "dataset_variables": "all unset except the build record's",
-   "work": "~/Workspace/geant4-work/j14-a1"
+   "work": "~/Workspace/geant4-work/j14-a1-75k"
   },
   "exit_status": 0,
   "input_manifest": [
    {
     "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/mpv-control-minus.json",
-    "sha256": "f80cb668108c1028541ba71eba70cb8ebdce24f7ca07ed529b79b9c29f274377"
+    "sha256": "c24c0aa1f273f2a81bb976133c72b5ff81817b0dbdaa3901cc8462a0dd246e20"
    }
   ],
   "output_hashes": {
    "mpv-control-minus/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
-   "mpv-control-minus/events.csv": "904bead057e6ad167ed568d3189ca8f97c7c04c8f8c99a950b9b46c64ce09da9",
+   "mpv-control-minus/events.csv": "abc56cfc99cd8f8e5b73f9de62f45dca24422058f339821643e54a65fc37759a",
    "mpv-control-minus/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
-   "mpv-control-minus/materials.json": "bf7da55c386072cb54c2465e91dab959e2484899e65bbe7eaf33c2bbd283f65b",
-   "mpv-control-minus/spec.json": "1b7de25ffc8dff1e453316663b34f6e83b9a50fdb75c99632f1bfb9b90234910"
+   "mpv-control-minus/materials.json": "31bcc73920f372cf45f2a56b018702086f56ec7dcd1b3c574571ee8d8263a1be",
+   "mpv-control-minus/spec.json": "968d025a8759d5ed0a789ce7253150300c78a187e57f2d298b8a7000c914a7c0"
   },
   "seeds": {
    "layered_sim": [
@@ -163,7 +163,7 @@
      "version": "2.0"
     }
    ],
-   "events": 546528,
+   "events": 1200000,
    "evidence_role": "control",
    "first_event": 0,
    "geant4": {
@@ -203,11 +203,11 @@
     "world_fraction": -0.499
    },
    "logical_run_seed": 1257075004,
-   "material_dump_sha256": "bf7da55c386072cb54c2465e91dab959e2484899e65bbe7eaf33c2bbd283f65b",
+   "material_dump_sha256": "31bcc73920f372cf45f2a56b018702086f56ec7dcd1b3c574571ee8d8263a1be",
    "materials": [
     {
      "a_g_mole": 28.0855,
-     "density_g_cm3": 2.163641,
+     "density_g_cm3": 2.168299,
      "name": "Si_study",
      "source": "PDG Atomic and Nuclear Properties, silicon (2024): A = 28.0855(3) g/mol, density 2.329 g/cm3",
      "z": 14
@@ -256,7 +256,7 @@
    },
    "run_manager": "serial",
    "seed_scheme": "hash-v1",
-   "spec_sha256": "d1584ba0b632b5d745eb13781765ee3437f0364c0403faaf6e0f538080fa68fb",
+   "spec_sha256": "a626e7845ec6fe0a4debfe9a79cc4202d4eebeb5be4a2789e2d371fad8a2cd70",
    "step_limits": {},
    "threads": 1,
    "ui_commands": []
@@ -274,7 +274,7 @@
   ]
  },
  "inputs": [],
- "objective": "Geant4 layered_sim run mpv-control-minus: mu- 10000.0 MeV, 546528 events (a completed run, not a validated result)",
+ "objective": "Geant4 layered_sim run mpv-control-minus: mu- 10000.0 MeV, 1200000 events (a completed run, not a validated result)",
  "outputs": [],
  "provenance": {
   "code_paths": [
@@ -301,7 +301,7 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.12.0",
+  "contracts": "3.13.0",
   "plugin": "0.38.0",
   "profiles": {}
  }

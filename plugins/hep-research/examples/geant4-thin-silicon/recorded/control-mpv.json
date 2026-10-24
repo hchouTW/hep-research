@@ -1,13 +1,13 @@
 {
  "controls": {
   "mpv-control": {
-   "injected": "silicon density x 1.071 on the Geant4 side (reference keeps 2.329 g/cm3)",
-   "injected_relative": 0.071
+   "injected": "silicon density x 1.069 on the Geant4 side (reference keeps 2.329 g/cm3)",
+   "injected_relative": 0.069
   },
   "mpv-control-minus": {
-   "injected": "silicon density x 0.929 on the Geant4 side (reference keeps 2.329 g/cm3)",
-   "injected_relative": -0.071
+   "injected": "silicon density x 0.931 on the Geant4 side (reference keeps 2.329 g/cm3)",
+   "injected_relative": -0.069
   }
  },
- "planned_detection_limit_relative": 0.07096836716612218
+ "planned_detection_limit_relative": 0.06887456459118038
 }

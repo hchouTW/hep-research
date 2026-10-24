@@ -38,7 +38,7 @@
    "the most probable energy loss and deposit of thin-layer benchmarks",
    "the value and statistical uncertainty of F4 design evaluations built on such studies"
   ],
-  "bias": "on J14 the bootstrap SEs were 15-20 % below the batch-means SEs of the same events (mean deposit 0.000193 vs 0.000237 MeV, tail fraction 0.00057 vs 0.00064); the thin-layer MPV detection limit was 0.0827 and is 0.0715 after the fix with the re-recorded runs",
+  "bias": "on J14 the bootstrap SEs were 15-20 % below the batch-means SEs of the same events (mean deposit 0.000193 vs 0.000237 MeV, tail fraction 0.00057 vs 0.00064); the thin-layer MPV detection limit was 0.0827 and is 0.0700 after the fix with the re-recorded runs",
   "trigger": "any Geant4 study made with check_geant4_study.py summarize and geant4_benchmarks.py (bootstrap SE), most for most probable values and for tail fractions with few counts"
  },
  "applies_to": {

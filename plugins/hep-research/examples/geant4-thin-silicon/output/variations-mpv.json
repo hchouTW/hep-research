@@ -1,6 +1,6 @@
 {
  "domain": "em",
- "envelope_relative": 0.0038552731550377025,
+ "envelope_relative": 0.007942835190786415,
  "nominal": {
   "model_assignment": {
    "domain": "em",
@@ -10,7 +10,7 @@
   },
   "run_record_id": "geant4-run-mpv-nominal",
   "summary": "recorded/blocks/mpv-nominal.json",
-  "value": 0.0848381015076379
+  "value": 0.08493246265845779
  },
  "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
  "observable": "mpv_loss_MeV",
@@ -29,13 +29,13 @@
     "fluctuation_model": "Urban",
     "known": true
    },
-   "relative_to_nominal": -0.0037413507318104617,
+   "relative_to_nominal": -0.003302507805765821,
    "resolved": false,
    "run_record_id": "geant4-run-mpv-em-option0",
-   "se": 0.0003158563742815812,
-   "se_of_relative_difference": 0.005024873966778261,
+   "se": 0.00024300898956226884,
+   "se_of_relative_difference": 0.00402919659630951,
    "summary": "recorded/blocks/mpv-em-option0.json",
-   "value": 0.08452069241447689,
+   "value": 0.08465197253756532,
    "variation": "em-option0"
   },
   {
@@ -52,13 +52,13 @@
     "fluctuation_model": "Urban",
     "known": true
    },
-   "relative_to_nominal": -0.003774534500835397,
-   "resolved": false,
+   "relative_to_nominal": -0.007942835190786415,
+   "resolved": true,
    "run_record_id": "geant4-run-mpv-em-option3",
-   "se": 0.00032931957166681063,
-   "se_of_relative_difference": 0.005143557517503774,
+   "se": 0.00020302812186565565,
+   "se_of_relative_difference": 0.0037097533286868743,
    "summary": "recorded/blocks/mpv-em-option3.json",
-   "value": 0.08451787716651195,
+   "value": 0.08425785810521404,
    "variation": "em-option3"
   },
   {
@@ -75,13 +75,13 @@
     "fluctuation_model": "Urban",
     "known": true
    },
-   "relative_to_nominal": -0.0038552731550377025,
+   "relative_to_nominal": -0.0037928210646785148,
    "resolved": false,
    "run_record_id": "geant4-run-mpv-pai",
-   "se": 0.00027281042291665164,
-   "se_of_relative_difference": 0.004661408774135576,
+   "se": 0.00018502107804560609,
+   "se_of_relative_difference": 0.0035768123423378676,
    "summary": "recorded/blocks/mpv-pai.json",
-   "value": 0.08451102745237114,
+   "value": 0.08461032902501177,
    "variation": "pai"
   },
   {
@@ -99,13 +99,13 @@
     "known": true
    },
    "reason": "same model for this particle and energy: a false zero difference, not a systematic",
-   "relative_to_nominal": -0.0024761863455956858,
+   "relative_to_nominal": -0.0019483123935723737,
    "resolved": false,
    "run_record_id": "geant4-run-mpv-ftfp-bert-emz",
-   "se": 0.00024213713672158237,
-   "se_of_relative_difference": 0.004419751376905528,
+   "se": 0.00020478575500319462,
+   "se_of_relative_difference": 0.0037231219294421615,
    "summary": "recorded/blocks/mpv-ftfp-bert-emz.json",
-   "value": 0.08462802655909843,
+   "value": 0.08476698768884369,
    "variation": "ftfp-bert-emz"
   }
  ]

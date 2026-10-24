@@ -75,9 +75,10 @@ K = 16
 F_TWO_STAGE = f_ppf(0.95, K - 1, K - 1)  # A1.9 with the maintainer's choice F_0.95 (about 2.40)
 N_TRIAL = {"mpv": 64000, "sp": 16000}
 # A1.7 design (bias toys, Moyal with 1.5 xi checked against the recorded 60k-event histogram; VALIDATION
-# GEANT4-CORRECTNESS): with 2 keV bins the mean of block modes has a 95 % upper bias bound <= tol/10 = 0.002 only from
-# B = 30000 events per block, so every point of the MPV study has at least K x 30000 events
-MIN_BLOCK_EVENTS = {"mpv": 30000, "sp": 1}
+# GEANT4-CORRECTNESS): with 2 keV bins the mean of block modes has a relative bias of about +0.0017 at B = 34158, too
+# close to tol/10 = 0.002; at B = 75000 it is +0.00144 (95 % upper bound 0.00151), so every point of the MPV study has
+# at least K x 75000 events
+MIN_BLOCK_EVENTS = {"mpv": 75000, "sp": 1}
 CUTS = (0.1, 0.03)
 COARSE = (1.0, 0.3)
 BASE = {"mpv": "mpv-mu10GeV.json", "sp": "sp-p100MeV.json"}
@@ -181,7 +182,9 @@ def live(work: Path, rec_dir: Path) -> None:
     keep = {name: (rec_dir / "runs" / f"{name}.computational-run.json").read_bytes() for name in LEGACY}
     keep_csv = {name: (rec_dir / "events" / f"{name}.csv.gz").read_bytes() for name in LEGACY}
     keep_specs = {name: (rec_dir / "specs" / f"{name}.json").read_bytes() for name in LEGACY}
+    keep_legacy_summaries = {f.name: f.read_bytes() for f in (rec_dir / "summaries").glob("*.json")}  # 0.38.0 records
     old_control = json.loads((rec_dir / "control-sp.json").read_text(encoding="utf-8"))
+    old_control = (old_control.get("controls") or {}).get("sp-control", old_control)  # this format, or the 0.38.0 one
     legacy_control = {"injected_relative": old_control.get("injected_relative"),
                       "injected": old_control.get("injected")}
     if rec_dir.exists():
@@ -193,6 +196,14 @@ def live(work: Path, rec_dir: Path) -> None:
                                ("specs", keep_specs, ".json")):
             (rec_dir / sub).mkdir(parents=True, exist_ok=True)
             (rec_dir / sub / f"{name}{ext}").write_bytes(data[name])
+    for name, data in keep_legacy_summaries.items():  # geant4-run-summary/1 of the 0.38.0 runs, kept for old records
+        (rec_dir / "summaries").mkdir(parents=True, exist_ok=True)
+        (rec_dir / "summaries" / name).write_bytes(data)
+    for study in BASE:  # the study spec names the nominal's effective spec; until that run, the template stands in
+        nominal_spec = rec_dir / "specs" / f"{study}-nominal.json"
+        if not nominal_spec.exists():
+            nominal_spec.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(HERE / "specs" / BASE[study], nominal_spec)
     table = run_table()
     plan: dict = {"factor": F_TWO_STAGE, "K": K, "runs": {}}
 

@@ -567,7 +567,7 @@
   "run_record": {
    "artifact_id": "geant4-run-sp-cut-0.1-trial",
    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.1-trial.computational-run.json",
-   "sha256": "8ea7995348e8799ffeaf3ef915b660e4dd05253eeaae46729d9c6aae07e4b761"
+   "sha256": "80b1bd6dd34f4fd2eac67a989426205abed6201920b3cbdb1705d92cec2865b7"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

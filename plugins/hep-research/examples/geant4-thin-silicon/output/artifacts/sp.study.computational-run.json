@@ -23,7 +23,7 @@
    },
    {
     "path": "output/convergence-sp.json",
-    "sha256": "1907fca76595581598b3c82a8eb232351ffa8b64dc429a3b001ba17e5999ac41"
+    "sha256": "a43ac249ac962b01feebece7f77da6c92b631447c011526cd003f9a97c3991ce"
    },
    {
     "path": "output/variations-sp.json",
@@ -345,51 +345,51 @@
    "artifact_id": "geant4-run-sp-control-minus",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/sp-control-minus.computational-run.json",
-   "sha256": "a3ff2c539e7fa1640e6d8e6359c84ce78575626efa03d1747e44b3e2baaabb6f",
+   "sha256": "9790b18337fcf3d0eefb1f286b996d3fc7caaafa794b8e266821113270a3d92a",
    "status": [
     "unvalidated"
    ],
-   "version": "3.12.0"
+   "version": "3.13.0"
   },
   {
    "artifact_id": "geant4-run-sp-cut-0.1",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/sp-cut-0.1.computational-run.json",
-   "sha256": "51a10a2957267e99246dcbceb407a26176d6b60b0084e115e4cefe762983810c",
+   "sha256": "84c721bd0620f65764a9fc939f2fd552911af3b35b5977d3b8b110c94b044c8e",
    "status": [
     "unvalidated"
    ],
-   "version": "3.12.0"
+   "version": "3.13.0"
   },
   {
    "artifact_id": "geant4-run-sp-cut-0.03",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/sp-cut-0.03.computational-run.json",
-   "sha256": "56e039e05cf4df5ed889c3cb1b608f4166103d5e20bd2c8ba5ef070667c00d48",
+   "sha256": "ef58069b6421e92c51bce906f5fa30b52f618da965dada7a0545738506001885",
    "status": [
     "unvalidated"
    ],
-   "version": "3.12.0"
+   "version": "3.13.0"
   },
   {
    "artifact_id": "geant4-run-sp-em-option0",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/sp-em-option0.computational-run.json",
-   "sha256": "7510360631bfa5ef0d457a3cc14cd84c23718139b331b374d0e72593faeb286f",
+   "sha256": "a19da5598e51dc0822c4dcb797dc13c664033c9971b8811e0ea8fc24718bdbd6",
    "status": [
     "unvalidated"
    ],
-   "version": "3.12.0"
+   "version": "3.13.0"
   },
   {
    "artifact_id": "geant4-run-sp-em-option3",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/sp-em-option3.computational-run.json",
-   "sha256": "d5ea83aa59e2b453021f1e05570a1498e8b6316ae289032701fa821af2305ab2",
+   "sha256": "59ec4dee7e00d7576226ebc40e74f3b88ac79962aea26f752e8dbb3ea66ad47f",
    "status": [
     "unvalidated"
    ],
-   "version": "3.12.0"
+   "version": "3.13.0"
   }
  ],
  "objective": "Geant4 study record: mean stopping power for proton 100.0 MeV; benchmarks, convergence and scope embedded (unvalidated in phase 1)",

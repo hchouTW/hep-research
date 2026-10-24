@@ -5726,7 +5726,7 @@
   "run_record": {
    "artifact_id": "geant4-run-mpv-cut-0.3-trial",
    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.3-trial.computational-run.json",
-   "sha256": "db8d2871fe506423d5721538d8ccaa0483c1b1954f921aa1a3cb6badcd37971c"
+   "sha256": "dfb299d4cabb375af5c82d73e3cd6b7884e7ac5b15802161e98ae06e883f2087"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

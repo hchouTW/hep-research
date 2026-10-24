@@ -567,7 +567,7 @@
   "run_record": {
    "artifact_id": "geant4-run-sp-em-option3",
    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-em-option3.computational-run.json",
-   "sha256": "d5ea83aa59e2b453021f1e05570a1498e8b6316ae289032701fa821af2305ab2"
+   "sha256": "59ec4dee7e00d7576226ebc40e74f3b88ac79962aea26f752e8dbb3ea66ad47f"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

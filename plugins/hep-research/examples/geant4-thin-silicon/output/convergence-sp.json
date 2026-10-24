@@ -111,9 +111,9 @@
    "run_record": {
     "artifact_id": "geant4-run-sp-cut-0.1",
     "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.1.computational-run.json",
-    "sha256": "51a10a2957267e99246dcbceb407a26176d6b60b0084e115e4cefe762983810c"
+    "sha256": "84c721bd0620f65764a9fc939f2fd552911af3b35b5977d3b8b110c94b044c8e"
    },
-   "sha256": "4428348c3828abffd147a319ddb509669879bb3993da2a9a7ffa9e7497f50801"
+   "sha256": "601d90dfcb85210cf49c491f18eddf3d8c4937961fdff4a49523d275eadabe76"
   },
   {
    "legacy": false,
@@ -144,9 +144,9 @@
    "run_record": {
     "artifact_id": "geant4-run-sp-cut-0.03",
     "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.03.computational-run.json",
-    "sha256": "56e039e05cf4df5ed889c3cb1b608f4166103d5e20bd2c8ba5ef070667c00d48"
+    "sha256": "ef58069b6421e92c51bce906f5fa30b52f618da965dada7a0545738506001885"
    },
-   "sha256": "9265649fad357a4e0d80782c00d318a28f766bc3f88a2dbb83e62ea8337ab46b"
+   "sha256": "225b53022cfa31ef4ea1f7c15052779d8df3873276432b1bcbcce8b7f1762c81"
   }
  ]
 }

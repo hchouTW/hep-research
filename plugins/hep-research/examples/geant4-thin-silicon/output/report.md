@@ -10,7 +10,7 @@ Particle Physics [@ParticleDataGroup:2024cfk], with silicon inputs from the PDG 
 properties tables, never from the Geant4 material dump.
 
 - Most probable energy loss of 10 GeV mu- (thin-layer-mpv, reference grade): relative difference to the PDG
-  Landau-Vavilov value +0.0137, detection limit 0.0715; negative control
+  Landau-Vavilov value +0.0149, detection limit 0.0700; negative control
   caught; convergence gate pass.
 - Mean stopping power of 100 MeV protons (stopping-power, reference grade): relative difference to Bethe
   -0.0018, detection limit 0.0394; negative control caught;

@@ -6,14 +6,14 @@
    "configuration_basis": {
     "artifact_id": "geant4-run-mpv-nominal",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-    "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
+    "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de"
    },
    "configuration_gap": null,
-   "detection_limit_relative": 0.0715312464119818,
+   "detection_limit_relative": 0.06995854203702802,
    "estimator": "mean of the three-point parabola modes of the K block histograms (bin width 0.002 MeV, bins from the observable declaration), batch-means SE",
-   "geant4": 0.0848381015076379,
+   "geant4": 0.08493246265845779,
    "geant4_dof": 15,
-   "geant4_se": 0.0002862989614551863,
+   "geant4_se": 0.00024094404767510298,
    "grade": "reference",
    "hash_scheme": "spec-v1",
    "inputs": {
@@ -32,10 +32,10 @@
    "mpv_checks": {
     "fallback_blocks": 0,
     "merged_check": {
-     "bound": 0.012768317554102283,
-     "relative_difference": 0.002817489753166458
+     "bound": 0.01168800867977108,
+     "relative_difference": 0.002507821747613136
     },
-    "merged_mode": 0.08459974259974261
+    "merged_mode": 0.08472
    },
    "negative_control": {
     "at_claimed_detection_limit": true,
@@ -43,13 +43,13 @@
      {
       "at_claimed_detection_limit": true,
       "csv": null,
-      "detection_limit_relative": 0.0715312464119818,
-      "injected": "silicon density x 1.071 on the Geant4 side (reference keeps 2.329 g/cm3)",
-      "injected_relative": 0.071,
-      "relative_difference": 0.07655354096303266,
+      "detection_limit_relative": 0.06995854203702802,
+      "injected": "silicon density x 1.069 on the Geant4 side (reference keeps 2.329 g/cm3)",
+      "injected_relative": 0.069,
+      "relative_difference": 0.08606803226563212,
       "run_record": "../recorded/runs/mpv-control.computational-run.json",
-      "se_of_shift": 0.005106114549732925,
-      "shift": 0.06281832598292081,
+      "se_of_shift": 0.004583493094079355,
+      "shift": 0.07120529062223731,
       "sign": "+",
       "status": "caught",
       "summary": "../recorded/blocks/mpv-control.json",
@@ -58,20 +58,20 @@
      {
       "at_claimed_detection_limit": true,
       "csv": null,
-      "detection_limit_relative": 0.07111865412596297,
-      "injected": "silicon density x 0.929 on the Geant4 side (reference keeps 2.329 g/cm3)",
-      "injected_relative": -0.071,
-      "relative_difference": -0.05771004024443139,
+      "detection_limit_relative": 0.06793162748330063,
+      "injected": "silicon density x 0.931 on the Geant4 side (reference keeps 2.329 g/cm3)",
+      "injected_relative": -0.069,
+      "relative_difference": -0.05542934573762228,
       "run_record": "../recorded/runs/mpv-control-minus.computational-run.json",
-      "se_of_shift": 0.00491004214624843,
-      "shift": -0.07144525522454326,
+      "se_of_shift": 0.003606878552015016,
+      "shift": -0.0702920873810171,
       "sign": "-",
       "status": "caught",
       "summary": "../recorded/blocks/mpv-control-minus.json",
       "verdict_on_control": "fail"
      }
     ],
-    "detection_limit_relative": 0.0715312464119818,
+    "detection_limit_relative": 0.06995854203702802,
     "detection_limit_sign": "+-",
     "status": "caught"
    },
@@ -81,10 +81,10 @@
     "version": "RPP 2024"
    },
    "reference_value": 0.08368862031620586,
-   "relative_difference": 0.013735214980111862,
-   "relative_se": 0.003421002286493018,
+   "relative_difference": 0.014862741643394815,
+   "relative_se": 0.002879053887669904,
    "scope": {
-    "detection_limit_relative": 0.0715312464119818,
+    "detection_limit_relative": 0.06995854203702802,
     "detection_limit_sign": "+-",
     "energy_MeV": 10000.0,
     "material": "Si_study",
@@ -94,10 +94,10 @@
    },
    "selection": {
     "blocks": 16,
-    "events": 546528,
+    "events": 1200000,
     "excluded": 0,
     "excluded_fraction": 0.0,
-    "used": 546528
+    "used": 1200000
    },
    "statistic": "most probable energy loss of transmitted primaries (MeV)",
    "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",
@@ -108,10 +108,10 @@
     "parts": {
      "binning": 0.006898790624199416,
      "k_sigma": 3,
-     "mc_statistics": 0.010263006859479054,
+     "mc_statistics": 0.008637161663009712,
      "reference_accuracy": 0.03
     },
-    "total": 0.04716179748367847
+    "total": 0.04553595228720913
    },
    "validation_evidence": true,
    "verdict": "pass",
@@ -123,9 +123,9 @@
    "configuration_basis": {
     "artifact_id": "geant4-run-mpv-nominal",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-    "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
+    "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de"
    },
-   "geant4": 0.03,
+   "geant4": 0.028,
    "grade": "sanity",
    "hash_scheme": "spec-v1",
    "inputs": {
@@ -141,7 +141,7 @@
     "version": "RPP 2024"
    },
    "reference_value": 0.021392353632502466,
-   "relative_difference": 0.4023702354293315,
+   "relative_difference": 0.3088788864007095,
    "scope": {
     "energy_MeV": 10000.0,
     "material": "Si_study",
@@ -151,10 +151,10 @@
    },
    "selection": {
     "blocks": 16,
-    "events": 546528,
+    "events": 1200000,
     "excluded": 0,
     "excluded_fraction": 0.0,
-    "used": 546528
+    "used": 1200000
    },
    "statistic": "FWHM of the deposit distribution (MeV)",
    "target_geometry_sha256": "b62c334caee71360be29ea83ae306bca950000b3ac89a9f3f3657d85b528e8fe",

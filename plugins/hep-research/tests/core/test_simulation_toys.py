@@ -148,23 +148,20 @@ class CoverageToys(unittest.TestCase):
 @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
 class MpvBiasToys(unittest.TestCase):
     def test_j14_design_point(self):
-        """J14's realised MPV block size B = 546528 / 16 = 34158, 2 keV bins, K = 16, Moyal(mode 0.085 MeV, 1.5 xi
-        with xi = 5.35 keV): 95 % upper bound of the relative bias of the mean of block modes <= 0.002 (tol/10 for
-        mpv_deposit_MeV, tol 0.02). 1000 toys: at the design minimum B = 30000 the bias sits close to the bound and
-        200 toys gave upper bounds of 0.0018 and 0.00203 in two runs (VALIDATION GEANT4-CORRECTNESS)."""
-        rng = random.Random(91)
-        mode, xi, w, b, k, toys = 0.085, 1.5 * 0.00535, 0.002, 34158, 16, 1000
-        est = []
-        for _ in range(toys):
-            hists = []
-            for _ in range(k):
-                h = [0] * 200
-                for _ in range(b):
-                    j = int(_moyal(rng, mode, xi) / w)
-                    if 0 <= j < 200:
-                        h[j] += 1
-                hists.append(h)
-            est.append(M.mpv(hists, 0.0, w)["value"])
+        """J14's MPV design minimum B = 75000 events per block, 2 keV bins, K = 16, Moyal(mode 0.085 MeV, 1.5 xi with
+        xi = 5.35 keV): 95 % upper bound of the relative bias of the mean of block modes <= 0.002 (tol/10 for
+        mpv_deposit_MeV, tol 0.02), 4000 toys. Each block histogram is drawn as an exact multinomial of the bin
+        probabilities (the Moyal CDF erfc(exp(-l/2)/sqrt(2))), which has the distribution of binning B events. The
+        earlier design B >= 30000 (realised 34158) had a bias of about +0.0017, too close to the bound: 200- and
+        1000-toy runs gave upper bounds of 0.0018 to 0.00209 (VALIDATION GEANT4-CORRECTNESS)."""
+        import numpy as np
+        mode, xi, w, b, k, toys, lo, hi = 0.085, 1.5 * 0.00535, 0.002, 75000, 16, 4000, 0.05, 0.13
+        edges = [lo + i * w for i in range(round((hi - lo) / w) + 1)]
+        cdf = [math.erfc(math.exp(-((x - mode) / xi) / 2) / math.sqrt(2)) for x in edges]
+        p = [cdf[i + 1] - cdf[i] for i in range(len(edges) - 1)]
+        p.append(1.0 - sum(p))
+        rng = np.random.default_rng(91)
+        est = [M.mpv([list(h[:-1]) for h in rng.multinomial(b, p, size=k)], lo, w)["value"] for _ in range(toys)]
         mean = sum(est) / toys
         sd = math.sqrt(sum((e - mean) ** 2 for e in est) / (toys - 1))
         ub = (mean - mode) / mode + 1.645 * sd / math.sqrt(toys) / mode

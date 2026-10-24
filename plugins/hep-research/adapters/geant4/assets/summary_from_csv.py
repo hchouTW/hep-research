@@ -41,23 +41,43 @@ class InputError(ValueError):
     """Input the producer refuses (exit 2)."""
 
 
-def read_rows(path: Path) -> list[dict]:
-    raw = gzip.decompress(path.read_bytes()).decode() if path.suffix == ".gz" else path.read_text(encoding="utf-8")
-    lines = raw.splitlines()
-    if len(lines) < 2 or lines[0] != "# SIMULATION":
+def _open(path: Path):
+    return gzip.open(path, "rt", encoding="utf-8") if path.suffix == ".gz" else path.open(encoding="utf-8")
+
+
+def header(path: Path) -> list[str]:
+    """The column names of a layered_sim CSV (first line '# SIMULATION', second the columns)."""
+    with _open(path) as fh:
+        first, cols = fh.readline().rstrip("\n"), fh.readline().rstrip("\n")
+    if first != "# SIMULATION" or not cols:
         raise InputError(f"{path.name}: not a layered_sim CSV (first line must be '# SIMULATION')")
-    cols = lines[1].split(",")
-    rows = []
-    for ln in lines[2:]:
-        if ln:
-            row = {}
-            for c, v in zip(cols, ln.split(",")):
-                try:
-                    row[c] = float(v)
-                except ValueError:
-                    row[c] = v
-            rows.append(row)
-    return rows
+    return cols.split(",")
+
+
+def iter_rows(path: Path):
+    """The events of a CSV one by one (numbers as floats), so a large run is never held in memory."""
+    with _open(path) as fh:
+        fh.readline()
+        cols = fh.readline().rstrip("\n").split(",")
+        for ln in fh:
+            ln = ln.rstrip("\n")
+            if ln:
+                row = {}
+                for c, v in zip(cols, ln.split(",")):
+                    try:
+                        row[c] = float(v)
+                    except ValueError:
+                        row[c] = v
+                yield row
+
+
+def unit_weights(rows):
+    """Pass the events on, refusing a weight other than 1 (deposits are already multiplied by the track weight)."""
+    for row in rows:
+        if row.get("weight", 1.0) != 1.0:
+            raise InputError(f"event {row.get('event')} has weight {row.get('weight')}: weighted accumulation is not "
+                             "supported (A1.5)")
+        yield row
 
 
 def declarations(path: Path) -> list[dict]:
@@ -80,20 +100,19 @@ def cmd(args) -> tuple[str, dict]:
     sim = (rec.get("extension") or {}).get("simulation")
     if not isinstance(sim, dict):
         raise InputError("--run-record is not a Geant4 run record (no extension.simulation)")
-    rows = []
+    cols = None
     for c in args.csv:
-        rows += read_rows(Path(c))
-    if not rows:
-        raise InputError("the CSVs hold no events")
-    cols = set(rows[0])
+        hc = set(header(Path(c)))
+        if cols is not None and hc != cols:
+            raise InputError(f"{Path(c).name}: its columns differ from the first CSV's")
+        cols = hc
     for o in obs:
         needed = {o["source_column"], *(c["column"] for c in o.get("selection") or [])}
         if needed - cols:
             raise InputError(f"observable {o['name']}: columns {sorted(needed - cols)} are not in the CSV")
+    rows = (row for c in args.csv for row in iter_rows(Path(c)))
     if "weight" in cols:
-        bad = sum(1 for r in rows if r.get("weight") != 1.0)
-        if bad:
-            raise InputError(f"{bad} events have a weight other than 1: weighted accumulation is not supported (A1.5)")
+        rows = unit_weights(rows)
         weight = "unit"
     else:
         if biasing(sim):
@@ -121,6 +140,8 @@ def cmd(args) -> tuple[str, dict]:
                       {"name": "python-csv", "version": VERSION, **trace.provenance()})
     except S.SummaryError as exc:
         raise InputError(str(exc)) from exc
+    if doc["run"]["events_in_blocks"] + doc["run"]["events_ignored"] == 0:
+        raise InputError("the CSVs hold no events")
     rep = validate(doc, "simulation_summary.json")
     if not rep.ok:
         raise InputError("the summary does not validate: " + "; ".join(f.message for f in rep.errors)[:400])

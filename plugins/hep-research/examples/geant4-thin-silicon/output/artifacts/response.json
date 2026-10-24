@@ -52,8 +52,8 @@
    "ref": "output/artifacts/runs/mpv-nominal.computational-run.json",
    "artifact_type": "computational-run",
    "artifact_id": "geant4-run-mpv-nominal",
-   "version": "3.12.0",
-   "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f",
+   "version": "3.13.0",
+   "sha256": "0a38ffe25f9b22b28da05e39f260b010c453e3d777d25756417faa2404ae40de",
    "status": [
     "unvalidated"
    ]

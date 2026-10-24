@@ -5726,7 +5726,7 @@
   "run_record": {
    "artifact_id": "geant4-run-mpv-nominal-trial",
    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-nominal-trial.computational-run.json",
-   "sha256": "b59ce8fce231db6e30fbebb5192459ef075857304cd12474f48751125e8378e6"
+   "sha256": "a65e2df068df95d1e0f76e333ea7506abcb3fc556ca14d9284cff8c313e61b62"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

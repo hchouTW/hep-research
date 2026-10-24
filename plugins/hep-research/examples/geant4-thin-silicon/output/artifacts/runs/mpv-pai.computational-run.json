@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.12.0",
+ "contract_version": "3.13.0",
  "extension": {
   "commands": [
    "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-pai/spec.json"
@@ -13,21 +13,21 @@
   "environment": {
    "G4FORCE_RUN_MANAGER_TYPE": "unset",
    "dataset_variables": "all unset except the build record's",
-   "work": "~/Workspace/geant4-work/j14-a1"
+   "work": "~/Workspace/geant4-work/j14-a1-75k"
   },
   "exit_status": 0,
   "input_manifest": [
    {
     "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/mpv-pai.json",
-    "sha256": "3b9636701976fb320fd6bbbaab93e890da1dbbf2106d48f983413a5ec78ca416"
+    "sha256": "bb3b13f3479a636071433f0445e67686161902dc418de12f4dfaad516cf9124e"
    }
   ],
   "output_hashes": {
    "mpv-pai/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
-   "mpv-pai/events.csv": "0f0bcea453a6635cc1e63d9069c35c8760cc370486c076df1f4bca2f1868dd0a",
+   "mpv-pai/events.csv": "61dd5bf409f2e2a73c732e4bc39e13cb5654a8be26d4df82501ba7045e22b1e8",
    "mpv-pai/log.txt": "84609efdb594ebeea4f5ee590b0df62363293c2a31a5a684bef3a450e62dddb7",
    "mpv-pai/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
-   "mpv-pai/spec.json": "4522dcd1d4bd85ae471d5dbd19c63d6f8fc5a811492217da73ccbc594d573072"
+   "mpv-pai/spec.json": "6e6aeaf9da050055dada79296620216a901b4282c2f56f30652b4de6cde1462f"
   },
   "seeds": {
    "layered_sim": [
@@ -163,7 +163,7 @@
      "version": "2.0"
     }
    ],
-   "events": 546528,
+   "events": 1200000,
    "evidence_role": "variation",
    "first_event": 0,
    "geant4": {
@@ -256,7 +256,7 @@
    },
    "run_manager": "serial",
    "seed_scheme": "hash-v1",
-   "spec_sha256": "7e2ff052d78a09127efc307d4f5365f9a82f31749840e69a6a45df913717a5af",
+   "spec_sha256": "b8f7cab829a9277f10058a8ce44a5a67b2bc4a75039cd3a10956a2ff9a2cdb0d",
    "step_limits": {},
    "threads": 1,
    "ui_commands": [
@@ -276,7 +276,7 @@
   ]
  },
  "inputs": [],
- "objective": "Geant4 layered_sim run mpv-pai: mu- 10000.0 MeV, 546528 events (a completed run, not a validated result)",
+ "objective": "Geant4 layered_sim run mpv-pai: mu- 10000.0 MeV, 1200000 events (a completed run, not a validated result)",
  "outputs": [],
  "provenance": {
   "code_paths": [
@@ -303,7 +303,7 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.12.0",
+  "contracts": "3.13.0",
   "plugin": "0.38.0",
   "profiles": {}
  }

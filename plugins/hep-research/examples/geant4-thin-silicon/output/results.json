@@ -46,16 +46,16 @@
   "mpv": {
    "benchmarks": {
     "thin-layer-mpv": {
-     "detection_limit": 0.0715312464119818,
+     "detection_limit": 0.06995854203702802,
      "negative_control": "caught",
-     "relative_difference": 0.013735214980111862,
+     "relative_difference": 0.014862741643394815,
      "validation_evidence": true,
      "verdict": "pass"
     },
     "thin-layer-width": {
      "detection_limit": null,
      "negative_control": null,
-     "relative_difference": 0.4023702354293315,
+     "relative_difference": 0.3088788864007095,
      "validation_evidence": false,
      "verdict": "plausible"
     }

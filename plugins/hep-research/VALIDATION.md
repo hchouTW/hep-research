@@ -2825,23 +2825,30 @@ commit), so the S1 entries stay D1. Each S1 entry awaits the maintainer's `revie
 **Slow tier (HEP_SLOW_TESTS=1, `tests/core/test_simulation_toys.py`).** Gate toys (1e4 per cell) reproduce the A1.8
 operating-characteristics table to 3 sigma_MC in every cell (TOST-only and two-stage columns); coverage toys of nominal
 90 % batch-means intervals (2000 toys, K = 16) pass for mean, proportion, quantile and mode, and coverage_gate does not
-fail; the detection-limit power at the claimed limit is >= 0.977 - 3 sigma_MC. **The MPV bias toy fails:** at J14's
-block size B = 34158 with 2 keV bins, 1000 Moyal toys (1.5 xi, shape checked against the recorded 60k-event Geant4
-histogram near the peak, 10-20 % flat normalisation) give a 95 % upper bound of the relative bias of 0.00209 against
-tol/10 = 0.002 for `mpv_deposit_MeV` (it meets the benchmark's tol/10 = 0.003); two earlier 200-toy runs at B = 30000
-gave 0.0018 and 0.00203. The criterion is unchanged; the design decision (more events per block, other binning, or a
-stated bound) is the maintainer's, and gate G-A1 is not met until then.
+fail; the detection-limit power at the claimed limit is >= 0.977 - 3 sigma_MC.
+
+**MPV design (A1.7).** The first design (2 keV bins, B >= 30000, realised 34158) failed the bias criterion: 1000 Moyal
+toys (1.5 xi, shape checked against the recorded 60k-event Geant4 histogram near the peak, 10-20 % flat
+normalisation) gave a 95 % upper bound of the relative bias of 0.00209 against tol/10 = 0.002 for `mpv_deposit_MeV`
+(200-toy runs at 30000: 0.0018, 0.00203); the true bias, about +0.0017, sat too close to the bound. Its parts: a
+deterministic bias of the three-point parabola on the skewed peak (exact bin contents: +0.0010 at 2 keV, +0.00024 at
+1 keV, scaling as w^2) and a noise part that falls with B. A scan of w x B (4000 multinomial toys each) showed that
+narrower bins raise the se above the per-point target (1 keV, B = 50000: se 0.00395 against 0.00354), so the design
+keeps 2 keV bins and raises the block size: B >= 75000 gives bias +0.00144, upper bound 0.00151, se 0.00256. The
+criterion is unchanged. `tests/core/test_simulation_toys.py::MpvBiasToys` (4000 toys, exact multinomial block
+histograms) passes at B = 75000. The pre-fix five-point fit is biased about +0.0032 at infinite statistics.
 
 **J14 regeneration (A1.13, live).** layered_sim rebuilt from the adapter sources (sha256 d39225ea) against the
-recorded Geant4 11.4.3 build. Trial runs fixed N with F_0.95(15, 15) and the A1.7 design minimum B >= 30000: MPV
-nominal 546,528 events (driven by tail_fraction), scans 480,000-709,712; stopping-power scans 16,000 and 17,760.
-sp-nominal, sp-control and sp-density-10 were not re-recorded (blocks cut from their CSVs, legacy seeds). Results: both
-convergence gates pass (MPV: mean deposit -0.00025 +- 0.00073, MPV deposit -0.0001 +- 0.0041, tail fraction
-+0.005 +- 0.012; SP: +0.0009 +- 0.0017); statistical targets met; thin-layer-mpv rel +0.0137, DL 0.0715 (0.0827 before),
-controls +0.063 and -0.071 caught at the limit; stopping-power rel -0.0019, DL 0.0394, controls +0.038 (legacy) and
--0.040 caught; both studies re-issued validated-in-scope and pass `--strict` and dependencies.py. recorded/ 2,620,784
-bytes (largest file 316,443). MPV per-execution check: 0 fallback blocks, |block mean - merged mode| 0.28 % against the
-bound 1.28 %.
+recorded Geant4 11.4.3 build. Trial runs fixed N with F_0.95(15, 15); the A1.7 design minimum B >= 75000 sets every
+point of the MPV study to 1,200,000 events (the trials asked for at most 709,712); stopping-power scans 16,000 and
+17,760. sp-nominal, sp-control and sp-density-10 were not re-recorded (blocks cut from their CSVs, legacy seeds).
+Results: both convergence gates pass (MPV: mean deposit -0.00011 +- 0.00044, MPV deposit +0.0029 +- 0.0038, tail
+fraction +0.006 +- 0.009; SP: +0.0009 +- 0.0017); statistical targets met; thin-layer-mpv rel +0.0149, DL 0.0700
+(0.0827 before), controls +0.071 and -0.070 caught at the limit; stopping-power rel -0.0019, DL 0.0394, controls
++0.038 (legacy) and -0.040 caught; both studies re-issued validated-in-scope and pass `--strict` and dependencies.py.
+recorded/ 2,630,783 bytes with the legacy summaries (largest file 316,443). MPV per-execution check: 0 fallback blocks, |block mean - merged
+mode| 0.25 % against the bound 1.17 %. A first live recording at B >= 30000 (546,528 events) passed every criterion
+too and was replaced by this one for the bias design.
 
 Not run: the independent new-problem agent run and the `review.py` Markdown review of §A.8; the external source for
 GEANT4-STOPPING-RULE (gap); the contracts version bump (at release).

@@ -35,7 +35,7 @@ stopping-power, range, thin-layer and longitudinal-profile benchmarks, and `nega
 - `evaluate_design.py f4` passes `--label-run-record`, `--label-reference-record` and `--label-variations` to `label`
   and reports a refused upgrade or missing results as `incomplete` (`design-f4-label-passthrough`).
 - J14 (`examples/geant4-thin-silicon`) re-recorded live with trial runs and planned event counts; both studies keep
-  `validated-in-scope`; detection limits 0.0715 (MPV, was 0.0827) and 0.0394 (stopping power), caught in both
+  `validated-in-scope`; detection limits 0.0700 (MPV, was 0.0827) and 0.0394 (stopping power), caught in both
   directions. Test fixes: the J14 replay cache is forgotten at module teardown (D10); the study-spec benchmark enum and
   grades (D8).
 
