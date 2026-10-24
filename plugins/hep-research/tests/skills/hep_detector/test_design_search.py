@@ -540,6 +540,57 @@ class Validity(unittest.TestCase):
         self.assertEqual(space.violation(facts)[0], 0.0)
         self.assertEqual(ext["overrides"]["DES-RICH-S01"]["interfaces"], ["DES-ECAL-S01"])
 
+    def base_with_ecal_and_rich(self) -> None:
+        """Put a calorimeter (front 2.9 m, 17 X0 of Pb) and a RICH (front 2.7 m, 3 cm radiator) into cand-S."""
+        space = space_for(self.art, spec_a(self.art, free_parameters=[], regenerate_budgets=[],
+                                           slots={"calorimetry-em": [0, 1], "rich": [0, 1]}))
+        g, _ = space.repair(space.proposal_genome({"id": "P", "reason": "r", "enabled": {
+            "calorimetry-em": True, "rich": True}}))
+        ext, _ = space.decode(g, "s", f"{NS_A}:x")
+        cand = json.loads((self.art / "candidates" / "cand-S.json").read_text(encoding="utf-8"))
+        for new, sid, z in (("DES-ECAL-001", "DES-ECAL-S01", 2.9), ("DES-RICH-001", "DES-RICH-S01", 2.7)):
+            sub = ext["overrides"][sid]
+            sub["parameters"]["z_front_m"]["value"] = z
+            cand["extension"]["subsystems"][new] = sub
+            for q in ext["budgets"]:
+                cand["extension"]["budgets"][q][new] = ext["budgets"][q][sid]
+        (self.art / "candidates" / "cand-S.json").write_text(json.dumps(cand, indent=1), encoding="utf-8")
+
+    def base_extent_violation(self, free: list[str], values: dict) -> tuple[float, list[str]]:
+        self.base_with_ecal_and_rich()
+        fps = [{"ref": f"{sid}.parameters.{name}", "range": rng} for sid, name, rng in free]
+        space = space_for(self.art, spec_a(self.art, free_parameters=fps, slots={}, regenerate_budgets=[],
+                                           envelope={"length_m": 3.0}))
+        g = space.proposal_genome({"id": "P", "reason": "r", "parameters": values})
+        _, facts = space.decode(g, "s", f"{NS_A}:x")
+        return space.violation(facts)
+
+    def expected_base_extent_violation(self, v: float, why: list[str]) -> None:
+        x0 = json.loads((ASSETS / "materials.json").read_text(encoding="utf-8"))["materials"]["G4_Pb"][
+            "radiation_length_cm"]
+        ecal = (2.9, 2.9 + 17.0 * x0 * 0.01 / 0.5)
+        rich = (2.7, 2.7 + 0.03 + 0.3)
+        expect = (ecal[1] - 3.0) / 3.0 + (rich[1] - 3.0) / 3.0 + (rich[1] - ecal[0]) / 3.0
+        self.assertIn("envelope: DES-ECAL-001 extends outside [0, 3.0] m", why)
+        self.assertIn("envelope: DES-RICH-001 extends outside [0, 3.0] m", why)
+        self.assertTrue(any(w.startswith("overlap: DES-ECAL-001 and DES-RICH-001") for w in why), why)
+        self.assertAlmostEqual(v, expect)
+
+    def test_base_slot_with_only_the_front_free(self):
+        """A base calorimeter or RICH with only z_front_m free takes depth, absorber and radiator from the base."""
+        v, why = self.base_extent_violation(
+            [("DES-ECAL-001", "z_front_m", [0.0, 20.0]), ("DES-RICH-001", "z_front_m", [0.0, 20.0])],
+            {"DES-ECAL-001.parameters.z_front_m": 2.9, "DES-RICH-001.parameters.z_front_m": 2.7})
+        self.expected_base_extent_violation(v, why)
+
+    def test_base_slot_with_the_front_fixed(self):
+        """A base calorimeter or RICH with depth_X0 or radiator_length_cm free and z_front_m fixed is still checked
+        for envelope and overlap, from the base front."""
+        v, why = self.base_extent_violation(
+            [("DES-ECAL-001", "depth_X0", [5.0, 30.0]), ("DES-RICH-001", "radiator_length_cm", [1.0, 200.0])],
+            {"DES-ECAL-001.parameters.depth_X0": 17.0, "DES-RICH-001.parameters.radiator_length_cm": 3.0})
+        self.expected_base_extent_violation(v, why)
+
     def test_parent_reset_when_the_mother_is_disabled(self):
         spec = spec_a(self.art, free_parameters=[], slots={"calorimetry-em": [0, 1], "rich": [0, 1]},
                       regenerate_budgets=[])

@@ -1525,9 +1525,13 @@ class SearchSpace:
             ext = self.rules.get(s["role"], {}).get("extent")
             if ext:
                 p = st["params"]
-                front = p.get(ext["front"])
-                if front is None:
+                if s["base"]:  # a base slot decodes only its free parameters: the others keep the base value
+                    p = {**{k: q.get("value") for k, q in self.base_subs[s["sid"]]["parameters"].items()}, **p}
+                need = [ext["front"]] + ([ext["depth_x0"], ext["material"]] if "depth_x0" in ext
+                                         else [ext["length_cm"]])
+                if any(p.get(k) is None for k in need):
                     continue
+                front = p[ext["front"]]
                 if "depth_x0" in ext:
                     size = p[ext["depth_x0"]] * self._material(p[ext["material"]])["radiation_length_cm"] * 0.01 / \
                         ext["absorber_fraction"]
