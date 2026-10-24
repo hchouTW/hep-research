@@ -242,7 +242,7 @@
    "condition": {
     "all": [
      {
-      "field": "physics.layered_sim.reference_list",
+      "field": "physics.layered_sim.physics.reference_list",
       "op": "exists"
      }
     ]

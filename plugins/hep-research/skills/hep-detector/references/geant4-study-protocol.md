@@ -16,7 +16,7 @@ Physics 2024, chapter "Passage of particles through matter" (RPP 2024).
 
 - **A run that completes** says only that the program ran. A simulation with an unsuitable physics list runs to the end
   without any error.
-- **Agreement with the official examples** (B1, B4a, TestEm3, TestEm5; `geant4_examples.py`) and with a mirror of an
+- **Agreement with the official examples** (B1, TestEm3, TestEm5, and B4a as a smoke test only; `geant4_examples.py`) and with a mirror of an
   example (`geant4_verify.py mirror`) is **verification**: the installation and the application reproduce Geant4's own
   numbers.
 - **Validation** is agreement with an independent reference whose inputs do not come from Geant4, within a stated
@@ -31,15 +31,18 @@ run. Its fields:
 
 | Field | What it fixes |
 |---|---|
-| `observable` | name, kind (for example `most-probable-value`, `stopping-power`, `energy-deposit`), domain (`em` or `hadronic`), exact definition, unit, whether weights apply |
+| `observable` | name, kind (for example `most-probable-value`, `stopping-power`, `energy-deposit`), domain (`em` or `hadronic`), exact definition, unit, whether weights apply, and for leakage `leakage_faces` |
 | `particle` | species and kinetic energy |
 | `geometry_source`, `materials` | where the geometry and materials come from; for each reference material: density, its source, and `reference_origin` (`independent`, never the Geant4 material dump); Z/A, mean excitation energy I and the Sternheimer parameters when a benchmark uses them (stopping power, thin-layer MPV and width) |
 | `physics` | the layered_sim spec, the order of UI commands, and a justification per choice with its source |
-| `convergence_plan` | the cut or step-limit scan, the observables checked and their relative tolerances |
+| `convergence_plan` | the cut or step-limit scan, the observables checked (any declared in `observables`) and their tolerances (relative, or absolute per observable declaration) |
 | `statistical_target` | the observable and the relative standard error required |
 | `validation_plan` | the benchmarks and the declared scope (particle, energy range, material, thickness range, observable) |
 | `variation_plan` | the model variations and whether their model assignment was checked |
-| `downstream_use` | response matrix, comparison with published data, report; who receives it |
+| `downstream_use` | response matrix, comparison with published data, report; who receives it (the fields below are also part of the spec) |
+| `observables`, `blocks` | the declared observables (`simulation-observables/1`) and K |
+| `stopping_rule` | how the event count was fixed before the first evidence run (trial events, target SE, events) and what happens to a point that misses its target |
+| `citations`, `reproducibility`, `geant4` | the sources cited, the reproducibility record and the Geant4 version and datasets |
 
 Ask the user for the observable, the particle and energy, the source of the geometry and materials, and the precision
 target or downstream use when any is missing. Never choose an experiment or a detector for the user.
@@ -68,12 +71,16 @@ coverage. The items say when to look and where, not which list to use.
   most advanced options for precise simulation at low and intermediate energies
   (`geant4:source/physics_lists/constructors/electromagnetic/include/G4EmStandardPhysics_option4.hh`). Justify the choice.
   Rule `G4R-PRECISION-EM`.
-- **Hadronic model ranges**: QGSP_BIC uses the Binary cascade only for protons and neutrons up to 1.5 GeV
+- **Hadronic model ranges**: the list named exactly QGSP_BIC uses the Binary cascade only for protons and neutrons up to 1.5 GeV
   (`geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BIC.cc`,
   `maxBIC_proton = maxBIC_neutron = 1.5 GeV`, Bertini from 1 GeV, otherwise as
-  `geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BERT.cc`); the FTF-cascade
+  `geant4:source/physics_lists/constructors/hadron_inelastic/src/G4HadronPhysicsQGSP_BERT.cc`; FTFP_BERT has no
+  Binary range); the model table holds for the lists named exactly QGSP_BIC and FTFP_BERT: variants such as FTFP_BERT_ATL (transition moved) or the _HP lists
+  (ParticleHP below 20 MeV) use other models, and `check_geant4_study.py` treats their model as unknown; the FTF-cascade
   transition is 3 to 6 GeV and the QGS-FTF transition 12 to 25 GeV
-  (`geant4:source/processes/hadronic/util/src/G4HadronicParameters.cc`). Rule `G4R-BIC-RANGE`.
+  (`geant4:source/processes/hadronic/util/src/G4HadronicParameters.cc`). Rule `G4R-BIC-RANGE` (it requires only the declaration
+  `variation_plan.model_assignment_checked`; the comparison itself is `check_geant4_study.py variations`, run with each
+  variation's effective config).
 - **Stopping power**: the Bethe mean rate (RPP 2024 Eq. 34.5) is accurate to a few percent only for 0.1 <~ beta gamma
   <~ 1000. Rule `G4R-BETHE-RANGE`.
 - **Datasets, UI timing, replicas, step limiters, biasing**: rules `G4R-DATASETS`, `G4R-UI-TIMING`,
@@ -88,18 +95,22 @@ coverage. The items say when to look and where, not which list to use.
 ## 4. The convergence gate and the event count
 
 - **Statistics** (contracts CV-A1). Each evidence point is one logical run with seed S = H(study_id, role, point_id)
-  (`core/simulation/seeds.py`), split by event number into K >= 16 blocks declared in the spec (`blocks.K`); its run
+  (`core/simulation/seeds.py`; under per-event seeding `geant4_run.py scan` writes it for each point too, from
+  `--study-id`, which defaults to the grid name: pass the study's study_id), split by event number into K >= 16 blocks declared in the spec (`blocks.K`); its run
   summary (`simulation-summary/1`; from geant4 adapter 0.2.0 written by `layered_sim` itself from `output.observables`
   and `output.blocks`, merged across threads, with `adapters/geant4/assets/summary_from_csv.py` as its test oracle and
   the producer for older runs) holds per-block accumulators of the spec's `observables` (estimator mean, proportion,
-  mode or quantile). New studies seed per event (`run.seeding: per-event`, the default of `geant4_run.py scan`): event
+  mode or quantile). New studies seed per event (`run.seeding: per-event`, the default of `geant4_run.py scan`, which gives
+  point k its own S = H(study_id, role, point id) from `--study-id` and `--role`): event
   i starts from (H(S, i, 0), H(S, i, 1)), so a logical run gives the same events for any split into jobs and threads;
   reproduce such an event from (S, i), not from Geant4's stored random status. Values and SEs are batch means over the blocks
   (SE on K - 1 degrees of freedom; a proportion with an empty block or fewer than 100 counts uses exact intervals);
   the most probable value is the mean of three-point parabola modes of the block histograms. Choose the bin width
   and the events per block with bias toys before the first evidence run (95 % upper bound of the bias <= tol/10).
   Events must not share state (biasing breaks it); weights other than 1 are refused (`layered_sim` exits 2 when a
-  weighted event meets a declared observable).
+  weighted event meets a declared observable), so a biased run cannot give a summary; rule `G4R-BIASED-BALANCE` applies to every
+  spec with secondary biasing and requires `observable.weighted` (the per-event CSV checks), and `summary_from_csv.py`
+  checks only the vertex weight, so keep biased runs out of the evidence by hand.
 - **Boundary artifacts** (A2.6, D9). The study scripts read only what a run hands over: the run summary, the column
   map (`column_map.json`, `simulation-columns/1`: per column a semantic name, unit and definition) and the effective
   config (what Geant4 resolved: geometry tree, materials, EM parameters, cuts per couple, hadronic models with their
@@ -115,19 +126,25 @@ coverage. The items say when to look and where, not which list to use.
   tol (m = parameters x observables); anything else is `incomplete` (exit 3). Expect it: about 19 % of point pairs
   miss a target under the two-stage design below, and at a true difference equal to the tolerance about 90 % are
   unresolved; given that both points met the target, the pass rate there is 0.054, slightly above 0.05. It is the
-  only check that catches a cut that is too coarse: no reference benchmark sees it.
+  only check that catches a cut that is too coarse (no reference benchmark sees it), and only as far as the declared
+  scan reaches: the finest declared cut must be fine for the observable and the tolerance tight enough to matter.
 - **Event count and stopping rule** (D6). Decide the stopping rule, scan grid, K, the event counts and how an
   unresolved result is handled in the study spec before the first evidence run. Each point gets a trial run (role
   `trial`, K_trial = 16, N_trial declared); its evidence run then has N = N_trial (SE_trial / target)^2 F_0.95(K - 1,
   K_trial - 1) events, rounded up to a multiple of K. A point that still misses its target is `incomplete`: never add
-  events, rerun with another seed or refine the scan because of a result (optional stopping biases the evidence).
+  events, rerun with another seed or refine the scan because of a result (optional stopping biases the evidence; a
+  procedural rule: no tool can tell a rerun under a new study or point id from a new study, so list every run in
+  the study record).
   With n points that need a target all meet it with probability about 0.9^n.
 - **Shared evidence** (D7). One run often serves several decisions (the nominal feeds the gate, the statistical
   target, the benchmark and the variations); `label` lists such runs in `extension.study.evidence_overlap`, and they
   are not independent evidence.
 - **Observables for the gate.** Declare in `observables` what the study measures (thin layers: mean deposit, most
-  probable deposit and loss, tail fraction; thick absorbers: leakage fractions from the leakage-by-face columns).
-  `geant4_run.py scan` gives every point its own seeds, so the SE of a difference is that of independent samples.
+  probable deposit and loss, tail fraction; thick absorbers: leakage fractions from the leakage-by-face columns); any declared observable can be a gate
+  observable in `convergence_plan.observables`.
+  `geant4_run.py scan` gives every point its own seeds (its own S under per-event seeding, also when the base spec
+  declares it, unless the grid scans `run.logical_run_seed`), so the SE of a difference is that of independent
+  samples.
 
 ## 5. The validation ladder and verified pitfalls
 
@@ -144,7 +161,8 @@ mirror), then convergence, then independent-reference benchmarks.
   (`geant4:examples/basic/B1/src/RunAction.cc`); TestEm3 prints the single-event RMS, and its "+- x %" is the
   resolution over sqrt(N) (`geant4:examples/extended/electromagnetic/TestEm3/src/Run.cc`); TestEm5 prints the error on
   the mean (`geant4:examples/extended/electromagnetic/TestEm5/src/Run.cc`). Printed values are rounded at the
-  precision each `Run.cc` sets per field (TestEm3 track lengths have 3 digits).
+  precision each example's run class sets per field (`Run.cc`, B1's `RunAction.cc`; TestEm3 track lengths have
+  3 digits).
 - **Biased runs do not balance.** With secondary biasing TestEm3 weights the deposit but not the leakage, so run 1 does
   not close its energy balance (`geant4:examples/extended/electromagnetic/TestEm3/TestEm3.in`).
 - **Killed tracks are booked as deposits.** `G4StepLimiterPhysics` attaches `G4UserSpecialCuts`, which books a killed
@@ -184,8 +202,10 @@ and setup-matched benchmarks can upgrade a study: reference against a physics mo
 isolated target, setup-matched against a published measurement of the same configuration (isolated, target hash
 equal to the measured one).
 
-**Configuration and isolation** (CV-A1). `geant4_benchmarks.py` derives each benchmark's configuration from the run
-record its setting names (`run_record`), never from user input: the target is `target_slabs` (absorbers included; by
+**Configuration and isolation** (CV-A1). `geant4_benchmarks.py` derives each benchmark's geometry, materials and target hash
+from the run record its setting names (`run_record`), never from user input. The slab list, and the particle, energy,
+material and thickness that set the reference value and the benchmark scope, come from the benchmark config and are
+not compared with the run record: check them against it by hand. The target is `target_slabs` (absorbers included; by
 default the measured slab; `longitudinal-profile` lists its whole sampling stack). For records before geant4 adapter
 0.2.0 the target hash (`hash_scheme: spec-v1`) is the sha256 of the target's placements in order with thickness,
 transverse size, material and declared composition from spec/1 (numbers as `float.hex()`); records from 0.2.0 use
@@ -215,10 +235,13 @@ scattering off) do not count. A benchmark whose control is not caught is not evi
 Vary only what changes the model used for this particle and energy, and state the model assignment
 (`check_geant4_study.py variations`). For thin-layer EM observables vary the EM constructor and the fluctuation model
 (Urban against PAI). For hadronic observables first check that the two lists use different models at that energy:
-QGSP_BIC and FTFP_BERT give a false zero difference for pions below 12 GeV and for nucleons between 1.5 and 12 GeV
-(Bertini, the shared 3-6 GeV Bertini-FTF transition, then FTFP, in both); they differ for nucleons below 1.5 GeV (Binary cascade) and above 12 GeV (QGSP). A reference list with an EM
-suffix that maps to the same constructor (for example `FTFP_BERT_EMZ` against option 4) keeps the EM model and is
-excluded. Report the spread as a model envelope, not a sigma, with each variation's standard error (a difference
+QGSP_BIC and FTFP_BERT use the same inelastic models for pions below 12 GeV and for nucleons between 1.5 and 12
+GeV (Bertini, the shared 3-6 GeV Bertini-FTF transition, then FTFP, in both), so their difference there is not a
+model variation (what remains comes from ion elastic physics and cross-section data); they differ for nucleons below 1.5 GeV (Binary cascade) and for pions and nucleons above 12 GeV (QGSP). A reference list that builds the
+same EM constructor as the nominal keeps the EM model and is excluded from the EM variations: the constructor
+comes from the EM suffix, or without one from the list itself (option 4 in the QGSP_BIC_HP family, GS in
+FTFP_BERT_TRV, G4EmStandardPhysics otherwise; LBE ignores suffixes), so `FTFP_BERT_EMZ` against
+`QGSP_BIC_HP` is no EM variation. Report the spread as a model envelope, not a sigma, with each variation's standard error (a difference
 below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
 
 ## 7. Labels and handoffs
@@ -233,17 +256,21 @@ below about 2 SE is not resolved), and hand it to hep-statistics as an envelope.
   `extension.evidence_records` (path and sha256; `dependencies.py` checks the hash, exit status 0, no `failed`, and
   that output hashes are recorded (present and well formed, not compared with the output files), without inheriting
   their labels) and the record requires `core:evidence-records`. The contract
-  rule (`geant4.upgrade_*`) refuses a record without a passed reference benchmark whose negative control was caught,
+  rule (`geant4.upgrade_*`) refuses a record without a passed reference or setup-matched benchmark whose negative control was
+  caught,
   without a passed convergence gate, or with a declared particle, material, energy or thickness outside the benchmark
-  scope; a run record is never re-issued. Neither the rule nor `label` compares the observable, and a declared scope
-  that omits the thickness is not checked against the benchmark's thickness: declare both and check them by hand. This is the one exception to keeping labels on everything derived from them (shared stanza, point 5).
-  Validated means only: within this particle, energy, material, thickness and observable (the observable, and an
-  omitted thickness, checked by hand as above), the run agreed with an
+  scope; a run record is never re-issued. From contracts 3.13.0 (CV-A1) the rule compares the controlled
+  observable kind and every scope dimension of the benchmark, thickness included; records before 3.13.0 are checked
+  this way only under `validate.py --strict` (which this section asks for); otherwise declare every dimension and
+  check them by hand. This is the one exception to keeping labels on everything derived from them (shared stanza, point 5).
+  Validated means only: within this particle, energy, material, thickness and observable (for records before contracts
+  3.13.0 the observable and an omitted thickness are checked by hand as above), the run agreed with an
   independent reference to the stated tolerance, with the detection limit stated. Never relabel by hand.
 - A table from the runs (resolution, containment, leakage by face): a `dataset-record` with status `simulated`
   (contracts 3.2.0), the run records (or the study record) as `inputs` with their labels, level `detector` or
   `particle-fiducial`; it keeps `unvalidated` unless its input study record carries `validated-in-scope`, and the
-  table must stay inside that study's benchmarked scope (not checked by the contract: state it).
+  table must stay inside that study's benchmarked scope: the contract does not check this (it checks only that an
+  input study record carries `validated-in-scope`), so state the scope in the table's record and check it by hand.
 - A response from the runs: `build_response.py build ... --status unvalidated --input-record <run record>` links the
   run records as inputs with their labels. Inference goes to hep-statistics; plots of simulation alone are labelled
   "Simulation" (hep-authoring).
@@ -294,7 +321,9 @@ Geant4 papers and the documents from a hep-citations literature-record, never fr
 draft with hep-authoring's `check_citations.py`.
 
 **Done when:** the study spec passes `check_geant4_study.py spec`, the convergence gate passes, every reference
-benchmark's negative control is caught at its claimed detection limit (with no reference benchmark this holds
-vacuously and `label` records the R5 gap: the study is then not validation evidence), the study record is `unvalidated` with its
+or setup-matched benchmark's negative control is caught at its claimed detection limit, the statistical target is met
+(with no such benchmark the control clause holds vacuously and `label` records the R5 gap: the study is then not
+validation evidence), the study record carries the label `label` issued (`unvalidated`, or `validated-in-scope` after
+`--upgrade` when a reference or setup-matched benchmark qualifies; with none the study is verification only) with its
 evidence and scope embedded and passes `validate.py --strict` and `dependencies.py`, and every citation is in a
 literature-record.

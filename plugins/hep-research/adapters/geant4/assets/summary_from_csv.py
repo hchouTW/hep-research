@@ -26,7 +26,7 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from g4common import JsonArgumentParser, sha256_file, tilde, write_json  # noqa: E402
+from g4common import JsonArgumentParser, run_settings, sha256_file, tilde, write_json  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.schema import validate  # noqa: E402
 from core.simulation import summary as S  # noqa: E402
@@ -118,11 +118,7 @@ def cmd(args) -> tuple[str, dict]:
         if biasing(sim):
             raise InputError(f"the run used biasing commands {biasing(sim)} but the CSV has no weight column")
         weight = "absent"
-    phys, gun = sim.get("physics") or {}, sim.get("gun") or {}
-    settings = {"default_cut_mm": phys.get("default_cut_mm"), "step_limit_mm": phys.get("step_limit_mm", 0.0),
-                "em_constructor": phys.get("em_constructor"), "reference_list": phys.get("reference_list"),
-                "ui_commands": sim.get("ui_commands", []), "particle": gun.get("particle"),
-                "energy_MeV": gun.get("energy_MeV")}
+    settings = run_settings(sim)
     run = {"run_id": rec.get("artifact_id"), "evidence_role": args.evidence_role, "seeding": "stream",
            "spec_sha256": sim.get("spec_sha256"), "weight_column": weight, "settings": settings,
            "data_path_problems": sim.get("data_path_problems", []),

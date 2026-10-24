@@ -77,6 +77,30 @@ EM_SUFFIX = {"": "G4EmStandardPhysics", "_EMV": "G4EmStandardPhysics_option1", "
              "_EMY": "G4EmStandardPhysics_option3", "_EMZ": "G4EmStandardPhysics_option4", "_LIV": "G4EmLivermorePhysics",
              "_PEN": "G4EmPenelopePhysics", "_EM0": "G4EmStandardPhysics", "_WVI": "G4EmStandardPhysicsWVI",
              "__GS": "G4EmStandardPhysicsGS", "__SS": "G4EmStandardPhysicsSS", "__LE": "G4EmLowEPPhysics"}
+# the EM constructor a reference list builds without a suffix, where it is not G4EmStandardPhysics (Geant4 11.4.3:
+# QGSP_BIC_HP.cc, QGSP_BIC_HPT.cc, QGSP_BIC_AllHP.cc register option 4; FTFP_BERT_TRV.cc registers GS); LBE builds its
+# own EM processes and G4PhysListFactory ignores an EM suffix on it (G4PhysListFactory.cc, had_name != "LBE")
+EM_BASE = {"QGSP_BIC_HP": "G4EmStandardPhysics_option4", "QGSP_BIC_HPT": "G4EmStandardPhysics_option4",
+           "QGSP_BIC_AllHP": "G4EmStandardPhysics_option4", "QGSP_BIC_AllHPT": "G4EmStandardPhysics_option4",
+           "FTFP_BERT_TRV": "G4EmStandardPhysicsGS", "LBE": "LBE (its own EM processes)"}
+
+
+def split_reference_list(ref: str) -> tuple[str, str]:
+    """(hadronic list, EM suffix) of a G4PhysListFactory name: the suffix is the last four characters when they are one
+    of the factory's EM options (G4PhysListFactory::GetReferencePhysList), else empty."""
+    suf = ref[-4:] if len(ref) > 4 and ref[-4:] in EM_SUFFIX and ref[-4:] else ""
+    return (ref[: -len(suf)] if suf else ref), suf
+
+
+def em_constructor_of(ref: str) -> str:
+    """The EM constructor a reference list builds: the suffix's, else the list's own (EM_BASE), else
+    G4EmStandardPhysics; LBE keeps its own EM whatever the suffix; _EM0 is the factory's default (no replacement)."""
+    had, suf = split_reference_list(ref)
+    if had == "LBE":
+        return EM_BASE["LBE"]
+    if suf and suf != "_EM0":
+        return EM_SUFFIX[suf]
+    return EM_BASE.get(had, "G4EmStandardPhysics")
 # hadronic inelastic model by list, particle class and kinetic energy (MeV), Geant4 11.4.3: G4HadronPhysicsQGSP_BIC.cc
 # (maxBIC_proton = maxBIC_neutron = 1.5 GeV, minBERT 1 GeV; otherwise as G4HadronPhysicsQGSP_BERT.cc) and
 # G4HadronicParameters.cc (FTF-cascade transition 3-6 GeV, QGS-FTF transition 12-25 GeV); "A/B" is a transition region
@@ -505,18 +529,15 @@ def _declared_assignment(settings: dict, domain: str) -> dict:
     fluct = "PAI" if any(c.startswith("/process/em/AddPAIRegion") for c in ui) else "Urban"
     if domain == "hadronic":
         ref = settings.get("reference_list") or ""
-        base = next((b for b in HADRONIC if ref.startswith(b)), None)
+        base = split_reference_list(ref)[0]  # the exact list name: a variant (_ATL, _HP, ...) has other models
+        base = base if base in HADRONIC else None
         part, e = settings["particle"], settings["energy_MeV"]
         cls = "nucleon" if part in NUCLEONS else "pion" if part in PIONS else None
         if not base or not cls:
             return {"domain": "hadronic", "model": None, "known": False}
         model = next(m for lim, m in HADRONIC[base][cls] if e <= lim)
         return {"domain": "hadronic", "list": base, "particle_class": cls, "model": model, "known": True}
-    em = settings.get("em_constructor")
-    if not em:
-        ref = settings.get("reference_list") or ""
-        suf = next((s for s in sorted(EM_SUFFIX, key=len, reverse=True) if s and ref.endswith(s)), "")
-        em = EM_SUFFIX[suf]
+    em = settings.get("em_constructor") or em_constructor_of(settings.get("reference_list") or "")
     return {"domain": "em", "em_constructor": em, "fluctuation_model": fluct, "known": True}
 
 
