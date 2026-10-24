@@ -566,8 +566,8 @@
   "run_id": "geant4-run-sp-cut-0.1-trial",
   "run_record": {
    "artifact_id": "geant4-run-sp-cut-0.1-trial",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-cut-0.1-trial.computational-run.json",
-   "sha256": "97320c4ac31fbba7a66a750afe804f642069145719558094fd609c53e3341604"
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.1-trial.computational-run.json",
+   "sha256": "8ea7995348e8799ffeaf3ef915b660e4dd05253eeaae46729d9c6aae07e4b761"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

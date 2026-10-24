@@ -5725,8 +5725,8 @@
   "run_id": "geant4-run-mpv-control-minus",
   "run_record": {
    "artifact_id": "geant4-run-mpv-control-minus",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-control-minus.computational-run.json",
-   "sha256": "0ff9853c8aeb031b3a7538332acda1c3abfb4c50857db3addc75743d00535cf2"
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-control-minus.computational-run.json",
+   "sha256": "36cc2eabb5e8b479388609a37c9db1251ff6dcb1a135b5a8b4431627990ae7dc"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

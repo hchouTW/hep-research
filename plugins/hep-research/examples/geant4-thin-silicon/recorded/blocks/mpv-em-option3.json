@@ -5725,8 +5725,8 @@
   "run_id": "geant4-run-mpv-em-option3",
   "run_record": {
    "artifact_id": "geant4-run-mpv-em-option3",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-em-option3.computational-run.json",
-   "sha256": "9298819223669b315b86721932a0efdfe88ac43924cb2c8744eb81b7783676c4"
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-em-option3.computational-run.json",
+   "sha256": "ab37236e3cee28b290b2042740a5fd2d591d2d5a17a4fc411a0b69c3e6560671"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

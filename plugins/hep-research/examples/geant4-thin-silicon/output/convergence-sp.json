@@ -77,10 +77,10 @@
    "role": "nominal",
    "run_record": {
     "artifact_id": "geant4-run-sp-nominal",
-    "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-nominal.computational-run.json",
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-nominal.computational-run.json",
     "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
    },
-   "sha256": "9332798a6170f0dd6945df5deba91ce3d69da27a113ee8a6f05fa573c182a041"
+   "sha256": "b0d9ad5bff454ab031f587d98ce866639e2a90c2a8189a1e3a7a976cd43c7ab1"
   },
   {
    "legacy": false,
@@ -110,10 +110,10 @@
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-sp-cut-0.1",
-    "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-cut-0.1.computational-run.json",
-    "sha256": "0a9833df6ea4ea716fd399f1f5744fb794f8185ce8006888d5d291714946b087"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.1.computational-run.json",
+    "sha256": "51a10a2957267e99246dcbceb407a26176d6b60b0084e115e4cefe762983810c"
    },
-   "sha256": "4967196321519a65795c0e6079334b09d5d3ce88272295e2aa4eb6c8d717935c"
+   "sha256": "4428348c3828abffd147a319ddb509669879bb3993da2a9a7ffa9e7497f50801"
   },
   {
    "legacy": false,
@@ -143,10 +143,10 @@
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-sp-cut-0.03",
-    "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-cut-0.03.computational-run.json",
-    "sha256": "87c6226e8b96007bccf5dbbc16b24aae6df607915f019022ed0d60f518a26b97"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-cut-0.03.computational-run.json",
+    "sha256": "56e039e05cf4df5ed889c3cb1b608f4166103d5e20bd2c8ba5ef070667c00d48"
    },
-   "sha256": "9ac01581585037b5fefd58b78934fb250403710b9f41efba9e418e6df18b06f5"
+   "sha256": "9265649fad357a4e0d80782c00d318a28f766bc3f88a2dbb83e62ea8337ab46b"
   }
  ]
 }

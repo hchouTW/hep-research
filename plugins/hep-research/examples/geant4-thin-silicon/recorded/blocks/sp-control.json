@@ -565,7 +565,7 @@
   "run_id": "geant4-run-sp-control",
   "run_record": {
    "artifact_id": "geant4-run-sp-control",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-control.computational-run.json",
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-control.computational-run.json",
    "sha256": "86600a2444f156987789c205d818f755343fcf5ce1fc8b4a19f584460027f651"
   },
   "seed_scheme": "legacy",

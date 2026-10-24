@@ -31,35 +31,35 @@
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/sp-control-minus.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "2519a40fe1801356a4d8d244637490e47735bf50537f4ac2f496f53ae7eca54a"
+    "sha256": "a3ff2c539e7fa1640e6d8e6359c84ce78575626efa03d1747e44b3e2baaabb6f"
    },
    {
     "artifact_id": "geant4-run-sp-cut-0.1",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/sp-cut-0.1.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "0a9833df6ea4ea716fd399f1f5744fb794f8185ce8006888d5d291714946b087"
+    "sha256": "51a10a2957267e99246dcbceb407a26176d6b60b0084e115e4cefe762983810c"
    },
    {
     "artifact_id": "geant4-run-sp-cut-0.03",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/sp-cut-0.03.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "87c6226e8b96007bccf5dbbc16b24aae6df607915f019022ed0d60f518a26b97"
+    "sha256": "56e039e05cf4df5ed889c3cb1b608f4166103d5e20bd2c8ba5ef070667c00d48"
    },
    {
     "artifact_id": "geant4-run-sp-em-option0",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/sp-em-option0.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "7f2813c3af194adf2ebdd0dd086fd29989abc7176fc5edf9f064654752821a73"
+    "sha256": "7510360631bfa5ef0d457a3cc14cd84c23718139b331b374d0e72593faeb286f"
    },
    {
     "artifact_id": "geant4-run-sp-em-option3",
     "artifact_type": "computational-run",
     "ref": "output/artifacts/runs/sp-em-option3.computational-run.json",
     "role": "Geant4 run",
-    "sha256": "45c03a41314d0503e047f2ce658caa8a5aa7185cd056745b5e90deb7fa7737ba"
+    "sha256": "d5ea83aa59e2b453021f1e05570a1498e8b6316ae289032701fa821af2305ab2"
    }
   ],
   "exit_status": 0,
@@ -74,7 +74,7 @@
    },
    {
     "path": "output/convergence-sp.json",
-    "sha256": "0545360f60fad24ad6e00bef0fbaeb7c26bad0f06f7f3a7878bbef2f4f3ab8c5"
+    "sha256": "1907fca76595581598b3c82a8eb232351ffa8b64dc429a3b001ba17e5999ac41"
    },
    {
     "path": "output/variations-sp.json",

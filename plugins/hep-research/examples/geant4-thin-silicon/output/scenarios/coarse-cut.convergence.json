@@ -152,10 +152,10 @@
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-1.0",
-    "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-cut-1.0.computational-run.json",
-    "sha256": "32026a268e9e5e6fdb881ef97e99053fea64e5dc699c1cc2de64123c071d0c18"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-cut-1.0.computational-run.json",
+    "sha256": "ee0d0cfa7e1e85e927c9de28e399c22fa23497a20cfc92a0943085d3508d9d5a"
    },
-   "sha256": "fa879940ec7ba88b46af8b569e40cb77c4d4fba42e77692d3eb082852d2b8ff5"
+   "sha256": "2579e53a0c2c8863757db04ded5206960ab020acc5d33ee2feaf4b1dec82072a"
   },
   {
    "legacy": false,
@@ -232,10 +232,10 @@
    "role": "scan",
    "run_record": {
     "artifact_id": "geant4-run-mpv-cut-0.3",
-    "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-cut-0.3.computational-run.json",
-    "sha256": "bd6d8da0f90ebcb292d35622ed200b6214cf3254bdfe887a0a5cbc826881fe16"
+    "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-cut-0.3.computational-run.json",
+    "sha256": "b06d3fb6bdf10c45c986d8ad5970661ec6d872cfdef19cdbb49f364926ce9849"
    },
-   "sha256": "8ce2cf956f4066e461ec05737edb1ab7c2ba21a24c91a194f2b64fbe5264c27a"
+   "sha256": "6dfa3b4fe1240b63ada59bf6acf7ad166978187cabe9509bbcef044d2debffc0"
   }
  ]
 }

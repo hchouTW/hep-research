@@ -18,7 +18,7 @@
   "exit_status": 0,
   "input_manifest": [
    {
-    "path": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/specs/sp-control-minus.json",
+    "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/sp-control-minus.json",
     "sha256": "ebf028d286e6f33459a2c11aa3c8bcffbe7100c6c96c67d66eb579947667e40e"
    }
   ],

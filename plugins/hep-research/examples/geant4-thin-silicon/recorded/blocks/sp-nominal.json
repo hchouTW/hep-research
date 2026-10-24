@@ -565,7 +565,7 @@
   "run_id": "geant4-run-sp-nominal",
   "run_record": {
    "artifact_id": "geant4-run-sp-nominal",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-nominal.computational-run.json",
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-nominal.computational-run.json",
    "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
   },
   "seed_scheme": "legacy",

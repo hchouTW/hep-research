@@ -565,7 +565,7 @@
   "run_id": "geant4-run-sp-density-10",
   "run_record": {
    "artifact_id": "geant4-run-sp-density-10",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-density-10.computational-run.json",
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-density-10.computational-run.json",
    "sha256": "3df4a381c6b1d0538b6c71d537a8592e5df557fd03ea1493466b4a4aa2eca048"
   },
   "seed_scheme": "legacy",

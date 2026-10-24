@@ -6,7 +6,7 @@
    "configuration_basis": {
     "artifact_id": "geant4-run-mpv-nominal",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-    "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
+    "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
    },
    "configuration_gap": null,
    "detection_limit_relative": 0.0715312464119818,
@@ -123,7 +123,7 @@
    "configuration_basis": {
     "artifact_id": "geant4-run-mpv-nominal",
     "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-    "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
+    "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
    },
    "geant4": 0.03,
    "grade": "sanity",

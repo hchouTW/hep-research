@@ -18,7 +18,7 @@
   "exit_status": 0,
   "input_manifest": [
    {
-    "path": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/specs/mpv-ftfp-bert-emz.json",
+    "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/mpv-ftfp-bert-emz.json",
     "sha256": "7fbd7c3e2d4215e9081781804dac15d0c25ea05b94f5e94945d905c2bd7bc63a"
    }
   ],

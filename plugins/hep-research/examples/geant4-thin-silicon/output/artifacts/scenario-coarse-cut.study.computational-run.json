@@ -19,11 +19,11 @@
    },
    {
     "path": "output/benchmarks-mpv.json",
-    "sha256": "a97fcf09b061246bc3042567ba0ebbf467b7b334d3c700ce664bdc49bbeea199"
+    "sha256": "388b0b5db34890f6cc99999d4d38178f13bc2ff9115675d821d73b5397162115"
    },
    {
     "path": "output/scenarios/coarse-cut.convergence.json",
-    "sha256": "e4050de300c21da4a56dc5068b70bad0b50b7c2130422bceabe4d7b5deaa1f59"
+    "sha256": "7845f43021df12a61316f1fd9f7b345e3b7f538accc559e7f2ff12b81b2f206b"
    },
    {
     "path": "output/variations-mpv.json",
@@ -44,7 +44,7 @@
      "configuration_basis": {
       "artifact_id": "geant4-run-mpv-nominal",
       "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-      "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
+      "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
      },
      "configuration_gap": null,
      "detection_limit_relative": 0.0715312464119818,
@@ -161,7 +161,7 @@
      "configuration_basis": {
       "artifact_id": "geant4-run-mpv-nominal",
       "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-      "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
+      "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
      },
      "geant4": 0.03,
      "grade": "sanity",

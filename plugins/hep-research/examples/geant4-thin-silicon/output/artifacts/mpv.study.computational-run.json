@@ -19,11 +19,11 @@
    },
    {
     "path": "output/benchmarks-mpv.json",
-    "sha256": "a97fcf09b061246bc3042567ba0ebbf467b7b334d3c700ce664bdc49bbeea199"
+    "sha256": "388b0b5db34890f6cc99999d4d38178f13bc2ff9115675d821d73b5397162115"
    },
    {
     "path": "output/convergence-mpv.json",
-    "sha256": "f751e66d9d80a357d9b6f24f7bc9c98b2d79d5bcabde997adece7435de1c35fd"
+    "sha256": "bee7a326faa6f25ac6f35da35bdba9b5fb9652716db4c45e049c850e6d43d200"
    },
    {
     "path": "output/variations-mpv.json",
@@ -44,7 +44,7 @@
      "configuration_basis": {
       "artifact_id": "geant4-run-mpv-nominal",
       "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-      "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
+      "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
      },
      "configuration_gap": null,
      "detection_limit_relative": 0.0715312464119818,
@@ -161,7 +161,7 @@
      "configuration_basis": {
       "artifact_id": "geant4-run-mpv-nominal",
       "run_record": "../recorded/runs/mpv-nominal.computational-run.json",
-      "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b"
+      "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f"
      },
      "geant4": 0.03,
      "grade": "sanity",
@@ -465,7 +465,7 @@
    "artifact_id": "geant4-run-mpv-nominal",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-nominal.computational-run.json",
-   "sha256": "32b3aa58c89ca0b9eda7ecdef261ea1c6cdf345ff68b2186ccf256108bdd1f5b",
+   "sha256": "b5d0f993f78b3a58f5e12e8727eddebd8424be600632e487bbfdcc5bf987cb6f",
    "status": [
     "unvalidated"
    ],
@@ -475,7 +475,7 @@
    "artifact_id": "geant4-run-mpv-control",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-control.computational-run.json",
-   "sha256": "7be03c82c64579315a733f43b9408b3c40c9d647f95cbff9352b6172b5f73263",
+   "sha256": "4664dd67380368a7fef2446b4d795bfa4c40ea8c58d4af1e34e6217c8a9d122c",
    "status": [
     "unvalidated"
    ],
@@ -485,7 +485,7 @@
    "artifact_id": "geant4-run-mpv-control-minus",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-control-minus.computational-run.json",
-   "sha256": "0ff9853c8aeb031b3a7538332acda1c3abfb4c50857db3addc75743d00535cf2",
+   "sha256": "36cc2eabb5e8b479388609a37c9db1251ff6dcb1a135b5a8b4431627990ae7dc",
    "status": [
     "unvalidated"
    ],
@@ -495,7 +495,7 @@
    "artifact_id": "geant4-run-mpv-cut-0.1",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-cut-0.1.computational-run.json",
-   "sha256": "fad35ff3a622a7878db3400ae4a82089a0d042047ed2cb7e0363647ae563d48e",
+   "sha256": "019677c398b65ea715e8335ed00ee446752acaca9b2f936fee013532d760a07b",
    "status": [
     "unvalidated"
    ],
@@ -505,7 +505,7 @@
    "artifact_id": "geant4-run-mpv-cut-0.03",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-cut-0.03.computational-run.json",
-   "sha256": "db73d3b1c0b50e211e20385ccfb0af90f110ebade8d469578c4427045e8312ec",
+   "sha256": "e3c610960b119f028a7a5fc11b710560b628a07dd345bd1689afb36d6b2075f4",
    "status": [
     "unvalidated"
    ],
@@ -515,7 +515,7 @@
    "artifact_id": "geant4-run-mpv-em-option0",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-em-option0.computational-run.json",
-   "sha256": "0ba84d2e92e2f8efac71f1e07a05f279c7fed0e33ad41a93eb814ab882882922",
+   "sha256": "37fb9ff5fa3eeaf7e47aeb051c298b7f04915e2a1e11ed9198c191123caa7f91",
    "status": [
     "unvalidated"
    ],
@@ -525,7 +525,7 @@
    "artifact_id": "geant4-run-mpv-em-option3",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-em-option3.computational-run.json",
-   "sha256": "9298819223669b315b86721932a0efdfe88ac43924cb2c8744eb81b7783676c4",
+   "sha256": "ab37236e3cee28b290b2042740a5fd2d591d2d5a17a4fc411a0b69c3e6560671",
    "status": [
     "unvalidated"
    ],
@@ -535,7 +535,7 @@
    "artifact_id": "geant4-run-mpv-pai",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-pai.computational-run.json",
-   "sha256": "e91a9e056f84539e2f392663e09c1d07143e63fb097e218dc85da163f35e3af3",
+   "sha256": "8e01c18808c1023c81c870c3a5041becd93d41e1f0f06cded7736f83e448944c",
    "status": [
     "unvalidated"
    ],
@@ -545,7 +545,7 @@
    "artifact_id": "geant4-run-mpv-ftfp-bert-emz",
    "artifact_type": "computational-run",
    "ref": "output/artifacts/runs/mpv-ftfp-bert-emz.computational-run.json",
-   "sha256": "837c2c21db9bce9f2ca42dab82b7579accb28dadceef03dc151c98ff0c903dcc",
+   "sha256": "b8612ca177fb06b6fef8db859c02c9e02c45d04989c5edd5d5c9b6430b2dd161",
    "status": [
     "unvalidated"
    ],

@@ -5725,8 +5725,8 @@
   "run_id": "geant4-run-mpv-ftfp-bert-emz",
   "run_record": {
    "artifact_id": "geant4-run-mpv-ftfp-bert-emz",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-ftfp-bert-emz.computational-run.json",
-   "sha256": "837c2c21db9bce9f2ca42dab82b7579accb28dadceef03dc151c98ff0c903dcc"
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-ftfp-bert-emz.computational-run.json",
+   "sha256": "b8612ca177fb06b6fef8db859c02c9e02c45d04989c5edd5d5c9b6430b2dd161"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

@@ -5725,8 +5725,8 @@
   "run_id": "geant4-run-mpv-nominal-trial",
   "run_record": {
    "artifact_id": "geant4-run-mpv-nominal-trial",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/mpv-nominal-trial.computational-run.json",
-   "sha256": "dabdf27d881ec718bcfd5f9140fdcb14890a40aaea0e6b31353c0fc5afc98eee"
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/mpv-nominal-trial.computational-run.json",
+   "sha256": "b59ce8fce231db6e30fbebb5192459ef075857304cd12474f48751125e8378e6"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

@@ -18,7 +18,7 @@
   "exit_status": 0,
   "input_manifest": [
    {
-    "path": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/specs/sp-cut-0.1.json",
+    "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/sp-cut-0.1.json",
     "sha256": "80fc4314a881c95b325fcaf46725ff6a32ccf0a0cf6d9b82c34d1f05dee9b311"
    }
   ],

@@ -566,8 +566,8 @@
   "run_id": "geant4-run-sp-control-minus",
   "run_record": {
    "artifact_id": "geant4-run-sp-control-minus",
-   "ref": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/runs/sp-control-minus.computational-run.json",
-   "sha256": "2519a40fe1801356a4d8d244637490e47735bf50537f4ac2f496f53ae7eca54a"
+   "ref": "<plugin root>/examples/geant4-thin-silicon/recorded/runs/sp-control-minus.computational-run.json",
+   "sha256": "a3ff2c539e7fa1640e6d8e6359c84ce78575626efa03d1747e44b3e2baaabb6f"
   },
   "seed_scheme": "hash-v1",
   "seeding": "stream",

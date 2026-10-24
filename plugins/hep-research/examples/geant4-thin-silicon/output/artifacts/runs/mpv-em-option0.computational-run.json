@@ -18,7 +18,7 @@
   "exit_status": 0,
   "input_manifest": [
    {
-    "path": "/private/tmp/claude-501/-Users-hchou-hep-research/a7292050-71ca-43b7-85f3-571d72b3251d/scratchpad/j14-recorded/specs/mpv-em-option0.json",
+    "path": "<plugin root>/examples/geant4-thin-silicon/recorded/specs/mpv-em-option0.json",
     "sha256": "568f4fa5d0acec138f5505432c32e7e632c1a95ded3e81c603aea65209500b02"
    }
   ],
