@@ -5,6 +5,8 @@ Purpose: verification that the application is written correctly, before any phys
 validation: it says nothing about whether the physics list suits the observable (hep-detector decides that).
 
 Checks (subcommands):
+  Geometry: the placements, thicknesses and materials come from the effective config's geometry tree for runs from
+  adapter 0.2.0 whose probe recorded (geometry_source "effective config"), else from the run record's spec/1.
   overlaps  construction-time checkOverlaps of every placement (layered_sim places every slab with its own
             G4PVPlacement, no replicas, because G4PVReplica does not override CheckOverlaps) plus /geometry/test/run;
             neither may report an overlap (G4Exception GeomVol1002). Both are sampled checks: a pass is not proof.
@@ -91,10 +93,30 @@ def read_csv(path: Path) -> list[dict]:
     return out
 
 
+def placements(rec: dict) -> tuple[list[tuple[str, float, str]], str]:
+    """(slab name, thickness along x in mm, material) of every placement below the world, and the source: the
+    effective config's geometry tree for runs from adapter 0.2.0 whose probe recorded (A2.6), else spec/1."""
+    sim = rec["extension"]["simulation"]
+    tree = ((sim.get("effective_config") or {}).get("geometry") or {}).get("tree")
+    if tree:
+        lvs = {lv["id"]: lv for lv in tree["logical_volumes"]}
+        out = []
+        for pl in tree["placements"]:
+            if pl.get("mother_logical") is None:
+                continue
+            lv = lvs[pl["logical"]]
+            par = (lv.get("solid") or {}).get("parameters") or {}
+            out.append((lv["name"], 2 * float.fromhex(par["half_x_mm"]) if "half_x_mm" in par else float("nan"),
+                        lv.get("material")))
+        return out, "effective config"
+    return [(sl["name"], sl["thickness_mm"], sl["material"]) for layer in sim["geometry"]["layers"]
+            for _ in range(layer.get("repeat", 1)) for sl in layer["slabs"]], "spec/1"
+
+
 def check_overlaps(rec: dict, run_dir: Path) -> tuple[str, dict]:
     log = (run_dir / "log.txt").read_text(encoding="utf-8", errors="replace")
-    geo = rec["extension"]["simulation"]["geometry"]
-    expected = sum(layer.get("repeat", 1) * len(layer["slabs"]) for layer in geo["layers"]) + 1  # + the world
+    pls, source = placements(rec)
+    expected = len(pls) + 1  # + the world
     checked = sum(1 for ln in log.splitlines() if ln.startswith("Checking overlaps for volume") and "OK!" in ln)
     reports = log.count("GeomVol1002")
     test_run = "/geometry/test/run" in log or rec["extension"]["simulation"].get("geometry") is not None
@@ -102,7 +124,8 @@ def check_overlaps(rec: dict, run_dir: Path) -> tuple[str, dict]:
               .get("overlap_test_points", 0))
     ok = reports == 0 and checked >= expected - 1 and points > 0
     return ("ok" if ok else "failed"), {
-        "check": "overlaps", "placements_expected": expected - 1, "construction_checks_ok": checked,
+        "check": "overlaps", "placements_expected": expected - 1, "geometry_source": source,
+        "construction_checks_ok": checked,
         "overlap_reports": reports, "geometry_test_run_points": points, "geometry_test_run_requested": bool(test_run),
         "note": "sampled checks (construction-time checkOverlaps and /geometry/test/run): a pass is not a proof"}
 
@@ -114,13 +137,13 @@ def check_budget(rec: dict, run_dir: Path, tol: float) -> tuple[str, dict]:
     dump = {m["name"]: m for m in json.loads((run_dir / "materials.json").read_text(encoding="utf-8"))["materials"]}
     rows = read_csv(run_dir / "events.csv")
     problems, slabs = [], []
-    for layer in sim["geometry"]["layers"]:
-        for s in layer["slabs"]:
-            m = dump.get(s["material"])
-            if m is None:
-                problems.append(f"material {s['material']} missing from the dump")
-                continue
-            slabs.append((s["name"], layer.get("repeat", 1) * s["thickness_mm"], m))
+    pls, source = placements(rec)
+    for name, t, mat in pls:
+        m = dump.get(mat)
+        if m is None:
+            problems.append(f"material {mat} missing from the dump")
+            continue
+        slabs.append((name, t, m))
     for user in sim.get("materials", []):
         m = dump.get(user["name"])
         if m and abs(m["density_g_cm3"] / user["density_g_cm3"] - 1) > tol:
@@ -141,7 +164,8 @@ def check_budget(rec: dict, run_dir: Path, tol: float) -> tuple[str, dict]:
         if abs(a - b) > tol * max(abs(a), 1e-300):
             problems.append(f"sum t/{label}: spec {a} != geantino {b}")
     return ("ok" if not problems else "failed"), {
-        "check": "material-budget", "tolerance_relative": tol, "spec_x_over_X0": spec_x0, "scan_x_over_X0": scan_x0,
+        "check": "material-budget", "geometry_source": source, "tolerance_relative": tol, "spec_x_over_X0": spec_x0,
+        "scan_x_over_X0": scan_x0,
         "spec_x_over_lambda_I": spec_li, "scan_x_over_lambda_I": scan_li, "problems": problems,
         "note": "X0 and lambda_I come from the Geant4 material dump: closure of the application, never a reference"}
 

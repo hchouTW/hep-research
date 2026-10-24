@@ -8,14 +8,10 @@
 #include <utility>
 #include <vector>
 
-struct MaterialDef {  // a single element (Z, A) or a mixture by mass fraction of named materials, with a density
-  std::string name;
-  int z = 0;
-  double a_g_mole = 0., density_g_cm3 = 0.;
-  std::vector<std::pair<std::string, double>> components;  // (material name, mass fraction); empty: single element
-  std::string state = "solid";  // solid, liquid, gas
-  double temperature_K = -1., pressure_Pa = -1.;  // < 0: Geant4 default
-};
+#include "SimMaterials.hh"
+#include "SimSummary.hh"
+
+using g4sim::MaterialDef;
 
 struct SlabDef {
   std::string name, material;
@@ -64,10 +60,17 @@ struct Spec {
   std::array<long, 2> seeds{0, 0};
   std::string run_manager = "serial";
   int threads = 1;
+  std::string seeding = "stream";  // per-event: event i reseeds with (H(S, i, 0), H(S, i, 1)) (g4sim/SimSeed.hh)
+  long long logical_run_seed = 0;  // S, required by per-event
   // outputs
   std::string csv, materials_out, datapaths_out;
   int overlap_test_points = 0;  // > 0: /geometry/test/run after initialisation with this resolution
   bool per_instance = false;     // also write one deposit column per placed slab copy
+  std::vector<g4sim::ObservableDecl> observables;  // output.observables: the run summary (summary.json) accumulates them
+  long block_size = 0, blocks = 0, block_first_event = 0;  // output.blocks: B, K and the logical run's first event
+  bool debug_observable_dump = false;  // a side file of the observables' columns per event (%.17g), for tests only
+  // written next to the CSV: summary.json (with observables), column_map.json, probe.json, observables_dump.csv
+  std::string summary_out, column_map_out, probe_out, dump_out;
 
   std::vector<std::string> slabNames() const;
 };

@@ -1,0 +1,95 @@
+{
+ "$comment": "Column map of a Geant4 run (simulation-columns/1; geant4 adapter 0.2.0, Geant4 program A2.5; owner adapters/geant4, versioned by column_map_version). layered_sim writes column_map.json next to its CSV for every run. Per column: the semantic name the study layer reads, the actual column name, unit, operational definition and the file it lives in (csv or summary). Only declarative operations: rename, unit conversion, sum, filter; a transformation that needs computation is a separate, recorded step. Validated by the adapter's scripts with contracts.schema.validate.",
+ "type": "object",
+ "required": [
+  "column_map_version",
+  "producer",
+  "columns"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "column_map_version": {
+   "const": "simulation-columns/1"
+  },
+  "producer": {
+   "type": "string",
+   "minLength": 1
+  },
+  "note": {
+   "type": "string"
+  },
+  "columns": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "semantic",
+     "column",
+     "unit",
+     "definition",
+     "file",
+     "operation"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "semantic": {
+      "type": "string",
+      "minLength": 1
+     },
+     "column": {
+      "type": "string",
+      "minLength": 1
+     },
+     "unit": {
+      "type": "string"
+     },
+     "definition": {
+      "type": "string"
+     },
+     "file": {
+      "enum": [
+       "csv",
+       "summary"
+      ]
+     },
+     "operation": {
+      "type": "object",
+      "required": [
+       "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "kind": {
+        "enum": [
+         "rename",
+         "unit-conversion",
+         "sum",
+         "filter"
+        ]
+       },
+       "source_column": {
+        "type": "string"
+       },
+       "selection": {
+        "type": "array",
+        "items": {
+         "type": "object"
+        }
+       },
+       "factor": {
+        "type": "number"
+       },
+       "columns": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

@@ -52,7 +52,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from contracts import revocation as rv  # noqa: E402
-from contracts.validate import STICKY_STATUSES, geant4_spec_v1, validate_artifact  # noqa: E402
+from contracts.validate import STICKY_STATUSES, geant4_configuration, validate_artifact  # noqa: E402
 from core.protected.guard import ProtectedUseRefused, guard, protected_main  # noqa: E402
 from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
@@ -261,8 +261,9 @@ class _Checker:
     def configuration(self, path: Path, doc: dict):
         """CV-A1 (A1.3): a benchmark of a study record that states its configuration is re-derived from the run
         record named by its configuration_basis, which must be one of the record's evidence records or inputs (same id
-        and sha256): configuration, hash_scheme and target hash must equal what contracts.validate.geant4_spec_v1
-        gives."""
+        and sha256): configuration, hash_scheme and target hash must equal what contracts.validate.geant4_configuration
+        gives under the benchmark's hash_scheme (spec-v1 for A1 records, tree-v1 from the effective config for records
+        from geant4 adapter 0.2.0, A2.6)."""
         ext = doc.get("extension") or {}
         study = ext.get("study")
         records = [r for key in (ext.get("evidence_records"), doc.get("inputs")) if isinstance(key, list) for r in key]
@@ -285,7 +286,8 @@ class _Checker:
                 continue  # reported by evidence()
             try:
                 sdoc = json.loads(src.read_text(encoding="utf-8"))
-                conf = geant4_spec_v1((sdoc.get("extension") or {}).get("simulation") or {}, b.get("target_slabs"))
+                conf = geant4_configuration((sdoc.get("extension") or {}).get("simulation") or {}, b.get("target_slabs"),
+                                            b.get("hash_scheme") or "spec-v1")
             except (ValueError, OSError) as exc:
                 self.add("error", where, "geant4.configuration_mismatch", f"cannot re-derive the configuration: {exc}")
                 continue

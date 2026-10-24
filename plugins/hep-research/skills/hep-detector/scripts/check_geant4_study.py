@@ -9,6 +9,8 @@ Subcommands:
   spec        completeness of the study spec (assets/geant4-study-spec.schema.json) and the sourced rule table
               (assets/geant4-physics-rules.json; a rule without a source is refused); reports the rule coverage.
               Exit 1 when the observable, statistical target or validation scope is missing or an error rule fires.
+              With --effective-config (geant4 adapter 0.2.0) the thin-layer rule takes the minimum slab thickness
+              from the effective config's geometry tree (derived.min_thickness_basis), else from spec/1.
   run         run summaries (simulation-summary/1, written by adapters/geant4/assets/summary_from_csv.py, or legacy
               geant4-run-summary/1 for records made before contracts CV-A1) against the spec (physics, gun, spec
               hash, data paths and dataset hashes, the observable declarations and block count), the statistical
@@ -29,7 +31,7 @@ Subcommands:
               benchmarks, convergence, variations and scope embedded. Insufficient evidence still writes the record,
               listing the gaps; only invalid input is refused (exit 2).
 Usage (paths relative to the current folder):
-  check_geant4_study.py spec --spec STUDY.json [--rules RULES.json]
+  check_geant4_study.py spec --spec STUDY.json [--rules RULES.json] [--effective-config EFFECTIVE_CONFIG.json]
   check_geant4_study.py run --spec STUDY.json --summary SUMMARY.json [...] [--out CONVERGENCE.json]
   check_geant4_study.py variations --spec STUDY.json --nominal SUMMARY.json --variation NAME=SUMMARY.json [...] --out VARIATIONS.json
   check_geant4_study.py label --spec STUDY.json --benchmarks BENCH.json --convergence CONV.json [--variations VAR.json]
@@ -58,7 +60,7 @@ import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV re
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.schema import validate as schema_validate  # noqa: E402
-from contracts.validate import scope_outside  # noqa: E402  (CV-A1: the single scope implementation)
+from contracts.validate import geant4_tree_thickness_mm, scope_outside  # noqa: E402  (CV-A1, A2.6)
 from core.simulation import estimates as E  # noqa: E402
 from core.simulation.summary import SUMMARY_VERSION  # noqa: E402
 from core.stats import batch_means as M, decisions as D  # noqa: E402
@@ -140,7 +142,9 @@ def load_study(path: Path) -> dict:
     return study
 
 
-def derived(study: dict) -> dict:
+def derived(study: dict, effective_config: dict | None = None) -> dict:
+    """Facts the rule table reads. The minimum slab thickness comes from the effective config's geometry tree when
+    one is given (records from geant4 adapter 0.2.0, A2.6), else from spec/1's geometry.layers."""
     ls = get(study, "physics.layered_sim") or {}
     phys = ls.get("physics", {})
     ui = ls.get("ui_commands", [])
@@ -154,8 +158,16 @@ def derived(study: dict) -> dict:
                 had = ref[: -len(suf)]
                 break
     scans = [p.get("values") for p in get(study, "convergence_plan.parameters") or [] if isinstance(p, dict)]
-    return {"em_only": "em_constructor" in phys, "min_thickness_mm": min((s["thickness_mm"] for s in slabs),
-                                                                        default=None),
+    thick, basis = min((s["thickness_mm"] for s in slabs), default=None), None
+    if effective_config is not None:
+        if not effective_config.get("recorded"):
+            raise StudyError("--effective-config: the probe recorded nothing (recorded: false); give none to use spec/1")
+        try:
+            thick, basis = min(geant4_tree_thickness_mm(effective_config).values(), default=None), "effective config"
+        except ValueError as exc:
+            raise StudyError(f"--effective-config: {exc}") from exc
+    return {"em_only": "em_constructor" in phys, "min_thickness_mm": thick,
+            **({"min_thickness_basis": basis} if basis else {}),
             "pai_requested": any(c.startswith("/process/em/AddPAIRegion") for c in ui),
             "step_limits": bool(phys.get("step_limit_mm") or phys.get("min_ekin_MeV")),
             "cut_scan_values": scans, "hadronic_list": had,
@@ -205,7 +217,8 @@ def cmd_spec(args) -> tuple[str, dict]:
     for k in ("observable.kind", "particle.name", "particle.energy_MeV", "validation_plan.scope"):
         if get(study, k) in (None, [], {}, "") and k.split(".")[0] not in missing:
             missing.append(k)
-    doc = dict(study, derived=derived(study))
+    ec = load_json(Path(args.effective_config)) if getattr(args, "effective_config", None) else None
+    doc = dict(study, derived=derived(study, ec))
     if study.get("observables") is not None:  # CV-A1 (A1.12): the declarations and the names that must be declared
         rep = schema_validate(study["observables"], "simulation_observables.json")
         if not rep.ok:
@@ -452,7 +465,42 @@ def cmd_run(args) -> tuple[str, dict]:
     return "ok", doc
 
 
-def model_assignment(settings: dict, domain: str) -> dict:
+PROBE_MODEL_NAMES = {"BertiniCascade": "BERT", "Binary Cascade": "BIC", "FTFP": "FTFP", "QGSP": "QGSP"}
+
+
+def probe_hadronic_model(effective_config: dict, particle: str, energy_mev: float) -> str | None:
+    """The inelastic model(s) the probe recorded for a particle at an energy (A2.4): models whose closed range contains
+    the energy, a model whose range only starts at that energy left out unless it is the only one (the convention of
+    HADRONIC, whose rows end at e <= lim), ordered by their lower edge and joined by '/', in the short names of
+    HADRONIC; None if the probe has no inelastic process for the particle."""
+    procs = [h for h in (effective_config.get("sections") or {}).get("geant4", {}).get("hadronic") or []
+             if h.get("particle") == particle and "nelastic" in h.get("process", "")]
+    if not procs:
+        return None
+    ranges = [(float.fromhex(m["min_MeV"]), float.fromhex(m["max_MeV"]), m["name"]) for m in procs[0]["models"]]
+    inside = [r for r in ranges if r[0] <= energy_mev <= r[1]]
+    interior = [r for r in inside if r[0] < energy_mev or len(inside) == 1]
+    return "/".join(PROBE_MODEL_NAMES.get(n, n) for _, _, n in sorted(interior or inside))
+
+
+def model_assignment(settings: dict, domain: str, effective_config: dict | None = None) -> dict:
+    """The model a variation uses for the study's particle and energy. Hadronic: from the run's effective config when
+    one is given (source probe; the declared table, source declared, otherwise; both present and different is an
+    error, A2.4). EM: from the declared settings (the probe records the EM parameters, not the constructor)."""
+    ma = _declared_assignment(settings, domain)
+    if domain == "hadronic" and effective_config is not None and effective_config.get("recorded"):
+        got = probe_hadronic_model(effective_config, settings["particle"], settings["energy_MeV"])
+        if got is not None:
+            if ma.get("known") and ma["model"] != got:
+                raise StudyError(f"the effective config gives the hadronic model {got} for {settings['particle']} at "
+                                 f"{settings['energy_MeV']} MeV, the declared table {ma['model']} (A2.4)")
+            cls = "nucleon" if settings["particle"] in NUCLEONS else "pion" if settings["particle"] in PIONS else None
+            return {**ma, "domain": "hadronic", "particle_class": ma.get("particle_class", cls), "model": got,
+                    "known": True, "source": "probe"}
+    return ma  # source declared (the key is written only when the probe is read, so older outputs are unchanged)
+
+
+def _declared_assignment(settings: dict, domain: str) -> dict:
     ui = settings.get("ui_commands", [])
     fluct = "PAI" if any(c.startswith("/process/em/AddPAIRegion") for c in ui) else "Urban"
     if domain == "hadronic":
@@ -477,14 +525,18 @@ def cmd_variations(args) -> tuple[str, dict]:
     domain = get(study, "observable.domain") or "em"
     obs = get(study, "variation_plan.observable") or get(study, "statistical_target.observable")
     nominal = load_summary(args.nominal, study)
-    nm = model_assignment(nominal["settings"], domain)
+    configs = {}
+    for item in args.effective_config or []:
+        name, _, path = item.partition("=")
+        configs[name] = load_json(Path(path))
+    nm = model_assignment(nominal["settings"], domain, configs.get("nominal"))
     if obs not in nominal["observables"]:
         raise StudyError(f"observable {obs} not in the nominal summary")
     rows, included = [], [nominal["observables"][obs]["value"]]
     for item in args.variation:
         name, _, path = item.partition("=")
         s = load_summary(path, study)
-        ma = model_assignment(s["settings"], domain)
+        ma = model_assignment(s["settings"], domain, configs.get(name))
         keys = ("domain", "particle_class", "model") if domain == "hadronic" else ("domain", "em_constructor",
                                                                                   "fluctuation_model")
         changed = ma.get("known") and nm.get("known") and any(ma.get(k) != nm.get(k) for k in keys)
@@ -702,6 +754,8 @@ def main(argv=None) -> int:
     p = sub.add_parser("spec", help="completeness and physics rules of a study spec")
     p.add_argument("--spec", required=True)
     p.add_argument("--rules")
+    p.add_argument("--effective-config", help="an effective config (geant4 adapter 0.2.0): the thin-layer rule reads "
+                                              "the minimum thickness from its geometry tree")
     p = sub.add_parser("run", help="records against the spec, statistical target, convergence gate")
     p.add_argument("--spec", required=True)
     p.add_argument("--summary", action="append", required=True,
@@ -712,6 +766,9 @@ def main(argv=None) -> int:
     p.add_argument("--spec", required=True)
     p.add_argument("--nominal", required=True)
     p.add_argument("--variation", action="append", required=True, help="NAME=SUMMARY.json")
+    p.add_argument("--effective-config", action="append",
+                   help="NAME=EFFECTIVE_CONFIG.json (NAME nominal or a variation; geant4 adapter 0.2.0): the hadronic "
+                        "model assignment reads the probe first (source probe), else the declared table")
     p.add_argument("--out")
     p = sub.add_parser("label", help="highest usable label, gaps, and the study record")
     p.add_argument("--spec", required=True)
@@ -729,7 +786,7 @@ def main(argv=None) -> int:
     for sp in sub.choices.values():
         add_status_argument(sp)
     args = ap.parse_args(argv)
-    inputs = {k: v for k, v in vars(args).items() if k != "status"}
+    inputs = {k: v for k, v in vars(args).items() if k != "status" and not (k == "effective_config" and v is None)}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
     defaults = [k for k in ("rules", "bootstrap", "seed", "mpv_bin_mev", "tail_threshold_mev", "created", "status")
                 if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]

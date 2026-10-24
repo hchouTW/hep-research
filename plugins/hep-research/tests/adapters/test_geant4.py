@@ -67,6 +67,74 @@ json.dump({"materials": [{"name": "G4_Si", "density_g_cm3": 2.33, "radiation_len
           open(spec["output"]["materials"], "w"))
 json.dump({"geant4_version": "fake", "before_initialization": {},
            "after_run": {k: os.environ[k] for k in DATA_VARS if k in os.environ}}, open(spec["output"]["datapaths"], "w"))
+# adapter 0.2.0 side files: probe.json (a geometry tree that follows the spec), column_map.json, summary.json
+out_dir = os.path.dirname(spec["output"]["csv"])
+user = {m["name"]: m for m in spec.get("materials", [])}
+ui = spec.get("ui_commands", [])
+def mat(name):
+    dens = 1e-25 if name == "G4_Galactic" else user.get(name, {}).get("density_g_cm3", 2.33)
+    if "/fake/inconsistent" in ui and name == g["world"]["material"]:
+        dens = 1.2e-3  # the probe sees air where spec/1 says vacuum
+    return {"name": name, "density_g_cm3": float(dens).hex(), "state": "solid", "temperature_K": (293.15).hex(),
+            "pressure_Pa": (101325.0).hex(), "mean_excitation_energy_eV": (173.0).hex(),
+            "elements": [{"symbol": "Si", "z": (14.0).hex(), "a_g_mole": (28.0855).hex(), "mass_fraction": (1.0).hex()}]}
+def box(hx, hy, hz):
+    return {"type": "G4Box", "parameters": {"half_x_mm": float(hx).hex(), "half_y_mm": float(hy).hex(),
+                                            "half_z_mm": float(hz).hex()}}
+g = spec["geometry"]
+defs = {s["name"]: s for layer in g["layers"] for s in layer["slabs"]}
+stack = sum(layer.get("repeat", 1) * sum(s["thickness_mm"] for s in layer["slabs"]) for layer in g["layers"])
+lat = g["lateral_mm"]
+w = g["world"]
+wx, wy, wz = (w["scale"] * stack, w["scale"] * lat, w["scale"] * lat) if "scale" in w else w["size_mm"]
+lvs = [{"id": 0, "name": "World", "solid": box(wx / 2, wy / 2, wz / 2), "material": w["material"], "field": None,
+        "user_limits": None, "region": "DefaultRegionForTheWorld"}]
+for i, n in enumerate(slabs):
+    lvs.append({"id": i + 1, "name": n, "solid": box(defs[n]["thickness_mm"] / 2, lat / 2, lat / 2),
+                "material": defs[n]["material"], "field": None, "user_limits": None, "region": None})
+zero = (0.0).hex()
+pls = [{"name": "World", "copy_number": 0, "logical": 0, "mother_logical": None, "translation_mm": [zero] * 3,
+        "rotation": None, "kind": "placement"}]
+x, copy = -stack / 2, 0
+for layer in g["layers"]:
+    for _ in range(layer.get("repeat", 1)):
+        for s in layer["slabs"]:
+            t = s["thickness_mm"]
+            pls.append({"name": s["name"], "copy_number": copy, "logical": slabs.index(s["name"]) + 1,
+                        "mother_logical": 0, "translation_mm": [float(x + t / 2 + s.get("shift_mm", 0)).hex(), zero, zero],
+                        "rotation": None, "kind": "placement"})
+            x, copy = x + t, copy + 1
+names = [w["material"]] + [defs[n]["material"] for n in slabs]
+geometry = {"units": {"length": "mm"}, "logical_volumes": lvs, "placements": pls,
+            "materials": [mat(n) for n in dict.fromkeys(names)], "global_field": None, "gdml_sha256": None}
+probe = {"probe_version": "g4sim-probe/1", "engine": "geant4", "engine_version": "11.4.3", "recorded": True,
+         "application_state": "GeomClosed", "couples": 2, "note": "fake", "geometry": geometry,
+         "random_state_unchanged": True}
+if "/fake/unrecorded" in ui:
+    probe = {k: v for k, v in probe.items() if k != "geometry"}
+    probe.update(recorded=False, application_state="Idle", couples=0)
+json.dump(probe, open(os.path.join(out_dir, "probe.json"), "w"))
+json.dump({"column_map_version": "simulation-columns/1", "producer": "fake layered_sim",
+           "columns": [{"semantic": c, "column": c, "unit": "", "definition": "", "file": "csv",
+                        "operation": {"kind": "rename"}} for c in cols]}, open(os.path.join(out_dir, "column_map.json"), "w"))
+obs = spec["output"].get("observables")
+if obs:
+    sys.path.insert(0, "@PLUGIN@")
+    from core.simulation import summary as S
+    rows = []
+    for line in open(spec["output"]["csv"]).read().splitlines()[2:]:
+        r = {}
+        for c, v in zip(cols, line.split(",")):
+            try:
+                r[c] = float(v)
+            except ValueError:
+                r[c] = v
+        rows.append(r)
+    b = spec["output"]["blocks"]
+    doc = S.build(rows, obs, b["block_size"], b["blocks"], b.get("first_event", 0),
+                  {"seeding": spec["run"].get("seeding", "stream"), "weight_column": "unit"},
+                  {"name": "layered_sim", "version": "fake"})
+    json.dump(doc, open(os.path.join(out_dir, "summary.json"), "w"))
 print("LAYERED_SIM_STATUS {\"status\": \"ok\"}")
 '''
 
@@ -128,7 +196,7 @@ class _Tmp(unittest.TestCase):
 
     def fake_exe(self):
         exe = self.d / "fake_layered_sim"
-        exe.write_text(f"#!{sys.executable}\n" + FAKE_SIM.split("\n", 1)[1])
+        exe.write_text(f"#!{sys.executable}\n" + FAKE_SIM.split("\n", 1)[1].replace("@PLUGIN@", str(PLUGIN)))
         exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
         return exe
 
@@ -153,9 +221,15 @@ class Declaration(unittest.TestCase):
                        "separate executable", "JSON and CSV", "G5"):
             self.assertIn(phrase, lb)
         listed = set(doc["assets"])
-        for src in ("CMakeLists.txt", "MiniJson.hh", "Spec.cc", "Detector.cc", "Physics.cc", "Actions.cc",
+        for src in ("CMakeLists.txt", "Spec.cc", "Detector.cc", "Physics.cc", "Actions.cc",
                     "layered_sim.cc", "spec.schema.json", "output.schema.json"):
             self.assertIn(f"assets/layered_sim/{src}", listed)
+        # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset
+        self.assertEqual(doc["version"], "0.2.0")
+        on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas") for p in (ASSETS / d).iterdir()
+                   if p.is_file()}
+        self.assertLessEqual(on_disk | {"assets/summary_from_csv.py"}, listed)
+        self.assertNotIn("assets/layered_sim/MiniJson.hh", listed)
 
     def test_adapter_python_imports_no_skill_script_and_no_geant4(self):
         for py in ASSETS.glob("*.py"):
@@ -453,6 +527,249 @@ class RunAndPartition(_Tmp):
                 self.d / "b.csv.gz")[1]
         self.assertEqual(a["sha256"], b["sha256"])
         self.assertTrue(gzip.decompress((self.d / "a.csv.gz").read_bytes()).startswith(b"# SIMULATION\nevent,"))
+
+
+OBS = [{"name": "dep", "source_column": "edep_Pb_MeV", "bins": {"lo": 0.0, "hi": 0.02, "width": 0.001},
+        "thresholds": [0.005]},
+       {"name": "loss_transmitted", "source_column": "primary_eloss_MeV", "bins": {"lo": 0.0, "hi": 0.02, "width": 0.001},
+        "selection": [{"column": "primary_fate", "op": "==", "value": 1},
+                      {"column": "primary_end_process", "op": "==", "value": "Transportation"}]}]
+NEW_SPEC_FIELDS = {"run": ("seeding", "logical_run_seed"), "output": ("observables", "blocks", "debug_observable_dump")}
+
+
+def a2_spec(**over):
+    s = spec(**over)
+    s["run"].update(seeding="per-event", logical_run_seed=12345)
+    s.setdefault("output", {}).update(observables=json.loads(json.dumps(OBS)), blocks={"blocks": 4, "block_size": 10})
+    return s
+
+
+class BoundaryArtifacts(_Tmp):
+    """Geant4 program A2 (adapter 0.2.0) with the fake layered_sim: new spec fields in all three places, the summary,
+    column map and effective config of a run, the spec-v1/tree-v1 consistency check and the run record fields."""
+
+    def go(self, s, run_id="r1", work="work"):
+        rec, _ = self.fake_install()
+        sp = self.write(f"{run_id}.spec.json", s)
+        return run(asset("geant4_run.py"), "run", "--spec", sp, "--exe", self.fake_exe(), "--build-record", rec,
+                   "--work", self.d / work, "--run-id", run_id, "--record", self.d / "art" / f"{run_id}.json",
+                   "--created", "2026-10-24")
+
+    def test_new_spec_fields_live_in_all_three_places(self):
+        schema = json.loads((ASSETS / "layered_sim" / "spec.schema.json").read_text(encoding="utf-8"))
+        spec_cc = (ASSETS / "layered_sim" / "Spec.cc").read_text(encoding="utf-8")
+        run_py = (ASSETS / "geant4_run.py").read_text(encoding="utf-8")
+        for section, keys in NEW_SPEC_FIELDS.items():
+            for k in keys:
+                with self.subTest(field=f"{section}.{k}"):
+                    self.assertIn(k, schema["properties"][section]["properties"])
+                    self.assertIn(f'"{k}"', spec_cc)
+                    self.assertIn(f'"{k}"', run_py)
+
+    def test_new_fields_are_accepted_and_unknown_or_broken_ones_refused(self):
+        from contracts.schema import validate
+        schema = str(ASSETS / "layered_sim" / "spec.schema.json")
+        good = a2_spec()
+        good["output"]["debug_observable_dump"] = True
+        self.assertTrue(validate(good, schema).ok, validate(good, schema).errors[:3])
+        self.assertEqual(self.go(good)[0], 0)
+        bads = {"unknown run key": lambda s: s["run"].update(seedling="per-event"),
+                "unknown output key": lambda s: s["output"].update(summary=True),
+                "per-event without S": lambda s: s["run"].pop("logical_run_seed"),
+                "bad seeding": lambda s: s["run"].update(seeding="per-job"),
+                "blocks without observables": lambda s: s["output"].pop("observables"),
+                "unknown column": lambda s: s["output"]["observables"][0].update(source_column="edep_W_MeV"),
+                "dump without observables": lambda s: (s["output"].pop("observables"), s["output"].pop("blocks"),
+                                                       s["output"].update(debug_observable_dump=True)),
+                "one block": lambda s: s["output"]["blocks"].update(blocks=1),
+                "blocks start after the run": lambda s: s["output"]["blocks"].update(first_event=5),
+                "string source column": lambda s: s["output"]["observables"][0].update(
+                    source_column="primary_end_process"),
+                "contains on a number column": lambda s: s["output"]["observables"][0].update(
+                    selection=[{"column": "primary_pdg", "op": "contains", "value": 2}]),
+                "contains with a numeric value": lambda s: s["output"]["observables"][0].update(
+                    selection=[{"column": "primary_end_process", "op": "contains", "value": 5}])}
+        for name, mutate in bads.items():
+            s = a2_spec()
+            mutate(s)
+            with self.subTest(bad=name):
+                code, out = self.go(s, run_id="bad")
+                self.assertEqual(code, 2, out)
+                if name.startswith("unknown") and "key" in name:
+                    self.assertFalse(validate(s, schema).ok)
+
+    def test_run_record_carries_the_boundary_artifacts_argv_and_release(self):
+        code, out = self.go(a2_spec())
+        self.assertEqual(code, 0, out)
+        rec = json.loads((self.d / "art" / "r1.json").read_text(encoding="utf-8"))
+        self.assertTrue(validate_artifact(rec).ok, validate_artifact(rec).as_dict())
+        ext, sim = rec["extension"], rec["extension"]["simulation"]
+        self.assertTrue(ext["argv"][1].endswith("geant4_run.py"))
+        self.assertIn(ext["argv"][1], ext["script_sha256"])
+        self.assertIn("plugin_release", rec["versions"])
+        self.assertEqual(sim["seeding"], "per-event")
+        for k in ("summary", "column_map", "effective_config"):
+            self.assertIn(k, sim)
+        self.assertEqual(sim["summary"]["sha256"], ext["output_hashes"]["r1/summary.json"])
+        ec = sim["effective_config"]
+        stored = json.loads((self.d / "work" / ec["ref"]).read_text(encoding="utf-8"))
+        self.assertEqual(stored["config_sha256"], ec["config_sha256"])
+        self.assertEqual(stored["seeding"], {"mode": "per-event", "logical_run_seed": 12345})
+        self.assertTrue(any(k.startswith("g4sim/") for k in sim["program"]["sources_sha256"]))
+
+    def test_an_effective_config_is_stored_once_per_content(self):
+        s1, s2 = a2_spec(), a2_spec()
+        s2["run"]["seeds"] = [7, 8]  # stream seeds are not part of the configuration
+        self.assertEqual(self.go(s1, run_id="a")[0], 0)
+        self.assertEqual(self.go(s2, run_id="b")[0], 0)
+        ra = json.loads((self.d / "art" / "a.json").read_text(encoding="utf-8"))["extension"]["simulation"]
+        rb = json.loads((self.d / "art" / "b.json").read_text(encoding="utf-8"))["extension"]["simulation"]
+        self.assertEqual(ra["effective_config"]["config_sha256"], rb["effective_config"]["config_sha256"])
+        self.assertEqual(len(list((self.d / "work" / "effective_configs").glob("*.json"))), 1)
+        s3 = a2_spec()
+        s3["physics"]["default_cut_mm"] = 0.05  # not seen by the fake's probe: the seeding differs instead
+        s3["run"]["logical_run_seed"] = 99
+        self.assertEqual(self.go(s3, run_id="c")[0], 0)
+        self.assertEqual(len(list((self.d / "work" / "effective_configs").glob("*.json"))), 2)
+
+    def test_a_deliberate_inconsistency_between_spec_v1_and_tree_v1_is_refused(self):
+        s = a2_spec()
+        s["geometry"]["world"]["material"] = "G4_Galactic"
+        self.assertEqual(self.go(s, run_id="vacuum")[0], 0)  # consistent: both isolated for the whole stack
+        s["ui_commands"] = ["/fake/inconsistent"]  # the probe sees air where spec/1 says vacuum
+        code, out = self.go(s)
+        self.assertEqual(code, 2, out)
+        self.assertIn("tree-v1", out["error"])
+        self.assertFalse((self.d / "art" / "r1.json").exists())
+
+    def test_an_unrecorded_probe_cannot_upgrade(self):
+        code, out = self.go(a2_spec(ui_commands=["/fake/unrecorded"]))
+        self.assertEqual(code, 0, out)
+        sim = json.loads((self.d / "art" / "r1.json").read_text(encoding="utf-8"))["extension"]["simulation"]
+        self.assertEqual((sim["effective_config"]["recorded"], sim["effective_config"]["source"]), (False, "declared"))
+        sys.path.insert(0, str(PLUGIN / "skills" / "hep-detector" / "scripts"))
+        import geant4_benchmarks as G
+        conf = G.configuration({"benchmark": "stopping-power", "run_record": "art/r1.json", "target_slabs": ["Pb"]},
+                               self.d)
+        self.assertIsNone(conf["configuration"])
+        self.assertIn("cannot upgrade", conf["configuration_gap"])
+
+    def test_a_tree_v1_record_gives_a_tree_v1_configuration(self):
+        self.assertEqual(self.go(a2_spec())[0], 0)
+        sys.path.insert(0, str(PLUGIN / "skills" / "hep-detector" / "scripts"))
+        import geant4_benchmarks as G
+        conf = G.configuration({"benchmark": "stopping-power", "run_record": "art/r1.json", "target_slabs": ["Pb"]},
+                               self.d)
+        self.assertEqual(conf["hash_scheme"], "tree-v1")
+
+    def test_partition_summaries_merge_without_reading_a_csv(self):
+        rec, _ = self.fake_install()
+        s = a2_spec()
+        s["run"]["events"] = 40
+        sp = self.write("s.json", s)
+        lp = PLUGIN / "skills" / "hep-computing" / "scripts" / "local_partition.py"
+        man, state, work = self.d / "m.json", self.d / "state", self.d / "chunks"
+        self.assertEqual(run(lp, "plan", "--job", "g4", "--items", 40, "--chunk-size", 10, "--seed", 3, "--out", man)[0], 0)
+        cmd = (f"{sys.executable} -B {asset('geant4_run.py')} chunk --spec {sp} --exe {self.fake_exe()} --build-record "
+               f"{rec} --work {work} --start {{start}} --stop {{stop}} --seed {{seed}} --id {{id}} --out {{out}}")
+        self.assertEqual(run(lp, "run", "--manifest", man, "--state", state, "--cmd", cmd)[0], 0)
+        code, merged = run(lp, "merge", "--manifest", man, "--state", state, "--rule", "csv=concat", "--rule",
+                           "records=concat", "--rule", "summaries=concat")
+        self.assertEqual(code, 0, merged)
+        mfile = self.write("merged.json", merged)
+        for f in work.glob("c*/events.csv"):
+            f.unlink()  # the summary path must not need them
+        code, summ = run(asset("geant4_run.py"), "summarize", "--merged", mfile, "--work", work)
+        self.assertEqual(code, 0, summ)
+        self.assertEqual((summ["source"], summ["summaries"], summ["events_in_blocks"]), ("summaries", 4, 40))
+        self.assertEqual(self.go(s, run_id="single")[0], 0)
+        single = json.loads((self.d / "work" / "single" / "summary.json").read_text(encoding="utf-8"))
+        sys.path.insert(0, str(PLUGIN))
+        from core.simulation import estimates
+        want = estimates.estimate(single, {"name": "dep", "estimator": "mean"})
+        self.assertAlmostEqual(summ["observables"]["dep"]["mean"], want["value"], places=12)
+
+    def test_scan_writes_per_event_specs_for_new_studies(self):
+        rec, _ = self.fake_install()
+        base = self.write("base.json", spec())
+        grid = self.write("grid.json", {"name": "cuts", "parameters": {"physics.default_cut_mm": [1.0, 0.1]}})
+        sys.path.insert(0, str(PLUGIN))
+        from core.simulation.seeds import H
+        for seeding, want in (("per-event", "per-event"), ("stream", None)):
+            out_dir = self.d / f"scan-{seeding}"
+            code, out = run(asset("geant4_run.py"), "scan", "--base", base, "--grid", grid, "--exe", self.fake_exe(),
+                            "--build-record", rec, "--out-dir", out_dir, "--events-per-second", "1000",
+                            *(["--seeding", seeding] if seeding == "stream" else []))
+            self.assertEqual(code, 0, out)
+            s0 = json.loads((out_dir / "specs" / "cuts-000.json").read_text(encoding="utf-8"))
+            self.assertEqual(s0["run"].get("seeding"), want)
+            if want:
+                self.assertEqual(s0["run"]["logical_run_seed"], H("cuts", "cuts-000"))
+
+    def test_verify_reads_the_geometry_tree(self):
+        self.assertEqual(self.go(a2_spec())[0], 0)
+        code, out = run(asset("geant4_verify.py"), "overlaps", "--run-record", self.d / "art" / "r1.json")
+        self.assertEqual(out["geometry_source"], "effective config")
+        self.assertEqual(out["placements_expected"], 2)
+
+    def test_sources_hash_covers_every_build_file(self):
+        sys.path.insert(0, str(ASSETS))
+        import geant4_run
+        listed = set(geant4_run.SIM_SOURCES)
+        files = {f"layered_sim/{p.name}" for p in (ASSETS / "layered_sim").iterdir()
+                 if p.suffix in (".cc", ".hh") or p.name == "CMakeLists.txt"}
+        files |= {f"g4sim/{p.name}" for p in (ASSETS / "g4sim").glob("*.hh")}
+        self.assertEqual(files, listed)
+        for s in listed:
+            self.assertTrue((ASSETS / s).is_file(), s)
+
+
+class StudyLayerColumns(unittest.TestCase):
+    """A2.6 (D9): hep-detector's Geant4 study scripts name no layered_sim CSV column; they read semantic names through
+    a run's column map (or the legacy map, a data file)."""
+
+    PATTERNS = ("edep_", "chlen_", "plen_", "leak_", "killed_", "exit_d", "exit_ekin", "primary_", "n_sec_")
+    EXACT = ("event", "chunk", "weight")
+
+    def literals(self, path):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        doc_nodes = {id(n.body[0].value) for n in ast.walk(tree)
+                     if isinstance(n, (ast.Module, ast.FunctionDef, ast.ClassDef)) and n.body
+                     and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant)}
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in doc_nodes:
+                yield n.lineno, n.value
+
+    def test_no_csv_column_names_in_the_study_scripts(self):
+        scripts = PLUGIN / "skills" / "hep-detector" / "scripts"
+        for name in ("geant4_benchmarks.py", "check_geant4_study.py"):
+            for line, s in self.literals(scripts / name):
+                with self.subTest(script=name, line=line):
+                    self.assertFalse(s.startswith(self.PATTERNS) or s in self.EXACT, f"{name}:{line} {s!r}")
+
+    def test_the_scan_catches_a_column_name(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            (tmp / "x.py").write_text('"""doc edep_Si_MeV"""\nX = "primary_eloss_MeV"\n', encoding="utf-8")
+            self.assertEqual([s for _, s in self.literals(tmp / "x.py")], ["primary_eloss_MeV"])
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_the_legacy_map_covers_the_layered_sim_columns(self):
+        sys.path.insert(0, str(PLUGIN / "skills" / "hep-detector" / "scripts"))
+        sys.path.insert(0, str(ASSETS))
+        import geant4_benchmarks as G
+        import geant4_run
+        cols = geant4_run.csv_columns(spec(output={"per_instance": True}))
+        legacy = G.Columns()
+        unmapped = [c for c in cols if legacy.semantic(c) == c]
+        self.assertEqual(unmapped, [])
+        self.assertEqual(legacy.semantic("edep_copy3_MeV"), "energy_deposit.copy3")
+        self.assertEqual(legacy.semantic("edep_Si_MeV"), "energy_deposit.Si")
+        self.assertEqual(legacy.semantic("edep_world_MeV"), "energy_deposit.world")
+        from contracts.schema import validate
+        doc = json.loads(G.LEGACY_COLUMNS.read_text(encoding="utf-8"))
+        self.assertTrue(validate(doc, str(ASSETS / "schemas" / "column_map.schema.json")).ok)
 
 
 class ImplementationChecks(_Tmp):

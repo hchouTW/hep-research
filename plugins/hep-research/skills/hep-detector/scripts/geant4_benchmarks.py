@@ -49,9 +49,11 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
 Data (contracts CV-A1): stopping-power, range, thin-layer-mpv, thin-layer-width and longitudinal-profile read a run
 summary (simulation-summary/1, adapters/geant4/assets/summary_from_csv.py) and estimate their statistic by batch
 means over its K blocks (core/simulation/estimates.py; SE on K - 1 degrees of freedom); the summary observable must
-have the selection the benchmark's definition requires (transmitted: primary_fate == 1 and primary_end_process ==
+have the selection the benchmark's definition requires (transmitted: primary.fate == 1 and primary.end_process ==
 Transportation; range: stopped with no hadronic end process). The other sanity and interface benchmarks read the
-per-event CSV. Verdict: |G4 - ref| / ref <= tolerance, tolerance = reference accuracy + k x SE, plus a stated binning
+per-event CSV. Columns (A2.6, D9): the code names semantic columns only (primary.energy_loss, energy_deposit.<slab>,
+...) and resolves them through the run's column map (simulation-columns/1, config key column_map, written by
+layered_sim from adapter 0.2.0) or, for runs before 0.2.0, through assets/geant4-columns-legacy.json. Verdict: |G4 - ref| / ref <= tolerance, tolerance = reference accuracy + k x SE, plus a stated binning
 term for the MPV. Negative controls (A1.10, core/stats/decisions.py): every reference or setup-matched benchmark reruns
 on its controls (Geant4 runs with an error of known size injected on the Geant4 side, the reference unchanged); a
 control is judged on the observable: shift = (control - nominal) / reference with the SE of both runs, caught when the
@@ -64,13 +66,15 @@ Input: a benchmark config JSON (schema geant4-benchmarks/1; paths relative to th
    "csv", "run_record", "slab", "material", "particle", "energy_MeV", "thickness_mm", "tolerance":
    {"reference_accuracy_relative", "k_sigma"}, "binning": {"bin_width_MeV"}, "negative_controls": [{"summary" or
    "csv", "run_record", "injected", "injected_relative"}] (or one "negative_control"), "reference_table" (range),
-   "column"/"published" (published-data), "layers" [{"t", "observable"}] (longitudinal-profile), "published"
+   "column"/"published" (published-data; column a semantic name or a CSV column), "column_map" (the run's
+   column_map.json; also per negative control), "layers" [{"t", "observable"}] (longitudinal-profile), "published"
    {"alpha", "beta", "source"}, "systematic_relative" (longitudinal-profile), "target_slabs" (the slabs of the target,
    absorbers included; default the measured slab; required for longitudinal-profile), "measured_configuration"
    {"target_geometry_sha256", "hash_scheme"} (setup-matched: the configuration the measurement was made on)}]}
 Configuration (contracts CV-A1): each result carries configuration (isolated or embedded), target_geometry_sha256,
-hash_scheme spec-v1, target_slabs and configuration_basis, derived from the spec/1 of the run record its setting names
-(contracts.validate.geant4_spec_v1), never from user input; a reference or setup-matched benchmark is validation
+hash_scheme, target_slabs and configuration_basis, derived from the run record its setting names, never from user
+input: tree-v1 from the effective config's geometry for records from geant4 adapter 0.2.0 (a probe that recorded
+nothing is a configuration_gap), spec-v1 from spec/1 for earlier records (contracts.validate.geant4_configuration); a reference or setup-matched benchmark is validation
 evidence only on an isolated target (vacuum world, every placement in the target) with a run record, and a
 setup-matched one only when its target hash equals the measured configuration's (otherwise configuration_gap).
 Usage: geant4_benchmarks.py run --config CONFIG.json [--out OUT.json] [--status LABEL]
@@ -92,6 +96,7 @@ import gzip
 import hashlib
 import json
 import math
+import re
 import statistics
 import subprocess
 import sys
@@ -101,7 +106,7 @@ sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 from contracts.schema import validate as schema_validate  # noqa: E402
-from contracts.validate import geant4_spec_v1  # noqa: E402  (CV-A1: one configuration derivation)
+from contracts.validate import geant4_configuration  # noqa: E402  (CV-A1, A2.6: one configuration derivation)
 from core.simulation import estimates as E, summary as S  # noqa: E402
 from core.stats.batch_means import batch_mean  # noqa: E402
 from core.stats.decisions import detection_limit, welch_dof  # noqa: E402
@@ -224,9 +229,55 @@ def _is_num(v: str) -> bool:
         return False
 
 
+LEGACY_COLUMNS = Path(__file__).resolve().parents[1] / "assets" / "geant4-columns-legacy.json"
+
+
+class Columns:
+    """Semantic column names of a run's per-event data (simulation-columns/1, A2.6): from the run's column map, or for
+    runs before geant4 adapter 0.2.0 from the legacy layered_sim map; patterns <slab> and <i> stand for a slab name and
+    a copy number. The benchmarks name semantic columns only."""
+
+    def __init__(self, path: Path | None = None):
+        src = path or LEGACY_COLUMNS
+        doc = json.loads(src.read_text(encoding="utf-8"))
+        if doc.get("column_map_version") != "simulation-columns/1" or not isinstance(doc.get("columns"), list):
+            raise BenchmarkError(f"{src.name}: not a simulation-columns/1 column map")
+        self.source = "legacy layered_sim map" if path is None else src.name
+        self.exact: dict[str, str] = {}
+        patterns = []
+        for c in doc["columns"]:
+            if c.get("file") != "csv":
+                continue
+            if "<" in c["column"]:
+                pieces = re.split(r"(<slab>|<i>)", c["column"])
+                rx = "".join({"<slab>": r"(?P<slab>[A-Za-z0-9_]+)", "<i>": r"(?P<i>[0-9]+)"}.get(x, re.escape(x))
+                             for x in pieces)
+                patterns.append((len("".join(x for x in pieces if x not in ("<slab>", "<i>"))), re.compile(f"^{rx}$"),
+                                 c["semantic"]))
+            else:
+                self.exact[c["column"]] = c["semantic"]
+        self.patterns = [(rx, sem) for _, rx, sem in sorted(patterns, key=lambda t: -t[0])]
+
+    def semantic(self, column: str) -> str:
+        if column in self.exact:
+            return self.exact[column]
+        for rx, sem in self.patterns:
+            m = rx.match(column)
+            if m:
+                return sem.replace("<slab>", m.groupdict().get("slab") or "").replace("<i>", m.groupdict().get("i") or "")
+        return column
+
+    def rows(self, rows: list[dict]) -> list[dict]:
+        names = {c: self.semantic(c) for c in rows[0]}
+        return [{names[c]: v for c, v in r.items()} for r in rows]
+
+    def selection(self, sel: list) -> list:
+        return [{**c, "column": self.semantic(c["column"])} for c in sel or []]
+
+
 def transmitted(rows: list[dict]) -> tuple[list[dict], dict]:
-    kept = [r for r in rows if r.get("primary_fate") == 1 and r.get("primary_end_process") == "Transportation"]
-    hadronic = sum(1 for r in rows if any(h in str(r.get("primary_end_process")) for h in HADRONIC_END))
+    kept = [r for r in rows if r.get("primary.fate") == 1 and r.get("primary.end_process") == "Transportation"]
+    hadronic = sum(1 for r in rows if any(h in str(r.get("primary.end_process")) for h in HADRONIC_END))
     return kept, {"events": len(rows), "used": len(kept), "excluded": len(rows) - len(kept),
                   "excluded_fraction": (len(rows) - len(kept)) / len(rows), "ended_in_hadronic_process": hadronic}
 
@@ -264,10 +315,10 @@ def _tol(b: dict, se_rel: float, extra: float = 0.0) -> tuple[float, dict, float
         total + 2 * se_rel
 
 
-TRANSMITTED = [{"column": "primary_fate", "op": "==", "value": 1},
-               {"column": "primary_end_process", "op": "==", "value": "Transportation"}]
-STOPPED = [{"column": "primary_fate", "op": "==", "value": 0}] + [
-    {"column": "primary_end_process", "op": "!contains", "value": h} for h in HADRONIC_END]
+TRANSMITTED = [{"column": "primary.fate", "op": "==", "value": 1},
+               {"column": "primary.end_process", "op": "==", "value": "Transportation"}]
+STOPPED = [{"column": "primary.fate", "op": "==", "value": 0}] + [
+    {"column": "primary.end_process", "op": "!contains", "value": h} for h in HADRONIC_END]
 SUMMARY_BENCHMARKS = ("stopping-power", "range", "thin-layer-mpv", "thin-layer-width", "longitudinal-profile")
 
 
@@ -275,8 +326,9 @@ class Summary:
     """The run summary (simulation-summary/1) behind a summary-based benchmark: validated, its observables estimated
     by core.simulation.estimates; each benchmark names the observables it needs and their required selection."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, columns: Columns | None = None):
         self.path = path
+        self.columns = columns or Columns()
         self.doc = json.loads(path.read_text(encoding="utf-8"))
         rep = schema_validate(self.doc, "simulation_summary.json")
         if self.doc.get("summary_version") != "simulation-summary/1" or not rep.ok:
@@ -288,9 +340,10 @@ class Summary:
             o = S.observable(self.doc, name)
         except S.SummaryError as exc:
             raise BenchmarkError(f"{self.path.name}: {exc}") from exc
-        if o["source_column"] != column or o["selection"] != selection:
+        got_col, got_sel = self.columns.semantic(o["source_column"]), self.columns.selection(o["selection"])
+        if got_col != column or got_sel != selection:
             raise BenchmarkError(f"{self.path.name}: observable {name} must be {what} (column {column}, selection "
-                                 f"{selection}), not column {o['source_column']} with selection {o['selection']}")
+                                 f"{selection}), not column {got_col} with selection {got_sel} ({self.columns.source})")
         return o
 
     def estimate(self, o: dict, estimator: str, tol=None) -> dict:
@@ -309,7 +362,7 @@ class Summary:
 def bench_stopping_power(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
     mass, z = particle_props(b["particle"])
-    o = summ.obs(b["observable"], "primary_eloss_MeV", TRANSMITTED, "the energy loss of transmitted primaries")
+    o = summ.obs(b["observable"], "primary.energy_loss", TRANSMITTED, "the energy loss of transmitted primaries")
     e = summ.estimate(o, "mean")
     t_cm = b["thickness_mm"] / 10
     mean_loss = e["value"]
@@ -348,7 +401,7 @@ def bench_range(b: dict, summ: Summary, study: dict, cfg_dir: Path) -> dict:
                            / (math.log(e1) - math.log(e0)))
             break
     mat = material(study, b["material"], ("density_g_cm3", "reference_source"))
-    o = summ.obs(b["observable"], "primary_end_x_mm", STOPPED,
+    o = summ.obs(b["observable"], "primary.end_position.x", STOPPED,
                  "the end position of primaries that stopped without a hadronic process")
     est = summ.estimate(o, "mean")
     x0 = b.get("entry_x_mm", 0.0)
@@ -372,7 +425,7 @@ def bench_mpv(b: dict, summ: Summary, study: dict) -> dict:
     width = b.get("binning", {}).get("bin_width_MeV")
     if not isinstance(width, (int, float)) or width <= 0:
         raise BenchmarkError("thin-layer-mpv: binning.bin_width_MeV is required")
-    o = summ.obs(b["observable"], "primary_eloss_MeV", TRANSMITTED, "the energy loss of transmitted primaries")
+    o = summ.obs(b["observable"], "primary.energy_loss", TRANSMITTED, "the energy loss of transmitted primaries")
     if abs(o["bins"]["width"] - width) > 1e-12 * width:
         raise BenchmarkError(f"thin-layer-mpv: the summary bins {o['bins']['width']} MeV, the config declares {width}")
     base = {"reference": {"source": f"most probable energy loss Delta_p, {RPP}, eq. 34.12 (j = 0.200), delta(beta "
@@ -408,7 +461,7 @@ def bench_width(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
     mass, z = particle_props(b["particle"])
     lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
-    o = summ.obs(b["observable"], f"edep_{b['slab']}_MeV", TRANSMITTED, "the deposit of transmitted primaries")
+    o = summ.obs(b["observable"], f"energy_deposit.{b['slab']}", TRANSMITTED, "the deposit of transmitted primaries")
     hist, w = S.merged_accumulators(o)["hist"], o["bins"]["width"]
     peak = max(hist)
     above = [i for i, c in enumerate(hist) if c >= peak / 2]
@@ -425,7 +478,8 @@ def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
     kept, sel = transmitted(rows)
     angles = []
     for r in kept:
-        angles += [math.atan2(r["exit_dy"], r["exit_dx"]), math.atan2(r["exit_dz"], r["exit_dx"])]
+        angles += [math.atan2(r["primary.exit_direction.y"], r["primary.exit_direction.x"]),
+                   math.atan2(r["primary.exit_direction.z"], r["primary.exit_direction.x"])]
     angles.sort()
     cut = int(0.01 * len(angles))
     core = angles[cut:len(angles) - cut] if cut else angles
@@ -451,7 +505,8 @@ def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
 
 
 def bench_shower(b: dict, rows: list[dict], study: dict) -> dict:
-    cols = sorted((c for c in rows[0] if c.startswith("edep_copy")), key=lambda c: int(c[9:-4]))
+    copy = "energy_deposit.copy"
+    cols = sorted((c for c in rows[0] if c.startswith(copy) and c[len(copy):].isdigit()), key=lambda c: int(c[len(copy):]))
     if not cols:
         raise BenchmarkError("em-shower-shape: needs per-copy deposits (output.per_instance)")
     profile = [statistics.fmean(r[c] for r in rows) for c in cols]
@@ -510,8 +565,8 @@ def bench_containment(b: dict, rows: list[dict]) -> dict:
     for k in ("depth_x0", "critical_energy_MeV"):
         if not isinstance(b.get(k), (int, float)) or b[k] <= 0:
             raise BenchmarkError(f"shower-containment: {k} (from the study spec or PDG, never the dump) is required")
-    if "leak_rear_MeV" not in rows[0]:
-        raise BenchmarkError("shower-containment needs leak_rear_MeV (layered_sim with leakage by face)")
+    if "leakage.rear" not in rows[0]:
+        raise BenchmarkError("shower-containment needs the rear leakage column (layered_sim with leakage by face)")
     ref_block = {"source": f"longitudinal profile dE/dt = E0 b (bt)^(a-1) e^(-bt) / Gamma(a), {RPP}, Eqs. 34.34-34.36 "
                            "(fits to EGS4 showers, carbon to uranium, 1 to 100 GeV)", "version": "RPP 2024",
                  "validity": "sanity only: the profile is itself a fit to simulated showers and RPP states no accuracy; "
@@ -524,7 +579,7 @@ def bench_containment(b: dict, rows: list[dict]) -> dict:
     tmax = math.log(e / b["critical_energy_MeV"]) + (-0.5 if b["particle"] in ("e-", "e+") else 0.5)
     a = 1 + bpar * tmax
     ref = 1 - gamma_p(a, bpar * b["depth_x0"])
-    vals = [r["leak_rear_MeV"] / r["primary_ekin_MeV"] for r in rows]
+    vals = [r["leakage.rear"] / r["primary.kinetic_energy"] for r in rows]
     g4 = statistics.fmean(vals)
     window = max(0.3 * min(ref, 1 - ref), 0.02)
     return {"statistic": "rear leakage fraction (energy leaving the +x face over the primary kinetic energy)",
@@ -532,7 +587,7 @@ def bench_containment(b: dict, rows: list[dict]) -> dict:
             "relative_difference": (g4 - ref) / ref if ref else None, "profile": {"a": a, "b": bpar, "t_max": tmax},
             "verdict": "plausible" if abs(g4 - ref) <= window else "implausible",
             "plausibility_window": f"within {window:.3g} (absolute) of the profile",
-            "albedo_fraction": statistics.fmean(r["leak_front_MeV"] / r["primary_ekin_MeV"] for r in rows),
+            "albedo_fraction": statistics.fmean(r["leakage.front"] / r["primary.kinetic_energy"] for r in rows),
             "reference": ref_block}
 
 
@@ -646,10 +701,10 @@ def bench_profile(b: dict, summ: Summary) -> dict:
                                       + (pub.get("validity") or "")}}
 
 
-def bench_published(b: dict, rows: list[dict]) -> dict:
-    col = b.get("column")
+def bench_published(b: dict, rows: list[dict], columns: Columns | None = None) -> dict:
+    col = (columns or Columns()).semantic(b.get("column") or "")
     if not col or col not in rows[0]:
-        raise BenchmarkError("published-data: 'column' must name a CSV column")
+        raise BenchmarkError("published-data: 'column' must name a column of the run (semantic or CSV name)")
     vals = [r[col] for r in rows]
     return {"statistic": f"mean of {col}", "geant4": statistics.fmean(vals),
             "geant4_se": statistics.stdev(vals) / math.sqrt(len(vals)), "published": b.get("published"),
@@ -673,8 +728,13 @@ def configuration(b: dict, cfg_dir: Path) -> dict:
                                         else None)
     if not targets:
         raise BenchmarkError(f"{b['benchmark']}: target_slabs (the slabs of the target, absorbers included) is required")
-    try:
-        conf = geant4_spec_v1((rec.get("extension") or {}).get("simulation") or {}, targets)
+    sim = (rec.get("extension") or {}).get("simulation") or {}
+    ec = sim.get("effective_config")
+    if isinstance(ec, dict) and not ec.get("recorded"):
+        return {"configuration": None, "configuration_gap": "the run's probe recorded no effective config (recorded: "
+                                                            "false): this run cannot upgrade (A2.4)"}
+    try:  # A2.6: records from adapter 0.2.0 use tree-v1 (the effective config), A1 records spec-v1
+        conf = geant4_configuration(sim, targets, "tree-v1" if isinstance(ec, dict) else "spec-v1")
     except ValueError as exc:
         raise BenchmarkError(f"{b['benchmark']}: {exc}") from exc
     out = {**conf, "configuration_basis": {"run_record": rr, "artifact_id": rec.get("artifact_id"),
@@ -702,17 +762,24 @@ def evaluate(b: dict, src, study: dict, cfg_dir: Path) -> dict:
         return bench_containment(b, src)
     if name == "longitudinal-profile":
         return bench_profile(b, src)
-    return bench_published(b, src)
+    return bench_published(b, src, _columns(b, cfg_dir))
+
+
+def _columns(e: dict, cfg_dir) -> Columns:
+    """The column map of a benchmark entry (its column_map, config-relative) or the legacy layered_sim map."""
+    return Columns(Path(cfg_dir) / e["column_map"]) if e.get("column_map") and cfg_dir is not None else Columns()
 
 
 def source(b: dict, cfg_dir: Path, entry: dict | None = None):
-    """The data a benchmark reads: the run summary for the summary-based benchmarks, else the per-event CSV."""
+    """The data a benchmark reads: the run summary for the summary-based benchmarks, else the per-event CSV with its
+    columns renamed to their semantic names (A2.6)."""
     e = entry or b
+    cols = _columns(e if e.get("column_map") else b, cfg_dir)
     if b["benchmark"] in SUMMARY_BENCHMARKS:
         if not e.get("summary"):
             raise BenchmarkError(f"{b['benchmark']}: 'summary' (a simulation-summary/1 of the run) is required")
-        return Summary(cfg_dir / e["summary"])
-    return read_csv(cfg_dir / e["csv"])
+        return Summary(cfg_dir / e["summary"], cols)
+    return cols.rows(read_csv(cfg_dir / e["csv"]))
 
 
 def controls(b: dict, res: dict, study: dict, cfg_dir: Path) -> dict:

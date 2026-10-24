@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 39,
-   "bytes": 531431,
+   "bytes": 534069,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2081,8 +2081,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 24689,
-   "lines": 277,
+   "bytes": 27327,
+   "lines": 301,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",

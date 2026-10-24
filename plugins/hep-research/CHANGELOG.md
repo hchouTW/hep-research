@@ -73,6 +73,46 @@ Contracts 3.13.0 (minor; no capability added).
   states); capability `detector-design` item DSD-SEARCH; routing case `dsd-direct-3` (no description change).
 - Closure tests (gate G-C1): DTLZ2, plane placement, structure choice on Example A, reproducibility, consistency.
 
+Geant4 program stage A2 (shared headers and boundary artifacts): geant4 adapter 0.2.0. No contracts bump (the new
+schema keywords are used by no contract schema; tree-v1 was already a CV-A1 hash scheme). Existing spec/1 files and
+outputs are unchanged: the 26 recorded J14 specs give bit-identical CSVs with the new build (gate G-A2).
+
+**Before you upgrade:**
+- The keys of a run record's `simulation.program.sources_sha256` change once: from bare names (`Spec.cc`) to paths
+  under `adapters/geant4/assets/` (`layered_sim/Spec.cc`, `g4sim/MiniJson.hh`), and the map now also covers `g4sim/`.
+  `MiniJson.hh` moved from `layered_sim/` to `g4sim/`. Rebuild layered_sim (`geant4_run.py build-sim`).
+- `geant4_run.py scan` writes specs with per-event seeding unless the base spec states `run.seeding`
+  (`--seeding stream` keeps the stream).
+- Benchmark configs may name the run's `column_map`; the benchmarks name semantic columns, so a study script or
+  config that relied on a CSV column name in a refusal message sees the semantic name instead.
+
+- `adapters/geant4/assets/g4sim/`: `SimHash.hh` (SHA-256, the seed hash H, Python `float.hex()` formatting,
+  SplitMix64 and Box-Muller), `SimSeed.hh` (per-event seeds), `SimSummary.hh` and `SimObservables.hh` (the run summary
+  accumulators and their JSON), `SimProbe.hh` (the effective-config probe), `SimMaterials.hh`, `SimPhysics.hh`,
+  `SimCsv.hh` (moved from layered_sim unchanged), `MiniJson.hh` (moved); `selftest.cc` with
+  `tests/adapters/test_g4sim.py` checks the Geant4-free headers against `core/simulation/` and Python.
+- layered_sim spec/1 optional fields, in `validate_spec()`, `spec.schema.json` and `Spec.cc` together:
+  `run.seeding` (`stream` or `per-event`), `run.logical_run_seed`, `output.observables`, `output.blocks`,
+  `output.debug_observable_dump`. Per-event seeding reseeds event i at the start of `GeneratePrimaries`; with
+  observables layered_sim writes `summary.json` (merged across threads through a `G4VAccumulable`; an event weight
+  other than 1 exits 2). Every run also writes `column_map.json` (`simulation-columns/1`) and `probe.json`, from which
+  `geant4_run.py` builds the effective config (schemas in `adapters/geant4/assets/schemas/`), stored once per
+  `config_sha256` under `effective_configs/`.
+- `geant4_run.py`: run records carry the summary, column map and effective config (hash and reference, with the
+  geometry tree and its tree-v1 hashes), `seeding`, `argv`, `script_sha256` and `versions.plugin_release`; a run whose
+  spec-v1 and tree-v1 isolation decisions differ is refused (exit 2); `chunk` lists the chunk's summary and
+  `summarize` merges chunk summaries without reading a CSV.
+- contracts: `geant4_tree_v1` (configuration and target hash from an effective config's geometry tree: physics only,
+  names in `naming_sha256`, canonical daughter order), `geant4_tree_thickness_mm` and `geant4_configuration` (dispatch
+  by `hash_scheme`); `contracts/dependencies.py` re-derives a benchmark's configuration by its `hash_scheme`.
+  `contracts/schema.py` implements `maxItems`, `maximum`, `exclusiveMaximum`, `oneOf` and `not`; the schema-keyword
+  test also scans the adapters' schemas.
+- hep-detector: `geant4_benchmarks.py` and `check_geant4_study.py` read only boundary artifacts and name semantic
+  columns, resolved through the run's column map or `assets/geant4-columns-legacy.json` for older runs; records from
+  adapter 0.2.0 get a tree-v1 configuration (a probe that recorded nothing is a configuration gap);
+  `check_geant4_study.py spec --effective-config` takes the thin-layer rule's minimum thickness from the geometry
+  tree. `geant4_verify.py` counts placements and takes thicknesses from the tree when there is one.
+
 ## 0.38.0 (2026-10-24)
 
 Minor release, contracts 3.12.0. It ships the maintainer's decisions on the four spec questions left open by the M3

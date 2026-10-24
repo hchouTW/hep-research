@@ -1,8 +1,12 @@
 // User actions of layered_sim: a particle gun, a per-event record filled at stepping and stacking level, and one CSV
-// per thread (columns in output.schema.json).
+// per thread (columns in output.schema.json). From adapter 0.2.0 (Geant4 program A2): optional per-event reseeding at
+// the start of GeneratePrimaries (run.seeding per-event, g4sim/SimSeed.hh), the run summary of the declared observables
+// accumulated per block and merged across threads through a G4VAccumulable (summary.json), an optional per-event dump
+// of the observables' columns, and the effective-config probe on the master at the start of the run (probe.json).
 #ifndef LAYERED_SIM_ACTIONS_HH
 #define LAYERED_SIM_ACTIONS_HH
 
+#include <atomic>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -12,8 +16,10 @@
 #include "G4UserRunAction.hh"
 #include "G4UserStackingAction.hh"
 #include "G4UserSteppingAction.hh"
+#include "G4VAccumulable.hh"
 #include "G4VUserActionInitialization.hh"
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "SimSummary.hh"
 #include "Spec.hh"
 
 class Detector;
@@ -31,22 +37,55 @@ struct EventRecord {
   double endX = 0;
   std::string endProcess;
   long nGamma = 0, nElectron = 0, nPositron = 0, nOther = 0;
+  bool nonUnitWeight = false;  // a step of a track with weight != 1 (the summary refuses weighted accumulation)
   void Reset(std::size_t nSlabs, std::size_t nInst);
 };
 
 std::vector<std::string> CsvColumns(const Spec& spec, const Detector& det);
 
+// What the run found that main() turns into an exit status after BeamOn.
+struct RunFlags {
+  std::atomic<bool> weightRejected{false};     // an event with weight != 1 while the summary accumulates (exit 2)
+  std::atomic<bool> probeBadGeometry{false};   // an infinite or NaN number in the geometry (exit 2)
+  std::atomic<bool> probeRandomChanged{false};  // the probe changed the random-engine state (exit 1)
+  std::atomic<bool> summaryError{false};        // an event the summary could not accumulate (exit 2)
+};
+RunFlags& Flags();
+#ifdef LAYERED_SIM_TEST_HOOKS
+// Tests only (/layered_sim/test/randomGun): GeneratePrimaries draws the gun's y and z from G4UniformRand, so a test can
+// show that per-event seeding keeps events independent of the split even when the generator draws random numbers.
+std::atomic<bool>& TestRandomGun();
+#endif
+
+// The run summary of one thread, merged into the master's by G4AccumulableManager (same registration order on master
+// and workers: one accumulable each).
+class SummaryAccumulable : public G4VAccumulable {
+ public:
+  explicit SummaryAccumulable(const Spec& spec);
+  void Merge(const G4VAccumulable& other) override;
+  void Reset() override { fAcc.Reset(); }
+  g4sim::SummaryAccumulator& Acc() { return fAcc; }
+
+ private:
+  g4sim::SummaryAccumulator fAcc;
+};
+
 class RunAction : public G4UserRunAction {
  public:
-  RunAction(const Spec& spec, const Detector& det) : fSpec(spec), fDet(det) {}
+  RunAction(const Spec& spec, const Detector& det);
   void BeginOfRunAction(const G4Run*) override;
   void EndOfRunAction(const G4Run*) override;
   std::ofstream& Out() { return fOut; }
+  std::ofstream& Dump() { return fDump; }
+  SummaryAccumulable& Summary() { return fSummary; }
 
  private:
+  void WriteProbe() const;
+  void WriteSummary();
   const Spec& fSpec;
   const Detector& fDet;
-  std::ofstream fOut;
+  std::ofstream fOut, fDump;
+  SummaryAccumulable fSummary;
 };
 
 class EventAction : public G4UserEventAction {
@@ -61,6 +100,7 @@ class EventAction : public G4UserEventAction {
   const Detector& fDet;
   RunAction* fRun;
   EventRecord fRec;
+  std::vector<std::string> fCols, fNeeded;  // CSV columns and the observables' columns (set at the first event)
 };
 
 class SteppingAction : public G4UserSteppingAction {
@@ -109,5 +149,7 @@ class ActionInitialization : public G4VUserActionInitialization {
 
 // path of the CSV this thread writes: the spec's path in serial mode, path.thread<N> for worker N in MT mode
 std::string ThreadCsvPath(const Spec& spec, int thread);
+// the same for the observable dump
+std::string ThreadDumpPath(const Spec& spec, int thread);
 
 #endif
