@@ -2426,7 +2426,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ced5a53e 2026-10-24"
+   "last_commit": "01849545 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",

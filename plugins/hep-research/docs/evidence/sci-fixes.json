@@ -5586,31 +5586,46 @@
    },
    "severity": "S1",
    "evidence_tests": [
+    "tests/core/test_simulation_s1_evidence.py::BatchMeansSE::test_against_scipy_sem_and_t_interval",
+    "tests/core/test_simulation_s1_evidence.py::BatchMeansSE::test_t_halfwidth_has_its_coverage_under_sympy_student_t",
     "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
     "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
-    "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance",
-    "tests/core/test_simulation_stats.py::Distributions::test_t_and_f_quantiles_against_scipy"
+    "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance"
    ],
    "oracle_kinds": [
-    "independent-implementation"
+    "independent-implementation",
+    "invariant",
+    "symbolic"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D1",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "correctness C2 is below the S1 minimum C3: a second independent oracle kind, an invariant test and a negative control emulating the pre-fix estimator are missing",
     "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
    ],
-   "note": "SE = sd(block estimates)/sqrt(K) on K-1 dof; slow-tier coverage toys per estimator class (mean, proportion, quantile, mode) through toy_ensemble.coverage_gate (VALIDATION GEANT4-CORRECTNESS)",
+   "note": "SE = sd(block estimates)/sqrt(K) on K-1 dof; invariants (shift, scale, permutation); negative control: the pre-fix event bootstrap covers far below 0.90 on block-correlated runs while batch means cover at 0.90; slow-tier coverage toys per estimator class through toy_ensemble.coverage_gate (VALIDATION GEANT4-CORRECTNESS)",
    "independence": [
     {
      "kind": "independent-implementation",
-     "test": "tests/core/test_simulation_stats.py::Distributions::test_t_and_f_quantiles_against_scipy",
+     "test": "tests/core/test_simulation_s1_evidence.py::BatchMeansSE::test_against_scipy_sem_and_t_interval",
      "basis": "third-party",
-     "detail": "scipy.stats.t and f quantiles behind the batch-means t intervals",
+     "detail": "scipy.stats.sem and scipy.stats.t.interval of the block estimates (K = 2..64)",
      "requires": {
       "core": [
        "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "symbolic",
+     "test": "tests/core/test_simulation_s1_evidence.py::BatchMeansSE::test_t_halfwidth_has_its_coverage_under_sympy_student_t",
+     "basis": "third-party",
+     "detail": "sympy.stats StudentT CDF: the t half-width has its nominal coverage (nu = 3, 15, 30)",
+     "requires": {
+      "core": [
+       "sympy"
       ],
       "backend": []
      },
@@ -5673,28 +5688,41 @@
    },
    "severity": "S1",
    "evidence_tests": [
+    "tests/core/test_simulation_s1_evidence.py::LowCountExact::test_against_scipy_binomtest",
+    "tests/core/test_simulation_s1_evidence.py::LowCountExact::test_coverage_by_exact_enumeration",
     "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
     "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
-    "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance",
-    "tests/core/test_simulation_stats.py::BatchMeans::test_rate_ratio_interval_against_scipy"
+    "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance"
    ],
    "oracle_kinds": [
-    "independent-implementation"
+    "exhaustive",
+    "independent-implementation",
+    "invariant"
    ],
-   "correctness": "C2",
+   "correctness": "C4",
    "discrimination": "D1",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "correctness C2 is below the S1 minimum C3: a second independent oracle kind, an invariant test and a negative control emulating the pre-fix estimator are missing",
     "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
    ],
-   "note": "Clopper-Pearson and Garwood reuse tail_estimation and poisson_diagnostics (VALIDATION GEANT4-CORRECTNESS)",
+   "note": "Clopper-Pearson and Garwood reuse tail_estimation and poisson_diagnostics; invariants (complement symmetry, nesting in the level); negative control: the pre-fix normal interval covers below 0.75 at n = 20, p = 0.05 by the same enumeration (VALIDATION GEANT4-CORRECTNESS)",
    "independence": [
     {
+     "kind": "exhaustive",
+     "test": "tests/core/test_simulation_s1_evidence.py::LowCountExact::test_coverage_by_exact_enumeration",
+     "basis": "exhaustive",
+     "detail": "every outcome k = 0..n for n = 1..30 on a 49-point p grid, and n1 = 0..N for N = 1..25 at 5 rate ratios: exact coverage >= 0.90",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    },
+    {
      "kind": "independent-implementation",
-     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_rate_ratio_interval_against_scipy",
+     "test": "tests/core/test_simulation_s1_evidence.py::LowCountExact::test_against_scipy_binomtest",
      "basis": "third-party",
-     "detail": "scipy.stats.beta quantiles for the conditional-binomial rate ratio",
+     "detail": "scipy.stats.binomtest(...).proportion_ci(method='exact')",
      "requires": {
       "core": [
        "scipy"
@@ -5760,27 +5788,43 @@
    },
    "severity": "S1",
    "evidence_tests": [
+    "tests/core/test_simulation_s1_evidence.py::MpvEstimator::test_vertex_against_numpy_polyfit",
+    "tests/core/test_simulation_s1_evidence.py::MpvEstimator::test_vertex_by_exact_linear_algebra_over_a_finite_domain",
     "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
     "tests/core/test_simulation_stats.py::BatchMeans::test_exact_intervals_reuse_the_existing_ones",
     "tests/core/test_simulation_stats.py::BatchMeans::test_mean_se_and_covariance"
    ],
    "oracle_kinds": [
-    "analytic"
+    "exhaustive",
+    "independent-implementation",
+    "invariant"
    ],
-   "correctness": "C2",
+   "correctness": "C3",
    "discrimination": "D1",
-   "negative_control_emulates_pre_fix": false,
+   "negative_control_emulates_pre_fix": true,
    "gaps": [
-    "correctness C2 is below the S1 minimum C3: a second independent oracle kind, an invariant test and a negative control emulating the pre-fix estimator are missing",
     "D1 only: not every evidence node fails on the parent by assertion (parent_records: an error where the test needs an interface new in the fix, a pass where the core function predates the wiring commit); risk 11 of the program spec"
    ],
-   "note": "the A1.7 bias toys (slow tier) at J14's block size bound the bias below tol/10 (VALIDATION GEANT4-CORRECTNESS)",
+   "note": "invariants (translation, count scaling, the vertex stays by the fullest bin); negative control: on J14's expected peak the pre-fix five-point fit is biased above tol/10 = 0.002 for every bin phase, the three-point vertex below; the A1.7 bias toys (slow tier) at J14's block size (VALIDATION GEANT4-CORRECTNESS)",
    "independence": [
     {
-     "kind": "analytic",
-     "test": "tests/core/test_simulation_stats.py::BatchMeans::test_block_mode_is_the_parabola_vertex",
+     "kind": "independent-implementation",
+     "test": "tests/core/test_simulation_s1_evidence.py::MpvEstimator::test_vertex_against_numpy_polyfit",
+     "basis": "third-party",
+     "detail": "numpy.polyfit degree 2 through the three bin centres on 500 random histograms",
+     "requires": {
+      "core": [
+       "numpy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "exhaustive",
+     "test": "tests/core/test_simulation_s1_evidence.py::MpvEstimator::test_vertex_by_exact_linear_algebra_over_a_finite_domain",
      "basis": "exhaustive",
-     "detail": "the vertex of exact quadratics at 4 positions, the edge and tie cases",
+     "detail": "every admissible triple of counts 0..12: the stationary point of the interpolating parabola solved by Gaussian elimination in exact rationals",
      "requires": {
       "core": [],
       "backend": []

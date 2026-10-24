@@ -2809,7 +2809,18 @@ evidence test files copied in, no other adaptation):
 The entries of D3-D5 share the wiring commit `3710ac62` (one summary-based rewrite carries them; the spec's §H.1
 records it). Their tests either need the summary interface new in that commit (parent error) or test core functions
 added in the foundation commit `8765fd92` (parent pass), so they are D1 and say so in `gaps`. No mutants were run (no
-entry claims D3). The S1 entries are C2, below the S1 minimum C3, and need the maintainer's `review` sign-off.
+entry claims D3).
+
+**S1 correctness** (`tests/core/test_simulation_s1_evidence.py`, 12 tests, pass): GEANT4-BATCH-MEANS-SE C3 (scipy.stats
+sem and t.interval; sympy.stats Student-t coverage of the t half-width; shift, scale and permutation invariants;
+negative control: the pre-fix event bootstrap covers below 0.60 on block-correlated runs where batch means cover
+0.90); GEANT4-LOW-COUNT-EXACT C4 (exact enumeration of coverage for n = 1..30 and rate-ratio totals 1..25; scipy
+binomtest exact intervals; complement and nesting invariants; negative control: the pre-fix normal interval covers
+below 0.75 at n = 20, p = 0.05); GEANT4-MPV-ESTIMATOR C3 (numpy.polyfit through the three bin centres; Gaussian
+elimination in exact rationals over every count triple 0..12; translation and scaling invariants; negative control:
+on J14's expected peak the pre-fix five-point fit is biased above tol/10 = 0.002 at every bin phase, about +0.0032,
+the three-point vertex about +0.0010). These tests pass on the parent too (the core functions predate the wiring
+commit), so the S1 entries stay D1. Each S1 entry awaits the maintainer's `review` sign-off (`{by, date, scope}`).
 
 **Slow tier (HEP_SLOW_TESTS=1, `tests/core/test_simulation_toys.py`).** Gate toys (1e4 per cell) reproduce the A1.8
 operating-characteristics table to 3 sigma_MC in every cell (TOST-only and two-stage columns); coverage toys of nominal
