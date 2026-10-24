@@ -54,6 +54,10 @@
     "sigma_t_ps": {
      "type": "number",
      "exclusiveMinimum": 0
+    },
+    "test_layer_offset_ps": {
+     "type": "number",
+     "description": "TEST ONLY (negative control of tof-beta and tof-layer-consistency, Geant4 program B3.2): a time offset added to the true time of the first TOF layer of the second station before smearing; kept in the reco spec, so the record shows it"
     }
    }
   },

@@ -1,0 +1,86 @@
+{
+ "geometry": {
+  "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/studies/G-N6-TRK1.geometry.json",
+  "sha256": "6c0b91376e36efca776fb5c1c8d3566c85aa7be2a334940dc399fb147f10700c"
+ },
+ "reco_record": {
+  "artifact_id": "geant4-reco-N6-TRK1-nominal-off",
+  "sha256": "e0f5201386f7708310ed2c410113e5c93bf9a4913eaf796406a87421de93d4fd"
+ },
+ "results": {
+  "momentum-resolution-core": {
+   "denominator": {
+    "rigidity_GV": 1.0,
+    "species": "proton"
+   },
+   "dof": 15,
+   "estimator": {
+    "name": "gaussian-core",
+    "observable": "core",
+    "truncation_sigma": 2.0
+   },
+   "model_envelope": [
+    0.017709223582439454,
+    0.019099019670767155
+   ],
+   "model_envelope_annotation": {
+    "ends": {
+     "hi": {
+      "se": 0.00027161316642596776,
+      "variation": "air"
+     },
+     "lo": {
+      "se": 0.00021426954750928886,
+      "variation": "ss"
+     }
+    },
+    "variations": {
+     "air": {
+      "se": 0.00027161316642596776,
+      "value": 0.019099019670767155
+     },
+     "nominal": {
+      "se": 0.00020244701971312148,
+      "value": 0.01818013528981194
+     },
+     "qgsp-bic": {
+      "se": 0.00026261639947823117,
+      "value": 0.01797740222420427
+     },
+     "ss": {
+      "se": 0.00021426954750928886,
+      "value": 0.017709223582439454
+     }
+    }
+   },
+   "replica_spread": 0.0,
+   "replica_values": [
+    0.01818013528981194
+   ],
+   "replicas": 1,
+   "se": 0.00020244701971312148,
+   "statistical_uncertainty": 0.00020942863859591237,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.00035489981991698906,
+    "plus": 0.00035489981991698906
+   },
+   "uncertainty_components": {
+    "replica_spread": {
+     "half_width": 0.0,
+     "sd": 0.0
+    },
+    "statistical": {
+     "method": "t_0.95(K-1) x batch-means SE over K blocks",
+     "minus": 0.00035489981991698906,
+     "plus": 0.00035489981991698906
+    }
+   },
+   "value": 0.01818013528981194
+  }
+ },
+ "schema": "f4-results/1",
+ "tail_sources_simulated": []
+}

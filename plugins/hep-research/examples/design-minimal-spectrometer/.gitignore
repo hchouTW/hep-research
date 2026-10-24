@@ -1,0 +1,4 @@
+# unpacked by run.py from recorded/ on every replay (recorded/runs holds them gzip-compressed)
+output/artifacts/runs/
+output/artifacts/specs/
+output/artifacts/checks/

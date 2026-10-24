@@ -1,0 +1,84 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-CALC-MASS-N4",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N4.json",
+   "sha256": "9d51bc09b36df5e4b9ae18ccaf7a1402e641fabf1249ccf39425d6db0cf1602b",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N4",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-MASS-N4.computational-run.json",
+   "sha256": "4f956c17a3cec9ac71e98d81be61ddf335db5c2af94a7fc9d45cd619d0c28a8e",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-v1-CALC-MASS-N4-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:CALC-MASS-N4",
+  "candidate": "j15-v1:cand-N4",
+  "figure_of_merit": "mass-budget",
+  "denominator": {},
+  "bound": "estimate",
+  "fidelity": "F1",
+  "value": 1932.0,
+  "unit": "kg",
+  "run_ref": "runs/CALC-MASS-N4.computational-run.json",
+  "parameter_refs": [
+   "budgets.mass.DES-CAL-001",
+   "budgets.mass.DES-MAG-001",
+   "budgets.mass.DES-TOF-001",
+   "budgets.mass.DES-TRK-001",
+   "subsystems"
+  ],
+  "parameter_digest": "73438b1671730616b0ba225a7bbc223be4b7480f88fee78933c1b0ee2a99d63b",
+  "validity": {
+   "assumptions": [],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 161.4,
+   "plus": 161.4,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

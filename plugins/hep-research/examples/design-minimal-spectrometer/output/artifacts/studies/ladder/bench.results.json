@@ -1,0 +1,566 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "field-propagation",
+   "compared": 5000,
+   "geant4": 0.004160571549505221,
+   "grade": "verification",
+   "max_dt_ps": 1.751363498669889e-06,
+   "problems": [],
+   "reference": {
+    "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+    "validity": "deterministic: charged geantinos have no interactions",
+    "version": "exact"
+   },
+   "reference_value": 0.0,
+   "scope": {
+    "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+   },
+   "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+   "tolerance": {
+    "in_plane_um": 0.5,
+    "time_ps": 1.0
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "material-definition",
+   "grade": "verification",
+   "problems": [],
+   "reference": {
+    "source": "the study spec's independent material sources and the candidate's declared x/X0",
+    "validity": "verification of the realized geometry",
+    "version": "as declared"
+   },
+   "rows": [
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si1",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si2",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si3",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si4",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si5",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si6",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    }
+   ],
+   "scope": {
+    "geometry_sha256": "6c0b91376e36efca776fb5c1c8d3566c85aa7be2a334940dc399fb147f10700c",
+    "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+   },
+   "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+   "tolerance": {
+    "density_relative": 0.001,
+    "relative": 0.02
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "field-propagation-muon",
+   "entries": 4000,
+   "geant4": -8.357834884426557e-05,
+   "grade": "sanity",
+   "reference": {
+    "source": "plane-averaged true 1/R (B2.1)",
+    "validity": "sanity",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 0.014682283286508554,
+   "se": 0.00023214728218594788,
+   "statistic": "mean relative inverse-rigidity residual of muons",
+   "tolerance": {
+    "absolute": 0.003
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "field-propagation-muon",
+   "entries": 4000,
+   "geant4": -0.00012743851107816106,
+   "grade": "sanity",
+   "reference": {
+    "source": "plane-averaged true 1/R (B2.1)",
+    "validity": "sanity",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 0.018201588990357745,
+   "se": 0.00028779239121887515,
+   "statistic": "mean relative inverse-rigidity residual of muons",
+   "tolerance": {
+    "absolute": 0.003
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "field-propagation-muon",
+   "entries": 50720,
+   "geant4": -0.00045257710431789386,
+   "grade": "sanity",
+   "reference": {
+    "source": "plane-averaged true 1/R (B2.1)",
+    "validity": "sanity",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 0.08691727483206409,
+   "se": 0.00038593705519476693,
+   "statistic": "mean relative inverse-rigidity residual of muons",
+   "tolerance": {
+    "absolute": 0.003
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "reco-closure",
+   "entries": 8000,
+   "geant4": 0.9978043630408748,
+   "grade": "verification",
+   "problems": [],
+   "pull_mean": 0.013431276383804655,
+   "pull_width": 0.9978043630408748,
+   "pull_width_mc_sigma": 0.007905694150420948,
+   "reference": {
+    "source": "the truth of the simulated charged geantinos",
+    "validity": "closure of the fit; no physics",
+    "version": "exact"
+   },
+   "reference_value": 1.0,
+   "residual_mean": 0.011631545335214067,
+   "scope": {
+    "particle": "chargedgeantino",
+    "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+    "rigidity_GV": 1000.0
+   },
+   "statistic": "pull width and bias of the signed inverse rigidity",
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "tof-beta",
+   "entries": 12486,
+   "geant4": 0.0003534387987459364,
+   "grade": "verification",
+   "reference": {
+    "source": "kinematics along the true trajectory",
+    "validity": "bookkeeping verification (no physics control on the Geant4 side)",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 0.016757169710592046,
+   "se": 0.00014996468608538508,
+   "statistic": "mean relative beta residual",
+   "tolerance": {
+    "absolute": 0.002
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "tof-layer-consistency",
+   "entries": 12486,
+   "geant4": -0.528943721946913,
+   "grade": "verification",
+   "reference": {
+    "source": "inter-layer path / (beta c), widths sqrt(2) sigma_t",
+    "validity": "bookkeeping verification",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 142.60013161498478,
+   "se": 1.27616920653722,
+   "statistic": "two-layer time-difference residual (ps)",
+   "tolerance": {
+    "absolute": 10.0
+   },
+   "validation_evidence": false,
+   "verdict": "pass",
+   "width": {
+    "expected": 141.4213562373095,
+    "geant4": 142.60013161498478,
+    "relative": 0.008335200630499084,
+    "tolerance_relative": 0.1
+   }
+  },
+  {
+   "benchmark": "sampling-fraction",
+   "geant4": 0.2679804877561994,
+   "grade": "sanity",
+   "plausibility_window": "within 10% of the reference",
+   "reference": {
+    "source": "ionization dE/dx of 1 GeV (kinetic) muons, PDG 2024 muon tables muE_lead_Pb.txt (1.270 MeV cm2/g) and muE_polyvinyltoluene.txt (2.066 MeV cm2/g), read 2026-10-24: 0.5 cm x 1.032 x 2.066 / (that + 0.2 cm x 11.35 x 1.270) = 0.270",
+    "validity": "sanity",
+    "version": "-"
+   },
+   "reference_value": 0.27,
+   "relative_difference": -0.0074796749770392745,
+   "scope": {},
+   "se": 0.00027492218786844024,
+   "statistic": "sampling fraction sum(active) / sum(active + passive)",
+   "validation_evidence": false,
+   "verdict": "plausible"
+  }
+ ],
+ "gaps": [
+  "no reference or setup-matched benchmark in the config: nothing here is validation evidence"
+ ],
+ "controls": [
+  {
+   "benchmark": "field-propagation",
+   "compared": 5000,
+   "geant4": 7.806644785958383,
+   "grade": "verification",
+   "max_dt_ps": 0.002533221113765194,
+   "problems": [
+    "event 0 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 0 Si4: in-plane distance 1.88 um > 0.5 um",
+    "event 0 Si5: in-plane distance 3.29 um > 0.5 um",
+    "event 0 Si6: in-plane distance 5.1 um > 0.5 um",
+    "event 0 TOF2a: in-plane distance 7.55 um > 0.5 um",
+    "event 0 TOF2b: in-plane distance 7.81 um > 0.5 um",
+    "event 1 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 1 Si4: in-plane distance 1.88 um > 0.5 um",
+    "event 1 Si5: in-plane distance 3.29 um > 0.5 um",
+    "event 1 Si6: in-plane distance 5.1 um > 0.5 um",
+    "event 1 TOF2a: in-plane distance 7.55 um > 0.5 um",
+    "event 1 TOF2b: in-plane distance 7.81 um > 0.5 um",
+    "event 2 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 2 Si4: in-plane distance 1.88 um > 0.5 um",
+    "event 2 Si5: in-plane distance 3.29 um > 0.5 um",
+    "event 2 Si6: in-plane distance 5.1 um > 0.5 um",
+    "event 2 TOF2a: in-plane distance 7.55 um > 0.5 um",
+    "event 2 TOF2b: in-plane distance 7.81 um > 0.5 um",
+    "event 3 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 3 Si4: in-plane distance 1.88 um > 0.5 um"
+   ],
+   "reference": {
+    "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+    "validity": "deterministic: charged geantinos have no interactions",
+    "version": "exact"
+   },
+   "reference_value": 0.0,
+   "scope": {
+    "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+   },
+   "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+   "tolerance": {
+    "in_plane_um": 0.5,
+    "time_ps": 1.0
+   },
+   "validation_evidence": false,
+   "verdict": "fail",
+   "injected": "Geant4-side B x 1.0001",
+   "caught": true
+  },
+  {
+   "benchmark": "field-propagation",
+   "compared": 5000,
+   "geant4": 7.798298877602861,
+   "grade": "verification",
+   "max_dt_ps": 0.002529455928268476,
+   "problems": [
+    "event 0 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 0 Si4: in-plane distance 1.88 um > 0.5 um",
+    "event 0 Si5: in-plane distance 3.29 um > 0.5 um",
+    "event 0 Si6: in-plane distance 5.1 um > 0.5 um",
+    "event 0 TOF2a: in-plane distance 7.54 um > 0.5 um",
+    "event 0 TOF2b: in-plane distance 7.8 um > 0.5 um",
+    "event 1 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 1 Si4: in-plane distance 1.88 um > 0.5 um",
+    "event 1 Si5: in-plane distance 3.29 um > 0.5 um",
+    "event 1 Si6: in-plane distance 5.1 um > 0.5 um",
+    "event 1 TOF2a: in-plane distance 7.54 um > 0.5 um",
+    "event 1 TOF2b: in-plane distance 7.8 um > 0.5 um",
+    "event 2 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 2 Si4: in-plane distance 1.88 um > 0.5 um",
+    "event 2 Si5: in-plane distance 3.29 um > 0.5 um",
+    "event 2 Si6: in-plane distance 5.1 um > 0.5 um",
+    "event 2 TOF2a: in-plane distance 7.54 um > 0.5 um",
+    "event 2 TOF2b: in-plane distance 7.8 um > 0.5 um",
+    "event 3 Si3: in-plane distance 0.867 um > 0.5 um",
+    "event 3 Si4: in-plane distance 1.88 um > 0.5 um"
+   ],
+   "reference": {
+    "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+    "validity": "deterministic: charged geantinos have no interactions",
+    "version": "exact"
+   },
+   "reference_value": 0.0,
+   "scope": {
+    "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+   },
+   "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+   "tolerance": {
+    "in_plane_um": 0.5,
+    "time_ps": 1.0
+   },
+   "validation_evidence": false,
+   "verdict": "fail",
+   "injected": "Geant4-side B x 0.9999",
+   "caught": true
+  },
+  {
+   "benchmark": "material-definition",
+   "grade": "verification",
+   "problems": [
+    "Pb_ctl: Geant4 density 11.9175 g/cm3 differs from the independent 11.35 g/cm3"
+   ],
+   "reference": {
+    "source": "the study spec's independent material sources and the candidate's declared x/X0",
+    "validity": "verification of the realized geometry",
+    "version": "as declared"
+   },
+   "rows": [
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si1",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si2",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si3",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si4",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si5",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.0032017075773745998,
+     "element": "Si6",
+     "geantino_x_over_x0": 0.0032017075773745998,
+     "relative": 0.0
+    }
+   ],
+   "scope": {
+    "geometry_sha256": "6c0b91376e36efca776fb5c1c8d3566c85aa7be2a334940dc399fb147f10700c",
+    "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+   },
+   "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+   "tolerance": {
+    "density_relative": 0.001,
+    "relative": 0.02
+   },
+   "validation_evidence": false,
+   "verdict": "fail",
+   "injected": "Pb density x 1.05 in the spec, 11.35 g/cm3 in the study",
+   "caught": true
+  },
+  {
+   "benchmark": "field-propagation-muon",
+   "entries": 4000,
+   "geant4": -0.49764770424433247,
+   "grade": "sanity",
+   "reference": {
+    "source": "plane-averaged true 1/R (B2.1)",
+    "validity": "sanity",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 0.00990203416074481,
+   "se": 0.00015656490708373732,
+   "statistic": "mean relative inverse-rigidity residual of muons",
+   "tolerance": {
+    "absolute": 0.003
+   },
+   "validation_evidence": false,
+   "verdict": "fail",
+   "injected": "Geant4-side B x 1.01 at 10 GV",
+   "caught": true
+  },
+  {
+   "benchmark": "reco-closure",
+   "entries": 8000,
+   "geant4": 0.9981550176510853,
+   "grade": "verification",
+   "problems": [
+    "mean relative residual -0.507 beyond 3 SE (0.00464)"
+   ],
+   "pull_mean": -1.2172965062169927,
+   "pull_width": 0.9981550176510853,
+   "pull_width_mc_sigma": 0.007905694150420948,
+   "reference": {
+    "source": "the truth of the simulated charged geantinos",
+    "validity": "closure of the fit; no physics",
+    "version": "exact"
+   },
+   "reference_value": 1.0,
+   "residual_mean": -0.506520947248323,
+   "scope": {
+    "particle": "chargedgeantino",
+    "reco_spec_sha256": "6215c596bf784421c0fbcecd620f5dbdf7982c06606ec72a31541c85d64714e2",
+    "rigidity_GV": 1000.0
+   },
+   "statistic": "pull width and bias of the signed inverse rigidity",
+   "validation_evidence": false,
+   "verdict": "fail",
+   "injected": "reconstruction B x 1.05 (field_scale_global)",
+   "caught": true
+  },
+  {
+   "benchmark": "tof-beta",
+   "entries": 12486,
+   "geant4": -0.00781680921669297,
+   "grade": "verification",
+   "reference": {
+    "source": "kinematics along the true trajectory",
+    "validity": "bookkeeping verification (no physics control on the Geant4 side)",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 0.016507388482801963,
+   "se": 0.00014772932271182656,
+   "statistic": "mean relative beta residual",
+   "tolerance": {
+    "absolute": 0.002
+   },
+   "validation_evidence": false,
+   "verdict": "fail",
+   "injected": "+100 ps on one TOF2 layer",
+   "caught": true
+  },
+  {
+   "benchmark": "tof-layer-consistency",
+   "entries": 12486,
+   "geant4": -99.1033470536781,
+   "grade": "verification",
+   "reference": {
+    "source": "inter-layer path / (beta c), widths sqrt(2) sigma_t",
+    "validity": "bookkeeping verification",
+    "version": "-"
+   },
+   "reference_value": 0.0,
+   "scope": {},
+   "sd": 143.0973248348179,
+   "se": 1.2806187303186094,
+   "statistic": "two-layer time-difference residual (ps)",
+   "tolerance": {
+    "absolute": 10.0
+   },
+   "validation_evidence": false,
+   "verdict": "fail",
+   "width": {
+    "expected": 141.4213562373095,
+    "geant4": 143.0973248348179,
+    "relative": 0.011850887603538807,
+    "tolerance_relative": 0.1
+   },
+   "injected": "+100 ps on one TOF2 layer",
+   "caught": true
+  },
+  {
+   "benchmark": "sampling-fraction",
+   "geant4": 0.3049321433560093,
+   "grade": "sanity",
+   "plausibility_window": "within 10% of the reference",
+   "reference": {
+    "source": "ionization dE/dx of 1 GeV (kinetic) muons, PDG 2024 muon tables muE_lead_Pb.txt (1.270 MeV cm2/g) and muE_polyvinyltoluene.txt (2.066 MeV cm2/g), read 2026-10-24: 0.5 cm x 1.032 x 2.066 / (that + 0.2 cm x 11.35 x 1.270) = 0.270",
+    "validity": "sanity",
+    "version": "-"
+   },
+   "reference_value": 0.27,
+   "relative_difference": 0.12937830872596034,
+   "scope": {},
+   "se": 0.0002908158523116932,
+   "statistic": "sampling fraction sum(active) / sum(active + passive)",
+   "validation_evidence": false,
+   "verdict": "implausible",
+   "injected": "PVT density x 1.2",
+   "caught": true
+  }
+ ],
+ "implementation_checks": [
+  {
+   "check": "overlap",
+   "class": "implementation",
+   "verdict": "ok",
+   "control": {
+    "injected": "Si2 moved onto Si1",
+    "caught": true,
+    "by": "geant4_run.py check-spec (refused before a run)"
+   }
+  },
+  {
+   "check": "energy balance (e- 1 GeV)",
+   "class": "implementation",
+   "verdict": "ok",
+   "worst_residual_MeV": null,
+   "control": {
+    "injected": "double-count-leakage",
+    "caught": true
+   }
+  },
+  {
+   "check": "energy balance (e+ 1 GeV)",
+   "class": "implementation",
+   "verdict": "ok",
+   "worst_residual_MeV": null,
+   "control": {
+    "injected": "omit-positron-mass",
+    "caught": true
+   }
+  },
+  {
+   "check": "material budget (geantino path lengths)",
+   "class": "implementation",
+   "verdict": "ok",
+   "x_over_x0_total": null
+  }
+ ],
+ "note": "verification ladder (B3.2): verification and sanity benchmarks with their negative controls; the record is never upgraded"
+}

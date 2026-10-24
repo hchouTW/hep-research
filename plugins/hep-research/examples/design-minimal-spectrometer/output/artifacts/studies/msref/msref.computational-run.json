@@ -1,0 +1,503 @@
+{
+ "artifact_id": "j15-msref-study",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "commands": [
+   "check_geant4_study.py label --write"
+  ],
+  "environment": {},
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "studies/msref/study.json",
+    "sha256": "86d8b27be8d5cc69347bdaf6e968527039dfa60509a0e5313576b67cf22f41bc"
+   },
+   {
+    "path": "studies/msref/bench.results.json",
+    "sha256": "6724e52871b750c752464d0f903022d4397f2a8be1d184b3d8fb3d927e06959d"
+   },
+   {
+    "path": "studies/ladder/convergence.json",
+    "sha256": "6a39cf7d1ab0bae1a51aac16f60bdac8ea70574466e0108e00bbdd1b6cd1a73e"
+   },
+   {
+    "path": "specs/msref-1gv-nominal.spec.json",
+    "sha256": "70e05b87f3b0ee91cc9164874c98c25a98f7b5d2b8dcc34fc924ec6e41fc4f55"
+   }
+  ],
+  "output_hashes": {},
+  "seeds": {},
+  "study": {
+   "benchmarks": [
+    {
+     "benchmark": "multiple-scattering-reference",
+     "canonical_ties": 0,
+     "configuration": "isolated",
+     "configuration_basis": {
+      "artifact_id": "geant4-run-msref-1gv-nominal",
+      "run_record": "../../proj/artifacts/runs/msref-1gv-nominal.computational-run.json",
+      "sha256": "c619df266b4b9b7453742a56dfe6089bd0d9182eb30f921bfa8e1c87e3a16a56"
+     },
+     "configuration_gap": null,
+     "geant4": 0.0008350520647324336,
+     "geant4_dof": 15,
+     "grade": "reference",
+     "hash_scheme": "tree-v1",
+     "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+     "negative_control": {
+      "at_claimed_detection_limit": true,
+      "controls": [
+       {
+        "at_claimed_detection_limit": true,
+        "crossings": "../msref/msref-1gv-density-plus.crossings.csv",
+        "detection_limit_relative": 0.08086765304006459,
+        "injected": "slab density x 1.13",
+        "injected_relative": 0.1299999999999999,
+        "injection_in_run": 0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-1gv-density-plus.computational-run.json",
+        "se_of_shift": 0.010814823420224214,
+        "shift": 0.07280808073517159,
+        "sign": "+",
+        "status": "caught"
+       },
+       {
+        "at_claimed_detection_limit": true,
+        "crossings": "../msref/msref-1gv-density-minus.crossings.csv",
+        "detection_limit_relative": 0.08075950454344658,
+        "injected": "slab density x 0.87",
+        "injected_relative": -0.13,
+        "injection_in_run": -0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-1gv-density-minus.computational-run.json",
+        "se_of_shift": 0.010764371763132491,
+        "shift": -0.0695379342661927,
+        "sign": "-",
+        "status": "caught"
+       }
+      ],
+      "detection_limit_relative": 0.08086765304006459,
+      "detection_limit_sign": "+-",
+      "status": "caught"
+     },
+     "reference": {
+      "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+      "validity": "as declared",
+      "version": "1991"
+     },
+     "reference_value": 0.0008502461110064238,
+     "relative_difference": -0.017870174385161586,
+     "relative_se": 0.006814288858865224,
+     "scope": {
+      "material": [
+       "G4_Si"
+      ],
+      "particle": [
+       "proton"
+      ],
+      "rigidity_GV": 1.0,
+      "thickness_x0": 0.0032017075773745998
+     },
+     "selection": {
+      "blocks": 16,
+      "events": 8000
+     },
+     "statistic": "core width of the projected exit angle (rad), central 98 %",
+     "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+     "target_slabs": [
+      "Plane",
+      "Slab"
+     ],
+     "tolerance": {
+      "parts": {
+       "binning": 0.0,
+       "k_sigma": 3.0,
+       "mc_statistics": 0.02044286657659567,
+       "reference_accuracy": 0.02
+      },
+      "total": 0.04044286657659567
+     },
+     "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+     "validation_evidence": true,
+     "verdict": "pass",
+     "world_material": "G4_Galactic"
+    },
+    {
+     "benchmark": "multiple-scattering-reference",
+     "canonical_ties": 0,
+     "configuration": "isolated",
+     "configuration_basis": {
+      "artifact_id": "geant4-run-msref-100gv-nominal",
+      "run_record": "../../proj/artifacts/runs/msref-100gv-nominal.computational-run.json",
+      "sha256": "3fd0dd8e70c68d44c59278a5744a3aa781e4e68c20600b77b428f3ff29902e0d"
+     },
+     "configuration_gap": null,
+     "geant4": 5.960009288440414e-06,
+     "geant4_dof": 15,
+     "grade": "reference",
+     "hash_scheme": "tree-v1",
+     "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+     "negative_control": {
+      "at_claimed_detection_limit": false,
+      "controls": [
+       {
+        "at_claimed_detection_limit": true,
+        "crossings": "../msref/msref-100gv-density-plus.crossings.csv",
+        "detection_limit_relative": 0.0628496800727933,
+        "injected": "slab density x 1.13",
+        "injected_relative": 0.1299999999999999,
+        "injection_in_run": 0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-100gv-density-plus.computational-run.json",
+        "se_of_shift": 0.008915982888257661,
+        "shift": 0.06314203214223732,
+        "sign": "+",
+        "status": "caught"
+       },
+       {
+        "at_claimed_detection_limit": false,
+        "crossings": "../msref/msref-100gv-density-minus.crossings.csv",
+        "detection_limit_relative": 0.06300011678977513,
+        "injected": "slab density x 0.87",
+        "injected_relative": -0.13,
+        "injection_in_run": -0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-100gv-density-minus.computational-run.json",
+        "se_of_shift": 0.00898773349195976,
+        "shift": -0.08143277098550092,
+        "sign": "-",
+        "status": "caught"
+       }
+      ],
+      "detection_limit_relative": 0.06300011678977513,
+      "detection_limit_sign": "+-",
+      "status": "caught"
+     },
+     "reference": {
+      "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+      "validity": "as declared",
+      "version": "1991"
+     },
+     "reference_value": 5.994243543652734e-06,
+     "relative_difference": -0.005711188570002301,
+     "relative_se": 0.00619234432513264,
+     "scope": {
+      "material": [
+       "G4_Si"
+      ],
+      "particle": [
+       "proton"
+      ],
+      "rigidity_GV": 100.0,
+      "thickness_x0": 0.0032017075773745998
+     },
+     "selection": {
+      "blocks": 16,
+      "events": 8000
+     },
+     "statistic": "core width of the projected exit angle (rad), central 98 %",
+     "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+     "target_slabs": [
+      "Plane",
+      "Slab"
+     ],
+     "tolerance": {
+      "parts": {
+       "binning": 0.0,
+       "k_sigma": 3.0,
+       "mc_statistics": 0.018577032975397922,
+       "reference_accuracy": 0.02
+      },
+      "total": 0.038577032975397926
+     },
+     "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+     "validation_evidence": true,
+     "verdict": "pass",
+     "world_material": "G4_Galactic"
+    },
+    {
+     "benchmark": "multiple-scattering-reference",
+     "canonical_ties": 0,
+     "configuration": "isolated",
+     "configuration_basis": {
+      "artifact_id": "geant4-run-msref-500gv-nominal",
+      "run_record": "../../proj/artifacts/runs/msref-500gv-nominal.computational-run.json",
+      "sha256": "f8b597a4b29a44f67db3a4c141177fb83263ab8e8dc9c1f2d4542fd710c6a0ac"
+     },
+     "configuration_gap": null,
+     "geant4": 1.1845882739955688e-06,
+     "geant4_dof": 15,
+     "grade": "reference",
+     "hash_scheme": "tree-v1",
+     "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+     "negative_control": {
+      "at_claimed_detection_limit": true,
+      "controls": [
+       {
+        "at_claimed_detection_limit": true,
+        "crossings": "../msref/msref-500gv-density-plus.crossings.csv",
+        "detection_limit_relative": 0.07568120977651287,
+        "injected": "slab density x 1.13",
+        "injected_relative": 0.1299999999999999,
+        "injection_in_run": 0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-500gv-density-plus.computational-run.json",
+        "se_of_shift": 0.010723819864383394,
+        "shift": 0.0667627311024806,
+        "sign": "+",
+        "status": "caught"
+       },
+       {
+        "at_claimed_detection_limit": true,
+        "crossings": "../msref/msref-500gv-density-minus.crossings.csv",
+        "detection_limit_relative": 0.07314724018048668,
+        "injected": "slab density x 0.87",
+        "injected_relative": -0.13,
+        "injection_in_run": -0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-500gv-density-minus.computational-run.json",
+        "se_of_shift": 0.009504160338739286,
+        "shift": -0.06674164365587945,
+        "sign": "-",
+        "status": "caught"
+       }
+      ],
+      "detection_limit_relative": 0.07568120977651287,
+      "detection_limit_sign": "+-",
+      "status": "caught"
+     },
+     "reference": {
+      "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+      "validity": "as declared",
+      "version": "1991"
+     },
+     "reference_value": 1.1987923558263232e-06,
+     "relative_difference": -0.011848658995630257,
+     "relative_se": 0.0071658897137681435,
+     "scope": {
+      "material": [
+       "G4_Si"
+      ],
+      "particle": [
+       "proton"
+      ],
+      "rigidity_GV": 500.0,
+      "thickness_x0": 0.0032017075773745998
+     },
+     "selection": {
+      "blocks": 16,
+      "events": 8000
+     },
+     "statistic": "core width of the projected exit angle (rad), central 98 %",
+     "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+     "target_slabs": [
+      "Plane",
+      "Slab"
+     ],
+     "tolerance": {
+      "parts": {
+       "binning": 0.0,
+       "k_sigma": 3.0,
+       "mc_statistics": 0.02149766914130443,
+       "reference_accuracy": 0.02
+      },
+      "total": 0.04149766914130443
+     },
+     "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+     "validation_evidence": true,
+     "verdict": "pass",
+     "world_material": "G4_Galactic"
+    }
+   ],
+   "convergence": {
+    "gate": "not-run",
+    "parameters": []
+   },
+   "declared_scope": {
+    "energy_MeV": [
+     433.0,
+     433.0
+    ],
+    "material": "G4_Si",
+    "observable": "multiple-scattering core width",
+    "observable_kind": "angle",
+    "particle": "proton"
+   },
+   "evidence_overlap": [],
+   "evidence_overlap_version": 1,
+   "gaps": [
+    "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)",
+    "convergence gate not passed: ",
+    "no variation table",
+    "multiple-scattering-reference: observable kind 'angle' is not one multiple-scattering-reference supports (['tracking-resolution'])",
+    "multiple-scattering-reference: the declared scope has no thickness_x0 (every dimension of the benchmark is required)",
+    "multiple-scattering-reference: the declared scope has no rigidity_GV (every dimension of the benchmark is required)",
+    "multiple-scattering-reference: observable kind 'angle' is not one multiple-scattering-reference supports (['tracking-resolution'])",
+    "multiple-scattering-reference: the declared scope has no thickness_x0 (every dimension of the benchmark is required)",
+    "multiple-scattering-reference: the declared scope has no rigidity_GV (every dimension of the benchmark is required)",
+    "multiple-scattering-reference: observable kind 'angle' is not one multiple-scattering-reference supports (['tracking-resolution'])",
+    "multiple-scattering-reference: the declared scope has no thickness_x0 (every dimension of the benchmark is required)",
+    "multiple-scattering-reference: the declared scope has no rigidity_GV (every dimension of the benchmark is required)"
+   ],
+   "highest_usable_label": "unvalidated",
+   "phase2_upgrade_eligible_scopes": [],
+   "statistical_target": null,
+   "variations": null
+  },
+  "tolerances": {
+   "convergence": {}
+  },
+  "tools": [
+   {
+    "name": "check_geant4_study.py",
+    "version": "dedc2c52621c0505"
+   },
+   {
+    "name": "geant4_benchmarks.py",
+    "version": "42dde9ff11e315fe"
+   }
+  ]
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-run-msref-1gv-nominal",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-1gv-nominal.computational-run.json",
+   "sha256": "c619df266b4b9b7453742a56dfe6089bd0d9182eb30f921bfa8e1c87e3a16a56",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-1gv-density-plus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-1gv-density-plus.computational-run.json",
+   "sha256": "ec79138a1ceeb5259c55c960e7158ad172db20e7d0ecd29eb814d71ca84971a1",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-1gv-density-minus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-1gv-density-minus.computational-run.json",
+   "sha256": "7034064c94e93df580e0c4e8d900b536581ea539340ea2aa7dfd957ea132896b",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-100gv-nominal",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-100gv-nominal.computational-run.json",
+   "sha256": "3fd0dd8e70c68d44c59278a5744a3aa781e4e68c20600b77b428f3ff29902e0d",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-100gv-density-plus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-100gv-density-plus.computational-run.json",
+   "sha256": "5e513c3c3a7aac16759df987174fae24f76e0747cde43eb4ed7a4bd343802d8a",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-100gv-density-minus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-100gv-density-minus.computational-run.json",
+   "sha256": "856bd98129228a1c5e2c50c4c73c98192db20dba835ada83b817b3b349ee0fed",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-500gv-nominal",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-500gv-nominal.computational-run.json",
+   "sha256": "f8b597a4b29a44f67db3a4c141177fb83263ab8e8dc9c1f2d4542fd710c6a0ac",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-500gv-density-plus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-500gv-density-plus.computational-run.json",
+   "sha256": "992005ca2a675e086bc27ffe0d618353eae3291b11947b71479abf6065ae1ee5",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-500gv-density-minus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-500gv-density-minus.computational-run.json",
+   "sha256": "d09b7b71cc244f578c7d34715e72915d105b3535a69a2f8b82c0fed93dc2efe8",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  }
+ ],
+ "objective": "Geant4 study record: multiple-scattering core width for proton 433.0 MeV; benchmarks, convergence and scope embedded (unvalidated in phase 1)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/simulation/__init__.py",
+   "core/simulation/estimates.py",
+   "core/simulation/helix.py",
+   "core/simulation/summary.py",
+   "core/stats/__init__.py",
+   "core/stats/_linalg.py",
+   "core/stats/_poisson.py",
+   "core/stats/batch_means.py",
+   "core/stats/decisions.py",
+   "core/stats/distributions.py",
+   "core/stats/poisson_diagnostics.py",
+   "core/stats/tail_estimation.py",
+   "core/status.py",
+   "core/trace.py",
+   "skills/hep-detector/scripts/check_geant4_study.py",
+   "skills/hep-detector/scripts/geant4_benchmarks.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "status": "ok",
+ "status_label": "synthetic",
+ "inputs": {
+  "command": "infield-acceptance",
+  "z_m": [
+   0.0,
+   0.16,
+   0.32,
+   0.48,
+   0.64,
+   0.8
+  ],
+  "radius_m": [
+   0.1,
+   0.1,
+   0.1,
+   0.1,
+   0.1,
+   0.1
+  ],
+  "lateral_offset_m": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "field_tesla": 0.5,
+  "rigidity": 10.0,
+  "charge_sign": "positive",
+  "radius_tolerance_m": 0.001,
+  "samples": 50000,
+  "seed": 1,
+  "status": "synthetic"
+ },
+ "label": "[General method]",
+ "warnings": [],
+ "acceptance_m2sr": 0.0014705710557623146,
+ "acceptance_uncertainty_m2sr": 6.1029263638280214e-05,
+ "statistical_m2sr": 5.347466061801941e-05,
+ "tolerance_term_m2sr": 2.941142111524629e-05,
+ "accepted": 745,
+ "samples": 50000,
+ "seed": 1,
+ "bending_radius_m": 66.71281903963042,
+ "uncertainty_meaning": "one standard deviation: binomial statistics and the aperture-radius tolerance (2 dr / r of the smallest aperture) in quadrature"
+}

@@ -1,0 +1,594 @@
+{
+ "label": "SYNTHETIC design study (journey J15, minimal spectrometer; names no experiment)",
+ "design_id": "j15-v1",
+ "evaluations": {
+  "cand-N6": {
+   "F1 resolution 1 GV": {
+    "value": 0.02537296233103489,
+    "bound": "estimate"
+   },
+   "F2 toy_spectrometer 1 GV": {
+    "value": 0.021572966753747626,
+    "bound": "estimate"
+   },
+   "F1 resolution 100 GV": {
+    "value": 0.087282143243663,
+    "bound": "optimistic"
+   },
+   "F2 toy_spectrometer 100 GV": {
+    "value": 0.08983556725385114,
+    "bound": "estimate"
+   },
+   "F1 resolution 500 GV": {
+    "value": 0.4269026094681686,
+    "bound": "optimistic"
+   },
+   "F1 MDR intrinsic": {
+    "value": 1130.5881600020443,
+    "bound": "estimate"
+   },
+   "F1 MDR total": {
+    "value": 1130.4484746365156,
+    "bound": "estimate"
+   },
+   "F1 charge confusion 500 GV": {
+    "value": 0.009578681159629947,
+    "bound": "optimistic"
+   },
+   "F1 acceptance 1 GV": {
+    "value": 0.001495667310470862,
+    "bound": "optimistic"
+   },
+   "F2 acceptance 1 GV": {
+    "value": 0.001559397495372119,
+    "bound": "estimate"
+   },
+   "F1 acceptance 10 GV": {
+    "value": 0.001495667310470862,
+    "bound": "optimistic"
+   },
+   "F2 acceptance 10 GV": {
+    "value": 0.0014705710557623146,
+    "bound": "estimate"
+   },
+   "F1 mass": {
+    "value": 1938.0
+   },
+   "F1 channel_count": {
+    "value": 12116.0
+   }
+  },
+  "cand-N4": {
+   "F1 resolution 1 GV": {
+    "value": 0.02072646916027955,
+    "bound": "estimate"
+   },
+   "F2 toy_spectrometer 1 GV": {
+    "value": 0.01762720312698775,
+    "bound": "estimate"
+   },
+   "F1 resolution 100 GV": {
+    "value": 0.0950222983947967,
+    "bound": "optimistic"
+   },
+   "F2 toy_spectrometer 100 GV": {
+    "value": 0.0997190545553518,
+    "bound": "estimate"
+   },
+   "F1 resolution 500 GV": {
+    "value": 0.46931717736101514,
+    "bound": "optimistic"
+   },
+   "F1 MDR intrinsic": {
+    "value": 1011.2287921283917,
+    "bound": "estimate"
+   },
+   "F1 MDR total": {
+    "value": 1011.1455015699255,
+    "bound": "estimate"
+   },
+   "F1 charge confusion 500 GV": {
+    "value": 0.016554658859681815,
+    "bound": "optimistic"
+   },
+   "F1 acceptance 1 GV": {
+    "value": 0.001495667310470862,
+    "bound": "optimistic"
+   },
+   "F2 acceptance 1 GV": {
+    "value": 0.001559397495372119,
+    "bound": "estimate"
+   },
+   "F1 acceptance 10 GV": {
+    "value": 0.001495667310470862,
+    "bound": "optimistic"
+   },
+   "F2 acceptance 10 GV": {
+    "value": 0.0014705710557623146,
+    "bound": "estimate"
+   },
+   "F1 mass": {
+    "value": 1932.0
+   },
+   "F1 channel_count": {
+    "value": 8116.0
+   }
+  },
+  "cand-N8": {
+   "F1 resolution 1 GV": {
+    "value": 0.029292216725578708,
+    "bound": "estimate"
+   },
+   "F2 toy_spectrometer 1 GV": {
+    "value": 0.024902463600530285,
+    "bound": "estimate"
+   },
+   "F1 resolution 100 GV": {
+    "value": 0.08165539986309821,
+    "bound": "optimistic"
+   },
+   "F2 toy_spectrometer 100 GV": {
+    "value": 0.08275815270079508,
+    "bound": "estimate"
+   },
+   "F1 resolution 500 GV": {
+    "value": 0.3946460116240801,
+    "bound": "optimistic"
+   },
+   "F1 MDR intrinsic": {
+    "value": 1238.497276962759,
+    "bound": "estimate"
+   },
+   "F1 MDR total": {
+    "value": 1238.2932492491884,
+    "bound": "estimate"
+   },
+   "F1 charge confusion 500 GV": {
+    "value": 0.0056397819503904755,
+    "bound": "optimistic"
+   },
+   "F1 acceptance 1 GV": {
+    "value": 0.001495667310470862,
+    "bound": "optimistic"
+   },
+   "F2 acceptance 1 GV": {
+    "value": 0.001559397495372119,
+    "bound": "estimate"
+   },
+   "F1 acceptance 10 GV": {
+    "value": 0.001495667310470862,
+    "bound": "optimistic"
+   },
+   "F2 acceptance 10 GV": {
+    "value": 0.0014705710557623146,
+    "bound": "estimate"
+   },
+   "F1 mass": {
+    "value": 1944.0
+   },
+   "F1 channel_count": {
+    "value": 16116.0
+   }
+  }
+ },
+ "f4": {
+  "SIM-N6-TRK1": {
+   "upgrade": "re-issued as validated-in-scope",
+   "gaps": [],
+   "value": 0.01819511530127913,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.00037013449551151186,
+    "plus": 0.00037013449551151186
+   },
+   "model_envelope": [
+    0.017780358680328325,
+    0.0192562179665863
+   ],
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "bound": "estimate"
+  },
+  "SIM-N6-TRK1-notails": {
+   "upgrade": "re-issued as validated-in-scope",
+   "gaps": [],
+   "value": 0.01818013528981194,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.00035489981991698906,
+    "plus": 0.00035489981991698906
+   },
+   "model_envelope": [
+    0.017709223582439454,
+    0.019099019670767155
+   ],
+   "tail_sources_simulated": [],
+   "bound": "optimistic"
+  },
+  "SIM-N6-TRK100": {
+   "upgrade": {
+    "refused": [
+     "the tracking-resolution qualification path does not hold (B2.8: every condition passed and matched by its own scope keys, and a passed convergence gate)",
+     "2 gap(s) remain"
+    ]
+   },
+   "gaps": [
+    "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)",
+    "convergence gate not passed: physics.default_cut_mm incomplete"
+   ],
+   "value": 0.10520609938269829,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.0034344161595744583,
+    "plus": 0.0034344161595744583
+   },
+   "model_envelope": [
+    0.1046260702048812,
+    0.10601087845244458
+   ],
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "bound": "estimate"
+  },
+  "SIM-N4-TRK1": {
+   "upgrade": "re-issued as validated-in-scope",
+   "gaps": [],
+   "value": 0.014786095715123845,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.00021394395266321846,
+    "plus": 0.00021394395266321846
+   },
+   "model_envelope": [
+    0.014320506288614088,
+    0.014786095715123845
+   ],
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "bound": "estimate"
+  },
+  "SIM-N4-TRK100": {
+   "upgrade": {
+    "refused": [
+     "1 gap(s) remain"
+    ]
+   },
+   "gaps": [
+    "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)"
+   ],
+   "value": 0.11338809278302535,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.0025673678687415705,
+    "plus": 0.0025673678687415705
+   },
+   "model_envelope": [
+    0.11338809278302535,
+    0.11503123463324924
+   ],
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "bound": "estimate"
+  },
+  "SIM-N8-TRK1": {
+   "upgrade": "re-issued as validated-in-scope",
+   "gaps": [],
+   "value": 0.02080568447775748,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.000539947918206488,
+    "plus": 0.000539947918206488
+   },
+   "model_envelope": [
+    0.02080568447775748,
+    0.021437924792197492
+   ],
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "bound": "estimate"
+  },
+  "SIM-N8-TRK100": {
+   "upgrade": {
+    "refused": [
+     "1 gap(s) remain"
+    ]
+   },
+   "gaps": [
+    "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)"
+   ],
+   "value": 0.09752082231601225,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.0021849808811767973,
+    "plus": 0.0021849808811767973
+   },
+   "model_envelope": [
+    0.0974620404779663,
+    0.09761011056279845
+   ],
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "bound": "estimate"
+  },
+  "SIM-N6-CC500": {
+   "upgrade": {
+    "refused": [
+     "the charge-confusion qualification path does not hold (B2.8: every condition passed and matched by its own scope keys, and a passed convergence gate)",
+     "3 gap(s) remain"
+    ]
+   },
+   "gaps": [
+    "ms-tail-reference: not applicable (no published tail reference configured (D0-b): charge confusion cannot qualify)",
+    "no reference benchmark is validation evidence for this study (R5 not met)",
+    "qualification (charge-confusion): ms-tail-reference: verdict 'not-applicable'; negative control not caught; not validation evidence; particle: the benchmark states none; material: the benchmark states none; thickness_x0: the benchmark states none; rigidity_GV: the benchmark states none"
+   ],
+   "value": 0.03360996112879524,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "exact",
+    "interval": "central",
+    "minus": 0.03360996112879524,
+    "plus": 0.042569710480881685
+   },
+   "model_envelope": [
+    0.03360996112879524,
+    0.038391937120787686
+   ],
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "bound": "estimate"
+  },
+  "SIM-N6-CAL10": {
+   "upgrade": {
+    "refused": [
+     "no scope is eligible (a passed reference benchmark with its control caught, a passed convergence gate, the declared scope inside the benchmark scope)",
+     "2 gap(s) remain"
+    ]
+   },
+   "gaps": [
+    "no reference or setup-matched benchmark in the config: nothing here is validation evidence",
+    "no reference benchmark is validation evidence for this study (R5 not met)"
+   ],
+   "value": 0.9683039145355059,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.0001393521914171377,
+    "plus": 0.0001393521914171377
+   },
+   "model_envelope": [
+    0.9681996227733369,
+    0.9683039145355059
+   ],
+   "tail_sources_simulated": [],
+   "bound": "estimate"
+  }
+ },
+ "verdicts": {
+  "REQ-TRK-001 cand-N4": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "REQ-TRK-001 cand-N6": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction",
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "REQ-TRK-001 cand-N8": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "REQ-TRK-002 cand-N4": {
+   "result": "inconclusive",
+   "codes": [
+    "fidelity.insufficient"
+   ],
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ]
+  },
+  "REQ-TRK-002 cand-N6": {
+   "result": "inconclusive",
+   "codes": [
+    "fidelity.insufficient"
+   ],
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ]
+  },
+  "REQ-TRK-002 cand-N8": {
+   "result": "inconclusive",
+   "codes": [
+    "fidelity.insufficient"
+   ],
+   "missing_evidence": [
+    "momentum-resolution-core at F3 or above (compliance threshold)"
+   ]
+  },
+  "REQ-CC-001 cand-N4": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02)",
+    "charge-confusion-rate at F4 or above (compliance threshold)",
+    "momentum-resolution-core at F3 or above (in the chain of j15-v1:CALC-CC-N4, now F1)",
+    "rigidity-scale-offset at F5 or above (required for compliance, ADQ-02)"
+   ]
+  },
+  "REQ-CC-001 cand-N6": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02)",
+    "charge-confusion-rate at F4 or above (compliance threshold)",
+    "momentum-resolution-core at F3 or above (in the chain of j15-v1:CALC-CC-N6, now F1)",
+    "rigidity-scale-offset at F5 or above (required for compliance, ADQ-02)"
+   ]
+  },
+  "REQ-CC-001 cand-N8": {
+   "result": "inconclusive",
+   "codes": [
+    "bound.direction"
+   ],
+   "missing_evidence": [
+    "charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02)",
+    "charge-confusion-rate at F4 or above (compliance threshold)",
+    "momentum-resolution-core at F3 or above (in the chain of j15-v1:CALC-CC-N8, now F1)",
+    "rigidity-scale-offset at F5 or above (required for compliance, ADQ-02)"
+   ]
+  },
+  "REQ-CAL-001 cand-N4": {
+   "result": "inconclusive",
+   "codes": [],
+   "missing_evidence": [
+    "shower-containment at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-CAL-001 cand-N6": {
+   "result": "inconclusive",
+   "codes": [
+    "fidelity.insufficient"
+   ],
+   "missing_evidence": [
+    "shower-containment at F4 or above (compliance threshold)"
+   ]
+  },
+  "REQ-CAL-001 cand-N8": {
+   "result": "inconclusive",
+   "codes": [],
+   "missing_evidence": [
+    "shower-containment at F4 or above (compliance threshold)"
+   ]
+  },
+  "CON-MASS-001 cand-N4": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "CON-MASS-001 cand-N6": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "CON-MASS-001 cand-N8": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "CON-CHAN-001 cand-N4": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "CON-CHAN-001 cand-N6": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  },
+  "CON-CHAN-001 cand-N8": {
+   "result": "pass",
+   "codes": [
+    "estimate.decides"
+   ],
+   "missing_evidence": []
+  }
+ },
+ "comparison_basis": {
+  "declared": true,
+  "holds": true,
+  "reason": null
+ },
+ "ranking": "refused",
+ "gate_flags": [
+  "gate.H1_missing",
+  "gate.H2_missing",
+  "gate.H3_missing"
+ ],
+ "pass": {
+  "no_design_errors": true,
+  "f1_1gv_in_b42_band": true,
+  "f1_mdr_near_b42": true,
+  "f1_100gv_measurement_term": true,
+  "f2_toy_close_to_f1": true,
+  "more_planes_better_at_100gv": true,
+  "acceptance_f2_near_f1_at_10gv": true,
+  "shower_needs_f4": true,
+  "gate_flags_shown": true,
+  "drafts_listed_not_valid": true,
+  "trk1_upgraded": true,
+  "n6_core_in_b42_band": true,
+  "tails_off_optimistic_on_estimate": true,
+  "trk1_decides": true,
+  "trk100_refused_on_the_control": true,
+  "trk100_more_planes_better": true,
+  "cc_not_qualifiable_before_d0b": true,
+  "shower_not_upgraded": true
+ },
+ "note": "verdicts derived by contracts/design.py"
+}

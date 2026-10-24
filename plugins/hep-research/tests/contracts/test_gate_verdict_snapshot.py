@@ -45,10 +45,23 @@ ALLOWED_CHANGES: dict[str, tuple[dict, str]] = {
 }
 
 
+def ignored_dirs() -> list[Path]:
+    """Directories an example's .gitignore excludes (lines ending in /): files a replay unpacks there are not
+    committed, so they are not snapshotted (a checkout without a local replay has none)."""
+    out = []
+    for gi in sorted((ROOT / "examples").glob("*/.gitignore")):
+        out += [gi.parent / ln.strip() for ln in gi.read_text(encoding="utf-8").splitlines()
+                if ln.strip().endswith("/") and not ln.startswith("#")]
+    return out
+
+
 def collect() -> dict:
     rows = {}
+    skip = ignored_dirs()
     for base in BASES:
         for p in sorted((ROOT / base).rglob("*.json")):
+            if any(p.is_relative_to(d) for d in skip):
+                continue
             try:
                 doc = json.loads(p.read_text(encoding="utf-8"))
             except (ValueError, UnicodeDecodeError):

@@ -1,0 +1,77 @@
+{
+ "geometry": {
+  "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/studies/G-N6-CAL10.geometry.json",
+  "sha256": "657139e36425d579075b67d1b7f901474cf539f37438c5d8d61ba9949f4e29c3"
+ },
+ "reco_record": {
+  "artifact_id": "geant4-reco-N6-CAL10-nominal-reco",
+  "sha256": "bd14ee01f18ba53500dbfd8fcf726d3f32b62c586c09715f7b0e25b4b4674a35"
+ },
+ "results": {
+  "shower-containment": {
+   "denominator": {
+    "energy_GeV": 10.0,
+    "species": "e-"
+   },
+   "dof": 15,
+   "estimator": {
+    "name": "mean",
+    "observable": "containment"
+   },
+   "model_envelope": [
+    0.9681996227733369,
+    0.9683039145355059
+   ],
+   "model_envelope_annotation": {
+    "ends": {
+     "hi": {
+      "se": 7.949126559007724e-05,
+      "variation": "nominal"
+     },
+     "lo": {
+      "se": 0.0001064901765612383,
+      "variation": "emy"
+     }
+    },
+    "variations": {
+     "emy": {
+      "se": 0.0001064901765612383,
+      "value": 0.9681996227733369
+     },
+     "nominal": {
+      "se": 7.949126559007724e-05,
+      "value": 0.9683039145355059
+     }
+    }
+   },
+   "replica_spread": 0.0,
+   "replica_values": [
+    0.9683039145355059
+   ],
+   "replicas": 1,
+   "se": 7.949126559007724e-05,
+   "statistical_uncertainty": 8.223261353210702e-05,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "non-gaussian",
+    "interval": "central",
+    "minus": 0.0001393521914171377,
+    "plus": 0.0001393521914171377
+   },
+   "uncertainty_components": {
+    "replica_spread": {
+     "half_width": 0.0,
+     "sd": 0.0
+    },
+    "statistical": {
+     "method": "t_0.95(K-1) x batch-means SE over K blocks",
+     "minus": 0.0001393521914171377,
+     "plus": 0.0001393521914171377
+    }
+   },
+   "value": 0.9683039145355059
+  }
+ },
+ "schema": "f4-results/1",
+ "tail_sources_simulated": []
+}

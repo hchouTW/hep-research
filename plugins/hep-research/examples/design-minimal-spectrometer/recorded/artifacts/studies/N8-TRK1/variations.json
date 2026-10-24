@@ -1,0 +1,66 @@
+{
+ "domain": "em",
+ "envelope_relative": 0.0055262350572143305,
+ "nominal": {
+  "model_assignment": {
+   "domain": "em",
+   "em_constructor": "G4EmStandardPhysics_option4",
+   "fluctuation_model": "Urban",
+   "known": true
+  },
+  "run_record_id": "geant4-reco-N8-TRK1-nominal-off",
+  "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N8-TRK1-nominal-off/summary_r000.json",
+  "value": 0.02087824933351689
+ },
+ "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
+ "observable": "core",
+ "variations": [
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysicsSS",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": 0.0055262350572143305,
+   "resolved": false,
+   "run_record_id": "geant4-reco-N8-TRK1-ss-off",
+   "se": 0.00027396113664025247,
+   "se_of_relative_difference": 0.019426875047218697,
+   "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N8-TRK1-ss-off/summary_r000.json",
+   "value": 0.020993627446917032,
+   "variation": "ss"
+  },
+  {
+   "listed": false,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "reason": "same model for this particle and energy: a false zero difference, not a systematic",
+   "relative_to_nominal": 0.015617140940770753,
+   "resolved": false,
+   "run_record_id": "geant4-reco-N8-TRK1-qgsp-bic-off",
+   "se": 0.0002659285308288292,
+   "se_of_relative_difference": 0.019169105724654113,
+   "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N8-TRK1-qgsp-bic-off/summary_r000.json",
+   "value": 0.021204307895954976,
+   "variation": "qgsp-bic"
+  }
+ ]
+}

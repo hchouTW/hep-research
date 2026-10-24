@@ -1,0 +1,88 @@
+{
+ "artifact_id": "geant4-verify-energy-balance-ladder-balance-e+",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "commands": [
+   "geant4_verify.py energy-balance"
+  ],
+  "environment": {},
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-balance-e+.computational-run.json",
+    "sha256": "1d28d0fae5c540b5b822cc0192a3a8e2541a825f54660ffca480182ea0ef2cf9"
+   }
+  ],
+  "output_hashes": {},
+  "seeds": {},
+  "tolerances": {
+   "tolerance_MeV": 0.001
+  },
+  "tools": [
+   {
+    "name": "geant4_verify.py",
+    "version": "50cfe683fb8f1d58"
+   }
+  ],
+  "verification": {
+   "check": "energy-balance",
+   "closure_test": true,
+   "events": 400,
+   "events_beyond_tolerance": 0,
+   "events_with_killed_eplus": 0,
+   "formula": "E_in - deposits - leakage - killed_unbooked - 2 m_e c^2 x killed_eplus (E_in includes 2 m_e c^2 for an e+ primary; booked killed energy is already a deposit)",
+   "injected_error": null,
+   "killed_booked_MeV_total": 0.0,
+   "residual_max_abs_MeV": 2.2305870056360533e-05,
+   "residual_mean_MeV": 1.0820187955951077e-07,
+   "residual_rms_MeV": 2.9463915171663983e-06,
+   "tolerance_MeV": 0.001
+  }
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-run-ladder-balance-e+",
+   "artifact_type": "computational-run",
+   "ref": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-balance-e+.computational-run.json",
+   "sha256": "1d28d0fae5c540b5b822cc0192a3a8e2541a825f54660ffca480182ea0ef2cf9",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
+ "objective": "Implementation check 'energy-balance' of geant4-run-ladder-balance-e+ (verification, not validation)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "adapters/geant4/assets/g4common.py",
+   "adapters/geant4/assets/geant4_verify.py",
+   "contracts/__init__.py",
+   "contracts/trace.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/simulation/__init__.py",
+   "core/simulation/helix.py",
+   "core/status.py",
+   "core/trace.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

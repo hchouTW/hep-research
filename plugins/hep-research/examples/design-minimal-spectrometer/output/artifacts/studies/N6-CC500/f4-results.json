@@ -1,0 +1,109 @@
+{
+ "geometry": {
+  "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/studies/G-N6-CC500.geometry.json",
+  "sha256": "2948a7c4c50ce1a17bc1ef96ce117663385dd761ef1aa95d4c6250da18badbff"
+ },
+ "reco_record": {
+  "artifact_id": "geant4-reco-N6-CC500-nominal-on",
+  "sha256": "601770497e5c2b961edd93678248cc4f11c7e7bcab13e0e37aae40437b7fe8f2"
+ },
+ "results": {
+  "charge-confusion-rate": {
+   "counts": {
+    "interval": [
+     0.0466720038719699,
+     0.05341023095911062
+    ],
+    "k": 580,
+    "method": "Clopper-Pearson (replica 0)",
+    "n": 11610
+   },
+   "denominator": {
+    "charge_sign": "positive",
+    "curvature_offset_per_GV": 0.0,
+    "rigidity_GV": 500.0,
+    "species": "proton"
+   },
+   "estimator": {
+    "name": "proportion",
+    "observable": "flip"
+   },
+   "model_envelope": [
+    0.03360996112879524,
+    0.038391937120787686
+   ],
+   "model_envelope_annotation": {
+    "ends": {
+     "hi": {
+      "se": 0.029754954769751808,
+      "variation": "emy"
+     },
+     "lo": {
+      "se": 0.02315697590394906,
+      "variation": "nominal"
+     }
+    },
+    "variations": {
+     "emy": {
+      "se": 0.029754954769751808,
+      "value": 0.038391937120787686
+     },
+     "nominal": {
+      "se": 0.02315697590394906,
+      "value": 0.03360996112879524
+     }
+    }
+   },
+   "replica_spread": 0.025795250796574392,
+   "replica_values": [
+    0.04996979189591596,
+    0.010766674160213811,
+    0.07052582474744187,
+    0.07871105051572472,
+    0.005942640599431574,
+    0.013949981538896457,
+    0.0426186820760354,
+    0.011373072685588235,
+    0.012833097659615683,
+    0.007321274763135229,
+    0.035141340096941136,
+    0.021358750602266358,
+    0.08785034806236355,
+    0.007493540051679587,
+    0.054492818437564663,
+    0.029017645639212886,
+    0.03255976491349775,
+    0.008527131782945736,
+    0.06072268873741693,
+    0.031023103610017276
+   ],
+   "replicas": 20,
+   "uncertainty": {
+    "coverage": 0.9,
+    "distribution": "exact",
+    "interval": "central",
+    "minus": 0.03360996112879524,
+    "plus": 0.042569710480881685
+   },
+   "uncertainty_components": {
+    "replica_spread": {
+     "half_width": 0.04242941183086824,
+     "sd": 0.025795250796574392
+    },
+    "statistical": {
+     "method": "Clopper-Pearson 90 % interval of replica 0's counts, its distances from replica 0's proportion applied around the replica mean",
+     "minus": 0.00328492980589401,
+     "plus": 0.0034532972812467075
+    }
+   },
+   "value": 0.03360996112879524
+  }
+ },
+ "schema": "f4-results/1",
+ "tail_sources_simulated": [
+  "alignment",
+  "calibration-non-uniformity",
+  "noise-digitization",
+  "pattern-recognition"
+ ]
+}

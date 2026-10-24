@@ -1,0 +1,157 @@
+{
+ "schema": "geant4-study-spec/1",
+ "study_id": "j15-N6-CAL10",
+ "label": "SYNTHETIC J15 F4 study (journey J15; names no experiment)",
+ "geant4": {
+  "version": "11.4.3",
+  "documentation": [
+   {
+    "name": "Geant4 upstream source, tag v11.4.3",
+    "version": "11.4.3",
+    "relied_on": true
+   }
+  ]
+ },
+ "geometry_source": {
+  "kind": "design",
+  "description": "derived by geant4_run.py from-geometry from studies/G-N6-CAL10.geometry.json and j15.realization.json",
+  "uses_replicas": false
+ },
+ "materials": [
+  {
+   "name": "G4_Si",
+   "z": 14,
+   "a_g_mole": 28.0855,
+   "density_g_cm3": 2.329,
+   "radiation_length_mm": 93.7,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, silicon_Si: density 2.329 g/cm3, A 28.0855(3), X0 9.370 cm",
+   "reference_origin": "independent"
+  },
+  {
+   "name": "G4_Pb",
+   "z": 82,
+   "a_g_mole": 207.2,
+   "density_g_cm3": 11.35,
+   "radiation_length_mm": 5.612,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, lead_Pb: density 11.35 g/cm3, X0 0.5612 cm",
+   "reference_origin": "independent"
+  },
+  {
+   "name": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "density_g_cm3": 1.032,
+   "radiation_length_mm": 425.4,
+   "reference_source": "PDG Atomic and Nuclear Properties 2024 (https://pdg.lbl.gov/2024/AtomicNuclearProperties/), read 2026-10-24, polyvinyltoluene: density 1.032 g/cm3, X0 42.54 cm",
+   "reference_origin": "independent"
+  }
+ ],
+ "reproducibility": {
+  "data_paths_recorded": true,
+  "build_record": "~/Workspace/geant4-work/records/geant4-build-a.computational-run.json"
+ },
+ "downstream_use": {
+  "kind": "other",
+  "note": "F4 evaluation of shower-containment (journey J15)"
+ },
+ "observable": {
+  "name": "shower-containment",
+  "kind": "containment",
+  "domain": "em",
+  "definition": "1 - (rear + front + lateral leakage of the calorimeter mother) / incident kinetic energy",
+  "unit": "1"
+ },
+ "particle": {
+  "name": "e-",
+  "energy_MeV": 10000.0
+ },
+ "physics": {
+  "element_sim_spec": "../../specs/N6-CAL10-nominal.spec.json",
+  "justification": [
+   {
+    "choice": "FTFP_BERT_EMZ",
+    "reason": "EM option 4 for multiple scattering and showers; FTFP_BERT the default hadronic list",
+    "source": "geant4:source/physics_lists/lists (reference list factory)"
+   },
+   {
+    "choice": "production cut",
+    "reason": "converged in this study's cut scan",
+    "source": "convergence gate of this study"
+   }
+  ]
+ },
+ "convergence_plan": {
+  "parameters": [
+   {
+    "name": "physics.default_cut_mm",
+    "values": [
+     0.1,
+     0.3,
+     0.7,
+     1.0
+    ]
+   }
+  ],
+  "observables": [
+   "containment",
+   "rear_leak"
+  ],
+  "tolerance_relative": {
+   "containment": 0.01
+  }
+ },
+ "observables": [
+  {
+   "name": "containment",
+   "source_column": "containment",
+   "bins": {
+    "lo": 0,
+    "hi": 1.0001,
+    "width": 0.0001
+   }
+  },
+  {
+   "name": "rear_leak",
+   "source_column": "rear_leak_fraction",
+   "bins": {
+    "lo": 0,
+    "hi": 1,
+    "width": 0.0001
+   },
+   "tolerance_mode": "absolute",
+   "tolerance": 0.002
+  }
+ ],
+ "blocks": {
+  "K": 16
+ },
+ "statistical_target": {
+  "observable": "containment",
+  "relative_se": 0.0017677669529663686
+ },
+ "validation_plan": {
+  "benchmarks": [
+   {
+    "name": "shower-containment",
+    "grade": "sanity"
+   }
+  ],
+  "scope": {
+   "particle": "e-",
+   "energy_MeV": [
+    10000.0,
+    10000.0
+   ],
+   "observable": "shower-containment",
+   "material": "G4_Pb"
+  }
+ },
+ "variation_plan": {
+  "observable": "containment",
+  "model_assignment_checked": true,
+  "variations": [
+   {
+    "name": "emy",
+    "change": "reference list FTFP_BERT_EMY: EM option 3 against option 4 (G4R-PRECISION-EM)"
+   }
+  ]
+ }
+}

@@ -1,0 +1,757 @@
+{
+ "artifact_id": "j15-N4-TRK100-study",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "commands": [
+   "check_geant4_study.py label --write"
+  ],
+  "environment": {},
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "studies/N4-TRK100/study.json",
+    "sha256": "4d4cc9a27c76d532fefd102c3de9dffcce56033185fb26bf13c590a1c6b9e863"
+   },
+   {
+    "path": "studies/N4-TRK100/bench.results.json",
+    "sha256": "06a04f64ccbd7f2c34b5702d38a901a603719c31176dc1160d0d4c5188bf2b82"
+   },
+   {
+    "path": "studies/N4-TRK100/convergence.json",
+    "sha256": "ec4e99f20f0043b921389ebb05fe20ae3d41e88dd07761e25fccd761583d52f1"
+   },
+   {
+    "path": "studies/N4-TRK100/variations.json",
+    "sha256": "44da67c8842c7de59226763a1e7d3533f9b72efd06a66faaf510a1990521c15b"
+   },
+   {
+    "path": "studies/N4-TRK100/f4-results.json",
+    "sha256": "a30548c50c4bef7b4e0745c2baf657e8232415b2c986d46f3c77df07f794493b"
+   },
+   {
+    "path": "studies/G-N4-TRK100.geometry.json",
+    "sha256": "78fed4bbb3798e1f2ff9517ac73fa3587c7cd2d204b1617f30c7af9e180f7b0a"
+   },
+   {
+    "path": "specs/N4-TRK100-nominal.spec.json",
+    "sha256": "61912b59fe4695914dd6a3b6f52332e6628e9066c1a454d36dada460f3eca953"
+   },
+   {
+    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/j15.realization.json",
+    "sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+   }
+  ],
+  "output_hashes": {},
+  "seeds": {},
+  "study": {
+   "benchmarks": [
+    {
+     "benchmark": "material-definition",
+     "grade": "verification",
+     "problems": [],
+     "reference": {
+      "source": "the study spec's independent material sources and the candidate's declared x/X0",
+      "validity": "verification of the realized geometry",
+      "version": "as declared"
+     },
+     "rows": [
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si1",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si2",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si3",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      },
+      {
+       "declared": 0.0032017075773745998,
+       "element": "Si4",
+       "geantino_x_over_x0": 0.0032017075773745998,
+       "relative": 0.0
+      }
+     ],
+     "scope": {
+      "geometry_sha256": "78fed4bbb3798e1f2ff9517ac73fa3587c7cd2d204b1617f30c7af9e180f7b0a",
+      "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+     },
+     "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+     "tolerance": {
+      "density_relative": 0.001,
+      "relative": 0.01
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "field-propagation",
+     "compared": 4000,
+     "geant4": 0.004346476870864535,
+     "grade": "verification",
+     "max_dt_ps": 1.8111707689172363e-06,
+     "problems": [],
+     "reference": {
+      "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+      "validity": "deterministic: charged geantinos have no interactions",
+      "version": "exact"
+     },
+     "reference_value": 0.0,
+     "scope": {
+      "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d"
+     },
+     "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+     "tolerance": {
+      "in_plane_um": 0.5,
+      "time_ps": 1.0
+     },
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "reco-closure",
+     "entries": 8000,
+     "geant4": 0.9941833811876684,
+     "grade": "verification",
+     "problems": [],
+     "pull_mean": 0.012919978327502255,
+     "pull_width": 0.9941833811876684,
+     "pull_width_mc_sigma": 0.007905694150420948,
+     "reference": {
+      "source": "the truth of the simulated charged geantinos",
+      "validity": "closure of the fit; no physics",
+      "version": "exact"
+     },
+     "reference_value": 1.0,
+     "residual_mean": 0.012233404198737934,
+     "scope": {
+      "particle": "chargedgeantino",
+      "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+      "rigidity_GV": 1000.0
+     },
+     "statistic": "pull width and bias of the signed inverse rigidity",
+     "validation_evidence": false,
+     "verdict": "pass"
+    },
+    {
+     "benchmark": "multiple-scattering-reference",
+     "canonical_ties": 0,
+     "configuration": "isolated",
+     "configuration_basis": {
+      "artifact_id": "geant4-run-msref-100gv-nominal",
+      "run_record": "../../proj/artifacts/runs/msref-100gv-nominal.computational-run.json",
+      "sha256": "3fd0dd8e70c68d44c59278a5744a3aa781e4e68c20600b77b428f3ff29902e0d"
+     },
+     "configuration_gap": null,
+     "geant4": 5.960009288440414e-06,
+     "geant4_dof": 15,
+     "grade": "reference",
+     "hash_scheme": "tree-v1",
+     "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+     "negative_control": {
+      "at_claimed_detection_limit": false,
+      "controls": [
+       {
+        "at_claimed_detection_limit": true,
+        "crossings": "../msref/msref-100gv-density-plus.crossings.csv",
+        "detection_limit_relative": 0.0628496800727933,
+        "injected": "slab density x 1.13",
+        "injected_relative": 0.1299999999999999,
+        "injection_in_run": 0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-100gv-density-plus.computational-run.json",
+        "se_of_shift": 0.008915982888257661,
+        "shift": 0.06314203214223732,
+        "sign": "+",
+        "status": "caught"
+       },
+       {
+        "at_claimed_detection_limit": false,
+        "crossings": "../msref/msref-100gv-density-minus.crossings.csv",
+        "detection_limit_relative": 0.06300011678977513,
+        "injected": "slab density x 0.87",
+        "injected_relative": -0.13,
+        "injection_in_run": -0.1299999999999999,
+        "run_record": "../../proj/artifacts/runs/msref-100gv-density-minus.computational-run.json",
+        "se_of_shift": 0.00898773349195976,
+        "shift": -0.08143277098550092,
+        "sign": "-",
+        "status": "caught"
+       }
+      ],
+      "detection_limit_relative": 0.06300011678977513,
+      "detection_limit_sign": "+-",
+      "status": "caught"
+     },
+     "reference": {
+      "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+      "validity": "as declared",
+      "version": "1991"
+     },
+     "reference_value": 5.994243543652734e-06,
+     "relative_difference": -0.005711188570002301,
+     "relative_se": 0.00619234432513264,
+     "scope": {
+      "material": [
+       "G4_Si"
+      ],
+      "particle": [
+       "proton"
+      ],
+      "rigidity_GV": 100.0,
+      "thickness_x0": 0.0032017075773745998
+     },
+     "selection": {
+      "blocks": 16,
+      "events": 8000
+     },
+     "statistic": "core width of the projected exit angle (rad), central 98 %",
+     "target_geometry_sha256": "3cb598f25e9bf4990966e11e20dc849906f86dfb1540fa6e9ad69c26f6cb7d9e",
+     "target_slabs": [
+      "Plane",
+      "Slab"
+     ],
+     "tolerance": {
+      "parts": {
+       "binning": 0.0,
+       "k_sigma": 3.0,
+       "mc_statistics": 0.018577032975397922,
+       "reference_accuracy": 0.02
+      },
+      "total": 0.038577032975397926
+     },
+     "tree_sha256": "442ed2e37b75816d20ebd095882ab38d1f582d5bd6f6013a055d99b48b9b8682",
+     "validation_evidence": true,
+     "verdict": "pass",
+     "world_material": "G4_Galactic"
+    }
+   ],
+   "convergence": {
+    "gate": "pass",
+    "multiplicity": 1,
+    "parameters": [
+     {
+      "observables": [
+       {
+        "dof": 27.46731153417899,
+        "finest": 0.35,
+        "margin": 0.020185999114801817,
+        "next": 0.7,
+        "observable": "core",
+        "reason": "within-tolerance",
+        "relative_change": 0.046556206608466,
+        "se_of_change": 0.01953743516663478,
+        "se_targets_met": {
+         "finest": true,
+         "next": true
+        },
+        "tolerance": 0.1,
+        "tolerance_mode": "relative",
+        "verdict": "pass"
+       }
+      ],
+      "parameter": "physics.default_cut_mm",
+      "two_finest": [
+       0.35,
+       0.7
+      ],
+      "values": [
+       0.35,
+       0.7
+      ],
+      "verdict": "pass"
+     }
+    ],
+    "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
+   },
+   "declared_scope": {
+    "energy_MeV": [
+     99066.12958626528,
+     99066.12958626528
+    ],
+    "field_configuration_sha256": "54225938f6ca64ede33df0b5985bbcf9b37a2d10848845d603ac5db3c3f1b51d",
+    "geometry_sha256": "78fed4bbb3798e1f2ff9517ac73fa3587c7cd2d204b1617f30c7af9e180f7b0a",
+    "material": "G4_Si",
+    "observable": "momentum-resolution-core",
+    "observable_kind": "tracking-resolution",
+    "particle": "proton",
+    "realization_sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b",
+    "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+    "rigidity_GV": [
+     100.0,
+     100.0
+    ],
+    "thickness_x0": [
+     0.0032017075773745998,
+     0.0032017075773745998
+    ]
+   },
+   "evidence_overlap": [
+    {
+     "decisions": [
+      "convergence",
+      "statistical-target",
+      "variations"
+     ],
+     "run": "geant4-reco-N4-TRK100-nominal-off"
+    }
+   ],
+   "evidence_overlap_version": 1,
+   "gaps": [
+    "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)"
+   ],
+   "geometry": {
+    "path": "studies/G-N4-TRK100.geometry.json",
+    "sha256": "78fed4bbb3798e1f2ff9517ac73fa3587c7cd2d204b1617f30c7af9e180f7b0a"
+   },
+   "highest_usable_label": "unvalidated",
+   "phase2_upgrade_eligible_scopes": [
+    {
+     "benchmarks": [
+      "material-definition",
+      "field-propagation",
+      "reco-closure",
+      "multiple-scattering-reference"
+     ],
+     "qualification": "tracking-resolution"
+    }
+   ],
+   "results": {
+    "momentum-resolution-core": {
+     "denominator": {
+      "rigidity_GV": 100.0,
+      "species": "proton"
+     },
+     "dof": 15,
+     "estimator": {
+      "name": "gaussian-core",
+      "observable": "core",
+      "truncation_sigma": 2.0
+     },
+     "model_envelope": [
+      0.11338809278302535,
+      0.11503123463324924
+     ],
+     "model_envelope_annotation": {
+      "ends": {
+       "hi": {
+        "se": 0.001566150827772356,
+        "variation": "emy"
+       },
+       "lo": {
+        "se": 0.0013016088631797793,
+        "variation": "nominal"
+       }
+      },
+      "variations": {
+       "emy": {
+        "se": 0.001566150827772356,
+        "value": 0.11503123463324924
+       },
+       "nominal": {
+        "se": 0.0013016088631797793,
+        "value": 0.11338809278302535
+       },
+       "qgsp-bic": {
+        "se": 0.0013776643458459656,
+        "value": 0.11496675198688788
+       }
+      }
+     },
+     "replica_spread": 0.0007154365553223604,
+     "replica_values": [
+      0.11389130954381904,
+      0.112635420239045,
+      0.11276899792706327,
+      0.11463706098960427,
+      0.1121998165926874,
+      0.11305283420568264,
+      0.11396138706462428,
+      0.11331074781059916,
+      0.11361774741804992,
+      0.11331440919901299,
+      0.1133331395936874,
+      0.11431213187807276,
+      0.11190047162387472,
+      0.11274978050195537,
+      0.11334833049996759,
+      0.1133778154885478,
+      0.11330153158318296,
+      0.11370019487874321,
+      0.11383923852459986,
+      0.11450949009768727
+     ],
+     "replicas": 20,
+     "se": 0.0013016088631797793,
+     "statistical_uncertainty": 0.0013464963454952077,
+     "uncertainty": {
+      "coverage": 0.9,
+      "distribution": "non-gaussian",
+      "interval": "central",
+      "minus": 0.005071961667077111,
+      "plus": 0.005071961667077111
+     },
+     "uncertainty_components": {
+      "qualification": {
+       "benchmark": "multiple-scattering-reference",
+       "half_width": 0.004374176194308249,
+       "method": "the qualifying reference's total tolerance (published accuracy + k SE) times |value|, combined in quadrature with the statistical and replica parts (D0-c)",
+       "relative_tolerance": 0.038577032975397926
+      },
+      "replica_spread": {
+       "half_width": 0.001176788412875652,
+       "sd": 0.0007154365553223604
+      },
+      "statistical": {
+       "method": "t_0.95(K-1) x batch-means SE over K blocks",
+       "minus": 0.0022817858805699183,
+       "plus": 0.0022817858805699183
+      }
+     },
+     "value": 0.11338809278302535
+    }
+   },
+   "statistical_target": {
+    "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
+    "events": 7984,
+    "events_needed": null,
+    "observable": "core",
+    "relative_se": 0.011528273344905308,
+    "target": 0.02,
+    "verdict": "pass"
+   },
+   "tail_sources_simulated": [
+    "alignment",
+    "calibration-non-uniformity",
+    "noise-digitization",
+    "pattern-recognition"
+   ],
+   "variations": {
+    "domain": "em",
+    "envelope_relative": 0.010181147703283409,
+    "nominal": {
+     "model_assignment": {
+      "domain": "em",
+      "em_constructor": "G4EmStandardPhysics_option4",
+      "fluctuation_model": "Urban",
+      "known": true
+     },
+     "run_record_id": "geant4-reco-N4-TRK100-nominal-off",
+     "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N4-TRK100-nominal-off/summary_r000.json",
+     "value": 0.09298574300820782
+    },
+    "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
+    "observable": "core",
+    "variations": [
+     {
+      "listed": true,
+      "model_assignment": {
+       "domain": "em",
+       "em_constructor": "G4EmStandardPhysics_option3",
+       "fluctuation_model": "Urban",
+       "known": true
+      },
+      "nominal_model_assignment": {
+       "domain": "em",
+       "em_constructor": "G4EmStandardPhysics_option4",
+       "fluctuation_model": "Urban",
+       "known": true
+      },
+      "relative_to_nominal": 0.010181147703283409,
+      "resolved": false,
+      "run_record_id": "geant4-reco-N4-TRK100-emy-off",
+      "se": 0.0015271572550450987,
+      "se_of_relative_difference": 0.020065755017147528,
+      "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N4-TRK100-emy-off/summary_r000.json",
+      "value": 0.09393244459207394,
+      "variation": "emy"
+     },
+     {
+      "listed": false,
+      "model_assignment": {
+       "domain": "em",
+       "em_constructor": "G4EmStandardPhysics_option4",
+       "fluctuation_model": "Urban",
+       "known": true
+      },
+      "nominal_model_assignment": {
+       "domain": "em",
+       "em_constructor": "G4EmStandardPhysics_option4",
+       "fluctuation_model": "Urban",
+       "known": true
+      },
+      "reason": "same model for this particle and energy: a false zero difference, not a systematic",
+      "relative_to_nominal": 0.008067841184460068,
+      "resolved": false,
+      "run_record_id": "geant4-reco-N4-TRK100-qgsp-bic-off",
+      "se": 0.001443057793837767,
+      "se_of_relative_difference": 0.01933247187770255,
+      "summary": "~/Workspace/geant4-work/sim-b3/j15/sim/N4-TRK100-qgsp-bic-off/summary_r000.json",
+      "value": 0.09373593721521706,
+      "variation": "qgsp-bic"
+     }
+    ]
+   }
+  },
+  "tolerances": {
+   "convergence": {
+    "core": 0.1
+   }
+  },
+  "tools": [
+   {
+    "name": "check_geant4_study.py",
+    "version": "dedc2c52621c0505"
+   },
+   {
+    "name": "geant4_benchmarks.py",
+    "version": "42dde9ff11e315fe"
+   }
+  ]
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-run-N4-TRK100-nominal",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-nominal.computational-run.json",
+   "sha256": "015dcd3a8aca4989f8e5df3627416726d42c94c12743e3eff0516e5733d7a362",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N4-TRK100-scan",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-scan.computational-run.json",
+   "sha256": "5f8a89d2f8cf72905d4d2bde971bd5319350e54eb0c4692fb234e78704b7a5b7",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N4-TRK100-var-emy",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-var-emy.computational-run.json",
+   "sha256": "3ae95666bb6a884c03805a7cfa5c4fa3dd484f44713fc239f6a56df8766f597c",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N4-TRK100-var-qgsp-bic",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-var-qgsp-bic.computational-run.json",
+   "sha256": "713b241968b4ce0978af8db6fe188fab7620e58adc1c0d312a612352adef6137",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-TRK100-nominal-off",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-nominal-off.computational-run.json",
+   "sha256": "a639745c924053c3c0d9289dbfb2e911c942429f55174c27092058e996102bf0",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-TRK100-scan-off",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-scan-off.computational-run.json",
+   "sha256": "ccc528dd3e950807ac7b58e484077be8005ed98955d8a313e0c32588a2f18458",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-TRK100-emy-off",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-emy-off.computational-run.json",
+   "sha256": "5e30abc05d5b1651f98e8af7f23d1905df3a381697ad1d6e47dceea0366402ce",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-TRK100-qgsp-bic-off",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-qgsp-bic-off.computational-run.json",
+   "sha256": "d32bbfce1d5afc859a428135086463c1a747d44463da1ec1c6b8512d0c4ec608",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-TRK100-nominal-on",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-nominal-on.computational-run.json",
+   "sha256": "6f48b899491a543ecdf5f493a7a4f8d525848eb8d6639d686ae2f6bb1bcf59fd",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-TRK100-emy-on",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-emy-on.computational-run.json",
+   "sha256": "2ed5b004d215e95235a4932858cc24608eacf1980314a4137199559463ef55c6",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-TRK100-qgsp-bic-on",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-TRK100-qgsp-bic-on.computational-run.json",
+   "sha256": "9d9ba5d22b0d884a9a412dc9e3297c740d240a0b7a4c6d15cc8cc9658e5afbcd",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N4-geantino",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-geantino.computational-run.json",
+   "sha256": "2617affc404f3341510e67c06a5c71afab1cae8846b99b2e965dade5597cdcaf",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N4-chargedgeantino",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-chargedgeantino.computational-run.json",
+   "sha256": "9a1183153b2e4e999b76f43894c972f3618160f68a80c3ba56f3c0dc67ee6634",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-N4-closure",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-closure.computational-run.json",
+   "sha256": "94afba950b21c509448a73547ef30575a95a6ae5ccfd9c1d138b62c720ccddac",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-reco-N4-closure-reco",
+   "artifact_type": "computational-run",
+   "ref": "runs/N4-closure-reco.computational-run.json",
+   "sha256": "ecc445217fc230a3bb4c280ece4894e6ad50d94bac54066dea79737966be7fec",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-100gv-nominal",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-100gv-nominal.computational-run.json",
+   "sha256": "3fd0dd8e70c68d44c59278a5744a3aa781e4e68c20600b77b428f3ff29902e0d",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-100gv-density-plus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-100gv-density-plus.computational-run.json",
+   "sha256": "5e513c3c3a7aac16759df987174fae24f76e0747cde43eb4ed7a4bd343802d8a",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  },
+  {
+   "artifact_id": "geant4-run-msref-100gv-density-minus",
+   "artifact_type": "computational-run",
+   "ref": "runs/msref-100gv-density-minus.computational-run.json",
+   "sha256": "856bd98129228a1c5e2c50c4c73c98192db20dba835ada83b817b3b349ee0fed",
+   "status": [
+    "unvalidated"
+   ],
+   "version": "3.13.0"
+  }
+ ],
+ "objective": "Geant4 study record: momentum-resolution-core for proton 99066.12958626528 MeV; benchmarks, convergence and scope embedded (unvalidated in phase 1)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/simulation/__init__.py",
+   "core/simulation/estimates.py",
+   "core/simulation/helix.py",
+   "core/simulation/summary.py",
+   "core/stats/__init__.py",
+   "core/stats/_linalg.py",
+   "core/stats/_poisson.py",
+   "core/stats/batch_means.py",
+   "core/stats/decisions.py",
+   "core/stats/distributions.py",
+   "core/stats/poisson_diagnostics.py",
+   "core/stats/tail_estimation.py",
+   "core/status.py",
+   "core/trace.py",
+   "skills/hep-detector/scripts/check_geant4_study.py",
+   "skills/hep-detector/scripts/geant4_benchmarks.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

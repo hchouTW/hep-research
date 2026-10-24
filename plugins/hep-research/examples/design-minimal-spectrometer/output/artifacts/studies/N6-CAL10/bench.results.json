@@ -1,0 +1,67 @@
+{
+ "benchmarks": [
+  {
+   "albedo_fraction": -0.10826592719333138,
+   "benchmark": "shower-containment",
+   "canonical_ties": 0,
+   "configuration": "embedded",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-N6-CAL10-nominal",
+    "run_record": "../../proj/artifacts/runs/N6-CAL10-nominal.computational-run.json",
+    "sha256": "1d276030e8462fa31f380f8d2b04a8eabe46407eebc36f34532eff107b7eb7f2"
+   },
+   "geant4": 0.025252364960314595,
+   "geant4_se": 0.0001078425508173228,
+   "grade": "sanity",
+   "hash_scheme": "tree-v1",
+   "inputs": {
+    "csv": "../../sim/N6-CAL10-nominal/events.csv",
+    "observable": null,
+    "run_record": "../../proj/artifacts/runs/N6-CAL10-nominal.computational-run.json",
+    "summary": null
+   },
+   "naming_sha256": "636acfc104107c3b7676b5ff6e00f031de9ff7d08e53540bb73d5fcbeb9fe99c",
+   "plausibility_window": "within 0.02 (absolute) of the profile",
+   "profile": {
+    "a": 4.1939763258429785,
+    "b": 0.5,
+    "t_max": 6.387952651685957
+   },
+   "reference": {
+    "source": "longitudinal profile dE/dt = E0 b (bt)^(a-1) e^(-bt) / Gamma(a), PDG RPP 2024, Passage of particles through matter (pdg.lbl.gov/2024/reviews/rpp2024-rev-passage-particles-matter.pdf), Eqs. 34.34-34.36 (fits to EGS4 showers, carbon to uranium, 1 to 100 GeV)",
+    "validity": "sanity only: the profile is itself a fit to simulated showers and RPP states no accuracy; b depends on Z and energy (RPP Fig. 34.21), b = 0.5 by default",
+    "version": "RPP 2024"
+   },
+   "reference_value": 0.022604583129440803,
+   "relative_difference": 0.11713473394805725,
+   "scope": {
+    "energy_MeV": 10000.0,
+    "material": null,
+    "observable": "rear leakage fraction (energy leaving the +x face over the primary kinetic energy)",
+    "particle": "e-",
+    "thickness_mm": null
+   },
+   "statistic": "rear leakage fraction (energy leaving the +x face over the primary kinetic energy)",
+   "target_geometry_sha256": "1e47fa070644a743bc8f54e6300ccda3e6af7d2fc98c4870ede1a9c867df4015",
+   "target_slabs": [
+    "Calo"
+   ],
+   "tree_sha256": "93e73b63faf9cffdbbd84f5c0460e930f0dd81b637640cf436412bc465f92e46",
+   "validation_evidence": false,
+   "verdict": "plausible",
+   "world_material": "G4_Galactic"
+  }
+ ],
+ "constants": {
+  "K_MeV_mol_cm2": 0.3070749269094836,
+  "m_e_MeV": 0.51099895069,
+  "source": "core/constants (CODATA 2022)"
+ },
+ "failed": [],
+ "gaps": [
+  "no reference or setup-matched benchmark in the config: nothing here is validation evidence"
+ ],
+ "note": "reference inputs come from the study spec; the Geant4 material dump is never read",
+ "status": "ok",
+ "status_label": "unvalidated"
+}

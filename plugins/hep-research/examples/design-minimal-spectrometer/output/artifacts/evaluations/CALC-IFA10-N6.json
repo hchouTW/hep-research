@@ -1,0 +1,82 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-CALC-IFA10-N6",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-IFA10-N6.computational-run.json",
+   "sha256": "5c50bcf57330ace9a30524e9cade7f71d37a346ffd35513bed10b92485c4ce76",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-v1-CALC-IFA10-N6-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:CALC-IFA10-N6",
+  "candidate": "j15-v1:cand-N6",
+  "figure_of_merit": "geometric-acceptance",
+  "denominator": {
+   "rigidity_GV": 10.0,
+   "species": "proton",
+   "charge_sign": "positive"
+  },
+  "bound": "estimate",
+  "fidelity": "F2",
+  "value": 0.0014705710557623146,
+  "unit": "m2 sr",
+  "run_ref": "runs/CALC-IFA10-N6.computational-run.json",
+  "parameter_refs": [
+   "DES-MAG-001.parameters.field_T",
+   "DES-TRK-001.parameters.aperture_radius_tolerance_m",
+   "DES-TRK-001.parameters.layer_aperture_radius_m",
+   "DES-TRK-001.parameters.layer_lateral_offset_m",
+   "DES-TRK-001.parameters.layer_positions_m"
+  ],
+  "parameter_digest": "008319b5f8d1aeb695d1eaecb5ad90122e199b7a495012af19e2dd09f688775e",
+  "validity": {
+   "assumptions": [
+    "uniform field along y over the whole stack",
+    "circular apertures",
+    "geometry only: no material, nuclear interactions or detection efficiency"
+   ],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 6.1029263638280214e-05,
+   "plus": 6.1029263638280214e-05,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

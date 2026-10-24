@@ -5325,6 +5325,24 @@
    "note": "for a comparison with published data, hep-statistics comes before hep-citations"
   },
   {
+   "id": "j15",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Take my spectrometer design from analytic resolution estimates to a detector simulation (Geant4) study that qualifies as F4 evidence for its momentum-resolution requirement, and give me the verdicts.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "detector simulation (Geant4)"
+   ],
+   "journey": "J15",
+   "set": "GEANT4",
+   "chain": [
+    "hep-detector",
+    "hep-computing",
+    "hep-detector"
+   ],
+   "note": "the design loop and the Geant4 study stay in hep-detector; building and running the programs is hep-computing"
+  },
+  {
    "id": "dsd-direct-1",
    "lang": "en",
    "kind": "direct",

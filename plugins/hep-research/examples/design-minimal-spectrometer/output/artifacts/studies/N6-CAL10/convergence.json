@@ -1,0 +1,195 @@
+{
+ "convergence": {
+  "gate": "pass",
+  "multiplicity": 2,
+  "parameters": [
+   {
+    "observables": [
+     {
+      "dof": 24.45798695704053,
+      "finest": 0.1,
+      "margin": 0.009577429253490043,
+      "next": 0.3,
+      "observable": "containment",
+      "reason": "within-tolerance",
+      "relative_change": 0.0001223529856847052,
+      "se_of_change": 0.0001756072559004539,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
+      "tolerance": 0.01,
+      "tolerance_mode": "relative",
+      "verdict": "pass"
+     },
+     {
+      "change": -7.020205555947207e-05,
+      "dof": 21.821030733320704,
+      "finest": 0.1,
+      "margin": 0.0016432077283190757,
+      "next": 0.3,
+      "observable": "rear_leak",
+      "reason": "within-tolerance",
+      "se_of_change": 0.00016683919452473517,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
+      "tolerance": 0.002,
+      "tolerance_mode": "absolute",
+      "verdict": "pass"
+     }
+    ],
+    "parameter": "physics.default_cut_mm",
+    "two_finest": [
+     0.1,
+     0.3
+    ],
+    "values": [
+     0.1,
+     0.3,
+     0.7,
+     1.0
+    ],
+    "verdict": "pass"
+   }
+  ],
+  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
+ },
+ "record_problems": [],
+ "statistical_target": {
+  "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
+  "events": 30064,
+  "events_needed": null,
+  "observable": "containment",
+  "relative_se": 8.209330190326565e-05,
+  "target": 0.0017677669529663686,
+  "verdict": "pass"
+ },
+ "summaries": [
+  {
+   "legacy": false,
+   "observables": {
+    "containment": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.9682567190888354,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 0.00014605306581681713,
+     "status": "ok",
+     "value": 0.9682567190888355
+    },
+    "rear_leak": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.025342437747952938,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 0.0001497945545267269,
+     "status": "ok",
+     "value": 0.025342437747952935
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CAL10-cut-0.1-reco/summary_r000.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-CAL10-cut-0.1-reco"
+   },
+   "sha256": "e93d017c092c8f2fe356d4784579652215ecb497f69fc0a93be5693ccaba2ddf"
+  },
+  {
+   "legacy": false,
+   "observables": {
+    "containment": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.9681382644816207,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 8.70207875032263e-05,
+     "status": "ok",
+     "value": 0.9681382644816205
+    },
+    "rear_leak": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.025412639803512407,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 7.346365267124867e-05,
+     "status": "ok",
+     "value": 0.025412639803512407
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CAL10-cut-0.3-reco/summary_r000.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-CAL10-cut-0.3-reco"
+   },
+   "sha256": "8e1322d7db14b67f02d6f473c3fe4b9e36a1a264accb6bc255095681308b0f90"
+  },
+  {
+   "legacy": false,
+   "observables": {
+    "containment": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.9683039145355059,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 7.949126559007724e-05,
+     "status": "ok",
+     "value": 0.9683039145355059
+    },
+    "rear_leak": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.025252364960314595,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 9.45218741647526e-05,
+     "status": "ok",
+     "value": 0.025252364960314595
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CAL10-nominal-reco/summary_r000.json",
+   "role": "nominal",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-CAL10-nominal-reco"
+   },
+   "sha256": "5deea97effa87004470f042014da1f0219d84487000e55d116c53dc813b8f8a7"
+  },
+  {
+   "legacy": false,
+   "observables": {
+    "containment": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.9681313974823285,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 0.00013380260809331708,
+     "status": "ok",
+     "value": 0.9681313974823283
+    },
+    "rear_leak": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.025469989093648046,
+     "method": "batch means of block means",
+     "n": 30064,
+     "se": 0.00012021927614842186,
+     "status": "ok",
+     "value": 0.02546998909364805
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CAL10-cut-1-reco/summary_r000.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-CAL10-cut-1-reco"
+   },
+   "sha256": "c32e1229a245b5a3be8407da3c38fa6836791457bf5b220ea91c55e2a56a40e3"
+  }
+ ]
+}

@@ -238,6 +238,11 @@
     "max_step_mm": {
      "type": "number",
      "exclusiveMinimum": 0
+    },
+    "max_track_time_ns": {
+     "type": "number",
+     "minimum": 0,
+     "description": "copied into the derived spec's field block: tracks in a field element older than this are killed (loopers); 0 or absent: no limit"
     }
    }
   },

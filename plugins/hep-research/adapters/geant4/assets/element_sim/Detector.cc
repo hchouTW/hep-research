@@ -1,5 +1,6 @@
 #include "Detector.hh"
 
+#include <cfloat>
 #include <set>
 #include <stdexcept>
 
@@ -55,7 +56,11 @@ G4VPhysicalVolume* Detector::Construct() {
     for (const auto& n : rd.elements) region->AddRootLogicalVolume(fLVs.at(n));
   }
   if (fSpec.HasField()) {  // the maximum step on each field element and on each of its daughters
-    auto* limits = new G4UserLimits(fSpec.field.max_step_mm * mm);
+    // a charged secondary circling in a vacuum field region completes every (limited) step, so Geant4's looper
+    // killer never acts: field.max_track_time_ns > 0 kills tracks older than that there (G4UserSpecialCuts, added
+    // with G4StepLimiterPhysics, books the killed energy as a local deposit, so the energy balance still closes)
+    auto* limits = new G4UserLimits(fSpec.field.max_step_mm * mm, DBL_MAX,
+                                    fSpec.field.max_track_time_ns > 0 ? fSpec.field.max_track_time_ns * ns : DBL_MAX);
     for (const auto& r : fSpec.field.regions) {
       fLVs.at(r.element)->SetUserLimits(limits);
       for (const auto& e : fSpec.elements)

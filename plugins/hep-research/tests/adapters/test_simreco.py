@@ -233,6 +233,10 @@ class Simreco(unittest.TestCase):
                  "calibration-non-uniformity": ({"on": True, "sigma": 0.01}, "two field regions"),
                  "noise-digitization": ({"on": True, "efficiency": 0.99}, "pitch_y_um"),
                  "pattern-recognition": ({"on": True}, "window_mm")}
+        # a strip pitch whose pitch / sqrt 12 is finer than the declared 10 um would improve the measurement (J15)
+        problems = RS.check(reco({"tail_sources": {"noise-digitization": {"on": True, "pitch_y_um": 36,
+                                                                          "pitch_z_um": 116, "sharing_um": 8}}}), J15)
+        self.assertTrue(any("finer than the declared" in p for p in problems), problems)
         for name, (params, why) in cases.items():
             with self.subTest(source=name):
                 problems = RS.check(reco({"replicas": 20, "tail_sources": {name: params}}), J15)
@@ -305,6 +309,7 @@ class Estimators(unittest.TestCase):
         self.assertGreater(r["replica_spread"], 0)
         self.assertGreater(r["uncertainty"]["plus"], r["uncertainty_components"]["statistical"]["plus"])
         self.assertNotIn("statistical_uncertainty", r)
+        self.assertLessEqual(r["uncertainty"]["minus"], r["value"])  # a proportion stops at zero
         with self.assertRaises(Exception):
             RS.fom_result("momentum-resolution-core", sums, obs[0], {})  # needs the gaussian-core estimator
         lo, hi = r["counts"]["interval"]

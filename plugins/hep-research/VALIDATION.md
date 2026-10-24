@@ -2756,6 +2756,92 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## GEANT4-J15 (2026-10-24/25, E2: macOS 26.5 arm64, Apple clang 21.0.0, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b3` from main `a97a40e2`)
+
+Geant4 program stage B3 (spec §B.7): journey J15, `examples/design-minimal-spectrometer`, geant4 adapter 0.4.1.
+Live campaign `live.py` (work folder `~/Workspace/geant4-work/sim-b3/j15`, element_sim and simreco rebuilt from this
+branch), recorded in `recorded/` (1.83 MB); offline replay `run.py`, 18 pre-declared criteria pass; every geometry is
+invented (J15 is SYNTHETIC).
+
+| Check | Result |
+|---|---|
+| B3.1 design | design-spec `j15-v1`, three candidates (six, four, eight 0.3 mm Si planes over 0.80 m), no `design.*` error; F1 resolution at 1 GV 2.5 % and F2 2.2 % (§B.4.2: 1.8-2.6 %), MDR 1131 GV with Gluckstern (§B.4.2: about 1172 GV exact), 100 GV measurement term 8.7 %, F2 in-field acceptance within 10 % of the straight-line acceptance at 10 GV; `from-geometry` on `cand-N6` (mapping 1.1.0 fields: tracker size and material, field extent, TOF layers, calorimeter front, depth and sampling) equals §B.4.1 element by element; H1 and H2 drafts listed, not valid (DEC-05) |
+| Event counts (A1.9) | per study a 1600-event trial, then N = N_trial (SE / target)^2 F_0.95(15, 15) on the core (target 1.77 %, the convergence se target): 12800 (N6, 1 GV), 18976 (N4, 1 GV), 9936 (N8, 1 GV), 5728, 7984, 8704 (100 GV), 11968 (500 GV, on the charge-flip proportion), 30064 (10 GeV showers, on the rear-leakage fraction) |
+| Multiple-scattering reference (isolated 0.3 mm Si, protons, ±13 % density controls) | 1 GV: -1.79 %, controls +7.3 % and -7.0 % against DL 8.1 %; 100 GV: -0.57 %, both caught, the -13 % control shifted -8.1 % against DL 6.3 % (beyond 1.1 DL; the controls had a fixed size, not one sized from each rigidity's DL): a gap, recorded and not rerun; 500 GV: -1.18 %, caught |
+| F4 tracking studies (tails on, 20 replicas) | 1 GV: N4 1.48 %, N6 1.82 %, N8 2.08 %, all re-issued `validated-in-scope` (four conditions: material definition, field propagation, reconstruction closure, the reference); N4 and N8 pass `REQ-TRK-001` at row 16 (D0-c uncertainty with the 1 GV reference's 4.0 % tolerance, floor 0.02); N6 is inconclusive only because the tails-off demonstration (`optimistic`, row 14) is also present at equal fidelity (AGG-04; without it N6 passes, checked, and J15 keeps it). 100 GV: N4 11.3 %, N6 10.5 %, N8 9.8 % (tails off: 9.3 %, 8.6 %, 7.9 %), refused for the reference control gap (N6 also missed its convergence se target) |
+| Charge confusion, 500 GV | 3.4 % (replica mean; F1 Gaussian core 0.96 %), refused: no published tail reference (D0-b) |
+| Shower containment, 10 GeV e- | 96.8 % (rear leakage 2.5 %, PDG gamma profile 2.3 %: plausible), cut scan 0.1 / 0.3 / 0.7 / 1.0 mm converged on containment and rear leakage; refused: no reference benchmark |
+| Variations | 1 GV: single scattering (`FTFP_BERT__SS`) and binary cascade; 100 and 500 GV: option 3 (Urban msc for protons) and binary cascade; air instead of vacuum widens the N6 1 GV core by 5 % |
+| TOF (B3.5) | sigma_beta/beta at 1 GV 1.68 % (100 ps) and 2.52 % (150 ps), = 2.3 % x beta (0.73) scaled; two-layer residual 142.6 and 213.9 ps (sqrt 2 sigma_t: 141.4, 212.1) |
+| Verification ladder (separate `unvalidated` record) | overlaps (control: Si2 onto Si1, refused by check-spec), energy balance e-/e+ 1 GeV EM-only (controls double-count-leakage, omit-positron-mass caught), material budget, material definition (Pb density x 1.05 caught), field propagation (B x (1 ± 1e-4) caught), field-propagation-muon 1/10/100 GV (B x 1.01 caught), reco closure (reconstruction B x 1.05 caught), tof-beta and tof-layer-consistency (+100 ps caught), sampling fraction 0.268 vs 0.270 (PDG muon tables; PVT density x 1.2 caught) |
+| Replay test | `tests/examples/test_design_minimal_spectrometer.py`: 5 tests (criteria, results within 1e-9, strict validation of the upgraded records with the D0-c term, derived report, recorded budget), 37 s |
+
+Problems found by the campaign and fixed (each before the final runs):
+- A planned event count of 21 million: the planner estimated the trial from the summary's own observable (no
+  estimator: a plain mean, relative SE 1.3) instead of the study's declaration; fixed, plus a cap (200000 events) that
+  refuses a planning error before any run.
+- A looper: one worker stuck on an electron circling in the vacuum field region (every limited step completes, so the
+  looper killer never acts); element_sim `field.max_track_time_ns` (J15: 1000 ns).
+- Single scattering at 100 GeV is prohibitive (the hadronic shower's electrons in lead): the high-rigidity
+  multiple-scattering variation is option 3 (Urban for protons, `isWVI=false`) against option 4 (WentzelVI).
+- Tails on narrower than tails off at 100 GV: the strip digitization measured better than the declared 10 um (a fixed
+  pencil beam saw the same strip phase every event, and charge sharing interpolates); simreco now draws a random
+  strip phase per plane and event, uses sigma = sqrt((p - w)^3 / 12 p), and refuses a digitization finer than the
+  declaration (J15: 47 um and 116 um, 8 um sharing).
+- Shower containment above 1: the net face leakage subtracts secondaries radiated upstream that enter through the
+  front face; containment is now the calorimeter deposit over E0.
+- The ladder's balance gave no verdict (a hadronic list), its overlap check had no test points, and its muon field
+  control reconstructed with the same wrong field: fixed (EM-only balance runs, a dedicated overlap run with 10000
+  points, the control reconstructed with the design field).
+- `geant4_benchmarks.py` raised a KeyError on a detector reference control outside its detection limit (B2 bug).
+- A counting interval below zero (the replica spread added in quadrature): capped at zero.
+
+**B3.9 independent-agent acceptance** ("the rigidity resolution of 1 GV protons in J15"; a general-purpose agent that
+did not take part, given only the plugin path, the task and `HEP_GEANT4_CONFIG`, forbidden to use J15's `recorded/` and
+`output/`; its own project `~/Workspace/geant4-work/sim-b3/agent-j15`): design `aj15-v1` with `cand-N6` passes
+`design.py`; F1 0.02537; geometry, its own realization profile, `from-geometry`, a 1600-event trial planned to 15360
+events, nominal, cut scan, two variations, tails on with 20 replicas, the four qualification benchmarks, `label
+--upgrade` re-issued `validated-in-scope` with no gaps, `validate.py --strict` on the artifacts_dir passes; F4 core
+0.018225 (1.82 %, inside §B.4.2's 1.8-2.6 %), ±0.000406 (statistical ⊕ replicas; ±0.000884 with the 4.3 % D0-c term),
+`REQ-TRK-001` pass. No maintainer help. Deviations and doc gaps it reported:
+- Its multiple-scattering controls were built from the PDG silicon density × (1 ± 0.13), while Geant4 resolves G4_Si
+  to its own density, so `injected_relative` differed from the realized change and both controls were not counted; it
+  re-declared `injected_relative` as the tool's `injection_in_run` and re-evaluated, without new runs. That is a
+  correction after the result, which the protocol treats as a rerun after a miss: this acceptance item passes with
+  that deviation recorded. The protocol and `geant4_benchmarks.py --help` now say to declare the injection Geant4
+  realizes, before the runs.
+- The single-scattering variation (`FTFP_BERT__SS`) was too slow (about 2000 events in 16 min, protons stopping in
+  the lead calorimeter); it used option 3 instead. The protocol now warns about the cost.
+- The detector benchmarks' config keys were documented only in J15's `live.py` (now in `geant4_benchmarks.py
+  --help`); `geometry` writes `geometry_ref` into the candidate (now in the design workflow); validate the whole
+  artifacts_dir, not a subfolder (now in the protocol).
+- Not fixed here (follow-ups): no tool reports the central-68 % half-width that B3.9 asks for beside the core (so it is
+  not reported); no bias-toy tool for the Gaussian-core bin width; the trial size, convergence tolerance and statistical
+  target of a tracking study are not given by the protocol; `f4 --status` defaults to `unvalidated` for a
+  `validated-in-scope` study.
+
+**`review.py` Markdown review** of the J15 README (R102edead76, 0.22.0 mechanism, models opus and sonnet,
+`--lens-model design=opus --filter-model opus`, own configuration; advisory, `reviews/R102edead76/report.md` in
+`~/Workspace/hep-research-tasks/geant4-program/b3/review`): round 1, 8 slots (one rerun after a cited file changed)
+and the filter (19 findings, 13 kept): all disposed, 18 changed, 1 declined (the 1 GV controls are within 1.1 DL; the
+numbers were added). Fixed: the tail-source list, the 1 GV tolerance (4.0 %, not 3.9 %, also in this entry), why
+`cand-N6` is inconclusive (AGG-04, not "the estimate decides"), 100 GV numbers labelled as refused studies, gate H3,
+the comparison-basis tolerance, the 100 GV F1 row, the 1 GV control shifts, the hadronic-variation label. Round 2,
+8 slots (two reruns after recorded/ was rewritten) and one arbitration: further wording findings (LIM-02 quoted
+exactly, DEC-05 checks a declared actor, the floor does not bind for J15, option 3 differs in more than proton
+scattering, alignment residuals per axis, a new 100 GV reference needs a pre-declared control size that only a human
+can check), applied. Round 3, 8 slots: three more (the omission called a gap in LIM-02's shortcut guard, AGG-04 compares only the top fidelity present so an agreeing optimistic bound blocks a pass there but not below, this entry's content), applied; the round limit is reached, so the review is escalated: **open, waiting for a human `resolve`**. The reviewers also caught the mechanism's planted canaries. Follow-up for `design.py`: AGG-04 lets a `bound.direction` evaluation that agrees with a deciding estimate at the same fidelity block it.
+
+**Packaging**: the live campaign wrote absolute home paths into the run records and study inputs; `live.py export` now
+writes `~` for the home directory and rewrites every sha256 that cites a changed file, to a fixpoint (the committed
+`recorded/` was converted the same way; the replay and its test pass on it). J15 adds 566 files; the plugin README's
+size statement is updated.
+
+Deviations, recorded here: the recorded simreco summaries carry producer version "0.4.0" (the version string was
+bumped to 0.4.1 after the campaign; the code was the 0.4.1 code except the string). The verification-ladder record
+lists the nominal implementation-check records as inputs; the negative-control check records, failed by design, are
+summarized in the ladder's results instead (as inputs their `failed` label would propagate).
+
 ## GEANT4-F4 (2026-10-24, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b2` from main `8b3dc9f7`)
 
 Geant4 program stage B2 (spec §B.6): geant4 adapter 0.4.0 (`simreco`, `geant4_run.py reco` and `table`, mapping 1.1.0

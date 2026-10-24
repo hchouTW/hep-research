@@ -1,0 +1,39 @@
+{
+  "status": "synthetic",
+  "method": "PDG Highland scattering with Gluckstern intrinsic term",
+  "name": null,
+  "layers": 5,
+  "measuring_layers": 4,
+  "total_x_over_x0": 0.012806830309498399,
+  "highland_validity": {
+    "range_x_over_x0": [
+      0.001,
+      100.0
+    ],
+    "inside": true
+  },
+  "beta": 0.9999559851804368,
+  "beta_source": "derived from rigidity, charge and mass",
+  "mass_gev": 0.93827208943,
+  "charge_number": 1,
+  "scattering_angle_rad": 1.2842726214718125e-05,
+  "rigidity_gv": 100.0,
+  "scattering_term": 0.012835067515580632,
+  "intrinsic_term": 0.09888958935744326,
+  "intrinsic_coefficient": {
+    "gluckstern": 9.486832980505138,
+    "exact_equal_spacing": 9.0,
+    "exact_over_gluckstern_variance": 0.8999999999999999,
+    "used": "gluckstern"
+  },
+  "total_relative_resolution": 0.099719054555352,
+  "dominant_term": "intrinsic",
+  "crossover_rigidity_gv": 13.01231494524757,
+  "maximum_detectable_rigidity_gv": 1011.1455015699255,
+  "mdr_definition": "rigidity where the total sigma(R)/R reaches 1 (scattering and intrinsic terms)",
+  "mdr_intrinsic_only_gv": 1011.2287921283917,
+  "warnings": [
+    "4 measuring layers: the Gluckstern term (stated for N >= 10) overstates the intrinsic term by 5.4% against the exact fit of 4 equally spaced points (intrinsic_coefficient); for the actual layer positions use tracker_resolution.py momentum"
+  ],
+  "note": "Design-level estimate assuming equally spaced measuring layers and a uniform field; it does not replace a full track fit."
+}

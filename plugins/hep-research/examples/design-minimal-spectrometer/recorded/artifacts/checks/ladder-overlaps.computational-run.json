@@ -1,0 +1,82 @@
+{
+ "artifact_id": "geant4-verify-overlaps-ladder-overlap-test",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "commands": [
+   "geant4_verify.py overlaps"
+  ],
+  "environment": {},
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-overlap-test.computational-run.json",
+    "sha256": "d1c449e2e525e77e107e8faa6d1c9321cad623b382b70edf5aed411076a2a208"
+   }
+  ],
+  "output_hashes": {},
+  "seeds": {},
+  "tolerances": {},
+  "tools": [
+   {
+    "name": "geant4_verify.py",
+    "version": "50cfe683fb8f1d58"
+   }
+  ],
+  "verification": {
+   "check": "overlaps",
+   "construction_checks_ok": 224,
+   "geometry_source": "effective config",
+   "geometry_test_run_points": 10000,
+   "geometry_test_run_requested": false,
+   "note": "sampled checks (construction-time checkOverlaps and /geometry/test/run): a pass is not a proof",
+   "overlap_reports": 0,
+   "placements_expected": 112
+  }
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-run-ladder-overlap-test",
+   "artifact_type": "computational-run",
+   "ref": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-overlap-test.computational-run.json",
+   "sha256": "d1c449e2e525e77e107e8faa6d1c9321cad623b382b70edf5aed411076a2a208",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
+ "objective": "Implementation check 'overlaps' of geant4-run-ladder-overlap-test (verification, not validation)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "adapters/geant4/assets/g4common.py",
+   "adapters/geant4/assets/geant4_verify.py",
+   "contracts/__init__.py",
+   "contracts/trace.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/simulation/__init__.py",
+   "core/simulation/helix.py",
+   "core/status.py",
+   "core/trace.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

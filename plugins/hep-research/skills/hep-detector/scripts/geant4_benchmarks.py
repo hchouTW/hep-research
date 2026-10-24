@@ -46,6 +46,28 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
                     between the planar model and the measurement; the fit is made per block and t_max is the batch
                     mean of the block fits.
   published-data    (interface) the Geant4 mean of a named column and a published value, handed to hep-statistics.
+Detector benchmarks (CV-B2, element_sim and simreco runs) and their config keys, paths relative to the config file
+(worked configs: examples/design-minimal-spectrometer/live.py):
+  field-propagation        element_spec, crossings (simroot dump CSV of a charged-geantino run), optional
+                           reference_spec, tolerance_um (0.5), tolerance_ps (1.0)
+  material-definition      element_spec, geometry (evaluate_design.py geometry), realization (profile), run_record
+                           (a geantino run; its effective-config tree gives Geant4's densities), csv and column_map
+                           (that run's events and column map), tolerance_relative (0.01)
+  reco-closure             reco_record (simreco, every tail source off), summary, pull_observable,
+                           residual_observable, rigidity_GV, particle
+  multiple-scattering-reference  element_spec (an isolated slab plus a thin downstream measuring plane, vacuum, no
+                           field), crossings (simroot dump), measuring_plane (element name), material,
+                           thickness_mm, particle, momentum_MeV, blocks (16), tolerance {reference_accuracy,
+                           k_sigma, reference_source, validity}, run_record, slab (the slab's logical volume),
+                           negative_controls [{crossings, run_record, injected, injected_relative}]:
+                           injected_relative must equal the areal-density change Geant4 realized (each run's
+                           effective config, to 1e-6; a NIST material resolves to Geant4's own density, so derive
+                           the control from it), else the control is not counted
+  field-propagation-muon, tof-beta  summary, observable, tolerance_absolute
+  tof-layer-consistency    summary, observable, tolerance_absolute, sigma_t_ps, width_tolerance_relative (0.1)
+  sampling-fraction        summary, active_observable, passive_observable, reference_value, reference_source,
+                           window_relative (0.10)
+  regression-comparison    summary_a, summary_b, observable, tolerance, tolerance_mode, m, version_a, version_b
 Data (contracts CV-A1): stopping-power, range, thin-layer-mpv, thin-layer-width and longitudinal-profile read a run
 summary (simulation-summary/1, adapters/geant4/assets/summary_from_csv.py) and estimate their statistic by batch
 means over its K blocks (core/simulation/estimates.py; SE on K - 1 degrees of freedom); the summary observable must
@@ -1368,7 +1390,7 @@ def cmd_run(args) -> tuple[str, dict]:
                 gaps.append(f"{r['benchmark']}: {r['configuration_gap']}")
             elif not nc.get("at_claimed_detection_limit"):
                 gaps.append(f"{r['benchmark']}: a negative control's shift of the observable is not at the claimed "
-                            f"detection limit {r['detection_limit_relative']:.4g} (|shift| <= 1.1 DL)")
+                            f"detection limit {r.get('detection_limit_relative', nc.get('detection_limit_relative')):.4g} (|shift| <= 1.1 DL)")
             elif nc.get("detection_limit_sign") in ("+", "-"):
                 gaps.append(f"{r['benchmark']}: negative controls in one direction only: the detection limit is "
                             f"claimed for sign {nc['detection_limit_sign']} only")

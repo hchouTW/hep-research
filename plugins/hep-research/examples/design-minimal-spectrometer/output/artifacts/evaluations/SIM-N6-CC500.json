@@ -1,0 +1,94 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-SIM-N6-CC500",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "studies/N6-CC500/study.computational-run.json",
+   "sha256": "55cc2514752bfa3b3c2a18256346e10c12db78c45a15c5117779072d1af8d8e3",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-N6-CC500-study",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "unvalidated",
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:SIM-N6-CC500",
+  "candidate": "j15-v1:cand-N6",
+  "figure_of_merit": "charge-confusion-rate",
+  "denominator": {
+   "rigidity_GV": 500.0,
+   "species": "proton",
+   "charge_sign": "positive",
+   "curvature_offset_per_GV": 0.0
+  },
+  "value": 0.03360996112879524,
+  "unit": "1",
+  "bound": "estimate",
+  "fidelity": "F4",
+  "study_ref": "studies/N6-CC500/study.computational-run.json",
+  "parameter_refs": [
+   "DES-CAL-001.parameters.active_material",
+   "DES-CAL-001.parameters.active_thickness_mm",
+   "DES-CAL-001.parameters.depth_x0",
+   "DES-CAL-001.parameters.front_position_m",
+   "DES-CAL-001.parameters.passive_material",
+   "DES-CAL-001.parameters.passive_thickness_mm",
+   "DES-CAL-001.parameters.sampling_layers",
+   "DES-MAG-001.parameters.field_T",
+   "DES-MAG-001.parameters.field_extent_m",
+   "DES-TOF-001.parameters.layer_positions_m",
+   "DES-TOF-001.parameters.layer_thickness_m",
+   "DES-TOF-001.parameters.time_resolution_ps",
+   "DES-TRK-001.parameters.layer_material",
+   "DES-TRK-001.parameters.layer_positions_m",
+   "DES-TRK-001.parameters.layer_transverse_half_m",
+   "DES-TRK-001.parameters.layer_x_over_x0",
+   "DES-TRK-001.parameters.passive_x_over_x0",
+   "DES-TRK-001.parameters.point_resolution_um"
+  ],
+  "parameter_digest": "7db58839c7392a820c9dd6bbe9bf554203f9c7d06a3950c5287605302896f3d2",
+  "uncertainty": {
+   "minus": 0.03360996112879524,
+   "plus": 0.042569710480881685,
+   "coverage": 0.9,
+   "interval": "central",
+   "distribution": "exact"
+  },
+  "geometry_ref": "studies/G-N6-CC500.geometry.json",
+  "model_envelope": [
+   0.03360996112879524,
+   0.038391937120787686
+  ]
+ }
+}

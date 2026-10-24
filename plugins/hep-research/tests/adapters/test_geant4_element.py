@@ -225,6 +225,21 @@ class FromGeometry(unittest.TestCase):
         self.assertEqual(new["elements"], ref["elements"])
         self.assertEqual(new["field"]["regions"][0]["b_tesla"], [0.0, 0.0, 0.4])
 
+    def test_max_track_time_reaches_the_spec(self):
+        """Adapter 0.4.1: field.max_track_time_ns (a looper limit in vacuum field regions) is copied from the profile
+        and accepted by check-spec; a negative value is refused."""
+        p = profile()
+        p["field"]["max_track_time_ns"] = 1000.0
+        pp = self.d / "p.json"
+        pp.write_text(json.dumps(p))
+        code, doc, out = self.derive(self.geometry(), "t.json", pp)
+        self.assertEqual(code, 0, doc)
+        spec = json.loads(out.read_text())
+        self.assertEqual(spec["field"]["max_track_time_ns"], 1000.0)
+        self.assertEqual(ES.check_spec(spec), [])
+        spec["field"]["max_track_time_ns"] = -1.0
+        self.assertTrue(ES.check_spec(spec))
+
     def test_refusals(self):
         geom = self.geometry()
         doc = json.loads(geom.read_text())

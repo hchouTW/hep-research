@@ -295,6 +295,11 @@
      "type": "number",
      "exclusiveMinimum": 0,
      "description": "G4UserLimits on the field elements and their daughters (G4StepLimiterPhysics is added with a field)"
+    },
+    "max_track_time_ns": {
+     "type": "number",
+     "minimum": 0,
+     "description": "tracks inside a field element older than this are killed (loopers in a vacuum field region never trigger Geant4's looper killer under a step limit); 0 or absent: no limit"
     }
    }
   },

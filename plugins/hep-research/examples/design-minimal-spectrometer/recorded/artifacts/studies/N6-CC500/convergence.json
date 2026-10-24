@@ -1,0 +1,202 @@
+{
+ "convergence": {
+  "gate": "pass",
+  "multiplicity": 1,
+  "parameters": [
+   {
+    "observables": [
+     {
+      "dof": 29.82697337794788,
+      "finest": 0.35,
+      "margin": 0.07484015780049896,
+      "next": 0.7,
+      "observable": "core",
+      "reason": "within-tolerance",
+      "relative_change": 0.0009008437437687228,
+      "se_of_change": 0.014290387737971928,
+      "se_targets_met": {
+       "finest": true,
+       "next": true
+      },
+      "tolerance": 0.1,
+      "tolerance_mode": "relative",
+      "verdict": "pass"
+     }
+    ],
+    "parameter": "physics.default_cut_mm",
+    "two_finest": [
+     0.35,
+     0.7
+    ],
+    "values": [
+     0.35,
+     0.7
+    ],
+    "verdict": "pass"
+   }
+  ],
+  "rule": "every declared value of each scan has a run summary (else incomplete, missing-scan-value); between the two finest declared settings every declared observable is equivalent within its tolerance: pass when |diff| + t_0.95(nu) se <= tol and both points meet the se target tol/(4 sqrt 2), fail when |diff| - t_(1-0.05/m)(nu) se > tol, otherwise incomplete; low counts decide on exact interval endpoints (A1.8)"
+ },
+ "record_problems": [],
+ "statistical_target": {
+  "estimate": "batch means over the run's blocks (legacy summaries: their bootstrap SE); N_needed = N (SE/target)^2; a missed target is incomplete and is not topped up (A1.9)",
+  "events": 11968,
+  "events_needed": null,
+  "observable": "flip",
+  "relative_se": 0.08775404842640917,
+  "target": 0.2,
+  "verdict": "pass"
+ },
+ "summaries": [
+  {
+   "legacy": false,
+   "observables": {
+    "beta": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.0002818987959301107,
+     "method": "batch means of block means",
+     "n": 11638,
+     "se": 0.00013397409673229356,
+     "status": "ok",
+     "value": 0.00028206055710746616
+    },
+    "core": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.42558837238265407,
+     "full_sample_mean": -0.002996919731835439,
+     "method": "batch means of block Gaussian-core widths (iterative +-2 sigma truncation, truncation-corrected)",
+     "n": 11638,
+     "se": 0.004466219199916798,
+     "status": "ok",
+     "truncation_sigma": 2.0,
+     "value": 0.4260609332197854
+    },
+    "flip": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.011084378759236983,
+     "k": 129,
+     "low_count": false,
+     "method": "batch means of block proportions",
+     "n": 11638,
+     "se": 0.0009726601093650553,
+     "status": "ok",
+     "value": 0.011083934323334738
+    },
+    "pull": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.007777293200513994,
+     "method": "batch means of block means",
+     "n": 11638,
+     "se": 0.008429831703778106,
+     "status": "ok",
+     "value": -0.00784744417395326
+    },
+    "residual": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.003327072063117707,
+     "method": "batch means of block means",
+     "n": 11638,
+     "se": 0.0034292483655477325,
+     "status": "ok",
+     "value": -0.0033533254846171753
+    },
+    "tofdt": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.5659075767992141,
+     "method": "batch means of block means",
+     "n": 11638,
+     "se": 0.9563952549937615,
+     "status": "ok",
+     "value": 0.560844506924318
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CC500-nominal-off/summary_r000.json",
+   "role": "nominal",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-CC500-nominal-off"
+   },
+   "sha256": "07d1ec77adf72798d91ca65e051571cd81dbf8ca0089245037a4b20155ba42f0"
+  },
+  {
+   "legacy": false,
+   "observables": {
+    "beta": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.0009521256374870647,
+     "method": "batch means of block means",
+     "n": 11662,
+     "se": 0.0002588242548867725,
+     "status": "ok",
+     "value": 0.000952964747547729
+    },
+    "core": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.4283808404817968,
+     "full_sample_mean": -0.0013025134649909819,
+     "method": "batch means of block Gaussian-core widths (iterative +-2 sigma truncation, truncation-corrected)",
+     "n": 11662,
+     "se": 0.004138072375301904,
+     "status": "ok",
+     "truncation_sigma": 2.0,
+     "value": 0.4264447475459407
+    },
+    "flip": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 0.009946835877208026,
+     "k": 116,
+     "low_count": false,
+     "method": "batch means of block proportions",
+     "n": 11662,
+     "se": 0.000921905144893309,
+     "status": "ok",
+     "value": 0.00994347769066177
+    },
+    "pull": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.006351440558093972,
+     "method": "batch means of block means",
+     "n": 11662,
+     "se": 0.008619798207270213,
+     "status": "ok",
+     "value": -0.006270570689302298
+    },
+    "residual": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": -0.002350907271746465,
+     "method": "batch means of block means",
+     "n": 11662,
+     "se": 0.0038803181478625683,
+     "status": "ok",
+     "value": -0.002317267058735235
+    },
+    "tofdt": {
+     "blocks": 16,
+     "dof": 15,
+     "full_sample": 1.2899195748034997,
+     "method": "batch means of block means",
+     "n": 11662,
+     "se": 1.1850365799442504,
+     "status": "ok",
+     "value": 1.286054362776597
+    }
+   },
+   "path": "~/Workspace/geant4-work/sim-b3/j15/sim/N6-CC500-scan-off/summary_r000.json",
+   "role": "scan",
+   "run_record": {
+    "artifact_id": "geant4-reco-N6-CC500-scan-off"
+   },
+   "sha256": "359e00c391723aac79b5ed059860cffe2fe1ae82df83a80b9276df76f406697a"
+  }
+ ]
+}

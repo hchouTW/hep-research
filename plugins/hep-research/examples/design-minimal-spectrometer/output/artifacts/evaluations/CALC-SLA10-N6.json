@@ -1,0 +1,73 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-CALC-SLA10-N6",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-SLA10-N6.computational-run.json",
+   "sha256": "787276ccfa49ed9975ef9f62369cdd019538978c4507e8cfacc8386f6dea8740",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-v1-CALC-SLA10-N6-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:CALC-SLA10-N6",
+  "candidate": "j15-v1:cand-N6",
+  "figure_of_merit": "geometric-acceptance",
+  "denominator": {
+   "rigidity_GV": 10.0,
+   "species": "proton",
+   "charge_sign": "positive"
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 0.001495667310470862,
+  "unit": "m2 sr",
+  "run_ref": "runs/CALC-SLA10-N6.computational-run.json",
+  "parameter_refs": [
+   "DES-TRK-001.parameters.layer_aperture_radius_m",
+   "DES-TRK-001.parameters.layer_lateral_offset_m",
+   "DES-TRK-001.parameters.layer_positions_m"
+  ],
+  "parameter_digest": "fffb517837b78a4e4501cde9787a4033d4a4a5bc10dc7110cd2208d5e47181b5",
+  "validity": {
+   "assumptions": [
+    "straight-line limit: no bending, no nuclear interactions, full detection efficiency",
+    "isotropic flux",
+    "circular coaxial apertures"
+   ],
+   "in_domain": true
+  }
+ }
+}

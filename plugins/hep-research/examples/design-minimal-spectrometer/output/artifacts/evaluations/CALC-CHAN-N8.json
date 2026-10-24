@@ -1,0 +1,84 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "j15-v1-CALC-CHAN-N8",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-N8.json",
+   "sha256": "ae69d6d64d209136fa9765b6f914f6d093a56f3e5d361e1f437e568b81eeca69",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N8",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "candidates/cand-N6.json",
+   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "artifact_type": "design-candidate",
+   "artifact_id": "j15-v1-cand-N6",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-CHAN-N8.computational-run.json",
+   "sha256": "a2d633321478ef281790edcf161b9abb3dee5d062ed68f7106f0122ee94a742c",
+   "artifact_type": "computational-run",
+   "artifact_id": "j15-v1-CALC-CHAN-N8-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "j15-v1:CALC-CHAN-N8",
+  "candidate": "j15-v1:cand-N8",
+  "figure_of_merit": "channel-count-budget",
+  "denominator": {},
+  "bound": "estimate",
+  "fidelity": "F1",
+  "value": 16116.0,
+  "unit": "1",
+  "run_ref": "runs/CALC-CHAN-N8.computational-run.json",
+  "parameter_refs": [
+   "budgets.channel_count.DES-CAL-001",
+   "budgets.channel_count.DES-MAG-001",
+   "budgets.channel_count.DES-TOF-001",
+   "budgets.channel_count.DES-TRK-001",
+   "subsystems"
+  ],
+  "parameter_digest": "cf0368434afa83a1d15bbd9df1481c29e9b761ac5906fba00212ea87f1236151",
+  "validity": {
+   "assumptions": [],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 805.8,
+   "plus": 805.8,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

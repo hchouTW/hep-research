@@ -1,0 +1,127 @@
+{
+ "artifact_id": "geant4-table-N6-TRK1",
+ "artifact_type": "dataset-record",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.13.0",
+ "extension": {
+  "conditions": "tail sources simulated: ['alignment', 'calibration-non-uniformity', 'noise-digitization', 'pattern-recognition']; replicas 20",
+  "covariance": {
+   "status": "absent"
+  },
+  "data": {
+   "edges": [
+    0.999999998999,
+    1.0000000010010002
+   ],
+   "uncertainties": [
+    {
+     "correlation": "uncorrelated",
+     "gaussian": false,
+     "kind": "statistical",
+     "name": "statistical (+) replica spread, coverage 0.90",
+     "values": [
+      0.00037013449551151186
+     ]
+    }
+   ],
+   "unit": "1",
+   "values": [
+    0.01819511530127913
+   ]
+  },
+  "dataset_id": "simulation:N6-TRK1",
+  "observable": {
+   "bin_semantics": "point",
+   "level": "detector",
+   "normalization": {
+    "kind": "shape-only"
+   },
+   "phase_space": {
+    "definition": "{\"rigidity_GV\": 1.0, \"species\": \"proton\"}"
+   },
+   "process": "simulation of momentum-resolution-core",
+   "quantity": "resolution",
+   "unit": "1",
+   "variables": [
+    {
+     "name": "rigidity_GV",
+     "points": [
+      1.0
+     ],
+     "unit": ""
+    }
+   ]
+  },
+  "source_evidence_ids": [],
+  "status": "simulated"
+ },
+ "inputs": [
+  {
+   "artifact_id": "geant4-reco-N6-TRK1-nominal-on",
+   "artifact_type": "computational-run",
+   "ref": "runs/N6-TRK1-nominal-on.computational-run.json",
+   "sha256": "9408e550f4547943295b9a96a65c1e6adceb0a5418ac10e0bf48a7d34f3995f4",
+   "status": [
+    "unvalidated"
+   ]
+  }
+ ],
+ "objective": "Simulated momentum-resolution-core from geant4-reco-N6-TRK1-nominal-on (detector level; unvalidated unless an input study record is validated in scope)",
+ "outputs": [],
+ "provenance": {
+  "code_paths": [
+   "adapters/geant4/assets/element_spec.py",
+   "adapters/geant4/assets/g4common.py",
+   "adapters/geant4/assets/geant4_run.py",
+   "adapters/geant4/assets/simreco_spec.py",
+   "contracts/__init__.py",
+   "contracts/identity.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/constants/__init__.py",
+   "core/constants/physical.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/simulation/__init__.py",
+   "core/simulation/estimates.py",
+   "core/simulation/seeds.py",
+   "core/simulation/summary.py",
+   "core/stats/__init__.py",
+   "core/stats/_linalg.py",
+   "core/stats/_poisson.py",
+   "core/stats/batch_means.py",
+   "core/stats/distributions.py",
+   "core/stats/poisson_diagnostics.py",
+   "core/stats/tail_estimation.py",
+   "core/status.py",
+   "core/trace.py"
+  ],
+  "code_tags": [
+   "geant4-batch-means"
+  ],
+  "created": "2026-10-24",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.13.0",
+  "plugin": "0.38.0",
+  "profiles": {}
+ }
+}

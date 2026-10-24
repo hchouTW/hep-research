@@ -1,0 +1,42 @@
+{
+  "status": "ok",
+  "status_label": "synthetic",
+  "method": "sigma(1/R)^2 = a^2 + (b/(beta R))^2 (Gluckstern a, Highland b; multiple_scattering.py)",
+  "inputs": {
+    "config": "configs/CALC-TOY100-N4.config.json",
+    "config_sha256": "99f930701f6f9e075f87e29469c8226a3584aba50da7b9f69e3724d726aac4bb",
+    "species": "p",
+    "era": "era-1",
+    "rigidity_gv": [
+      100.0
+    ]
+  },
+  "defaults_used": [
+    "era: the first era 'era-1'"
+  ],
+  "warnings": [],
+  "eras": [
+    {
+      "name": "era-1",
+      "first_period": 0,
+      "layers": 5,
+      "measuring_layers": 4,
+      "point_resolution_eff_um": 10.0,
+      "field_tesla": 0.5,
+      "lever_arm_m": 0.8,
+      "total_x_over_x0": 0.012806830309498399,
+      "a_per_gv": 0.0009888958935744326,
+      "b": 0.012834502582399853,
+      "charge_layers": 4
+    }
+  ],
+  "points": [
+    {
+      "rigidity_gv": 100.0,
+      "beta": 0.9999559851805561,
+      "sigma_inv_rigidity_per_gv": 0.000997190545553518,
+      "relative_resolution": 0.0997190545553518,
+      "dominant_term": "intrinsic"
+    }
+  ]
+}

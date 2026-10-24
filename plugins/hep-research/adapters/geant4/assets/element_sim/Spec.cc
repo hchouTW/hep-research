@@ -137,6 +137,7 @@ Spec ReadSpec(const std::string& path) {
     s.field.min_epsilon_step = optNumber(f, "min_epsilon_step", s.field.min_epsilon_step, "field");
     s.field.max_epsilon_step = optNumber(f, "max_epsilon_step", s.field.max_epsilon_step, "field");
     s.field.max_step_mm = optNumber(f, "max_step_mm", s.field.max_step_mm, "field");
+    s.field.max_track_time_ns = optNumber(f, "max_track_time_ns", s.field.max_track_time_ns, "field");
     if (s.field.stepper != "DormandPrince745" || s.field.driver != "InterpolationDriver")
       throw JsonError("field: only stepper DormandPrince745 with driver InterpolationDriver is built");
   }

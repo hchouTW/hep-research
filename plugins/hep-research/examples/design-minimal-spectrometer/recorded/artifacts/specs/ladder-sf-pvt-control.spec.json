@@ -1,0 +1,360 @@
+{
+ "elements": [
+  {
+   "centre_mm": [
+    -100.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    420.0,
+    150.0,
+    150.0
+   ],
+   "material": "G4_Galactic",
+   "name": "FieldRegion",
+   "role": "passive"
+  },
+  {
+   "centre_mm": [
+    -500.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.15,
+    100.0,
+    100.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si1",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    -340.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.15,
+    100.0,
+    100.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si2",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    -180.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.15,
+    100.0,
+    100.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si3",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    -20.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.15,
+    100.0,
+    100.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si4",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    140.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.15,
+    100.0,
+    100.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si5",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    300.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.15,
+    100.0,
+    100.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si6",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    -805.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    150.0,
+    150.0
+   ],
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "name": "TOF1a",
+   "role": "tof-layer"
+  },
+  {
+   "centre_mm": [
+    -785.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    150.0,
+    150.0
+   ],
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "name": "TOF1b",
+   "role": "tof-layer"
+  },
+  {
+   "centre_mm": [
+    495.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    200.0,
+    200.0
+   ],
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "name": "TOF2a",
+   "role": "tof-layer"
+  },
+  {
+   "centre_mm": [
+    515.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    200.0,
+    200.0
+   ],
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "name": "TOF2b",
+   "role": "tof-layer"
+  },
+  {
+   "centre_mm": [
+    725.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    175.0,
+    250.0,
+    250.0
+   ],
+   "material": "G4_Galactic",
+   "name": "Calo",
+   "role": "calorimeter"
+  },
+  {
+   "centre_mm": [
+    551.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    1.0,
+    250.0,
+    250.0
+   ],
+   "material": "G4_Pb",
+   "mother": "Calo",
+   "name": "CaloPb",
+   "repeat": {
+    "count": 50,
+    "pitch_mm": [
+     7.0,
+     0.0,
+     0.0
+    ]
+   },
+   "role": "calorimeter-passive"
+  },
+  {
+   "centre_mm": [
+    554.5,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    2.5,
+    250.0,
+    250.0
+   ],
+   "material": "PVT_ctl",
+   "mother": "Calo",
+   "name": "CaloSc",
+   "repeat": {
+    "count": 50,
+    "pitch_mm": [
+     7.0,
+     0.0,
+     0.0
+    ]
+   },
+   "role": "calorimeter-active"
+  }
+ ],
+ "field": {
+  "delta_chord_mm": 0.25,
+  "delta_intersection_mm": 1e-05,
+  "delta_one_step_mm": 0.01,
+  "driver": "InterpolationDriver",
+  "max_epsilon_step": 0.001,
+  "max_step_mm": 10.0,
+  "max_track_time_ns": 1000.0,
+  "min_epsilon_step": 5e-05,
+  "regions": [
+   {
+    "b_tesla": [
+     0.0,
+     0.0,
+     0.5
+    ],
+    "element": "FieldRegion"
+   }
+  ],
+  "stepper": "DormandPrince745"
+ },
+ "note": "derived by geant4_run.py from-geometry from candidate j15-v1:cand-N6 (figure of merit momentum-resolution-core); never edited by hand (Geant4 program B1.8)",
+ "output": {
+  "event_file": {
+   "compression": 1,
+   "level": "crossings"
+  },
+  "observables": [
+   {
+    "name": "active",
+    "source_column": "edep_CaloSc_MeV",
+    "bins": {
+     "lo": 0,
+     "hi": 1000,
+     "width": 1000
+    }
+   },
+   {
+    "name": "passive",
+    "source_column": "edep_CaloPb_MeV",
+    "bins": {
+     "lo": 0,
+     "hi": 1000,
+     "width": 1000
+    }
+   }
+  ],
+  "blocks": {
+   "blocks": 16,
+   "block_size": 250
+  }
+ },
+ "physics": {
+  "default_cut_mm": 0.7,
+  "reference_list": "FTFP_BERT_EMZ"
+ },
+ "provenance": {
+  "candidate": "j15-v1:cand-N6",
+  "generator": "geant4_run.py from-geometry (adapter 0.4.0)",
+  "geometry": {
+   "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/studies/G-N6-TRK1.geometry.json",
+   "sha256": "6c0b91376e36efca776fb5c1c8d3566c85aa7be2a334940dc399fb147f10700c"
+  },
+  "mapping_version": "1.1.0",
+  "parameter_digest": "7db58839c7392a820c9dd6bbe9bf554203f9c7d06a3950c5287605302896f3d2",
+  "realization": {
+   "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/j15.realization.json",
+   "sha256": "4b01603714b37c4609a5155aefedfe06b607eb62dec72925dd1a8a8450b52d4b"
+  }
+ },
+ "run": {
+  "events": 4000,
+  "first_event": 0,
+  "logical_run_seed": 663608702,
+  "run_manager": "mt",
+  "seeding": "per-event",
+  "seeds": [
+   1224386623,
+   848318400
+  ],
+  "threads": 8
+ },
+ "schema": "element_sim.spec/1",
+ "source": {
+  "direction": [
+   1.0,
+   0.0,
+   0.0
+  ],
+  "energy_MeV": 1000.0,
+  "particle": "mu-",
+  "position_mm": [
+   -1000.0,
+   0.0,
+   0.0
+  ],
+  "type": "gun"
+ },
+ "world": {
+  "half_mm": [
+   1200.0,
+   600.0,
+   600.0
+  ],
+  "material": "G4_Galactic"
+ },
+ "materials": [
+  {
+   "name": "PVT_ctl",
+   "density_g_cm3": 1.2384,
+   "components": [
+    {
+     "material": "G4_H",
+     "mass_fraction": 0.085
+    },
+    {
+     "material": "G4_C",
+     "mass_fraction": 0.915
+    }
+   ]
+  }
+ ]
+}

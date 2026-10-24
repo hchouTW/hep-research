@@ -375,6 +375,20 @@ execution layer. Its records are always `unvalidated`.
   writes a record with the input hashes (changing digitization or tail sources needs no new simulation); `table`
   writes the simulated dataset-record and, with `--f4-results`, the F4 results file. The summary's
   `tail_sources_simulated` lists only the stages that ran.
+- From adapter 0.4.1: `field.max_track_time_ns` kills tracks older than that in a field element (a looper in a
+  vacuum field region never meets the looper killer under a step limit); the strip digitization draws a random strip
+  phase per plane and event and gives hits sigma = sqrt((p - w)^3 / 12 p) (pitch p, sharing width w), and
+  `simreco_spec.check` refuses a digitization finer than the declared point resolution (tails on would then measure
+  better than tails off); shower containment is the calorimeter deposit over the incident energy. A design project
+  taken from F1 to F4 with these programs:
+  [examples/design-minimal-spectrometer](../../../examples/design-minimal-spectrometer/README.md) (J15).
+  The detector benchmarks' config keys are listed in `geant4_benchmarks.py --help`. A reference's negative
+  control is declared with the injection Geant4 realized (a NIST material resolves to Geant4's own density, so
+  derive the control from it), before the runs; a control declared otherwise is not counted, and correcting the
+  declaration after the result is a rerun after a miss. Single scattering (`__SS`) in a design with a thick
+  calorimeter can cost far more per event than option 4 even at 1 GV (protons stopping in lead; J15's acceptance
+  run measured about 2000 events in 16 min on 8 threads); plan its event count from a trial. Validate the whole artifacts_dir (`contracts/validate.py --strict <artifacts_dir>`), with
+  derived specs and dumps kept outside it: paths in records are relative to that root.
 
 The hep-detector side never imports the adapter: `scripts/check_geant4_study.py` (`spec`, `run`, `variations`,
 `label`) and `scripts/geant4_benchmarks.py` (`run`, `reference`, `scope-keys`) read the files it writes. A worked
