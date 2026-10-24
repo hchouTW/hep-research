@@ -111,6 +111,13 @@ def main():
     ms = th / (C_GEV * B * L)
     print(f"MDR (measurement term alone = 1) = {mdr:.1f} GV; MS term (beta=1, Highland with log on total) "
           f"{100 * ms:.2f} % (x1.0-1.4 bracket {100 * ms:.2f}-{140 * ms:.2f} %)")
+    print("  B/N table (same lever arm L, equally spaced planes; beta = 1):")
+    for bt, n in ((0.15, 6), (0.5, 6), (1.0, 6), (0.5, 4), (0.5, 8)):
+        mdr_bn = C_GEV * bt * L * L / (EPS * math.sqrt(exact_A(n)))
+        xn = n * 0.03 / SI['X0']
+        ms_bn = 0.0136 * math.sqrt(xn) * (1 + 0.038 * math.log(xn)) / (C_GEV * bt * L)
+        print(f"    B {bt:4.2f} T, N {n}: MDR {mdr_bn:6.0f} GV; MS {100 * ms_bn:.1f}-{140 * ms_bn:.1f} %; "
+              f"equal-terms rigidity {ms_bn * mdr_bn:.0f}-{1.4 * ms_bn * mdr_bn:.0f} GV")
     for name, m in (("mu", MMU), ("p", MP)):
         for R in (0.6, 1, 2, 5):
             b = R / math.hypot(R, m)

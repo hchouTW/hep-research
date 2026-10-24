@@ -3,7 +3,7 @@
 > 對象：`geant4-program.md`（commit 3f8b9c1，基準 `9f08796`／0.23.0／contracts 3.5.0）
 > 對照：`origin/main` `5584927`（0.38.0，contracts 3.12.0，比基準多 197 個 commit）
 > 方法：四位獨立審查者（任務 A、任務 B／J15、任務 C、計畫與架構）各自對照 main 的程式碼；主要論點由主工作階段在 main 上複核（標 ✔）
-> 狀態：審查紀錄；`geant4-program.md` 尚未依本紀錄修改
+> 狀態：審查紀錄；`geant4-program.md` 已於同日依本紀錄與使用者的決定（全面重寫；搜尋為 `evaluate_design.py search`；D0 採資格路徑）重新規劃
 
 ## 1. 結論
 

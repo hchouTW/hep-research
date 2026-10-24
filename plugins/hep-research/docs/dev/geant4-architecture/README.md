@@ -1,11 +1,16 @@
 # Geant4 architecture: working base
 
-This folder holds one consolidated document for the Geant4 work in hep-research: correctness fixes and boundary
-artifacts (task A), a second simulation backend with reconstruction and the J15 minimal spectrometer (task B), and
-automated detector design search (task C), together with the program plan and the design rationale. It lives on the
-branch `worktree-geant4-architecture`, based on `main` at `9f08796` (0.23.0 plus unreleased changes, contracts 3.5.0).
+This folder holds one consolidated document for the Geant4 work in hep-research. It plugs into the detector system
+design loop that `main` shipped in 0.37.0–0.38.0 (design-spec, design-candidate, design-evaluation; verdicts derived by
+`contracts/design.py`; fidelity F0–F5 with F4 = a qualified Geant4 study): correctness fixes and boundary artifacts
+that make Geant4 study labels trustworthy for F4 (task A), a second simulation backend with reconstruction that serves
+as main's F4 evaluator, and J15 as a design project (task B), and automated generation of design candidates inside the
+loop, `evaluate_design.py search` (task C), together with the program plan and the design rationale. It lives on the
+branch `worktree-geant4-architecture`, re-planned on 2026-10-24 against `main` at `5584927` (0.38.0, contracts
+3.12.0), which is merged into the branch.
 
-**Status (2026-10-23):** awaiting the user's and the maintainer's approval; do not start implementation before that.
+**Status (2026-10-24):** awaiting the user's and the maintainer's approval, including decision D0 (how a
+detector-level Geant4 study qualifies as F4, §P.7); do not start implementation before that.
 
 ## Files
 
@@ -13,11 +18,11 @@ branch `worktree-geant4-architecture`, based on `main` at `9f08796` (0.23.0 plus
 |---|---|
 | `geant4-program.md` | **The consolidated document** (Traditional Chinese original): Part 1 plan (§P), Part 2 task A (§A), Part 3 task B (§B), Part 4 task C (§C), Part 5 design rationale (§R) |
 | `geant4-program.en.md` | English translation with the same parts, sections, tables, checkboxes and numbers; if they disagree, the Chinese wins until the English is corrected |
-| `review-2026-10-24-main-0.38.md` | Review record (Chinese) of the document against `main` 0.38.0, which shipped the detector system design loop; lists findings and a proposed re-plan; the document has not yet been revised accordingly |
+| `review-2026-10-24-main-0.38.md` | Review record (Chinese) of the document against `main` 0.38.0, which shipped the detector system design loop; lists findings and the re-plan; the document was revised accordingly on the same day |
 | `gate_operating_characteristics.py` | Convergence-gate operating characteristics, two-stage factors, Welch degrees of freedom (§A.8, §A.9, §A Appendix B). Needs numpy and scipy; a design aid, not plugin code |
 | `j15_design_estimates.py` | J15 design numbers (§B Appendix A). Standard library; scipy optional |
 | `design_search_closure.py` | Reference values of task C's plane-placement closure test (§C Appendix A). Standard library |
-| `prototype/phase1-core.patch` | Reference prototype of parts of A1.1–A1.3 and the enum fix of A1.12 (changes `contracts/validate.py`, `check_geant4_study.py`, `geant4_benchmarks.py`, the study-spec schema and two tests; nothing in `core/`); applies to `9f08796`; predates the current spec (§A.0 lists what it lacks); not reviewed for merge |
+| `prototype/phase1-core.patch` | Reference prototype of parts of A1.1–A1.3 and the enum fix of A1.12 (changes `contracts/validate.py`, `check_geant4_study.py`, `geant4_benchmarks.py`, the study-spec schema and two tests; nothing in `core/`); written for `9f08796` and still applies to `5584927` with small offsets; predates the current spec (§A.0 lists what it lacks); not reviewed for merge |
 
 ## If you are an agent starting work here
 
