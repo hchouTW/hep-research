@@ -1,8 +1,8 @@
 {
  "id": "adapter:geant4",
- "version": "0.2.0",
+ "version": "0.3.0",
  "status": "demonstrated-on-synthetic-data",
- "purpose": "Run Geant4 correctly for research: a pinned, recorded build from source (geant4_build.py), the official examples B1, B4a, TestEm3 and TestEm5 compared with their reference outputs by the statistical meaning of each printed quantity (geant4_examples.py), a layered-slab simulation program driven by a JSON spec with per-event CSV output (layered_sim, geant4_run.py with scan, partition chunks, reduce and an oracle that calls hep-detector's geant4_benchmarks.py), and four implementation checks (geant4_verify.py: overlaps, material budget, energy balance, mirror). From 0.2.0 (Geant4 program A2) the shared headers g4sim/ (seed hash, per-event seeding, run summary accumulators, the effective-config probe, materials, physics lists, CSV helpers) and three boundary artifacts per run: the run summary (simulation-summary/1, summary.json, merged across threads), the column map (simulation-columns/1, column_map.json) and the effective config (stored once per content hash, with the tree-v1 geometry hashes); summary_from_csv.py stays as the summary's test oracle. Every record is unvalidated: a run that completes is verification at most; hep-detector decides physics. Optional, required by no skill",
+ "purpose": "Run Geant4 correctly for research: a pinned, recorded build from source (geant4_build.py), the official examples B1, B4a, TestEm3 and TestEm5 compared with their reference outputs by the statistical meaning of each printed quantity (geant4_examples.py), a layered-slab simulation program driven by a JSON spec with per-event CSV output (layered_sim, geant4_run.py with scan, partition chunks, reduce and an oracle that calls hep-detector's geant4_benchmarks.py), and four implementation checks (geant4_verify.py: overlaps, material budget, energy balance, mirror). From 0.2.0 (Geant4 program A2) the shared headers g4sim/ (seed hash, per-event seeding, run summary accumulators, the effective-config probe, materials, physics lists, CSV helpers) and three boundary artifacts per run: the run summary (simulation-summary/1, summary.json, merged across threads), the column map (simulation-columns/1, column_map.json) and the effective config (stored once per content hash, with the tree-v1 geometry hashes); summary_from_csv.py stays as the summary's test oracle. Every record is unvalidated: a run that completes is verification at most; hep-detector decides physics. Optional, required by no skill. From 0.3.0 (Geant4 program B1) a second program, element_sim: box elements with one level of nesting, uniform field regions built with an explicit DormandPrince745 stepper and interpolation driver, plane crossings of every charged track, calorimeter leakage by face, per-event seeding only, the same three boundary artifacts and a per-event ROOT file (element_sim.events/1, written with Geant4's bundled g4tools, never committed) read by simroot (info, dump, hash); geant4_run.py check-spec (schema and cross-field rules, element_spec.py) and from-geometry (design-geometry/1 plus an element_sim.realization/1 profile to an element_sim.spec/1, deterministic); geant4_verify.py field, the deterministic field check against the analytic helix of core/simulation/helix.py",
  "tools": [
   {
    "name": "Geant4 build and official examples (geant4_build.py, geant4_examples.py): Geant4 11.4.3 from https://github.com/Geant4/geant4 (tag v11.4.3), Geant4 Software License 1.0",
@@ -12,15 +12,16 @@
    ]
   },
   {
-   "name": "layered_sim, the g4sim headers, geant4_run.py, geant4_verify.py and summary_from_csv.py (this plugin's code; layered_sim links against the user's Geant4 installation)",
+   "name": "layered_sim, element_sim, simroot, the g4sim headers, geant4_run.py, geant4_verify.py, element_spec.py and summary_from_csv.py (this plugin's code; the programs link against the user's Geant4 installation)",
    "status": "demonstrated-on-synthetic-data",
    "tested_versions": [
     "layered_sim built against Geant4 11.4.3 on E2 (2026-10-21): mirror runs of TestEm3 run 0 (10000 events) and TestEm5 run 0 (1e5 events) agree with the local examples; overlap, material-budget and energy-balance checks pass and their five negative tests are caught; a cut scan under run_workflow.py and a four-chunk local_partition.py run agree with a single run; the runs are of invented layouts (synthetic geometries), so the status stays demonstrated-on-synthetic-data",
-    "adapter 0.2.0 built against Geant4 11.4.3 on E2 (2026-10-24): the 26 recorded J14 specs give events.csv files bit-identical to the pre-A2 build (gate G-A2) and every probe left the random-engine state unchanged; per-event seeding gives bit-identical events for 1, 2 and 4 threads and 1, 2 and 4 jobs, also with a random gun in a test build; the summary written by layered_sim equals core/simulation/summary.py recomputed from the per-event dump (integers identical, floats within 1e-12); a weighted run with observables exits 2; the probe called before BeamOn records nothing (VALIDATION GEANT4-SUMMARY); the layouts are invented, so the status stays demonstrated-on-synthetic-data"
+    "adapter 0.2.0 built against Geant4 11.4.3 on E2 (2026-10-24): the 26 recorded J14 specs give events.csv files bit-identical to the pre-A2 build (gate G-A2) and every probe left the random-engine state unchanged; per-event seeding gives bit-identical events for 1, 2 and 4 threads and 1, 2 and 4 jobs, also with a random gun in a test build; the summary written by layered_sim equals core/simulation/summary.py recomputed from the per-event dump (integers identical, floats within 1e-12); a weighted run with observables exits 2; the probe called before BeamOn records nothing (VALIDATION GEANT4-SUMMARY); the layouts are invented, so the status stays demonstrated-on-synthetic-data",
+    "adapter 0.3.0 built against Geant4 11.4.3 on E2 (2026-10-24): G4RootAnalysisReader reads MT-merged compressed event files with string columns (gate G-B1a; the MT master cannot fill a merged ntuple, so worker 0 writes the run and processes rows); the J15 geometry passes overlaps, material budget and energy balance; the deterministic field check passes at nominal with one and two field regions (largest in-plane deviation 0.054 um against 0.5 um, TOF times within 1 ps) and catches B x (1 +- 1e-4); layered_sim and element_sim agree on the mean and most probable silicon deposit and the total calorimeter leakage (gate G-B1b); 1, 2 and 4 threads and 1 against 4 jobs give the same event-file content hash (VALIDATION GEANT4-ELEMENT); the layouts are invented, so the status stays demonstrated-on-synthetic-data"
    ]
   }
  ],
- "licence_boundary": "Geant4 is distributed under the Geant4 Software License, Version 1.0, 28 June 2006; this plugin is Apache-2.0. Nothing of Geant4 is bundled or copied: geant4_build.py clones the source into the work directory the user names and builds it there, with the user's approval (it contacts github.com and cern.ch); layered_sim is this plugin's own code, built by the user against that installation and run as a separate executable that exchanges JSON and CSV files. No pyproject extra and no required CI job. Gate G5: approved for distribution by the maintainer on 2026-10-21 with this wording",
+ "licence_boundary": "Geant4 is distributed under the Geant4 Software License, Version 1.0, 28 June 2006; this plugin is Apache-2.0. Nothing of Geant4 is bundled or copied: geant4_build.py clones the source into the work directory the user names and builds it there, with the user's approval (it contacts github.com and cern.ch); layered_sim and element_sim (and simroot, which reads element_sim's event files with Geant4's own reader) are this plugin's own code, built by the user against that installation and run as separate executables that exchange JSON and CSV files (element_sim also writes ROOT files through Geant4's bundled g4tools; ROOT itself is not needed). No pyproject extra and no required CI job. Gate G5: approved for distribution by the maintainer on 2026-10-21 for layered_sim; element_sim, simroot and the event file of adapter 0.3.0 (written from the Geant4 API, no example code copied or adapted, B1.9) await the reviewer's G5 confirmation in VALIDATION GEANT4-ELEMENT",
  "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Python 3.13 standard library only on the plugin side; Geant4 11.4.3 built from source by geant4_build.py in ~/Workspace/geant4-work (no system-wide installation), eleven datasets downloaded from cern.ch with MD5 checks. The Apptainer definition assets/geant4.def is declared but not built or tested. Live tests need HEP_GEANT4_LIVE_TEST=1 and HEP_GEANT4_CONFIG",
  "assets": [
   "assets/build_spec.example.json",
@@ -56,11 +57,28 @@
   "assets/layered_sim/mirror_testem3.json",
   "assets/layered_sim/mirror_testem5_run0.json",
   "assets/schemas/effective_config.schema.json",
-  "assets/schemas/column_map.schema.json"
+  "assets/schemas/column_map.schema.json",
+  "assets/element_spec.py",
+  "assets/element_sim/CMakeLists.txt",
+  "assets/element_sim/Spec.hh",
+  "assets/element_sim/Spec.cc",
+  "assets/element_sim/Detector.hh",
+  "assets/element_sim/Detector.cc",
+  "assets/element_sim/Field.hh",
+  "assets/element_sim/Field.cc",
+  "assets/element_sim/Actions.hh",
+  "assets/element_sim/Actions.cc",
+  "assets/element_sim/EventFile.hh",
+  "assets/element_sim/EventFile.cc",
+  "assets/element_sim/element_sim.cc",
+  "assets/element_sim/spec.schema.json",
+  "assets/element_sim/realization.schema.json",
+  "assets/simroot/simroot.cc"
  ],
  "tests": [
   "../../tests/adapters/test_g4sim.py",
-  "../../tests/adapters/test_geant4.py"
+  "../../tests/adapters/test_geant4.py",
+  "../../tests/adapters/test_geant4_element.py"
  ],
  "owner_skill": "hep-detector",
  "status_rule": "the adapter status is the lowest of its tools' statuses; the build and examples stay tested-in-declared-environment only while the recorded build and comparison replay and the live rerun (HEP_GEANT4_LIVE_TEST=1) pass on the declared version; another Geant4 version, compiler or platform is a new test. A completed run, a passed implementation check or agreement with an official example is verification, never physical validity, which hep-detector's study protocol decides (every record stays unvalidated in phase 1)"

@@ -1,0 +1,216 @@
+{
+ "schema": "element_sim.realization/1",
+ "note": "J15 realization profile (Geant4 program B.4.4): the facts mapping 1.0.0 lacks; synthetic geometry",
+ "geometry_kind": "layered-spectrometer",
+ "mapping_versions": [
+  "1.0.0"
+ ],
+ "stack_axis": "x",
+ "field_direction": [
+  0.0,
+  0.0,
+  1.0
+ ],
+ "origin_mm": [
+  -500.0,
+  0.0,
+  0.0
+ ],
+ "world": {
+  "material": "G4_Galactic",
+  "half_mm": [
+   1200.0,
+   600.0,
+   600.0
+  ]
+ },
+ "templates": {
+  "tracking": {
+   "material": "G4_Si",
+   "radiation_length_mm": 93.7,
+   "radiation_length_source": "PDG Atomic and Nuclear Properties, silicon: X0 = 9.370 cm (https://pdg.lbl.gov/2020/AtomicNuclearProperties/HTML/silicon_Si.html, read 2026-10-21)",
+   "transverse_half_mm": [
+    100.0,
+    100.0
+   ],
+   "name_prefix": "Si"
+  },
+  "bending": {
+   "element": "FieldRegion",
+   "material": "G4_Galactic",
+   "margin_mm": 20.0,
+   "transverse_half_mm": [
+    150.0,
+    150.0
+   ]
+  }
+ },
+ "elements": [
+  {
+   "name": "TOF1a",
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "centre_mm": [
+    -805.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    150.0,
+    150.0
+   ],
+   "role": "tof-layer"
+  },
+  {
+   "name": "TOF1b",
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "centre_mm": [
+    -785.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    150.0,
+    150.0
+   ],
+   "role": "tof-layer"
+  },
+  {
+   "name": "TOF2a",
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "centre_mm": [
+    495.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    200.0,
+    200.0
+   ],
+   "role": "tof-layer"
+  },
+  {
+   "name": "TOF2b",
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "centre_mm": [
+    515.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    5.0,
+    200.0,
+    200.0
+   ],
+   "role": "tof-layer"
+  },
+  {
+   "name": "Calo",
+   "material": "G4_Galactic",
+   "centre_mm": [
+    725.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    175.0,
+    250.0,
+    250.0
+   ],
+   "role": "calorimeter"
+  },
+  {
+   "name": "CaloPb",
+   "material": "G4_Pb",
+   "centre_mm": [
+    551.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    1.0,
+    250.0,
+    250.0
+   ],
+   "mother": "Calo",
+   "role": "calorimeter-passive",
+   "repeat": {
+    "count": 50,
+    "pitch_mm": [
+     7.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "name": "CaloSc",
+   "material": "G4_PLASTIC_SC_VINYLTOLUENE",
+   "centre_mm": [
+    554.5,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    2.5,
+    250.0,
+    250.0
+   ],
+   "mother": "Calo",
+   "role": "calorimeter-active",
+   "repeat": {
+    "count": 50,
+    "pitch_mm": [
+     7.0,
+     0.0,
+     0.0
+    ]
+   }
+  }
+ ],
+ "field": {
+  "stepper": "DormandPrince745",
+  "driver": "InterpolationDriver",
+  "delta_chord_mm": 0.25,
+  "delta_one_step_mm": 0.01,
+  "delta_intersection_mm": 1e-05,
+  "min_epsilon_step": 5e-05,
+  "max_epsilon_step": 0.001,
+  "max_step_mm": 10.0
+ },
+ "physics": {
+  "reference_list": "FTFP_BERT_EMZ",
+  "default_cut_mm": 0.7
+ },
+ "source": {
+  "type": "gun",
+  "particle": "proton",
+  "energy_MeV": 432.98810283955174,
+  "position_mm": [
+   -1000.0,
+   0.0,
+   0.0
+  ],
+  "direction": [
+   1.0,
+   0.0,
+   0.0
+  ]
+ },
+ "run": {
+  "events": 100,
+  "first_event": 0,
+  "run_manager": "serial",
+  "threads": 1,
+  "seeding": "per-event",
+  "logical_run_seed": 1621212803
+ },
+ "output": {
+  "event_file": {
+   "level": "crossings",
+   "compression": 1
+  }
+ }
+}

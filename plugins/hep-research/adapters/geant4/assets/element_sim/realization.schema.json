@@ -1,0 +1,254 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "element_sim.realization/1",
+ "title": "element_sim realization profile",
+ "description": "The geometric facts a design-geometry/1 file lacks, read by geant4_run.py from-geometry (Geant4 program B1.8): geometry kind and mapping versions it realizes, stack axis and field direction, the coordinate origin of layer_positions_m = 0, a template per role (material, transverse half sizes, the radiation length that converts x/X0 into a thickness, with its source), the field-region extent rule, the elements of subsystems the mapping does not cover yet (TOF, calorimeter; world coordinates as in element_sim.spec/1), world, materials, and physics, source, run and output defaults. General configuration with no candidate parameters: one profile serves a whole design project or search. Its sha256 goes into the derived spec's provenance and the study's input_manifest.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "geometry_kind",
+  "mapping_versions",
+  "stack_axis",
+  "field_direction",
+  "origin_mm",
+  "world",
+  "templates"
+ ],
+ "properties": {
+  "schema": {
+   "const": "element_sim.realization/1"
+  },
+  "note": {
+   "type": "string"
+  },
+  "geometry_kind": {
+   "enum": [
+    "layered-spectrometer"
+   ]
+  },
+  "mapping_versions": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "string",
+    "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+   }
+  },
+  "stack_axis": {
+   "enum": [
+    "x",
+    "y",
+    "z"
+   ]
+  },
+  "field_direction": {
+   "$ref": "spec.schema.json#/$defs/number3"
+  },
+  "origin_mm": {
+   "$ref": "spec.schema.json#/$defs/number3",
+   "description": "world position of layer_positions_m = 0 (the first plane's centre in J15)"
+  },
+  "world": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "material",
+    "half_mm"
+   ],
+   "properties": {
+    "material": {
+     "type": "string",
+     "minLength": 1
+    },
+    "half_mm": {
+     "$ref": "spec.schema.json#/$defs/positive3"
+    }
+   }
+  },
+  "materials": {
+   "type": "array",
+   "items": {
+    "$ref": "spec.schema.json#/$defs/material"
+   }
+  },
+  "templates": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "tracking": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "material",
+      "radiation_length_mm",
+      "radiation_length_source",
+      "transverse_half_mm",
+      "name_prefix"
+     ],
+     "properties": {
+      "material": {
+       "type": "string",
+       "minLength": 1
+      },
+      "radiation_length_mm": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "radiation_length_source": {
+       "type": "string",
+       "minLength": 1
+      },
+      "transverse_half_mm": {
+       "$ref": "#/$defs/positive2"
+      },
+      "name_prefix": {
+       "$ref": "spec.schema.json#/$defs/name"
+      }
+     }
+    },
+    "bending": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "element",
+      "material",
+      "margin_mm",
+      "transverse_half_mm"
+     ],
+     "properties": {
+      "element": {
+       "$ref": "spec.schema.json#/$defs/name"
+      },
+      "material": {
+       "type": "string",
+       "minLength": 1
+      },
+      "margin_mm": {
+       "type": "number",
+       "exclusiveMinimum": 0,
+       "description": "the field region extends this far beyond the first and the last plane centre along the stack axis"
+      },
+      "transverse_half_mm": {
+       "$ref": "#/$defs/positive2"
+      }
+     }
+    },
+    "passive": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "element",
+      "material",
+      "radiation_length_mm",
+      "radiation_length_source",
+      "position_m",
+      "transverse_half_mm"
+     ],
+     "properties": {
+      "element": {
+       "$ref": "spec.schema.json#/$defs/name"
+      },
+      "material": {
+       "type": "string",
+       "minLength": 1
+      },
+      "radiation_length_mm": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "radiation_length_source": {
+       "type": "string",
+       "minLength": 1
+      },
+      "position_m": {
+       "type": "number",
+       "description": "centre along the stack axis, relative to origin_mm, in the units of layer_positions_m"
+      },
+      "transverse_half_mm": {
+       "$ref": "#/$defs/positive2"
+      }
+     }
+    }
+   }
+  },
+  "elements": {
+   "type": "array",
+   "items": {
+    "$ref": "spec.schema.json#/$defs/element"
+   }
+  },
+  "field": {
+   "type": "object",
+   "additionalProperties": false,
+   "description": "accuracy parameters copied into the derived spec's field block (the regions come from field_T)",
+   "properties": {
+    "stepper": {
+     "enum": [
+      "DormandPrince745"
+     ]
+    },
+    "driver": {
+     "enum": [
+      "InterpolationDriver"
+     ]
+    },
+    "delta_chord_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "delta_one_step_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "delta_intersection_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "min_epsilon_step": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "max_epsilon_step": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "max_step_mm": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    }
+   }
+  },
+  "physics": {
+   "$ref": "spec.schema.json#/$defs/physics"
+  },
+  "ui_commands": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^/"
+   }
+  },
+  "source": {
+   "$ref": "spec.schema.json#/$defs/source"
+  },
+  "run": {
+   "type": "object",
+   "description": "run defaults; seeds are derived from logical_run_seed (core/simulation/seeds.py)"
+  },
+  "output": {
+   "$ref": "spec.schema.json#/$defs/output"
+  }
+ },
+ "$defs": {
+  "positive2": {
+   "type": "array",
+   "minItems": 2,
+   "maxItems": 2,
+   "items": {
+    "type": "number",
+    "exclusiveMinimum": 0
+   }
+  }
+ }
+}

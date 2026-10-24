@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Implementation checks of a layered_sim Geant4 application: overlaps, material budget, energy balance, mirror (WP1).
+"""Implementation checks of the geant4 adapter's programs: overlaps, material budget, energy balance, mirror, field.
 
 Purpose: verification that the application is written correctly, before any physics question. A pass here is not
 validation: it says nothing about whether the physics list suits the observable (hep-detector decides that).
@@ -20,10 +20,22 @@ Checks (subcommands):
             only for an EM-only list (em_constructor) with an e-, e+ or gamma primary; otherwise the residual is
             reported without a verdict. --inject omit-positron-mass | double-count-booked applies a deliberately
             wrong accounting (negative controls: the check must fail); an injection that changes no event is
-            reported incomplete (exit 3), never as a pass.
+            reported incomplete (exit 3), never as a pass. element_sim runs take omit-positron-mass and
+            double-count-leakage (the calorimeter leakage subtracted again on top of the escape).
   mirror    a layered_sim mirror run against the local official example (TestEm3 run 0 or TestEm5 run 0) at the
             same settings: only quantities present on both sides, z-tests with a Bonferroni threshold.
   datapaths the data-path comparison of a run record (resolved paths and content hashes against the build record).
+  field     (element_sim, Geant4 program B1.7) the deterministic field check: every charged-geantino primary of the
+            run (a source cycle of energies and directions) is followed analytically through the field regions of
+            the run's spec, or of --reference-spec (a negative control runs Geant4 with B scaled and checks it against
+            the nominal field), with core/simulation/helix.py; the first entry of the primary (track 1) into every
+            tracker plane and TOF layer, read from the event file's crossings with simroot, must lie within
+            --tolerance-um (default 0.5 um) of the analytic entry point in the plane (sqrt(dy^2 + dz^2) for planes
+            normal to x) and, for TOF layers, within --tolerance-ps (default 1 ps) in time; a plane the analytic
+            trajectory reaches without a Geant4 row, or the reverse, fails. |x - x_face| of Geant4's point is
+            reported. No statistics: the geantino has no interactions.
+For element_sim runs (adapter 0.3.0) the budget check reads the primary path lengths plen_<element>_mm and the balance
+check's residual is E_in - sum deposits (elements and world) - escape_world_MeV (an escaping e+ with 2 m_e c^2).
 Each check can write a computational-run record (--record) that lists the checked run record as an input (status
 declared, sha256) and so carries its labels.
 Usage (from the plugin root):
@@ -32,6 +44,8 @@ Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_verify.py balance --run-record RUN.json --tolerance-mev T [--inject KIND]
   python3 adapters/geant4/assets/geant4_verify.py mirror --run-record RUN.json --example TestEm3|TestEm5 --local-out FILE.out [--alpha 0.05]
   python3 adapters/geant4/assets/geant4_verify.py datapaths --run-record RUN.json
+  python3 adapters/geant4/assets/geant4_verify.py field --run-record RUN.json [--reference-spec SPEC.json]
+      [--tolerance-um 0.5] [--tolerance-ps 1.0] [--simroot SIMROOT]
 The run record's work folder is found from extension.environment.work; --work overrides it.
 Every subcommand takes --status LABEL (default unvalidated), echoed as status_label.
 Exit codes: 0 the check passed (or reported without a verdict); 1 it failed; 2 bad input; 3 an injected negative
@@ -44,6 +58,7 @@ import gzip
 import json
 import math
 import statistics
+import subprocess
 import sys
 from pathlib import Path
 
@@ -51,11 +66,12 @@ sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from g4common import JsonArgumentParser, SpecError, expand, record_skeleton, sha256_file, tilde, write_json  # noqa: E402
 from core import constants as K  # noqa: E402
+from core.simulation import helix as HELIX  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 ME_C2_MEV = K.constant("electron_mass_energy", unit="MeV").value  # CODATA 2022
 EM_PRIMARIES = {"e-", "e+", "gamma"}
-INJECTIONS = ("omit-positron-mass", "double-count-booked")
+INJECTIONS = ("omit-positron-mass", "double-count-booked", "double-count-leakage")
 
 
 def load_run(args) -> tuple[dict, Path, Path]:
@@ -91,6 +107,14 @@ def read_csv(path: Path) -> list[dict]:
                 row[c] = v
         out.append(row)
     return out
+
+
+def is_element(rec: dict) -> bool:
+    return rec["extension"]["simulation"].get("program", {}).get("name") == "element_sim"
+
+
+def primary(sim: dict) -> str:
+    return (sim.get("gun") or sim.get("source") or {}).get("particle")
 
 
 def placements(rec: dict) -> tuple[list[tuple[str, float, str]], str]:
@@ -132,7 +156,7 @@ def check_overlaps(rec: dict, run_dir: Path) -> tuple[str, dict]:
 
 def check_budget(rec: dict, run_dir: Path, tol: float) -> tuple[str, dict]:
     sim = rec["extension"]["simulation"]
-    if sim["gun"]["particle"] != "geantino":
+    if primary(sim) != "geantino":
         raise SpecError("the material-budget check needs a geantino run along the axis")
     dump = {m["name"]: m for m in json.loads((run_dir / "materials.json").read_text(encoding="utf-8"))["materials"]}
     rows = read_csv(run_dir / "events.csv")
@@ -149,6 +173,9 @@ def check_budget(rec: dict, run_dir: Path, tol: float) -> tuple[str, dict]:
         if m and abs(m["density_g_cm3"] / user["density_g_cm3"] - 1) > tol:
             problems.append(f"{user['name']}: dump density {m['density_g_cm3']} != spec {user['density_g_cm3']}")
     by_name = {}
+    if is_element(rec):  # mothers are traversed too: only leaf elements (no daughters) carry a thickness
+        mothers = {e.get("mother") for e in sim["elements"]}
+        slabs = [s for s in slabs if s[0] not in mothers]
     for name, t, m in slabs:
         e = by_name.setdefault(name, [0.0, m])
         e[0] += t
@@ -175,6 +202,12 @@ def residuals(rows: list[dict], particle: str, inject: str | None) -> list[float
     for r in rows:
         e_in = r["primary_ekin_MeV"] + (2 * ME_C2_MEV if particle == "e+" and inject != "omit-positron-mass" else 0)
         dep = sum(v for k, v in r.items() if k.startswith("edep_") and k.endswith("_MeV") and "_copy" not in k)
+        if "escape_world_MeV" in r:  # element_sim (adapter 0.3.0): no killed tracks; 2 m_e c^2 already in the escape
+            res = e_in - dep - r["escape_world_MeV"]
+            if inject == "double-count-leakage":  # the calorimeter's leakage counted again on top of the escape
+                res -= r.get("leak_rear_MeV", 0.0) + r.get("leak_front_MeV", 0.0) + r.get("leak_lateral_MeV", 0.0)
+            out.append(res)
+            continue
         leak = r["leak_gamma_MeV"] + r["leak_e_MeV"] + r["leak_nu_MeV"] + r["leak_other_MeV"]
         res = e_in - dep - leak - r["killed_unbooked_MeV"]
         if inject != "omit-positron-mass":
@@ -190,19 +223,24 @@ def check_balance(rec: dict, run_dir: Path, tol: float, inject: str | None) -> t
     rows = read_csv(run_dir / "events.csv")
     if not rows:
         raise SpecError("no events")
-    res = residuals(rows, sim["gun"]["particle"], inject)
-    em_only = "em_constructor" in sim["physics"] and sim["gun"]["particle"] in EM_PRIMARIES
+    if inject == "double-count-booked" and is_element(rec):
+        raise SpecError("--inject double-count-booked applies to layered_sim's killed tracks; element_sim kills none "
+                        "(use double-count-leakage)")
+    if inject == "double-count-leakage" and not is_element(rec):
+        raise SpecError("--inject double-count-leakage applies to element_sim's calorimeter leakage")
+    res = residuals(rows, primary(sim), inject)
+    em_only = "em_constructor" in sim["physics"] and primary(sim) in EM_PRIMARIES
     worst = max(res, key=abs)
     doc = {"check": "energy-balance", "tolerance_MeV": tol, "events": len(res),
            "residual_mean_MeV": statistics.fmean(res), "residual_rms_MeV": math.sqrt(statistics.fmean(x * x for x in res)),
            "residual_max_abs_MeV": abs(worst), "events_beyond_tolerance": sum(abs(x) > tol for x in res),
-           "events_with_killed_eplus": sum(1 for r in rows if r["killed_eplus"] > 0),
-           "killed_booked_MeV_total": math.fsum(r["killed_booked_MeV"] for r in rows),
+           "events_with_killed_eplus": sum(1 for r in rows if r.get("killed_eplus", 0) > 0),
+           "killed_booked_MeV_total": math.fsum(r.get("killed_booked_MeV", 0.0) for r in rows),
            "injected_error": inject, "closure_test": em_only,
            "formula": "E_in - deposits - leakage - killed_unbooked - 2 m_e c^2 x killed_eplus "
                       "(E_in includes 2 m_e c^2 for an e+ primary; booked killed energy is already a deposit)"}
     if inject:
-        affected = sum(1 for a, b in zip(res, residuals(rows, sim["gun"]["particle"], None)) if abs(a - b) > 0)
+        affected = sum(1 for a, b in zip(res, residuals(rows, primary(sim), None)) if abs(a - b) > 0)
         doc["events_affected_by_injection"] = affected
         if affected == 0:
             doc["note"] = ("the injected error changes no event of this run (no killed tracks, no killed e+, no e+ "
@@ -269,6 +307,107 @@ def check_mirror(rec: dict, run_dir: Path, example: str, local_out: Path, alpha:
         "note": "verification against the local official example at the same settings; not validation"}
 
 
+PLANE_ROLES = ("tracker-plane", "tof-layer")
+
+
+def _element_boxes(spec: dict, name: str) -> list[tuple[list, list]]:
+    for e in spec["elements"]:
+        if e["name"] == name:
+            n = (e.get("repeat") or {}).get("count", 1)
+            pitch = (e.get("repeat") or {}).get("pitch_mm", [0.0, 0.0, 0.0])
+            shift = e.get("shift_mm", [0.0, 0.0, 0.0])
+            out = []
+            for k in range(n):
+                c = [e["centre_mm"][i] + k * pitch[i] + shift[i] for i in range(3)]
+                out.append(([c[i] - e["half_mm"][i] for i in range(3)], [c[i] + e["half_mm"][i] for i in range(3)]))
+            return out
+    raise SpecError(f"element {name} not in the spec")
+
+
+def read_crossings(simroot: Path, root_file: Path) -> list[dict]:
+    p = subprocess.run([str(simroot), "dump", str(root_file), "--ntuple", "crossings"], capture_output=True, text=True,
+                       timeout=3600)
+    if p.returncode != 0:
+        raise SpecError(f"simroot dump failed (exit {p.returncode}): {p.stdout.strip()[:300]}")
+    lines = p.stdout.splitlines()
+    cols = lines[0].split(",")
+    return [{c: float(v) for c, v in zip(cols, ln.split(","))} for ln in lines[1:] if ln]
+
+
+def check_field(rec: dict, run_dir: Path, reference: dict | None, tol_um: float, tol_ps: float,
+                simroot: Path | None) -> tuple[str, dict]:
+    sim = rec["extension"]["simulation"]
+    if not is_element(rec):
+        raise SpecError("the field check reads an element_sim run (its event file's crossings)")
+    spec = json.loads((run_dir / "spec.json").read_text(encoding="utf-8"))
+    ref = reference or spec
+    src = spec["source"]
+    if src.get("particle") != "chargedgeantino":
+        raise SpecError("the field check needs charged geantinos (mass 0, beta = 1, no interactions)")
+    level = ((spec.get("output") or {}).get("event_file") or {}).get("level", "none")
+    if level not in ("crossings", "hits"):
+        raise SpecError("the field check needs an event file at level crossings or hits")
+    ef = sim.get("event_file") or {}
+    simroot = simroot or (expand(ef["simroot"]["path"]) if ef.get("simroot") else None)
+    if simroot is None or not simroot.is_file():
+        raise FileNotFoundError("simroot not found (--simroot)")
+    boxes = []
+    for r in (ref.get("field") or {}).get("regions", []):
+        (lo, hi), = _element_boxes(ref, r["element"])
+        boxes.append(HELIX.FieldBox(lo, hi, list(r["b_tesla"])))
+    names = [e["name"] for e in spec["elements"] if e["role"] in PLANE_ROLES]
+    index = {e["name"]: i for i, e in enumerate(spec["elements"])}
+    roles = {e["name"]: e["role"] for e in spec["elements"]}
+    rows = [r for r in read_crossings(simroot, run_dir / "events.root") if int(r["track_id"]) == 1]
+    g4 = {(int(r["event_id"]), int(r["plane_id"]), int(r["copy"])): r for r in rows}
+    cycle = src.get("cycle") or [{"energy_MeV": src["energy_MeV"], "direction": src.get("direction", [1.0, 0.0, 0.0])}]
+    first, n = spec["run"].get("first_event", 0), spec["run"]["events"]
+    table, problems, worst_um, worst_ps, worst_dx = [], [], 0.0, 0.0, 0.0
+    for ev in range(first, first + n):
+        c = cycle[ev % len(cycle)]
+        p_gev = c["energy_MeV"] / 1000.0  # massless: p = E
+        traj = HELIX.trajectory(src.get("position_mm", [0.0, 0.0, 0.0]), c["direction"], p_gev, 1.0, boxes, 1e5)
+        for name in names:
+            for k, (lo, hi) in enumerate(_element_boxes(spec, name)):
+                a = HELIX.first_entry(traj, lo, hi)
+                got = g4.get((ev, index[name], k))
+                if a is None and got is None:
+                    continue
+                if a is None or got is None:
+                    problems.append(f"event {ev} plane {name} copy {k}: "
+                                    + ("Geant4 recorded an entry the analytic trajectory does not make" if a is None
+                                       else "the analytic trajectory enters, Geant4 recorded no entry"))
+                    continue
+                x = a["position_mm"]
+                face = min(range(3), key=lambda i: min(abs(x[i] - lo[i]), abs(x[i] - hi[i])))  # the entry face
+                other = [i for i in range(3) if i != face]
+                gp = [got["x_mm"], got["y_mm"], got["z_mm"]]
+                d_um = 1e3 * math.hypot(gp[other[0]] - x[other[0]], gp[other[1]] - x[other[1]])
+                dx = abs(gp[face] - x[face]) * 1e3
+                dt_ps = (got["t_ns"] - a["time_ns"]) * 1e3
+                worst_um, worst_dx = max(worst_um, d_um), max(worst_dx, dx)
+                row = {"event": ev, "plane": name, "copy": k, "rigidity_GV": p_gev, "in_plane_um": d_um,
+                       "normal_um": dx}
+                if roles[name] == "tof-layer":
+                    row["dt_ps"] = dt_ps
+                    worst_ps = max(worst_ps, abs(dt_ps))
+                    if abs(dt_ps) > tol_ps:
+                        problems.append(f"event {ev} {name}: |dt| = {abs(dt_ps):.3g} ps > {tol_ps} ps")
+                if d_um > tol_um:
+                    problems.append(f"event {ev} {name}: in-plane distance {d_um:.3g} um > {tol_um} um")
+                table.append(row)
+    status = "ok" if not problems and table else "failed"
+    if not table:
+        problems.append("no crossing was compared")
+    return status, {"check": "field-propagation", "tolerance_um": tol_um, "tolerance_ps": tol_ps,
+                    "reference": "the run's own spec" if reference is None else "--reference-spec",
+                    "field_regions": [{"lo": b.lo, "hi": b.hi, "b_tesla": b.b_tesla} for b in boxes],
+                    "events": n, "compared": len(table), "max_in_plane_um": worst_um, "max_dt_ps": worst_ps,
+                    "max_normal_um": worst_dx, "rows": table, "problems": problems[:50],
+                    "note": "deterministic (no statistics): charged geantinos against the analytic helix "
+                            "(core/simulation/helix.py); verification, not validation"}
+
+
 def check_datapaths(rec: dict) -> tuple[str, dict]:
     sim = rec["extension"]["simulation"]
     problems = sim.get("data_path_problems", [])
@@ -305,7 +444,8 @@ def main(argv=None) -> int:
                             ("budget", "material-budget closure from a geantino run"),
                             ("balance", "per-event energy balance"),
                             ("mirror", "mirror run against the local official example"),
-                            ("datapaths", "resolved data paths against the build record")):
+                            ("datapaths", "resolved data paths against the build record"),
+                            ("field", "element_sim crossings of charged geantinos against the analytic helix")):
         p = sub.add_parser(name, help=help_text)
         p.add_argument("--run-record", required=True)
         p.add_argument("--work")
@@ -317,6 +457,11 @@ def main(argv=None) -> int:
         if name == "balance":
             p.add_argument("--tolerance-mev", type=float, required=True, help="per-event |residual| limit, declared")
             p.add_argument("--inject", choices=INJECTIONS, help="a deliberately wrong accounting (negative control)")
+        if name == "field":
+            p.add_argument("--reference-spec", help="the field regions to check against (default: the run's own)")
+            p.add_argument("--tolerance-um", type=float, default=0.5, help="in-plane distance limit (default 0.5)")
+            p.add_argument("--tolerance-ps", type=float, default=1.0, help="TOF-layer time limit (default 1)")
+            p.add_argument("--simroot", help="the simroot executable (default: the run record's)")
         if name == "mirror":
             p.add_argument("--example", required=True, choices=sorted(MIRROR))
             p.add_argument("--local-out", required=True)
@@ -324,7 +469,8 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     inputs = {k: v for k, v in vars(args).items() if k != "status"}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("tolerance", "alpha", "created", "status") if hasattr(args, k) and f"--{k}" not in given]
+    defaults = [k for k in ("tolerance", "alpha", "created", "tolerance_um", "tolerance_ps", "status")
+                if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
     try:
         rec, work, run_dir = load_run(args)
         if args.command == "overlaps":
@@ -333,6 +479,10 @@ def main(argv=None) -> int:
             status, doc = check_budget(rec, run_dir, args.tolerance)
         elif args.command == "balance":
             status, doc = check_balance(rec, run_dir, args.tolerance_mev, args.inject)
+        elif args.command == "field":
+            ref = json.loads(expand(args.reference_spec).read_text(encoding="utf-8")) if args.reference_spec else None
+            status, doc = check_field(rec, run_dir, ref, args.tolerance_um, args.tolerance_ps,
+                                      expand(args.simroot) if args.simroot else None)
         elif args.command == "mirror":
             local = expand(args.local_out)
             if not local.is_file():

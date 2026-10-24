@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from core.status import EXIT_CODES  # noqa: E402
-from tests.skills.test_cli_robustness import HC_CONTRACT, MISSING_FILE_ARGS  # noqa: E402
+from tests.skills.test_cli_robustness import HC_CONTRACT, MISSING_FILE_ARGS, argv_sets  # noqa: E402
 
 
 def _tools(patterns):
@@ -143,7 +143,7 @@ def run(script, args, timeout=180):
 def refused_input_violation(script):
     """None when a missing input gives one JSON object with a status and exit 2 (or exit 3 with the status
     missing-dependency), else the reason."""
-    args = list(MISSING_FILE_ARGS[script]) + (["--json"] if script in HAS_JSON_SWITCH else [])
+    args = list(argv_sets(MISSING_FILE_ARGS[script])[0]) + (["--json"] if script in HAS_JSON_SWITCH else [])
     res = run(script, args)
     if res.returncode not in (2, 3):
         return f"exit {res.returncode}"

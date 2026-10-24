@@ -229,11 +229,12 @@ class Declaration(unittest.TestCase):
         for src in ("CMakeLists.txt", "Spec.cc", "Detector.cc", "Physics.cc", "Actions.cc",
                     "layered_sim.cc", "spec.schema.json", "output.schema.json"):
             self.assertIn(f"assets/layered_sim/{src}", listed)
-        # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset
-        self.assertEqual(doc["version"], "0.2.0")
-        on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas") for p in (ASSETS / d).iterdir()
-                   if p.is_file()}
-        self.assertLessEqual(on_disk | {"assets/summary_from_csv.py"}, listed)
+        # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset; adapter
+        # 0.3.0 (B1.9): also every file under element_sim/ and simroot/, and element_spec.py
+        self.assertEqual(doc["version"], "0.3.0")
+        on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas", "element_sim", "simroot")
+                   for p in (ASSETS / d).iterdir() if p.is_file()}
+        self.assertLessEqual(on_disk | {"assets/summary_from_csv.py", "assets/element_spec.py"}, listed)
         self.assertNotIn("assets/layered_sim/MiniJson.hh", listed)
 
     def test_adapter_python_imports_no_skill_script_and_no_geant4(self):
@@ -767,13 +768,16 @@ class BoundaryArtifacts(_Tmp):
     def test_sources_hash_covers_every_build_file(self):
         sys.path.insert(0, str(ASSETS))
         import geant4_run
-        listed = set(geant4_run.SIM_SOURCES)
-        files = {f"layered_sim/{p.name}" for p in (ASSETS / "layered_sim").iterdir()
-                 if p.suffix in (".cc", ".hh") or p.name == "CMakeLists.txt"}
-        files |= {f"g4sim/{p.name}" for p in (ASSETS / "g4sim").glob("*.hh")}
-        self.assertEqual(files, listed)
-        for s in listed:
-            self.assertTrue((ASSETS / s).is_file(), s)
+        for group, listed in geant4_run.SIM_SOURCES.items():  # adapter 0.3.0: one group per program (B1.9)
+            files = {f"{group}/{p.name}" for p in (ASSETS / group).iterdir()
+                     if p.suffix in (".cc", ".hh") or p.name == "CMakeLists.txt"}
+            if group == "g4sim":
+                files = {f for f in files if f.endswith(".hh")}  # selftest.cc is built by the tests only
+            with self.subTest(group=group):
+                self.assertEqual(files, set(listed))
+        for program, groups in geant4_run.PROGRAM_GROUPS.items():
+            keys = set(geant4_run.program_sources(program))
+            self.assertEqual(keys, {s for g in groups for s in geant4_run.SIM_SOURCES[g]})
 
 
 class StudyLayerColumns(unittest.TestCase):

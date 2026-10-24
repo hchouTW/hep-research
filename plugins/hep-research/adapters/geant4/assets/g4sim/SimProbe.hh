@@ -8,8 +8,10 @@
 // G4EmParameters::StreamInfo plus parsed fields), the production cuts per material-cuts couple, the hadronic models per
 // particle and process with their energy ranges per material and element (GetMinEnergy/GetMaxEnergy and IsBlocked;
 // never GetHadronicInteraction or ChooseHadronicInteraction, which draw random numbers on overlapping ranges), the
-// sub-processes of the general gamma and neutron processes, user limits, biasing wrappers, field managers, the run
-// manager type and the random-number status flags. Numbers are strings in the format of Python's float.hex()
+// sub-processes of the general gamma and neutron processes, user limits, biasing wrappers, field managers (from adapter
+// 0.3.0 with each field's value, accuracy parameters and the actual stepper and driver classes, and the list of
+// distinct field managers with the volume each was attached to), the run manager type and the random-number status
+// flags. Numbers are strings in the format of Python's float.hex()
 // (SimHash.hh PyFloatHex); integers are JSON integers.
 //
 // The probe draws no random numbers; it compares the engine state (put()) before and after itself and reports
@@ -20,9 +22,12 @@
 #ifndef G4SIM_SIMPROBE_HH
 #define G4SIM_SIMPROBE_HH
 
+#include <cxxabi.h>
+
 #include <cmath>
 #include <cstdlib>
 #include <map>
+#include <typeinfo>
 #include <set>
 #include <sstream>
 #include <string>
@@ -30,6 +35,7 @@
 
 #include "G4ApplicationState.hh"
 #include "G4Box.hh"
+#include "G4ChordFinder.hh"
 #include "G4Element.hh"
 #include "G4EmParameters.hh"
 #include "G4FieldManager.hh"
@@ -40,6 +46,7 @@
 #include "G4IonisParamMat.hh"
 #include "G4LogicalVolume.hh"
 #include "G4MTRunManager.hh"
+#include "G4MagIntegratorStepper.hh"
 #include "G4Material.hh"
 #include "G4MaterialCutsCouple.hh"
 #include "G4NeutronGeneralProcess.hh"
@@ -59,7 +66,9 @@
 #include "G4TransportationManager.hh"
 #include "G4Trd.hh"
 #include "G4Tubs.hh"
+#include "G4UniformMagField.hh"
 #include "G4UserLimits.hh"
+#include "G4VIntegrationDriver.hh"
 #include "G4VPhysicalVolume.hh"
 #include "G4VSolid.hh"
 #include "G4Version.hh"
@@ -143,10 +152,67 @@ inline std::string MaterialJson(const G4Material* m, Writer& w) {
   return o.str();
 }
 
+inline std::string ClassName(const std::type_info& t) {
+  int status = 0;
+  char* name = abi::__cxa_demangle(t.name(), nullptr, nullptr, &status);
+  std::string out = status == 0 && name ? name : t.name();
+  std::free(name);
+  return out;
+}
+
+// A field manager without a field gives {"present": false, "source": "probe"} (unchanged from adapter 0.2.0). With a
+// field (adapter 0.3.0, Geant4 program B1.2): the field class, its value when uniform (tesla, float.hex()), the
+// accuracy parameters read back through the manager and its chord finder, and the actual classes of driver and
+// stepper (RTTI). Names of volumes are not part of it: the logical volume's field block enters the tree-v1 hash.
 inline std::string FieldJson(const G4FieldManager* fm) {
   if (!fm) return "null";
   const G4Field* f = fm->GetDetectorField();
-  return std::string("{\"present\": ") + (f ? "true" : "false") + ", \"source\": \"probe\"}";
+  if (!f) return "{\"present\": false, \"source\": \"probe\"}";
+  Writer w;
+  std::ostringstream o;
+  o << "{\"present\": true, \"source\": \"probe\", \"type\": " << JsonQuote(ClassName(typeid(*f))) << ", \"b_tesla\": ";
+  if (auto* u = dynamic_cast<const G4UniformMagField*>(f)) {
+    G4ThreeVector b = const_cast<G4UniformMagField*>(u)->GetConstantFieldValue();
+    o << "[" << w.Hex(b.x() / tesla) << ", " << w.Hex(b.y() / tesla) << ", " << w.Hex(b.z() / tesla) << "]";
+  } else {
+    o << "null";
+  }
+  o << ", \"delta_one_step_mm\": " << w.Hex(fm->GetDeltaOneStep() / mm) << ", \"delta_intersection_mm\": "
+    << w.Hex(fm->GetDeltaIntersection() / mm) << ", \"min_epsilon_step\": " << w.Hex(fm->GetMinimumEpsilonStep())
+    << ", \"max_epsilon_step\": " << w.Hex(fm->GetMaximumEpsilonStep());
+  auto* cf = const_cast<G4FieldManager*>(fm)->GetChordFinder();
+  if (cf) {
+    o << ", \"delta_chord_mm\": " << w.Hex(cf->GetDeltaChord() / mm);
+    G4VIntegrationDriver* driver = cf->GetIntegrationDriver();
+    o << ", \"driver\": " << (driver ? JsonQuote(ClassName(typeid(*driver))) : "null") << ", \"stepper\": ";
+    G4MagIntegratorStepper* stepper = driver ? driver->GetStepper() : nullptr;
+    o << (stepper ? JsonQuote(ClassName(typeid(*stepper))) : "null");
+  } else {
+    o << ", \"delta_chord_mm\": null, \"driver\": null, \"stepper\": null";
+  }
+  o << "}";
+  return o.str();
+}
+
+// Every distinct field manager with a field (by pointer), with the volume it was attached to: the first logical
+// volume in store order that has it while its mother's volume does not (SetFieldManager(fm, true) propagates it to
+// the daughters). The master's copies only: each worker builds its own.
+inline std::string FieldsJson() {
+  std::vector<std::string> rows;
+  std::set<const G4FieldManager*> seen;
+  std::map<const G4LogicalVolume*, const G4LogicalVolume*> motherOf;
+  for (const G4VPhysicalVolume* pv : *G4PhysicalVolumeStore::GetInstance())
+    if (pv->GetMotherLogical()) motherOf[pv->GetLogicalVolume()] = pv->GetMotherLogical();
+  for (const G4VPhysicalVolume* pv : *G4PhysicalVolumeStore::GetInstance()) {
+    const G4LogicalVolume* lv = pv->GetLogicalVolume();
+    const G4FieldManager* fm = lv->GetFieldManager();
+    if (!fm || !fm->GetDetectorField() || seen.count(fm)) continue;
+    auto m = motherOf.find(lv);
+    if (m != motherOf.end() && m->second->GetFieldManager() == fm) continue;  // propagated from the mother
+    seen.insert(fm);
+    rows.push_back("{\"attached_to\": " + JsonQuote(lv->GetName()) + ", \"field\": " + FieldJson(fm) + "}");
+  }
+  return Join(rows);
 }
 
 inline std::string UserLimitsJson(G4UserLimits* ul, Writer& w) {
@@ -441,6 +507,10 @@ inline ProbeResult RunProbe(const std::string& note) {
       << ", \"hadronic\": " << Join(procs.hadronic) << ", \"general_processes\": " << Join(procs.general)
       << ", \"biasing\": {\"wrapped_processes\": " << Join(procs.biasing) << ", \"events_may_share_state\": "
       << (procs.biasing.empty() ? "false" : "true") << "}, \"run_manager\": " << RunManagerJson();
+    std::string fields = FieldsJson();
+    if (fields != "[]")  // only with a field (adapter 0.3.0), so a run without one keeps its 0.2.0 probe
+      o << ", \"fields\": " << fields << ", \"fields_note\": \"the master's field managers; each worker builds its "
+        << "own copy in its ConstructSDandField\"";
     if (w.BadGeometry()) res.error = "the geometry has an infinite or NaN number";
   } else {
     o << ", \"reason\": \"the probe runs in state G4State_GeomClosed with at least one material-cuts couple\"";
