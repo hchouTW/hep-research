@@ -1,7 +1,7 @@
 # Decision record D0: how a detector-level Geant4 study qualifies as F4
 
-Status: **open — awaiting the maintainer** (prepared 2026-10-24 by the agent; an agent-written record is not
-approval). Sent for decision as issue #273 (https://github.com/hchouTW/hep-research/issues/273). Programme: `geant4-program.md` (§P.7 item 1 and §P.7.1, B2.8; English translation `geant4-program.en.md`).
+Status: **decided by the maintainer on 2026-10-24** (prepared by the agent; the decision below is the maintainer's,
+transcribed by the agent). Sent for decision as issue #273 (https://github.com/hchouTW/hep-research/issues/273). Programme: `geant4-program.md` (§P.7 item 1 and §P.7.1, B2.8; English translation `geant4-program.en.md`).
 Baseline: `main` `5584927` (0.38.0, contracts 3.12.0). Labels: **Confirmed** (checked in code), **Inferred**,
 **Unresolved**.
 
@@ -85,4 +85,14 @@ confirmation do not start, and confirmation studies stay `unvalidated`.
 
 ## Decision
 
-_To be filled in by the maintainer: D0-a, D0-b, D0-c, D0-d, date, and any conditions._
+Decided by the maintainer on 2026-10-24 ("approve as recommended"; transcribed by the agent, which recorded no
+decision of its own):
+
+| Id | Decision |
+| --- | --- |
+| D0-a | Direction (a), the qualification path, **approved conditionally**: on the revised B2.8 (per-class scope model, the material-definition condition, charge confusion only through a tail benchmark) and on D0-c |
+| D0-b | Charge confusion qualifies **only with a tail benchmark** (`ms-tail-reference`: fraction of scattering angles beyond about 3θ₀ against single-scattering/Molière theory or published data); until it exists, charge-confusion studies are not upgraded |
+| D0-c | **(a)**: CV-B2 changes FID-01 so that the F4 uncertainty = statistical ⊕ tail-replica spread (at least 20 reconstruction replicas with independent misalignment and field-non-uniformity draws); the model envelope stays separate (FID-05). If the combined uncertainty is still below the adequacy minimum, **(b)** revising the F4 minima follows. B2 must include an end-to-end test that reaches a decisive verdict row, not only `uncertainty.missing` |
+| D0-d | Screening-only F4 **not adopted** (may be reconsidered after B2) |
+
+Gate G-D0 has passed: B2.8's rules are in force when B2 merges; B3 and C2's F4 confirmation may start after B2.
