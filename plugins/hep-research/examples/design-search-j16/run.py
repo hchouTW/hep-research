@@ -16,8 +16,9 @@ The search demonstrates the process: its finalists are not new detector designs.
     requirements are evaluated as unavailable for the finalists and carried through the report.
 
 Every step goes through skills/hep-detector/scripts/evaluate_design.py (search, expand --search, run, budget, report,
-search --diagnose) and check_geant4_study.py label. Usage (from the plugin root):
-  python3 examples/design-search-j16/run.py [--out DIR]
+search --diagnose) and check_geant4_study.py label. The two searches are replayed from recorded/search/ (run
+live with --live-search). Usage (from the plugin root):
+  python3 examples/design-search-j16/run.py [--out DIR] [--live-search]
 Exit 0 when every pre-declared criterion passes."""
 from __future__ import annotations
 
@@ -123,11 +124,26 @@ def spec_b(art: Path) -> dict:
             "consistency_samples": 3}
 
 
-def search(art: Path, sid: str, spec: dict) -> dict:
+def search(art: Path, sid: str, spec: dict, live: bool = False) -> dict:
+    """The search: run live (--live-search, or when nothing is recorded) and recorded to recorded/search/<sid>.run.json.gz,
+    else unpacked from that record. NSGA-II draws its variation with libm functions (pow), whose last bits differ
+    between platforms, so a rerun elsewhere may take another trajectory; the recorded search keeps the finalists, and
+    with them the confirmation's candidate, identical everywhere (decoding a recorded genome is exact arithmetic)."""
     (art / "search").mkdir(exist_ok=True)
     (art / "search" / f"{sid}.spec.json").write_text(json.dumps(spec, indent=1) + "\n", encoding="utf-8")
-    _, out = ev(art, "search", "--spec", f"search/{sid}.spec.json", "--id", sid, "--status", "synthetic")
-    return out
+    rec = RECORDED / "search" / f"{sid}.run.json.gz"
+    run = art / "runs" / f"{sid}.computational-run.json"
+    if live or not rec.is_file():
+        _, out = ev(art, "search", "--spec", f"search/{sid}.spec.json", "--id", sid, "--status", "synthetic")
+        rec.parent.mkdir(parents=True, exist_ok=True)
+        with open(rec, "wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", compresslevel=9, mtime=0,
+                                                   filename="") as fh:
+            fh.write(run.read_bytes())
+        return out
+    run.parent.mkdir(exist_ok=True)
+    run.write_bytes(gzip.decompress(rec.read_bytes()))
+    summ = json.loads(run.read_text(encoding="utf-8"))["extension"]["search_summary"]
+    return {"status": "ok", "stopped": summ["optimizer"].get("stopped"), "recorded": True}
 
 
 def evaluate_finalists(art: Path, ns: str, sid: str, requirements: list[str], upstream: dict | None = None,
@@ -201,10 +217,10 @@ def matrix_rows(full: dict, prefix: str) -> dict:
 
 
 def run_example(name: str, src: Path, out: Path, spec_fn, ns: str, sid: str, requirements, upstream=None,
-                unavailable=(), confirm=False) -> dict:
+                unavailable=(), confirm=False, live=False) -> dict:
     art = prepare(src, out / name)
     dec = out / name / "decisions"
-    s = search(art, sid, spec_fn(art))
+    s = search(art, sid, spec_fn(art), live)
     rows = evaluate_finalists(art, ns, sid, requirements, upstream, unavailable)
     conf = replay_confirmation(art) if confirm else None
     rep_args = ["report", "--name", f"j16-{name.lower()}"] + (["--decisions", str(dec)] if dec.is_dir() else [])
@@ -259,13 +275,14 @@ def criteria(a: dict, b: dict) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", type=Path, default=HERE / "output")
+    ap.add_argument("--live-search", action="store_true", help="rerun both searches and rewrite recorded/search/")
     args = ap.parse_args(argv)
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     a = run_example("A", SRC_A, out, spec_a, NS_A, "SEARCH-J16A", ["REQ-TRK-001", "REQ-CC-001"],
-                    upstream={"REQ-CC-001": "REQ-TRK-001"}, confirm=True)
+                    upstream={"REQ-CC-001": "REQ-TRK-001"}, confirm=True, live=args.live_search)
     b = run_example("B", SRC_B, out, spec_b, NS_B, "SEARCH-J16B", ["REQ-TRK-001", "REQ-ECAL-001"],
-                    unavailable=UNAVAILABLE_B)
+                    unavailable=UNAVAILABLE_B, live=args.live_search)
     passed = criteria(a, b)
     results = {"note": NOTE, "A": a, "B": b, "pass": passed}
     (out / "results.json").write_text(json.dumps(results, indent=1, sort_keys=True) + "\n", encoding="utf-8")
