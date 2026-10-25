@@ -21,6 +21,10 @@ Oracles, each independent of the code under test:
   spread (150 e) and against each batch's own true-threshold sd (Monte Carlo, 60 batches of 200 channels, hits
   drawn with erfc), the uncorrected sd as negative control; the MAD against sqrt(150^2 + mean fit error^2), the
   unscaled MAD as negative control; median and count recomputed from the per-channel results.
+- Geant4 spectrum (FE1 asset): the table's total, mean, lowest and highest charge against the J14 mpv-pai run's
+  recorded block summaries (examples/geant4-thin-silicon/recorded/blocks), its peak against the recorded PAI most
+  probable loss and the Landau-Vavilov Delta_p of geant4_benchmarks.py (values recorded below), and its low-side tail
+  against a Landau with that Delta_p and xi (the reason for the table).
 - simreco block (FE4): the efficiency, occupancy and threshold fraction of a Gaussian signal in closed form, composed
   by hand (eps ** sides, (occupancy x channels) ** sides, threshold / mean), one side as negative control; the
   merged tail source against the simreco spec schema and checks (adapters/geant4/assets/simreco_spec.py); the default
@@ -752,6 +756,60 @@ class ThresholdTrim(unittest.TestCase):
         self.assertFalse(r['validity'])
         n = fr.threshold_trim(1000, 10, 20, dac_nonlinearity=10)
         self.assertAlmostEqual(n['residual_dispersion'], math.hypot(20 / math.sqrt(12), 10), places=6)
+
+
+class HitEfficiencyGeant4Spectrum(unittest.TestCase):
+    """The simulated thin-silicon spectrum in assets/ (Geant4 PAI, J14 run mpv-pai): it is the recorded run, binned,
+    and its low-side tail is far wider than Landau's."""
+    ASSET = PLUGIN / 'skills' / 'hep-detector' / 'assets' / 'thin-silicon-300um-mu10gev.geant4-pai.csv'
+    BLOCKS = PLUGIN / 'examples' / 'geant4-thin-silicon' / 'recorded' / 'blocks' / 'mpv-pai.json'
+    W_EV = 3.65
+    # geant4_benchmarks.py reference --study-spec examples/geant4-thin-silicon/study-mpv.json --material Si_study
+    # --particle mu- --energy-mev 10000 --thickness-mm 0.3 (Landau-Vavilov, PDG RPP): Delta_p and xi in MeV
+    DELTA_P, XI = 0.08368862031620586, 0.005348088408125617
+    PAI_MPV = 0.08461032902501177  # examples/geant4-thin-silicon/output/variations-mpv.json, variation pai
+
+    @classmethod
+    def setUpClass(cls):
+        cls.kind, cls.charges, cls.counts = fr.read_spectrum(str(cls.ASSET))
+        cls.meta = json.loads(cls.ASSET.with_suffix('.json').read_text(encoding='utf-8'))
+
+    def electrons(self, mev):
+        return mev * 1e6 / self.W_EV
+
+    def test_table_is_the_recorded_run(self):
+        blocks = [o for o in json.loads(self.BLOCKS.read_text(encoding='utf-8'))['observables']
+                  if o['name'] == 'mean_deposit_MeV'][0]['blocks']
+        n = sum(b['n'] for b in blocks)
+        self.assertEqual((self.kind, sum(self.counts)), ('count', n))
+        self.assertEqual(self.meta['binning']['events'], n)
+        step = self.meta['binning']['width_electrons']
+        self.assertEqual(self.meta['conversion']['pair_energy_eV'], self.W_EV)
+        mean = sum(q * c for q, c in zip(self.charges, self.counts)) / n
+        self.assertLess(abs(mean - self.electrons(sum(b['sum'] for b in blocks) / n)), step / 2)
+        filled = [q for q, c in zip(self.charges, self.counts) if c]
+        self.assertLessEqual(abs(filled[0] - self.electrons(min(b['min'] for b in blocks))), step / 2)
+        self.assertLessEqual(abs(filled[-1] - self.electrons(max(b['max'] for b in blocks))), step / 2)
+
+    def test_peak_against_the_recorded_and_reference_most_probable_loss(self):
+        peak = self.charges[max(range(len(self.counts)), key=self.counts.__getitem__)]
+        self.assertLessEqual(abs(peak - self.electrons(self.PAI_MPV)), 100)  # the recorded mode, one bin
+        self.assertLess(abs(peak / self.electrons(self.DELTA_P) - 1), 0.03)  # +1.4 %
+
+    def test_low_side_tail_is_wider_than_landau(self):
+        mpv, xi = self.electrons(self.DELTA_P), self.electrons(self.XI)
+        # threshold 16 000 e (0.7 of the peak), ENC 1000 e: table 9.5e-4, Landau 1.7e-6 (546 times less); at
+        # 18 000 e the noise smears the Landau edge too and the ratio is 20, at ENC 2000 e it is 6
+        table = fr.hit_efficiency([16000.0], 1000.0, 'table', spectrum=(self.kind, self.charges, self.counts))
+        landau = fr.hit_efficiency([16000.0], 1000.0, 'landau', mpv=mpv, xi=xi)
+        t_ineff, l_ineff = table['thresholds'][0]['inefficiency'], landau['thresholds'][0]['inefficiency']
+        self.assertGreater(t_ineff, 5e-4)
+        self.assertGreater(t_ineff, 100 * l_ineff)
+        self.assertFalse(any('ends at' in v for v in table['validity']), table['validity'])  # no missing tail
+        # the half-maximum width is wider than Landau's 4.02 xi (about 1.38 times here)
+        top = max(self.counts)
+        above = [q for q, c in zip(self.charges, self.counts) if c >= top / 2]
+        self.assertGreater(above[-1] - above[0] + 100, 1.2 * 4.018 * xi)
 
 
 class SimrecoBlock(unittest.TestCase):

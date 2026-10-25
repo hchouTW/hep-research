@@ -596,9 +596,12 @@ Test requirements:
   `front-end-waveform-processing.md` (sampled-waveform amplitude and time, pileup, photosensor and LAr TPC readout,
   digital pulse processing, pulse-shape discrimination) and `front-end-calibration.md` (calibration and simulation of
   the electronics); the front-end page is registered as a hub.
-- **[C] FE1 spectrum**: decided 2026-10-26 by the maintainer: no measured spectrum goes into `assets/` (a search
-  on 2026-10-26 found no open dataset ready to place there); the tests keep synthetic tables, and users give their own
-  measured spectrum with `--spectrum`.
+- **[C] FE1 spectrum**: decided 2026-10-26 by the maintainer: no measured spectrum (a search on 2026-10-26 found no
+  open dataset ready to place in `assets/`); instead a simulated one,
+  `skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.csv`, binned from J14's recorded Geant4 PAI run
+  `mpv-pai` (10 GeV mu-, 300 um silicon; the rerun reproduced the recorded event file's hash). Its low-side tail is far
+  wider than Landau's (`HitEfficiencyGeant4Spectrum`); it stays `unvalidated`, and users give their own measured
+  spectrum with `--spectrum`.
 - **[C] E2 versions**: recorded at FE0 (VALIDATION FRONTEND-RECO-SIM): Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1,
   SymPy 1.14.0, mpmath 1.3.0.
 

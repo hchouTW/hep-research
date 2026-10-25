@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 42,
-   "bytes": 589007,
+   "bytes": 589119,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1721,7 +1721,7 @@
     "skills/hep-detector/scripts/calorimeter_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "a1267715 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/charge-confusion.md",
@@ -1760,7 +1760,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "a1267715 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
@@ -1966,7 +1966,7 @@
     "hep-ml",
     "hep-theory"
    ],
-   "last_commit": "765bf693 2026-10-25"
+   "last_commit": "a1267715 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/detector-systems-overview.md",
@@ -2011,7 +2011,7 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e4841301 2026-10-25"
+   "last_commit": "e2957da1 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2049,13 +2049,13 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e4841301 2026-10-25"
+   "last_commit": "e2957da1 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 24202,
-   "lines": 362,
+   "bytes": 24314,
+   "lines": 363,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2075,7 +2075,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e4841301 2026-10-25"
+   "last_commit": "a1267715 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/front-end-waveform-processing.md",
@@ -2093,7 +2093,7 @@
     "skills/hep-detector/references/triggers-luminosity-pileup.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e4841301 2026-10-25"
+   "last_commit": "a1267715 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2138,7 +2138,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "cdcb3651 2026-10-25"
+   "last_commit": "f360dcc6 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2363,7 +2363,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e4841301 2026-10-25"
+   "last_commit": "e2957da1 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -2424,6 +2424,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
+    "skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.json",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
@@ -2437,7 +2438,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "32450b32 2026-10-22"
+   "last_commit": "a1267715 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
@@ -2513,6 +2514,7 @@
     "contracts/rules/design_adequacy.json",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.json",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2560,7 +2562,7 @@
     "skills/hep-detector/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "a1267715 2026-10-25"
   },
   {
    "path": "skills/hep-measurement/references/analysis-design.md",

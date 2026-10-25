@@ -199,7 +199,8 @@ distribution, not only its width, and its spectrum when tails appear.
   the inefficiency below about 1 %, and the measured noise tail above about 6 sigma. For that
   low-side tail, give the measured spectrum as a table (`hit-efficiency --signal-model table
   --spectrum FILE`, CSV `charge,density` or `charge,count`); the table is normalized over its
-  range, so it must reach far enough up that the missing tail is negligible. For the
+  range, so it must reach far enough up that the missing tail is negligible. A simulated
+  example (Geant4 PAI, 10 GeV muons, 300 um) is `assets/thin-silicon-300um-mu10gev.geant4-pai.csv`. For the
   `noise-digitization` tail source of the Geant4 adapter's `simreco`, `--simreco-channels N`
   (channels per side of a plane; one threshold, also given as `--threshold-enc` in noise
   sigmas) prints its `threshold` (the fraction of the most probable charge), `efficiency`

@@ -2891,7 +2891,19 @@ files or a tool run), 1 declined (the branch name it reported was in this file a
 human. On 2026-10-26 the maintainer accepted it as missing (the human decision `accept-missing` for a slot; the
 shadow facts slot S3 was accepted with 4 claims supported, and S4's overlapping findings were checked by the author).
 The review's state stayed in the container it ran in, so the decision is recorded here, not through
-`review.py resolve`. The substantive corrections: the FE1-1 criterion could not fail (thresholds
+`review.py resolve`.
+
+**FE1 spectrum asset (2026-10-26, E2).** `skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.csv`: the
+J14 run `mpv-pai` (1 200 000 mu- of 10 GeV through 300 um silicon, `G4EmStandardPhysics_option4` with the PAI model in
+the silicon region, Geant4 11.4.3 build A) binned in 100 e (2953 rows, every event inside; 3.65 eV per pair). The
+recorded spec, rerun with the recorded executable (sha256 `d39225ea...`) and build record, gave the recorded hashes of
+all five output files (`events.csv` `61dd5bf4...`); the current `geant4_run.py` marked the rerun failed only because
+that older executable writes no `probe.json`. `HitEfficiencyGeant4Spectrum` (3 tests): total 1 200 000, mean, lowest and
+highest charge within half a bin of the recorded block summaries; peak 23 250 e, within one bin of the recorded PAI
+most probable loss (23 181 e) and +1.4 % from the Landau-Vavilov Delta_p of `geant4_benchmarks.py` (22 928 e); half-
+maximum width 1.38 x Landau's 4.02 xi; at a 16 000 e threshold with ENC 1000 e the table's inefficiency is 9.5e-4
+against 1.7e-6 for a Landau with that Delta_p and xi; no missing-tail warning. A table shifted by 300 e fails the
+first two tests. The spectrum is a simulation (`unvalidated`), not a measurement. The substantive corrections: the FE1-1 criterion could not fail (thresholds
 far below the Landau peak), the threshold spread is routed pre-trim to `threshold-trim` and post-trim to
 `hit-efficiency`, the FE3 corrected spread is clipped at zero, the stage base follows P.10.2, the C4 guidance change is
 flagged for classification and has a second located source (arXiv:0912.2642, sec. 3.1.2).
