@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 39,
-   "bytes": 557642,
+   "bytes": 558103,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2081,8 +2081,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 42456,
-   "lines": 432,
+   "bytes": 42846,
+   "lines": 435,
    "linked_from_skill_md": false,
    "cited_by": [
     "examples/design-minimal-spectrometer/README.md",
@@ -2100,7 +2100,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "2a0b9f29 2026-10-25"
+   "last_commit": "e7ba1299 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2419,7 +2419,7 @@
   {
    "path": "skills/hep-detector/references/system-design-workflow.md",
    "owner": "hep-detector",
-   "bytes": 30520,
+   "bytes": 30591,
    "lines": 320,
    "linked_from_skill_md": false,
    "cited_by": [

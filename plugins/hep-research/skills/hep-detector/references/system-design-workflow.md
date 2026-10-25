@@ -135,7 +135,7 @@ how many planes, where they sit). It only proposes candidates; `contracts/design
    ```
 
 3. `search` decodes each genome into overrides on the base candidate (an independent candidate when it drops a
-   subsystem), skips invalid designs (spacing, envelope, overlap, nesting; they compete through their violation),
+   subsystem), skips invalid designs (spacing, envelope, overlap including TOF planes against the other extents and the tracking planes, nesting; they compete through their violation),
    computes F1 search values in process with the tool contracts' own tools, runs NSGA-II from Sobol designs and your
    proposals (flagged `proposer: llm`), and fixes the finalists before any official evaluation. It writes only
    `runs/SEARCH-*.computational-run.json` (`search_summary`): the search size (designs, topologies), the search

@@ -48,6 +48,14 @@ every recorded study are unchanged.
   a measured shift; a density change of DL moves the width only about DL/2). J15 at 100 GV and J16 at 1 TV keep the
   window rule and stay refused.
 - Tests: `tests/skills/hep_detector/test_geant4_declared_size.py`.
+- `declared-size/1` also covers `stopping-power` and `thin-layer-mpv`: the expected shift comes from Bethe at the
+  shifted mid-slab energy and from the Landau-Vavilov Delta_p of the scaled areal density (the density effect kept at
+  the spec density's parameters); the injection must be in the control's run record (effective config), as for the
+  multiple-scattering reference. The modelled responses agree with J14's recorded Geant4 controls within 2 SE.
+  `plan-controls --benchmark NAME`. `range` and `longitudinal-profile` keep the window rule (not modelled).
+- `evaluate_design.py search`: TOF planes (rules 1.1.0; each plane centre +- half its thickness) are checked for
+  overlap against the other subsystems' extents (a TOF that is their daughter excepted) and against the tracking
+  planes; an overlapping design is invalid and not evaluated.
 
 ## 0.39.0 (2026-10-25)
 
