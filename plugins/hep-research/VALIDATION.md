@@ -2787,6 +2787,17 @@ far below the Landau peak), the threshold spread is routed pre-trim to `threshol
 `hit-efficiency`, the FE3 corrected spread is clipped at zero, the stage base follows P.10.2, the C4 guidance change is
 flagged for classification and has a second located source (arXiv:0912.2642, sec. 3.1.2).
 
+**FE0 pre-merge acceptance in E2 (2026-10-25).** Environment: E2 venv `~/.venvs/hep-research-e2`, macOS 26.5 arm64,
+Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; host CLIs Claude Code 2.1.310 and codex-cli
+0.160.0; worktree `.claude/worktrees/frontend-fe0`, branch `worktree-frontend-fe0` from main `d5c8ff24` (0.40.0),
+patches 0001-0004 applied with `git am --3way`: only the generated reference inventory conflicted (regenerated), and
+the CHANGELOG entry, which auto-merged into the released 0.39.0 section, was moved to Unreleased. Checked at commit
+`6f156782` (after the C4 split): `tools/run_all_checks.py --out <scratch>` with the host CLIs, 31 of 31 checks pass;
+unittest 5573 run, 5420 pass, 153 skipped, 0 failures or errors (458 modules); no `ModuleNotFoundError`; the two
+failures FE0-1 allows (`test_paper_skeleton`, `test_ci_plan.RunnerRecord`) do not occur here, nor does the
+`ams_optional` failure of the container run. ruff 0.16.10 on the changed Python files and `core contracts`, and
+mypy 2.4.0, clean. The task document passes `lint_task.py --repo .` (0 errors, 0 warnings).
+
 **sci-fix FRONTEND-INJECTION-GAIN (C4, S3; maintainer decision D-C4 2026-10-25: split from the `feat:` calibration
 commit).** The calibration chain no longer takes the charge-injection gain for the signal gain. Sources read in the
 full text on 2026-10-25: arXiv:1306.6756v2 sec. II-C ("a factor to correct for differences between the physics signal

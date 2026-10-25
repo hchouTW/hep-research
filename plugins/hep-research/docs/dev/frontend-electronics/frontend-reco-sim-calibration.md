@@ -5,7 +5,7 @@
 | Document type | Evaluation results and implementation specification, for the executing agent, reviewers and maintainers |
 | Format | hep-computing task format (`skills/hep-computing/assets/task-template.md`); check with `skills/hep-computing/scripts/lint_task.py` |
 | Baseline | hep-research `main` at `bc7b1c18` (plugin 0.38.0) |
-| Completed work | Local branch `worktree-frontend-reco-sim`, four commits, not pushed (Background, "Completed work") |
+| Completed work | Local branch `worktree-frontend-reco-sim`, four commits, not pushed (Background, "Completed work"); FE0 done on branch `worktree-frontend-fe0` from main `d5c8ff24` (0.40.0) |
 | Date | 2026-10-25 |
 | Language | English (translated from the Traditional Chinese original); file names, commands, fields and identifiers unchanged |
 | Execution environment | Every stage runs in its own isolated git worktree (Technical Approach §0); never modify the main checkout or another worktree |
@@ -71,7 +71,7 @@ reproduced before were recomputed independently with NumPy/SciPy and agree [C]:
 | Same pulse, ρ 0.6, two samples before and two after the peak: phase bias | +0.93 % / −1.79 % (∓2 ns); −5.81 % (+5 ns) | as printed |
 
 **Coverage.** The main problem was coverage [C]. Only one item, C4, changes existing guidance; it is maintenance class
-S3 (wrong guidance), currently inside a `feat:` commit, and its classification awaits the maintainer (decision D-C4).
+S3 (wrong guidance); by decision D-C4 it is its own `sci-fix:` commit (FE0).
 
 | Code | Gap | Handling (done unless marked) |
 |---|---|---|
@@ -89,7 +89,7 @@ S3 (wrong guidance), currently inside a `feat:` commit, and its classification a
 | C1 | Calibration has no order | Chain: pedestal → noise covariance → gain → thresholds and trim → timing → templates/weights → physics scale |
 | C2 | S-curve has no fit method or errors | `s-curve`: binomial ML, Fisher errors, deviance, design mode; multi-channel → **FE3** |
 | C3 | Dispersion after trim not quantified | `threshold-trim` |
-| C4 | Injection gain treated as signal gain (maintenance class S3) | Rewritten with two section-located sources (References); commit classification pending (D-C4) |
+| C4 | Injection gain treated as signal gain (maintenance class S3) | Rewritten with two section-located sources (References); own `sci-fix:` commit, ledger FRONTEND-INJECTION-GAIN (D-C4) |
 | C5 | No calibration closure in simulation | Added in two places of the reference pages |
 
 #### Completed work (branch `worktree-frontend-reco-sim`, base `bc7b1c18`)
@@ -305,8 +305,9 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
    `.claude/worktrees/frontend-fe1`); branch `worktree-frontend-<stage>`.
 2. **Base.**
    - FE0: the completed work. The remote has only `main` (`git ls-remote origin` [C]), so create the worktree from
-     `origin/main` in E2 and apply patches `0001`–`0004` in order with `git am`. The patches ship with this document and
-     apply without conflicts on a clean worktree, giving the same file tree as the branch [C].
+     `origin/main` in E2 and apply patches `0001`–`0004` in order with `git am`. The patches ship with this document.
+     On `d5c8ff24` (0.40.0) they need `git am --3way`: the generated reference inventory conflicts (regenerate it) and
+     the CHANGELOG entry lands in the released 0.39.0 section (move it to Unreleased) [C].
    - FE1–FE5: the latest `origin/main` **after FE0 is merged** (as §P.10.2: "the latest main that contains every
      prerequisite stage"). Do not start them earlier. If the maintainer approves an early start, base on FE0's branch,
      rebase onto the new `main` before merging, rerun all checks, and state this exception to §P.10.2 in the stage's
@@ -567,19 +568,18 @@ Test requirements:
 
 ## Open Questions
 
-- **[U] D-FE0**: Who pushes FE0's branch; single PR or commit by commit; which version number? Blocks: Merging FE0 (and
-  so FE1–FE5). Decided by: Maintainer. Type: Requires Confirmation.
-- **[U] D-C4**: C4 rewrote existing method guidance (maintenance class S3) and sits in `feat:` commit `a32df2aa`. Keep
-  it there with a CHANGELOG note, or split into its own `sci-fix:` commit with S3 evidence? Blocks: FE0 step 4. Decided
-  by: Maintainer. Type: Requires Confirmation.
+- **[C] D-FE0**: decided 2026-10-25 by the maintainer: push `worktree-frontend-fe0`, one pull request with the
+  commits kept, merged by the maintainer; no version bump in FE0.
+- **[C] D-C4**: decided 2026-10-25 by the maintainer: split. C4 is its own `sci-fix:` commit (ledger
+  FRONTEND-INJECTION-GAIN, both sources read in the full text, regression test `InjectionGainGuidance`).
 - **[U] D-FE4**: Do FE4? Only new options (`feat:`, records unchanged) or changed defaults (`sci-fix:`, re-record J15
   and J16)? Blocks: FE4. Decided by: Maintainer. Type: Requires Confirmation.
 - **[U] D-FE5**: Do FE5? Which sections move (photosensor and LAr TPC alone do not reach 24 KB)? Register the front-end
   page as a hub? Blocks: FE5. Decided by: Maintainer. Type: Requires Confirmation.
 - **[U] FE1 spectrum**: Is there a thin-silicon charge spectrum that may be placed publicly in `assets/`? If not, tests
   use synthetic tables only. Blocks: Nothing (test data only). Decided by: Maintainer. Type: Open Question.
-- **[U] E2 versions**: Current E2 versions of Python, NumPy, SciPy, SymPy, mpmath, as recorded by the maintainer.
-  Blocks: FE0-2 record. Decided by: Maintainer. Type: Requires Confirmation.
+- **[C] E2 versions**: recorded at FE0 (VALIDATION FRONTEND-RECO-SIM): Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1,
+  SymPy 1.14.0, mpmath 1.3.0.
 
 ## References
 
@@ -600,8 +600,8 @@ Test requirements:
 |---|---|
 | W. E. Cleland, E. G. Stern, Nucl. Instrum. Methods A338 (1994) 467 | Optimal filtering and pileup noise |
 | M. Aharrouche et al., arXiv:0709.1094, sec. 2.4 | ATLAS LAr: OF coefficients from g, g′ and the pedestal-run autocorrelation by Lagrange multipliers |
-| N. Nikiforou for ATLAS, arXiv:1306.6756, sec. II-C | M_phys/M_cali in the cell-energy formula (C4, first source) |
-| G. Aad et al., arXiv:0912.2642, sec. 3.1.2 | `1/(M_phys/M_cali)` as the ratio of responses to a calibration pulse and an ionization pulse of the same input current (C4, second source; passage located through a search index of the PDF, full text not re-read) |
+| N. Nikiforou for ATLAS, arXiv:1306.6756v2, sec. II-C | M_phys/M_cali in the cell-energy formula (C4, first source) |
+| G. Aad et al., arXiv:0912.2642v4, sec. 3.1.2, eq. 5 | `1/(M_phys/M_cali)` as the ratio of responses to a calibration pulse and an ionization pulse of the same input current (C4, second source; read in the full text 2026-10-25) |
 | J. Apostolakis et al., arXiv:1803.04165, sec. 5 | HSF simulation white paper: overlay needs non-zero-suppressed samples; signal addition is nonlinear |
 | J. P. Nolan, Stochastic Models 13 (1997) 759, DOI 10.1080/15326349708807450 | Integral representation of stable distributions (Landau) |
 | V. T. Jordanov, G. F. Knoll, Nucl. Instrum. Methods A345 (1994) 337 | Digital trapezoidal shaping |
