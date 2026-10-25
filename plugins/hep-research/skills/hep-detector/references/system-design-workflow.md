@@ -108,8 +108,12 @@ how many planes, where they sit). It only proposes candidates; `contracts/design
 
 1. Design brief (you): from the current design-spec, list the candidate roles, two to six seed topologies with a
    physics reason each, and the search ranges, all inside the role rules
-   (`assets/design-search/roles.json`: per role the parameters the search may change, their ranges, the derived
-   per-plane x/X0, the calibration template and an assumed budget model; `materials.json`: Geant4 NIST values).
+   (`assets/design-search/roles.json`, rules 1.1.0: per role the parameters the search may change, their ranges, the
+   derived parameters (per-plane x/X0, the TOF flight path from its plane positions, a calorimeter's template
+   sampling structure from `depth_x0` and its passive material), the calibration template and an assumed budget
+   model; the TOF and calorimeter geometry use the design-geometry mapping's names, so a subsystem the search sets
+   can be realized in Geant4. An earlier rules version stays as `roles-<version>.json`, so a recorded search
+   replays; `materials.json`: Geant4 NIST values).
 2. Search spec (`design-search-spec/1`, `contracts/schemas/design_search_spec.json`; a JSON file in the
    artifacts_dir): `design_spec` (path and sha256 of the current version), `base_candidate`, up to four `objectives`
    and any `constraints` (a requirement or constraint id, or a figure of merit with its denominator; each needs an
@@ -152,8 +156,10 @@ how many planes, where they sit). It only proposes candidates; `contracts/design
    generation are paired; gate G-C2a measures Var(independent) / Var(paired) on the first generation and switches to
    independent seeds below the threshold (noted). One survivor per topology; the last survivors are the finalists
    (`fixed_from: geant4`). The runs stay in the work folder; `search_summary.seeds.geant4_search` lists every S.
-   Only subsystems that carry geometry-mapping fields vary in Geant4: a TOF or calorimeter the search adds from the
-   role rules has F1 parameters only.
+   Only subsystems that carry geometry-mapping fields vary in Geant4. With rules 1.1.0 a TOF or calorimeter the
+   search sets carries them (rules 1.0.0 gave such a subsystem F1 parameters only); the realization profile must
+   still have the matching elements: `from-geometry` refuses a TOF plane count other than the profile's and needs one
+   calorimeter with one passive and one active daughter.
 7. F4 confirmation (C2.4): for each finalist and (figure of merit, denominator), `geometry`, then a Geant4 study whose
    runs are seeded S = H(study_id, role, point_id) with study_id = `confirmation_study_id(search id, design digest,
    figure of merit, denominator)` (`core/simulation/seeds.py`), `check_geant4_study.py label --upgrade` and `f4`.

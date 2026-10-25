@@ -989,8 +989,13 @@ def canonical(obj) -> str:
 
 
 def load_asset(name: str, key: str, version: str) -> tuple[dict, str]:
+    """The shipped asset of that version: name itself, or an earlier version kept as <stem>-<version>.json (a recorded
+    search replays with the rules it ran with)."""
     path = SEARCH_ASSETS / name
     doc = json.loads(path.read_text(encoding="utf-8"))
+    kept = SEARCH_ASSETS / f"{Path(name).stem}-{version}{Path(name).suffix}"
+    if doc.get(key) != version and kept.is_file():
+        path, doc = kept, json.loads(kept.read_text(encoding="utf-8"))
     if doc.get(key) != version:
         raise UsageError(f"the search spec names {key} {version}, the shipped {name} is {doc.get(key)}: a different "
                          "version is a new search spec")
@@ -1429,14 +1434,40 @@ class SearchSpace:
             "value", defaults.get("sensor_thickness_um")))
         return str(mat), float(thick)
 
+    def _sampling(self, rule: dict, depth_x0: float, passive: str) -> dict:
+        """Role rule 'sampling' (1.1.0): the template structure whose total radiation lengths equal depth_x0, the
+        passive thickness solved from layers x (passive / X0(passive) + active / X0(active)) = depth_x0 and rounded to
+        1 um (the realized depth then differs from depth_x0 by far less than from-geometry's 1 % tolerance)."""
+        t = rule["sampling"]
+        layers, active, ta = int(t["layers"]), t["active_material"], float(t["active_thickness_mm"])
+        x0p = self._material(passive)["radiation_length_cm"] * 10.0
+        x0a = self._material(active)["radiation_length_cm"] * 10.0
+        tp = round(x0p * (float(depth_x0) / layers - ta / x0a), 3)  # whole micrometres: the layers tile exactly
+        if tp <= 0:
+            raise UsageError(f"depth_x0 {depth_x0} is thinner than the template's {layers} active layers alone")
+        return {"sampling_layers": layers, "passive_thickness_mm": tp, "active_material": active,
+                "active_thickness_mm": ta}
+
     def _derived(self, slot: dict, params: dict, n: int | None) -> dict:
-        """Per-plane x/X0 from sensor material and thickness (role rule 'derived'), and per-plane arrays of the base
-        resized when the number of planes changes."""
+        """Per-plane x/X0 from sensor material and thickness (role rule 'derived'), per-plane arrays of the base
+        resized when the number of planes changes, the TOF flight path from the plane positions (position-span) and a
+        calorimeter's sampling structure from depth_x0 and the passive material (sampling-structure), derived only
+        when the search sets what they come from."""
         out: dict = {}
         rule = self.rules[slot["role"]]
-        if "layer_x_over_x0" in rule.get("derived", {}) and self._has_sensor(slot) and n is not None:
+        derived = rule.get("derived", {})
+        if "layer_x_over_x0" in derived and self._has_sensor(slot) and n is not None:
             mat, thick = self._sensor(slot, params)
             out["layer_x_over_x0"] = [thick * 1e-4 / self._material(mat)["radiation_length_cm"]] * n
+        if (derived.get("path_m") or {}).get("model") == "position-span" and "layer_positions_m" in params:
+            pos = params["layer_positions_m"]
+            out["path_m"] = max(pos) - min(pos)
+        if any(d.get("model") == "sampling-structure" for d in derived.values()) and \
+                ({"depth_x0", "passive_material"} & set(params) or not slot["base"]):
+            base = {k: q.get("value") for k, q in self.base_subs.get(slot["sid"], {}).get("parameters", {}).items()} \
+                if slot["base"] else rule.get("new_subsystem", {})
+            p = {**base, **params}
+            out.update(self._sampling(rule, p["depth_x0"], p["passive_material"]))
         if slot["base"] and n is not None:
             for name in rule.get("per_layer", []):
                 par = self.base_subs[slot["sid"]]["parameters"].get(name)
@@ -1459,11 +1490,23 @@ class SearchSpace:
             mass, channels = inp["mass_per_tesla_kg"] * params["field_T"], 0.0
         elif name == "tof-planes":
             dens = self._material(inp["scintillator_material"])["density_g_cm3"] * 1000.0
-            mass = params["n_layers"] * inp["plane_area_m2"] * params["scintillator_thickness_cm"] * 0.01 * dens
-            channels = float(params["n_layers"] * inp["paddles_per_layer"] * 2)
+            if "layer_positions_m" in params:  # rules 1.1.0
+                n_tof, thick_m = len(params["layer_positions_m"]), params["layer_thickness_m"]
+            else:  # rules 1.0.0
+                n_tof, thick_m = params["n_layers"], params["scintillator_thickness_cm"] * 0.01
+            mass = n_tof * inp["plane_area_m2"] * thick_m * dens
+            channels = float(n_tof * inp["paddles_per_layer"] * 2)
         elif name == "calorimeter-block":
-            m = self._material(params["absorber_material"])
-            mass = inp["block_area_m2"] * params["depth_X0"] * m["radiation_length_cm"] * 0.01 * m["density_g_cm3"] * 1000
+            if "passive_material" in params:  # rules 1.1.0: the passive layers of the sampling structure
+                m = self._material(params["passive_material"])
+                samp = params if "passive_thickness_mm" in params else \
+                    self._sampling(rule, params["depth_x0"], params["passive_material"])
+                mass = inp["block_area_m2"] * samp["sampling_layers"] * samp["passive_thickness_mm"] * 1e-3 * \
+                    m["density_g_cm3"] * 1000
+            else:  # rules 1.0.0
+                m = self._material(params["absorber_material"])
+                mass = inp["block_area_m2"] * params["depth_X0"] * m["radiation_length_cm"] * 0.01 * \
+                    m["density_g_cm3"] * 1000
             channels = inp["block_area_m2"] / inp["cell_size_m"] ** 2
         elif name == "rich-block":
             mass, channels = inp["block_area_m2"] * inp["areal_mass_kg_m2"], inp["block_area_m2"] / inp["pixel_size_m"] ** 2
@@ -1580,12 +1623,20 @@ class SearchSpace:
                 p = st["params"]
                 if s["base"]:  # a base slot decodes only its free parameters: the others keep the base value
                     p = {**{k: q.get("value") for k, q in self.base_subs[s["sid"]]["parameters"].items()}, **p}
-                need = [ext["front"]] + ([ext["depth_x0"], ext["material"]] if "depth_x0" in ext
+                need = [ext["front"]] + (["depth_x0", "passive_material"] if ext.get("model") == "sampling" else
+                                         [ext["depth_x0"], ext["material"]] if "depth_x0" in ext
                                          else [ext["length_cm"]])
                 if any(p.get(k) is None for k in need):
                     continue
                 front = p[ext["front"]]
-                if "depth_x0" in ext:
+                if ext.get("model") == "sampling":  # rules 1.1.0: the realized sampling structure
+                    samp = {k: p[k] for k in ("sampling_layers", "passive_thickness_mm", "active_thickness_mm")} \
+                        if not ({"depth_x0", "passive_material"} & set(st["params"])) and s["base"] and all(
+                            p.get(k) is not None for k in ("sampling_layers", "passive_thickness_mm",
+                                                           "active_thickness_mm")) \
+                        else self._sampling(self.rules[s["role"]], p["depth_x0"], p["passive_material"])
+                    size = samp["sampling_layers"] * (samp["passive_thickness_mm"] + samp["active_thickness_mm"]) * 1e-3
+                elif "depth_x0" in ext:
                     size = p[ext["depth_x0"]] * self._material(p[ext["material"]])["radiation_length_cm"] * 0.01 / \
                         ext["absorber_fraction"]
                 else:

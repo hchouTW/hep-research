@@ -18,6 +18,21 @@ expected exit 0 there treats exit 3 like the `--label-spec` path's refusal.
   write no F4 evaluation (`results.json` records `f4_written` and the exit), with no verdict change except that the
   rows lose the below-screening F4 entry; the J14, J15 and J16 study records name the new tool hash.
 
+**Before you upgrade:** search role rules 1.1.0 rename the TOF and calorimeter search parameters to the
+design-geometry mapping's names: TOF `layer_positions_m` (2 to 4 planes) and `layer_thickness_m` replace `n_layers`,
+`scintillator_thickness_cm` and `path_m`; calorimetry-em `depth_x0` (the whole sampling structure), `passive_material`
+and `front_position_m` replace `depth_X0`, `absorber_material` and `z_front_m`. A new search spec names
+`rules_version` 1.1.0 and these names; a recorded 1.0.0 search still expands (1.0.0 is kept as `roles-1.0.0.json`).
+
+- `evaluate_design.py search` (rules 1.1.0): the TOF flight path `path_m` (the F1 time-of-flight input) is derived from
+  the plane positions; a calorimeter's sampling structure (`sampling_layers`, `passive_thickness_mm` in whole
+  micrometres, `active_material`, `active_thickness_mm`) is derived from `depth_x0` and the passive material with the
+  rule's template (20 layers of 5 mm scintillator), and its extent and budget come from that structure. A TOF or
+  calorimeter the search sets therefore carries the geometry mapping's fields and can vary in Geant4 (follow-up of
+  stage C2). `load_asset` reads an earlier version from `<stem>-<version>.json`.
+- Tests: the search tests run on rules 1.1.0; `test_design_search_g4.py` decodes TOF plane positions and thickness and
+  a calorimeter depth into an element_sim spec that passes `check-spec`; a 1.0.0 spec still decodes.
+
 ## 0.39.0 (2026-10-25)
 
 Minor release, contracts 3.13.0, `CORE_VERSION` 1.1.0, geant4 adapter 0.5.0. It ships the Geant4 program (spec
