@@ -13,7 +13,7 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.39.0",
+  "plugin": "0.40.0",
   "contracts": "3.13.0",
   "plugin_release": {
    "release": "unreleased",

@@ -25,7 +25,7 @@ PROFILE = HERE.parent
 sys.path.insert(0, str(HERE))
 
 PROFILE_ID, PROFILE_VERSION = "theory:dis-parton-model", "0.1.0"
-PLUGIN_VERSION, CONTRACTS = "0.39.0", "3.13.0"
+PLUGIN_VERSION, CONTRACTS = "0.40.0", "3.13.0"
 CREATED = "2026-10-23"
 SPEC_PATH = PROFILE / "derivations" / "theory-spec.json"
 PRED_PATH = PROFILE / "predictions" / "fl-toy-grid.prediction.json"

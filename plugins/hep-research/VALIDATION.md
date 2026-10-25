@@ -3266,6 +3266,24 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.40.0 release check (2026-10-25, E2 and the CI lock)
+
+Release branch `release/0.40.0` from main `9d12d8ae` (main CI green). It ships #289-#292 (F4-REFUSED-STUDY,
+SEARCH-ROLES-1.1.0, DECLARED-SIZE-CONTROLS, DECLARED-SIZE-SLABS-TOF-OVERLAP); contracts 3.13.0, `CORE_VERSION` 1.1.0
+and geant4 adapter 0.5.0 unchanged; no sci-fix ledger entry is unreleased. The ams02-research companion needs no
+change.
+
+What changed in the release branch: version 0.40.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts carry the new version); CHANGELOG `Unreleased` is now `0.40.0`; examples
+regenerated with E2 (`bc-propagation-fit` with the CI lock): only version strings and the hashes that cover them change
+(`unfolding-coverage` restored; J16 replays from its `recorded/sources/` snapshot, unaffected by the bump); reference
+inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5540 tests in 457 modules, 5387 pass, 0 failures, 153 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5540 tests, 5295 pass, 0 failures, 245 skipped |
+
 ## DECLARED-SIZE-SLABS-TOF-OVERLAP (2026-10-25, E2 and the CI lock; branch `feat/declared-size-slabs-tof-overlap` from main `c2236ba9`)
 
 The two follow-ups left by DECLARED-SIZE-CONTROLS and SEARCH-ROLES-1.1.0.

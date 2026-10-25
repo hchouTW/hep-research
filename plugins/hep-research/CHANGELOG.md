@@ -3,7 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.40.0 (2026-10-25)
+
+Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups
+of the Geant4 program (#289-#292): `f4` refuses a refused study, search role rules 1.1.0 (TOF and calorimeter in the
+geometry mapping's names, TOF plane overlap), and the control rule `declared-size/1` with `plan-controls`.
+
+**Before you upgrade** (details in each entry below):
+- `evaluate_design.py f4 --study` on a study whose `label --upgrade` was refused exits 3 and writes nothing.
+- A new search spec names `rules_version` 1.1.0 and the new TOF and calorimeter parameter names; recorded 1.0.0
+  searches still expand.
+- A search design whose TOF plane overlaps another subsystem or a tracking plane is now invalid.
 
 **Before you upgrade:** `evaluate_design.py f4 --study` on a study record whose `label --upgrade` was refused now
 exits 3 (`upgrade-refused`) and writes no F4 evaluation; until 0.39.0 it wrote one that decided nothing. A script that

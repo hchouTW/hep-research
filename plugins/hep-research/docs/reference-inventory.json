@@ -2100,7 +2100,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "e7ba1299 2026-10-25"
+   "last_commit": "bbeb133f 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2430,7 +2430,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5066eab3 2026-10-25"
+   "last_commit": "bbeb133f 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
