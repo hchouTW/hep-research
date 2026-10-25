@@ -1469,6 +1469,10 @@
       "input": "rho"
      },
      {
+      "flag": "--noise-covariance",
+      "input": "noise_covariance"
+     },
+     {
       "flag": "--pileup-rate",
       "input": "pileup_rate"
      },
@@ -1536,8 +1540,15 @@
      "kind": "parameter",
      "unit": "1",
      "required": false,
-     "constraint": "electronic-noise correlation between neighbouring samples, in [0, 1)",
+     "constraint": "electronic-noise correlation between neighbouring samples, in [0, 1); not with noise_covariance",
      "default": 0.0
+    },
+    {
+     "name": "noise_covariance",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "JSON {\"covariance\": [[...]]}: the measured electronic noise covariance, samples x samples, in units of the per-sample noise sigma squared; finite, symmetric and positive definite (refused, never repaired); not with rho"
     },
     {
      "name": "pileup_rate",
@@ -1655,6 +1666,16 @@
      "name": "constraints",
      "kind": "label",
      "unit": "n/a"
+    },
+    {
+     "name": "noise_model",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "noise_covariance_sha256",
+     "kind": "label",
+     "unit": "n/a"
     }
    ],
    "failure_states": [
@@ -1666,7 +1687,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+     "meaning": "an argument is missing, malformed or out of range, or the noise covariance file cannot be read, does not parse, has the wrong dimension, or is not finite, symmetric and positive definite, or comes with rho (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
     }
    ],
    "required_capabilities": [],
@@ -2015,6 +2036,10 @@
       "input": "rho"
      },
      {
+      "flag": "--noise-covariance",
+      "input": "noise_covariance"
+     },
+     {
       "flag": "--pileup-rate",
       "input": "pileup_rate"
      },
@@ -2106,8 +2131,15 @@
      "kind": "parameter",
      "unit": "1",
      "required": false,
-     "constraint": "electronic-noise correlation between neighbouring samples, in [0, 1)",
+     "constraint": "electronic-noise correlation between neighbouring samples, in [0, 1); not with noise_covariance",
      "default": 0.0
+    },
+    {
+     "name": "noise_covariance",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "JSON {\"covariance\": [[...]]}: the measured electronic noise covariance, samples x samples, in units of the per-sample noise sigma squared; finite, symmetric and positive definite (refused, never repaired); not with rho"
     },
     {
      "name": "pileup_rate",
@@ -2263,6 +2295,16 @@
      "name": "constraints",
      "kind": "label",
      "unit": "n/a"
+    },
+    {
+     "name": "noise_model",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "noise_covariance_sha256",
+     "kind": "label",
+     "unit": "n/a"
     }
    ],
    "failure_states": [
@@ -2274,7 +2316,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+     "meaning": "an argument is missing, malformed or out of range, or the noise covariance file cannot be read, does not parse, has the wrong dimension, or is not finite, symmetric and positive definite, or comes with rho (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
     }
    ],
    "required_capabilities": [],

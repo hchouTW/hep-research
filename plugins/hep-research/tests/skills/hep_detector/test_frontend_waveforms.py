@@ -14,6 +14,9 @@ Oracles, each independent of the code under test:
   itself checked above against SciPy and the oscillatory integral), with a +300 e shifted table as negative control;
   a Gaussian density table against the closed form, with a 5 % wider table as negative control; a count table
   computed by hand (bin edges at the midpoints, uniform within a bin).
+- measured noise covariance (FE2): a rho^|i-j| matrix against the --rho path (to 1e-12); the sample covariance of
+  20 000 draws against the input matrix within 4 Gaussian standard errors per element (AR(1) draws as negative
+  control); the common-mode variance 0.3 (sum w)^2 of a linear estimator in closed form; SHA-256 recomputed.
 Standard library only.
 """
 import contextlib
@@ -393,6 +396,138 @@ class WaveformToy(unittest.TestCase):
         self.assertEqual(r['saturated_events'], 500)
         self.assertLess(r['estimators']['largest_sample']['relative_bias'], -0.3)
 
+
+
+def exponential_matrix(rho, m, common=0.0):
+    return [[rho ** abs(i - j) + common for j in range(m)] for i in range(m)]
+
+
+class MeasuredNoiseCovariance(unittest.TestCase):
+    """FE2: a measured per-sample noise covariance for optimal-filter and waveform-toy."""
+    ARGS = dict(order=4, peaking_ns=45, period_ns=25, samples=7, first_offset_ns=-50)
+    CLI = ['--order', '4', '--peaking', '45', '--period', '25', '--samples', '7', '--first-offset', '-50']
+
+    def test_exponential_matrix_equals_rho(self):  # FE2-1
+        cov = exponential_matrix(0.6, 7)
+        for kw in ({}, {'constraints': ['phase']}, {'pileup_rate_hz': 1e6, 'pileup_rms': 2.0, 'amplitude': 40.0}):
+            a = fr.optimal_filter(rho=0.6, **self.ARGS, **kw)
+            b = fr.optimal_filter(noise_covariance=cov, **self.ARGS, **kw)
+            for key in ('sigma_optimal', 'sigma_template_uncorrelated', 'sigma_largest_sample'):
+                self.assertAlmostEqual(a[key], b[key], delta=1e-12)
+            for x, y in zip(a['weights_optimal'], b['weights_optimal']):
+                self.assertAlmostEqual(x, y, delta=1e-12)
+        toy = dict(amplitude=50, events=20000, pileup_rate_hz=1e6, pileup_mean_amp=2.0, **self.ARGS)
+        a = fr.waveform_toy(rho=0.6, **toy)
+        b = fr.waveform_toy(noise_covariance=cov, **toy)
+        for name, est in b['estimators'].items():
+            self.assertAlmostEqual(est['predicted_sigma'], a['estimators'][name]['predicted_sigma'], delta=1e-12)
+            self.assertLess(abs(est['closure_z_sigma']), 4, name)
+            self.assertLess(abs(est['closure_z_bias']), 4, name)
+
+    def test_common_mode_matrix_is_generated(self):  # FE2-2
+        import random
+        cov = exponential_matrix(0.6, 7, common=0.3)
+        _, lower, _ = fr.measured_covariance(cov, 7)
+        n = 20000
+
+        def sample_covariance(draw):
+            rng = random.Random(7)
+            xs = [draw(rng) for _ in range(n)]
+            mean = [sum(x[i] for x in xs) / n for i in range(7)]
+            return [[sum((x[i] - mean[i]) * (x[j] - mean[j]) for x in xs) / (n - 1) for j in range(7)]
+                    for i in range(7)]
+        got = sample_covariance(lambda rng: fr.correlated_noise(rng, lower))
+        for i in range(7):
+            for j in range(7):
+                se = math.sqrt((cov[i][i] * cov[j][j] + cov[i][j] ** 2) / n)  # Gaussian standard error of s_ij
+                self.assertLess(abs(got[i][j] - cov[i][j]), 4 * se, (i, j))
+        # negative control: the AR(1) noise without the common mode is far from this matrix
+        _, ar_lower, _ = fr.measured_covariance(exponential_matrix(0.6, 7), 7)
+        ar = sample_covariance(lambda rng: fr.correlated_noise(rng, ar_lower))
+        worst = max(abs(ar[i][j] - cov[i][j]) / math.sqrt((cov[i][i] * cov[j][j] + cov[i][j] ** 2) / n)
+                    for i in range(7) for j in range(7))
+        self.assertGreater(worst, 4)
+        r = fr.waveform_toy(noise_covariance=cov, amplitude=50, events=20000, **self.ARGS)
+        self.assertEqual(r['noise_model'], 'measured')
+        for name, est in r['estimators'].items():
+            self.assertLess(abs(est['closure_z_sigma']), 4, name)
+            self.assertLess(abs(est['closure_z_bias']), 4, name)
+        # the common mode adds 0.3 sum(w)^2 to the variance of each linear estimator
+        base = fr.optimal_filter(rho=0.6, **self.ARGS)
+        w = [x / sum(g * g for g in base['pulse_samples']) for x in base['pulse_samples']]
+        cm = fr.optimal_filter(noise_covariance=cov, **self.ARGS)
+        self.assertAlmostEqual(cm['sigma_template_uncorrelated'] ** 2,
+                               base['sigma_template_uncorrelated'] ** 2 + 0.3 * sum(w) ** 2, delta=1e-12)
+
+    def test_bad_matrices_are_refused_not_repaired(self):  # FE2-3
+        good = exponential_matrix(0.6, 7)
+        indefinite = [row[:] for row in good]
+        indefinite[0][6] = indefinite[6][0] = 0.99
+        asymmetric = [row[:] for row in good]
+        asymmetric[0][1] = 0.5
+        nonfinite = [row[:] for row in good]
+        nonfinite[2][2] = float('nan')
+        cases = {'not positive definite': indefinite, 'singular': [[1.0] * 7 for _ in range(7)],
+                 'not symmetric': asymmetric, 'wrong dimension': exponential_matrix(0.6, 6),
+                 'ragged': [row[:6] if i == 3 else row for i, row in enumerate(good)], 'non-finite': nonfinite}
+        for name, m in cases.items():
+            with self.subTest(name), self.assertRaises(ValueError):
+                fr.optimal_filter(noise_covariance=m, **self.ARGS)
+        self.assertEqual(indefinite[0][6], 0.99)  # the input is left as it was
+        for name in ('not positive definite', 'singular'):  # refused by the check itself, not repaired
+            with self.subTest(name), self.assertRaises(ValueError):
+                fr.measured_covariance(cases[name], 7)
+
+    def test_bad_files_are_invalid_input(self):
+        good = json.dumps({'covariance': exponential_matrix(0.6, 7)})
+        cases = {'does not parse': '{"covariance": [[1, 2]', 'no key': '{"cov": [[1]]}', 'not an object': '[[1]]',
+                 'not rows': '{"covariance": [1, 2]}', 'empty': '{"covariance": []}',
+                 'a string entry': good.replace('1.0', '"x"', 1), 'a boolean entry': good.replace('1.0', 'true', 1),
+                 'NaN token': good.replace('1.0', 'NaN', 1), 'Infinity token': good.replace('1.0', 'Infinity', 1),
+                 'wrong dimension': json.dumps({'covariance': exponential_matrix(0.6, 5)})}
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = {'missing': str(Path(tmp) / 'absent.json')}
+            for i, (name, text) in enumerate(cases.items()):
+                path = Path(tmp) / f'case{i}.json'
+                path.write_text(text, encoding='utf-8')
+                paths[name] = str(path)
+            bad_bytes = Path(tmp) / 'latin.json'
+            bad_bytes.write_bytes(b'{"covariance": [[\xff]]}')
+            paths['not utf-8'] = str(bad_bytes)
+            good_path = Path(tmp) / 'good.json'
+            good_path.write_text(good, encoding='utf-8')
+            for cmd, extra in (('optimal-filter', []), ('waveform-toy', ['--amplitude', '20', '--events', '100'])):
+                for name, path in paths.items():
+                    proc = subprocess.run([sys.executable, '-I', str(SCRIPT), cmd, *self.CLI, *extra,
+                                           '--noise-covariance', path], capture_output=True, text=True, timeout=120)
+                    with self.subTest(cmd=cmd, case=name):
+                        self.assertEqual(proc.returncode, 2, proc.stdout)
+                        self.assertEqual(json.loads(proc.stdout)['error_kind'], 'invalid-input')
+                        self.assertNotIn('Traceback', proc.stderr)
+                proc = subprocess.run([sys.executable, '-I', str(SCRIPT), cmd, *self.CLI, *extra, '--rho', '0.6',
+                                       '--noise-covariance', str(good_path)], capture_output=True, text=True, timeout=120)
+                self.assertEqual(proc.returncode, 2, proc.stdout)  # --rho and --noise-covariance exclude each other
+                proc = subprocess.run([sys.executable, '-I', str(SCRIPT), cmd, *self.CLI, *extra,
+                                       '--noise-covariance', str(good_path)], capture_output=True, text=True, timeout=120)
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                self.assertEqual(json.loads(proc.stdout)['noise_model'], 'measured')
+
+    def test_noise_model_and_hash(self):  # FE2-4
+        import hashlib
+        cov = exponential_matrix(0.6, 7)
+        want = hashlib.sha256(json.dumps([[float(v) for v in row] for row in cov],
+                                         separators=(',', ':')).encode('utf-8')).hexdigest()
+        measured = fr.optimal_filter(noise_covariance=cov, **self.ARGS)
+        self.assertEqual(measured['noise_model'], 'measured')
+        self.assertEqual(measured['noise_covariance_sha256'], want)
+        ar1 = fr.optimal_filter(rho=0.6, **self.ARGS)
+        self.assertEqual(ar1['noise_model'], 'ar1')
+        self.assertIsNone(ar1['noise_covariance_sha256'])
+        toy = fr.waveform_toy(noise_covariance=cov, amplitude=20, events=100, **self.ARGS)
+        self.assertEqual(toy['noise_covariance_sha256'], want)
+        changed = [row[:] for row in cov]
+        changed[3][4] = changed[4][3] = cov[3][4] + 1e-9
+        self.assertNotEqual(fr.optimal_filter(noise_covariance=changed, **self.ARGS)['noise_covariance_sha256'], want)
 
 class SCurve(unittest.TestCase):
     CHARGES = [3000.0 + 200 * i for i in range(8)]

@@ -16,7 +16,8 @@ labelled synthetic in status_label). For calibration: the binomial fit of a thre
 the expected errors of a scan design, and the threshold dispersion after per-channel trim. Each result carries its assumptions and a validity
 list; a non-empty validity list means the input is outside the range where the relation holds.
 
-Subcommands (numbers on the command line, except the table spectrum of hit-efficiency; JSON on stdout):
+Subcommands (numbers on the command line, except the table spectrum of hit-efficiency and the measured noise
+covariance of optimal-filter and waveform-toy; JSON on stdout):
   enc          ENC (electrons) from capacitance, series/parallel/1/f noise, peaking time, order
   noise-rate   Rice up-crossing rate above a threshold, fake hits per event
   timing       jitter, leading-edge walk, constant-fraction mode, TDC quantization
@@ -57,6 +58,7 @@ Run: python3 <plugin root>/skills/hep-detector/scripts/frontend_response.py enc 
 import argparse
 import bisect
 import csv
+import hashlib
 import json
 import math
 import sys
@@ -64,7 +66,7 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root, also under python3 -I
-from core.stats._linalg import solve  # noqa: E402
+from core.stats._linalg import cholesky, solve  # noqa: E402
 from core.stats.statistical_toys import chi2_sf  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
@@ -547,20 +549,61 @@ def _sample_times(peaking_ns, period_ns, samples, first_offset_ns):
     return [peaking_ns + first + i * period for i in range(samples)]
 
 
-def _noise_covariance(times, n, tau, rho, pileup_rate_hz, pileup_rms):
+def _noise_covariance(times, n, tau, rho, pileup_rate_hz, pileup_rms, electronic=None):
     """Per-sample noise covariance in units of the electronic noise variance.
 
-    Electronic part rho^|i-j| (exponential correlation, unit variance per sample); pileup part from Campbell's
-    theorem, nu <a^2> int g(t) g(t + t_i - t_j) dt, with <a^2> in units of the electronic noise variance.
+    Electronic part rho^|i-j| (exponential correlation, unit variance per sample), or the measured matrix
+    `electronic` when given; pileup part from Campbell's theorem, nu <a^2> int g(t) g(t + t_i - t_j) dt, with <a^2>
+    in units of the electronic noise variance.
     """
     m = len(times)
     nu_a2 = pileup_rate_hz * 1e-9 * pileup_rms ** 2  # per ns, so that the ns autocorrelation is dimensionless
     cov = [[0.0] * m for _ in range(m)]
     for i in range(m):
         for j in range(m):
-            cov[i][j] = rho ** abs(i - j) + (nu_a2 * pulse_autocorrelation(times[i] - times[j], n, tau)
-                                             if nu_a2 > 0 else 0.0)
+            base = electronic[i][j] if electronic is not None else rho ** abs(i - j)
+            cov[i][j] = base + (nu_a2 * pulse_autocorrelation(times[i] - times[j], n, tau) if nu_a2 > 0 else 0.0)
     return cov
+
+
+def read_noise_covariance(path):
+    """The measured per-sample noise covariance from a file {"covariance": [[...], ...]} (units of the per-sample
+    electronic noise sigma squared). Returns the matrix as lists of float; every problem is a ValueError."""
+    try:
+        with open(path, encoding='utf-8') as fh:
+            doc = json.load(fh)
+    except (OSError, UnicodeDecodeError) as exc:
+        raise ValueError(f'cannot read the noise covariance file {path}: {exc}') from None
+    except json.JSONDecodeError as exc:
+        raise ValueError(f'the noise covariance file {path} does not parse: {exc}') from None
+    if not isinstance(doc, dict) or 'covariance' not in doc:
+        raise ValueError('the noise covariance file needs an object with the key "covariance"')
+    rows = doc['covariance']
+    if not isinstance(rows, list) or not rows or not all(isinstance(r, list) for r in rows):
+        raise ValueError('"covariance" must be a non-empty list of rows')
+    matrix = []
+    for row in rows:
+        if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in row):
+            raise ValueError('the noise covariance has an entry that is not a number')
+        matrix.append([float(v) for v in row])
+    return matrix
+
+
+def measured_covariance(matrix, samples):
+    """Check a measured noise covariance against the sampling: square, dimension `samples`, finite, symmetric and
+    positive definite (refused, never repaired). Returns (matrix, Cholesky factor L, SHA-256)."""
+    if len(matrix) != samples or any(len(r) != samples for r in matrix):
+        raise ValueError(f'the noise covariance must be {samples} x {samples} (one row and column per sample)')
+    if any(not math.isfinite(v) for r in matrix for v in r):
+        raise ValueError('the noise covariance has a non-finite entry')
+    scale = max(abs(matrix[i][i]) for i in range(samples))
+    for i in range(samples):
+        for j in range(i):
+            if abs(matrix[i][j] - matrix[j][i]) > 1e-12 * max(scale, 1e-300):
+                raise ValueError(f'the noise covariance is not symmetric (entries {i},{j} and {j},{i})')
+    lower, _ = cholesky(matrix, 'the noise covariance', error=ValueError)
+    digest = hashlib.sha256(json.dumps(matrix, separators=(',', ':')).encode('utf-8')).hexdigest()
+    return matrix, lower, digest
 
 
 def _dot(a, b):
@@ -621,11 +664,12 @@ def _constraint_vectors(constraints, times, n, tau):
 
 
 def optimal_filter(order, peaking_ns, period_ns, samples, first_offset_ns, rho=0.0, pileup_rate_hz=0.0,
-                   pileup_rms=0.0, amplitude=None, phase_errors_ns=(), constraints=()):
+                   pileup_rms=0.0, amplitude=None, phase_errors_ns=(), constraints=(), noise_covariance=None):
     """Amplitude (and time) estimators from a few samples of a known pulse: optimal filter, uncorrelated
     template fit, largest sample; their variances, the bias from a phase error and from a baseline offset.
 
     Units: amplitudes and noise in units of the per-sample electronic noise sigma; the pulse has unit peak.
+    noise_covariance: a measured electronic noise covariance (instead of rho^|i-j|), one row per sample.
     """
     n = _order(order)
     tp = _num(peaking_ns, 'peaking time')
@@ -637,7 +681,10 @@ def optimal_filter(order, peaking_ns, period_ns, samples, first_offset_ns, rho=0
     g = [pulse(t, n, tau) for t in times]
     if max(g) <= 0:
         raise ValueError('every sample is before the pulse starts: move the first sample later')
-    cov = _noise_covariance(times, n, tau, r, nu, a_rms)
+    measured, digest = (None, None)
+    if noise_covariance is not None:
+        measured, _, digest = measured_covariance(noise_covariance, len(times))
+    cov = _noise_covariance(times, n, tau, r, nu, a_rms, measured)
     info = {}
     extra = _constraint_vectors(list(constraints), times, n, tau)
     if len(extra) + 1 > len(times):
@@ -654,10 +701,12 @@ def optimal_filter(order, peaking_ns, period_ns, samples, first_offset_ns, rho=0
            'sigma_largest_sample': sigma_max, 'largest_sample_index': k,
            'pileup_sigma_per_sample': pile_sigma,
            'baseline_offset_gain': {'optimal': sum(w), 'template_uncorrelated': sum(w_t), 'largest_sample': 1 / g[k]},
-           'assumptions': ['known CR-(RC)^n pulse shape and phase; stationary Gaussian noise with exponential '
-                           'sample correlation rho^|i-j| plus Campbell pileup noise (unipolar pulses, Poisson '
-                           'arrivals); sigmas are for unit pulse amplitude in units of the per-sample electronic '
-                           'noise'],
+           'noise_model': 'ar1' if measured is None else 'measured', 'noise_covariance_sha256': digest,
+           'assumptions': ['known CR-(RC)^n pulse shape and phase; stationary Gaussian noise with '
+                           + ('exponential sample correlation rho^|i-j|' if measured is None else
+                              'the measured sample covariance')
+                           + ' plus Campbell pileup noise (unipolar pulses, Poisson arrivals); sigmas are for unit '
+                           'pulse amplitude in units of the per-sample electronic noise'],
            'validity': []}
     if constraints:
         out['sigma_optimal_unconstrained'] = math.sqrt(_filter_weights(g, cov)[1])
@@ -1030,15 +1079,24 @@ def _poisson(rng, mean):
         k += 1
 
 
+def correlated_noise(rng, lower):
+    """One draw of Gaussian noise with covariance L L^T: L z with z standard normal (rng: random.Random)."""
+    z = [rng.gauss(0.0, 1.0) for _ in lower]
+    return [sum(row[j] * z[j] for j in range(i + 1)) for i, row in enumerate(lower)]
+
+
 def waveform_toy(order, peaking_ns, period_ns, samples, first_offset_ns, amplitude, events=20000, seed=1,
                  rho=0.0, phase_jitter_ns=0.0, pileup_rate_hz=0.0, pileup_mean_amp=0.0,
-                 pileup_amplitudes='fixed', adc_lsb=None, adc_bits=12, pedestal=5.0, constraints=()):
+                 pileup_amplitudes='fixed', adc_lsb=None, adc_bits=12, pedestal=5.0, constraints=(),
+                 noise_covariance=None):
     """Seeded toy of a sampled readout: pulses, correlated noise, Poisson pileup, phase jitter and an ADC, then
     reconstruction with the largest sample, the uncorrelated template fit and two optimal filters (weights from
     electronic noise only, and matched to electronic plus pileup noise). Reports the bias and resolution of each
     against the analytic prediction (closure).
 
     Units: amplitudes, noise, pedestal and ADC bin in units of the per-sample electronic noise sigma.
+    noise_covariance: a measured electronic noise covariance; the noise is then L z (Cholesky L, z standard normal)
+    and the weights and predictions use the same matrix.
     """
     import random
     n = _order(order)
@@ -1064,8 +1122,11 @@ def waveform_toy(order, peaking_ns, period_ns, samples, first_offset_ns, amplitu
     g = [pulse(t, n, tau) for t in times]
     if max(g) <= 0:
         raise ValueError('every sample is before the pulse starts: move the first sample later')
-    cov_e = _noise_covariance(times, n, tau, r, 0.0, 0.0)
-    cov_t = _noise_covariance(times, n, tau, r, nu, math.sqrt(a2))
+    measured, lower, digest = (None, None, None)
+    if noise_covariance is not None:
+        measured, lower, digest = measured_covariance(noise_covariance, len(times))
+    cov_e = _noise_covariance(times, n, tau, r, 0.0, 0.0, measured)
+    cov_t = _noise_covariance(times, n, tau, r, nu, math.sqrt(a2), measured)
     extra = _constraint_vectors(list(constraints), times, n, tau)
     if len(extra) + 1 > len(times):
         raise ValueError('more constraints than samples')
@@ -1090,11 +1151,15 @@ def waveform_toy(order, peaking_ns, period_ns, samples, first_offset_ns, amplitu
     for _ in range(events):
         d = rng.gauss(0.0, jitter) if jitter > 0 else 0.0
         v = [amp * pulse(t + d, n, tau) for t in times]
-        x = rng.gauss(0.0, 1.0)
-        for i in range(len(v)):
-            if i:
-                x = r * x + sq * rng.gauss(0.0, 1.0)
-            v[i] += x
+        if lower is None:
+            x = rng.gauss(0.0, 1.0)
+            for i in range(len(v)):
+                if i:
+                    x = r * x + sq * rng.gauss(0.0, 1.0)
+                v[i] += x
+        else:
+            for i, x in enumerate(correlated_noise(rng, lower)):
+                v[i] += x
         if nu > 0 and a_mean > 0:
             for _p in range(_poisson(rng, nu * span_s)):
                 t0 = rng.uniform(t_lo, t_hi)
@@ -1151,8 +1216,11 @@ def waveform_toy(order, peaking_ns, period_ns, samples, first_offset_ns, amplitu
             'constraints': list(constraints),
             'sample_times_ns': times, 'pulse_samples': g, 'pileup_mean_offset_per_sample': pile_mean,
             'saturated_events': saturated, 'estimators': results,
+            'noise_model': 'ar1' if measured is None else 'measured', 'noise_covariance_sha256': digest,
             'assumptions': ['synthetic toy: CR-(RC)^n pulse with unit peak; stationary Gaussian electronic noise '
-                            'with sample correlation rho^|i-j| (AR(1)); Poisson pileup in continuous time with '
+                            + ('with sample correlation rho^|i-j| (AR(1))' if measured is None else
+                               'with the measured covariance (L z, Cholesky)')
+                            + '; Poisson pileup in continuous time with '
                             'fixed or exponential amplitudes; Gaussian phase jitter; uniform ADC with a known '
                             'pedestal (no differential nonlinearity); no baseline correction, so the pileup mean '
                             'appears as a bias'],
@@ -1354,6 +1422,15 @@ def threshold_trim(spread, trim_bits, trim_step, dac_nonlinearity=0.0):
 
 # ---------------------------------------------------------------- cli
 
+def _noise_args(args):
+    """(rho, measured covariance or None) from --rho and --noise-covariance, which exclude each other."""
+    if args.noise_covariance is not None:
+        if args.rho is not None:
+            raise ValueError('--noise-covariance and --rho exclude each other')
+        return 0.0, read_noise_covariance(args.noise_covariance)
+    return (args.rho if args.rho is not None else 0.0), None
+
+
 def _fail(message, kind='failed'):
     print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'frontend_response.py: error: {message}', file=sys.stderr)
@@ -1444,8 +1521,11 @@ def main():
         p.add_argument('--samples', type=int, required=True, help='number of samples (1 to 64)')
         p.add_argument('--first-offset', type=float, required=True, dest='first_offset',
                        help='time of the first sample relative to the pulse peak, ns (negative: before the peak)')
-        p.add_argument('--rho', type=float, default=0.0,
+        p.add_argument('--rho', type=float,
                        help='correlation of the electronic noise between neighbouring samples (rho^|i-j|; default 0)')
+        p.add_argument('--noise-covariance', dest='noise_covariance',
+                       help='measured electronic noise covariance, a file {"covariance": [[...]]} with one row per '
+                            'sample, in units of the per-sample noise sigma squared (not with --rho)')
         p.add_argument('--pileup-rate', type=float, default=0.0, dest='pileup_rate',
                        help='pileup pulse rate per channel, Hz (default 0)')
         p.add_argument('--constraints', nargs='+', choices=['phase', 'baseline'], default=[],
@@ -1554,9 +1634,10 @@ def main():
                                       'surface and breakdown currents do not scale this way'],
                       'validity': []}
         elif args.command == 'optimal-filter':
-            result = optimal_filter(args.order, args.peaking, args.period, args.samples, args.first_offset, args.rho,
+            rho, cov = _noise_args(args)
+            result = optimal_filter(args.order, args.peaking, args.period, args.samples, args.first_offset, rho,
                                     args.pileup_rate, args.pileup_rms, args.amplitude, args.phase_errors,
-                                    args.constraints)
+                                    args.constraints, cov)
         elif args.command == 'hit-efficiency':
             if args.scan is not None:
                 low, high, steps = args.scan
@@ -1571,10 +1652,11 @@ def main():
                                     args.order, args.noise_type, args.series_fraction, args.window,
                                     args.min_efficiency, args.max_occupancy, spectrum)
         elif args.command == 'waveform-toy':
+            rho, cov = _noise_args(args)
             result = waveform_toy(args.order, args.peaking, args.period, args.samples, args.first_offset,
-                                  args.amplitude, args.events, args.seed, args.rho, args.phase_jitter,
+                                  args.amplitude, args.events, args.seed, rho, args.phase_jitter,
                                   args.pileup_rate, args.pileup_mean_amp, args.pileup_amplitudes, args.adc_lsb,
-                                  args.adc_bits, args.pedestal, args.constraints)
+                                  args.adc_bits, args.pedestal, args.constraints, cov)
         elif args.command == 's-curve':
             design = args.design_threshold is not None or args.design_noise is not None
             if design == (args.hits is not None):
