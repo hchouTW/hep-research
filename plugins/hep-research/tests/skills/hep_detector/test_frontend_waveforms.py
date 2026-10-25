@@ -332,6 +332,29 @@ class ThresholdTrim(unittest.TestCase):
         self.assertAlmostEqual(n['residual_dispersion'], math.hypot(20 / math.sqrt(12), 10), places=6)
 
 
+class InjectionGainGuidance(unittest.TestCase):
+    """sci-fix C4 (S3): the calibration chain does not take the charge-injection gain for the signal gain.
+    Sources: arXiv:1306.6756v2 sec. II-C (M_phys/M_cali corrects for the difference between physics and
+    calibration pulses) and arXiv:0912.2642v4 sec. 3.1.2, eq. 5 (its inverse is the response ratio of a calibration
+    and an ionization pulse of the same input current)."""
+    PAGE = PLUGIN / 'skills' / 'hep-detector' / 'references' / 'front-end-electronics-and-signal-processing.md'
+
+    def setUp(self):
+        self.text = self.PAGE.read_text(encoding='utf-8')
+
+    def test_injection_bullet_separates_injection_and_signal_gain(self):
+        calibration = self.text.split('## Calibration of the electronics', 1)[1].split('\n## ', 1)[0]
+        bullet = calibration.split('- **Charge injection**', 1)[1].split('\n- **', 1)[0]
+        flat = ' '.join(bullet.split())
+        self.assertIn('the injection gain and the physics-signal gain differ', flat)
+        self.assertIn('cross-check with a source or minimum-ionizing particles', flat)
+        for locator in ('arXiv:1306.6756v2, sec. II-C', 'arXiv:0912.2642v4, sec. 3.1.2'):
+            self.assertIn(locator, flat)
+
+    def test_misconception_is_listed(self):
+        self.assertIn('**"Injection gain is the signal gain."**', self.text)
+
+
 class CommandLine(unittest.TestCase):
     def run_cli(self, args):
         return subprocess.run([sys.executable, '-I', str(SCRIPT), *args], capture_output=True, text=True, timeout=120)

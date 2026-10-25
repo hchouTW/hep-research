@@ -451,6 +451,16 @@ everything downstream.
   nonlinearity from the residuals of the linear fit. The absolute scale carries the
   uncertainty of the injection capacitor and the pulser amplitude, common to all channels
   injected by the same circuit: a correlated scale systematic, not per-channel scatter.
+  An injected pulse is not a sensor signal (no collection time, so no ballistic deficit;
+  sometimes without the sensor capacitance), so the injection gain and the physics-signal
+  gain differ; cross-check with a source or minimum-ionizing particles.
+  <!-- example: source citation -->
+  The ATLAS liquid-argon calorimeter carries an explicit physics-to-calibration pulse ratio
+  (`M_phys/M_cali`) in its cell-energy formula (N. Nikiforou for ATLAS, arXiv:1306.6756v2,
+  sec. II-C; read 2026-10-25); its readiness paper defines `1/(M_phys/M_cali)` as the ratio
+  of the responses to a calibration pulse and to an ionization pulse of the same input
+  current (G. Aad et al., arXiv:0912.2642v4, sec. 3.1.2, eq. 5; read 2026-10-25).
+  <!-- /example -->
 - **Threshold scans** (S-curves): fit hits out of `N` injections at each charge with a
   binomial likelihood for `Phi((Q - T)/sigma)` (`frontend_response.py s-curve`), not a
   least-squares fit to fractions, which mis-weights the points near 0 and 100 % and cannot
@@ -511,6 +521,8 @@ period, pileup counted once) and the closure checks that validate the digitizati
 - **"Pedestal subtraction removes dark counts."** It removes the mean, not the variance.
 - **"Bipolar shaping has no baseline shift."** Only in steady state.
 - **"Fit S-curve fractions by least squares."** Use the binomial likelihood.
+- **"Injection gain is the signal gain."** No ballistic deficit or sensor in the injected
+  pulse; cross-check with a physics signal.
 - **"Trim leaves D/sqrt(12)."** Only for channels within the trim range.
 - **"Five sigma means no fake hits."** Multiply by channels, window, and `nu` (not `nu_0`).
 - **"Noise is per channel and independent."** Coherent noise can dominate sums.

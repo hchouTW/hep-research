@@ -34,11 +34,17 @@ hep-detector front-end electronics for reconstruction, simulation and calibratio
   nonlinearities, sub-threshold content lost by a suppressed overlay, same period, pileup counted once) and the
   closure checks that validate a digitization. Cross-links from `event-reconstruction.md` and
   `tracking-and-vertexing.md`; bibliography adds Jordanov and Knoll (1994) and Nolan (1997).
-- Tests: `tests/skills/hep_detector/test_frontend_waveforms.py` (31 tests); `FrontendResponseContractTests` cover
+- Tests: `tests/skills/hep_detector/test_frontend_waveforms.py` (33 tests); `FrontendResponseContractTests` cover
   the five new operations.
-- Sources: the constrained optimal filter cites the ATLAS liquid-argon paper arXiv:0709.1094,
-  the overlay rules the HSF detector-simulation white paper
-  arXiv:1803.04165 (bibliography entries added).
+- Sources: the constrained optimal filter cites the ATLAS liquid-argon paper arXiv:0709.1094, the overlay rules the
+  HSF detector-simulation white paper arXiv:1803.04165 (bibliography entries added).
+- **The charge-injection gain is not the signal gain (sci-fix FRONTEND-INJECTION-GAIN, S3).** The front-end page's
+  calibration chain treated the gain from charge injection as the gain for sensor signals. An injected pulse has no
+  collection time (so no ballistic deficit) and sometimes no sensor capacitance, so the two differ; the page now says
+  to cross-check with a source or minimum-ionizing particles and lists the misconception. Sources: arXiv:1306.6756v2
+  sec. II-C and arXiv:0912.2642v4 sec. 3.1.2, eq. 5 (the physics-to-calibration pulse ratio `M_phys/M_cali`), both
+  read in full text; regression test `InjectionGainGuidance` in `test_frontend_waveforms.py`. Committed apart from
+  the `feat:` calibration commit (maintainer decision D-C4).
 - Developer document `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md` (English, task format, passes
   `lint_task.py`): the evaluation, the completed work, and stages FE0-FE5 with isolated-worktree execution,
   acceptance criteria and open decisions.

@@ -107,6 +107,14 @@ criteria as above.
   calorimeter", arXiv:0709.1094 (read 2026-10-25; journal reference not checked). Optimal
   filtering coefficients from the pulse shape, its derivative and the pedestal-run noise
   autocorrelation by Lagrange multipliers.
+- N. Nikiforou for the ATLAS Collaboration, "Performance of the ATLAS liquid argon
+  calorimeter after three years of LHC operation and plans for a future upgrade",
+  arXiv:1306.6756v2 (full text read 2026-10-25). Cell energy from samples with the ramp, the DAC
+  calibration and the physics-to-calibration pulse ratio `M_phys/M_cali` (sec. II-C).
+- G. Aad et al., "Readiness of the ATLAS liquid argon calorimeter for LHC collisions",
+  arXiv:0912.2642v4 (sec. 3.1.2, pp. 16-17, read in the full text 2026-10-25; journal
+  reference not checked). Cell energy reconstruction (eq. 5); `M_phys/M_cali` as the ratio of the
+  responses to calibration and ionization pulses of the same input current.
 <!-- /example -->
 - J. Apostolakis et al., "HEP Software Foundation Community White Paper Working Group -
   Detector Simulation", arXiv:1803.04165 (read 2026-10-25). Zero-bias overlay against

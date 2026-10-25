@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 40,
-   "bytes": 583755,
+   "bytes": 585335,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1913,8 +1913,8 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 16341,
-   "lines": 210,
+   "bytes": 17036,
+   "lines": 218,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2039,8 +2039,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 38955,
-   "lines": 547,
+   "bytes": 39840,
+   "lines": 559,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",

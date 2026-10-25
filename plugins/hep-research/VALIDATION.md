@@ -2787,6 +2787,18 @@ far below the Landau peak), the threshold spread is routed pre-trim to `threshol
 `hit-efficiency`, the FE3 corrected spread is clipped at zero, the stage base follows P.10.2, the C4 guidance change is
 flagged for classification and has a second located source (arXiv:0912.2642, sec. 3.1.2).
 
+**sci-fix FRONTEND-INJECTION-GAIN (C4, S3; maintainer decision D-C4 2026-10-25: split from the `feat:` calibration
+commit).** The calibration chain no longer takes the charge-injection gain for the signal gain. Sources read in the
+full text on 2026-10-25: arXiv:1306.6756v2 sec. II-C ("a factor to correct for differences between the physics signal
+and calibration pulses") and arXiv:0912.2642v4 sec. 3.1.2, eq. 5 (the factor `1/(M_phys/M_cali)` "quantifies the
+ratio of response to a calibration pulse and an ionization pulse corresponding to the same input current"); the second
+source had only been located through a search index before. Parent: `9a116535` (the branch with C4 removed).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance::test_injection_bullet_separates_injection_and_signal_gain` | behavioral (guidance text with both locators) | fail (assertion) | pass | no | E2 |
+| `tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance::test_misconception_is_listed` | behavioral | fail (assertion) | pass | no | E2 |
+
 Software checks show contract consistency and agreement with the named oracles, not physical validity: the Landau
 model has no Bichsel broadening, and the toy is synthetic.
 

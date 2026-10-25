@@ -6441,6 +6441,33 @@
     "internal sources only (maintainer decision 2026-10-22)"
    ],
    "note": "D7: extension.study.evidence_overlap lists the runs that serve more than one decision"
+  },
+  {
+   "id": "FRONTEND-INJECTION-GAIN",
+   "title": "Charge-injection gain is not the physics-signal gain: an injected pulse has no collection time (no ballistic deficit) and sometimes no sensor capacitance; cross-check with a source or minimum-ionizing particles (front-end calibration chain, C4 of VALIDATION FRONTEND-RECO-SIM)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "N. Nikiforou for the ATLAS Collaboration, arXiv:1306.6756v2",
+     "locator": "Sec. II-C, cell-energy formula and the definition of M_phys/M_cali",
+     "read": "2026-10-25"
+    },
+    {
+     "kind": "external",
+     "citation": "G. Aad et al. (ATLAS), arXiv:0912.2642v4",
+     "locator": "Sec. 3.1.2, eq. 5, pp. 16-17",
+     "read": "2026-10-25"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+     "locator": "Calibration of the electronics, Charge injection; Misconceptions",
+     "read": "2026-10-25"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; arXiv:1306.6756v2 Sec. II-C (M_phys/M_cali is a factor to correct for differences between the physics signal and calibration pulses) and arXiv:0912.2642v4 Sec. 3.1.2 eq. 5 (the factor 1/(M_phys/M_cali) quantifies the ratio of response to a calibration pulse and an ionization pulse corresponding to the same input current), both read in the full text 2026-10-25; regression test tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance fails on the parent and passes on the fix; split out of the feat: calibration commit by maintainer decision D-C4 2026-10-25"
   }
  ],
  "superseded": [
